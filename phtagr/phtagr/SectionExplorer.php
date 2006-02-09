@@ -17,6 +17,7 @@ function SectionExplorer()
 {
     $this->name="explorer";
 }
+
 function print_navigator($link, $current, $count)
 {
     if ($count<2) return;
@@ -33,7 +34,7 @@ function print_navigator($link, $current, $count)
                   ($i < 3 || $i > $count-4 || 
                   ($i-$current < 4 && $current-$i<4)))
         {
-            printf("<a href=\"$link&page=%d\">%d</a>\n", $i, $i);
+            printf("<a href=\"$link%s\">%d</a>\n", ($i>0?"&page=$i":""), $i);
         }
         else if ($i == $count-4 || $i == 3) 
             echo "&nbsp;...&nbsp;\n";

@@ -113,24 +113,6 @@ function from_URL()
     $this->set_page_size($_REQUEST['pagesize']);
 }
 
-function handle_orderby()
-{
-  if ($this->orderby=='date')
-    return " ORDER BY image.date DESC";
-  return '';
-}
-
-function handle_limit($nolimit=false)
-{
-  if (!$nolimit)
-  {
-    // Limit, use $count
-    $page_pos=$this->page_num*$this->page_size;
-    return " LIMIT $page_pos," . $this->page_size;
-  }
-  return '';
-}
-
 function to_URL()
 {
   $url='';
@@ -165,7 +147,7 @@ function to_URL()
   return $url;
 }
 
-function get_query_from_tags($tags, $tagop=0, $nolimit=false)
+function get_query_from_tags($tags, $tagop=0)
 {
     $num_tags=count($tags);
       
@@ -179,8 +161,6 @@ function get_query_from_tags($tags, $tagop=0, $nolimit=false)
         $this->date_start==0 && $this->date_end==0 &&
         $this->page_num==0 && $this->page_size==10)
     {
-      $sql.=$this->handle_orderby();
-      $sql.=$this->handle_limit($nolimit);
       return $sql;
     }
       
@@ -234,10 +214,25 @@ function get_query_from_tags($tags, $tagop=0, $nolimit=false)
         }
     }
 
-    $sql.=$this->handle_orderby();
-    $sql.=$this->handle_limit($nolimit);
-
     return $sql;
+}
+
+function handle_orderby()
+{
+  if ($this->orderby=='date')
+    return " ORDER BY image.date DESC";
+  return '';
+}
+
+function handle_limit($nolimit=false)
+{
+  if (!$nolimit)
+  {
+    // Limit, use $count
+    $page_pos=$this->page_num*$this->page_size;
+    return " LIMIT $page_pos," . $this->page_size;
+  }
+  return '';
 }
 
 function get_query($count=0, $nolimit=false)
@@ -262,10 +257,16 @@ function get_query($count=0, $nolimit=false)
       $sql.=" ) AND id NOT IN ( ";
       $sql.=$this->get_query_from_tags($neg_tags, 1);
       $sql.=" )";
+      $sql.=$this->handle_orderby();
+      $sql.=$this->handle_limit($nolimit);
     }
     else 
-      $sql=$this->get_query_from_tags($pos_tags, $this->tagop, $nolimit);
-
+    {
+      $sql=$this->get_query_from_tags($pos_tags, $this->tagop);
+      $sql.=$this->handle_orderby();
+      $sql.=$this->handle_limit($nolimit);
+    }
+  
     // For debuggin: echo "<!-- $sql -->"; 
     return $sql; 
 }
