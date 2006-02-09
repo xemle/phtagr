@@ -1,0 +1,167 @@
+phTagr
+
+An image browser inspired by www.flickr.com. 
+
+Main Idea: Browsing images by Tags/Keywords or searching images by Tags, Place,
+Comment and Date while keeping the data in the single images.
+
+A PHP frontend synchronize the images data with a SQL database. Adding images
+via scp, rsync, http upload should be suporreted. Download raw images for
+friends should be supported as well. Therefore, phTagr is a simple frontend for
+your local images and can be used on your webpage as well.
+
+Other image communities: http://holocore.com/?PictureSync_services
+
+
+- PHP 
+  - XHTML/1.1 compatible
+    - Buildup in modules by classes
+  - Tabspace is 2
+
+- User
+  Setting of a user account.
+  - Storage of common user information
+    name, password, email, creation time
+  - Add/Modify/Delete
+    Defaults should be defined by an admin user
+    If a user is deleted, it images should be removed
+  - Quota 
+    A user can upload only a specific amount of data to its storage.
+    Default is set by admin account.
+  - Root directory
+    The root directory defines the storages place of the raw images of a
+    specific user. Default is set by admin account.
+  - Default image ACL: view, modify, download
+  - Image of a user
+
+- Images
+  An image is owned by an phTagr user. It could be places on any place for
+  system users (e.g. /pub/images) or on the phTagr directory (e.g.
+  /var/www/phtagr/<user>)
+  - Different views by tags
+    Mosaic, Preview, Detail, Full size
+  - Edit IPTC data
+    Add or remove Keyword, Place, Time, Comment, Category by one-click
+  - Advanced search
+    by Tags, Comments, Date and Place
+  - ACLs
+    A user can set the specific access control to an image. The access levels
+    are: Public, phTagr user, friends and own. 
+    - View, Edit, downloadable
+  - An image has a unique image id and a unique filename 
+  - Number of views. If a image is viewed in detail the count is increased
+  - A phTagr user can add a comment on a image (this information is not
+    stored in a image itself)
+  - Create a Image object
+    - contains exif and iptc data by database or by origial file.
+      - array of tags(), commet, date, place, set, etc
+    - read_exif(), read_iptc(), write_iptc()
+      - if EXIF and IPTC information are not available, get height and width
+        of an image
+    - create different sizes
+      - via convert of image magick
+      - mosaic, 50x50, png
+      - thumbnail, 250x250, jpg
+      - preview, 800x600, jpg
+      - high-resolution, 1024x786
+      - original size
+      - Insert of a watermark or copyright by IPTC copyright
+    
+- Image Search: Search.php
+  - By Set
+  - By Caption content
+  - Comment
+    - Contains words
+  - Set
+  - Place
+  - ACL
+    - restrict images to public, phtagr acounts, friends and personal)
+  - Create a Query class. Done. 2006-01-21
+    - Tags. 
+      - Operation AND, OR, FUZZY (75% match of tags)
+    - Section
+      - Page size
+      - Page number
+    - Time
+      Enables search by date, inclusive links 1day [.], 1 week [-], 1 month [#]
+      - Start time in UNIX timestamp
+      - Interval length (3h, 1d, 1w, 1m)
+    - function query_count() Returns total numbers 
+    - function query_images() Returns a list of images ids
+    - function from_URL and to_URL
+    - clone function to create search URLs
+    
+- Image Sets
+  Images can be grouped by sets (or categories). Sets or categories are more
+  general description than tags or keywords.
+  - IPTC categories stores the sets
+
+- FileBrowser
+  Images can be added in a file browser. This option is available for local
+  system users only.
+  - Only a phTagr user can browse its directory
+  - Insert images of whole tree
+    - default ACL, Tags, Comment, Copyright
+  - The root of the file browser depends on the users root directory
+  - Upload of tar balls
+
+- Setup
+  - Easy step-by-step setup of phTagr like bitweaver
+  - Connection to the SQL database
+  - Creation of SQL tables
+  - Creation of the admin account
+  - Default settings (admin)
+    - Allow creation of user
+    - Default root directory (could depends on the username)
+    - Allow browsing of file structure
+    - Setup of user quota
+    - Allow upload files by tar.gz
+    - Allow download of files
+    - Synchronize files with the database
+  - Reset of tables (while developing the database structure)
+
+- Themes
+  - Diffent themes by CSS
+
+- Additional 
+  - Images can be uploaded to an flickr account
+
+ToDos:
+Search:
+  - Add exclusions for tags by "-tags"
+    SQL:  select id 
+          from image,tag
+          where image.id=tag.imageid and (tag.name='heidelberg') and id not in 
+          (
+            select id 
+            from image,tag 
+            where image.id=tag.imageid and tag.name='akt7'
+          )
+Explorer:
+  - Add clicks to database
+    - Add popular value by last click time and a delta function. 
+  - Add IPTC place and set to images if they are available
+  - Add all used tags of the preview windows in a sidebar
+  - Remove the last comma in the tag list
+  - Add checkboxes to images to add collaborative image edit
+  - Add total count of previewed images
+  - Enable AJAX update of image properties. 
+Browser:
+  - Add single images to add
+  - Distinguish between files and directories
+  - Add Icons to files and directories
+
+
+Already done:
+Home:
+- Add List of 100 popular Tags in the home section with an random image. Done
+  2006-01-18 by Sebastian 
+Titlebar:
+- Add Search function in the title bar. Done 2006-01-21 by sebastian
+  - Add multiple tag search. Done 2006-01-21 by sebastian
+- Login and logout should generate meaningful page generation. The logout
+  action shows the first time as a authenticated session. Done 2006-01-21 by
+  sebastian
+- Move login and logout to the account section as action. Done 2006-01-20 by
+  sebastian 
+

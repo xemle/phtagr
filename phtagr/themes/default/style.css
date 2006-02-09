@@ -1,0 +1,216 @@
+/* Colors from http://www.smedia.info/index.php
+  Color: B4D89C */
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family:sans-serif;
+  background-color: #D9D9D9;
+}
+
+a:visited {
+  color: #262626;
+}
+
+.header {
+  padding: 0;
+  margin: 0;
+  height: 60px;
+  background-color: #B3AF81;
+  border-bottom: 3px solid #8C8A65;
+}
+
+.headerleft {
+  position: relative;
+  padding: 0 0 0 20; 
+  float:left;
+}
+
+.headerright {
+  position: relative;
+  float:right;
+  padding: 10 10 0 0; 
+  text-align: right;
+}
+
+.menu {
+  position: relative;
+  clear: both;
+  float: left;
+  width: 200px;
+  padding: 0;
+  margin: 0;
+  
+  background-color: #D9D59C;
+  border: 1px solid #B3AF81;
+}
+
+.menu * li, .menu > ul {
+  padding: 2 0 2 4;
+  margin: 0;
+  list-style-type: none;
+}
+
+.menu > h2 {
+  padding: 5;
+  font-size: 12pt;
+  background-color: #758C65;
+  margin: 0;
+}
+
+.menu * a {
+  text-decoration: none;
+}
+
+.menu * a:hover {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  display: block;
+  background-color: #B3AF81;
+}
+
+
+.body {
+  position: relative;
+  text-align: left;
+  padding: 0 0 0 10;
+  float: left;
+  width: 750px;
+}
+
+.body * h2 {
+  background-color: #D9D59C;
+  border-left: 15px solid #758C65;
+  border-bottom: 1px solid #758C65;
+  border-top: 1px solid #758C65;
+  border-right: 1px solid #758C65;
+  padding: 5 5 5 5;
+  margin: 0 0 0 0; 
+}
+
+.footer {
+  position: relative;
+  clear: both;
+  padding: 10 0 10 0;
+  font-size: 8pt;
+  text-align: center;
+  color: #8C8C8C;
+  border-top: 3px solid #8C8C8C;
+  background-color: #B3B3B3;
+}
+
+.navigator {
+  color: #8C8C8C;
+  margin: 10 0 10 0;
+  text-align: center;
+}
+
+.navigator > a, .headerright > a, .headerright * .submit, .headerright * .search {
+  text-decoration: none;
+  font-size: 8pt;
+  /*width: 12px;
+  height: 12px;*/
+  padding: 2 5 2 5;
+  margin: 5 0 3 0;
+  background-color: #D9D59C;
+  border: 1px solid #8C8A65;
+}
+
+.navigator > a:hover {
+  border: 1px solid #8C8A65;
+  background-color: #B3AF81;
+}
+.navigator > .current {
+  padding: 2 5 2 5;
+  margin: 0 0 0 0;
+  font-size: 8pt;
+  color: black;
+  background-color: #B3B3B3;
+  border: 1px solid #8C8C8C;
+}
+
+.tableview {
+  border-spacing: 0;
+}
+
+.thumb {
+  margin: 10 10 10 10;
+  text-align: center; 
+}
+
+.preview * img {
+  border: 1px solid black;
+}
+
+td {
+  width: 300px;
+  vertical-align: top;
+}
+
+.preview {
+  padding: 10 10 10 10;
+  margin: 10 10 10 10;
+}
+
+.file {
+  font-size: 14pt;
+  background-color: #D9D59C;
+  border-left: 10px solid #758C65;
+  border-bottom: 1px solid #758C65;
+  border-top: 1px solid #B3AF81;
+  border-right: 1px solid #B3AF81;
+  padding: 2 0 2 5;
+  font-weight: bold;
+}
+
+.description {
+  color: #4D4D4D;
+  font-size: 10pt;
+  font-style: italic;
+}
+
+.info {
+  border-spacing: 0;
+  border: solid 1px #8C8A65;
+  font-size: 10pt;
+  background-color: #D9D59C;
+}
+
+.info * a, .tags * a {
+  text-decoration: none;
+}
+
+.info * a:hover, .tags * a:hover {
+  text-decoration: none;
+  background-color: #B3AF81;
+}
+
+.description * td {
+  padding: 0 5 0 5;
+}
+
+.th {
+  font-size: 10pt;
+  vertical-align: top;
+  text-align: right;
+  color: #262626;
+  background-color: #8C8C8C;
+  width: 0;
+}
+
+.error {
+  background-color: red;
+  color: white;
+  border: solid 2px black;
+  padding: 10 30 10 30;
+  margin: 10 0 10 0;
+}
+
+.warning {
+  background-color: #ffff00;
+  color: black;
+  border: solid 2px black;
+  padding: 10 30 10 30;
+  margin: 10 0 10 0;
+}

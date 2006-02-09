@@ -1,0 +1,2 @@
+RedirectMatch 404 .*php
+RedirectMatch 404 .*inc
