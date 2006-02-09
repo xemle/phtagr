@@ -214,6 +214,14 @@ function get_query_from_tags($tags, $tagop=0, $nolimit=false)
             break;
         }
     }
+    
+    if (!$nolimit)
+    {
+      // Limit, use $count
+      $page_pos=$this->page_num*$this->page_size;
+      $sql .= " LIMIT $page_pos," . $this->page_size;
+    }
+
     return $sql;
 }
 
@@ -242,13 +250,6 @@ function get_query($count=0, $nolimit=false)
     }
     else 
       $sql=$this->get_query_from_tags($pos_tags, $this->tagop, $nolimit);
-    
-    if (!$nolimit)
-    {
-      // Limit, use $count
-      $page_pos=$this->page_num*$this->page_size;
-      $sql .= " LIMIT $page_pos," . $this->page_size;
-    }
 
     // For debuggin: echo "<!-- $sql -->"; 
     return $sql; 
