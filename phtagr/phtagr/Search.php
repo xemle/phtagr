@@ -9,6 +9,7 @@ var $date_start;
 var $date_end;
 var $page_size;
 var $page_num;
+var $orderby;
 
 
 function Search()
@@ -20,6 +21,7 @@ function Search()
     $this->date_end=0;
     $this->page_size=10;
     $this->page_num=0;
+    $this->orderby='date';
 }
 
 function set_userid($userid)
@@ -111,6 +113,24 @@ function from_URL()
     $this->set_page_size($_REQUEST['pagesize']);
 }
 
+function handle_orderby()
+{
+  if ($this->orderby=='date')
+    return " ORDER BY image.date DESC";
+  return '';
+}
+
+function handle_limit($nolimit=false)
+{
+  if (!$nolimit)
+  {
+    // Limit, use $count
+    $page_pos=$this->page_num*$this->page_size;
+    return " LIMIT $page_pos," . $this->page_size;
+  }
+  return '';
+}
+
 function to_URL()
 {
   $url='';
@@ -159,10 +179,9 @@ function get_query_from_tags($tags, $tagop=0, $nolimit=false)
         $this->date_start==0 && $this->date_end==0 &&
         $this->page_num==0 && $this->page_size==10)
     {
-        if ($nolimit)
-          return $sql;
-        else
-          return "$sql LIMIT 0,".$this->page_size;
+      $sql.=$this->handle_orderby();
+      $sql.=$this->handle_limit($nolimit);
+      return $sql;
     }
       
     $sql .= " WHERE 1=1"; // dummy where clause
@@ -214,13 +233,9 @@ function get_query_from_tags($tags, $tagop=0, $nolimit=false)
             break;
         }
     }
-    
-    if (!$nolimit)
-    {
-      // Limit, use $count
-      $page_pos=$this->page_num*$this->page_size;
-      $sql .= " LIMIT $page_pos," . $this->page_size;
-    }
+
+    $sql.=$this->handle_orderby();
+    $sql.=$this->handle_limit($nolimit);
 
     return $sql;
 }
