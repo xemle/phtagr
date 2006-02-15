@@ -40,7 +40,7 @@ function print_content()
 
     if (mysql_num_rows($result)==0)
     {
-        $this->print_warning("Could not find image with id $id");
+        $this->warning("Could not find image with id $id");
         return;
     }
     

@@ -22,7 +22,7 @@ function print_navigator($link, $current, $count)
 {
     if ($count<2) return;
 
-    echo "<div class=\"navigator\">\nNavigation:&nbsp;";
+    echo "<div class=\"navigator\">\nPage:&nbsp;";
     for ($i=0; $i < $count; $i++)
     {
         if ($i == $current)

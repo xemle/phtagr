@@ -30,7 +30,7 @@ function create_user($name, $password)
     }
     if (mysql_num_rows($result) > 0)
     {
-        $this->print_error("Username '$name' is already taken");
+        $this->error("Username '$name' is already taken");
         return false;
     }
     $sql="insert into user (name, password, email) values ('$name', '$password', 'email')";
@@ -121,12 +121,12 @@ function print_content()
         $confirm=$_REQUEST['confirm'];
         if ($password != $confirm) 
         {
-            $this->print_error("Password mismatch");
+            $this->error("Password mismatch");
             return;
         }
         if ($this->create_user($name, $password)==true)
         {
-            $this->print_success("User '$name' created");
+            $this->success("User '$name' created");
         }
         return;
     }

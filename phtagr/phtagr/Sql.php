@@ -35,6 +35,27 @@ function connect()
     if ($this->link) mysql_select_db($this->database, $this->link);
 }
 
+/** Test a sql connection 
+ @return true on success, false on failure.
+*/
+function test_db($host, $user, $password, $database)
+{
+    error_reporting(0);
+    $link=mysql_connect($host,$user,$password);
+    if ($this->link) 
+    {
+      $success = mysql_select_db($this->database, $this->link);
+    }
+    error_reporting(E_ERROR | E_WARNING | E_PARSE);
+    if ($this->link && $success)
+    {
+      mysql_close($this->link);
+      return true;
+    }
+    return false;
+}
+
+
 /** Sql query an return the result. On failure print an error and return NULL
  * */
 function query($sql, $quiet=false)

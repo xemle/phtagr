@@ -75,8 +75,12 @@ function set_page_num($page)
 
 function set_page_size($size)
 {
-    if ($size>2 && $size<250)
-      $this->page_size=$size;
+    if ($size<2)
+      $size=2;
+    if ($size>250)
+      $size=250;
+      
+    $this->page_size=$size;
 }
 
 function from_URL()
