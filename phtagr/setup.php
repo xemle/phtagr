@@ -22,8 +22,8 @@ include "$prefix/SectionSetup.php";
 $setup = new PageBase();
 
 $hdr = new SectionBase('header');
-$header = new SectionHeaderLeft();
-$hdr->add_section($header);
+$hdr_left = new SectionHeaderLeft();
+$hdr->add_section($hdr_left);
 $setup->add_section($hdr);
 
 $menu = new SectionMenu();
@@ -61,8 +61,8 @@ if (isset($_REQUEST['section']))
     }
     //echo "<pre>"; print_r($a);echo "</pre>";
 } else {
-    $home = new SectionHome();
-    $setup->add_section($home);
+    $ssetup = new SectionSetup();
+    $setup->add_section($ssetup);
 }
 
 $footer = new SectionFooter();

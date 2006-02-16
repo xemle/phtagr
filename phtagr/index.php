@@ -37,11 +37,10 @@ $page->add_section($hdr);
 $menu = new SectionMenu();
 $menu->add_menu_item("Home", "index.php");
 $menu->add_menu_item("Explorer", "index.php?section=explorer");
-//$menu->add_menu_item("Login", "index.php?section=login");
-//$menu->add_menu_item("Logout", "index.php?section=logout");
 
 $db = new Sql();
 $db->connect();
+$pref=$db->read_pref();
 
 $auth = new Auth();
 $auth->check_session();

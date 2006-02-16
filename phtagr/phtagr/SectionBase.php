@@ -76,6 +76,11 @@ function error($message)
     $this->div('error', $message);
 }
 
+function info($message)
+{
+    $this->div('info', $message);
+}
+
 function success($message)
 {
     $this->div('success', $message);

@@ -22,7 +22,7 @@ function SectionAccount()
 function create_user($name, $password)
 {
     global $db;
-    $sql="select id from user where name='$name'";
+    $sql="select id from ".$db->prefix."user where name='$name'";
     $result=$db->query($sql);
     if (!$result)
     {
@@ -33,7 +33,7 @@ function create_user($name, $password)
         $this->error("Username '$name' is already taken");
         return false;
     }
-    $sql="insert into user (name, password, email) values ('$name', '$password', 'email')";
+    $sql="insert into ".$db->prefix."user (name, password, email) values ('$name', '$password', 'email')";
     if (!$db->query($sql))
     {
         return false;

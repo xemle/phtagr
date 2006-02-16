@@ -33,7 +33,7 @@ function print_all_tags() {
   
   echo "<div class=\"tags\"><p>Popular tags:</p>\n\n<p>";
   // best of tags
-  $sql="select name,COUNT(name) as hits from tag group by name order by hits desc limit 0,50";
+  $sql="select name,COUNT(name) as hits from $db->tag group by name order by hits desc limit 0,50";
   $result = $db->query($sql);
   $tags=array();
   $hits=array();

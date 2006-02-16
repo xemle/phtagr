@@ -28,8 +28,8 @@ function print_content()
 
     $id=$_REQUEST['id'];
     
-    $sql="SELECT id,userid,filename,name,UNIX_TIMESTAMP(synced),clicks
-          FROM image
+    $sql="SELECT id,userid,filename,name,UNIX_TIMESTAMP(synced),clicks,UNIX_TIMESTAMP(lastview),ranking
+          FROM $db->image
           WHERE id=$id";
 
     $result = $db->query($sql);
@@ -51,14 +51,19 @@ function print_content()
     $name=$row[3];
     $synced=$row[4];
     $clicks=$row[5];
+    $lastview=$row[6];
+    $ranking=$row[7];
     
     $preview=create_preview($id, $userid, $filename, $synced);
     
-    echo "<h3>$name<h3>\n";
+    echo "<h3>$name</h3>\n";
     echo "<p><img src=\"$preview\" /></p>\n";
-    echo "<p>Clicks: $clicks</p>\n";
+    echo "<p>Clicks: $clicks, Ranking: $ranking</p>\n";
   
-    $sql="UPDATE image SET clicks=clicks+1 WHERE id=$id";
+    $ranking=0.8*$ranking+500/(1+time()-$lastview);
+    $sql="UPDATE $db->image SET ranking=$ranking WHERE id=$id";
+    $result = $db->query($sql);
+    $sql="UPDATE $db->image SET clicks=clicks+1, lastview=NOW() WHERE id=$id";
     $result = $db->query($sql);
   
 }

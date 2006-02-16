@@ -1,6 +1,7 @@
 <?php
 
 global $prefix;
+
 include_once("$prefix/SectionBody.php");
 include_once("$prefix/SectionAccount.php");
 
@@ -26,7 +27,7 @@ function SectionSetup()
         return;
     }
 
-    $sql="select id,name from user where name='admin'";
+    $sql="select id,name from ".$db->prefix."user where name='admin'";
     $result=$db->query($sql, true);
     if (!$result || mysql_num_rows($result)==0)
     {
@@ -41,15 +42,60 @@ function exec_stage0()
 {
     // check sql parameters
     global $db;
-    if (!$db->test($_REQUEST['host'], 
+    $result=$db->test_database($_REQUEST['host'], 
                    $_REQUEST['user'], 
                    $_REQUEST['password'], 
-                   $_REQUEST['database']))
+                   $_REQUEST['database']);
+    if ($result!=true)
     {
-      $this->error("Could not connect to sql database");
+      $this->error($result);
       return false;
     }
     
+    $configdir=getcwd()."/phtagr";
+    if (!is_writeable($configdir))
+    {
+      $this->error("Could not write to config directory $configdir");
+      return false;
+    }
+    
+    // check for writing the minimalistic configure file
+    $config="$configdir/vars.inc";
+    
+    // write minimalistic configuration file
+    $f=fopen($config, "w");
+    if (!$f) 
+    {
+      $this->error("Could not write to config file $config");
+      return false;
+    }
+
+    fwrite($f, "# Configuration file\n");
+    fwrite($f, "db_host=".$_REQUEST['host']."\n");
+    fwrite($f, "db_user=".$_REQUEST['user']."\n");
+    fwrite($f, "db_password=".$_REQUEST['password']."\n");
+    fwrite($f, "db_database=".$_REQUEST['database']."\n");
+    fwrite($f, "# Prefix of phTagr tables.\n");
+    fwrite($f, "db_prefix=".$_REQUEST['prefix']."\n");
+    fclose($f);
+
+    $this->p("The configure file was created successfully");
+    $this->warning("Please change the write permission of directory $configdir to only readable");
+    $db = new Sql();
+    if (!$db->connect() || !$db->create_tables())
+    {
+      $this->warning("The tables could not be created successfully");
+      return false;
+    }
+    $this->success("Tables where successfully created");
+    $sql="INSERT $db->pref (name, value) VALUES('cache', '".getcwd()."/cache')";
+    $db->query($sql);
+    
+    return true;
+}
+
+function exec_stage1()
+{
     // check cache directory
     if (!is_dir($_REQUEST['cache']))
     {
@@ -61,37 +107,14 @@ function exec_stage0()
       $this->error("Could not write to cache directory");
       return false;
     }
-    
-    // check for writing the minimalistic configure file
-    $config=getcwd."/phtagr/vars.inc";
-    if (!is_writeable($config))
-    {
-      $this->error("Could not write to file $config");
-      return false;
-    }
-    
-    // write minimalistic configuration file
-    $f=fopen($config, "w");
-    fwrite($f, "<?php\n");
-    fwrite($f, "\$db_host='".$_REQUEST['host']."';");
-    fwrite($f, "\$db_host='".$_REQUEST['host']."';");
-    fwrite($f, "\$db_database='".$_REQUEST['database']."';");
-    fwrite($f, "\$db_user='".$_REQUEST['user']."';");
-    fwrite($f, "\$db_password='".$_REQUEST['password']."';");
-    fwrite($f, "\$db_cache='".$_REQUEST['cache']."';");
-    fwrite($f, "?>\n");
-    fclose($f);
-
-    $this->p("The configure file was created successfully");
-    $this->warning("Please change the write permission of $config to only readable");
-    return true;
 }
 
 function print_stage0()
 {
-    echo "<h3>Connection to mySQL database</h3>\n";
-    $this->error("Could not connect to mySQL database.");
-    echo "Please check the user/password authentication in phtagr/Sql.php";
+    echo "<h3>Setup of mySQL database connection</h3>\n";
+    
+    $this->p("Please insert the connection data for the mysql connection data");
+    
     echo "<form method=\"post\">
 <input type=\"hidden\" name=\"section\" value=\"setup\" />
 <input type=\"hidden\" name=\"stage\" value=\"0\" />
@@ -102,25 +125,26 @@ function print_stage0()
   <tr>
     <td>Host</td><td><input type=\"text\" name=\"host\" value=\"localhost\" /></td>
   </tr><tr>
-    <td>Database</td><td><input type=\"text\" name=\"database\" value=\"phtagr\" /></td>
-  </tr><tr>
     <td>User</td><td><input type=\"text\" name=\"user\" value=\"phtagr\" /></td>
   </tr><tr>
     <td>Password</td><td><input type=\"password\" name=\"password\" /></td>
+  </tr><tr>
+    <td>Database</td><td><input type=\"text\" name=\"database\" value=\"phtagr\" /></td>
+  </tr><tr>
+    <td>Table prefix</td><td><input type=\"text\" name=\"prefix\" value=\"\" /></td>
   </tr>
 </table>
 </fieldset>
 
-<fieldset><legend><b>Directories</b>
-<table>
-  <tr>
-    <td>Cache Directory</td><td><input type=\"text\" name=\"cache\" /></td>
-  </tr>
-</table>
-</fieldset>
 <input type=\"submit\" value=\"OK\" /><input type=\"reset\" value=\"Reset\" />
-";
 
+";
+  $this->info("The data will be stored in the phtagr directory. For this reason,
+  the directory should be writeable by the webserver. After this setup step,
+  the permission should be set to read-only.");
+  
+  $this->info("To run multiple phTagr instances within one database, please use
+  the table prefix");
 }
 
 function print_stage1()
@@ -157,6 +181,7 @@ function print_content()
     if ($action=='init')
     {
         $this->exec_stage0();
+        $this->stage++;
     }
     else if ($action=='delete_tables')
     {
@@ -194,7 +219,6 @@ function print_content()
     case 2: $this->print_stage2(); break;
     default: $this->print_stage3(); break;
     }
-    
 }
 
 }

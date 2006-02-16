@@ -10,10 +10,10 @@ include_once("$prefix/Search.php");
 */
 function create_thumbnail($id,$userid,$filename,$synced) {
   global $db;
-
+  global $pref;
   // Get the thumbnail filename
   $thumb="$userid-$id.thumb.jpg";
-  $file="$db->cache/$thumb";
+  $file="${pref['cache']}/$thumb";
   
   if (! file_exists($file) or filectime($file) < $synced) {
     system ("convert -resize 220x220 -quality 80 '$filename' '$file'", $retval);
@@ -24,10 +24,11 @@ function create_thumbnail($id,$userid,$filename,$synced) {
 
 function create_preview($id,$userid,$filename,$synced) {
   global $db;
+  global $pref;
 
   // Get the thumbnail filename
   $thumb="$userid-$id.preview.jpg";
-  $file="$db->cache/$thumb";
+  $file="${pref['cache']}/$thumb";
   
   if (! file_exists($file) or filectime($file) < $synced) {
     system ("convert -resize 640x640 -quality 90 '$filename' '$file'", $retval);
@@ -43,7 +44,7 @@ function print_preview($id) {
   global $search;
   
   $sql="SELECT userid,filename,synced,name,UNIX_TIMESTAMP(date),caption
-    FROM image
+    FROM $db->image
     WHERE id=$id";
   $result = $db->query($sql);
   if (!$result) {
@@ -68,7 +69,7 @@ function print_preview($id) {
   }
   echo "</div>\n";  
 
-  echo "<table class=\"info\">\n";
+  echo "<table class=\"imginfo\">\n";
   //echo "  <tr><td class=\"th\">File:</td><td>$filename</td></tr>\n";
   echo "  <tr><td class=\"th\">Date:</td><td>";
   $date=date("Y-m-d H:i:s", $sec);
@@ -100,7 +101,7 @@ function print_preview($id) {
   echo "</td></tr>\n";
   
   
-  $sql="SELECT name FROM tag WHERE imageid=$id";
+  $sql="SELECT name FROM $db->tag WHERE imageid=$id";
   $result = $db->query($sql);
   $tags=array();
   while($row = mysql_fetch_row($result)) {

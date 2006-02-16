@@ -30,7 +30,7 @@ function check_login($user, $password)
     global $db;
     if ($user!='' && $password!='')
     {
-        $sql="select id,password from user where name='$user'";
+        $sql="select id,password from ".$db->prefix."user where name='$user'";
         $result=$db->query($sql);
         if ($result)
         {

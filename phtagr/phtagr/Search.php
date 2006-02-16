@@ -153,11 +153,12 @@ function to_URL()
 
 function get_query_from_tags($tags, $tagop=0)
 {
+    global $db;
     $num_tags=count($tags);
       
-    $sql="SELECT image.id FROM image";
+    $sql="SELECT i.id FROM $db->image AS i";
     if ($num_tags)
-        $sql .= ",tag";
+        $sql .= ",$db->tag AS t";
 
     // check for where condition 
     if ($this->userid==NULL &&
@@ -170,11 +171,11 @@ function get_query_from_tags($tags, $tagop=0)
       
     $sql .= " WHERE 1=1"; // dummy where clause
     if ($num_tags)
-      $sql .= " AND image.id=tag.imageid";
+      $sql .= " AND i.id=t.imageid";
 
     // handle user id
     if ($this->userid!=NULL)
-        $sql .= " AND image.userid=".$this->userid;
+        $sql .= " AND i.userid=".$this->userid;
     
     // handle tags
     if ($num_tags>1)
@@ -182,7 +183,7 @@ function get_query_from_tags($tags, $tagop=0)
         $sql .= " AND (";
         for ($i=0; $i<$num_tags; $i++)
         {
-            $sql .= " tag.name='" . $tags[$i] . "'";
+            $sql .= " t.name='" . $tags[$i] . "'";
             if ($i != $num_tags-1)
                 $sql .= " OR";
         }
@@ -190,30 +191,30 @@ function get_query_from_tags($tags, $tagop=0)
     }
     else if ($num_tags==1)
     {
-        $sql .= " AND tag.name='" . $tags[0] . "'";
+        $sql .= " AND t.name='" . $tags[0] . "'";
     }
 
     // handle date
     if ($this->date_start>0)
-        $sql .= " AND UNIX_TIMESTAMP(image.date)>=".$this->date_start;
+        $sql .= " AND UNIX_TIMESTAMP(i.date)>=".$this->date_start;
     if ($this->date_end>0)
-        $sql .= " AND UNIX_TIMESTAMP(image.date)<".$this->date_end;
+        $sql .= " AND UNIX_TIMESTAMP(i.date)<".$this->date_end;
     
-    $sql .= " GROUP BY image.id";
+    $sql .= " GROUP BY i.id";
 
     // handle tag operation
     if ($num_tags>1)
     {
         switch ($tagop) {
         case 0:
-            $sql .= " HAVING COUNT(image.id)=$num_tags";
+            $sql .= " HAVING COUNT(i.id)=$num_tags";
             break;
         case 1:
             //$sql .= " HAVING COUNT(image.id)>=1";
             break;
         case 2:
             $fuzzy=intval($num_pos_tags*0.7);
-            $sql .= " HAVING COUNT(image.id)>=$num_tags";
+            $sql .= " HAVING COUNT(i.id)>=$num_tags";
             break;
         }
     }
@@ -224,7 +225,7 @@ function get_query_from_tags($tags, $tagop=0)
 function handle_orderby()
 {
   if ($this->orderby=='date')
-    return " ORDER BY image.date DESC";
+    return " ORDER BY i.date DESC";
   return '';
 }
 
@@ -241,6 +242,7 @@ function handle_limit($nolimit=false)
 
 function get_query($count=0, $nolimit=false)
 {
+    global $db;
     $pos_tags=array();
     $neg_tags=array();
     foreach ($this->tags as $tag)
@@ -255,7 +257,7 @@ function get_query($count=0, $nolimit=false)
     
     if ($num_pos_tags && $num_neg_tags)
     {
-      $sql="SELECT image.id FROM image";
+      $sql="SELECT id FROM $db->image ";
       $sql.=" WHERE id IN ( ";
       $sql.=$this->get_query_from_tags($pos_tags, $this->tagop);
       $sql.=" ) AND id NOT IN ( ";
@@ -277,7 +279,8 @@ function get_query($count=0, $nolimit=false)
 
 function get_num_query()
 {
-    $sql="SELECT COUNT(*) FROM image WHERE id IN ( ";
+    global $db;
+    $sql="SELECT COUNT(*) FROM $db->image WHERE id IN ( ";
     $sql .= $this->get_query(0, true);
     $sql .= " )";
     return $sql;

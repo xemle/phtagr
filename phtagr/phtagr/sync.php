@@ -16,7 +16,7 @@ function update_file($userid, $file)
     return;
   } 
   
-  $sql="select id,synced from image where filename='$file' and userid='$userid' ";
+  $sql="select id,synced from ".$db->prefix."image where filename='$file' and userid='$userid' ";
   $result = $db->query($sql);
   if (!$result) 
   { 
@@ -54,11 +54,11 @@ function update_exif($imageid, $userid, $file)
   $height=$exif['COMPUTED']['Width'];
   $camera=$exif['IFD0']['Model'];
   if ($imageid == -1 ) {
-    $sql="insert into image (
-      filename,synced,userid,name,date,width,height,camera,clicks) values (
-      '$file',NOW(),$userid,'$name','$date','$width','$height','$camera',0)";
+    $sql="insert into ".$db->prefix."image (
+      filename,synced,userid,name,date,width,height,camera,clicks,lastview,ranking) values (
+      '$file',NOW(),$userid,'$name','$date','$width','$height','$camera',0,NOW(),0)";
   } else {
-    $sql="update image set synced=NOW(),name='$name',date='$date',width='$width',height='$height',camera='$camera' where id=$imageid";
+    $sql="update ".$db->prefix."image set synced=NOW(),name='$name',date='$date',width='$width',height='$height',camera='$camera' where id=$imageid";
   }
   $result = $db->query($sql);
   if (!$result) 
@@ -75,7 +75,7 @@ function update_iptc($imageid, $userid, $file)
   global $db;
   if ($imageid == -1) {
     // get the new image id
-    $sql="select id from image where filename='$file' and userid='$userid' ";
+    $sql="select id from ".$db->prefix."image where filename='$file' and userid='$userid' ";
     $result = $db->query($sql);
     if (!$result) 
     { 
@@ -92,7 +92,7 @@ function update_iptc($imageid, $userid, $file)
     $imageid=$row[0];
   } else {
     // remove all tags
-    $sql="delete from tag where imageid=$imageid";
+    $sql="delete from ".$db->prefix."tag where imageid=$imageid";
     $result = $db->query($sql);
     if (!$result) 
     { 
@@ -125,7 +125,7 @@ function update_iptc($imageid, $userid, $file)
     for ($i=0; $i < $c; $i++)
     {
       $key=$iptc['2#025'][$i];
-      $sql="insert into tag ( imageid, name ) values ( $imageid, '$key' )";
+      $sql="insert into ".$db->prefix."tag ( imageid, name ) values ( $imageid, '$key' )";
       $result = $db->query($sql);
       if (!$result) 
       {
@@ -136,7 +136,7 @@ function update_iptc($imageid, $userid, $file)
     if (array_key_exists('2#120', $iptc))
     {
       $caption=$iptc['2#120'][0];
-      $sql="update image set caption='$caption' where id=$imageid";
+      $sql="update ".$db->prefix."image set caption='$caption' where id=$imageid";
       $result = $db->query($sql);
       if (!$result) 
       {
@@ -203,7 +203,7 @@ function print_iptc($file)
 function sync_files()
 {
   global $db;
-  $sql="select id,userid,filename from image";
+  $sql="select id,userid,filename from ".$db->prefix."image";
   $result = $db->query($sql);
   if (!$result) 
   { 
@@ -231,13 +231,13 @@ function delete_file($imageid)
 {
   global $db;
   echo "<div class='error'>Deleting file '$file' from database</div>\n";
-  $sql="delete from tag where imageid=$imageid";
+  $sql="delete from ".$db->prefix."tag where imageid=$imageid";
   $result = $db->query($sql);
   if (!$result) 
   { 
     echo "<div class='error'>Could not run Query: '$sql'</div>\n";
   }
-  $sql="delete from image where id=$imageid";
+  $sql="delete from ".$db->prefix."image where id=$imageid";
   $result = $db->query($sql);
   if (!$result) 
   { 
