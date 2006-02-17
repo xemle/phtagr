@@ -86,8 +86,7 @@ function print_mini($id) {
   $v = mysql_fetch_array($result, MYSQL_ASSOC);
   $thumb=create_mini($v['id'], $v['userid'], $v['filename'], $v['synced'],$v['width'],$v['height']);
   
-  echo "<div class=\"mini\">".
-    "<a href=\"index.php?section=image&id=$id\"><img src=\"$thumb\" alt=\"${v['name']}\" align=\"center\"/></a>";
+  echo "<a href=\"index.php?section=image&id=$id\"><img src=\"$thumb\" alt=\"${v['name']}\" align=\"center\"/></a>";
 
 }
 function print_preview($id) {

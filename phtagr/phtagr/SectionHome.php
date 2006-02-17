@@ -54,27 +54,54 @@ function print_all_tags() {
     $size=intval(8+($hit-$min)*$grad);
     echo "<span style=\"font-size:${size}pt;\"><a href=\"?section=explorer&tags=$tag\">$tag</a></span>&nbsp;\n";
   }
-  echo "<p></div>";
+  echo "<p></div>\n";
 }
 
+/** Prints randomly images as small square images 
+  Only 8 of 50 top rated images are shown */
 function print_popular_images()
 {
   global $db;
+  
+  // get total count of images
+  $sql="SELECT COUNT(*)
+        FROM $db->image";
+  $result=$db->query($sql);
+  if (!$result)
+    return;
+  $row=mysql_fetch_row($result);
+  $count=intval($row[0]*0.01);
+  $count=$count<20?20:$count;
+    
+  // select top 1% of images
   $sql="SELECT id
         FROM $db->image AS i
-        ORDER BY ranking
-        LIMIT 2,8";
+        ORDER BY ranking DESC
+        LIMIT 0,$count";
   $result=$db->query($sql);
   if (!$result)
     return;
 
-  echo "<div class=\"tags\"><p>Popular Images:</p>\n\n<p>";
+  // fetch all top rated images and remove randomly some
+  $ids=array();
   while ($row=mysql_fetch_row($result))
+    array_push($ids,$row[0]);
+  while (count($ids)>8)
+    array_splice($ids,rand(0,count($ids)-1),1);
+  
+  echo "<div class=\"mini\"><p>Popular Images:</p>\n\n";
+  echo "<table>\n<tr>\n";
+  foreach ($ids as $id)
   {
-    print_mini($row[0]);
+    echo "  <td>";
+    print_mini($id);
+    echo "</td>\n";
   }
+  echo "</tr>\n</table>\n";
+    
   echo "</div>\n";
 }
+
 function print_content()
 {
   echo "<h2>Home</h2>\n";

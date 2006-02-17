@@ -257,7 +257,7 @@ function get_query($count=0, $nolimit=false)
     
     if ($num_pos_tags && $num_neg_tags)
     {
-      $sql="SELECT id FROM $db->image ";
+      $sql="SELECT id FROM $db->image AS i";
       $sql.=" WHERE id IN ( ";
       $sql.=$this->get_query_from_tags($pos_tags, $this->tagop);
       $sql.=" ) AND id NOT IN ( ";
@@ -280,7 +280,7 @@ function get_query($count=0, $nolimit=false)
 function get_num_query()
 {
     global $db;
-    $sql="SELECT COUNT(*) FROM $db->image WHERE id IN ( ";
+    $sql="SELECT COUNT(*) FROM $db->image AS i WHERE id IN ( ";
     $sql .= $this->get_query(0, true);
     $sql .= " )";
     return $sql;
