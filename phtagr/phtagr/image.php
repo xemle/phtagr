@@ -2,6 +2,44 @@
 
 include_once("$prefix/Search.php");
 
+/** Create a mini square image with size of 75x75 pixels. 
+
+  @param id image id
+  @param userid id of the user
+  @param synchornized time of image data in UNIX time 
+*/
+function create_mini($id,$userid,$filename,$synced,$width,$height) {
+  global $pref;
+  // Get the mini filename
+  $thumb="$userid-$id.mini.jpg";
+  $file="${pref['cache']}/$thumb";
+ 
+  if ($height<=0 || $width<=0)
+    return '';
+  
+  if (! file_exists($file) or filectime($file) < $synced) {
+    
+    if ($width<$height) {
+      $w=105;
+      $h=intval(95*$height/$width);
+      $l=10;
+      $t=intval(($h-75)/2);
+    } else {
+      $w=intval(95*$width/$height);
+      $h=105;
+      $l=intval(($w-75)/2);
+      $t=10;
+    }
+    $cmd="convert -resize ${w}x$h -crop 75x75+${l}+${t} -quality 80 '$filename' '$file'";
+    system ($cmd, $retval);
+    if ($retval!=0)
+      echo "<div id=\"error\">Could not execute command '$cmd'. Exit with code $retval</div>\n";
+
+    system ("chmod 644 '$file'");
+  }
+  return './cache/' . $thumb;
+}
+
 /** Create a thumbnail image 
 
   @param id image id
@@ -9,7 +47,6 @@ include_once("$prefix/Search.php");
   @param synchornized time of image data in UNIX time 
 */
 function create_thumbnail($id,$userid,$filename,$synced) {
-  global $db;
   global $pref;
   // Get the thumbnail filename
   $thumb="$userid-$id.thumb.jpg";
@@ -23,7 +60,6 @@ function create_thumbnail($id,$userid,$filename,$synced) {
 }
 
 function create_preview($id,$userid,$filename,$synced) {
-  global $db;
   global $pref;
 
   // Get the thumbnail filename
@@ -37,7 +73,23 @@ function create_preview($id,$userid,$filename,$synced) {
   return './cache/' . $thumb;
 }
 
+function print_mini($id) {
+  global $db;
+  
+  $sql="SELECT * 
+        FROM $db->image 
+        WHERE id=$id";
+  $result = $db->query($sql);
+  if (!$result)
+    return;
+  
+  $v = mysql_fetch_array($result, MYSQL_ASSOC);
+  $thumb=create_mini($v['id'], $v['userid'], $v['filename'], $v['synced'],$v['width'],$v['height']);
+  
+  echo "<div class=\"mini\">".
+    "<a href=\"index.php?section=image&id=$id\"><img src=\"$thumb\" alt=\"${v['name']}\" align=\"center\"/></a>";
 
+}
 function print_preview($id) {
   global $db;
   global $auth;
@@ -47,9 +99,9 @@ function print_preview($id) {
     FROM $db->image
     WHERE id=$id";
   $result = $db->query($sql);
-  if (!$result) {
-    echo "Could not run query: " . mysql_error();
-  }
+  if (!$result)
+    return;
+  
   $row = mysql_fetch_row($result);          
   $userid=$row[0];
   $filename=$row[1];

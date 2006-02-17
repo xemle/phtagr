@@ -50,8 +50,8 @@ function update_exif($imageid, $userid, $file)
   
   $name=basename($file);
   $date=$exif['EXIF']['DateTimeOriginal'];
-  $width=$exif['COMPUTED']['Height'];
-  $height=$exif['COMPUTED']['Width'];
+  $width=$exif['COMPUTED']['Width'];
+  $height=$exif['COMPUTED']['Height'];
   $camera=$exif['IFD0']['Model'];
   if ($imageid == -1 ) {
     $sql="insert into ".$db->prefix."image (

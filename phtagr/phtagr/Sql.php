@@ -188,10 +188,16 @@ function create_tables()
 
 function delete_tables()
 {
-  $sql="DROP TABLE ".$this->prefix."image,"
-        .$this->prefix."user,"
-        .$this->prefix."tag,"
-        .$this->prefix."pref";
+  $sql="DROP TABLE $this->image,$this->user,$this->tag,$this->pref";
+  if (!$this->query($sql)) { return false; }
+  return true;
+}
+
+function delete_images()
+{
+  $sql="DELETE FROM $this->image";
+  if (!$this->query($sql)) { return false; }
+  $sql="DELETE FROM $this->tag";
   if (!$this->query($sql)) { return false; }
   return true;
 }

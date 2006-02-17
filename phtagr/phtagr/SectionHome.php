@@ -57,10 +57,29 @@ function print_all_tags() {
   echo "<p></div>";
 }
 
+function print_popular_images()
+{
+  global $db;
+  $sql="SELECT id
+        FROM $db->image AS i
+        ORDER BY ranking
+        LIMIT 2,8";
+  $result=$db->query($sql);
+  if (!$result)
+    return;
+
+  echo "<div class=\"tags\"><p>Popular Images:</p>\n\n<p>";
+  while ($row=mysql_fetch_row($result))
+  {
+    print_mini($row[0]);
+  }
+  echo "</div>\n";
+}
 function print_content()
 {
-    echo "<h2>Home</h2>\n";
-    $this->print_all_tags();
+  echo "<h2>Home</h2>\n";
+  $this->print_all_tags();
+  $this->print_popular_images();
 }
 
 }

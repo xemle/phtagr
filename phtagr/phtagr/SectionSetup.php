@@ -21,24 +21,19 @@ function SectionSetup()
         $this->stage=0;
         return;
     }
-    if (mysql_num_rows($result)==0)
+
+    $sql="select id,name from $db->user where name='admin'";
+    $result=$db->query($sql, true);
+    if (!$result || mysql_num_rows($result)==0)
     {
         $this->stage=1;
         return;
     }
-
-    $sql="select id,name from ".$db->prefix."user where name='admin'";
-    $result=$db->query($sql, true);
-    if (!$result || mysql_num_rows($result)==0)
-    {
-        $this->stage=2;
-        return;
-    }
     
-    $this->stage=3;
+    $this->stage=2;
 }
 
-function exec_stage0()
+function exec_stage_db()
 {
     // check sql parameters
     global $db;
@@ -94,7 +89,7 @@ function exec_stage0()
     return true;
 }
 
-function exec_stage1()
+function exec_stage_pref()
 {
     // check cache directory
     if (!is_dir($_REQUEST['cache']))
@@ -109,7 +104,7 @@ function exec_stage1()
     }
 }
 
-function print_stage0()
+function print_stage_db()
 {
     echo "<h3>Setup of mySQL database connection</h3>\n";
     
@@ -139,23 +134,15 @@ function print_stage0()
 <input type=\"submit\" value=\"OK\" /><input type=\"reset\" value=\"Reset\" />
 
 ";
-  $this->info("The data will be stored in the phtagr directory. For this reason,
-  the directory should be writeable by the webserver. After this setup step,
-  the permission should be set to read-only.");
+  $this->info("The data will be stored in the directory ".getcwd()."/phtagr.
+  For this reason, the directory should be writeable by the webserver. After
+  this setup step, the permission should be set to read-only.");
   
   $this->info("To run multiple phTagr instances within one database, please use
-  the table prefix");
+  the table prefix. Usually this option is not used.");
 }
 
-function print_stage1()
-{
-    echo "<h3>Creation of Tables</h3>\n";
-    $this->warning("Tables are not created");
-    echo "<a href=\"setup.php?section=setup&action=create_tables\">Create Tables</a>\n";
-     
-}
-
-function print_stage2()
+function print_stage_admin()
 {
     echo "<h3>Creation of Admin Account</h3>\n";
     $account=new SectionAccount();
@@ -163,10 +150,12 @@ function print_stage2()
     $account->print_form_new_account();
 }
 
-function print_stage3()
+function print_actions()
 {
     echo "<ul>\n";
+    echo "<li><a href=\"setup.php?section=setup&action=init\">Create a phTagr Instance</a></li>\n";
     echo "<li><a href=\"setup.php?section=setup&action=delete_tables\">Delete Tables</a></li>\n";
+    echo "<li><a href=\"setup.php?section=setup&action=delete_images\">Delete all images</a></li>\n";
     echo "<li><a href=\"index.php\">Go to phTagr</a></li>\n";
     echo "</ul>\n";
 }
@@ -180,21 +169,19 @@ function print_content()
     $action=$_REQUEST['action'];
     if ($action=='init')
     {
-        $this->exec_stage0();
+        $this->exec_stage_db();
         $this->stage++;
+    }
+    else if ($action=='delete_images')
+    {
+        $db->delete_images();
+        $this->warning('All image data are deleted');
+        return;
     }
     else if ($action=='delete_tables')
     {
         $db->delete_tables();
         $this->warning('Tables deleted');
-        return;
-    }
-    else if ($action=='create_tables')
-    {
-        if ($db->create_tables())
-        {
-            $this->success('Tables created');
-        }
         return;
     }
     else if ($action=='create')
@@ -214,10 +201,9 @@ function print_content()
         return;
     }
     switch ($this->stage) {
-    case 0: $this->print_stage0(); break;
-    case 1: $this->print_stage1(); break;
-    case 2: $this->print_stage2(); break;
-    default: $this->print_stage3(); break;
+    case 0: $this->print_stage_db(); break;
+    case 1: $this->print_stage_admin(); break;
+    default: $this->print_actions(); break;
     }
 }
 
