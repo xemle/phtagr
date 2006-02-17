@@ -18,6 +18,12 @@ Other image communities: http://holocore.com/?PictureSync_services
     - Buildup in modules by classes
   - Tabspace is 2
 
+- mySQL database
+  - Store image timestamps as UNIX timestamp
+  - Add popular values as last view and current value. Done 2006-02-16
+    Popular index = current value*0.8 + 0.2*(1/(current time+1 - last view))
+    The value is updated every time if a image is clicked
+
 - User
   Setting of a user account.
   - Storage of common user information
