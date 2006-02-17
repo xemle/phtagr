@@ -76,7 +76,7 @@ function create_preview($id,$userid,$filename,$synced) {
 function print_mini($id) {
   global $db;
   
-  $sql="SELECT * 
+  $sql="SELECT id,userid,filename,UNIX_TIMESTAMP(synced),name,UNIX_TIMESTAMP(date),caption,width,height
         FROM $db->image 
         WHERE id=$id";
   $result = $db->query($sql);
@@ -94,7 +94,7 @@ function print_preview($id) {
   global $auth;
   global $search;
   
-  $sql="SELECT userid,filename,synced,name,UNIX_TIMESTAMP(date),caption
+  $sql="SELECT userid,filename,UNIX_TIMESTAMP(synced),name,UNIX_TIMESTAMP(date),caption
     FROM $db->image
     WHERE id=$id";
   $result = $db->query($sql);

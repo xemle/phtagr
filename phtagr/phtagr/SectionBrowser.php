@@ -147,7 +147,9 @@ function print_content()
         printf ("Found %d images<br/>\n", count($this->images));
         foreach ($this->images as $img)
         {
-            update_file($auth->userid, $this->root . $img);
+            $return=update_file($auth->userid, $this->root . $img);
+            if ($return==1)
+              echo "Image '$img' was updated.<br/>\n";
         }
         echo "<a href=\"index.php?section=browser&cd=$this->path\">Search again</a><br/>\n";
     } else if (isset($_REQUEST['cd'])) 

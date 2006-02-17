@@ -153,6 +153,7 @@ function print_stage_admin()
 function print_actions()
 {
     echo "<ul>\n";
+    echo "<li><a href=\"setup.php?section=setup&action=sync\">Synchronize</a> files with the database</li>\n";
     echo "<li><a href=\"setup.php?section=setup&action=init\">Create a phTagr Instance</a></li>\n";
     echo "<li><a href=\"setup.php?section=setup&action=delete_tables\">Delete Tables</a></li>\n";
     echo "<li><a href=\"setup.php?section=setup&action=delete_images\">Delete all images</a></li>\n";
@@ -162,49 +163,53 @@ function print_actions()
 
 function print_content()
 {
-    global $db;
-    global $auth;
-    
-    echo "<h2>Setup</h2>\n";
-    $action=$_REQUEST['action'];
-    if ($action=='init')
-    {
-        $this->exec_stage_db();
-        $this->stage++;
+  global $db;
+  global $auth;
+  
+  echo "<h2>Setup</h2>\n";
+  $action=$_REQUEST['action'];
+  if ($action=='init')
+  {
+    $this->exec_stage_db();
+    $this->stage++;
+  }
+  else if ($action=='sync')
+  {
+    sync_files();   
+  }
+  else if ($action=='delete_images')
+  {
+    $db->delete_images();
+    $this->warning('All image data are deleted');
+    return;
+  }
+  else if ($action=='delete_tables')
+  {
+    $db->delete_tables();
+    $this->warning('Tables deleted');
+    return;
+  }
+  else if ($action=='create')
+  {
+    echo "<h2>Create A New Account</h2>\n";
+    $name=$_REQUEST['name'];
+    $password=$_REQUEST['password'];
+    $confirm=$_REQUEST['confirm'];
+    if ($password != $confirm) {
+      $this->error("Password mismatch");             
+      return;
     }
-    else if ($action=='delete_images')
-    {
-        $db->delete_images();
-        $this->warning('All image data are deleted');
-        return;
+    $account=new SectionAccount();
+    if ($account->create_user($name, $password)==true) {
+      $this->success("User '$name' created");
     }
-    else if ($action=='delete_tables')
-    {
-        $db->delete_tables();
-        $this->warning('Tables deleted');
-        return;
-    }
-    else if ($action=='create')
-    {
-        echo "<h2>Create A New Account</h2>\n";
-        $name=$_REQUEST['name'];
-        $password=$_REQUEST['password'];
-        $confirm=$_REQUEST['confirm'];
-        if ($password != $confirm)         {
-            $this->error("Password mismatch");             return;
-        }
-        $account=new SectionAccount();
-        if ($account->create_user($name, $password)==true)
-        {
-            $this->success("User '$name' created");
-        }
-        return;
-    }
-    switch ($this->stage) {
-    case 0: $this->print_stage_db(); break;
-    case 1: $this->print_stage_admin(); break;
-    default: $this->print_actions(); break;
-    }
+    return;
+  }
+  switch ($this->stage) {
+  case 0: $this->print_stage_db(); break;
+  case 1: $this->print_stage_admin(); break;
+  default: $this->print_actions(); break;
+  }
 }
 
 }
