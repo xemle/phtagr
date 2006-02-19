@@ -6,161 +6,171 @@ include_once("$prefix/SectionBody.php");
 class SectionBrowser extends SectionBody
 {
 
+/** Relative root directory to emulate chroot() at userspace */
 var $root;
 var $path;
 var $images;
 
 function SectionBrowser()
 {
-    $this->name="browser";
-    $this->root='';
-    $this->path=getcwd();
-    $this->images=array();
+  $this->name="browser";
+  $this->root='';
+  $this->path=getcwd();
+  $this->images=array();
 }
 
-function is_dir2($dir)
+/** is_dir function with root prefix
+ @param dir Directory without the root directory
+ @return true if given dir is a directory. Otherwise false */
+function is_dir($dir)
 {
-    if (is_dir("$this->root/$dir"))
-    {   
-        return true;
-    } else {
-        return false;
-    }
+  if (is_dir("$this->root".DIRECTORY_SEPARATOR."$dir"))
+    return true;
+  else
+    return false;
 }
 
-function chdir2($dir)
+/** chdir function with root prefix
+ If $dir is not a directory, it will change the directory to the root directory
+ */
+function chdir($dir)
 {
-    if ($this->is_dir2($dir)) 
-    {
-        chdir("$this->root/$dir");
-    } else {
-        chdir("$this->root");
-    }
+  if ($this->is_dir($dir)) 
+    chdir("$this->root".DIRECTORY_SEPARATOR."$dir");
+  else 
+    chdir($this->root);
 }
 
-function opendir2($dir)
+/** opendir function with root prefix
+ @param dir Directory without root prefix */
+function opendir($dir)
 {
-    return opendir("$this->root/$dir");
+  return opendir("$this->root".DIRECTORY_SEPARATOR."$dir");
 }
 
-function is_readable2($dir)
+/** is_readable function with root prefix 
+ @return true if directory is readable. false otherwise */
+function is_readable($dir)
 {
-    return is_readable("$this->root/$dir");
+  return is_readable("$this->root".DIRECTORY_SEPARATOR."$dir");
 }
 
+/** Search images recursively of a directory. 
+ The function search only for jpg or JPG files. */
 function find_images($dir)
 {
-    $subdirs=array();
+  $subdirs=array();
     
-    if (!$this->is_readable2($dir) || !$this->is_dir2($dir)) return;
-    $this->chdir2($dir);
-    if (!$handle = $this->opendir2($dir)) return;
-    
-    while (false != ($file = readdir($handle))) {
-        if (!is_readable($file) || $file=='.' || $file=='..') continue;
+  if (!$this->is_readable($dir) || !$this->is_dir($dir)) return;
+  $this->chdir($dir);
+  if (!$handle = $this->opendir($dir)) return;
+  
+  while (false != ($file = readdir($handle))) {
+    if (!is_readable($file) || $file=='.' || $file=='..') continue;
 
-        $file="$dir/$file";
-        if ($this->is_dir2($file)) {
-            array_push($subdirs, "$file");
-        } else if (strtolower(substr($file, -3, 3))=='jpg') {
-            array_push($this->images, "$file");
-        }
+    $file="$dir".DIRECTORY_SEPARATOR."$file";
+    if ($this->is_dir($file)) {
+      array_push($subdirs, "$file");
+    } else if (strtolower(substr($file, -3, 3))=='jpg') {
+      array_push($this->images, "$file");
     }
-    closedir($handle);
-    
-    foreach ($subdirs as $sub) {
-        $this->find_images($sub);
-    }
+  }
+  closedir($handle);
+  
+  foreach ($subdirs as $sub) {
+    $this->find_images($sub);
+  }
 }
 
+/** Prints the subdirctories as list with checkboxes */
 function print_browser($dir)
 {
-    if (!$this->is_readable2($dir) || !$this->is_dir2($dir)) return;
-    $this->chdir2($dir);
-    if (!$handle = $this->opendir2($dir)) return;
-    
-    $subdirs=array();
-    
-    echo "Path:&nbsp;";
-    $dirs=split('/', $dir);
-    echo "<a href=\"?section=browser&cd=/\">root</a>";
-    $path='';
-    foreach ($dirs as $cd)
-    {
-        if ($cd == '' || $path == '/') continue;
+  if (!$this->is_readable($dir) || !$this->is_dir($dir)) return;
+  $this->chdir($dir);
+  if (!$handle = $this->opendir($dir)) return;
+  
+  $subdirs=array();
+  
+  echo "Path:&nbsp;";
+  $dirs=split('/', $dir);
+  echo "<a href=\"?section=browser&cd=/\">root</a>";
+  $path='';
+  foreach ($dirs as $cd)
+  {
+    if ($cd == '' || $path == '/') continue;
 
-        $path = "$path/$cd";
-        echo "&nbsp;/&nbsp;";
-        
-        if ($this->is_dir2($path)) {
-            echo "<a href=\"?section=browser&cd=$path\">$cd</a>";
-        } else {
-            echo "$cd";
-        }
-    }
+    $path = "$path".DIRECTORY_SEPARATOR."$cd";
     echo "&nbsp;/&nbsp;";
     
-    $handle=$this->opendir2($dir);
-    while (false != ($file = readdir($handle))) {
-        if (!is_readable($file) || $file=='.' || $file=='..') continue;
-        if (substr($file, 0, 1)=='.') continue; 
-
-        if ($this->is_dir2("$dir/$file")) {
-            array_push($subdirs, "$file");
-        }
+    if ($this->is_dir($path)) {
+      echo "<a href=\"?section=browser&cd=$path\">$cd</a>";
+    } else {
+      echo "$cd";
     }
-    closedir($handle);
+  }
+  echo "&nbsp;/&nbsp;";
+  
+  $handle=$this->opendir($dir);
+  while (false != ($file = readdir($handle))) {
+    if (!is_readable($file) || $file=='.' || $file=='..') continue;
+    if (substr($file, 0, 1)=='.') continue; 
 
-    echo "<form section=\"index.php\" method=\"post\">\n";
-    echo "<input type=\"hidden\" name=\"section\" value=\"browser\" />";
-
-    asort($subdirs);
-    echo "<input type=\"checkbox\" name=\"add[]\" value=\"$dir\" />&nbsp;. (this dir)</br>\n";
-    foreach($subdirs as $sub) 
-    {
-        if ($dir != '/') {
-            $cd="$dir/$sub";
-        } else {
-            $cd=$sub;
-        }
-        echo "<input type=\"checkbox\" name=\"add[]\" value=\"$cd\" />&nbsp;<a href=\"?section=browser&cd=$cd\">$sub</a></br>\n";
+    if ($this->is_dir("$dir".DIRECTORY_SEPARATOR."$file")) {
+      array_push($subdirs, "$file");
     }
-    echo "<input type=\"submit\" value=\"Add images\" />";
-    echo "<input type=\"reset\" value=\"Clear\" />";
-    
-    echo "<form>\n";
+  }
+  closedir($handle);
+
+  echo "<form section=\"index.php\" method=\"post\">\n";
+  echo "<input type=\"hidden\" name=\"section\" value=\"browser\" />";
+
+  asort($subdirs);
+  echo "<input type=\"checkbox\" name=\"add[]\" value=\"$dir\" />&nbsp;. (this dir)</br>\n";
+  foreach($subdirs as $sub) 
+  {
+    if ($dir != '/') {
+      $cd="$dir".DIRECTORY_SEPARATOR."$sub";
+    } else {
+      $cd=$sub;
+    }
+    echo "<input type=\"checkbox\" name=\"add[]\" value=\"$cd\" />&nbsp;<a href=\"?section=browser&cd=$cd\">$sub</a></br>\n";
+  }
+  echo "<input type=\"submit\" value=\"Add images\" />";
+  echo "<input type=\"reset\" value=\"Clear\" />";
+  
+  echo "<form>\n";
 }
 
 function print_content()
 {
-    global $auth; 
-    echo "<h2>Browser</h2>\n";
-    if (isset($_REQUEST['add'])) {
-        foreach ($_REQUEST['add'] as $d)
-        {
-            $this->find_images($d);
-        }
-        if (count($this->images))
-        { 
-            asort($this->images);
-        }
-        printf ("Found %d images<br/>\n", count($this->images));
-        foreach ($this->images as $img)
-        {
-            $return=update_file($auth->userid, $this->root . $img);
-            if ($return==1)
-              echo "Image '$img' was updated.<br/>\n";
-        }
-        echo "<a href=\"index.php?section=browser&cd=$this->path\">Search again</a><br/>\n";
-    } else if (isset($_REQUEST['cd'])) 
+  global $auth; 
+  echo "<h2>Browser</h2>\n";
+  if (isset($_REQUEST['add'])) {
+    foreach ($_REQUEST['add'] as $d)
     {
-        $this->path=$_REQUEST['cd'];
-        $this->print_browser($this->path);
-    } else {
-        $this->print_browser($this->path);
+      $this->find_images($d);
     }
+    if (count($this->images))
+    { 
+      asort($this->images);
+    }
+    printf ("Found %d images<br/>\n", count($this->images));
+    foreach ($this->images as $img)
+    {
+      $return=update_file($auth->userid, $this->root . $img);
+      if ($return==1)
+        echo "Image '$img' was updated.<br/>\n";
+    }
+    echo "<a href=\"index.php?section=browser&cd=$this->path\">Search again</a><br/>\n";
+  } else if (isset($_REQUEST['cd'])) 
+  {
+    $this->path=$_REQUEST['cd'];
+    $this->print_browser($this->path);
+  } else {
+    $this->print_browser($this->path);
+  }
 
-    //echo '<pre>'; print_r($_REQUEST); echo '</pre>';
+  //echo '<pre>'; print_r($_REQUEST); echo '</pre>';
 }
 
 }
