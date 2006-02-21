@@ -89,6 +89,7 @@ function print_mini($id) {
   echo "<a href=\"index.php?section=image&id=$id\"><img src=\"$thumb\" alt=\"${v['name']}\" align=\"center\"/></a>";
 
 }
+
 function print_preview($id) {
   global $db;
   global $auth;
@@ -112,11 +113,11 @@ function print_preview($id) {
   $thumb=create_thumbnail($id, $userid, $filename, $synced);
   
   echo "<div class=\"file\">$name</div>\n";
-  echo "<div class=\"thumb\">" .
-    "<a href=\"index.php?section=image&id=$id\"><img src=\"$thumb\" alt=\"$name\" align=\"center\"/></a>";
+  echo "<div class=\"thumb\">";
+  echo "<a href=\"index.php?section=image&id=$id\"><img src=\"$thumb\" alt=\"$name\" align=\"center\"/></a>";
   
   if ($caption != "") {
-    echo "<div class=\"Description\">$caption</div>\n";
+    echo "<div class=\"description\">$caption</div>\n";
   }
   echo "</div>\n";  
 
@@ -158,6 +159,7 @@ function print_preview($id) {
   while($row = mysql_fetch_row($result)) {
     array_push($tags, $row[0]);
   }
+  sort($tags);
   $num_tags=count($tags);
   
   echo "  <tr><td class=\"th\"";
@@ -181,6 +183,10 @@ function print_preview($id) {
         echo ", ";
   }
   echo "</td></tr>\n";
+  if ($auth->is_auth())
+  {
+    echo "<tr><td class=\"th\">Edit</td><td><input type=\"checkbox\" name=\"images[]\" value=\"$id\" /></td></tr>\n";
+  }
   
   echo "</table>";
 } 

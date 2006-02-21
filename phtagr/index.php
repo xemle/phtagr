@@ -7,6 +7,7 @@ $prefix='./phtagr';
 include "$prefix/Auth.php";
 include "$prefix/Sql.php";
 include "$prefix/Search.php";
+include "$prefix/Edit.php";
 
 include "$prefix/PageBase.php";
 include "$prefix/SectionHeaderLeft.php";
@@ -46,11 +47,11 @@ $auth = new Auth();
 $auth->check_session();
 if ($auth->is_auth)
 {
-    $menu->add_menu_item("Browser", "index.php?section=browser");
+  $menu->add_menu_item("Browser", "index.php?section=browser");
 }
 if ($auth->is_auth && $auth->user=='admin')
 {
-    $menu->add_menu_item("Setup", "index.php?section=setup");
+  $menu->add_menu_item("Setup", "index.php?section=setup");
 }
 
 $search= new Search();
@@ -61,73 +62,77 @@ $page->add_section($menu);
 
 if (isset($_REQUEST['section']))
 {
-    $section=$_REQUEST['section'];
+  $section=$_REQUEST['section'];
     
-    if ($auth->is_auth && 
-        $_REQUEST['section']=='account' && isset($_REQUEST['pass-section']))
-    {
-        $section=$_REQUEST['pass-section'];
-    } 
-    if ($auth->is_logout)
-    {
-        $section='home';
+  if ($auth->is_auth && 
+      $_REQUEST['section']=='account' && isset($_REQUEST['pass-section']))
+  {
+    $section=$_REQUEST['pass-section'];
+  } 
+  if ($auth->is_logout)
+  {
+    $section='home';
+  }
+  
+  if($section=='account')
+  {
+    $account= new SectionAccount();
+    $page->add_section($account);
+  } 
+  else if($section=='explorer')
+  {
+    $explorer= new SectionExplorer();
+    $page->add_section($explorer);
+  } 
+  else if($section=='image')
+  {
+    $image= new SectionImage();
+    $page->add_section($image);
+  } 
+  else if($section=='browser')
+  {
+    if ($auth->is_auth()) {
+      $browser = new SectionBrowser();
+      $browser->root='';
+      $browser->path='';
+      $page->add_section($browser);
+    } else {
+      $login = new SectionLogin();
+      $login->section=$section;
+      $login->message="You are not loged in!";
+      $page->add_section($login);
     }
-    
-    if($section=='account')
+  } 
+  else if($section=='edit')
+  {
+    $edit=new Edit();
+  }
+  else if($section=='setup')
+  {
+    if ($auth->is_auth && $auth->user!='admin') 
     {
-        $account= new SectionAccount();
-        $page->add_section($account);
-    } 
-    else if($section=='explorer')
-    {
-        $explorer= new SectionExplorer();
-        $page->add_section($explorer);
-    } 
-    else if($section=='image')
-    {
-        $image= new SectionImage();
-        $page->add_section($image);
-    } 
-    else if($section=='browser')
-    {
-        if ($auth->is_auth) {
-            $browser = new SectionBrowser();
-            $browser->root='';
-            $browser->path='';
-            $page->add_section($browser);
-        } else {
-            $login = new SectionLogin();
-            $login->section=$section;
-            $login->message="You are not loged in!";
-            $page->add_section($login);
-        }
-    } 
-    else if($section=='setup')
-    {
-        if ($auth->is_auth && $auth->user!='admin') 
-        {
-            $login=new SectionLogin();
-            $login->message='You are not loged in as an admin';
-            $login->section='setup';
-            $page->add_section($login);
-        } else {
-            $setup=new SectionSetup();
-            $page->add_section($setup);
-        }
+      $login=new SectionLogin();
+      $login->message='You are not loged in as an admin';
+      $login->section='setup';
+      $page->add_section($login);
+    } else {
+      $setup=new SectionSetup();
+      $page->add_section($setup);
     }
-    else if($section=='help')
-    {
-        $help = new SectionHelp();
-        $page->add_section($help);
-    } 
-    else {
-        $home = new SectionHome();
-        $page->add_section($home);
-    }
-    //echo "<pre>"; print_r($a);echo "</pre>";
-} else {
+  }
+  else if($section=='help')
+  {
+    $help = new SectionHelp();
+    $page->add_section($help);
+  } 
+  else {
     $home = new SectionHome();
     $page->add_section($home);
+  }
+  //echo "<pre>"; print_r($a);echo "</pre>";
+} else {
+  $home = new SectionHome();
+  $page->add_section($home);
 }
 
 $footer = new SectionFooter();
