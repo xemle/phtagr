@@ -185,7 +185,7 @@ function print_preview($id) {
   echo "</td></tr>\n";
   if ($auth->is_auth())
   {
-    echo "<tr><td class=\"th\">Edit</td><td><input type=\"checkbox\" name=\"images[]\" value=\"$id\" /></td></tr>\n";
+    echo "<tr><td class=\"th\">Select</td><td><input type=\"checkbox\" name=\"images[]\" value=\"$id\" /></td></tr>\n";
   }
   
   echo "</table>";

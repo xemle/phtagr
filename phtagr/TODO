@@ -48,6 +48,8 @@ Other image communities: http://holocore.com/?PictureSync_services
     Mosaic, Preview, Detail, Full size
   - Edit IPTC data
     Add or remove Keyword, Place, Time, Comment, Category by one-click
+    - Change tags, sets, comment, time, acl, author at the bottom
+    - Actions, 
   - Advanced search
     by Tags, Comments, Date and Place
   - ACLs
@@ -60,19 +62,20 @@ Other image communities: http://holocore.com/?PictureSync_services
     stored in a image itself)
   - Create a Image object
     - contains exif and iptc data by database or by origial file.
-      - array of tags(), commet, date, place, set, etc
+      - array of tags(), commet, date, place, set, copyright, author, etc
     - read_exif(), read_iptc(), write_iptc()
       - if EXIF and IPTC information are not available, get height and width
         of an image
     - create different sizes
       - via convert of image magick
-      - mosaic, 50x50, png
+      - mosaic, 75x75, png
       - thumbnail, 250x250, jpg
       - preview, 800x600, jpg
       - high-resolution, 1024x786
       - original size
       - Insert of a watermark or copyright by IPTC copyright
-    
+    - Merge Iptc.php with image.php
+
 - Image Search: Search.php
   - By Set
   - By Caption content
@@ -110,6 +113,20 @@ Other image communities: http://holocore.com/?PictureSync_services
     - default ACL, Tags, Comment, Copyright
   - The root of the file browser depends on the users root directory
   - Upload of tar balls
+  - Creation of preview images
+
+- Session
+  - Remember visit image. This information will be used for counting the clicks
+    on the images
+  - Add images to download, edit
+  - Init the session by a cookie if it is available
+
+- Accounts
+  - Verify a account creation by an image
+    - Save value of image in the session
+  - Set default values
+    - root
+    - policy
 
 - Setup
   - Easy step-by-step setup of phTagr like bitweaver
