@@ -1,0 +1,45 @@
+Installation:
+
+- Create a mySQL database and execute as mysql admin:
+
+  mysql> CREATE DATABASE phtagr;
+  mysql> GRANT ALL PRIVILEGES ON phtagr.* TO 'phtagr'@'localhost' \
+      IDENTIFIED BY '<PASSWD>'; 
+
+- Checkout the new branch from svn to a webbrowser directory like
+  ~/.public_html or /var/www
+
+  $ svn checkout svn://inspirationslos.de/phtagr/trunk/phtagr
+
+- Change to the phtagr directory
+
+- Create a subdirectory cache which is writeable by the webserver. Eg.
+
+  $ chmod 777 cache
+
+  mysql> CREATE DATABASE sebastian;
+  mysql> GRANT ALL PRIVILEGES ON sebastian.* TO 'sebastian'@'localhost'
+  IDENTIFIED BY '<PASSWD>'; or better
+ 
+  $ chgrp www-data cache
+  $ chmod 774 cache
+
+- change the write permission of the subdirectory temporarily
+
+  $ chmod 777 phtagr
+
+- run setup.php
+  - Enter the mysql data
+  - Create admin account (account name must be "admin")
+
+- Change the permission of subdirectory phtagr to read only
+  
+  $ chmod 755 phtagr
+
+- Change the permission of setup.php to not readable.
+
+  $ chmod 600 phtagr
+
+- run index.php
+  - to add images, login as admin and browse the filesystem.
+

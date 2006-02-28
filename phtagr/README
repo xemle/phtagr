@@ -5,16 +5,4 @@ Requirements:
 - php-mysql
 - imagemagick
 
-Install:
-
-- edit phtagr/vars.inc to access a mysql database
-  - the cache directory must be writeable by the webserver.
-
-- run setup.php
-  - create tables
-  - create admin account (account name must be "admin")
-
-- run index.php
-  - to add images, login as admin and browse the filesystem.
-  - BUG: Insert only single directories
 
