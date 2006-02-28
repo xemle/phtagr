@@ -414,6 +414,13 @@ function _replace_iptc($do_rename=false)
   if (!isset($this->_jpg))
     return false;
   $jpg=&$this->_jpg;
+
+  $tmp=$jpg['filename'].'.tmp';
+  if (!is_writeable($tmp)) 
+  {
+    echo "<div class=\"error\">Could not write to file $tmp</div>\n";
+    return false;
+  }
   
   $new_iptc=$this->_iptc2bytes();
   $new_iptc_len=strlen($new_iptc);
