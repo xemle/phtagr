@@ -40,6 +40,6 @@ Installation:
 
   $ chmod 600 phtagr
 
-- run index.php
-  - to add images, login as admin and browse the filesystem.
+- Run index.php
+  - To add images, login as admin and browse the filesystem.
 
