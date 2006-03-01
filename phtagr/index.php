@@ -81,6 +81,10 @@ if (isset($_REQUEST['section']))
   } 
   else if($section=='explorer')
   {
+    if($_REQUEST['action']=='edit')
+    {
+      $edit=new Edit();
+    }
     $explorer= new SectionExplorer();
     $page->add_section($explorer);
   } 
@@ -103,10 +107,6 @@ if (isset($_REQUEST['section']))
       $page->add_section($login);
     }
   } 
-  else if($section=='edit')
-  {
-    $edit=new Edit();
-  }
   else if($section=='setup')
   {
     if ($auth->is_auth && $auth->user!='admin') 

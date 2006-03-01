@@ -213,24 +213,33 @@ td {
 }
 
 .error {
-  background-color: red;
-  color: white;
-  border: solid 2px black;
+  background-color: #ffb09f;
+  color: black;
+  border: solid 2px #ff0000;
   padding: 10 30 10 30;
   margin: 10 0 10 0;
 }
 
 .warning {
-  background-color: #ffff00;
+  background-color: #ffb260;
   color: black;
-  border: solid 2px black;
+  border: solid 2px #ff7300;
+  padding: 10 30 10 30;
+  margin: 10 0 10 0;
+}
+
+.success {
+  background-color: #7aff8c;
+  color: black;
+  border: solid 2px #008e47;
   padding: 10 30 10 30;
   margin: 10 0 10 0;
 }
 
 .info{
+  background-color: #ffffb8;
   color: black;
-  border: solid 2px black;
+  border: solid 2px #ffdc3b;
   padding: 10 30 10 30;
   margin: 10 0 10 0;
 }

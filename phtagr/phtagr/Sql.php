@@ -128,6 +128,30 @@ function read_pref()
   return $pref;
 }
 
+// This function will be used later
+/* * Gets the tag id of a tag name 
+  @param tagname name of the tag
+  @param create If the tag name does not exists and this flag is true, the tag
+  name will be created 
+  @return -1 if the tagnam was not found, id otherwise * /
+function tag2id($tagname, $create=false;)
+{
+  $sql="SELECT id FROM $db->tag WHERE name='$tagname'";
+  $result=$this->query($sql);
+  if (!$result)
+  {
+    $sql="INSERT INTO $this->tag (name) VALUES('$tagname')";
+    $result=$this->query($sql);
+    if ($result)
+      return $this->tag2id($tagname);
+    else 
+    return -1;
+  }
+  $row=mysql_fetch_row($result);
+  return $row[0];
+}
+*/
+
 /** creates the phTagr tables an returns true on success */
 function create_tables()
 { 
@@ -148,14 +172,18 @@ function create_tables()
         lastview      DATETIME,
         ranking       FLOAT DEFAULT 0,
         
-        PRIMARY KEY(id,userid))";
+        INDEX(date),
+        INDEX(ranking),
+        PRIMARY KEY(id))";
   if (!$this->query($sql)) { return false; }
 
   $sql="CREATE TABLE ".$this->prefix."tag (
         imageid       INT NOT NULL,
-        name          VARCHAR(64) NOT NULL)";
+        name          VARCHAR(64) NOT NULL,
+        
+        INDEX(name))";
   if (!$this->query($sql)) { return false; }
-
+  
   $sql="CREATE TABLE ".$this->prefix."user (
         id            INT NOT NULL AUTO_INCREMENT,
         name          VARCHAR(32) NOT NULL,

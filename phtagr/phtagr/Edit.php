@@ -28,9 +28,9 @@ function Edit()
     $iptc=new Iptc();
     $iptc->load_from_file($filename);
     
-    if (isset($_REQUEST['tags']))
+    if (isset($_REQUEST['_tags']))
     {
-      $tags=split(" ", $_REQUEST['tags']);
+      $tags=split(" ", $_REQUEST['_tags']);
       $iptc->add_iptc_tags("2:025", $tags); 
     }
 

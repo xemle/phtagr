@@ -113,7 +113,7 @@ function print_preview($id) {
   $thumb=create_thumbnail($id, $userid, $filename, $synced);
   
   echo "<div class=\"file\">$name</div>\n";
-  echo "<div class=\"thumb\">";
+  echo "<div class=\"thumb\">&nbsp;";
   echo "<a href=\"index.php?section=image&id=$id\"><img src=\"$thumb\" alt=\"$name\" align=\"center\"/></a>";
   
   if ($caption != "") {

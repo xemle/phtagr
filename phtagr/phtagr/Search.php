@@ -151,6 +151,47 @@ function to_URL()
   return $url;
 }
 
+function _input($name, $value) 
+{
+  return "<input type=\"hidden\" name=\"$name\" value=\"$value\" />\n";
+}
+
+function to_form()
+{
+  $form='';
+  
+  if ($this->userid>0)
+    $form .= $this->_input('user', $this->userid);
+
+  $num_tags=count($this->tags);
+  if ($num_tags>0)
+  {
+    $tags='';
+    for ($i=0; $i<$num_tags; $i++)
+    {
+      $tags.=$this->tags[$i];
+      if ($i<$num_tags-1)
+        $tags.='+';
+    }
+    $form .= $this->_input('tags',$tags);
+    
+    if ($num_tags>1 && $this->tagop!=0)
+      $form .= $this->_input('tagop',$this->tagop);
+  }
+  
+  if ($this->date_start>0)
+    $form .= $this->_input('start',$this->date_start);
+  if ($this->date_end>0)
+    $form .= $this->_input('end',$this->date_end);
+    
+  if ($this->page_num>0)
+    $form .= $this->_input('page',$this->page_num);
+  if ($this->page_size!=10)
+    $form .= $this->_input('pagesize',$this->page_size);
+  
+  return $form;
+}
+
 function get_query_from_tags($tags, $tagop=0)
 {
     global $db;

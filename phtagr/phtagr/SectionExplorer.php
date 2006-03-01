@@ -47,11 +47,10 @@ function print_edit()
   echo "
 <fieldset><legend>Edit</legend>
   <table>
-    <tr><td class=\"th\">Tags:</td><td><input type=\"text\" name=\"tags\" size=\"60\"/></td></tr>
-    <tr><td class=\"th\">Set:</td><td><input type=\"text\" name=\"sets\" size=\"60\"/></td></tr>
+    <tr><td class=\"th\">Tags:</td><td><input type=\"text\" name=\"_tags\" size=\"60\"/></td></tr>
+    <tr><td class=\"th\">Set:</td><td><input type=\"text\" name=\"_sets\" size=\"60\"/></td></tr>
   </table>
 </fieldset>
-<input type=\"hidden\" name=\"section\" value=\"edit\"/>
 <input type=\"hidden\" name=\"action\" value=\"edit\"/>
 <input type=\"submit\" value=\"OK\" />
 <input type=\"reset\" value=\"Reset fields\" />
@@ -94,7 +93,6 @@ function print_content()
     {
       return;
     }
-
     
     $search_nav=$search;
     $page=$search_nav->page_num;
@@ -128,6 +126,8 @@ function print_content()
     $this->print_navigator($url_nav, $page, ceil($count/$search_nav->page_size));
     if ($auth->is_auth())
     {
+      echo "<input type=\"hidden\" name=\"section\" value=\"explorer\" />\n";
+      echo $search->to_form();  
       $this->print_edit();
       echo "</form>\n";
     }
