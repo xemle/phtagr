@@ -11,12 +11,14 @@ var $pref;
 var $user;
 var $prefix;
 var $cache;
+var $upload_dir;
 
 function Sql()
 {
   $this->link=NULL;
   $this->prefix='';
   $this->cache="/var/www/silef.de/phtagr/cache";
+  $this->upload_dir=$prefix."/phtagr_upload";
 }
 
 /** Reads the configuration file for the mySQL database 
@@ -46,6 +48,9 @@ function read_config()
   $this->image=$data['db_prefix']."image";
   $this->user=$data['db_prefix']."user";
   $this->pref=$data['db_prefix']."pref";
+
+  # Maybe this can be moved into the prefs table?
+  $this->upload_dir=$prefix . '/' . $data['upload_dir'];
   return $data;
 }
 
@@ -210,7 +215,12 @@ function create_tables()
         name          VARCHAR(64),
         value         VARCHAR(192))";
   if (!$this->query($sql)) { return false; }
-  
+
+  # We also set up the default directory for uploads
+  $sql="INSERT INTO ".$this->prefix."pref
+        VALUES ('upload_dir', '/phtagr_upload')";
+  if (!$this->query($sql)) { return false; }	
+
   return true;
 }
 

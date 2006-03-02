@@ -34,12 +34,13 @@ function update_file($userid, $file)
       return 0;
   }
   $exif=update_exif($imageid, $userid, $file);
-  if ($i<0)
+  if ($exif<0)
     return -1;
-    
+  
   $iptc=update_iptc($imageid, $userid, $file);
   if ($exif>0 || $iptc>0)
     return 1;
+
   return 0;
 }  
 

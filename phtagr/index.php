@@ -23,7 +23,7 @@ include "$prefix/SectionExplorer.php";
 include "$prefix/SectionImage.php";
 include "$prefix/SectionBrowser.php";
 include "$prefix/SectionSetup.php";
-
+include "$prefix/SectionUpload.php";
 
 $page = new PageBase();
 
@@ -41,7 +41,16 @@ $menu->add_menu_item("Explorer", "index.php?section=explorer");
 
 $db = new Sql();
 $db->connect();
-$pref=$db->read_pref();
+if (!($pref=$db->read_pref()))
+{
+  echo "It looks as if phtagr is not completely configured.\n";
+  echo "Please follow <a href=\"./setup.php?action=install\">\n";
+  echo "this</a> link to install phtagr.\n";
+  $footer = new SectionFooter();
+  $page->add_section($footer);
+  $page->layout();
+  return;
+}
 
 $auth = new Auth();
 $auth->check_session();
@@ -52,6 +61,7 @@ if ($auth->is_auth)
 if ($auth->is_auth && $auth->user=='admin')
 {
   $menu->add_menu_item("Setup", "index.php?section=setup");
+  $menu->add_menu_item("Upload", "index.php?section=upload");
 }
 
 $search= new Search();
@@ -118,6 +128,14 @@ if (isset($_REQUEST['section']))
     } else {
       $setup=new SectionSetup();
       $page->add_section($setup);
+    }
+  }
+  else if($section=='upload')
+  {
+    if ($auth->is_auth && $auth->user=='admin')
+    {
+      $upload = new SectionUpload();
+      $page->add_section($upload);
     }
   }
   else if($section=='help')

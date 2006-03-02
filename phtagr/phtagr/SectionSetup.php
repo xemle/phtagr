@@ -157,8 +157,55 @@ function print_actions()
     echo "<li><a href=\"setup.php?section=setup&action=init\">Create a phTagr Instance</a></li>\n";
     echo "<li><a href=\"setup.php?section=setup&action=delete_tables\">Delete Tables</a></li>\n";
     echo "<li><a href=\"setup.php?section=setup&action=delete_images\">Delete all images</a></li>\n";
+    echo "<li><a href=\"setup.php?section=setup&action=upload_dir\">Set the upload directory</a></li>\n";
     echo "<li><a href=\"index.php\">Go to phTagr</a></li>\n";
     echo "</ul>\n";
+}
+
+function setup_upload()
+{
+  global $db;
+
+  $request_upload_dir=$_REQUEST['set_dir'];
+  if ($request_upload_dir != "")
+  {
+    // Check if upload is already exists
+    $sql = "SELECT value 
+            FROM $db->pref 
+            WHERE name='upload_dir'";
+    $result= $db->query($sql);
+    if (!$result)
+      return false;
+    
+    if (mysql_num_rows($result)>0)
+      $sql="UPDATE $db->pref 
+            SET value='${request_upload_dir}'
+            WHERE name='upload_dir'";
+    else
+      $sql="INSERT INTO $db->pref (name, value) 
+            VALUES('upload_dir', '${request_upload_dir}')";
+    $result = $db->query ($sql);
+    if (!$result)
+    {
+      $this->warning( "Could not update 'update_dir'!\n");
+      return false;
+    }
+    else
+      $this->success( "Update successful!\n");
+  }
+
+  $pref = $db->read_pref();
+  $upload_dir = $pref['upload_dir'];
+
+  echo "<h3>Uploads</h3>\n";
+  echo "<form action=\"./setup.php\" method=\"GET\">\n";
+  echo "All uploads go below this folder. For each user a subfolder will be ";
+  echo "created under which his images will reside. If a file exists, it ";
+  echo "will be saved as FILENAME-xyz.EXTENSION.<br>\n";
+  echo "<input type=\"hidden\" name=\"action\" value=\"upload_dir\" />\n";
+  echo "<input type=\"text\" name=\"set_dir\" value=\"" . $upload_dir . "\" size=\"60\"/>\n";
+  echo "<input type=\"submit\" value=\"Save\" class=\"submit\" />\n";
+  echo "</form>\n";
 }
 
 function print_content()
@@ -168,7 +215,11 @@ function print_content()
   
   echo "<h2>Setup</h2>\n";
   $action=$_REQUEST['action'];
-  if ($action=='init')
+  if ($action=='install')
+  {
+    $this->stage=0;
+  }
+  else if ($action=='init')
   {
     $this->exec_stage_db();
     $this->stage++;
@@ -187,6 +238,11 @@ function print_content()
   {
     $db->delete_tables();
     $this->warning('Tables deleted');
+    return;
+  }
+  else if ($action=='upload_dir')
+  {
+    $this->setup_upload(); 
     return;
   }
   else if ($action=='create')
