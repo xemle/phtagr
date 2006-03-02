@@ -415,18 +415,18 @@ function _replace_iptc($do_rename=false)
     return false;
   $jpg=&$this->_jpg;
 
-  $tmp=$jpg['filename'].'.tmp';
-  if (!is_writeable($tmp)) 
-  {
-    echo "<div class=\"error\">Could not write to file $tmp</div>\n";
-    return false;
-  }
   
   $new_iptc=$this->_iptc2bytes();
   $new_iptc_len=strlen($new_iptc);
   
+  $tmp=$jpg['filename'].'.tmp';
+  $fout=@fopen($tmp, 'wb');
+  if ($fout==false) 
+  {
+    echo "<div class=\"error\">Could not write to file $tmp</div>\n";
+    return false;
+  }
   $fin=fopen($jpg['filename'], 'rb');
-  $fout=fopen($jpg['filename'].'.tmp', 'wb');
   
   $pos=0;
   if (!isset($jpg['_app13']))
