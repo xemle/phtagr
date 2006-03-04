@@ -113,13 +113,16 @@ function print_content()
   global $auth;
   echo "<h2>Image upload</h2>\n";
 
+  // Check for uploaded images
   $do_upload=false;
-  foreach ($_FILES['images']['size'] as $key)
+  if (isset($_FILES) && isset($_FILES['images'])) 
   {
-    if ($_FILES['images']['size'][$key]>0)
-      $do_upload=true;
+    foreach ($_FILES['images']['size'] as $key)
+    {
+      if ($_FILES['images']['size'][$key]>0)
+        $do_upload=true;
+    }
   }
-
   if ($do_upload)
     $this->upload_process();
   else
