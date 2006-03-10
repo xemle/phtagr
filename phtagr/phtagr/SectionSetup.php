@@ -153,11 +153,11 @@ function print_stage_admin()
 function print_actions()
 {
     echo "<ul>\n";
-    echo "<li><a href=\"setup.php?section=setup&action=sync\">Synchronize</a> files with the database</li>\n";
-    echo "<li><a href=\"setup.php?section=setup&action=init\">Create a phTagr Instance</a></li>\n";
-    echo "<li><a href=\"setup.php?section=setup&action=delete_tables\">Delete Tables</a></li>\n";
-    echo "<li><a href=\"setup.php?section=setup&action=delete_images\">Delete all images</a></li>\n";
-    echo "<li><a href=\"setup.php?section=setup&action=upload_dir\">Set the upload directory</a></li>\n";
+    echo "<li><a href=\"index.php?section=setup&action=sync\">Synchronize</a> files with the database</li>\n";
+    echo "<li><a href=\"index.php?section=setup&action=init\">Create a phTagr Instance</a></li>\n";
+    echo "<li><a href=\"index.php?section=setup&action=delete_tables\">Delete Tables</a></li>\n";
+    echo "<li><a href=\"index.php?section=setup&action=delete_images\">Delete all images</a></li>\n";
+    echo "<li><a href=\"index.php?section=setup&action=upload_dir\">Set the upload directory</a></li>\n";
     echo "<li><a href=\"index.php\">Go to phTagr</a></li>\n";
     echo "</ul>\n";
 }
@@ -198,10 +198,11 @@ function setup_upload()
   $upload_dir = $pref['upload_dir'];
 
   echo "<h3>Uploads</h3>\n";
-  echo "<form action=\"./setup.php\" method=\"GET\">\n";
+  echo "<form action=\"./index.php\" method=\"POST\">\n";
   echo "All uploads go below this folder. For each user a subfolder will be ";
   echo "created under which his images will reside. If a file exists, it ";
   echo "will be saved as FILENAME-xyz.EXTENSION.<br>\n";
+  echo "<input type=\"hidden\" name=\"section\" value=\"setup\" />\n";
   echo "<input type=\"hidden\" name=\"action\" value=\"upload_dir\" />\n";
   echo "<input type=\"text\" name=\"set_dir\" value=\"" . $upload_dir . "\" size=\"60\"/>\n";
   echo "<input type=\"submit\" value=\"Save\" class=\"submit\" />\n";
