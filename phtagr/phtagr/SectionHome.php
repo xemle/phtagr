@@ -3,13 +3,16 @@
 global $prefix;
 include_once("$prefix/SectionBody.php");
 
+/**
+  @class SectionHome Prints the initial page with tags and popular images.
+*/
 class SectionHome extends SectionBody
 {
 
 
 function SectionHome()
 {
-    $this->name="home";
+  $this->name="home";
 }
 
 function print_all_tags() {

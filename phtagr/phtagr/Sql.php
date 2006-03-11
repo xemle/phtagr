@@ -2,6 +2,9 @@
 
 global $prefix;
 
+/** 
+  @class Sql Handles the SQL connection and queries
+*/
 class Sql
 {
 
@@ -9,7 +12,8 @@ var $tag;
 var $image;
 var $pref;
 var $user;
-var $prefix;
+/** Prefix of tables */
+var $prefix; 
 var $cache;
 var $upload_dir;
 
@@ -222,6 +226,7 @@ function create_tables()
   return true;
 }
 
+/** Deletes all tabels used by the phtagr instance */
 function delete_tables()
 {
   $sql="DROP TABLE $this->image,$this->user,$this->tag,$this->pref";
@@ -229,6 +234,7 @@ function delete_tables()
   return true;
 }
 
+/** Delete all image information */
 function delete_images()
 {
   $sql="DELETE FROM $this->image";

@@ -10,5 +10,14 @@ For installation read INSTALL
 Source Style:
 
 - 2 Spaces, no tabs (php and html output)
+- Private functions have a prefix of an underscore ("_")
+- Documentation style of doxygen
+- Valid php 4 code
 
-Send patches from the currenct subversion repository to sebastian@silef.de.
+Patches:
+
+- Send patches from the currenct subversion repository to sebastian@silef.de.
+
+Commits:
+
+- Add "- " on comments at a commit

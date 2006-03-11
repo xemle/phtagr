@@ -1,20 +1,20 @@
 <?php
 
 global $prefix;
-include_once("$prefix/SectionHome.php");
+include_once("$prefix/SectionBody.php");
 
-class SectionHelp extends SectionHome
+class SectionHelp extends SectionBody
 {
 
 
 function SectionHelp()
 {
-    $this->name="help";
+  $this->name="help";
 }
 
 function print_content()
 {
-    echo "<h2>Help</h2>\n";
+  echo "<h2>Help</h2>\n";
 }
 
 }

@@ -1,10 +1,10 @@
 <?php
 
 global $prefix;
-include_once("$prefix/SectionHome.php");
+include_once("$prefix/SectionBody.php");
 include_once("$prefix/Auth.php");
 
-class SectionAccount extends SectionHome
+class SectionAccount extends SectionBody
 {
 
 var $message;

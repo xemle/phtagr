@@ -98,11 +98,15 @@ function check_session()
   {
     $this->_check_login($_SESSION['user'], $_SESSION['password']);
   }
-  else if (isset($_COOKIE[$cockie]))
+  else if (isset($_COOKIE[$cookie]))
   {
-    if ($this->_check_login($_COOKIE[$cockie]['user'], $_COOKIE[$cockie]['password']))
+    list ($user, $password)=split(' ', $_COOKIE[$cookie]);
+    $password=base64_decode($password);
+    if ($this->_check_login($user, $password))
     {
-      $this->_set_session($_REQUEST['user'], $_REQUEST['password']);
+      $this->_set_session($user, $password);
+      // refresh cookie
+      $this->_set_cookie($user, $password);
     }
   }
 }
@@ -114,19 +118,19 @@ function _set_session($user, $password)
   $_SESSION['password']=$password;
 }
 
-/** removes a session */
+/** Removes a session */
 function _remove_session()
 {
   session_destroy();
 }
 
-/** Sets the user and password in the cookie */
+/** Sets the user and password in the cookie. The values are valid for
+ one year.*/
 function _set_cookie($user, $password)
 {
   global $db;
   $cookie="phtagr".$db->prefix;
-  setcookie($cookie."[user]", $user);   
-  setcookie($cookie."[password]", $password);   
+  setcookie($cookie, $user.' '.base64_encode($password), time()+31536000);   
 }
 
 /** Removes a cookie from the client */
