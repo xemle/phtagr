@@ -119,7 +119,9 @@ Other image communities: http://holocore.com/?PictureSync_services
   - Remember visit image. This information will be used for counting the clicks
     on the images
   - Add images to download, edit
-  - Init the session by a cookie if it is available
+  - Init the session by a cookie if it is available. Done 2006-03-11.
+  - Save and transmit password in MD5
+  - Secure and improve the login by adding turing test image
 
 - Accounts
   - Verify a account creation by an image

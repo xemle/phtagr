@@ -6,3 +6,9 @@ Requirements:
 - imagemagick
 
 For installation read INSTALL
+
+Source Style:
+
+- 2 Spaces, no tabs (php and html output)
+
+Send patches from the currenct subversion repository to sebastian@silef.de.

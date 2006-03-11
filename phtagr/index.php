@@ -79,6 +79,7 @@ if (isset($_REQUEST['section']))
   {
     $section=$_REQUEST['pass-section'];
   } 
+
   if ($auth->is_logout)
   {
     $section='home';

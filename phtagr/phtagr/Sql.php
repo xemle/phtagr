@@ -17,8 +17,6 @@ function Sql()
 {
   $this->link=NULL;
   $this->prefix='';
-  $this->cache="/var/www/silef.de/phtagr/cache";
-  $this->upload_dir=$prefix."/phtagr_upload";
 }
 
 /** Reads the configuration file for the mySQL database 

@@ -123,15 +123,44 @@ function update_iptc($imageid, $userid, $file)
     for ($i=0; $i < $c; $i++)
     {
       $key=$iptc['2#025'][$i];
-      $sql="insert into $db->tag ( imageid, name ) values ( $imageid, '$key' )";
+      $sql="INSERT INTO $db->tag ( imageid, name ) 
+            VALUES ( $imageid, '$key' )";
       $result = $db->query($sql);
       if (!$result) 
         return -1;
     }
+
+    // Extract caption
     if (array_key_exists('2#120', $iptc))
     {
       $caption=$iptc['2#120'][0];
-      $sql="update $db->image set caption='$caption' where id=$imageid";
+      $caption=preg_replace("/'/s", "\\'", $caption);
+      $sql="UPDATE $db->image 
+            SET caption='$caption'
+            WHERE id=$imageid";
+      $result = $db->query($sql);
+      if (!$result) 
+        return -1;
+    }
+    
+    // Extract IPTC date and time
+    if (array_key_exists('2#055', $iptc))
+    {
+      // Convert IPTC date/time to sql timestamp "YYYY-MM-DD hh:mm:ss"
+      // IPTC date formate is YYYYMMDD
+      $date=$iptc['2#055'][0];
+      $date=substr($date, 0, 4)."-".substr($date, 4, 2)."-".substr($date, 6, 2);
+      $time='';
+      // IPTC time format it hhmmss[+offset]
+      if (array_key_exists('2#060', $iptc))
+      {
+        $time=$iptc['2#060'][0];
+        $time=" ".substr($time, 0, 2).":".substr($time, 2, 2).":".substr($time, 4, 2);
+      }
+      $date=$date.$time;
+      $sql="UPDATE $db->image 
+            SET date='$date'
+            WHERE id=$imageid";
       $result = $db->query($sql);
       if (!$result) 
         return -1;
