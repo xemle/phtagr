@@ -27,10 +27,16 @@ function Edit()
     $filename=$row[0];
     $iptc=new Iptc();
     $iptc->load_from_file($filename);
-    
-    if (isset($_REQUEST['_tags']))
+   
+    /* TODO: When do we have to use tagname 2#025 and when
+    2:025?? When using 2:025 this doesn't work...*/
+    if (!$iptc->clear_iptc_tags("2#025"))
     {
-      $tags=split(" ", $_REQUEST['_tags']);
+      $this->warning("Couldn't delete iptc-tag!\n");
+    }
+    if (isset($_REQUEST['tags']))
+    {
+      $tags=split(" ", $_REQUEST['tags']);
       $iptc->add_iptc_tags("2:025", $tags); 
     }
 
