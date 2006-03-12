@@ -101,7 +101,7 @@ function update_iptc($imageid, $userid, $file)
       return -1; 
     
     // remove caption
-    $sql="update image set caption=NULL where id=$imageid";
+    $sql="update $db->image set caption=NULL where id=$imageid";
     $result = $db->query($sql);
     if (!$result) 
       return -1; 
