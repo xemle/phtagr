@@ -33,6 +33,18 @@ function get_error()
   return $this->_error;
 }
 
+/** Get iptc tags
+  @param filename Image of which the iptc category tags should be read
+  @return An array of the iptc category tags otherwise -1 */
+function get_values($filename)
+{
+  getimagesize ($filename, $info);
+  if (!is_array($info))
+    return -1;
+  $section = iptcparse($info["APP13"]);
+  return $section['2#025'];
+}
+
 function load_from_file($filename)
 {
   if (!is_readable($filename))
@@ -150,6 +162,31 @@ function add_iptc_tags($name, $tags)
       $changed=true;
   }
   return $changed;
+}
+
+/** Clear iptc category tags
+  @param name Name of the IPTC tag
+  @return true if deletion of tags was successful, false if not */
+function clear_iptc_tags($name)
+{
+  if ($name=='')
+    return false;
+
+  if (!isset($this->iptc))
+  {
+    $this->iptc=array();
+    $this->_changed=true;
+  }
+  $iptc=&$this->iptc;
+  
+  if (!isset($iptc[$name]))
+  {
+    $this->_changed=true;
+    $iptc="";
+    return true;
+  }
+
+  return false;
 }
 
 function _read_jpg_segs($jpg)
