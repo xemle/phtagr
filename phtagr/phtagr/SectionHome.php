@@ -51,7 +51,12 @@ function print_all_tags() {
     $data[$row[0]]=$row[1];
   }
   array_multisort($tags,SORT_ASC,$hits,SORT_ASC,$data);
-  $grad=20/($max-$min);
+
+  /* What is this? Division thru 0! */
+  if ($max == $min)
+    $grad=20;
+  else
+    $grad=20/($max-$min);
   foreach ($data as $tag => $hit)
   {
     $size=intval(8+($hit-$min)*$grad);
