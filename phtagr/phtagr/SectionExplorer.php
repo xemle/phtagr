@@ -103,7 +103,9 @@ function print_content()
     
     if ($auth->is_auth())
     {
-      echo "<form method=\"post\" action=\"index.php\">";
+/* TODO when this form is enabled, you can't use the fancy
+  JS-Script from for editing a single image. What to do? */
+//      echo "<form method=\"post\" action=\"index.php\">";
     }
     echo "<table class=\"tableview\">\n";
     $cell=0;
