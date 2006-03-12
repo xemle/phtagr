@@ -252,9 +252,9 @@ function get_query_from_tags($tags, $tagop=0)
 
   // handle date
   if ($this->date_start>0)
-    $sql .= " AND UNIX_TIMESTAMP(i.date)>=".$this->date_start;
+    $sql .= " AND i.date>=FROM_UNIXTIME(".$this->date_start.")";
   if ($this->date_end>0)
-    $sql .= " AND UNIX_TIMESTAMP(i.date)<".$this->date_end;
+    $sql .= " AND i.date<FROM_UNIXTIME(".$this->date_end.")";
   
   $sql .= " GROUP BY i.id";
 
