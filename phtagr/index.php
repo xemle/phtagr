@@ -60,8 +60,8 @@ if ($auth->is_auth)
 }
 if ($auth->is_auth && $auth->user=='admin')
 {
-  $menu->add_menu_item("Setup", "index.php?section=setup");
   $menu->add_menu_item("Upload", "index.php?section=upload");
+  $menu->add_menu_item("Setup", "index.php?section=setup");
 }
 
 $search= new Search();
