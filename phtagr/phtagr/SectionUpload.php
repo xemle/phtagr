@@ -89,32 +89,32 @@ function delete_upload()
       {
         if ($file !== '.' && $file !== '..')
         {
-	  /** Uhhh.... Bad hack! It is very weird, but when I try to
-	    reference the files directly over POST or GET, all the '.'
-	    in the filename get replaced by a '_'. This here check's
-	    whether there is a file that would be named like the other
-	    one if there was such an replacement. Any hints? */
-	  $tmp_name = $file;
-	  $tmp_name = preg_replace('/\./','_',$tmp_name);
-	  if (isset($_REQUEST[$tmp_name]))
-	  {
-	    $found = TRUE;
+          /** Uhhh.... Bad hack! It is very weird, but when I try to
+            reference the files directly over POST or GET, all the '.'
+            in the filename get replaced by a '_'. This here check's
+            whether there is a file that would be named like the other
+            one if there was such an replacement. Any hints? */
+          $tmp_name = $file;
+          $tmp_name = preg_replace('/\./','_',$tmp_name);
+          if (isset($_REQUEST[$tmp_name]))
+          {
+            $found = TRUE;
             if (!unlink ($fullpath . $file))
             {
               /* We don't return a false, because maybe there is a
-	        file from a former installation. In this case, the
-	        file can be added through the browser */
-	      //return FALSE;
+                file from a former installation. In this case, the
+                file can be added through the browser */
+              //return FALSE;
             }
             $sql = "DELETE FROM ".$db->image." 
-	            WHERE filename='".$fullpath . $file ."'";
+                    WHERE filename='".$fullpath . $file ."'";
             if (!$db->query($sql))
             {
               return FALSE;
             }
 
-	    /* TODO Delete the images in the /cache folder! */
-	  }
+            /* TODO Delete the images in the /cache folder! */
+          }
         }
       }
       if ($found)
@@ -137,20 +137,20 @@ function rm_rf ($path)
       while (($file = readdir($dh)) !== false)
       {
         if ($file !== '.' && $file !== '..')
-	{
-	  if (is_dir ($file))
-	  {
-	    if ($this->rm_rf ($path ."/". $file) == false)
-	      return false;
-	    if (rmdir ($path."/".$file) == false)
-	      return false;
+        {
+          if (is_dir ($file))
+          {
+            if ($this->rm_rf ($path ."/". $file) == false)
+              return false;
+            if (rmdir ($path."/".$file) == false)
+              return false;
           }
-	  else 
-	  {
+          else 
+          {
             if (unlink ($path."/".$file) == false)
-	      return false;
-	  }
-	}
+              return false;
+          }
+        }
       }
     }
     closedir($dh);
@@ -175,8 +175,8 @@ function zipfile_process($path, $filename)
   every file to the destination directory. While doing so, we need
   to ensure, that no existing file will be overwritten. */
   $result = shell_exec("/usr/bin/unzip -d "
-	 . $filename . "/ " 
-	 . "-j $filename" . "/images.zip");
+         . $filename . "/ " 
+         . "-j $filename" . "/images.zip");
   $files = array();
   $files = preg_split ("/\n/",$result);
   $count = 0;
@@ -195,7 +195,7 @@ function zipfile_process($path, $filename)
       if (update_file($auth->userid, $upload_name) == false)
       {
         /* If something went wrong, we try to delete as much as possible. */
-	echo "<div class=\"error\">Uploading $zip_content.</div>\n";
+        echo "<div class=\"error\">Uploading $zip_content.</div>\n";
         $this->rm_rf ($filename);
         return false;
       }
@@ -247,21 +247,21 @@ function upload_process()
     }
   }
  
-  foreach ($_FILES["images"]["error"] as $key => $error) 
+  for($i=0; $i<count($_FILES['images']); $i++) 
   {
-    if ($_FILES["images"]['size'][$key]==0)
+    if ($_FILES['images']['size'][$i]==0)
       continue;
       
-    if ($error == UPLOAD_ERR_OK) {
-      $tmp_name = $_FILES["images"]["tmp_name"][$key];
-      $name = $_FILES["images"]["name"][$key];
+    if ($_FILES['images']['error'][$i] == UPLOAD_ERR_OK) {
+      $tmp_name = $_FILES["images"]["tmp_name"][$i];
+      $name = $_FILES["images"]["name"][$i];
       $upload_name=$this->get_upload_filename($path, $name);
 
       if (preg_match("/\.zip$/i", $upload_name))
       {
         mkdir ($upload_name);
         if (!move_uploaded_file($tmp_name, $upload_name ."/images.zip"))
-	  continue;
+          continue;
         $this->zipfile_process($path, $upload_name);
       }
       else {
@@ -344,31 +344,31 @@ function print_uploaded()
         if ($file !== '.' && $file !== '..' && !is_dir($file))
         {
           $sql = "SELECT id FROM ".$db->image."
-	          WHERE filename='". $fullpath . $file . "'";
+                  WHERE filename='". $fullpath . $file . "'";
           $result = $db->query($sql);
           $v = mysql_fetch_array ($result, MYSQL_ASSOC);
 
-          echo "\t\t<tr>\n";
-	  echo "\t\t\t<td align=\"center\" width=\"5\"><input type=\"checkbox\" name=\"".$file."\" /></td>\n";
-          echo "\t\t\t<td align=\"center\">\n";
+          echo "    <tr>\n";
+          echo "      <td align=\"center\" width=\"5\"><input type=\"checkbox\" name=\"".$file."\" /></td>\n";
+          echo "      <td align=\"center\">\n";
           echo print_mini($v['id']) . "</td>\n";
-          echo "\t\t\t<td align=\"center\">$file</td>\n";
-          echo "\t\t\t<td align=\"right\">"
+          echo "      <td align=\"center\">$file</td>\n";
+          echo "      <td align=\"right\">"
              . $this->get_readable_size ( filesize($fullpath . $file) ) 
              . " Bytes</td>\n";
-	  echo "<td><div class=\"headerright\"><a href='./index.php?section=upload&delete_upload=&".urlencode($file)."=on'>Delete</a></div></td>\n";
-          echo "\t\t</tr>\n";
+          echo "<td><div class=\"headerright\"><a href='./index.php?section=upload&delete_upload=&".urlencode($file)."=on'>Delete</a></div></td>\n";
+          echo "    </tr>\n";
           $file_size_sum += filesize($fullpath . $file) ;
         }
       }
-      echo "\t\t<tr>\n";
-      echo "\t\t\t<td></td>\n";
-      echo "\t\t\t<td></td>\n";
-      echo "\t\t\t<td</td>\n";
-      echo "\t\t\t<td align=\"right\">"
-	 . $this->get_readable_size ( $file_size_sum )
-	 . " Bytes</td>\n";
-      echo "\t\t</tr>\n";
+      echo "    <tr>\n";
+      echo "      <td></td>\n";
+      echo "      <td></td>\n";
+      echo "      <td></td>\n";
+      echo "      <td align=\"right\">"
+         . $this->get_readable_size ( $file_size_sum )
+         . " Bytes</td>\n";
+      echo "    </tr>\n";
 
       closedir ($dh);
     }
@@ -382,7 +382,7 @@ function print_uploaded()
     echo "$fullpath doesn't seem to be a directory\n";
   }
   echo "</table>\n";
-  echo "\t<input type=\"submit\" value=\"Delete\" class=\"delete\" />\n";
+  echo "  <input type=\"submit\" value=\"Delete\" class=\"delete\" />\n";
   echo "</form>\n";
 
 }
@@ -396,12 +396,13 @@ function print_content()
   $do_upload=false;
   if (isset($_FILES) && isset($_FILES['images'])) 
   {
-    foreach ($_FILES['images']['size'] as $key)
+    foreach ($_FILES['images']['size'] as $size)
     {
-      if ($_FILES['images']['size'][$key]>0)
+      if ($size>0)
         $do_upload=true;
     }
   }
+
   // Check whether we want to delete some images
   if (isset($_REQUEST['delete_upload']))
   {
