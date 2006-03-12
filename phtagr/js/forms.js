@@ -18,8 +18,8 @@ function add_form_tags(id, tags)
 
   // encode node content to b64 to catch all special characters
   text=btoa(text); 
-  e.innerHTML="<form>" +
-    "<input type=\"hidden\" name=\"section\" value=\"edit\"/>"+
+  e.innerHTML="<form action=\"./index.php\" method=\"POST\">" +
+    "<input type=\"hidden\" name=\"section\" value=\"explorer\"/>"+
     "<input type=\"hidden\" name=\"action\" value=\"edit\"/>"+
     "<input type=\"hidden\" name=\"images[]\" value=\""+id+"\"/>"+
     "<input type=\"text\" id=\"" + i + "\" name=\"tags\" value=\"" + tags + "\" size=\"35\"/>"+
