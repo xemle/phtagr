@@ -131,6 +131,11 @@ a:visited {
   border: 1px solid #8C8C8C;
 }
 
+.navigator > table {
+  text-align: center;
+  width: 10%;
+}
+
 .tableview {
   border-spacing: 0;
 }
@@ -152,8 +157,14 @@ a:visited {
   text-align: center;
   padding: 0 0 10 0;
 }
+
 .mini * img {
   border: 1px solid black;
+  margin: 0 3 0 3;
+}
+
+.mini.prev, .mini.next {
+  margin: 0 3 0 3;
 }
 
 td {

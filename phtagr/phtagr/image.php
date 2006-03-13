@@ -7,6 +7,7 @@ include_once("$prefix/Search.php");
   @param id image id
   @param userid id of the user
   @param synchornized time of image data in UNIX time 
+  @return URL of the square image. false on an error.
 */
 function create_mini($id,$userid,$filename,$synced,$width,$height) {
   global $pref;
@@ -15,7 +16,7 @@ function create_mini($id,$userid,$filename,$synced,$width,$height) {
   $file="${pref['cache']}/$thumb";
  
   if ($height<=0 || $width<=0)
-    return '';
+    return false;
   
   if (! file_exists($file) or filectime($file) < $synced) {
     
@@ -33,7 +34,10 @@ function create_mini($id,$userid,$filename,$synced,$width,$height) {
     $cmd="convert -resize ${w}x$h -crop 75x75+${l}+${t} -quality 80 '$filename' '$file'";
     system ($cmd, $retval);
     if ($retval!=0)
+    {
       echo "<div id=\"error\">Could not execute command '$cmd'. Exit with code $retval</div>\n";
+      return false;
+    }
 
     system ("chmod 644 '$file'");
   }
@@ -73,7 +77,11 @@ function create_preview($id,$userid,$filename,$synced) {
   return './cache/' . $thumb;
 }
 
-function print_mini($id) {
+/** Gets the URL of the mini preview 
+  @param id ID of the image
+  @return URL string. On error an false */
+function get_mini_URL($id)
+{
   global $db;
   
   $sql="SELECT id,userid,filename,UNIX_TIMESTAMP(synced),name,UNIX_TIMESTAMP(date),caption,width,height
@@ -81,48 +89,26 @@ function print_mini($id) {
         WHERE id=$id";
   $result = $db->query($sql);
   if (!$result)
-    return;
+    return false;
   
   $v = mysql_fetch_array($result, MYSQL_ASSOC);
   $thumb=create_mini($v['id'], $v['userid'], $v['filename'], $v['synced'],$v['width'],$v['height']);
   
-  echo "<a href=\"index.php?section=image&id=$id\"><img src=\"$thumb\" alt=\"${v['name']}\" align=\"center\"/></a>";
+  return $thumb;
+}
+
+/** print a link to the image */
+function print_mini($id) 
+{
+  $src=get_mini_URL($id);
+  if (!$src)
+    return;
+  echo "<a href=\"index.php?section=image&id=$id\"><img src=\"$src\" alt=\"${v['name']}\" align=\"center\"/></a>";
 
 }
 
-function print_preview($id) {
-  global $db;
-  global $auth;
-  global $search;
-  
-  $sql="SELECT userid,filename,UNIX_TIMESTAMP(synced),name,UNIX_TIMESTAMP(date),caption
-    FROM $db->image
-    WHERE id=$id";
-  $result = $db->query($sql);
-  if (!$result)
-    return;
-  
-  $row = mysql_fetch_row($result);          
-  $userid=$row[0];
-  $filename=$row[1];
-  $synced=$row[2];
-  $name=$row[3];
-  $sec=$row[4];
-  $caption=$row[5];
-  
-  $thumb=create_thumbnail($id, $userid, $filename, $synced);
-  
-  echo "<div class=\"file\">$name</div>\n";
-  echo "<div class=\"thumb\">&nbsp;";
-  echo "<a href=\"index.php?section=image&id=$id\"><img src=\"$thumb\" alt=\"$name\" align=\"center\"/></a>";
-  
-  if ($caption != "") {
-    echo "<div class=\"description\">$caption</div>\n";
-  }
-  echo "</div>\n";  
-
-  echo "<table class=\"imginfo\">\n";
-  //echo "  <tr><td class=\"th\">File:</td><td>$filename</td></tr>\n";
+function print_row_date($sec)
+{
   echo "  <tr><td class=\"th\">Date:</td><td>";
   $date=date("Y-m-d H:i:s", $sec);
   $search_date=new Search();
@@ -151,8 +137,12 @@ function print_preview($id) {
   $url.=$search_date->to_URL();
   echo "<span class=\"month\"><a href=\"$url\">m</a></span>]";
   echo "</td></tr>\n";
-  
-  
+}
+
+function print_row_tags($id)
+{
+  global $db;
+
   $sql="SELECT name FROM $db->tag WHERE imageid=$id";
   $result = $db->query($sql);
   $tags=array();
@@ -183,6 +173,47 @@ function print_preview($id) {
         echo ", ";
   }
   echo "</td></tr>\n";
+}
+
+function print_preview($id, $search=null) {
+  global $db;
+  global $auth;
+  
+  $sql="SELECT userid,filename,UNIX_TIMESTAMP(synced),name,UNIX_TIMESTAMP(date),caption
+    FROM $db->image
+    WHERE id=$id";
+  $result = $db->query($sql);
+  if (!$result)
+    return;
+  
+  $row = mysql_fetch_row($result);          
+  $userid=$row[0];
+  $filename=$row[1];
+  $synced=$row[2];
+  $name=$row[3];
+  $sec=$row[4];
+  $caption=$row[5];
+  
+  $thumb=create_thumbnail($id, $userid, $filename, $synced);
+  
+  echo "<div class=\"file\">$name</div>\n";
+  echo "<div class=\"thumb\">&nbsp;";
+  
+  $link="index.php?section=image&id=$id";
+  if ($search!=null)
+    $link.=$search->to_URL();
+  echo "<a href=\"$link\"><img src=\"$thumb\" alt=\"$name\" align=\"center\"/></a>";
+  
+  if ($caption != "") {
+    echo "<div class=\"description\">$caption</div>\n";
+  }
+  echo "</div>\n";  
+
+  echo "<table class=\"imginfo\">\n";
+  //echo "  <tr><td class=\"th\">File:</td><td>$filename</td></tr>\n";
+  print_row_date($sec);
+  
+  print_row_tags($id);
   if ($auth->is_auth())
   {
     echo "<tr><td class=\"th\">Select</td><td><input type=\"checkbox\" name=\"images[]\" value=\"$id\" /></td></tr>\n";

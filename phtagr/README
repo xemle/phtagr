@@ -9,10 +9,13 @@ For installation read INSTALL
 
 Source Style:
 
-- 2 Spaces, no tabs (php and html output)
-- Private functions have a prefix of an underscore ("_")
-- Documentation style of doxygen
 - Valid php 4 code
+- Class names have the first letter capitalized
+- Private functions have a prefix of an underscore ("_")
+- Indent of 2 spaces, no tabs (php and html output)
+- Indents are in BSD/Allman style. See
+  http://en.wikipedia.org/wiki/Indent_style
+- Documentation style of doxygen
 
 Patches:
 

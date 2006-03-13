@@ -12,33 +12,36 @@ var $userid;
 var $tagop;
 var $date_start;
 var $date_end;
+/** Absolute position of image */
+var $pos;
 var $page_size;
 var $page_num;
 var $orderby;
 
 function Search()
 {
-    $this->userid=NULL;
-    $this->tags=array();
-    $this->tagop=0;
-    $this->date_start=0;
-    $this->date_end=0;
-    $this->page_size=10;
-    $this->page_num=0;
-    $this->orderby='date';
+  $this->userid=NULL;
+  $this->tags=array();
+  $this->tagop=0;
+  $this->date_start=0;
+  $this->date_end=0;
+  $this->pos=0;
+  $this->page_size=10;
+  $this->page_num=0;
+  $this->orderby='date';
 }
 
 function set_userid($userid)
 {
-    if ($userid>0)
-      $this->userid=$userid;
+  if ($userid>0)
+    $this->userid=$userid;
 }
 
 function add_tag($tag)
 {
-    if ($tag=='') return;
-    array_push($this->tags, $tag);
-    $this->tags=array_unique($this->tags);
+  if ($tag=='') return;
+  array_push($this->tags, $tag);
+  $this->tags=array_unique($this->tags);
 }
 
 function clear_tags()
@@ -73,10 +76,30 @@ function set_date_end($end)
     $this->date_end=$end;
 }
 
+/**
+  @param pos If is less than 0 set it to 0 */
+function set_pos($pos)
+{
+  if ($pos>0)
+    $this->pos=$pos;
+  else
+    $this->pos=0;
+}
+
+function get_pos()
+{
+  return $this->pos;
+}
+
 function set_page_num($page)
 {
   if ($page>0)
     $this->page_num=$page;
+}
+
+function get_page_num()
+{
+  return $this->page_num;
 }
 
 function set_page_size($size)
@@ -87,6 +110,11 @@ function set_page_size($size)
     $size=250;
       
   $this->page_size=$size;
+}
+
+function get_page_size()
+{
+  return $this->page_size;
 }
 
 /** Creates a search object from a URL */
@@ -118,6 +146,8 @@ function from_URL()
   if (isset($_REQUEST['end']))
     $this->set_date_end($_REQUEST['end']);
 
+  if (isset($_REQUEST['pos']))
+    $this->set_pos($_REQUEST['pos']);
   if (isset($_REQUEST['page']))
     $this->set_page_num($_REQUEST['page']);
   if (isset($_REQUEST['pagesize']))
@@ -151,6 +181,8 @@ function to_URL()
   if ($this->date_end>0)
     $url .= '&end='.$this->date_end;
     
+  if ($this->pos>0)
+    $url .= '&pos='.$this->pos;
   if ($this->page_num>0)
     $url .= '&page='.$this->page_num;
   if ($this->page_size!=10)
@@ -207,7 +239,7 @@ function to_form()
 /** Create a SQL query from a tag array 
   @param tags Array of tags, could be NULL
   @param tagop Operator of tags */
-function get_query_from_tags($tags, $tagop=0)
+function _get_query_from_tags($tags, $tagop=0)
 {
   global $db;
   $num_tags=count($tags);
@@ -278,8 +310,9 @@ function get_query_from_tags($tags, $tagop=0)
   return $sql;
 }
 
-/** Adds a SQL sort statement */
-function handle_orderby()
+/** Adds a SQL sort statement 
+  @return Retruns an SQL order by statement string */
+function _handle_orderby()
 {
   if ($this->orderby=='date')
     return " ORDER BY i.date DESC";
@@ -287,20 +320,32 @@ function handle_orderby()
 }
 
 /** Adds the SQL limit statement 
-  @param nolimit If true do not limit. Default is false */
-function handle_limit($nolimit=false)
+  @param limit If 0 do not limit and return an empty string. If it is 1 the
+  limit is calculated by page_size and page_num. If it is 2, the limit is set
+  by pos and page_size.  Default is 0. 
+  @return SQL limit string */
+function _handle_limit($limit=0)
 {
-  if (!$nolimit)
+  if ($limit==1)
   {
     // Limit, use $count
-    $page_pos=$this->page_num*$this->page_size;
-    return " LIMIT $page_pos," . $this->page_size;
+    $pos=$this->page_num*$this->page_size;
+    return " LIMIT $pos," . $this->page_size;
+  }
+  else if ($limit==2)
+  {
+    return " LIMIT $this->pos," . $this->page_size;
   }
   return '';
 }
 
-/** Returns the SQL query of the search */
-function get_query($count=0, $nolimit=false)
+/** Returns the SQL query of the search i
+  @param count 
+  @param limit Type of limit the query. 0 means no limit. 1 means limit by page
+  size and page num. And 2 means limit by pos and size. 
+  @return SQL query string 
+  @see _handle_limit */
+function get_query($limit=1)
 {
   global $db;
   $pos_tags=array();
@@ -319,18 +364,18 @@ function get_query($count=0, $nolimit=false)
   {
     $sql="SELECT id FROM $db->image AS i";
     $sql.=" WHERE id IN ( ";
-    $sql.=$this->get_query_from_tags($pos_tags, $this->tagop);
+    $sql.=$this->_get_query_from_tags($pos_tags, $this->tagop);
     $sql.=" ) AND id NOT IN ( ";
-    $sql.=$this->get_query_from_tags($neg_tags, 1);
+    $sql.=$this->_get_query_from_tags($neg_tags, 1);
     $sql.=" )";
-    $sql.=$this->handle_orderby();
-    $sql.=$this->handle_limit($nolimit);
+    $sql.=$this->_handle_orderby();
+    $sql.=$this->_handle_limit($limit);
   }
   else 
   {
-    $sql=$this->get_query_from_tags($pos_tags, $this->tagop);
-    $sql.=$this->handle_orderby();
-    $sql.=$this->handle_limit($nolimit);
+    $sql=$this->_get_query_from_tags($pos_tags, $this->tagop);
+    $sql.=$this->_handle_orderby();
+    $sql.=$this->_handle_limit($limit);
   }
 
   // For debuggin: echo "<!-- $sql -->"; 
@@ -342,7 +387,7 @@ function get_num_query()
 {
   global $db;
   $sql="SELECT COUNT(*) FROM $db->image AS i WHERE id IN ( ";
-  $sql .= $this->get_query(0, true);
+  $sql .= $this->get_query(0);
   $sql .= " )";
   return $sql;
 }
