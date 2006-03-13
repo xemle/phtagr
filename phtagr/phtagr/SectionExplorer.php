@@ -46,7 +46,7 @@ function print_navigator($link, $current, $count)
     else if ($i == $count-4 || $i == 3) 
       echo "&nbsp;...&nbsp;\n";
   }
-  if ($current<$count)
+  if ($current<$count-1)
   {
     $i=$current+1;
     printf("&nbsp;<a href=\"$link%s\">&gt;</a>\n", ($i>0?"&page=$i":""), $i);
