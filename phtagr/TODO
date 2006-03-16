@@ -14,10 +14,8 @@ Other image communities: http://holocore.com/?PictureSync_services
 
 
 - PHP 
-  - XHTML/1.1 compatible
-    - Buildup in modules by classes
-  - Tabspace is 2
-
+  - Generate valid XHTML
+  
 - mySQL database
   - Store image timestamps as UNIX timestamp
   - Add popular values as last view and current value. Done 2006-02-16
@@ -60,6 +58,7 @@ Other image communities: http://holocore.com/?PictureSync_services
     A user can set the specific access control to an image. The access levels
     are: Public, phTagr user, friends and own. 
     - View, Edit, downloadable
+    - User can have a role
   - An image has a unique image id and a unique filename 
   - Number of views. If a image is viewed in detail the count is increased
   - A phTagr user can add a comment on a image (this information is not
@@ -80,6 +79,7 @@ Other image communities: http://holocore.com/?PictureSync_services
       - Insert of a watermark or copyright by IPTC copyright
     - Merge Iptc.php with image.php
   - Download image
+  - Add edit form to change IPTC tags
   
 - Image Search: Search.php
   - By Set
@@ -121,8 +121,8 @@ Other image communities: http://holocore.com/?PictureSync_services
   - Creation of preview images
 
 - Session
-  - Remember visit image. This information will be used for counting the clicks
-    on the images
+  - Remember visited image. This information will be used for counting the
+    clicks on the images
   - Add images to download, edit
   - Init the session by a cookie if it is available. Done 2006-03-11.
   - Save and transmit password in MD5
@@ -156,18 +156,7 @@ Other image communities: http://holocore.com/?PictureSync_services
 - Additional 
   - Images can be uploaded to an flickr account
 
-ToDos:
-Search:
-  - Add exclusions for tags by "-tags"
-    SQL:  select id 
-          from image,tag
-          where image.id=tag.imageid and (tag.name='heidelberg') and id not in 
-          (
-            select id 
-            from image,tag 
-            where image.id=tag.imageid and tag.name='akt7'
-          )
-Explorer:
+- Explorer
   - Add clicks to database
     - Add popular value by last click time and a delta function. 
   - Add IPTC place and set to images if they are available
@@ -176,11 +165,14 @@ Explorer:
   - Add checkboxes to images to add collaborative image edit
   - Add total count of previewed images
   - Enable AJAX update of image properties. 
-Browser:
+  - JavaScript: Add link of current page as parameter
+  - If comment is too long in the thumbnail view, short it by dots "..."
+  
+- Browser
   - Add single images to add
   - Distinguish between files and directories
   - Add Icons to files and directories
-
+    - Use created thumbnails of the JPG images
 
 Already done:
 Home:
