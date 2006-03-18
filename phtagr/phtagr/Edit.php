@@ -6,6 +6,22 @@ include_once("$prefix/Iptc.php");
 class Edit 
 {
 
+/** Returns the filename of an id 
+  @return on error return an empty string */
+function _get_filename($id)
+{
+  global $db;
+  $sql="SELECT filename 
+        FROM $db->image
+        WHERE id=$id";
+  $result=$db->query($sql);
+  if (!$result)
+    return '';
+  
+  $row=mysql_fetch_row($result);
+  return $row[0];
+}
+
 function Edit()
 {
   global $db;
@@ -14,29 +30,27 @@ function Edit()
   if (!isset($_REQUEST['images']))
     return;
  
+  //echo "<pre>"; print_r($_REQUEST); echo "</pre>";
   foreach ($_REQUEST['images'] as $id)
   {
-    $sql="SELECT filename 
-          FROM $db->image
-          WHERE id=$id";
-    $result=$db->query($sql);
-    if (!$result)
+    $filename=$this->_get_filename($id);
+    if ($filename=='')
       continue;
-
-    $row=mysql_fetch_row($result);
-    $filename=$row[0];
+      
     $iptc=new Iptc();
-    $iptc->load_from_file($filename);
-   
-    /* TODO: When do we have to use tagname 2#025 and when
-    2:025?? When using 2:025 this doesn't work...*/
-    if (!$iptc->clear_iptc_tags("2#025"))
+    if (!$iptc->load_from_file($filename))
+      continue;
+    $iptc->reset_error();
+    
+    // Distinguish between java script values and global values
+    if (isset($_REQUEST['js_tags']))
     {
-      $this->warning("Couldn't delete iptc-tag!\n");
+      $tags=split(" ", $_REQUEST['js_tags']);
+      $iptc->add_iptc_tags("2:025", $tags); 
     }
-    if (isset($_REQUEST['tags']))
+    else if (isset($_REQUEST['edit_tags']))
     {
-      $tags=split(" ", $_REQUEST['tags']);
+      $tags=split(" ", $_REQUEST['edit_tags']);
       $iptc->add_iptc_tags("2:025", $tags); 
     }
 

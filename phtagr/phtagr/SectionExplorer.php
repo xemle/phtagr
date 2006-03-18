@@ -59,8 +59,8 @@ function print_edit()
   echo "
 <fieldset><legend>Edit</legend>
   <table>
-    <tr><td class=\"th\">Tags:</td><td><input type=\"text\" name=\"_tags\" size=\"60\"/></td></tr>
-    <tr><td class=\"th\">Set:</td><td><input type=\"text\" name=\"_sets\" size=\"60\"/></td></tr>
+    <tr><td class=\"th\">Tags:</td><td><input type=\"text\" name=\"edit_tags\" size=\"60\"/></td></tr>
+    <tr><td class=\"th\">Set:</td><td><input type=\"text\" name=\"edit_sets\" size=\"60\"/></td></tr>
   </table>
 </fieldset>
 <input type=\"hidden\" name=\"action\" value=\"edit\"/>
@@ -118,7 +118,7 @@ function print_content()
   {
 /* TODO when this form is enabled, you can't use the fancy
   JS-Script from for editing a single image. What to do? */
-//      echo "<form method=\"post\" action=\"index.php\">";
+    echo "<form method=\"post\" action=\"index.php\">";
   }
   echo "<table class=\"tableview\">\n";
   $cell=0;

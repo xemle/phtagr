@@ -142,6 +142,7 @@ function print_row_date($sec)
 function print_row_tags($id)
 {
   global $db;
+  global $auth;
 
   $sql="SELECT name FROM $db->tag WHERE imageid=$id";
   $result = $db->query($sql);

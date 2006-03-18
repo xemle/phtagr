@@ -4,15 +4,20 @@
  http://www.codeproject.com/bitmap/iptc.asp
 */
 
-class Iptc {
+/** @class Iptc
+  Reads and write IPTC tags from a given JPEG file. */
+class Iptc 
+{
 
-/** general error string */
+/** General error string. This field must be resettet after each operation */
 var $_error;
-/** jpg segents */
+/** array of jpg segents. This array contains the JPEG segments */
 var $_jpg;
-/** IPTC data, array of array */
+/** IPTC data, array of array. The IPTC tags are stored in as "r:ttt", where
+ * 'r' is the record number and 'ttt' is the type of the IPTC tag
+ */
 var $iptc;
-/** If some date is changed */
+/** This flag is true if the IPTC data changes. */
 var $_changed; 
 
 function Iptc()
@@ -33,18 +38,14 @@ function get_error()
   return $this->_error;
 }
 
-/** Get iptc tags
-  @param filename Image of which the iptc category tags should be read
-  @return An array of the iptc category tags otherwise -1 */
-function get_values($filename)
+function reset_error()
 {
-  getimagesize ($filename, $info);
-  if (!is_array($info))
-    return -1;
-  $section = iptcparse($info["APP13"]);
-  return $section['2#025'];
+  $this->_error='';
 }
 
+/** Reads the JPEG segments, the photoshop segments, and finally the IPTC
+ segments. 
+ @return true on success. False otherwise. */
 function load_from_file($filename)
 {
   if (!is_readable($filename))
@@ -76,11 +77,15 @@ function load_from_file($filename)
   if (ord($data{0})!=0xff || ord($data{1})!=0xd8)
   {
     $this->_error="JPEG header mismatch";
+    fclose($fp);
     return false;
   }
   
   if (!$this->_read_jpg_segs(&$jpg))
+  {
+    fclose($fp);
     return false;
+  }
 
   if ($this->_read_ps_segs(&$jpg))
   {
@@ -99,6 +104,13 @@ function save_to_file()
   }
 }
 
+/** Return the iptc array of array
+  @return null if no iptc tag was found */
+function get_iptc()
+{
+  return $this->iptc;
+}
+
 /** Add iptc value 
   @param name Name of IPTC tag
   @param value Value of IPTC tag. If iptc tag is not keyword or set, the value
@@ -106,6 +118,8 @@ function save_to_file()
   @return true if the iptc changes */
 function add_iptc_tag($name, $value)
 {
+  $this->_error='';
+  
   if ($value=='')
     return false;
 
@@ -152,6 +166,8 @@ function add_iptc_tag($name, $value)
   @return true if iptc changes */
 function add_iptc_tags($name, $tags)
 {
+  $this->_error='';
+  
   if ($tags=='')
     return false;
 
@@ -169,6 +185,8 @@ function add_iptc_tags($name, $tags)
   @return true if deletion of tags was successful, false if not */
 function clear_iptc_tags($name)
 {
+  $this->_error='';
+
   if ($name=='')
     return false;
 
@@ -181,8 +199,8 @@ function clear_iptc_tags($name)
   
   if (!isset($iptc[$name]))
   {
+    $iptc[$name]=array();
     $this->_changed=true;
-    $iptc="";
     return true;
   }
 
