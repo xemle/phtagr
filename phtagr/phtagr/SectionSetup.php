@@ -12,105 +12,139 @@ var $stage=0;
 
 function SectionSetup()
 {
-    global $db;
-    $this->name="setup";
-    $sql="show tables;";
-    $result=$db->query($sql, true);
-    if (!$result) 
-    {
-        $this->stage=0;
-        return;
-    }
+  global $db;
+  $this->name="setup";
 
-    $sql="select id,name from $db->user where name='admin'";
-    $result=$db->query($sql, true);
-    if (!$result || mysql_num_rows($result)==0)
-    {
-        $this->stage=1;
-        return;
-    }
-    
-    $this->stage=2;
+  $sql="show tables;";
+  $result=$db->query($sql, true);
+  if (!$result) 
+  {
+    $this->stage=0;
+    return;
+  }
+
+  $sql="select id,name from $db->user where name='admin'";
+  $result=$db->query($sql, true);
+  if (!$result || mysql_num_rows($result)==0)
+  {
+    $this->stage=1;
+    return;
+  }
+  
+  $this->stage=2;
 }
 
 function exec_stage_db()
 {
-    // check sql parameters
-    global $db;
-    $result=$db->test_database($_REQUEST['host'], 
-                   $_REQUEST['user'], 
-                   $_REQUEST['password'], 
-                   $_REQUEST['database']);
-    if ($result!=true)
-    {
-      $this->error($result);
-      return false;
-    }
-    
-    $configdir=getcwd()."/phtagr";
-    if (!is_writeable($configdir))
-    {
-      $this->error("Could not write to config directory $configdir");
-      return false;
-    }
-    
-    // check for writing the minimalistic configure file
-    $config="$configdir/vars.inc";
-    
-    // write minimalistic configuration file
-    $f=fopen($config, "w");
-    if (!$f) 
-    {
-      $this->error("Could not write to config file $config");
-      return false;
-    }
+  // check sql parameters
+  global $db;
+  $result=$db->test_database($_REQUEST['host'], 
+                 $_REQUEST['user'], 
+                 $_REQUEST['password'], 
+                 $_REQUEST['database']);
+  if ($result!=true)
+  {
+    $this->error($result);
+    return false;
+  }
+  
+  $configdir=getcwd()."/data";
+  if (!is_writeable($configdir))
+  {
+    $this->error("Could not write to config directory $configdir");
+    return false;
+  }
+  
+  // check for writing the minimalistic configure file
+  $config="$configdir/vars.inc";
+  
+  // write minimalistic configuration file
+  $f=fopen($config, "w");
+  if (!$f) 
+  {
+    $this->error("Could not write to config file $config");
+    return false;
+  }
 
-    fwrite($f, "# Configuration file\n");
-    fwrite($f, "db_host=".$_REQUEST['host']."\n");
-    fwrite($f, "db_user=".$_REQUEST['user']."\n");
-    fwrite($f, "db_password=".$_REQUEST['password']."\n");
-    fwrite($f, "db_database=".$_REQUEST['database']."\n");
-    fwrite($f, "# Prefix of phTagr tables.\n");
-    fwrite($f, "db_prefix=".$_REQUEST['prefix']."\n");
-    fclose($f);
+  fwrite($f, "# Configuration file\n");
+  fwrite($f, "db_host=".$_REQUEST['host']."\n");
+  fwrite($f, "db_user=".$_REQUEST['user']."\n");
+  fwrite($f, "db_password=".$_REQUEST['password']."\n");
+  fwrite($f, "db_database=".$_REQUEST['database']."\n");
+  fwrite($f, "# Prefix of phTagr tables.\n");
+  fwrite($f, "db_prefix=".$_REQUEST['prefix']."\n");
+  fclose($f);
+  
+  if (!$db->connect($config))
+  {
+    $this->error("Could not read the configuration file $config");
+    // remove the configuration file
+    unlink($config);
+    return false;
+  }
+  
+  if (!$db->create_tables())
+  {
+    $this->error("The tables could not be created successfully");
+    // remove the configuration file
+    unlink($config);
+    return false;
+  }
+  
+  $this->success("Configuration file and tables created successfully");
+  $this->warning("Please move the file '$config' to the directory '".getcwd()."/phtagr'");
+  
+  if (!$this->init_tables())
+  {
+    $this->warning("Could not init the tables correctly");
+    return false;
+  }
 
-    $this->p("The configure file was created successfully");
-    $this->warning("Please change the write permission of directory $configdir to only readable");
-    $db = new Sql();
-    if (!$db->connect() || !$db->create_tables())
-    {
-      $this->warning("The tables could not be created successfully");
-      return false;
-    }
-    $this->success("Tables where successfully created");
-    $sql="INSERT $db->pref (name, value) VALUES('cache', '".getcwd()."/cache')";
-    $db->query($sql);
-    
-    return true;
+  return true;
+}
+
+/** Insert default values to the table
+  @return true on success. false on failure */
+function init_tables()
+{
+  $dir=getcwd();
+  global $db;
+
+  // image cache
+  $sql="INSERT $db->pref (name, value) VALUES('cache', '$dir/cache')";
+  $result=$db->query($sql);
+  if (!$result) return false;
+
+  // upload dir
+  $sql="INSERT $db->pref (name, value) VALUES('upload_dir', '$dir/data')";
+  $result=$db->query($sql);
+  if (!$result) return false;
+  
+  return true;
 }
 
 function exec_stage_pref()
 {
-    // check cache directory
-    if (!is_dir($_REQUEST['cache']))
-    {
-      $this->error("Cache directory does not exists");
-      return false;
-    }
-    if (!is_writeable($_REQUEST['cache']))
-    {
-      $this->error("Could not write to cache directory");
-      return false;
-    }
+  // check cache directory
+  if (!is_dir($_REQUEST['cache']))
+  {
+    $this->error("Cache directory does not exists");
+    return false;
+  }
+  if (!is_writeable($_REQUEST['cache']))
+  {
+    $this->error("Could not write to cache directory");
+    return false;
+  }
 }
 
 function print_stage_db()
 {
-    echo "<h3>Setup of mySQL database connection</h3>\n";
-    
-    $this->p("Please insert the connection data for the mysql connection data");
-    
-    echo "<form method=\"post\">
+  echo "<h3>Setup of mySQL database connection</h3>\n";
+  
+  $this->p("Please insert the connection data for the mysql connection data");
+  
+  echo "<form method=\"post\">
 <input type=\"hidden\" name=\"section\" value=\"setup\" />
 <input type=\"hidden\" name=\"stage\" value=\"0\" />
 <input type=\"hidden\" name=\"action\" value=\"init\" />
@@ -144,22 +178,22 @@ function print_stage_db()
 
 function print_stage_admin()
 {
-    echo "<h3>Creation of Admin Account</h3>\n";
-    $account=new SectionAccount();
-    $account->user='admin';
-    $account->print_form_new_account();
+  echo "<h3>Creation of Admin Account</h3>\n";
+  $account=new SectionAccount();
+  $account->user='admin';
+  $account->print_form_new_account();
 }
 
 function print_actions()
 {
-    echo "<ul>\n";
-    echo "<li><a href=\"index.php?section=setup&action=sync\">Synchronize</a> files with the database</li>\n";
-    echo "<li><a href=\"index.php?section=setup&action=init\">Create a phTagr Instance</a></li>\n";
-    echo "<li><a href=\"index.php?section=setup&action=delete_tables\">Delete Tables</a></li>\n";
-    echo "<li><a href=\"index.php?section=setup&action=delete_images\">Delete all images</a></li>\n";
-    echo "<li><a href=\"index.php?section=setup&action=upload_dir\">Set the upload directory</a></li>\n";
-    echo "<li><a href=\"index.php\">Go to phTagr</a></li>\n";
-    echo "</ul>\n";
+  echo "<ul>\n";
+  echo "<li><a href=\"index.php?section=setup&action=sync\">Synchronize</a> files with the database</li>\n";
+  echo "<li><a href=\"index.php?section=setup&action=init\">Create a phTagr Instance</a></li>\n";
+  echo "<li><a href=\"index.php?section=setup&action=delete_tables\">Delete Tables</a></li>\n";
+  echo "<li><a href=\"index.php?section=setup&action=delete_images\">Delete all images</a></li>\n";
+  echo "<li><a href=\"index.php?section=setup&action=upload_dir\">Set the upload directory</a></li>\n";
+  echo "<li><a href=\"index.php\">Go to phTagr</a></li>\n";
+  echo "</ul>\n";
 }
 
 function setup_upload()

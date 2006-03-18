@@ -14,8 +14,6 @@ var $pref;
 var $user;
 /** Prefix of tables */
 var $prefix; 
-var $cache;
-var $upload_dir;
 
 function Sql()
 {
@@ -24,10 +22,14 @@ function Sql()
 }
 
 /** Reads the configuration file for the mySQL database 
- @return Array of data values on success, false otherwise */
-function read_config()
+  @param config Optional filename of configruation file
+  @return Array of data values on success, false otherwise 
+ */
+function read_config($config='')
 {
-  $config=getcwd()."/phtagr/vars.inc";
+  if ($config=='')
+    $config=getcwd()."/phtagr/vars.inc";
+
   if (!file_exists($config) || !is_readable($config))
   {
     return false;
@@ -51,16 +53,15 @@ function read_config()
   $this->user=$data['db_prefix']."user";
   $this->pref=$data['db_prefix']."pref";
 
-  # Maybe this can be moved into the prefs table?
-  $this->upload_dir=$prefix . '/' . $data['upload_dir'];
   return $data;
 }
 
 /** Connect to the sql database 
- @return true on success */
-function connect()
+  @param config Optional filename of configruation file
+  @return true on success */
+function connect($config='')
 {
-  $data=$this->read_config();
+  $data=$this->read_config($config);
   if ($data==false)
     return false;
     

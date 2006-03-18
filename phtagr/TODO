@@ -137,6 +137,8 @@ Other image communities: http://holocore.com/?PictureSync_services
 
 - Setup
   - Easy step-by-step setup of phTagr like bitweaver
+    - An other aproach is to have a single configuration page. E.g. Creation
+      tables and the admin account at one step.
   - Connection to the SQL database
   - Creation of SQL tables
   - Creation of the admin account
