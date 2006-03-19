@@ -111,12 +111,22 @@ function get_iptc()
   return $this->iptc;
 }
 
+/** Return, if the record occurs only one time */
+function is_single_record($name)
+{
+  
+  if ($name='2:025') // keyword
+    return false;
+  return true;
+}
+
 /** Add iptc value 
-  @param name Name of IPTC tag
-  @param value Value of IPTC tag. If iptc tag is not keyword or set, the value
-  will be replaced 
-  @return true if the iptc changes */
-function add_iptc_tag($name, $value)
+  @param name Name of IPTC record
+  @param value Value of IPTC record. If iptc tag is a single record, the
+  value will be replaced. For multiple records like keywords or sets, the value
+  will be added if it does not exist.
+  @return true if the iptc record changes */
+function add_record($name, $value)
 {
   $this->_error='';
   
@@ -137,8 +147,8 @@ function add_iptc_tag($name, $value)
     return true;
   }
   
-  // Single tags
-  if ($name != '2:025')
+  // Single record
+  if ($this->is_single_record($name))
   {
     if ($iptc[$name][0]==$value)
       return false;
@@ -162,49 +172,90 @@ function add_iptc_tag($name, $value)
   return true;
 }
 
-/** Add an iptc tags 
+/** Add a multiple IPTC record
+  @param name Name of the IPTC record. 
+  @param values Array of values. The array must be set, otherwise it returns
+  false.
   @return true if iptc changes */
-function add_iptc_tags($name, $tags)
+function add_records($name, $values)
 {
   $this->_error='';
   
-  if ($tags=='')
+  if (count($values)==0)
     return false;
 
   $changed=false;
-  foreach ($tags as $tag)
+  foreach ($values as $value)
   {
-    if ($this->add_iptc_tag($name,$tag))
+    if ($this->add_record($name, $value))
       $changed=true;
   }
   return $changed;
 }
 
-/** Clear iptc category tags
-  @param name Name of the IPTC tag
-  @return true if deletion of tags was successful, false if not */
-function clear_iptc_tags($name)
+/** Remove iptc value 
+  @param name Name of IPTC record
+  @param value Value of IPTC record. If this is an empty string, the record
+  will be removed, especially whole multiple records.
+  @return true if the iptc changes */
+function rem_record($name, $value='')
 {
   $this->_error='';
-
-  if ($name=='')
-    return false;
-
+  
   if (!isset($this->iptc))
   {
-    $this->iptc=array();
-    $this->_changed=true;
+    return false;
   }
   $iptc=&$this->iptc;
-  
   if (!isset($iptc[$name]))
   {
-    $iptc[$name]=array();
+    return false;
+  }
+  
+  // Single tags
+  if ($this->is_single_record($name) || $value=='')
+  {
+    unset($iptc[$name]);
     $this->_changed=true;
     return true;
   }
 
+  // Multiple records
+  $key=array_search($value, $iptc[$name]);
+  //echo "<pre>";
+  //print_r($iptc[$name]);
+  //echo "\n$key</pre>\n";
+  if (is_int($key) && $key>=0)
+  {
+    unset($iptc[$name][$key]);
+    if (count($iptc[$name])==0)
+      unset($iptc[$name]);
+    $this->_changed=true;
+    return true;
+  }
+  
   return false;
+}
+
+/** Remove iptc records. This function is used for multiple records like
+  keywords or sets.
+  @param name IPTC name of the record. 
+  @param array of values. This must be set, otherwise it returns false.
+  @return true if iptc changes */
+function rem_records($name, $values)
+{
+  $this->_error='';
+  
+  if (count($values)==0)
+    return false;
+
+  $changed=false;
+  foreach ($values as $value)
+  {
+    if ($this->rem_record($name, $value))
+      $changed=true;
+  }
+  return $changed;
 }
 
 function _read_jpg_segs($jpg)
