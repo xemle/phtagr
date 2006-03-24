@@ -22,8 +22,12 @@ a:visited {
 
 .headerleft {
   position: relative;
-  padding: 0 0 0 20; 
+  padding: 0 0 0 50; 
   float:left;
+  background-image: url(./phtagr.icon.png);
+  background-repeat: no-repeat;
+  background-position: 5px 20px;
+  
 }
 
 .headerright {

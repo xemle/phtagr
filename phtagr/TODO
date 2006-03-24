@@ -35,6 +35,8 @@ Other image communities: http://holocore.com/?PictureSync_services
   - Quota 
     A user can upload only a specific amount of data to its storage.
     Default is set by admin account.
+    - Add quota, quotatime (howmany can be uploaded in which time), and
+      quotalimit (absolut quota)
   - Root directory
     The root directory defines the storages place of the raw images of a
     specific user. Default is set by admin account.
