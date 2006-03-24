@@ -5,7 +5,7 @@ global $prefix;
 /** 
   @class Sql Handles the SQL connection and queries
 */
-class Sql
+class Sql 
 {
 
 /** Prefix of tables */

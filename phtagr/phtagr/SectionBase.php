@@ -1,6 +1,8 @@
 <?php
 
-class SectionBase
+include_once("$prefix/Base.php");
+
+class SectionBase extends Base
 {
 
 var $name;
@@ -12,31 +14,9 @@ function SectionBase($name='default')
   $this->subsections=array();
 }
     
-function div_open($css_class)
-{
-  echo "<div class=\"$css_class\">";
-}
-
-function div_close()
-{
-  echo "</div>\n";
-}
-
 function add_section($section) 
 {
   array_push($this->subsections, $section);
-}
-
-/** Add span section */
-function span($css_class, $text)
-{
-  echo "<span class=\"$css_class\">".$text."</span>";
-}
-
-/** Add div section */
-function div($css_class, $text)
-{
-  echo "<div class=\"$css_class\">".$text."</div>\n";
 }
 
 /** Add paragraph section */
@@ -64,31 +44,6 @@ function print_section()
   $this->print_content();
   $this->div_close();
   echo "\n";
-}
-
-function warning($message)
-{
-  $this->div('warning', $message);
-}
-
-function error($message)
-{
-  $this->div('error', $message);
-}
-
-function info($message)
-{
-  $this->div('info', $message);
-}
-
-function success($message)
-{
-  $this->div('success', $message);
-}
-
-function comment($message)
-{
-  echo "<-- $message -->\n";
 }
 
 }
