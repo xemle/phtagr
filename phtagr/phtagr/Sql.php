@@ -8,12 +8,16 @@ global $prefix;
 class Sql
 {
 
-var $tag;
-var $image;
-var $pref;
-var $user;
 /** Prefix of tables */
 var $prefix; 
+/** Table name of users */
+var $user;
+/** Tablename of images */
+var $image;
+/** Tablename of tags */
+var $tag;
+/** Table name of preferences */
+var $pref;
 
 function Sql()
 {
@@ -76,12 +80,12 @@ function connect($config='')
 /** Test a mySQL connection 
  @return true on success, error string otherwise
 */
-function test_database($host, $user, $password, $database)
+function test_database($host, $username, $password, $database)
 {
   $prefix=intval(rand(1, 100))."-";
   
   error_reporting(0);
-  $link=mysql_connect($host,$user,$password);
+  $link=mysql_connect($host,$username,$password);
   error_reporting(E_ERROR | E_WARNING | E_PARSE);
   if ($link) 
     $err=!mysql_select_db($database, $link);

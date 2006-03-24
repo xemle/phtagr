@@ -28,6 +28,7 @@ function Iptc()
   $this->_changed=false;
 }
 
+/** Return true if IPTC records changed */
 function is_changed()
 {
   return $this->_changed;

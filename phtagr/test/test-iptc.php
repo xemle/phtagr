@@ -13,7 +13,7 @@ if ($img->load_from_file($filename)==false)
 {
   echo $img->error."\n";
 } else {
-  $img->add_iptc('2:025', "Keyword");
+  $img->add_record('2:025', "Keyword");
   $content=$img->_iptc2bytes();
   $img->_replace_iptc();
 }

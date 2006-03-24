@@ -25,7 +25,7 @@ function _get_filename($id)
 function Edit()
 {
   global $db;
-  global $auth;
+  global $user;
 
   if (!isset($_REQUEST['images']) && !isset($_REQUEST['image']))
     return;
@@ -91,7 +91,7 @@ function Edit()
     if ($iptc->is_changed())
     {
       $iptc->save_to_file();
-      update_iptc($id, $auth->userid, $filename);  
+      update_iptc($id, $user->userid, $filename);  
     }
   }
 }

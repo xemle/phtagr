@@ -4,7 +4,7 @@ session_start();
 
 $prefix='./phtagr';
 
-include "$prefix/Auth.php";
+include "$prefix/User.php";
 include "$prefix/Sql.php";
 include "$prefix/Search.php";
 include "$prefix/Edit.php";
@@ -52,13 +52,13 @@ if (!($pref=$db->read_pref()))
   return;
 }
 
-$auth = new Auth();
-$auth->check_session();
-if ($auth->is_auth)
+$user = new Auth();
+$user->check_session();
+if ($user->is_auth)
 {
   $menu->add_menu_item("Browser", "index.php?section=browser");
 }
-if ($auth->is_auth && $auth->user=='admin')
+if ($user->is_auth && $user->user=='admin')
 {
   $menu->add_menu_item("Upload", "index.php?section=upload");
   $menu->add_menu_item("Setup", "index.php?section=setup");
@@ -74,13 +74,13 @@ if (isset($_REQUEST['section']))
 {
   $section=$_REQUEST['section'];
     
-  if ($auth->is_auth && 
+  if ($user->is_auth && 
       $_REQUEST['section']=='account' && isset($_REQUEST['pass-section']))
   {
     $section=$_REQUEST['pass-section'];
   } 
 
-  if ($auth->is_logout)
+  if ($user->is_logout)
   {
     $section='home';
   }
@@ -106,7 +106,7 @@ if (isset($_REQUEST['section']))
   } 
   else if($section=='browser')
   {
-    if ($auth->is_auth()) {
+    if ($user->is_auth()) {
       $browser = new SectionBrowser();
       $browser->root='';
       $browser->path='';
@@ -120,7 +120,7 @@ if (isset($_REQUEST['section']))
   } 
   else if($section=='setup')
   {
-    if ($auth->is_auth && $auth->user!='admin') 
+    if ($user->is_auth && $user->user!='admin') 
     {
       $login=new SectionLogin();
       $login->message='You are not loged in as an admin';
@@ -133,7 +133,7 @@ if (isset($_REQUEST['section']))
   }
   else if($section=='upload')
   {
-    if ($auth->is_auth && $auth->user=='admin')
+    if ($user->is_auth && $user->user=='admin')
     {
       $upload = new SectionUpload();
       $page->add_section($upload);

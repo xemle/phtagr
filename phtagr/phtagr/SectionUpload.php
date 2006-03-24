@@ -3,7 +3,7 @@
 global $prefix;
 
 include_once("$prefix/SectionBody.php");
-include_once("$prefix/Auth.php");
+include_once("$prefix/User.php");
 include_once("$prefix/Sql.php");
 
 class SectionUpload extends SectionBody
@@ -60,11 +60,11 @@ function get_readable_size($size)
   @returns true on success, false otherwise */
 function delete_upload()
 {
-  global $auth;
+  global $user;
   global $db;
   global $prefix;
 
-  if (!$auth->is_auth || $auth->user!=='admin')
+  if (!$user->is_auth || $user->user!=='admin')
   {
     echo "You are not allowed to perform this action!\n";
     return FALSE;
@@ -72,7 +72,7 @@ function delete_upload()
 
   $pref = $db->read_pref();
   $upload_dir = $pref['upload_dir'];
-  $fullpath = $upload_dir . "/" . $auth->user . "/";
+  $fullpath = $upload_dir . "/" . $user->user . "/";
   $files = glob ( $fullpath . "*");
 
   $found = FALSE;
@@ -169,7 +169,7 @@ function rm_rf ($path)
   @returns nothing yet */
 function zipfile_process($path, $filename)
 {
-  global $auth;
+  global $user;
 
   /* At first we need to extract the files and need to copy
   every file to the destination directory. While doing so, we need
@@ -192,7 +192,7 @@ function zipfile_process($path, $filename)
       $upload_name = $this->get_upload_filename($path, $zip_content);
       copy ($name[1],$upload_name);
       unlink ($name[1]);
-      if (update_file($auth->userid, $upload_name) == false)
+      if (update_file($user->userid, $upload_name) == false)
       {
         /* If something went wrong, we try to delete as much as possible. */
         echo "<div class=\"error\">Uploading $zip_content.</div>\n";
@@ -224,10 +224,10 @@ function zipfile_process($path, $filename)
 function upload_process()
 {
   global $db;
-  global $auth;
+  global $user;
   global $prefix;
  
-  if (!$auth->is_auth || $auth->user!='admin')
+  if (!$user->is_auth || $user->user!='admin')
   {
     echo "<div class=\"warning\">You are not allowed to upload a file.</div>\n";
     return false;
@@ -237,7 +237,7 @@ function upload_process()
   $upload_dir = $pref['upload_dir'];
 
   # At first we must ensure, that the directories exist:
-  $path = $upload_dir . "/". $auth->user . "/";
+  $path = $upload_dir . "/". $user->user . "/";
   if (!file_exists($path))
   {
     if (!mkdir ($path))
@@ -269,7 +269,7 @@ function upload_process()
           continue;
     
         chmod($upload_name, 0644);
-        update_file($auth->userid, $upload_name);
+        update_file($user->userid, $upload_name);
         echo "<div class=\"success\">File $name uploaded.</div>\n";
       }
     }
@@ -309,14 +309,14 @@ function print_form_upload($dir)
   @return nicely formatted html list of the uploaded images */
 function print_uploaded()
 {
-  global $auth;
+  global $user;
   global $prefix;
   global $db;
 
   # Now we want to list all files, the user has already uploaded
   $pref = $db->read_pref();
   $upload_dir = $pref['upload_dir'];
-  $fullpath = $upload_dir . "/" . $auth->user . "/";
+  $fullpath = $upload_dir . "/" . $user->user . "/";
   $files = glob ( $fullpath . "*");
   if (count ($files) == 0)
     return;
@@ -389,7 +389,7 @@ function print_uploaded()
 
 function print_content()
 {
-  global $auth;
+  global $user;
   echo "<h2>Image upload</h2>\n";
 
   // Check for uploaded images

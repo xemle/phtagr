@@ -142,7 +142,7 @@ function print_row_date($sec)
 function print_row_tags($id)
 {
   global $db;
-  global $auth;
+  global $user;
 
   $sql="SELECT name FROM $db->tag WHERE imageid=$id";
   $result = $db->query($sql);
@@ -154,7 +154,7 @@ function print_row_tags($id)
   $num_tags=count($tags);
   
   echo "  <tr><td class=\"th\"";
-  if ($auth->is_auth)
+  if ($user->is_auth)
   {
     $list='';
     for ($i=0; $i<$num_tags; $i++)
@@ -178,7 +178,7 @@ function print_row_tags($id)
 
 function print_preview($id, $search=null) {
   global $db;
-  global $auth;
+  global $user;
   
   $sql="SELECT userid,filename,UNIX_TIMESTAMP(synced),name,UNIX_TIMESTAMP(date),caption
     FROM $db->image
@@ -215,7 +215,7 @@ function print_preview($id, $search=null) {
   print_row_date($sec);
   
   print_row_tags($id);
-  if ($auth->is_auth())
+  if ($user->is_auth())
   {
     echo "<tr><td class=\"th\">Select</td><td><input type=\"checkbox\" name=\"images[]\" value=\"$id\" /></td></tr>\n";
   }

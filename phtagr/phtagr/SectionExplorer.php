@@ -73,7 +73,7 @@ function print_content()
 {
   global $db;
   global $search;
-  global $auth; 
+  global $user; 
 
   $sql=$search->get_num_query();
   $result = $db->query($sql);
@@ -114,7 +114,7 @@ function print_content()
   $url_nav.=$search_nav->to_URL();
   $this->print_navigator($url_nav, $page, ceil($count/$search_nav->page_size));
   
-  if ($auth->is_auth())
+  if ($user->is_auth())
   {
 /* TODO when this form is enabled, you can't use the fancy
   JS-Script from for editing a single image. What to do? */
@@ -143,7 +143,7 @@ function print_content()
   echo "</table>";
 
   $this->print_navigator($url_nav, $page, ceil($count/$search_nav->page_size));
-  if ($auth->is_auth())
+  if ($user->is_auth())
   {
     echo "<input type=\"hidden\" name=\"section\" value=\"explorer\" />\n";
     echo $search->to_form();  

@@ -98,8 +98,7 @@ function check_session()
   {
     $this->_check_login($_SESSION['user'], $_SESSION['password']);
   }
-  // If the session ID is not valid, check the cookie
-  if (!$this->is_auth && isset($_COOKIE[$cookie]))
+  else if (isset($_COOKIE[$cookie]))
   {
     list ($user, $password)=split(' ', $_COOKIE[$cookie]);
     $password=base64_decode($password);

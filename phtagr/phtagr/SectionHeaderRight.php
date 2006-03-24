@@ -14,8 +14,8 @@ function SectionHeaderRight()
 
 function print_content()
 {
-    global $auth;
-    if (!$auth->is_auth)
+    global $user;
+    if (!$user->is_auth)
     {
         echo "<a href=\"index.php?section=account&action=login&pass-section=home\">Login</a>\n";
     }

@@ -143,7 +143,7 @@ function print_browser($dir)
 
 function print_content()
 {
-  global $auth; 
+  global $user; 
   echo "<h2>Browser</h2>\n";
   if (isset($_REQUEST['add'])) {
     foreach ($_REQUEST['add'] as $d)
@@ -157,7 +157,7 @@ function print_content()
     printf ("Found %d images<br/>\n", count($this->images));
     foreach ($this->images as $img)
     {
-      $return=update_file($auth->userid, $this->root . $img);
+      $return=update_file($user->userid, $this->root . $img);
       if ($return==1)
         echo "Image '$img' was updated.<br/>\n";
     }

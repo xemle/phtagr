@@ -246,7 +246,7 @@ function setup_upload()
 function print_content()
 {
   global $db;
-  global $auth;
+  global $user;
   
   echo "<h2>Setup</h2>\n";
   $action=$_REQUEST['action'];

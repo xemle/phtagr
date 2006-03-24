@@ -40,9 +40,9 @@ $db = new Sql();
 $db->connect();
 error_reporting(E_ERROR | E_WARNING | E_PARSE);
   
-$auth = new Auth();
-$auth->user='admin';
-$auth->is_auth=true;
+$user = new Auth();
+$user->user='admin';
+$user->is_auth=true;
 $menu->add_menu_item("Setup", "setup.php?section=setup");
 $setup->add_section($menu);
 

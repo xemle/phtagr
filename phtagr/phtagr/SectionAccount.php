@@ -2,7 +2,7 @@
 
 global $prefix;
 include_once("$prefix/SectionBody.php");
-include_once("$prefix/Auth.php");
+include_once("$prefix/User.php");
 
 class SectionAccount extends SectionBody
 {
@@ -77,8 +77,8 @@ function print_login()
   /*
   if ($_REQUEST['user']!='' && $_REQUEST['password']!='')
   {
-    $auth = new Auth();
-    if ($auth->check_login($_REQUEST['user'], $_REQUEST['password']))
+    $user = new Auth();
+    if ($user->check_login($_REQUEST['user'], $_REQUEST['password']))
     {
       echo "Login succeed.</br>\n";
       return;
