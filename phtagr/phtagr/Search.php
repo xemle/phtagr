@@ -162,14 +162,14 @@ function from_URL()
     
   if (isset($_REQUEST['tags']))
   {
-    if (strpos($_REQUEST['tags'], ' '))
+    if (strpos($_REQUEST['tags'], ' ')>0)
     {
-      foreach (split(' ',$_REQUEST['tags']) as $tag)
+      foreach (split("[ ]",$_REQUEST['tags']) as $tag)
         $this->add_tag($tag);
     }
-    else if (strpos($_REQUEST['tags'], '+'))
+    else if (strpos($_REQUEST['tags'], "+")>0)
     {
-      foreach (split('+',$_REQUEST['tags']) as $tag)
+      foreach (split("[+]",$_REQUEST['tags']) as $tag)
         $this->add_tag($tag);
     }
     else 
