@@ -171,7 +171,9 @@ function print_caption($id, $caption, $docut=true)
 
 function print_row_date($sec)
 {
-  echo "  <tr><th>Date:</th><td>";
+  echo "  <tr>
+    <th>Date:</th>
+    <td>";
   $date=date("Y-m-d H:i:s", $sec);
   $search_date=new Search();
   $search_date->date_start=$sec-(60*30*3);
@@ -198,7 +200,7 @@ function print_row_date($sec)
   $url="index.php?section=explorer";
   $url.=$search_date->to_URL();
   echo "<span class=\"month\"><a href=\"$url\">m</a></span>]";
-  echo "</td></tr>\n";
+  echo "\n    </td>\n  </tr>\n";
 }
 
 function print_row_tags($id)
@@ -215,7 +217,9 @@ function print_row_tags($id)
   sort($tags);
   $num_tags=count($tags);
   
-  echo "  <tr><th>Tags:</th><td id=\"tag-$id\">";  
+  echo "  <tr>
+    <th>Tags:</th>
+    <td id=\"tag-$id\">";  
 
   for ($i=0; $i<$num_tags; $i++)
   {
@@ -234,7 +238,8 @@ function print_row_tags($id)
     }
     echo " <span class=\"js-button\" onclick=\"add_form_tags('$id','$list')\">[edit]</span>";
   }
-  echo "</td></tr>\n";
+  echo "</td>
+  </tr>\n";
 }
 
 function print_preview($id, $search=null) {
@@ -258,13 +263,13 @@ function print_preview($id, $search=null) {
   
   $thumb=create_thumbnail($id, $userid, $filename, $synced);
   
-  echo "<div class=\"file\">$name</div>\n";
+  echo "\n<div class=\"file\">$name</div>\n";
   echo "<div class=\"thumb\">&nbsp;";
   
   $link="index.php?section=image&amp;id=$id";
   if ($search!=null)
     $link.=$search->to_URL();
-  echo "<a href=\"$link\"><img src=\"$thumb\" alt=\"$name\" /></a>";
+  echo "<a href=\"$link\"><img src=\"$thumb\" alt=\"$name\" title=\"$name\"/></a>\n";
   
   print_caption($id, $caption);
   
@@ -277,10 +282,13 @@ function print_preview($id, $search=null) {
   print_row_tags($id);
   if ($user->can_select($id))
   {
-    echo "<tr><th>Select:</th><td><input type=\"checkbox\" name=\"images[]\" value=\"$id\" /></td></tr>\n";
+    echo "  <tr>
+    <th>Select:</th>
+    <td><input type=\"checkbox\" name=\"images[]\" value=\"$id\" /></td>
+  </tr>\n";
   }
   
-  echo "</table>";
+  echo "</table>\n";
 } 
 
 ?>

@@ -108,8 +108,8 @@ a:visited {
   background-color: #B3B3B3;
 }
 
-.footer * a {
-  border: 0;
+.footer * img {
+  border: 1px solid black;
 }
 .navigator {
   color: #8C8C8C;
