@@ -22,13 +22,13 @@ function SectionSearch()
 function print_content()
 {
   echo "<form action=\"index.php\" method=\"post\">
-<input type=\"hidden\" name=\"section\" value=\"explorer\" />
+<div><input type=\"hidden\" name=\"section\" value=\"explorer\" /></div>
 <table>
   <tr>
     <th>Tags:</th>
     <td>
       <input type=\"text\" name=\"tags\" size=\"30\" /><br />
-      Operation: <input type=\"radio\" name=\"tagop\" value=\"0\" checked=''/> AND,  
+      Operation: <input type=\"radio\" name=\"tagop\" value=\"0\" checked /> AND,  
       <input type=\"radio\" name=\"tagop\" value=\"1\" /> OR,  
       <input type=\"radio\" name=\"tagop\" value=\"2\" /> FUZZY
     </td>

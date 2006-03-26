@@ -197,15 +197,15 @@ function to_URL()
   $url='';
   
   if ($this->imageid>0)
-    $url .= '&id='.$this->imageid;
+    $url .= '&amp;id='.$this->imageid;
 
   if ($this->userid>0)
-    $url .= '&user='.$this->userid;
+    $url .= '&amp;user='.$this->userid;
 
   $num_tags=count($this->tags);
   if ($num_tags>0)
   {
-    $url .= '&tags=';
+    $url .= '&amp;tags=';
     for ($i=0; $i<$num_tags; $i++)
     {
       $url .= $this->tags[$i];
@@ -213,20 +213,20 @@ function to_URL()
         $url .= '+';
     }
     if ($num_tags>1 && $this->tagop!=0)
-      $url .= '&tagop='.$this->tagop;
+      $url .= '&amp;tagop='.$this->tagop;
   }
   
   if ($this->date_start>0)
-    $url .= '&start='.$this->date_start;
+    $url .= '&amp;start='.$this->date_start;
   if ($this->date_end>0)
-    $url .= '&end='.$this->date_end;
+    $url .= '&amp;end='.$this->date_end;
     
   if ($this->pos>0)
-    $url .= '&pos='.$this->pos;
+    $url .= '&amp;pos='.$this->pos;
   if ($this->page_num>0)
-    $url .= '&page='.$this->page_num;
+    $url .= '&amp;page='.$this->page_num;
   if ($this->page_size!=10)
-    $url .= '&pagesize='.$this->page_size;
+    $url .= '&amp;pagesize='.$this->page_size;
   
   return $url;
 }

@@ -33,7 +33,7 @@ function print_navigator($link, $current, $count)
   if ($current>0)
   {
     $i=$current-1;
-    printf("<a href=\"$link%s\">&lt;</a>&nbsp;\n", ($i>0?"&page=$i":""), $i);
+    printf("<a href=\"$link%s\">&lt;</a>&nbsp;\n", ($i>0?"&amp;page=$i":""), $i);
   }
     
   for ($i=0; $i < $count; $i++)
@@ -47,7 +47,7 @@ function print_navigator($link, $current, $count)
             ($i < 3 || $i > $count-4 || 
             ($i-$current < 4 && $current-$i<4)))
     {
-      printf("<a href=\"$link%s\">%d</a>\n", ($i>0?"&page=$i":""), $i);
+      printf("<a href=\"$link%s\">%d</a>\n", ($i>0?"&amp;page=$i":""), $i);
     }
     else if ($i == $count-4 || $i == 3) 
       echo "&nbsp;...&nbsp;\n";
@@ -55,9 +55,9 @@ function print_navigator($link, $current, $count)
   if ($current<$count-1)
   {
     $i=$current+1;
-    printf("&nbsp;<a href=\"$link%s\">&gt;</a>\n", ($i>0?"&page=$i":""), $i);
+    printf("&nbsp;<a href=\"$link%s\">&gt;</a>\n", ($i>0?"&amp;page=$i":""), $i);
   }
-  echo "</div>\n";
+  echo "</div>\n\n";
 }
 
 /** Print the current page with an table */
@@ -129,11 +129,14 @@ function print_content()
     $pos++;
   }
 
-  echo "</table>";
+  echo "</table>\n\n";
 
   $this->print_navigator($url_nav, $page, ceil($count/$search_nav->page_size));
-  echo "<input type=\"hidden\" name=\"section\" value=\"explorer\" />\n";
-  echo $search->to_form();  
+  
+  echo "<div><input type=\"hidden\" name=\"section\" value=\"explorer\" />\n";
+  echo $search->to_form();
+  echo "</div>\n";
+
   $edit=new Edit();
   if ($user->can_edit())
     $edit->print_edit_inputs();

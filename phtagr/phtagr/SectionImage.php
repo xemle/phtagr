@@ -41,13 +41,14 @@ function print_navigation($search)
   $sql=$search->get_query(2);
 
   $result=$db->query($sql);
-  if (!$result)
+  // we need at least 2 lines.
+  if (!$result || mysql_num_rows($result)<2)
     return;
 
   // restore old page style
   $search->set_page_size($page_size);
 
-  echo "\n<div class=\"navigator\">\n<table><tr>\n";
+  echo "\n<div class=\"navigator\">\n<table>\n<tr>\n";
   while ($row=mysql_fetch_row($result))
   {
     // skip current image
@@ -72,7 +73,7 @@ function print_navigation($search)
       echo "<td><div class=\"mini.prev\">&lt;</div></td>\n";
     $cur_pos++;
   }
-  echo "</td></table>\n</div>\n";
+  echo "</tr></table>\n</div>\n";
 }
 
 /** Convert the SQL time string to unix time stamp. 
@@ -126,7 +127,7 @@ function print_content()
   $preview=create_preview($v['id'], $v['userid'], $v['filename'], $sec);
   
   echo "<h3>${v['name']}</h3>\n";
-  echo "<p><img src=\"$preview\" /></p>\n";
+  echo "<p><img src=\"$preview\" alt=\"${v['name']}\" /></p>\n";
   if ($user->can_edit($v['id']))
   {
     echo "<form action=\"index.php\" method=\"post\">\n";

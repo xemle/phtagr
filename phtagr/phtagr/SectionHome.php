@@ -60,9 +60,9 @@ function print_all_tags() {
   foreach ($data as $tag => $hit)
   {
     $size=intval(8+($hit-$min)*$grad);
-    echo "<span style=\"font-size:${size}pt;\"><a href=\"?section=explorer&tags=$tag\">$tag</a></span>&nbsp;\n";
+    echo "<span style=\"font-size:${size}pt;\"><a href=\"?section=explorer&amp;tags=$tag\">$tag</a></span>&nbsp;\n";
   }
-  echo "<p></div>\n";
+  echo "</p></div>\n";
 }
 
 /** Prints randomly images as small square images 

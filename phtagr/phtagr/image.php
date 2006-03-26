@@ -103,7 +103,7 @@ function print_mini($id)
   $src=get_mini_URL($id);
   if (!$src)
     return;
-  echo "<a href=\"index.php?section=image&id=$id\"><img src=\"$src\" alt=\"${v['name']}\" align=\"center\"/></a>";
+  echo "<a href=\"index.php?section=image&amp;id=$id\"><img src=\"$src\" alt=\"${v['name']}\" /></a>";
 
 }
 
@@ -116,7 +116,6 @@ function _cut_caption($id, $caption)
     return $caption;
 
   $words=split(" ", $caption);
-  $result="<span id=\"$id-caption-text\">";
   foreach ($words as $word)
   {
     if (strlen($result) > 40)
@@ -124,6 +123,7 @@ function _cut_caption($id, $caption)
 
     $result.=" $word";
   }
+  $result="<span id=\"caption-text-$id\">".$result;
   $b64=base64_encode($caption);
   $result.=" <span class=\"js-button\" onclick=\"print_caption('$id', '$b64')\">[...]</span>";
   $result.="</span>";
@@ -140,7 +140,7 @@ function print_caption($id, $caption, $docut=true)
   global $user;
   $can_edit=$user->can_edit($id);
   
-  echo "<div class=\"caption\" id=\"$id-caption\">";
+  echo "<div class=\"caption\" id=\"caption-$id\">";
   // the user can not edit the image
   if (!$can_edit)
   {
@@ -158,7 +158,8 @@ function print_caption($id, $caption, $docut=true)
       $text=_cut_caption($id, &$caption);
     else
       $text=&$caption;
-    echo "$text <span class=\"js-button\" onclick=\"add_form_caption('$id', '$caption') \">[edit]</span>";
+    $caption64=base64_encode($caption);
+    echo "$text <span class=\"js-button\" onclick=\"add_form_caption('$id', '$caption64') \">[edit]</span>";
   }
   else
   {
@@ -214,11 +215,11 @@ function print_row_tags($id)
   sort($tags);
   $num_tags=count($tags);
   
-  echo "  <tr><th>Tags:</th><td id=\"$id-tag\">";  
+  echo "  <tr><th>Tags:</th><td id=\"tag-$id\">";  
 
   for ($i=0; $i<$num_tags; $i++)
   {
-    echo "<a href=\"?section=explorer&tags=" . $tags[$i] . "\">" . $tags[$i] . "</a>";
+    echo "<a href=\"index?section=explorer&amp;tags=" . $tags[$i] . "\">" . $tags[$i] . "</a>";
     if ($i<$num_tags-1)
         echo ", ";
   }
@@ -260,10 +261,10 @@ function print_preview($id, $search=null) {
   echo "<div class=\"file\">$name</div>\n";
   echo "<div class=\"thumb\">&nbsp;";
   
-  $link="index.php?section=image&id=$id";
+  $link="index.php?section=image&amp;id=$id";
   if ($search!=null)
     $link.=$search->to_URL();
-  echo "<a href=\"$link\"><img src=\"$thumb\" alt=\"$name\" align=\"center\"/></a>";
+  echo "<a href=\"$link\"><img src=\"$thumb\" alt=\"$name\" /></a>";
   
   print_caption($id, $caption);
   

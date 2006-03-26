@@ -14,36 +14,32 @@ a:visited {
 
 .header {
   padding: 0;
-  margin: 0;
+  margin: 0 0 10px 0;
   height: 60px;
   background-color: #B3AF81;
   border-bottom: 3px solid #8C8A65;
 }
 
 .headerleft {
-  position: relative;
-  padding: 0 0 0 50; 
-  float:left;
+  position: absolute;
+  padding: 0 0 0 50px; 
+  margin: 0;
   background-image: url(./phtagr.icon.png);
   background-repeat: no-repeat;
   background-position: 5px 20px;
-  
 }
 
 .headerright {
   position: relative;
   float:right;
-  padding: 10 10 0 0; 
+  padding: 0px 10px 0 0; 
   text-align: right;
 }
 
-.headerright > a {
-  font-size:8pt;
-}
-
-.headerright > form {
+.headerright * p, .headerright > a, headerright > form {
+  margin: 0;
   padding: 0;
-  margin:0;
+  font-size: 8pt;
 }
 
 .menu {
@@ -59,13 +55,13 @@ a:visited {
 }
 
 .menu * li, .menu > ul {
-  padding: 2 0 2 4;
+  padding: 2px 0 2px 4px;
   margin: 0;
   list-style-type: none;
 }
 
 .menu > h2 {
-  padding: 5;
+  padding: 5px;
   font-size: 12pt;
   background-color: #758C65;
   margin: 0;
@@ -86,7 +82,7 @@ a:visited {
 .body {
   position: relative;
   text-align: left;
-  padding: 0 0 0 10;
+  padding: 0 0 0 10px;
   float: left;
   width: 750px;
 }
@@ -97,14 +93,14 @@ a:visited {
   border-bottom: 1px solid #758C65;
   border-top: 1px solid #758C65;
   border-right: 1px solid #758C65;
-  padding: 5 5 5 5;
+  padding: 5px 5px 5px 5px;
   margin: 0 0 0 0; 
 }
 
 .footer {
   position: relative;
   clear: both;
-  padding: 10 0 10 0;
+  padding: 10px 0 10px 0;
   font-size: 8pt;
   text-align: center;
   color: #8C8C8C;
@@ -112,9 +108,12 @@ a:visited {
   background-color: #B3B3B3;
 }
 
+.footer * a {
+  border: 0;
+}
 .navigator {
   color: #8C8C8C;
-  margin: 10 0 10 0;
+  margin: 10px 0 10px 0;
   text-align: center;
 }
 
@@ -123,8 +122,8 @@ a:visited {
   font-size: 8pt;
   /*width: 12px;
   height: 12px;*/
-  padding: 2 5 2 5;
-  margin: 5 0 3 0;
+  padding: 2px 5px 2px 5px;
+  margin: 5px 0 3px 0;
   background-color: #D9D59C;
   border: 1px solid #8C8A65;
 }
@@ -135,7 +134,7 @@ a:visited {
 }
 
 .navigator > .current {
-  padding: 2 5 2 5;
+  padding: 2px 5px 2px 5px;
   margin: 0 0 0 0;
   font-size: 8pt;
   color: black;
@@ -163,7 +162,7 @@ a:visited {
 }
 
 .thumb {
-  margin: 10 10 10 10;
+  margin: 10px 10px 10px 10px;
   text-align: center; 
 }
 
@@ -177,16 +176,16 @@ a:visited {
 
 .mini > table {
   text-align: center;
-  padding: 0 0 10 0;
+  padding: 0 0 10px 0;
 }
 
 .mini * img {
   border: 1px solid black;
-  margin: 0 3 0 3;
+  margin: 0 3px 0 3px;
 }
 
 .mini.prev, .mini.next {
-  margin: 0 3 0 3;
+  margin: 0 3px 0 3px;
 }
 
 td {
@@ -204,8 +203,8 @@ th {
 }
 
 .preview {
-  padding: 10 10 10 10;
-  margin: 10 10 10 10;
+  padding: 10px 10px 10px 10px;
+  margin: 10px 10px 10px 10px;
 }
 
 .file {
@@ -215,7 +214,7 @@ th {
   border-bottom: 1px solid #758C65;
   border-top: 1px solid #B3AF81;
   border-right: 1px solid #B3AF81;
-  padding: 2 0 2 5;
+  padding: 2px 0 2px 5px;
   font-weight: bold;
 }
 
@@ -226,7 +225,7 @@ th {
 }
 
 .caption * td {
-  padding: 0 5 0 5;
+  padding: 0 5px 0 5px;
 }
 
 .imginfo {
@@ -249,30 +248,30 @@ th {
   background-color: #ffb09f;
   color: black;
   border: solid 2px #ff0000;
-  padding: 10 30 10 30;
-  margin: 10 0 10 0;
+  padding: 10px 30px 10px 30px;
+  margin: 10px 0 10px 0;
 }
 
 .warning {
   background-color: #ffb260;
   color: black;
   border: solid 2px #ff7300;
-  padding: 10 30 10 30;
-  margin: 10 0 10 0;
+  padding: 10px 30px 10px 30px;
+  margin: 10px 0 10px 0;
 }
 
 .success {
   background-color: #7aff8c;
   color: black;
   border: solid 2px #008e47;
-  padding: 10 30 10 30;
-  margin: 10 0 10 0;
+  padding: 10px 30px 10px 30px;
+  margin: 10px 0 10px 0;
 }
 
 .info{
   background-color: #ffffb8;
   color: black;
   border: solid 2px #ffdc3b;
-  padding: 10 30 10 30;
-  margin: 10 0 10 0;
+  padding: 10px 30px 10px 30px;
+  margin: 10px 0 10px 0;
 }

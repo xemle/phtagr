@@ -93,7 +93,7 @@ function print_browser($dir)
   
   echo "Path:&nbsp;";
   $dirs=split('/', $dir);
-  echo "<a href=\"?section=browser&cd=/\">root</a>";
+  echo "<a href=\"./index.php?section=browser&amp;cd=/\">root</a>";
   $path='';
   foreach ($dirs as $cd)
   {
@@ -103,7 +103,7 @@ function print_browser($dir)
     echo "&nbsp;/&nbsp;";
     
     if ($this->is_dir($path)) {
-      echo "<a href=\"?section=browser&cd=$path\">$cd</a>";
+      echo "<a href=\"./index.php?section=browser&amp;cd=$path\">$cd</a>";
     } else {
       echo "$cd";
     }
@@ -121,11 +121,11 @@ function print_browser($dir)
   }
   closedir($handle);
 
-  echo "<form section=\"index.php\" method=\"post\">\n";
+  echo "<form section=\"./index.php\" method=\"post\">\n<p>\n";
   echo "<input type=\"hidden\" name=\"section\" value=\"browser\" />";
 
   asort($subdirs);
-  echo "<input type=\"checkbox\" name=\"add[]\" value=\"$dir\" />&nbsp;. (this dir)</br>\n";
+  echo "<input type=\"checkbox\" name=\"add[]\" value=\"$dir\" />&nbsp;. (this dir)<br />\n";
   foreach($subdirs as $sub) 
   {
     if ($dir != '/') {
@@ -133,12 +133,12 @@ function print_browser($dir)
     } else {
       $cd=$sub;
     }
-    echo "<input type=\"checkbox\" name=\"add[]\" value=\"$cd\" />&nbsp;<a href=\"?section=browser&cd=$cd\">$sub</a></br>\n";
+    echo "<input type=\"checkbox\" name=\"add[]\" value=\"$cd\" />&nbsp;<a href=\"?section=browser&amp;cd=$cd\">$sub</a><br />\n";
   }
-  echo "<input type=\"submit\" value=\"Add images\" />";
+  echo "<input type=\"submit\" value=\"Add images\" />&nbsp;";
   echo "<input type=\"reset\" value=\"Clear\" />";
   
-  echo "<form>\n";
+  echo "\n<p>\n<form>\n";
 }
 
 function print_content()
@@ -161,7 +161,7 @@ function print_content()
       if ($return==1)
         echo "Image '$img' was updated.<br/>\n";
     }
-    echo "<a href=\"index.php?section=browser&cd=$this->path\">Search again</a><br/>\n";
+    echo "<a href=\"./index.php?section=browser&amp;cd=$this->path\">Search again</a><br/>\n";
   } else if (isset($_REQUEST['cd'])) 
   {
     $this->path=$_REQUEST['cd'];

@@ -15,7 +15,7 @@ function reset_text(id)
 
 function print_caption(id, caption64)
 {
-  var node=id+"-caption-text";
+  var node="caption-text-"+id;
   var e=document.getElementById(node);
   if (e==null)
     return;
@@ -29,18 +29,19 @@ function print_caption(id, caption64)
 }
   
 /** Add a form for caption */
-function add_form_caption(id, caption)
+function add_form_caption(id, caption64)
 {
-  var node=id+"-caption";
+  var node="caption-"+id;
   var e=document.getElementById(node);
   if (e==null)
     return;
 
-  var i=node+"-caption-edit";
+  var i=node+"-edit";
   var text=e.innerHTML;
 
   // Remember old content
   Data[node]=text;
+  caption=atob(caption64);
   // encode node content to b64 to catch all special characters
   e.innerHTML="<form action=\"index.php\" method=\"post\">" +
     "<input type=\"hidden\" name=\"image\" value=\""+id+"\"/>"+
@@ -57,7 +58,7 @@ function add_form_caption(id, caption)
   @param tags List of the tags */
 function add_form_tags(id, tags)
 {
-  var node=id+"-tag";
+  var node="tag-"+id;
   var e=document.getElementById(node);
   if (e==null)
     return;

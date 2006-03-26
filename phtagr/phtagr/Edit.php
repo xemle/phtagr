@@ -154,15 +154,15 @@ function print_edit_inputs()
     <tr><th>Set:</th><td><input type=\"text\" name=\"edit_sets\" size=\"60\"/></td></tr>
   </table>
 </fieldset>
-<input type=\"hidden\" name=\"action\" value=\"edit\"/>
+<div><input type=\"hidden\" name=\"action\" value=\"edit\"/></div>
 ";
 }
 
 /** Pirnt the submit and reset buttons */
 function print_buttons()
 {
-  echo "<input type=\"submit\" value=\"OK\" />
-<input type=\"reset\" value=\"Reset fields\" />
+  echo "<div><input type=\"submit\" value=\"OK\" />
+<input type=\"reset\" value=\"Reset fields\" /></div>
 ";
 }
 
