@@ -1,10 +1,15 @@
 <?php
 
+include_once("$prefix/Base.php");
 /**
   @class Search Mapping between URLs, HTML forms and SQL queries.
 */
-class Search {
+class Search extends Base
+{
 
+/** Image id */
+var $imageid;
+/** String of tags */
 var $tags;
 var $userid;
 /** Tag operation. 
@@ -20,6 +25,7 @@ var $orderby;
 
 function Search()
 {
+  $this->imageid=NULL;
   $this->userid=NULL;
   $this->tags=array();
   $this->tagop=0;
@@ -29,6 +35,12 @@ function Search()
   $this->page_size=10;
   $this->page_num=0;
   $this->orderby='date';
+}
+
+function set_imageid($imageid)
+{
+  if ($imageid>0)
+    $this->imageid=$imageid;
 }
 
 function set_userid($userid)
@@ -64,14 +76,36 @@ function set_user($userid)
     $this->userid=$userid;
 }
 
+/** Convert input string to unix time. Currently only the format of YYYY-MM-DD
+ * and an integer as unix timestamp is supported.
+  @param date arbitrary date string
+  @return Unix time stamp. False on error. */
+function convert_date($date)
+{
+  if (is_numeric($date) && $date >= 0)
+    return $date;
+
+  // YYYY-MM-DD
+  if (strlen($date)==10 && strpos($date, '-')>0)
+  {
+    $s=strtr($date, '-', ' ');
+    $a=split(' ', $s);
+    $sec=mktime(0, 0, 0, $a[1], $a[2], $a[0]);
+    return $sec;
+  }
+  return false;
+}
+
 function set_date_start($start)
 {
+  $start=$this->convert_date($start);
   if ($start>0)
     $this->date_start=$start;
 }
 
 function set_date_end($end)
 {
+  $end=$this->convert_date($end);
   if ($end>0)
     $this->date_end=$end;
 }
@@ -120,6 +154,9 @@ function get_page_size()
 /** Creates a search object from a URL */
 function from_URL()
 {
+  if (isset($_REQUEST['id']))
+    $this->set_imageid($_REQUEST['id']);
+    
   if (isset($_REQUEST['user']))
     $this->set_userid($_REQUEST['user']);
     
@@ -159,6 +196,9 @@ function to_URL()
 {
   $url='';
   
+  if ($this->imageid>0)
+    $url .= '&id='.$this->imageid;
+
   if ($this->userid>0)
     $url .= '&user='.$this->userid;
 
@@ -204,6 +244,9 @@ function to_form()
 {
   $form='';
   
+  if ($this->imageid>0)
+    $form .= $this->_input('id', $this->imageid);
+
   if ($this->userid>0)
     $form .= $this->_input('user', $this->userid);
 
@@ -261,6 +304,10 @@ function _get_query_from_tags($tags, $tagop=0)
   if ($num_tags)
     $sql .= " AND i.id=t.imageid";
 
+  // handle image id
+  if ($this->imageid!=NULL)
+    $sql .= " AND i.id=".$this->imageid;
+  
   // handle user id
   if ($this->userid!=NULL)
     $sql .= " AND i.userid=".$this->userid;

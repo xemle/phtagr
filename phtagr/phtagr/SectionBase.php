@@ -5,7 +5,6 @@ include_once("$prefix/Base.php");
 class SectionBase extends Base
 {
 
-var $name;
 var $subsections;
 
 function SectionBase($name='default')
@@ -31,14 +30,14 @@ function print_content()
   echo "&nbsp;\n";
 }
 
-function print_section()
+function print_sections()
 {
   $this->div_open($this->name);
   if (count($this->subsections))
   { 
     foreach ($this->subsections as $sub)
     {
-      $sub->print_section();
+      $sub->print_sections();
     }
   }
   $this->print_content();

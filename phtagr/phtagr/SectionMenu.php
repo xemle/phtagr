@@ -10,24 +10,24 @@ var $menu;
 
 function SectionMenu()
 {
-    $this->name="menu";
+  $this->name="menu";
+  $this->menu=array();
 }
 
 function add_menu_item($item, $link)
 {
-    $this->menu[$item]=$link;
+  $this->menu[$item]=$link;
 }
 
 function print_content()
 {
-    echo "<h2>Menu</h2>\n";
-    echo "<ul>\n";
-    foreach ($this->menu as $item => $link)
-    {
-        echo "\t<li><a href=\"$link\">$item</a></li>\n";
-    }
-    echo "</ul>\n";
-    //echo "<pre>"; print_r($this->menu);echo "</pre>";
+  echo "<h2>Menu</h2>\n";
+  echo "<ul>\n";
+  foreach ($this->menu as $item => $link)
+  {
+    echo "  <li><a href=\"$link\">$item</a></li>\n";
+  }
+  echo "</ul>\n";
 }
 
 }

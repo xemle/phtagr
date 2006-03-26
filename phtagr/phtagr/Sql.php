@@ -1,11 +1,11 @@
 <?php
 
 global $prefix;
-
+include_once("$prefix/Base.php");
 /** 
   @class Sql Handles the SQL connection and queries
 */
-class Sql 
+class Sql extends Base
 {
 
 /** Prefix of tables */
@@ -119,7 +119,7 @@ function query($sql, $quiet=false)
   $result=@mysql_query($sql, $this->link);
   if (!$result && !$quiet)
   {
-    echo "<div class='error'>Could not run Query: '$sql'</div><br/>";
+    $this->error("Could not run Query: '$sql'");
     return NULL;
   }
   return $result;

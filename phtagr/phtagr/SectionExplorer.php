@@ -5,11 +5,13 @@ global $db;
 
 include_once("$prefix/SectionBody.php");
 include_once("$prefix/Search.php");
+include_once("$prefix/Edit.php");
 include_once("$prefix/image.php");
 include_once("$prefix/sync.php");
 include_once("$prefix/Sql.php");
 
-
+/** Explore the images.
+  @class Explorer */
 class SectionExplorer extends SectionBody
 {
 
@@ -18,6 +20,10 @@ function SectionExplorer()
   $this->name="explorer";
 }
 
+/** Print the page navigation bar. It prints the first, the current and the last pagest. Also a preview and a next page link. 
+  @param link Base link for pages
+  @param current Index of current page 
+  @param count Absolut count of pages*/
 function print_navigator($link, $current, $count)
 {
   if ($count<2) return;
@@ -54,21 +60,7 @@ function print_navigator($link, $current, $count)
   echo "</div>\n";
 }
 
-function print_edit()
-{
-  echo "
-<fieldset><legend>Edit</legend>
-  <table>
-    <tr><td class=\"th\">Tags:</td><td><input type=\"text\" name=\"edit_tags\" size=\"60\"/></td></tr>
-    <tr><td class=\"th\">Set:</td><td><input type=\"text\" name=\"edit_sets\" size=\"60\"/></td></tr>
-  </table>
-</fieldset>
-<input type=\"hidden\" name=\"action\" value=\"edit\"/>
-<input type=\"submit\" value=\"OK\" />
-<input type=\"reset\" value=\"Reset fields\" />
-";
-}
-
+/** Print the current page with an table */
 function print_content()
 {
   global $db;
@@ -114,12 +106,9 @@ function print_content()
   $url_nav.=$search_nav->to_URL();
   $this->print_navigator($url_nav, $page, ceil($count/$search_nav->page_size));
   
-  if ($user->is_auth())
-  {
-/* TODO when this form is enabled, you can't use the fancy
-  JS-Script from for editing a single image. What to do? */
-    echo "<form method=\"post\" action=\"index.php\">";
-  }
+  // Formular for further actions
+  echo "<form action=\"index.php\" method=\"post\">";
+
   echo "<table class=\"tableview\">\n";
   $cell=0;
   $pos=$search->get_page_size()*$search->get_page_num();
@@ -143,14 +132,13 @@ function print_content()
   echo "</table>";
 
   $this->print_navigator($url_nav, $page, ceil($count/$search_nav->page_size));
-  if ($user->is_auth())
-  {
-    echo "<input type=\"hidden\" name=\"section\" value=\"explorer\" />\n";
-    echo $search->to_form();  
-    $this->print_edit();
-    echo "</form>\n";
-  }
-
+  echo "<input type=\"hidden\" name=\"section\" value=\"explorer\" />\n";
+  echo $search->to_form();  
+  $edit=new Edit();
+  if ($user->can_edit())
+    $edit->print_edit_inputs();
+  $edit->print_buttons();
+  echo "</form>\n";
 }
 
 }

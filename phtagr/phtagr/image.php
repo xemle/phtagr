@@ -107,9 +107,70 @@ function print_mini($id)
 
 }
 
+/** Cut the caption by words. If the length of the caption is longer than 20
+ * characters, the caption will be cutted into words and reconcartenated to the
+ * length of 20.  */
+function _cut_caption($id, $caption)
+{
+  if (strlen($caption)< 60) 
+    return $caption;
+
+  $words=split(" ", $caption);
+  $result="<span id=\"$id-caption-text\">";
+  foreach ($words as $word)
+  {
+    if (strlen($result) > 40)
+      break;
+
+    $result.=" $word";
+  }
+  $b64=base64_encode($caption);
+  $result.=" <span class=\"js-button\" onclick=\"print_caption('$id', '$b64')\">[...]</span>";
+  $result.="</span>";
+  return $result;
+}
+
+/** Print the caption of an image. 
+  @param id ID of current image
+  @param caption String of the caption
+  @param docut True if a long caption will be shorted. False if the whole
+  caption will be printed. Default true */
+function print_caption($id, $caption, $docut=true)
+{
+  global $user;
+  $can_edit=$user->can_edit($id);
+  
+  echo "<div class=\"caption\" id=\"$id-caption\">";
+  // the user can not edit the image
+  if (!$can_edit)
+  {
+    if ($caption!="")
+      echo _cut_caption($id, &$caption);
+
+    echo "</div>\n";
+    return;
+  }
+  
+  // The user can edit the image
+  if ($caption != "") 
+  {
+    if ($docut=true)
+      $text=_cut_caption($id, &$caption);
+    else
+      $text=&$caption;
+    echo "$text <span class=\"js-button\" onclick=\"add_form_caption('$id', '$caption') \">[edit]</span>";
+  }
+  else
+  {
+    echo " <span onclick=\"add_form_caption('$id', '')\">Click here to add a caption</span>";
+  }
+  
+  echo "</div>\n";
+}
+
 function print_row_date($sec)
 {
-  echo "  <tr><td class=\"th\">Date:</td><td>";
+  echo "  <tr><th>Date:</th><td>";
   $date=date("Y-m-d H:i:s", $sec);
   $search_date=new Search();
   $search_date->date_start=$sec-(60*30*3);
@@ -153,8 +214,15 @@ function print_row_tags($id)
   sort($tags);
   $num_tags=count($tags);
   
-  echo "  <tr><td class=\"th\"";
-  if ($user->is_auth)
+  echo "  <tr><th>Tags:</th><td id=\"$id-tag\">";  
+
+  for ($i=0; $i<$num_tags; $i++)
+  {
+    echo "<a href=\"?section=explorer&tags=" . $tags[$i] . "\">" . $tags[$i] . "</a>";
+    if ($i<$num_tags-1)
+        echo ", ";
+  }
+  if ($user->can_edit($id))
   {
     $list='';
     for ($i=0; $i<$num_tags; $i++)
@@ -163,15 +231,7 @@ function print_row_tags($id)
       if ($i<$num_tags-1)
         $list.=" ";
     }
-    echo " onclick=\"add_form_tags('$id','$list')\"";
-  }
-  echo ">Tags:</td><td id=\"$id-tag\">";  
-  
-  for ($i=0; $i<$num_tags; $i++)
-  {
-    echo "<a href=\"?section=explorer&tags=" . $tags[$i] . "\">" . $tags[$i] . "</a>";
-    if ($i<$num_tags-1)
-        echo ", ";
+    echo " <span class=\"js-button\" onclick=\"add_form_tags('$id','$list')\">[edit]</span>";
   }
   echo "</td></tr>\n";
 }
@@ -205,19 +265,18 @@ function print_preview($id, $search=null) {
     $link.=$search->to_URL();
   echo "<a href=\"$link\"><img src=\"$thumb\" alt=\"$name\" align=\"center\"/></a>";
   
-  if ($caption != "") {
-    echo "<div class=\"description\">$caption</div>\n";
-  }
+  print_caption($id, $caption);
+  
   echo "</div>\n";  
 
   echo "<table class=\"imginfo\">\n";
-  //echo "  <tr><td class=\"th\">File:</td><td>$filename</td></tr>\n";
+  //echo "  <tr><th>File:</th><td>$filename</td></tr>\n";
   print_row_date($sec);
   
   print_row_tags($id);
-  if ($user->is_auth())
+  if ($user->can_select($id))
   {
-    echo "<tr><td class=\"th\">Select</td><td><input type=\"checkbox\" name=\"images[]\" value=\"$id\" /></td></tr>\n";
+    echo "<tr><th>Select:</th><td><input type=\"checkbox\" name=\"images[]\" value=\"$id\" /></td></tr>\n";
   }
   
   echo "</table>";

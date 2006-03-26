@@ -22,10 +22,11 @@ include "$prefix/SectionAccount.php";
 include "$prefix/SectionExplorer.php";
 include "$prefix/SectionImage.php";
 include "$prefix/SectionBrowser.php";
+include "$prefix/SectionSearch.php";
 include "$prefix/SectionSetup.php";
 include "$prefix/SectionUpload.php";
 
-$page = new PageBase();
+$page = new PageBase("page");
 
 $hdr = new SectionBase('header');
 $headerleft = new SectionHeaderLeft();
@@ -38,6 +39,7 @@ $page->add_section($hdr);
 $menu = new SectionMenu();
 $menu->add_menu_item("Home", "index.php");
 $menu->add_menu_item("Explorer", "index.php?section=explorer");
+$menu->add_menu_item("Search", "index.php?section=search");
 
 $db = new Sql();
 $db->connect();
@@ -52,15 +54,18 @@ if (!($pref=$db->read_pref()))
   return;
 }
 
-$user = new Auth();
+$user = new User();
 $user->check_session();
-if ($user->is_auth)
+if ($user->can_browse())
 {
   $menu->add_menu_item("Browser", "index.php?section=browser");
 }
-if ($user->is_auth && $user->user=='admin')
+if ($user->can_upload())
 {
   $menu->add_menu_item("Upload", "index.php?section=upload");
+}
+if ($user->is_admin())
+{
   $menu->add_menu_item("Setup", "index.php?section=setup");
 }
 
@@ -74,7 +79,7 @@ if (isset($_REQUEST['section']))
 {
   $section=$_REQUEST['section'];
     
-  if ($user->is_auth && 
+  if ($user->is_auth() && 
       $_REQUEST['section']=='account' && isset($_REQUEST['pass-section']))
   {
     $section=$_REQUEST['pass-section'];
@@ -95,18 +100,32 @@ if (isset($_REQUEST['section']))
     if($_REQUEST['action']=='edit')
     {
       $edit=new Edit();
+      $edit->execute();
+      unset($edit);
     }
     $explorer= new SectionExplorer();
     $page->add_section($explorer);
   } 
   else if($section=='image')
   {
+    if($_REQUEST['action']=='edit')
+    {
+      $edit=new Edit();
+      $edit->execute();
+      print_r($edit);
+      unset($edit);
+    }
     $image= new SectionImage();
     $page->add_section($image);
   } 
+  else if($section=='search')
+  {
+    $search= new SectionSearch();
+    $page->add_section($search);
+  } 
   else if($section=='browser')
   {
-    if ($user->is_auth()) {
+    if ($user->can_browse()) {
       $browser = new SectionBrowser();
       $browser->root='';
       $browser->path='';
@@ -120,7 +139,7 @@ if (isset($_REQUEST['section']))
   } 
   else if($section=='setup')
   {
-    if ($user->is_auth && $user->user!='admin') 
+    if ($user->is_admin()) 
     {
       $login=new SectionLogin();
       $login->message='You are not loged in as an admin';
@@ -133,7 +152,7 @@ if (isset($_REQUEST['section']))
   }
   else if($section=='upload')
   {
-    if ($user->is_auth && $user->user=='admin')
+    if ($user->can_upload())
     {
       $upload = new SectionUpload();
       $page->add_section($upload);

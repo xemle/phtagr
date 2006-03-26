@@ -2,7 +2,7 @@
 
 $prefix='./phtagr';
 
-include "$prefix/Auth.php";
+include "$prefix/User.php";
 include "$prefix/Sql.php";
 
 include "$prefix/PageBase.php";
@@ -40,9 +40,9 @@ $db = new Sql();
 $db->connect();
 error_reporting(E_ERROR | E_WARNING | E_PARSE);
   
-$user = new Auth();
-$user->user='admin';
-$user->is_auth=true;
+$user = new User();
+$user->username='admin';
+$user->_is_auth=true;
 $menu->add_menu_item("Setup", "setup.php?section=setup");
 $setup->add_section($menu);
 

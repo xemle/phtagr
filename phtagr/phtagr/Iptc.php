@@ -3,14 +3,18 @@
  Thanks to Christian Tratz, who has written a nice IPTC howto on
  http://www.codeproject.com/bitmap/iptc.asp
 */
+include_once("$prefix/Base.php");
 
 /** @class Iptc
   Reads and write IPTC tags from a given JPEG file. */
-class Iptc 
+class Iptc extends Base 
 {
 
+/** Error number. Fatal errors are less than zero. If this number is greater
+ * than zero, the error could be accepted */
+var $_errno;
 /** General error string. This field must be resettet after each operation */
-var $_error;
+var $_errmsg;
 /** array of jpg segents. This array contains the JPEG segments */
 var $_jpg;
 /** IPTC data, array of array. The IPTC tags are stored in as "r:ttt", where
@@ -24,7 +28,8 @@ function Iptc()
 {
   $this->_jpg=NULL;
   $this->iptc=NULL;
-  $this->_error='';
+  $this->_errno=0;
+  $this->_errmsg='';
   $this->_changed=false;
 }
 
@@ -34,14 +39,23 @@ function is_changed()
   return $this->_changed;
 }
 
-function get_error()
+/** Resets the error number and message for internal purpose */
+function _reset_error()
 {
-  return $this->_error;
+  $this->_errno=0;
+  $this->_errmsg='';
 }
 
-function reset_error()
+/** Returns the current error no */
+function get_errno()
 {
-  $this->_error='';
+  return $this->_errno;
+}
+
+/** Returns the current error message */
+function get_errmsg()
+{
+  return $this->_errmsg;
 }
 
 /** Reads the JPEG segments, the photoshop segments, and finally the IPTC
@@ -49,16 +63,17 @@ function reset_error()
  @return true on success. False otherwise. */
 function load_from_file($filename)
 {
+  $this->_reset_error();
   if (!is_readable($filename))
   {
-    $this->_error="$filename could not be read";
-    return false;
+    $this->_errmsg="$filename could not be read";
+    return -1;
   }
   $size=filesize($filename);
   if ($size<30)
   {
-    $this->_error="Filesize of $size is to small";
-    return false;
+    $this->_errmsg="Filesize of $size is to small";
+    return -1;
   }
   
   $this->_jpg=array();
@@ -69,23 +84,23 @@ function load_from_file($filename)
   $fp=fopen($filename, "rb");
   if ($fp==false) 
   {
-    $this->_error="Could not open file for reading";
-    return false;
+    $this->_errmsg="Could not open file for reading";
+    return -1;
   }
   $jpg['_fp']=$fp;
 
   $data=fread($fp, 2);
   if (ord($data{0})!=0xff || ord($data{1})!=0xd8)
   {
-    $this->_error="JPEG header mismatch";
+    $this->_errmsg="JPEG header mismatch";
     fclose($fp);
-    return false;
+    return -1;
   }
   
   if (!$this->_read_jpg_segs(&$jpg))
   {
     fclose($fp);
-    return false;
+    return -1;
   }
 
   if ($this->_read_ps_segs(&$jpg))
@@ -94,7 +109,7 @@ function load_from_file($filename)
   } 
   fclose($fp);
   
-  return true;
+  return 0;
 }
 
 function save_to_file()
@@ -116,7 +131,7 @@ function get_iptc()
 function is_single_record($name)
 {
   
-  if ($name='2:025') // keyword
+  if ($name=='2:025') // keyword
     return false;
   return true;
 }
@@ -129,8 +144,6 @@ function is_single_record($name)
   @return true if the iptc record changes */
 function add_record($name, $value)
 {
-  $this->_error='';
-  
   if ($value=='')
     return false;
 
@@ -148,13 +161,14 @@ function add_record($name, $value)
     return true;
   }
   
-  // Single record
+  // Single record. Remove all other records and set the new value
   if ($this->is_single_record($name))
   {
     if ($iptc[$name][0]==$value)
       return false;
 
-    $iptc[$name]=array();
+    while(count($iptc[$name]))
+      array_shift($iptc[$name]);
     array_push($iptc[$name], $value);
     $this->_changed=true;
     return true;
@@ -162,9 +176,7 @@ function add_record($name, $value)
 
   // List tags
   $key=array_search($value, $iptc[$name]);
-  //echo "<pre>";
-  //print_r($iptc[$name]);
-  //echo "\n$key</pre>\n";
+  
   if (is_int($key) && $key>=0)
     return false;
 
@@ -180,8 +192,6 @@ function add_record($name, $value)
   @return true if iptc changes */
 function add_records($name, $values)
 {
-  $this->_error='';
-  
   if (count($values)==0)
     return false;
 
@@ -201,8 +211,6 @@ function add_records($name, $values)
   @return true if the iptc changes */
 function rem_record($name, $value='')
 {
-  $this->_error='';
-  
   if (!isset($this->iptc))
   {
     return false;
@@ -223,9 +231,6 @@ function rem_record($name, $value='')
 
   // Multiple records
   $key=array_search($value, $iptc[$name]);
-  //echo "<pre>";
-  //print_r($iptc[$name]);
-  //echo "\n$key</pre>\n";
   if (is_int($key) && $key>=0)
   {
     unset($iptc[$name][$key]);
@@ -245,8 +250,6 @@ function rem_record($name, $value='')
   @return true if iptc changes */
 function rem_records($name, $values)
 {
-  $this->_error='';
-  
   if (count($values)==0)
     return false;
 
@@ -259,6 +262,17 @@ function rem_records($name, $values)
   return $changed;
 }
 
+/** Read all segments of an JPEG image until the data segment. Each JPEG
+ * segment starts with a marker of an 0xff byte followed by the segemnt type
+ * (also one byte). The segment type 0xda indicates the data segment, the real
+ * image data. If this segment is found the algorithm stops. The segment type
+ * 0xed indicates the photoshop meta data segment.  The segment size of 2 bytes
+ * is folled. The size does not include the segment marker and the segment
+ * byte.
+
+  @param jpg Pointer to the JPEG array
+  @return Return true if all segments have a correct size. The function will
+  return false on a segment start mismatch. */
 function _read_jpg_segs($jpg)
 {
   $fp=$jpg['_fp'];
@@ -272,7 +286,8 @@ function _read_jpg_segs($jpg)
     $marker=substr($hdr, 0, 2);
     if (ord($marker{0})!=0xff)
     {
-      $this->_error="Invalid jpeg segment start: ".$this->_str2hex($marker)." at $pos";
+      $this->_errno=-1;
+      $this->_errmsg="Invalid jpeg segment start: ".$this->_str2hex($marker)." at $pos";
       return false;
     }
     // size is excl. marker 
@@ -280,7 +295,7 @@ function _read_jpg_segs($jpg)
     $size=$this->_byte2short(substr($hdr, 2, 2));
     if ($pos+$size+2>$jpg['size'])
     {
-      $this->_error="Invalid segment size of $size";
+      $this->_errmsg="Invalid segment size of $size";
       return false;
     }
     $seg=array();
@@ -297,7 +312,8 @@ function _read_jpg_segs($jpg)
   return true;
 }
 
-/* Read the photoshop headers 
+/* Read the photoshop meta headers.
+ * @param jpg Pointer to the JPEG array
  * @return false on failure with an error string */
 function _read_ps_segs($jpg)
 {
@@ -319,7 +335,8 @@ function _read_ps_segs($jpg)
   // Photoshop header not found
   if ($i==count($jpg['_segs']))
   {
-    $this->_error="Photoshop header was not found";
+    $this->_errno=1;
+    $this->_errmsg="Photoshop header was not found";
     return false;
   }  
   $fp=$jpg['_fp'];
@@ -328,7 +345,8 @@ function _read_ps_segs($jpg)
   $marker=fread($fp, 14);
   if ($marker!="Photoshop 3.0\0")
   {
-    $this->_error="Wrong photoshop marker $marker";
+    $this->_errno=-1;
+    $this->_errmsg="Wrong photoshop marker $marker";
     return false;
   }
   $jpg['_app13']=array();
@@ -347,7 +365,8 @@ function _read_ps_segs($jpg)
     size: 2 bytes, excl. marker, type, padding, size
     data: length of size
     
-    padding: 1 byes=0x00 (only last 8BIM segment)
+    padding: 1 byes=0x00 (only last 8BIM segment). However, not all program
+    uses this padding.
   */
   while (true)
   {
@@ -356,14 +375,16 @@ function _read_ps_segs($jpg)
     $hdr=fread($fp, 12);
     if (strlen($hdr)!=12)
     {
-      $this->_error="Could not read PS segment header";
+      $this->_errno=-1;
+      $this->_errmsg="Could not read PS segment header";
       return false;
     }
     // size of section starting from pos: size+12
     $data['size']=$this->_byte2short(substr($hdr, 10, 2));
     if ($data['pos']+12+$data['size']>$app13['pos']+2+$app13['size'])
     {
-      $this->_error="PS segment size overflow: ".$data['size']." at ".$data['pos'];
+      $this->_errno=-1;
+      $this->_errmsg="PS segment size overflow: ".$data['size']." at ".$data['pos'];
       return false;
     }
   
@@ -372,7 +393,8 @@ function _read_ps_segs($jpg)
       break;
     if ($data['marker']!='8BIM')
     {
-      $this->_error="Wrong 8BIM marker: ".$data['marker'];
+      $this->_errno=-1;
+      $this->_errmsg="Wrong 8BIM marker: ".$data['marker'];
       return false;
     }
     $data['type']=$this->_str2hex(substr($hdr, 4, 2));
@@ -390,6 +412,7 @@ function _read_ps_segs($jpg)
 }
 
 /* Read the IPTC data from textual 8BIM segment (type 0x0404) 
+  @param jpg Pointer to the JPEG array
   @return false on failure with an error message */
 function _read_iptc_segs($jpg)
 {
@@ -407,7 +430,8 @@ function _read_iptc_segs($jpg)
   // iptc section not found
   if ($i==count($app13['_segs']))
   {
-    $this->_error="iptc section was not found";
+    $this->_errno=1;
+    $this->_errmsg="iptc section was not found";
     return false;
   }  
   $fp=$jpg['_fp'];
@@ -437,16 +461,18 @@ function _read_iptc_segs($jpg)
     $hdr=fread($fp, 5);
 
     // Header checks
-    if (ord($hdr{0})==0x00||$hdr{0}=='8')
+    if (ord($hdr{0})==0x00||ord($hdr{0})==0xff||$hdr{0}=='8')
       break;
     if (ord($hdr{0})!=0x1c)
     {
-      $this->_error="Wrong 8BIM segment start at ".$data['pos'];
+      $this->_errno=-1;
+      $this->_errmsg="Wrong 8BIM segment start at ".$data['pos'];
       break;
     }
     if (strlen($hdr)!= 5)
     {
-      $this->_error="Could not read IPTC header at ".$data['pos'];
+      $this->_errno=-1;
+      $this->_errmsg="Could not read IPTC header at ".$data['pos'];
       return false;
     }
     
@@ -454,7 +480,8 @@ function _read_iptc_segs($jpg)
     $data['size']=$this->_byte2short(substr($hdr, 3, 2));
     if ($data['pos']+5+$data['size']>$iptc['pos']+12+$iptc['size'])
     {
-      $this->_error="IPTC segment size overflow: ".$data['size']." at ".$data['pos'];
+      $this->_errno=-1;
+      $this->_errmsg="IPTC segment size overflow: ".$data['size']." at ".$data['pos'];
       return false;
     }
     $data['marker']=substr($hdr, 0, 1);
@@ -470,7 +497,7 @@ function _read_iptc_segs($jpg)
       $iptc_keys[$name]=array();
     array_push($iptc_keys[$name], $data['data']);
    
-    if ($data['pos']+5+$data['size']>=$iptc['pos']+12+$iptc['size'])
+    if ($data['pos']+5+$data['size']>=$iptc['pos']+12+$iptc['size']-1)
       break;
   }
   return true;
@@ -489,7 +516,8 @@ function add_iptc($key, $value) {
   array_push($iptc[$key], $value);
 }
 
-/** convert iptc values to 8BIM segment in bytes */
+/** convert iptc values to 8BIM segment in bytes 
+  @return Byte string of IPTC block. On failure it returns false */
 function _iptc2bytes()
 {
   if (!isset($this->iptc))
@@ -522,18 +550,27 @@ function _replace_iptc($do_rename=false)
     return false;
   $jpg=&$this->_jpg;
 
-  
   $new_iptc=$this->_iptc2bytes();
+  if ($new_iptc==false)
+    return false;
+    
   $new_iptc_len=strlen($new_iptc);
   
   $tmp=$jpg['filename'].'.tmp';
   $fout=@fopen($tmp, 'wb');
   if ($fout==false) 
   {
-    echo "<div class=\"error\">Could not write to file $tmp</div>\n";
+    $this->_errno=-1;
+    $this->_errmsg="Could not write to file $tmp";
     return false;
   }
   $fin=fopen($jpg['filename'], 'rb');
+  if (!$fin)
+  {
+    $this->_errno=-1;
+    $this->_errmsg="Could not read the file ".$jpg['filename'];
+    return false;
+  }
   
   $pos=0;
   if (!isset($jpg['_app13']))
@@ -604,16 +641,19 @@ function _replace_iptc($do_rename=false)
     rename($jpg['filename'].'.tmp', $jpg['filename']);
 }
 
+/** Converts a shor int value (16 bit) a byte sting */
 function _short2byte($i)
 {
   return chr(($i>>8)&0xff) . chr(($i)&0xff);
 }
 
+/** Convert a short byte string (2 bytes) to an integer */
 function _byte2short($short)
 {
   return ord($short{0})<<8 | ord($short{1});
 }
 
+/** Convert a sting to a hex string. This is only for debugging purpose */
 function _str2hex($string) {
   $hex = '';
   $len = strlen($string);

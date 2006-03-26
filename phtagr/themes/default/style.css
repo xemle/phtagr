@@ -37,6 +37,15 @@ a:visited {
   text-align: right;
 }
 
+.headerright > a {
+  font-size:8pt;
+}
+
+.headerright > form {
+  padding: 0;
+  margin:0;
+}
+
 .menu {
   position: relative;
   clear: both;
@@ -74,7 +83,6 @@ a:visited {
   background-color: #B3AF81;
 }
 
-
 .body {
   position: relative;
   text-align: left;
@@ -110,7 +118,7 @@ a:visited {
   text-align: center;
 }
 
-.navigator > a, .headerright > a, input, submit, reset {
+.navigator > a, input, submit, reset, textarea {
   text-decoration: none;
   font-size: 8pt;
   /*width: 12px;
@@ -139,6 +147,16 @@ a:visited {
   text-align: center;
   width: 10%;
 }
+
+.js-button {
+  text-decoration: none;
+  font-size: 8pt;
+  font-style: normal;
+  padding: 0;
+  margin: 0;
+  background-color: #D9D59C;
+}
+
 
 .tableview {
   border-spacing: 0;
@@ -176,6 +194,15 @@ td {
   vertical-align: top;
 }
 
+th {
+  font-size: 10pt;
+  vertical-align: top;
+  text-align: right;
+  color: #262626;
+  background-color: #8C8C8C;
+  width: 0;
+}
+
 .preview {
   padding: 10 10 10 10;
   margin: 10 10 10 10;
@@ -192,10 +219,14 @@ td {
   font-weight: bold;
 }
 
-.description {
+.caption {
   color: #4D4D4D;
   font-size: 10pt;
   font-style: italic;
+}
+
+.caption * td {
+  padding: 0 5 0 5;
 }
 
 .imginfo {
@@ -212,19 +243,6 @@ td {
 .imginfo * a:hover, .tags * a:hover {
   text-decoration: none;
   background-color: #B3AF81;
-}
-
-.description * td {
-  padding: 0 5 0 5;
-}
-
-.th {
-  font-size: 10pt;
-  vertical-align: top;
-  text-align: right;
-  color: #262626;
-  background-color: #8C8C8C;
-  width: 0;
 }
 
 .error {

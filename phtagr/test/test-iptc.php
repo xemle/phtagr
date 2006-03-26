@@ -4,7 +4,8 @@
  Thanks to Christian Tratz, who has written a nice IPTC howto on
  http://www.codeproject.com/bitmap/iptc.asp
 */
-include_once('../phtagr/Iptc.php');
+$prefix='../phtagr';
+include_once("$prefix/Iptc.php");
 
 $filename=$argv[1];
 

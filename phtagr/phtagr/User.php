@@ -1,5 +1,7 @@
 <?php
 
+include_once("$prefix/Base.php");
+
 /** This class handles the authentication of an user.
 
 The authentication bases on cookies and sessions. A user has to login first.
@@ -10,18 +12,18 @@ username and password of the account.
 If the session is not available, the cookie is checked for username and
 password. 
 
-@class Auth
+@class User
 */
-class Auth 
+class User extends Base
 {
 
-var $is_auth; 
+var $_is_auth; 
 var $is_logout; 
-var $user; 
-var $userid;
+var $username; 
+var $usernameid;
 var $root;
 
-function Auth()
+function User()
 {
   $this->_clear_data();
 }
@@ -29,29 +31,29 @@ function Auth()
 /** Resets all authorization data */
 function _clear_data()
 {
-  $this->is_auth=false;
+  $this->_is_auth=false;
   $this->is_logout=false;
-  $this->user='';
+  $this->username='';
   $this->userid='';
 }
 
 /** Validates a user with its password
  @return true if the password is valid */
-function _check_login($user, $password)
+function _check_login($username, $password)
 {
   global $db;
-  if ($user!='' && $password!='')
+  if ($username!='' && $password!='')
   {
     $sql="SELECT id,password 
           FROM $db->user 
-          WHERE name='$user'";
+          WHERE name='$username'";
     $result=$db->query($sql);
     if ($result)
     {
       $row = mysql_fetch_row($result);
       if ($password == $row[1]) {
-        $this->is_auth=true;
-        $this->user=$user;
+        $this->_is_auth=true;
+        $this->username=$username;
         $this->userid=$row[0];
         $this->root=$row[2];
         return true;
@@ -61,11 +63,65 @@ function _check_login($user, $password)
   return false;
 }
 
-/** 
- @return true if the user is authorized */
+/** Return true if the user is allready authenticated and logged in */
 function is_auth()
 {
-  return $this->is_auth;
+  return $this->_is_auth;
+}
+
+/** Return true if the current user is an super user and has admin rights */
+function is_admin()
+{
+  if ($this->username=="admin")
+    return true;
+  return false;
+}
+/** Return true if the user can browse the filesystem */
+function can_browse()
+{
+  if ($this->username=='admin')
+    return true;
+
+  return false;
+}
+
+/** Return true if the user can select an image */
+function can_select($imageid=-1)
+{
+  return true;
+}
+
+/** Return true if user can edit the image 
+  @param imageid Image id. Default -1.*/
+function can_edit($imageid=-1)
+{
+  if ($this->username=='admin')
+    return true;
+
+  return false;
+}
+
+/** Return true if user can upload a file in general.
+  @param size Size of current uploaded file. This size is mandatory. */
+function can_upload()
+{
+  if ($this->username=='admin')
+    return true;
+
+  return false;
+}
+
+/** Return true if user can upload a file with the given size
+  @param size Size of current uploaded file. This size is mandatory. */
+function can_upload_size($size=0)
+{
+  if (!isset($size))
+    return false;
+    
+  if ($this->username=='admin')
+    return true;
+
+  return false;
 }
 
 /** Checks if the session is valid. 
@@ -100,21 +156,21 @@ function check_session()
   }
   else if (isset($_COOKIE[$cookie]))
   {
-    list ($user, $password)=split(' ', $_COOKIE[$cookie]);
+    list ($username, $password)=split(' ', $_COOKIE[$cookie]);
     $password=base64_decode($password);
-    if ($this->_check_login($user, $password))
+    if ($this->_check_login($username, $password))
     {
-      $this->_set_session($user, $password);
+      $this->_set_session($username, $password);
       // refresh cookie
-      $this->_set_cookie($user, $password);
+      $this->_set_cookie($username, $password);
     }
   }
 }
 
 /** Sets the session parameter */
-function _set_session($user, $password)
+function _set_session($username, $password)
 {
-  $_SESSION['user']=$user;
+  $_SESSION['user']=$username;
   $_SESSION['password']=$password;
 }
 
@@ -126,11 +182,11 @@ function _remove_session()
 
 /** Sets the user and password in the cookie. The values are valid for
  one year.*/
-function _set_cookie($user, $password)
+function _set_cookie($username, $password)
 {
   global $db;
   $cookie="phtagr".$db->prefix;
-  setcookie($cookie, $user.' '.base64_encode($password), time()+31536000);   
+  setcookie($cookie, $username.' '.base64_encode($password), time()+31536000);   
 }
 
 /** Removes a cookie from the client */

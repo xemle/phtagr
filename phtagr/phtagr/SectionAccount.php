@@ -77,7 +77,7 @@ function print_login()
   /*
   if ($_REQUEST['user']!='' && $_REQUEST['password']!='')
   {
-    $user = new Auth();
+    $user = new User();
     if ($user->check_login($_REQUEST['user'], $_REQUEST['password']))
     {
       echo "Login succeed.</br>\n";

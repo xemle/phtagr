@@ -11,7 +11,7 @@ function SectionBase()
     $this->name="home";
 }
     
-function print_section()
+function print_sections()
 {
     $this->div_open('body');
     $this->div_open($this->name);

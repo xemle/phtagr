@@ -62,12 +62,11 @@ function delete_upload()
 {
   global $user;
   global $db;
-  global $prefix;
 
-  if (!$user->is_auth || $user->user!=='admin')
+  if (!$user->can_upload())
   {
-    echo "You are not allowed to perform this action!\n";
-    return FALSE;
+    $this->warning("You are not allowed to perform this action!");
+    return false;
   }
 
   $pref = $db->read_pref();
@@ -75,11 +74,11 @@ function delete_upload()
   $fullpath = $upload_dir . "/" . $user->user . "/";
   $files = glob ( $fullpath . "*");
 
-  $found = FALSE;
+  $found = false;
 
   if (count ($files ) == 0)
   {
-    return FALSE;
+    return false;
   }
   if (is_dir ($fullpath))
   {
@@ -98,7 +97,7 @@ function delete_upload()
           $tmp_name = preg_replace('/\./','_',$tmp_name);
           if (isset($_REQUEST[$tmp_name]))
           {
-            $found = TRUE;
+            $found = true;
             if (!unlink ($fullpath . $file))
             {
               /* We don't return a false, because maybe there is a
@@ -110,7 +109,7 @@ function delete_upload()
                     WHERE filename='".$fullpath . $file ."'";
             if (!$db->query($sql))
             {
-              return FALSE;
+              return false;
             }
 
             /* TODO Delete the images in the /cache folder! */
@@ -118,11 +117,11 @@ function delete_upload()
         }
       }
       if ($found)
-        return TRUE;
+        return true;
     }
   }
 
-  return FALSE;
+  return false;
 }
 
 /** Deletes a file or directory recursively
@@ -195,11 +194,11 @@ function zipfile_process($path, $filename)
       if (update_file($user->userid, $upload_name) == false)
       {
         /* If something went wrong, we try to delete as much as possible. */
-        echo "<div class=\"error\">Uploading $zip_content.</div>\n";
+        $this->error("Uploading $zip_content.");
         $this->rm_rf ($filename);
         return false;
       }
-      echo "<div class=\"success\">File $zip_content uploaded.</div>\n";
+      $this->success("File $zip_content uploaded.");
       $count++;
     }
     
@@ -208,12 +207,12 @@ function zipfile_process($path, $filename)
 
   if ($count == 0)
   {
-    echo "<div class=\"warning\">No images in $filename/images.zip found!</div>\n";
+    $this->warning("No images in $filename/images.zip found!");
   }
   
   if ($this->rm_rf ($filename) == false)
   {
-    echo "<div class=\"warning\">Cleaning up after unpacking $filename/images.zip.</div>\n";
+    $this->warning("Cleaning up after unpacking $filename/images.zip.");
     return false;
   }
   return true;
@@ -225,11 +224,10 @@ function upload_process()
 {
   global $db;
   global $user;
-  global $prefix;
  
-  if (!$user->is_auth || $user->user!='admin')
+  if (!$user->can_upload())
   {
-    echo "<div class=\"warning\">You are not allowed to upload a file.</div>\n";
+    $this->warning("You are not allowed to upload a file.");
     return false;
   }
   
@@ -242,7 +240,7 @@ function upload_process()
   {
     if (!mkdir ($path))
     {
-      echo "Couldn't create directory $path!<br>\n";
+      $this->warning("Couldn't create directory $path!");
       return false;
     }
   }
@@ -255,6 +253,12 @@ function upload_process()
     if ($_FILES['images']['error'][$i] == UPLOAD_ERR_OK) {
       $tmp_name = $_FILES["images"]["tmp_name"][$i];
       $name = $_FILES["images"]["name"][$i];
+      $size = $_FILES["images"]["size"][$i];
+      if ($user->can_upload_size($size))
+      {
+        $this->error("Could not upload file. Filesize exceeds the account");
+        return false;
+      }
       $upload_name=$this->get_upload_filename($path, $name);
 
       if (preg_match("/\.zip$/i", $upload_name))
@@ -270,7 +274,7 @@ function upload_process()
     
         chmod($upload_name, 0644);
         update_file($user->userid, $upload_name);
-        echo "<div class=\"success\">File $name uploaded.</div>\n";
+        $this->success("File $name uploaded.");
       }
     }
     else
@@ -310,7 +314,6 @@ function print_form_upload($dir)
 function print_uploaded()
 {
   global $user;
-  global $prefix;
   global $db;
 
   # Now we want to list all files, the user has already uploaded
