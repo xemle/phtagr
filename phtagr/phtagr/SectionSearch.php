@@ -21,7 +21,9 @@ function SectionSearch()
 
 function print_content()
 {
-  echo "<form action=\"index.php\" method=\"post\">
+  echo "<h2>Advanced Search</h2>
+  
+<form action=\"index.php\" method=\"post\">
 <div><input type=\"hidden\" name=\"section\" value=\"explorer\" /></div>
 <table>
   <tr>
@@ -42,7 +44,7 @@ function print_content()
     </td>
   </tr>
   <tr>
-    <th></th>
+    <td></td>
     <td><input type=\"submit\" value=\" Search \" />
         <input type=\"reset\" value=\" Cancel \" /></td>
   </tr>

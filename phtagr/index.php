@@ -139,9 +139,9 @@ if (isset($_REQUEST['section']))
   } 
   else if($section=='setup')
   {
-    if ($user->is_admin()) 
+    if (!$user->is_admin()) 
     {
-      $login=new SectionLogin();
+      $login=new SectionAccount();
       $login->message='You are not loged in as an admin';
       $login->section='setup';
       $page->add_section($login);

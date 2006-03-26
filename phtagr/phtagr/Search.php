@@ -345,11 +345,11 @@ function _get_query_from_tags($tags, $tagop=0)
       $sql .= " HAVING COUNT(i.id)=$num_tags";
       break;
     case 1:
-      //$sql .= " HAVING COUNT(image.id)>=1";
+      //$sql .= " HAVING COUNT(i.id)>=1";
       break;
     case 2:
-      $fuzzy=intval($num_pos_tags*0.7);
-      $sql .= " HAVING COUNT(i.id)>=$num_tags";
+      $fuzzy=intval($num_tags*0.75);
+      $sql .= " HAVING COUNT(i.id)>=$fuzzy";
       break;
     }
   }
