@@ -44,6 +44,17 @@ function print_content()
     </td>
   </tr>
   <tr>
+    <th>Sort by:</th>
+    <td>
+      <select name=\"orderby\">
+        <option value=\"date\">choose</option>
+        <option value=\"-date\">date asc</option>
+        <option value=\"ranking\">ranking</option>
+        <option value=\"-ranking\">ranking asc</option>
+      </select>
+    </td>
+  </tr>
+  <tr>
     <td></td>
     <td><input type=\"submit\" value=\" Search \" />
         <input type=\"reset\" value=\" Cancel \" /></td>

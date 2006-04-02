@@ -21,6 +21,7 @@ var $date_end;
 var $pos;
 var $page_size;
 var $page_num;
+/** Sort relation */
 var $orderby;
 
 function Search()
@@ -151,6 +152,19 @@ function get_page_size()
   return $this->page_size;
 }
 
+function set_orderby($orderby)
+{
+  if ($orderby=='-date' ||
+      $orderby=='ranking' ||
+      $orderby=='-ranking')
+    $this->orderby=$orderby;
+}
+
+function get_orderby()
+{
+  return $this->orderby;
+}
+
 /** Creates a search object from a URL */
 function from_URL()
 {
@@ -189,6 +203,9 @@ function from_URL()
     $this->set_page_num($_REQUEST['page']);
   if (isset($_REQUEST['pagesize']))
     $this->set_page_size($_REQUEST['pagesize']);
+  
+  if (isset($_REQUEST['orderby']))
+    $this->set_orderby($_REQUEST['orderby']);
 }
 
 /** Converts the search to a URL */
@@ -227,7 +244,10 @@ function to_URL()
     $url .= '&amp;page='.$this->page_num;
   if ($this->page_size!=10)
     $url .= '&amp;pagesize='.$this->page_size;
-  
+ 
+  if ($this->orderby!='date')
+    $url .= '&amp;orderby='.$this->orderby;
+    
   return $url;
 }
 
@@ -275,6 +295,9 @@ function to_form()
     $form .= $this->_input('page',$this->page_num);
   if ($this->page_size!=10)
     $form .= $this->_input('pagesize',$this->page_size);
+  
+  if ($this->orderby!='date')
+    $form .= $this->_input('orderby',$this->orderby);
   
   return $form;
 }
@@ -363,6 +386,12 @@ function _handle_orderby()
 {
   if ($this->orderby=='date')
     return " ORDER BY i.date DESC";
+  else if ($this->orderby=='-date')
+    return " ORDER BY i.date ASC";
+  else if ($this->orderby=='ranking')
+    return " ORDER BY i.ranking DESC";
+  else if ($this->orderby=='-ranking')
+    return " ORDER BY i.ranking ASC";
   return '';
 }
 

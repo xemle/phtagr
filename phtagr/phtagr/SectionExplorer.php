@@ -11,7 +11,7 @@ include_once("$prefix/sync.php");
 include_once("$prefix/Sql.php");
 
 /** Explore the images.
-  @class Explorer */
+  @class SectionExplorer */
 class SectionExplorer extends SectionBody
 {
 
