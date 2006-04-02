@@ -5,17 +5,17 @@ include_once("$prefix/Base.php");
 class SectionBase extends Base
 {
 
-var $subsections;
+var $sections;
 
 function SectionBase($name='default')
 {
   $this->name=$name;
-  $this->subsections=array();
+  $this->sections=array();
 }
     
 function add_section($section) 
 {
-  array_push($this->subsections, $section);
+  array_push($this->sections, $section);
 }
 
 /** Add paragraph section */
@@ -33,9 +33,9 @@ function print_content()
 function print_sections()
 {
   $this->div_open($this->name);
-  if (count($this->subsections))
+  if (count($this->sections))
   { 
-    foreach ($this->subsections as $sub)
+    foreach ($this->sections as $sub)
     {
       $sub->print_sections();
     }

@@ -1,22 +1,17 @@
 <?php
 
-include_once("$prefix/Base.php");
+include_once("$prefix/SectionBase.php");
 
-class PageBase extends Base
+class PageBase extends SectionBase
 {
 
 var $title;
-var $sections;
 
-function PageBase()
+function PageBase($title='phtagr')
 {
-  $this->title="phTagr";
-  $this->sections=array();
-}
+  $this->SectionBase($title);
 
-function add_section($section)
-{
-  array_push($this->sections, $section);
+  $this->title=$title;
 }
 
 function print_header_html()
@@ -27,25 +22,22 @@ function print_header_html()
 <html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\">\n\n";
 
   echo "<head>\n";
-  echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"themes/default/style.css\"/>\n";
   echo "<title>$this->title</title>\n";
+  echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"themes/default/style.css\"/>\n";
   echo "<script src=\"js/forms.js\" type=\"text/javascript\"></script>\n";
   echo "</head>\n\n";
 }
 
 function print_footer_html()
 {
-  echo "</html>";
+  echo "</html>\n";
 }
 
 function layout()
 {
   $this->print_header_html();
   echo "<body>\n";
-  foreach ($this->sections as $section)
-  {
-    $section->print_sections();
-  }
+  $this->print_sections();
   echo "</body>\n";
   $this->print_footer_html();
 }
