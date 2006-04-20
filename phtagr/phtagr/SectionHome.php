@@ -2,7 +2,7 @@
 
 global $prefix;
 include_once("$prefix/SectionBody.php");
-include_once("$prefix/image.php");
+include_once("$prefix/Image.php");
 
 /**
   @class SectionHome Prints the initial page with tags and popular images.

@@ -4,8 +4,7 @@ global $prefix;
 global $db;
 
 include_once("$prefix/SectionBody.php");
-include_once("$prefix/image.php");
-include_once("$prefix/sync.php");
+include_once("$prefix/Image.php");
 include_once("$prefix/Sql.php");
 
 

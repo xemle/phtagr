@@ -4,7 +4,7 @@ global $prefix;
 
 include_once("$prefix/SectionBody.php");
 include_once("$prefix/SectionAccount.php");
-include_once("$prefix/image.php");
+include_once("$prefix/Image.php");
 
 class SectionSetup extends SectionBody
 {
