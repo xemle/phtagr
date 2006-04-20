@@ -4,6 +4,7 @@ global $prefix;
 
 include_once("$prefix/SectionBody.php");
 include_once("$prefix/SectionAccount.php");
+include_once("$prefix/image.php");
 
 class SectionSetup extends SectionBody
 {
@@ -111,12 +112,12 @@ function init_tables()
   global $db;
 
   // image cache
-  $sql="INSERT $db->pref (name, value) VALUES('cache', '$dir/cache')";
+  $sql="INSERT $db->pref (userid, name, value) VALUES(0, 'cache', '$dir/cache')";
   $result=$db->query($sql);
   if (!$result) return false;
 
   // upload dir
-  $sql="INSERT $db->pref (name, value) VALUES('upload_dir', '$dir/data')";
+  $sql="INSERT $db->pref (userid, name, value) VALUES(0, 'upload_dir', '$dir/data')";
   $result=$db->query($sql);
   if (!$result) return false;
   
@@ -165,7 +166,7 @@ function print_stage_db()
 </table>
 </fieldset>
 
-<input type=\"submit\" value=\"OK\" /><input type=\"reset\" value=\"Reset\" />
+<input type=\"submit\" value=\"OK\" />&nbsp;&nbsp;<input type=\"reset\" value=\"Reset\" />
 
 ";
   $this->info("The data will be stored in the directory ".getcwd()."/phtagr.
@@ -243,6 +244,61 @@ function setup_upload()
   echo "</form>\n";
 }
 
+/** Synchronize files between the database and the filesystem. If a file not
+ * exists delete its data. If a file is newer since the last update, update its
+ * data. */
+function sync_files()
+{
+  global $db;
+
+  echo "<h3>Synchronize image data...</h3>\n";
+
+  $this->info("This operation may take some time");
+  
+  $sql="SELECT id,filename
+        FROM $db->image";
+  $result=$db->query($sql);
+  if (!$result)
+    return;
+    
+  $updated=0;
+  $deleted=0;
+  while ($row=mysql_fetch_row($result))
+  {
+    $id=$row[0];
+    $filename=$row[1];
+
+    if (!file_exists($filename))
+    {
+      $this->delete_image_data($id,$filename);
+      $deleted++;
+    }
+    else 
+    {
+      $image=new Image($id);
+      if ($image->update())
+        $updated++;
+      unset($image);
+    }
+  }
+  $this->p("All images are now synchronized. $deleted images are delted. $updated images are updated.");
+}
+
+/** Deletes a file from the database */
+function delete_image_data($id, $file)
+{
+  global $db;
+  echo "<div class='warning'>File '$file' does not exists. Deleting its data form database</div>\n";
+  $sql="DELETE FROM $db->tag 
+        WHERE imageid=$id";
+  $result = $db->query($sql);
+
+  $sql="DELETE FROM $db->image 
+        WHERE id=$id";
+  $result = $db->query($sql);
+}
+
+
 function print_content()
 {
   global $db;
@@ -257,11 +313,11 @@ function print_content()
   else if ($action=='init')
   {
     $this->exec_stage_db();
-    $this->stage++;
+    $this->stage=1;
   }
   else if ($action=='sync')
   {
-    sync_files();   
+    $this->sync_files();   
   }
   else if ($action=='delete_images')
   {

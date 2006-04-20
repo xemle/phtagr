@@ -344,24 +344,30 @@ function print_uploaded()
     {
       while (($file = readdir($dh)) !== false)
       {
-        if ($file !== '.' && $file !== '..' && !is_dir($file))
+        if ($file != '.' && 
+            $file != '..' && 
+            !is_dir($file) && 
+            file_exists($fullpath.$file))
         {
-          $sql = "SELECT id FROM ".$db->image."
-                  WHERE filename='". $fullpath . $file . "'";
-          $result = $db->query($sql);
-          $v = mysql_fetch_array ($result, MYSQL_ASSOC);
+          $image=new Image(-1);
+          if (!$image->init_by_filename($fullpath.$file))
+            continue;
 
           echo "    <tr>\n";
           echo "      <td align=\"center\" width=\"5\"><input type=\"checkbox\" name=\"".$file."\" /></td>\n";
           echo "      <td align=\"center\">\n";
-          echo print_mini($v['id']) . "</td>\n";
+          
+          $src=$image->create_mini();
+          echo "<img src=\"$src\">";
+          echo "</td>\n";
           echo "      <td align=\"center\">$file</td>\n";
           echo "      <td align=\"right\">"
-             . $this->get_readable_size ( filesize($fullpath . $file) ) 
+             . $this->get_readable_size ( $image->get_bytes() ) 
              . " Bytes</td>\n";
           echo "<td><div class=\"headerright\"><a href='./index.php?section=upload&delete_upload=&".urlencode($file)."=on'>Delete</a></div></td>\n";
           echo "    </tr>\n";
-          $file_size_sum += filesize($fullpath . $file) ;
+          $file_size_sum += $image->get_bytes() ;
+          unset($image);
         }
       }
       echo "    <tr>\n";

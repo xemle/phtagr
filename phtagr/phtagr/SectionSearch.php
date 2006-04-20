@@ -51,6 +51,8 @@ function print_content()
         <option value=\"-date\">date asc</option>
         <option value=\"ranking\">ranking</option>
         <option value=\"-ranking\">ranking asc</option>
+        <option value=\"newest\">newest</option>
+        <option value=\"-newest\">newest desc</option>
       </select>
     </td>
   </tr>
@@ -58,7 +60,7 @@ function print_content()
     <th>Page size:</th>
     <td>
       <select name=\"pagesize\">
-        <option>choose</option>
+        <option value=\"0\">choose</option>
         <option value=\"10\">10</option>
         <option value=\"20\">20</option>
         <option value=\"50\">50</option>

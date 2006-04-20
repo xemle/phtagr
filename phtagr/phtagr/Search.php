@@ -139,6 +139,9 @@ function get_page_num()
 
 function set_page_size($size)
 {
+  if (!is_numeric($size))
+    return;
+
   if ($size<1)
     $size=2;
   if ($size>250)
@@ -156,7 +159,9 @@ function set_orderby($orderby)
 {
   if ($orderby=='-date' ||
       $orderby=='ranking' ||
-      $orderby=='-ranking')
+      $orderby=='-ranking' ||
+      $orderby=='newest' ||
+      $orderby=='-newest' )
     $this->orderby=$orderby;
 }
 
@@ -392,6 +397,10 @@ function _handle_orderby()
     return " ORDER BY i.ranking DESC";
   else if ($this->orderby=='-ranking')
     return " ORDER BY i.ranking ASC";
+  else if ($this->orderby=='newest')
+    return " ORDER BY i.created DESC";
+  else if ($this->orderby=='-newest')
+    return " ORDER BY i.created ASC";
   return '';
 }
 

@@ -42,8 +42,7 @@ $menu->add_menu_item("Explorer", "index.php?section=explorer");
 $menu->add_menu_item("Search", "index.php?section=search");
 
 $db = new Sql();
-$db->connect();
-if (!($pref=$db->read_pref()))
+if (!$db->connect())
 {
   echo "It looks as if phtagr is not completely configured.\n";
   echo "Please follow <a href=\"./setup.php?action=install\">\n";
@@ -56,6 +55,9 @@ if (!($pref=$db->read_pref()))
 
 $user = new User();
 $user->check_session();
+
+$pref=$db->read_pref($user->get_userid());
+
 if ($user->can_browse())
 {
   $menu->add_menu_item("Browser", "index.php?section=browser");
@@ -79,13 +81,13 @@ if (isset($_REQUEST['section']))
 {
   $section=$_REQUEST['section'];
     
-  if ($user->is_auth() && 
+  if ($user->is_member() && 
       $_REQUEST['section']=='account' && isset($_REQUEST['pass-section']))
   {
     $section=$_REQUEST['pass-section'];
   } 
 
-  if ($user->is_logout)
+  if ($_REQUEST['section']=='account' && $_REQUEST['action']=='logout')
   {
     $section='home';
   }
@@ -176,8 +178,11 @@ if (isset($_REQUEST['section']))
 $footer = new SectionFooter();
 $page->add_section($footer);
 
-//print_r($_SESSION);
-
 $page->layout();
 
+/*
+echo "<pre>";
+print_r($_SESSION);
+echo "</pre>\n";
+*/
 ?>

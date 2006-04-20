@@ -76,18 +76,7 @@ function print_navigation($search)
   echo "</tr></table>\n</div>\n";
 }
 
-/** Convert the SQL time string to unix time stamp. 
-  @param string The time string has the format like "2005-04-06 09:24:56", the
-  result is 1112772296 
-  @return Unix time in seconds */
-function _sqltime2unix($string)
-{
-  $s=strtr($string, ":", " ");
-  $s=strtr($s, "-", " ");
-  $a=split(' ', $s);
-  $time=mktime($a[3],$a[4],$a[5],$a[1],$a[2],$a[0]);
-  return $time;
-}
+
 
 function print_content()
 {
@@ -103,64 +92,40 @@ function print_content()
     return;
  
   $id=$_REQUEST['id'];
+  $image=new Image($id);
   
-  $sql="SELECT *         
-        FROM $db->image
-        WHERE id=$id";
+  $preview=$image->create_preview();
+  $name=$image->get_name();
   
-  $result = $db->query($sql);
-  if (!$result)
-  {
-    return;
-  }
-  
-
-  if (mysql_num_rows($result)==0)
-  {
-    $this->warning("Could not find image with id $id");
-    return;
-  }
-  
-  $v=mysql_fetch_array($result, MYSQL_ASSOC);
-
-  $sec=$this->_sqltime2unix($v['synced']); 
-  $preview=create_preview($v['id'], $v['userid'], $v['filename'], $sec);
-  
-  echo "<h3>${v['name']}</h3>\n";
-  echo "<p><img src=\"$preview\" alt=\"${v['name']}\" /></p>\n";
-  if ($user->can_edit($v['id']))
+  echo "<h3>$name</h3>\n";
+  echo "<p><img src=\"$preview\" alt=\"$name\" /></p>\n";
+  if ($user->can_edit(&$image))
   {
     echo "<form action=\"index.php\" method=\"post\">\n";
     echo "<input type=\"hidden\" name=\"section\" value=\"image\" />\n";
     echo "<input type=\"hidden\" name=\"action\" value=\"edit\" />\n";
     echo $search->to_form();
   } 
-  print_caption($v['id'], $v['caption'], false);
+  $image->print_caption(false);
   echo "<table class=\"imginfo\">\n";
   
-  $ranking=0+strtr($v['ranking'], 'E', 'e');
-  echo "  <tr><th>Clicks:</th><td>${v['clicks']}"
+  $ranking=0+strtr($image->get_ranking(), 'E', 'e');
+  echo "  <tr><th>Clicks:</th><td>".$image->get_clicks()
     ." (Ranking: $ranking)</td></tr>\n";
 
-  $sec=$this->_sqltime2unix($v['date']); 
-  print_row_date($sec);
-  print_row_tags($v['id']);
+  $sec=$image->get_date(true);
+  $image->print_row_date($sec);
+  $image->print_row_tags();
   echo "</table>\n";
 
-  if ($user->can_edit($v['id']))
+  if ($user->can_edit(&$image))
     echo "</form>\n";
 
+  if (!isset($_SESSION['img_viewed'][$id]))
+    $image->update_ranking();
 
-  $ranking=0.8*$ranking+500/(1+time()-$this->_sqltime2unix($v['lastview']));
-  $sql="UPDATE $db->image 
-        SET ranking=$ranking 
-        WHERE id=".$v['id'];
-  $result = $db->query($sql);
-  $sql="UPDATE $db->image 
-        SET clicks=clicks+1, lastview=NOW() 
-        WHERE id=$id";
-  $result = $db->query($sql);
-  
+  $_SESSION['img_viewed'][$id]++;
+
   $this->print_navigation($search);
  
 }

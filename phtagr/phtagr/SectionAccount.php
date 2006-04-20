@@ -33,11 +33,14 @@ function create_user($name, $password)
     $this->error("Username '$name' is already taken");
     return false;
   }
-  $sql="insert into ".$db->prefix."user (name, password, email) values ('$name', '$password', 'email')";
+  $sql="INSERT INTO 
+        $db->user ( 
+          name, password, email
+        ) VALUES (
+          '$name', '$password', 'email'
+        )";
   if (!$db->query($sql))
-  {
     return false;
-  }
 
   return true;
 }

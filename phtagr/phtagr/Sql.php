@@ -2,6 +2,7 @@
 
 global $prefix;
 include_once("$prefix/Base.php");
+
 /** 
   @class Sql Handles the SQL connection and queries
 */
@@ -12,10 +13,12 @@ class Sql extends Base
 var $prefix; 
 /** Table name of users */
 var $user;
+var $group;
 /** Tablename of images */
 var $image;
 /** Tablename of tags */
 var $tag;
+var $set;
 /** Table name of preferences */
 var $pref;
 
@@ -52,9 +55,11 @@ function read_config($config='')
   }
   fclose($f);
   $this->prefix=$data['db_prefix'];
-  $this->tag=$data['db_prefix']."tag";
-  $this->image=$data['db_prefix']."image";
   $this->user=$data['db_prefix']."user";
+  $this->group=$data['db_prefix']."groups";
+  $this->image=$data['db_prefix']."image";
+  $this->tag=$data['db_prefix']."tag";
+  $this->set=$data['db_prefix']."sets";
   $this->pref=$data['db_prefix']."pref";
 
   return $data;
@@ -62,7 +67,7 @@ function read_config($config='')
 
 /** Connect to the sql database 
   @param config Optional filename of configruation file
-  @return true on success */
+  @return true on success, false otherwise */
 function connect($config='')
 {
   $data=$this->read_config($config);
@@ -126,21 +131,38 @@ function query($sql, $quiet=false)
 }
 
 /** Read the global preferences from the sql database */
-function read_pref()
+function read_pref($userid=-1)
 {
-  $sql="SELECT * FROM $this->pref";
+  // read global preferences first
+  $sql="SELECT * 
+        FROM $this->pref
+        WHERE userid=0";
   $result=$this->query($sql);
   if (!$result)
     return NULL;
 
   $pref=array();
-  while($row = mysql_fetch_row($result)) {
-    $pref[$row[0]]=$row[1];
+  while($row = mysql_fetch_array($result, MYSQL_ASSOC)) {
+    $pref[$row['name']]=$row['value'];
   }
+  
+  // read user preferences
+  $sql="SELECT * 
+        FROM $this->pref
+        WHERE userid=$userid";
+  $result=$this->query($sql);
+  if ($result)
+  {
+    while($row = mysql_fetch_array($result, MYSQL_ASSOC)) {
+      $pref[$row['name']]=$row['value'];
+    }
+  }
+  
   return $pref;
 }
 
-// This function will be used later
+// This function will be used later for a three table version of 
+// img->imgtab<-tag
 /* * Gets the tag id of a tag name 
   @param tagname name of the tag
   @param create If the tag name does not exists and this flag is true, the tag
@@ -169,25 +191,32 @@ function create_tables()
 { 
   $sql="CREATE TABLE ".$this->prefix."image (
         id            INT NOT NULL AUTO_INCREMENT,
-        filename      TEXT NOT NULL,
-        synced        DATETIME,
         userid        INT NOT NULL,
         groupid       INT NOT NULL,
-        acl           TINYINT UNSIGNED,
+        synced        DATETIME,           /* syncing time between image and the
+                                             database */
+        created       DATETIME,           /* insert time of the image */
+        filename      TEXT NOT NULL,
+        bytes         INT NOT NULL,       /* size of image in bytes */
+        is_upload     TINYINT UNSIGNED,   /* 0=local, 1=upload */
+        gacl          TINYINT UNSIGNED,   /* group access control list */
+        oacl          TINYINT UNSIGNED,   /* other access control list */
+        aacl          TINYINT UNSIGNED,   /* all access control list */
+        
         name          VARCHAR(128),
-        date          DATETIME,
-        size          INT NOT NULL,
+        date          DATETIME,           /* date of image */
         width         INT UNSIGNED,
         height        INT UNSIGNED,
         orientation   TINYINT,
-        camera        VARCHAR(128),
         caption       TEXT,
-        clicks        INT NOT NULL,
-        lastview      DATETIME,
-        ranking       FLOAT DEFAULT 0,
+
+        clicks        INT DEFAULT 0,      /* count of detailed view */
+        lastview      DATETIME,           /* last time of detailed view */
+        ranking       FLOAT DEFAULT 0,    /* image ranking */
         
         INDEX(date),
         INDEX(ranking),
+        INDEX(aacl),
         PRIMARY KEY(id))";
   if (!$this->query($sql)) { return false; }
 
@@ -198,18 +227,39 @@ function create_tables()
         INDEX(name))";
   if (!$this->query($sql)) { return false; }
   
+  // 'set' is a reserved word
+  $sql="CREATE TABLE ".$this->prefix."sets (
+        imageid       INT NOT NULL,
+        name          VARCHAR(64) NOT NULL,
+        
+        INDEX(name))";
+  if (!$this->query($sql)) { return false; }
+  
   $sql="CREATE TABLE ".$this->prefix."user (
         id            INT NOT NULL AUTO_INCREMENT,
         name          VARCHAR(32) NOT NULL,
         password      VARCHAR(32),
+        
         surname       VARCHAR(32),
         forname       VARCHAR(32),
         email         VARCHAR(64),
+        
         created       DATETIME,
         updated       TIMESTAMP,
         login         TIMESTAMP,
         fsroot        TEXT DEFAULT '',
+        quota         INT,
+        quota_interval INT,
 
+        PRIMARY KEY(id))";
+  if (!$this->query($sql)) { return false; }
+  
+  // 'group' is a reserved word
+  $sql="CREATE TABLE ".$this->prefix."groups (
+        id            INT NOT NULL AUTO_INCREMENT,
+        name          VARCHAR(32) NOT NULL,
+        userid        INT,
+        
         PRIMARY KEY(id))";
   if (!$this->query($sql)) { return false; }
      
@@ -221,14 +271,12 @@ function create_tables()
   if (!$this->query($sql)) { return false; }
   */
   $sql="CREATE TABLE ".$this->prefix."pref (
+        userid        INT NOT NULL,
         name          VARCHAR(64),
-        value         VARCHAR(192))";
+        value         VARCHAR(192),
+        
+        INDEX(userid))";
   if (!$this->query($sql)) { return false; }
-
-  # We also set up the default directory for uploads
-  $sql="INSERT INTO ".$this->prefix."pref
-        VALUES ('upload_dir', '/phtagr_upload')";
-  if (!$this->query($sql)) { return false; }	
 
   return true;
 }
@@ -236,7 +284,7 @@ function create_tables()
 /** Deletes all tabels used by the phtagr instance */
 function delete_tables()
 {
-  $sql="DROP TABLE $this->image,$this->user,$this->tag,$this->pref";
+  $sql="DROP TABLE $this->image,$this->user,$this->group,$this->tag,$this->set,$this->pref";
   if (!$this->query($sql)) { return false; }
   return true;
 }
@@ -247,6 +295,8 @@ function delete_images()
   $sql="DELETE FROM $this->image";
   if (!$this->query($sql)) { return false; }
   $sql="DELETE FROM $this->tag";
+  if (!$this->query($sql)) { return false; }
+  $sql="DELETE FROM $this->set";
   if (!$this->query($sql)) { return false; }
   return true;
 }

@@ -2,6 +2,7 @@
 
 global $prefix;
 include_once("$prefix/SectionBody.php");
+include_once("$prefix/image.php");
 
 /**
   @class SectionHome Prints the initial page with tags and popular images.
@@ -36,7 +37,10 @@ function print_all_tags() {
   
   echo "<div class=\"tags\"><p>Popular tags:</p>\n\n<p>";
   // best of tags
-  $sql="select name,COUNT(name) as hits from $db->tag group by name order by hits desc limit 0,50";
+  $sql="SELECT name,COUNT(name) AS hits 
+        FROM $db->tag 
+        GROUP BY name 
+        ORDER BY hits DESC LIMIT 0,50";
   $result = $db->query($sql);
   $tags=array();
   $hits=array();
@@ -83,7 +87,7 @@ function print_popular_images()
     
   // select top 1% of images
   $sql="SELECT id
-        FROM $db->image AS i
+        FROM $db->image
         ORDER BY ranking DESC
         LIMIT 0,$count";
   $result=$db->query($sql);
@@ -102,7 +106,14 @@ function print_popular_images()
   foreach ($ids as $id)
   {
     echo "  <td>";
-    print_mini($id);
+    $image=new Image($id);
+    $src=$image->create_mini();
+    if ($src)
+    {
+      $name=$image->get_name();
+      echo "<a href=\"index.php?section=image&amp;id=$id\"><img src=\"$src\" alt=\"$name\" /></a>";
+    }    
+    unset($image);
     echo "</td>\n";
   }
   echo "</tr>\n</table>\n";

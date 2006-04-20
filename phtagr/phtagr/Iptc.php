@@ -46,7 +46,10 @@ function _reset_error()
   $this->_errmsg='';
 }
 
-/** Returns the current error no */
+/** Returns the current error no
+  @return A fatal error has an error number less than zero. Error which are
+  greater than zero are informational. 
+  @see get_errmsg() */
 function get_errno()
 {
   return $this->_errno;
@@ -128,7 +131,7 @@ function get_iptc()
 }
 
 /** Return, if the record occurs only one time */
-function is_single_record($name)
+function _is_single_record($name)
 {
   
   if ($name=='2:025') // keyword
@@ -162,7 +165,7 @@ function add_record($name, $value)
   }
   
   // Single record. Remove all other records and set the new value
-  if ($this->is_single_record($name))
+  if ($this->_is_single_record($name))
   {
     if ($iptc[$name][0]==$value)
       return false;
@@ -204,7 +207,31 @@ function add_records($name, $values)
   return $changed;
 }
 
-/** Remove iptc value 
+/** Return an single value of a given record name
+  @return Returns NULL if no record is available. */
+function get_record($name)
+{
+  if (!$this->_is_single_record($name))
+    return NULL;
+    
+  if (isset($this->iptc) && isset($this->iptc[$name]))
+    return $this->iptc[$name][0];
+  return NULL;
+}
+
+/** Return an array of a given record name
+  @return Returns NULL if no record is available. */
+function get_records($name)
+{
+  if ($this->_is_single_record($name))
+    return NULL;
+    
+  if (isset($this->iptc) && isset($this->iptc[$name]))
+    return $this->iptc[$name];
+  return NULL;
+}
+
+/** Remove an record with an optional value for multi records
   @param name Name of IPTC record
   @param value Value of IPTC record. If this is an empty string, the record
   will be removed, especially whole multiple records.
@@ -222,7 +249,7 @@ function rem_record($name, $value='')
   }
   
   // Single tags
-  if ($this->is_single_record($name) || $value=='')
+  if ($this->_is_single_record($name) || $value=='')
   {
     unset($iptc[$name]);
     $this->_changed=true;

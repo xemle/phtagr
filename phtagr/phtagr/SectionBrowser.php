@@ -2,6 +2,7 @@
 
 global $prefix;
 include_once("$prefix/SectionBody.php");
+include_once("$prefix/image.php");
 
 class SectionBrowser extends SectionBody
 {
@@ -157,11 +158,26 @@ function print_content()
     printf ("Found %d images<br/>\n", count($this->images));
     foreach ($this->images as $img)
     {
-      $return=update_file($user->userid, $this->root . $img);
-      if ($return==1)
+      $image=new Image();
+      $return=$image->insert($this->root . $img, 0);
+      switch ($return)
+      {
+      case 0:
+        echo "Image '$img' was successfully inserted.<br/>\n";
+        break;
+      case 1:
         echo "Image '$img' was updated.<br/>\n";
+        break;
+      case 2:
+        echo "Image '$img' is already the database.<br/>\n";
+        break;
+      default:
+        echo "A error occured with file '$img'.<br/>\n";
+      }
+
+      unset($image);
     }
-    echo "<a href=\"./index.php?section=browser&amp;cd=$this->path\">Search again</a><br/>\n";
+    echo "<a href=\"./index.php?section=browser&amp;cd=".$_REQUEST['cd']."\">Search again</a><br/>\n";
   } else if (isset($_REQUEST['cd'])) 
   {
     $this->path=$_REQUEST['cd'];

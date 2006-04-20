@@ -119,7 +119,8 @@ function print_content()
     }
     echo "<td class=\"preview\">";
     $search->set_pos($pos);
-    print_preview($row[0], $search);
+    $image=new Image($row[0]);
+    $image->print_preview(&$search);
     echo "</td>\n\n";
     
     if ($cell % 2 == 1) {
