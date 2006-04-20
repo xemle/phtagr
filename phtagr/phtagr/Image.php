@@ -155,7 +155,7 @@ function update()
   $sql="UPDATE $db->image 
         SET synced=NOW()
         WHERE id=".$this->get_id();
-  $result=$db->query($db);
+  $result=$db->query($sql);
   if ($result)
     return true;
 }

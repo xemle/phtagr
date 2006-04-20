@@ -261,13 +261,15 @@ function sync_files()
   if (!$result)
     return;
     
+  $count=0;
   $updated=0;
   $deleted=0;
   while ($row=mysql_fetch_row($result))
   {
     $id=$row[0];
     $filename=$row[1];
-
+    $count++;
+    
     if (!file_exists($filename))
     {
       $this->delete_image_data($id,$filename);
@@ -281,7 +283,7 @@ function sync_files()
       unset($image);
     }
   }
-  $this->p("All images are now synchronized. $deleted images are delted. $updated images are updated.");
+  $this->p("All $count images are now synchronized. $deleted images are deleted. $updated images are updated.");
 }
 
 /** Deletes a file from the database */
