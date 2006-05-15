@@ -136,7 +136,7 @@ function execute()
     {
       $iptc->save_to_file();
       $image=new Image($id);
-      $image->update_iptc();
+      $image->update();
       unset($image);
       if ($this->_check_iptc_error(&$iptc))
         return false;

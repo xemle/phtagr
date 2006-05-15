@@ -808,7 +808,7 @@ function print_preview($search=null)
   echo "</div>\n";  
 
   echo "<table class=\"imginfo\">\n";
-  //echo "  <tr><th>File:</th><td>$filename</td></tr>\n";
+  echo "  <tr><th>File:</th><td>".$this->get_filename()."</td></tr>\n";
   $this->print_row_date();
   
   $this->print_row_tags();
