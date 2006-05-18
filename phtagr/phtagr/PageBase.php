@@ -16,6 +16,8 @@ function PageBase($title='phtagr')
 
 function print_header_html()
 {
+  $theme="default";
+  
   echo "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>
 <!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"
   \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">
@@ -23,7 +25,11 @@ function print_header_html()
 
   echo "<head>\n";
   echo "<title>$this->title</title>\n";
-  echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"themes/default/style.css\"/>\n";
+  echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"themes/$theme/style.css\"/>\n";
+  if (file_exists("themes/$theme/favicon.ico"))
+  {
+    echo "<link rel=\"shortcut icon\" type=\"image/x-icon\" href=\"themes/$theme/favicon.ico\" />\n"; 
+  }
   echo "<script src=\"js/forms.js\" type=\"text/javascript\"></script>\n";
   echo "</head>\n\n";
 }
