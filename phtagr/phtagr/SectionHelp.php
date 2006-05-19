@@ -1,9 +1,9 @@
 <?php
 
 global $prefix;
-include_once("$prefix/SectionBody.php");
+include_once("$prefix/SectionBase.php");
 
-class SectionHelp extends SectionBody
+class SectionHelp extends SectionBase
 {
 
 

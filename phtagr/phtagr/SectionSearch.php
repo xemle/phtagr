@@ -3,13 +3,13 @@
 global $prefix;
 global $db;
 
-include_once("$prefix/SectionBody.php");
+include_once("$prefix/SectionBase.php");
 include_once("$prefix/Search.php");
 include_once("$prefix/Edit.php");
 include_once("$prefix/Sql.php");
 
 
-class SectionSearch extends SectionBody
+class SectionSearch extends SectionBase
 {
 
 function SectionSearch()

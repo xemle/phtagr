@@ -3,12 +3,12 @@
 global $prefix;
 global $db;
 
-include_once("$prefix/SectionBody.php");
+include_once("$prefix/SectionBase.php");
 include_once("$prefix/Image.php");
 include_once("$prefix/Sql.php");
 
 
-class SectionImage extends SectionBody
+class SectionImage extends SectionBase
 {
 
 function SectionImage()

@@ -2,11 +2,11 @@
 
 global $prefix;
 
-include_once("$prefix/SectionBody.php");
+include_once("$prefix/SectionBase.php");
 include_once("$prefix/User.php");
 include_once("$prefix/Sql.php");
 
-class SectionUpload extends SectionBody
+class SectionUpload extends SectionBase
 {
 
 function SectionUpload()

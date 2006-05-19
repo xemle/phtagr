@@ -7,7 +7,7 @@ class Base
 
 function div_open($css_class)
 {
-  echo "<div class=\"$css_class\">";
+  echo "<div class=\"$css_class\">\n";
 }
 
 function div_close()
@@ -49,7 +49,7 @@ function success($message)
 
 function comment($message)
 {
-  echo "<-- $message -->\n";
+  echo "<!-- $message -->\n";
 }
 
 /** Prints an object by print_r. This function should be used for debug only 

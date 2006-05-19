@@ -795,7 +795,7 @@ function print_preview($search=null)
   $id=$this->get_id();
   $name=$this->get_name();
   
-  echo "\n<div class=\"file\">$name</div>\n";
+  echo "\n<div class=\"name\">$name</div>\n";
   echo "<div class=\"thumb\">&nbsp;";
   
   $link="index.php?section=image&amp;id=$id";

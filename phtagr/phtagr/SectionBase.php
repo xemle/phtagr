@@ -26,8 +26,7 @@ function p($text)
 
 function print_content()
 {
-  // add dummy text
-  echo "&nbsp;\n";
+  return;
 }
 
 function print_sections()
@@ -42,6 +41,7 @@ function print_sections()
   }
   $this->print_content();
   $this->div_close();
+  $this->comment("end of $this->name");
   echo "\n";
 }
 

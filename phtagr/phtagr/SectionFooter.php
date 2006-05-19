@@ -7,9 +7,9 @@ class SectionFooter extends SectionBase
 {
 
 
-function SectionFooter()
+function SectionFooter($title="footer")
 {
-    $this->name="footer";
+    $this->name=$title;
 }
 
 function print_content()

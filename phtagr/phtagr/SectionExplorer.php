@@ -3,7 +3,7 @@
 global $prefix;
 global $db;
 
-include_once("$prefix/SectionBody.php");
+include_once("$prefix/SectionBase.php");
 include_once("$prefix/Search.php");
 include_once("$prefix/Edit.php");
 include_once("$prefix/Image.php");
@@ -11,7 +11,7 @@ include_once("$prefix/Sql.php");
 
 /** Explore the images.
   @class SectionExplorer */
-class SectionExplorer extends SectionBody
+class SectionExplorer extends SectionBase
 {
 
 function SectionExplorer()

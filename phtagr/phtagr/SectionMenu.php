@@ -10,7 +10,7 @@ var $menu;
 
 function SectionMenu()
 {
-  $this->name="menu";
+  $this->SectionBase("menu");
   $this->menu=array();
 }
 

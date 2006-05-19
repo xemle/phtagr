@@ -2,11 +2,11 @@
 
 global $prefix;
 
-include_once("$prefix/SectionBody.php");
+include_once("$prefix/SectionBase.php");
 include_once("$prefix/SectionAccount.php");
 include_once("$prefix/Image.php");
 
-class SectionSetup extends SectionBody
+class SectionSetup extends SectionBase
 {
 
 var $stage=0;

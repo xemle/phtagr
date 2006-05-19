@@ -36,6 +36,8 @@ $hdr->add_section(& $headerright);
 
 $page->add_section($hdr);
 
+$body = new SectionBase("body");
+
 $menu = new SectionMenu();
 $menu->add_menu_item("Home", "index.php");
 $menu->add_menu_item("Explorer", "index.php?section=explorer");
@@ -50,7 +52,7 @@ if (!$db->connect())
   $footer = new SectionFooter();
   $page->add_section($footer);
   $page->layout();
-  return;
+  exit;
 }
 
 $user = new User();
@@ -68,6 +70,7 @@ if ($user->can_upload())
 }
 if ($user->is_admin())
 {
+  $menu->add_menu_item("Account", "index.php?section=account&amp;action=new");
   $menu->add_menu_item("Setup", "index.php?section=setup");
 }
 
@@ -75,7 +78,9 @@ $search= new Search();
 $search->from_URL();
 
 //$menu->add_menu_item("Help", "index.php?section=help");
-$page->add_section($menu);
+$body->add_section($menu);
+
+$cnt = new SectionBase("content");
 
 if (isset($_REQUEST['section']))
 {
@@ -95,7 +100,7 @@ if (isset($_REQUEST['section']))
   if($section=='account')
   {
     $account= new SectionAccount();
-    $page->add_section($account);
+    $cnt->add_section($account);
   } 
   else if($section=='explorer')
   {
@@ -106,7 +111,7 @@ if (isset($_REQUEST['section']))
       unset($edit);
     }
     $explorer= new SectionExplorer();
-    $page->add_section($explorer);
+    $cnt->add_section($explorer);
   } 
   else if($section=='image')
   {
@@ -118,12 +123,12 @@ if (isset($_REQUEST['section']))
       unset($edit);
     }
     $image= new SectionImage();
-    $page->add_section($image);
+    $cnt->add_section($image);
   } 
   else if($section=='search')
   {
     $search= new SectionSearch();
-    $page->add_section($search);
+    $cnt->add_section($search);
   } 
   else if($section=='browser')
   {
@@ -131,12 +136,12 @@ if (isset($_REQUEST['section']))
       $browser = new SectionBrowser();
       $browser->root='';
       $browser->path='';
-      $page->add_section($browser);
+      $cnt->add_section($browser);
     } else {
       $login = new SectionLogin();
       $login->section=$section;
       $login->message="You are not loged in!";
-      $page->add_section($login);
+      $cnt->add_section($login);
     }
   } 
   else if($section=='setup')
@@ -146,10 +151,10 @@ if (isset($_REQUEST['section']))
       $login=new SectionAccount();
       $login->message='You are not loged in as an admin';
       $login->section='setup';
-      $page->add_section($login);
+      $cnt->add_section($login);
     } else {
       $setup=new SectionSetup();
-      $page->add_section($setup);
+      $cnt->add_section($setup);
     }
   }
   else if($section=='upload')
@@ -157,28 +162,34 @@ if (isset($_REQUEST['section']))
     if ($user->can_upload())
     {
       $upload = new SectionUpload();
-      $page->add_section($upload);
+      $cnt->add_section($upload);
     }
   }
   else if($section=='help')
   {
     $help = new SectionHelp();
-    $page->add_section($help);
+    $cnt->add_section($help);
   } 
   else {
     $home = new SectionHome();
-    $page->add_section($home);
+    $cnt->add_section($home);
   }
   //echo "<pre>"; print_r($a);echo "</pre>";
 } else {
   $home = new SectionHome();
-  $page->add_section($home);
+  $cnt->add_section($home);
 }
 
-$footer = new SectionFooter();
+$body->add_section($cnt);
+$page->add_section($body);
+
+$footer = new SectionBase("footer");
+$cnt = new SectionFooter("content");
+$footer->add_section($cnt);
 $page->add_section($footer);
 
 $page->layout();
+
 
 /*
 echo "<pre>";

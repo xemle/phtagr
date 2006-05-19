@@ -1,13 +1,13 @@
 <?php
 
 global $prefix;
-include_once("$prefix/SectionBody.php");
+include_once("$prefix/SectionBase.php");
 include_once("$prefix/Image.php");
 
 /**
   @class SectionHome Prints the initial page with tags and popular images.
 */
-class SectionHome extends SectionBody
+class SectionHome extends SectionBase
 {
 
 
@@ -98,7 +98,7 @@ function print_popular_images()
   $ids=array();
   while ($row=mysql_fetch_row($result))
     array_push($ids,$row[0]);
-  while (count($ids)>8)
+  while (count($ids)>6)
     array_splice($ids,rand(0,count($ids)-1),1);
   
   echo "<div class=\"mini\"><p>Popular Images:</p>\n\n";

@@ -1,10 +1,10 @@
 <?php
 
 global $prefix;
-include_once("$prefix/SectionBody.php");
+include_once("$prefix/SectionBase.php");
 include_once("$prefix/Image.php");
 
-class SectionBrowser extends SectionBody
+class SectionBrowser extends SectionBase
 {
 
 /** Relative root directory to emulate chroot() at userspace */
