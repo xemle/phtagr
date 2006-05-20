@@ -121,6 +121,8 @@ function test_database($host, $username, $password, $database)
  * */
 function query($sql, $quiet=false)
 {
+  if (!$this->link) return null;
+  
   $result=@mysql_query($sql, $this->link);
   if (!$result && !$quiet)
   {

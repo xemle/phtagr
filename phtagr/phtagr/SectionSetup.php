@@ -49,7 +49,7 @@ function exec_stage_db()
     return false;
   }
   
-  $configdir=getcwd()."/data";
+  $configdir=getcwd().DIRECTORY_SEPARATOR."data";
   if (!is_writeable($configdir))
   {
     $this->error("Could not write to config directory $configdir");
@@ -57,7 +57,7 @@ function exec_stage_db()
   }
   
   // check for writing the minimalistic configure file
-  $config="$configdir/vars.inc";
+  $config=$configdir.DIRECTORY_SEPARATOR."vars.inc";
   
   // write minimalistic configuration file
   $f=fopen($config, "w");
@@ -93,7 +93,7 @@ function exec_stage_db()
   }
   
   $this->success("Configuration file and tables created successfully");
-  $this->warning("Please move the file '$config' to the directory '".getcwd()."/phtagr'");
+  $this->warning("Please move the file '$config' to the directory '".getcwd().DIRECTORY_SEPARATOR."phtagr'");
   
   if (!$this->init_tables())
   {
@@ -108,16 +108,20 @@ function exec_stage_db()
   @return true on success. false on failure */
 function init_tables()
 {
-  $dir=getcwd();
   global $db;
-
+  $dir=getcwd();
+  
   // image cache
-  $sql="INSERT $db->pref (userid, name, value) VALUES(0, 'cache', '$dir/cache')";
+  $cache=$dir.DIRECTORY_SEPARATOR."cache";
+  $cache=str_replace('\\','\\\\',$cache);
+  $sql="INSERT $db->pref (userid, name, value) VALUES(0, 'cache', '$cache')";
   $result=$db->query($sql);
   if (!$result) return false;
 
   // upload dir
-  $sql="INSERT $db->pref (userid, name, value) VALUES(0, 'upload_dir', '$dir/data')";
+  $data=$dir.DIRECTORY_SEPARATOR."data";
+  $data=str_replace('\\','\\\\',$data);
+  $sql="INSERT $db->pref (userid, name, value) VALUES(0, 'upload_dir', '$data')";
   $result=$db->query($sql);
   if (!$result) return false;
   
@@ -143,7 +147,7 @@ function print_stage_db()
 {
   echo "<h3>Setup of mySQL database connection</h3>\n";
   
-  $this->p("Please insert the connection data for the mysql connection data");
+  echo "<p>Please insert the connection data for the mysql connection data</p>";
   
   echo "<form method=\"post\">
 <input type=\"hidden\" name=\"section\" value=\"setup\" />
@@ -169,9 +173,6 @@ function print_stage_db()
 <input type=\"submit\" value=\"OK\" />&nbsp;&nbsp;<input type=\"reset\" value=\"Reset\" />
 
 ";
-  $this->info("The data will be stored in the directory ".getcwd()."/phtagr.
-  For this reason, the directory should be writeable by the webserver. After
-  this setup step, the permission should be set to read-only.");
   
   $this->info("To run multiple phTagr instances within one database, please use
   the table prefix. Usually this option is not used.");
@@ -182,7 +183,7 @@ function print_stage_admin()
   echo "<h3>Creation of Admin Account</h3>\n";
   $account=new SectionAccount();
   $account->user='admin';
-  $account->print_form_new_account();
+  $account->print_form_new();
 }
 
 function print_actions()

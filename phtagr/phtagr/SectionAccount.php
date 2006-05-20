@@ -50,7 +50,7 @@ function check_username($name)
   return true;
 }
 
-/** Creats a new user 
+/** Creats a new user.
   @param name Name of the new user
   @param password password of the new user
   @return true on success, false otherwise */
@@ -72,7 +72,7 @@ function user_create($name, $password)
         )";
   if (!$db->query($sql))
     return false;
-
+    
   return true;
 }
 

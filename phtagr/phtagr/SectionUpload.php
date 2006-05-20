@@ -4,6 +4,7 @@ global $prefix;
 
 include_once("$prefix/SectionBase.php");
 include_once("$prefix/User.php");
+include_once("$prefix/Image.php");
 include_once("$prefix/Sql.php");
 
 class SectionUpload extends SectionBase
@@ -71,7 +72,7 @@ function delete_upload()
 
   $pref = $db->read_pref();
   $upload_dir = $pref['upload_dir'];
-  $fullpath = $upload_dir . "/" . $user->user . "/";
+  $fullpath = $upload_dir . DIRECTORY_SEPARATOR . $user->get_username() . DIRECTORY_SEPARATOR;
   $files = glob ( $fullpath . "*");
 
   $found = false;
@@ -139,14 +140,14 @@ function rm_rf ($path)
         {
           if (is_dir ($file))
           {
-            if ($this->rm_rf ($path ."/". $file) == false)
+            if ($this->rm_rf ($path .DIRECTORY_SEPARATOR. $file) == false)
               return false;
-            if (rmdir ($path."/".$file) == false)
+            if (rmdir ($path.DIRECTORY_SEPARATOR.$file) == false)
               return false;
           }
           else 
           {
-            if (unlink ($path."/".$file) == false)
+            if (unlink ($path.DIRECTORY_SEPARATOR.$file) == false)
               return false;
           }
         }
@@ -191,7 +192,9 @@ function zipfile_process($path, $filename)
       $upload_name = $this->get_upload_filename($path, $zip_content);
       copy ($name[1],$upload_name);
       unlink ($name[1]);
-      if (update_file($user->userid, $upload_name) == false)
+      
+      $image = new Image();
+      if ($image->insert($upload_name, 1) == false)
       {
         /* If something went wrong, we try to delete as much as possible. */
         $this->error("Uploading $zip_content.");
@@ -224,7 +227,7 @@ function upload_process()
 {
   global $db;
   global $user;
- 
+  
   if (!$user->can_upload())
   {
     $this->warning("You are not allowed to upload a file.");
@@ -235,7 +238,7 @@ function upload_process()
   $upload_dir = $pref['upload_dir'];
 
   # At first we must ensure, that the directories exist:
-  $path = $upload_dir . "/". $user->user . "/";
+  $path = $upload_dir . DIRECTORY_SEPARATOR. $user->get_username() . DIRECTORY_SEPARATOR;
   if (!file_exists($path))
   {
     if (!mkdir ($path))
@@ -254,9 +257,9 @@ function upload_process()
       $tmp_name = $_FILES["images"]["tmp_name"][$i];
       $name = $_FILES["images"]["name"][$i];
       $size = $_FILES["images"]["size"][$i];
-      if ($user->can_upload_size($size))
+      if (!$user->can_upload_size($size))
       {
-        $this->error("Could not upload file. Filesize exceeds the account");
+        $this->error("Could not upload file. Filesize of $size bytes exceeds your account");
         return false;
       }
       $upload_name=$this->get_upload_filename($path, $name);
@@ -270,10 +273,15 @@ function upload_process()
       }
       else {
         if (!move_uploaded_file($tmp_name, $upload_name))
+        {
+          $this->info("Could not save uploaded file to $upload_name");
           continue;
+        }
     
         chmod($upload_name, 0644);
-        update_file($user->userid, $upload_name);
+        $image = new Image();
+        $image->insert($upload_name, 1);
+        
         $this->success("File $name uploaded.");
       }
     }
@@ -319,7 +327,7 @@ function print_uploaded()
   # Now we want to list all files, the user has already uploaded
   $pref = $db->read_pref();
   $upload_dir = $pref['upload_dir'];
-  $fullpath = $upload_dir . "/" . $user->user . "/";
+  $fullpath = $upload_dir . DIRECTORY_SEPARATOR . $user->get_username() . DIRECTORY_SEPARATOR;
   $files = glob ( $fullpath . "*");
   if (count ($files) == 0)
     return;

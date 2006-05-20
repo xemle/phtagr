@@ -109,7 +109,7 @@ function is_in_group($groupid=-1)
 /** Return true if the current user is an super user and has admin rights */
 function is_admin()
 {
-  if ($_SESSION['username']=='admin')
+  if ($this->get_username()=='admin')
     return true;
   return false;
 }
@@ -188,9 +188,9 @@ function can_upload()
   @param size Size of current uploaded file. This size is mandatory. */
 function can_upload_size($size=0)
 {
-  if (!isset($size))
-    return false;
-    
+  if ($size<10)
+	return false;
+	
   if ($this->is_admin())
     return true;
 
@@ -203,8 +203,7 @@ function check_session()
 {
   global $db;
   $cookie="phtagr".$db->prefix;
-  
-  
+    
   if ($_REQUEST['section']=='account')
   {
     if ($_REQUEST['action']=='login')

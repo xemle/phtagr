@@ -34,31 +34,47 @@ $hdr->add_section($headerleft);
 $headerright = new SectionHeaderRight();
 $hdr->add_section(& $headerright);
 
-$page->add_section($hdr);
+$page->add_section(&$hdr);
 
 $body = new SectionBase("body");
+$page->add_section(&$body);
 
 $menu = new SectionMenu();
-$menu->add_menu_item("Home", "index.php");
-$menu->add_menu_item("Explorer", "index.php?section=explorer");
-$menu->add_menu_item("Search", "index.php?section=search");
+$body->add_section(&$menu);
+
+$cnt = new SectionBase("content");
+$body->add_section(&$cnt);
+
+$footer = new SectionBase("footer");
+$fcnt = new SectionFooter("content");
+$footer->add_section(&$fcnt);
+$page->add_section(&$footer);
 
 $db = new Sql();
-if (!$db->connect())
+$user = new User();
+
+if (!$db->connect() && $_REQUEST['section']!="setup")
 {
-  echo "It looks as if phtagr is not completely configured.\n";
-  echo "Please follow <a href=\"./setup.php?action=install\">\n";
-  echo "this</a> link to install phtagr.\n";
-  $footer = new SectionFooter();
-  $page->add_section($footer);
+  $msg = new SectionBase();
+  $cnt->add_section(&$msg);
+  $msg->h("Database Error");
+  $text="It looks as if phtagr is not completely configured.<br/>\n".
+	"Please follow <a href=\"./index.php?section=setup&amp;action=install\"> ".
+    "this</a> link to install phtagr.\n";
+  $msg->p($text);
+  
+  $menu->add_menu_item("Configure", "index.php?section=setup&amp;action=install");
   $page->layout();
   exit;
 }
 
-$user = new User();
 $user->check_session();
 
 $pref=$db->read_pref($user->get_userid());
+
+$menu->add_menu_item("Home", "index.php");
+$menu->add_menu_item("Explorer", "index.php?section=explorer");
+$menu->add_menu_item("Search", "index.php?section=search");
 
 if ($user->can_browse())
 {
@@ -76,11 +92,6 @@ if ($user->is_admin())
 
 $search= new Search();
 $search->from_URL();
-
-//$menu->add_menu_item("Help", "index.php?section=help");
-$body->add_section($menu);
-
-$cnt = new SectionBase("content");
 
 if (isset($_REQUEST['section']))
 {
@@ -100,7 +111,7 @@ if (isset($_REQUEST['section']))
   if($section=='account')
   {
     $account= new SectionAccount();
-    $cnt->add_section($account);
+    $cnt->add_section(&$account);
   } 
   else if($section=='explorer')
   {
@@ -111,7 +122,7 @@ if (isset($_REQUEST['section']))
       unset($edit);
     }
     $explorer= new SectionExplorer();
-    $cnt->add_section($explorer);
+    $cnt->add_section(&$explorer);
   } 
   else if($section=='image')
   {
@@ -123,12 +134,12 @@ if (isset($_REQUEST['section']))
       unset($edit);
     }
     $image= new SectionImage();
-    $cnt->add_section($image);
+    $cnt->add_section(&$image);
   } 
   else if($section=='search')
   {
     $search= new SectionSearch();
-    $cnt->add_section($search);
+    $cnt->add_section(&$search);
   } 
   else if($section=='browser')
   {
@@ -136,25 +147,25 @@ if (isset($_REQUEST['section']))
       $browser = new SectionBrowser();
       $browser->root='';
       $browser->path='';
-      $cnt->add_section($browser);
+      $cnt->add_section(&$browser);
     } else {
       $login = new SectionLogin();
       $login->section=$section;
       $login->message="You are not loged in!";
-      $cnt->add_section($login);
+      $cnt->add_section(&$login);
     }
   } 
   else if($section=='setup')
   {
-    if (!$user->is_admin()) 
+    if (!$db->link || $user->is_admin()) 
     {
+      $setup=new SectionSetup();
+      $cnt->add_section(&$setup);
+    } else {
       $login=new SectionAccount();
       $login->message='You are not loged in as an admin';
       $login->section='setup';
-      $cnt->add_section($login);
-    } else {
-      $setup=new SectionSetup();
-      $cnt->add_section($setup);
+      $cnt->add_section(&$login);
     }
   }
   else if($section=='upload')
@@ -162,31 +173,22 @@ if (isset($_REQUEST['section']))
     if ($user->can_upload())
     {
       $upload = new SectionUpload();
-      $cnt->add_section($upload);
+      $cnt->add_section(&$upload);
     }
   }
   else if($section=='help')
   {
     $help = new SectionHelp();
-    $cnt->add_section($help);
+    $cnt->add_section(&$help);
   } 
   else {
     $home = new SectionHome();
-    $cnt->add_section($home);
+    $cnt->add_section(&$home);
   }
-  //echo "<pre>"; print_r($a);echo "</pre>";
 } else {
   $home = new SectionHome();
-  $cnt->add_section($home);
+  $cnt->add_section(&$home);
 }
-
-$body->add_section($cnt);
-$page->add_section($body);
-
-$footer = new SectionBase("footer");
-$cnt = new SectionFooter("content");
-$footer->add_section($cnt);
-$page->add_section($footer);
 
 $page->layout();
 

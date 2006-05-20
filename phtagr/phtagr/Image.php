@@ -54,9 +54,11 @@ function init_by_filename($filename)
   if ($filename=='')
     return false;
     
+  $filenamesql=str_replace('\\','\\\\',$filename);
+
   $sql="SELECT * 
         FROM $db->image
-        WHERE filename='$filename'";
+        WHERE filename='$filenamesql'";
   $result=$db->query($sql);
   if (!$result || mysql_num_rows($result)==0)
     return false;
@@ -85,9 +87,11 @@ function insert($filename, $is_upload=0)
     return -1;
   } 
   
+  $filenamesql=str_replace('\\','\\\\',$filename);
+  
   $sql="SELECT * 
         FROM $db->image
-        WHERE filename='$filename'";
+        WHERE filename='$filenamesql'";
   $result=$db->query($sql);
   if (!$result)
     return false;
@@ -116,7 +120,7 @@ function insert($filename, $is_upload=0)
           clicks,lastview,ranking
         ) VALUES (
           $userid,$groupid,NOW(),NOW(),
-          '$filename',$is_upload,
+          '$filenamesql',$is_upload,
           $gacl,$oacl,$aacl,
           0,NOW(),0.0
         )";
@@ -125,7 +129,7 @@ function insert($filename, $is_upload=0)
     return -1;
   $sql="SELECT *
         FROM $db->image
-        WHERE filename='$filename'";
+        WHERE filename='$filenamesql'";
   
   $result=$db->query($sql);
   if (!$result)
@@ -557,7 +561,7 @@ function create_preview()
   
   if (! file_exists($file) || 
     filectime($file) < $this->_sqltime2unix($this->get_synced())) {
-    $cmd="convert -resize 640x640 -quality 90 '$filename' '$file'";
+    $cmd="convert -resize 600x600 -quality 90 '$filename' '$file'";
     system ($cmd, $retval);
     if ($retval!=0)
     {

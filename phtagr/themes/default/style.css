@@ -4,7 +4,7 @@ body {
 
 .page {
   margin: 10px auto;
-  width: 730px;
+  width: 750px;
   font-family:sans-serif;
 }
 
@@ -47,7 +47,7 @@ a:visited {
   position: relative;
   clear: both;
   float: left;
-  width: 730px;
+  width: 750px;
   background-image: url(./body.png);
   background-repeat: repeat-y;
 }
@@ -55,9 +55,9 @@ a:visited {
 .menu {
   position: absolute;
   float: left;
-  width: 80px;
+  width: 90px;
   padding: 0;
-  margin: 10px 0 0 17px;
+  margin: 10px 0 0 12px;
   font-size: 08pt;
   
   background-color: #ffffff;
@@ -74,7 +74,8 @@ a:visited {
   padding: 1px 1px 1px 5px;
   font-size: 10pt;
   color: #ffffff;
-  background-color: #00a800;
+  background: url(./headline.png) no-repeat -5px 0px;
+  border-bottom: 1px solid #000000;
   margin: 0;
 }
 
@@ -83,7 +84,6 @@ a:visited {
 }
 
 .menu * a:hover {
-  width: 100%;
   padding: 0 0 0 5px;
   margin: 0;
   display: block;
@@ -96,13 +96,13 @@ a:visited {
   float: left;
   text-align: left;
   padding: 0 0 0 0px;
-  margin: 0 0 0 120px;
-  width: 590px;
+  margin: 0 0 0 113px;
+  width: 620px;
 }
 
 .content * h2 {
   color: #ffffff;
-  background-color: #00a800;
+  background: url(./headline.png) no-repeat;
   border-bottom: 1px solid #000000;
   padding: 5px 5px 5px 5px;
   margin: 10px 0 0 0; 
@@ -111,7 +111,7 @@ a:visited {
 .footer > .content {
   margin: 0;
   padding: 0;
-  width: 730px;
+  width: 750px;
   float: left;
 
   color: #555555;
@@ -123,12 +123,11 @@ a:visited {
 .footer {
   position: relative;
   clear: both;
-  width: 730px;
+  width: 750px;
   float: left;
   display block;
   background: url(./footer.content.png) repeat-y;
 }
-
 
 .footer * img {
   border: 0px solid black;
@@ -179,7 +178,6 @@ a:visited {
   margin: 0;
   background-color: #dddddd;
 }
-
 
 .tableview {
   border-spacing: 0;
@@ -261,6 +259,18 @@ th {
 .imginfo * a:hover, .tags * a:hover {
   text-decoration: none;
   background-color: #cccccc;
+}
+
+pre {
+  position: relative;
+  clear: both;
+  float: left;
+  color: #404040;
+  font-size: 8pt;
+  background-color: #dddddd;
+  border: solid 2px #808080;
+  padding: 10px 30px 10px 30px;
+  margin: 10px 0 10px 0;
 }
 
 .error {
