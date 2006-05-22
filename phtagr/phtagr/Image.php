@@ -659,7 +659,7 @@ function print_caption($docut=true)
   $id=$this->get_id();
   $caption=$this->get_caption();
   
-  $can_edit=$user->can_edit($id);
+  $can_edit=$user->can_edit(&$this);
   
   echo "<div class=\"caption\" id=\"caption-$id\">";
   // the user can not edit the image
@@ -774,7 +774,7 @@ function print_row_tags()
     if ($i<$num_tags-1)
         echo ", ";
   }
-  if ($user->can_edit($id))
+  if ($user->can_edit($this))
   {
     $list='';
     for ($i=0; $i<$num_tags; $i++)
@@ -812,7 +812,8 @@ function print_preview($search=null)
   echo "</div>\n";  
 
   echo "<table class=\"imginfo\">\n";
-  echo "  <tr><th>File:</th><td>".$this->get_filename()."</td></tr>\n";
+  if ($user->is_owner($this->get_userid()))
+    echo "  <tr><th>File:</th><td>".$this->get_filename()."</td></tr>\n";
   $this->print_row_date();
   
   $this->print_row_tags();

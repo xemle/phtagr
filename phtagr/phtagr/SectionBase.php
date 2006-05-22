@@ -19,10 +19,13 @@ function SectionBase($name='default')
   $this->content='';
 }
     
-/** Add a cascated section */
+/** Add a cascated section. 
+  @note If you are using PHP 4, objects should be passed by references which is
+  done by an ampersand 
+  @see print_sections() */
 function add_section($section) 
 {
-  array_push($this->sections, $section);
+  array_push($this->sections, &$section);
 }
 
 /** Add paragraph section */
@@ -57,6 +60,7 @@ function print_sections()
   { 
     foreach ($this->sections as $sub)
     {
+      if (!isset($sub)) continue;
       $sub->print_sections();
     }
   }

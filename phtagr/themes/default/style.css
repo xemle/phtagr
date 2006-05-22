@@ -8,6 +8,10 @@ body {
   font-family:sans-serif;
 }
 
+a:link {
+  color: #006000;
+}
+
 a:visited {
   color: #262626;
 }
@@ -55,9 +59,9 @@ a:visited {
 .menu {
   position: absolute;
   float: left;
-  width: 90px;
+  width: 98px;
   padding: 0;
-  margin: 10px 0 0 12px;
+  margin: 10px 0 0 8px;
   font-size: 08pt;
   
   background-color: #ffffff;

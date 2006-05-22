@@ -32,7 +32,7 @@ $hdr = new SectionBase('header');
 $headerleft = new SectionHeaderLeft();
 $hdr->add_section($headerleft);
 $headerright = new SectionHeaderRight();
-$hdr->add_section(& $headerright);
+$hdr->add_section(&$headerright);
 
 $page->add_section(&$hdr);
 
