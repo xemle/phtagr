@@ -278,33 +278,42 @@ pre {
 }
 
 .error {
-  background-color: #ffb09f;
   color: black;
   border: solid 2px #ff0000;
-  padding: 10px 30px 10px 30px;
+  padding: 10px 30px 10px 50px;
   margin: 10px 0 10px 0;
+  background: #ffb09f url(./error.png) no-repeat 5px 5px;
 }
 
 .warning {
-  background-color: #ffb260;
   color: black;
   border: solid 2px #ff7300;
-  padding: 10px 30px 10px 30px;
+  padding: 10px 30px 10px 50px;
   margin: 10px 0 10px 0;
+  background: #ffb260 url(./warning.png) no-repeat 5px 5px;
 }
 
 .success {
   background-color: #7aff8c;
   color: black;
   border: solid 2px #008e47;
-  padding: 10px 30px 10px 30px;
+  padding: 10px 30px 10px 50px;
   margin: 10px 0 10px 0;
+  background: #7aff8c url(./success.png) no-repeat 5px 5px;
 }
 
 .info{
-  background-color: #ffffb8;
   color: black;
   border: solid 2px #ffdc3b;
-  padding: 10px 30px 10px 30px;
+  padding: 10px 30px 10px 50px;
   margin: 10px 0 10px 0;
+  background: #ffffb8 url(./info.png) no-repeat 5px 5px;
+}
+
+.question {
+  color: black;
+  border: solid 2px #0000ff;
+  padding: 10px 30px 10px 50px;
+  margin: 10px 0 10px 0;
+  background: #9797ff url(./question.png) no-repeat 5px 5px;
 }

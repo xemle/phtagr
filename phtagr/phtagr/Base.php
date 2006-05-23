@@ -47,6 +47,11 @@ function success($message)
   $this->div('success', $message);
 }
 
+function question($message)
+{
+  $this->div('question', $message);
+}
+
 function comment($message)
 {
   echo "<!-- $message -->\n";
@@ -54,7 +59,7 @@ function comment($message)
 
 /** Prints an object by print_r. This function should be used for debug only 
   @param object Object which is dumped */
-function _debug($object)
+function debug($object)
 {
   $this->div_open("debug");
   echo "<pre>";

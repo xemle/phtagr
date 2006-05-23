@@ -188,6 +188,7 @@ function print_stage_admin()
 
 function print_actions()
 {
+  $this->warning("Please handle these operations carefully!");
   echo "<ul>\n";
   echo "<li><a href=\"index.php?section=setup&action=sync\">Synchronize</a> files with the database</li>\n";
   echo "<li><a href=\"index.php?section=setup&action=init\">Create a phTagr Instance</a></li>\n";
