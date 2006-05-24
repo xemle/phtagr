@@ -265,16 +265,17 @@ th {
   background-color: #cccccc;
 }
 
-pre {
+
+.debug {
   position: relative;
   clear: both;
   float: left;
-  color: #404040;
   font-size: 8pt;
-  background-color: #dddddd;
-  border: solid 2px #808080;
-  padding: 10px 30px 10px 30px;
+  color: black;
+  border: solid 2px #cc00ff;
+  padding: 10px 30px 10px 50px;
   margin: 10px 0 10px 0;
+  background: #eeeeee url(./debug.png) no-repeat 5px 5px;
 }
 
 .error {
