@@ -107,13 +107,12 @@ function print_popular_images()
   {
     echo "  <td>";
     $image=new Image($id);
-    $src=$image->create_mini();
-    if ($src)
+    if ($image)
     {
       $name=$image->get_name();
-      echo "<a href=\"index.php?section=image&amp;id=$id\"><img src=\"$src\" alt=\"$name\" /></a>";
+      echo "<a href=\"index.php?section=image&amp;id=$id\"><img src=\"./image.php?id=$id&amp;type=mini\" alt=\"$name\" width=\"75\" height=\"75\"/></a>";
+      unset($image);
     }    
-    unset($image);
     echo "</td>\n";
   }
   echo "</tr>\n</table>\n";

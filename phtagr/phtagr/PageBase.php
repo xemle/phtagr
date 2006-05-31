@@ -7,9 +7,9 @@ class PageBase extends SectionBase
 
 var $title;
 
-function PageBase($title='phtagr')
+function PageBase($title='phtagr', $cssclass='page')
 {
-  $this->SectionBase($title);
+  $this->SectionBase($cssclass);
 
   $this->title=$title;
 }
@@ -24,7 +24,7 @@ function print_header_html()
 <html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\">\n\n";
 
   echo "<head>\n";
-  echo "<title>$this->title</title>\n";
+  echo "<title>".$this->title."</title>\n";
   echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"themes/$theme/style.css\"/>\n";
   if (file_exists("themes/$theme/favicon.ico"))
   {

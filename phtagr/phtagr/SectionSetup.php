@@ -39,6 +39,20 @@ function exec_stage_db()
 {
   // check sql parameters
   global $db;
+  
+  if (!file_exists($_REQUEST['dir']))
+  {
+    $this->error("Directory ".$_REQUEST['dir']." does not exists. Create it first.");
+    return false;
+  }
+  $configdir=realpath($_REQUEST['dir']);
+
+  if (!is_writeable($configdir))
+  {
+    $this->error("Could not write to data directory $configdir");
+    return false;
+  }
+  
   $result=$db->test_database($_REQUEST['host'], 
                  $_REQUEST['user'], 
                  $_REQUEST['password'], 
@@ -46,13 +60,6 @@ function exec_stage_db()
   if ($result!=true)
   {
     $this->error($result);
-    return false;
-  }
-  
-  $configdir=getcwd().DIRECTORY_SEPARATOR."data";
-  if (!is_writeable($configdir))
-  {
-    $this->error("Could not write to config directory $configdir");
     return false;
   }
   
@@ -95,7 +102,7 @@ function exec_stage_db()
   $this->success("Configuration file and tables created successfully");
   $this->warning("Please move the file '$config' to the directory '".getcwd().DIRECTORY_SEPARATOR."phtagr'");
   
-  if (!$this->init_tables())
+  if (!$this->init_tables($configdir))
   {
     $this->warning("Could not init the tables correctly");
     return false;
@@ -104,78 +111,109 @@ function exec_stage_db()
   return true;
 }
 
+function _create_dir($dir)
+{
+  echo $dir;
+  if (!file_exists($dir))
+  {
+    if (!@mkdir($dir, true))
+    {
+      $this->error("Could not create directory $dir.");
+      return false;
+    }
+  }
+
+  if (!@chmod($dir, 0755))
+  {
+    $this->error("Could not change the permission correctly of directory $dir.");
+    return false;
+  }
+
+  return true;
+}
+
 /** Insert default values to the table
   @return true on success. false on failure */
-function init_tables()
+function init_tables($configdir)
 {
   global $db;
-  $dir=getcwd();
   
   // image cache
-  $cache=$dir.DIRECTORY_SEPARATOR."cache";
+  $cache=$configdir.DIRECTORY_SEPARATOR."cache";
+  if (!$this->_create_dir($cache))
+    return false;
+  
   $cache=str_replace('\\','\\\\',$cache);
   $sql="INSERT $db->pref (userid, name, value) VALUES(0, 'cache', '$cache')";
   $result=$db->query($sql);
   if (!$result) return false;
 
   // upload dir
-  $data=$dir.DIRECTORY_SEPARATOR."data";
-  $data=str_replace('\\','\\\\',$data);
-  $sql="INSERT $db->pref (userid, name, value) VALUES(0, 'upload_dir', '$data')";
+  $upload=$configdir.DIRECTORY_SEPARATOR."upload";
+  if (!$this->_create_dir($upload))
+    return false;
+
+  $upload=str_replace('\\','\\\\',$upload);
+  $sql="INSERT $db->pref (userid, name, value) VALUES(0, 'upload_dir', '$upload')";
   $result=$db->query($sql);
   if (!$result) return false;
   
   return true;
 }
 
-function exec_stage_pref()
-{
-  // check cache directory
-  if (!is_dir($_REQUEST['cache']))
-  {
-    $this->error("Cache directory does not exists");
-    return false;
-  }
-  if (!is_writeable($_REQUEST['cache']))
-  {
-    $this->error("Could not write to cache directory");
-    return false;
-  }
-}
-
 function print_stage_db()
 {
-  echo "<h3>Setup of mySQL database connection</h3>\n";
-  
-  echo "<p>Please insert the connection data for the mysql connection data</p>";
   
   echo "<form method=\"post\">
 <input type=\"hidden\" name=\"section\" value=\"setup\" />
 <input type=\"hidden\" name=\"stage\" value=\"0\" />
 <input type=\"hidden\" name=\"action\" value=\"init\" />
 
-<fieldset><legend><b>SQL Table</b></legend>
+<h3>Data Directory</h3>
+
+<p>phTagr will store all its data in this directory including cached images, uploaded images, etc.</p>
+
+<p>This directory must be writeable by PHP</p>
+
 <table>
   <tr>
-    <td>Host</td><td><input type=\"text\" name=\"host\" value=\"localhost\" /></td>
+    <td>Data Directory:</td>
+    <td><input type=\"text\" name=\"dir\" value=\"\" /></td>
+</table>
+";
+
+  $this->info("For security reasons, the data directory should be writeable by the PHP but not readable from the browser.");
+
+  echo "<h3>mySQL Connection</h3>
+  
+<p>Please insert the connection data for the mysql connection data</p>
+
+<table>
+  <tr>
+    <td>Host:</td>
+    <td><input type=\"text\" name=\"host\" value=\"localhost\" /></td>
   </tr><tr>
-    <td>User</td><td><input type=\"text\" name=\"user\" value=\"phtagr\" /></td>
+    <td>User:</td>
+    <td><input type=\"text\" name=\"user\" value=\"\" /></td>
   </tr><tr>
-    <td>Password</td><td><input type=\"password\" name=\"password\" /></td>
+    <td>Password:</td>
+    <td><input type=\"password\" name=\"password\" /></td>
   </tr><tr>
-    <td>Database</td><td><input type=\"text\" name=\"database\" value=\"phtagr\" /></td>
+    <td>Database:</td>
+    <td><input type=\"text\" name=\"database\" value=\"\" /></td>
   </tr><tr>
-    <td>Table prefix</td><td><input type=\"text\" name=\"prefix\" value=\"\" /></td>
+    <td>Table Prefix:</td>
+    <td><input type=\"text\" name=\"prefix\" value=\"\" /></td>
   </tr>
 </table>
-</fieldset>
-
-<input type=\"submit\" value=\"OK\" />&nbsp;&nbsp;<input type=\"reset\" value=\"Reset\" />
 
 ";
-  
   $this->info("To run multiple phTagr instances within one database, please use
   the table prefix. Usually this option is not used.");
+
+  echo "
+<input type=\"submit\" value=\"OK\" />&nbsp;&nbsp;<input type=\"reset\" value=\"Reset\" />
+";
 }
 
 function print_stage_admin()
@@ -316,8 +354,10 @@ function print_content()
   }
   else if ($action=='init')
   {
-    $this->exec_stage_db();
-    $this->stage=1;
+    if (!$this->exec_stage_db())
+      $this->stage=0;
+    else
+      $this->stage=1;
   }
   else if ($action=='sync')
   {

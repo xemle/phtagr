@@ -310,6 +310,43 @@ function get_lastview($in_unix=false)
     return $lastview;
 }
 
+/** Returns the size of an thumbnail in an array. This function keeps the
+ * ratio.
+  @param Size of the longes side. Default is 220. If the size is larger than
+  the largest side, the size is cutted.
+  @return Array of (width, height, str), wherease the string is the string for
+  html img tag. On an error it returns an empty array */
+function get_size($size=220)
+{
+  $height=$this->get_height();
+  $width=$this->get_width();
+  
+  if ($height > $width && $height>0)
+  {
+    if ($size>$height)
+      $size=$height;
+      
+    $w=intval($size*$width/$height);
+    $h=$size;
+  }
+  else if ($width > $height && $width > 0)
+  {
+    if ($size>$width)
+      $size=$width;
+      
+    $h=intval($size*$height/$width);
+    $w=$size;
+  }
+  else
+  {
+    return array(0,0,'');
+  }
+  
+  $s="width=\"$w\" height=\"$h\"";
+  
+  return array($w, $h, $s);
+}
+
 /** Read static values from an image and insert them into the database. The
  * static values are filesize, name, width and height */
 function _insert_static()
@@ -570,7 +607,7 @@ function create_preview()
     }
     system ("chmod 644 '$file'");
   }
-  return './cache/' . $thumb;
+  return $file;
 }
 
 /** Create a mini square image with size of 75x75 pixels. 
@@ -615,7 +652,7 @@ function create_mini()
 
     system ("chmod 644 '$file'");
   }
-  return './cache/' . $thumb;
+  return $file;
 }
 
 /** Create a thumbnail image 
@@ -637,7 +674,8 @@ function create_thumbnail()
   if (! file_exists($file) || 
     filectime($file) < $this->_sqltime2unix($this->get_synced())) 
   {
-    system ("convert -resize 220x220 -quality 80 '$filename' '$file'", $retval);
+    $cmd="convert -resize 220x220 -quality 80 '$filename' '$file'";
+    system ($cmd, $retval);
     if ($retval!=0)
     {
       $this->error("Could not execute command '$cmd'. Exit with code $retval");
@@ -645,7 +683,7 @@ function create_thumbnail()
     }
     system ("chmod 644 '$file'");
   }
-  return './cache/' . $thumb;
+  return $file;
 }
 
 /** Print the caption of an image. 
@@ -794,8 +832,6 @@ function print_preview($search=null)
   global $db;
   global $user;
   
-  $thumb=$this->create_thumbnail();
-  
   $id=$this->get_id();
   $name=$this->get_name();
   
@@ -805,7 +841,10 @@ function print_preview($search=null)
   $link="index.php?section=image&amp;id=$id";
   if ($search!=null)
     $link.=$search->to_URL();
-  echo "<a href=\"$link\"><img src=\"$thumb\" alt=\"$name\" title=\"$name\"/></a>\n";
+  
+  $size=$this->get_size(220);
+
+  echo "<a href=\"$link\"><img src=\"./image.php?id=$id&amp;type=thumb\" alt=\"$name\" title=\"$name\" ".$size[2]."/></a>\n";
   
   $this->print_caption();
   

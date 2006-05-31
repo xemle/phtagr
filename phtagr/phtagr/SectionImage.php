@@ -93,11 +93,11 @@ function print_content()
   $id=$_REQUEST['id'];
   $image=new Image($id);
   
-  $preview=$image->create_preview();
   $name=$image->get_name();
   
   echo "<h3>$name</h3>\n";
-  echo "<p><img src=\"$preview\" alt=\"$name\" /></p>\n";
+  $size=$image->get_size(600);
+  echo "<p><img src=\"./image.php?id=$id&amp;type=preview\" alt=\"$name\" ".$size[2]."/></p>\n";
   if ($user->can_edit(&$image))
   {
     echo "<form action=\"index.php\" method=\"post\">\n";

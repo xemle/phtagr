@@ -26,7 +26,7 @@ include "$prefix/SectionSearch.php";
 include "$prefix/SectionSetup.php";
 include "$prefix/SectionUpload.php";
 
-$page = new PageBase("page");
+$page = new PageBase("phTagr");
 
 $hdr = new SectionBase('header');
 $headerleft = new SectionHeaderLeft();
@@ -59,7 +59,7 @@ if (!$db->connect() && $_REQUEST['section']!="setup")
   $cnt->add_section(&$msg);
   $msg->h("Database Error");
   $text="It looks as if phtagr is not completely configured.<br/>\n".
-	"Please follow <a href=\"./index.php?section=setup&amp;action=install\"> ".
+    "Please follow <a href=\"./index.php?section=setup&amp;action=install\"> ".
     "this</a> link to install phtagr.\n";
   $msg->p($text);
   

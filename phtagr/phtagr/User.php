@@ -1,6 +1,7 @@
 <?php
 
 include_once("$prefix/Base.php");
+include_once("$prefix/Constants.php");
 
 /** This class handles the authentication of an user.
 
@@ -154,24 +155,68 @@ function can_select($image=null)
   return true;
 }
 
-/** Return true if user can edit the image 
-  @param imageid Image id. Default -1.*/
-function can_edit($image=null)
+/** Checks the acl of an image 
+  @param image Image object
+  @param flag ACL bit
+  @return True if user is allow to do the action */
+function _check_image_acl($image, $flag)
 {
+  if (!isset($image))
+    return false;
+    
   if ($this->is_admin())
     return true;
-  
-  if ($image==null)
-    return false;
   
   if ($image->get_userid()==$this->get_userid())
     return true;
     
-  if ($image->get_gacl()&1>0 &&
-    $this->is_in_group($image->get_groupid()))
+  if ($this->is_in_group($image->get_groupid()) &&
+    $image->get_gacl() AND $flag > 0)
+    return true;
+  
+  if ($this->is_member() &&
+    $image->get_oacl() AND $flag > 0)
+    return true;
+
+  if ($image->get_aacl() AND $flag > 0)
     return true;
   
   return false;
+}
+
+/** Return true if user can edit the image 
+  @param image Image object. Default is null.*/
+function can_edit($image=null)
+{
+  return $this->_check_image_acl(&$image, ACL_EDIT);
+}
+
+function can_metadata($image=null)
+{
+  return $this->_check_image_acl(&$image, ACL_METADATA);
+}
+
+/** Return true if user can upload a file with the given size
+/** Return true if user can preview the image 
+  @param image Image object. Default is null.*/
+function can_preview($image=null)
+{
+  return $this->_check_image_acl(&$image, ACL_PREVIEW);
+}
+
+function can_highsolution($image=null)
+{
+  return $this->_check_image_acl(&$image, ACL_HIGHSOLUTION);
+}
+
+function can_fullsize($image=null)
+{
+  return $this->_check_image_acl(&$image, ACL_FULLSIZE);
+}
+
+function can_download($image=null)
+{
+  return $this->_check_image_acl($image, ACL_DOWNLOAD);
 }
 
 /** Return true if user can upload a file in general.

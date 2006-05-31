@@ -10,18 +10,24 @@ function div_open($css_class)
   echo "<div class=\"$css_class\">\n";
 }
 
-function div_close()
+/** Prints a closed div tag
+  @param newline Prints no newline after the tag if false. Default is true
+  */
+function div_close($newline=true)
 {
-  echo "</div>\n";
+  if ($newline)
+    echo "</div>\n";
+  else
+    echo "</div>";
 }
 
-/** Add span section */
+/** Add span section without a newline after the tag */
 function span($css_class, $text)
 {
   echo "<span class=\"$css_class\">".$text."</span>";
 }
 
-/** Add div section */
+/** Add div section with an newline after the tag */
 function div($css_class, $text)
 {
   echo "<div class=\"$css_class\">".$text."</div>\n";

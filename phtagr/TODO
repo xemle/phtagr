@@ -14,16 +14,16 @@ Other image communities: http://holocore.com/?PictureSync_services
 
 
 - PHP 
-  - Generate valid XHTML
+  - Generate valid XHTML. Mostly validated. Done.
   
 - mySQL database
   - Store image timestamps as UNIX timestamp
   - Add popular values as last view and current value. Done 2006-02-16
     Popular index = current value*0.8 + 0.2*(1/(current time+1 - last view))
     The value is updated every time if a image is clicked and only one per
-    session
-  - Add flag for uploaded image
-  - Add table for sets
+    session. 
+  - Add flag for uploaded image. Done
+  - Add table for sets. Done.
 
 - User
   Setting of a user account.
@@ -59,27 +59,33 @@ Other image communities: http://holocore.com/?PictureSync_services
   - ACLs
     A user can set the specific access control to an image. The access levels
     are: Public, phTagr user, friends and own. 
-    - View, Edit, downloadable
-    - User can have a role
-  - An image has a unique image id and a unique filename 
+    - Users are assigned to groups
+    - download 0x80
+    - fullsize 0x40
+    - highsolution 0x20
+    - preview 0x10
+    - metadata 0x02
+    - edit 0x01
+  - An image has a unique image id. Done.
   - Number of views. If a image is viewed in detail the count is increased
   - A phTagr user can add a comment on a image (this information is not
     stored in a image itself)
-  - Create a Image object
+  - Image object
     - contains exif and iptc data by database or by origial file.
       - array of tags(), commet, date, place, set, copyright, author, etc
-    - read_exif(), read_iptc(), write_iptc()
+    - read_exif()
       - if EXIF and IPTC information are not available, get height and width
         of an image
     - create different sizes
-      - via convert of image magick
+      - by GD, or ImageMagick
+        - Check if GD keeps the EXIF and IPTC data
       - mosaic, 75x75, png
       - thumbnail, 250x250, jpg
       - preview, 800x600, jpg
       - high-resolution, 1024x786
       - original size
       - Insert of a watermark or copyright by IPTC copyright
-    - Merge Iptc.php with image.php
+    - get_imagesize for mini, thumb, and preview.
   - Download image
   - Add edit form to change IPTC tags
   
@@ -102,9 +108,9 @@ Other image communities: http://holocore.com/?PictureSync_services
       Enables search by date, inclusive links 1day [.], 1 week [-], 1 month [#]
       - Start time in UNIX timestamp
       - Interval length (3h, 1d, 1w, 1m)
-    - function query_count() Returns total numbers 
+    - function query_count() Returns total numbers. Done. 
     - function query_images() Returns a list of images ids
-    - function from_URL and to_URL
+    - function from_URL and to_URL. Done.
     - clone function to create search URLs
     
 - Image Sets
@@ -116,6 +122,7 @@ Other image communities: http://holocore.com/?PictureSync_services
   Images can be added in a file browser. This option is available for local
   system users only.
   - Only a phTagr user can browse its directory
+  - Enable multiple directories which are accessable by the users root
   - Insert images of whole tree
     - default ACL, Tags, Comment, Copyright
   - The root of the file browser depends on the users root directory
@@ -124,7 +131,7 @@ Other image communities: http://holocore.com/?PictureSync_services
 
 - Session
   - Remember visited image. This information will be used for counting the
-    clicks on the images
+    clicks on the images. Done.
   - Add images to download, edit
   - Init the session by a cookie if it is available. Done 2006-03-11.
   - Save and transmit password in MD5
@@ -136,9 +143,11 @@ Other image communities: http://holocore.com/?PictureSync_services
   - Set default values
     - root
     - policy
+    - ACL
+    - Upload
 
 - Setup
-  - Easy step-by-step setup of phTagr like bitweaver
+  - Easy setup of phTagr via HTML. 
     - An other aproach is to have a single configuration page. E.g. Creation
       tables and the admin account at one step.
   - Connection to the SQL database
