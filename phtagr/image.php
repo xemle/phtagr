@@ -87,23 +87,38 @@ if (!file_exists($fn))
   exit;
 }
   
-// Getting headers sent by the client.
-$headers = apache_request_headers();
+// Getting headers sent by the client. Convert header to lower case since it is
+// case insensitive 
+if (function_exists('apache_request_headers'))
+{
+  $headers = apache_request_headers();
+  foreach($headers as $h=>$v)
+    $headers[strtolower($h)]=$v;
+}
+else
+{
+  $headers=array();
+  foreach($_SERVER as $h=>$v)
+  {
+    if(ereg('HTTP_(.+)',$h,$hp))
+      $headers[strtolower($hp[1])]=$v;
+  }
+}
 
 // Checking if the client is validating his cache and if it is current.
-if (isset($headers['If-Modified-Since']) && (strtotime($headers['If-Modified-Since']) == filemtime($fn))) {
-   // Client's cache IS current, so we just respond '304 Not Modified'.
-   header('Last-Modified: '.gmdate('D, d M Y H:i:s', filemtime($fn)).' GMT', true, 304);
-   // Allow caching for 30 days
-   header('Cache-Control: max-age=2592000, must-revalidate');
+if (isset($headers['if-modified-since']) && (strtotime($headers['if-modified-since']) == filemtime($fn))) {
+  // Client's cache IS current, so we just respond '304 Not Modified'.
+  header('Last-Modified: '.gmdate('D, d M Y H:i:s', filemtime($fn)).' GMT', true, 304);
+  // Allow caching for 30 days
+  header('Cache-Control: max-age=2592000, must-revalidate');
 } else {
-   // Image not cached or cache outdated, we respond '200 OK' and output the image.
-   header('Last-Modified: '.gmdate('D, d M Y H:i:s', filemtime($fn)).' GMT', true, 200);
-   header('Content-Length: '.filesize($fn));
-   header('Content-Type: image/jpg');
-   // Allow caching
-   header('Cache-Control: max-age=2592000, must-revalidate');
-   print file_get_contents($fn);
+  // Image not cached or cache outdated, we respond '200 OK' and output the image.
+  header('Last-Modified: '.gmdate('D, d M Y H:i:s', filemtime($fn)).' GMT', true, 200);
+  header('Content-Length: '.filesize($fn));
+  header('Content-Type: image/jpg');
+  // Allow caching
+  header('Cache-Control: max-age=2592000, must-revalidate');
+  print file_get_contents($fn);
 }
 
 ?>

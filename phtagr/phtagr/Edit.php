@@ -57,7 +57,7 @@ function execute()
   $signle_image=-1;
   if (isset($_REQUEST['image']))
     $signle_image=$_REQUEST['image'];
-  
+
   $images=array_merge($_REQUEST['images'], $_REQUEST['image']);
   foreach ($images as $id)
   {
