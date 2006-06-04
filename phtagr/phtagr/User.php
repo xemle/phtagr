@@ -86,19 +86,19 @@ function get_username()
 /** Return the default ACL for the group */
 function get_gacl()
 {
-  return 0xff;
+  return ACL_PREVIEW;
 }
 
 /** Return the default ACL for other phtagr users */
 function get_oacl()
 {
-  return 0xff;
+  return ACL_PREVIEW;
 }
 
 /** Return the default ACL for all */
 function get_aacl()
 {
-  return 0xff;
+  return ACL_PREVIEW;
 }
 
 /* Return true if the given user is member of a group */
@@ -118,10 +118,13 @@ function is_admin()
 /** Return if the given user has the same user id than an object 
   @param userid Userid of the given object
 */
-function is_owner($userid=-1)
+function is_owner($image=null)
 {
-  if ($userid!=-1 && 
-    $_SESSION['userid']==$userid)
+  if ($image==null)
+    return false;
+    
+  if ($this->get_userid()==
+    $image->get_userid())
     return true;
   return false;
 }
@@ -216,7 +219,7 @@ function can_fullsize($image=null)
 
 function can_download($image=null)
 {
-  return $this->_check_image_acl($image, ACL_DOWNLOAD);
+  return $this->_check_image_acl(&$image, ACL_DOWNLOAD);
 }
 
 /** Return true if user can upload a file in general.

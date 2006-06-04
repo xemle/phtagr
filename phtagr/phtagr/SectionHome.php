@@ -3,6 +3,7 @@
 global $prefix;
 include_once("$prefix/SectionBase.php");
 include_once("$prefix/Image.php");
+include_once("$prefix/Search.php");
 
 /**
   @class SectionHome Prints the initial page with tags and popular images.
@@ -86,10 +87,11 @@ function print_popular_images()
   $count=$count<20?20:$count;
     
   // select top 1% of images
-  $sql="SELECT id
-        FROM $db->image
-        ORDER BY ranking DESC
-        LIMIT 0,$count";
+  $search=new Search();
+  $search->set_orderby('ranking');
+  $search->set_page_size($count);
+  $sql=$search->get_query();
+
   $result=$db->query($sql);
   if (!$result)
     return;

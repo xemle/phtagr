@@ -50,7 +50,7 @@ $user->check_session();
 $pref=$db->read_pref($user->get_userid());
 
 $img=new Image($_REQUEST['id']);
-if (!$img || $img->get_oacl()<255)
+if (!$img)
 {
   return;
 }

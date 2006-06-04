@@ -92,6 +92,7 @@ function print_content()
   }
   
   $sql=$search->get_query();
+  //$this->comment($sql);
   $result = $db->query($sql);
   if (!$result)
   {
@@ -138,7 +139,7 @@ function print_content()
   echo "</div>\n";
 
   $edit=new Edit();
-  if ($user->can_edit())
+  if ($user->is_member())
     $edit->print_edit_inputs();
   $edit->print_buttons();
   echo "</form>\n";

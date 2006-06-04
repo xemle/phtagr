@@ -68,6 +68,8 @@ function execute()
     if ($filename=='')
       continue;
       
+    $img=new Image($id);
+    
     $iptc=new Iptc();
     $iptc->load_from_file($filename);
     if ($this->_check_iptc_error(&$iptc))
@@ -77,6 +79,9 @@ function execute()
     // Distinguish between javascript values and global values
     if (isset($_REQUEST['js_tags']))
     {
+      if (!$user->can_metadata(&$img))
+        continue;
+        
       $tags=split(" ", $_REQUEST['js_tags']);
       /** @todo optimize set of this operation. Do only delete required tags */
       $iptc->rem_record("2:025");
@@ -96,6 +101,9 @@ function execute()
     }
     else if (isset($_REQUEST['edit_tags']))
     {
+      if (!$user->can_metadata(&$img))
+        continue;
+        
       $tags=split(" ", $_REQUEST['edit_tags']);
     
       // distinguish between add and remove operation.
@@ -119,6 +127,9 @@ function execute()
     // Add captions
     if (isset($_REQUEST['js_caption']))
     {
+      if (!$user->can_metadata(&$img))
+        continue;
+        
       $caption=$_REQUEST['js_caption'];
       $iptc->add_record("2:120", $caption);
       if ($this->_check_iptc_error(&$iptc))
@@ -126,6 +137,9 @@ function execute()
     }
     else if (isset($_REQUEST['edit_caption']))
     {
+      if (!$user->can_metadata(&$img))
+        continue;
+        
       $caption=$_REQUEST['edit_caption'];
       $iptc->add_record("2:120", $caption);
       if ($this->_check_iptc_error(&$iptc))
@@ -140,6 +154,73 @@ function execute()
       unset($image);
       if ($this->_check_iptc_error(&$iptc))
         return false;
+    }
+
+    if (!$user->can_edit(&$img))
+      continue;
+        
+    if (isset($_REQUEST['aacl']))
+    {
+      switch ($_REQUEST['aacl'])
+      {
+        case 'add':
+          $sql="UPDATE $db->image
+                SET aacl=aacl | ".ACL_PREVIEW.",
+                    oacl=oacl | ".ACL_PREVIEW.",
+                    gacl=gacl | ".ACL_PREVIEW."
+                WHERE id=$id";
+          $result=$db->query($sql);
+          break;
+        case 'del':
+          $sql="UPDATE $db->image
+                SET aacl=aacl & ~".ACL_PREVIEW_MASK." 
+                WHERE id=$id";
+          $result=$db->query($sql);
+          break;
+        default:
+      }
+    }
+    if (isset($_REQUEST['oacl']))
+    {
+      switch ($_REQUEST['oacl'])
+      {
+        case 'add':
+          $sql="UPDATE $db->image
+                SET oacl=oacl | ".ACL_PREVIEW.",
+                    gacl=gacl | ".ACL_PREVIEW."
+                WHERE id=$id";
+          $result=$db->query($sql);
+          break;
+        case 'del':
+          $sql="UPDATE $db->image
+                SET aacl=aacl & ~".ACL_PREVIEW_MASK.",
+                    oacl=oacl & ~".ACL_PREVIEW_MASK." 
+                WHERE id=$id";
+          $result=$db->query($sql);
+          break;
+        default:
+      }
+    }
+    if (isset($_REQUEST['gacl']))
+    {
+      switch ($_REQUEST['gacl'])
+      {
+        case 'add':
+          $sql="UPDATE $db->image
+                SET gacl=gacl | ".ACL_PREVIEW."
+                WHERE id=$id";
+          $result=$db->query($sql);
+          break;
+        case 'del':
+          $sql="UPDATE $db->image
+                SET aacl=aacl & ~".ACL_PREVIEW_MASK.",
+                    oacl=oacl & ~".ACL_PREVIEW_MASK.", 
+                    gacl=gacl & ~".ACL_PREVIEW_MASK." 
+                WHERE id=$id";
+          $result=$db->query($sql);
+          break;
+        default:
+      }
     }
   }
   return true;
@@ -156,6 +237,21 @@ function print_edit_inputs()
     <tr><th>Set:</th><td><input type=\"text\" name=\"edit_sets\" size=\"60\"/></td></tr>
   </table>
 </fieldset>
+<fieldset><legend>ACL</legend>
+  <table>
+    <tr><th>Group</th><th>Members</th><th>All</th><tr>
+    <tr><td><input type=\"radio\" name=\"gacl\" value=\"add\" />
+        <input type=\"radio\" name=\"gacl\" value=\"del\" />
+        <input type=\"radio\" name=\"gacl\" value=\"keep\" checked /></td>
+      <td><input type=\"radio\" name=\"oacl\" value=\"add\" />
+        <input type=\"radio\" name=\"oacl\" value=\"del\" />
+        <input type=\"radio\" name=\"oacl\" value=\"keep\" checked /></td>
+      <td><input type=\"radio\" name=\"aacl\" value=\"add\" />
+        <input type=\"radio\" name=\"aacl\" value=\"del\" />
+        <input type=\"radio\" name=\"aacl\" value=\"keep\" checked /></td></tr>
+  </table>
+</fieldset>
+
 <div><input type=\"hidden\" name=\"action\" value=\"edit\"/></div>
 ";
 }

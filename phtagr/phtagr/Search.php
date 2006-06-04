@@ -313,6 +313,7 @@ function to_form()
 function _get_query_from_tags($tags, $tagop=0)
 {
   global $db;
+  global $user;
   $num_tags=count($tags);
     
   $sql="SELECT i.id FROM $db->image AS i";
@@ -339,6 +340,25 @@ function _get_query_from_tags($tags, $tagop=0)
   // handle user id
   if ($this->userid!=NULL)
     $sql .= " AND i.userid=".$this->userid;
+  
+  // if requested user id is not the own user id
+  // check for acl 
+  if ($this->userid!=$user->get_userid() &&
+    !$user->is_admin())
+  {
+    if ($user->is_in_group($this->userid))
+    {
+      $sql .= " AND i.gacl>=".ACL_PREVIEW;
+    } 
+    else if ($user->is_member())
+    {
+      $sql .= " AND i.oacl>=".ACL_PREVIEW;
+    }
+    else
+    {
+      $sql .= " AND i.aacl>=".ACL_PREVIEW;
+    }
+  }
   
   // handle tags
   if ($num_tags>1)
