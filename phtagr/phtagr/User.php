@@ -160,28 +160,32 @@ function can_select($image=null)
 
 /** Checks the acl of an image 
   @param image Image object
-  @param flag ACL bit
-  @return True if user is allow to do the action */
+  @param flag ACL bit mask
+  @return True if user is allow to do the action defined by the flag */
 function _check_image_acl($image, $flag)
 {
   if (!isset($image))
     return false;
     
+  // Admin is permitted always
   if ($this->is_admin())
     return true;
   
   if ($image->get_userid()==$this->get_userid())
     return true;
     
-  if ($this->is_in_group($image->get_groupid()) &&
-    $image->get_gacl() AND $flag > 0)
+  // If acls are calculated within if statement, I got wrong evaluation.
+  $gacl=$image->get_gacl() & $flag;
+  $oacl=$image->get_oacl() & $flag;
+  $aacl=$image->get_aacl() & $flag;
+  
+  if ($this->is_in_group($image->get_groupid()) && $gacl > 0)
     return true;
   
-  if ($this->is_member() &&
-    $image->get_oacl() AND $flag > 0)
+  if ($this->is_member() && $oacl > 0)
     return true;
 
-  if ($image->get_aacl() AND $flag > 0)
+  if ($aacl > 0)
     return true;
   
   return false;
@@ -237,8 +241,8 @@ function can_upload()
 function can_upload_size($size=0)
 {
   if ($size<10)
-	return false;
-	
+  return false;
+  
   if ($this->is_admin())
     return true;
 

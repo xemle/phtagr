@@ -58,7 +58,7 @@ function print_content()
     <th>Page size:</th>
     <td>
       <select name=\"pagesize\">
-        <option value=\"0\">choose</option>
+        <option value=\"10\">choose</option>
         <option value=\"10\">10</option>
         <option value=\"20\">20</option>
         <option value=\"50\">50</option>

@@ -11,35 +11,19 @@ Installation:
 
   $ svn checkout svn://inspirationslos.de/phtagr/trunk/phtagr
 
-- Change to the phtagr directory
+- Create a phTagr data directory. Eg. /var/www/phtagr-data. This directory is
+  used for cached image data or uploaded images. For security reasons, this
+  folder should be writeable by the webserver process but not accessable by the
+  browser.
 
-- Create a subdirectory cache which is writeable by the webserver. Eg.
+  $ mkdir -p /var/www/phtagr-data
+  $ chmod 775 /var/www/phtagr-data
+  $ chgrp www-data /var/www/phtar-data
 
-  $ chmod 777 cache
-
-  mysql> CREATE DATABASE sebastian;
-  mysql> GRANT ALL PRIVILEGES ON sebastian.* TO 'sebastian'@'localhost'
-  IDENTIFIED BY '<PASSWD>'; or better
- 
-  $ chgrp www-data cache
-  $ chmod 774 cache
-
-- change the write permission of the subdirectory temporarily
-
-  $ chmod 777 phtagr
-
-- run setup.php
+- Open the phTagr URL from the browser and follow the installtion link.
+  - Enter the phTagr data directory
   - Enter the mysql data
+  - Copy the var.inc file from the phTagr data directory to the phtagr
+    subdirectory which contains all the php objects
   - Create admin account (account name must be "admin")
-
-- Change the permission of subdirectory phtagr to read only
-  
-  $ chmod 755 phtagr
-
-- Change the permission of setup.php to not readable.
-
-  $ chmod 600 phtagr
-
-- Run index.php
-  - To add images, login as admin and browse the filesystem.
 

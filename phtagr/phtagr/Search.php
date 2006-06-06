@@ -309,7 +309,9 @@ function to_form()
 
 /** Create a SQL query from a tag array 
   @param tags Array of tags, could be NULL
-  @param tagop Operator of tags */
+  @param tagop Operator of tags 
+  @return Return the sql statement of the query object corresponding to the
+  Seach parameters */
 function _get_query_from_tags($tags, $tagop=0)
 {
   global $db;
@@ -320,16 +322,8 @@ function _get_query_from_tags($tags, $tagop=0)
   if ($num_tags)
     $sql .= ",$db->tag AS t";
 
-  // check for where condition 
-  if ($this->userid==NULL &&
-    $num_tags==0 && 
-    $this->date_start==0 && $this->date_end==0 &&
-    $this->page_num==0 && $this->page_size==10)
-  {
-    return $sql;
-  }
-    
   $sql .= " WHERE 1=1"; // dummy where clause
+  
   if ($num_tags)
     $sql .= " AND i.id=t.imageid";
 
@@ -341,24 +335,8 @@ function _get_query_from_tags($tags, $tagop=0)
   if ($this->userid!=NULL)
     $sql .= " AND i.userid=".$this->userid;
   
-  // if requested user id is not the own user id
-  // check for acl 
-  if ($this->userid!=$user->get_userid() &&
-    !$user->is_admin())
-  {
-    if ($user->is_in_group($this->userid))
-    {
-      $sql .= " AND i.gacl>=".ACL_PREVIEW;
-    } 
-    else if ($user->is_member())
-    {
-      $sql .= " AND i.oacl>=".ACL_PREVIEW;
-    }
-    else
-    {
-      $sql .= " AND i.aacl>=".ACL_PREVIEW;
-    }
-  }
+  // handle the acl
+  $sql .= $this->_handle_acl();
   
   // handle tags
   if ($num_tags>1)
@@ -403,6 +381,34 @@ function _get_query_from_tags($tags, $tagop=0)
   }
 
   return $sql;
+}
+
+/** Returns sql statement for the where clause which checks the acl */
+function _handle_acl()
+{
+  global $user;
+  
+  $acl='';
+
+  if ($user->is_admin() || 
+    $this->userid == $user->get_userid())
+    return $acl;
+    
+  // if requested user id is not the own user id
+  if ($user->is_in_group($this->userid))
+  {
+    $acl .= " AND i.gacl>=".ACL_PREVIEW;
+  } 
+  else if ($user->is_member())
+  {
+    $acl .= " AND i.oacl>=".ACL_PREVIEW;
+  }
+  else
+  {
+    $acl .= " AND i.aacl>=".ACL_PREVIEW;
+  }
+
+  return $acl;
 }
 
 /** Adds a SQL sort statement 
@@ -483,7 +489,6 @@ function get_query($limit=1)
     $sql.=$this->_handle_limit($limit);
   }
 
-  // For debuggin: echo "<!-- $sql -->"; 
   return $sql; 
 }
 
