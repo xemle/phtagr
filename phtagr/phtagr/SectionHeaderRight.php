@@ -22,7 +22,7 @@ function print_content()
 </form>\n";
   echo "<a href=\"index.php?section=search\">advanced search</a>&nbsp;-&nbsp;\n";
   if (!$user->is_member())
-    echo "<a href=\"index.php?section=account&amp;action=login&amp;pass-section=home\">login</a>\n";
+    echo "<a href=\"index.php?section=account&amp;action=login&amp;goto=home\">login</a>\n";
   else
     echo "<a href=\"index.php?section=account&amp;action=logout\">logout</a>\n";
 }

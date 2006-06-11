@@ -26,8 +26,8 @@ var $orderby;
 
 function Search()
 {
-  $this->imageid=NULL;
-  $this->userid=NULL;
+  $this->imageid=null;
+  $this->userid=null;
   $this->tags=array();
   $this->tagop=0;
   $this->date_start=0;
@@ -40,7 +40,7 @@ function Search()
 
 function set_imageid($imageid)
 {
-  if ($imageid>0)
+  if ($imageid==null || $imageid>0)
     $this->imageid=$imageid;
 }
 
@@ -115,10 +115,12 @@ function set_date_end($end)
   @param pos If is less than 0 set it to 0 */
 function set_pos($pos)
 {
-  if ($pos>0)
+  if ($pos>=0)
     $this->pos=$pos;
   else
     $this->pos=0;
+
+  $this->set_page_num(floor($this->pos / $this->page_size));
 }
 
 function get_pos()
@@ -128,8 +130,10 @@ function get_pos()
 
 function set_page_num($page)
 {
-  if ($page>0)
+  if ($page>=0)
     $this->page_num=$page;
+  else
+    $this->page_num=0;
 }
 
 function get_page_num()
@@ -320,19 +324,19 @@ function _get_query_from_tags($tags, $tagop=0)
     
   $sql="SELECT i.id FROM $db->image AS i";
   if ($num_tags)
-    $sql .= ",$db->tag AS t";
+    $sql .= ",$db->imagetag AS it";
 
   $sql .= " WHERE 1=1"; // dummy where clause
   
   if ($num_tags)
-    $sql .= " AND i.id=t.imageid";
+    $sql .= " AND i.id=it.imageid";
 
   // handle image id
-  if ($this->imageid!=NULL)
+  if ($this->imageid!=null)
     $sql .= " AND i.id=".$this->imageid;
   
   // handle user id
-  if ($this->userid!=NULL)
+  if ($this->userid!=null)
     $sql .= " AND i.userid=".$this->userid;
   
   // handle the acl
@@ -344,7 +348,8 @@ function _get_query_from_tags($tags, $tagop=0)
     $sql .= " AND (";
     for ($i=0; $i<$num_tags; $i++)
     {
-      $sql .= " t.name='" . $tags[$i] . "'";
+      $tagid=$db->tag2id($tags[$i]);
+      $sql .= " it.tagid=$tagid";
       if ($i != $num_tags-1)
         $sql .= " OR";
     }
@@ -352,7 +357,8 @@ function _get_query_from_tags($tags, $tagop=0)
   }
   else if ($num_tags==1)
   {
-    $sql .= " AND t.name='" . $tags[0] . "'";
+    $tagid=$db->tag2id($tags[0]);
+    $sql .= " AND it.tagid=$tagid";
   }
 
   // handle date
@@ -386,6 +392,7 @@ function _get_query_from_tags($tags, $tagop=0)
 /** Returns sql statement for the where clause which checks the acl */
 function _handle_acl()
 {
+  global $db;
   global $user;
   
   $acl='';
@@ -395,13 +402,15 @@ function _handle_acl()
     return $acl;
     
   // if requested user id is not the own user id
-  if ($user->is_in_group($this->userid))
-  {
-    $acl .= " AND i.gacl>=".ACL_PREVIEW;
-  } 
   else if ($user->is_member())
   {
-    $acl .= " AND i.oacl>=".ACL_PREVIEW;
+    $acl .= " AND (
+               (i.groupid in ( 
+                SELECT groupid
+                FROM $db->usergroup
+                WHERE userid=".$user->get_userid().")
+              AND i.gacl>=".ACL_PREVIEW." )";
+    $acl .= " OR i.oacl>=".ACL_PREVIEW." )";
   }
   else
   {

@@ -98,9 +98,9 @@ if (isset($_REQUEST['section']))
   $section=$_REQUEST['section'];
     
   if ($user->is_member() && 
-      $_REQUEST['section']=='account' && isset($_REQUEST['pass-section']))
+      $_REQUEST['section']=='account' && isset($_REQUEST['goto']))
   {
-    $section=$_REQUEST['pass-section'];
+    $section=$_REQUEST['goto'];
   } 
 
   if ($_REQUEST['section']=='account' && $_REQUEST['action']=='logout')

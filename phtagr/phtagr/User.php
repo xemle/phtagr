@@ -104,6 +104,15 @@ function get_aacl()
 /* Return true if the given user is member of a group */
 function is_in_group($groupid=-1)
 {
+  global $db;
+
+  $sql="SELECT userid
+        FROM $db->usergroup
+        WHERE userid=".$this->get_userid()."
+          AND groupid=$groupid";
+  $result=$db->query($sql);
+  if (mysql_num_rows($result)>0)
+    return true;
   return false;
 }
 

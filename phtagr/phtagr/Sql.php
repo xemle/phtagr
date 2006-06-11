@@ -14,11 +14,14 @@ var $prefix;
 /** Table name of users */
 var $user;
 var $group;
+var $usergroup;
 /** Tablename of images */
 var $image;
 /** Tablename of tags */
 var $tag;
+var $imagetag;
 var $set;
+var $imageset;
 /** Table name of preferences */
 var $pref;
 
@@ -56,10 +59,13 @@ function read_config($config='')
   fclose($f);
   $this->prefix=$data['db_prefix'];
   $this->user=$data['db_prefix']."user";
+  $this->usergroup=$data['db_prefix']."usergroup";
   $this->group=$data['db_prefix']."groups";
   $this->image=$data['db_prefix']."image";
   $this->tag=$data['db_prefix']."tag";
+  $this->imagetag=$data['db_prefix']."imagetag";
   $this->set=$data['db_prefix']."sets";
+  $this->imageset=$data['db_prefix']."imageset";
   $this->pref=$data['db_prefix']."pref";
 
   return $data;
@@ -163,30 +169,59 @@ function read_pref($userid=-1)
   return $pref;
 }
 
-// This function will be used later for a three table version of 
-// img->imgtab<-tag
-/* * Gets the tag id of a tag name 
+/** Gets the tag id of a tag name 
   @param tagname name of the tag
   @param create If the tag name does not exists and this flag is true, the tag
   name will be created 
-  @return -1 if the tagnam was not found, id otherwise * /
-function tag2id($tagname, $create=false;)
+  @return -1 if the tagnam was not found, id otherwise */
+function tag2id($tagname, $create=false)
 {
-  $sql="SELECT id FROM $db->tag WHERE name='$tagname'";
+  $sql="SELECT id FROM $this->tag WHERE name='$tagname'";
   $result=$this->query($sql);
   if (!$result)
   {
-    $sql="INSERT INTO $this->tag (name) VALUES('$tagname')";
-    $result=$this->query($sql);
-    if ($result)
-      return $this->tag2id($tagname);
-    else 
     return -1;
+  }
+  else if (mysql_num_rows($result)==0)
+  {
+    if ($create)
+    {
+      $sql="INSERT INTO $this->tag (name) VALUES('$tagname')";
+      $result=$this->query($sql);
+      if ($result)
+        return $this->tag2id($tagname);
+      else 
+        return -1;
+    }
+    else
+    {
+      return -1;
+    }
   }
   $row=mysql_fetch_row($result);
   return $row[0];
 }
-*/
+
+/** Returns the name of a tag by an ID
+  @param id Id of the tag
+  @return Name of the tag, null if it does not exists */
+function id2tag($id)
+{
+  global $db;
+  $sql="SELECT name
+        FROM $db->tag
+        WEHERE id=$id";
+  $result=$db->query($sql);
+  if (!$result)
+  {
+    return null;
+  }
+  else
+  {
+    $row=mysql_fetch_row($result);
+    return $row[0];
+  }
+}
 
 /** creates the phTagr tables an returns true on success */
 function create_tables()
@@ -223,18 +258,34 @@ function create_tables()
   if (!$this->query($sql)) { return false; }
 
   $sql="CREATE TABLE ".$this->prefix."tag (
-        imageid       INT NOT NULL,
+        id            INT NOT NULL AUTO_INCREMENT,
         name          VARCHAR(64) NOT NULL,
         
-        INDEX(name))";
+        INDEX(name),
+        PRIMARY KEY(id))";
+  if (!$this->query($sql)) { return false; }
+  
+  $sql="CREATE TABLE ".$this->prefix."imagetag (
+        imageid       INT,
+        tagid         INT,
+
+        PRIMARY KEY(imageid,tagid))";
   if (!$this->query($sql)) { return false; }
   
   // 'set' is a reserved word
   $sql="CREATE TABLE ".$this->prefix."sets (
-        imageid       INT NOT NULL,
+        id            INT NOT NULL AUTO_INCREMENT,
         name          VARCHAR(64) NOT NULL,
         
-        INDEX(name))";
+        INDEX(name),
+        PRIMARY KEY (id))";
+  if (!$this->query($sql)) { return false; }
+  
+  $sql="CREATE TABLE ".$this->prefix."imageset (
+        imageid       INT,
+        setid         INT,
+
+        PRIMARY KEY(imageid,setid))";
   if (!$this->query($sql)) { return false; }
   
   $sql="CREATE TABLE ".$this->prefix."user (
@@ -248,7 +299,6 @@ function create_tables()
         
         created       DATETIME,
         updated       TIMESTAMP,
-        login         TIMESTAMP,
         fsroot        TEXT DEFAULT '',
         quota         INT,
         quota_interval INT,
@@ -259,21 +309,30 @@ function create_tables()
   // 'group' is a reserved word
   $sql="CREATE TABLE ".$this->prefix."groups (
         id            INT NOT NULL AUTO_INCREMENT,
-        name          VARCHAR(32) NOT NULL,
         userid        INT,
+        name          VARCHAR(32) NOT NULL,
         
         PRIMARY KEY(id))";
   if (!$this->query($sql)) { return false; }
+   
+  $sql="CREATE TABLE ".$this->prefix."usergroups (
+        userid        INT,
+        groupid       INT,
+        
+        PRIMARY KEY(userid,groupid))";
+  if (!$this->query($sql)) { return false; }
      
-  /*
   $sql="CREATE TABLE comment (
         imageid       INT NOT NULL,
-        userid        INT NOT NULL,
+        user          VARCHAR(32),
+        email         VARCHAR(64),
+        date          DATETIME,
         comment       TEXT)";
   if (!$this->query($sql)) { return false; }
-  */
+
   $sql="CREATE TABLE ".$this->prefix."pref (
         userid        INT NOT NULL,
+        groupid       INT NOT NULL,
         name          VARCHAR(64),
         value         VARCHAR(192),
         
@@ -286,7 +345,7 @@ function create_tables()
 /** Deletes all tabels used by the phtagr instance */
 function delete_tables()
 {
-  $sql="DROP TABLE $this->image,$this->user,$this->group,$this->tag,$this->set,$this->pref";
+  $sql="DROP TABLE $this->image,$this->user,$this->group,$this->tag,$this->set,$this->pref,$this->usergroup";
   if (!$this->query($sql)) { return false; }
   return true;
 }

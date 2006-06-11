@@ -195,6 +195,11 @@ function print_login()
     }
   }
   */
+  if ($_REQUEST['user']!='' && $_REQUEST['password']!='')
+  {
+    $this->warning("The username is unkown or the password is incorrect");
+  }
+
   if ($this->message!='') 
   {
     $this->warning($this->message);
@@ -212,7 +217,7 @@ function print_login()
 <input type=\"hidden\" name=\"action\" value=\"login\" />\n";
   if ($this->section!='')
   {
-    echo "<input type=\"hidden\" name=\"pass-section\" value=\"$this->section\" />\n";
+    echo "<input type=\"hidden\" name=\"goto\" value=\"$this->section\" />\n";
   }
 echo "</form>";
 

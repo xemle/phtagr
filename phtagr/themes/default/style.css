@@ -203,22 +203,9 @@ h2 {
   border: 1px solid black;
 }
 
+
 .tags p {
   text-align: justify;
-}
-
-.mini table {
-  text-align: center;
-  padding: 0 0 10px 0;
-}
-
-.mini * img {
-  border: 1px solid black;
-  margin: 0 3px 0 3px;
-}
-
-.mini.prev, .mini.next {
-  margin: 0 3px 0 3px;
 }
 
 td {

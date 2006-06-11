@@ -64,14 +64,12 @@ function execute()
     if ($signle_image>=0 && $signle_image!=$id)
       continue;
       
-    $filename=$this->_get_filename($id);
-    if ($filename=='')
+    $img=new Image($id);
+    if ($img->get_id()!=$id)
       continue;
       
-    $img=new Image($id);
-    
     $iptc=new Iptc();
-    $iptc->load_from_file($filename);
+    $iptc->load_from_file($img->get_filename());
     if ($this->_check_iptc_error(&$iptc))
       continue;
     
@@ -150,7 +148,7 @@ function execute()
     {
       $iptc->save_to_file();
       $image=new Image($id);
-      $image->update();
+      $image->update(true);
       unset($image);
       if ($this->_check_iptc_error(&$iptc))
         return false;

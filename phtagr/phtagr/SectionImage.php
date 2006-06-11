@@ -24,19 +24,19 @@ function print_navigation($search)
   if ($search==null)
     return;
     
-  //echo "<pre>"; print_r($search);echo "</pre>";
   
   $pos=$search->get_pos();
   $page_size=$search->get_page_size();
 
   $cur_pos=$pos;
-  if ($pos>3)
-    $cur_pos-=4;
+  if ($pos>1)
+    $cur_pos-=1;
   else 
     $cur_pos=0;
 
   $search->set_pos($cur_pos);
-  $search->set_page_size($pos-$cur_pos+5);
+  $search->set_page_size($pos-$cur_pos+2);
+  $search->set_imageid(null);
   $sql=$search->get_query(2);
 
   $result=$db->query($sql);
@@ -47,35 +47,35 @@ function print_navigation($search)
   // restore old page style
   $search->set_page_size($page_size);
 
-  echo "\n<div class=\"navigator\">\n<table>\n<tr>\n";
+  echo "\n<div class=\"navigator\">\n";
   while ($row=mysql_fetch_row($result))
   {
+    $search->set_pos($cur_pos);
     // skip current image
     if ($cur_pos==$pos)
     {
+      $url="index.php?section=explorer";
+      $url.=$search->to_URL();
+      echo "<a href=\"$url\">up</a>&nbsp;";
       $cur_pos++;
       continue;
     }
 
-    if ($cur_pos==$pos+1)
-      echo "<td><div class=\"mini.next\">&gt;</div></td>\n";
-
+    $id=$row[0];
     $search->set_pos($cur_pos);
     
-    $thumb=get_mini_URL($row[0]);
-    $url="index.php?section=image&id=$row[0]";
+    $url="index.php?section=image&id=$id";
     $url.=$search->to_URL();
     
-    print "  <td><div class=\"mini\"><a href=\"$url\">"
-      ."<img src=\"$thumb\" /></a></div></td>\n";
-    if ($cur_pos==$pos-1)
-      echo "<td><div class=\"mini.prev\">&lt;</div></td>\n";
+    if ($cur_pos<$pos)
+      echo "<a href=\"$url\">prev</a>&nbsp;";
+    else
+      echo "<a href=\"$url\">next</a>";
+    
     $cur_pos++;
   }
-  echo "</tr></table>\n</div>\n";
+  echo "</div>\n";
 }
-
-
 
 function print_content()
 {
@@ -96,6 +96,9 @@ function print_content()
   $name=$image->get_name();
   
   echo "<h3>$name</h3>\n";
+
+  $this->print_navigation($search);
+  
   $size=$image->get_size(600);
   echo "<p><img src=\"./image.php?id=$id&amp;type=preview\" alt=\"$name\" ".$size[2]."/></p>\n";
   if ($user->can_edit(&$image))

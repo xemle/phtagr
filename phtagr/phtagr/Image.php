@@ -144,15 +144,19 @@ function insert($filename, $is_upload=0)
 
 /** Update the image data if the file modification time is after the
  * synchronization time of the image data set. 
+  @param force If true, force the update procedure. Default is false.
   @return True if the image was updated. False otherwise */
-function update()
+function update($force=false)
 {
   global $db;
   
   $synced=$this->get_synced(true);
   $ctime=filectime($this->get_filename());
-  if ($ctime <= $synced)
+  if (!$force && $ctime < $synced)
+  {
+    $this->debug("Synced: $ctime $synced");
     return false;
+  }
   
   $this->reinsert();
   
@@ -396,10 +400,18 @@ function _insert_exif()
   if (!$exif)
     return false;
     
-  $date=$exif['EXIF']['DateTimeOriginal'];
-
+  if (isset($exif['EXIF']['DateTimeOriginal']))
+    $date="'".$exif['EXIF']['DateTimeOriginal']."'";
+  else
+    $date="NOW()";
+  
+  if (isset($exif['IFD0']['Orientation']))
+    $orientation=$exif['IFD0']['Orientation'];
+  else
+    $orientation=1;
+    
   $sql="UPDATE $db->image 
-        SET date='$date'
+        SET date=$date,orientation=$orientation
         WHERE id=".$this->get_id();
   $result = $db->query($sql);
   if (!$result)
@@ -444,8 +456,9 @@ function _insert_iptc_tags($iptc=null)
   {
     foreach ($tags as $index => $tag)
     {
-      $sql="INSERT INTO $db->tag ( imageid, name )
-            VALUES ( $id, '$tag' )";
+      $tagid=$db->tag2id($tag, true);
+      $sql="INSERT INTO $db->imagetag ( imageid, tagid )
+            VALUES ( $id, $tagid )";
       $result = $db->query($sql);
       if (!$result)
         return false;
@@ -467,7 +480,7 @@ function _insert_iptc_caption($iptc=null)
   $caption=$iptc->get_record('2:120');
   if ($caption!=NULL)
   {
-    $caption=preg_replace("/'/s", "\\'", $caption);
+    $caption=preg_replace("/'/s", "\'", $caption);
     $sql="UPDATE $db->image
           SET caption='$caption'
           WHERE id=$id";
@@ -519,7 +532,7 @@ function remove_tags()
   if (!isset($this->_data))
     return false;
     
-  $sql="DELETE FROM $db->tag
+  $sql="DELETE FROM $db->imagetag
         WHERE imageid=".$this->get_id();
   $result = $db->query($sql);
   if (!$result)
@@ -793,7 +806,20 @@ function print_row_tags()
   global $user;
 
   $id=$this->get_id();
-  $sql="SELECT name FROM $db->tag WHERE imageid=$id";
+  /**
+  $sql="SELECT name 
+        FROM $db->tag 
+        WHERE id IN (
+          SELECT tagid
+          FROM $db->imagetag
+          WHERE imageid=$id
+        )";
+        */
+  $sql="SELECT t.name
+        FROM $db->tag as t, $db->imagetag as it
+        WHERE it.imageid=$id 
+          AND it.tagid=t.id
+        GROUP BY t.name";
   $result = $db->query($sql);
   $tags=array();
   while($row = mysql_fetch_row($result)) {

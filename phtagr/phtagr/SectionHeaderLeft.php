@@ -13,7 +13,11 @@ function SectionHeaderLeft()
 
 function print_content()
 {
-  echo "<h1>phTagr</h1>\n";
+  global $user;
+  echo "<h1>phTagr";
+  if ($user->is_member())
+    echo ": ".$user->get_username();
+  echo "</h1>\n";
 }
 
 }
