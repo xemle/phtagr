@@ -38,9 +38,10 @@ function print_all_tags() {
   
   echo "<div class=\"tags\"><p>Popular tags:</p>\n\n<p>";
   // best of tags
-  $sql="SELECT name,COUNT(name) AS hits 
-        FROM $db->tag 
-        GROUP BY name 
+  $sql="SELECT t.name,COUNT(t.name) AS hits 
+        FROM $db->tag AS t, $db->imagetag AS it 
+        WHERE t.id=it.tagid
+        GROUP BY t.name 
         ORDER BY hits DESC LIMIT 0,50";
   $result = $db->query($sql);
   $tags=array();
