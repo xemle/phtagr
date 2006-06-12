@@ -731,7 +731,7 @@ function print_caption($docut=true)
     else
       $text=&$caption;
     $caption64=base64_encode($caption);
-    echo "$text <span class=\"js-button\" onclick=\"add_form_caption('$id', '$caption64') \">[edit]</span>";
+    echo "$text <span class=\"jsbutton\" onclick=\"add_form_caption('$id', '$caption64') \">[edit]</span>";
   }
   else
   {
@@ -759,7 +759,7 @@ function _cut_caption($id, $caption)
   }
   $result="<span id=\"caption-text-$id\">".$result;
   $b64=base64_encode($caption);
-  $result.=" <span class=\"js-button\" onclick=\"print_caption('$id', '$b64')\">[...]</span>";
+  $result.=" <span class=\"jsbutton\" onclick=\"print_caption('$id', '$b64')\">[...]</span>";
   $result.="</span>";
   return $result;
 }
@@ -847,7 +847,7 @@ function print_row_tags()
       if ($i<$num_tags-1)
         $list.=" ";
     }
-    echo " <span class=\"js-button\" onclick=\"add_form_tags('$id','$list')\">[edit]</span>";
+    echo " <span class=\"jsbutton\" onclick=\"add_form_tags('$id','$list')\">[edit]</span>";
   }
   echo "</td>
   </tr>\n";

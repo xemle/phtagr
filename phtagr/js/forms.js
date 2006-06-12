@@ -87,3 +87,12 @@ function add_form_tags(id, tags)
   document.getElementById(i).focus();
 }
 
+function checkbox(name, value)
+{
+  for (var i=0; i<document.forms[1].elements.length; i++) {
+    var e = document.forms[1].elements[i];
+    if (e.name==name && e.type == 'checkbox') {
+      e.checked = value;
+    }
+  }
+}

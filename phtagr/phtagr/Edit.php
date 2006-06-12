@@ -228,6 +228,9 @@ function execute()
 function print_edit_inputs()
 {
   echo "
+<p>Select <span class=\"jsbutton\" onclick=\"checkbox('images[]',true)\">[all]</span> / 
+  <span class=\"jsbutton\" onclick=\"checkbox('images[]',false)\">[none]</span> images</p>
+
 <fieldset><legend>Edit</legend>
   <table>
     <tr><th>Caption:</th><td><textarea name=\"edit_caption\" cols=\"24\" rows=\"3\" ></textarea></td></tr>
@@ -237,17 +240,21 @@ function print_edit_inputs()
 </fieldset>
 <fieldset><legend>ACL</legend>
   <table>
-    <tr><th>Group</th><th>Members</th><th>All</th><tr>
-    <tr><td><input type=\"radio\" name=\"gacl\" value=\"add\" />
-        <input type=\"radio\" name=\"gacl\" value=\"del\" />
-        <input type=\"radio\" name=\"gacl\" value=\"keep\" checked /></td>
-      <td><input type=\"radio\" name=\"oacl\" value=\"add\" />
-        <input type=\"radio\" name=\"oacl\" value=\"del\" />
-        <input type=\"radio\" name=\"oacl\" value=\"keep\" checked /></td>
-      <td><input type=\"radio\" name=\"aacl\" value=\"add\" />
-        <input type=\"radio\" name=\"aacl\" value=\"del\" />
-        <input type=\"radio\" name=\"aacl\" value=\"keep\" checked /></td></tr>
+    <tr><td></td><th>Group</th><th>Members</th><th>All</th></tr>
+    <tr><td>Preview</td><td>
+        <span class=\"acladd\">&nbsp;<input type=\"radio\" name=\"gacl\" value=\"add\" />&nbsp;</span>
+        <span class=\"aclremove\">&nbsp;<input type=\"radio\" name=\"gacl\" value=\"del\" />&nbsp;</span>
+        <span class=\"aclkeep\">&nbsp;<input type=\"radio\" name=\"gacl\" value=\"keep\" checked />&nbsp;</span></td>
+      <td>
+        <span class=\"acladd\">&nbsp;<input type=\"radio\" name=\"oacl\" value=\"add\" />&nbsp;</span>
+        <span class=\"aclremove\">&nbsp;<input type=\"radio\" name=\"oacl\" value=\"del\" />&nbsp;</span>
+        <span class=\"aclkeep\">&nbsp;<input type=\"radio\" name=\"oacl\" value=\"keep\" checked />&nbsp;</span></td>
+      <td>
+        <span class=\"acladd\">&nbsp;<input type=\"radio\" name=\"aacl\" value=\"add\" />&nbsp;</span>
+        <span class=\"aclremove\">&nbsp;<input type=\"radio\" name=\"aacl\" value=\"del\" />&nbsp;</span>
+        <span class=\"aclkeep\">&nbsp;<input type=\"radio\" name=\"aacl\" value=\"keep\" checked />&nbsp;</span></td></tr>
   </table>
+  Set the access to the selected images. The checkboxes are: Add, remove and keep.
 </fieldset>
 
 <div><input type=\"hidden\" name=\"action\" value=\"edit\"/></div>

@@ -67,6 +67,7 @@ function print_content()
   global $user; 
 
   $sql=$search->get_num_query();
+  $this->comment($sql);
   $result = $db->query($sql);
   if (!$result)
   {
@@ -107,7 +108,7 @@ function print_content()
   $this->print_navigator($url_nav, $page, ceil($count/$search_nav->page_size));
   
   // Formular for further actions
-  echo "<form action=\"index.php\" method=\"post\">";
+  echo "<form name=\"formImages\" action=\"index.php\" method=\"post\">";
 
   echo "<table class=\"tableview\">\n";
   $cell=0;

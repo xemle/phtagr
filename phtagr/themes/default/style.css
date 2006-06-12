@@ -134,7 +134,7 @@ h2 {
   clear: both;
   width: 750px;
   float: left;
-  display block;
+  display: block;
   background: url(./footer.content.png) repeat-y;
 }
 
@@ -179,7 +179,7 @@ h2 {
   width: 10%;
 }
 
-.js-button {
+.jsbutton {
   text-decoration: none;
   font-size: 8pt;
   font-style: normal;
@@ -259,6 +259,17 @@ th {
   background-color: #cccccc;
 }
 
+.acladd {
+  background-color: #80ff80;
+}
+
+.aclremove {
+  background-color: #ff8080;
+}
+
+.aclkeep {
+  background-color: #8080ff;
+}
 
 .debug {
   position: relative;

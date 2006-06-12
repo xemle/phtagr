@@ -9,12 +9,12 @@ include_once("$prefix/Base.php");
 class Sql extends Base
 {
 
-/** Prefix of tables */
-var $prefix; 
 /** Table name of users */
 var $user;
 var $group;
 var $usergroup;
+/** Table name of preferences */
+var $pref;
 /** Tablename of images */
 var $image;
 /** Tablename of tags */
@@ -22,13 +22,11 @@ var $tag;
 var $imagetag;
 var $set;
 var $imageset;
-/** Table name of preferences */
-var $pref;
+var $comment;
 
 function Sql()
 {
   $this->link=NULL;
-  $this->prefix='';
 }
 
 /** Reads the configuration file for the mySQL database 
@@ -57,15 +55,17 @@ function read_config($config='')
     }
   }
   fclose($f);
-  $this->prefix=$data['db_prefix'];
   $this->user=$data['db_prefix']."user";
   $this->usergroup=$data['db_prefix']."usergroup";
+  // 'group' is a reserved word
   $this->group=$data['db_prefix']."groups";
   $this->image=$data['db_prefix']."image";
   $this->tag=$data['db_prefix']."tag";
   $this->imagetag=$data['db_prefix']."imagetag";
+  // 'set' is a reserved word
   $this->set=$data['db_prefix']."sets";
   $this->imageset=$data['db_prefix']."imageset";
+  $this->comment=$data['db_prefix']."comment";
   $this->pref=$data['db_prefix']."pref";
 
   return $data;
@@ -226,7 +226,7 @@ function id2tag($id)
 /** creates the phTagr tables an returns true on success */
 function create_tables()
 { 
-  $sql="CREATE TABLE ".$this->prefix."image (
+  $sql="CREATE TABLE $this->image (
         id            INT NOT NULL AUTO_INCREMENT,
         userid        INT NOT NULL,
         groupid       INT NOT NULL,
@@ -257,7 +257,7 @@ function create_tables()
         PRIMARY KEY(id))";
   if (!$this->query($sql)) { return false; }
 
-  $sql="CREATE TABLE ".$this->prefix."tag (
+  $sql="CREATE TABLE $this->tag (
         id            INT NOT NULL AUTO_INCREMENT,
         name          VARCHAR(64) NOT NULL,
         
@@ -265,7 +265,7 @@ function create_tables()
         PRIMARY KEY(id))";
   if (!$this->query($sql)) { return false; }
   
-  $sql="CREATE TABLE ".$this->prefix."imagetag (
+  $sql="CREATE TABLE $this->imagetag (
         imageid       INT,
         tagid         INT,
 
@@ -273,7 +273,7 @@ function create_tables()
   if (!$this->query($sql)) { return false; }
   
   // 'set' is a reserved word
-  $sql="CREATE TABLE ".$this->prefix."sets (
+  $sql="CREATE TABLE $this->set (
         id            INT NOT NULL AUTO_INCREMENT,
         name          VARCHAR(64) NOT NULL,
         
@@ -281,20 +281,20 @@ function create_tables()
         PRIMARY KEY (id))";
   if (!$this->query($sql)) { return false; }
   
-  $sql="CREATE TABLE ".$this->prefix."imageset (
+  $sql="CREATE TABLE $this->imageset (
         imageid       INT,
         setid         INT,
 
         PRIMARY KEY(imageid,setid))";
   if (!$this->query($sql)) { return false; }
   
-  $sql="CREATE TABLE ".$this->prefix."user (
+  $sql="CREATE TABLE $this->user (
         id            INT NOT NULL AUTO_INCREMENT,
         name          VARCHAR(32) NOT NULL,
         password      VARCHAR(32),
         
         surname       VARCHAR(32),
-        forname       VARCHAR(32),
+        lastname      VARCHAR(32),
         email         VARCHAR(64),
         
         created       DATETIME,
@@ -306,8 +306,7 @@ function create_tables()
         PRIMARY KEY(id))";
   if (!$this->query($sql)) { return false; }
   
-  // 'group' is a reserved word
-  $sql="CREATE TABLE ".$this->prefix."groups (
+  $sql="CREATE TABLE $this->group (
         id            INT NOT NULL AUTO_INCREMENT,
         userid        INT,
         name          VARCHAR(32) NOT NULL,
@@ -315,14 +314,14 @@ function create_tables()
         PRIMARY KEY(id))";
   if (!$this->query($sql)) { return false; }
    
-  $sql="CREATE TABLE ".$this->prefix."usergroups (
+  $sql="CREATE TABLE $this->usergroup (
         userid        INT,
         groupid       INT,
         
         PRIMARY KEY(userid,groupid))";
   if (!$this->query($sql)) { return false; }
      
-  $sql="CREATE TABLE comment (
+  $sql="CREATE TABLE $this->comment (
         imageid       INT NOT NULL,
         user          VARCHAR(32),
         email         VARCHAR(64),
@@ -330,7 +329,7 @@ function create_tables()
         comment       TEXT)";
   if (!$this->query($sql)) { return false; }
 
-  $sql="CREATE TABLE ".$this->prefix."pref (
+  $sql="CREATE TABLE $this->pref (
         userid        INT NOT NULL,
         groupid       INT NOT NULL,
         name          VARCHAR(64),
@@ -345,7 +344,14 @@ function create_tables()
 /** Deletes all tabels used by the phtagr instance */
 function delete_tables()
 {
-  $sql="DROP TABLE $this->image,$this->user,$this->group,$this->tag,$this->set,$this->pref,$this->usergroup";
+  $sql="DROP TABLE 
+          $this->user,
+          $this->group,   $this->usergroup,
+          $this->pref,
+          $this->image,
+          $this->tag,     $this->imagetag,
+          $this->set,     $this->imageset,
+          $this->comment";
   if (!$this->query($sql)) { return false; }
   return true;
 }
@@ -357,7 +363,11 @@ function delete_images()
   if (!$this->query($sql)) { return false; }
   $sql="DELETE FROM $this->tag";
   if (!$this->query($sql)) { return false; }
+  $sql="DELETE FROM $this->imagetag";
+  if (!$this->query($sql)) { return false; }
   $sql="DELETE FROM $this->set";
+  if (!$this->query($sql)) { return false; }
+  $sql="DELETE FROM $this->imageset";
   if (!$this->query($sql)) { return false; }
   return true;
 }
