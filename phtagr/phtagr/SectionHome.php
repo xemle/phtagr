@@ -1,9 +1,9 @@
 <?php
 
 global $prefix;
-include_once("$prefix/SectionBase.php");
-include_once("$prefix/Image.php");
-include_once("$prefix/Search.php");
+include_once("$phtagr_prefix/SectionBase.php");
+include_once("$phtagr_prefix/Image.php");
+include_once("$phtagr_prefix/Search.php");
 
 /**
   @class SectionHome Prints the initial page with tags and popular images.

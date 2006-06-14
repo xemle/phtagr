@@ -1,7 +1,7 @@
 <?php
 
-global $prefix;
-include_once("$prefix/SectionBase.php");
+global $phtagr_prefix;
+include_once("$phtagr_prefix/SectionBase.php");
 
 class SectionMenu extends SectionBase
 {

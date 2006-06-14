@@ -2,9 +2,9 @@
 
 global $prefix;
 
-include_once("$prefix/SectionBase.php");
-include_once("$prefix/SectionAccount.php");
-include_once("$prefix/Image.php");
+include_once("$phtagr_prefix/SectionBase.php");
+include_once("$phtagr_prefix/SectionAccount.php");
+include_once("$phtagr_prefix/Image.php");
 
 class SectionSetup extends SectionBase
 {

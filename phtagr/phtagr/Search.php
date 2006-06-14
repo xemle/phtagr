@@ -1,6 +1,6 @@
 <?php
 
-include_once("$prefix/Base.php");
+include_once("$phtagr_prefix/Base.php");
 /**
   @class Search Mapping between URLs, HTML forms and SQL queries.
 */

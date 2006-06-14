@@ -1,6 +1,6 @@
 <?php
 
-include_once("$prefix/SectionBase.php");
+include_once("$phtagr_prefix/SectionBase.php");
 
 class PageBase extends SectionBase
 {
@@ -16,6 +16,8 @@ function PageBase($title='phtagr', $cssclass='page')
 
 function print_header_html()
 {
+  global $phtagr_url_prefix;
+
   $theme="default";
   
   echo "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>
@@ -25,12 +27,12 @@ function print_header_html()
 
   echo "<head>\n";
   echo "<title>".$this->title."</title>\n";
-  echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"themes/$theme/style.css\"/>\n";
-  if (file_exists("themes/$theme/favicon.ico"))
+  echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"$phtagr_url_prefix/themes/$theme/style.css\"/>\n";
+  if (file_exists("$phtagr_prefix/themes/$theme/favicon.ico"))
   {
-    echo "<link rel=\"shortcut icon\" type=\"image/x-icon\" href=\"themes/$theme/favicon.ico\" />\n"; 
+    echo "<link rel=\"shortcut icon\" type=\"image/x-icon\" href=\"$phtagr_url_prefix/themes/$theme/favicon.ico\" />\n"; 
   }
-  echo "<script src=\"js/forms.js\" type=\"text/javascript\"></script>\n";
+  echo "<script src=\"$phtagr_url_prefix/js/forms.js\" type=\"text/javascript\"></script>\n";
   echo "</head>\n\n";
 }
 

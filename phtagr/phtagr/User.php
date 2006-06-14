@@ -1,7 +1,7 @@
 <?php
 
-include_once("$prefix/Base.php");
-include_once("$prefix/Constants.php");
+include_once("$phtagr_prefix/Base.php");
+include_once("$phtagr_prefix/Constants.php");
 
 /** This class handles the authentication of an user.
 

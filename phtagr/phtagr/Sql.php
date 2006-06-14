@@ -1,7 +1,7 @@
 <?php
 
 global $prefix;
-include_once("$prefix/Base.php");
+include_once("$phtagr_prefix/Base.php");
 
 /** 
   @class Sql Handles the SQL connection and queries
@@ -27,6 +27,7 @@ var $comment;
 function Sql()
 {
   $this->link=NULL;
+  $this->prefix='';
 }
 
 /** Reads the configuration file for the mySQL database 
@@ -36,39 +37,28 @@ function Sql()
 function read_config($config='')
 {
   if ($config=='')
-    $config=getcwd()."/phtagr/vars.inc";
+    $config=getcwd().DIRECTORY_SEPARATOR."config.php";
 
   if (!file_exists($config) || !is_readable($config))
   {
     return false;
   }
-  
-  $f=fopen($config, "r");
-  $data=array();
-  while($line=fscanf($f, "%s\n"))
-  {
-    // do not read comments, which are starting with '#' sign
-    if ($line[0]{0}!='#')
-    {
-      list($name, $value)=split("=", $line[0]);
-      $data[$name]=$value;
-    }
-  }
-  fclose($f);
-  $this->user=$data['db_prefix']."user";
-  $this->usergroup=$data['db_prefix']."usergroup";
-  // 'group' is a reserved word
-  $this->group=$data['db_prefix']."groups";
-  $this->image=$data['db_prefix']."image";
-  $this->tag=$data['db_prefix']."tag";
-  $this->imagetag=$data['db_prefix']."imagetag";
-  // 'set' is a reserved word
-  $this->set=$data['db_prefix']."sets";
-  $this->imageset=$data['db_prefix']."imageset";
-  $this->comment=$data['db_prefix']."comment";
-  $this->pref=$data['db_prefix']."pref";
+ 
+  include_once "$config";
 
-  return $data;
+  $this->prefix=$db_prefix;
+  $this->user=$db_prefix."user";
+  $this->usergroup=$db_prefix."usergroup";
+  $this->group=$db_prefix."groups";
+  $this->image=$db_prefix."image";
+  $this->tag=$db_prefix."tag";
+  $this->imagetag=$db_prefix."imagetag";
+  $this->set=$db_prefix."sets";
+  $this->imageset=$db_prefix."imageset";
+  $this->comment=$db_prefix."comment";
+  $this->pref=$db_prefix."pref";
+
+  return true;
 }
 
 /** Connect to the sql database 
@@ -76,16 +66,34 @@ function read_config($config='')
   @return true on success, false otherwise */
 function connect($config='')
 {
-  $data=$this->read_config($config);
-  if ($data==false)
-    return false;
-    
+  if ($config=='')
+    $config=getcwd().DIRECTORY_SEPARATOR."config.php";
+
+  if (file_exists($config) && is_readable($config))
+  {
+    include "$config";
+  }
+  
+  $this->prefix=$db_prefix;
+  $this->user=$db_prefix."user";
+  $this->usergroup=$db_prefix."usergroup";
+  $this->group=$db_prefix."groups";
+  $this->image=$db_prefix."image";
+  $this->tag=$db_prefix."tag";
+  $this->imagetag=$db_prefix."imagetag";
+  $this->set=$db_prefix."sets";
+  $this->imageset=$db_prefix."imageset";
+  $this->comment=$db_prefix."comment";
+  $this->pref=$db_prefix."pref";
+
   $this->link=@mysql_connect(
-                $data['db_host'],
-                $data['db_user'],
-                $data['db_password']);
+                $db_host,
+		$db_user,
+		$db_password);
   if ($this->link)
-    return mysql_select_db($data['db_database'], $this->link);
+    return mysql_select_db($db_database, $this->link);
+ 
+  return false;
 }
 
 /** Test a mySQL connection 
@@ -120,6 +128,40 @@ function test_database($host, $username, $password, $database)
     mysql_close($this->link);
   
   return true;
+}
+
+/** Checks whether the required tables for phTagr already exist
+ @result If none exist we return 0, if all exist 1, if some of the
+         required exist -1.
+ * */
+function tables_exist()
+{
+  $existing = array ();
+
+  $existing[$this->image]=0;
+  $existing[$this->user]=0;
+  $existing[$this->group]=0;
+  $existing[$this->tag]=0;
+  $existing[$this->set]=0;
+  $existing[$this->pref]=0;
+ 
+  $sql="SHOW TABLES";
+  $result=$this->query($sql);
+  while ($row=mysql_fetch_row($result))
+   {
+    $existing[$row[0]]=1;
+  }
+
+  $n_existing= $existing[$this->image] + $existing[$this->user] +
+    $existing[$this->group] + $existing[$this->tag] +
+    $existing[$this->set] + $existing[$this->pref];
+
+  if (!$n_existing)
+    return 0;
+  if ($n_existing==6)
+    return 1;
+  
+  return -1;
 }
 
 /** Sql query an return the result. 
@@ -264,7 +306,7 @@ function create_tables()
         INDEX(name),
         PRIMARY KEY(id))";
   if (!$this->query($sql)) { return false; }
-  
+
   $sql="CREATE TABLE $this->imagetag (
         imageid       INT,
         tagid         INT,
@@ -280,7 +322,7 @@ function create_tables()
         INDEX(name),
         PRIMARY KEY (id))";
   if (!$this->query($sql)) { return false; }
-  
+
   $sql="CREATE TABLE $this->imageset (
         imageid       INT,
         setid         INT,
@@ -293,7 +335,7 @@ function create_tables()
         name          VARCHAR(32) NOT NULL,
         password      VARCHAR(32),
         
-        surname       VARCHAR(32),
+        firstname       VARCHAR(32),
         lastname      VARCHAR(32),
         email         VARCHAR(64),
         

@@ -6,24 +6,10 @@ Installation:
   mysql> GRANT ALL PRIVILEGES ON phtagr.* TO 'phtagr'@'localhost' \
       IDENTIFIED BY '<PASSWD>'; 
 
-- Checkout the new branch from svn to a webbrowser directory like
+- Checkout the newest branch from svn to a webbrowser directory like
   ~/.public_html or /var/www
 
   $ svn checkout svn://inspirationslos.de/phtagr/trunk/phtagr
 
-- Create a phTagr data directory. Eg. /var/www/phtagr-data. This directory is
-  used for cached image data or uploaded images. For security reasons, this
-  folder should be writeable by the webserver process but not accessable by the
-  browser.
-
-  $ mkdir -p /var/www/phtagr-data
-  $ chmod 775 /var/www/phtagr-data
-  $ chgrp www-data /var/www/phtar-data
-
-- Open the phTagr URL from the browser and follow the installtion link.
-  - Enter the phTagr data directory
-  - Enter the mysql data
-  - Copy the var.inc file from the phTagr data directory to the phtagr
-    subdirectory which contains all the php objects
-  - Create admin account (account name must be "admin")
-
+- Open the index.php with your webbrowser and follow the installation
+  instructions.

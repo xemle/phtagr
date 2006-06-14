@@ -2,10 +2,10 @@
 
 global $prefix;
 
-include_once("$prefix/SectionBase.php");
-include_once("$prefix/User.php");
-include_once("$prefix/Image.php");
-include_once("$prefix/Sql.php");
+include_once("$phtagr_prefix/SectionBase.php");
+include_once("$phtagr_prefix/User.php");
+include_once("$phtagr_prefix/Image.php");
+include_once("$phtagr_prefix/Sql.php");
 
 class SectionUpload extends SectionBase
 {

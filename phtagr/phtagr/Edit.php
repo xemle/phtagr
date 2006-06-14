@@ -1,8 +1,8 @@
 <?php
 
-global $prefix;
-include_once("$prefix/Iptc.php");
-include_once("$prefix/Base.php");
+global $phtagr_prefix;
+include_once("$phtagr_prefix/Iptc.php");
+include_once("$phtagr_prefix/Base.php");
 
 /** This class handles modifications and checks the access rights.
   @class Edit */
@@ -53,15 +53,23 @@ function execute()
 
   if (!isset($_REQUEST['images']) && !isset($_REQUEST['image']))
     return;
- 
-  $signle_image=-1;
-  if (isset($_REQUEST['image']))
-    $signle_image=$_REQUEST['image'];
 
-  $images=array_merge($_REQUEST['images'], $_REQUEST['image']);
+  $images=array();
+
+  if (isset($_REQUEST['image']))
+    $images=array($_REQUEST['image']);
+
+  if (isset($_REQUEST['images']))
+    $images=array_merge($_REQUEST['images'], $images);
+ 
+  $single_image=-1;
+
+  if (isset($_REQUEST['image']))
+    $single_image=$_REQUEST['image'];
+
   foreach ($images as $id)
   {
-    if ($signle_image>=0 && $signle_image!=$id)
+    if ($single_image>=0 && $single_image!=$id)
       continue;
       
     $img=new Image($id);

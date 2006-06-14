@@ -1,7 +1,7 @@
 <?php
 
 global $prefix;
-include_once("$prefix/SectionBase.php");
+include_once("$phtagr_prefix/SectionBase.php");
 
 class SectionHeaderRight extends SectionBase
 {

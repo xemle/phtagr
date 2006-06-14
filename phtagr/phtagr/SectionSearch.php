@@ -3,10 +3,10 @@
 global $prefix;
 global $db;
 
-include_once("$prefix/SectionBase.php");
-include_once("$prefix/Search.php");
-include_once("$prefix/Edit.php");
-include_once("$prefix/Sql.php");
+include_once("$phtagr_prefix/SectionBase.php");
+include_once("$phtagr_prefix/Search.php");
+include_once("$phtagr_prefix/Edit.php");
+include_once("$phtagr_prefix/Sql.php");
 
 
 class SectionSearch extends SectionBase

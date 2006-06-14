@@ -1,7 +1,7 @@
 <?php
 
-include_once("$prefix/Search.php");
-include_once("$prefix/Base.php");
+include_once("$phtagr_prefix/Search.php");
+include_once("$phtagr_prefix/Base.php");
 
 /** 
   @class Image Create thumbnails, image previews, synchronize 
@@ -834,7 +834,7 @@ function print_row_tags()
 
   for ($i=0; $i<$num_tags; $i++)
   {
-    echo "<a href=\"index?section=explorer&amp;tags=" . $tags[$i] . "\">" . $tags[$i] . "</a>";
+    echo "<a href=\"index.php?section=explorer&amp;tags=" . $tags[$i] . "\">" . $tags[$i] . "</a>";
     if ($i<$num_tags-1)
         echo ", ";
   }

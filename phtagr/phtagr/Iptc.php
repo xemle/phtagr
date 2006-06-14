@@ -3,7 +3,7 @@
  Thanks to Christian Tratz, who has written a nice IPTC howto on
  http://www.codeproject.com/bitmap/iptc.asp
 */
-include_once("$prefix/Base.php");
+include_once("$phtagr_prefix/Base.php");
 
 /** @class Iptc
   Reads and write IPTC tags from a given JPEG file. */

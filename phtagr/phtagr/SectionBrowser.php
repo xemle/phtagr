@@ -1,8 +1,8 @@
 <?php
 
 global $prefix;
-include_once("$prefix/SectionBase.php");
-include_once("$prefix/Image.php");
+include_once("$phtagr_prefix/SectionBase.php");
+include_once("$phtagr_prefix/Image.php");
 
 class SectionBrowser extends SectionBase
 {
