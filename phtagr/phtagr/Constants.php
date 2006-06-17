@@ -12,4 +12,8 @@ define("ACL_PREVIEW_MASK", 0xf0);
 define("ACL_METADATA", 0x02);
 define("ACL_EDIT", 0x01);
 
+define("ACL_GROUP", 0);
+define("ACL_OTHER", 1);
+define("ACL_ALL", 2);
+
 ?>

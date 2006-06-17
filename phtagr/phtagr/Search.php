@@ -420,23 +420,43 @@ function _handle_acl()
   return $acl;
 }
 
+function _get_column_order()
+{
+  switch ($this->orderby) {
+  case 'date':
+  case '-date':
+    return ",date";
+  case 'ranking':
+  case '-ranking':
+    return ",ranking";
+  case 'newest':
+  case '-newest':
+    return ",created";
+  default:
+    return '';
+  }
+}
+
 /** Adds a SQL sort statement 
   @return Retruns an SQL order by statement string */
 function _handle_orderby()
 {
-  if ($this->orderby=='date')
+  switch ($this->orderby) {
+  case 'date':
     return " ORDER BY i.date DESC";
-  else if ($this->orderby=='-date')
+  case '-date':
     return " ORDER BY i.date ASC";
-  else if ($this->orderby=='ranking')
+  case 'ranking':
     return " ORDER BY i.ranking DESC";
-  else if ($this->orderby=='-ranking')
+  case '-ranking':
     return " ORDER BY i.ranking ASC";
-  else if ($this->orderby=='newest')
+  case 'newest':
     return " ORDER BY i.created DESC";
-  else if ($this->orderby=='-newest')
+  case '-newest':
     return " ORDER BY i.created ASC";
-  return '';
+  default:
+    return '';
+  }
 }
 
 /** Adds the SQL limit statement 
@@ -465,7 +485,7 @@ function _handle_limit($limit=0)
   size and page num. And 2 means limit by pos and size. 
   @return SQL query string 
   @see _handle_limit */
-function get_query($limit=1)
+function get_query($limit=1, $order=true)
 {
   global $db;
   $pos_tags=array();
@@ -482,19 +502,23 @@ function get_query($limit=1)
   
   if ($num_pos_tags && $num_neg_tags)
   {
-    $sql="SELECT id FROM $db->image AS i";
-    $sql.=" WHERE id IN ( ";
+    $sql="SELECT id";
+    if ($order)
+      $sql.=$this->get_column_order();
+    $sql.=" FROM (";
     $sql.=$this->_get_query_from_tags($pos_tags, $this->tagop);
-    $sql.=" ) AND id NOT IN ( ";
+    $sql.=" ) AS i AND id NOT IN ( ";
     $sql.=$this->_get_query_from_tags($neg_tags, 1);
     $sql.=" )";
-    $sql.=$this->_handle_orderby();
+    if ($order)
+      $sql.=$this->_handle_orderby();
     $sql.=$this->_handle_limit($limit);
   }
   else 
   {
     $sql=$this->_get_query_from_tags($pos_tags, $this->tagop);
-    $sql.=$this->_handle_orderby();
+    if ($order)
+      $sql.=$this->_handle_orderby();
     $sql.=$this->_handle_limit($limit);
   }
 
@@ -505,9 +529,9 @@ function get_query($limit=1)
 function get_num_query()
 {
   global $db;
-  $sql="SELECT COUNT(*) FROM $db->image AS i WHERE id IN ( ";
-  $sql .= $this->get_query(0);
-  $sql .= " )";
+  $sql="SELECT COUNT(*) FROM ( ";
+  $sql .= $this->get_query(0, false);
+  $sql .= " ) AS num";
   return $sql;
 }
 

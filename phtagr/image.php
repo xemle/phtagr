@@ -6,6 +6,6 @@ if (file_exists ('config.php'))
 if (!isset ($phtagr_prefix))
   $phtagr_prefix='./phtagr';
 
-include "$phtagr_prefix/image.php";
+include "$phtagr_prefix/imagerequest.php";
 
 ?> 

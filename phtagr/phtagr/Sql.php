@@ -22,6 +22,8 @@ var $tag;
 var $imagetag;
 var $set;
 var $imageset;
+var $location;
+var $imagelocation;
 var $comment;
 
 function Sql()
@@ -40,11 +42,9 @@ function read_config($config='')
     $config=getcwd().DIRECTORY_SEPARATOR."config.php";
 
   if (!file_exists($config) || !is_readable($config))
-  {
     return false;
-  }
  
-  include_once "$config";
+  include "$config";
 
   $this->prefix=$db_prefix;
   $this->user=$db_prefix."user";
@@ -55,6 +55,8 @@ function read_config($config='')
   $this->imagetag=$db_prefix."imagetag";
   $this->set=$db_prefix."sets";
   $this->imageset=$db_prefix."imageset";
+  $this->location=$db_prefix."location";
+  $this->imagelocation=$db_prefix."imagelocation";
   $this->comment=$db_prefix."comment";
   $this->pref=$db_prefix."pref";
 
@@ -66,30 +68,21 @@ function read_config($config='')
   @return true on success, false otherwise */
 function connect($config='')
 {
+  if (!$this->read_config($config))
+    return false;
+  
   if ($config=='')
     $config=getcwd().DIRECTORY_SEPARATOR."config.php";
 
-  if (file_exists($config) && is_readable($config))
-  {
-    include "$config";
-  }
-  
-  $this->prefix=$db_prefix;
-  $this->user=$db_prefix."user";
-  $this->usergroup=$db_prefix."usergroup";
-  $this->group=$db_prefix."groups";
-  $this->image=$db_prefix."image";
-  $this->tag=$db_prefix."tag";
-  $this->imagetag=$db_prefix."imagetag";
-  $this->set=$db_prefix."sets";
-  $this->imageset=$db_prefix."imageset";
-  $this->comment=$db_prefix."comment";
-  $this->pref=$db_prefix."pref";
+  if (!file_exists($config) || !is_readable($config))
+    return false;
+ 
+  include "$config";
 
   $this->link=@mysql_connect(
                 $db_host,
-		$db_user,
-		$db_password);
+                $db_user,
+                $db_password);
   if ($this->link)
     return mysql_select_db($db_database, $this->link);
  
@@ -130,35 +123,45 @@ function test_database($host, $username, $password, $database)
   return true;
 }
 
+/* @return array of all used or required table names */
+function _get_table_names()
+{
+  return array(
+    $this->user,
+    $this->group,
+    $this->usergroup,
+    $this->pref,
+    $this->image,
+    $this->tag,
+    $this->imagetag,
+    $this->set,
+    $this->imageset,
+    $this->location,
+    $this->imagelocation,
+    $this->comment);
+}
+
 /** Checks whether the required tables for phTagr already exist
- @result If none exist we return 0, if all exist 1, if some of the
-         required exist -1.
- * */
+  @result If none exist we return 0, if all exist 1, if some of the required
+  exist -1.
+ */
 function tables_exist()
 {
-  $existing = array ();
+  $tables = $this->_get_table_names();
 
-  $existing[$this->image]=0;
-  $existing[$this->user]=0;
-  $existing[$this->group]=0;
-  $existing[$this->tag]=0;
-  $existing[$this->set]=0;
-  $existing[$this->pref]=0;
- 
-  $sql="SHOW TABLES";
-  $result=$this->query($sql);
-  while ($row=mysql_fetch_row($result))
-   {
-    $existing[$row[0]]=1;
+  $n_existing=0;
+  foreach ($tables as $tbl)
+  {
+    $sql="SHOW TABLES LIKE '$tbl'";
+    $this->debug($sql);
+    $result=$this->query($sql);
+    if ($result && mysql_num_rows($result)==1)
+      $n_existing++;
   }
-
-  $n_existing= $existing[$this->image] + $existing[$this->user] +
-    $existing[$this->group] + $existing[$this->tag] +
-    $existing[$this->set] + $existing[$this->pref];
-
+  
   if (!$n_existing)
     return 0;
-  if ($n_existing==6)
+  if ($n_existing==count($tables))
     return 1;
   
   return -1;
@@ -268,6 +271,49 @@ function id2tag($id)
 /** creates the phTagr tables an returns true on success */
 function create_tables()
 { 
+  $sql="CREATE TABLE $this->user (
+        id            INT NOT NULL AUTO_INCREMENT,
+        name          VARCHAR(32) NOT NULL,
+        password      VARCHAR(32),
+        
+        firstname     VARCHAR(32),
+        lastname      VARCHAR(32),
+        email         VARCHAR(64),
+        
+        created       DATETIME,
+        updated       TIMESTAMP,
+        fsroot        TEXT DEFAULT '',
+        quota         INT,
+        quota_interval INT,
+        data          BLOB,             /* For optional and individual values */
+
+        PRIMARY KEY(id))";
+  if (!$this->query($sql)) { return false; }
+
+  $sql="CREATE TABLE $this->pref (
+        userid        INT NOT NULL,
+        groupid       INT NOT NULL,
+        name          VARCHAR(64),
+        value         VARCHAR(192),
+        
+        INDEX(userid))";
+  if (!$this->query($sql)) { return false; }
+  
+  $sql="CREATE TABLE $this->group (
+        id            INT NOT NULL AUTO_INCREMENT,
+        userid        INT,
+        name          VARCHAR(32) NOT NULL,
+        
+        PRIMARY KEY(id))";
+  if (!$this->query($sql)) { return false; }
+   
+  $sql="CREATE TABLE $this->usergroup (
+        userid        INT,
+        groupid       INT,
+        
+        PRIMARY KEY(userid,groupid))";
+  if (!$this->query($sql)) { return false; }
+  
   $sql="CREATE TABLE $this->image (
         id            INT NOT NULL AUTO_INCREMENT,
         userid        INT NOT NULL,
@@ -292,6 +338,7 @@ function create_tables()
         clicks        INT DEFAULT 0,      /* count of detailed view */
         lastview      DATETIME,           /* last time of detailed view */
         ranking       FLOAT DEFAULT 0,    /* image ranking */
+        data          BLOB,               /* for optinal data */
         
         INDEX(date),
         INDEX(ranking),
@@ -330,39 +377,22 @@ function create_tables()
         PRIMARY KEY(imageid,setid))";
   if (!$this->query($sql)) { return false; }
   
-  $sql="CREATE TABLE $this->user (
+  $sql="CREATE TABLE $this->location (
         id            INT NOT NULL AUTO_INCREMENT,
-        name          VARCHAR(32) NOT NULL,
-        password      VARCHAR(32),
+        name          VARCHAR(64) NOT NULL,
+        type          TINYINT UNSIGNED,    /* Country, State, City, ... */
         
-        firstname       VARCHAR(32),
-        lastname      VARCHAR(32),
-        email         VARCHAR(64),
-        
-        created       DATETIME,
-        updated       TIMESTAMP,
-        fsroot        TEXT DEFAULT '',
-        quota         INT,
-        quota_interval INT,
+        INDEX(name),
+        PRIMARY KEY (id))";
+  if (!$this->query($sql)) { return false; }
 
-        PRIMARY KEY(id))";
+  $sql="CREATE TABLE $this->imagelocation (
+        imageid       INT,
+        locationid    INT,
+
+        PRIMARY KEY(imageid,locationid))";
   if (!$this->query($sql)) { return false; }
-  
-  $sql="CREATE TABLE $this->group (
-        id            INT NOT NULL AUTO_INCREMENT,
-        userid        INT,
-        name          VARCHAR(32) NOT NULL,
-        
-        PRIMARY KEY(id))";
-  if (!$this->query($sql)) { return false; }
-   
-  $sql="CREATE TABLE $this->usergroup (
-        userid        INT,
-        groupid       INT,
-        
-        PRIMARY KEY(userid,groupid))";
-  if (!$this->query($sql)) { return false; }
-     
+    
   $sql="CREATE TABLE $this->comment (
         imageid       INT NOT NULL,
         user          VARCHAR(32),
@@ -371,34 +401,25 @@ function create_tables()
         comment       TEXT)";
   if (!$this->query($sql)) { return false; }
 
-  $sql="CREATE TABLE $this->pref (
-        userid        INT NOT NULL,
-        groupid       INT NOT NULL,
-        name          VARCHAR(64),
-        value         VARCHAR(192),
-        
-        INDEX(userid))";
-  if (!$this->query($sql)) { return false; }
-
   return true;
 }
 
 /** Deletes all tabels used by the phtagr instance */
 function delete_tables()
 {
-  $sql="DROP TABLE 
-          $this->user,
-          $this->group,   $this->usergroup,
-          $this->pref,
-          $this->image,
-          $this->tag,     $this->imagetag,
-          $this->set,     $this->imageset,
-          $this->comment";
+  $tables=$this->_get_table_names();
+  $sql="DROP TABLES IF EXISTS ";
+  for($i=0; $i<count($tables); $i++)
+  {
+    $sql.=$tables[$i];
+    if ($i<count($tables)-1)
+      $sql.=",";
+  }
   if (!$this->query($sql)) { return false; }
   return true;
 }
 
-/** Delete all image information */
+/** Delete all image information from the databases */
 function delete_images()
 {
   $sql="DELETE FROM $this->image";
@@ -410,6 +431,12 @@ function delete_images()
   $sql="DELETE FROM $this->set";
   if (!$this->query($sql)) { return false; }
   $sql="DELETE FROM $this->imageset";
+  if (!$this->query($sql)) { return false; }
+  $sql="DELETE FROM $this->location";
+  if (!$this->query($sql)) { return false; }
+  $sql="DELETE FROM $this->imagelocation";
+  if (!$this->query($sql)) { return false; }
+  $sql="DELETE FROM $this->comment";
   if (!$this->query($sql)) { return false; }
   return true;
 }

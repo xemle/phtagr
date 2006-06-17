@@ -154,7 +154,7 @@ function update($force=false)
   $ctime=filectime($this->get_filename());
   if (!$force && $ctime < $synced)
   {
-    $this->debug("Synced: $ctime $synced");
+    //$this->debug("Synced: $ctime $synced");
     return false;
   }
   
@@ -480,7 +480,6 @@ function _insert_iptc_caption($iptc=null)
   $caption=$iptc->get_record('2:120');
   if ($caption!=NULL)
   {
-    $caption=preg_replace("/'/s", "\'", $caption);
     $sql="UPDATE $db->image
           SET caption='$caption'
           WHERE id=$id";
@@ -889,7 +888,7 @@ function print_preview($search=null)
   {
     echo "  <tr>
     <th>Select:</th>
-    <td><input type=\"checkbox\" name=\"images[]\" value=\"$id\" /></td>
+    <td><input type=\"checkbox\" name=\"images[]\" value=\"$id\" onclick=\"uncheck('selectall')\" /></td>
   </tr>\n";
   }
   

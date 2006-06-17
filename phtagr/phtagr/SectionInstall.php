@@ -331,7 +331,6 @@ function exec_stage_tables()
       $this->warning("Could not init the tables correctly");
       return false;
     }
-    $this->success("Initialization of the tables successful!");
   }
 
   return true;

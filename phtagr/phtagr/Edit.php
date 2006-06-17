@@ -3,6 +3,7 @@
 global $phtagr_prefix;
 include_once("$phtagr_prefix/Iptc.php");
 include_once("$phtagr_prefix/Base.php");
+include_once("$phtagr_prefix/Constants.php");
 
 /** This class handles modifications and checks the access rights.
   @class Edit */
@@ -44,6 +45,7 @@ function _check_iptc_error($iptc)
   }
   return false;
 }
+
 
 /** Executes the edits. This function also checks the rights to execute the operation */
 function execute()
@@ -162,82 +164,115 @@ function execute()
         return false;
     }
 
-    if (!$user->can_edit(&$img))
-      continue;
-        
-    if (isset($_REQUEST['aacl']))
-    {
-      switch ($_REQUEST['aacl'])
-      {
-        case 'add':
-          $sql="UPDATE $db->image
-                SET aacl=aacl | ".ACL_PREVIEW.",
-                    oacl=oacl | ".ACL_PREVIEW.",
-                    gacl=gacl | ".ACL_PREVIEW."
-                WHERE id=$id";
-          $result=$db->query($sql);
-          break;
-        case 'del':
-          $sql="UPDATE $db->image
-                SET aacl=aacl & ~".ACL_PREVIEW_MASK." 
-                WHERE id=$id";
-          $result=$db->query($sql);
-          break;
-        default:
-      }
-    }
-    if (isset($_REQUEST['oacl']))
-    {
-      switch ($_REQUEST['oacl'])
-      {
-        case 'add':
-          $sql="UPDATE $db->image
-                SET oacl=oacl | ".ACL_PREVIEW.",
-                    gacl=gacl | ".ACL_PREVIEW."
-                WHERE id=$id";
-          $result=$db->query($sql);
-          break;
-        case 'del':
-          $sql="UPDATE $db->image
-                SET aacl=aacl & ~".ACL_PREVIEW_MASK.",
-                    oacl=oacl & ~".ACL_PREVIEW_MASK." 
-                WHERE id=$id";
-          $result=$db->query($sql);
-          break;
-        default:
-      }
-    }
-    if (isset($_REQUEST['gacl']))
-    {
-      switch ($_REQUEST['gacl'])
-      {
-        case 'add':
-          $sql="UPDATE $db->image
-                SET gacl=gacl | ".ACL_PREVIEW."
-                WHERE id=$id";
-          $result=$db->query($sql);
-          break;
-        case 'del':
-          $sql="UPDATE $db->image
-                SET aacl=aacl & ~".ACL_PREVIEW_MASK.",
-                    oacl=oacl & ~".ACL_PREVIEW_MASK.", 
-                    gacl=gacl & ~".ACL_PREVIEW_MASK." 
-                WHERE id=$id";
-          $result=$db->query($sql);
-          break;
-        default:
-      }
-    }
+    $this->_handle_request_acl(&$img);
   }
   return true;
+}
+
+/* Permit a new flag. The ACL flag influence lower levels. E.g. if a member is
+ * allowed to access some data, the group member is also allowed.
+  @param acl Pointer to acl array
+  @param level Level of flag. 0 for group, 1 for member, 2 for all
+  @param flag ACL flag */
+function _add_acl(&$acl, $level, $flag)
+{
+  switch ($level) {
+  case ACL_GROUP:
+    $acl[ACL_GROUP]|=$flag;
+    break;
+  case ACL_OTHER:
+    $acl[ACL_OTHER]|=$flag;
+    $acl[ACL_GROUP]|=$flag;
+    break;
+  case ACL_ALL:
+    $acl[ACL_ALL]|=$flag;
+    $acl[ACL_OTHER]|=$flag;
+    $acl[ACL_GROUP]|=$flag;
+    break;
+  default:
+  }
+}
+
+/* Deny a resource. The ACL flag influence higher levels. E.g. if a member is
+ * denied to access some data, a non-member is also denied.
+  @param acl Pointer to acl array
+  @param level Level of flag. 0 for group, 1 for member, 2 for all
+  @param mask Mask to deny higher data. */
+function _del_acl(&$acl, $level, $mask)
+{
+  switch ($level) {
+  case ACL_GROUP:
+    $acl[ACL_GROUP]&=!$mask;
+    $acl[ACL_OTHER]&=!$mask;
+    $acl[ACL_ALL]&=!$mask;
+    break;
+  case ACL_OTHER:
+    $acl[ACL_OTHER]&=!$mask;
+    $acl[ACL_ALL]&=!$mask;
+    break;
+  case ACL_ALL:
+    $acl[ACL_ALL]&=!$mask;
+    break;
+  default:
+  }
+}
+
+/** 
+  @param acl ACL array of current image
+  @param op Operant. Currenty only string 'add' or 'del' is supported
+  @param flag Permit bit of the current ACL
+  @param mask Deny mask of current ACL */
+function _handle_acl(&$acl, $op, $level, $flag, $mask)
+{
+  if ($op=='add')
+    $this->_add_acl(&$acl, $level, $flag);
+  else if ($op=='del')
+    $this->_del_acl(&$acl, $level, $mask);
+}
+
+/** Handle the ACL requests of an specific image
+  @param img Pointer to the image object
+  @return True on success, false otherwise 
+  @todo Update image only if acl changes */
+function _handle_request_acl(&$img)
+{
+  global $user;
+  global $db;
+  
+  if (!$img)
+    return false;
+  if (!$user->can_edit(&$img))
+    return false;
+    
+  $acl=array();
+  $acl[ACL_GROUP]=$img->get_gacl();
+  $acl[ACL_OTHER]=$img->get_oacl();
+  $acl[ACL_ALL]=$img->get_aacl();
+  
+  if (isset($_REQUEST['aacl']))
+    $this->_handle_acl(&$acl, $_REQUEST['aacl'], ACL_ALL, ACL_PREVIEW, ACL_PREVIEW_MASK);
+  if (isset($_REQUEST['oacl']))
+    $this->_handle_acl(&$acl, $_REQUEST['oacl'], ACL_OTHER, ACL_PREVIEW, ACL_PREVIEW_MASK);
+  if (isset($_REQUEST['gacl']))
+    $this->_handle_acl(&$acl, $_REQUEST['gacl'], ACL_GROUP, ACL_PREVIEW, ACL_PREVIEW_MASK);
+
+  $id=$img->get_id();
+  $sql="UPDATE $db->image
+        SET gacl=".$acl[ACL_GROUP].
+        ",oacl=".$acl[ACL_OTHER].
+        ",aacl=".$acl[ACL_ALL]."
+        WHERE id=$id";
+  if ($db->query($sql))
+    return true;
+
+  return false;
 }
 
 /** Print the inputs to edit IPTC tags like comment, tags or sets. */
 function print_edit_inputs()
 {
   echo "
-<p>Select <span class=\"jsbutton\" onclick=\"checkbox('images[]',true)\">[all]</span> / 
-  <span class=\"jsbutton\" onclick=\"checkbox('images[]',false)\">[none]</span> images</p>
+<p><input type=\"checkbox\" id=\"selectall\" onclick=\"checkbox('selectall', 'images[]')\"> Select all</p>
 
 <fieldset><legend>Edit</legend>
   <table>
@@ -248,21 +283,38 @@ function print_edit_inputs()
 </fieldset>
 <fieldset><legend>ACL</legend>
   <table>
-    <tr><td></td><th>Group</th><th>Members</th><th>All</th></tr>
-    <tr><td>Preview</td><td>
-        <span class=\"acladd\">&nbsp;<input type=\"radio\" name=\"gacl\" value=\"add\" />&nbsp;</span>
-        <span class=\"aclremove\">&nbsp;<input type=\"radio\" name=\"gacl\" value=\"del\" />&nbsp;</span>
-        <span class=\"aclkeep\">&nbsp;<input type=\"radio\" name=\"gacl\" value=\"keep\" checked />&nbsp;</span></td>
-      <td>
-        <span class=\"acladd\">&nbsp;<input type=\"radio\" name=\"oacl\" value=\"add\" />&nbsp;</span>
-        <span class=\"aclremove\">&nbsp;<input type=\"radio\" name=\"oacl\" value=\"del\" />&nbsp;</span>
-        <span class=\"aclkeep\">&nbsp;<input type=\"radio\" name=\"oacl\" value=\"keep\" checked />&nbsp;</span></td>
-      <td>
-        <span class=\"acladd\">&nbsp;<input type=\"radio\" name=\"aacl\" value=\"add\" />&nbsp;</span>
-        <span class=\"aclremove\">&nbsp;<input type=\"radio\" name=\"aacl\" value=\"del\" />&nbsp;</span>
-        <span class=\"aclkeep\">&nbsp;<input type=\"radio\" name=\"aacl\" value=\"keep\" checked />&nbsp;</span></td></tr>
+    <tr>
+      <td></td>
+      <th colspan=\"3\">Friends</th>
+      <th colspan=\"3\">Members</th>
+      <th colspan=\"3\">All</th>
+    </tr>
+    <tr>
+      <td></td>
+      <td>permit</td>
+      <td>deny</td>
+      <td>keep</td>
+      <td>permit</td>
+      <td>deny</td>
+      <td>keep</td>
+      <td>permit</td>
+      <td>deny</td>
+      <td>keep</td>
+    </tr>
+    <tr>
+      <td>Preview</td>
+      <td class=\"acladd\"><input type=\"radio\" name=\"gacl\" value=\"add\" /></td>
+      <td class=\"acldel\"><input type=\"radio\" name=\"gacl\" value=\"del\" /></td>
+      <td class=\"aclkeep\"><input type=\"radio\" name=\"gacl\" value=\"keep\" checked /></td>
+      <td class=\"acladd\"><input type=\"radio\" name=\"oacl\" value=\"add\" /></td>
+      <td class=\"acldel\"><input type=\"radio\" name=\"oacl\" value=\"del\" /></td>
+      <td class=\"aclkeep\"><input type=\"radio\" name=\"oacl\" value=\"keep\" checked /></td>
+      <td class=\"acladd\"><input type=\"radio\" name=\"aacl\" value=\"add\" /></td>
+      <td class=\"acldel\"><input type=\"radio\" name=\"aacl\" value=\"del\" /></td>
+      <td class=\"aclkeep\"><input type=\"radio\" name=\"aacl\" value=\"keep\" checked /></td>
+    </tr>
   </table>
-  Set the access to the selected images. The checkboxes are: Add, remove and keep.
+  Set the access level to the selected images.
 </fieldset>
 
 <div><input type=\"hidden\" name=\"action\" value=\"edit\"/></div>

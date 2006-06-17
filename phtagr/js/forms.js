@@ -87,12 +87,28 @@ function add_form_tags(id, tags)
   document.getElementById(i).focus();
 }
 
-function checkbox(name, value)
+/** Checks all checkboxes
+  @param id Id of the refered checkbox
+  @param name Name of the checkbox names
+*/
+function checkbox(id, name)
 {
-  for (var i=0; i<document.forms[1].elements.length; i++) {
+  var cb=document.getElementById(id);
+  if (!cb)
+    return;
+    
+  for (var i=0; i<document.forms["formImages"].elements.length; i++) {
     var e = document.forms[1].elements[i];
     if (e.name==name && e.type == 'checkbox') {
-      e.checked = value;
+      e.checked = cb.checked;
     }
   }
+}
+
+function uncheck(id)
+{
+  var cb=document.getElementById(id);
+  if (!cb)
+    return;
+  cb.checked=false;
 }
