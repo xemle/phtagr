@@ -1,5 +1,14 @@
 <?php
 
+define("INSTALLER_STAGE_WELCOME", "0");
+define("INSTALLER_STAGE_DIRECTORY", "1");
+define("INSTALLER_STAGE_DATABASE", "2");
+define("INSTALLER_STAGE_TABLES", "3");
+define("INSTALLER_STAGE_ADMIN", "4");
+define("INSTALLER_STAGE_CLEANUP", "5");
+define("INSTALLER_STAGE_DONE", "6");
+
+
 global $prefix;
 
 include_once("$phtagr_prefix/SectionBase.php");
@@ -38,25 +47,34 @@ function _create_dir($dir)
   return true;
 }
 
+function clear_session()
+{
+  if (isset($_SESSION['directory']))
+    unset ($_SESSION['directory']);
+  if (isset($_SESSION['install_id']))
+    unset ($_SESSION['install_id']);
+}
+
 /** Insert default values to the table
   @return true on success. false on failure */
 function init_tables()
 {
   global $db;
   $directory="";
-  if (isset($_REQUEST["directory"]))
-    $directory=$_REQUEST["directory"];
+  $data_directory="";
+
+  if (isset($_SESSION["directory"]))
+    $directory=$_SESSION["directory"];
   else
   {
     $this->error("No directory specified!");
     return false;
   }
 
-  if (strrpos($directory,DIRECTORY_SEPARATOR) < strlen($directory) - 1)
-    $directory=$directory.DIRECTORY_SEPARATOR;
-  
+  $data_directory=$_SESSION["data_directory"];
+
   // image cache
-  $cache=$directory."data/cache";
+  $cache=$data_directory."cache";
   if (!$this->_create_dir($cache))
     return false;
   
@@ -66,7 +84,7 @@ function init_tables()
   if (!$result) return false;
 
   // upload dir
-  $upload=$directory."data/upload";
+  $upload=$data_directory."upload";
   if (!$this->_create_dir($upload))
     return false;
 
@@ -85,23 +103,31 @@ function SectionInstall()
   $this->stage=0;
 }
 
-function exec_stage_authenticate()
+function check_install_id ($id='')
 {
   $auth_file=getcwd().DIRECTORY_SEPARATOR."login.txt";
 
   if (file_exists($auth_file))
   {
     $f=fopen($auth_file,"r");
-    $id=fgets($f,256); // This should be long enough for the md5 sum
-    $id=trim($id);
+    $install_id=fgets($f,256); // This should be long enough for the md5 sum
+    $install_id=trim($install_id);
     fclose($f);
-    $install_id="";
-    if (isset($_REQUEST['id']))
-      $install_id=$_REQUEST['id'];
-    else
-      return false;
-
     if ($id==$install_id)
+      return true;
+  }
+  return false;
+}
+
+function exec_stage_authenticate()
+{
+  if (isset($_REQUEST['install_id']))
+  {
+    $_SESSION['install_id']=$_REQUEST['install_id'];
+  }
+  if (isset($_SESSION['install_id']))
+  {
+    if ($this->check_install_id($_SESSION['install_id']))
       return true;
   }
 
@@ -131,15 +157,37 @@ function check_file_permissions($directory, $file)
 function exec_stage_directory()
 {
   $directory="";
+  $data_directory="";
+  $ext_data_directory=true;
+
   if (isset($_REQUEST['directory']))
     $directory=$_REQUEST['directory'];
   else
+  {
+    $this->error("No directory specified!");
     return false;
- 
+  }
   if (strrpos($directory,DIRECTORY_SEPARATOR) < strlen($directory) - 1)
     $directory=$directory.DIRECTORY_SEPARATOR;
 
+  if (isset($_REQUEST['data_directory']))
+    $data_directory=$_REQUEST['data_directory'];
+
+  if (strrpos($data_directory,DIRECTORY_SEPARATOR) < strlen($data_directory) - 1)
+    $data_directory=$data_directory.DIRECTORY_SEPARATOR;
+
+  if ($data_directory=="")
+  {
+    $data_directory=$directory."data".DIRECTORY_SEPARATOR;
+    $ext_data_directory=false;
+  }
+ 
   $dir_writable=is_writable($directory);
+
+  if ($ext_data_directory && !is_writable($data_directory))
+  {
+    $this->error ("Your specified data directory is not writable!");
+  }
 
   if (file_exists($directory))
   {
@@ -185,14 +233,20 @@ function exec_stage_directory()
       return false;
     }
 
-    if(!$this->check_file_permissions($directory,"data/"))
+    if (!$ext_data_directory)
     {
-      $this->error("Data directory is not writable!");
-      return false;
+      if (!$this->check_file_permissions($directory,"data".DIRECTORY_SEPARATOR))
+      {
+        $this->error("Data directory is not writable!");
+        return false;
+      }
+
+      if(!file_exists($directory."data".DIRECTORY_SEPARATOR))
+        mkdir($directory."data");
     }
 
-    if(!file_exists($directory."data".DIRECTORY_SEPARATOR))
-      mkdir($directory."data");
+    $_SESSION['directory']=$directory;
+    $_SESSION['data_directory']=$data_directory;
 
     return true;
   }
@@ -209,24 +263,26 @@ function exec_stage_database()
   // check sql parameters
   global $db;
   $directory="";
-  if (isset($_REQUEST["directory"]))
-    $directory=$_REQUEST["directory"];
+  if (isset($_SESSION["directory"]))
+    $directory=$_SESSION["directory"];
   else
   {
     $this->error("No directory specified!");
     return false;
   }
+  if (isset($_SESSION["data_directory"]))
+    $data_directory=$_SESSION["data_directory"];
 
   if (strrpos($directory,DIRECTORY_SEPARATOR) < strlen($directory) - 1)
     $directory=$directory.DIRECTORY_SEPARATOR;
 
-  $result=$db->test_database($_REQUEST['host'], 
+  $error=$db->test_database($_REQUEST['host'], 
                  $_REQUEST['user'], 
                  $_REQUEST['password'], 
                  $_REQUEST['database']);
-  if ($result!=true)
+  if ($error)
   {
-    $this->error($result);
+    $this->error($error);
     return false;
   }
 
@@ -249,15 +305,26 @@ function exec_stage_database()
 
   fwrite($f, '<?php
 // Configuration file for phTagr
-   
+// 
+// Please only modify if you know what you are doing!
+
+// Database settings
 $db_host=\''.$_REQUEST['host'].'\';
 $db_user=\''.$_REQUEST['user'].'\';
 $db_password=\''.$_REQUEST['password'].'\';
 $db_database=\''.$_REQUEST['database'].'\';
 // Prefix of phTagr tables.
 $db_prefix=\''.$_REQUEST['prefix'].'\';
+
+// The prefix to the actual phtagr sources
 $phtagr_prefix=\''.getcwd().DIRECTORY_SEPARATOR."phtagr".DIRECTORY_SEPARATOR.'\';
+
+// The url to the phtagr base (needed for including the
+// css and javascript files
 $phtagr_url_prefix=\''.$url_prefix.'\';
+
+// The directory for the images, upload, cache, etc.
+$phtagr_data_directory=\''.$data_directory.'\';
 
 ?>');
 
@@ -281,8 +348,8 @@ function exec_stage_tables()
   global $db;
 
   $directory='';
-  if(isset($_REQUEST['directory']))
-    $directory=$_REQUEST['directory'];
+  if(isset($_SESSION['directory']))
+    $directory=$_SESSION['directory'];
   else
   {
     $this->error("No directory specified!");
@@ -345,10 +412,8 @@ function exec_stage_admin()
   $password="";
   $confirm="";
 
-  if (isset($_REQUEST['id']))
-    $install_id=$_REQUEST['id'];
-  if (isset($_REQUEST['directory']))
-    $directory=$_REQUEST['directory'];
+  if (isset($_SESSION['directory']))
+    $directory=$_SESSION['directory'];
   if (isset($_REQUEST['password']))
     $password=$_REQUEST['password'];
   if (isset($_REQUEST['confirm']))
@@ -387,17 +452,17 @@ function exec_stage_admin()
 function print_stage_welcome()
 {
   $install_id="";
-  if (isset($_REQUEST['id']))
-    $install_id=$_REQUEST['id'];
-  else 
-    $install_id=md5(time()*rand());
+  
+  $install_id=md5(time()*rand());
 
-  if (isset($_REQUEST['id']))
+  if (isset($_SESSION['install_id']))
   {
     $this->error("Could not open $curr_path"."login.txt or it contained wrong installation id!");
+    unset($_SESSION['install_id']);
   }
 
-//  $install_id="ca0f54141d795ebb3c32223f246ba453"; //DEBUG
+  $this->clear_session();
+
   $curr_path=getcwd().DIRECTORY_SEPARATOR;
 
   echo "<h3>Welcome to the installation of phTagr</h3>
@@ -411,7 +476,8 @@ a file <code><b>login.txt</b></code> in the directory
 <form method=\"post\">
 <input type=\"hidden\" name=\"section\" value=\"install\" />
 <input type=\"hidden\" name=\"action\" value=\"authenticate\" />
-<input type=\"hidden\" name=\"id\" value=\"$install_id\" />
+<input type=\"hidden\" name=\"install_id\" value=\"$install_id\" />
+
 
 <input type=\"submit\" value=\"Next\" />
 </form>
@@ -424,15 +490,8 @@ function print_stage_directory()
   $install_id="";
   $directory=getcwd().DIRECTORY_SEPARATOR;
 
-  if (isset($_REQUEST['id']))
-    $install_id=$_REQUEST['id'];
-  else
-  {
-    $this->error("No installation id specified!");
-    return;
-  }
-  if (isset($_REQUEST['directory']))
-    $directory=$_REQUEST['directory'];
+  if (isset($_SESSION['directory']))
+    $directory=$_SESSION['directory'];
 
 //  $directory="/home/martin/public_html/phtagr_test/"; //DEBUG
 
@@ -460,7 +519,6 @@ directories and files in it need write access by the web server:</p>
 <form method=\"post\">
 <input type=\"hidden\" name=\"section\" value=\"install\" />
 <input type=\"hidden\" name=\"action\" value=\"directory\" />
-<input type=\"hidden\" name=\"id\" value=\"$install_id\" />
 
 <table>
 <tr>
@@ -468,10 +526,27 @@ directories and files in it need write access by the web server:</p>
 <td><input type=\"text\" name=\"directory\" value=\"$directory\" size=\"50\" /></td>
 </tr>
 </table>
+</p>
+
+";
+$this->info ("You can optionally specify a datadirectory that is not directly
+accessible by the web browser. By doing so you can use a more secure accessing
+mode in which the web server includes the images in his reply and the images
+are not accessible through direct links.");
+
+echo "
+<p>
+<table>
+<tr>
+<td>Data directory:</td>
+<td><input type=\"text\" name=\"data_directory\" value=\"\" size=\"50\" /></td>
+</tr>
+</table>
+</p>
 
 <input type=\"submit\" value=\"Next\" />&nbsp;&nbsp;<input type=\"Reset\" value=\"Reset\" />
-</p>
 </form>
+</p>
 ";
 }
 
@@ -480,15 +555,8 @@ function print_stage_database()
   $install_id="";
   $directory=getcwd().DIRECTORY_SEPARATOR;
 
-  if (isset($_REQUEST['id']))
-    $install_id=$_REQUEST['id'];
-  else
-  {
-    $this->error("No installation id specified!");
-    return;
-  }
-  if (isset($_REQUEST['directory']))
-    $directory=$_REQUEST['directory'];
+  if (isset($_SESSION['directory']))
+    $directory=$_SESSION['directory'];
   else
   {
     $this->error("No directory specified!");
@@ -503,8 +571,6 @@ in the parameters for your database in the following form:</p>
 <form method=\"post\">
 <input type=\"hidden\" name=\"section\" value=\"install\" />
 <input type=\"hidden\" name=\"action\" value=\"database\" />
-<input type=\"hidden\" name=\"id\" value=\"$install_id\" />
-<input type=\"hidden\" name=\"directory\" value=\"$directory\" />
 
 <table>
   <tr>
@@ -540,15 +606,8 @@ function print_stage_tables()
   $install_id="";
   $directory=getcwd().DIRECTORY_SEPARATOR;
 
-  if (isset($_REQUEST['id']))
-    $install_id=$_REQUEST['id'];
-  else
-  {
-    $this->error("No installation id specified!");
-    return;
-  }
-  if (isset($_REQUEST['directory']))
-    $directory=$_REQUEST['directory'];
+  if (isset($_SESSION['directory']))
+    $directory=$_SESSION['directory'];
   else
   {
     $this->error("No directory specified!");
@@ -560,14 +619,12 @@ function print_stage_tables()
 <p>It seems as if there is already a phTagr installation in that database with
 the given prefix. To solve this conflict you can either use the existing
 database, delete the existing database or return to
-<a href=\"index.php?section=install&action=database&id=$install_id&directory=$directory\">this</a> step and use another prefix or a different database
+<a href=\"index.php?section=install&action=database&directory=$directory\">this</a> step and use another prefix or a different database
 this installation.</p>
 
 <form method=\"post\">
 <input type=\"hidden\" name=\"section\" value=\"install\" />
 <input type=\"hidden\" name=\"action\" value=\"tables\" />
-<input type=\"hidden\" name=\"id\" value=\"$install_id\" />
-<input type=\"hidden\" name=\"directory\" value=\"$directory\" />
 
 <p>
 <input type=\"radio\" name=\"resolve\" value=\"use\">Use the existing database.<br>
@@ -584,10 +641,8 @@ function print_stage_admin()
   $install_id="";
   $directory="";
 
-  if (isset($_REQUEST['id']))
-    $install_id=$_REQUEST['id'];
-  if (isset($_REQUEST['directory']))
-    $directory=$_REQUEST['directory'];
+  if (isset($_SESSION['directory']))
+    $directory=$_SESSION['directory'];
 
   echo "<h3>Creation of the admin account</h3>
 
@@ -597,8 +652,6 @@ account of this phTagr instance.</p>
 <form method=\"post\">
 <input type=\"hidden\" name=\"section\" value=\"install\" />
 <input type=\"hidden\" name=\"action\" value=\"admin\" />
-<input type=\"hidden\" name=\"id\" value=\"$install_id\" />
-<input type=\"hidden\" name=\"directory\" value=\"$directory\" />
 
 <table>
   <tr><td>Username:</td><td><input type=\"text\" name=\"name\" value=\"admin\" disabled/><td></tr>
@@ -615,6 +668,7 @@ account of this phTagr instance.</p>
 
 function print_stage_cleanup()
 {
+  $this->clear_session();
   echo "<h3>Almost done!</h3>
 
 <p>Please delete delete now the file
@@ -632,75 +686,80 @@ function print_content()
   
   echo "<h2>Installation</h2>\n";
   $action=$_REQUEST['action'];
-
+  
   if (!$this->exec_stage_authenticate())
   {
     $action=""; 
-    $this->stage=0;
+    $this->stage=INSTALLER_STAGE_WELCOME;
   }
 
   if ($action=='authenticate')
   {
-    if ($this->exec_stage_authenticate())
-      $this->stage=1;
-    else
-      $this->stage=0;
+    if($this->exec_stage_authenticate())
+      $this->stage=INSTALLER_STAGE_DIRECTORY;
   }
-  else if ($action=='directory')
+  if ($action=='directory')
   {
     if ($this->exec_stage_directory())
-      $this->stage=2;
+      $this->stage=INSTALLER_STAGE_DATABASE;
     else
-      $this->stage=1;
+      $this->stage=INSTALLER_STAGE_DIRECTORY;
   }
   else if ($action=='database')
   {
     if ($this->exec_stage_database())
     {
-      if ($db->tables_exist())
-        $this->stage=3;
-      else
+      $table_status=$db->tables_exist();
+
+      if ($table_status==1)
+        $this->stage=INSTALLER_STAGE_TABLES;
+      else if ($table_status==0)
       {
         $this->exec_stage_tables();
         if ($this->init_tables())
-        $this->stage=4;
+        $this->stage=INSTALLER_STAGE_ADMIN;
+      }
+      else
+      {
+        $this->error("Some of the required tables do exist already. Please use another prefix or delete them manually!");
+	$this->stage=INSTALLER_STAGE_DATABASE;
       }
     }
     else
-      $this->stage=2;
+      $this->stage=INSTALLER_STAGE_DATABASE;
   }
   else if ($action=='tables')
   {
     if ($this->exec_stage_tables())
     {
-      $this->stage=4;
+      $this->stage=INSTALLER_STAGE_ADMIN;
       if (isset($_REQUEST['resolve']) && $_REQUEST['resolve']=="use")
-        $this->stage=5;
+        $this->stage=INSTALLER_STAGE_CLEANUP;
     }
     else
-      $this->stage=3;
+      $this->stage=INSTALLER_STAGE_TABLES;
   }
-   else if ($action=='admin')
+  else if ($action=='admin')
   {
     if ($this->exec_stage_admin())
-      $this->stage=5;
+      $this->stage=INSTALLER_STAGE_CLEANUP;
     else
-      $this->stage=4;
+      $this->stage=INSTALLER_STAGE_ADMIN;
   }
-   else if ($action=='cleanup')
+  else if ($action=='cleanup')
   {
     if ($this->exec_stage_cleanup())
-      $this->stage=6;
+      $this->stage=INSTALLER_STAGE_DONE;
     else
-      $this->stage=5;
+      $this->stage=INSTALLER_STAGE_CLEANUP;
   }
-  
+ 
   switch ($this->stage) {
-  case 1: $this->print_stage_directory(); break;
-  case 2: $this->print_stage_database(); break;
-  case 3: $this->print_stage_tables(); break;
-  case 4: $this->print_stage_admin(); break;
-  case 5: $this->print_stage_cleanup(); break;
+  case INSTALLER_STAGE_DIRECTORY: $this->print_stage_directory(); break;
+  case INSTALLER_STAGE_DATABASE: $this->print_stage_database(); break;
+  case INSTALLER_STAGE_TABLES: $this->print_stage_tables(); break;
+  case INSTALLER_STAGE_ADMIN: $this->print_stage_admin(); break;
+  case INSTALLER_STAGE_CLEANUP: $this->print_stage_cleanup(); break;
   default: $this->print_stage_welcome(); break;
   }
 }

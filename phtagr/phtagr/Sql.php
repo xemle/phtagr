@@ -90,11 +90,11 @@ function connect($config='')
 }
 
 /** Test a mySQL connection 
- @return true on success, error string otherwise
+ @return NULL on success, error string otherwise
 */
 function test_database($host, $username, $password, $database)
 {
-  $prefix=intval(rand(1, 100))."-";
+  $prefix=intval(rand(1, 100))."_";
   
   error_reporting(0);
   $link=mysql_connect($host,$username,$password);
@@ -105,22 +105,22 @@ function test_database($host, $username, $password, $database)
     return "Could not connect to the database";
     
   // check to create tables
-  $sql="CREATE TABLE ${prefix}create-test (
+  $sql="CREATE TABLE ${prefix}create_test (
           id INT NOT NULL AUTO_INCREMENT,
           PRIMARY KEY(id))";
   $result=mysql_query($sql);
   if ($result==false)
-    return "Could not create a table";
+    return "Could not create a test table";
 
-  $sql="DROP TABLE IF EXISTS create-test";
+  $sql="DROP TABLE IF EXISTS ${prefix}create_test";
   $result=mysql_query($sql);
   if (!$result)
-    return "Could not delete tables";
+    return "Could not delete test tables";
   
   if ($this->link)
     mysql_close($this->link);
   
-  return true;
+  return NULL;
 }
 
 /* @return array of all used or required table names */
@@ -153,7 +153,7 @@ function tables_exist()
   foreach ($tables as $tbl)
   {
     $sql="SHOW TABLES LIKE '$tbl'";
-    $this->debug($sql);
+//    $this->debug($sql);
     $result=$this->query($sql);
     if ($result && mysql_num_rows($result)==1)
       $n_existing++;
