@@ -67,7 +67,7 @@ function init_tables()
     $directory=$_SESSION["directory"];
   else
   {
-    $this->error("No directory specified!");
+    $this->error("Invalid installation session!");
     return false;
   }
 
@@ -228,11 +228,6 @@ function exec_stage_directory()
 	}
       }
     }
-    if (!$this->check_file_permissions($directory,"config.php"))
-    {
-      $this->error($directory."config.php is not writable!");
-      return false;
-    }
 
     if (!$ext_data_directory)
     {
@@ -268,7 +263,7 @@ function exec_stage_database()
     $directory=$_SESSION["directory"];
   else
   {
-    $this->error("No directory specified!");
+    $this->error("Invalid installation session!");
     return false;
   }
   if (isset($_SESSION["data_directory"]))
@@ -290,7 +285,10 @@ function exec_stage_database()
   $this->success("Connection to the database successful!");
   
   // check for writing the minimalistic configure file
-  $config=$directory."config.php";
+  if (!$this->check_file_permissions ($directory, "config.php"))
+    $config=$data_directory."config.php";
+  else
+    $config=$directory."config.php";
   
   // write minimalistic configuration file
   $f=fopen($config, "w+");
@@ -353,14 +351,21 @@ function exec_stage_tables()
     $directory=$_SESSION['directory'];
   else
   {
-    $this->error("No directory specified!");
+    $this->error("Invalid installation session!");
     return false;
   }
+
+  $data_directory=$_SESSION['data_directory'];
 
   if (strrpos($directory,DIRECTORY_SEPARATOR) < strlen($directory) - 1)
     $directory=$directory.DIRECTORY_SEPARATOR;
 
+  // Per default we use the config file in the $data_directory. So the
+  // config file in the $directory does not need to be writable.
   $config=$directory."config.php";
+  if (file_exists($data_directory."config.php"))
+    $config=$data_directory."config.php";
+
   $resolve=$_REQUEST['resolve'];
 
   if ($resolve=="delete")
@@ -410,8 +415,10 @@ function exec_stage_admin()
 
   $install_id="";
   $directory="";
+  $data_directory="";
   $password="";
   $confirm="";
+  $config="";
 
   if (isset($_SESSION['directory']))
     $directory=$_SESSION['directory'];
@@ -419,11 +426,25 @@ function exec_stage_admin()
     $password=$_REQUEST['password'];
   if (isset($_REQUEST['confirm']))
     $confirm=$_REQUEST['confirm'];
+  if (isset($_SESSION['directory']))
+    $directory=$_SESSION['directory'];
+  else
+  {
+    $this->error("Invalid installation session!");
+    return false;
+  }
+  $data_directory=$_SESSION['data_directory'];
  
   if (strrpos($directory,DIRECTORY_SEPARATOR) < strlen($directory) - 1)
     $directory=$directory.DIRECTORY_SEPARATOR;
 
-  if (!$db->connect($directory."config.php"))
+  // Per default we use the config file in the $data_directory. So the
+  // config file in the $directory does not need to be writable.
+  $config=$directory."config.php";
+  if (file_exists($data_directory."config.php"))
+    $config=$data_directory."config.php";
+
+  if (!$db->connect($config))
   {
     $this->error("Could not add admin account: No connection to the database!");
     return false;
@@ -560,7 +581,7 @@ function print_stage_database()
     $directory=$_SESSION['directory'];
   else
   {
-    $this->error("No directory specified!");
+    $this->error("Invalid installation session!");
     return;
   }
 
@@ -611,7 +632,7 @@ function print_stage_tables()
     $directory=$_SESSION['directory'];
   else
   {
-    $this->error("No directory specified!");
+    $this->error("Invalid installation session!");
     return;
   }
 
@@ -620,7 +641,7 @@ function print_stage_tables()
 <p>It seems as if there is already a phTagr installation in that database with
 the given prefix. To solve this conflict you can either use the existing
 database, delete the existing database or return to
-<a href=\"index.php?section=install&action=database&directory=$directory\">this</a> step and use another prefix or a different database
+<a href=\"index.php?section=install&action=database\">this</a> step and use another prefix or a different database
 this installation.</p>
 
 <form method=\"post\">
@@ -669,15 +690,21 @@ account of this phTagr instance.</p>
 
 function print_stage_cleanup()
 {
-  $this->clear_session();
   echo "<h3>Almost done!</h3>
 
 <p>Please delete delete now the file
 <code><b>".getcwd().DIRECTORY_SEPARATOR."login.txt</b></code> to ensure
 that no one will create instances of phTagr that you do not want.</p>
+";
+  if (file_exists ($_SESSION['data_directory']."config.php"))
+  {
+    $this->info("As a final step please move <code><b>".$_SESSION['data_directory']."config.php</b></code> to <code><b>".$_SESSION['directory']."</code></b> and remove the write permissions!"); 
+  }
 
+echo "
 <p>Have fun!</p>
 ";
+  $this->clear_session();
 }
 
 function print_content()
