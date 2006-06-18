@@ -173,20 +173,21 @@ function exec_stage_directory()
   if (isset($_REQUEST['data_directory']))
     $data_directory=$_REQUEST['data_directory'];
 
-  if (strrpos($data_directory,DIRECTORY_SEPARATOR) < strlen($data_directory) - 1)
-    $data_directory=$data_directory.DIRECTORY_SEPARATOR;
-
   if ($data_directory=="")
   {
     $data_directory=$directory."data".DIRECTORY_SEPARATOR;
     $ext_data_directory=false;
   }
+
+  if (strrpos($data_directory,DIRECTORY_SEPARATOR) < strlen($data_directory) - 1)
+    $data_directory=$data_directory.DIRECTORY_SEPARATOR;
  
   $dir_writable=is_writable($directory);
 
   if ($ext_data_directory && !is_writable($data_directory))
   {
     $this->error ("Your specified data directory is not writable!");
+    return false;
   }
 
   if (file_exists($directory))
