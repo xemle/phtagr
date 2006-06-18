@@ -53,6 +53,8 @@ function clear_session()
     unset ($_SESSION['directory']);
   if (isset($_SESSION['install_id']))
     unset ($_SESSION['install_id']);
+  if (isset($_SESSION['data_directory']))
+    unset ($_SESSION['data_directory']);
 }
 
 /** Insert default values to the table
