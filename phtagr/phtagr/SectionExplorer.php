@@ -101,8 +101,9 @@ function print_content()
   }
   
   $search_nav=$search;
-  $page=$search_nav->page_num;
-  $search_nav->page_num=0;
+  $page=$search_nav->get_page_num();
+  $search_nav->set_page_num(0);
+  $search_nav->set_pos(0);
   $url_nav="index.php?section=explorer";
   $url_nav.=$search_nav->to_URL();
   $this->print_navigator($url_nav, $page, ceil($count/$search_nav->page_size));

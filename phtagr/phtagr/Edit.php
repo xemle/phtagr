@@ -76,8 +76,17 @@ function execute()
       
     $img=new Image($id);
     if ($img->get_id()!=$id)
+    {
+      unset($img);
       continue;
+    }
       
+    if (!$user->can_edit(&$img))
+    {
+      unset($img);
+      continue;
+    }
+    
     $iptc=new Iptc();
     $iptc->load_from_file($img->get_filename());
     if ($this->_check_iptc_error(&$iptc))
@@ -87,9 +96,6 @@ function execute()
     // Distinguish between javascript values and global values
     if (isset($_REQUEST['js_tags']))
     {
-      if (!$user->can_metadata(&$img))
-        continue;
-        
       $tags=split(" ", $_REQUEST['js_tags']);
       /** @todo optimize set of this operation. Do only delete required tags */
       $iptc->rem_record("2:025");
@@ -109,9 +115,6 @@ function execute()
     }
     else if (isset($_REQUEST['edit_tags']))
     {
-      if (!$user->can_metadata(&$img))
-        continue;
-        
       $tags=split(" ", $_REQUEST['edit_tags']);
     
       // distinguish between add and remove operation.
@@ -135,9 +138,6 @@ function execute()
     // Add captions
     if (isset($_REQUEST['js_caption']))
     {
-      if (!$user->can_metadata(&$img))
-        continue;
-        
       $caption=$_REQUEST['js_caption'];
       $iptc->add_record("2:120", $caption);
       if ($this->_check_iptc_error(&$iptc))
@@ -145,9 +145,6 @@ function execute()
     }
     else if (isset($_REQUEST['edit_caption']))
     {
-      if (!$user->can_metadata(&$img))
-        continue;
-        
       $caption=$_REQUEST['edit_caption'];
       $iptc->add_record("2:120", $caption);
       if ($this->_check_iptc_error(&$iptc))
@@ -157,14 +154,14 @@ function execute()
     if ($iptc->is_changed())
     {
       $iptc->save_to_file();
-      $image=new Image($id);
-      $image->update(true);
-      unset($image);
+      $img->update(true);
       if ($this->_check_iptc_error(&$iptc))
         return false;
     }
 
     $this->_handle_request_acl(&$img);
+    
+    unset($img);
   }
   return true;
 }
@@ -202,16 +199,16 @@ function _del_acl(&$acl, $level, $mask)
 {
   switch ($level) {
   case ACL_GROUP:
-    $acl[ACL_GROUP]&=!$mask;
-    $acl[ACL_OTHER]&=!$mask;
-    $acl[ACL_ALL]&=!$mask;
+    $acl[ACL_GROUP]&=~$mask;
+    $acl[ACL_OTHER]&=~$mask;
+    $acl[ACL_ALL]&=~$mask;
     break;
   case ACL_OTHER:
-    $acl[ACL_OTHER]&=!$mask;
-    $acl[ACL_ALL]&=!$mask;
+    $acl[ACL_OTHER]&=~$mask;
+    $acl[ACL_ALL]&=~$mask;
     break;
   case ACL_ALL:
-    $acl[ACL_ALL]&=!$mask;
+    $acl[ACL_ALL]&=~$mask;
     break;
   default:
   }
@@ -219,18 +216,21 @@ function _del_acl(&$acl, $level, $mask)
 
 /** 
   @param acl ACL array of current image
-  @param op Operant. Currenty only string 'add' or 'del' is supported
+  @param op Operant. Possible values are strings of 'add', 'del', 'keep' or
+  null. If op is null, the operant is handled as 'del' and will remove the ACL.
+  The operand 'keep' changes nothing.
   @param flag Permit bit of the current ACL
   @param mask Deny mask of current ACL */
 function _handle_acl(&$acl, $op, $level, $flag, $mask)
 {
   if ($op=='add')
     $this->_add_acl(&$acl, $level, $flag);
-  else if ($op=='del')
+  else if ($op=='del' || $op==null)
     $this->_del_acl(&$acl, $level, $mask);
 }
 
-/** Handle the ACL requests of an specific image
+/** Handle the ACL requests of an specific image. Only the image owner can
+ * modify the ACL levels.
   @param img Pointer to the image object
   @return True on success, false otherwise 
   @todo Update image only if acl changes */
@@ -241,7 +241,7 @@ function _handle_request_acl(&$img)
   
   if (!$img)
     return false;
-  if (!$user->can_edit(&$img))
+  if (!$user->is_owner(&$img))
     return false;
     
   $acl=array();
@@ -249,13 +249,28 @@ function _handle_request_acl(&$img)
   $acl[ACL_OTHER]=$img->get_oacl();
   $acl[ACL_ALL]=$img->get_aacl();
   
-  if (isset($_REQUEST['aacl']))
-    $this->_handle_acl(&$acl, $_REQUEST['aacl'], ACL_ALL, ACL_PREVIEW, ACL_PREVIEW_MASK);
-  if (isset($_REQUEST['oacl']))
-    $this->_handle_acl(&$acl, $_REQUEST['oacl'], ACL_OTHER, ACL_PREVIEW, ACL_PREVIEW_MASK);
-  if (isset($_REQUEST['gacl']))
-    $this->_handle_acl(&$acl, $_REQUEST['gacl'], ACL_GROUP, ACL_PREVIEW, ACL_PREVIEW_MASK);
+  // JavaScript formular or set selection?
+  if (isset($_REQUEST['js_acl']))
+  {
+    $this->_handle_acl(&$acl, $_REQUEST['js_aacl_edit'], ACL_ALL, ACL_EDIT, ACL_EDIT_MASK);
+    $this->_handle_acl(&$acl, $_REQUEST['js_oacl_edit'], ACL_OTHER, ACL_EDIT, ACL_EDIT_MASK);
+    $this->_handle_acl(&$acl, $_REQUEST['js_gacl_edit'], ACL_GROUP, ACL_EDIT, ACL_EDIT_MASK);
+      
+    $this->_handle_acl(&$acl, $_REQUEST['js_aacl_preview'], ACL_ALL, ACL_PREVIEW, ACL_PREVIEW_MASK);
+    $this->_handle_acl(&$acl, $_REQUEST['js_oacl_preview'], ACL_OTHER, ACL_PREVIEW, ACL_PREVIEW_MASK);
+    $this->_handle_acl(&$acl, $_REQUEST['js_gacl_preview'], ACL_GROUP, ACL_PREVIEW, ACL_PREVIEW_MASK);
+  }
+  else
+  {
+    $this->_handle_acl(&$acl, $_REQUEST['aacl_edit'], ACL_ALL, ACL_EDIT, ACL_EDIT_MASK);
+    $this->_handle_acl(&$acl, $_REQUEST['oacl_edit'], ACL_OTHER, ACL_EDIT, ACL_EDIT_MASK);
+    $this->_handle_acl(&$acl, $_REQUEST['gacl_edit'], ACL_GROUP, ACL_EDIT, ACL_EDIT_MASK);
 
+    $this->_handle_acl(&$acl, $_REQUEST['aacl_preview'], ACL_ALL, ACL_PREVIEW, ACL_PREVIEW_MASK);
+    $this->_handle_acl(&$acl, $_REQUEST['oacl_preview'], ACL_OTHER, ACL_PREVIEW, ACL_PREVIEW_MASK);
+    $this->_handle_acl(&$acl, $_REQUEST['gacl_preview'], ACL_GROUP, ACL_PREVIEW, ACL_PREVIEW_MASK);
+  }
+  
   $id=$img->get_id();
   $sql="UPDATE $db->image
         SET gacl=".$acl[ACL_GROUP].
@@ -302,16 +317,28 @@ function print_edit_inputs()
       <td>keep</td>
     </tr>
     <tr>
+      <td>Edit</td>
+      <td class=\"acladd\"><input type=\"radio\" name=\"gacl_edit\" value=\"add\" /></td>
+      <td class=\"acldel\"><input type=\"radio\" name=\"gacl_edit\" value=\"del\" /></td>
+      <td class=\"aclkeep\"><input type=\"radio\" name=\"gacl_edit\" value=\"keep\" checked /></td>
+      <td class=\"acladd\"><input type=\"radio\" name=\"oacl_edit\" value=\"add\" /></td>
+      <td class=\"acldel\"><input type=\"radio\" name=\"oacl_edit\" value=\"del\" /></td>
+      <td class=\"aclkeep\"><input type=\"radio\" name=\"oacl_edit\" value=\"keep\" checked /></td>
+      <td class=\"acladd\"><input type=\"radio\" name=\"aacl_edit\" value=\"add\" /></td>
+      <td class=\"acldel\"><input type=\"radio\" name=\"aacl_edit\" value=\"del\" /></td>
+      <td class=\"aclkeep\"><input type=\"radio\" name=\"aacl_edit\" value=\"keep\" checked /></td>
+    </tr>
+    <tr>
       <td>Preview</td>
-      <td class=\"acladd\"><input type=\"radio\" name=\"gacl\" value=\"add\" /></td>
-      <td class=\"acldel\"><input type=\"radio\" name=\"gacl\" value=\"del\" /></td>
-      <td class=\"aclkeep\"><input type=\"radio\" name=\"gacl\" value=\"keep\" checked /></td>
-      <td class=\"acladd\"><input type=\"radio\" name=\"oacl\" value=\"add\" /></td>
-      <td class=\"acldel\"><input type=\"radio\" name=\"oacl\" value=\"del\" /></td>
-      <td class=\"aclkeep\"><input type=\"radio\" name=\"oacl\" value=\"keep\" checked /></td>
-      <td class=\"acladd\"><input type=\"radio\" name=\"aacl\" value=\"add\" /></td>
-      <td class=\"acldel\"><input type=\"radio\" name=\"aacl\" value=\"del\" /></td>
-      <td class=\"aclkeep\"><input type=\"radio\" name=\"aacl\" value=\"keep\" checked /></td>
+      <td class=\"acladd\"><input type=\"radio\" name=\"gacl_preview\" value=\"add\" /></td>
+      <td class=\"acldel\"><input type=\"radio\" name=\"gacl_preview\" value=\"del\" /></td>
+      <td class=\"aclkeep\"><input type=\"radio\" name=\"gacl_preview\" value=\"keep\" checked /></td>
+      <td class=\"acladd\"><input type=\"radio\" name=\"oacl_preview\" value=\"add\" /></td>
+      <td class=\"acldel\"><input type=\"radio\" name=\"oacl_preview\" value=\"del\" /></td>
+      <td class=\"aclkeep\"><input type=\"radio\" name=\"oacl_preview\" value=\"keep\" checked /></td>
+      <td class=\"acladd\"><input type=\"radio\" name=\"aacl_preview\" value=\"add\" /></td>
+      <td class=\"acldel\"><input type=\"radio\" name=\"aacl_preview\" value=\"del\" /></td>
+      <td class=\"aclkeep\"><input type=\"radio\" name=\"aacl_preview\" value=\"keep\" checked /></td>
     </tr>
   </table>
   Set the access level to the selected images.

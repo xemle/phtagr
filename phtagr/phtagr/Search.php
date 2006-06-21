@@ -141,12 +141,16 @@ function get_page_num()
   return $this->page_num;
 }
 
+/**
+  @param size If 0, set it to default. */
 function set_page_size($size)
 {
   if (!is_numeric($size))
     return;
 
-  if ($size<1)
+  if ($size==0)
+    $size=10;
+  if ($size<2)
     $size=2;
   if ($size>250)
     $size=250;
@@ -480,7 +484,6 @@ function _handle_limit($limit=0)
 }
 
 /** Returns the SQL query of the search i
-  @param count 
   @param limit Type of limit the query. 0 means no limit. 1 means limit by page
   size and page num. And 2 means limit by pos and size. 
   @return SQL query string 

@@ -86,6 +86,67 @@ function add_form_tags(id, tags)
   "</form>";
   document.getElementById(i).focus();
 }
+/** Add a form for acl
+  @param id ID of the image
+  @param tags List of the tags */
+function add_form_acl(id, gacl, oacl, aacl)
+{
+  var node="acl-"+id;
+  var e=document.getElementById(node);
+  if (e==null)
+    return;
+
+  var i=node+"-acl";
+  var text=e.innerHTML;
+
+  // Does a form already exists?
+  // On mozilla, the form will be omitted, check also for the next input node
+  if (Data[node]!=null && text!=Data[node])
+  {
+    reset_text(node);
+    return;
+  }
+
+  // Remember old content
+  Data[node]=text;
+  // encode node content to b64 to catch all special characters
+  s="<form name=\"js_acl\" action=\"index.php\" method=\"post\">" +
+    "<input type=\"hidden\" name=\"image\" value=\""+id+"\"/>"+
+    "<input type=\"hidden\" name=\"js_acl\" value=\"1\"/>"+
+    "<table>"+
+    "  <tr>"+
+    "    <td></td><td>Friends</td><td>Members</td><td>All</td>"+
+    "  </tr>"+
+    "  <tr>"+
+    "    <td>Edit</td>"+
+    "    <td><input type=\"checkbox\" name=\"js_gacl_edit\" value=\"add\"";
+  if ((gacl & 0x01)>0) s+=" checked=\"checked\"";
+  s+="></td> "+
+    "    <td><input type=\"checkbox\" name=\"js_oacl_edit\" value=\"add\"";
+  if ((oacl & 0x01)>0) s+=" checked=\"checked\"";
+  s+="></td> "+
+    "    <td><input type=\"checkbox\" name=\"js_aacl_edit\" value=\"add\"";
+  if ((aacl & 0x01)>0) s+=" checked=\"checked\"";
+  s+="></td>"+
+    "  </tr>"+
+    "  <tr>"+
+    "    <td>Preview</td>"+
+    "    <td><input type=\"checkbox\" name=\"js_gacl_preview\" value=\"add\"";
+  if ((gacl & 0xf0)>0) s+=" checked=\"checked\"";
+  s+="></td> "+
+    "    <td><input type=\"checkbox\" name=\"js_oacl_preview\" value=\"add\"";
+  if ((oacl & 0xf0)>0) s+=" checked=\"checked\"";
+  s+="></td> "+
+    "    <td><input type=\"checkbox\" name=\"js_aacl_preview\" value=\"add\"";
+  if ((aacl & 0xf0)>0) s+=" checked=\"checked\"";
+  s+="></td>"+
+    "  </tr>"+
+    "</table>"+
+    "<input class=\"submit\" type=\"submit\" value=\" OK \"/> or "+
+    "<input class=\"reset\" type=\"reset\" onclick=\"reset_text('"+node+"')\"/>"+
+  "</form>";
+  e.innerHTML=s;
+}
 
 /** Checks all checkboxes
   @param id Id of the refered checkbox

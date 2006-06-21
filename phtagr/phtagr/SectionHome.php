@@ -85,7 +85,7 @@ function print_popular_images()
     return;
   $row=mysql_fetch_row($result);
   $count=intval($row[0]*0.01);
-  $count=$count<20?20:$count;
+  $count=$count<50?50:$count;
     
   // select top 1% of images
   $search=new Search();
@@ -99,21 +99,32 @@ function print_popular_images()
 
   // fetch all top rated images and remove randomly some
   $ids=array();
+  $n=1;
   while ($row=mysql_fetch_row($result))
-    array_push($ids,$row[0]);
+  {
+    array_push($ids, array($row[0], $n));
+    $n++;
+  }
   while (count($ids)>6)
     array_splice($ids,rand(0,count($ids)-1),1);
-  
+
+  $search->set_page_size(0);
+
   echo "<div class=\"mini\"><p>Popular Images:</p>\n\n";
   echo "<table>\n<tr>\n";
-  foreach ($ids as $id)
+  foreach ($ids as $t)
   {
+    $id=$t[0];
+    $pos=$t[1];
     echo "  <td>";
     $image=new Image($id);
     if ($image)
     {
       $name=$image->get_name();
-      echo "<a href=\"index.php?section=image&amp;id=$id\"><img src=\"./image.php?id=$id&amp;type=mini\" alt=\"$name\" width=\"75\" height=\"75\"/></a>";
+      $search->set_pos($pos);
+      $url="index.php?section=image&amp;id=$id";
+      $url.=$search->to_URL();
+      echo "<a href=\"$url\"><img src=\"./image.php?id=$id&amp;type=mini\" alt=\"$name\" width=\"75\" height=\"75\"/></a>";
       unset($image);
     }    
     echo "</td>\n";

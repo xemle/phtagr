@@ -132,6 +132,9 @@ function is_owner($image=null)
   if ($image==null)
     return false;
     
+  if ($this->is_admin())
+    return true;
+
   if ($this->get_userid()==
     $image->get_userid())
     return true;
