@@ -317,16 +317,19 @@ function to_form()
 
 /** Create a SQL query from a tag array 
   @param tags Array of tags, could be NULL
-  @param tagop Operator of tags 
+  @param order Insert order column to select statement if true
   @return Return the sql statement of the query object corresponding to the
   Seach parameters */
-function _get_query_from_tags($tags, $tagop=0)
+function _get_query_from_tags($tags, $order=false)
 {
   global $db;
   global $user;
   $num_tags=count($tags);
     
-  $sql="SELECT i.id FROM $db->image AS i";
+  $sql="SELECT i.id";
+  if ($order)
+    $sql.=$this->_get_column_order();
+  $sql.=" FROM $db->image AS i";
   if ($num_tags)
     $sql .= ",$db->imagetag AS it";
 
@@ -370,25 +373,6 @@ function _get_query_from_tags($tags, $tagop=0)
     $sql .= " AND i.date>=FROM_UNIXTIME(".$this->date_start.")";
   if ($this->date_end>0)
     $sql .= " AND i.date<FROM_UNIXTIME(".$this->date_end.")";
-  
-  $sql .= " GROUP BY i.id";
-
-  // handle tag operation
-  if ($num_tags>1)
-  {
-    switch ($tagop) {
-    case 0:
-      $sql .= " HAVING COUNT(i.id)=$num_tags";
-      break;
-    case 1:
-      //$sql .= " HAVING COUNT(i.id)>=1";
-      break;
-    case 2:
-      $fuzzy=intval($num_tags*0.75);
-      $sql .= " HAVING COUNT(i.id)>=$fuzzy";
-      break;
-    }
-  }
 
   return $sql;
 }
@@ -424,6 +408,9 @@ function _handle_acl()
   return $acl;
 }
 
+/** 
+  @return Returns the column order for the selected column. This is needed for
+  passing the order from subqueries */
 function _get_column_order()
 {
   switch ($this->orderby) {
@@ -463,6 +450,31 @@ function _handle_orderby()
   }
 }
 
+/** 
+  @para num_tags Count of tags. Should be zero or greater zero
+  @para tagop Tag operand (0 is and, 1 is or, 2 is fuzzy
+  @return Returns the having statement */
+function _handle_having($num_tags, $tagop)
+{
+  // handle tag operation
+  if ($num_tags>1)
+  {
+    switch ($tagop) {
+    case 0:
+      $sql .= " HAVING COUNT(i.id)=$num_tags";
+      break;
+    case 1:
+      //$sql .= " HAVING COUNT(i.id)>=1";
+      break;
+    case 2:
+      $fuzzy=intval($num_tags*0.75);
+      $sql .= " HAVING COUNT(i.id)>=$fuzzy";
+      break;
+    }
+  }
+  return $sql;
+}
+
 /** Adds the SQL limit statement 
   @param limit If 0 do not limit and return an empty string. If it is 1 the
   limit is calculated by page_size and page_num. If it is 2, the limit is set
@@ -483,11 +495,15 @@ function _handle_limit($limit=0)
   return '';
 }
 
-/** Returns the SQL query of the search i
+/** Returns the SQL query of the search. It splits the tags according to
+ * positiv or negative tags (negative tags have a minus sign as prefix) and
+ * creates subqueries for positive and negative tags.
   @param limit Type of limit the query. 0 means no limit. 1 means limit by page
   size and page num. And 2 means limit by pos and size. 
+  @param order If this flag is true, the order column will be included into the
+  select statement. Otherwise not. Default is true.
   @return SQL query string 
-  @see _handle_limit */
+  @see _get_query_from_tags, _handle_limit, _get_order_column  */
 function get_query($limit=1, $order=true)
 {
   global $db;
@@ -507,19 +523,25 @@ function get_query($limit=1, $order=true)
   {
     $sql="SELECT id";
     if ($order)
-      $sql.=$this->get_column_order();
-    $sql.=" FROM (";
-    $sql.=$this->_get_query_from_tags($pos_tags, $this->tagop);
-    $sql.=" ) AS i AND id NOT IN ( ";
-    $sql.=$this->_get_query_from_tags($neg_tags, 1);
-    $sql.=" )";
+      $sql.=$this->_get_column_order();
+    $sql.=" FROM ( ";
+    $sql.=$this->_get_query_from_tags($pos_tags, $order);
+    $sql.=" AND id NOT IN ( ";
+    $sql.=$this->_get_query_from_tags($neg_tags, false);
+    $sql.=" ) ) AS i";
+    $sql.=" GROUP BY i.id";
+    $sql.=$this->_handle_having($num_pos_tags, $this->tagop);
+
     if ($order)
       $sql.=$this->_handle_orderby();
     $sql.=$this->_handle_limit($limit);
   }
   else 
   {
-    $sql=$this->_get_query_from_tags($pos_tags, $this->tagop);
+    $sql=$this->_get_query_from_tags($pos_tags);
+    $sql.=" GROUP BY i.id";
+    $sql.=$this->_handle_having($num_pos_tags, $this->tagop);
+
     if ($order)
       $sql.=$this->_handle_orderby();
     $sql.=$this->_handle_limit($limit);
@@ -528,7 +550,8 @@ function get_query($limit=1, $order=true)
   return $sql; 
 }
 
-/** Returns the SQL statement to return the count of the query */
+/** Returns the SQL statement to return the count of the query. The query does
+ * not order the result. */
 function get_num_query()
 {
   global $db;
