@@ -67,7 +67,8 @@ function print_content()
   global $user; 
 
   $sql=$search->get_num_query();
-  $this->comment($sql);
+  // for debugging
+  //$this->comment($sql);
   $result = $db->query($sql);
   if (!$result)
   {

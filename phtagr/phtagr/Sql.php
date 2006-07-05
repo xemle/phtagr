@@ -296,7 +296,8 @@ function create_tables()
         name          VARCHAR(64),
         value         VARCHAR(192),
         
-        INDEX(userid))";
+        INDEX(userid)
+        INDEX(groupid))";
   if (!$this->query($sql)) { return false; }
   
   $sql="CREATE TABLE $this->group (
@@ -397,8 +398,11 @@ function create_tables()
         imageid       INT NOT NULL,
         user          VARCHAR(32),
         email         VARCHAR(64),
+        url           VARCHAR(128),
         date          DATETIME,
-        comment       TEXT)";
+        comment       TEXT
+        
+        PRIMARY KEY(imageid))";
   if (!$this->query($sql)) { return false; }
 
   return true;

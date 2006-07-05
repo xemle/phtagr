@@ -7,17 +7,45 @@ include "$phtagr_prefix/User.php";
 include "$phtagr_prefix/Sql.php";
 include "$phtagr_prefix/Image.php";
 
+function unauthorized()
+{
+  header('HTTP/1.1 401 Unauthorized');
+  echo "You are not authorized to view this picture. Please login\n";
+  exit;
+}
+
+function not_found()
+{
+  header('HTTP/1.1 404 Not Found');
+  echo "The image was not found\n";
+  exit;
+}
+
+function bad_request()
+{
+  header('HTTP/1.1 400 Bad Request');
+  echo "Your request is wrong\n";
+  exit;
+}
+
+function internal_error()
+{
+  header('HTTP/1.1 500 Internal Server Error');
+  echo "Something went wrong\n";
+  exit;
+}
+
 // Check the parameter of HTML request 
 if (!isset($_REQUEST['id']) || !isset($_REQUEST['type']))
 {
-  exit;
+  bad_request();
 }
 
 // check ID as a positiv value
 $id=intval($_REQUEST['id']);
 if ($id<=0)
 {
-  exit;
+  bad_request();
 }
 
 // check image type
@@ -31,14 +59,14 @@ switch ($type)
   case 'full':
     break;
   default:
-    exit;
+    bad_request();
 }
 
 /** Check the database connection */
 $db=new Sql();
-if (!$db->connect() || !isset($_REQUEST['id']) || !isset($_REQUEST['type']))
+if (!$db->connect())
 {
-  exit;
+  internal_error();
 }
 
 session_start();
@@ -51,7 +79,7 @@ $pref=$db->read_pref($user->get_userid());
 $img=new Image($_REQUEST['id']);
 if (!$img)
 {
-  return;
+  internal_error();
 }
 
 $fn='';
@@ -60,30 +88,40 @@ switch ($type)
   case 'mini':
     if ($user->can_preview(&$img))
       $fn=$img->create_mini();
+    else
+      unauthorized();
     break;
   case 'thumb':
     if ($user->can_preview(&$img))
       $fn=$img->create_thumbnail();
+    else
+      unauthorized();
     break;
   case 'preview':
     if ($user->can_preview(&$img))
       $fn=$img->create_preview();
+    else
+      unauthorized();
     break;
   case 'high':
     if ($user->can_preview(&$img))
       $fn=$img->create_preview();
+    else
+      unauthorized();
     break;
   case 'full':
     if ($user->can_fullsize(&$img))
       $fn=$img->get_filename();
+    else
+      unauthorized();
     break;
   default:
-    exit;
+    bad_request();
 }
 
 if (!file_exists($fn))
 {
-  exit;
+  internal_error();
 }
 
 
@@ -120,4 +158,5 @@ if (isset($headers['if-modified-since']) && (strtotime($headers['if-modified-sin
   header('Cache-Control: max-age=2592000, must-revalidate');
   print file_get_contents($fn);
 }
+
 ?>
