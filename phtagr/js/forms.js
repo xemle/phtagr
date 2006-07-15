@@ -1,6 +1,85 @@
 /** Define global data variable to store the contents of replaced elements */
 var Data=new Array();
 
+/** Print the node information of a node. The function appends a PRE node to
+ * the to node.
+  @param from ID of the node, which has to be printed
+  @param to ID fo the node, where the debug information hast to be printed */
+function _debugNode(from, to)
+{
+  p=document.getElementById(to);
+  e=document.getElementById(from);
+  
+  var pre=document.createElement("pre");
+  var t=document.createTextNode("");
+  
+  _printNode(t, e, 0, "0");
+  pre.appendChild(t);
+  p.appendChild(pre);
+}
+
+/** Prints recursivly detailed information about the node and add the text data
+ * to the text node 
+  @param t Textnode
+  @param e Current element
+  @param depth Current depth
+  @param path String of path 
+  @return No return value */
+function _printNode(t, e, depth, path)
+{
+  var i, j, cn=0, an=0;
+  
+  var text="";
+  for (i=0; i<depth; i++)
+    text+="  ";
+    
+  switch (e.nodeType) {
+    case 1:
+      an=e.attributes.length;
+      text+="Element "+e.nodeName;
+      break;
+    case 2:
+      text+="Attribute "+e.nodeName;
+      break;
+    case 3:
+      text+="Text";
+      break;
+    default:
+      text+="Other";
+      break;
+  }
+  if (e.hasChildNodes())
+  {
+    cn=e.childNodes.length;
+    if (cn==1)
+      text+=" ("+cn+" child)";
+    else
+      text+=" ("+cn+" children)";
+  }
+  
+  if (e.nodeValue!=null)
+    text+=": '"+e.nodeValue+"'";
+  text+=" ["+path+"]";
+  text+="\n"; 
+  t.nodeValue+=text;
+
+  for (j=0; j<an; j++)
+  {
+    text="";
+    for (i=0; i<depth+1; i++)
+      text+="  ";
+    text+="@"+e.attributes[j].nodeName+"=";
+    text+=e.attributes[j].nodeValue;
+    text+="\n";
+    t.nodeValue+=text;
+  }
+
+  for (i=0; i<cn; i++)
+  {
+    _printNode(t, e.childNodes[i], depth+1, path+"."+i);
+  }
+}
+
 /** Reset a node by the text
   @param id Id of the element
   @param text New text of the node. The text is encoded in B64 */
