@@ -730,11 +730,11 @@ function print_caption($docut=true)
     else
       $text=&$caption;
     $caption64=base64_encode($caption);
-    echo "$text <span class=\"jsbutton\" onclick=\"add_form_caption('$id', '$caption64') \">[edit]</span>";
+    echo "$text <span class=\"jsbutton\" onclick=\"add_form_caption($id, '$caption64') \">[edit]</span>";
   }
   else
   {
-    echo " <span onclick=\"add_form_caption('$id', '')\">Click here to add a caption</span>";
+    echo " <span onclick=\"add_form_caption($id, '')\">Click here to add a caption</span>";
   }
   
   echo "</div>\n";
@@ -758,7 +758,7 @@ function _cut_caption($id, $caption)
   }
   $result="<span id=\"caption-text-$id\">".$result;
   $b64=base64_encode($caption);
-  $result.=" <span class=\"jsbutton\" onclick=\"print_caption('$id', '$b64')\">[...]</span>";
+  $result.=" <span class=\"jsbutton\" onclick=\"print_caption($id, '$b64')\">[...]</span>";
   $result.="</span>";
   return $result;
 }

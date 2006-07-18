@@ -3,19 +3,20 @@ var Data=new Array();
 
 /** Print the node information of a node. The function appends a PRE node to
  * the to node.
-  @param from ID of the node, which has to be printed
-  @param to ID fo the node, where the debug information hast to be printed */
-function _debugNode(from, to)
+  @param src Source node, which has to be debugged
+  @param dst Destination node, where the debug information hast to be printed 
+  @param maxDepth Maximum of depth*/
+function _debugNode(src, dst, maxDepth)
 {
-  p=document.getElementById(to);
-  e=document.getElementById(from);
-  
-  var pre=document.createElement("pre");
+  if (src==null || dst==null)
+    return;
+    
   var t=document.createTextNode("");
-  
-  _printNode(t, e, 0, "0");
+  _printNode(t, src, 0, maxDepth, "0");
+
+  var pre=document.createElement("pre");
   pre.appendChild(t);
-  p.appendChild(pre);
+  dst.appendChild(pre);
 }
 
 /** Prints recursivly detailed information about the node and add the text data
@@ -23,12 +24,16 @@ function _debugNode(from, to)
   @param t Textnode
   @param e Current element
   @param depth Current depth
+  @param maxDepth Maximum of depth
   @param path String of path 
   @return No return value */
-function _printNode(t, e, depth, path)
+function _printNode(t, e, depth, maxDepth, path)
 {
   var i, j, cn=0, an=0;
   
+  if (depth>maxDepth)
+    return;
+
   var text="";
   for (i=0; i<depth; i++)
     text+="  ";
@@ -76,60 +81,135 @@ function _printNode(t, e, depth, path)
 
   for (i=0; i<cn; i++)
   {
-    _printNode(t, e.childNodes[i], depth+1, path+"."+i);
+    _printNode(t, e.childNodes[i], depth+1, maxDepth, path+"."+i);
   }
 }
 
-/** Reset a node by the text
-  @param id Id of the element
-  @param text New text of the node. The text is encoded in B64 */
-function reset_text(id)
+/** Resets a node with the old value. The node with ID of nodeId was cloned to
+ * the Data array. 
+  @param nodeId Node ID of the Data array */
+function resetNode(nodeId)
 {
-  var e=document.getElementById(id);
-  if (e==null)
+  var from=document.getElementById(nodeId);
+  var to=Data[nodeId];
+  
+  if (from==null || to==null)
     return;
-  // decode node content from b64
-  e.innerHTML=Data[id];
+
+  var p=from.parentNode;
+
+  p.replaceChild(to, from);
+
+  Data[nodeId]=null;
 }
 
 function print_caption(id, caption64)
 {
-  var node="caption-text-"+id;
-  var e=document.getElementById(node);
+  var nodeId="caption-text-"+id;
+  var e=document.getElementById(nodeId);
   if (e==null)
     return;
 
+  if (Data[nodeId]!=null)
+  {
+    resetNode(nodeId);
+    return;
+  }
+  
   // Remember old content
-  Data[node]=e.innerHTML;
+  Data[nodeId]=e.cloneNode(true);
+
   caption=atob(caption64);
-  // encode node content to b64 to catch all special characters
-  e.innerHTML=caption+
-    " <span class=\"js-button\" onclick=\"reset_text('"+node+"')\">[-]</span>";
+  var text=document.createTextNode(caption+" ");
+  
+  var span=document.createElement("span");
+  span.setAttribute("class", "jsbutton");
+  span.setAttribute("onclick", "resetNode('"+nodeId+"')");
+  span.appendChild(document.createTextNode("[-]"));
+  
+  while (e.hasChildNodes())
+    e.removeChild(e.lastChild);
+  e.appendChild(text);
+  e.appendChild(span);
 }
   
 /** Add a form for caption */
 function add_form_caption(id, caption64)
 {
-  var node="caption-"+id;
-  var e=document.getElementById(node);
+  var nodeId="caption-"+id;
+  var e=document.getElementById(nodeId);
   if (e==null)
     return;
 
-  var i=node+"-edit";
-  var text=e.innerHTML;
+  var focusId=nodeId+"-edit";
 
   // Remember old content
-  Data[node]=text;
-  caption=atob(caption64);
+  Data[nodeId]=e.cloneNode(true);
+  
+  var form=document.createElement("form");
+  form.setAttribute("action", "index.php");
+  form.setAttribute("method", "post");
+
+  // copy all hidden inputs from formExplorer
+  var srcForm=document.getElementById("formExplorer");
+  _clone_hidden_input(srcForm, form);
+  
+  var input=document.createElement("input");
+  input.setAttribute("type", "hidden");
+  input.setAttribute("name", "image");
+  input.setAttribute("value", id);
+  form.appendChild(input);
+
+  var textarea=document.createElement("textarea");
+  textarea.setAttribute("id", focusId);
+  textarea.setAttribute("name", "js_caption");
+  textarea.setAttribute("cols", 24);
+  textarea.setAttribute("rows", 3);
+  form.appendChild(textarea);
+
   // encode node content to b64 to catch all special characters
-  e.innerHTML="<form action=\"index.php\" method=\"post\">" +
-    "<input type=\"hidden\" name=\"image\" value=\""+id+"\"/>"+
-    "<textarea id=\"" + i + "\" name=\"js_caption\" cols=\"24\" rows=\"3\" >" + caption + "</textarea>"+
-    "<br/>"+
-    "<input class=\"submit\" type=\"submit\" value=\" OK \"/> or "+
-    "<input class=\"reset\" type=\"reset\" onclick=\"reset_text('"+node+"')\"/>"+
-  "</form>";
-  document.getElementById(i).focus();
+  var text=document.createTextNode(atob(caption64));
+  textarea.appendChild(text);
+
+  var br=document.createElement("br");
+  form.appendChild(br);
+  
+  input=document.createElement("input");
+  input.setAttribute("class", "submit");
+  input.setAttribute("type", "submit");
+  input.setAttribute("value", " OK ");
+  form.appendChild(input);
+
+  var text=document.createTextNode(" or ");
+  form.appendChild(text);
+  
+  input=document.createElement("input");
+  input.setAttribute("class", "reset");
+  input.setAttribute("type", "reset");
+  input.setAttribute("onclick", "resetNode('"+nodeId+"')");
+  form.appendChild(input);
+
+  while (e.hasChildNodes())
+    e.removeChild(e.lastChild);
+  e.appendChild(form);
+
+  document.getElementById(focusId).focus();
+}
+
+function _clone_hidden_input(srcForm, dstForm)
+{
+  if (srcForm==null || dstForm==null)
+    return;
+    
+  var i,input;
+  for (i=0; i<srcForm.childNodes.length; i++)
+  {
+    input=srcForm.childNodes[i];
+    if (input.nodeType==1 &&
+      input.nodeName=="INPUT" && 
+      input.getAttribute("type")=="hidden")
+      dstForm.appendChild(input.cloneNode(true));
+  }
 }
 
 /** Add a form for tags
@@ -137,94 +217,227 @@ function add_form_caption(id, caption64)
   @param tags List of the tags */
 function add_form_tags(id, tags)
 {
-  var node="tag-"+id;
-  var e=document.getElementById(node);
+  var nodeId="tag-"+id;
+  var e=document.getElementById(nodeId);
   if (e==null)
     return;
 
-  var i=node+"-edit";
-  var text=e.innerHTML;
+  var focusId=nodeId+"-edit";
 
   // Does a form already exists?
   // On mozilla, the form will be omitted, check also for the next input node
-  if (Data[node]!=null && text!=Data[node])
+  if (Data[nodeId]!=null)
   {
-    reset_text(node);
+    resetNode(nodeId);
     return;
   }
 
   // Remember old content
-  Data[node]=text;
-  // encode node content to b64 to catch all special characters
-  e.innerHTML="<form action=\"index.php\" method=\"post\">" +
-    "<input type=\"hidden\" name=\"image\" value=\""+id+"\"/>"+
-    "<input id=\"" + i + "\" type=\"text\" name=\"js_tags\" value=\"" + tags + "\" size=\"35\"/>"+
-    "<br/>"+
-    "<input class=\"submit\" type=\"submit\" value=\" OK \"/> or "+
-    "<input class=\"reset\" type=\"reset\" onclick=\"reset_text('"+node+"')\"/>"+
-  "</form>";
-  document.getElementById(i).focus();
+  Data[nodeId]=e.cloneNode(true);
+
+  var form=document.createElement("form");
+  form.setAttribute("action", "index.php");
+  form.setAttribute("method", "post");
+
+  // copy all hidden inputs from formExplorer
+  var srcForm=document.getElementById("formExplorer");
+  _clone_hidden_input(srcForm, form);
+  
+  var input=document.createElement("input");
+  input.setAttribute("type", "hidden");
+  input.setAttribute("name", "image");
+  input.setAttribute("value", id);
+  form.appendChild(input);
+
+  input=document.createElement("input");
+  input.setAttribute("id", focusId);
+  input.setAttribute("type", "text");
+  input.setAttribute("name", "js_tags");
+  input.setAttribute("value", tags);
+  input.setAttribute("size", 35);
+  form.appendChild(input);
+  
+  input=document.createElement("input");
+  input.setAttribute("class", "submit");
+  input.setAttribute("type", "submit");
+  input.setAttribute("value", " OK ");
+  form.appendChild(input);
+
+  var text=document.createTextNode(" or ");
+  form.appendChild(text);
+  
+  input=document.createElement("input");
+  input.setAttribute("class", "reset");
+  input.setAttribute("type", "reset");
+  input.setAttribute("onclick", "resetNode('"+nodeId+"')");
+  form.appendChild(input);
+
+  while (e.hasChildNodes())
+    e.removeChild(e.lastChild);
+  e.appendChild(form);
+  
+  document.getElementById(focusId).focus();
 }
 /** Add a form for acl
   @param id ID of the image
   @param tags List of the tags */
 function add_form_acl(id, gacl, oacl, aacl)
 {
-  var node="acl-"+id;
-  var e=document.getElementById(node);
+  var nodeId="acl-"+id;
+  var e=document.getElementById(nodeId);
   if (e==null)
     return;
 
-  var i=node+"-acl";
-  var text=e.innerHTML;
+  var focusId=nodeId+"-acl";
 
   // Does a form already exists?
-  // On mozilla, the form will be omitted, check also for the next input node
-  if (Data[node]!=null && text!=Data[node])
+  if (Data[nodeId]!=null)
   {
-    reset_text(node);
+    resetNod(nodeId);
     return;
   }
 
   // Remember old content
-  Data[node]=text;
-  // encode node content to b64 to catch all special characters
-  s="<form name=\"js_acl\" action=\"index.php\" method=\"post\">" +
-    "<input type=\"hidden\" name=\"image\" value=\""+id+"\"/>"+
-    "<input type=\"hidden\" name=\"js_acl\" value=\"1\"/>"+
-    "<table>"+
-    "  <tr>"+
-    "    <td></td><td>Friends</td><td>Members</td><td>All</td>"+
-    "  </tr>"+
-    "  <tr>"+
-    "    <td>Edit</td>"+
-    "    <td><input type=\"checkbox\" name=\"js_gacl_edit\" value=\"add\"";
-  if ((gacl & 0x01)>0) s+=" checked=\"checked\"";
-  s+="></td> "+
-    "    <td><input type=\"checkbox\" name=\"js_oacl_edit\" value=\"add\"";
-  if ((oacl & 0x01)>0) s+=" checked=\"checked\"";
-  s+="></td> "+
-    "    <td><input type=\"checkbox\" name=\"js_aacl_edit\" value=\"add\"";
-  if ((aacl & 0x01)>0) s+=" checked=\"checked\"";
-  s+="></td>"+
-    "  </tr>"+
-    "  <tr>"+
-    "    <td>Preview</td>"+
-    "    <td><input type=\"checkbox\" name=\"js_gacl_preview\" value=\"add\"";
-  if ((gacl & 0xf0)>0) s+=" checked=\"checked\"";
-  s+="></td> "+
-    "    <td><input type=\"checkbox\" name=\"js_oacl_preview\" value=\"add\"";
-  if ((oacl & 0xf0)>0) s+=" checked=\"checked\"";
-  s+="></td> "+
-    "    <td><input type=\"checkbox\" name=\"js_aacl_preview\" value=\"add\"";
-  if ((aacl & 0xf0)>0) s+=" checked=\"checked\"";
-  s+="></td>"+
-    "  </tr>"+
-    "</table>"+
-    "<input class=\"submit\" type=\"submit\" value=\" OK \"/> or "+
-    "<input class=\"reset\" type=\"reset\" onclick=\"reset_text('"+node+"')\"/>"+
-  "</form>";
-  e.innerHTML=s;
+  Data[nodeId]=e.cloneNode(true);
+  
+  var form=document.createElement("form");
+  form.setAttribute("action", "index.php");
+  form.setAttribute("method", "post");
+
+  // copy all hidden inputs from formExplorer
+  var srcForm=document.getElementById("formExplorer");
+  _clone_hidden_input(srcForm, form);
+  
+  var input=document.createElement("input");
+  input.setAttribute("type", "hidden");
+  input.setAttribute("name", "image");
+  input.setAttribute("value", id);
+  form.appendChild(input);
+
+  input=input.cloneNode(false);
+  input.setAttribute("name", "js_acl");
+  input.setAttribute("value", "yes");
+  form.appendChild(input);
+  
+  var table=document.createElement("table");
+  // first row
+  var tr=document.createElement("tr");
+  
+  var td=document.createElement("td");
+  tr.appendChild(td);
+
+  td=td.cloneNode(false);
+  td.appendChild(document.createTextNode("Friends"));
+  tr.appendChild(td);
+
+  td=td.cloneNode(false);
+  td.appendChild(document.createTextNode("Members"));
+  tr.appendChild(td);
+
+  td=td.cloneNode(false);
+  td.appendChild(document.createTextNode("All"));
+  tr.appendChild(td);
+
+  table.appendChild(tr);
+
+  // second row
+  tr=tr.cloneNode(false);
+
+  td=td.cloneNode(false);
+  td.appendChild(document.createTextNode("Edit"));
+  tr.appendChild(td);
+  
+  td=td.cloneNode(false);
+  var input=document.createElement("input");
+  input.setAttribute("id", focusId);
+  input.setAttribute("type", "checkbox");
+  input.setAttribute("name", "js_gacl_edit");
+  input.setAttribute("value", "add");
+  if ((gacl & 0x01)>0) 
+    input.setAttribute("checked", "checked");
+  td.appendChild(input);
+  input.appendChild(document.createTextNode(gacl+"Super"));
+  tr.appendChild(td);
+  
+  td=td.cloneNode(true);
+  input=td.childNodes[0];
+  input.removeAttribute("id");
+  input.setAttribute("name", "js_oacl_edit");
+  if ((oacl & 0x01)>0)
+    input.setAttribute("checked", "checked");
+  else
+    input.removeAttribute("checked");
+  tr.appendChild(td);
+  
+  td=td.cloneNode(true);
+  input=td.childNodes[0];
+  input.setAttribute("name", "js_aacl_edit");
+  if ((aacl & 0x01)>0)
+    input.setAttribute("checked", "checked");
+  else
+    input.removeAttribute("checked");
+  tr.appendChild(td);
+  
+  table.appendChild(tr);
+  
+  // third row
+  tr=tr.cloneNode(false);
+
+  td=td.cloneNode(false);
+  td.appendChild(document.createTextNode("Preview"));
+  tr.appendChild(td);
+  
+  td=td.cloneNode(false);
+  var input=document.createElement("input");
+  input.setAttribute("type", "checkbox");
+  input.setAttribute("name", "js_gacl_preview");
+  input.setAttribute("value", "add");
+  if ((gacl & 0xf0)>0) 
+    input.setAttribute("checked", "checked");
+  td.appendChild(input);
+  tr.appendChild(td);
+  
+  td=td.cloneNode(true);
+  input=td.childNodes[0];
+  input.setAttribute("name", "js_oacl_preview");
+  if ((oacl & 0xf0)>0)
+    input.setAttribute("checked", "checked");
+  else
+    input.removeAttribute("checked");
+  tr.appendChild(td);
+  
+  td=td.cloneNode(true);
+  input=td.childNodes[0];
+  input.setAttribute("name", "js_aacl_preview");
+  if ((aacl & 0xf0)>0)
+    input.setAttribute("checked", "checked");
+  else
+    input.removeAttribute("checked");
+  tr.appendChild(td);
+  
+  table.appendChild(tr);
+  form.appendChild(table); 
+
+  input=document.createElement("input");
+  input.setAttribute("class", "submit");
+  input.setAttribute("type", "submit");
+  input.setAttribute("value", " OK ");
+  form.appendChild(input);
+
+  var text=document.createTextNode(" or ");
+  form.appendChild(text);
+  
+  input=document.createElement("input");
+  input.setAttribute("class", "reset");
+  input.setAttribute("type", "reset");
+  input.setAttribute("onclick", "resetNode('"+nodeId+"')");
+  form.appendChild(input);
+
+  while (e.hasChildNodes())
+    e.removeChild(e.lastChild);
+  e.appendChild(form);
+  
+  document.getElementById(focusId).focus();
 }
 
 /** Checks all checkboxes

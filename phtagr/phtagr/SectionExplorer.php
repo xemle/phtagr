@@ -110,7 +110,7 @@ function print_content()
   $this->print_navigator($url_nav, $page, ceil($count/$search_nav->page_size));
   
   // Formular for further actions
-  echo "<form name=\"formImages\" action=\"index.php\" method=\"post\">";
+  echo "<form name=\"formExplorer\" id=\"formExplorer\" action=\"index.php\" method=\"post\">";
 
   echo "<table class=\"tableview\">\n";
   $cell=0;
@@ -137,9 +137,8 @@ function print_content()
 
   $this->print_navigator($url_nav, $page, ceil($count/$search_nav->page_size));
   
-  echo "<div><input type=\"hidden\" name=\"section\" value=\"explorer\" />\n";
+  echo "<input type=\"hidden\" name=\"section\" value=\"explorer\" />\n";
   echo $search->to_form();
-  echo "</div>\n";
 
   $edit=new Edit();
   if ($user->is_member())

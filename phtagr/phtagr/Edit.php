@@ -159,7 +159,9 @@ function execute()
         return false;
     }
 
-    $this->_handle_request_acl(&$img);
+    if (isset($_REQUEST['js_acl']) ||
+      isset($_REQUEST['aacl_edit']))
+      $this->_handle_request_acl(&$img);
     
     unset($img);
   }
@@ -260,7 +262,7 @@ function _handle_request_acl(&$img)
     $this->_handle_acl(&$acl, $_REQUEST['js_oacl_preview'], ACL_OTHER, ACL_PREVIEW, ACL_PREVIEW_MASK);
     $this->_handle_acl(&$acl, $_REQUEST['js_gacl_preview'], ACL_GROUP, ACL_PREVIEW, ACL_PREVIEW_MASK);
   }
-  else
+  else 
   {
     $this->_handle_acl(&$acl, $_REQUEST['aacl_edit'], ACL_ALL, ACL_EDIT, ACL_EDIT_MASK);
     $this->_handle_acl(&$acl, $_REQUEST['oacl_edit'], ACL_OTHER, ACL_EDIT, ACL_EDIT_MASK);
@@ -344,7 +346,7 @@ function print_edit_inputs()
   Set the access level to the selected images.
 </fieldset>
 
-<div><input type=\"hidden\" name=\"action\" value=\"edit\"/></div>
+<input type=\"hidden\" name=\"action\" value=\"edit\"/>
 ";
 }
 
