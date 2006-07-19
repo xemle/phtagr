@@ -450,7 +450,7 @@ function checkbox(id, name)
   if (!cb)
     return;
     
-  for (var i=0; i<document.forms["formImages"].elements.length; i++) {
+  for (var i=0; i<document.forms["formExplorer"].elements.length; i++) {
     var e = document.forms[1].elements[i];
     if (e.name==name && e.type == 'checkbox') {
       e.checked = cb.checked;
