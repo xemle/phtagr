@@ -208,12 +208,12 @@ function exec_stage_directory()
       }
       else
       {
-	// We need to copy the file there
-	if (!copy (getcwd().DIRECTORY_SEPARATOR."index.php", $directory."index.php"))
-	{
-	  $this->error("Could not copy index.php to $directory!");
-	  return false;
-	}
+        // We need to copy the file there
+        if (!copy (getcwd().DIRECTORY_SEPARATOR."index.php", $directory."index.php"))
+        {
+          $this->error("Could not copy index.php to $directory!");
+          return false;
+        }
       }
       if(!$this->check_file_permissions($directory,"image.php"))
       {
@@ -222,12 +222,12 @@ function exec_stage_directory()
       }
       else
       {
-	// We need to copy the file there
-	if (!copy (getcwd().DIRECTORY_SEPARATOR."image.php", $directory."image.php"))
-	{
-	  $this->error("Could not copy image.php to $directory!");
-	  return false;
-	}
+        // We need to copy the file there
+        if (!copy (getcwd().DIRECTORY_SEPARATOR."image.php", $directory."image.php"))
+        {
+          $this->error("Could not copy image.php to $directory!");
+          return false;
+        }
       }
     }
 
@@ -497,6 +497,9 @@ a file <code><b>login.txt</b></code> in the directory
 
 <p><code><b>$install_id</b></code></p>
 
+<p>If you run phTagr in an Linux environment, execute</p>
+<pre>$> echo $install_id > ./login.txt</pre>
+
 <form method=\"post\">
 <input type=\"hidden\" name=\"section\" value=\"install\" />
 <input type=\"hidden\" name=\"action\" value=\"authenticate\" />
@@ -704,7 +707,7 @@ that no one will create instances of phTagr that you do not want.</p>
   }
 
 echo "
-<p>Have fun!</p>
+<p><a href=\"".$_SERVER['PHP_SELF']."/index.php\">Have fun!</a></p>
 ";
   $this->clear_session();
 }
@@ -752,7 +755,7 @@ function print_content()
       else
       {
         $this->error("Some of the required tables do exist already. Please use another prefix or delete them manually!");
-	$this->stage=INSTALLER_STAGE_DATABASE;
+        $this->stage=INSTALLER_STAGE_DATABASE;
       }
     }
     else
