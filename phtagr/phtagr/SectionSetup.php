@@ -5,6 +5,7 @@ global $prefix;
 include_once("$phtagr_prefix/SectionBase.php");
 include_once("$phtagr_prefix/SectionAccount.php");
 include_once("$phtagr_prefix/Image.php");
+include_once("$phtagr_prefix/Thumbnail.php");
 
 class SectionSetup extends SectionBase
 {
@@ -233,6 +234,7 @@ function print_actions()
   echo "<li><a href=\"index.php?section=setup&action=delete_tables\">Delete Tables</a></li>\n";
   echo "<li><a href=\"index.php?section=setup&action=delete_images\">Delete all images</a></li>\n";
   echo "<li><a href=\"index.php?section=setup&action=upload_dir\">Set the upload directory</a></li>\n";
+  echo "<li><a href=\"index.php?section=setup&action=create_all_previews\">Create all preview images</a></li>\n";
   echo "<li><a href=\"index.php\">Go to phTagr</a></li>\n";
   echo "</ul>\n";
 }
@@ -323,7 +325,36 @@ function sync_files()
       unset($image);
     }
   }
-  $this->p("All $count images are now synchronized. $deleted images are deleted. $updated images are updated.");
+  echo "All $count images are now synchronized. $deleted images are deleted. $updated images are updated.<br/>\n";
+}
+
+/** Create all preview images */
+function create_all_previews()
+{
+  global $db;
+
+  echo "<h3>Create preview images ...</h3>\n";
+
+  $this->info("This operation may take some time");
+  
+  $sql="SELECT id
+        FROM $db->image";
+  $result=$db->query($sql);
+  if (!$result)
+    return;
+    
+  $count=0;
+  $updated=0;
+  $deleted=0;
+  while ($row=mysql_fetch_row($result))
+  {
+    $id=$row[0];
+    $count++;
+    
+    $img=new Thumbnail($id);
+    $img->create_all_previews();
+  }
+  echo "All preview images of $count images are now created.<br/>\n";
 }
 
 /** Deletes a file from the database */
@@ -380,6 +411,12 @@ function print_content()
     $this->setup_upload(); 
     return;
   }
+  else if ($action=='create_all_previews')
+  {
+    $this->create_all_previews(); 
+    return;
+  }
+  
   else if ($action=='create')
   {
     echo "<h2>Create A New Account</h2>\n";

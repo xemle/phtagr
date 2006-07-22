@@ -5,7 +5,7 @@
 
 include "$phtagr_prefix/User.php";
 include "$phtagr_prefix/Sql.php";
-include "$phtagr_prefix/Image.php";
+include "$phtagr_prefix/Thumbnail.php";
 
 function unauthorized()
 {
@@ -76,7 +76,7 @@ $user->check_session();
 
 $pref=$db->read_pref($user->get_userid());
 
-$img=new Image($_REQUEST['id']);
+$img=new Thumbnail($_REQUEST['id']);
 if (!$img)
 {
   internal_error();
@@ -87,25 +87,25 @@ switch ($type)
 {
   case 'mini':
     if ($user->can_preview(&$img))
-      $fn=$img->create_mini();
+      $fn=$img->get_filename_mini();
     else
       unauthorized();
     break;
   case 'thumb':
     if ($user->can_preview(&$img))
-      $fn=$img->create_thumbnail();
+      $fn=$img->get_filename_thumb();
     else
       unauthorized();
     break;
   case 'preview':
     if ($user->can_preview(&$img))
-      $fn=$img->create_preview();
+      $fn=$img->get_filename_preview();
     else
       unauthorized();
     break;
   case 'high':
     if ($user->can_preview(&$img))
-      $fn=$img->create_preview();
+      $fn=$img->get_filename_hight();
     else
       unauthorized();
     break;
@@ -118,12 +118,6 @@ switch ($type)
   default:
     bad_request();
 }
-
-if (!file_exists($fn))
-{
-  internal_error();
-}
-
 
 // Getting headers sent by the client. Convert header to lower case since it is
 // case insensitive 
@@ -144,19 +138,51 @@ else
 }
 
 // Checking if the client is validating his cache and if it is current.
-if (isset($headers['if-modified-since']) && (strtotime($headers['if-modified-since']) == filemtime($fn))) {
+if (isset($headers['if-modified-since']) && 
+    (strtotime($headers['if-modified-since']) == $img->get_synced(true))) 
+{
   // Client's cache IS current, so we just respond '304 Not Modified'.
-  header('Last-Modified: '.gmdate('D, d M Y H:i:s', filemtime($fn)).' GMT', true, 304);
+  header('Last-Modified: '.
+    gmdate('D, d M Y H:i:s', $img->get_synced(true)).' GMT', true, 304);
   // Allow caching for 30 days
   header('Cache-Control: max-age=2592000, must-revalidate');
 } else {
   // Image not cached or cache outdated, we respond '200 OK' and output the image.
-  header('Last-Modified: '.gmdate('D, d M Y H:i:s', filemtime($fn)).' GMT', true, 200);
-  header('Content-Length: '.filesize($fn));
-  header('Content-Type: image/jpg');
+  header('Last-Modified: '.gmdate('D, d M Y H:i:s', 
+    $img->get_synced(true)).' GMT', true, 200);
   // Allow caching
   header('Cache-Control: max-age=2592000, must-revalidate');
-  print file_get_contents($fn);
+  
+  switch ($type)
+  {
+    case 'mini':
+      $img->create_mini();
+      break;
+    case 'thumb':
+      $img->create_thumb();
+      break;
+    case 'preview':
+      $img->create_preview();
+      break;
+    case 'high':
+      $img->create_high();
+      break;
+    case 'full':
+      break;
+    default:
+      bad_request();
+  }
+
+  if (!file_exists($fn))
+  {
+    not_found();        
+  } else {
+    header('Content-Type: image/jpg');
+    /* Do not include the filesize of the content. I had bad experience with it 
+    header('Content-Length: '.filesize($fn));
+    */
+    print file_get_contents($fn);
+  }
 }
 
 ?>

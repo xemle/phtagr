@@ -136,6 +136,8 @@ function print_browser($dir)
     }
     echo "<input type=\"checkbox\" name=\"add[]\" value=\"$cd\" />&nbsp;<a href=\"?section=browser&amp;cd=$cd\">$sub</a><br />\n";
   }
+  echo "<br/>\n";
+  echo "<input type=\"checkbox\" name=\"create_all_previews\" checked=\"checked\" />&nbsp;Create all previews<br />\n";
   echo "<input type=\"submit\" value=\"Add images\" />&nbsp;";
   echo "<input type=\"reset\" value=\"Clear\" />";
   
@@ -158,8 +160,16 @@ function print_content()
     printf ("Found %d images<br/>\n", count($this->images));
     foreach ($this->images as $img)
     {
-      $image=new Image();
+      $image=new image();
       $return=$image->insert($this->root . $img, 0);
+
+      if ($_REQUEST['create_all_previews'])
+      {
+        $thumb=new Thumbnail($image->get_id());
+        $thumb->create_all_previews();
+        unset($thumb);
+      }
+
       switch ($return)
       {
       case 0:
