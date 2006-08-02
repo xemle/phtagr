@@ -144,7 +144,6 @@ if (isset($_REQUEST['section']))
     {
       $edit=new Edit();
       $edit->execute();
-      print_r($edit);
       unset($edit);
     }
     $image= new SectionImage();

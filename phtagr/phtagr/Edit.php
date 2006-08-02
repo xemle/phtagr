@@ -64,16 +64,8 @@ function execute()
   if (isset($_REQUEST['images']))
     $images=array_merge($_REQUEST['images'], $images);
  
-  $single_image=-1;
-
-  if (isset($_REQUEST['image']))
-    $single_image=$_REQUEST['image'];
-
   foreach ($images as $id)
   {
-    if ($single_image>=0 && $single_image!=$id)
-      continue;
-      
     $img=new Image($id);
     if ($img->get_id()!=$id)
     {

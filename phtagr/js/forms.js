@@ -150,8 +150,17 @@ function add_form_caption(id, caption64)
   form.setAttribute("action", "index.php");
   form.setAttribute("method", "post");
 
-  // copy all hidden inputs from formExplorer
-  var srcForm=document.getElementById("formExplorer");
+  // copy all hidden inputs from formExplorer or formImage
+  // whichever exists
+  var srcForm;
+  if (document.getElementById("formExplorer"))
+  {
+    srcForm=document.getElementById("formExplorer");
+  }
+  else
+  {
+    srcForm=document.getElementById("formImage");
+  }
   _clone_hidden_input(srcForm, form);
   
   var input=document.createElement("input");
@@ -239,11 +248,26 @@ function add_form_tags(id, tags)
   form.setAttribute("action", "index.php");
   form.setAttribute("method", "post");
 
-  // copy all hidden inputs from formExplorer
-  var srcForm=document.getElementById("formExplorer");
+  // copy all hidden inputs from formExplorer or formImage
+  // whichever exists
+  var srcForm;
+  if (document.getElementById("formExplorer"))
+  {
+    srcForm=document.getElementById("formExplorer");
+  }
+  else
+  {
+    srcForm=document.getElementById("formImage");
+  }
+
   _clone_hidden_input(srcForm, form);
   
   var input=document.createElement("input");
+  input.setAttribute("type", "hidden");
+  input.setAttribute("name", "action");
+  input.setAttribute("value", "edit");
+  form.appendChild(input);
+
   input.setAttribute("type", "hidden");
   input.setAttribute("name", "image");
   input.setAttribute("value", id);
@@ -304,8 +328,17 @@ function add_form_acl(id, gacl, oacl, aacl)
   form.setAttribute("action", "index.php");
   form.setAttribute("method", "post");
 
-  // copy all hidden inputs from formExplorer
-  var srcForm=document.getElementById("formExplorer");
+  // copy all hidden inputs from formExplorer or formImage
+  // whichever exists
+  var srcForm;
+  if (document.getElementById("formExplorer"))
+  {
+    srcForm=document.getElementById("formExplorer");
+  }
+  else
+  {
+    srcForm=document.getElementById("formImage");
+  }
   _clone_hidden_input(srcForm, form);
   
   var input=document.createElement("input");

@@ -498,7 +498,7 @@ a file <code><b>login.txt</b></code> in the directory
 <p><code><b>$install_id</b></code></p>
 
 <p>If you run phTagr in an Linux environment, execute</p>
-<pre>$> echo $install_id > ./login.txt</pre>
+<pre>$> echo $install_id > $curr_path"."login.txt</pre>
 
 <form method=\"post\">
 <input type=\"hidden\" name=\"section\" value=\"install\" />

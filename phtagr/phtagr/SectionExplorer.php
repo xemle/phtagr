@@ -137,6 +137,7 @@ function print_content()
 
   $this->print_navigator($url_nav, $page, ceil($count/$search_nav->page_size));
   
+  echo "<input type=\"hidden\" name=\"page\" value=\"$page\" />\n";
   echo "<input type=\"hidden\" name=\"section\" value=\"explorer\" />\n";
   echo $search->to_form();
 

@@ -149,21 +149,23 @@ function user_delete($id=-1)
   global $user;
   global $db;
 
-  if ($id>0)
+  /* We only allow to delete non admin users, which means users
+  with an id > 1 */
+  if ($id>1)
   {
+    /* Only the admin is allowed to delete user. */
     if (!$user->is_admin())
     {
-      $this->warning("You are not allowed to delete the user");
+      $this->warning("You are not allowed to delete user.");
       return false;
     }
+
     if ($this->_delete_user_data($id))
-      $this->info("User was deleted successfully");
+        $this->info("User was deleted successfully");
     return;
   }
-
-  $id=$user->get_userid();
-  if ($this->_delete_user_data($id))
-    $this->info("Your Account was deleted successfully");
+  
+  $this->warning("You are not allowed to delete this user!");
   return;
 }
 
@@ -243,11 +245,22 @@ function print_user_list()
   $delete="index.php?section=account&amp;action=delete&amp;id=";
   while ($row=mysql_fetch_assoc($result))
   {
+    if ($row['id'] == 1)
+    {
+    echo "  <tr>
+    <td><input type=\"checkbox\" disabled></td>
+    <td>${row['name']}</td>
+    <td><div class=\"button_disabled\"><a href=\"\">delete</a></div></td>
+  </tr>\n";
+    }
+    else
+    {
     echo "  <tr>
     <td><input type=\"checkbox\"></td>
     <td>${row['name']}</td>
-    <td><a href=\"${delete}${row['id']}\">delete</a></td>
+    <td><div class=\"button\"><a href=\"${delete}${row['id']}\">delete</a></div></td>
   </tr>\n";
+    }
   }
   echo "</table>\n";
 }

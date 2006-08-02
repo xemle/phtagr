@@ -342,7 +342,7 @@ function print_uploaded()
     <th width=\"5%\">Image</th>
     <th>Name</th>
     <th width=\"20%\">Size</th>
-    <th width=\"1%\"></th>
+    <th width=\"1%\">Action</th>
 ";
 
   $file_size_sum = 0;
@@ -357,7 +357,7 @@ function print_uploaded()
             !is_dir($file) && 
             file_exists($fullpath.$file))
         {
-          $image=new Image(-1);
+          $image=new Thumbnail(-1);
           if (!$image->init_by_filename($fullpath.$file))
             continue;
 
@@ -366,13 +366,15 @@ function print_uploaded()
           echo "      <td align=\"center\">\n";
           
           $src=$image->create_mini();
-          echo "<img src=\"$src\">";
+	  echo "<a href=\"./index.php?section=image&id=".$image->get_id()."\">";
+          echo "<img src=\"./image.php?id=".$image->get_id()."&amp;type=mini\" alt=\"".$image->get_name()."\">";
+	  echo "</a>\n";
           echo "</td>\n";
           echo "      <td align=\"center\">$file</td>\n";
           echo "      <td align=\"right\">"
              . $this->get_readable_size ( $image->get_bytes() ) 
              . " Bytes</td>\n";
-          echo "<td><div class=\"headerright\"><a href='./index.php?section=upload&delete_upload=&".urlencode($file)."=on'>Delete</a></div></td>\n";
+          echo "<td><div class=\"button\"><a href='./index.php?section=upload&delete_upload=&".urlencode($file)."=on'>Delete</a></div></td>\n";
           echo "    </tr>\n";
           $file_size_sum += $image->get_bytes() ;
           unset($image);

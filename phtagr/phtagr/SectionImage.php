@@ -95,21 +95,24 @@ function print_content()
   
   $name=$image->get_name();
   
-  echo "<h3>$name</h3>\n";
-
   $this->print_navigation($search);
-  
+
+  echo "<div class=\"name\">$name</div>\n";
+
+  echo "<div align=\"middle\">\n";
+
   $size=$image->get_size(600);
   echo "<p><img src=\"./image.php?id=$id&amp;type=preview\" alt=\"$name\" ".$size[2]."/></p>\n";
   if ($user->can_edit(&$image))
   {
-    echo "<form action=\"index.php\" method=\"post\">\n";
+    echo "<form name=\"formImage\" id=\"formImage\" action=\"index.php\" method=\"post\">\n";
     echo "<input type=\"hidden\" name=\"section\" value=\"image\" />\n";
+    echo "<input type=\"hidden\" name=\"id\" value=\"".$image->get_id()."\" />\n";
     echo "<input type=\"hidden\" name=\"action\" value=\"edit\" />\n";
     echo $search->to_form();
   } 
   $image->print_caption(false);
-  echo "<table class=\"imginfo\">\n";
+  echo "<p><table class=\"imginfo\">\n";
   
   $ranking=0+strtr($image->get_ranking(), 'E', 'e');
   echo "  <tr><th>Clicks:</th><td>".$image->get_clicks()
@@ -118,10 +121,12 @@ function print_content()
   $sec=$image->get_date(true);
   $image->print_row_date($sec);
   $image->print_row_tags();
-  echo "</table>\n";
+  echo "</table></p>\n";
 
   if ($user->can_edit(&$image))
     echo "</form>\n";
+
+  echo "</div>\n";
 
   if (!isset($_SESSION['img_viewed'][$id]))
     $image->update_ranking();
