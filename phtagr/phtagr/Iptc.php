@@ -406,6 +406,19 @@ function _read_ps_segs($jpg)
       $this->_errmsg="Could not read PS segment header";
       return false;
     }
+
+    // try to fix padding of last 8BIM segment and shift header with 1 byte
+    if ($hdr{0}!='8')
+    {
+      if ($hdr{1}=='8')
+      {
+        $hdr=substr($hdr, 1).fread($fp, 1);
+        $data['pos']++;
+      }
+      else
+        break;
+    }
+
     // size of section starting from pos: size+12
     $data['size']=$this->_byte2short(substr($hdr, 10, 2));
     if ($data['pos']+12+$data['size']>$app13['pos']+2+$app13['size'])
@@ -416,8 +429,6 @@ function _read_ps_segs($jpg)
     }
   
     $data['marker']=substr($hdr, 0, 4);
-    if ($data['marker']{0}!='8')
-      break;
     if ($data['marker']!='8BIM')
     {
       $this->_errno=-1;

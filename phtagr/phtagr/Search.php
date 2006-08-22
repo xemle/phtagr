@@ -571,7 +571,7 @@ function _handle_limit($limit=0)
   @param order If this flag is true, the order column will be included into the
   select statement. Otherwise not. Default is true.
   @return SQL query string 
-  @see _get_query_from_tags, _handle_limit, _get_order_column  */
+  @see _get_query_from_tags, _handle_limit, _get_column_order  */
 function get_query($limit=1, $order=true)
 {
   global $db;
