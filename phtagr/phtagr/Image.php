@@ -2,6 +2,7 @@
 
 include_once("$phtagr_prefix/Search.php");
 include_once("$phtagr_prefix/Base.php");
+include_once("$phtagr_prefix/Constants.php");
 
 /** 
   @class Image Create thumbnails, image previews, synchronize 
@@ -437,6 +438,7 @@ function _insert_iptc()
   $this->_insert_iptc_tags(&$iptc);
   $this->_insert_iptc_caption(&$iptc);
   $this->_insert_iptc_date(&$iptc);
+  $this->_insert_iptc_location(&$iptc);
   
   return true;
 }
@@ -516,6 +518,66 @@ function _insert_iptc_date($iptc=null)
     $sql="UPDATE $db->image
           SET date='$date'
           WHERE id=$id";
+    $result = $db->query($sql);
+    if (!$result)
+      return false;
+  }
+  return true;
+} 
+
+
+/** Read the location data from the IPTC segment and insert it to the database
+  @param iptc The Iptc object of the current image */
+function _insert_iptc_location($iptc=null)
+{
+  global $db;
+  if (!isset($this->_data) || !isset($iptc))
+    return false;
+
+  $id=$this->get_id();
+  
+  // Remove old stuff
+  $sql="DELETE FROM $db->imagelocation 
+        WHERE imageid=$id";
+  $result=$db->query($sql);
+  
+  // Extract IPTC city
+  $city=$iptc->get_record('2:090');
+  if ($city!=NULL)
+  {
+    $locationid=$db->location2id($city, LOCATION_CITY, true);
+    $sql="INSERT INTO $db->imagelocation ( imageid, locationid )
+          VALUES ( $id, $locationid )";
+    $result = $db->query($sql);
+    if (!$result)
+      return false;
+  }
+  $sublocation=$iptc->get_record('2:092');
+  if ($sublocation!=NULL)
+  {
+    $locationid=$db->location2id($sublocation, LOCATION_SUBLOCATION, true);
+    $sql="INSERT INTO $db->imagelocation ( imageid, locationid )
+          VALUES ( $id, $locationid )";
+    $result = $db->query($sql);
+    if (!$result)
+      return false;
+  }
+  $state=$iptc->get_record('2:095');
+  if ($state!=NULL)
+  {
+    $locationid=$db->location2id($state, LOCATION_STATE, true);
+    $sql="INSERT INTO $db->imagelocation ( imageid, locationid )
+          VALUES ( $id, $locationid )";
+    $result = $db->query($sql);
+    if (!$result)
+      return false;
+  }
+  $country=$iptc->get_record('2:101');
+  if ($country!=NULL)
+  {
+    $locationid=$db->location2id($country, LOCATION_COUNTRY, true);
+    $sql="INSERT INTO $db->imagelocation ( imageid, locationid )
+          VALUES ( $id, $locationid )";
     $result = $db->query($sql);
     if (!$result)
       return false;
@@ -705,15 +767,6 @@ function print_row_tags()
   global $user;
 
   $id=$this->get_id();
-  /**
-  $sql="SELECT name 
-        FROM $db->tag 
-        WHERE id IN (
-          SELECT tagid
-          FROM $db->imagetag
-          WHERE imageid=$id
-        )";
-        */
   $sql="SELECT t.name
         FROM $db->tag as t, $db->imagetag as it
         WHERE it.imageid=$id 
@@ -752,6 +805,67 @@ function print_row_tags()
   </tr>\n";
 }
 
+function print_row_location()
+{
+  global $db;
+  global $user;
+
+  $id=$this->get_id();
+  $sql="SELECT l.name,l.type
+        FROM $db->location as l, $db->imagelocation as il
+        WHERE il.imageid=$id 
+          AND il.locationid=l.id";
+  $result = $db->query($sql);
+  $location=array();
+  
+  $city='';
+  $sublocation='';
+  $state='';
+  $country='';
+
+  while($row = mysql_fetch_row($result)) {
+    switch($row[1]) {
+    case LOCATION_CITY:
+      $city=$row[0];
+      break;
+    case LOCATION_SUBLOCATION:
+      $sublocation=$row[0];
+      break;
+    case LOCATION_STATE:
+      $state=$row[0];
+      break;
+    case LOCATION_COUNTRY:
+      $country=$row[0];
+      break;
+    } 
+    array_push($location, array($row[1], $row[0]));
+  }
+   
+  echo "  <tr>
+    <th>Location:</th>
+    <td id=\"location-$id\">";  
+
+  $num_location=count($location);
+  for ($i=0; $i<$num_location; $i++)
+  {
+    echo "<a href=\"index.php?section=explorer&amp;location=".$location[$i][1] . "\">" . $location[$i][1] . "</a>";
+    if ($i<$num_location-1)
+        echo ", ";
+  }
+  if ($user->can_edit($this))
+  {
+    $list='';
+    for ($i=0; $i<$num_location; $i++)
+    {
+      $list.=$tags[$i];
+      if ($i<$num_tags-1)
+        $list.=" ";
+    }
+    echo " <span class=\"jsbutton\" onclick=\"add_form_location('$id','$city','$sublocation', '$state', '$country')\">[edit]</span>";
+  }
+  echo "</td>
+  </tr>\n";
+}
 function print_preview($search=null) 
 {
   global $db;
@@ -789,6 +903,7 @@ function print_preview($search=null)
   $this->print_row_date();
   
   $this->print_row_tags();
+  $this->print_row_location();
   if ($user->can_select($id))
   {
     echo "  <tr>

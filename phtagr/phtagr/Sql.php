@@ -268,6 +268,44 @@ function id2tag($id)
   }
 }
 
+/** Gets the id of a location 
+  @param location name of the location
+  @param type Type of the location
+  @param create If the tag name does not exists and this flag is true, the tag
+  name will be created 
+  @return -1 if the location was not found, id otherwise */
+function location2id($location, $type, $create=false)
+{
+  if ($type==LOCATION_UNDEFINED && $create==false)
+    $sql="SELECT id FROM $this->location WHERE name='$location'";
+  else
+    $sql="SELECT id FROM $this->location WHERE name='$location' AND type=$type";
+  $result=$this->query($sql);
+  if (!$result)
+  {
+    return -1;
+  }
+  else if (mysql_num_rows($result)==0)
+  {
+    if ($create)
+    {
+      $sql="INSERT INTO $this->location (name, type) VALUES('$location', $type)";
+      $result=$this->query($sql);
+      if ($result)
+        return $this->location2id($location, $type);
+      else 
+        return -1;
+    }
+    else
+    {
+      return -1;
+    }
+  }
+  $row=mysql_fetch_row($result);
+  return $row[0];
+}
+
+
 /** creates the phTagr tables an returns true on success */
 function create_tables()
 { 

@@ -69,10 +69,9 @@ if (!$db->connect())
   internal_error();
 }
 
-session_start();
-
+// Check user login without refresh the cookie
 $user=new User();
-$user->check_session();
+$user->check_session(false);
 
 $pref=$db->read_pref($user->get_userid());
 
@@ -146,43 +145,48 @@ if (isset($headers['if-modified-since']) &&
     gmdate('D, d M Y H:i:s', $img->get_synced(true)).' GMT', true, 304);
   // Allow caching for 30 days
   header('Cache-Control: max-age=2592000, must-revalidate');
-} else {
-  // Image not cached or cache outdated, we respond '200 OK' and output the image.
-  header('Last-Modified: '.gmdate('D, d M Y H:i:s', 
-    $img->get_synced(true)).' GMT', true, 200);
-  // Allow caching
-  header('Cache-Control: max-age=2592000, must-revalidate');
-  
-  switch ($type)
-  {
-    case 'mini':
-      $img->create_mini();
-      break;
-    case 'thumb':
-      $img->create_thumb();
-      break;
-    case 'preview':
-      $img->create_preview();
-      break;
-    case 'high':
-      $img->create_high();
-      break;
-    case 'full':
-      break;
-    default:
-      bad_request();
-  }
+  exit;
+}
 
-  if (!file_exists($fn))
-  {
-    not_found();        
-  } else {
-    header('Content-Type: image/jpg');
-    /* Do not include the filesize of the content. I had bad experience with it 
-    header('Content-Length: '.filesize($fn));
-    */
-    print file_get_contents($fn);
-  }
+// Image not cached or cache outdated, we respond '200 OK' and output the image.
+header('Last-Modified: '.gmdate('D, d M Y H:i:s', 
+  $img->get_synced(true)).' GMT', true, 200);
+// Allow caching
+header('Cache-Control: max-age=2592000');
+
+switch ($type)
+{
+  case 'mini':
+    $img->create_mini();
+    break;
+  case 'thumb':
+    $img->create_thumb();
+    break;
+  case 'preview':
+    $img->create_preview();
+    break;
+  case 'high':
+    $img->create_high();
+    break;
+  case 'full':
+    break;
+  default:
+    bad_request();
+}
+
+if (!file_exists($fn))
+{
+  not_found();        
+} else {
+  header('Content-Type: image/jpg');
+  /* Do not include the filesize of the content. I had bad experience with it 
+  */
+  header('Content-Length: '.filesize($fn));
+  header("Content-Transfer-Encoding: binary");
+  //print file_get_contents($fn);
+  @readfile($fn) or internal_error();
+  //echo "\n";
+  exit;
 }
 
 ?>

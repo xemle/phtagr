@@ -84,7 +84,8 @@ function execute()
     if ($this->_check_iptc_error(&$iptc))
       continue;
     
-    //echo "<pre>\n"; print_r($iptc); echo "</pre>\n";
+    //$this->debug($_REQUEST);
+
     // Distinguish between javascript values and global values
     if (isset($_REQUEST['js_tags']))
     {
@@ -142,6 +143,8 @@ function execute()
       if ($this->_check_iptc_error(&$iptc))
         return false;
     }
+   
+    $this->handle_iptc_location(&$iptc);
     
     if ($iptc->is_changed())
     {
@@ -158,6 +161,70 @@ function execute()
     unset($img);
   }
   return true;
+}
+
+/** Change the location information of the image. Location types are state,
+ * sublocation, state and country. If a location type starts with an minus sign
+ * in the multi-select mode, the location type will be removed. 
+ @param iptc Pointer to the IPTC object of the image */
+function handle_iptc_location(&$iptc)
+{
+  if (isset($_REQUEST['js_location']))
+  {
+    if ($_REQUEST['js_city']!='')
+      $iptc->add_record("2:090", $_REQUEST['js_city']);
+    else
+      $iptc->rem_record("2:090");
+    
+    if ($_REQUEST['js_sublocation']!='')
+      $iptc->add_record("2:092", $_REQUEST['js_sublocation']);
+    else
+      $iptc->rem_record("2:092");
+    
+    if ($_REQUEST['js_state']!='')
+      $iptc->add_record("2:095", $_REQUEST['js_state']);
+    else
+      $iptc->rem_record("2:095");
+    
+    if ($_REQUEST['js_country']!='')
+      $iptc->add_record("2:101", $_REQUEST['js_country']);
+    else
+      $iptc->rem_record("2:101");
+  }
+  else 
+  {
+    if ($_REQUEST['edit_city']!='')
+    {
+      if ($_REQUEST['edit_city'][0]=='-')
+        $iptc->rem_record("2:090", substr($_REQUEST['edit_city'],1));
+      else
+        $iptc->add_record("2:090", $_REQUEST['edit_city']);
+    }
+    
+    if ($_REQUEST['edit_sublocation']!='')
+    {
+      if ($_REQUEST['edit_sublocation'][0]=='-')
+        $iptc->rem_record("2:092", substr($_REQUEST['edit_sublocation'],1));
+      else
+        $iptc->add_record("2:092", $_REQUEST['edit_sublocation']);
+    }
+    
+    if ($_REQUEST['edit_state']!='')
+    {
+      if ($_REQUEST['edit_state'][0]=='-')
+        $iptc->rem_record("2:095", substr($_REQUEST['edit_state'],1));
+      else
+        $iptc->add_record("2:095", $_REQUEST['edit_state']);
+    }
+    
+    if ($_REQUEST['edit_country']!='')
+    {
+      if ($_REQUEST['edit_country'][0]=='-')
+        $iptc->rem_record("2:101", substr($_REQUEST['edit_country'],1));
+      else
+        $iptc->add_record("2:101", $_REQUEST['edit_country']);
+    }
+  }
 }
 
 /* Permit a new flag. The ACL flag influence lower levels. E.g. if a member is
@@ -277,6 +344,7 @@ function _handle_request_acl(&$img)
   return false;
 }
 
+
 /** Print the inputs to edit IPTC tags like comment, tags or sets. */
 function print_edit_inputs()
 {
@@ -285,9 +353,25 @@ function print_edit_inputs()
 
 <fieldset><legend>Edit</legend>
   <table>
-    <tr><th>Caption:</th><td><textarea name=\"edit_caption\" cols=\"24\" rows=\"3\" ></textarea></td></tr>
-    <tr><th>Tags:</th><td><input type=\"text\" name=\"edit_tags\" size=\"60\"/></td></tr>
-    <tr><th>Set:</th><td><input type=\"text\" name=\"edit_sets\" size=\"60\"/></td></tr>
+    <tr>
+      <th>Caption:</th>
+      <td><textarea name=\"edit_caption\" cols=\"24\" rows=\"3\" ></textarea></td>
+    </tr>
+    <tr>
+      <th>Tags:</th>
+      <td><input type=\"text\" name=\"edit_tags\" size=\"60\"/></td>
+    </tr>
+    <tr>
+      <th>Set:</th>
+      <td><input type=\"text\" name=\"edit_sets\" size=\"60\"/></td>
+    </tr>
+    <tr>
+      <th>Location:</th>
+      <td>City: <input type=\"text\" name=\"edit_city\" size=\"60\"/><br/>
+        Sublocation: <input type=\"text\" name=\"edit_sublocation\" size=\"60\"/><br/> 
+        State: <input type=\"text\" name=\"edit_province\" size=\"60\"/><br/>
+        Country: <input type=\"text\" name=\"edit_country\" size=\"60\"/></td>
+    </tr>
   </table>
 </fieldset>
 <fieldset><legend>ACL</legend>

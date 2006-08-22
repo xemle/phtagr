@@ -1,5 +1,7 @@
 <?php
 
+include_once("$phtagr_prefix/Constants.php");
+
 /** Base class of all classes. It provides basic wrappers for HTML output.
 @class Base */
 class Base

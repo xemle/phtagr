@@ -273,28 +273,41 @@ function add_form_tags(id, tags)
   input.setAttribute("value", id);
   form.appendChild(input);
 
+  var table=document.createElement("table");
+  var tr=document.createElement("tr");
+  var td=document.createElement("td");
+  
   input=document.createElement("input");
   input.setAttribute("id", focusId);
   input.setAttribute("type", "text");
   input.setAttribute("name", "js_tags");
   input.setAttribute("value", tags);
-  input.setAttribute("size", 35);
-  form.appendChild(input);
+  input.setAttribute("size", 30);
+  td.appendChild(input);
+  tr.appendChild(td);
+  table.appendChild(tr);
   
   input=document.createElement("input");
   input.setAttribute("class", "submit");
   input.setAttribute("type", "submit");
   input.setAttribute("value", " OK ");
-  form.appendChild(input);
+
+  tr=tr.cloneNode(false);
+  td=td.cloneNode(false);
+  td.appendChild(input);
 
   var text=document.createTextNode(" or ");
-  form.appendChild(text);
+  td.appendChild(text);
   
   input=document.createElement("input");
   input.setAttribute("class", "reset");
   input.setAttribute("type", "reset");
   input.setAttribute("onclick", "resetNode('"+nodeId+"')");
-  form.appendChild(input);
+  td.appendChild(input);
+  tr.appendChild(td);
+  table.appendChild(tr);
+
+  form.appendChild(table);
 
   while (e.hasChildNodes())
     e.removeChild(e.lastChild);
@@ -302,6 +315,7 @@ function add_form_tags(id, tags)
   
   document.getElementById(focusId).focus();
 }
+
 /** Add a form for acl
   @param id ID of the image
   @param tags List of the tags */
@@ -447,6 +461,110 @@ function add_form_acl(id, gacl, oacl, aacl)
   else
     input.removeAttribute("checked");
   tr.appendChild(td);
+  
+  table.appendChild(tr);
+  form.appendChild(table); 
+
+  input=document.createElement("input");
+  input.setAttribute("class", "submit");
+  input.setAttribute("type", "submit");
+  input.setAttribute("value", " OK ");
+  form.appendChild(input);
+
+  var text=document.createTextNode(" or ");
+  form.appendChild(text);
+  
+  input=document.createElement("input");
+  input.setAttribute("class", "reset");
+  input.setAttribute("type", "reset");
+  input.setAttribute("onclick", "resetNode('"+nodeId+"')");
+  form.appendChild(input);
+
+  while (e.hasChildNodes())
+    e.removeChild(e.lastChild);
+  e.appendChild(form);
+  
+  document.getElementById(focusId).focus();
+}
+
+/** Add a form for acl
+  @param id ID of the image
+  @param tags List of the tags */
+function add_form_location(id, city, sublocation, state, country)
+{
+  var nodeId="location-"+id;
+  var e=document.getElementById(nodeId);
+  if (e==null)
+    return;
+
+  var focusId=nodeId+"-location";
+
+  // Does a form already exists?
+  if (Data[nodeId]!=null)
+  {
+    resetNod(nodeId);
+    return;
+  }
+
+  // Remember old content
+  Data[nodeId]=e.cloneNode(true);
+  
+  var form=document.createElement("form");
+  form.setAttribute("action", "index.php");
+  form.setAttribute("method", "post");
+
+  // copy all hidden inputs from formExplorer
+  var srcForm=document.getElementById("formExplorer");
+  _clone_hidden_input(srcForm, form);
+  
+  var input=document.createElement("input");
+  input.setAttribute("type", "hidden");
+  input.setAttribute("name", "image");
+  input.setAttribute("value", id);
+  form.appendChild(input);
+
+  input=input.cloneNode(false);
+  input.setAttribute("name", "js_location");
+  input.setAttribute("value", "yes");
+  form.appendChild(input);
+  
+  var table=document.createElement("table");
+  // first row
+  var tr=document.createElement("tr");
+  
+  var td=document.createElement("td");
+  td.appendChild(document.createTextNode("City:"));
+  tr.appendChild(td);
+
+  td=td.cloneNode(false);
+  input=input.cloneNode(false);
+  input.setAttribute("type", "input");
+  input.setAttribute("id", focusId);
+  input.setAttribute("name", "js_city");
+  input.setAttribute("value", city);
+  input.setAttribute("size", 20);
+  td.appendChild(input);
+  tr.appendChild(td);
+  table.appendChild(tr);
+  
+  tr=tr.cloneNode(true);
+  tr.childNodes[0].childNodes[0].nodeValue="Sublocation:";
+  tr.childNodes[1].childNodes[0].removeAttribute("id");
+  tr.childNodes[1].childNodes[0].setAttribute("name", "js_sublocation");
+  tr.childNodes[1].childNodes[0].setAttribute("value", sublocation);
+  table.appendChild(tr);
+
+  tr=tr.cloneNode(true);
+  tr.childNodes[0].childNodes[0].nodeValue="State:";
+  tr.childNodes[1].childNodes[0].setAttribute("name", "js_state");
+  tr.childNodes[1].childNodes[0].setAttribute("value", state);
+  table.appendChild(tr);
+
+  tr=tr.cloneNode(true);
+  tr.childNodes[0].childNodes[0].nodeValue="Country:";
+  tr.childNodes[1].childNodes[0].setAttribute("name", "js_country");
+  tr.childNodes[1].childNodes[0].setAttribute("value", country);
+  table.appendChild(tr);
   
   table.appendChild(tr);
   form.appendChild(table); 

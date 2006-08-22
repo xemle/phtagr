@@ -36,16 +36,28 @@ function print_content()
   <tr>
     <th>Date:</th>
     <td>
-      after: <input type=\"text\" name=\"start\" size=\"10\" />
+      after: <input type=\"text\" name=\"start\" size=\"10\" /><br />
       before: <input type=\"text\" name=\"end\" size=\"10\" /><br />
       E.g. \"2006-04-21\"
     </td>
   </tr>
   <tr>
+    <th>Location:</th>
+    <td>
+      <input type=\"text\" name=\"location\" size=\"30\" /><br />
+      Type: <select name=\"location_type\" size=\"1\">
+        <option value=\"".LOCATION_UNDEFINED."\" selected=\"selected\">undefined</option>
+        <option value=\"".LOCATION_CITY."\">City</option>
+        <option value=\"".LOCATION_SUBLOCATION."\">Sublocation</option>
+        <option value=\"".LOCATION_STATE."\">State</option>
+        <option value=\"".LOCATION_COUNTRY."\">Country</option>
+      </select>
+    </td>
+  <tr>
     <th>Sort by:</th>
     <td>
       <select name=\"orderby\">
-        <option value=\"date\">choose</option>
+        <option value=\"date\" selected=\"selected\">date</option>
         <option value=\"-date\">date asc</option>
         <option value=\"ranking\">ranking</option>
         <option value=\"-ranking\">ranking asc</option>
@@ -58,8 +70,7 @@ function print_content()
     <th>Page size:</th>
     <td>
       <select name=\"pagesize\">
-        <option value=\"10\">choose</option>
-        <option value=\"10\">10</option>
+        <option value=\"10\" selected=\"selected\">10</option>
         <option value=\"20\">20</option>
         <option value=\"50\">50</option>
         <option value=\"100\">100</option>

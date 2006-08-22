@@ -262,8 +262,10 @@ function can_upload_size($size=0)
 }
 
 /** Checks if the session is valid. 
+ @param docookierefresh If false, no not send a new cookie to refresh the
+ timeout. Default is true.
  @return true If the session is valid */
-function check_session()
+function check_session($docookierefresh=true)
 {
   global $db;
   $cookie="phtagr".$db->prefix;
@@ -272,7 +274,8 @@ function check_session()
   {
     if ($_REQUEST['action']=='login')
     {
-      if ($this->_check_login($_REQUEST['user'], $_REQUEST['password']))
+      if ($this->_check_login($_REQUEST['user'], $_REQUEST['password']) && 
+          $docookierefresh)
       {
         $this->_set_cookie($_REQUEST['user'], $_REQUEST['password']);
       }
@@ -288,7 +291,8 @@ function check_session()
   {
     list ($username, $password)=split(' ', $_COOKIE[$cookie]);
     $password=base64_decode($password);
-    if ($this->_check_login($username, $password))
+    if ($this->_check_login($username, $password) &&
+        $docookierefresh)
     {
       // refresh cookie
       $this->_set_cookie($username, $password);

@@ -95,11 +95,11 @@ function crop($width, $height, $left=0, $top=0)
 }
 
 /** Set to quality of the output image 
-  @param quality Value between 0 (worset) and 100 (best). Default is 80 */
-function setQuality($quality=80)
+  @param quality Value between 0 (worset) and 100 (best). Default is 85 */
+function setQuality($quality=85)
 {
   if ($quality<0 || $quality > 100)
-    $quality=80;
+    $quality=85;
     
   $this->cmd.=" -quality $quality";
 }
@@ -160,7 +160,7 @@ function create_mini($inherit=false)
     }
     $this->resize($w, $h);
     $this->crop(75, 75, $l, $t);
-    $this->setQuality(80);
+    $this->setQuality(85);
     return $this->saveTo($mini);
   }
   return true;
@@ -186,7 +186,7 @@ function create_thumb($inherit=false)
       $this->init($this->get_filename_preview());
     }
     $this->resize(220, 220);
-    $this->setQuality(80);
+    $this->setQuality(85);
     return $this->saveTo($thumb);
   }
   return true;
@@ -212,7 +212,7 @@ function create_preview($inherit=false)
       $this->init($this->get_filename_high());
     }
     $this->resize(600, 600);
-    $this->setQuality(80);
+    $this->setQuality(90);
     return $this->saveTo($preview);
   }
   return true;

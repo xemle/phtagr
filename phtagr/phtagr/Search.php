@@ -17,6 +17,8 @@ var $userid;
 var $tagop;
 var $date_start;
 var $date_end;
+var $location;
+var $location_type;
 /** Absolute position of image */
 var $pos;
 var $page_size;
@@ -32,6 +34,8 @@ function Search()
   $this->tagop=0;
   $this->date_start=0;
   $this->date_end=0;
+  $this->location='';
+  $this->location_type=LOCATION_UNDEFINED;
   $this->pos=0;
   $this->page_size=10;
   $this->page_num=0;
@@ -75,6 +79,18 @@ function set_user($userid)
 {
   if ($userid>0)
     $this->userid=$userid;
+}
+
+function set_location($location)
+{
+  $this->location=$location;
+}
+
+function set_location_type($location_type)
+{
+  if ($location_type >= LOCATION_UNDEFINED &&
+      $location_type <= LOCATION_COUNTRY)
+  $this->location_type=$location_type;
 }
 
 /** Convert input string to unix time. Currently only the format of YYYY-MM-DD
@@ -205,6 +221,11 @@ function from_URL()
   if (isset($_REQUEST['tagop']))
     $this->set_tagop($_REQUEST['tagop']);
   
+  if (isset($_REQUEST['location']))
+    $this->set_location($_REQUEST['location']);
+  if (isset($_REQUEST['location_type']))
+    $this->set_location_type($_REQUEST['location_type']);
+    
   if (isset($_REQUEST['start']))
     $this->set_date_start($_REQUEST['start']);
   if (isset($_REQUEST['end']))
@@ -245,7 +266,12 @@ function to_URL()
     if ($num_tags>1 && $this->tagop!=0)
       $url .= '&amp;tagop='.$this->tagop;
   }
-  
+ 
+  if ($this->location!='')
+    $url .= '&amp;location='.$this->location;
+  if ($this->location_type!=LOCATION_UNDEFINED)
+    $url .= '&amp;location_type='.$this->location_type;
+    
   if ($this->date_start>0)
     $url .= '&amp;start='.$this->date_start;
   if ($this->date_end>0)
@@ -299,6 +325,11 @@ function to_form()
       $form .= $this->_input('tagop',$this->tagop);
   }
   
+  if ($this->location!='')
+    $form .= $this->_input('location', $this->location);
+  if ($this->location_type!=LOCATION_UNDEFINED)
+    $form .= $this->_input('location_type', $this->location_type);
+    
   if ($this->date_start>0)
     $form .= $this->_input('start',$this->date_start);
   if ($this->date_end>0)
@@ -329,10 +360,15 @@ function _get_query_from_tags($tags, $order=false)
   $sql="SELECT i.id";
   if ($order)
     $sql.=$this->_get_column_order();
+  if ($this->tagop==1 || $this->tagop==2)
+    $sql.=", COUNT(i.id) AS hits";
+
   $sql.=" FROM $db->image AS i";
   if ($num_tags)
     $sql .= ",$db->imagetag AS it";
-
+  if ($this->location!='') 
+    $sql .= ",$db->imagelocation AS il";
+    
   $sql .= " WHERE 1=1"; // dummy where clause
   
   if ($num_tags)
@@ -366,6 +402,13 @@ function _get_query_from_tags($tags, $order=false)
   {
     $tagid=$db->tag2id($tags[0]);
     $sql .= " AND it.tagid=$tagid";
+  }
+
+  // handle location
+  if ($this->location!='')
+  {
+    $locationid=$db->location2id($this->location, $this->location_type);
+    $sql .= " AND i.id=il.imageid AND il.locationid=$locationid";
   }
 
   // handle date
@@ -410,49 +453,74 @@ function _handle_acl()
 
 /** 
   @return Returns the column order for the selected column. This is needed for
-  passing the order from subqueries */
+  passing the order from subqueries to upper queries.*/
 function _get_column_order()
 {
+  $order='';
   switch ($this->orderby) {
   case 'date':
   case '-date':
-    return ",date";
+    $order.=",date";
+    break;
   case 'ranking':
   case '-ranking':
-    return ",ranking";
+    $order.=",ranking";
+    break;
   case 'newest':
   case '-newest':
-    return ",created";
+    $order.=",created";
+    break;
   default:
-    return '';
+    break;
   }
+
+  return $order;
 }
 
 /** Adds a SQL sort statement 
   @return Retruns an SQL order by statement string */
 function _handle_orderby()
 {
+  $hits='';
+  if ($this->tagop==1 || $this->tagop==2)
+    $hits.=" hits DESC";
+
+  $order='';
   switch ($this->orderby) {
   case 'date':
-    return " ORDER BY i.date DESC";
+    $order.=" i.date DESC";
+    break;
   case '-date':
-    return " ORDER BY i.date ASC";
+    $order.=" i.date ASC";
+    break;
   case 'ranking':
-    return " ORDER BY i.ranking DESC";
+    $order.=" i.ranking DESC";
+    break;
   case '-ranking':
-    return " ORDER BY i.ranking ASC";
+    $order.=" i.ranking ASC";
+    break;
   case 'newest':
-    return " ORDER BY i.created DESC";
+    $order.=" i.created DESC";
+    break;
   case '-newest':
-    return " ORDER BY i.created ASC";
+    $order.=" i.created ASC";
+    break;
   default:
-    return '';
+    break;
   }
+  if ($hits!='' && $order!='')
+    return " ORDER BY".$hits.",".$order;
+  else if ($hits!='')
+    return " ORDER BY".$hits;
+  else if ($order!='')
+    return " ORDER BY".$order;
+    
+  return '';
 }
 
 /** 
   @para num_tags Count of tags. Should be zero or greater zero
-  @para tagop Tag operand (0 is and, 1 is or, 2 is fuzzy
+  @para tagop Tag operand (0 is and, 1 is or, 2 is fuzzy)
   @return Returns the having statement */
 function _handle_having($num_tags, $tagop)
 {
