@@ -20,7 +20,7 @@ function print_content()
 <input type=\"text\" name=\"tags\" class=\"search\" />
 <input type=\"submit\" value=\"search\" class=\"submit\" /></p>
 </form>\n";
-  echo "<a href=\"index.php?section=search\">advanced search</a>&nbsp;-&nbsp;\n";
+  echo "<a href=\"index.php?section=search\">advanced search</a>&nbsp;-&nbsp;";
   if (!$user->is_member())
     echo "<a href=\"index.php?section=account&amp;action=login&amp;goto=home\">login</a>\n";
   else

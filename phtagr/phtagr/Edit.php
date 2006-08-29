@@ -351,7 +351,8 @@ function print_edit_inputs()
   echo "
 <p><input type=\"checkbox\" id=\"selectall\" onclick=\"checkbox('selectall', 'images[]')\"> Select all</p>
 
-<fieldset><legend>Edit</legend>
+<span id=\"btnEdit\" class=\"jsbutton\" onclick=\"toggle_visibility('toggleEdit', 'btnEdit')\">-&gt; Edit Image Data</span><br/>
+<fieldset id='toggleEdit' style=\"display:none\"><legend>Edit Image Data <span class=\"jsbutton\" onclick=\"toggle_visibility('toggleEdit', 'btnEdit')\">[Hide]</span></legend>
   <table>
     <tr>
       <th>Caption:</th>
@@ -374,53 +375,67 @@ function print_edit_inputs()
     </tr>
   </table>
 </fieldset>
-<fieldset><legend>ACL</legend>
+<span id=\"btnAcl\" class=\"jsbutton\" onclick=\"toggle_visibility('toggleAcl', 'btnAcl')\">-&gt; Edit Access Control Lists (ACL)</span><br/>
+<fieldset id='toggleAcl' style=\"display:none\"><legend>Access Control List <span class=\"jsbutton\" onclick=\"toggle_visibility('toggleAcl', 'btnAcl')\">[Hide]</span></legend>
   <table>
     <tr>
-      <td></td>
-      <th colspan=\"3\">Friends</th>
-      <th colspan=\"3\">Members</th>
-      <th colspan=\"3\">All</th>
-    </tr>
-    <tr>
-      <td></td>
-      <td>permit</td>
-      <td>deny</td>
-      <td>keep</td>
-      <td>permit</td>
-      <td>deny</td>
-      <td>keep</td>
-      <td>permit</td>
-      <td>deny</td>
-      <td>keep</td>
+      <th></th>
+      <th>Friends</th>
+      <th>Members</th>
+      <th>All</th>
     </tr>
     <tr>
       <td>Edit</td>
-      <td class=\"acladd\"><input type=\"radio\" name=\"gacl_edit\" value=\"add\" /></td>
-      <td class=\"acldel\"><input type=\"radio\" name=\"gacl_edit\" value=\"del\" /></td>
-      <td class=\"aclkeep\"><input type=\"radio\" name=\"gacl_edit\" value=\"keep\" checked /></td>
-      <td class=\"acladd\"><input type=\"radio\" name=\"oacl_edit\" value=\"add\" /></td>
-      <td class=\"acldel\"><input type=\"radio\" name=\"oacl_edit\" value=\"del\" /></td>
-      <td class=\"aclkeep\"><input type=\"radio\" name=\"oacl_edit\" value=\"keep\" checked /></td>
-      <td class=\"acladd\"><input type=\"radio\" name=\"aacl_edit\" value=\"add\" /></td>
-      <td class=\"acldel\"><input type=\"radio\" name=\"aacl_edit\" value=\"del\" /></td>
-      <td class=\"aclkeep\"><input type=\"radio\" name=\"aacl_edit\" value=\"keep\" checked /></td>
+      <td>
+        <select size=\"1\" name=\"gacl_edit\">
+          <option selected=\"selected\" value=\"keep\">Keep</option>
+          <option value=\"del\">Deny</option>
+          <option value=\"add\">Permit</option>
+        </select>
+      </td>
+      <td>
+        <select size=\"1\" name=\"oacl_edit\">
+          <option selected=\"selected\" value=\"keep\">Keep</option>
+          <option value=\"del\">Deny</option>
+          <option value=\"add\">Permit</option>
+        </select>
+      </td>
+      <td>
+        <select size=\"1\" name=\"aacl_edit\">
+          <option selected=\"selected\" value=\"keep\">Keep</option>
+          <option value=\"del\">Deny</option>
+          <option value=\"add\">Permit</option>
+        </select>
+      </td>
     </tr>
     <tr>
       <td>Preview</td>
-      <td class=\"acladd\"><input type=\"radio\" name=\"gacl_preview\" value=\"add\" /></td>
-      <td class=\"acldel\"><input type=\"radio\" name=\"gacl_preview\" value=\"del\" /></td>
-      <td class=\"aclkeep\"><input type=\"radio\" name=\"gacl_preview\" value=\"keep\" checked /></td>
-      <td class=\"acladd\"><input type=\"radio\" name=\"oacl_preview\" value=\"add\" /></td>
-      <td class=\"acldel\"><input type=\"radio\" name=\"oacl_preview\" value=\"del\" /></td>
-      <td class=\"aclkeep\"><input type=\"radio\" name=\"oacl_preview\" value=\"keep\" checked /></td>
-      <td class=\"acladd\"><input type=\"radio\" name=\"aacl_preview\" value=\"add\" /></td>
-      <td class=\"acldel\"><input type=\"radio\" name=\"aacl_preview\" value=\"del\" /></td>
-      <td class=\"aclkeep\"><input type=\"radio\" name=\"aacl_preview\" value=\"keep\" checked /></td>
+      <td>
+        <select size=\"1\" name=\"gacl_preview\">
+          <option selected=\"selected\" value=\"keep\">Keep</option>
+          <option value=\"del\">Deny</option>
+          <option value=\"add\">Permit</option>
+        </select>
+      </td>
+      <td>
+        <select size=\"1\" name=\"oacl_preview\">
+          <option selected=\"selected\" value=\"keep\">Keep</option>
+          <option value=\"del\">Deny</option>
+          <option value=\"add\">Permit</option>
+        </select>
+      </td>
+      <td>
+        <select size=\"1\" name=\"aacl_preview\">
+          <option selected=\"selected\" value=\"keep\">Keep</option>
+          <option value=\"del\">Deny</option>
+          <option value=\"add\">Permit</option>
+        </select>
+      </td>
     </tr>
   </table>
-  Set the access level to the selected images.
+  <p>Set the access level to the selected images.</p>
 </fieldset>
+<br/>
 
 <input type=\"hidden\" name=\"action\" value=\"edit\"/>
 ";

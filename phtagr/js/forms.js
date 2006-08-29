@@ -616,3 +616,24 @@ function uncheck(id)
     return;
   cb.checked=false;
 }
+
+/* Toggle the visibility between two elements. It toggles the style attribute of
+ * the node from 'none' with ''. 
+  @param fromId First element
+  @param toId Second Id */
+function toggle_visibility(fromId, toId)
+{
+  var from=document.getElementById(fromId);
+  var to=document.getElementById(toId);
+
+  if (from==null || to==null)
+    return;
+
+  if (from.style.display=='none') {
+    from.style.display='';
+    to.style.display='none';
+  } else {
+    from.style.display='none';
+    to.style.display='';
+  }
+}

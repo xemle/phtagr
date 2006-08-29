@@ -23,7 +23,6 @@ function print_navigation($search)
   
   if ($search==null)
     return;
-    
   
   $pos=$search->get_pos();
   $page_size=$search->get_page_size();
@@ -114,13 +113,15 @@ function print_content()
   $image->print_caption(false);
   echo "<p><table class=\"imginfo\">\n";
   
-  $ranking=0+strtr($image->get_ranking(), 'E', 'e');
-  echo "  <tr><th>Clicks:</th><td>".$image->get_clicks()
-    ." (Ranking: $ranking)</td></tr>\n";
+  if ($user->is_owner(&$image)) {
+    $image->print_row_filename();
+    $image->print_row_acl();
+  }
 
-  $sec=$image->get_date(true);
-  $image->print_row_date($sec);
+  $image->print_row_clicks();
+  $image->print_row_date();
   $image->print_row_tags();
+  $image->print_row_location();
   echo "</table></p>\n";
 
   if ($user->can_edit(&$image))

@@ -287,18 +287,6 @@ th {
   background-color: #cccccc;
 }
 
-.acladd {
-  background-color: #80ff80;
-}
-
-.acldel {
-  background-color: #ff8080;
-}
-
-.aclkeep {
-  background-color: #8080ff;
-}
-
 .debug {
   position: relative;
   clear: both;

@@ -725,6 +725,28 @@ function _cut_caption($id, $caption)
   return $result;
 }
 
+function print_row_clicks()
+{
+  $ranking=0+strtr($this->get_ranking(), 'E', 'e');
+  echo "  <tr><th>Clicks:</th><td>".$this->get_clicks()
+    ." (Ranking: $ranking)</td></tr>\n";
+}
+
+function print_row_filename()
+{
+  echo "  <tr><th>File:</th><td>".$this->get_filename()."</td></tr>\n";
+}
+
+function print_row_acl()
+{
+  $gacl=$this->get_gacl();
+  $oacl=$this->get_oacl();
+  $aacl=$this->get_aacl();
+  echo "  <tr><th>ACL:</th><td id=\"acl-$id\">$gacl,$oacl,$aacl";
+  echo " <span class=\"jsbutton\" onclick=\"add_form_acl('$id',$gacl,$oacl,$aacl)\">[edit]</span>";
+  echo "</td></tr>\n";
+}
+
 function print_row_date()
 {
   $sec=$this->_sqltime2unix($this->get_date());
@@ -892,13 +914,8 @@ function print_preview($search=null)
   echo "<table class=\"imginfo\">\n";
   if ($user->is_owner(&$this))
   {
-    $gacl=$this->get_gacl();
-    $oacl=$this->get_oacl();
-    $aacl=$this->get_aacl();
-    echo "  <tr><th>File:</th><td>".$this->get_filename()."</td></tr>\n";
-    echo "  <tr><th>ACL:</th><td id=\"acl-$id\">$gacl,$oacl,$aacl";
-    echo " <span class=\"jsbutton\" onclick=\"add_form_acl('$id',$gacl,$oacl,$aacl)\">[edit]</span>";
-    echo "</td></tr>\n";
+    $this->print_row_filename();
+    $this->print_row_acl();
   }
   $this->print_row_date();
   
