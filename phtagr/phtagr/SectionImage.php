@@ -106,7 +106,6 @@ function print_content()
   {
     echo "<form name=\"formImage\" id=\"formImage\" action=\"index.php\" method=\"post\">\n";
     echo "<input type=\"hidden\" name=\"section\" value=\"image\" />\n";
-    echo "<input type=\"hidden\" name=\"id\" value=\"".$image->get_id()."\" />\n";
     echo "<input type=\"hidden\" name=\"action\" value=\"edit\" />\n";
     echo $search->to_form();
   } 

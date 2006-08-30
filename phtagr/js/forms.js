@@ -4,7 +4,7 @@ var Data=new Array();
 /** Print the node information of a node. The function appends a PRE node to
  * the to node.
   @param src Source node, which has to be debugged
-  @param dst Destination node, where the debug information hast to be printed 
+  @param dst Destination node, where the debug information has to be printed 
   @param maxDepth Maximum of depth*/
 function _debugNode(src, dst, maxDepth)
 {
@@ -103,6 +103,9 @@ function resetNode(nodeId)
   Data[nodeId]=null;
 }
 
+/** Prints the whole caption 
+  @param id Id of the caption element
+  @param caption64 Original caption in base64 */
 function print_caption(id, caption64)
 {
   var nodeId="caption-text-"+id;
@@ -133,7 +136,9 @@ function print_caption(id, caption64)
   e.appendChild(span);
 }
   
-/** Add a form for caption */
+/** Insert a form for caption 
+  @param id Id of capation element
+  @param caption64 Original caption in base64 */
 function add_form_caption(id, caption64)
 {
   var nodeId="caption-"+id;
@@ -205,6 +210,9 @@ function add_form_caption(id, caption64)
   document.getElementById(focusId).focus();
 }
 
+/** Clones all hidden input elements from one form to another
+  @param srcForm Element of the source form
+  @param dstForm Element of the destination form */
 function _clone_hidden_input(srcForm, dstForm)
 {
   if (srcForm==null || dstForm==null)
@@ -316,9 +324,11 @@ function add_form_tags(id, tags)
   document.getElementById(focusId).focus();
 }
 
-/** Add a form for acl
+/** Insert a form for acl input
   @param id ID of the image
-  @param tags List of the tags */
+  @param gacl Group ACL value 
+  @param oacl Member ACL value
+  @param aacl ACL value of all others */
 function add_form_acl(id, gacl, oacl, aacl)
 {
   var nodeId="acl-"+id;
@@ -487,9 +497,12 @@ function add_form_acl(id, gacl, oacl, aacl)
   document.getElementById(focusId).focus();
 }
 
-/** Add a form for acl
+/** Insert a form for location input
   @param id ID of the image
-  @param tags List of the tags */
+  @param city String of the city
+  @param sublocation String of the sublocation
+  @param state String of the state
+  @param country String of the Country */
 function add_form_location(id, city, sublocation, state, country)
 {
   var nodeId="location-"+id;
@@ -513,8 +526,17 @@ function add_form_location(id, city, sublocation, state, country)
   form.setAttribute("action", "index.php");
   form.setAttribute("method", "post");
 
-  // copy all hidden inputs from formExplorer
-  var srcForm=document.getElementById("formExplorer");
+  // copy all hidden inputs from formExplorer or formImage
+  // whichever exists
+  var srcForm;
+  if (document.getElementById("formExplorer"))
+  {
+    srcForm=document.getElementById("formExplorer");
+  }
+  else
+  {
+    srcForm=document.getElementById("formImage");
+  }
   _clone_hidden_input(srcForm, form);
   
   var input=document.createElement("input");
@@ -591,7 +613,7 @@ function add_form_location(id, city, sublocation, state, country)
   document.getElementById(focusId).focus();
 }
 
-/** Checks all checkboxes
+/** Selects all checkboxes
   @param id Id of the refered checkbox
   @param name Name of the checkbox names
 */
@@ -609,6 +631,8 @@ function checkbox(id, name)
   }
 }
 
+/** Unchecks all checkboses by an ID
+  @param id Ids of the checkboxes */
 function uncheck(id)
 {
   var cb=document.getElementById(id);
@@ -617,8 +641,8 @@ function uncheck(id)
   cb.checked=false;
 }
 
-/* Toggle the visibility between two elements. It toggles the style attribute of
- * the node from 'none' with ''. 
+/** Toggle the visibility between two elements. It toggles the style attribute
+ * of the node from 'none' with ''. 
   @param fromId First element
   @param toId Second Id */
 function toggle_visibility(fromId, toId)

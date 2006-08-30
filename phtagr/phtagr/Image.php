@@ -739,6 +739,7 @@ function print_row_filename()
 
 function print_row_acl()
 {
+  $id=$this->get_id();
   $gacl=$this->get_gacl();
   $oacl=$this->get_oacl();
   $aacl=$this->get_aacl();
@@ -836,7 +837,8 @@ function print_row_location()
   $sql="SELECT l.name,l.type
         FROM $db->location as l, $db->imagelocation as il
         WHERE il.imageid=$id 
-          AND il.locationid=l.id";
+          AND il.locationid=l.id
+        ORDER BY l.type";
   $result = $db->query($sql);
   $location=array();
   
