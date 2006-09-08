@@ -17,7 +17,6 @@ Other image communities: http://holocore.com/?PictureSync_services
   - Generate valid XHTML. Mostly validated. Done.
   
 - mySQL database
-  - Store image timestamps as UNIX timestamp
   - Add popular values as last view and current value. Done 2006-02-16
     Popular index = current value*0.8 + 0.2*(1/(current time+1 - last view))
     The value is updated every time if a image is clicked and only one per
@@ -27,27 +26,53 @@ Other image communities: http://holocore.com/?PictureSync_services
 
 - User
   Setting of a user account.
-  - Storage of common user information
-    name, password, email, creation time
-  - Add/Modify/Delete
-    Defaults should be defined by an admin user
-    If a user is deleted, it images should be removed
+  - A admin account can create/modify/delete user accounts
+    - A admin can set quotas, or other restrictions of users
+    - At user creation, the user upload directory should be created and default
+      values should be stored in the preference database. Root points the the
+      upload directory.
+    - At user deletion, all data of an user should be deleted
+    - The deletion of the admin account is not permitted
+    - Setup of admin settings
+      - Allow creation of user
+      - Default root directory (could depends on the username)
+      - Allow browsing of file structure
+      - Setup of user quota
+      - Allow upload files by tar.gz
+      - Allow download of files
+      - Synchronize files with the database
+      - Reset of tables (while developing the database structure)
+  - A user can
+    - hava a user image which will be shown in the explorer
+    - set the default ACLs and some image values like Name of Creator on
+      uploading files
+    - User can browse and reorder his uploaded images by directories (by
+      chroot technique)
+    - read the current quota
+    - create/modifiy groups, which are assigned to images. A group is a list of
+      other phtagr users, which will have special rights to specific images. 
   - Quota 
     A user can upload only a specific amount of data to its storage.
-    Default is set by admin account.
-    - Add quota, quotatime (howmany can be uploaded in which time), and
+    - Default values are set by admin account.
+    - Add quota, quotatime (how much can be uploaded in which time), and
       quotalimit (absolut quota)
-  - Root directory
-    The root directory defines the storages place of the raw images of a
-    specific user. Default is set by admin account.
-  - Default image ACL: view, modify, download
-  - Image of a user
-  - Add role or group of the user
-
+  - Upload directory
+    The Upload directory defines the storages place of the raw images of a
+    specific user. Default place is set by admin account.
+  - On login, users preferences are loaded from the preference database to the
+    $_SESSION variables, overwritten by global values
+    
 - Images
   An image is owned by an phTagr user. It could be places on any place for
   system users (e.g. /pub/images) or on the phTagr directory (e.g.
   /var/www/phtagr/data/<user>)
+  - An image has a unique image id.
+  - ACLs
+    A user can set the specific access control to an image. The access levels
+    are: Public, phTagr user, friends, or nobody but its own. 
+    - Images are assigned to a group
+  - A phTagr user can add a comment on a image (this information is not
+    stored in a image itself)
   - Different views by tags
     Mosaic, Preview, Detail, Full size
   - Edit IPTC data
@@ -56,20 +81,7 @@ Other image communities: http://holocore.com/?PictureSync_services
     - Actions, 
   - Advanced search
     by Tags, Comments, Date and Place
-  - ACLs
-    A user can set the specific access control to an image. The access levels
-    are: Public, phTagr user, friends and own. 
-    - Users are assigned to groups
-    - download 0x80
-    - fullsize 0x40
-    - highsolution 0x20
-    - preview 0x10
-    - metadata 0x02
-    - edit 0x01
-  - An image has a unique image id. Done.
   - Number of views. If a image is viewed in detail the count is increased
-  - A phTagr user can add a comment on a image (this information is not
-    stored in a image itself)
   - Image object
     - contains exif and iptc data by database or by origial file.
       - array of tags(), commet, date, place, set, copyright, author, etc
@@ -121,21 +133,32 @@ Other image communities: http://holocore.com/?PictureSync_services
 - FileBrowser
   Images can be added in a file browser. This option is available for local
   system users only.
-  - Only a phTagr user can browse its directory
-  - Enable multiple directories which are accessable by the users root
+  - Supports chroot-like browsing (an FileSystem object should handle all
+    filesystem related operations like cd, mkdir, ls)
+    - The root of the file browser depends on the users root directory
+    - Only a phTagr user can browse their own upload directory
+    - Multiple root directories should be supported 
+      - Windows has no real root directory, but drives. These drives are
+        multiple root directories. 
+      - On Linux, a normal user may browse his own home directory and its
+        upload directory)
   - Insert images of whole tree
     - default ACL, Tags, Comment, Copyright
-  - The root of the file browser depends on the users root directory
-  - Upload of tar balls
-  - Creation of preview images
+  - Upload of tar balls. Done.
+  - Creation of preview images. Done.
+  - Add single images to add
+  - Distinguish between files and directories
+  - Add Icons to files and directories
+    - Use created thumbnails of the JPG images
 
 - Session
   - Remember visited image. This information will be used for counting the
     clicks on the images. Done.
-  - Add images to download, edit
+  - Selection of images to download, or edit
   - Init the session by a cookie if it is available. Done 2006-03-11.
   - Save and transmit password in MD5
   - Secure and improve the login by adding turing test image
+  - Support HTTPS
 
 - Accounts
   - Verify a account creation by an image
@@ -150,18 +173,9 @@ Other image communities: http://holocore.com/?PictureSync_services
   - Easy setup of phTagr via HTML. 
     - An other aproach is to have a single configuration page. E.g. Creation
       tables and the admin account at one step.
-  - Connection to the SQL database
+  - Connection to the SQL databas
   - Creation of SQL tables
   - Creation of the admin account
-  - Default settings (admin)
-    - Allow creation of user
-    - Default root directory (could depends on the username)
-    - Allow browsing of file structure
-    - Setup of user quota
-    - Allow upload files by tar.gz
-    - Allow download of files
-    - Synchronize files with the database
-  - Reset of tables (while developing the database structure)
 
 - Themes
   - Diffent themes by CSS
@@ -181,12 +195,6 @@ Other image communities: http://holocore.com/?PictureSync_services
   - JavaScript: Add link of current page as parameter
   - If comment is too long in the thumbnail view, short it by dots "..."
   
-- Browser
-  - Add single images to add
-  - Distinguish between files and directories
-  - Add Icons to files and directories
-    - Use created thumbnails of the JPG images
-
 Already done:
 Home:
 - Add List of 100 popular Tags in the home section with an random image. Done
