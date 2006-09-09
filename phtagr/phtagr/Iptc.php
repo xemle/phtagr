@@ -137,10 +137,10 @@ function load_from_file($filename)
 }
 
 /** Save changes to the file
-  @param overwrite If true, the temporary file overwrites the origin
+  @param do_rename If true, the temporary file overwrites the origin
   file. Otherwise, the temoprary file remains. This option is only used for
   debugging. Default is true. */
-function save_to_file($overwrite=true)
+function save_to_file($do_rename=true)
 {
   if ($this->_changed_iptc==false && $this->_changed_com==false)
     return;
