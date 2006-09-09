@@ -33,6 +33,7 @@ function init_session()
     $_SESSION['userid']=-1;
     $_SESSION['username']='anonymous';
     $_SESSION['img_viewed']=array();
+    $_SESSION['img_voted']=array();
   }  
   $_SESSION['update']=time();
 }

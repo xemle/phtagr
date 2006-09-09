@@ -80,9 +80,7 @@ function print_content()
 {
   global $db;
   global $user;
-
-  $search=new Search();
-  $search->from_URL();
+  global $search;
  
   echo "<h2>Image</h2>\n";
   
@@ -94,7 +92,9 @@ function print_content()
   
   $name=$image->get_name();
   
-  $this->print_navigation($search);
+  $search_nav=new Search();
+  $search_nav->from_URL();
+  $this->print_navigation($search_nav);
 
   echo "<div class=\"name\">$name</div>\n";
 
@@ -102,13 +102,14 @@ function print_content()
 
   $size=$image->get_size(600);
   echo "<p><img src=\"./image.php?id=$id&amp;type=preview\" alt=\"$name\" ".$size[2]."/></p>\n";
-  if ($user->can_edit(&$image))
-  {
-    echo "<form name=\"formImage\" id=\"formImage\" action=\"index.php\" method=\"post\">\n";
-    echo "<input type=\"hidden\" name=\"section\" value=\"image\" />\n";
-    echo "<input type=\"hidden\" name=\"action\" value=\"edit\" />\n";
-    echo $search->to_form();
-  } 
+
+  echo "<form name=\"formImage\" id=\"formImage\" action=\"index.php\" method=\"post\">\n";
+  echo "<input type=\"hidden\" name=\"section\" value=\"image\" />\n";
+  echo "<input type=\"hidden\" name=\"action\" value=\"edit\" />\n";
+  echo "<input type=\"hidden\" name=\"image\" value=\"$id\" />\n";
+
+  echo $search->to_form();
+
   $image->print_caption(false);
   echo "<p><table class=\"imginfo\">\n";
   
@@ -117,14 +118,14 @@ function print_content()
     $image->print_row_acl();
   }
 
-  $image->print_row_clicks();
   $image->print_row_date();
   $image->print_row_tags();
   $image->print_row_location();
+  $image->print_row_clicks();
+  $image->print_row_voting();
   echo "</table></p>\n";
 
-  if ($user->can_edit(&$image))
-    echo "</form>\n";
+  echo "</form>\n";
 
   echo "</div>\n";
 
@@ -133,8 +134,7 @@ function print_content()
 
   $_SESSION['img_viewed'][$id]++;
 
-  $this->print_navigation($search);
- 
+  $this->print_navigation($search_nav);
 }
 
 }

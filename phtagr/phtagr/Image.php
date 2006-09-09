@@ -293,6 +293,7 @@ function get_width()
   return $this->_get_data('width');
 }
 
+/** Returns the count of views */
 function get_clicks()
 {
   return $this->_get_data('clicks');
@@ -301,6 +302,38 @@ function get_clicks()
 function get_ranking()
 {
   return $this->_get_data('ranking');
+}
+
+/** Returns the current voting values */
+function get_voting()
+{
+  return $this->_get_data('voting');
+}
+
+/** Returns the current number of votes */
+function get_votes()
+{
+  return $this->_get_data('votes');
+}
+
+/** Set a now vote to the image 
+  @param voting Vote of the image
+  @return True on success, false otherwise */
+function new_vote($voting) 
+{
+  global $db;
+  $voting=intval($voting);
+  if ($voting<0 || $voting>VOTING_MAX)
+    return false;
+
+  $id=$this->get_id();
+  $sql="UPDATE $db->image 
+        SET voting=((voting*votes+$voting)/(votes+1)), votes=votes+1
+        WHERE id=$id";
+  if (!$db->query($sql))
+    return false;
+
+  return true;
 }
 
 /** Return the time of the last click
@@ -727,9 +760,39 @@ function _cut_caption($id, $caption)
 
 function print_row_clicks()
 {
-  $ranking=0+strtr($this->get_ranking(), 'E', 'e');
+  $ranking=sprintf("%.3f", $this->get_ranking());
   echo "  <tr><th>Clicks:</th><td>".$this->get_clicks()
-    ." (Ranking: $ranking)</td></tr>\n";
+    ." (Populariy: $ranking)</td></tr>\n";
+}
+
+function print_row_voting()
+{
+  $id=$this->get_id();
+  $voting=sprintf("%.1f", $this->get_voting());
+  $votes=$this->get_votes();
+  echo "  <tr><th>Voting:</th><td>";
+
+  if ($votes>0) 
+    echo "$voting ($votes votes) ";
+  else
+    echo "No votes ";
+
+  if (!isset($_SESSION['img_voted'][$id]))
+  {
+    echo "<select size=\"1\" name=\"voting\">\n"
+      ."  <option selected=\"selected\" value=\"none\">None</option>\n";
+    for ($i=0; $i<=VOTING_MAX; $i++)
+    {
+      switch ($i) {
+      case 0: $s=" (worst)"; break;
+      case VOTING_MAX: $s=" (best)"; break;
+      default: $s=""; 
+      }
+      echo "  <option value=\"$i\">$i$s</option>\n";
+    }
+    echo "</select>&nbsp;<input type=\"submit\" value=\"Vote!\" />";
+  }
+  echo "</td></tr>\n";
 }
 
 function print_row_filename()

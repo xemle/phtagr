@@ -23,4 +23,5 @@ define("LOCATION_SUBLOCATION", 0x02);
 define("LOCATION_STATE", 0x03);
 define("LOCATION_COUNTRY", 0x04);
 
+define("VOTING_MAX", 0x0a);
 ?>

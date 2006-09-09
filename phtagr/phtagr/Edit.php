@@ -73,6 +73,14 @@ function execute()
       continue;
     }
       
+    /* Accept only votes of unvoted images for this session */
+    if (isset($_REQUEST['voting']) && 
+      !isset($_SESSION['img_voted'][$id]))
+    {
+      if ($img->new_vote($_REQUEST['voting']))
+        $_SESSION['img_voted'][$id]=$_REQUEST['voting'];
+    }
+
     if (!$user->can_edit(&$img))
     {
       unset($img);

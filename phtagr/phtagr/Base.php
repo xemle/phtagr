@@ -76,5 +76,20 @@ function debug($object)
   $this->div_close();
 }
 
+function debug_buf($buf, $len)
+{
+  $c=0;
+  while ($c<$len) {
+    $c++;
+    if ($c%4==0) echo " ";
+    if ($c%8==0) echo " ";
+    if ($c%16==0) echo "\n";
+    
+    printf("%2x ", $buf{$c-1});
+  }
+  if (!($c%16==0))
+    echo "\n";
+}
+
 }
 ?>

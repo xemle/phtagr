@@ -4,7 +4,8 @@ global $prefix;
 include_once("$phtagr_prefix/Base.php");
 
 /** 
-  @class Sql Handles the SQL connection and queries
+  @class Sql Handles the SQL database operation like connection, creation,
+  queries and queries clean ups 
 */
 class Sql extends Base
 {
@@ -123,7 +124,7 @@ function test_database($host, $username, $password, $database)
   return NULL;
 }
 
-/* @return array of all used or required table names */
+/* @return Array of all used or required table names */
 function _get_table_names()
 {
   return array(
@@ -153,7 +154,6 @@ function tables_exist()
   foreach ($tables as $tbl)
   {
     $sql="SHOW TABLES LIKE '$tbl'";
-//    $this->debug($sql);
     $result=$this->query($sql);
     if ($result && mysql_num_rows($result)==1)
       $n_existing++;
@@ -305,24 +305,27 @@ function location2id($location, $type, $create=false)
   return $row[0];
 }
 
-
-/** creates the phTagr tables an returns true on success */
+/** Creates the phTagr tables
+  @return Returns true on success. False otherwise */
 function create_tables()
 { 
   $sql="CREATE TABLE $this->user (
         id            INT NOT NULL AUTO_INCREMENT,
         name          VARCHAR(32) NOT NULL,
-        password      VARCHAR(32),
+        password      VARCHAR(32) NOT NULL,
         
         firstname     VARCHAR(32),
-        lastname      VARCHAR(32),
+        lastname      VARCHAR(32) NOT NULL,
         email         VARCHAR(64),
         
-        created       DATETIME,
+        created       DATETIME NOT NULL DEFAULT NOW(),
         updated       TIMESTAMP,
         fsroot        TEXT DEFAULT '',
-        quota         INT,
-        quota_interval INT,
+        quota         INT,              /* Users quota in bytes */
+        quota_interval INT,             /* Upload quota interval in seconds.
+                                           The user is allowed to upload quota
+                                           bytes in quota_interval seconds. */
+        quota_max     INT,              /* Maximum upload limit in bytes */
         data          BLOB,             /* For optional and individual values */
 
         PRIMARY KEY(id))";
@@ -340,15 +343,15 @@ function create_tables()
   
   $sql="CREATE TABLE $this->group (
         id            INT NOT NULL AUTO_INCREMENT,
-        userid        INT,
+        owner         INT NOT NULL,       /* User ID of the owner */
         name          VARCHAR(32) NOT NULL,
         
         PRIMARY KEY(id))";
   if (!$this->query($sql)) { return false; }
    
   $sql="CREATE TABLE $this->usergroup (
-        userid        INT,
-        groupid       INT,
+        userid        INT NOT NULL,
+        groupid       INT NOT NULL,
         
         PRIMARY KEY(userid,groupid))";
   if (!$this->query($sql)) { return false; }
@@ -357,30 +360,39 @@ function create_tables()
         id            INT NOT NULL AUTO_INCREMENT,
         userid        INT NOT NULL,
         groupid       INT NOT NULL,
-        synced        DATETIME,           /* syncing time between image and the
+        synced        DATETIME,           /* Syncing time between image and the
                                              database */
-        created       DATETIME,           /* insert time of the image */
+        created       DATETIME,           /* Insert time of the image */
         filename      TEXT NOT NULL,
-        bytes         INT NOT NULL,       /* size of image in bytes */
+        bytes         INT NOT NULL,       /* Size of image in bytes */
         is_upload     TINYINT UNSIGNED,   /* 0=local, 1=upload */
-        gacl          TINYINT UNSIGNED,   /* group access control list */
-        oacl          TINYINT UNSIGNED,   /* other access control list */
-        aacl          TINYINT UNSIGNED,   /* all access control list */
+        gacl          TINYINT UNSIGNED,   /* Group/Friend access control list */
+        oacl          TINYINT UNSIGNED,   /* Other/Member access control list */
+        aacl          TINYINT UNSIGNED,   /* All access control list */
         
         name          VARCHAR(128),
-        date          DATETIME,           /* date of image */
+        date          DATETIME,           /* Date of image */
         width         INT UNSIGNED,
         height        INT UNSIGNED,
         orientation   TINYINT,
         caption       TEXT,
 
-        clicks        INT DEFAULT 0,      /* count of detailed view */
-        lastview      DATETIME,           /* last time of detailed view */
+        clicks        INT DEFAULT 0,      /* Count of detailed view */
+                                          /* Last time of detailed view */
+        lastview      DATETIME NOT NULL DEFAULT '2006-01-08 11:00:00',
         ranking       FLOAT DEFAULT 0,    /* image ranking */
-        data          BLOB,               /* for optinal data */
+
+        voting        FLOAT DEFAULT 0,
+        votes         INT DEFAULT 0,      /* Nuber of votes */
+
+        longitude     FLOAT,
+        latitude      FLOAT,
+
+        data          BLOB,               /* For optinal data */
         
         INDEX(date),
         INDEX(ranking),
+        INDEX(voting),
         INDEX(aacl),
         PRIMARY KEY(id))";
   if (!$this->query($sql)) { return false; }
@@ -394,8 +406,8 @@ function create_tables()
   if (!$this->query($sql)) { return false; }
 
   $sql="CREATE TABLE $this->imagetag (
-        imageid       INT,
-        tagid         INT,
+        imageid       INT NOT NULL,
+        tagid         INT NOT NULL,
 
         PRIMARY KEY(imageid,tagid))";
   if (!$this->query($sql)) { return false; }
@@ -410,8 +422,8 @@ function create_tables()
   if (!$this->query($sql)) { return false; }
 
   $sql="CREATE TABLE $this->imageset (
-        imageid       INT,
-        setid         INT,
+        imageid       INT NOT NULL,
+        setid         INT NOT NULL,
 
         PRIMARY KEY(imageid,setid))";
   if (!$this->query($sql)) { return false; }
@@ -426,19 +438,24 @@ function create_tables()
   if (!$this->query($sql)) { return false; }
 
   $sql="CREATE TABLE $this->imagelocation (
-        imageid       INT,
-        locationid    INT,
+        imageid       INT NOT NULL,
+        locationid    INT NOT NULL,
 
         PRIMARY KEY(imageid,locationid))";
   if (!$this->query($sql)) { return false; }
     
   $sql="CREATE TABLE $this->comment (
         imageid       INT NOT NULL,
-        user          VARCHAR(32),
-        email         VARCHAR(64),
-        url           VARCHAR(128),
-        date          DATETIME,
-        comment       TEXT,
+                                          /* Name of the commentator */
+        name          VARCHAR(32) NOT NULL,
+                                          /* User ID, if commentator is a
+                                           * phTagr user */
+        userid        INT NOT NULL DEFAULT 0,
+        email         VARCHAR(64) NOT NULL DEFAULT '',
+        url           VARCHAR(128) NOT NULL DEFAULT '',
+        date          DATETIME NOT NULL DEFAULT NOW(),
+
+        comment       TEXT NOT NULL,
         
         PRIMARY KEY(imageid))";
   if (!$this->query($sql)) { return false; }

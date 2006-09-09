@@ -151,8 +151,8 @@ if (isset($_REQUEST['section']))
   } 
   else if($section=='search')
   {
-    $search= new SectionSearch();
-    $cnt->add_section(&$search);
+    $seg_search= new SectionSearch();
+    $cnt->add_section(&$seg_search);
   } 
   else if($section=='browser')
   {

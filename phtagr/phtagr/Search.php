@@ -184,6 +184,8 @@ function set_orderby($orderby)
   if ($orderby=='-date' ||
       $orderby=='ranking' ||
       $orderby=='-ranking' ||
+      $orderby=='voting' ||
+      $orderby=='-voting' ||
       $orderby=='newest' ||
       $orderby=='-newest' )
     $this->orderby=$orderby;
@@ -466,6 +468,10 @@ function _get_column_order()
   case '-ranking':
     $order.=",ranking";
     break;
+  case 'voting':
+  case '-voting':
+    $order.=",voting";
+    break;
   case 'newest':
   case '-newest':
     $order.=",created";
@@ -498,6 +504,12 @@ function _handle_orderby()
     break;
   case '-ranking':
     $order.=" i.ranking ASC";
+    break;
+  case 'voting':
+    $order.=" i.voting DESC";
+    break;
+  case '-voting':
+    $order.=" i.voting ASC";
     break;
   case 'newest':
     $order.=" i.created DESC";

@@ -101,7 +101,7 @@ function print_content()
     return;
   }
   
-  $search_nav=$search;
+  $search_nav=clone $search;
   $page=$search_nav->get_page_num();
   $search_nav->set_page_num(0);
   $search_nav->set_pos(0);

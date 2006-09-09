@@ -61,6 +61,8 @@ function print_content()
         <option value=\"-date\">date asc</option>
         <option value=\"ranking\">ranking</option>
         <option value=\"-ranking\">ranking asc</option>
+        <option value=\"voting\">voting</option>
+        <option value=\"-voting\">voting asc</option>
         <option value=\"newest\">newest</option>
         <option value=\"-newest\">newest desc</option>
       </select>

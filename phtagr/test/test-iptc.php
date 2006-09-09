@@ -10,15 +10,20 @@ include_once("$phtagr_prefix/Iptc.php");
 $filename=$argv[1];
 
 $img=new Iptc();
-if ($img->load_from_file($filename)==false)
+echo "Load Image...\n";
+$img->load_from_file($filename);
+if ($img->get_errno()!=0)
 {
   echo $img->error."\n";
 } else {
+  echo "Reinsert keyword record...\n";
+  $img->rem_record('2:025', "Keyword");
   $img->add_record('2:025', "Keyword");
-  $content=$img->_iptc2bytes();
-  $img->_replace_iptc();
+  echo "Save changes...\n";
+  $img->save_to_file(false);
+  echo "Done.\n";
 }
 print_r($img);
 
 exit;
-
+?>
