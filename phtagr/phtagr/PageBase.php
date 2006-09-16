@@ -1,6 +1,6 @@
 <?php
 
-include_once("$phtagr_prefix/SectionBase.php");
+include_once("$phtagr_lib/SectionBase.php");
 
 class PageBase extends SectionBase
 {

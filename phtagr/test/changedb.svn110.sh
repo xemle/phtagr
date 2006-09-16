@@ -14,7 +14,7 @@ sql_query()
 
 sql_query "ALTER TABLE ${DB_PREFIX}user CHANGE password password VARCHAR(32) NOT NULL"
 sql_query "ALTER TABLE ${DB_PREFIX}user CHANGE lastname lastname VARCHAR(32) NOT NULL"
-sql_query "ALTER TABLE ${DB_PREFIX}user CHANGE created created DATETIME NOT NULL DEFAULT NOW()"
+sql_query "ALTER TABLE ${DB_PREFIX}user CHANGE created created DATETIME NOT NULL"
 sql_query "ALTER TABLE ${DB_PREFIX}user ADD quota_max INT"
 
 sql_query "ALTER TABLE ${DB_PREFIX}group CHANGE userid owner INT NOT NULL"

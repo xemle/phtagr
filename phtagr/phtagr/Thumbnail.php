@@ -1,7 +1,7 @@
 <?php
 
-include_once("$phtagr_prefix/Search.php");
-include_once("$phtagr_prefix/Image.php");
+include_once("$phtagr_lib/Search.php");
+include_once("$phtagr_lib/Image.php");
 
 /** 
   @class Thumbnail Create thumbnails, image previews

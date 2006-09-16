@@ -1,8 +1,7 @@
 <?php
 
-global $prefix;
-include_once("$phtagr_prefix/SectionBase.php");
-include_once("$phtagr_prefix/User.php");
+include_once("$phtagr_lib/SectionBase.php");
+include_once("$phtagr_lib/User.php");
 
 class SectionAccount extends SectionBase
 {

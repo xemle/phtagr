@@ -1,7 +1,6 @@
 <?php
 
-global $prefix;
-include_once("$phtagr_prefix/Base.php");
+include_once("$phtagr_lib/Base.php");
 
 /** 
   @class Sql Handles the SQL database operation like connection, creation,
@@ -70,7 +69,7 @@ function read_config($config='')
 function connect($config='')
 {
   if (!$this->read_config($config))
-    return false;
+      return false;
   
   if ($config=='')
     $config=getcwd().DIRECTORY_SEPARATOR."config.php";
@@ -79,6 +78,12 @@ function connect($config='')
     return false;
  
   include "$config";
+
+  if (!function_exists('mysql_connect'))
+  {
+    $this->error("mySQL function 'mysql_connect' does not exists. Please check your PHP5 installation");
+    return false;
+  }
 
   $this->link=@mysql_connect(
                 $db_host,

@@ -3,7 +3,7 @@
  Thanks to Christian Tratz, who has written a nice IPTC howto on
  http://www.codeproject.com/bitmap/iptc.asp
 */
-include_once("$phtagr_prefix/Base.php");
+include_once("$phtagr_lib/Base.php");
 
 // Size of different headers 
 define("HDR_SIZE_JPG", 0x04);

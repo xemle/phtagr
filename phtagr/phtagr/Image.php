@@ -1,8 +1,8 @@
 <?php
 
-include_once("$phtagr_prefix/Search.php");
-include_once("$phtagr_prefix/Base.php");
-include_once("$phtagr_prefix/Constants.php");
+include_once("$phtagr_lib/Search.php");
+include_once("$phtagr_lib/Base.php");
+include_once("$phtagr_lib/Constants.php");
 
 /** 
   @class Image Create thumbnails, image previews, synchronize 
@@ -680,7 +680,7 @@ function update_ranking()
   $ranking=$this->get_ranking();
   $lastview=$this->get_lastview(true);
 
-  $ranking=0.8*$ranking+500/(1+time()-$lastview);     
+  $ranking=0.8*$ranking+100/log((1+time()-$lastview));     
 
   $sql="UPDATE $db->image
         SET ranking=$ranking
@@ -725,11 +725,11 @@ function print_caption($docut=true)
     else
       $text=&$caption;
     $caption64=base64_encode($caption);
-    echo "$text <span class=\"jsbutton\" onclick=\"add_form_caption($id, '$caption64') \">[edit]</span>";
+    echo "$text <span class=\"jsbutton\" onclick=\"add_form_caption($id, '$caption64') \">"._("[edit]")."</span>";
   }
   else
   {
-    echo " <span onclick=\"add_form_caption($id, '')\">Click here to add a caption</span>";
+    echo " <span onclick=\"add_form_caption($id, '')\">"._("Click here to add a caption")."</span>";
   }
   
   echo "</div>\n";
@@ -761,43 +761,43 @@ function _cut_caption($id, $caption)
 function print_row_clicks()
 {
   $ranking=sprintf("%.3f", $this->get_ranking());
-  echo "  <tr><th>Clicks:</th><td>".$this->get_clicks()
-    ." (Populariy: $ranking)</td></tr>\n";
+  echo "  <tr><th>"._("Clicks:")."</th><td>"
+    .sprintf(_("%d (Populariy: %.3f)"), $this->get_clicks(), $ranking)
+    ."</td></tr>\n";
 }
 
 function print_row_voting()
 {
   $id=$this->get_id();
-  $voting=sprintf("%.1f", $this->get_voting());
   $votes=$this->get_votes();
-  echo "  <tr><th>Voting:</th><td>";
+  echo "  <tr><th>"._("Voting:")."</th><td>";
 
   if ($votes>0) 
-    echo "$voting ($votes votes) ";
+    echo sprintf(_("%.1f (%d votes) "), $this->get_voting(), $votes);
   else
-    echo "No votes ";
+    echo _("No votes ");
 
   if (!isset($_SESSION['img_voted'][$id]))
   {
     echo "<select size=\"1\" name=\"voting\">\n"
-      ."  <option selected=\"selected\" value=\"none\">None</option>\n";
+      ."  <option selected=\"selected\" value=\"none\">"._("None")."</option>\n";
     for ($i=0; $i<=VOTING_MAX; $i++)
     {
       switch ($i) {
-      case 0: $s=" (worst)"; break;
-      case VOTING_MAX: $s=" (best)"; break;
+      case 0: $s=_(" (worst)"); break;
+      case VOTING_MAX: $s=_(" (best)"); break;
       default: $s=""; 
       }
       echo "  <option value=\"$i\">$i$s</option>\n";
     }
-    echo "</select>&nbsp;<input type=\"submit\" value=\"Vote!\" />";
+    echo "</select>&nbsp;<input type=\"submit\" value=\""._("Vote!")."\" />";
   }
   echo "</td></tr>\n";
 }
 
 function print_row_filename()
 {
-  echo "  <tr><th>File:</th><td>".$this->get_filename()."</td></tr>\n";
+  echo "  <tr><th>"._("File:")."</th><td>".$this->get_filename()."</td></tr>\n";
 }
 
 function print_row_acl()
@@ -806,8 +806,8 @@ function print_row_acl()
   $gacl=$this->get_gacl();
   $oacl=$this->get_oacl();
   $aacl=$this->get_aacl();
-  echo "  <tr><th>ACL:</th><td id=\"acl-$id\">$gacl,$oacl,$aacl";
-  echo " <span class=\"jsbutton\" onclick=\"add_form_acl('$id',$gacl,$oacl,$aacl)\">[edit]</span>";
+  echo "  <tr><th>"._("ACL:")."</th><td id=\"acl-$id\">$gacl,$oacl,$aacl";
+  echo " <span class=\"jsbutton\" onclick=\"add_form_acl('$id',$gacl,$oacl,$aacl)\">"._("[edit]")."</span>";
   echo "</td></tr>\n";
 }
 
@@ -816,7 +816,7 @@ function print_row_date()
   $sec=$this->_sqltime2unix($this->get_date());
   
   echo "  <tr>
-    <th>Date:</th>
+    <th>"._("Date:")."</th>
     <td>";
   $date=date("Y-m-d H:i:s", $sec);
   $search_date=new Search();
@@ -867,7 +867,7 @@ function print_row_tags()
   $num_tags=count($tags);
   
   echo "  <tr>
-    <th>Tags:</th>
+    <th>"._("Tags:")."</th>
     <td id=\"tag-$id\">";  
 
   for ($i=0; $i<$num_tags; $i++)
@@ -885,7 +885,7 @@ function print_row_tags()
       if ($i<$num_tags-1)
         $list.=" ";
     }
-    echo " <span class=\"jsbutton\" onclick=\"add_form_tags('$id','$list')\">[edit]</span>";
+    echo " <span class=\"jsbutton\" onclick=\"add_form_tags('$id','$list')\">"._("[edit]")."</span>";
   }
   echo "</td>
   </tr>\n";
@@ -929,7 +929,7 @@ function print_row_location()
   }
    
   echo "  <tr>
-    <th>Location:</th>
+    <th>"._("Location:")."</th>
     <td id=\"location-$id\">";  
 
   $num_location=count($location);
@@ -948,7 +948,7 @@ function print_row_location()
       if ($i<$num_tags-1)
         $list.=" ";
     }
-    echo " <span class=\"jsbutton\" onclick=\"add_form_location('$id','$city','$sublocation', '$state', '$country')\">[edit]</span>";
+    echo " <span class=\"jsbutton\" onclick=\"add_form_location('$id','$city','$sublocation', '$state', '$country')\">"._("[edit]")."</span>";
   }
   echo "</td>
   </tr>\n";
@@ -989,7 +989,7 @@ function print_preview($search=null)
   if ($user->can_select($id))
   {
     echo "  <tr>
-    <th>Select:</th>
+    <th>"._("Select:")."</th>
     <td><input type=\"checkbox\" name=\"images[]\" value=\"$id\" onclick=\"uncheck('selectall')\" /></td>
   </tr>\n";
   }

@@ -1,11 +1,9 @@
 <?php
 
-global $prefix;
-
-include_once("$phtagr_prefix/SectionBase.php");
-include_once("$phtagr_prefix/SectionAccount.php");
-include_once("$phtagr_prefix/Image.php");
-include_once("$phtagr_prefix/Thumbnail.php");
+include_once("$phtagr_lib/SectionBase.php");
+include_once("$phtagr_lib/SectionAccount.php");
+include_once("$phtagr_lib/Image.php");
+include_once("$phtagr_lib/Thumbnail.php");
 
 class SectionSetup extends SectionBase
 {
@@ -43,14 +41,15 @@ function exec_stage_db()
   
   if (!file_exists($_REQUEST['dir']))
   {
-    $this->error("Directory ".$_REQUEST['dir']." does not exists. Create it first.");
+    $this->error(sprintf(_("Directory %s does not exists. Create it first."),$_REQUEST['dir']));
     return false;
   }
   $configdir=realpath($_REQUEST['dir']);
 
   if (!is_writeable($configdir))
   {
-    $this->error("Could not write to data directory $configdir");
+    $this->error(sprintf(_("Could not write to data directory %s"),
+                 $configdir));
     return false;
   }
   
@@ -71,7 +70,7 @@ function exec_stage_db()
   $f=fopen($config, "w");
   if (!$f) 
   {
-    $this->error("Could not write to config file $config");
+    $this->error(sprintf(_("Could not write to config file %s"), $config));
     return false;
   }
 
@@ -86,7 +85,7 @@ function exec_stage_db()
   
   if (!$db->connect($config))
   {
-    $this->error("Could not read the configuration file $config");
+    $this->error(sprintf(_("Could not read the configuration file %s"), $config));
     // remove the configuration file
     unlink($config);
     return false;
@@ -94,18 +93,18 @@ function exec_stage_db()
   
   if (!$db->create_tables())
   {
-    $this->error("The tables could not be created successfully");
+    $this->error(_("The tables could not be created successfully"));
     // remove the configuration file
     unlink($config);
     return false;
   }
   
-  $this->success("Configuration file and tables created successfully");
-  $this->warning("Please move the file '$config' to the directory '".getcwd().DIRECTORY_SEPARATOR."phtagr'");
+  $this->success(_("Configuration file and tables created successfully"));
+  $this->warning(sprintf(_("Please move the file '%s' to the directory '%s'"), $config, getcwd().DIRECTORY_SEPARATOR."phtagr"));
   
   if (!$this->init_tables($configdir))
   {
-    $this->warning("Could not init the tables correctly");
+    $this->warning(_("Could not init the tables correctly"));
     return false;
   }
 
@@ -119,14 +118,14 @@ function _create_dir($dir)
   {
     if (!@mkdir($dir, true))
     {
-      $this->error("Could not create directory $dir.");
+      $this->error(sprintf(_("Could not create directory %s"), $dir));
       return false;
     }
   }
 
   if (!@chmod($dir, 0755))
   {
-    $this->error("Could not change the permission correctly of directory $dir.");
+    $this->error(sprintf(_("Could not change the permission correctly of directory %s"), $dir));
     return false;
   }
 
@@ -170,56 +169,56 @@ function print_stage_db()
 <input type=\"hidden\" name=\"stage\" value=\"0\" />
 <input type=\"hidden\" name=\"action\" value=\"init\" />
 
-<h3>Data Directory</h3>
+<h3>"._("Data Directory")."</h3>
 
-<p>phTagr will store all its data in this directory including cached images, uploaded images, etc.</p>
+<p>"._("phTagr will store all its data in this directory including cached images, uploaded images, etc.")."</p>
 
-<p>This directory must be writeable by PHP</p>
+<p>"._("This directory must be writeable by PHP")."</p>
 
 <table>
   <tr>
-    <td>Data Directory:</td>
+    <td>"._("Data Directory:")."</td>
     <td><input type=\"text\" name=\"dir\" value=\"\" /></td>
 </table>
 ";
 
-  $this->info("For security reasons, the data directory should be writeable by the PHP but not readable from the browser.");
+  $this->info(_("For security reasons, the data directory should be writeable by the PHP but not readable from the browser."));
 
-  echo "<h3>mySQL Connection</h3>
+  echo "<h3>"._("mySQL Connection")."</h3>
   
-<p>Please insert the connection data for the mysql connection data</p>
+<p>"._("Please insert the connection data for the mysql connection data")."</p>
 
 <table>
   <tr>
-    <td>Host:</td>
+    <td>"._("Host:")."</td>
     <td><input type=\"text\" name=\"host\" value=\"localhost\" /></td>
   </tr><tr>
-    <td>User:</td>
+    <td>"._("User:")."</td>
     <td><input type=\"text\" name=\"user\" value=\"\" /></td>
   </tr><tr>
-    <td>Password:</td>
+    <td>"._("Password:")."</td>
     <td><input type=\"password\" name=\"password\" /></td>
   </tr><tr>
-    <td>Database:</td>
+    <td>"._("Database:")."</td>
     <td><input type=\"text\" name=\"database\" value=\"\" /></td>
   </tr><tr>
-    <td>Table Prefix:</td>
+    <td>"._("Table Prefix:")."</td>
     <td><input type=\"text\" name=\"prefix\" value=\"\" /></td>
   </tr>
 </table>
 
 ";
-  $this->info("To run multiple phTagr instances within one database, please use
-  the table prefix. Usually this option is not used.");
+  $this->info(_("To run multiple phTagr instances within one database, please
+  use the table prefix. Usually this option is not used."));
 
   echo "
-<input type=\"submit\" value=\"OK\" />&nbsp;&nbsp;<input type=\"reset\" value=\"Reset\" />
+<input type=\"submit\" value=\""._("OK")."\" />&nbsp;&nbsp;<input type=\"reset\" value=\""._("Reset").".\" />
 ";
 }
 
 function print_stage_admin()
 {
-  echo "<h3>Creation of Admin Account</h3>\n";
+  echo "<h3>"._("Creation of Admin Account")."</h3>\n";
   $account=new SectionAccount();
   $account->user='admin';
   $account->print_form_new();
@@ -227,7 +226,7 @@ function print_stage_admin()
 
 function print_actions()
 {
-  $this->warning("Please handle these operations carefully!");
+  $this->warning(_("Please handle these operations carefully!"));
   echo "<ul>\n";
   echo "<li><a href=\"index.php?section=setup&action=sync\">Synchronize</a> files with the database</li>\n";
   echo "<li><a href=\"index.php?section=setup&action=init\">Create a phTagr Instance</a></li>\n";

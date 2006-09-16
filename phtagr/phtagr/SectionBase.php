@@ -1,6 +1,6 @@
 <?php
 
-include_once("$phtagr_prefix/Base.php");
+include_once("$phtagr_lib/Base.php");
 
 class SectionBase extends Base
 {

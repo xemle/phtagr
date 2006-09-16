@@ -1,0 +1,616 @@
+# phTagr Language for german
+# Copyright (C) 2006 Sebastian Felis
+# This file is distributed under the same license as the phtagr package.
+# Sebastian Felis <sebastian@silef.de>, 2006.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: phtagr 0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2006-09-14 18:03+0200\n"
+"PO-Revision-Date: 2006-09-16 14:15+0100\n"
+"Last-Translator: Sebastian Felis <sebastian@silef.de>\n"
+"Language-Team: de_DE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: German\n"
+"X-Poedit-Country: GERMANY\n"
+"X-Poedit-SourceCharset: iso-8859-1\n"
+
+#: Edit.php:360
+msgid "Select all"
+msgstr "Alle auswaehlen"
+
+#: Edit.php:362
+msgid "Edit Image Data"
+msgstr "Bilderdaten aendern"
+
+#: Edit.php:386
+msgid "Edit Access Control Lists (ACL)"
+msgstr "Zugriffsrechte aendern (ACL)"
+
+#: Image.php:728
+#: Image.php:810
+#: Image.php:888
+#: Image.php:951
+msgid "[edit]"
+msgstr "[aendern]"
+
+#: Image.php:732
+msgid "Click here to add a caption"
+msgstr "Hier klicken, um das Bild zu beschreiben"
+
+#: Image.php:764
+msgid "Clicks:"
+msgstr "Klicks:"
+
+#: Image.php:765
+#, php-format
+msgid "%d (Populariy: %.3f)"
+msgstr "%d (Beliebtheit: %.3f)"
+
+#: Image.php:773
+msgid "Voting:"
+msgstr "Abstimmen:"
+
+#: Image.php:776
+#, php-format
+msgid "%.1f (%d votes) "
+msgstr "%.1f (%d Stimmen) "
+
+#: Image.php:778
+msgid "No votes "
+msgstr "Kein Votum"
+
+#: Image.php:783
+msgid "None"
+msgstr "None"
+
+#: Image.php:787
+msgid " (worst)"
+msgstr " (schlecht)"
+
+#: Image.php:788
+msgid " (best)"
+msgstr " (sehr gut)"
+
+#: Image.php:793
+msgid "Vote!"
+msgstr "Abstimmen!"
+
+#: Image.php:800
+msgid "File:"
+msgstr "Datei"
+
+#: Image.php:809
+msgid "ACL:"
+msgstr "Berechtigung:"
+
+#: Image.php:819
+#: SectionSearch.php:33
+msgid "Date:"
+msgstr "Datum:"
+
+#: Image.php:870
+#: SectionSearch.php:24
+msgid "Tags:"
+msgstr "Tags:"
+
+#: Image.php:932
+#: SectionSearch.php:41
+msgid "Location:"
+msgstr "Ort:"
+
+#: Image.php:992
+msgid "Select:"
+msgstr "Auswaehlen:"
+
+#: SectionHeaderRight.php:20
+#: SectionSearch.php:81
+msgid "Search"
+msgstr "Suche"
+
+#: SectionHeaderRight.php:22
+msgid "Advanced search"
+msgstr "Erweiterete Suche"
+
+#: SectionHeaderRight.php:24
+msgid "Login"
+msgstr "Einloggen"
+
+#: SectionHeaderRight.php:26
+msgid "Logout"
+msgstr "Ausloggen"
+
+#: SectionHome.php:38
+msgid "Popular tags:"
+msgstr "Populaere Tags:"
+
+#: SectionHome.php:112
+msgid "Popular Images:"
+msgstr "Beliebte Bilder:"
+
+#: SectionHome.php:138
+msgid "Home"
+msgstr "Startseite"
+
+#: SectionImage.php:54
+msgid "up"
+msgstr "Oben"
+
+#: SectionImage.php:66
+msgid "prev"
+msgstr "Vorheriges"
+
+#: SectionImage.php:68
+msgid "next"
+msgstr "Naechstes"
+
+#: SectionImage.php:81
+msgid "Image"
+msgstr "Bild"
+
+#: SectionInstall.php:33
+#, php-format
+msgid "Could not create directory %s."
+msgstr "Das Verzeichnis %s konnte nicht erstellt werden."
+
+#: SectionInstall.php:40
+#: SectionSetup.php:128
+#, php-format
+msgid "Could not change the permission correctly of directory %s"
+msgstr "Die Zugriffsrechte vom dem Verzeichnis %s konnten nicht geaendern werden"
+
+#: SectionInstall.php:69
+#: SectionInstall.php:265
+#: SectionInstall.php:353
+#: SectionInstall.php:432
+#: SectionInstall.php:585
+#: SectionInstall.php:636
+msgid "Invalid installation session!"
+msgstr "Ungueltige Installationssitzung."
+
+#: SectionInstall.php:166
+msgid "No directory specified!"
+msgstr "Das Verzeichnis wurde nicht angegebn!"
+
+#: SectionInstall.php:188
+msgid "Your specified data directory is not writable!"
+msgstr "Das angegebene Datenverzeichnis ist nicht beschreibbar!"
+
+#: SectionInstall.php:203
+#: SectionInstall.php:217
+#, php-format
+msgid "File '%s' is not writable!"
+msgstr "Datei '%s' ist nicht schreibbar"
+
+#: SectionInstall.php:211
+#, php-format
+msgid "Could not copy file '%s' to directory '%s'!"
+msgstr "Die Datei '%s' konnte nicht nach '%s' kopiert werden!"
+
+#: SectionInstall.php:225
+#, php-format
+msgid "Could not copy image.php to %s!"
+msgstr "Die Datei 'image.php' konnte nicht nach '%s' kopiert werden!"
+
+#: SectionInstall.php:235
+msgid "Data directory is not writable!"
+msgstr "Das Datenverzeichnis ist nicht schreibbar!"
+
+#: SectionInstall.php:250
+#, php-format
+msgid "%s does not exist!"
+msgstr "%s existiert nicht"
+
+#: SectionInstall.php:284
+msgid "Connection to the database successful!"
+msgstr "Die Verbindung zur Datenbank wurde erfolgreich erstellt."
+
+#: SectionInstall.php:296
+#: SectionSetup.php:73
+#, php-format
+msgid "Could not write to config file %s"
+msgstr "Die Konfigurationsdatei '%s' konnte nicht geschrieben werden"
+
+#: SectionInstall.php:333
+#: SectionSetup.php:88
+#, php-format
+msgid "Could not read the configuration file %s"
+msgstr "Die Konfigurationsdatei '%s' konnte nicht gelesen werden"
+
+#: SectionInstall.php:338
+msgid "Configuration file created successfully"
+msgstr "Die Konfigurationsdatei wurde erfolgreich erstellt"
+
+#: SectionInstall.php:374
+msgid "Deletion of tables successful!"
+msgstr "Die Tabellen wurden erfolgreich geloescht."
+
+#: SectionInstall.php:377
+msgid "Error while deleting tables!"
+msgstr "Ein Fehler ist beim Loeschen der Tabellen aufgetreten!"
+
+#: SectionInstall.php:388
+msgid "Tables created successfully!"
+msgstr "Die Tabellen konnten erfolgreich erstellt werden"
+
+#: SectionInstall.php:392
+#: SectionSetup.php:96
+msgid "The tables could not be created successfully"
+msgstr "Die Tabellen konnten nicht erfolgreich erstellt werden"
+
+#: SectionInstall.php:399
+msgid "Tables initialized successfully!"
+msgstr "Die Tabellen konnten erfolgreich initialisiert werden!"
+
+#: SectionInstall.php:403
+#: SectionSetup.php:107
+msgid "Could not init the tables correctly"
+msgstr "Die Tabellen konnten nicht richtig initialisiert werden"
+
+#: SectionInstall.php:448
+msgid "Could not add admin account: No connection to the database!"
+msgstr "Das Administrationskonto konnte nicht angelegt werden, da die Verbindung zur Datenbank fehlerhaft war!"
+
+#: SectionInstall.php:454
+msgid "No password specified!"
+msgstr "Das Passwort wurde nicht angegeben!"
+
+#: SectionInstall.php:462
+msgid "Admin account successfully created!"
+msgstr "Das Administrationskonto wurde erfolgreich erstellt."
+
+#: SectionInstall.php:467
+msgid "Passwords do not match!"
+msgstr "Die angegebenen Passwoerter stimmen nicht ueberein!"
+
+#: SectionInstall.php:489
+msgid "Welcome to the installation of phTagr"
+msgstr "Herzlich willkommen zu der phTagr Installation"
+
+#: SectionInstall.php:491
+#, php-format
+msgid ""
+"To ensure that nobody unwanted performs an installation, please\n"
+"create a file '%s' in the directory '%s' with the following content:"
+msgstr "Um sicher zu stellen, dass keine ungewollte Installation durchgefuehrt werden kann, erstellen Sie bitte die Datei '%s' in dem Verzeichnis '%s' mit follgendem Inhalt:"
+
+#: SectionInstall.php:497
+msgid "If you run phTagr in an Linux environment, execute"
+msgstr "Wenn phTagr in einer Linux/Unix Umgebung laeuft, koennen Sie folgens ausfueren:"
+
+#: SectionInstall.php:506
+#: SectionInstall.php:570
+#: SectionInstall.php:622
+msgid "Next"
+msgstr "Naechster"
+
+#: SectionInstall.php:547
+msgid "Directory:"
+msgstr "Verzeichnis:"
+
+#: SectionInstall.php:554
+msgid ""
+"You can optionally specify a datadirectory that is not directly\n"
+"accessible by the web browser. By doing so you can use a more secure accessing\n"
+"mode in which the web server includes the images in his reply and the images\n"
+"are not accessible through direct links."
+msgstr "Sie koennen optional ein Datenverzeichnis angeben, dass nicht direkt vom Webbrowser zugaenglich ist. Dies erhoeht die Privatsphaehre der Bilder. Bilder koennen somit nicht direkt durch Links runtergeladen werden und die Zugriffsrechte werden ueberprueft."
+
+#: SectionInstall.php:563
+msgid "Data directory:"
+msgstr "Datenverzeichnis:"
+
+#: SectionInstall.php:570
+#: SectionInstall.php:622
+#: SectionInstall.php:663
+#: SectionInstall.php:692
+#: SectionSetup.php:215
+msgid "Reset"
+msgstr "Zuruecksetzen"
+
+#: SectionInstall.php:589
+msgid "mySQL connection"
+msgstr "mySQL Vergbindung"
+
+#: SectionInstall.php:591
+msgid ""
+"In this step we create the connection to the mySQL database. Please\n"
+"fill in the parameters for your database in the following form:"
+msgstr "Bitte geben Sie in diesem Schritt die Verbindungsdaten fuer Ihre Datenbank an."
+
+#: SectionInstall.php:600
+#: SectionSetup.php:193
+msgid "Host:"
+msgstr "Rechner:"
+
+#: SectionInstall.php:603
+#: SectionSetup.php:196
+msgid "User:"
+msgstr "Benutzer:"
+
+#: SectionInstall.php:606
+#: SectionInstall.php:687
+#: SectionSetup.php:199
+msgid "Password:"
+msgstr "Passwort:"
+
+#: SectionInstall.php:609
+#: SectionSetup.php:202
+msgid "Database:"
+msgstr "Datenbank:"
+
+#: SectionInstall.php:612
+#: SectionSetup.php:205
+msgid "Table Prefix:"
+msgstr "Tabellenprefix:"
+
+#: SectionInstall.php:618
+msgid ""
+"To run multiple phTagr instances within one database, please\n"
+"  use the table prefix. Otherwise you can ignore it."
+msgstr "Um mehrere phTagr Instanzen erstellen zu koennen, benutzen Sie bitte einen Tabellenprefix."
+
+#: SectionInstall.php:640
+msgid "Conflict while initializing the tables"
+msgstr "Ein Fehler ist beim Initialisieren der Tabellen aufgetreten!"
+
+#: SectionInstall.php:644
+msgid "this"
+msgstr "diesen"
+
+#: SectionInstall.php:646
+#, php-format
+msgid ""
+"It seems as if there is already a phTagr installation in that\n"
+"database with the given prefix. To solve this conflict you can either use the\n"
+"existing database, delete the existing database or return to\n"
+"%s step and use another prefix or a different database this installation."
+msgstr "Es scheint, dass schon ein phTagr Instanz mit dem angegebenen Tabellenprefix in der Datenbank vorhanden ist. Um diesen Konflikt zu loesen, koennen Sie die existierenden Tabellen loeschen oder zu %s Installationsschritt zurueckkehren, um einen anderen Tabellenprefix zu waehlen."
+
+#: SectionInstall.php:659
+msgid "Use the existing database."
+msgstr "Die vorhandenen Datenbank benutzen"
+
+#: SectionInstall.php:660
+msgid "Delete the existing database."
+msgstr "Die vorhandene Datenbank benutzen"
+
+#: SectionInstall.php:676
+msgid "Creation of the admin account"
+msgstr "Erstellung des Administratorkontos"
+
+#: SectionInstall.php:678
+msgid ""
+"In this final step you need to enter the details for the admin\n"
+"account of this phTagr instance."
+msgstr "In diesem Schritt muessen Sie die Details fuer das Administrationskonto eingeben."
+
+#: SectionInstall.php:686
+msgid "Username:"
+msgstr "Benutzername:"
+
+#: SectionInstall.php:688
+msgid "Confirm:"
+msgstr "Wiederholung:"
+
+#: SectionInstall.php:689
+msgid "Email:"
+msgstr "Emai:"
+
+#: SectionInstall.php:691
+msgid "Create"
+msgstr "Erstellen"
+
+#: SectionInstall.php:700
+msgid "Almost done!"
+msgstr "Fast fertig!"
+
+#: SectionInstall.php:702
+#, php-format
+msgid ""
+"Please delete delete now the file '%s' to ensure\n"
+"that no one will create instances of phTagr that you do not want."
+msgstr "Bitte loeschen Sie nund die Datei '%s', um sicher zu gehen, dass keine weitere phTagr Instanz instralliert werden kann."
+
+#: SectionInstall.php:707
+#, php-format
+msgid "As a final step please move '%s' to '%s' and remove the write permissions!"
+msgstr "Als letzten Schritte verschieben Sie die Datei '%s' nach '%s' und setzen Sie die Zugriffsrechte auf 'nur lesbar'!"
+
+#: SectionInstall.php:711
+msgid "Have fun!"
+msgstr "Viel Spass"
+
+#: SectionInstall.php:721
+msgid "Installation"
+msgstr "Installation"
+
+#: SectionInstall.php:758
+msgid "Some of the required tables do exist already. Please use another prefix or delete them manually!"
+msgstr "Einige der benoetigten Dateien existieren schon. Bitte benutzen Sie einen anderen Tabellenprefix oder loeschen Sie die Tabellen manuell."
+
+#: SectionSearch.php:18
+msgid "Advanced Search"
+msgstr "Erweiterete Suche"
+
+#: SectionSearch.php:35
+msgid "after:"
+msgstr "nach"
+
+#: SectionSearch.php:36
+msgid "before:"
+msgstr "vor:"
+
+#: SectionSearch.php:37
+msgid "E.g."
+msgstr "Z.B."
+
+#: SectionSearch.php:45
+msgid "undefined"
+msgstr "undefiniert"
+
+#: SectionSearch.php:46
+msgid "City"
+msgstr "Stadt"
+
+#: SectionSearch.php:47
+msgid "Sublocation"
+msgstr "Unterort"
+
+#: SectionSearch.php:48
+msgid "State"
+msgstr "Bundesstaat"
+
+#: SectionSearch.php:49
+msgid "Country"
+msgstr "Land"
+
+#: SectionSearch.php:53
+msgid "Sort by:"
+msgstr "Sortiert nach"
+
+#: SectionSearch.php:56
+msgid "date"
+msgstr "Datum"
+
+#: SectionSearch.php:57
+msgid "date asc"
+msgstr "Datum aufst."
+
+#: SectionSearch.php:58
+msgid "ranking"
+msgstr "Rangliste"
+
+#: SectionSearch.php:59
+msgid "ranking asc"
+msgstr "Rangliste aufst."
+
+#: SectionSearch.php:60
+msgid "voting"
+msgstr "Abstimmen"
+
+#: SectionSearch.php:61
+msgid "voting asc"
+msgstr "Abstimmung aufst."
+
+#: SectionSearch.php:62
+msgid "newest"
+msgstr "Neuestem"
+
+#: SectionSearch.php:63
+msgid "newest desc"
+msgstr "neu abst."
+
+#: SectionSearch.php:68
+msgid "Page size:"
+msgstr "Seitengroesse:"
+
+#: SectionSearch.php:82
+msgid "Cancel"
+msgstr "Abbrechen"
+
+#: SectionSetup.php:44
+#, php-format
+msgid "Directory %s does not exists. Create it first."
+msgstr "Das Verzeichnis '%s' existiert nicht. Es wird erstellt."
+
+#: SectionSetup.php:51
+#, php-format
+msgid "Could not write to data directory %s"
+msgstr "Das gewaehlte Datenverzeichnis '%s' ist nicht schreibbar"
+
+#: SectionSetup.php:102
+msgid "Configuration file and tables created successfully"
+msgstr "Die Konfigurationsdateien und Tabellen wurden erfolgreich erstellt"
+
+#: SectionSetup.php:103
+#, php-format
+msgid "Please move the file '%s' to the directory '%s'"
+msgstr "Bitte verschieben Sie die Datei '%s' zu dem Verzeichnis '%s'"
+
+#: SectionSetup.php:121
+#, php-format
+msgid "Could not create directory %s"
+msgstr "Das Verzeichnis %s konnte nicht erstellt werden"
+
+#: SectionSetup.php:172
+msgid "Data Directory"
+msgstr "Datenverzeichnis"
+
+#: SectionSetup.php:174
+msgid "phTagr will store all its data in this directory including cached images, uploaded images, etc."
+msgstr "phTagr wird alle Daten in diesem Verzeichnis speichern inkl. den Vorschaubildern, die hochgeladenen Bildern, etc."
+
+#: SectionSetup.php:176
+msgid "This directory must be writeable by PHP"
+msgstr "Dieses Verzeichnis soll vom PHP Prozess schreibbar sein."
+
+#: SectionSetup.php:180
+msgid "Data Directory:"
+msgstr "Datenverzeichnis:"
+
+#: SectionSetup.php:185
+msgid "For security reasons, the data directory should be writeable by the PHP but not readable from the browser."
+msgstr "Aus Sicherheitsgruenden soll das Datenverseichnis nur vom PHP Prozess lesbar sein aber nicht vom Browser selbst."
+
+#: SectionSetup.php:187
+msgid "mySQL Connection"
+msgstr "mySQL Vergbindung"
+
+#: SectionSetup.php:189
+msgid "Please insert the connection data for the mysql connection data"
+msgstr "Bitte geben Sie die Verbindungsdaten fuer die mysql Datenbank ein"
+
+#: SectionSetup.php:211
+msgid ""
+"To run multiple phTagr instances within one database, please\n"
+"  use the table prefix. Usually this option is not used."
+msgstr "Verwenden Sie den Tabellenprefix, um mehrere phTagr Instanzen mit nur einer Datenbank zu benutzen."
+
+#: SectionSetup.php:215
+msgid "OK"
+msgstr "OK"
+
+#: SectionSetup.php:221
+msgid "Creation of Admin Account"
+msgstr "Erstellung des Administratorkontos"
+
+#: SectionSetup.php:229
+msgid "Please handle these operations carefully!"
+msgstr "Bitte die Operationen mit Vorsicht ausfuehren!"
+
+#: main.php:75
+msgid "No Installation found"
+msgstr "Es wurde keine Installation gefunden"
+
+#: SectionInstall.php:520
+msgid "Choosing the installation directory"
+msgstr "Waehlen Sie das Installationsverzeichnis aus."
+
+#: SectionInstall.php:522
+msgid ""
+"phTagr allows you to make multiple instances of phTagr which all use\n"
+"the same codebase but have their own directory for upload, cache etc.\n"
+"and their own configurations. In this step you need to choose where you\n"
+"want to have this new instance installed to."
+msgstr "Die Installation von phTagr erlaubt Ihnen mehrere Instanzen von phTagr zu erstellen. Diese koennen die gleiche Codebasis besitzen, waehrend sie unterschiedliche Konfigurationen und Datenverzeichnisse haben. In diesem Schritt waehlen Sie das Ziel Ihrer Installation aus."
+
+#: SectionInstall.php:527
+msgid ""
+"The directory in which you want to install this instance must exist and\n"
+"bei either fully writable by the web server or at least the following\n"
+"directories and files in it need write access by the web server:"
+msgstr "Das Verzeichnis, dass Sie fuer die Installation waehlen, muss existieren. Weiter muessen die angegebenen Verzeichnis vom Weberserver schreibbar sein."
+
+#~ msgid "Could not copy index.php to %s!"
+#~ msgstr "Die Datei 'index.php' konnte nicht nach '%s' kopiert werden!"
+#~ msgid "directory"
+#~ msgstr "Verzeichnis"
+#~ msgid "action"
+#~ msgstr "Aktion"
+#~ msgid "%s is not writable!"
+#~ msgstr "%s ist nicht schreibbar"
+

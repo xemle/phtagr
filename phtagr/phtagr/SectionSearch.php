@@ -1,13 +1,9 @@
 <?php
 
-global $prefix;
-global $db;
-
-include_once("$phtagr_prefix/SectionBase.php");
-include_once("$phtagr_prefix/Search.php");
-include_once("$phtagr_prefix/Edit.php");
-include_once("$phtagr_prefix/Sql.php");
-
+include_once("$phtagr_lib/SectionBase.php");
+include_once("$phtagr_lib/Search.php");
+include_once("$phtagr_lib/Edit.php");
+include_once("$phtagr_lib/Sql.php");
 
 class SectionSearch extends SectionBase
 {
@@ -19,13 +15,13 @@ function SectionSearch()
 
 function print_content()
 {
-  echo "<h2>Advanced Search</h2>
+  echo "<h2>"._("Advanced Search")."</h2>
   
 <form action=\"index.php\" method=\"post\">
 <div><input type=\"hidden\" name=\"section\" value=\"explorer\" /></div>
 <table>
   <tr>
-    <th>Tags:</th>
+    <th>"._("Tags:")."</th>
     <td>
       <input type=\"text\" name=\"tags\" size=\"30\" /><br />
       Operation: <input type=\"radio\" name=\"tagop\" value=\"0\" checked /> AND,  
@@ -34,42 +30,42 @@ function print_content()
     </td>
   </tr>
   <tr>
-    <th>Date:</th>
+    <th>"._("Date:")."</th>
     <td>
-      after: <input type=\"text\" name=\"start\" size=\"10\" /><br />
-      before: <input type=\"text\" name=\"end\" size=\"10\" /><br />
-      E.g. \"2006-04-21\"
+      "._("after:")." <input type=\"text\" name=\"start\" size=\"10\" /><br />
+      "._("before:")." <input type=\"text\" name=\"end\" size=\"10\" /><br />
+      "._("E.g.")." \"2006-04-21\"
     </td>
   </tr>
   <tr>
-    <th>Location:</th>
+    <th>"._("Location:")."</th>
     <td>
       <input type=\"text\" name=\"location\" size=\"30\" /><br />
       Type: <select name=\"location_type\" size=\"1\">
-        <option value=\"".LOCATION_UNDEFINED."\" selected=\"selected\">undefined</option>
-        <option value=\"".LOCATION_CITY."\">City</option>
-        <option value=\"".LOCATION_SUBLOCATION."\">Sublocation</option>
-        <option value=\"".LOCATION_STATE."\">State</option>
-        <option value=\"".LOCATION_COUNTRY."\">Country</option>
+        <option value=\"".LOCATION_UNDEFINED."\" selected=\"selected\">"._("undefined")."</option>
+        <option value=\"".LOCATION_CITY."\">"._("City")."</option>
+        <option value=\"".LOCATION_SUBLOCATION."\">"._("Sublocation")."</option>
+        <option value=\"".LOCATION_STATE."\">"._("State")."</option>
+        <option value=\"".LOCATION_COUNTRY."\">"._("Country")."</option>
       </select>
     </td>
   <tr>
-    <th>Sort by:</th>
+    <th>"._("Sort by:")."</th>
     <td>
       <select name=\"orderby\">
-        <option value=\"date\" selected=\"selected\">date</option>
-        <option value=\"-date\">date asc</option>
-        <option value=\"ranking\">ranking</option>
-        <option value=\"-ranking\">ranking asc</option>
-        <option value=\"voting\">voting</option>
-        <option value=\"-voting\">voting asc</option>
-        <option value=\"newest\">newest</option>
-        <option value=\"-newest\">newest desc</option>
+        <option value=\"date\" selected=\"selected\">"._("date")."</option>
+        <option value=\"-date\">"._("date asc")."</option>
+        <option value=\"ranking\">"._("ranking")."</option>
+        <option value=\"-ranking\">"._("ranking asc")."</option>
+        <option value=\"voting\">"._("voting")."</option>
+        <option value=\"-voting\">"._("voting asc")."</option>
+        <option value=\"newest\">"._("newest")."</option>
+        <option value=\"-newest\">"._("newest desc")."</option>
       </select>
     </td>
   </tr>
   <tr>
-    <th>Page size:</th>
+    <th>"._("Page size:")."</th>
     <td>
       <select name=\"pagesize\">
         <option value=\"10\" selected=\"selected\">10</option>
@@ -82,8 +78,8 @@ function print_content()
   </tr>
   <tr>
     <td></td>
-    <td><input type=\"submit\" value=\" Search \" />
-        <input type=\"reset\" value=\" Cancel \" /></td>
+    <td><input type=\"submit\" value=\""._("Search")."\" />
+        <input type=\"reset\" value=\""._("Cancel")."\" /></td>
   </tr>
 </table>
 </form>

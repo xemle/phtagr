@@ -1,13 +1,10 @@
 <?php
 
-global $prefix;
-global $db;
-
-include_once("$phtagr_prefix/SectionBase.php");
-include_once("$phtagr_prefix/Search.php");
-include_once("$phtagr_prefix/Edit.php");
-include_once("$phtagr_prefix/Image.php");
-include_once("$phtagr_prefix/Sql.php");
+include_once("$phtagr_lib/SectionBase.php");
+include_once("$phtagr_lib/Search.php");
+include_once("$phtagr_lib/Edit.php");
+include_once("$phtagr_lib/Image.php");
+include_once("$phtagr_lib/Sql.php");
 
 /** Explore the images.
   @class SectionExplorer */

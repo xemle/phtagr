@@ -98,8 +98,22 @@ Other image communities: http://holocore.com/?PictureSync_services
       - original size
       - Insert of a watermark or copyright by IPTC copyright
     - get_imagesize for mini, thumb, and preview.
+    - Save meta data in XML
+      - Dublin core metadata initiative
+      - store meta file filename.xml besides the original image or in
+        subdirectory .phtagr 
+      - Some meta data can be stored in IPTC, some not. Some phtagr specific
+        data may not supported by dublin core meta. Save phtagr specific meta
+        data in phtagr namespace
+      - get_xml_meta($noiptc): Returns xml meta data. If set without IPTC data
+      - save_xml_meta(): Reads meta data from xml
   - Download image
   - Add edit form to change IPTC tags
+  - Replace voting by 5 stars. Each star is a direct vote link.
+  - Add geo tags supported by google maps 
+    - See tutorial: http://www.econym.demon.co.uk/googlemaps/
+  - Add color table for images to search a image by color
+  - Replace and improve the ranking function of the image
   
 - Image Search: Search.php
   - By Set
@@ -133,15 +147,7 @@ Other image communities: http://holocore.com/?PictureSync_services
 - FileBrowser
   Images can be added in a file browser. This option is available for local
   system users only.
-  - Supports chroot-like browsing (an FileSystem object should handle all
-    filesystem related operations like cd, mkdir, ls)
-    - The root of the file browser depends on the users root directory
-    - Only a phTagr user can browse their own upload directory
-    - Multiple root directories should be supported 
-      - Windows has no real root directory, but drives. These drives are
-        multiple root directories. 
-      - On Linux, a normal user may browse his own home directory and its
-        upload directory)
+  - Supports chroot-like browsing ()
   - Insert images of whole tree
     - default ACL, Tags, Comment, Copyright
   - Upload of tar balls. Done.
@@ -151,10 +157,40 @@ Other image communities: http://holocore.com/?PictureSync_services
   - Add Icons to files and directories
     - Use created thumbnails of the JPG images
 
+- FileSystem Object
+  This object should handle all filesystem related operations like cd, mkdir,
+  ls
+  - Multiple root directories should be supported 
+    - Windows has no real root directory, but drives. These drives are multiple
+      root directories. 
+    - On Linux, a normal user may browse his own home directory and its upload
+      directory)
+  - The roots of the file browser depends on the users roots directories
+    - Only a phTagr user can browse their own upload directory
+  - Array of root directories with aliases.
+    - User can browse all its aliases
+    - Aliases are loaded from at startup in $pref
+    - Should the files be saved as aliases?
+  - Supported functions
+    - add_root($realpath, $alias): Add a root directory, which is accessable
+    - cd($allow_symlink=false): Change of current directory
+    - ls($pattern='*'): List of all files and dirs, returns array($dirs,
+      $files)
+    - get_dirs($pattern=''): returns all directories
+    - get_files($pattern=''): returns all files
+    - get_files_suppoted(): returns all supported image/video files
+    - get_realname(): Returns real filename
+    - mkdir($create_parrent=false): creates a directory
+    - rm($pattern='*', $recursivly=false): remove files
+    - touch(): update timestamp of file
+    - con_dir($parent, $child): concardinate two dirs
+
 - Session
   - Remember visited image. This information will be used for counting the
     clicks on the images. Done.
-  - Selection of images to download, or edit
+  - Storing of users preferences. These are loaded at a session beginning or
+    preference changes
+  - Selection of images to download, or edit 
   - Init the session by a cookie if it is available. Done 2006-03-11.
   - Save and transmit password in MD5
   - Secure and improve the login by adding turing test image
@@ -182,6 +218,10 @@ Other image communities: http://holocore.com/?PictureSync_services
 
 - Additional 
   - Images can be uploaded to an flickr account
+  - Support RSS infos about new images or comments
+  - Support previews in a link for the own homepage. This link lists a few
+    photos randomly in a user defined table (like in flickr)
+  - Support anonymous as cookie (Language, theme, etc)
 
 - Explorer
   - Add clicks to database
@@ -194,7 +234,21 @@ Other image communities: http://holocore.com/?PictureSync_services
   - Enable AJAX update of image properties. 
   - JavaScript: Add link of current page as parameter
   - If comment is too long in the thumbnail view, short it by dots "..."
-  
+  - Enable Dia Show to current search via JavaScript
+  - Support diffent views
+    - 3 column table
+    - minimized table for editing
+
+- Multi Language Support
+  - use gettext() and *.mo files
+
+- Support Video Files
+  - Use flash movies like YouTube or video.google
+  - Convert videos from avi, mpeg, or mov to flv via ffmpeg and fvltool2 (see
+    http://blog.go4teams.com/?p=56)
+  - Should we split the image table to generic file table with image and video
+    table?
+
 Already done:
 Home:
 - Add List of 100 popular Tags in the home section with an random image. Done

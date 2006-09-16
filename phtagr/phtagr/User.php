@@ -1,7 +1,7 @@
 <?php
 
-include_once("$phtagr_prefix/Base.php");
-include_once("$phtagr_prefix/Constants.php");
+include_once("$phtagr_lib/Base.php");
+include_once("$phtagr_lib/Constants.php");
 
 /** This class handles the authentication of an user.
 
@@ -34,7 +34,10 @@ function init_session()
     $_SESSION['username']='anonymous';
     $_SESSION['img_viewed']=array();
     $_SESSION['img_voted']=array();
-  }  
+  } else {
+    if (isset($_SESSION['lang']))
+      $this->_set_lang($_SESSION['lang']);
+  }
   $_SESSION['update']=time();
 }
 
@@ -61,6 +64,31 @@ function _check_login($username, $password)
     }
   }
   return false;
+}
+
+/** Sets the language of the page */
+function _set_lang($lang)
+{
+  global $phtagr_prefix;
+
+  if ($lang=='')
+    $lang='en_US';
+
+  $locale_dir=$phtagr_prefix.DIRECTORY_SEPARATOR.'locale';
+  $dir=$locale_dir.DIRECTORY_SEPARATOR.$lang;
+
+  if (!is_dir($dir))
+    return false;
+
+  putenv("LANG=$lang");
+  setlocale(LC_ALL, $lang);
+  $domain='messages';
+  bindtextdomain($domain, $locale_dir);
+  textdomain($domain);
+  //bind_textdomain_codeset($domain, 'UTF-8');
+
+  $_SESSION['lang']=$lang;
+  return true;
 }
 
 /** Returns the userid of the current session 
@@ -299,7 +327,10 @@ function check_session($docookierefresh=true)
       $this->_set_cookie($username, $password);
     }
   }
-
+  if (isset($_REQUEST['lang']))
+  {
+    $this->_set_lang($_REQUEST['lang']);
+  }
 }
 
 /** Removes a session */

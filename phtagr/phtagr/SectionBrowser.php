@@ -1,8 +1,7 @@
 <?php
 
-global $prefix;
-include_once("$phtagr_prefix/SectionBase.php");
-include_once("$phtagr_prefix/Image.php");
+include_once("$phtagr_lib/SectionBase.php");
+include_once("$phtagr_lib/Image.php");
 
 class SectionBrowser extends SectionBase
 {
@@ -92,7 +91,7 @@ function print_browser($dir)
   
   $subdirs=array();
   
-  echo "Path:&nbsp;";
+  echo _("Path:")."&nbsp;";
   $dirs=split('/', $dir);
   echo "<a href=\"./index.php?section=browser&amp;cd=/\">root</a>";
   $path='';
@@ -137,9 +136,9 @@ function print_browser($dir)
     echo "<input type=\"checkbox\" name=\"add[]\" value=\"$cd\" />&nbsp;<a href=\"?section=browser&amp;cd=$cd\">$sub</a><br />\n";
   }
   echo "<br/>\n";
-  echo "<input type=\"checkbox\" name=\"create_all_previews\" checked=\"checked\" />&nbsp;Create all previews<br />\n";
-  echo "<input type=\"submit\" value=\"Add images\" />&nbsp;";
-  echo "<input type=\"reset\" value=\"Clear\" />";
+  echo "<input type=\"checkbox\" name=\"create_all_previews\" checked=\"checked\" />&nbsp;"._("Create all previews")."<br />\n";
+  echo "<input type=\"submit\" value=\""._("Add images")."\" />&nbsp;";
+  echo "<input type=\"reset\" value=\""._("Clear")."\" />";
   
   echo "\n<p>\n<form>\n";
 }
@@ -147,7 +146,7 @@ function print_browser($dir)
 function print_content()
 {
   global $user; 
-  echo "<h2>Browser</h2>\n";
+  echo "<h2>"._("Browser")."</h2>\n";
   if (isset($_REQUEST['add'])) {
     foreach ($_REQUEST['add'] as $d)
     {
@@ -157,7 +156,7 @@ function print_content()
     { 
       asort($this->images);
     }
-    printf ("Found %d images<br/>\n", count($this->images));
+    printf (_("Found %d images")."<br/>\n", count($this->images));
     foreach ($this->images as $img)
     {
       $image=new image();
@@ -173,7 +172,7 @@ function print_content()
       switch ($return)
       {
       case 0:
-        echo "Image '$img' was successfully inserted.<br/>\n";
+        printf(_("Image '%s' was successfully inserted.")."<br/>\n", $img);
         break;
       case 1:
         echo "Image '$img' was updated.<br/>\n";

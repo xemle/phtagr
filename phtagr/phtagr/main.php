@@ -2,28 +2,28 @@
 
 session_start();
 
-include "$phtagr_prefix/User.php";
-include "$phtagr_prefix/Sql.php";
-include "$phtagr_prefix/Search.php";
-include "$phtagr_prefix/Edit.php";
+include "$phtagr_lib/User.php";
+include "$phtagr_lib/Sql.php";
+include "$phtagr_lib/Search.php";
+include "$phtagr_lib/Edit.php";
 
-include "$phtagr_prefix/PageBase.php";
-include "$phtagr_prefix/SectionHeaderLeft.php";
-include "$phtagr_prefix/SectionHeaderRight.php";
-include "$phtagr_prefix/SectionMenu.php";
-include "$phtagr_prefix/SectionHome.php";
-include "$phtagr_prefix/SectionFooter.php";
-include "$phtagr_prefix/SectionHelp.php";
+include "$phtagr_lib/PageBase.php";
+include "$phtagr_lib/SectionHeaderLeft.php";
+include "$phtagr_lib/SectionHeaderRight.php";
+include "$phtagr_lib/SectionMenu.php";
+include "$phtagr_lib/SectionHome.php";
+include "$phtagr_lib/SectionFooter.php";
+include "$phtagr_lib/SectionHelp.php";
 
-include "$phtagr_prefix/SectionAccount.php";
+include "$phtagr_lib/SectionAccount.php";
 
-include "$phtagr_prefix/SectionExplorer.php";
-include "$phtagr_prefix/SectionImage.php";
-include "$phtagr_prefix/SectionBrowser.php";
-include "$phtagr_prefix/SectionSearch.php";
-include "$phtagr_prefix/SectionSetup.php";
-include "$phtagr_prefix/SectionUpload.php";
-include "$phtagr_prefix/SectionInstall.php";
+include "$phtagr_lib/SectionExplorer.php";
+include "$phtagr_lib/SectionImage.php";
+include "$phtagr_lib/SectionBrowser.php";
+include "$phtagr_lib/SectionSearch.php";
+include "$phtagr_lib/SectionSetup.php";
+include "$phtagr_lib/SectionUpload.php";
+include "$phtagr_lib/SectionInstall.php";
 
 $page = new PageBase("phTagr");
 
@@ -72,7 +72,7 @@ if (!$db->connect() && $section!="install")
 {
   $msg = new SectionBase();
   $cnt->add_section(&$msg);
-  $msg->h("No Installation found");
+  $msg->h(_("No Installation found"));
   $text="It looks as if phtagr is not completely configured.<br/>\n".
     "Please follow <a href=\"./index.php?section=install\"> ".
     "this</a> link to install phtagr.\n";
@@ -210,10 +210,4 @@ if (isset($_REQUEST['section']))
 
 $page->layout();
 
-
-/*
-echo "<pre>";
-print_r($_SESSION);
-echo "</pre>\n";
-*/
 ?>

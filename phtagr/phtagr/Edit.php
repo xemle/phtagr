@@ -1,9 +1,9 @@
 <?php
 
-global $phtagr_prefix;
-include_once("$phtagr_prefix/Iptc.php");
-include_once("$phtagr_prefix/Base.php");
-include_once("$phtagr_prefix/Constants.php");
+global $phtagr_lib;
+include_once("$phtagr_lib/Iptc.php");
+include_once("$phtagr_lib/Base.php");
+include_once("$phtagr_lib/Constants.php");
 
 /** This class handles modifications and checks the access rights.
   @class Edit */
@@ -357,9 +357,9 @@ function _handle_request_acl(&$img)
 function print_edit_inputs()
 {
   echo "
-<p><input type=\"checkbox\" id=\"selectall\" onclick=\"checkbox('selectall', 'images[]')\"> Select all</p>
+<p><input type=\"checkbox\" id=\"selectall\" onclick=\"checkbox('selectall', 'images[]')\"> "._("Select all")."</p>
 
-<span id=\"btnEdit\" class=\"jsbutton\" onclick=\"toggle_visibility('toggleEdit', 'btnEdit')\">-&gt; Edit Image Data</span><br/>
+<span id=\"btnEdit\" class=\"jsbutton\" onclick=\"toggle_visibility('toggleEdit', 'btnEdit')\">-&gt; "._("Edit Image Data")."</span><br/>
 <fieldset id='toggleEdit' style=\"display:none\"><legend>Edit Image Data <span class=\"jsbutton\" onclick=\"toggle_visibility('toggleEdit', 'btnEdit')\">[Hide]</span></legend>
   <table>
     <tr>
@@ -383,7 +383,7 @@ function print_edit_inputs()
     </tr>
   </table>
 </fieldset>
-<span id=\"btnAcl\" class=\"jsbutton\" onclick=\"toggle_visibility('toggleAcl', 'btnAcl')\">-&gt; Edit Access Control Lists (ACL)</span><br/>
+<span id=\"btnAcl\" class=\"jsbutton\" onclick=\"toggle_visibility('toggleAcl', 'btnAcl')\">-&gt; "._("Edit Access Control Lists (ACL)")."</span><br/>
 <fieldset id='toggleAcl' style=\"display:none\"><legend>Access Control List <span class=\"jsbutton\" onclick=\"toggle_visibility('toggleAcl', 'btnAcl')\">[Hide]</span></legend>
   <table>
     <tr>

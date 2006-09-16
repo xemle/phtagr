@@ -1,12 +1,8 @@
 <?php
 
-global $prefix;
-global $db;
-
-include_once("$phtagr_prefix/SectionBase.php");
-include_once("$phtagr_prefix/Image.php");
-include_once("$phtagr_prefix/Sql.php");
-
+include_once("$phtagr_lib/SectionBase.php");
+include_once("$phtagr_lib/Image.php");
+include_once("$phtagr_lib/Sql.php");
 
 class SectionImage extends SectionBase
 {
@@ -55,7 +51,7 @@ function print_navigation($search)
     {
       $url="index.php?section=explorer";
       $url.=$search->to_URL();
-      echo "<a href=\"$url\">up</a>&nbsp;";
+      echo "<a href=\"$url\">"._("up")."</a>&nbsp;";
       $cur_pos++;
       continue;
     }
@@ -67,9 +63,9 @@ function print_navigation($search)
     $url.=$search->to_URL();
     
     if ($cur_pos<$pos)
-      echo "<a href=\"$url\">prev</a>&nbsp;";
+      echo "<a href=\"$url\">"._("prev")."</a>&nbsp;";
     else
-      echo "<a href=\"$url\">next</a>";
+      echo "<a href=\"$url\">"._("next")."</a>";
     
     $cur_pos++;
   }
@@ -82,7 +78,7 @@ function print_content()
   global $user;
   global $search;
  
-  echo "<h2>Image</h2>\n";
+  echo "<h2>"._("Image")."</h2>\n";
   
   if (!isset($_REQUEST['id']))
     return;

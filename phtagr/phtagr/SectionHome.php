@@ -1,9 +1,8 @@
 <?php
 
-global $prefix;
-include_once("$phtagr_prefix/SectionBase.php");
-include_once("$phtagr_prefix/Image.php");
-include_once("$phtagr_prefix/Search.php");
+include_once("$phtagr_lib/SectionBase.php");
+include_once("$phtagr_lib/Image.php");
+include_once("$phtagr_lib/Search.php");
 
 /**
   @class SectionHome Prints the initial page with tags and popular images.
@@ -36,7 +35,7 @@ function print_all_tags() {
   echo "<div class=\"tags\">Most tags (of $count):";
   */
   
-  echo "<div class=\"tags\"><p>Popular tags:</p>\n\n<p>";
+  echo "<div class=\"tags\"><p>"._("Popular tags:")."</p>\n\n<p>";
   // best of tags
   $sql="SELECT t.name,COUNT(t.name) AS hits 
         FROM $db->tag AS t, $db->imagetag AS it 
@@ -110,7 +109,7 @@ function print_popular_images()
 
   $search->set_page_size(0);
 
-  echo "<div class=\"mini\"><p>Popular Images:</p>\n\n";
+  echo "<div class=\"mini\"><p>"._("Popular Images:")."</p>\n\n";
   echo "<table>\n<tr>\n";
   foreach ($ids as $t)
   {
@@ -136,7 +135,7 @@ function print_popular_images()
 
 function print_content()
 {
-  echo "<h2>Home</h2>\n";
+  echo "<h2>"._("Home")."</h2>\n";
   $this->print_all_tags();
   $this->print_popular_images();
 }

@@ -3,9 +3,9 @@
  * acces rights of the image and copies the binary image data to html output.
  * If an error occurs exit silently. */
 
-include "$phtagr_prefix/User.php";
-include "$phtagr_prefix/Sql.php";
-include "$phtagr_prefix/Thumbnail.php";
+include "$phtagr_lib/User.php";
+include "$phtagr_lib/Sql.php";
+include "$phtagr_lib/Thumbnail.php";
 
 function unauthorized()
 {
