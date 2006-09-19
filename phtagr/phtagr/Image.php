@@ -720,12 +720,14 @@ function print_caption($docut=true)
   // The user can edit the image
   if ($caption != "") 
   {
+    $b64=base64_encode($caption);
     if ($docut=true)
       $text=$this->_cut_caption($id, &$caption);
-    else
-      $text=&$caption;
-    $caption64=base64_encode($caption);
-    echo "$text <span class=\"jsbutton\" onclick=\"add_form_caption($id, '$caption64') \">"._("[edit]")."</span>";
+    else {
+      $text=htmlspecialchars($caption);
+    }
+
+    echo "$text <span class=\"jsbutton\" onclick=\"add_form_caption($id, '$b64') \">"._("[edit]")."</span>";
   }
   else
   {
@@ -740,6 +742,9 @@ function print_caption($docut=true)
  * length of 20.  */
 function _cut_caption($id, $caption)
 {
+  $b64=base64_encode($caption);
+  $caption=htmlspecialchars($caption);
+
   if (strlen($caption)< 60) 
     return $caption;
 
@@ -752,7 +757,6 @@ function _cut_caption($id, $caption)
     $result.=" $word";
   }
   $result="<span id=\"caption-text-$id\">".$result;
-  $b64=base64_encode($caption);
   $result.=" <span class=\"jsbutton\" onclick=\"print_caption($id, '$b64')\">[...]</span>";
   $result.="</span>";
   return $result;

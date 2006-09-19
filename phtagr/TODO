@@ -15,6 +15,9 @@ Other image communities: http://holocore.com/?PictureSync_services
 
 - PHP 
   - Generate valid XHTML. Mostly validated. Done.
+  - All inputs must be checked for validity (prevent XCS and other intrusions)
+    - Comments should not allow HTML tag: e.g.
+      "<script>window.alert('intrusion');</script>"
   
 - mySQL database
   - Add popular values as last view and current value. Done 2006-02-16
@@ -114,6 +117,7 @@ Other image communities: http://holocore.com/?PictureSync_services
     - See tutorial: http://www.econym.demon.co.uk/googlemaps/
   - Add color table for images to search a image by color
   - Replace and improve the ranking function of the image
+  - Add JavaScript Image Object with meta data to access them easily by JS
   
 - Image Search: Search.php
   - By Set
@@ -121,7 +125,7 @@ Other image communities: http://holocore.com/?PictureSync_services
   - Comment
     - Contains words
   - Set
-  - Place
+  - Location
   - ACL
     - restrict images to public, phtagr acounts, friends and personal)
   - Create a Query class. Done. 2006-01-21
@@ -138,7 +142,23 @@ Other image communities: http://holocore.com/?PictureSync_services
     - function query_images() Returns a list of images ids
     - function from_URL and to_URL. Done.
     - clone function to create search URLs
-    
+  - Add JavaScript object of image with all important or meta data. This replaces complicated
+
+- Comment
+  An image can be commented by other users or memebers. The image ACL defines
+  the access rights to add comments. The image owner can delete comments. The
+  comment creator receives an authorization token to modify or delete his
+  comment. The comments can be stored within the image in the JPEG comment
+  block.
+  - ID
+  - Created
+  - From
+  - Name
+  - Email
+  - URL
+  - Authorization: Authorization Code to delete or modify the comment
+  - Body: Message body.
+
 - Image Sets
   Images can be grouped by sets (or categories). Sets or categories are more
   general description than tags or keywords.
@@ -222,6 +242,21 @@ Other image communities: http://holocore.com/?PictureSync_services
   - Support previews in a link for the own homepage. This link lists a few
     photos randomly in a user defined table (like in flickr)
   - Support anonymous as cookie (Language, theme, etc)
+  - Greeting Cards
+  - Messages
+    Simple messages can be used to inform users or to send messages to users
+    - id
+    - Created: Creation time of the message
+    - expire: Valid time of the message
+    - type
+      - Message between users 
+      - Autorisation Request of group invation
+      - Greeting Card
+      - Admin information
+    - FromUser: ID of creator
+    - ToUser: ID of receiver
+    - message: Message body
+    - data: Additional custom data for parameters
 
 - Explorer
   - Add clicks to database
