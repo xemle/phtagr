@@ -756,27 +756,27 @@ function add_records($name, $values)
 }
 
 /** Return an single value of a given record name
-  @return Returns NULL if no record is available. */
+  @return Returns null if no record is available. */
 function get_record($name)
 {
   if (!$this->_is_single_record($name))
-    return NULL;
+    return null;
     
   if (isset($this->iptc) && isset($this->iptc[$name]))
     return $this->iptc[$name][0];
-  return NULL;
+  return null;
 }
 
 /** Return an array of a given record name
-  @return Returns NULL if no record is available. */
+  @return Returns null if no record is available. */
 function get_records($name)
 {
   if ($this->_is_single_record($name))
-    return NULL;
+    return null;
     
   if (isset($this->iptc) && isset($this->iptc[$name]))
     return $this->iptc[$name];
-  return NULL;
+  return null;
 }
 
 /** Remove an record with an optional value for multi records

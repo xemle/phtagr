@@ -95,7 +95,7 @@ function insert($filename, $is_upload=0)
         WHERE filename='$filenamesql'";
   $result=$db->query($sql);
   if (!$result)
-    return false;
+    return -1;
 
   // image found in the database. Update it
   if (mysql_num_rows($result)!=0)
@@ -104,7 +104,7 @@ function insert($filename, $is_upload=0)
     if ($this->update())
       return 1;
       
-    return 2;
+    return 0;
   }
   
   $userid=$user->get_userid();
@@ -158,8 +158,6 @@ function update($force=false)
     //$this->debug("Synced: $ctime $synced");
     return false;
   }
-  
-  $this->reinsert();
   
   $sql="UPDATE $db->image 
         SET synced=NOW()
@@ -430,20 +428,19 @@ function _insert_exif()
   if (!isset($this->_data))
     return false;
     
-  $exif = @exif_read_data($this->get_filename(), 0, true);
-  if (!$exif)
-    return false;
+  $date="NOW()";
+  $orientation=1;
+  if (function_exists('exif_read_data'))
+  {
+    $exif = @exif_read_data($this->get_filename(), 0, true);
     
-  if (isset($exif['EXIF']['DateTimeOriginal']))
-    $date="'".$exif['EXIF']['DateTimeOriginal']."'";
-  else
-    $date="NOW()";
-  
-  if (isset($exif['IFD0']['Orientation']))
-    $orientation=$exif['IFD0']['Orientation'];
-  else
-    $orientation=1;
-    
+    if (isset($exif['EXIF']) && isset($exif['EXIF']['DateTimeOriginal']))
+      $date="'".$exif['EXIF']['DateTimeOriginal']."'";
+   
+    if (isset($exif['IFD0']) && isset($exif['IFD0']['Orientation']))
+      $orientation=$exif['IFD0']['Orientation'];
+  }
+   
   $sql="UPDATE $db->image 
         SET date=$date,orientation=$orientation
         WHERE id=".$this->get_id();
@@ -487,7 +484,7 @@ function _insert_iptc_tags($iptc=null)
   $id=$this->get_id();
   
   $tags=$iptc->get_records('2:025');
-  if ($tags!=NULL)
+  if ($tags!=null)
   {
     foreach ($tags as $index => $tag)
     {
@@ -513,7 +510,7 @@ function _insert_iptc_caption($iptc=null)
   $id=$this->get_id();
   
   $caption=$iptc->get_record('2:120');
-  if ($caption!=NULL)
+  if ($caption!=null)
   {
     $sql="UPDATE $db->image
           SET caption='$caption'
@@ -536,14 +533,14 @@ function _insert_iptc_date($iptc=null)
   $id=$this->get_id();
   // Extract IPTC date and time
   $date=$iptc->get_record('2:055');
-  if ($date!=NULL)
+  if ($date!=null)
   {
     // Convert IPTC date/time to sql timestamp "YYYY-MM-DD hh:mm:ss"
     // IPTC date formate is YYYYMMDD
     $date=substr($date, 0, 4)."-".substr($date, 4, 2)."-".substr($date, 6, 2);
     $time=$iptc->get_record('2:060');
     // IPTC time format is hhmmss[+offset]
-    if ($time!=NULL)
+    if ($time!=null)
     {
       $time=" ".substr($time, 0, 2).":".substr($time, 2, 2).":".substr($time, 4, 2);
     }
@@ -576,7 +573,7 @@ function _insert_iptc_location($iptc=null)
   
   // Extract IPTC city
   $city=$iptc->get_record('2:090');
-  if ($city!=NULL)
+  if ($city!=null)
   {
     $locationid=$db->location2id($city, LOCATION_CITY, true);
     $sql="INSERT INTO $db->imagelocation ( imageid, locationid )
@@ -586,7 +583,7 @@ function _insert_iptc_location($iptc=null)
       return false;
   }
   $sublocation=$iptc->get_record('2:092');
-  if ($sublocation!=NULL)
+  if ($sublocation!=null)
   {
     $locationid=$db->location2id($sublocation, LOCATION_SUBLOCATION, true);
     $sql="INSERT INTO $db->imagelocation ( imageid, locationid )
@@ -596,7 +593,7 @@ function _insert_iptc_location($iptc=null)
       return false;
   }
   $state=$iptc->get_record('2:095');
-  if ($state!=NULL)
+  if ($state!=null)
   {
     $locationid=$db->location2id($state, LOCATION_STATE, true);
     $sql="INSERT INTO $db->imagelocation ( imageid, locationid )
@@ -606,7 +603,7 @@ function _insert_iptc_location($iptc=null)
       return false;
   }
   $country=$iptc->get_record('2:101');
-  if ($country!=NULL)
+  if ($country!=null)
   {
     $locationid=$db->location2id($country, LOCATION_COUNTRY, true);
     $sql="INSERT INTO $db->imagelocation ( imageid, locationid )

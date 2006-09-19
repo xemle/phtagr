@@ -159,8 +159,8 @@ function print_content()
     printf (_("Found %d images")."<br/>\n", count($this->images));
     foreach ($this->images as $img)
     {
-      $image=new image();
-      $return=$image->insert($this->root . $img, 0);
+      $image=new Image();
+      $result=$image->insert($this->root . $img, 0);
 
       if ($_REQUEST['create_all_previews'])
       {
@@ -169,7 +169,7 @@ function print_content()
         unset($thumb);
       }
 
-      switch ($return)
+      switch ($result)
       {
       case 0:
         printf(_("Image '%s' was successfully inserted.")."<br/>\n", $img);
@@ -184,7 +184,7 @@ function print_content()
         echo "A error occured with file '$img'.<br/>\n";
       }
 
-      unset($image);
+      //unset($image);
     }
     echo "<a href=\"./index.php?section=browser&amp;cd=".$_REQUEST['cd']."\">Search again</a><br/>\n";
   } else if (isset($_REQUEST['cd'])) 
