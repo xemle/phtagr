@@ -219,6 +219,22 @@ function read_pref($userid=-1)
   return $pref;
 }
 
+/** Adds or updates a tag-value pair in the preference table. */
+function set_pref($tag, $value)
+{
+  $sql="SELECT *
+        FROM $this->pref
+	WHERE name=\"$tag\"";
+  $result=$this->query($sql);
+
+  if (mysql_num_rows($result)==0)
+    $sql="INSERT INTO $this->pref VALUES (0,0,'$tag','$value')";    
+  else
+    $sql="UPDATE $this->pref SET value='$value' WHERE name='$tag'";
+
+  return $this->query($sql);
+}
+
 /** Gets the tag id of a tag name 
   @param tagname name of the tag
   @param create If the tag name does not exists and this flag is true, the tag
@@ -323,7 +339,7 @@ function create_tables()
         lastname      VARCHAR(32) NOT NULL,
         email         VARCHAR(64),
         
-        created       DATETIME NOT NULL DEFAULT NOW(),
+        created       DATETIME NOT NULL DEFAULT 0,
         updated       TIMESTAMP,
         fsroot        TEXT DEFAULT '',
         quota         INT,              /* Users quota in bytes */
@@ -458,7 +474,7 @@ function create_tables()
         userid        INT NOT NULL DEFAULT 0,
         email         VARCHAR(64) NOT NULL DEFAULT '',
         url           VARCHAR(128) NOT NULL DEFAULT '',
-        date          DATETIME NOT NULL DEFAULT NOW(),
+        date          DATETIME NOT NULL DEFAULT 0,
 
         comment       TEXT NOT NULL,
         

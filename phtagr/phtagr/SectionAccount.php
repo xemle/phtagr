@@ -49,6 +49,50 @@ function check_username($name)
   return true;
 }
 
+/** Reads all the saved data we have about an user
+  @param id ID of the user
+  @return an array of all the saved data */
+function get_info($id)
+{
+  global $db;
+
+  $sql="SELECT *
+        FROM $db->user
+        WHERE id=$id";
+
+  $result=$db->query($sql);
+  $info=array();
+  if ($result)
+  {
+    return mysql_fetch_array($result, MYSQL_ASSOC);
+  }
+
+  return $info;
+}
+
+/** Updates the data of an user 
+  @param info the new values for the info of the user
+  @return true on success, false otherwise */
+function set_info($info)
+{
+  global $db;
+
+  $sql="UPDATE $db->user
+        SET firstname='".$info['firstname']."',
+	lastname='".$info['lastname']."',
+	email='".$info['email']."',
+	fsroot='".$info['fsroot']."',
+	quota='".$info['quota']."',
+	quota_interval='".$info['quota_interval']."',
+	quota_max='".$info['quota_max']."',
+	data='".$info['data']."'
+	WHERE id=".$info['id'];
+  $result=$db->query($sql);
+  if(!$result)
+    return false;
+
+  return true;
+}
 /** Creats a new user.
   @param name Name of the new user
   @param password password of the new user
@@ -56,6 +100,15 @@ function check_username($name)
 function user_create($name, $password)
 {
   global $db;
+  global $user;
+
+  $pref=$db->read_pref();
+  if (!($pref['allow_user_self_register']) && !($user->is_admin()))
+  {
+    $this->error("You are not allowed to create a new user!");
+    return false;
+  }
+
   $result=$this->check_username($name);
   if (!is_bool($result) || $result==false)
   {
@@ -262,7 +315,8 @@ function print_user_list()
     }
   }
   echo "</table>\n";
-}
+} 
+
 function print_content()
 {
   global $db;

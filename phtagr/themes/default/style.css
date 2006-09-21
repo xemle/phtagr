@@ -98,6 +98,55 @@ div.menu h2 {
   background-color: #cccccc;
 }
 
+.tab {
+  position: relative;
+  top: 0px;
+  left: 0px;
+  float: left;
+  padding: 0;
+  font-size: 10pt;
+  width: 618px;
+  margin-bottom: 10px;
+  background-color: #ccc;
+  border: 1px solid #b3b3b3;
+  border-bottom: 2px solid #b3b3b3;
+}
+
+.tab * li, .tab ul {
+  padding: 1px 0 1px 5px;
+  display: inline;
+}
+
+.tab .current {
+  background: #fff;
+  border-left: 1px solid #aaa;
+  border-top: 1px solid #aaa;
+  border-right: 1px solid #aaa;
+  border-bottom: 2px solid #fff;
+  font-weight: bold;
+}
+
+div.tab h2 {
+  padding: 1px 1px 1px 5px;
+  font-size: 10pt;
+  color: #ffffff;
+  background: url(./headline.png) no-repeat -5px 0px;
+  border-bottom: 1px solid #000000;
+  display: inline;
+  margin-bottom: 10px;
+}
+
+.tab * a {
+  text-decoration: none;
+}
+
+.tab * a:hover {
+  display: inline;
+  color: #000000;
+  background-color: #eee;
+  border-bottom: 2px solid #d8d8d8;
+}
+
 .content {
   position: relative;
   top: 0px;

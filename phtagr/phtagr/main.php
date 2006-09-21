@@ -21,9 +21,9 @@ include "$phtagr_lib/SectionExplorer.php";
 include "$phtagr_lib/SectionImage.php";
 include "$phtagr_lib/SectionBrowser.php";
 include "$phtagr_lib/SectionSearch.php";
-include "$phtagr_lib/SectionSetup.php";
 include "$phtagr_lib/SectionUpload.php";
 include "$phtagr_lib/SectionInstall.php";
+include "$phtagr_lib/SectionAdmin.php";
 
 $page = new PageBase("phTagr");
 
@@ -100,8 +100,7 @@ if ($user->can_upload())
 }
 if ($user->is_admin())
 {
-  $menu->add_menu_item("Account", "index.php?section=account&amp;action=new");
-  $menu->add_menu_item("Setup", "index.php?section=setup");
+  $menu->add_menu_item("Administration", "index.php?section=admin");
 }
 
 $search= new Search();
@@ -124,9 +123,9 @@ if (isset($_REQUEST['section']))
   
   if($section=='account')
   {
-    $account= new SectionAccount();
+    $account=new SectionAccount();
     $cnt->add_section(&$account);
-  } 
+  }
   else if($section=='explorer')
   {
     if($_REQUEST['action']=='edit')
@@ -168,20 +167,20 @@ if (isset($_REQUEST['section']))
       $cnt->add_section(&$login);
     }
   } 
-  else if($section=='setup')
+  else if($section=='admin')
   {
     if (!$db->link || $user->is_admin()) 
     {
-      $setup=new SectionSetup();
-      $cnt->add_section(&$setup);
+      $admin=new SectionAdmin();
+      $cnt->add_section(&$admin);
     } else {
       $login=new SectionAccount();
       $login->message='You are not loged in as an admin';
-      $login->section='setup';
+      $login->section='admin';
       $cnt->add_section(&$login);
     }
   }
-  else if($section=='upload')
+   else if($section=='upload')
   {
     if ($user->can_upload())
     {
