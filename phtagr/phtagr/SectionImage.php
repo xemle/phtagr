@@ -93,22 +93,13 @@ function print_content()
 
   echo "<div class=\"name\">$name</div>\n";
 
-  echo "<div align=\"middle\">\n";
-
   $size=$image->get_size(600);
-  echo "<p><img src=\"./image.php?id=$id&amp;type=preview\" alt=\"$name\" ".$size[2]."/></p>\n";
-
-  echo "<form name=\"formImage\" id=\"formImage\" action=\"index.php\" method=\"post\">\n";
-  echo "<input type=\"hidden\" name=\"section\" value=\"image\" />\n";
-  echo "<input type=\"hidden\" name=\"action\" value=\"edit\" />\n";
-  echo "<input type=\"hidden\" name=\"image\" value=\"$id\" />\n";
-
-  echo $search->to_form();
+  echo "<div class=\"preview\"><img src=\"./image.php?id=$id&amp;type=preview\" alt=\"$name\" ".$size[2]."/></div>\n";
 
   $image->print_caption(false);
   $image->print_voting();
 
-  echo "<p><table class=\"imginfo\">\n";
+  echo "<div class=\"imginfo\"><table>\n";
   
   if ($user->is_owner(&$image)) {
     $image->print_row_filename();
@@ -119,12 +110,15 @@ function print_content()
   $image->print_row_tags();
   $image->print_row_location();
   $image->print_row_clicks();
-  echo "</table></p>\n";
+  echo "</table></div>\n";
 
+  echo "<form name=\"formImage\" id=\"formImage\" action=\"index.php\" method=\"post\">\n";
+  echo "<input type=\"hidden\" name=\"section\" value=\"image\" />\n";
+  echo "<input type=\"hidden\" name=\"action\" value=\"edit\" />\n";
+  echo "<input type=\"hidden\" name=\"image\" value=\"$id\" />\n";
+
+  echo $search->to_form();
   echo "</form>\n";
-
-  echo "</div>\n";
-
   if (!isset($_SESSION['img_viewed'][$id]))
     $image->update_ranking();
 

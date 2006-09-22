@@ -41,9 +41,9 @@ a:visited {
   text-align: right;
 }
 
-.headerright * p, .headerright a, headerright form {
-  margin: 0;
-  padding: 0;
+.headerright * p, .headerright a, .headerright form {
+  margin: 0px;
+  padding: 0px;
   font-size: 8pt;
   color: #ffffff;
 }
@@ -260,45 +260,22 @@ h2 {
   text-decoration: none;
   font-size: 8pt;
   font-style: normal;
-  padding: 0;
+  padding: 0px 2px 0px 2px;
   margin: 0;
-  background-color: #dddddd;
+  border: 1px solid #aaaaaa;
+  background-color: #ffffff;
 }
 
 .tableview {
   width: 600px;
-  
   border-spacing: 0;
 }
 
-.thumb {
-  margin: 10px 10px 10px 10px;
-  text-align: center; 
-}
-
-.thumb * img {
-  border: 1px solid black;
-}
-
-.tags p {
-  text-align: justify;
-}
-
-td {
-  width: 250px;
-  vertical-align: top;
-}
-
-th {
-  vertical-align: top;
-  color: #262626;
-  background-color: #cccccc;
-  width: 0px;
-}
-
-.preview {
+.thumbcell {
+  width: 300px;
   padding: 10px 10px 10px 10px;
-  margin: 10px 10px 10px 10px;
+  text-align: center; 
+  vertical-align: top;
 }
 
 .name {
@@ -308,6 +285,23 @@ th {
   border-bottom: 1px solid #00a800;
   padding: 2px 0 2px 5px;
   font-weight: bold;
+  text-align: left;
+}
+
+.thumb * img {
+  margin: 5px 0px 5px 0px;
+  border: 1px solid black;
+}
+
+.preview {
+  padding: 10px 10px 10px 10px;
+  margin: 10px auto;
+  text-align: center;
+}
+
+.image {
+  margin: 0px auto;
+  text-align: center;
 }
 
 .caption {
@@ -316,18 +310,53 @@ th {
   font-style: italic;
 }
 
-.caption * td {
-  padding: 0 5px 0 5px;
+.voting {
+  margin: 5px auto;
+  display: block;
+  width: 150px;
+  text-align: center;
+  font-size: 8pt;
+}
+
+.vote, .voting > .text {
+  vertical-align: top;
+  position: relative;
+  display: block;
+  float: left;
+  padding: 0px;
+  margin: 0px;
+}
+
+.vote img, .vote {
+  padding: 0px;
+  margin: 0px;
+  border-style: none;
+}
+
+.voting > .text {
+  padding: 0px 0px 0px 10px;
 }
 
 .imginfo {
+  padding: 5px 0px 0px 0px;
+}
+
+.imginfo > table {
+  clear: both;
   border-spacing: 0;
   border: solid 1px #dddddd;
+  margin: 15px auto;
+  width: 280px;
   font-size: 8pt;
+  display: block;
 }
 
 .imginfo * a, .tags * a {
   text-decoration: none;
+}
+
+.imginfo * table {
+  font-size: 8pt;
 }
 
 .imginfo * a:hover, .tags * a:hover {
@@ -335,20 +364,12 @@ th {
   background-color: #cccccc;
 }
 
-.voting {
-  margin: 3px auto;
-  display: block;
-  width: 150px;
-  text-align: center;
-  font-size: 8pt;
-}
-.vote {
-  position: relative;
-  float: left;
-}
-
-.vote > img {
-  border-width: 0px;
+th {
+  vertical-align: top;
+  color: #262626;
+  background-color: #cccccc;
+  width: 0px;
+  text-align: right;
 }
 
 .debug {

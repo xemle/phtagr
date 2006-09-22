@@ -726,7 +726,7 @@ function print_caption($docut=true)
       $text=htmlspecialchars($caption);
     }
 
-    echo "$text <span class=\"jsbutton\" onclick=\"add_form_caption($id, '$b64') \">"._("[edit]")."</span>";
+    echo "$text <a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"add_form_caption($id, '$b64') \">"._("edit")."</a>";
   }
   else
   {
@@ -756,7 +756,7 @@ function _cut_caption($id, $caption)
     $result.=" $word";
   }
   $result="<span id=\"caption-text-$id\">".$result;
-  $result.=" <span class=\"jsbutton\" onclick=\"print_caption($id, '$b64')\">[...]</span>";
+  $result.=" <a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"print_caption($id, '$b64')\">[...]</a>";
   $result.="</span>";
   return $result;
 }
@@ -765,7 +765,7 @@ function print_row_clicks()
 {
   $ranking=sprintf("%.3f", $this->get_ranking());
   echo "  <tr><th>"._("Clicks:")."</th><td>"
-    .sprintf(_("%d (Populariy: %.3f)"), $this->get_clicks(), $ranking)
+    .sprintf(_("%d (Popularity: %.3f)"), $this->get_clicks(), $ranking)
     ."</td></tr>\n";
 }
 
@@ -775,7 +775,7 @@ function print_voting()
   global $pref;
   $id=$this->get_id();
   $votes=$this->get_votes();
-  $voting=$this->get_voting();
+  $voting=sprintf("%.2f", $this->get_voting());
 
   $url.="index.php?section=".$_REQUEST['section'];
   $url.=$search->to_URL();
@@ -792,7 +792,7 @@ function print_voting()
   {
     $title="";
     if ($can_vote) {
-      echo "<a href=\"$url&amp;action=edit&amp;image=$id&amp;voting=$i\">";
+      echo "<a href=\"$url&amp;action=edit&amp;image=$id&amp;voting=$i#img-$id\">";
       $title=" title=\"".
         sprintf(_("Vote the image with %d points!"), $i)."\"";
     } 
@@ -802,21 +802,21 @@ function print_voting()
     {
       if ($can_vote)
         echo "onmouseover=\"vote_highlight($id, $voting, $i)\" onmouseout=\"vote_reset($id, $voting)\"";
-      echo "><img id=\"voting-$id-$i\" src=\"$set\" border=\"0\" $title />";
+      echo ">\n  <img id=\"voting-$id-$i\" src=\"$set\" border=\"0\" $title />\n";
     } else {
 
       if ($can_vote)
         echo "onmouseover=\"vote_highlight($id, $voting, $i)\" onmouseout=\"vote_reset($id, $voting)\"";
 
-      echo "><img id=\"voting-$id-$i\" src=\"$none\" border=\"0\" $title />";
+      echo ">\n  <img id=\"voting-$id-$i\" src=\"$none\" border=\"0\" $title />\n";
     }
-    echo "</div>";
+    echo "</div>\n";
 
     if ($can_vote)
       echo "</a>\n";
   }
 
-  echo "&nbsp;";
+  echo "<div class=\"text\">";
   if ($votes==1)
     echo sprintf(_("(%.1f, %d vote)"), $this->get_voting(), $votes);
   else if ($votes>1) 
@@ -824,7 +824,7 @@ function print_voting()
   else
     echo _("No votes");
 
-  echo "</div>\n";
+  echo "</div></div>\n";
 }
 
 function print_row_filename()
@@ -839,7 +839,7 @@ function print_row_acl()
   $oacl=$this->get_oacl();
   $aacl=$this->get_aacl();
   echo "  <tr><th>"._("ACL:")."</th><td id=\"acl-$id\">$gacl,$oacl,$aacl";
-  echo " <span class=\"jsbutton\" onclick=\"add_form_acl('$id',$gacl,$oacl,$aacl)\">"._("[edit]")."</span>";
+  echo " <a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"add_form_acl('$id',$gacl,$oacl,$aacl)\">"._("edit")."</a>";
   echo "</td></tr>\n";
 }
 
@@ -917,7 +917,7 @@ function print_row_tags()
       if ($i<$num_tags-1)
         $list.=" ";
     }
-    echo " <span class=\"jsbutton\" onclick=\"add_form_tags('$id','$list')\">"._("[edit]")."</span>";
+    echo " <a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"add_form_tags('$id','$list')\">"._("edit")."</a>";
   }
   echo "</td>
   </tr>\n";
@@ -980,7 +980,7 @@ function print_row_location()
       if ($i<$num_tags-1)
         $list.=" ";
     }
-    echo " <span class=\"jsbutton\" onclick=\"add_form_location('$id','$city','$sublocation', '$state', '$country')\">"._("[edit]")."</span>";
+    echo " <a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"add_form_location('$id','$city','$sublocation', '$state', '$country')\">"._("edit")."</a>";
   }
   echo "</td>
   </tr>\n";
@@ -1002,14 +1002,12 @@ function print_preview($search=null)
   
   $size=$this->get_size(220);
 
-  echo "<a href=\"$link\"><img src=\"./image.php?id=$id&amp;type=thumb\" alt=\"$name\" title=\"$name\" ".$size[2]."/></a>\n";
+  echo "<a href=\"$link\"><img src=\"./image.php?id=$id&amp;type=thumb\" alt=\"$name\" title=\"$name\" ".$size[2]."/></a></div>\n";
   
   $this->print_caption();
-  
   $this->print_voting();
-  echo "</div>\n";  
 
-  echo "<table class=\"imginfo\">\n";
+  echo "<div class=\"imginfo\"><table>\n";
   if ($user->is_owner(&$this))
   {
     $this->print_row_filename();
@@ -1027,7 +1025,7 @@ function print_preview($search=null)
   </tr>\n";
   }
   
-  echo "</table>\n";
+  echo "</table></div>\n";
 } 
 }
 

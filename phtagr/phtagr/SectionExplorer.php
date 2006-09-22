@@ -109,7 +109,7 @@ function print_content()
   // Formular for further actions
   echo "<form name=\"formExplorer\" id=\"formExplorer\" action=\"index.php\" method=\"post\">";
 
-  echo "<table class=\"tableview\">\n";
+  echo "<div class=\"tableview\"><table>\n";
   $cell=0;
   $pos=$search->get_page_size()*$search->get_page_num();
   while($row = mysql_fetch_row($result)) 
@@ -117,7 +117,8 @@ function print_content()
     if ($cell % 2 == 0) {
         echo "<tr>\n";
     }
-    echo "<td class=\"preview\">";
+    echo "<td class=\"thumbcell\">";
+    echo "<a name=\"img-".$row[0]."\">\n";
     $search->set_pos($pos);
     $image=new Image($row[0]);
     $image->print_preview(&$search);
@@ -130,7 +131,7 @@ function print_content()
     $pos++;
   }
 
-  echo "</table>\n\n";
+  echo "</table></div>\n\n";
 
   $this->print_navigator($url_nav, $page, ceil($count/$search_nav->page_size));
   
