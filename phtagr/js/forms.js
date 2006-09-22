@@ -661,3 +661,38 @@ function toggle_visibility(fromId, toId)
     to.style.display='';
   }
 }
+
+function vote_highlight(id, voting, i)
+{
+  for (j=0; j<=5; j++)
+  {
+    var s="voting-"+id+"-"+j;
+    var e=document.getElementById(s);
+    if (!e)
+      return;
+
+    if (j>0 && j<=i) 
+      e.setAttribute("src", "./themes/default/vote-select.png");
+    else if (j<=voting)
+      e.setAttribute("src", "./themes/default/vote-set.png");
+    else
+      e.setAttribute("src", "./themes/default/vote-none.png");
+  }
+}
+
+function vote_reset(id, voting)
+{
+  for (j=0; j<=5; j++) 
+  {
+    var s="voting-"+id+"-"+j;
+    var e=document.getElementById(s);
+    if (!e)
+      return;
+
+    if (j>0 && j<=voting)
+      e.setAttribute("src", pref['path.theme']+"/vote-set.png");
+    else
+      e.setAttribute("src", pref['path.theme']+"/vote-none.png");
+  }
+}
+

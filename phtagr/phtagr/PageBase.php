@@ -27,6 +27,7 @@ function print_header_html()
 
   echo "<head>\n";
   echo "<title>".$this->title."</title>\n";
+  echo "<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">\n";
   echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"$phtagr_url_prefix/themes/$theme/style.css\"/>\n";
   if (file_exists("$phtagr_prefix/themes/$theme/favicon.ico"))
   {

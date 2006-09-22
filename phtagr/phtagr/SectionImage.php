@@ -88,8 +88,7 @@ function print_content()
   
   $name=$image->get_name();
   
-  $search_nav=new Search();
-  $search_nav->from_URL();
+  $search_nav=clone $search;
   $this->print_navigation($search_nav);
 
   echo "<div class=\"name\">$name</div>\n";
@@ -107,6 +106,8 @@ function print_content()
   echo $search->to_form();
 
   $image->print_caption(false);
+  $image->print_voting();
+
   echo "<p><table class=\"imginfo\">\n";
   
   if ($user->is_owner(&$image)) {
@@ -118,7 +119,6 @@ function print_content()
   $image->print_row_tags();
   $image->print_row_location();
   $image->print_row_clicks();
-  $image->print_row_voting();
   echo "</table></p>\n";
 
   echo "</form>\n";
@@ -130,6 +130,7 @@ function print_content()
 
   $_SESSION['img_viewed'][$id]++;
 
+  $search_nav=clone $search;
   $this->print_navigation($search_nav);
 }
 

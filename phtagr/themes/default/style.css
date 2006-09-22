@@ -276,10 +276,9 @@ h2 {
   text-align: center; 
 }
 
-.preview * img {
+.thumb * img {
   border: 1px solid black;
 }
-
 
 .tags p {
   text-align: justify;
@@ -334,6 +333,22 @@ th {
 .imginfo * a:hover, .tags * a:hover {
   text-decoration: none;
   background-color: #cccccc;
+}
+
+.voting {
+  margin: 3px auto;
+  display: block;
+  width: 150px;
+  text-align: center;
+  font-size: 8pt;
+}
+.vote {
+  position: relative;
+  float: left;
+}
+
+.vote > img {
+  border-width: 0px;
 }
 
 .debug {

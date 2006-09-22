@@ -159,6 +159,8 @@ function update($force=false)
     return false;
   }
   
+  $this->reinsert();
+
   $sql="UPDATE $db->image 
         SET synced=NOW()
         WHERE id=".$this->get_id();
@@ -767,33 +769,62 @@ function print_row_clicks()
     ."</td></tr>\n";
 }
 
-function print_row_voting()
+function print_voting()
 {
+  global $search;
+  global $pref;
   $id=$this->get_id();
   $votes=$this->get_votes();
-  echo "  <tr><th>"._("Voting:")."</th><td>";
+  $voting=$this->get_voting();
 
-  if ($votes>0) 
-    echo sprintf(_("%.1f (%d votes) "), $this->get_voting(), $votes);
-  else
-    echo _("No votes ");
+  $url.="index.php?section=".$_REQUEST['section'];
+  $url.=$search->to_URL();
 
+  $can_vote=false;
   if (!isset($_SESSION['img_voted'][$id]))
+    $can_vote=true;
+
+  $none=$pref['path.theme'].'/vote-none.png';
+  $set=$pref['path.theme'].'/vote-set.png';
+
+  echo "<div class=\"voting\">\n";
+  for ($i=0; $i<=VOTING_MAX; $i++)
   {
-    echo "<select size=\"1\" name=\"voting\">\n"
-      ."  <option selected=\"selected\" value=\"none\">"._("None")."</option>\n";
-    for ($i=0; $i<=VOTING_MAX; $i++)
+    $title="";
+    if ($can_vote) {
+      echo "<a href=\"$url&amp;action=edit&amp;image=$id&amp;voting=$i\">";
+      $title=" title=\"".
+        sprintf(_("Vote the image with %d points!"), $i)."\"";
+    } 
+
+    echo "<div class=\"vote\" ";
+    if ($i>0 && $i<=$voting)
     {
-      switch ($i) {
-      case 0: $s=_(" (worst)"); break;
-      case VOTING_MAX: $s=_(" (best)"); break;
-      default: $s=""; 
-      }
-      echo "  <option value=\"$i\">$i$s</option>\n";
+      if ($can_vote)
+        echo "onmouseover=\"vote_highlight($id, $voting, $i)\" onmouseout=\"vote_reset($id, $voting)\"";
+      echo "><img id=\"voting-$id-$i\" src=\"$set\" border=\"0\" $title />";
+    } else {
+
+      if ($can_vote)
+        echo "onmouseover=\"vote_highlight($id, $voting, $i)\" onmouseout=\"vote_reset($id, $voting)\"";
+
+      echo "><img id=\"voting-$id-$i\" src=\"$none\" border=\"0\" $title />";
     }
-    echo "</select>&nbsp;<input type=\"submit\" value=\""._("Vote!")."\" />";
+    echo "</div>";
+
+    if ($can_vote)
+      echo "</a>\n";
   }
-  echo "</td></tr>\n";
+
+  echo "&nbsp;";
+  if ($votes==1)
+    echo sprintf(_("(%.1f, %d vote)"), $this->get_voting(), $votes);
+  else if ($votes>1) 
+    echo sprintf(_("(%.1f, %d votes)"), $this->get_voting(), $votes);
+  else
+    echo _("No votes");
+
+  echo "</div>\n";
 }
 
 function print_row_filename()
@@ -975,6 +1006,7 @@ function print_preview($search=null)
   
   $this->print_caption();
   
+  $this->print_voting();
   echo "</div>\n";  
 
   echo "<table class=\"imginfo\">\n";
