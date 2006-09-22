@@ -671,9 +671,9 @@ function vote_highlight(id, voting, i)
     if (!e)
       return;
 
-    if (j>0 && j<=i) 
+    if (j<=i) 
       e.setAttribute("src", "./themes/default/vote-select.png");
-    else if (j<=voting)
+    else if (voting>0 && j<=voting)
       e.setAttribute("src", "./themes/default/vote-set.png");
     else
       e.setAttribute("src", "./themes/default/vote-none.png");
@@ -689,7 +689,7 @@ function vote_reset(id, voting)
     if (!e)
       return;
 
-    if (j>0 && j<=voting)
+    if (voting>0 && j<=voting)
       e.setAttribute("src", pref['path.theme']+"/vote-set.png");
     else
       e.setAttribute("src", pref['path.theme']+"/vote-none.png");

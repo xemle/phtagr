@@ -798,7 +798,7 @@ function print_voting()
     } 
 
     echo "<div class=\"vote\" ";
-    if ($i>0 && $i<=$voting)
+    if ($voting>0 && $i<=$voting)
     {
       if ($can_vote)
         echo "onmouseover=\"vote_highlight($id, $voting, $i)\" onmouseout=\"vote_reset($id, $voting)\"";
