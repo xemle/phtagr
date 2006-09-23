@@ -324,6 +324,101 @@ function add_form_tags(id, tags)
   document.getElementById(focusId).focus();
 }
 
+/** Add a form for sets
+  @param id ID of the image
+  @param sets List of the sets */
+function add_form_sets(id, sets)
+{
+  var nodeId="set-"+id;
+  var e=document.getElementById(nodeId);
+  if (e==null)
+    return;
+
+  var focusId=nodeId+"-edit";
+
+  // Does a form already exists?
+  // On mozilla, the form will be omitted, check also for the next input node
+  if (Data[nodeId]!=null)
+  {
+    resetNode(nodeId);
+    return;
+  }
+
+  // Remember old content
+  Data[nodeId]=e.cloneNode(true);
+
+  var form=document.createElement("form");
+  form.setAttribute("action", "index.php");
+  form.setAttribute("method", "post");
+
+  // copy all hidden inputs from formExplorer or formImage
+  // whichever exists
+  var srcForm;
+  if (document.getElementById("formExplorer"))
+  {
+    srcForm=document.getElementById("formExplorer");
+  }
+  else
+  {
+    srcForm=document.getElementById("formImage");
+  }
+
+  _clone_hidden_input(srcForm, form);
+  
+  var input=document.createElement("input");
+  input.setAttribute("type", "hidden");
+  input.setAttribute("name", "action");
+  input.setAttribute("value", "edit");
+  form.appendChild(input);
+
+  input.setAttribute("type", "hidden");
+  input.setAttribute("name", "image");
+  input.setAttribute("value", id);
+  form.appendChild(input);
+
+  var table=document.createElement("table");
+  var tr=document.createElement("tr");
+  var td=document.createElement("td");
+  
+  input=document.createElement("input");
+  input.setAttribute("id", focusId);
+  input.setAttribute("type", "text");
+  input.setAttribute("name", "js_sets");
+  input.setAttribute("value", sets);
+  input.setAttribute("size", 30);
+  td.appendChild(input);
+  tr.appendChild(td);
+  table.appendChild(tr);
+  
+  input=document.createElement("input");
+  input.setAttribute("class", "submit");
+  input.setAttribute("type", "submit");
+  input.setAttribute("value", " OK ");
+
+  tr=tr.cloneNode(false);
+  td=td.cloneNode(false);
+  td.appendChild(input);
+
+  var text=document.createTextNode(" or ");
+  td.appendChild(text);
+  
+  input=document.createElement("input");
+  input.setAttribute("class", "reset");
+  input.setAttribute("type", "reset");
+  input.setAttribute("onclick", "resetNode('"+nodeId+"')");
+  td.appendChild(input);
+  tr.appendChild(td);
+  table.appendChild(tr);
+
+  form.appendChild(table);
+
+  while (e.hasChildNodes())
+    e.removeChild(e.lastChild);
+  e.appendChild(form);
+  
+  document.getElementById(focusId).focus();
+}
+
 /** Insert a form for acl input
   @param id ID of the image
   @param gacl Group ACL value 
@@ -662,6 +757,10 @@ function toggle_visibility(fromId, toId)
   }
 }
 
+/** Highlight the voting.
+  @param id Current voting element
+  @param voting Current voting value
+  @param i Value of the vote */
 function vote_highlight(id, voting, i)
 {
   for (j=0; j<=5; j++)
@@ -671,15 +770,19 @@ function vote_highlight(id, voting, i)
     if (!e)
       return;
 
+    var a=e.getAttribute("src");
     if (j<=i) 
-      e.setAttribute("src", "./themes/default/vote-select.png");
+      e.setAttribute("src", a.replace(/vote-.*\.png/, "vote-select.png"));
     else if (voting>0 && j<=voting)
-      e.setAttribute("src", "./themes/default/vote-set.png");
+      e.setAttribute("src", a.replace(/vote-.*\.png/, "vote-set.png"));
     else
-      e.setAttribute("src", "./themes/default/vote-none.png");
+      e.setAttribute("src", a.replace(/vote-.*\.png/, "vote-none.png"));
   }
 }
 
+/** Reset the voting stars 
+  @param id Id of the current voting
+  @param voting Current voting value */
 function vote_reset(id, voting)
 {
   for (j=0; j<=5; j++) 
@@ -689,10 +792,11 @@ function vote_reset(id, voting)
     if (!e)
       return;
 
+    var a=e.getAttribute("src");
     if (voting>0 && j<=voting)
-      e.setAttribute("src", pref['path.theme']+"/vote-set.png");
+      e.setAttribute("src", a.replace(/vote-.*\.png/, "vote-set.png"));
     else
-      e.setAttribute("src", pref['path.theme']+"/vote-none.png");
+      e.setAttribute("src", a.replace(/vote-.*\.png/, "vote-none.png"));
   }
 }
 

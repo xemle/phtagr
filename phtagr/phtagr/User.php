@@ -13,6 +13,14 @@ username and password of the account.
 If the session is not available, the cookie is checked for username and
 password. 
 
+There are three types of users. Anonymous, members and guest. Anonymous is
+user, who has not signed in. A member is a user who owns some images. A
+guest is a user, who does not own images but can review all images of his
+assigned group (and public images). A guest is a kind of read-only member for special groups.
+
+A member owns a set of groups, which he can modify. A member can assign other
+members or guest to his groups. 
+
 @class User
 */
 class User extends Base
@@ -154,7 +162,7 @@ function is_admin()
 }
 
 /** Return if the given user has the same user id than an object 
-  @param userid Userid of the given object
+  @param image image object
 */
 function is_owner($image=null)
 {
@@ -174,6 +182,15 @@ function is_owner($image=null)
 function is_member()
 {
   return !$this->is_anonymous();
+}
+
+function is_guest()
+{
+  global $pref;
+  if (isset($pref['user.guest']))
+    return true;
+  else 
+    return false;
 }
 
 /* Return true if the given user is anonymous */
@@ -267,8 +284,7 @@ function can_download($image=null)
   return $this->_check_image_acl(&$image, ACL_DOWNLOAD);
 }
 
-/** Return true if user can upload a file in general.
-  @param size Size of current uploaded file. This size is mandatory. */
+/** Return true if user can upload a file in general.*/
 function can_upload()
 {
   if ($this->is_admin())

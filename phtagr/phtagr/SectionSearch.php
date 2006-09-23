@@ -30,6 +30,15 @@ function print_content()
     </td>
   </tr>
   <tr>
+    <th>"._("Sets:")."</th>
+    <td>
+      <input type=\"text\" name=\"sets\" size=\"30\" /><br />
+      Operation: <input type=\"radio\" name=\"setop\" value=\"0\" checked /> AND,  
+      <input type=\"radio\" name=\"setop\" value=\"1\" /> OR,  
+      <input type=\"radio\" name=\"setop\" value=\"2\" /> FUZZY
+    </td>
+  </tr>
+  <tr>
     <th>"._("Date:")."</th>
     <td>
       "._("after:")." <input type=\"text\" name=\"start\" size=\"10\" /><br />

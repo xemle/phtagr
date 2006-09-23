@@ -64,7 +64,10 @@ Other image communities: http://holocore.com/?PictureSync_services
     specific user. Default place is set by admin account.
   - On login, users preferences are loaded from the preference database to the
     $_SESSION variables, overwritten by global values
-    
+  - A special user can be a GUEST. A guest has a username and a password. He is
+    handle like an anonymous uses but can view all images of his assigned
+    groups. A guest does not own images and has now quota.
+
 - Images
   An image is owned by an phTagr user. It could be places on any place for
   system users (e.g. /pub/images) or on the phTagr directory (e.g.

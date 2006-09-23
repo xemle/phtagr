@@ -5,7 +5,15 @@ include_once("$phtagr_lib/Base.php");
 include_once("$phtagr_lib/Constants.php");
 
 /** 
-  @class Image Create thumbnails, image previews, synchronize 
+  An image is assigned to a user and a group. With the access control lists
+  (ACL) the privacy of the image can be set precisely. 
+
+  The owner can modify the image and can set the permissions of the image. The
+  owner assigns the image to a group and the ACLs. The ACL defines access
+  rights for groups, members and public. Therefore, a image can be accessed by
+  everyone, for members only, for group members or only the owner itself.
+
+  @class Image Models the image data object.
 */
 class Image extends Base
 {
@@ -181,6 +189,7 @@ function reinsert()
     return false;
   
   $this->remove_tags();
+  $this->remove_sets();
   $this->remove_caption();
 
   $this->_insert_static();
@@ -468,6 +477,7 @@ function _insert_iptc()
   }
 
   $this->_insert_iptc_tags(&$iptc);
+  $this->_insert_iptc_sets(&$iptc);
   $this->_insert_iptc_caption(&$iptc);
   $this->_insert_iptc_date(&$iptc);
   $this->_insert_iptc_location(&$iptc);
@@ -493,6 +503,33 @@ function _insert_iptc_tags($iptc=null)
       $tagid=$db->tag2id($tag, true);
       $sql="INSERT INTO $db->imagetag ( imageid, tagid )
             VALUES ( $id, $tagid )";
+      $result = $db->query($sql);
+      if (!$result)
+        return false;
+    }
+  }
+  return true;    
+}
+
+
+/** Read the sets from the IPTC segment and insert the sets to the database 
+  @param iptc The Iptc object of the current image */
+function _insert_iptc_sets($iptc=null)
+{
+  global $db;
+  if (!isset($this->_data) || !isset($iptc))
+    return false;
+
+  $id=$this->get_id();
+  
+  $sets=$iptc->get_records('2:020');
+  if ($sets!=null)
+  {
+    foreach ($sets as $index => $set)
+    {
+      $setid=$db->set2id($set, true);
+      $sql="INSERT INTO $db->imageset ( imageid, setid )
+            VALUES ( $id, $setid )";
       $result = $db->query($sql);
       if (!$result)
         return false;
@@ -634,6 +671,23 @@ function remove_tags()
   return true;
 }
 
+/** Remove sets from the database 
+  @return true on success, false on failure */
+function remove_sets()
+{
+  global $db;
+  if (!isset($this->_data))
+    return false;
+    
+  $sql="DELETE FROM $db->imageset
+        WHERE imageid=".$this->get_id();
+  $result = $db->query($sql);
+  if (!$result)
+    return false;
+
+  return true;
+}
+
 /** Remove caption from the database 
   @return true on success, false on failure */
 function remove_caption()
@@ -692,341 +746,6 @@ function update_ranking()
   $result = $db->query($sql);
 }
 
-/** Print the caption of an image. 
-  @param id ID of current image
-  @param caption String of the caption
-  @param docut True if a long caption will be shorted. False if the whole
-  caption will be printed. Default true */
-function print_caption($docut=true)
-{
-  global $user;
-  $id=$this->get_id();
-  $caption=$this->get_caption();
-  
-  $can_edit=$user->can_edit(&$this);
-  
-  echo "<div class=\"caption\" id=\"caption-$id\">";
-  // the user can not edit the image
-  if (!$can_edit)
-  {
-    if ($caption!="")
-      echo $this->_cut_caption($id, &$caption);
-
-    echo "</div>\n";
-    return;
-  }
-  
-  // The user can edit the image
-  if ($caption != "") 
-  {
-    $b64=base64_encode($caption);
-    if ($docut=true)
-      $text=$this->_cut_caption($id, &$caption);
-    else {
-      $text=htmlspecialchars($caption);
-    }
-
-    echo "$text <a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"add_form_caption($id, '$b64') \">"._("edit")."</a>";
-  }
-  else
-  {
-    echo " <span onclick=\"add_form_caption($id, '')\">"._("Click here to add a caption")."</span>";
-  }
-  
-  echo "</div>\n";
-}
-
-/** Cut the caption by words. If the length of the caption is longer than 20
- * characters, the caption will be cutted into words and reconcartenated to the
- * length of 20.  */
-function _cut_caption($id, $caption)
-{
-  $b64=base64_encode($caption);
-  $caption=htmlspecialchars($caption);
-
-  if (strlen($caption)< 60) 
-    return $caption;
-
-  $words=split(" ", $caption);
-  foreach ($words as $word)
-  {
-    if (strlen($result) > 40)
-      break;
-
-    $result.=" $word";
-  }
-  $result="<span id=\"caption-text-$id\">".$result;
-  $result.=" <a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"print_caption($id, '$b64')\">[...]</a>";
-  $result.="</span>";
-  return $result;
-}
-
-function print_row_clicks()
-{
-  $ranking=sprintf("%.3f", $this->get_ranking());
-  echo "  <tr><th>"._("Clicks:")."</th><td>"
-    .sprintf(_("%d (Popularity: %.3f)"), $this->get_clicks(), $ranking)
-    ."</td></tr>\n";
-}
-
-function print_voting()
-{
-  global $search;
-  global $pref;
-  $id=$this->get_id();
-  $votes=$this->get_votes();
-  $voting=sprintf("%.2f", $this->get_voting());
-
-  $url.="index.php?section=".$_REQUEST['section'];
-  $url.=$search->to_URL();
-
-  $can_vote=false;
-  if (!isset($_SESSION['img_voted'][$id]))
-    $can_vote=true;
-
-  $none=$pref['path.theme'].'/vote-none.png';
-  $set=$pref['path.theme'].'/vote-set.png';
-
-  echo "<div class=\"voting\">\n";
-  for ($i=0; $i<=VOTING_MAX; $i++)
-  {
-    $title="";
-    if ($can_vote) {
-      echo "<a href=\"$url&amp;action=edit&amp;image=$id&amp;voting=$i#img-$id\">";
-      $title=" title=\"".
-        sprintf(_("Vote the image with %d points!"), $i)."\"";
-    } 
-
-    echo "<div class=\"vote\" ";
-    if ($voting>0 && $i<=$voting)
-    {
-      if ($can_vote)
-        echo "onmouseover=\"vote_highlight($id, $voting, $i)\" onmouseout=\"vote_reset($id, $voting)\"";
-      echo ">\n  <img id=\"voting-$id-$i\" src=\"$set\" border=\"0\" $title />\n";
-    } else {
-
-      if ($can_vote)
-        echo "onmouseover=\"vote_highlight($id, $voting, $i)\" onmouseout=\"vote_reset($id, $voting)\"";
-
-      echo ">\n  <img id=\"voting-$id-$i\" src=\"$none\" border=\"0\" $title />\n";
-    }
-    echo "</div>\n";
-
-    if ($can_vote)
-      echo "</a>\n";
-  }
-
-  echo "<div class=\"text\">";
-  if ($votes==1)
-    echo sprintf(_("(%.1f, %d vote)"), $this->get_voting(), $votes);
-  else if ($votes>1) 
-    echo sprintf(_("(%.1f, %d votes)"), $this->get_voting(), $votes);
-  else
-    echo _("No votes");
-
-  echo "</div></div>\n";
-}
-
-function print_row_filename()
-{
-  echo "  <tr><th>"._("File:")."</th><td>".$this->get_filename()."</td></tr>\n";
-}
-
-function print_row_acl()
-{
-  $id=$this->get_id();
-  $gacl=$this->get_gacl();
-  $oacl=$this->get_oacl();
-  $aacl=$this->get_aacl();
-  echo "  <tr><th>"._("ACL:")."</th><td id=\"acl-$id\">$gacl,$oacl,$aacl";
-  echo " <a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"add_form_acl('$id',$gacl,$oacl,$aacl)\">"._("edit")."</a>";
-  echo "</td></tr>\n";
-}
-
-function print_row_date()
-{
-  $sec=$this->_sqltime2unix($this->get_date());
-  
-  echo "  <tr>
-    <th>"._("Date:")."</th>
-    <td>";
-  $date=date("Y-m-d H:i:s", $sec);
-  $search_date=new Search();
-  $search_date->date_start=$sec-(60*30*3);
-  $search_date->date_end=$sec+(60*30*3);
-  $url="index.php?section=explorer";
-  $url.=$search_date->to_URL();
-  echo "<a href=\"$url\">$date</a>\n";
-
-  // day
-  $search_date->date_start=$sec-(60*60*12);
-  $search_date->date_end=$sec+(60*60*12);
-  $url="index.php?section=explorer";
-  $url.=$search_date->to_URL();
-  echo "[<span class=\"day\"><a href=\"$url\">d</a></span>";
-  // week 
-  $search_date->date_start=$sec-(60*60*12*7);
-  $search_date->date_end=$sec+(60*60*12*7);
-  $url="index.php?section=explorer";
-  $url.=$search_date->to_URL();
-  echo "<span class=\"week\"><a href=\"$url\">w</a></span>";
-  // month 
-  $search_date->date_start=$sec-(60*60*12*30);
-  $search_date->date_end=$sec+(60*60*12*30);
-  $url="index.php?section=explorer";
-  $url.=$search_date->to_URL();
-  echo "<span class=\"month\"><a href=\"$url\">m</a></span>]";
-  echo "\n    </td>\n  </tr>\n";
-}
-
-function print_row_tags()
-{
-  global $db;
-  global $user;
-
-  $id=$this->get_id();
-  $sql="SELECT t.name
-        FROM $db->tag as t, $db->imagetag as it
-        WHERE it.imageid=$id 
-          AND it.tagid=t.id
-        GROUP BY t.name";
-  $result = $db->query($sql);
-  $tags=array();
-  while($row = mysql_fetch_row($result)) {
-    array_push($tags, $row[0]);
-  }
-  sort($tags);
-  $num_tags=count($tags);
-  
-  echo "  <tr>
-    <th>"._("Tags:")."</th>
-    <td id=\"tag-$id\">";  
-
-  for ($i=0; $i<$num_tags; $i++)
-  {
-    echo "<a href=\"index.php?section=explorer&amp;tags=" . $tags[$i] . "\">" . $tags[$i] . "</a>";
-    if ($i<$num_tags-1)
-        echo ", ";
-  }
-  if ($user->can_edit($this))
-  {
-    $list='';
-    for ($i=0; $i<$num_tags; $i++)
-    {
-      $list.=$tags[$i];
-      if ($i<$num_tags-1)
-        $list.=" ";
-    }
-    echo " <a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"add_form_tags('$id','$list')\">"._("edit")."</a>";
-  }
-  echo "</td>
-  </tr>\n";
-}
-
-function print_row_location()
-{
-  global $db;
-  global $user;
-
-  $id=$this->get_id();
-  $sql="SELECT l.name,l.type
-        FROM $db->location as l, $db->imagelocation as il
-        WHERE il.imageid=$id 
-          AND il.locationid=l.id
-        ORDER BY l.type";
-  $result = $db->query($sql);
-  $location=array();
-  
-  $city='';
-  $sublocation='';
-  $state='';
-  $country='';
-
-  while($row = mysql_fetch_row($result)) {
-    switch($row[1]) {
-    case LOCATION_CITY:
-      $city=$row[0];
-      break;
-    case LOCATION_SUBLOCATION:
-      $sublocation=$row[0];
-      break;
-    case LOCATION_STATE:
-      $state=$row[0];
-      break;
-    case LOCATION_COUNTRY:
-      $country=$row[0];
-      break;
-    } 
-    array_push($location, array($row[1], $row[0]));
-  }
-   
-  echo "  <tr>
-    <th>"._("Location:")."</th>
-    <td id=\"location-$id\">";  
-
-  $num_location=count($location);
-  for ($i=0; $i<$num_location; $i++)
-  {
-    echo "<a href=\"index.php?section=explorer&amp;location=".$location[$i][1] . "\">" . $location[$i][1] . "</a>";
-    if ($i<$num_location-1)
-        echo ", ";
-  }
-  if ($user->can_edit($this))
-  {
-    $list='';
-    for ($i=0; $i<$num_location; $i++)
-    {
-      $list.=$tags[$i];
-      if ($i<$num_tags-1)
-        $list.=" ";
-    }
-    echo " <a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"add_form_location('$id','$city','$sublocation', '$state', '$country')\">"._("edit")."</a>";
-  }
-  echo "</td>
-  </tr>\n";
-}
-function print_preview($search=null) 
-{
-  global $db;
-  global $user;
-  
-  $id=$this->get_id();
-  $name=$this->get_name();
-  
-  echo "\n<div class=\"name\">$name</div>\n";
-  echo "<div class=\"thumb\">&nbsp;";
-  
-  $link="index.php?section=image&amp;id=$id";
-  if ($search!=null)
-    $link.=$search->to_URL();
-  
-  $size=$this->get_size(220);
-
-  echo "<a href=\"$link\"><img src=\"./image.php?id=$id&amp;type=thumb\" alt=\"$name\" title=\"$name\" ".$size[2]."/></a></div>\n";
-  
-  $this->print_caption();
-  $this->print_voting();
-
-  echo "<div class=\"imginfo\"><table>\n";
-  if ($user->is_owner(&$this))
-  {
-    $this->print_row_filename();
-    $this->print_row_acl();
-  }
-  $this->print_row_date();
-  
-  $this->print_row_tags();
-  $this->print_row_location();
-  if ($user->can_select($id))
-  {
-    echo "  <tr>
-    <th>"._("Select:")."</th>
-    <td><input type=\"checkbox\" name=\"images[]\" value=\"$id\" onclick=\"uncheck('selectall')\" /></td>
-  </tr>\n";
-  }
-  
-  echo "</table></div>\n";
-} 
 }
 
 ?>

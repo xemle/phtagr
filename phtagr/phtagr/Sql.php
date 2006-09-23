@@ -242,7 +242,9 @@ function set_pref($tag, $value)
   @return -1 if the tagnam was not found, id otherwise */
 function tag2id($tagname, $create=false)
 {
-  $sql="SELECT id FROM $this->tag WHERE name='$tagname'";
+  $sql="SELECT id 
+        FROM $this->tag 
+        WHERE name='$tagname'";
   $result=$this->query($sql);
   if (!$result)
   {
@@ -256,6 +258,41 @@ function tag2id($tagname, $create=false)
       $result=$this->query($sql);
       if ($result)
         return $this->tag2id($tagname);
+      else 
+        return -1;
+    }
+    else
+    {
+      return -1;
+    }
+  }
+  $row=mysql_fetch_row($result);
+  return $row[0];
+}
+
+/** Gets the set id of a set name 
+  @param setname name of the set
+  @param create If the set name does not exists and this flag is true, the set
+  name will be created 
+  @return -1 if the setnam was not found, id otherwise */
+function set2id($setname, $create=false)
+{
+  $sql="SELECT id 
+        FROM $this->set 
+        WHERE name='$setname'";
+  $result=$this->query($sql);
+  if (!$result)
+  {
+    return -1;
+  }
+  else if (mysql_num_rows($result)==0)
+  {
+    if ($create)
+    {
+      $sql="INSERT INTO $this->set (name) VALUES('$setname')";
+      $result=$this->query($sql);
+      if ($result)
+        return $this->set2id($setname);
       else 
         return -1;
     }

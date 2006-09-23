@@ -9,12 +9,15 @@ class Search extends Base
 
 /** Image id */
 var $imageid;
+var $userid;
+var $groupid;
 /** String of tags */
 var $tags;
-var $userid;
 /** Tag operation. 
  0 = AND, 1 = OR, 2 = fuzzy */
 var $tagop;
+var $sets;
+var $setop;
 var $date_start;
 var $date_end;
 var $location;
@@ -28,10 +31,13 @@ var $orderby;
 
 function Search()
 {
-  $this->imageid=null;
-  $this->userid=null;
+  $this->imageid=0;
+  $this->userid=0;
+  $this->groupid=0;
   $this->tags=array();
   $this->tagop=0;
+  $this->sets=array();
+  $this->setop=0;
   $this->date_start=0;
   $this->date_end=0;
   $this->location='';
@@ -44,14 +50,20 @@ function Search()
 
 function set_imageid($imageid)
 {
-  if ($imageid==null || $imageid>0)
+  if ($imageid>=0)
     $this->imageid=$imageid;
 }
 
 function set_userid($userid)
 {
-  if ($userid>0)
+  if ($userid>=0)
     $this->userid=$userid;
+}
+
+function set_groupid($groupid)
+{
+  if ($groupid>=0)
+    $this->userid=$groupid;
 }
 
 function add_tag($tag)
@@ -59,12 +71,6 @@ function add_tag($tag)
   if ($tag=='') return;
   array_push($this->tags, $tag);
   $this->tags=array_unique($this->tags);
-}
-
-function clear_tags()
-{
-  unset($this->tags);
-  $this->tags=array();
 }
 
 /** Sets the operator of tags
@@ -75,10 +81,25 @@ function set_tagop($tagop)
     $this->tagop=$tagop;
 }
 
-function set_user($userid)
+function add_set($set)
 {
-  if ($userid>0)
-    $this->userid=$userid;
+  if ($set=='') return;
+  array_push($this->sets, $set);
+  $this->sets=array_unique($this->sets);
+}
+
+/** Sets the operator of sets
+  @param setop Must be between 0 and 2 */
+function set_setop($setop)
+{
+  if ($setop >=0 && $setop <=2)
+    $this->setop=$setop;
+}
+
+function clear_sets()
+{
+  unset($this->sets);
+  $this->sets=array();
 }
 
 function set_location($location)
@@ -205,6 +226,9 @@ function from_URL()
   if (isset($_REQUEST['user']))
     $this->set_userid($_REQUEST['user']);
     
+  if (isset($_REQUEST['group']))
+    $this->set_groupid($_REQUEST['group']);
+    
   if (isset($_REQUEST['tags']))
   {
     if (strpos($_REQUEST['tags'], ' ')>0)
@@ -223,6 +247,24 @@ function from_URL()
   if (isset($_REQUEST['tagop']))
     $this->set_tagop($_REQUEST['tagop']);
   
+  if (isset($_REQUEST['sets']))
+  {
+    if (strpos($_REQUEST['sets'], ' ')>0)
+    {
+      foreach (split("[ ]",$_REQUEST['sets']) as $set)
+        $this->add_set($set);
+    }
+    else if (strpos($_REQUEST['sets'], "+")>0)
+    {
+      foreach (split("[+]",$_REQUEST['sets']) as $set)
+        $this->add_set($set);
+    }
+    else 
+      $this->add_set($_REQUEST['sets']);
+  }
+  if (isset($_REQUEST['setop']))
+    $this->set_setop($_REQUEST['setop']);
+
   if (isset($_REQUEST['location']))
     $this->set_location($_REQUEST['location']);
   if (isset($_REQUEST['location_type']))
@@ -251,9 +293,10 @@ function to_URL()
   
   if ($this->imageid>0)
     $url .= '&amp;id='.$this->imageid;
-
   if ($this->userid>0)
     $url .= '&amp;user='.$this->userid;
+  if ($this->groupgid>0)
+    $url .= '&amp;groupg='.$this->groupgid;
 
   $num_tags=count($this->tags);
   if ($num_tags>0)
@@ -267,6 +310,20 @@ function to_URL()
     }
     if ($num_tags>1 && $this->tagop!=0)
       $url .= '&amp;tagop='.$this->tagop;
+  }
+  
+  $num_sets=count($this->sets);
+  if ($num_sets>0)
+  {
+    $url .= '&amp;sets=';
+    for ($i=0; $i<$num_sets; $i++)
+    {
+      $url .= $this->sets[$i];
+      if ($i<$num_sets-1)
+        $url .= '+';
+    }
+    if ($num_sets>1 && $this->setop!=0)
+      $url .= '&amp;setop='.$this->setop;
   }
  
   if ($this->location!='')
@@ -307,9 +364,10 @@ function to_form()
   
   if ($this->imageid>0)
     $form .= $this->_input('id', $this->imageid);
-
   if ($this->userid>0)
     $form .= $this->_input('user', $this->userid);
+  if ($this->groupid>0)
+    $form .= $this->_input('group', $this->groupid);
 
   $num_tags=count($this->tags);
   if ($num_tags>0)
@@ -325,6 +383,22 @@ function to_form()
     
     if ($num_tags>1 && $this->tagop!=0)
       $form .= $this->_input('tagop',$this->tagop);
+  }
+  
+  $num_sets=count($this->sets);
+  if ($num_sets>0)
+  {
+    $sets='';
+    for ($i=0; $i<$num_sets; $i++)
+    {
+      $sets.=$this->sets[$i];
+      if ($i<$num_sets-1)
+        $sets.='+';
+    }
+    $form .= $this->_input('sets',$sets);
+    
+    if ($num_sets>1 && $this->setop!=0)
+      $form .= $this->_input('setop',$this->setop);
   }
   
   if ($this->location!='')
@@ -350,14 +424,16 @@ function to_form()
 
 /** Create a SQL query from a tag array 
   @param tags Array of tags, could be NULL
+  @param sets Array of sets, could be NULL
   @param order Insert order column to select statement if true
   @return Return the sql statement of the query object corresponding to the
   Seach parameters */
-function _get_query_from_tags($tags, $order=false)
+function _get_query_from_tags($tags, $sets, $order=false)
 {
   global $db;
   global $user;
   $num_tags=count($tags);
+  $num_sets=count($sets);
     
   $sql="SELECT i.id";
   if ($order)
@@ -368,26 +444,27 @@ function _get_query_from_tags($tags, $order=false)
   $sql.=" FROM $db->image AS i";
   if ($num_tags)
     $sql .= ",$db->imagetag AS it";
+  if ($num_sets)
+    $sql .= ",$db->imageset AS iset";
   if ($this->location!='') 
     $sql .= ",$db->imagelocation AS il";
     
   $sql .= " WHERE 1=1"; // dummy where clause
   
-  if ($num_tags)
-    $sql .= " AND i.id=it.imageid";
-
-  // handle image id
+  // handle IDs of image
   if ($this->imageid!=null)
     $sql .= " AND i.id=".$this->imageid;
-  
-  // handle user id
   if ($this->userid!=null)
     $sql .= " AND i.userid=".$this->userid;
+  if ($this->groupid!=null)
+    $sql .= " AND i.groupid=".$this->groupid;
   
   // handle the acl
   $sql .= $this->_handle_acl();
   
   // handle tags
+  if ($num_tags)
+    $sql .= " AND i.id=it.imageid";
   if ($num_tags>1)
   {
     $sql .= " AND (";
@@ -404,6 +481,27 @@ function _get_query_from_tags($tags, $order=false)
   {
     $tagid=$db->tag2id($tags[0]);
     $sql .= " AND it.tagid=$tagid";
+  }
+
+  // handle sets
+  if ($num_sets)
+    $sql .= " AND i.id=iset.imageid";
+  if ($num_sets>1)
+  {
+    $sql .= " AND (";
+    for ($i=0; $i<$num_sets; $i++)
+    {
+      $setid=$db->set2id($sets[$i]);
+      $sql .= " iset.setid=$setid";
+      if ($i != $num_sets-1)
+        $sql .= " OR";
+    }
+    $sql .= " )";
+  }
+  else if ($num_sets==1)
+  {
+    $setid=$db->set2id($sets[0]);
+    $sql .= " AND iset.setid=$setid";
   }
 
   // handle location
@@ -435,7 +533,7 @@ function _handle_acl()
     return $acl;
     
   // if requested user id is not the own user id
-  else if ($user->is_member())
+  else if ($user->is_member() || $user->is_guest())
   {
     $acl .= " AND (
                (i.groupid in ( 
@@ -443,10 +541,13 @@ function _handle_acl()
                 FROM $db->usergroup
                 WHERE userid=".$user->get_userid().")
               AND i.gacl>=".ACL_PREVIEW." )";
-    $acl .= " OR i.oacl>=".ACL_PREVIEW." )";
+    if ($user->is_member())
+      $acl .= " OR i.oacl>=".ACL_PREVIEW;
+    else
+      $acl .= " OR i.aacl>=".ACL_PREVIEW;
+    $acl .= " )";
   }
-  else
-  {
+  else {
     $acl .= " AND i.aacl>=".ACL_PREVIEW;
   }
 
@@ -599,15 +700,28 @@ function get_query($limit=1, $order=true)
   $num_pos_tags=count($pos_tags);
   $num_neg_tags=count($neg_tags);
   
-  if ($num_pos_tags && $num_neg_tags)
+  $pos_sets=array();
+  $neg_sets=array();
+  foreach ($this->sets as $set)
+  {
+    if ($set{0}=='-')
+      array_push($neg_sets, substr($set, 1));
+    else
+      array_push($pos_sets, $set);
+  }
+  $num_pos_sets=count($pos_sets);
+  $num_neg_sets=count($neg_sets);
+  
+  if (($num_pos_tags || $num_pos_sets) && 
+      ($num_neg_tags || $num_neg_sets))
   {
     $sql="SELECT id";
     if ($order)
       $sql.=$this->_get_column_order();
     $sql.=" FROM ( ";
-    $sql.=$this->_get_query_from_tags($pos_tags, $order);
+    $sql.=$this->_get_query_from_tags($pos_tags, $pos_sets, $order);
     $sql.=" AND id NOT IN ( ";
-    $sql.=$this->_get_query_from_tags($neg_tags, false);
+    $sql.=$this->_get_query_from_tags($neg_tags, $neg_sets, false);
     $sql.=" ) ) AS i";
     $sql.=" GROUP BY i.id";
     $sql.=$this->_handle_having($num_pos_tags, $this->tagop);
@@ -618,7 +732,7 @@ function get_query($limit=1, $order=true)
   }
   else 
   {
-    $sql=$this->_get_query_from_tags($pos_tags);
+    $sql=$this->_get_query_from_tags($pos_tags, $pos_sets);
     $sql.=" GROUP BY i.id";
     $sql.=$this->_handle_having($num_pos_tags, $this->tagop);
 

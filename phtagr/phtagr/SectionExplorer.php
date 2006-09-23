@@ -120,8 +120,8 @@ function print_content()
     echo "<td class=\"thumbcell\">";
     echo "<a name=\"img-".$row[0]."\">\n";
     $search->set_pos($pos);
-    $image=new Image($row[0]);
-    $image->print_preview(&$search);
+    $sec_img=new SectionImage($row[0]);
+    $sec_img->print_preview(&$search);
     echo "</td>\n\n";
     
     if ($cell % 2 == 1) {

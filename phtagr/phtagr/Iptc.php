@@ -682,7 +682,8 @@ function get_iptc()
 function _is_single_record($name)
 {
   
-  if ($name=='2:025') // keyword
+  if ($name=='2:025' || // keywords
+    $name=='2:020')     // sets
     return false;
   return true;
 }

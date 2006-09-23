@@ -66,6 +66,9 @@ function execute()
  
   foreach ($images as $id)
   {
+    if (!is_numeric($id))
+      continue;
+
     $img=new Image($id);
     if ($img->get_id()!=$id)
     {
@@ -132,6 +135,48 @@ function execute()
       if ($this->_check_iptc_error(&$iptc))
         return false;
       $iptc->rem_records("2:025", $rem_tags); 
+      if ($this->_check_iptc_error(&$iptc))
+        return false;
+    }
+
+    // Distinguish between javascript values and global values
+    if (isset($_REQUEST['js_sets']))
+    {
+      $sets=split(" ", $_REQUEST['js_sets']);
+      /** @todo optimize set of this operation. Do only delete required sets */
+      $iptc->rem_record("2:020");
+      if ($this->_check_iptc_error(&$iptc))
+        return false;
+      // only positive sets
+      $add_sets=array();
+      foreach ($sets as $set)
+      {
+        if ($set{0}!='-')
+          array_push($add_sets, $set);
+      }
+      
+      $iptc->add_records("2:020", $add_sets); 
+      if ($this->_check_iptc_error(&$iptc))
+        return false;
+    }
+    else if (isset($_REQUEST['edit_sets']))
+    {
+      $sets=split(" ", $_REQUEST['edit_sets']);
+    
+      // distinguish between add and remove operation.
+      $add_sets=array();
+      $rem_sets=array();
+      foreach ($sets as $set)
+      {
+        if ($set{0}=='-')
+          array_push($rem_sets, substr($set, 1));
+        else
+          array_push($add_sets, $set);
+      }
+      $iptc->add_records("2:020", $add_sets); 
+      if ($this->_check_iptc_error(&$iptc))
+        return false;
+      $iptc->rem_records("2:020", $rem_sets); 
       if ($this->_check_iptc_error(&$iptc))
         return false;
     }

@@ -88,15 +88,9 @@ $pref=$db->read_pref($user->get_userid());
 $pref['theme']='default';
 $pref['path.theme']="./themes/".$pref['theme'];
 
-echo "<script>
-var pref=new Array();
-pref['path.theme']='".$pref['path.theme']."';
-</script>\n";
-
 $menu->add_menu_item("Home", "index.php");
 $menu->add_menu_item("Explorer", "index.php?section=explorer");
 $menu->add_menu_item("Search", "index.php?section=search");
-
 
 if ($user->can_browse())
 {
@@ -145,7 +139,7 @@ if (isset($_REQUEST['section']))
     $explorer= new SectionExplorer();
     $cnt->add_section(&$explorer);
   } 
-  else if($section=='image')
+  else if($section=='image' && isset($_REQUEST['id']))
   {
     if($_REQUEST['action']=='edit')
     {
@@ -153,7 +147,7 @@ if (isset($_REQUEST['section']))
       $edit->execute();
       unset($edit);
     }
-    $image= new SectionImage();
+    $image= new SectionImage(intval($_REQUEST['id']));
     $cnt->add_section(&$image);
   } 
   else if($section=='search')
