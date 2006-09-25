@@ -40,6 +40,14 @@ function _get_windows_drives()
   return $drives;
 }
 
+function _remove_dir_tail($s)
+{
+  $len=strlen($s);
+  if ($s{$len-1}==DIRECTORY_SEPARATOR)
+    return substr($s, 0, $len-1);
+  return $s;
+}
+
 /** Initiate the root aliases. On Unix like systems it adds the system rooot.
  * On Windows system, it adds the drives as aliases. */
 function _init_roots()
@@ -47,7 +55,7 @@ function _init_roots()
   $this->reset_roots();
   if ($this->_is_windows)
   {
-    $drives=_get_windows_drives();
+    $drives=$this->_get_windows_drives();
     foreach ($drives as $drive)
       $this->add_root($drive, $drive);
   } else {
@@ -70,7 +78,7 @@ function add_root($root, $alias)
   if (!is_dir($root))
     return false;
 
-  if (!preg_match('/^[A-Za-z][A-Za-z0-9\-_\.]+$/', $alias))
+  if (!preg_match('/^[A-Za-z][A-Za-z0-9\-_\.\:]+$/', $alias))
     return false;
 
   // Add directory separator at the end
@@ -249,9 +257,10 @@ function find($dir, $regex, $maxdepth=255, $_depth=0)
   if ($_depth>$maxdepth)
     return array();
 
+  //$dir=$this->_remove_dir_tail($dir);
   $matches=array();
   list($subdirs, $files)=$this->read_dir($dir);
-  if ($subdirs!=null)
+  if ($subdirs!=null && $_detph>$maxdepth+1)
   {
     foreach ($subdirs as $subdir)
     {

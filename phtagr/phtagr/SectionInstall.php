@@ -44,6 +44,20 @@ function _create_dir($dir)
   return true;
 }
 
+/** Removes the doubled backslashes on Windows systems and removes the 
+  tailing directory separator */
+function _convert_dir($s)
+{
+  if (DIRECTORY_SEPARATOR=='\\')
+    $s=str_replace(DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR, $s);
+  $len=strlen($s);
+  if ($s{$len-1}==DIRECTORY_SEPARATOR)
+    $s=substr($s, 0, $len-1);
+    
+  return $s;
+}
+
+
 function clear_session()
 {
   if (isset($_SESSION['directory']))
@@ -77,6 +91,7 @@ function init_tables()
   if (!$this->_create_dir($cache))
     return false;
   
+  // Escape strings for sql database
   $cache=str_replace('\\','\\\\',$cache);
   $sql="INSERT $db->pref (userid, name, value) VALUES(0, 'cache', '$cache')";
   $result=$db->query($sql);
@@ -142,6 +157,10 @@ function exec_stage_authenticate()
 */
 function check_file_permissions($directory, $file)
 {
+  $len=strlen($directory);
+  if ($directory{$len-1}!=DIRECTORY_SEPARATOR)
+    $directory.=DIRECTORY_SEPARATOR;
+    
   if (file_exists($directory.$file)
     && is_writable($directory.$file))
     return true;
@@ -166,20 +185,17 @@ function exec_stage_directory()
     $this->error(_("No directory specified!"));
     return false;
   }
-  if (strrpos($directory,DIRECTORY_SEPARATOR) < strlen($directory) - 1)
-    $directory=$directory.DIRECTORY_SEPARATOR;
+  $directory=$this->_convert_dir($directory);
 
   if (isset($_REQUEST['data_directory']))
     $data_directory=$_REQUEST['data_directory'];
 
   if ($data_directory=="")
   {
-    $data_directory=$directory."data".DIRECTORY_SEPARATOR;
+    $data_directory=$directory.DIRECTORY_SEPARATOR."data";
     $ext_data_directory=false;
   }
-
-  if (strrpos($data_directory,DIRECTORY_SEPARATOR) < strlen($data_directory) - 1)
-    $data_directory=$data_directory.DIRECTORY_SEPARATOR;
+  $data_directory=$this->_convert_dir($data_directory);
  
   $dir_writable=is_writable($directory);
 
@@ -194,7 +210,7 @@ function exec_stage_directory()
     // At first we need to check whether it is the current directory. If it
     // is, we don't need to write index.php.
 
-    if ($directory!=getcwd().DIRECTORY_SEPARATOR)
+    if ($directory!=getcwd())
     {
       // In this case we only need to check, whether we can write
       // the config file and into the data dir.
@@ -206,7 +222,7 @@ function exec_stage_directory()
       else
       {
         // We need to copy the file there
-        if (!copy (getcwd().DIRECTORY_SEPARATOR."index.php", $directory."index.php"))
+        if (!copy (getcwd().DIRECTORY_SEPARATOR."index.php", $directory.DIRECTORY_SEPARATOR."index.php"))
         {
           $this->error(sprintf(_("Could not copy file '%s' to directory '%s'!"), "index.php", $directory));
           return false;
@@ -220,7 +236,7 @@ function exec_stage_directory()
       else
       {
         // We need to copy the file there
-        if (!copy (getcwd().DIRECTORY_SEPARATOR."image.php", $directory."image.php"))
+        if (!copy (getcwd().DIRECTORY_SEPARATOR."image.php", $directory.DIRECTORY_SEPARATOR."image.php"))
         {
           $this->error(sprintf(_("Could not copy image.php to %s!"), $directory));
           return false;
@@ -230,13 +246,13 @@ function exec_stage_directory()
 
     if (!$ext_data_directory)
     {
-      if (!$this->check_file_permissions($directory,"data".DIRECTORY_SEPARATOR))
+      if (!$this->check_file_permissions($directory,"data"))
       {
         $this->error(_("Data directory is not writable!"));
         return false;
       }
 
-      if(!file_exists($directory."data".DIRECTORY_SEPARATOR))
+      if(!file_exists($directory.DIRECTORY_SEPARATOR."data"))
         mkdir($directory."data");
     }
 
@@ -299,7 +315,7 @@ function exec_stage_database()
 
   // The url_prefix is needed to have valid links to the themes in the
   // main repository of phTagr.
-  $url_prefix=substr($_SERVER['PHP_SELF'],0,strrpos($_SERVER['PHP_SELF'],DIRECTORY_SEPARATOR));
+  $url_prefix=dirname($_SERVER['PHP_SELF']);
 
   fwrite($f, '<?php
 // Configuration file for phTagr
@@ -478,7 +494,7 @@ function print_stage_welcome()
 
   if (isset($_SESSION['install_id']))
   {
-    $this->error(sprintf("Could not open %slogin.txt or it contained wrong installation id!"),$curr_path);
+    $this->error(sprintf(_("Could not open %slogin.txt or it contained wrong installation id!"),$curr_path));
     unset($_SESSION['install_id']);
   }
 

@@ -18,7 +18,7 @@ if (!isset ($phtagr_data_directory))
 
 if (!isset ($phtagr_url_prefix))
 {
-  $phtagr_url_prefix=substr($_SERVER['PHP_SELF'], 0, strrpos($_SERVER['PHP_SELF'], DIRECTORY_SEPARATOR));
+  $phtagr_url_prefix=dirname($_SERVER['PHP_SELF']);
 }
 
 include "$phtagr_lib/main.php";

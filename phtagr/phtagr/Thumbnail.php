@@ -109,16 +109,16 @@ function setQuality($quality=85)
   @return false Returns false on error */
 function saveTo($dst)
 {
-    $this->cmd.=" '$this->src' '$dst'";
-    system ($this->cmd, $retval);
-    if ($retval!=0)
-    {
-      $this->error("Could not execute command '".$this->cmd."'. Exit with code $retval");
-      return false;
-    }
+  $this->cmd.=" \"$this->src\" \"$dst\"";
+  system ($this->cmd, $retval);
+  if ($retval!=0)
+  {
+    $this->error("Could not execute command '".$this->cmd."'. Exit with code $retval");
+    return false;
+  }
 
-    chmod($dst, 0644);
-    return true;
+  chmod($dst, 0644);
+  return true;
 }
 
 /** Create a mini square image with size of 75x75 pixels. 

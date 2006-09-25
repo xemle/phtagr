@@ -31,18 +31,27 @@ function print_browser($dir)
   echo "<div class=\"path\">"._("Current path:")."&nbsp;".
     "<a href=\"./index.php?section=browser&amp;cd=\">"._("Root")."</a>";
   $path='';
-  $parts=split(DIRECTORY_SEPARATOR, $dir);
-  foreach ($parts as $part)
+  if ($dir!='')
   {
-    if ($part=='' || $path=='/') continue;
-
-    if ($path!='')
-      $path.=DIRECTORY_SEPARATOR.$part;
-    else 
-      $path=$part;
-    echo "&nbsp;/&nbsp;";
-    
-    echo "<a href=\"./index.php?section=browser&amp;cd=$path\">$part</a>";
+    if (DIRECTORY_SEPARATOR!='\\')
+    {
+      $parts=split(DIRECTORY_SEPARATOR, $dir);
+    } else {
+      $dir=str_replace(DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR, $dir);
+      $parts=split(DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR, $dir);
+    }
+    foreach ($parts as $part)
+    {
+      if ($part=='' || $path=='/') continue;
+  
+      if ($path!='')
+        $path.=DIRECTORY_SEPARATOR.$part;
+      else 
+        $path=$part;
+      echo "&nbsp;/&nbsp;";
+      
+      echo "<a href=\"./index.php?section=browser&amp;cd=$path\">$part</a>";
+    }
   }
   echo "&nbsp;/&nbsp;</div>";
   
@@ -88,7 +97,11 @@ function print_content()
       $recursive=true;
 
     foreach ($_REQUEST['add'] as $d)
+    {
+      if (DIRECTORY_SEPARATOR=="\\")
+        $d=str_replace(DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR, $d);
       $images=array_merge($images, $fs->find_images($d, $recursive));
+    }
 
     if (count($images))
       asort($images);
