@@ -73,9 +73,10 @@ if (!$db->connect() && $section!="install")
   $msg = new SectionBase();
   $cnt->add_section(&$msg);
   $msg->h(_("No Installation found"));
-  $text="It looks as if phtagr is not completely configured.<br/>\n".
-    "Please follow <a href=\"./index.php?section=install\"> ".
-    "this</a> link to install phtagr.\n";
+  $link=sprintf("<a href=\"./index.php?section=install\">%s</a>",
+    _("this link"));
+  $text=sprintf(_("It looks as if phtagr is not completely configured. ".
+    "Please follow %s to install phtagr."), $link);
   $msg->p($text);
   
   $page->layout();
@@ -88,21 +89,21 @@ $pref=$db->read_pref($user->get_userid());
 $pref['theme']='default';
 $pref['path.theme']="./themes/".$pref['theme'];
 
-$menu->add_menu_item("Home", "index.php");
-$menu->add_menu_item("Explorer", "index.php?section=explorer");
-$menu->add_menu_item("Search", "index.php?section=search");
+$menu->add_menu_item(_("Home"), "index.php");
+$menu->add_menu_item(_("Explorer"), "index.php?section=explorer");
+$menu->add_menu_item(_("Search"), "index.php?section=search");
 
 if ($user->can_browse())
 {
-  $menu->add_menu_item("Browser", "index.php?section=browser");
+  $menu->add_menu_item(_("Browser"), "index.php?section=browser");
 }
 if ($user->can_upload())
 {
-  $menu->add_menu_item("Upload", "index.php?section=upload");
+  $menu->add_menu_item(_("Upload"), "index.php?section=upload");
 }
 if ($user->is_admin())
 {
-  $menu->add_menu_item("Administration", "index.php?section=admin");
+  $menu->add_menu_item(_("Administration"), "index.php?section=admin");
 }
 
 $search= new Search();
@@ -159,13 +160,14 @@ if (isset($_REQUEST['section']))
   {
     if ($user->can_browse()) {
       $browser = new SectionBrowser();
-      $browser->root='';
-      $browser->path='';
+      // @todo set roots from preferences
+      // $browser->reset_roots();
+      // $browser->add_root(root, alias);
       $cnt->add_section(&$browser);
     } else {
       $login = new SectionLogin();
       $login->section=$section;
-      $login->message="You are not loged in!";
+      $login->message=_("You are not loged in!");
       $cnt->add_section(&$login);
     }
   } 
@@ -177,7 +179,7 @@ if (isset($_REQUEST['section']))
       $cnt->add_section(&$admin);
     } else {
       $login=new SectionAccount();
-      $login->message='You are not loged in as an admin';
+      $login->message=_('You are not loged in as an admin');
       $login->section='admin';
       $cnt->add_section(&$login);
     }

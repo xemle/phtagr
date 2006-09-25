@@ -1,142 +1,74 @@
 <?php
 
 include_once("$phtagr_lib/SectionBase.php");
-include_once("$phtagr_lib/Image.php");
+include_once("$phtagr_lib/Filesystem.php");
 
 class SectionBrowser extends SectionBase
 {
 
-/** Relative root directory to emulate chroot() at userspace */
-var $root;
-var $path;
-var $images;
+var $_fs;
 
 function SectionBrowser()
 {
   $this->name="browser";
-  $this->root='';
-  $this->path=getcwd();
-  $this->images=array();
+  $this->_fs=new Filesystem();
 }
 
-/** is_dir function with root prefix
- @param dir Directory without the root directory
- @return true if given dir is a directory. Otherwise false */
-function is_dir($dir)
+function add_root($root, $alias)
 {
-  if (is_dir("$this->root".DIRECTORY_SEPARATOR."$dir"))
-    return true;
-  else
-    return false;
+  $this->_fs->add_root($root, $alias);
 }
 
-/** chdir function with root prefix
- If $dir is not a directory, it will change the directory to the root directory
- */
-function chdir($dir)
+function reset_roots()
 {
-  if ($this->is_dir($dir)) 
-    chdir("$this->root".DIRECTORY_SEPARATOR."$dir");
-  else 
-    chdir($this->root);
-}
-
-/** opendir function with root prefix
- @param dir Directory without root prefix */
-function opendir($dir)
-{
-  return opendir("$this->root".DIRECTORY_SEPARATOR."$dir");
-}
-
-/** is_readable function with root prefix 
- @return true if directory is readable. false otherwise */
-function is_readable($dir)
-{
-  return is_readable("$this->root".DIRECTORY_SEPARATOR."$dir");
-}
-
-/** Search images recursively of a directory. 
- The function search only for jpg or JPG files. */
-function find_images($dir)
-{
-  $subdirs=array();
-    
-  if (!$this->is_readable($dir) || !$this->is_dir($dir)) return;
-  $this->chdir($dir);
-  if (!$handle = $this->opendir($dir)) return;
-  
-  while (false != ($file = readdir($handle))) {
-    if (!is_readable($file) || $file=='.' || $file=='..') continue;
-
-    $file="$dir".DIRECTORY_SEPARATOR."$file";
-    if ($this->is_dir($file)) {
-      array_push($subdirs, "$file");
-    } else if (strtolower(substr($file, -3, 3))=='jpg') {
-      array_push($this->images, "$file");
-    }
-  }
-  closedir($handle);
-  
-  foreach ($subdirs as $sub) {
-    $this->find_images($sub);
-  }
+  $this->_fs->reset_roots();
 }
 
 /** Prints the subdirctories as list with checkboxes */
 function print_browser($dir)
 {
-  if (!$this->is_readable($dir) || !$this->is_dir($dir)) return;
-  $this->chdir($dir);
-  if (!$handle = $this->opendir($dir)) return;
-  
-  $subdirs=array();
-  
-  echo _("Path:")."&nbsp;";
-  $dirs=split('/', $dir);
-  echo "<a href=\"./index.php?section=browser&amp;cd=/\">root</a>";
+  $fs=$this->_fs;
+  echo "<div class=\"path\">"._("Current path:")."&nbsp;".
+    "<a href=\"./index.php?section=browser&amp;cd=\">"._("Root")."</a>";
   $path='';
-  foreach ($dirs as $cd)
+  $parts=split(DIRECTORY_SEPARATOR, $dir);
+  foreach ($parts as $part)
   {
-    if ($cd == '' || $path == '/') continue;
+    if ($part=='' || $path=='/') continue;
 
-    $path = "$path".DIRECTORY_SEPARATOR."$cd";
+    if ($path!='')
+      $path.=DIRECTORY_SEPARATOR.$part;
+    else 
+      $path=$part;
     echo "&nbsp;/&nbsp;";
     
-    if ($this->is_dir($path)) {
-      echo "<a href=\"./index.php?section=browser&amp;cd=$path\">$cd</a>";
-    } else {
-      echo "$cd";
-    }
+    echo "<a href=\"./index.php?section=browser&amp;cd=$path\">$part</a>";
   }
-  echo "&nbsp;/&nbsp;";
+  echo "&nbsp;/&nbsp;</div>";
   
-  $handle=$this->opendir($dir);
-  while (false != ($file = readdir($handle))) {
-    if (!is_readable($file) || $file=='.' || $file=='..') continue;
-    if (substr($file, 0, 1)=='.') continue; 
-
-    if ($this->is_dir("$dir".DIRECTORY_SEPARATOR."$file")) {
-      array_push($subdirs, "$file");
-    }
-  }
-  closedir($handle);
-
   echo "<form section=\"./index.php\" method=\"post\">\n<p>\n";
   echo "<input type=\"hidden\" name=\"section\" value=\"browser\" />";
 
-  asort($subdirs);
   echo "<input type=\"checkbox\" name=\"add[]\" value=\"$dir\" />&nbsp;. (this dir)<br />\n";
+
+  if ($fs->is_dir($dir))
+  {
+    $subdirs=$fs->get_subdirs($dir);
+  }
+  else
+    $subdirs=$fs->get_roots();
+
   foreach($subdirs as $sub) 
   {
-    if ($dir != '/') {
-      $cd="$dir".DIRECTORY_SEPARATOR."$sub";
-    } else {
+    if ($dir!='')
+      $cd=$dir.DIRECTORY_SEPARATOR.$sub;
+    else 
       $cd=$sub;
-    }
     echo "<input type=\"checkbox\" name=\"add[]\" value=\"$cd\" />&nbsp;<a href=\"?section=browser&amp;cd=$cd\">$sub</a><br />\n";
   }
   echo "<br/>\n";
-  echo "<input type=\"checkbox\" name=\"create_all_previews\" checked=\"checked\" />&nbsp;"._("Create all previews")."<br />\n";
+  echo "<input type=\"checkbox\" name=\"create_all_previews\"/>&nbsp;"._("Create all previews.")."<br />\n";
+  echo "<input type=\"checkbox\" name=\"insert_recursive\" checked=\"checked\" />&nbsp;"._("Insert images also from subdirectories.")."<br />\n";
   echo "<input type=\"submit\" value=\""._("Add images")."\" />&nbsp;";
   echo "<input type=\"reset\" value=\""._("Clear")."\" />";
   
@@ -146,28 +78,26 @@ function print_browser($dir)
 function print_content()
 {
   global $user; 
+  $fs=$this->_fs;
   echo "<h2>"._("Browser")."</h2>\n";
   if (isset($_REQUEST['add'])) {
+    $images=array();
+
+    $recursive=false;
+    if (isset($_REQUEST['insert_recursive']))
+      $recursive=true;
+
     foreach ($_REQUEST['add'] as $d)
-    {
-      $this->find_images($d);
-    }
-    if (count($this->images))
-    { 
-      asort($this->images);
-    }
-    printf (_("Found %d images")."<br/>\n", count($this->images));
-    foreach ($this->images as $img)
+      $images=array_merge($images, $fs->find_images($d, $recursive));
+
+    if (count($images))
+      asort($images);
+
+    printf (_("Found %d images")."<br/>\n", count($images));
+    foreach ($images as $img)
     {
       $image=new Image();
-      $result=$image->insert($this->root . $img, 0);
-
-      if ($_REQUEST['create_all_previews'])
-      {
-        $thumb=new Thumbnail($image->get_id());
-        $thumb->create_all_previews();
-        unset($thumb);
-      }
+      $result=$image->insert($fs->get_realname($img), 0);
 
       switch ($result)
       {
@@ -175,27 +105,37 @@ function print_content()
         printf(_("Image '%s' was successfully inserted.")."<br/>\n", $img);
         break;
       case 1:
-        echo "Image '$img' was updated.<br/>\n";
+        printf(_("Image '%s' was updated.")."<br/>\n", $img);
         break;
       case 2:
-        echo "Image '$img' is already the database.<br/>\n";
+        printf(_("Image '%s' is already the database.")."<br/>\n", $img);
         break;
       default:
-        echo "A error occured with file '$img'.<br/>\n";
+        printf(_("A error occured with file '%s'.")."<br/>\n", $img);
       }
 
-      //unset($image);
+      unset($image);
     }
-    echo "<a href=\"./index.php?section=browser&amp;cd=".$_REQUEST['cd']."\">Search again</a><br/>\n";
+    if ($_REQUEST['create_all_previews'])
+    {
+      echo _("Now creating the previews. This can take a while...")."<br/>";
+      foreach ($images as $img)
+      {
+        $thumb=new Thumbnail();
+        $thumb->init_by_filename($fs->get_realname($img));
+        $thumb->create_all_previews();
+        unset($thumb);
+      }
+      $this->info(_("All previews successfully created"));
+    }
+    $this->info(_("Images inserted"));
+    echo "<br/><a href=\"./index.php?section=browser&amp;cd=".$_REQUEST['cd']."\">"._("Search again")."</a><br/>\n";
   } else if (isset($_REQUEST['cd'])) 
   {
-    $this->path=$_REQUEST['cd'];
-    $this->print_browser($this->path);
+    $this->print_browser($_REQUEST['cd']);
   } else {
-    $this->print_browser($this->path);
+    $this->print_browser('');
   }
-
-  //echo '<pre>'; print_r($_REQUEST); echo '</pre>';
 }
 
 }
