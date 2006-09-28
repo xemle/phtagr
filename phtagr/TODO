@@ -209,6 +209,17 @@ Other image communities: http://holocore.com/?PictureSync_services
     - con_dir($parent, $child): concardinate two dirs
 
 - Session
+  - Session Protection (http://www.php-center.de/faq/faq-version4_session.html)
+    The session id provides a server-side checks of previous requests and
+    enables the storage of session based data like visited links, downloaed
+    images, etc and. Therefore it is important that the session id is available
+    for mostly every request.
+    - At the first visit a new session with a session id will be created. The
+      session id is stored in a temporary cookie on the client side. 
+    - If no session id is available only the welcome page is shown.
+      - What is about rewritten links like /phtagr/tags/foo ?
+    - If no cookies are available add the session id to all links and
+      formulars. This is also the case for the first visit.
   - Remember visited image. This information will be used for counting the
     clicks on the images. Done.
   - Storing of users preferences. These are loaded at a session beginning or

@@ -19,23 +19,7 @@ function SectionHome()
 function print_all_tags() {
   global $db;
   
-  /*
-  // total number of tags
-  $sql="select count(*) from tag group by name";
-  $result=$db->query($sql);
-  if ($result)
-  {
-    $row=mysql_fetch_row($result);
-    $count=$row[0];
-  }
-  else
-  {
-    $count=0;
-  }
-  echo "<div class=\"tags\">Most tags (of $count):";
-  */
-  
-  echo "<div class=\"tags\"><p>"._("Popular tags:")."</p>\n\n<p>";
+  echo "<h3>"._("Popular tags:")."</h3>\n\n<p>";
   // best of tags
   $sql="SELECT t.name,COUNT(t.name) AS hits 
         FROM $db->tag AS t, $db->imagetag AS it 
@@ -67,7 +51,7 @@ function print_all_tags() {
     $size=intval(8+($hit-$min)*$grad);
     echo "<span style=\"font-size:${size}pt;\"><a href=\"?section=explorer&amp;tags=$tag\">$tag</a></span>&nbsp;\n";
   }
-  echo "</p></div>\n";
+  echo "</p>\n";
 }
 
 /** Prints randomly images as small square images 
@@ -109,8 +93,8 @@ function print_popular_images()
 
   $search->set_page_size(0);
 
-  echo "<div class=\"mini\"><p>"._("Popular Images:")."</p>\n\n";
-  echo "<table>\n<tr>\n";
+  echo "<h3>"._("Popular Images:")."</h3>\n\n";
+  echo "<table width=\"100%\">\n<tr>\n";
   foreach ($ids as $t)
   {
     $id=$t[0];
@@ -130,7 +114,6 @@ function print_popular_images()
   }
   echo "</tr>\n</table>\n";
     
-  echo "</div>\n";
 }
 
 function print_content()

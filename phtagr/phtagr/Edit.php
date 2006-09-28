@@ -402,10 +402,12 @@ function _handle_request_acl(&$img)
 function print_edit_inputs()
 {
   echo "
-<p><input type=\"checkbox\" id=\"selectall\" onclick=\"checkbox('selectall', 'images[]')\"> "._("Select all")."</p>
+<div class=\"edit\">
+<p><input type=\"checkbox\" id=\"selectall\" onclick=\"checkbox('selectall', 'images[]')\"/>"._("Select all")."</p>
 
-<span id=\"btnEdit\" class=\"jsbutton\" onclick=\"toggle_visibility('toggleEdit', 'btnEdit')\">-&gt; "._("Edit Image Data")."</span><br/>
-<fieldset id='toggleEdit' style=\"display:none\"><legend>Edit Image Data <span class=\"jsbutton\" onclick=\"toggle_visibility('toggleEdit', 'btnEdit')\">[Hide]</span></legend>
+<p><a href=\"javascript:void(0)\" id=\"btnEdit\" class=\"jsbutton\" onclick=\"toggle_visibility('toggleEdit', 'btnEdit')\">-&gt; "._("Edit Image Data")."</a></p>
+
+<fieldset id='toggleEdit' style=\"display:none\"><legend>Edit Image Data <a href=\"javascript:void(0)\" class=\"jsbutton\" onclick=\"toggle_visibility('toggleEdit', 'btnEdit')\">[Hide]</a></legend>
   <table>
     <tr>
       <th>Caption:</th>
@@ -428,8 +430,10 @@ function print_edit_inputs()
     </tr>
   </table>
 </fieldset>
-<span id=\"btnAcl\" class=\"jsbutton\" onclick=\"toggle_visibility('toggleAcl', 'btnAcl')\">-&gt; "._("Edit Access Control Lists (ACL)")."</span><br/>
-<fieldset id='toggleAcl' style=\"display:none\"><legend>Access Control List <span class=\"jsbutton\" onclick=\"toggle_visibility('toggleAcl', 'btnAcl')\">[Hide]</span></legend>
+
+<p><a href=\"javascript:void(0)\" id=\"btnAcl\" class=\"jsbutton\" onclick=\"toggle_visibility('toggleAcl', 'btnAcl')\">-&gt; "._("Edit Access Control Lists (ACL)")."</a></p>
+
+<fieldset id='toggleAcl' style=\"display:none\"><legend>Access Control List <a href=\"javascript:void(0)\" class=\"jsbutton\" onclick=\"toggle_visibility('toggleAcl', 'btnAcl')\">[Hide]</a></legend>
   <table>
     <tr>
       <th></th>
@@ -488,9 +492,8 @@ function print_edit_inputs()
   </table>
   <p>Set the access level to the selected images.</p>
 </fieldset>
-<br/>
 
-<input type=\"hidden\" name=\"action\" value=\"edit\"/>
+<input type=\"hidden\" name=\"action\" value=\"edit\"/></div>
 ";
 }
 

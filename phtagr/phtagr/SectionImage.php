@@ -63,7 +63,7 @@ function print_navigation($search)
     $id=$row[0];
     $search->set_pos($cur_pos);
     
-    $url="index.php?section=image&id=$id";
+    $url="index.php?section=image&amp;id=$id";
     $url.=$search->to_URL();
     
     if ($cur_pos<$pos)
@@ -175,36 +175,28 @@ function print_voting()
   $none=$pref['path.theme'].'/vote-none.png';
   $set=$pref['path.theme'].'/vote-set.png';
 
-  echo "<div class=\"voting\">\n";
+  echo "<div class=\"voting\"><p>\n";
   for ($i=0; $i<=VOTING_MAX; $i++)
   {
-    $title="";
+    $title='';
+    $fx='';
     if ($can_vote) {
       echo "<a href=\"$url&amp;action=edit&amp;image=$id&amp;voting=$i#img-$id\">";
       $title=" title=\"".
         sprintf(_("Vote the image with %d points!"), $i)."\"";
+      $fx=" onmouseover=\"vote_highlight($id, $voting, $i)\" onmouseout=\"vote_reset($id, $voting)\"";
     } 
 
-    echo "<div class=\"vote\" ";
     if ($voting>0 && $i<=$voting)
-    {
-      if ($can_vote)
-        echo "onmouseover=\"vote_highlight($id, $voting, $i)\" onmouseout=\"vote_reset($id, $voting)\"";
-      echo ">\n  <img id=\"voting-$id-$i\" src=\"$set\" border=\"0\" $title />\n";
-    } else {
-
-      if ($can_vote)
-        echo "onmouseover=\"vote_highlight($id, $voting, $i)\" onmouseout=\"vote_reset($id, $voting)\"";
-
-      echo ">\n  <img id=\"voting-$id-$i\" src=\"$none\" border=\"0\" $title />\n";
-    }
-    echo "</div>\n";
+      echo "<img id=\"voting-$id-$i\" src=\"$set\" alt=\"*\" $title$fx/>\n";
+    else
+      echo "<img id=\"voting-$id-$i\" src=\"$none\" alt=\"-\" $title$fx/>\n";
 
     if ($can_vote)
       echo "</a>\n";
   }
 
-  echo "<div class=\"text\">";
+  echo "&nbsp;";
   if ($votes==1)
     echo sprintf(_("(%.1f, %d vote)"), $img->get_voting(), $votes);
   else if ($votes>1) 
@@ -212,7 +204,7 @@ function print_voting()
   else
     echo _("No votes");
 
-  echo "</div></div>\n";
+  echo "</p></div>\n";
 }
 
 function print_row_filename()
@@ -508,13 +500,13 @@ function print_content()
   $this->print_row_clicks();
   echo "</table></div>\n";
 
-  echo "<form name=\"formImage\" id=\"formImage\" action=\"index.php\" method=\"post\">\n";
+  echo "<form id=\"formImage\" action=\"index.php\" method=\"post\"><div>\n";
   echo "<input type=\"hidden\" name=\"section\" value=\"image\" />\n";
   echo "<input type=\"hidden\" name=\"action\" value=\"edit\" />\n";
   echo "<input type=\"hidden\" name=\"image\" value=\"$id\" />\n";
 
   echo $search->to_form();
-  echo "</form>\n";
+  echo "</div></form>\n";
   if (!isset($_SESSION['img_viewed'][$id]))
     $image->update_ranking();
 

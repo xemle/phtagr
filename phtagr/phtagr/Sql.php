@@ -222,29 +222,33 @@ function read_pref($userid=-1)
 /** Adds or updates a tag-value pair in the preference table. */
 function set_pref($tag, $value)
 {
+  $stag=mysql_escape_string($tag);
+  $svalue=mysql_escape_string($value);
   $sql="SELECT *
         FROM $this->pref
-	WHERE name=\"$tag\"";
+	WHERE name=\"$stag\"";
   $result=$this->query($sql);
 
   if (mysql_num_rows($result)==0)
-    $sql="INSERT INTO $this->pref VALUES (0,0,'$tag','$value')";    
+    $sql="INSERT INTO $this->pref VALUES (0,0,'$stag','$svalue')";    
   else
-    $sql="UPDATE $this->pref SET value='$value' WHERE name='$tag'";
+    $sql="UPDATE $this->pref SET value='$svalue' WHERE name='$stag'";
 
   return $this->query($sql);
 }
 
 /** Gets the tag id of a tag name 
-  @param tagname name of the tag
+  @param tag Name of the tag
   @param create If the tag name does not exists and this flag is true, the tag
   name will be created 
   @return -1 if the tagnam was not found, id otherwise */
-function tag2id($tagname, $create=false)
+function tag2id($tag, $create=false)
 {
+  $stag=mysql_escape_string($tag);
+
   $sql="SELECT id 
         FROM $this->tag 
-        WHERE name='$tagname'";
+        WHERE name='$stag'";
   $result=$this->query($sql);
   if (!$result)
   {
@@ -254,10 +258,10 @@ function tag2id($tagname, $create=false)
   {
     if ($create)
     {
-      $sql="INSERT INTO $this->tag (name) VALUES('$tagname')";
+      $sql="INSERT INTO $this->tag (name) VALUES('$stag')";
       $result=$this->query($sql);
       if ($result)
-        return $this->tag2id($tagname);
+        return $this->tag2id($tag);
       else 
         return -1;
     }
@@ -271,15 +275,16 @@ function tag2id($tagname, $create=false)
 }
 
 /** Gets the set id of a set name 
-  @param setname name of the set
+  @param set Name of the set
   @param create If the set name does not exists and this flag is true, the set
   name will be created 
   @return -1 if the setnam was not found, id otherwise */
-function set2id($setname, $create=false)
+function set2id($set, $create=false)
 {
+  $sset=mysql_escape_string($set);
   $sql="SELECT id 
         FROM $this->set 
-        WHERE name='$setname'";
+        WHERE name='$sset'";
   $result=$this->query($sql);
   if (!$result)
   {
@@ -289,10 +294,10 @@ function set2id($setname, $create=false)
   {
     if ($create)
     {
-      $sql="INSERT INTO $this->set (name) VALUES('$setname')";
+      $sql="INSERT INTO $this->set (name) VALUES('$sset')";
       $result=$this->query($sql);
       if ($result)
-        return $this->set2id($setname);
+        return $this->set2id($set);
       else 
         return -1;
     }
@@ -334,10 +339,11 @@ function id2tag($id)
   @return -1 if the location was not found, id otherwise */
 function location2id($location, $type, $create=false)
 {
+  $slocation=mysql_escape_string($location);
   if ($type==LOCATION_UNDEFINED && $create==false)
-    $sql="SELECT id FROM $this->location WHERE name='$location'";
+    $sql="SELECT id FROM $this->location WHERE name='$slocation'";
   else
-    $sql="SELECT id FROM $this->location WHERE name='$location' AND type=$type";
+    $sql="SELECT id FROM $this->location WHERE name='$slocation' AND type=$type";
   $result=$this->query($sql);
   if (!$result)
   {
@@ -347,7 +353,7 @@ function location2id($location, $type, $create=false)
   {
     if ($create)
     {
-      $sql="INSERT INTO $this->location (name, type) VALUES('$location', $type)";
+      $sql="INSERT INTO $this->location (name, type) VALUES('$slocation', $type)";
       $result=$this->query($sql);
       if ($result)
         return $this->location2id($location, $type);

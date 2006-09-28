@@ -210,22 +210,28 @@ function add_form_caption(id, caption64)
   document.getElementById(focusId).focus();
 }
 
-/** Clones all hidden input elements from one form to another
-  @param srcForm Element of the source form
+
+/** Clones all hidden input elements from one form to another recursivly
+  @param src Source element
   @param dstForm Element of the destination form */
-function _clone_hidden_input(srcForm, dstForm)
+function _clone_hidden_input(src, dstForm)
 {
-  if (srcForm==null || dstForm==null)
-    return;
-    
-  var i,input;
-  for (i=0; i<srcForm.childNodes.length; i++)
+  if (src==null || dstForm==null)
   {
-    input=srcForm.childNodes[i];
-    if (input.nodeType==1 &&
-      input.nodeName=="INPUT" && 
-      input.getAttribute("type")=="hidden")
-      dstForm.appendChild(input.cloneNode(true));
+    window.allert("null");
+    return;
+  }
+    
+  var i,e;
+  for (i=0; i<src.childNodes.length; i++)
+  {
+    e=src.childNodes[i];
+    if (e.nodeType==1 &&
+      e.nodeName=="INPUT" && 
+      e.getAttribute("type")=="hidden")
+      dstForm.appendChild(e.cloneNode(true))
+    else
+      _clone_hidden_input(e, dstForm);
   }
 }
 
@@ -644,7 +650,7 @@ function add_form_location(id, city, sublocation, state, country)
   input.setAttribute("name", "js_location");
   input.setAttribute("value", "yes");
   form.appendChild(input);
-  
+
   var table=document.createElement("table");
   // first row
   var tr=document.createElement("tr");

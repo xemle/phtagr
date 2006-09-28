@@ -87,23 +87,30 @@ function init_tables()
   $data_directory=$_SESSION["data_directory"];
 
   // image cache
-  $cache=$data_directory."cache";
+  $cache=$data_directory.DIRECTORY_SEPARATOR."cache";
   if (!$this->_create_dir($cache))
     return false;
   
   // Escape strings for sql database
-  $cache=str_replace('\\','\\\\',$cache);
-  $sql="INSERT $db->pref (userid, name, value) VALUES(0, 'cache', '$cache')";
+  $scache=mysql_escape_string($cache);
+  $sql="INSERT $db->pref (
+          userid, name, value
+        ) VALUES ( 
+          0, 'cache', '$scache'
+        )";
   $result=$db->query($sql);
   if (!$result) return false;
 
   // upload dir
-  $upload=$data_directory."upload";
+  $upload=$data_directory.DIRECTORY_SEPARATOR."upload";
   if (!$this->_create_dir($upload))
     return false;
 
-  $upload=str_replace('\\','\\\\',$upload);
-  $sql="INSERT $db->pref (userid, name, value) VALUES(0, 'upload_dir', '$upload')";
+  $supload=mysql_escape_string($upload);
+  $sql="INSERT $db->pref (
+          userid, name, value
+        ) VALUES ( 
+          0, 'upload_dir', '$supload')";
   $result=$db->query($sql);
   if (!$result) return false;
   

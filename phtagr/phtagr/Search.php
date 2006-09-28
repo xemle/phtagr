@@ -571,7 +571,7 @@ function _get_column_order()
     break;
   case 'voting':
   case '-voting':
-    $order.=",voting";
+    $order.=",voting,votes";
     break;
   case 'newest':
   case '-newest':
@@ -607,10 +607,10 @@ function _handle_orderby()
     $order.=" i.ranking ASC";
     break;
   case 'voting':
-    $order.=" i.voting DESC";
+    $order.=" i.voting DESC, i.votes DESC";
     break;
   case '-voting':
-    $order.=" i.voting ASC";
+    $order.=" i.voting ASC, i.votes ASC";
     break;
   case 'newest':
     $order.=" i.created DESC";

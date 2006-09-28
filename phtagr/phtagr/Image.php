@@ -92,15 +92,15 @@ function insert($filename, $is_upload=0)
   
   if (!file_exists($filename))
   {
-    $this->error("File '$filename' does not exists");
+    $this->error(sprintf(_("File '%s' does not exists"), $filename));
     return -1;
   } 
   
-  $filenamesql=str_replace('\\','\\\\',$filename);
+  $sfilename=mysql_escape_string($filename);
   
   $sql="SELECT * 
         FROM $db->image
-        WHERE filename='$filenamesql'";
+        WHERE filename='$sfilename'";
   $result=$db->query($sql);
   if (!$result)
     return -1;
@@ -129,7 +129,7 @@ function insert($filename, $is_upload=0)
           clicks,lastview,ranking
         ) VALUES (
           $userid,$groupid,NOW(),NOW(),
-          '$filenamesql',$is_upload,
+          '$sfilename',$is_upload,
           $gacl,$oacl,$aacl,
           0,NOW(),0.0
         )";
@@ -138,7 +138,7 @@ function insert($filename, $is_upload=0)
     return -1;
   $sql="SELECT *
         FROM $db->image
-        WHERE filename='$filenamesql'";
+        WHERE filename='$sfilename'";
   
   $result=$db->query($sql);
   if (!$result)
@@ -549,10 +549,11 @@ function _insert_iptc_caption($iptc=null)
   $id=$this->get_id();
   
   $caption=$iptc->get_record('2:120');
+  $scaption=mysql_escape_string($caption);
   if ($caption!=null)
   {
     $sql="UPDATE $db->image
-          SET caption='$caption'
+          SET caption='$scaption'
           WHERE id=$id";
     $result = $db->query($sql);
     if (!$result)

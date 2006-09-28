@@ -60,19 +60,28 @@ function print_browser($dir)
 
   echo "<input type=\"checkbox\" name=\"add[]\" value=\"$dir\" />&nbsp;. (this dir)<br />\n";
 
+  $alias=$dir; // alias changes, if only one root is set
   if ($fs->is_dir($dir))
   {
     $subdirs=$fs->get_subdirs($dir);
-  }
-  else
+  } else {
     $subdirs=$fs->get_roots();
+    // OK, just one root is set. Hide alias name
+    if (count($subdirs)==1) 
+    {
+      $dir=$subdirs[0];
+      $subdirs=$fs->get_subdirs($dir);
+      $alias='';
+    }
+  }
 
   foreach($subdirs as $sub) 
   {
     if ($dir!='')
-      $cd=$dir.DIRECTORY_SEPARATOR.$sub;
+      $cd=$alias.DIRECTORY_SEPARATOR.$sub;
     else 
       $cd=$sub;
+
     echo "<input type=\"checkbox\" name=\"add[]\" value=\"$cd\" />&nbsp;<a href=\"?section=browser&amp;cd=$cd\">$sub</a><br />\n";
   }
   echo "<br/>\n";

@@ -107,7 +107,7 @@ function print_content()
   $this->print_navigator($url_nav, $page, ceil($count/$search_nav->page_size));
   
   // Formular for further actions
-  echo "<form name=\"formExplorer\" id=\"formExplorer\" action=\"index.php\" method=\"post\">";
+  echo "<form id=\"formExplorer\" action=\"index.php\" method=\"post\">";
 
   echo "<div class=\"tableview\"><table>\n";
   $cell=0;
@@ -118,7 +118,7 @@ function print_content()
         echo "<tr>\n";
     }
     echo "<td class=\"thumbcell\">";
-    echo "<a name=\"img-".$row[0]."\">\n";
+    echo "<a name=\"img-".$row[0]."\"/>\n";
     $search->set_pos($pos);
     $sec_img=new SectionImage($row[0]);
     $sec_img->print_preview(&$search);
@@ -135,9 +135,11 @@ function print_content()
 
   $this->print_navigator($url_nav, $page, ceil($count/$search_nav->page_size));
   
-  echo "<input type=\"hidden\" name=\"page\" value=\"$page\" />\n";
-  echo "<input type=\"hidden\" name=\"section\" value=\"explorer\" />\n";
+  echo "<p>
+<input type=\"hidden\" name=\"page\" value=\"$page\" />
+<input type=\"hidden\" name=\"section\" value=\"explorer\" />\n";
   echo $search->to_form();
+  echo "</p>\n";
 
   $edit=new Edit();
   if ($user->is_member())

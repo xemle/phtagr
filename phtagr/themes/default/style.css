@@ -1,9 +1,16 @@
+* {
+  margin: 0px;
+  padding: 0px;
+}
+
 body {
   text-align: center;
+  color: black;
   background-color: #e0e0e0;
 }
 
 .page {
+  display: block;
   margin: 10px auto;
   width: 750px;
   text-align: left;
@@ -19,15 +26,16 @@ a:visited {
 }
 
 .header {
-  padding: 0;
+  display: block;
   height: 70px;
   background: url(./header.png) no-repeat;
 }
 
 .headerleft {
   position: absolute;
-  padding: 0 0 0 70px; 
-  margin: 0;
+  display: block;
+  height: 70px;
+  padding: 20px 0 0 70px; 
   color: #ffffff;
   background-image: url(./icon.png);
   background-repeat: no-repeat;
@@ -149,6 +157,7 @@ div.tab h2 {
 
 .content {
   position: relative;
+  display: block;
   top: 0px;
   left: 0px;
   float: left;
@@ -166,11 +175,18 @@ h2 {
   border-bottom: 1px solid #000000;
 }
 
+h3 {
+  padding: 5px 5px 5px 0px;
+  margin: 10px 0px 10px 0px; 
+  border-bottom: 1px solid #000000;
+}
+
 .footer .content {
-  margin: 0;
-  padding: 0;
+  display: block;
   width: 750px;
-  float: left;
+  height: 50px;
+  padding: 0px;
+  margin: 10px 0px 0px 0px;
 
   color: #555555;
   font-size: 8pt;
@@ -179,11 +195,13 @@ h2 {
 }
 
 .footer {
-  position: relative;
-  clear: both;
+  display: block;
   width: 750px;
   float: left;
-  display: block;
+  position: relative; 
+  /*
+  clear: both;
+  */
   background: url(./footer.content.png) repeat-y;
 }
 
@@ -230,7 +248,7 @@ h2 {
   font-size: 8pt;
   /*width: 12px;
   height: 12px;*/
-  padding: 1px 5px 1px 5px;
+  padding: 2px 5px 2px 5px;
   margin: 5px 0 3px 0;
   background-color: #ffffff;
   border: 1px solid #b3b3b3;
@@ -278,6 +296,10 @@ h2 {
   vertical-align: top;
 }
 
+.thumbcell * textarea {
+  width: 270px;
+}
+
 .name {
   font-size: 14pt;
   background-color: #dddddd;
@@ -304,6 +326,14 @@ h2 {
   text-align: center;
 }
 
+.image .imginfo > table {
+  width: 400px;
+}
+
+.image * textarea {
+  width: 400px;
+}
+
 .caption {
   color: #4D4D4D;
   font-size: 10pt;
@@ -313,32 +343,15 @@ h2 {
 .voting {
   margin: 5px auto;
   display: block;
-  width: 150px;
+  width: 270px;
   text-align: center;
   font-size: 8pt;
 }
 
-.vote, .voting > .text {
-  vertical-align: top;
-  position: relative;
-  display: block;
-  float: left;
-  padding: 0px;
-  margin: 0px;
-}
-
-.vote img, .vote {
-  padding: 0px;
-  margin: 0px;
+.voting a img {
+  padding: 0;
+  margin: 0;
   border-style: none;
-}
-
-.voting > .text {
-  padding: 0px 0px 0px 10px;
-}
-
-.imginfo {
-  padding: 5px 0px 0px 0px;
 }
 
 .imginfo > table {
@@ -346,9 +359,12 @@ h2 {
   border-spacing: 0;
   border: solid 1px #dddddd;
   margin: 15px auto;
-  width: 280px;
   font-size: 8pt;
   display: block;
+}
+
+.thumbcell .imginfo > table {
+  width: 280px;
 }
 
 .imginfo * a, .tags * a {
@@ -357,6 +373,10 @@ h2 {
 
 .imginfo * table {
   font-size: 8pt;
+}
+
+.imginfo * td, .imginfo * th {
+  padding: 1px 3px 1px 3px;
 }
 
 .imginfo * a:hover, .tags * a:hover {

@@ -40,6 +40,7 @@ function _get_windows_drives()
   return $drives;
 }
 
+/** Removes a directory separator at the end */
 function _remove_dir_tail($s)
 {
   $len=strlen($s);
@@ -119,9 +120,14 @@ function get_roots()
   return $roots;
 }
 
-/** Returns the alias of a given directory 
+/** Splits the filename to root alias and the filename tail of a given name.
+ * The name "image/user/bob" is splitted to alias "image" and filename
+ * "user/bob". If only one root is used, the alias can be ommited and the file
+ * must start with the directory separator. If "image" is the only root alias,
+ * the return of "/user/bob" is also "image" and "user/bob".
   @param dir Current directory
-  @return Name of the root alias. False otherwise */
+  @return Array of root alias and filename. Otherwise return array of (false,
+  false) */
 function _split_alias($file) 
 {
   $pos=strpos($file, DIRECTORY_SEPARATOR);
@@ -130,6 +136,11 @@ function _split_alias($file)
   {
     $alias=substr($file, 0, $pos);
     $tail=substr($file, $pos+1);
+  // Note: $pos===0 checks for zero. Otherwise return value false is converted
+  // to zero as well.
+  } else if ($pos===0 && count($this->_roots)==1) {
+    $alias=key($this->_roots);
+    $tail=substr($file, 1);
   } else {
     $alias=$file;
     $tail='';
