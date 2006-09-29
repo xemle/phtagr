@@ -201,6 +201,24 @@ function is_anonymous()
   return false;
 }
 
+/** @return Returns true if user is allowed to create a file */
+function can_create_file()
+{
+  if ($this->is_admin())
+    return true;
+
+  return false;
+}
+
+/** @return Returns true if user is allowed to delete a file */
+function can_delete_file()
+{
+  if ($this->is_admin())
+    return true;
+
+  return false;
+}
+
 /** Return true if the user can browse the filesystem */
 function can_browse()
 {

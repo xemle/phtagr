@@ -2,9 +2,11 @@
 
 include_once("$phtagr_lib/Base.php");
 
-/**
-  @class Filesystem Implements a chrooted filesystem 
-  @todo Add flags to allow symlinks, allow create, allow delete */
+/** This class abstracts the filesystem with chroot aliases. 
+  @class Filesystem Implements a chrooted filesystem with multiple 
+  aliases
+  @todo Add flags to allow symlinks, allow create, allow delete
+  @note The Filesystem does not check the users authorization! */
 class Filesystem extends Base
 {
 
@@ -14,7 +16,6 @@ var $_is_windows;
 
 function Filesystem()
 {
-  $this->name="browser";
   $this->_roots=array();
   $this->_is_windows=false;
 
@@ -32,7 +33,7 @@ function _get_windows_drives()
 {
   $drives=array();
 
-  for ($i=ord('c'); $i<ord('z'); $i++)
+  for ($i=ord('C'); $i<ord('Z'); $i++)
   {
     if (is_dir(chr($i).':'))
       array_push($drives, chr($i).':');
@@ -73,10 +74,10 @@ function _init_roots()
   @return True on success. False otherwise */
 function add_root($root, $alias)
 {
-  if (isset($this->_roots['alias']))
+  if (isset($this->_roots[$alias]))
     return false;
 
-  if (!is_dir($root))
+  if (!@is_dir($root))
     return false;
 
   if (!preg_match('/^[A-Za-z][A-Za-z0-9\-_\.\:]+$/', $alias))
@@ -162,6 +163,14 @@ function get_realname($file)
   return $this->_roots[$alias].$tail;
 }
 
+function file_exists($file)
+{
+  if (file_exists($this->get_realname($file)))
+    return true;
+
+  return false;
+}
+
 /** is_dir function with root prefix
  @param dir Directory without the root directory
  @return true if given dir is a directory. Otherwise false */
@@ -171,6 +180,24 @@ function is_dir($dir)
     return true;
 
   return false;
+}
+
+/** @return Returns the basename of a filename. If is a directory 
+  returns the upper directory.
+  @note This function will not check if the given file exists */
+function basename($file)
+{
+  // Split alias and tail and operate only on the tail.
+  list($alias, $tail)=$this->_split_alias($file);
+  $pos=strrpos($tail, DIRECTORY_SEPARATOR);
+  
+  if ($pos===false)
+    return $file;
+  
+  else if ($pos==0)
+    return $alias;
+  else
+    return $alias.DIRECTORY_SEPARATOR.substr($tail, 0, $pos);
 }
 
 /** Change the current directory.
@@ -306,6 +333,31 @@ function find_images($dir, $recursive=true)
   else
     $maxdetph=0;
   return $this->find($dir, "/\.[Jj][Pp][Gg]$/", $maxdepth);
+}
+
+/** Creates a directory.
+  @param dir Directory to create
+  @param withparent Create also parent directories if they not exist. 
+  Default is false
+  @return True on success, false otherwise */
+function mkdir($dir, $withparent=false)
+{
+  if ($this->file_exists($dir))
+  {
+    if (!$this->is_dir($dir))
+      return false;
+    else
+      return true;
+  }
+  
+  if (!$withparent)
+    return @mkdir($this->get_realname($dir));
+  
+  // Call it recursivly to parent directoy
+  $base=$this->basename($dir);
+  if (!$this->is_dir($base) && !$this->mkdir($base, $withparent))
+    return false;
+  return @mkdir($this->get_realname($dir));
 }
 
 }

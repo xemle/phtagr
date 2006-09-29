@@ -3,6 +3,7 @@
 include_once("$phtagr_lib/SectionBase.php");
 include_once("$phtagr_lib/SectionAccount.php");
 include_once("$phtagr_lib/Image.php");
+include_once("$phtagr_lib/Filesystem.php");
 
 define("INSTALLER_STAGE_WELCOME", "0");
 define("INSTALLER_STAGE_DIRECTORY", "1");
@@ -24,29 +25,9 @@ class SectionInstall extends SectionBase
    */
 var $stage=0;
 
-function _create_dir($dir)
-{
-  if (!file_exists($dir))
-  {
-    if (!@mkdir($dir, true))
-    {
-      $this->error(sprintf(_("Could not create directory %s."), $dir));
-      return false;
-    }
-  }
-
-  if (!@chmod($dir, 0755))
-  {
-    $this->error(sprintf(_("Could not change the permission correctly of directory %s"), $dir));
-    return false;
-  }
-
-  return true;
-}
-
 /** Removes the doubled backslashes on Windows systems and removes the 
   tailing directory separator */
-function _convert_dir($s)
+function _escape_dir($s)
 {
   if (DIRECTORY_SEPARATOR=='\\')
     $s=str_replace(DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR, $s);
@@ -73,6 +54,7 @@ function clear_session()
 function init_tables()
 {
   global $db;
+  $fs=new Filesystem();
   $directory="";
   $data_directory="";
 
@@ -88,8 +70,11 @@ function init_tables()
 
   // image cache
   $cache=$data_directory.DIRECTORY_SEPARATOR."cache";
-  if (!$this->_create_dir($cache))
+  if (!$fs->mkdir($cache, true))
+  {
+    $this->warning(sprintf(_("Could not create directory '%s'"), $cache)); 
     return false;
+  }
   
   // Escape strings for sql database
   $scache=mysql_escape_string($cache);
@@ -99,20 +84,28 @@ function init_tables()
           0, 'cache', '$scache'
         )";
   $result=$db->query($sql);
-  if (!$result) return false;
+  if (!$result) { 
+    $this->warning(sprintf(_("Could not run SQL query '%s'"), $sql)); 
+    return false;
+  }
 
   // upload dir
   $upload=$data_directory.DIRECTORY_SEPARATOR."upload";
-  if (!$this->_create_dir($upload))
+  if (!$fs->mkdir($upload, true))
+  {
+    $this->warning(sprintf(_("Could not create directory '%s'"), $upload)); 
     return false;
+  }
 
   $supload=mysql_escape_string($upload);
   $sql="INSERT $db->pref (
           userid, name, value
         ) VALUES ( 
           0, 'upload_dir', '$supload')";
-  $result=$db->query($sql);
-  if (!$result) return false;
+  if (!$result) { 
+    $this->warning(sprintf(_("Could not run SQL query '%s'"), $sql)); 
+    return false;
+  }
   
   return true;
 }
@@ -149,9 +142,13 @@ function exec_stage_authenticate()
   if (isset($_SESSION['install_id']))
   {
     if ($this->check_install_id($_SESSION['install_id']))
+    {
+      $_SESSION['username']='admin';
       return true;
+    }
   }
 
+  unset($_SESSION['username']);
   return false;
 }
 
@@ -181,6 +178,8 @@ function check_file_permissions($directory, $file)
 
 function exec_stage_directory()
 {
+  $fs=new Filesystem();
+  
   $directory="";
   $data_directory="";
   $ext_data_directory=true;
@@ -192,7 +191,7 @@ function exec_stage_directory()
     $this->error(_("No directory specified!"));
     return false;
   }
-  $directory=$this->_convert_dir($directory);
+  $directory=$this->_escape_dir($directory);
 
   if (isset($_REQUEST['data_directory']))
     $data_directory=$_REQUEST['data_directory'];
@@ -202,7 +201,7 @@ function exec_stage_directory()
     $data_directory=$directory.DIRECTORY_SEPARATOR."data";
     $ext_data_directory=false;
   }
-  $data_directory=$this->_convert_dir($data_directory);
+  $data_directory=$this->_escape_dir($data_directory);
  
   $dir_writable=is_writable($directory);
 
@@ -260,7 +259,7 @@ function exec_stage_directory()
       }
 
       if(!file_exists($directory.DIRECTORY_SEPARATOR."data"))
-        mkdir($directory."data");
+        $fs->mkdir($directory."data");
     }
 
     $_SESSION['directory']=$directory;

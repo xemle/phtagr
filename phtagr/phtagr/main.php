@@ -72,6 +72,7 @@ if (!$db->connect() && $section!="install")
 {
   $msg = new SectionBase();
   $cnt->add_section(&$msg);
+    
   $msg->h(_("No Installation found"));
   $link=sprintf("<a href=\"./index.php?section=install\">%s</a>",
     _("this link"));
