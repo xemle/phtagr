@@ -29,7 +29,7 @@ function sync_files()
     
     if (!file_exists($filename))
     {
-      $this->delete_image_data($id,$filename);
+      delete_image_data($id,$filename);
       $deleted++;
     }
     else 

@@ -340,13 +340,6 @@ function _read_seg_ps($jpg)
 
     // size of section starting from pos: size+12
     $seg['size']=$this->_byte2short(substr($hdr, 10, 2));
-    if ($seg['pos']+HDR_SIZE_8BIM+$seg['size']>$app13['pos']+2+$app13['size'])
-    {
-      $this->_errno=-1;
-      $this->_errmsg="PS segment size overflow: ".$seg['size']." at ".$seg['pos'];
-      return false;
-    }
-  
     $seg['marker']=substr($hdr, 0, 4);
     if ($seg['marker']!='8BIM')
     {
@@ -354,16 +347,46 @@ function _read_seg_ps($jpg)
       $this->_errmsg="Wrong 8BIM marker: ".$seg['marker'];
       return false;
     }
-    $seg['type']=$this->_str2hex(substr($hdr, 4, 2));
-    $seg['padding']=$this->_str2hex(substr($hdr, 6, 4));
 
+    $seg['type']=$this->_str2hex(substr($hdr, 4, 2));
+
+    // Check for path segment
+    $type=$this->_byte2short(substr($hdr, 4, 2));
+    if ($type>=2000 && $type<3000)
+    {
+      // Path block: 8BIM + PATH_TYPE + LEN[1] + String[len] + '0' + Size[4] + data
+      $hdr_len=ord($hdr{6});
+      //printf("String Length: %d\n", $hdr_len);
+      $hdr_len+=12; // 4 Bytes '8BIM', 2 Bytes Type, 1 Byte len, 1 Byte leading '0', 4 Bytes size
+      if ($hdr_len>HDR_SIZE_8BIM)
+        $hdr.=fread($fp, $hdr_len-HDR_SIZE_8BIM);
+      else if ($len<HDR_SIZE_8BIM)
+      {
+        $hdr=substr($hdr,0,$hdr_len);
+        fseek($fp, $seg['pos']+$hdr_len, SEEK_SET);
+      }
+      $seg['size']=$this->_byte2short(substr($hdr, $hdr_len-2, 2));
+      //printf("New Header Length: %d\n", $hdr_len);
+      //printf("New Segement Size: %d\n", $seg['size']);
+    } else {
+      $hdr_len=HDR_SIZE_8BIM;
+      $seg['padding']=$this->_str2hex(substr($hdr, 6, 4));
+    }
+
+    if ($seg['pos']+$hdr_len+$seg['size']>$app13['pos']+2+$app13['size'])
+    {
+      $this->_errno=-1;
+      $this->_errmsg="PS segment size overflow: ".$seg['size']." at ".$seg['pos'];
+      return false;
+    }
+  
     array_push($app13['_segs'], $seg);
     
     if ($seg['type']=='0404') {
       $seg['index']=$i;
       $jpg['_iptc']=$seg;
     }
-    
+
     // Some programs have a padding '0' at the end of the PS segment 
     if ($seg['pos']+HDR_SIZE_8BIM+$seg['size']>=$app13['pos']+$app13['size']+1)
       break;
@@ -655,9 +678,9 @@ function _short2byte($i)
 }
 
 /** Convert a short byte string (2 bytes) to an integer */
-function _byte2short($short)
+function _byte2short($buf)
 {
-  return ord($short{0})<<8 | ord($short{1});
+  return ord($buf{0})<<8 | ord($buf{1});
 }
 
 /** Convert a sting to a hex string. This is only for debugging purpose */
