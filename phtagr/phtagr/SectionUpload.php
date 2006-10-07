@@ -4,6 +4,7 @@ include_once("$phtagr_lib/SectionBase.php");
 include_once("$phtagr_lib/User.php");
 include_once("$phtagr_lib/Image.php");
 include_once("$phtagr_lib/Sql.php");
+include_once("$phtagr_lib/Url.php");
 
 class SectionUpload extends SectionBase
 {
@@ -295,9 +296,11 @@ function upload_process()
 /** Prints the upload form */
 function print_form_upload($dir)
 {
-  echo "<form action=\"./index.php\" method=\"POST\" enctype=\"multipart/form-data\">
-<input type=\"hidden\" name=\"MAX_FILE_SIZE\" value=\"8000000\" />
-<input type=\"hidden\" name=\"section\" value=\"upload\" />
+  $url=new Url();
+  $url->add_param('section', 'upload');
+  echo "<form action=\"./index.php\" method=\"POST\" enctype=\"multipart/form-data\">\n";
+  echo $url->to_form();
+  echo "<input type=\"hidden\" name=\"MAX_FILE_SIZE\" value=\"8000000\" />
 <table>
   <tr>
     <td>Upload image 1:</td><td><input name=\"images[]\" type=\"file\" /></td>

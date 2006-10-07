@@ -1,69 +1,35 @@
 <?php
 
-include_once("$phtagr_lib/Base.php");
+include_once("$phtagr_lib/Url.php");
 /**
   @class Search Mapping between URLs, HTML forms and SQL queries.
 */
-class Search extends Base
+class Search extends Url
 {
 
-/** Image id */
-var $imageid;
-var $userid;
-var $groupid;
-/** String of tags */
 var $tags;
-/** Tag operation. 
- 0 = AND, 1 = OR, 2 = fuzzy */
-var $tagop;
 var $sets;
-var $setop;
-var $date_start;
-var $date_end;
-var $location;
-var $location_type;
-/** Absolute position of image */
-var $pos;
-var $page_size;
-var $page_num;
-/** Sort relation */
-var $orderby;
 
 function Search()
 {
-  $this->imageid=0;
-  $this->userid=0;
-  $this->groupid=0;
+  $this->Url();
   $this->tags=array();
-  $this->tagop=0;
   $this->sets=array();
-  $this->setop=0;
-  $this->date_start=0;
-  $this->date_end=0;
-  $this->location='';
-  $this->location_type=LOCATION_UNDEFINED;
-  $this->pos=0;
-  $this->page_size=10;
-  $this->page_num=0;
-  $this->orderby='date';
 }
 
 function set_imageid($imageid)
 {
-  if ($imageid>=0)
-    $this->imageid=$imageid;
+  $this->add_param('id', $imageid, PARAM_PINT);
 }
 
 function set_userid($userid)
 {
-  if ($userid>=0)
-    $this->userid=$userid;
+  $this->add_param('user', $userid, PARAM_PINT);
 }
 
 function set_groupid($groupid)
 {
-  if ($groupid>=0)
-    $this->userid=$groupid;
+  $this->add_param('group', $groupid, PARAM_PINT);
 }
 
 function add_tag($tag)
@@ -77,8 +43,13 @@ function add_tag($tag)
   @param tagop Must be between 0 and 2 */
 function set_tagop($tagop)
 {
-  if ($tagop >=0 && $tagop <=2)
-    $this->tagop=$tagop;
+  $this->add_iparam('tagop', $tagop, null, 1, 2);
+}
+
+function clear_tags()
+{
+  unset($this->tags);
+  $this->tags=array();
 }
 
 function add_set($set)
@@ -92,8 +63,7 @@ function add_set($set)
   @param setop Must be between 0 and 2 */
 function set_setop($setop)
 {
-  if ($setop >=0 && $setop <=2)
-    $this->setop=$setop;
+  $this->add_iparam('setop', $setop, null, 1, 2);
 }
 
 function clear_sets()
@@ -102,23 +72,16 @@ function clear_sets()
   $this->sets=array();
 }
 
-function set_location($location)
-{
-  $this->location=$location;
-}
-
 function set_location_type($location_type)
 {
-  if ($location_type >= LOCATION_UNDEFINED &&
-      $location_type <= LOCATION_COUNTRY)
-  $this->location_type=$location_type;
+  $this->add_iparam('location_type', $location_type, LOCATION_UNDEFINED, LOCATION_UNDEFINED, LOCATION_COUNTRY);
 }
 
 /** Convert input string to unix time. Currently only the format of YYYY-MM-DD
  * and an integer as unix timestamp is supported.
   @param date arbitrary date string
   @return Unix time stamp. False on error. */
-function convert_date($date)
+function _convert_date($date)
 {
   if (is_numeric($date) && $date >= 0)
     return $date;
@@ -136,46 +99,43 @@ function convert_date($date)
 
 function set_date_start($start)
 {
-  $start=$this->convert_date($start);
-  if ($start>0)
-    $this->date_start=$start;
+  $start=$this->_convert_date($start);
+  $this->add_iparam('start', $start, null, 1);
 }
 
 function set_date_end($end)
 {
-  $end=$this->convert_date($end);
-  if ($end>0)
-    $this->date_end=$end;
+  $end=$this->_convert_date($end);
+  $this->add_iparam('end', $end, null, 1);
 }
 
 /**
   @param pos If is less than 0 set it to 0 */
 function set_pos($pos)
 {
-  if ($pos>=0)
-    $this->pos=$pos;
+  if (!is_numeric($pos) || $pos<0)
+    $this->rem_param('pos');
   else
-    $this->pos=0;
+    $this->add_iparam('pos', $pos, null, 1);
 
-  $this->set_page_num(floor($this->pos / $this->page_size));
+  $pos=$this->get_param('pos', 0);
+  $size=$this->get_param('pagesize', 10);
+  $this->set_page_num(floor($pos / $size));
 }
 
 function get_pos()
 {
-  return $this->pos;
+  return $this->get_param('pos', 0);
 }
 
 function set_page_num($page)
 {
-  if ($page>=0)
-    $this->page_num=$page;
-  else
-    $this->page_num=0;
+  $this->add_iparam('page', $page, null, 1);
 }
 
 function get_page_num()
 {
-  return $this->page_num;
+  return $this->get_param('page', 0);
 }
 
 /**
@@ -183,21 +143,17 @@ function get_page_num()
 function set_page_size($size)
 {
   if (!is_numeric($size))
-    return;
-
-  if ($size==0)
     $size=10;
-  if ($size<2)
-    $size=2;
-  if ($size>250)
-    $size=250;
-      
-  $this->page_size=$size;
+
+  if ($size!=10)
+    $this->add_iparam('pagesize', $size, 10, 2, 250);
+  else
+    $this->rem_param('pagesize');
 }
 
 function get_page_size()
 {
-  return $this->page_size;
+  return $this->get_param('pagesize', 10);
 }
 
 function set_orderby($orderby)
@@ -209,25 +165,25 @@ function set_orderby($orderby)
       $orderby=='-voting' ||
       $orderby=='newest' ||
       $orderby=='-newest' )
-    $this->orderby=$orderby;
+    $this->add_param('orderby', $orderby);
+  else 
+    $this->rem_param('orderby');
+  
 }
 
 function get_orderby()
 {
-  return $this->orderby;
+  $return=$this->get_param('orderby', 'data');
 }
 
 /** Creates a search object from a URL */
 function from_URL()
 {
-  if (isset($_REQUEST['id']))
-    $this->set_imageid($_REQUEST['id']);
-    
-  if (isset($_REQUEST['user']))
-    $this->set_userid($_REQUEST['user']);
-    
-  if (isset($_REQUEST['group']))
-    $this->set_groupid($_REQUEST['group']);
+  parent::from_URL();
+
+  $this->add_rparam('id', PARAM_PINT, null);
+  $this->add_rparam('user', PARAM_PINT, null);
+  $this->add_rparam('group', PARAM_PINT, null);
     
   if (isset($_REQUEST['tags']))
   {
@@ -241,9 +197,10 @@ function from_URL()
       foreach (split("[+]",$_REQUEST['tags']) as $tag)
         $this->add_tag($tag);
     }
-    else 
+    else
       $this->add_tag($_REQUEST['tags']);
   }
+
   if (isset($_REQUEST['tagop']))
     $this->set_tagop($_REQUEST['tagop']);
   
@@ -265,20 +222,16 @@ function from_URL()
   if (isset($_REQUEST['setop']))
     $this->set_setop($_REQUEST['setop']);
 
-  if (isset($_REQUEST['location']))
-    $this->set_location($_REQUEST['location']);
-  if (isset($_REQUEST['location_type']))
-    $this->set_location_type($_REQUEST['location_type']);
+  $this->add_rparam('location', PARAM_STRING, null);
+  $this->add_rparam('location_type', PARAM_PINT, null);
     
   if (isset($_REQUEST['start']))
     $this->set_date_start($_REQUEST['start']);
   if (isset($_REQUEST['end']))
     $this->set_date_end($_REQUEST['end']);
+  $this->add_iparam('pos', $_REQUEST['pos'], null, 1);
+  $this->add_iparam('page', $_REQUEST['page'], null, 1);
 
-  if (isset($_REQUEST['pos']))
-    $this->set_pos($_REQUEST['pos']);
-  if (isset($_REQUEST['page']))
-    $this->set_page_num($_REQUEST['page']);
   if (isset($_REQUEST['pagesize']))
     $this->set_page_size($_REQUEST['pagesize']);
   
@@ -286,140 +239,48 @@ function from_URL()
     $this->set_orderby($_REQUEST['orderby']);
 }
 
-/** Converts the search to a URL */
-function to_URL()
+function _to_params()
 {
-  $url='';
-  
-  if ($this->imageid>0)
-    $url .= '&amp;id='.$this->imageid;
-  if ($this->userid>0)
-    $url .= '&amp;user='.$this->userid;
-  if ($this->groupgid>0)
-    $url .= '&amp;groupg='.$this->groupgid;
-
   $num_tags=count($this->tags);
   if ($num_tags>0)
   {
-    $url .= '&amp;tags=';
+    $v='';
     for ($i=0; $i<$num_tags; $i++)
     {
-      $url .= $this->tags[$i];
+      $v.=$this->tags[$i];
       if ($i<$num_tags-1)
-        $url .= '+';
+        $v.='+';
     }
-    if ($num_tags>1 && $this->tagop!=0)
-      $url .= '&amp;tagop='.$this->tagop;
+    $this->add_param('tags', $v);
   }
   
   $num_sets=count($this->sets);
   if ($num_sets>0)
   {
-    $url .= '&amp;sets=';
+    $v='';
     for ($i=0; $i<$num_sets; $i++)
     {
-      $url .= $this->sets[$i];
+      $v.=$this->sets[$i];
       if ($i<$num_sets-1)
-        $url .= '+';
+        $v.='+';
     }
-    if ($num_sets>1 && $this->setop!=0)
-      $url .= '&amp;setop='.$this->setop;
+    $this->add_param('sets', $v);
   }
- 
-  if ($this->location!='')
-    $url .= '&amp;location='.$this->location;
-  if ($this->location_type!=LOCATION_UNDEFINED)
-    $url .= '&amp;location_type='.$this->location_type;
-    
-  if ($this->date_start>0)
-    $url .= '&amp;start='.$this->date_start;
-  if ($this->date_end>0)
-    $url .= '&amp;end='.$this->date_end;
-    
-  if ($this->pos>0)
-    $url .= '&amp;pos='.$this->pos;
-  if ($this->page_num>0)
-    $url .= '&amp;page='.$this->page_num;
-  if ($this->page_size!=10)
-    $url .= '&amp;pagesize='.$this->page_size;
- 
-  if ($this->orderby!='date')
-    $url .= '&amp;orderby='.$this->orderby;
-    
-  return $url;
 }
 
-/** Print a hidden input form 
-  @param name name of the hidden parameter
-  @param value value of the parameter */
-function _input($name, $value) 
+/** Converts the search to a URL */
+function to_URL()
 {
-  return "<input type=\"hidden\" name=\"$name\" value=\"$value\" />\n";
+  $this->_to_params();
+  return parent::to_URL();
 }
+
 
 /** Print the search as a HTML form */
 function to_form()
 {
-  $form='';
-  
-  if ($this->imageid>0)
-    $form .= $this->_input('id', $this->imageid);
-  if ($this->userid>0)
-    $form .= $this->_input('user', $this->userid);
-  if ($this->groupid>0)
-    $form .= $this->_input('group', $this->groupid);
-
-  $num_tags=count($this->tags);
-  if ($num_tags>0)
-  {
-    $tags='';
-    for ($i=0; $i<$num_tags; $i++)
-    {
-      $tags.=$this->tags[$i];
-      if ($i<$num_tags-1)
-        $tags.='+';
-    }
-    $form .= $this->_input('tags',$tags);
-    
-    if ($num_tags>1 && $this->tagop!=0)
-      $form .= $this->_input('tagop',$this->tagop);
-  }
-  
-  $num_sets=count($this->sets);
-  if ($num_sets>0)
-  {
-    $sets='';
-    for ($i=0; $i<$num_sets; $i++)
-    {
-      $sets.=$this->sets[$i];
-      if ($i<$num_sets-1)
-        $sets.='+';
-    }
-    $form .= $this->_input('sets',$sets);
-    
-    if ($num_sets>1 && $this->setop!=0)
-      $form .= $this->_input('setop',$this->setop);
-  }
-  
-  if ($this->location!='')
-    $form .= $this->_input('location', $this->location);
-  if ($this->location_type!=LOCATION_UNDEFINED)
-    $form .= $this->_input('location_type', $this->location_type);
-    
-  if ($this->date_start>0)
-    $form .= $this->_input('start',$this->date_start);
-  if ($this->date_end>0)
-    $form .= $this->_input('end',$this->date_end);
-    
-  if ($this->page_num>0)
-    $form .= $this->_input('page',$this->page_num);
-  if ($this->page_size!=10)
-    $form .= $this->_input('pagesize',$this->page_size);
-  
-  if ($this->orderby!='date')
-    $form .= $this->_input('orderby',$this->orderby);
-  
-  return $form;
+  $this->_to_params();
+  return parent::to_form();  
 }
 
 /** Create a SQL query from a tag array 
@@ -438,7 +299,8 @@ function _get_query_from_tags($tags, $sets, $order=false)
   $sql="SELECT i.id";
   if ($order)
     $sql.=$this->_get_column_order();
-  if ($this->tagop==1 || $this->tagop==2)
+  $tagop=$this->get_param('tagop', 0);
+  if ($tagop==1 || $tagop==2)
     $sql.=", COUNT(i.id) AS hits";
 
   $sql.=" FROM $db->image AS i";
@@ -446,18 +308,22 @@ function _get_query_from_tags($tags, $sets, $order=false)
     $sql .= ",$db->imagetag AS it";
   if ($num_sets)
     $sql .= ",$db->imageset AS iset";
-  if ($this->location!='') 
+  $location=$this->get_param('location', '');
+  if ($location!='') 
     $sql .= ",$db->imagelocation AS il";
     
   $sql .= " WHERE 1=1"; // dummy where clause
   
   // handle IDs of image
-  if ($this->imageid!=null)
-    $sql .= " AND i.id=".$this->imageid;
-  if ($this->userid!=null)
-    $sql .= " AND i.userid=".$this->userid;
-  if ($this->groupid!=null)
-    $sql .= " AND i.groupid=".$this->groupid;
+  $imageid=$this->get_param('id', 0);
+  $userid=$this->get_param('user', 0);
+  $groupid=$this->get_param('group', 0);
+  if ($imageid>0)
+    $sql .= " AND i.id=".$imageid;
+  if ($userid>0)
+    $sql .= " AND i.userid=".$userid;
+  if ($groupid>0)
+    $sql .= " AND i.groupid=".$groupid;
   
   // handle the acl
   $sql .= $this->_handle_acl();
@@ -505,17 +371,20 @@ function _get_query_from_tags($tags, $sets, $order=false)
   }
 
   // handle location
-  if ($this->location!='')
+  if ($location!='')
   {
-    $locationid=$db->location2id($this->location, $this->location_type);
+    $locationtype=$this->get_param('location_type', 0);
+    $locationid=$db->location2id($location, $location_type);
     $sql .= " AND i.id=il.imageid AND il.locationid=$locationid";
   }
 
   // handle date
-  if ($this->date_start>0)
-    $sql .= " AND i.date>=FROM_UNIXTIME(".$this->date_start.")";
-  if ($this->date_end>0)
-    $sql .= " AND i.date<FROM_UNIXTIME(".$this->date_end.")";
+  $start=$this->get_param('start', 0);
+  $end=$this->get_param('end', 0);
+  if ($start>0)
+    $sql .= " AND i.date>=FROM_UNIXTIME($start)";
+  if ($end>0)
+    $sql .= " AND i.date<FROM_UNIXTIME($end)";
 
   return $sql;
 }
@@ -527,9 +396,9 @@ function _handle_acl()
   global $user;
   
   $acl='';
-
+  $userid=$this->get_param('user', null);
   if ($user->is_admin() || 
-    $this->userid == $user->get_userid())
+    ($userid!=null && $userid == $user->get_userid()))
     return $acl;
     
   // if requested user id is not the own user id
@@ -560,7 +429,8 @@ function _handle_acl()
 function _get_column_order()
 {
   $order='';
-  switch ($this->orderby) {
+  $orderby=$this->get_param('orderby', 'date');
+  switch ($orderby) {
   case 'date':
   case '-date':
     $order.=",date";
@@ -589,11 +459,13 @@ function _get_column_order()
 function _handle_orderby()
 {
   $hits='';
-  if ($this->tagop==1 || $this->tagop==2)
+  $tagop=$this->get_param('tagop', 0);
+  if ($tagop==1 || $tagop==2)
     $hits.=" hits DESC";
 
   $order='';
-  switch ($this->orderby) {
+  $orderby=$this->get_param('orderby', 'date');
+  switch ($orderby) {
   case 'date':
     $order.=" i.date DESC";
     break;
@@ -663,15 +535,19 @@ function _handle_having($num_tags, $tagop)
   @return SQL limit string */
 function _handle_limit($limit=0)
 {
+  $pos=$this->get_param('pos', 0);
+  $page=$this->get_param('page', 0);
+  $size=$this->get_param('pagesize', 10);
+
   if ($limit==1)
   {
     // Limit, use $count
-    $pos=$this->page_num*$this->page_size;
-    return " LIMIT $pos," . $this->page_size;
+    $pos=$page*$size;
+    return " LIMIT $pos," . $size;
   }
   else if ($limit==2)
   {
-    return " LIMIT $this->pos," . $this->page_size;
+    return " LIMIT $pos," . $size;
   }
   return '';
 }
@@ -690,6 +566,7 @@ function get_query($limit=1, $order=true)
   global $db;
   $pos_tags=array();
   $neg_tags=array();
+  $tagop=$this->get_param('tagop', 0);
   foreach ($this->tags as $tag)
   {
     if ($tag{0}=='-')
@@ -724,7 +601,7 @@ function get_query($limit=1, $order=true)
     $sql.=$this->_get_query_from_tags($neg_tags, $neg_sets, false);
     $sql.=" ) ) AS i";
     $sql.=" GROUP BY i.id";
-    $sql.=$this->_handle_having($num_pos_tags, $this->tagop);
+    $sql.=$this->_handle_having($num_pos_tags, $tagop);
 
     if ($order)
       $sql.=$this->_handle_orderby();
@@ -734,7 +611,7 @@ function get_query($limit=1, $order=true)
   {
     $sql=$this->_get_query_from_tags($pos_tags, $pos_sets);
     $sql.=" GROUP BY i.id";
-    $sql.=$this->_handle_having($num_pos_tags, $this->tagop);
+    $sql.=$this->_handle_having($num_pos_tags, $tagop);
 
     if ($order)
       $sql.=$this->_handle_orderby();

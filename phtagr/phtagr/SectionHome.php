@@ -46,12 +46,18 @@ function print_all_tags() {
     $grad=20;
   else
     $grad=20/($max-$min);
+  echo "<div class=\"tags\">\n";
+  $tag_url=new Url();
+  $tag_url->add_param('section', 'explorer');
   foreach ($data as $tag => $hit)
   {
     $size=intval(8+($hit-$min)*$grad);
-    echo "<span style=\"font-size:${size}pt;\"><a href=\"?section=explorer&amp;tags=$tag\">$tag</a></span>&nbsp;\n";
+    $tag_url->add_param('tags', $tag);
+    $url=$tag_url->to_URL();
+    echo "<span style=\"font-size:${size}pt;\"><a href=\"$url\">$tag</a></span>&nbsp;\n";
   }
-  echo "</p>\n";
+  echo "</div>\n</p>\n";
+  unset($tag_url);
 }
 
 /** Prints randomly images as small square images 
@@ -92,6 +98,7 @@ function print_popular_images()
     array_splice($ids,rand(0,count($ids)-1),1);
 
   $search->set_page_size(0);
+  $search->add_param('section', 'image');
 
   echo "<h3>"._("Popular Images:")."</h3>\n\n";
   echo "<table width=\"100%\">\n<tr>\n";
@@ -105,8 +112,8 @@ function print_popular_images()
     {
       $name=$image->get_name();
       $search->set_pos($pos);
-      $url="index.php?section=image&amp;id=$id";
-      $url.=$search->to_URL();
+      $search->add_param('id', $id);
+      $url=$search->to_URL();
       echo "<a href=\"$url\"><img src=\"./image.php?id=$id&amp;type=mini\" alt=\"$name\" width=\"75\" height=\"75\"/></a>";
       unset($image);
     }    

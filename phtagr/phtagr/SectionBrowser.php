@@ -2,6 +2,7 @@
 
 include_once("$phtagr_lib/SectionBase.php");
 include_once("$phtagr_lib/Filesystem.php");
+include_once("$phtagr_lib/Url.php");
 
 class SectionBrowser extends SectionBase
 {
@@ -10,7 +11,7 @@ var $_fs;
 
 function SectionBrowser()
 {
-  $this->name="browser";
+  $this->SectionBase("browser");
   $this->_fs=new Filesystem();
 }
 
@@ -28,8 +29,11 @@ function reset_roots()
 function print_browser($dir)
 {
   $fs=$this->_fs;
+  $url=new Url();
+  $url->add_param('section', 'browser');
+  $href=$url->to_URL();
   echo "<div class=\"path\">"._("Current path:")."&nbsp;".
-    "<a href=\"./index.php?section=browser&amp;cd=\">"._("Root")."</a>";
+    "<a href=\"$href\">"._("Root")."</a>";
   $path='';
   if ($dir!='')
   {
@@ -50,13 +54,16 @@ function print_browser($dir)
         $path=$part;
       echo "&nbsp;/&nbsp;";
       
-      echo "<a href=\"./index.php?section=browser&amp;cd=$path\">$part</a>";
+      $url->add_param('cd', $path);
+      $href=$url->to_URL();
+      echo "<a href=\"$href\">$part</a>";
     }
   }
   echo "&nbsp;/&nbsp;</div>";
   
   echo "<form section=\"./index.php\" method=\"post\">\n<p>\n";
-  echo "<input type=\"hidden\" name=\"section\" value=\"browser\" />";
+  $url->rem_param('cd');
+  echo $url->to_form();
 
   echo "<input type=\"checkbox\" name=\"add[]\" value=\"$dir\" />&nbsp;. (this dir)<br />\n";
 
@@ -82,7 +89,9 @@ function print_browser($dir)
     else 
       $cd=$sub;
 
-    echo "<input type=\"checkbox\" name=\"add[]\" value=\"$cd\" />&nbsp;<a href=\"?section=browser&amp;cd=$cd\">$sub</a><br />\n";
+    $url->add_param('cd', $cd);
+    $href=$url->to_URL();
+    echo "<input type=\"checkbox\" name=\"add[]\" value=\"$cd\" />&nbsp;<a href=\"$href\">$sub</a><br />\n";
   }
   echo "<br/>\n";
   echo "<input type=\"checkbox\" name=\"create_all_previews\"/>&nbsp;"._("Create all previews.")."<br />\n";
@@ -151,7 +160,11 @@ function print_content()
       $this->info(_("All previews successfully created"));
     }
     $this->info(_("Images inserted"));
-    echo "<br/><a href=\"./index.php?section=browser&amp;cd=".$_REQUEST['cd']."\">"._("Search again")."</a><br/>\n";
+    $url=new Url();
+    $url->add_param('section', 'browser');
+    $url->add_param('cd', $_REQUEST['cd']);
+    $href=$url->to_URL();
+    echo "<br/><a href=\"$href\">"._("Search again")."</a><br/>\n";
   } else if (isset($_REQUEST['cd'])) 
   {
     $this->print_browser($_REQUEST['cd']);

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-09-14 18:03+0200\n"
+"POT-Creation-Date: 2006-10-02 08:58+0200\n"
 "PO-Revision-Date: 2006-09-16 16:12+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,3 +15,613 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+#: Edit.php:406
+msgid "Select all"
+msgstr ""
+
+#: Edit.php:408
+msgid "Edit Image Data"
+msgstr ""
+
+#: Edit.php:434
+msgid "Edit Access Control Lists (ACL)"
+msgstr ""
+
+#: Filesystem.php:64
+msgid "Filesystem"
+msgstr ""
+
+#: Image.php:95
+#, php-format
+msgid "File '%s' does not exists"
+msgstr ""
+
+#: SectionAdmin.php:308
+msgid "Please handle these operations carefully!"
+msgstr ""
+
+#: SectionBrowser.php:31
+msgid "Current path:"
+msgstr ""
+
+#: SectionBrowser.php:32
+msgid "Root"
+msgstr ""
+
+#: SectionBrowser.php:88
+msgid "Create all previews."
+msgstr ""
+
+#: SectionBrowser.php:89
+msgid "Insert images also from subdirectories."
+msgstr ""
+
+#: SectionBrowser.php:90
+msgid "Add images"
+msgstr ""
+
+#: SectionBrowser.php:91
+msgid "Clear"
+msgstr ""
+
+#: SectionBrowser.php:100 main.php:99
+msgid "Browser"
+msgstr ""
+
+#: SectionBrowser.php:118
+#, php-format
+msgid "Found %d images"
+msgstr ""
+
+#: SectionBrowser.php:127
+#, php-format
+msgid "Image '%s' was successfully inserted."
+msgstr ""
+
+#: SectionBrowser.php:130
+#, php-format
+msgid "Image '%s' was updated."
+msgstr ""
+
+#: SectionBrowser.php:133
+#, php-format
+msgid "Image '%s' is already the database."
+msgstr ""
+
+#: SectionBrowser.php:136
+#, php-format
+msgid "A error occured with file '%s'."
+msgstr ""
+
+#: SectionBrowser.php:143
+msgid "Now creating the previews. This can take a while..."
+msgstr ""
+
+#: SectionBrowser.php:151
+msgid "All previews successfully created"
+msgstr ""
+
+#: SectionBrowser.php:153
+msgid "Images inserted"
+msgstr ""
+
+#: SectionBrowser.php:154
+msgid "Search again"
+msgstr ""
+
+#: SectionHeaderRight.php:20 SectionSearch.php:90 main.php:95
+msgid "Search"
+msgstr ""
+
+#: SectionHeaderRight.php:22
+msgid "Advanced search"
+msgstr ""
+
+#: SectionHeaderRight.php:24
+msgid "Login"
+msgstr ""
+
+#: SectionHeaderRight.php:26
+msgid "Logout"
+msgstr ""
+
+#: SectionHome.php:22
+msgid "Popular tags:"
+msgstr ""
+
+#: SectionHome.php:96
+msgid "Popular Images:"
+msgstr ""
+
+#: SectionHome.php:121 main.php:93
+msgid "Home"
+msgstr ""
+
+#: SectionImage.php:58
+msgid "up"
+msgstr ""
+
+#: SectionImage.php:70
+msgid "prev"
+msgstr ""
+
+#: SectionImage.php:72
+msgid "next"
+msgstr ""
+
+#: SectionImage.php:115 SectionImage.php:224 SectionImage.php:303
+#: SectionImage.php:347 SectionImage.php:411
+msgid "edit"
+msgstr ""
+
+#: SectionImage.php:119
+msgid "Click here to add a caption"
+msgstr ""
+
+#: SectionImage.php:154
+msgid "Clicks:"
+msgstr ""
+
+#: SectionImage.php:155
+#, php-format
+msgid "%d (Popularity: %.3f)"
+msgstr ""
+
+#: SectionImage.php:186
+#, php-format
+msgid "Vote the image with %d points!"
+msgstr ""
+
+#: SectionImage.php:201
+#, php-format
+msgid "(%.1f, %d vote)"
+msgstr ""
+
+#: SectionImage.php:203
+#, php-format
+msgid "(%.1f, %d votes)"
+msgstr ""
+
+#: SectionImage.php:205
+msgid "No votes"
+msgstr ""
+
+#: SectionImage.php:213
+msgid "File:"
+msgstr ""
+
+#: SectionImage.php:223
+msgid "ACL:"
+msgstr ""
+
+#: SectionImage.php:234 SectionSearch.php:42
+msgid "Date:"
+msgstr ""
+
+#: SectionImage.php:285 SectionSearch.php:24
+msgid "Tags:"
+msgstr ""
+
+#: SectionImage.php:329 SectionSearch.php:33
+msgid "Sets:"
+msgstr ""
+
+#: SectionImage.php:392 SectionSearch.php:50
+msgid "Location:"
+msgstr ""
+
+#: SectionImage.php:454
+msgid "Select:"
+msgstr ""
+
+#: SectionImage.php:468
+msgid "Image"
+msgstr ""
+
+#: SectionInstall.php:65 SectionInstall.php:287 SectionInstall.php:375
+#: SectionInstall.php:454 SectionInstall.php:607 SectionInstall.php:658
+msgid "Invalid installation session!"
+msgstr ""
+
+#: SectionInstall.php:75 SectionInstall.php:96
+#, php-format
+msgid "Could not create directory '%s'"
+msgstr ""
+
+#: SectionInstall.php:88 SectionInstall.php:106
+#, php-format
+msgid "Could not run SQL query '%s'"
+msgstr ""
+
+#: SectionInstall.php:191
+msgid "No directory specified!"
+msgstr ""
+
+#: SectionInstall.php:210
+msgid "Your specified data directory is not writable!"
+msgstr ""
+
+#: SectionInstall.php:225 SectionInstall.php:239
+#, php-format
+msgid "File '%s' is not writable!"
+msgstr ""
+
+#: SectionInstall.php:233
+#, php-format
+msgid "Could not copy file '%s' to directory '%s'!"
+msgstr ""
+
+#: SectionInstall.php:247
+#, php-format
+msgid "Could not copy image.php to %s!"
+msgstr ""
+
+#: SectionInstall.php:257
+msgid "Data directory is not writable!"
+msgstr ""
+
+#: SectionInstall.php:272
+#, php-format
+msgid "%s does not exist!"
+msgstr ""
+
+#: SectionInstall.php:306
+msgid "Connection to the database successful!"
+msgstr ""
+
+#: SectionInstall.php:318
+#, php-format
+msgid "Could not write to config file %s"
+msgstr ""
+
+#: SectionInstall.php:355
+#, php-format
+msgid "Could not read the configuration file %s"
+msgstr ""
+
+#: SectionInstall.php:360
+msgid "Configuration file created successfully"
+msgstr ""
+
+#: SectionInstall.php:396
+msgid "Deletion of tables successful!"
+msgstr ""
+
+#: SectionInstall.php:399
+msgid "Error while deleting tables!"
+msgstr ""
+
+#: SectionInstall.php:410
+msgid "Tables created successfully!"
+msgstr ""
+
+#: SectionInstall.php:414
+msgid "The tables could not be created successfully"
+msgstr ""
+
+#: SectionInstall.php:421
+msgid "Tables initialized successfully!"
+msgstr ""
+
+#: SectionInstall.php:425
+msgid "Could not init the tables correctly"
+msgstr ""
+
+#: SectionInstall.php:470
+msgid "Could not add admin account: No connection to the database!"
+msgstr ""
+
+#: SectionInstall.php:476
+msgid "No password specified!"
+msgstr ""
+
+#: SectionInstall.php:484
+msgid "Admin account successfully created!"
+msgstr ""
+
+#: SectionInstall.php:489
+msgid "Passwords do not match!"
+msgstr ""
+
+#: SectionInstall.php:503
+#, php-format
+msgid "Could not open %slogin.txt or it contained wrong installation id!"
+msgstr ""
+
+#: SectionInstall.php:511
+msgid "Welcome to the installation of phTagr"
+msgstr ""
+
+#: SectionInstall.php:513
+#, php-format
+msgid ""
+"To ensure that nobody unwanted performs an installation, please\n"
+"create a file '%s' in the directory '%s' with the following content:"
+msgstr ""
+
+#: SectionInstall.php:519
+msgid "If you run phTagr in an Linux environment, execute"
+msgstr ""
+
+#: SectionInstall.php:528 SectionInstall.php:592 SectionInstall.php:644
+msgid "Next"
+msgstr ""
+
+#: SectionInstall.php:542
+msgid "Choosing the installation directory"
+msgstr ""
+
+#: SectionInstall.php:544
+msgid ""
+"phTagr allows you to make multiple instances of phTagr which all use\n"
+"the same codebase but have their own directory for upload, cache etc.\n"
+"and their own configurations. In this step you need to choose where you\n"
+"want to have this new instance installed to."
+msgstr ""
+
+#: SectionInstall.php:549
+msgid ""
+"The directory in which you want to install this instance must exist and\n"
+"bei either fully writable by the web server or at least the following\n"
+"directories and files in it need write access by the web server:"
+msgstr ""
+
+#: SectionInstall.php:569
+msgid "Directory:"
+msgstr ""
+
+#: SectionInstall.php:576
+msgid ""
+"You can optionally specify a datadirectory that is not directly\n"
+"accessible by the web browser. By doing so you can use a more secure "
+"accessing\n"
+"mode in which the web server includes the images in his reply and the "
+"images\n"
+"are not accessible through direct links."
+msgstr ""
+
+#: SectionInstall.php:585
+msgid "Data directory:"
+msgstr ""
+
+#: SectionInstall.php:592 SectionInstall.php:644 SectionInstall.php:685
+#: SectionInstall.php:714
+msgid "Reset"
+msgstr ""
+
+#: SectionInstall.php:611
+msgid "mySQL connection"
+msgstr ""
+
+#: SectionInstall.php:613
+msgid ""
+"In this step we create the connection to the mySQL database. Please\n"
+"fill in the parameters for your database in the following form:"
+msgstr ""
+
+#: SectionInstall.php:622
+msgid "Host:"
+msgstr ""
+
+#: SectionInstall.php:625
+msgid "User:"
+msgstr ""
+
+#: SectionInstall.php:628 SectionInstall.php:709
+msgid "Password:"
+msgstr ""
+
+#: SectionInstall.php:631
+msgid "Database:"
+msgstr ""
+
+#: SectionInstall.php:634
+msgid "Table Prefix:"
+msgstr ""
+
+#: SectionInstall.php:640
+msgid ""
+"To run multiple phTagr instances within one database, please\n"
+"  use the table prefix. Otherwise you can ignore it."
+msgstr ""
+
+#: SectionInstall.php:662
+msgid "Conflict while initializing the tables"
+msgstr ""
+
+#: SectionInstall.php:666
+msgid "this"
+msgstr ""
+
+#: SectionInstall.php:668
+#, php-format
+msgid ""
+"It seems as if there is already a phTagr installation in that\n"
+"database with the given prefix. To solve this conflict you can either use "
+"the\n"
+"existing database, delete the existing database or return to\n"
+"%s step and use another prefix or a different database this installation."
+msgstr ""
+
+#: SectionInstall.php:681
+msgid "Use the existing database."
+msgstr ""
+
+#: SectionInstall.php:682
+msgid "Delete the existing database."
+msgstr ""
+
+#: SectionInstall.php:698
+msgid "Creation of the admin account"
+msgstr ""
+
+#: SectionInstall.php:700
+msgid ""
+"In this final step you need to enter the details for the admin\n"
+"account of this phTagr instance."
+msgstr ""
+
+#: SectionInstall.php:708
+msgid "Username:"
+msgstr ""
+
+#: SectionInstall.php:710
+msgid "Confirm:"
+msgstr ""
+
+#: SectionInstall.php:711
+msgid "Email:"
+msgstr ""
+
+#: SectionInstall.php:713
+msgid "Create"
+msgstr ""
+
+#: SectionInstall.php:722
+msgid "Almost done!"
+msgstr ""
+
+#: SectionInstall.php:724
+#, php-format
+msgid ""
+"Please delete delete now the file '%s' to ensure\n"
+"that no one will create instances of phTagr that you do not want."
+msgstr ""
+
+#: SectionInstall.php:729
+#, php-format
+msgid ""
+"As a final step please move '%s' to '%s' and remove the write permissions!"
+msgstr ""
+
+#: SectionInstall.php:733
+msgid "Have fun!"
+msgstr ""
+
+#: SectionInstall.php:743
+msgid "Installation"
+msgstr ""
+
+#: SectionInstall.php:780
+msgid ""
+"Some of the required tables do exist already. Please use another prefix or "
+"delete them manually!"
+msgstr ""
+
+#: SectionSearch.php:18
+msgid "Advanced Search"
+msgstr ""
+
+#: SectionSearch.php:44
+msgid "after:"
+msgstr ""
+
+#: SectionSearch.php:45
+msgid "before:"
+msgstr ""
+
+#: SectionSearch.php:46
+msgid "E.g."
+msgstr ""
+
+#: SectionSearch.php:54
+msgid "undefined"
+msgstr ""
+
+#: SectionSearch.php:55
+msgid "City"
+msgstr ""
+
+#: SectionSearch.php:56
+msgid "Sublocation"
+msgstr ""
+
+#: SectionSearch.php:57
+msgid "State"
+msgstr ""
+
+#: SectionSearch.php:58
+msgid "Country"
+msgstr ""
+
+#: SectionSearch.php:62
+msgid "Sort by:"
+msgstr ""
+
+#: SectionSearch.php:65
+msgid "date"
+msgstr ""
+
+#: SectionSearch.php:66
+msgid "date asc"
+msgstr ""
+
+#: SectionSearch.php:67
+msgid "ranking"
+msgstr ""
+
+#: SectionSearch.php:68
+msgid "ranking asc"
+msgstr ""
+
+#: SectionSearch.php:69
+msgid "voting"
+msgstr ""
+
+#: SectionSearch.php:70
+msgid "voting asc"
+msgstr ""
+
+#: SectionSearch.php:71
+msgid "newest"
+msgstr ""
+
+#: SectionSearch.php:72
+msgid "newest desc"
+msgstr ""
+
+#: SectionSearch.php:77
+msgid "Page size:"
+msgstr ""
+
+#: SectionSearch.php:91
+msgid "Cancel"
+msgstr ""
+
+#: main.php:76
+msgid "No Installation found"
+msgstr ""
+
+#: main.php:78
+msgid "this link"
+msgstr ""
+
+#: main.php:79
+#, php-format
+msgid "It looks as if phtagr is not completely configured. "
+msgstr ""
+
+#: main.php:80
+#, php-format
+msgid "Please follow %s to install phtagr."
+msgstr ""
+
+#: main.php:94
+msgid "Explorer"
+msgstr ""
+
+#: main.php:103
+msgid "Upload"
+msgstr ""
+
+#: main.php:107
+msgid "Administration"
+msgstr ""
+
+#: main.php:171
+msgid "You are not loged in!"
+msgstr ""
+
+#: main.php:183
+msgid "You are not loged in as an admin"
+msgstr ""

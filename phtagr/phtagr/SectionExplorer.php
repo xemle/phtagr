@@ -20,7 +20,7 @@ function SectionExplorer()
   @param link Base link for pages
   @param current Index of current page 
   @param count Absolut count of pages*/
-function print_navigator($link, $current, $count)
+function print_navigator($search, $current, $count)
 {
   if ($count<2) return;
 
@@ -29,7 +29,9 @@ function print_navigator($link, $current, $count)
   if ($current>0)
   {
     $i=$current-1;
-    printf("<a href=\"$link%s\">&lt;</a>&nbsp;\n", ($i>0?"&amp;page=$i":""), $i);
+    $search->set_page_num($i);
+    $url=$search->to_URL();
+    echo "<a href=\"$url\">&lt;</a>&nbsp;\n";
   }
     
   for ($i=0; $i < $count; $i++)
@@ -43,7 +45,9 @@ function print_navigator($link, $current, $count)
             ($i < 3 || $i > $count-4 || 
             ($i-$current < 4 && $current-$i<4)))
     {
-      printf("<a href=\"$link%s\">%d</a>\n", ($i>0?"&amp;page=$i":""), $i);
+      $search->set_page_num($i);
+      $url=$search->to_URL();
+      printf("<a href=\"$url\">%d</a>\n",$i);
     }
     else if ($i == $count-4 || $i == 3) 
       echo "&nbsp;...&nbsp;\n";
@@ -51,9 +55,57 @@ function print_navigator($link, $current, $count)
   if ($current<$count-1)
   {
     $i=$current+1;
-    printf("&nbsp;<a href=\"$link%s\">&gt;</a>\n", ($i>0?"&amp;page=$i":""), $i);
+    $search->set_page_num($i);
+    $url=$search->to_URL();
+    echo "&nbsp;<a href=\"$url\">&gt;</a>\n";
   }
   echo "</div>\n\n";
+}
+
+function print_tags($tags, $sets, $locations)
+{
+  echo "<div style=\"clear: both\">";
+  $url=new Url();
+  $url->add_param('section', 'explorer');
+  echo "Tags: ";
+  arsort($tags);
+  foreach ($tags as $tag => $nums) 
+  {
+    $url->add_param('tags', $tag);
+    $href=$url->to_URL();
+    echo "<a href=\"$href\">$tag ($nums)</a>\n";
+  }
+  $url->rem_param('tags');
+
+  echo "<br/>\nSets: ";
+  arsort($sets);
+  foreach ($sets as $set => $nums) 
+  {
+    $url->add_param('sets', $set);
+    $href=$url->to_URL();
+    echo "<a href=\"$href\">$set ($nums)</a>\n";
+  }
+  $url->rem_param('sets');
+
+  echo "<br/>\nLocations: ";
+  arsort($locations);
+  foreach ($locations as $loc => $nums) 
+  {
+    $url->add_param('location', $loc);
+    $href=$url->to_URL();
+    echo "<a href=\"$href\">$loc ($nums)</a>\n";
+  }
+
+  echo "</div>\n";
+}
+
+/** Merge an array and count the entries
+  @param counter Pointer to the merged array
+  @param add Array to add */
+function _array_count_merge(&$counter, $add)
+{
+  foreach ($add as $value)
+    $counter[$value]=$counter[$value]+1;
 }
 
 /** Print the current page with an table */
@@ -82,11 +134,11 @@ function print_content()
     echo "</h2>\n";
   }
   else
-    echo "<h2>Explore Tags</h2>\n";
+    echo "<h2>"._("Explore Tags")."</h2>\n";
 
   if ($count==0)
   {
-    echo "<p>No images found!</p>\n";
+    echo "<p>"._("No images found!")."</p>\n";
     return;
   }
   
@@ -97,54 +149,57 @@ function print_content()
   {
     return;
   }
-  
-  $search_nav=clone $search;
-  $page=$search_nav->get_page_num();
-  $search_nav->set_page_num(0);
-  $search_nav->set_pos(0);
-  $url_nav="index.php?section=explorer";
-  $url_nav.=$search_nav->to_URL();
-  $this->print_navigator($url_nav, $page, ceil($count/$search_nav->page_size));
-  
-  // Formular for further actions
-  echo "<form id=\"formExplorer\" action=\"index.php\" method=\"post\">";
 
-  echo "<div class=\"tableview\"><table>\n";
+  // Formular for further actions
+  echo "<form id=\"formExplorer\" action=\"index.php\" method=\"post\">\n";
+  
+  $nav_search=clone $search;
+  $nav_current=$nav_search->get_page_num();
+  $nav_size=$nav_search->get_page_size();
+  $nav_search->set_page_num(0);
+  $nav_search->set_pos(0);
+  $this->print_navigator($nav_search, $nav_current, ceil($count/$nav_size));
+ 
+  $tags=array();
+  $sets=array();
+  $locs=array();
+
+  echo "<div class=\"images\">\n";
   $cell=0;
   $pos=$search->get_page_size()*$search->get_page_num();
   while($row = mysql_fetch_row($result)) 
   {
-    if ($cell % 2 == 0) {
-        echo "<tr>\n";
-    }
-    echo "<td class=\"thumbcell\">";
-    echo "<a name=\"img-".$row[0]."\"/>\n";
+    echo "<div class=\"thumbcell\"><a name=\"img-".$row[0]."\"/>\n";
     $search->set_pos($pos);
     $sec_img=new SectionImage($row[0]);
     $sec_img->print_preview(&$search);
-    echo "</td>\n\n";
-    
-    if ($cell % 2 == 1) {
-      echo "</tr>\n";
+    $img=$sec_img->get_img();
+    if ($img)
+    {
+      $this->_array_count_merge(&$tags, $img->get_tags());
+      $this->_array_count_merge(&$sets, $img->get_sets());
+      $this->_array_count_merge(&$locs, $img->get_locations());
     }
+    echo "</div>\n";
     $cell++;
     $pos++;
   }
 
-  echo "</table></div>\n\n";
+  echo "</div>\n\n";
 
-  $this->print_navigator($url_nav, $page, ceil($count/$search_nav->page_size));
-  
-  echo "<p>
-<input type=\"hidden\" name=\"page\" value=\"$page\" />
-<input type=\"hidden\" name=\"section\" value=\"explorer\" />\n";
+  //$this->print_tags($tags, $sets, $locs);
+
+  $this->print_navigator($nav_search, $nav_current, ceil($count/$nav_size));
+
+  echo "<div class=\"edit\">";
   echo $search->to_form();
-  echo "</p>\n";
 
   $edit=new Edit();
+  $edit->print_bar();
   if ($user->is_member())
     $edit->print_edit_inputs();
   $edit->print_buttons();
+  echo "</edit>\n";
   echo "</form>\n";
 }
 

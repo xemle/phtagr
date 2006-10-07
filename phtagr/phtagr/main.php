@@ -85,30 +85,33 @@ if (!$db->connect() && $section!="install")
 }
 
 $user->check_session();
+$search= new Search();
+$search->from_URL();
+
 
 $pref=$db->read_pref($user->get_userid());
 $pref['theme']='default';
 $pref['path.theme']="./themes/".$pref['theme'];
 
-$menu->add_menu_item(_("Home"), "index.php");
-$menu->add_menu_item(_("Explorer"), "index.php?section=explorer");
-$menu->add_menu_item(_("Search"), "index.php?section=search");
+$menu=new SectionMenu('menu', _("Menu"));
+$menu->set_item_param('section');
 
+$menu->add_item('home', _("Home"));
+$menu->add_item('explorer', _("Explorer"));
+$menu->add_item('search', _("Search"));
+$menu->add_item_param('search', 'mode', 'full');
 if ($user->can_browse())
 {
-  $menu->add_menu_item(_("Browser"), "index.php?section=browser");
+  $menu->add_item('browser', _("Browser"));
 }
 if ($user->can_upload())
 {
-  $menu->add_menu_item(_("Upload"), "index.php?section=upload");
+  $menu->add_item('upload', _("Upload"));
 }
 if ($user->is_admin())
 {
-  $menu->add_menu_item(_("Administration"), "index.php?section=admin");
+  $menu->add_item('admin', _("Administration"));
 }
-
-$search= new Search();
-$search->from_URL();
 
 if (isset($_REQUEST['section']))
 {

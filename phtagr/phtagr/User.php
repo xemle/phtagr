@@ -42,11 +42,17 @@ function init_session()
     $_SESSION['username']='anonymous';
     $_SESSION['img_viewed']=array();
     $_SESSION['img_voted']=array();
+    $_SESSION['nrequests']=0;
   } else {
     if (isset($_SESSION['lang']))
       $this->_set_lang($_SESSION['lang']);
   }
   $_SESSION['update']=time();
+  $_SESSION['nrequests']++;
+  if (isset($_COOKIE['PHPSESSID']))
+    $_SESSION['withcookie']=true;
+  else
+    $_SESSION['withcookie']=false;
 }
 
 /** Validates a user with its password

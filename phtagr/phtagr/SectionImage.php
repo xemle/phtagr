@@ -16,6 +16,12 @@ function SectionImage($id=0)
     $this->img=new Image($id);
 }
 
+/** Returns the image object of the section */
+function get_img()
+{
+  return $this->img;
+}
+
 /** print image preview table */
 function print_navigation($search)
 {
@@ -49,22 +55,26 @@ function print_navigation($search)
   echo "\n<div class=\"navigator\">\n";
   while ($row=mysql_fetch_row($result))
   {
+    $id=$row[0];
     $search->set_pos($cur_pos);
     // skip current image
     if ($cur_pos==$pos)
     {
-      $url="index.php?section=explorer";
-      $url.=$search->to_URL();
+      $search->add_param('section', 'explorer');
+      $search->rem_param('id');
+      if ($this->img) {
+        $search->set_anchor('img-'.$this->img->get_id());
+      }
+      $url=$search->to_URL();
+      $search->rem_anchor();
       echo "<a href=\"$url\">"._("up")."</a>&nbsp;";
       $cur_pos++;
       continue;
     }
 
-    $id=$row[0];
-    $search->set_pos($cur_pos);
-    
-    $url="index.php?section=image&amp;id=$id";
-    $url.=$search->to_URL();
+    $search->add_param('section', 'image');
+    $search->set_imageid($id);
+    $url=$search->to_URL();
     
     if ($cur_pos<$pos)
       echo "<a href=\"$url\">"._("prev")."</a>&nbsp;";
@@ -165,12 +175,16 @@ function print_voting()
   $votes=$img->get_votes();
   $voting=sprintf("%.2f", $img->get_voting());
 
-  $url.="index.php?section=".$_REQUEST['section'];
-  $url.=$search->to_URL();
 
   $can_vote=false;
-  if (!isset($_SESSION['img_voted'][$id]))
+  if (!isset($_SESSION['img_voted'][$id]) && $_SESSION['nrequests']>1)
+  {
     $can_vote=true;
+    $vote_url=clone $search;
+    $vote_url->add_param('action', 'edit');
+    $vote_url->add_param('image', $id);
+    $vote_url->set_anchor('img-'.$id);
+  }
 
   $none=$pref['path.theme'].'/vote-none.png';
   $set=$pref['path.theme'].'/vote-set.png';
@@ -181,16 +195,18 @@ function print_voting()
     $title='';
     $fx='';
     if ($can_vote) {
-      echo "<a href=\"$url&amp;action=edit&amp;image=$id&amp;voting=$i#img-$id\">";
+      $vote_url->add_param('voting', $i);
+      $url=$vote_url->to_URL();
+      echo "<a href=\"$url\">";
       $title=" title=\"".
         sprintf(_("Vote the image with %d points!"), $i)."\"";
       $fx=" onmouseover=\"vote_highlight($id, $voting, $i)\" onmouseout=\"vote_reset($id, $voting)\"";
     } 
 
     if ($voting>0 && $i<=$voting)
-      echo "<img id=\"voting-$id-$i\" src=\"$set\" alt=\"*\" $title$fx/>\n";
+      echo "<img id=\"voting-$id-$i\" src=\"$set\" alt=\"#\" $title$fx/>\n";
     else
-      echo "<img id=\"voting-$id-$i\" src=\"$none\" alt=\"-\" $title$fx/>\n";
+      echo "<img id=\"voting-$id-$i\" src=\"$none\" alt=\".\" $title$fx/>\n";
 
     if ($can_vote)
       echo "</a>\n";
@@ -234,60 +250,51 @@ function print_row_date()
     <th>"._("Date:")."</th>
     <td>";
   $date=date("Y-m-d H:i:s", $sec);
-  $search_date=new Search();
-  $search_date->date_start=$sec-(60*30*3);
-  $search_date->date_end=$sec+(60*30*3);
-  $url="index.php?section=explorer";
-  $url.=$search_date->to_URL();
+  $date_url=new Url();
+  $date_url->add_param('section','explorer');
+  $date_url->add_param('start', $sec-(60*30*3));
+  $date_url->add_param('end', $sec+(60*30*3));
+  $url=$date_url->to_URL();
   echo "<a href=\"$url\">$date</a>\n";
 
   // day
-  $search_date->date_start=$sec-(60*60*12);
-  $search_date->date_end=$sec+(60*60*12);
-  $url="index.php?section=explorer";
-  $url.=$search_date->to_URL();
+  $date_url->add_param('start', $sec-(60*60*12));
+  $date_url->add_param('end', $sec+(60*60*12));
+  $url=$date_url->to_URL();
   echo "[<span class=\"day\"><a href=\"$url\">d</a></span>";
   // week 
-  $search_date->date_start=$sec-(60*60*12*7);
-  $search_date->date_end=$sec+(60*60*12*7);
-  $url="index.php?section=explorer";
-  $url.=$search_date->to_URL();
+  $date_url->add_param('start', $sec-(60*60*12*7));
+  $date_url->add_param('end', $sec+(60*60*12*7));
+  $url=$date_url->to_URL();
   echo "<span class=\"week\"><a href=\"$url\">w</a></span>";
   // month 
-  $search_date->date_start=$sec-(60*60*12*30);
-  $search_date->date_end=$sec+(60*60*12*30);
-  $url="index.php?section=explorer";
-  $url.=$search_date->to_URL();
+  $date_url->add_param('start', $sec-(60*60*12*30));
+  $date_url->add_param('end', $sec+(60*60*12*30));
+  $url=$date_url->to_URL();
   echo "<span class=\"month\"><a href=\"$url\">m</a></span>]";
   echo "\n    </td>\n  </tr>\n";
+  unset($date_url);
 }
 
 function print_row_tags()
 {
-  global $db;
   global $user;
   $img=$this->img;
   $id=$img->get_id();
-  $sql="SELECT t.name
-        FROM $db->tag AS t, $db->imagetag AS it
-        WHERE it.imageid=$id 
-          AND it.tagid=t.id
-        GROUP BY t.name";
-  $result = $db->query($sql);
-  $tags=array();
-  while($row = mysql_fetch_row($result)) {
-    array_push($tags, $row[0]);
-  }
-  sort($tags);
+  $tags=$img->get_tags();
   $num_tags=count($tags);
   
   echo "  <tr>
     <th>"._("Tags:")."</th>
     <td id=\"tag-$id\">";  
 
+  $tag_url=new Url();
+  $tag_url->add_param('section', 'explorer');
   for ($i=0; $i<$num_tags; $i++)
   {
-    echo "<a href=\"index.php?section=explorer&amp;tags=" . $tags[$i] . "\">" . $tags[$i] . "</a>";
+    $tag_url->add_param('tags', $tags[$i]);
+    $url=$tag_url->to_URL();
+    echo "<a href=\"$url\">" . $tags[$i] . "</a>";
     if ($i<$num_tags-1)
         echo ", ";
   }
@@ -304,6 +311,7 @@ function print_row_tags()
   }
   echo "</td>
   </tr>\n";
+  unset($tag_url);
 }
 
 function print_row_sets()
@@ -312,26 +320,20 @@ function print_row_sets()
   global $user;
   $img=$this->img;
   $id=$img->get_id();
-  $sql="SELECT s.name
-        FROM $db->set AS s, $db->imageset AS iset
-        WHERE iset.imageid=$id 
-          AND iset.setid=s.id
-        GROUP BY s.name";
-  $result = $db->query($sql);
-  $sets=array();
-  while($row = mysql_fetch_row($result)) {
-    array_push($sets, $row[0]);
-  }
-  sort($sets);
+  $sets=$img->get_sets();
   $num_sets=count($sets);
   
   echo "  <tr>
     <th>"._("Sets:")."</th>
     <td id=\"set-$id\">";  
 
+  $set_url=new Url();
+  $set_url->add_param('section', 'explorer');
   for ($i=0; $i<$num_sets; $i++)
   {
-    echo "<a href=\"index.php?section=explorer&amp;sets=" . $sets[$i] . "\">" . $sets[$i] . "</a>";
+    $set_url->add_param('sets', $sets[$i]);
+    $url=$set_url->to_URL();
+    echo "<a href=\"$url\">" . $sets[$i] . "</a>";
     if ($i<$num_sets-1)
         echo ", ";
   }
@@ -348,6 +350,7 @@ function print_row_sets()
   }
   echo "</td>
   </tr>\n";
+  unset($set_url);
 }
 
 function print_row_location()
@@ -392,10 +395,14 @@ function print_row_location()
     <th>"._("Location:")."</th>
     <td id=\"location-$id\">";  
 
+  $loc_url=new Url();
+  $loc_url->add_param('section', 'explorer');
   $num_location=count($location);
   for ($i=0; $i<$num_location; $i++)
   {
-    echo "<a href=\"index.php?section=explorer&amp;location=".$location[$i][1] . "\">" . $location[$i][1] . "</a>";
+    $loc_url->add_param('location', $location[$i][1]);
+    $url=$loc_url->to_URL();
+    echo "<a href=\"$url\">" . $location[$i][1] . "</a>";
     if ($i<$num_location-1)
         echo ", ";
   }
@@ -412,6 +419,7 @@ function print_row_location()
   }
   echo "</td>
   </tr>\n";
+  unset($loc_url);
 }
 
 function print_preview($search=null) 
@@ -426,13 +434,13 @@ function print_preview($search=null)
   echo "\n<div class=\"name\">$name</div>\n";
   echo "<div class=\"thumb\">&nbsp;";
   
-  $link="index.php?section=image&amp;id=$id";
-  if ($search!=null)
-    $link.=$search->to_URL();
-  
+  $img_url=clone $search;
+  $img_url->add_param('section', 'image');
+  $img_url->add_param('id', $id);
+  $url=$img_url->to_URL(); 
   $size=$img->get_size(220);
 
-  echo "<a href=\"$link\"><img src=\"./image.php?id=$id&amp;type=thumb\" alt=\"$name\" title=\"$name\" ".$size[2]."/></a></div>\n";
+  echo "<a href=\"$url\"><img src=\"./image.php?id=$id&amp;type=thumb\" alt=\"$name\" title=\"$name\" ".$size[2]."/></a></div>\n";
   
   $this->print_caption();
   $this->print_voting();

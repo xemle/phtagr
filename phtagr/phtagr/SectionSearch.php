@@ -15,11 +15,13 @@ function SectionSearch()
 
 function print_content()
 {
-  echo "<h2>"._("Advanced Search")."</h2>
-  
-<form action=\"index.php\" method=\"post\">
-<div><input type=\"hidden\" name=\"section\" value=\"explorer\" /></div>
-<table>
+  echo "<h2>"._("Advanced Search")."</h2>\n";
+  $url=new Url();
+  $url->add_param('section', 'search');
+
+  echo "<form action=\"index.php\" method=\"post\">\n";
+  echo $url->to_form();
+  echo "<table>
   <tr>
     <th>"._("Tags:")."</th>
     <td>
@@ -64,8 +66,8 @@ function print_content()
       <select name=\"orderby\">
         <option value=\"date\" selected=\"selected\">"._("date")."</option>
         <option value=\"-date\">"._("date asc")."</option>
-        <option value=\"ranking\">"._("ranking")."</option>
-        <option value=\"-ranking\">"._("ranking asc")."</option>
+        <option value=\"ranking\">"._("popular")."</option>
+        <option value=\"-ranking\">"._("popular asc")."</option>
         <option value=\"voting\">"._("voting")."</option>
         <option value=\"-voting\">"._("voting asc")."</option>
         <option value=\"newest\">"._("newest")."</option>

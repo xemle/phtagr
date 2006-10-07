@@ -5,20 +5,25 @@ include_once("$phtagr_lib/Base.php");
 class SectionBase extends Base
 {
 
-/** Name of this section. It is the class type of the surrounding HTML div block */
-var $name;
+/** The class type of the surrounding HTML div block */
+var $_class;
 /** Cascaded sections. They will be printed befor the content */
 var $sections;
 /** Content string */
 var $content;
 
-function SectionBase($name='default')
+/** @param class DIV class of the section */
+function SectionBase($class='default')
 {
-  $this->name=$name;
+  $this->_class=$class;
   $this->sections=array();
   $this->content='';
 }
     
+function set_class($class)
+{
+  $this->_class=$class;
+}
 /** Add a cascated section. 
   @note If you are using PHP 4, objects should be passed by references which is
   done by an ampersand 
@@ -55,7 +60,7 @@ function print_content()
   section in the class of section's name */
 function print_sections()
 {
-  $this->div_open($this->name);
+  $this->div_open($this->_class);
   if (count($this->sections))
   { 
     foreach ($this->sections as $sub)

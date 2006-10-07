@@ -76,6 +76,20 @@ function execute()
       continue;
     }
       
+    if (isset($_REQUEST['command']))
+    {
+      $cmd=$_REQUEST['command'];
+      if ($cmd=='remove')
+      {
+        if ($user->is_owner(&$img))
+        {
+          $img->remove_from_db();
+          unset($img);
+          continue;
+        }
+      }
+    }
+
     /* Accept only votes of unvoted images for this session */
     if (isset($_REQUEST['voting']) && 
       !isset($_SESSION['img_voted'][$id]))
@@ -397,13 +411,39 @@ function _handle_request_acl(&$img)
   return false;
 }
 
+function print_bar()
+{
+  global $user;
+  echo "<div class=\"tab\">
+<h2>"._("Actions:")."</h2>
+<ul>
+  <li>"._("Images per page:")." <select size=\"1\" name=\"pagesize\">
+  <option value=\"10\">"._("Default")."</option>
+  <option value=\"5\">5</option>
+  <option value=\"10\">10</option>
+  <option value=\"25\">25</option>
+  <option value=\"50\">50</option>
+  <option value=\"100\">100</option>
+  <option value=\"150\">150</option>
+  <option value=\"200\">200</option>
+</select></li>
+  <li>"._("Images:")." <select size=\"1\" name=\"command\">
+    <option value=\"none\">"._("Nothing")."</option>
+    <option value=\"mark\">"._("Mark")."</option>
+    <option value=\"demark\">"._("Demark")."</option>\n";
+    if ($user->is_member())
+      echo "<option value=\"remove\">"._("Remove from DB")."</option>\n";
+  echo "  </select></li>
+  <li><input type=\"checkbox\" id=\"selectall\" onclick=\"checkbox('selectall', 'images[]')\"/>"._("Select all images")."</li>
+</ul>
+</div>";
+}
 
 /** Print the inputs to edit IPTC tags like comment, tags or sets. */
 function print_edit_inputs()
 {
   echo "
 <div class=\"edit\">
-<p><input type=\"checkbox\" id=\"selectall\" onclick=\"checkbox('selectall', 'images[]')\"/>"._("Select all")."</p>
 
 <p><a href=\"javascript:void(0)\" id=\"btnEdit\" class=\"jsbutton\" onclick=\"toggle_visibility('toggleEdit', 'btnEdit')\">-&gt; "._("Edit Image Data")."</a></p>
 

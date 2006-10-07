@@ -17,8 +17,7 @@ class SectionAdmin extends SectionBase
 
 function SectionAdmin()
 {
-  global $db;
-  $this->name="administration";
+  $this->SectionBase("administration");
 }
 
 function exec_general ()
@@ -48,10 +47,11 @@ function print_general ()
 
   echo "<form action=\"./index.php\" method=\"POST\">\n";
 
-  echo "<input type=\"hidden\" name=\"section\" value=\"admin\" />\n";
-  echo "<input type=\"hidden\" name=\"page\" value=\"".ADMIN_TAB_GENERAL."\" />\n";
-  echo "<input type=\"hidden\" name=\"action\" value=\"settings\" /> \n";
-
+  $url=new Url();
+  $url->add_param('section', 'admin');
+  $url->add_param('page', ADMIN_TAB_GENERAL);
+  $url->add_param('action', 'settings');
+  echo $url->to_form();
   if ($user_self_register)
     echo "<input type=\"checkbox\" name=\"user_self_register\" checked/>";
   else
@@ -63,7 +63,7 @@ function print_general ()
   echo "<p></p>\n";
 }
 
-function exec_user ()
+function exec_user()
 {
   if (!isset ($_REQUEST['action']))
     return false;
@@ -73,18 +73,18 @@ function exec_user ()
   $action=$_REQUEST['action'];
   if ($action=='create')
   {
-    echo "<h3>Creating account</h3>\n";
+    echo "<h3>"._("Creating account")."</h3>\n";
     $name=$_REQUEST['name'];
     $password=$_REQUEST['password'];
     $confirm=$_REQUEST['confirm'];
     if ($password != $confirm)
     {
-      $this->error("Password mismatch");
+      $this->error(_("Password mismatch"));
       return;
     }
     if ($account->user_create($name, $password)==true)
     {
-      $this->success("User '$name' created");
+      $this->success(sprintf(_("User '%s' created"), $name));
     }
 
     return;
@@ -98,7 +98,7 @@ function exec_user ()
   {
     $account=new SectionAccount();
     $info=$account->get_info($_REQUEST['id']);
-    echo "<h3>Editing User '".$info['name']."'</h3>\n";
+    echo "<h3>".sprintf(_("Editing User '%s'"), $info['name'])."'</h3>\n";
 
     // If 'email' is set in the request, we assume that this current request
     // is already an update request with all the values we want to update.
@@ -108,28 +108,43 @@ function exec_user ()
       $info['firstname']=$_REQUEST['firstname'];
       $info['lastname']=$_REQUEST['lastname'];
       if ($account->set_info($info))
-        $this->success("Update successful!");
+        $this->success(_("Update successful!"));
       else
-        $this->error("Error updating userdata!");
+        $this->error(_("Error updating userdata!"));
 
       return;
     }
 
     // If we don't have a update request we show all the values we can
     // update.
-    echo "<form action=\"./index.php?section=admin&page=".ADMIN_TAB_USER."\" method=\"post\">
-<input type=\"hidden\" name=\"action\" value=\"edit\" />
-<input type=\"hidden\" name=\"id\" value=\"".$_REQUEST['id']."\" />
+    echo "<form action=\"./index.php\" method=\"post\">\n";
 
-<table>
-  <tr><td>First Name:</td><td><input type=\"text\" name=\"firstname\" value=\"".$info['firstname']."\" /><td></tr>
-  <tr><td>Last Name:</td><td><input type=\"text\" name=\"lastname\" value=\"".$info['lastname']."\" /><td></tr>
-  <tr><td>Email:</td><td><input type=\"text\" name=\"email\" value=\"".$info['email']."\" /><td></tr>
-  <tr><td></td>
-      <td><input type=\"submit\" value=\"Save\"/>&nbsp;&nbsp;
-      <input type=\"reset\" value=\"Reset\"/></td></tr>
+    $url=new Url();
+    $url->add_param('section', 'admin');
+    $url->add_param('page', ADMIN_TAB_USER);
+    $url->add_param('action', 'edit');
+    $url->add_param('id', $_REQUEST['id']);
+    echo $url->to_form();
+    echo "<table>
+  <tr>
+    <td>"._("First Name:")."</td>
+    <td><input type=\"text\" name=\"firstname\" value=\"".$info['firstname']."\" /><td>
+  </tr>
+  <tr>
+    <td>"._("Last Name:")."</td>
+    <td><input type=\"text\" name=\"lastname\" value=\"".$info['lastname']."\" /><td>
+  </tr>
+  <tr>
+    <td>"._("Email:")."</td>
+    <td><input type=\"text\" name=\"email\" value=\"".$info['email']."\" /><td>
+  </tr>
+  <tr>
+    <td></td>
+    <td><input type=\"submit\" value=\"Save\"/>&nbsp;&nbsp;
+      <input type=\"reset\" value=\"Reset\"/></td>
+  </tr>
 </table>
-</form><p></p>\n\n";
+</form>\n\n";
 
     return;
   }
@@ -140,21 +155,40 @@ function print_user ()
 {
   global $db;
 
-  echo "<h3>Create User</h3>\n";
-  echo "<form action=\"./index.php?section=admin&page=".ADMIN_TAB_USER."\" method=\"post\">
-<input type=\"hidden\" name=\"action\" value=\"create\" />
-<table>
-  <tr><td>Username:</td><td><input type=\"text\" name=\"name\" value=\"$this->user\"/><td></tr>
-  <tr><td>Password:</td><td><input type=\"password\" name=\"password\"/><td></tr>   
-  <tr><td>Confirm:</td><td><input type=\"password\" name=\"confirm\"/><td></tr>
-  <tr><td>Email:</td><td><input type=\"text\" name=\"email\"/><td></tr>
-  <tr><td></td>
-      <td><input type=\"submit\" value=\"Create\"/>&nbsp;&nbsp;
-      <input type=\"reset\" value=\"Reset\"/></td></tr>
-</table>
-</form><p></p>\n\n";
+  $url=new Url();
+  $url->add_param('section', 'admin');
+  $url->add_param('page', ADMIN_TAB_USER);
+  $url->add_param('action', 'create');
 
-  echo "<h3>Available Users</h3>\n";
+  echo "<h3>Create User</h3>\n";
+  echo "<form action=\"./index.php\" method=\"post\">\n";
+  echo $url->to_form();
+  echo "<table>
+  <tr>
+    <td>"._("Username:")."</td>
+    <td><input type=\"text\" name=\"name\" value=\"$this->user\"/><td>
+  </tr>
+  <tr>
+    <td>"._("Password:")."</td>
+    <td><input type=\"password\" name=\"password\"/><td>
+  </tr>   
+  <tr>
+    <td>"._("Confirm:")."</td>
+    <td><input type=\"password\" name=\"confirm\"/><td>
+  </tr>
+  <tr>
+    <td>"._("Email:")."</td>
+    <td><input type=\"text\" name=\"email\"/><td>
+  </tr>
+  <tr>
+    <td></td>
+    <td><input type=\"submit\" value=\"Create\"/>&nbsp;&nbsp;
+      <input type=\"reset\" value=\"Reset\"/></td>
+  </tr>
+</table>
+</form>\n\n";
+
+  echo "<h3>"._("Available Users")."</h3>\n";
 
   $sql="SELECT *
         FROM $db->user";
@@ -163,27 +197,29 @@ function print_user ()
   if (!$result)
     return;
 
-  echo "<form action=\"./index.php?section=admin&page=".ADMIN_TAB_USER."\" method=\"post\">\n";
+  echo "<form action=\"./index.php\" method=\"post\">\n";
   
   echo "<table>
   <tr> 
     <th></td>
-    <th>Name</th>
-    <th>Actions</th>
+    <th>"._("Name")."</th>
+    <th>"._("Actions")."</th>
   </tr>\n";
   $delete="index.php?section=admin&page=".ADMIN_TAB_USER."&action=delete&id=";
   $edit="index.php?section=admin&page=".ADMIN_TAB_USER."&action=edit&id=";
   while ($row=mysql_fetch_assoc($result))
   {
+    $url->add_param('id', $row['id']);
     if ($row['id'] == 1)
     {
       echo "  <tr>
-    <td><input type=\"checkbox\" disabled></td>
+    <td><input type=\"checkbox\" disabled=\"disabled\"></td>
     <td>${row['name']}</td>
     <td>
-    <div class=\"button\">
-      <a href=\"${edit}${row['id']}\" class=\"button\">edit</a>
-    </div>
+    <div class=\"button\">\n";
+      $url->add_param('action', 'edit');
+      echo "<a href=\"".$url->to_URL()."\" class=\"button\">edit</a>\n";
+      echo "    </div>
     </td>
   </tr>\n";
     }
@@ -193,9 +229,15 @@ function print_user ()
     <td><input type=\"checkbox\"></td>
     <td>${row['name']}</td>
     <td>
-      <div class=\"button\">
-      <a href=\"${edit}${row['id']}\">edit</a>
-      <a href=\"${delete}${row['id']}\" onclick=\"return confirm ('You are about to delete the user \'${row['name']}\'. Do you want to proceed?');\" >delete</a>
+      <div class=\"button\">";
+      $url->add_param('action', 'edit');
+      echo "<a href=\"".$url->to_URL()."\" class=\"button\">edit</a>";
+      $url->add_param('action', 'delete');
+      $warning=htmlspecialchars(
+        sprintf(_("You are about to delete the user '%s' (ID %d). "
+        ."Do you want to proceed?"), $row['name'], $row['id']));
+      echo "<a href=\"".$url->to_URL()."\" "
+        ."onclick=\"return confirm('$warning');\">delete</a>\n
     </div>
     </td>
   </tr>\n";
@@ -246,6 +288,11 @@ function print_upload ()
   $pref = $db->read_pref();
   $upload_dir = $pref['upload_dir'];
 
+  $url=new Url();
+  $url->add_param('section', 'admin');
+  $url->add_param('page', ADMIN_TAB_UPLOAD);
+  $url->add_param('action', upload_dir);
+
   echo "<h3>Upload Settings</h3>\n";
 
   echo "<form action=\"./index.php\" method=\"POST\">\n";
@@ -253,10 +300,8 @@ function print_upload ()
   echo "<p>All uploads go below this folder. For each user a subfolder will be ";
   echo "created under which his images will reside. If a file exists, it ";
   echo "will be saved as FILENAME-xyz.EXTENSION.<br>\n";
-  echo "<input type=\"hidden\" name=\"section\" value=\"admin\" />\n";
-  echo "<input type=\"hidden\" name=\"action\" value=\"upload_dir\" />\n";
-  echo "<input type=\"hidden\" name=\"page\" value=\"".ADMIN_TAB_UPLOAD."\" />\n";
-   echo "<input type=\"text\" name=\"set_dir\" value=\"" . $upload_dir . "\" size=\"60\"/>\n";
+  echo $url->to_form();
+  echo "<input type=\"text\" name=\"set_dir\" value=\"" . $upload_dir . "\" size=\"60\"/>\n";
   echo "<input type=\"submit\" value=\"Save\" class=\"submit\" />\n";
   echo "</form>\n";
   echo "</p>\n";
@@ -306,12 +351,24 @@ function print_debug ()
 {
   echo "<h3>Debug</h3>\n";
   $this->warning(_("Please handle these operations carefully!"));
+  $url=new Url();
+  $url->add_param('section', 'admin');
+  $url->add_param('page', ADMIN_TAB_DEBUG);
   echo "<ul>\n";
-  echo "<li><a href=\"index.php?section=admin&page=".ADMIN_TAB_DEBUG."&action=sync\">Synchronize</a> files with the database</li>\n";
-  echo "<li><a href=\"index.php?section=admin&page=".ADMIN_TAB_DEBUG."&action=delete_tables\">Delete Tables</a></li>\n";
-  echo "<li><a href=\"index.php?section=admin&page=".ADMIN_TAB_DEBUG."&action=delete_images\">Delete all images</a></li>\n";
-  echo "<li><a href=\"index.php?section=admin&page=".ADMIN_TAB_DEBUG."&action=create_all_previews\">Create all preview images</a></li>\n";
-  echo "<li><a href=\"index.php\">Go to phTagr</a></li>\n";
+  echo "<li>";
+  $url->add_param('action', 'sync'); $href=$url->to_URL();
+  echo "<a href=\"$href\">Synchronize</a> files with the database</li>\n";
+  $url->add_param('action', 'delete_tables'); $href=$url->to_URL();
+  echo "<li><a href=\"$href\">Delete Tables</a></li>\n";
+  $url->add_param('action', 'delete_images'); $href=$url->to_URL();
+  echo "<li><a href=\"$href\">Delete all images</a></li>\n";
+  $url->add_param('action', 'create_all_previews'); $href=$url->to_URL();
+  echo "<li><a href=\"$href\">Create all preview images</a></li>\n";
+  $url->rem_param('section');
+  $url->rem_param('page');
+  $url->rem_param('action');
+  $href=$url->to_URL();
+  echo "<li><a href=\"$href\">Go to phTagr</a></li>\n";
   echo "</ul>\n";
 }
 
@@ -319,50 +376,74 @@ function print_content()
 {
   global $db;
   global $user;
+  global $search;
   
-  echo "<h2>Administration</h2>\n";
-  $tabs=new SectionTab("Actions","index.php?section=admin","page");
-  $tabs->add_tab ("General", ADMIN_TAB_GENERAL);
-  $tabs->add_tab ("User", ADMIN_TAB_USER);
-  $tabs->add_tab ("Upload", ADMIN_TAB_UPLOAD);
-  $tabs->add_tab ("Debug", ADMIN_TAB_DEBUG);
-  $tabs->print_content();
+  echo "<h2>"._("Administration")."</h2>\n";
+  $tabs2=new SectionMenu('tab', _("Actions:"));
+  $tabs2->add_param('section', 'admin');
+  $tabs2->set_item_param('page');
 
+  $tabs2->add_item(ADMIN_TAB_GENERAL, _("General"), ADMIN_TAB_GENERAL==$curid );
+  $tabs2->add_item(ADMIN_TAB_USER, _("User"));
+  $tabs2->add_item(ADMIN_TAB_UPLOAD, _("Upload"));
+  $tabs2->add_item(ADMIN_TAB_DEBUG, _("Debug"));
+  $tabs2->print_sections();
+  $cur=$tabs2->get_current();
+  
   echo "\n";
 
   if (isset ($_REQUEST["action"]))
   {
     // @todo: Get rid of the <br> but keep the success boxes in correct
     //        positions.
-    echo "<br>\n";
+    echo "<br/>\n";
 
-    switch ($tabs->selected)
+    switch ($cur)
     {
-      case ADMIN_TAB_GENERAL: $this->exec_general ();
-           break;
-      case ADMIN_TAB_USER: $this->exec_user ();
-           break;
-      case ADMIN_TAB_UPLOAD: $this->exec_upload ();
-           break;
-      case ADMIN_TAB_DEBUG: $this->exec_debug ();
-           break;
+    case ADMIN_TAB_USER: 
+      $this->exec_user();
+      break;
+    case ADMIN_TAB_UPLOAD: 
+      $this->exec_upload();
+      break;
+    case ADMIN_TAB_DEBUG: 
+      $this->exec_debug();
+      break;
+    case ADMIN_TAB_GENERAL:
+      $this->exec_general();
+      break;
+    default:
+      $this->waring(_("No valid action found"));
+      break;
     }
 
+    $url=new Url();
+    $url->add_param('section', 'admin');
+    $url->add_param('page', $cur);
+    $href=$url->to_URL();
     echo "<div class=\"button\">
-<a href=\"index.php?section=admin&page=".$tabs->selected."\">Back</a>
+<a href=\"$href\">Back</a>
 </div>\n";
     echo "<p></p>\n";
  
-     return; // Uncomment this if you still want to see the contents.
+    return; // Uncomment this if you still want to see the contents.
   }
 
-  switch ($tabs->selected)
+  switch ($cur)
   {
-    case ADMIN_TAB_GENERAL: $this->print_general (); break;
-    case ADMIN_TAB_USER: $this->print_user (); break;
-    case ADMIN_TAB_UPLOAD: $this->print_upload (); break;
-    case ADMIN_TAB_DEBUG: $this->print_debug (); break;
-   }
+  case ADMIN_TAB_USER: 
+    $this->print_user (); 
+    break;
+  case ADMIN_TAB_UPLOAD: 
+    $this->print_upload (); 
+    break;
+  case ADMIN_TAB_DEBUG: 
+    $this->print_debug (); 
+    break;
+  default:
+    $this->print_general (); 
+    break;
+  }
 }
 
 }

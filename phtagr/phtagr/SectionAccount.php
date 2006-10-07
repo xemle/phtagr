@@ -2,6 +2,7 @@
 
 include_once("$phtagr_lib/SectionBase.php");
 include_once("$phtagr_lib/User.php");
+include_once("$phtagr_lib/Url.php");
 
 class SectionAccount extends SectionBase
 {
@@ -12,7 +13,7 @@ var $user;
 
 function SectionAccount()
 {
-  $this->name="account";
+  $this->SectionBase("account");
   $this->message='';
   $this->section='';
   $this->user='';
@@ -130,7 +131,11 @@ function user_create($name, $password)
 
 function print_form_new()
 {
-  echo "<form method=\"post\">
+  $url=new Url();
+  $url->from_URL();
+  $url->add_param('section', 'account');
+  $url->add_param('action', 'create');
+  echo "<form method=\"post\">".$url->to_form()."
 <table>
   <tr><td>Username:</td><td><input type=\"text\" name=\"name\" value=\"$this->user\"/><td></tr>
   <tr><td>Password:</td><td><input type=\"password\" name=\"password\"/><td></tr>
@@ -141,8 +146,6 @@ function print_form_new()
       <input type=\"reset\" value=\"Reset\"/></td></tr>
 </table>
 
-<input type=\"hidden\" name=\"section\" value=\"account\" />
-<input type=\"hidden\" name=\"action\" value=\"create\" />
 </form>";
 }
 
@@ -237,21 +240,17 @@ function print_delete_account()
 
 function print_login()
 {
-  echo "<h2>Login</h2>\n";
-  /*
+  $url=new Url();
+  $url->from_URL();
+  $url->add_param('section', 'account');
+  $url->add_param('action', 'login');
+  if ($this->section!='')
+    $url->add_param('goto', $this->section);
+    
+  echo "<h2>"._("Login")."</h2>\n";
   if ($_REQUEST['user']!='' && $_REQUEST['password']!='')
   {
-    $user = new User();
-    if ($user->check_login($_REQUEST['user'], $_REQUEST['password']))
-    {
-      echo "Login succeed.</br>\n";
-      return;
-    }
-  }
-  */
-  if ($_REQUEST['user']!='' && $_REQUEST['password']!='')
-  {
-    $this->warning("The username is unkown or the password is incorrect");
+    $this->warning(_("The username is unkown or the password is incorrect"));
   }
 
   if ($this->message!='') 
@@ -259,6 +258,7 @@ function print_login()
     $this->warning($this->message);
   }
   echo "<form section=\"index.php\" method=\"post\">
+".$url->to_form()."
 <table>
   <tr><td>Username:</td><td><input type=\"text\" name=\"user\"/><td></tr>
   <tr><td>Password:</td><td><input type=\"password\" name=\"password\"/><td></tr>
@@ -266,14 +266,7 @@ function print_login()
       <td><input type=\"submit\" value=\"Login\"/>&nbsp;&nbsp;
       <input type=\"reset\" value=\"Reset\"/></td></tr>
 </table>
-
-<input type=\"hidden\" name=\"section\" value=\"account\" />
-<input type=\"hidden\" name=\"action\" value=\"login\" />\n";
-  if ($this->section!='')
-  {
-    echo "<input type=\"hidden\" name=\"goto\" value=\"$this->section\" />\n";
-  }
-echo "</form>";
+</form>";
 
   //echo "<a href=\"index.php?section=account&action=new\">Create Account</a><br/>\n";
 }
@@ -325,13 +318,13 @@ function print_content()
   $action=$_REQUEST['action'];
   if ($action=='create')
   {
-    echo "<h2>Create A New Account</h2>\n";
+    echo "<h2>"._("Create A New Account")."</h2>\n";
     $name=$_REQUEST['name'];
     $password=$_REQUEST['password'];
     $confirm=$_REQUEST['confirm'];
     if ($password != $confirm) 
     {
-      $this->error("Password mismatch");
+      $this->error(_("Password mismatch"));
       return;
     }
     if ($this->user_create($name, $password)==true)
@@ -344,7 +337,7 @@ function print_content()
   }
   else if ($action=='new')
   {
-    echo "<h2>Create A New Account</h2>\n";
+    echo "<h2>"._("Create A New Account")."</h2>\n";
     $this->print_form_new();
   } else if ($action=='list')
   {

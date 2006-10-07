@@ -190,6 +190,7 @@ function reinsert()
   
   $this->remove_tags();
   $this->remove_sets();
+  $this->remove_locations();
   $this->remove_caption();
 
   $this->_insert_static();
@@ -689,6 +690,23 @@ function remove_sets()
   return true;
 }
 
+/** Remove locations from the database 
+  @return true on success, false on failure */
+function remove_locations()
+{
+  global $db;
+  if (!isset($this->_data))
+    return false;
+    
+  $sql="DELETE FROM $db->imagelocation
+        WHERE imageid=".$this->get_id();
+  $result = $db->query($sql);
+  if (!$result)
+    return false;
+
+  return true;
+}
+
 /** Remove caption from the database 
   @return true on success, false on failure */
 function remove_caption()
@@ -708,6 +726,22 @@ function remove_caption()
   return true;
 }
 
+/** Removes an image from the database
+  @return True on success, false otherwise */
+function remove_from_db()
+{
+  global $db;
+  $ret=true;
+  $ret&=$this->remove_tags();
+  $ret&=$this->remove_sets();
+  $ret&=$this->remove_locations();
+  $sql="DELETE FROM $db->image
+        WHERE id=".$this->get_id();
+  $result=$db->query($sql);
+  if (!$result)
+    $ret=false;
+  return $ret;
+}
 /** Convert the SQL time string to unix time stamp.
   @param string The time string has the format like "2005-04-06 09:24:56", the
   result is 1112772296
@@ -746,6 +780,73 @@ function update_ranking()
         WHERE id=$id";
   $result = $db->query($sql);
 }
+
+/** Returns an array of tags. The tags are sorted by name */
+function get_tags()
+{
+  global $db;
+  $id=$this->get_id();
+  $tags=array();
+  $sql="SELECT t.name
+        FROM $db->tag AS t, $db->imagetag AS it
+        WHERE it.imageid=$id 
+          AND it.tagid=t.id
+        GROUP BY t.name";
+  $result=$db->query($sql);
+  if (!$result)
+    return $tags;
+
+  while($row = mysql_fetch_row($result)) {
+    array_push($tags, $row[0]);
+  }
+  sort($tags);
+  return $tags;
+}
+
+/** Returns an array of sets. The sets are sorted by name */
+function get_sets()
+{
+  global $db;
+  $id=$this->get_id();
+  $sets=array();
+  $sql="SELECT s.name
+        FROM $db->set AS s, $db->imageset AS iset
+        WHERE iset.imageid=$id 
+          AND iset.setid=s.id
+        GROUP BY s.name";
+  $result=$db->query($sql);
+  if (!$result)
+    return $sets;
+
+  while($row = mysql_fetch_row($result)) {
+    array_push($sets, $row[0]);
+  }
+  sort($sets);
+  return $sets;
+}
+
+/** Returns an array of location. The locations are sorted by name */
+function get_locations()
+{
+  global $db;
+  $locs=array();
+  $id=$this->get_id();
+  $sql="SELECT l.name
+        FROM $db->location as l, $db->imagelocation as il
+        WHERE il.imageid=$id 
+          AND il.locationid=l.id
+        ORDER BY l.type";
+  $result = $db->query($sql);
+  if (!$result)
+    return $locs;
+
+  while($row = mysql_fetch_row($result)) {
+    array_push($locs, $row[0]);
+  }
+  sort($locs);
+  return $locs;
+}
+
 
 }
 

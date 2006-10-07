@@ -7,7 +7,7 @@ class SectionHeaderLeft extends SectionBase
 
 function SectionHeaderLeft()
 {
-  $this->name="headerleft";
+  $this->SectionBase("headerleft");
 }
 
 function print_content()
