@@ -84,7 +84,7 @@ function add_root($root, $alias)
     return false;
 
   // Add directory separator at the end
-  if ($root{-1}!=DIRECTORY_SEPARATOR)
+  if ($root{strlen($root)-1}!=DIRECTORY_SEPARATOR)
     $root.=DIRECTORY_SEPARATOR;
 
   $this->_roots[$alias]=$root;

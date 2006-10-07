@@ -17,7 +17,7 @@ function print_content()
 {
   echo "<h2>"._("Advanced Search")."</h2>\n";
   $url=new Url();
-  $url->add_param('section', 'search');
+  $url->add_param('section', 'explorer');
 
   echo "<form action=\"index.php\" method=\"post\">\n";
   echo $url->to_form();
