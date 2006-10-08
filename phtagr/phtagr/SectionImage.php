@@ -404,12 +404,14 @@ function print_row_location()
   unset($loc_url);
 }
 
+/** Prints the image information as javascript data array */
 function print_js()
 {
   global $user;
   $img=$this->img;
   if (!$img)
     return;
+  if ($user->can_edit(&$img))
   $id=$img->get_id();
   $caption=$img->get_caption();
   $date=$img->get_date();
@@ -450,6 +452,7 @@ function print_preview($search=null)
   $id=$img->get_id();
   $name=$img->get_name();
   
+  $this->print_js();
   echo "\n<div class=\"name\">$name</div>\n";
   echo "<div class=\"thumb\">&nbsp;";
   
@@ -461,7 +464,6 @@ function print_preview($search=null)
 
   echo "<a href=\"$url\"><img src=\"./image.php?id=$id&amp;type=thumb\" alt=\"$name\" title=\"$name\" ".$size[2]."/></a></div>\n";
   
-  $this->print_js();
   $this->print_caption();
   $this->print_voting();
 
@@ -495,28 +497,27 @@ function print_content()
  
   echo "<h2>"._("Image")."</h2>\n";
   
-  if (!isset($_REQUEST['id']))
+  $img=$this->img;
+  if (!$img)
     return;
  
-  $id=$_REQUEST['id'];
-  $image=new Image($id);
-  
-  $name=$image->get_name();
+  $id=$img->get_id();
+  $name=$img->get_name();
   
   $search_nav=clone $search;
   $this->print_navigation($search_nav);
 
   echo "<div class=\"name\">$name</div>\n";
+  $this->print_js();
 
-  $size=$image->get_size(600);
+  $size=$img->get_size(600);
   echo "<div class=\"preview\"><img src=\"./image.php?id=$id&amp;type=preview\" alt=\"$name\" ".$size[2]."/></div>\n";
 
   $this->print_caption(false);
   $this->print_voting();
-
-  echo "<div class=\"imginfo\"><table>\n";
+  echo "<div class=\"imginfo\" id=\"info-$id\"><table>\n";
   
-  if ($user->is_owner(&$image)) {
+  if ($user->is_owner(&$img)) {
     $this->print_row_filename();
     $this->print_row_acl();
   }
@@ -526,6 +527,13 @@ function print_content()
   $this->print_row_sets();
   $this->print_row_location();
   $this->print_row_clicks();
+  if ($user->can_edit(&$img))
+  {
+    echo "  <tr>
+    <th>"._("Edit:")."</th>
+    <td><a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"edit_image($id)\">edit</a></td>
+  </tr>\n";
+  }
   echo "</table></div>\n";
 
   echo "<form id=\"formImage\" action=\"index.php\" method=\"post\"><div>\n";
@@ -536,7 +544,7 @@ function print_content()
   echo $search->to_form();
   echo "</div></form>\n";
   if (!isset($_SESSION['img_viewed'][$id]))
-    $image->update_ranking();
+    $img->update_ranking();
 
   $_SESSION['img_viewed'][$id]++;
 
