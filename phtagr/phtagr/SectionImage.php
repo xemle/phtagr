@@ -122,7 +122,7 @@ function print_caption($docut=true)
       $text=htmlspecialchars($caption);
     }
 
-    echo "$text <a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"add_form_caption($id, '$b64') \">"._("edit")."</a>";
+    echo "$text <a href=\"javascript:void();\" class=\"jsbutton\" onclick=\"add_form_caption($id, '$b64') \">"._("edit")."</a>";
   }
   else
   {
@@ -152,7 +152,7 @@ function _cut_caption($id, $caption)
     $result.=" $word";
   }
   $result="<span id=\"caption-text-$id\">".$result;
-  $result.=" <a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"print_caption($id, '$b64')\">[...]</a>";
+  $result.=" <a href=\"javascript:void();\" class=\"jsbutton\" onclick=\"print_caption($id, '$b64')\">[...]</a>";
   $result.="</span>";
   return $result;
 }
@@ -237,7 +237,7 @@ function print_row_acl()
   $oacl=$img->get_oacl();
   $aacl=$img->get_aacl();
   echo "  <tr><th>"._("ACL:")."</th><td id=\"acl-$id\">$gacl,$oacl,$aacl";
-  echo " <a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"add_form_acl('$id',$gacl,$oacl,$aacl)\">"._("edit")."</a>";
+  //echo " <a href=\"javascript:void();\" class=\"jsbutton\" onclick=\"add_form_acl('$id',$gacl,$oacl,$aacl)\">"._("edit")."</a>";
   echo "</td></tr>\n";
 }
 
@@ -298,6 +298,7 @@ function print_row_tags()
     if ($i<$num_tags-1)
         echo ", ";
   }
+  /*
   if ($user->can_edit($img))
   {
     $list='';
@@ -309,6 +310,7 @@ function print_row_tags()
     }
     echo " <a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"add_form_tags('$id','$list')\">"._("edit")."</a>";
   }
+  */
   echo "</td>
   </tr>\n";
   unset($tag_url);
@@ -337,6 +339,7 @@ function print_row_sets()
     if ($i<$num_sets-1)
         echo ", ";
   }
+  /*
   if ($user->can_edit($img))
   {
     $list='';
@@ -348,6 +351,7 @@ function print_row_sets()
     }
     echo " <a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"add_form_sets('$id','$list')\">"._("edit")."</a>";
   }
+  */
   echo "</td>
   </tr>\n";
   unset($set_url);
@@ -360,54 +364,31 @@ function print_row_location()
 
   $img=$this->img;
   $id=$img->get_id();
-  $sql="SELECT l.name,l.type
-        FROM $db->location as l, $db->imagelocation as il
-        WHERE il.imageid=$id 
-          AND il.locationid=l.id
-        ORDER BY l.type";
-  $result = $db->query($sql);
-  $location=array();
+  $locations=$img->get_locations();
+  $num_locations=count($locations);
   
-  $city='';
-  $sublocation='';
-  $state='';
-  $country='';
-
-  while($row = mysql_fetch_row($result)) {
-    switch($row[1]) {
-    case LOCATION_CITY:
-      $city=$row[0];
-      break;
-    case LOCATION_SUBLOCATION:
-      $sublocation=$row[0];
-      break;
-    case LOCATION_STATE:
-      $state=$row[0];
-      break;
-    case LOCATION_COUNTRY:
-      $country=$row[0];
-      break;
-    } 
-    array_push($location, array($row[1], $row[0]));
-  }
-   
   echo "  <tr>
     <th>"._("Location:")."</th>
     <td id=\"location-$id\">";  
 
   $loc_url=new Url();
   $loc_url->add_param('section', 'explorer');
-  $num_location=count($location);
-  for ($i=0; $i<$num_location; $i++)
+  foreach ($locations as $type => $location)
   {
-    $loc_url->add_param('location', $location[$i][1]);
+    $loc_url->add_param('location', $location);
     $url=$loc_url->to_URL();
-    echo "<a href=\"$url\">" . $location[$i][1] . "</a>";
-    if ($i<$num_location-1)
+    echo "<a href=\"$url\">" . $location . "</a>";
+    if ($i<$num_locations-1)
         echo ", ";
+    $i++;
   }
+  /*
   if ($user->can_edit($img))
   {
+    $city=$location[LOCATION_CITY];
+    $sublocation=$location[LOCATION_SUBLOCATION];
+    $state=$location[LOCATION_STATE];
+    $country=$location[LOCATION_COUNTRY];
     $list='';
     for ($i=0; $i<$num_location; $i++)
     {
@@ -417,9 +398,47 @@ function print_row_location()
     }
     echo " <a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"add_form_location('$id','$city','$sublocation', '$state', '$country')\">"._("edit")."</a>";
   }
+  */
   echo "</td>
   </tr>\n";
   unset($loc_url);
+}
+
+function print_js()
+{
+  global $user;
+  $img=$this->img;
+  if (!$img)
+    return;
+  $id=$img->get_id();
+  $caption=$img->get_caption();
+  $date=$img->get_date();
+  $tags=$img->get_tags();
+  $sets=$img->get_sets();
+  $locs=$img->get_locations();
+  echo "<script type=\"text/javascript\">\n";
+  echo "  images[$id]=new Array();\n";
+  if ($user->is_owner(&$img)) 
+  {
+    echo "  images[$id]['gacl']=".$img->get_gacl().";\n";
+    echo "  images[$id]['oacl']=".$img->get_oacl().";\n";
+    echo "  images[$id]['aacl']=".$img->get_aacl().";\n";
+  }
+  echo "  images[$id]['caption']=\"$caption\";\n";
+  echo "  images[$id]['date']='$date';\n";
+  $ltags='';
+  foreach ($tags as $tag)
+    $ltags.=$tag.' ';
+  echo "  images[$id]['tags']='$ltags';\n";
+  $lsets='';
+  foreach ($sets as $set)
+    $lsets.=$set.' ';
+  echo "  images[$id]['sets']='$lsets';\n";
+  echo "  images[$id]['city']='".$locs[LOCATION_CITY]."';\n";
+  echo "  images[$id]['sublocation']='".$locs[LOCATION_SUBLOCATION]."';\n";
+  echo "  images[$id]['state']='".$locs[LOCATION_STATE]."';\n";
+  echo "  images[$id]['country']='".$locs[COUNTRY]."';\n";
+  echo "</script>\n";
 }
 
 function print_preview($search=null) 
@@ -442,10 +461,11 @@ function print_preview($search=null)
 
   echo "<a href=\"$url\"><img src=\"./image.php?id=$id&amp;type=thumb\" alt=\"$name\" title=\"$name\" ".$size[2]."/></a></div>\n";
   
+  $this->print_js();
   $this->print_caption();
   $this->print_voting();
 
-  echo "<div class=\"imginfo\"><table>\n";
+  echo "<div class=\"imginfo\" id=\"info-$id\"><table>\n";
   if ($user->is_owner(&$img))
   {
     $this->print_row_filename();
@@ -460,7 +480,7 @@ function print_preview($search=null)
   {
     echo "  <tr>
     <th>"._("Select:")."</th>
-    <td><input type=\"checkbox\" name=\"images[]\" value=\"$id\" onclick=\"uncheck('selectall')\" /></td>
+    <td><input type=\"checkbox\" name=\"images[]\" value=\"$id\" onclick=\"uncheck('selectall')\" /><a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"edit_image($id)\">edit</a></td>
   </tr>\n";
   }
   

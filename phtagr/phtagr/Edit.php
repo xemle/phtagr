@@ -118,7 +118,10 @@ function execute()
       /** @todo optimize set of this operation. Do only delete required tags */
       $iptc->rem_record("2:025");
       if ($this->_check_iptc_error(&$iptc))
-        return false;
+      {
+        unset($img);
+        continue;
+      }
       // only positive tags
       $add_tags=array();
       foreach ($tags as $tag)
@@ -129,7 +132,10 @@ function execute()
       
       $iptc->add_records("2:025", $add_tags); 
       if ($this->_check_iptc_error(&$iptc))
-        return false;
+      {
+        unset($img);
+        continue;
+      }
     }
     else if (isset($_REQUEST['edit_tags']))
     {
@@ -147,10 +153,16 @@ function execute()
       }
       $iptc->add_records("2:025", $add_tags); 
       if ($this->_check_iptc_error(&$iptc))
-        return false;
+      {
+        unset($img);
+        continue;
+      }
       $iptc->rem_records("2:025", $rem_tags); 
       if ($this->_check_iptc_error(&$iptc))
-        return false;
+      {
+        unset($img);
+        continue;
+      }
     }
 
     // Distinguish between javascript values and global values
@@ -160,7 +172,10 @@ function execute()
       /** @todo optimize set of this operation. Do only delete required sets */
       $iptc->rem_record("2:020");
       if ($this->_check_iptc_error(&$iptc))
-        return false;
+      {
+        unset($img);
+        continue;
+      }
       // only positive sets
       $add_sets=array();
       foreach ($sets as $set)
@@ -171,7 +186,10 @@ function execute()
       
       $iptc->add_records("2:020", $add_sets); 
       if ($this->_check_iptc_error(&$iptc))
-        return false;
+      {
+        unset($img);
+        continue;
+      }
     }
     else if (isset($_REQUEST['edit_sets']))
     {
@@ -189,10 +207,16 @@ function execute()
       }
       $iptc->add_records("2:020", $add_sets); 
       if ($this->_check_iptc_error(&$iptc))
-        return false;
+      {
+        unset($img);
+        continue;
+      }
       $iptc->rem_records("2:020", $rem_sets); 
       if ($this->_check_iptc_error(&$iptc))
-        return false;
+      {
+        unset($img);
+        continue;
+      }
     }
 
     // Add captions
@@ -201,14 +225,20 @@ function execute()
       $caption=$_REQUEST['js_caption'];
       $iptc->add_record("2:120", $caption);
       if ($this->_check_iptc_error(&$iptc))
-        return false;
+      {
+        unset($img);
+        continue;
+      }
     }
     else if (isset($_REQUEST['edit_caption']))
     {
       $caption=$_REQUEST['edit_caption'];
       $iptc->add_record("2:120", $caption);
       if ($this->_check_iptc_error(&$iptc))
-        return false;
+      {
+        unset($img);
+        continue;
+      }
     }
    
     $this->handle_iptc_location(&$iptc);
@@ -218,7 +248,10 @@ function execute()
       $iptc->save_to_file();
       $img->update(true);
       if ($this->_check_iptc_error(&$iptc))
-        return false;
+      {
+        unset($img);
+        continue;
+      }
     }
 
     if (isset($_REQUEST['js_acl']) ||
@@ -236,7 +269,7 @@ function execute()
  @param iptc Pointer to the IPTC object of the image */
 function handle_iptc_location(&$iptc)
 {
-  if (isset($_REQUEST['js_location']))
+  if (isset($_REQUEST['js_city']))
   {
     if ($_REQUEST['js_city']!='')
       $iptc->add_record("2:090", $_REQUEST['js_city']);
@@ -414,11 +447,15 @@ function _handle_request_acl(&$img)
 function print_bar()
 {
   global $user;
+  global $search;
+  $size=$search->get_page_size();
   echo "<div class=\"tab\">
 <h2>"._("Actions:")."</h2>
 <ul>
-  <li>"._("Images per page:")." <select size=\"1\" name=\"pagesize\">
-  <option value=\"10\">"._("Default")."</option>
+  <li>"._("Images per page:")." <select size=\"1\" name=\"pagesize\">\n";
+  if ($size!=10)
+    echo "    <option value=\"$size\">$size</option>\n";
+  echo "    <option value=\"10\">"._("Default")."</option>
   <option value=\"5\">5</option>
   <option value=\"10\">10</option>
   <option value=\"25\">25</option>

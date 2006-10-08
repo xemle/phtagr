@@ -20,12 +20,18 @@ class Image extends Base
 
 /** Array of the database values from table image */
 var $_data;
+var $_tags;
+var $_sets;
+var $_locations;
 
 /** Creates an Image object 
   @param id Id of the image. */
 function Image($id=-1)
 {
   $_data=null;
+  $_tags=null;
+  $_sets=null;
+  $_locations=null;
   $this->init_by_id($id);
 }
 
@@ -109,10 +115,8 @@ function insert($filename, $is_upload=0)
   if (mysql_num_rows($result)!=0)
   {
     $this->_data=mysql_fetch_array($result, MYSQL_ASSOC);
-    if ($this->update())
-      return 1;
-      
-    return 0;
+    $this->update();
+    return 1;
   }
   
   $userid=$user->get_userid();
@@ -278,7 +282,7 @@ function get_bytes()
 
 function get_caption()
 {
-  return $this->_get_data('caption');
+  return stripslashes($this->_get_data('caption'));
 }
 
 /** Return the date of the image
@@ -784,9 +788,12 @@ function update_ranking()
 /** Returns an array of tags. The tags are sorted by name */
 function get_tags()
 {
+  if ($this->_tags)
+    return $this->_tags;
+
   global $db;
   $id=$this->get_id();
-  $tags=array();
+  $this->_tags=array();
   $sql="SELECT t.name
         FROM $db->tag AS t, $db->imagetag AS it
         WHERE it.imageid=$id 
@@ -794,21 +801,24 @@ function get_tags()
         GROUP BY t.name";
   $result=$db->query($sql);
   if (!$result)
-    return $tags;
+    return $this->_tags;
 
   while($row = mysql_fetch_row($result)) {
-    array_push($tags, $row[0]);
+    array_push($this->_tags, stripslashes($row[0]));
   }
-  sort($tags);
-  return $tags;
+  sort($this->_tags);
+  return $this->_tags;
 }
 
 /** Returns an array of sets. The sets are sorted by name */
 function get_sets()
 {
+  if ($this->_sets)
+    return $this->_sets;
+
   global $db;
   $id=$this->get_id();
-  $sets=array();
+  $this->_sets=array();
   $sql="SELECT s.name
         FROM $db->set AS s, $db->imageset AS iset
         WHERE iset.imageid=$id 
@@ -816,35 +826,37 @@ function get_sets()
         GROUP BY s.name";
   $result=$db->query($sql);
   if (!$result)
-    return $sets;
+    return $this->_sets;
 
   while($row = mysql_fetch_row($result)) {
-    array_push($sets, $row[0]);
+    array_push($this->_sets, stripslashes($row[0]));
   }
-  sort($sets);
-  return $sets;
+  sort($this->_sets);
+  return $this->_sets;
 }
 
 /** Returns an array of location. The locations are sorted by name */
 function get_locations()
 {
+  if ($this->_locations)
+    return $this->_locations;
+
   global $db;
-  $locs=array();
+  $this->_locations=array();
   $id=$this->get_id();
-  $sql="SELECT l.name
+  $sql="SELECT l.name, l.type
         FROM $db->location as l, $db->imagelocation as il
         WHERE il.imageid=$id 
           AND il.locationid=l.id
         ORDER BY l.type";
   $result = $db->query($sql);
   if (!$result)
-    return $locs;
+    return $this->_locations;
 
   while($row = mysql_fetch_row($result)) {
-    array_push($locs, $row[0]);
+    $this->_locations[$row[1]]=stripslashes($row[0]);
   }
-  sort($locs);
-  return $locs;
+  return $this->_locations;
 }
 
 

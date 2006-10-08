@@ -73,13 +73,8 @@ function delete_image_data($id, $file)
 {
   global $db;
   echo "<div class='warning'>File '$file' does not exists. Deleting its data form database</div>\n";
-  $sql="DELETE FROM $db->imagetag 
-        WHERE imageid=$id";
-  $result = $db->query($sql);
-
-  $sql="DELETE FROM $db->image 
-        WHERE id=$id";
-  $result = $db->query($sql);
+  $img=new Image($id);
+  $img->remove_from_db();
 }
 
 ?>

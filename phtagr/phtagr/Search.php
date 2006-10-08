@@ -119,7 +119,7 @@ function set_pos($pos)
     $this->add_iparam('pos', $pos, null, 1);
 
   $pos=$this->get_param('pos', 0);
-  $size=$this->get_param('pagesize', 10);
+  $size=$this->get_page_size();
   $this->set_page_num(floor($pos / $size));
 }
 
@@ -537,7 +537,7 @@ function _handle_limit($limit=0)
 {
   $pos=$this->get_param('pos', 0);
   $page=$this->get_param('page', 0);
-  $size=$this->get_param('pagesize', 10);
+  $size=$this->get_page_size();
 
   if ($limit==1)
   {

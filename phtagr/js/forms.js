@@ -1,5 +1,6 @@
 /** Define global data variable to store the contents of replaced elements */
 var Data=new Array();
+var images=new Array();
 
 /** Print the node information of a node. The function appends a PRE node to
  * the to node.
@@ -191,15 +192,13 @@ function add_form_caption(id, caption64)
   input=document.createElement("input");
   input.setAttribute("class", "submit");
   input.setAttribute("type", "submit");
-  input.setAttribute("value", " OK ");
+  input.setAttribute("value", "Update");
   form.appendChild(input);
 
-  var text=document.createTextNode(" or ");
-  form.appendChild(text);
-  
   input=document.createElement("input");
   input.setAttribute("class", "reset");
   input.setAttribute("type", "reset");
+  input.setAttribute("value", "Cancel");
   input.setAttribute("onclick", "resetNode('"+nodeId+"')");
   form.appendChild(input);
 
@@ -233,485 +232,6 @@ function _clone_hidden_input(src, dstForm)
     else
       _clone_hidden_input(e, dstForm);
   }
-}
-
-/** Add a form for tags
-  @param id ID of the image
-  @param tags List of the tags */
-function add_form_tags(id, tags)
-{
-  var nodeId="tag-"+id;
-  var e=document.getElementById(nodeId);
-  if (e==null)
-    return;
-
-  var focusId=nodeId+"-edit";
-
-  // Does a form already exists?
-  // On mozilla, the form will be omitted, check also for the next input node
-  if (Data[nodeId]!=null)
-  {
-    resetNode(nodeId);
-    return;
-  }
-
-  // Remember old content
-  Data[nodeId]=e.cloneNode(true);
-
-  var form=document.createElement("form");
-  form.setAttribute("action", "index.php");
-  form.setAttribute("method", "post");
-
-  // copy all hidden inputs from formExplorer or formImage
-  // whichever exists
-  var srcForm;
-  if (document.getElementById("formExplorer"))
-  {
-    srcForm=document.getElementById("formExplorer");
-  }
-  else
-  {
-    srcForm=document.getElementById("formImage");
-  }
-
-  _clone_hidden_input(srcForm, form);
-  
-  var input=document.createElement("input");
-  input.setAttribute("type", "hidden");
-  input.setAttribute("name", "action");
-  input.setAttribute("value", "edit");
-  form.appendChild(input);
-
-  input.setAttribute("type", "hidden");
-  input.setAttribute("name", "image");
-  input.setAttribute("value", id);
-  form.appendChild(input);
-
-  var table=document.createElement("table");
-  var tr=document.createElement("tr");
-  var td=document.createElement("td");
-  
-  input=document.createElement("input");
-  input.setAttribute("id", focusId);
-  input.setAttribute("type", "text");
-  input.setAttribute("name", "js_tags");
-  input.setAttribute("value", tags);
-  input.setAttribute("size", 30);
-  td.appendChild(input);
-  tr.appendChild(td);
-  table.appendChild(tr);
-  
-  input=document.createElement("input");
-  input.setAttribute("class", "submit");
-  input.setAttribute("type", "submit");
-  input.setAttribute("value", " OK ");
-
-  tr=tr.cloneNode(false);
-  td=td.cloneNode(false);
-  td.appendChild(input);
-
-  var text=document.createTextNode(" or ");
-  td.appendChild(text);
-  
-  input=document.createElement("input");
-  input.setAttribute("class", "reset");
-  input.setAttribute("type", "reset");
-  input.setAttribute("onclick", "resetNode('"+nodeId+"')");
-  td.appendChild(input);
-  tr.appendChild(td);
-  table.appendChild(tr);
-
-  form.appendChild(table);
-
-  while (e.hasChildNodes())
-    e.removeChild(e.lastChild);
-  e.appendChild(form);
-  
-  document.getElementById(focusId).focus();
-}
-
-/** Add a form for sets
-  @param id ID of the image
-  @param sets List of the sets */
-function add_form_sets(id, sets)
-{
-  var nodeId="set-"+id;
-  var e=document.getElementById(nodeId);
-  if (e==null)
-    return;
-
-  var focusId=nodeId+"-edit";
-
-  // Does a form already exists?
-  // On mozilla, the form will be omitted, check also for the next input node
-  if (Data[nodeId]!=null)
-  {
-    resetNode(nodeId);
-    return;
-  }
-
-  // Remember old content
-  Data[nodeId]=e.cloneNode(true);
-
-  var form=document.createElement("form");
-  form.setAttribute("action", "index.php");
-  form.setAttribute("method", "post");
-
-  // copy all hidden inputs from formExplorer or formImage
-  // whichever exists
-  var srcForm;
-  if (document.getElementById("formExplorer"))
-  {
-    srcForm=document.getElementById("formExplorer");
-  }
-  else
-  {
-    srcForm=document.getElementById("formImage");
-  }
-
-  _clone_hidden_input(srcForm, form);
-  
-  var input=document.createElement("input");
-  input.setAttribute("type", "hidden");
-  input.setAttribute("name", "action");
-  input.setAttribute("value", "edit");
-  form.appendChild(input);
-
-  input.setAttribute("type", "hidden");
-  input.setAttribute("name", "image");
-  input.setAttribute("value", id);
-  form.appendChild(input);
-
-  var table=document.createElement("table");
-  var tr=document.createElement("tr");
-  var td=document.createElement("td");
-  
-  input=document.createElement("input");
-  input.setAttribute("id", focusId);
-  input.setAttribute("type", "text");
-  input.setAttribute("name", "js_sets");
-  input.setAttribute("value", sets);
-  input.setAttribute("size", 30);
-  td.appendChild(input);
-  tr.appendChild(td);
-  table.appendChild(tr);
-  
-  input=document.createElement("input");
-  input.setAttribute("class", "submit");
-  input.setAttribute("type", "submit");
-  input.setAttribute("value", " OK ");
-
-  tr=tr.cloneNode(false);
-  td=td.cloneNode(false);
-  td.appendChild(input);
-
-  var text=document.createTextNode(" or ");
-  td.appendChild(text);
-  
-  input=document.createElement("input");
-  input.setAttribute("class", "reset");
-  input.setAttribute("type", "reset");
-  input.setAttribute("onclick", "resetNode('"+nodeId+"')");
-  td.appendChild(input);
-  tr.appendChild(td);
-  table.appendChild(tr);
-
-  form.appendChild(table);
-
-  while (e.hasChildNodes())
-    e.removeChild(e.lastChild);
-  e.appendChild(form);
-  
-  document.getElementById(focusId).focus();
-}
-
-/** Insert a form for acl input
-  @param id ID of the image
-  @param gacl Group ACL value 
-  @param oacl Member ACL value
-  @param aacl ACL value of all others */
-function add_form_acl(id, gacl, oacl, aacl)
-{
-  var nodeId="acl-"+id;
-  var e=document.getElementById(nodeId);
-  if (e==null)
-    return;
-
-  var focusId=nodeId+"-acl";
-
-  // Does a form already exists?
-  if (Data[nodeId]!=null)
-  {
-    resetNod(nodeId);
-    return;
-  }
-
-  // Remember old content
-  Data[nodeId]=e.cloneNode(true);
-  
-  var form=document.createElement("form");
-  form.setAttribute("action", "index.php");
-  form.setAttribute("method", "post");
-
-  // copy all hidden inputs from formExplorer or formImage
-  // whichever exists
-  var srcForm;
-  if (document.getElementById("formExplorer"))
-  {
-    srcForm=document.getElementById("formExplorer");
-  }
-  else
-  {
-    srcForm=document.getElementById("formImage");
-  }
-  _clone_hidden_input(srcForm, form);
-  
-  var input=document.createElement("input");
-  input.setAttribute("type", "hidden");
-  input.setAttribute("name", "image");
-  input.setAttribute("value", id);
-  form.appendChild(input);
-
-  input=input.cloneNode(false);
-  input.setAttribute("name", "js_acl");
-  input.setAttribute("value", "yes");
-  form.appendChild(input);
-  
-  var table=document.createElement("table");
-  // first row
-  var tr=document.createElement("tr");
-  
-  var td=document.createElement("td");
-  tr.appendChild(td);
-
-  td=td.cloneNode(false);
-  td.appendChild(document.createTextNode("Friends"));
-  tr.appendChild(td);
-
-  td=td.cloneNode(false);
-  td.appendChild(document.createTextNode("Members"));
-  tr.appendChild(td);
-
-  td=td.cloneNode(false);
-  td.appendChild(document.createTextNode("All"));
-  tr.appendChild(td);
-
-  table.appendChild(tr);
-
-  // second row
-  tr=tr.cloneNode(false);
-
-  td=td.cloneNode(false);
-  td.appendChild(document.createTextNode("Edit"));
-  tr.appendChild(td);
-  
-  td=td.cloneNode(false);
-  var input=document.createElement("input");
-  input.setAttribute("id", focusId);
-  input.setAttribute("type", "checkbox");
-  input.setAttribute("name", "js_gacl_edit");
-  input.setAttribute("value", "add");
-  if ((gacl & 0x01)>0) 
-    input.setAttribute("checked", "checked");
-  td.appendChild(input);
-  input.appendChild(document.createTextNode(gacl+"Super"));
-  tr.appendChild(td);
-  
-  td=td.cloneNode(true);
-  input=td.childNodes[0];
-  input.removeAttribute("id");
-  input.setAttribute("name", "js_oacl_edit");
-  if ((oacl & 0x01)>0)
-    input.setAttribute("checked", "checked");
-  else
-    input.removeAttribute("checked");
-  tr.appendChild(td);
-  
-  td=td.cloneNode(true);
-  input=td.childNodes[0];
-  input.setAttribute("name", "js_aacl_edit");
-  if ((aacl & 0x01)>0)
-    input.setAttribute("checked", "checked");
-  else
-    input.removeAttribute("checked");
-  tr.appendChild(td);
-  
-  table.appendChild(tr);
-  
-  // third row
-  tr=tr.cloneNode(false);
-
-  td=td.cloneNode(false);
-  td.appendChild(document.createTextNode("Preview"));
-  tr.appendChild(td);
-  
-  td=td.cloneNode(false);
-  var input=document.createElement("input");
-  input.setAttribute("type", "checkbox");
-  input.setAttribute("name", "js_gacl_preview");
-  input.setAttribute("value", "add");
-  if ((gacl & 0xf0)>0) 
-    input.setAttribute("checked", "checked");
-  td.appendChild(input);
-  tr.appendChild(td);
-  
-  td=td.cloneNode(true);
-  input=td.childNodes[0];
-  input.setAttribute("name", "js_oacl_preview");
-  if ((oacl & 0xf0)>0)
-    input.setAttribute("checked", "checked");
-  else
-    input.removeAttribute("checked");
-  tr.appendChild(td);
-  
-  td=td.cloneNode(true);
-  input=td.childNodes[0];
-  input.setAttribute("name", "js_aacl_preview");
-  if ((aacl & 0xf0)>0)
-    input.setAttribute("checked", "checked");
-  else
-    input.removeAttribute("checked");
-  tr.appendChild(td);
-  
-  table.appendChild(tr);
-  form.appendChild(table); 
-
-  input=document.createElement("input");
-  input.setAttribute("class", "submit");
-  input.setAttribute("type", "submit");
-  input.setAttribute("value", " OK ");
-  form.appendChild(input);
-
-  var text=document.createTextNode(" or ");
-  form.appendChild(text);
-  
-  input=document.createElement("input");
-  input.setAttribute("class", "reset");
-  input.setAttribute("type", "reset");
-  input.setAttribute("onclick", "resetNode('"+nodeId+"')");
-  form.appendChild(input);
-
-  while (e.hasChildNodes())
-    e.removeChild(e.lastChild);
-  e.appendChild(form);
-  
-  document.getElementById(focusId).focus();
-}
-
-/** Insert a form for location input
-  @param id ID of the image
-  @param city String of the city
-  @param sublocation String of the sublocation
-  @param state String of the state
-  @param country String of the Country */
-function add_form_location(id, city, sublocation, state, country)
-{
-  var nodeId="location-"+id;
-  var e=document.getElementById(nodeId);
-  if (e==null)
-    return;
-
-  var focusId=nodeId+"-location";
-
-  // Does a form already exists?
-  if (Data[nodeId]!=null)
-  {
-    resetNod(nodeId);
-    return;
-  }
-
-  // Remember old content
-  Data[nodeId]=e.cloneNode(true);
-  
-  var form=document.createElement("form");
-  form.setAttribute("action", "index.php");
-  form.setAttribute("method", "post");
-
-  // copy all hidden inputs from formExplorer or formImage
-  // whichever exists
-  var srcForm;
-  if (document.getElementById("formExplorer"))
-  {
-    srcForm=document.getElementById("formExplorer");
-  }
-  else
-  {
-    srcForm=document.getElementById("formImage");
-  }
-  _clone_hidden_input(srcForm, form);
-  
-  var input=document.createElement("input");
-  input.setAttribute("type", "hidden");
-  input.setAttribute("name", "image");
-  input.setAttribute("value", id);
-  form.appendChild(input);
-
-  input=input.cloneNode(false);
-  input.setAttribute("name", "js_location");
-  input.setAttribute("value", "yes");
-  form.appendChild(input);
-
-  var table=document.createElement("table");
-  // first row
-  var tr=document.createElement("tr");
-  
-  var td=document.createElement("td");
-  td.appendChild(document.createTextNode("City:"));
-  tr.appendChild(td);
-
-  td=td.cloneNode(false);
-  input=input.cloneNode(false);
-  input.setAttribute("type", "input");
-  input.setAttribute("id", focusId);
-  input.setAttribute("name", "js_city");
-  input.setAttribute("value", city);
-  input.setAttribute("size", 20);
-  td.appendChild(input);
-  tr.appendChild(td);
-  table.appendChild(tr);
-  
-  tr=tr.cloneNode(true);
-  tr.childNodes[0].childNodes[0].nodeValue="Sublocation:";
-  tr.childNodes[1].childNodes[0].removeAttribute("id");
-  tr.childNodes[1].childNodes[0].setAttribute("name", "js_sublocation");
-  tr.childNodes[1].childNodes[0].setAttribute("value", sublocation);
-  table.appendChild(tr);
-
-  tr=tr.cloneNode(true);
-  tr.childNodes[0].childNodes[0].nodeValue="State:";
-  tr.childNodes[1].childNodes[0].setAttribute("name", "js_state");
-  tr.childNodes[1].childNodes[0].setAttribute("value", state);
-  table.appendChild(tr);
-
-  tr=tr.cloneNode(true);
-  tr.childNodes[0].childNodes[0].nodeValue="Country:";
-  tr.childNodes[1].childNodes[0].setAttribute("name", "js_country");
-  tr.childNodes[1].childNodes[0].setAttribute("value", country);
-  table.appendChild(tr);
-  
-  table.appendChild(tr);
-  form.appendChild(table); 
-
-  input=document.createElement("input");
-  input.setAttribute("class", "submit");
-  input.setAttribute("type", "submit");
-  input.setAttribute("value", " OK ");
-  form.appendChild(input);
-
-  var text=document.createTextNode(" or ");
-  form.appendChild(text);
-  
-  input=document.createElement("input");
-  input.setAttribute("class", "reset");
-  input.setAttribute("type", "reset");
-  input.setAttribute("onclick", "resetNode('"+nodeId+"')");
-  form.appendChild(input);
-
-  while (e.hasChildNodes())
-    e.removeChild(e.lastChild);
-  e.appendChild(form);
-  
-  document.getElementById(focusId).focus();
 }
 
 /** Selects all checkboxes
@@ -806,3 +326,301 @@ function vote_reset(id, voting)
   }
 }
 
+/** Return a new hidden input
+  @param name
+  @param value */
+function _new_hidden(name, value)
+{
+  var input=document.createElement("input");
+  input.setAttribute("type", "hidden");
+  input.setAttribute("name", name);
+  input.setAttribute("value", value);
+  return input;
+}
+
+/** Returns a new text input 
+  @param name
+  @param value */
+function _new_text(name, value)
+{
+  var input=document.createElement("input");
+  input.setAttribute("type", "text");
+  input.setAttribute("name", name);
+  if (value!='')
+    input.setAttribute("value", value);
+  return input;
+}
+
+/** Create a new combobox
+  @param name
+  @param value
+  @param checked True of greater zero if the checkbox should be checked */
+function _new_cb(name, value, checked)
+{
+  var input=document.createElement("input");
+  input.setAttribute("type", "checkbox");
+  input.setAttribute("name", name);
+  input.setAttribute("value", value);
+  if (checked || checked>0)
+    input.setAttribute("checked", "checked");
+  return input;
+}
+
+function edit_image(id)
+{
+  var e=document.getElementById('info-'+id);
+  if (!e)
+    return;
+
+  if (!images[id])
+    return;
+
+  var nodeId="info-"+id;
+  var focusId="focus-"+id;
+  // Does a form already exists?
+  // On mozilla, the form will be omitted, check also for the next input node
+  if (Data[nodeId]!=null)
+  {
+    resetNode(nodeId);
+    return;
+  }
+
+  // Remember old content
+  Data[nodeId]=e.cloneNode(true);
+
+  var form=document.createElement("form");
+  form.setAttribute("action", "index.php");
+  form.setAttribute("method", "post");
+
+  // copy all hidden inputs from formExplorer or formImage
+  // whichever exists
+  var srcForm;
+  if (document.getElementById("formExplorer"))
+    srcForm=document.getElementById("formExplorer");
+  else
+    srcForm=document.getElementById("formImage");
+  _clone_hidden_input(srcForm, form);
+ 
+  form.appendChild(_new_hidden('image', id));
+  form.appendChild(_new_hidden('js_acl', 1));
+
+  var t=document.createElement('table');
+  if (images[id]['gacl']!=null)
+    t.appendChild(_get_row_acls(id));
+  //t.appendChild(_get_row_date(id));
+  t.appendChild(_get_row_tags(id));
+  t.appendChild(_get_row_sets(id));
+  _append_row_locations(id,t);
+  t.appendChild(_get_row_buttons(id));
+
+  while (e.hasChildNodes())
+    e.removeChild(e.lastChild);
+  form.appendChild(t);
+  e.appendChild(form);
+  document.getElementById(focusId).focus();
+}
+
+function _get_row_acls(id)
+{
+  var gacl=images[id]['gacl'];
+  var oacl=images[id]['oacl'];
+  var aacl=images[id]['aacl'];
+
+  var row=document.createElement("tr");
+  var th=document.createElement("th");
+  th.appendChild(document.createTextNode('ACL:'));
+  row.appendChild(th);
+
+  var td=document.createElement('td');
+  row.appendChild(td);
+
+  var table=document.createElement("table");
+  td.appendChild(table);
+
+  // first row
+  var tr=document.createElement("tr");
+  
+  var td=document.createElement("td");
+  tr.appendChild(td);
+
+  td=td.cloneNode(false);
+  td.appendChild(document.createTextNode("Friends"));
+  tr.appendChild(td);
+
+  td=td.cloneNode(false);
+  td.appendChild(document.createTextNode("Members"));
+  tr.appendChild(td);
+
+  td=td.cloneNode(false);
+  td.appendChild(document.createTextNode("All"));
+  tr.appendChild(td);
+
+  table.appendChild(tr);
+
+  // second row
+  tr=tr.cloneNode(false);
+
+  td=td.cloneNode(false);
+  td.appendChild(document.createTextNode("Edit"));
+  tr.appendChild(td);
+  
+  td=document.createElement('td');
+  td.appendChild(_new_cb('js_gacl_edit', 'add', (gacl & 0x01)));
+  tr.appendChild(td);
+  
+  td=document.createElement('td');
+  td.appendChild(_new_cb('js_oacl_edit', 'add', (oacl & 0x01)));
+  tr.appendChild(td);
+
+  td=document.createElement('td');
+  td.appendChild(_new_cb('js_aacl_edit', 'add', (aacl & 0x01)));
+  tr.appendChild(td);
+
+  table.appendChild(tr);
+  
+  // third row
+  tr=tr.cloneNode(false);
+
+  td=td.cloneNode(false);
+  td.appendChild(document.createTextNode("Preview"));
+  tr.appendChild(td);
+  
+  td=document.createElement('td');
+  td.appendChild(_new_cb('js_gacl_preview', 'add', (gacl & 0xf0)));
+  tr.appendChild(td);
+  
+  td=document.createElement('td');
+  td.appendChild(_new_cb('js_oacl_preview', 'add', (oacl & 0xf0)));
+  tr.appendChild(td);
+
+  td=document.createElement('td');
+  td.appendChild(_new_cb('js_aacl_preview', 'add', (aacl & 0xf0)));
+  tr.appendChild(td);
+  
+  table.appendChild(tr);
+  return row;
+}
+
+/** Row for date
+  @param id ID of the image */
+function _get_row_date(id)
+{
+  var tr=document.createElement("tr");
+
+  var th=document.createElement("th");
+  th.appendChild(document.createTextNode('Date:'));
+  tr.appendChild(th);
+
+  var td=document.createElement("td");
+  td.appendChild(_new_text('js_date', images[id]['date']));
+  tr.appendChild(td);
+  
+  return tr;
+}
+
+/** Row for tags
+  @param id ID of the image */
+function _get_row_tags(id)
+{
+  var tr=document.createElement("tr");
+
+  var th=document.createElement("th");
+  th.appendChild(document.createTextNode('Tags:'));
+  tr.appendChild(th);
+
+  var td=document.createElement("td");
+  input=_new_text('js_tags', images[id]['tags']);
+  input.setAttribute('id', 'focus-'+id);
+  td.appendChild(input);
+  tr.appendChild(td);
+  
+  return tr;
+}
+
+/** Row for sets
+  @param id ID of the image */
+function _get_row_sets(id)
+{
+  var tr=document.createElement("tr");
+
+  var th=document.createElement("th");
+  th.appendChild(document.createTextNode('Sets:'));
+  tr.appendChild(th);
+
+  var td=document.createElement("td");
+  td.appendChild(_new_text('js_sets', images[id]['sets']));
+  tr.appendChild(td);
+  
+  return tr;
+}
+
+/** Row for sets
+  @param id ID of the image */
+function _append_row_locations(id, t)
+{
+  var tr=document.createElement("tr");
+  var th=document.createElement("th");
+  th.appendChild(document.createTextNode('City:'));
+  tr.appendChild(th);
+
+  var td=document.createElement("td");
+  td.appendChild(_new_text('js_city', images[id]['city']));
+  tr.appendChild(td);
+  t.appendChild(tr);
+
+  var tr=document.createElement("tr");
+  var th=document.createElement("th");
+  th.appendChild(document.createTextNode('Subloc.:'));
+  tr.appendChild(th);
+
+  td=document.createElement('td');
+  td.appendChild(_new_text('js_sublocation', images[id]['sublocation']));
+  tr.appendChild(td);
+  t.appendChild(tr);
+
+  var tr=document.createElement("tr");
+  var th=document.createElement("th");
+  th.appendChild(document.createTextNode('State:'));
+  tr.appendChild(th);
+
+  td=document.createElement('td');
+  td.appendChild(_new_text('js_state', images[id]['state']));
+  tr.appendChild(td);
+  t.appendChild(tr);
+
+  var tr=document.createElement("tr");
+  var th=document.createElement("th");
+  th.appendChild(document.createTextNode('Country:'));
+  tr.appendChild(th);
+
+  td=document.createElement('td');
+  td.appendChild(_new_text('js_country', images[id]['country']));
+  tr.appendChild(td);
+  t.appendChild(tr);
+}
+
+function _get_row_buttons(id)
+{
+  var nodeId='info-'+id;
+  var tr=document.createElement("tr");
+  var th=document.createElement("th");
+  tr.appendChild(th);
+
+  var td=document.createElement("td");
+  
+  var input=document.createElement("input");
+  input.setAttribute("class", "submit");
+  input.setAttribute("type", "submit");
+  input.setAttribute("value", "Update");
+  td.appendChild(input);
+
+  var input=document.createElement("input");
+  input.setAttribute("class", "reset");
+  input.setAttribute("type", "reset");
+  input.setAttribute("value", "Cancel");
+  input.setAttribute("onclick", "resetNode('"+nodeId+"')");
+  td.appendChild(input);
+  tr.appendChild(td);
+
+  return tr;
+}
