@@ -114,7 +114,10 @@ function print_popular_images()
       $search->set_pos($pos);
       $search->add_param('id', $id);
       $url=$search->to_URL();
-      echo "<a href=\"$url\"><img src=\"./image.php?id=$id&amp;type=mini\" alt=\"$name\" width=\"75\" height=\"75\"/></a>";
+      $iurl=new Url('image.php');
+      $iurl->add_param('id', $id);
+      $iurl->add_param('type', 'mini');
+      echo "<a href=\"$url\"><img src=\"".$iurl->to_URL()."\" alt=\"$name\" width=\"75\" height=\"75\"/></a>";
       unset($image);
     }    
     echo "</td>\n";

@@ -366,7 +366,26 @@ function _new_cb(name, value, checked)
   return input;
 }
 
-function edit_image(id)
+function _init_form(id)
+{
+  var form=document.createElement("form");
+  form.setAttribute("action", "index.php");
+  form.setAttribute("method", "post");
+
+  // copy all hidden inputs from formExplorer or formImage
+  // whichever exists
+  var srcForm;
+  if (document.getElementById("formExplorer"))
+    srcForm=document.getElementById("formExplorer");
+  else
+    srcForm=document.getElementById("formImage");
+  _clone_hidden_input(srcForm, form);
+ 
+  form.appendChild(_new_hidden('image', id));
+  return form;
+}
+
+function edit_meta(id)
 {
   var e=document.getElementById('info-'+id);
   if (!e)
@@ -388,29 +407,50 @@ function edit_image(id)
   // Remember old content
   Data[nodeId]=e.cloneNode(true);
 
-  var form=document.createElement("form");
-  form.setAttribute("action", "index.php");
-  form.setAttribute("method", "post");
+  var form=_init_form(id);
 
-  // copy all hidden inputs from formExplorer or formImage
-  // whichever exists
-  var srcForm;
-  if (document.getElementById("formExplorer"))
-    srcForm=document.getElementById("formExplorer");
-  else
-    srcForm=document.getElementById("formImage");
-  _clone_hidden_input(srcForm, form);
- 
-  form.appendChild(_new_hidden('image', id));
+  var t=document.createElement('table');
+  //t.appendChild(_get_row_date(id));
+  t.appendChild(_get_row_tags(id));
+  t.appendChild(_get_row_sets(id));
+  _append_row_locations(id,t);
+  t.appendChild(_get_row_buttons(id));
+
+  while (e.hasChildNodes())
+    e.removeChild(e.lastChild);
+  form.appendChild(t);
+  e.appendChild(form);
+  document.getElementById(focusId).focus();
+}
+
+function edit_acl(id)
+{
+  var e=document.getElementById('info-'+id);
+  if (!e)
+    return;
+
+  if (!images[id])
+    return;
+
+  var nodeId="info-"+id;
+  var focusId="focus-"+id;
+  // Does a form already exists?
+  // On mozilla, the form will be omitted, check also for the next input node
+  if (Data[nodeId]!=null)
+  {
+    resetNode(nodeId);
+    return;
+  }
+
+  // Remember old content
+  Data[nodeId]=e.cloneNode(true);
+
+  var form=_init_form(id);
   form.appendChild(_new_hidden('js_acl', 1));
 
   var t=document.createElement('table');
   if (images[id]['gacl']!=null)
     t.appendChild(_get_row_acls(id));
-  //t.appendChild(_get_row_date(id));
-  t.appendChild(_get_row_tags(id));
-  t.appendChild(_get_row_sets(id));
-  _append_row_locations(id,t);
   t.appendChild(_get_row_buttons(id));
 
   while (e.hasChildNodes())
@@ -494,7 +534,9 @@ function _get_row_acls(id)
   tr.appendChild(td);
 
   td=document.createElement('td');
-  td.appendChild(_new_cb('js_aacl_preview', 'add', (aacl & 0xf0)));
+  var cb=_new_cb('js_aacl_preview', 'add', (aacl & 0xf0));
+  cb.setAttribute('id', 'focus-'+id);
+  td.appendChild(cb);
   tr.appendChild(td);
   
   table.appendChild(tr);

@@ -261,29 +261,34 @@ function print_row_date()
   $date_url->rem_param('start');
   $date_url->add_param('end', $sec+1);
   $url=$date_url->to_URL();
-  echo "[<span class=\"day\"><a href=\"$url\">&lt;</a></span>";
+  $title=_("Show older images");
+  echo "[<span class=\"prev\"><a href=\"$url\" title=\"$title\">&lt;</a></span>";
 
   // day
   $date_url->add_param('start', $sec-(60*60*12));
   $date_url->add_param('end', $sec+(60*60*12));
   $url=$date_url->to_URL();
-  echo "<span class=\"day\"><a href=\"$url\">d</a></span>";
+  $title=_("Show images within the same day");
+  echo "<span class=\"day\"><a href=\"$url\" title=\"$title\">d</a></span>";
   // week 
   $date_url->add_param('start', $sec-(60*60*12*7));
   $date_url->add_param('end', $sec+(60*60*12*7));
   $url=$date_url->to_URL();
-  echo "<span class=\"week\"><a href=\"$url\">w</a></span>";
+  $title=_("Show images within the same week");
+  echo "<span class=\"week\"><a href=\"$url\" title=\"$title\">w</a></span>";
   // month 
   $date_url->add_param('start', $sec-(60*60*12*30));
   $date_url->add_param('end', $sec+(60*60*12*30));
   $url=$date_url->to_URL();
-  echo "<span class=\"month\"><a href=\"$url\">m</a></span>";
-  // before
+  $title=_("Show images within the same month");
+  echo "<span class=\"month\"><a href=\"$url\" title=\"$title\">m</a></span>";
+  // after
   $date_url->rem_param('end');
   $date_url->add_param('start', $sec-1);
   $date_url->add_param('orderby', '-date');
   $url=$date_url->to_URL();
-  echo "<span class=\"day\"><a href=\"$url\">&gt;</a></span>";
+  $title=_("Show newer images");
+  echo "<span class=\"next\"><a href=\"$url\" title=\"$title\">&gt;</a></span>";
   echo "]\n    </td>\n  </tr>\n";
   unset($date_url);
 }
@@ -423,7 +428,9 @@ function print_js()
   $img=$this->img;
   if (!$img)
     return;
-  if ($user->can_edit(&$img))
+  if (!$user->can_edit(&$img))
+    return;
+
   $id=$img->get_id();
   $caption=$img->get_caption();
   $date=$img->get_date();
@@ -474,7 +481,10 @@ function print_preview($search=null)
   $url=$img_url->to_URL(); 
   $size=$img->get_size(220);
 
-  echo "<a href=\"$url\"><img src=\"./image.php?id=$id&amp;type=thumb\" alt=\"$name\" title=\"$name\" ".$size[2]."/></a></div>\n";
+  $iurl=new Url('image.php');
+  $iurl->add_param('id', $id);
+  $iurl->add_param('type', 'preview');
+  echo "<a href=\"$url\"><img src=\"".$iurl->to_URL()."\" alt=\"$name\" title=\"$name\" ".$size[2]."/></a></div>\n";
   
   $this->print_caption();
   $this->print_voting();
@@ -494,8 +504,14 @@ function print_preview($search=null)
   {
     echo "  <tr>
     <th>"._("Select:")."</th>
-    <td><input type=\"checkbox\" name=\"images[]\" value=\"$id\" onclick=\"uncheck('selectall')\" /><a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"edit_image($id)\">edit</a></td>
-  </tr>\n";
+    <td><input type=\"checkbox\" name=\"images[]\" value=\"$id\" onclick=\"uncheck('selectall')\" />";
+    if ($user->can_edit(&$img))
+    { 
+      echo "<a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"edit_meta($id)\">"._("Edit Metadata")."</a>";
+      if ($user->is_owner(&$img))
+        echo "<a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"edit_acl($id)\">"._("Edit ACL")."</a>";
+    }
+    echo "</td>\n</tr>\n";
   }
   
   echo "</table></div>\n";
@@ -523,7 +539,10 @@ function print_content()
   $this->print_js();
 
   $size=$img->get_size(600);
-  echo "<div class=\"preview\"><img src=\"./image.php?id=$id&amp;type=preview\" alt=\"$name\" ".$size[2]."/></div>\n";
+  $url=new Url('image.php');
+  $url->add_param('id', $id);
+  $url->add_param('type', 'preview');
+  echo "<div class=\"preview\"><img src=\"".$url->to_URL()."\" alt=\"$name\" ".$size[2]."/></div>\n";
 
   $this->print_caption(false);
   $this->print_voting();
@@ -543,7 +562,10 @@ function print_content()
   {
     echo "  <tr>
     <th>"._("Edit:")."</th>
-    <td><a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"edit_image($id)\">edit</a></td>
+    <td><a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"edit_meta($id)\">"._("Edit Metadata")."</a>";
+    if ($user->is_owner(&$img))
+      echo "<a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"edit_acl($id)\">".("Edit ACL")."</a>";
+    echo "</td>
   </tr>\n";
   }
   echo "</table></div>\n";

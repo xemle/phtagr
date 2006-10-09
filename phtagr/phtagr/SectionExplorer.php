@@ -182,6 +182,12 @@ function print_content()
     }
     echo "</div>\n";
     $cell++;
+    if ($cell%2==0)
+      echo "<div class=\"row2\" ></div>\n";
+    if ($cell%3==0)
+      echo "<div class=\"row3\" ></div>\n";
+    if ($cell%4==0)
+      echo "<div class=\"row4\" ></div>\n";
     $pos++;
   }
 

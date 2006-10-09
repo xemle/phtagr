@@ -3,9 +3,12 @@
  * acces rights of the image and copies the binary image data to html output.
  * If an error occurs exit silently. */
 
+session_start();
+
 include "$phtagr_lib/User.php";
 include "$phtagr_lib/Sql.php";
 include "$phtagr_lib/Thumbnail.php";
+
 
 function unauthorized()
 {
@@ -137,22 +140,27 @@ else
 }
 
 // Checking if the client is validating his cache and if it is current.
-if (isset($headers['if-modified-since']) && 
+if ($_SESSION['withcookie'] && isset($headers['if-modified-since']) && 
     (strtotime($headers['if-modified-since']) == $img->get_synced(true))) 
 {
   // Client's cache IS current, so we just respond '304 Not Modified'.
   header('Last-Modified: '.
     gmdate('D, d M Y H:i:s', $img->get_synced(true)).' GMT', true, 304);
-  // Allow caching for 30 days
+  // Allow further caching for 30 days
   header('Cache-Control: max-age=2592000, must-revalidate');
   exit;
 }
 
-// Image not cached or cache outdated, we respond '200 OK' and output the image.
-header('Last-Modified: '.gmdate('D, d M Y H:i:s', 
-  $img->get_synced(true)).' GMT', true, 200);
-// Allow caching
-header('Cache-Control: max-age=2592000');
+// Allow only image caching if cookie is avaiable
+if ($_SESSION['withcookie'])
+{
+  // Allow caching
+  header('Last-Modified: '.gmdate('D, d M Y H:i:s', 
+    $img->get_synced(true)).' GMT', true, 200);
+  header('Cache-Control: max-age=2592000');
+} else {
+  header('Cache-Control: max-age=0');
+}
 
 switch ($type)
 {

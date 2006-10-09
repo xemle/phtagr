@@ -206,6 +206,7 @@ input, select, submit, reset, textarea {
   font-size: 10pt;
   height: 10px;
 }
+
 .tab h2, .tab ul li a {
   display: inline;
   font-size: 10pt;
@@ -215,6 +216,11 @@ input, select, submit, reset, textarea {
   background: none;
   border-bottom: none;
   color: black;
+}
+
+.tab * select {
+  margin: 0px;
+  padding: 0px 0px 0px 0px;
 }
 
 .tab * .current {
@@ -354,6 +360,10 @@ input, select, submit, reset, textarea {
   padding: 1px 3px 1px 3px;
   margin: 0;
   border: 1px solid #cccccc;
+}
+
+.row2 {
+  clear: both;
 }
 
 .content * .reset, .content * .submit {
