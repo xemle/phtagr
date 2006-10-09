@@ -257,11 +257,17 @@ function print_row_date()
   $url=$date_url->to_URL();
   echo "<a href=\"$url\">$date</a>\n";
 
+  // before
+  $date_url->rem_param('start');
+  $date_url->add_param('end', $sec+1);
+  $url=$date_url->to_URL();
+  echo "[<span class=\"day\"><a href=\"$url\">&lt;</a></span>";
+
   // day
   $date_url->add_param('start', $sec-(60*60*12));
   $date_url->add_param('end', $sec+(60*60*12));
   $url=$date_url->to_URL();
-  echo "[<span class=\"day\"><a href=\"$url\">d</a></span>";
+  echo "<span class=\"day\"><a href=\"$url\">d</a></span>";
   // week 
   $date_url->add_param('start', $sec-(60*60*12*7));
   $date_url->add_param('end', $sec+(60*60*12*7));
@@ -271,8 +277,14 @@ function print_row_date()
   $date_url->add_param('start', $sec-(60*60*12*30));
   $date_url->add_param('end', $sec+(60*60*12*30));
   $url=$date_url->to_URL();
-  echo "<span class=\"month\"><a href=\"$url\">m</a></span>]";
-  echo "\n    </td>\n  </tr>\n";
+  echo "<span class=\"month\"><a href=\"$url\">m</a></span>";
+  // before
+  $date_url->rem_param('end');
+  $date_url->add_param('start', $sec-1);
+  $date_url->add_param('orderby', '-date');
+  $url=$date_url->to_URL();
+  echo "<span class=\"day\"><a href=\"$url\">&gt;</a></span>";
+  echo "]\n    </td>\n  </tr>\n";
   unset($date_url);
 }
 
