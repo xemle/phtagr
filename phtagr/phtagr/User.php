@@ -57,27 +57,26 @@ function init_session()
 
 /** Validates a user with its password
  @return true if the password is valid */
-function _check_login($username, $password)
+function _check_login($name, $password)
 {
   global $db;
-  if ($username!='' && $password!='')
-  {
-    $sql="SELECT id,password 
-          FROM $db->user 
-          WHERE name='$username'";
-    $result=$db->query($sql);
-    if ($result)
-    {
-      $row = mysql_fetch_row($result);
-      if ($password == $row[1]) {
-        $this->_is_auth=true;
-        $_SESSION['username']=$username;
-        $_SESSION['userid']=$row[0];
-        return true;
-      }
-    }
-  }
-  return false;
+  if ($name=='' || $password=='')
+    return false;
+    
+  $sname=mysql_escape_string($name);
+  $spassword=mysql_escape_string($password);
+  $sql="SELECT id,name,password
+        FROM $db->user 
+        WHERE name='$sname' AND password='$spassword'";
+  $result=$db->query($sql);
+  if (!$result || mysql_num_rows($result)!=1)
+    return false;
+
+  $row=mysql_fetch_assoc($result);
+  $this->_is_auth=true;
+  $_SESSION['username']=$row['name'];
+  $_SESSION['userid']=$row['id'];
+  return true;
 }
 
 /** Sets the language of the page */
@@ -167,23 +166,6 @@ function is_admin()
   return false;
 }
 
-/** Return if the given user has the same user id than an object 
-  @param image image object
-*/
-function is_owner($image=null)
-{
-  if ($image==null)
-    return false;
-    
-  if ($this->is_admin())
-    return true;
-
-  if ($this->get_userid()==
-    $image->get_userid())
-    return true;
-  return false;
-}
-
 /* Return true if the given user has an phtagr account */
 function is_member()
 {
@@ -234,80 +216,6 @@ function can_browse()
   return false;
 }
 
-/** Return true if the user can select an image */
-function can_select($image=null)
-{
-  return true;
-}
-
-/** Checks the acl of an image 
-  @param image Image object
-  @param flag ACL bit mask
-  @return True if user is allow to do the action defined by the flag */
-function _check_image_acl($image, $flag)
-{
-  if (!isset($image))
-    return false;
-    
-  // Admin is permitted always
-  if ($this->is_admin())
-    return true;
-  
-  if ($image->get_userid()==$this->get_userid())
-    return true;
-    
-  // If acls are calculated within if statement, I got wrong evaluation.
-  $gacl=$image->get_gacl() & $flag;
-  $oacl=$image->get_oacl() & $flag;
-  $aacl=$image->get_aacl() & $flag;
-  
-  if ($this->is_in_group($image->get_groupid()) && $gacl > 0)
-    return true;
-  
-  if ($this->is_member() && $oacl > 0)
-    return true;
-
-  if ($aacl > 0)
-    return true;
-  
-  return false;
-}
-
-/** Return true if user can edit the image 
-  @param image Image object. Default is null.*/
-function can_edit($image=null)
-{
-  return $this->_check_image_acl(&$image, ACL_EDIT);
-}
-
-function can_metadata($image=null)
-{
-  return $this->_check_image_acl(&$image, ACL_METADATA);
-}
-
-/** Return true if user can upload a file with the given size
-/** Return true if user can preview the image 
-  @param image Image object. Default is null.*/
-function can_preview($image=null)
-{
-  return $this->_check_image_acl(&$image, ACL_PREVIEW);
-}
-
-function can_highsolution($image=null)
-{
-  return $this->_check_image_acl(&$image, ACL_HIGHSOLUTION);
-}
-
-function can_fullsize($image=null)
-{
-  return $this->_check_image_acl(&$image, ACL_FULLSIZE);
-}
-
-function can_download($image=null)
-{
-  return $this->_check_image_acl(&$image, ACL_DOWNLOAD);
-}
-
 /** Return true if user can upload a file in general.*/
 function can_upload()
 {
@@ -337,7 +245,7 @@ function can_upload_size($size=0)
 function check_session($docookierefresh=true)
 {
   global $db;
-  $cookie="phtagr".$db->prefix;
+  $cookie_name=$this->_get_cookie_name();
     
   if ($_REQUEST['section']=='account')
   {
@@ -356,15 +264,13 @@ function check_session($docookierefresh=true)
       $this->_remove_cookie();
     }
   }
-  else if (isset($_COOKIE[$cookie]))
+  else if (isset($_COOKIE[$cookie_name]))
   {
-    list ($username, $password)=split(' ', $_COOKIE[$cookie]);
-    $password=base64_decode($password);
-    if ($this->_check_login($username, $password) &&
+    if ($this->_check_cookie($_COOKIE[$cookie_name]) &&
         $docookierefresh)
     {
       // refresh cookie
-      $this->_set_cookie($username, $password);
+      $this->_update_cookie($cookie_name, $_COOKIE[$cookie_name]);
     }
   }
   if (isset($_REQUEST['lang']))
@@ -384,21 +290,96 @@ function _remove_session()
   $this->init_session();
 }
 
-/** Sets the user and password in the cookie. The values are valid for
- one year.*/
+/* @return Returns the current cookie value in the database */
+function _get_db_cookie()
+{
+  global $db;
+  $sql="SELECT cookie
+        FROM $db->user
+        WHERE name='".$this->get_username()."'";
+  $result=$db->query($sql);
+  if (!$result || mysql_num_rows($result)!=1)
+    return null;
+
+  $row=mysql_fetch_row($result);
+  return $row[0];
+}
+
+/** Checks the cookie with the cookie from the database
+  @param cookie HTTP cookie
+  @return True if the cookie matches the stored cookie. False otherwise */
+function _check_cookie($cookie)
+{
+  global $db;
+
+  if (strlen($cookie)<10)
+    return false;
+
+  $db_cookie=$this->_get_db_cookie();
+  if ($db_cookie==$cookie)
+    return true;
+
+  return false;
+}
+
+/** Sets the cookie of the current user. If a cookie value is already set in
+ * the database, the value is set to the cookie. The cookie is valid for one
+ * year.*/
 function _set_cookie($username, $password)
 {
   global $db;
-  $cookie="phtagr".$db->prefix;
-  setcookie($cookie, $username.' '.base64_encode($password), time()+31536000, '/');
+  $name=$this->_get_cookie_name();
+  $value=$this->_get_db_cookie();
+  //$this->debug("name: $name, value=$value");
+  if ($value==null)
+  {
+    $value=$this->_create_cookie($username, $password);
+    $svalue=mysql_escape_string($value);
+    $sql="UPDATE $db->user
+          SET cookie='$svalue'
+          WHERE name='$username'";
+    $db->query($sql);
+  }
+  $this->_update_cookie($name, $value);
+}
+
+function _update_cookie($name, $value)
+{
+  setcookie($name, $value, time()+31536000, '/');
+}
+
+/** @return Returns the name of the cookie */
+function _get_cookie_name()
+{
+  global $db;
+  return "phtagr".$db->prefix;
+}
+
+/** Creates a new cookie value. It is a MD5 hash computed by username, password
+ * and a random number.
+  @param username Name of the user
+  @param password User's password
+  @return MD5 hash of username, password and random data */
+function _create_cookie($username, $password)
+{
+  $sec=time();
+  srand($sec);
+  for ($i=0; $i<64; $i++)
+    $s.=chr(rand(0, 255));
+  return substr(md5($username.$s.$password),0,64);
 }
 
 /** Removes a cookie from the client */
 function _remove_cookie()
 {
   global $db;
-  $cookie="phtagr".$db->prefix;
-  setcookie($cookie, "", time() - 3600, '/');   
+  $name=$this->_get_cookie_name();
+  setcookie($name, "", time() - 3600, '/');   
+
+  $sql="UPDATE $db->user
+        SET cookie=NULL
+        WHERE name='".$this->get_username()."'";
+  $db->query($sql);
 }
 
 }

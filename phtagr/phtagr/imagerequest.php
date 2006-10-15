@@ -88,31 +88,31 @@ $fn='';
 switch ($type)
 {
   case 'mini':
-    if ($user->can_preview(&$img))
+    if ($img->can_preview(&$user))
       $fn=$img->get_filename_mini();
     else
       unauthorized();
     break;
   case 'thumb':
-    if ($user->can_preview(&$img))
+    if ($img->can_preview(&$user))
       $fn=$img->get_filename_thumb();
     else
       unauthorized();
     break;
   case 'preview':
-    if ($user->can_preview(&$img))
+    if ($img->can_preview(&$user))
       $fn=$img->get_filename_preview();
     else
       unauthorized();
     break;
   case 'high':
-    if ($user->can_preview(&$img))
+    if ($img->can_preview(&$user))
       $fn=$img->get_filename_hight();
     else
       unauthorized();
     break;
   case 'full':
-    if ($user->can_fullsize(&$img))
+    if ($img->can_fullsize(&$user))
       $fn=$img->get_filename();
     else
       unauthorized();

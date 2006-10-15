@@ -10,7 +10,7 @@ class SectionImage extends SectionBase
 var $img;
 function SectionImage($id=0)
 {
-  $this->name="image";
+  $this->SectionBase("image");
   $this->img=null;
   if ($id>0)
     $this->img=new Image($id);
@@ -99,7 +99,7 @@ function print_caption($docut=true)
   $id=$img->get_id();
   $caption=$img->get_caption();
   
-  $can_edit=$user->can_edit($img);
+  $can_edit=$img->can_edit($user);
   
   echo "<div class=\"caption\" id=\"caption-$id\">";
   // the user can not edit the image
@@ -115,18 +115,17 @@ function print_caption($docut=true)
   // The user can edit the image
   if ($caption != "") 
   {
-    $b64=base64_encode($caption);
     if ($docut=true)
       $text=$this->_cut_caption($id, &$caption);
     else {
       $text=htmlspecialchars($caption);
     }
 
-    echo "$text <a href=\"javascript:void();\" class=\"jsbutton\" onclick=\"add_form_caption($id, '$b64') \">"._("edit")."</a>";
+    echo "$text <a href=\"javascript:void();\" class=\"jsbutton\" onclick=\"edit_caption($id) \">"._("edit")."</a>";
   }
   else
   {
-    echo " <span onclick=\"add_form_caption($id, '')\">"._("Click here to add a caption")."</span>";
+    echo " <span onclick=\"edit_caption($id)\">"._("Click here to add a caption")."</span>";
   }
   
   echo "</div>\n";
@@ -137,7 +136,6 @@ function print_caption($docut=true)
  * length of 20.  */
 function _cut_caption($id, $caption)
 {
-  $b64=base64_encode($caption);
   $caption=htmlspecialchars($caption);
 
   if (strlen($caption)< 60) 
@@ -152,7 +150,7 @@ function _cut_caption($id, $caption)
     $result.=" $word";
   }
   $result="<span id=\"caption-text-$id\">".$result;
-  $result.=" <a href=\"javascript:void();\" class=\"jsbutton\" onclick=\"print_caption($id, '$b64')\">[...]</a>";
+  $result.=" <a href=\"javascript:void();\" class=\"jsbutton\" onclick=\"print_caption($id)\">[...]</a>";
   $result.="</span>";
   return $result;
 }
@@ -226,7 +224,8 @@ function print_voting()
 function print_row_filename()
 {
   $img=$this->img;
-  echo "  <tr><th>"._("File:")."</th><td>".$img->get_filename()."</td></tr>\n";
+  echo "  <tr><th>"._("File:")."</th>"
+    ."<td>".htmlentities($img->get_filename())."</td></tr>\n";
 }
 
 function print_row_acl()
@@ -237,7 +236,6 @@ function print_row_acl()
   $oacl=$img->get_oacl();
   $aacl=$img->get_aacl();
   echo "  <tr><th>"._("ACL:")."</th><td id=\"acl-$id\">$gacl,$oacl,$aacl";
-  //echo " <a href=\"javascript:void();\" class=\"jsbutton\" onclick=\"add_form_acl('$id',$gacl,$oacl,$aacl)\">"._("edit")."</a>";
   echo "</td></tr>\n";
 }
 
@@ -250,6 +248,9 @@ function print_row_date()
     <th>"._("Date:")."</th>
     <td>";
   $date=date("Y-m-d H:i:s", $sec);
+  if (substr($date, 10)==" 00:00:00")
+    $date=substr($date, 0, 10);
+
   $date_url=new Url();
   $date_url->add_param('section','explorer');
   $date_url->add_param('start', $sec-(60*30*3));
@@ -311,23 +312,10 @@ function print_row_tags()
   {
     $tag_url->add_param('tags', $tags[$i]);
     $url=$tag_url->to_URL();
-    echo "<a href=\"$url\">" . $tags[$i] . "</a>";
+    echo "<a href=\"$url\">" . htmlentities($tags[$i]) . "</a>";
     if ($i<$num_tags-1)
         echo ", ";
   }
-  /*
-  if ($user->can_edit($img))
-  {
-    $list='';
-    for ($i=0; $i<$num_tags; $i++)
-    {
-      $list.=$tags[$i];
-      if ($i<$num_tags-1)
-        $list.=" ";
-    }
-    echo " <a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"add_form_tags('$id','$list')\">"._("edit")."</a>";
-  }
-  */
   echo "</td>
   </tr>\n";
   unset($tag_url);
@@ -352,23 +340,10 @@ function print_row_sets()
   {
     $set_url->add_param('sets', $sets[$i]);
     $url=$set_url->to_URL();
-    echo "<a href=\"$url\">" . $sets[$i] . "</a>";
+    echo "<a href=\"$url\">" . htmlentities($sets[$i]) . "</a>";
     if ($i<$num_sets-1)
         echo ", ";
   }
-  /*
-  if ($user->can_edit($img))
-  {
-    $list='';
-    for ($i=0; $i<$num_sets; $i++)
-    {
-      $list.=$sets[$i];
-      if ($i<$num_sets-1)
-        $list.=" ";
-    }
-    echo " <a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"add_form_sets('$id','$list')\">"._("edit")."</a>";
-  }
-  */
   echo "</td>
   </tr>\n";
   unset($set_url);
@@ -394,31 +369,26 @@ function print_row_location()
   {
     $loc_url->add_param('location', $location);
     $url=$loc_url->to_URL();
-    echo "<a href=\"$url\">" . $location . "</a>";
+    echo "<a href=\"$url\">" . htmlentities($location) . "</a>";
     if ($i<$num_locations-1)
         echo ", ";
     $i++;
   }
-  /*
-  if ($user->can_edit($img))
-  {
-    $city=$location[LOCATION_CITY];
-    $sublocation=$location[LOCATION_SUBLOCATION];
-    $state=$location[LOCATION_STATE];
-    $country=$location[LOCATION_COUNTRY];
-    $list='';
-    for ($i=0; $i<$num_location; $i++)
-    {
-      $list.=$tags[$i];
-      if ($i<$num_tags-1)
-        $list.=" ";
-    }
-    echo " <a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"add_form_location('$id','$city','$sublocation', '$state', '$country')\">"._("edit")."</a>";
-  }
-  */
   echo "</td>
   </tr>\n";
   unset($loc_url);
+}
+
+/** Escapes all special characters for javascript 
+  @param s String to escape
+  @return Escaped string */
+function _escape_js($s)
+{
+  $patterns[0]='/\'/';
+  $patterns[1]="/\//";
+  $replaces[0]="\'";
+  $replaces[1]="\/";
+  return preg_replace($patterns, $replaces, $s);
 }
 
 /** Prints the image information as javascript data array */
@@ -428,7 +398,7 @@ function print_js()
   $img=$this->img;
   if (!$img)
     return;
-  if (!$user->can_edit(&$img))
+  if (!$img->can_edit(&$user))
     return;
 
   $id=$img->get_id();
@@ -439,26 +409,31 @@ function print_js()
   $locs=$img->get_locations();
   echo "<script type=\"text/javascript\">\n";
   echo "  images[$id]=new Array();\n";
-  if ($user->is_owner(&$img)) 
+  if ($img->is_owner(&$user)) 
   {
     echo "  images[$id]['gacl']=".$img->get_gacl().";\n";
     echo "  images[$id]['oacl']=".$img->get_oacl().";\n";
     echo "  images[$id]['aacl']=".$img->get_aacl().";\n";
   }
-  echo "  images[$id]['caption']=\"$caption\";\n";
-  echo "  images[$id]['date']='$date';\n";
+  echo "  images[$id]['caption']='".$this->_escape_js($caption)."';\n";
+  echo "  images[$id]['date']='".$this->_escape_js($date)."';\n";
   $ltags='';
   foreach ($tags as $tag)
     $ltags.=$tag.' ';
-  echo "  images[$id]['tags']='$ltags';\n";
+  echo "  images[$id]['tags']='".$this->_escape_js($ltags)."';\n";
   $lsets='';
   foreach ($sets as $set)
     $lsets.=$set.' ';
-  echo "  images[$id]['sets']='$lsets';\n";
-  echo "  images[$id]['city']='".$locs[LOCATION_CITY]."';\n";
-  echo "  images[$id]['sublocation']='".$locs[LOCATION_SUBLOCATION]."';\n";
-  echo "  images[$id]['state']='".$locs[LOCATION_STATE]."';\n";
-  echo "  images[$id]['country']='".$locs[COUNTRY]."';\n";
+  echo "  images[$id]['sets']='".$this->_escape_js($lsets)."';\n";
+
+  echo "  images[$id]['city']='".
+    $this->_escape_js($locs[LOCATION_CITY])."';\n";
+  echo "  images[$id]['sublocation']='".
+    $this->_escape_js($locs[LOCATION_SUBLOCATION])."';\n";
+  echo "  images[$id]['state']='".
+    $this->_escape_js($locs[LOCATION_STATE])."';\n";
+  echo "  images[$id]['country']='".
+    $this->_escape_js($locs[LOCATION_COUNTRY])."';\n";
   echo "</script>\n";
 }
 
@@ -490,7 +465,7 @@ function print_preview($search=null)
   $this->print_voting();
 
   echo "<div class=\"imginfo\" id=\"info-$id\"><table>\n";
-  if ($user->is_owner(&$img))
+  if ($img->is_owner(&$user))
   {
     $this->print_row_filename();
     $this->print_row_acl();
@@ -500,15 +475,15 @@ function print_preview($search=null)
   $this->print_row_tags();
   $this->print_row_sets();
   $this->print_row_location();
-  if ($user->can_select($id))
+  if ($img->can_select($user))
   {
     echo "  <tr>
     <th>"._("Select:")."</th>
     <td><input type=\"checkbox\" name=\"images[]\" value=\"$id\" onclick=\"uncheck('selectall')\" />";
-    if ($user->can_edit(&$img))
+    if ($img->can_edit(&$user))
     { 
       echo "<a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"edit_meta($id)\">"._("Edit Metadata")."</a>";
-      if ($user->is_owner(&$img))
+      if ($img->is_owner(&$user))
         echo "<a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"edit_acl($id)\">"._("Edit ACL")."</a>";
     }
     echo "</td>\n</tr>\n";
@@ -548,7 +523,7 @@ function print_content()
   $this->print_voting();
   echo "<div class=\"imginfo\" id=\"info-$id\"><table>\n";
   
-  if ($user->is_owner(&$img)) {
+  if ($img->is_owner(&$user)) {
     $this->print_row_filename();
     $this->print_row_acl();
   }
@@ -558,12 +533,12 @@ function print_content()
   $this->print_row_sets();
   $this->print_row_location();
   $this->print_row_clicks();
-  if ($user->can_edit(&$img))
+  if ($img->can_edit(&$user))
   {
     echo "  <tr>
     <th>"._("Edit:")."</th>
     <td><a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"edit_meta($id)\">"._("Edit Metadata")."</a>";
-    if ($user->is_owner(&$img))
+    if ($img->is_owner(&$user))
       echo "<a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"edit_acl($id)\">".("Edit ACL")."</a>";
     echo "</td>
   </tr>\n";

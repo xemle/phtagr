@@ -199,13 +199,13 @@ function to_URL()
     foreach ($this->params as $p => $v)
     {
       $i++;
-      $url.=$p.'='.$v;
+      $url.=htmlentities($p).'='.htmlentities($v);
       if ($i<$n)
         $url.='&amp;';
     }
   }
   if ($this->anchor!='')
-    $url.='#'.$this->anchor;
+    $url.='#'.htmlentities($this->anchor);
 
   return $url;
 }
@@ -223,7 +223,7 @@ function to_form()
 {
   $input='';
   foreach ($this->params as $p => $v)
-    $input.=$this->_input($p, $v);
+    $input.=$this->_input(htmlentities($p), htmlentities($v));
   return $input;
 }
 

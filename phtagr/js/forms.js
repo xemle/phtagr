@@ -104,111 +104,6 @@ function resetNode(nodeId)
   Data[nodeId]=null;
 }
 
-/** Prints the whole caption 
-  @param id Id of the caption element
-  @param caption64 Original caption in base64 */
-function print_caption(id, caption64)
-{
-  var nodeId="caption-text-"+id;
-  var e=document.getElementById(nodeId);
-  if (e==null)
-    return;
-
-  if (Data[nodeId]!=null)
-  {
-    resetNode(nodeId);
-    return;
-  }
-  
-  // Remember old content
-  Data[nodeId]=e.cloneNode(true);
-
-  caption=atob(caption64);
-  var text=document.createTextNode(caption+" ");
-  
-  var span=document.createElement("span");
-  span.setAttribute("class", "jsbutton");
-  span.setAttribute("onclick", "resetNode('"+nodeId+"')");
-  span.appendChild(document.createTextNode("[-]"));
-  
-  while (e.hasChildNodes())
-    e.removeChild(e.lastChild);
-  e.appendChild(text);
-  e.appendChild(span);
-}
-  
-/** Insert a form for caption 
-  @param id Id of capation element
-  @param caption64 Original caption in base64 */
-function add_form_caption(id, caption64)
-{
-  var nodeId="caption-"+id;
-  var e=document.getElementById(nodeId);
-  if (e==null)
-    return;
-
-  var focusId=nodeId+"-edit";
-
-  // Remember old content
-  Data[nodeId]=e.cloneNode(true);
-  
-  var form=document.createElement("form");
-  form.setAttribute("action", "index.php");
-  form.setAttribute("method", "post");
-
-  // copy all hidden inputs from formExplorer or formImage
-  // whichever exists
-  var srcForm;
-  if (document.getElementById("formExplorer"))
-  {
-    srcForm=document.getElementById("formExplorer");
-  }
-  else
-  {
-    srcForm=document.getElementById("formImage");
-  }
-  _clone_hidden_input(srcForm, form);
-  
-  var input=document.createElement("input");
-  input.setAttribute("type", "hidden");
-  input.setAttribute("name", "image");
-  input.setAttribute("value", id);
-  form.appendChild(input);
-
-  var textarea=document.createElement("textarea");
-  textarea.setAttribute("id", focusId);
-  textarea.setAttribute("name", "js_caption");
-  textarea.setAttribute("cols", 24);
-  textarea.setAttribute("rows", 3);
-  form.appendChild(textarea);
-
-  // encode node content to b64 to catch all special characters
-  var text=document.createTextNode(atob(caption64));
-  textarea.appendChild(text);
-
-  var br=document.createElement("br");
-  form.appendChild(br);
-  
-  input=document.createElement("input");
-  input.setAttribute("class", "submit");
-  input.setAttribute("type", "submit");
-  input.setAttribute("value", "Update");
-  form.appendChild(input);
-
-  input=document.createElement("input");
-  input.setAttribute("class", "reset");
-  input.setAttribute("type", "reset");
-  input.setAttribute("value", "Cancel");
-  input.setAttribute("onclick", "resetNode('"+nodeId+"')");
-  form.appendChild(input);
-
-  while (e.hasChildNodes())
-    e.removeChild(e.lastChild);
-  e.appendChild(form);
-
-  document.getElementById(focusId).focus();
-}
-
 
 /** Clones all hidden input elements from one form to another recursivly
   @param src Source element
@@ -385,6 +280,101 @@ function _init_form(id)
   return form;
 }
 
+/** Prints the whole caption 
+  @param id Id of the caption element */
+function print_caption(id)
+{
+  var nodeId="caption-text-"+id;
+  var e=document.getElementById(nodeId);
+  if (e==null)
+    return;
+
+  if (Data[nodeId]!=null)
+  {
+    resetNode(nodeId);
+    return;
+  }
+  
+  if (!images[id] || !images[id]['caption'])
+    return;
+
+  // Remember old content
+  Data[nodeId]=e.cloneNode(true);
+
+  var caption=images[id]['caption'];
+
+  var text=document.createTextNode(caption+" ");
+  
+  var span=document.createElement("span");
+  span.setAttribute("class", "jsbutton");
+  span.setAttribute("onclick", "resetNode('"+nodeId+"')");
+  span.appendChild(document.createTextNode("[-]"));
+  
+  while (e.hasChildNodes())
+    e.removeChild(e.lastChild);
+  e.appendChild(text);
+  e.appendChild(span);
+}
+  
+/** Insert a form for caption 
+  @param id Id of capation element */
+function edit_caption(id)
+{
+  var nodeId="caption-"+id;
+  var focusId=nodeId+"-focus";
+
+  var e=document.getElementById(nodeId);
+  if (!e)
+    return;
+
+  // Does a form already exists?
+  // On mozilla, the form will be omitted, check also for the next input node
+  if (Data[nodeId]!=null)
+  {
+    resetNode(nodeId);
+    return;
+  }
+
+  if (!images[id])
+    return;
+
+  // Remember old content
+  Data[nodeId]=e.cloneNode(true);
+
+  var caption=images[id]['caption'];
+
+  var form=_init_form(id);
+  var t=document.createElement('table');
+  var tr=document.createElement('tr');
+  var td=document.createElement('td');
+
+  var textarea=document.createElement("textarea");
+  textarea.setAttribute("id", focusId);
+  textarea.setAttribute("name", "js_caption");
+  textarea.setAttribute("cols", 24);
+  textarea.setAttribute("rows", 3);
+  // encode node content to b64 to catch all special characters
+  textarea.appendChild(document.createTextNode(caption));
+
+  td.appendChild(textarea);
+  tr.appendChild(td);
+  t.appendChild(tr);
+
+  // Buttons
+  var tr=document.createElement('tr');
+  var td=document.createElement('td');
+  _get_buttons(td, nodeId);
+  tr.appendChild(td);
+  t.appendChild(tr);
+
+  form.appendChild(t);
+
+  while (e.hasChildNodes())
+    e.removeChild(e.lastChild);
+  e.appendChild(form);
+  document.getElementById(focusId).focus();
+}
+
 function edit_meta(id)
 {
   var e=document.getElementById('info-'+id);
@@ -410,11 +400,11 @@ function edit_meta(id)
   var form=_init_form(id);
 
   var t=document.createElement('table');
-  //t.appendChild(_get_row_date(id));
+  t.appendChild(_get_row_date(id));
   t.appendChild(_get_row_tags(id));
   t.appendChild(_get_row_sets(id));
   _append_row_locations(id,t);
-  t.appendChild(_get_row_buttons(id));
+  t.appendChild(_get_row_buttons(nodeId));
 
   while (e.hasChildNodes())
     e.removeChild(e.lastChild);
@@ -451,7 +441,7 @@ function edit_acl(id)
   var t=document.createElement('table');
   if (images[id]['gacl']!=null)
     t.appendChild(_get_row_acls(id));
-  t.appendChild(_get_row_buttons(id));
+  t.appendChild(_get_row_buttons(nodeId));
 
   while (e.hasChildNodes())
     e.removeChild(e.lastChild);
@@ -641,27 +631,33 @@ function _append_row_locations(id, t)
   t.appendChild(tr);
 }
 
-function _get_row_buttons(id)
+function _get_buttons(e, nodeId)
 {
-  var nodeId='info-'+id;
-  var tr=document.createElement("tr");
-  var th=document.createElement("th");
-  tr.appendChild(th);
+  if (e==null || nodeId=='')
+    return;
 
-  var td=document.createElement("td");
-  
   var input=document.createElement("input");
   input.setAttribute("class", "submit");
   input.setAttribute("type", "submit");
   input.setAttribute("value", "Update");
-  td.appendChild(input);
+  e.appendChild(input);
 
   var input=document.createElement("input");
   input.setAttribute("class", "reset");
   input.setAttribute("type", "reset");
   input.setAttribute("value", "Cancel");
   input.setAttribute("onclick", "resetNode('"+nodeId+"')");
-  td.appendChild(input);
+  e.appendChild(input);
+}
+
+function _get_row_buttons(nodeId)
+{
+  var tr=document.createElement("tr");
+  var th=document.createElement("th");
+  tr.appendChild(th);
+
+  var td=document.createElement("td");
+  _get_buttons(td, nodeId);
   tr.appendChild(td);
 
   return tr;

@@ -38,10 +38,21 @@ body {
   background-repeat: repeat-y;
 }
 
-.content {
+.menu {
   float: left;
+  width: 98px;
+  padding: 0;
+  margin: 10px 0 0 8px;
+  font-size: 08pt;
+  
+  background-color: #ffffff;
+  border: 1px solid #b3b3b3;
+}
+
+.content {
+  float: right;
   width: 620px;
-  margin: 0px 0px 0px 10px;
+  margin: 0px 15px 0px 0px;
   padding: 10px 0 0 0px;
   text-align: left;
 }
@@ -133,14 +144,6 @@ input, select, submit, reset, textarea {
 }
 
 .menu {
-  float: left;
-  width: 98px;
-  margin: 10px 0 0 8px;
-  padding: 0;
-  font-size: 08pt;
-  
-  background-color: #ffffff;
-  border: 1px solid #b3b3b3;
 }
 
 .menu * li, .menu ul {

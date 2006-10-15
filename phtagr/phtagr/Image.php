@@ -362,6 +362,97 @@ function get_lastview($in_unix=false)
     return $lastview;
 }
 
+/** Return true if the user can select an image */
+function can_select($user=null)
+{
+  return true;
+}
+
+/** Return if the given user has the same user id than an object 
+  @param image image object
+*/
+function is_owner($user=null)
+{
+  if ($user==null)
+    return false;
+    
+  if ($user->is_admin())
+    return true;
+
+  if ($this->get_userid()==
+    $user->get_userid())
+    return true;
+  return false;
+}
+
+/** Checks the acl of an image 
+  @param image Image object
+  @param flag ACL bit mask
+  @return True if user is allow to do the action defined by the flag */
+function _check_acl($user, $flag)
+{
+  if (!isset($user))
+    return false;
+    
+  // Admin is permitted always
+  if ($user->is_admin())
+    return true;
+  
+  if ($user->get_userid()==$this->get_userid())
+    return true;
+    
+  // If acls are calculated within if statement, I got wrong evaluation.
+  $gacl=$this->get_gacl() & $flag;
+  $oacl=$this->get_oacl() & $flag;
+  $aacl=$this->get_aacl() & $flag;
+  
+  if ($user->is_in_group($this->get_groupid()) && $gacl > 0)
+    return true;
+  
+  if ($user->is_member() && $oacl > 0)
+    return true;
+
+  if ($aacl > 0)
+    return true;
+  
+  return false;
+}
+
+/** Return true if user can edit the image 
+  @param image Image object. Default is null.*/
+function can_edit($user=null)
+{
+  return $this->_check_acl(&$user, ACL_EDIT);
+}
+
+function can_metadata($user=null)
+{
+  return $this->_check_acl(&$user, ACL_METADATA);
+}
+
+/** Return true if user can upload a file with the given size
+/** Return true if user can preview the image 
+  @param user User object. Default is null.*/
+function can_preview($user=null)
+{
+  return $this->_check_acl(&$user, ACL_PREVIEW);
+}
+
+function can_highsolution($user=null)
+{
+  return $this->_check_acl(&$user, ACL_HIGHSOLUTION);
+}
+
+function can_fullsize($user=null)
+{
+  return $this->_check_acl(&$user, ACL_FULLSIZE);
+}
+
+function can_download($user=null)
+{
+  return $this->_check_acl(&$user, ACL_DOWNLOAD);
+}
+
 /** Returns the size of an thumbnail in an array. This function keeps the
  * ratio.
   @param Size of the longes side. Default is 220. If the size is larger than

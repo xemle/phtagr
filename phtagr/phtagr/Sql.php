@@ -25,6 +25,7 @@ var $imageset;
 var $location;
 var $imagelocation;
 var $comment;
+var $message;
 
 function Sql()
 {
@@ -58,6 +59,7 @@ function read_config($config='')
   $this->location=$db_prefix."location";
   $this->imagelocation=$db_prefix."imagelocation";
   $this->comment=$db_prefix."comment";
+  $this->message=$db_prefix."message";
   $this->pref=$db_prefix."pref";
 
   return true;
@@ -378,13 +380,18 @@ function create_tables()
         name          VARCHAR(32) NOT NULL,
         password      VARCHAR(32) NOT NULL,
         
+        created       DATETIME NOT NULL DEFAULT 0,
+        updated       TIMESTAMP,
+        expire        DATETIME DEFAULT NULL,
+        type          TINYINT UNSIGNED,
+
         firstname     VARCHAR(32),
         lastname      VARCHAR(32) NOT NULL,
         email         VARCHAR(64),
         
-        created       DATETIME NOT NULL DEFAULT 0,
-        updated       TIMESTAMP,
-        fsroot        TEXT DEFAULT '',
+        cookie        VARCHAR(64) DEFAULT NULL,
+        cookie_expire DATETIME DEFAUTL NULL,
+
         quota         INT,              /* Users quota in bytes */
         quota_interval INT,             /* Upload quota interval in seconds.
                                            The user is allowed to upload quota
@@ -452,6 +459,12 @@ function create_tables()
         longitude     FLOAT,
         latitude      FLOAT,
 
+        duration      INT DEFAULT -1,     /* duration of a video in seconds */
+
+        hue           FLOAT,              /* 0-359 */
+        saturation    FLOAT,              /* 0-255 */
+        luminosity    FLOAT,              /* 0-255 */
+
         data          BLOB,               /* For optinal data */
         
         INDEX(date),
@@ -509,19 +522,38 @@ function create_tables()
   if (!$this->query($sql)) { return false; }
     
   $sql="CREATE TABLE $this->comment (
+        id            INT NOT NULL AUTO_INCREMENT, 
         imageid       INT NOT NULL,
+        reply         INT DEFAULT NULL,
+        auth          VARCHAR(64) DEFAULT NULL,
                                           /* Name of the commentator */
         name          VARCHAR(32) NOT NULL,
                                           /* User ID, if commentator is a
                                            * phTagr user */
         userid        INT NOT NULL DEFAULT 0,
         email         VARCHAR(64) NOT NULL DEFAULT '',
+        notify        TINYINT UNSIGNED DEFAULT 0,
         url           VARCHAR(128) NOT NULL DEFAULT '',
         date          DATETIME NOT NULL DEFAULT 0,
 
         comment       TEXT NOT NULL,
         
-        PRIMARY KEY(imageid))";
+        INDEX (imageid),
+        PRIMARY KEY (id))";
+  if (!$this->query($sql)) { return false; }
+
+  $sql="CREATE TABLE $this->message (
+        id            INT NOT NULL AUTO_INCREMENT,
+        from_id       INT NOT NULL,
+        to_id         INT NOT NULL,
+        date          DATETIME NOT NULL,
+        expire        DATETIME DEFAULT NULL,
+        type          TINYINT UNSIGNED DEFAAULT 0,
+        private       BLOB,
+        subject       VARCHAR(128),
+        body          BLOB,
+        INDEX to,
+        PRIMARY KEY(id)";
   if (!$this->query($sql)) { return false; }
 
   return true;
@@ -560,6 +592,8 @@ function delete_images()
   $sql="DELETE FROM $this->imagelocation";
   if (!$this->query($sql)) { return false; }
   $sql="DELETE FROM $this->comment";
+  if (!$this->query($sql)) { return false; }
+  $sql="DELETE FROM $this->message";
   if (!$this->query($sql)) { return false; }
   return true;
 }

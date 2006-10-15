@@ -71,7 +71,7 @@ function print_sections()
   }
   $this->print_content();
   $this->div_close(true);
-  $this->comment("end of $this->name");
+  $this->comment("end of ".$this->_class);
   echo "\n";
 }
 

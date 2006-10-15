@@ -205,7 +205,7 @@ function print_content()
   if ($user->is_member())
     $edit->print_edit_inputs();
   $edit->print_buttons();
-  echo "</edit>\n";
+  echo "</div>\n";
   echo "</form>\n";
 }
 

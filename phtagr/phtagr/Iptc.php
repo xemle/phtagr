@@ -861,17 +861,67 @@ function rem_records($name, $values)
   return $changed;
 }
 
-/** Adds a iptc field 
- @todo recognize changes in iptc fields */
-function add_iptc($key, $value) {
-  $iptc=&$this->iptc;
-  if (!isset($iptc))
-    $iptc=array();
+function _set_date($year, $month, $day, $hour, $min, $sec)
+{
+  $year=$year<1000?1000:($year>3000?3000:$year);
+  $month=$month<1?1:($month>12?12:$month);
+  $day=$day<1?1:($day>31?31:$day);
 
-  if (!isset($iptc[$key]))
-    $iptc[$key]=array();
- 
-  array_push($iptc[$key], $value);
+  $hour=$hour<0?0:($hour>23?23:$hour);
+  $min=$min<0?0:($min>59?59:$min);
+  $sec=$sec<0?0:($sec>59?59:$sec);
+
+  $date=sprintf("%04d%02d%02d", $year, $month, $day);
+  $time=sprintf("%02d%02d%02d", $hour, $min, $sec);
+
+  $this->add_record('2:055', $date);
+
+  if ($time!='000000')
+    $this->add_record('2:060', $time);
+  else
+    $this->rem_record('2:060');
+}
+
+/** Sets the date. 
+  @param s The input can be in UNIX time or the format of 'YYYY-MM-DD
+  hh:mm:ss'. Valid prefixes are also allowed like 'YYYY-MM' or 'YYYY-MM-DD
+  hh:mm'. If the input starts with an minus sign '-', the date is removed 
+  @return True on success, false otherwise */
+function set_date($s)
+{
+  if ($s{0}=='-')
+  {
+    $this->rem_record('2:055');
+    $this->rem_record('2:060');
+    return true;
+  }
+
+  // If just a number, check for year or seconds 
+  if (is_numeric($s))
+  {
+    if (strlen($s)==4)
+    {
+      $year=$s;
+      $this->_set_date($year, 1, 1, 0, 0, 0);
+      return true;
+    }
+    $s=gmdate("Y-m-d H:i:s", intval($s));
+    return $this->set_date($s);
+  }
+  
+  // Check format of YYYY-MM-DD hh:mm:ss
+  if (!preg_match('/^[0-9]{4}(-[0-9]{2}(-[0-9]{2}( [0-9]{2}(:[0-9]{2}(:[0-9]{2})?)?)?)?)?$/', $s))
+    return false;
+
+  $this->_set_date(
+    intval(substr($s, 0, 4)), 
+    intval(substr($s, 5, 2)), 
+    intval(substr($s, 8, 2)),
+    intval(substr($s, 11, 2)), 
+    intval(substr($s, 14, 2)), 
+    intval(substr($s, 17, 2)));
+
+  return true;
 }
 
 }?>

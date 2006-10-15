@@ -89,8 +89,8 @@ function print_content()
   </tr>
   <tr>
     <td></td>
-    <td><input type=\"submit\" value=\""._("Search")."\" />
-        <input type=\"reset\" value=\""._("Cancel")."\" /></td>
+    <td><input type=\"submit\" class=\"submit\" value=\""._("Search")."\" />
+        <input type=\"reset\" class=\"reset\" value=\""._("Cancel")."\" /></td>
   </tr>
 </table>
 </form>

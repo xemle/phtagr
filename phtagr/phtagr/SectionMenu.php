@@ -7,10 +7,15 @@ include_once("$phtagr_lib/Url.php");
 class SectionMenu extends SectionBase
 {
 
+/** Title of the menu */
 var $_title;
+/** Base url of the items */
 var $_url;
+/** Parameter name of the menu items */
 var $_item_param;
+/** List of menu items */
 var $_items;
+/** Index of current item */
 var $_cur;
 
 /** @param class DIV class of the menu
@@ -25,7 +30,9 @@ function SectionMenu($class='menu', $title='menu')
   $this->_cur=null;
 }
 
-/** param title Sets the title of the menu */
+/** param title Sets the title of the menu 
+  @param title String of title
+  @note If title is an empty string, the title is not printed */
 function set_title($title)
 {
   $this->_title=$title;
@@ -85,6 +92,32 @@ function add_item_param($id, $param, $value)
   return true;
 }
 
+/** Add a submenu to an given item 
+  @param id ID of the item
+  @param submenu Menu object 
+    @return True on success, false otherwise */
+function add_submenu($id, $submenu)
+{
+  if (!isset($this->_items[$id]))
+    return false;
+  if ($submenu==null)
+    return false;
+  if (!get_class("SectionMenu") && !is_subclass_of("SectionMenu"))
+    return false;
+
+  $this->_items[$id]['_sub']=$submenu;
+  return true;
+}
+
+/** @return Returns the submenu of an item */
+function get_submenu($id)
+{
+  if (!isset($this->_items[$id])||!isset($this->_items[$id]['_sub']))
+    return null;
+
+  return $this->_items[$id]['_sub'];
+}
+
 /** @return Returns the current ID of the menu. Null if none is set or found */
 function get_current()
 {
@@ -127,7 +160,13 @@ function print_content()
     }
     $href=$li->to_URL();
 
-    echo "  <li><a href=\"$href\"$cur>$name</a></li>\n";
+    echo "  <li><a href=\"$href\"$cur>$name</a>";
+    if (isset($item['_sub']))
+    {
+      echo "\n";
+      $item['_sub']->print_content();
+    }
+    echo "</li>\n";
   }
   echo "</ul>\n";
 }

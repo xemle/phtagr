@@ -81,7 +81,7 @@ function execute()
       $cmd=$_REQUEST['command'];
       if ($cmd=='remove')
       {
-        if ($user->is_owner(&$img))
+        if ($img->is_owner(&$user))
         {
           $img->remove_from_db();
           unset($img);
@@ -98,7 +98,7 @@ function execute()
         $_SESSION['img_voted'][$id]=$_REQUEST['voting'];
     }
 
-    if (!$user->can_edit(&$img))
+    if (!$img->can_edit(&$user))
     {
       unset($img);
       continue;
@@ -106,153 +106,19 @@ function execute()
     
     $iptc=new Iptc();
     $iptc->load_from_file($img->get_filename());
-    if ($this->_check_iptc_error(&$iptc))
-      continue;
+    $this->_handle_iptc_caption(&$iptc);
+    $this->_handle_iptc_date(&$iptc);
+    $this->_handle_iptc_tags(&$iptc);
+    $this->_handle_iptc_sets(&$iptc);
+    $this->_handle_iptc_location(&$iptc);
     
-    //$this->debug($_REQUEST);
-
-    // Distinguish between javascript values and global values
-    if (isset($_REQUEST['js_tags']))
-    {
-      $tags=split(" ", $_REQUEST['js_tags']);
-      /** @todo optimize set of this operation. Do only delete required tags */
-      $iptc->rem_record("2:025");
-      if ($this->_check_iptc_error(&$iptc))
-      {
-        unset($img);
-        continue;
-      }
-      // only positive tags
-      $add_tags=array();
-      foreach ($tags as $tag)
-      {
-        if ($tag{0}!='-')
-          array_push($add_tags, $tag);
-      }
-      
-      $iptc->add_records("2:025", $add_tags); 
-      if ($this->_check_iptc_error(&$iptc))
-      {
-        unset($img);
-        continue;
-      }
-    }
-    else if (isset($_REQUEST['edit_tags']))
-    {
-      $tags=split(" ", $_REQUEST['edit_tags']);
-    
-      // distinguish between add and remove operation.
-      $add_tags=array();
-      $rem_tags=array();
-      foreach ($tags as $tag)
-      {
-        if ($tag{0}=='-')
-          array_push($rem_tags, substr($tag, 1));
-        else
-          array_push($add_tags, $tag);
-      }
-      $iptc->add_records("2:025", $add_tags); 
-      if ($this->_check_iptc_error(&$iptc))
-      {
-        unset($img);
-        continue;
-      }
-      $iptc->rem_records("2:025", $rem_tags); 
-      if ($this->_check_iptc_error(&$iptc))
-      {
-        unset($img);
-        continue;
-      }
-    }
-
-    // Distinguish between javascript values and global values
-    if (isset($_REQUEST['js_sets']))
-    {
-      $sets=split(" ", $_REQUEST['js_sets']);
-      /** @todo optimize set of this operation. Do only delete required sets */
-      $iptc->rem_record("2:020");
-      if ($this->_check_iptc_error(&$iptc))
-      {
-        unset($img);
-        continue;
-      }
-      // only positive sets
-      $add_sets=array();
-      foreach ($sets as $set)
-      {
-        if ($set{0}!='-')
-          array_push($add_sets, $set);
-      }
-      
-      $iptc->add_records("2:020", $add_sets); 
-      if ($this->_check_iptc_error(&$iptc))
-      {
-        unset($img);
-        continue;
-      }
-    }
-    else if (isset($_REQUEST['edit_sets']))
-    {
-      $sets=split(" ", $_REQUEST['edit_sets']);
-    
-      // distinguish between add and remove operation.
-      $add_sets=array();
-      $rem_sets=array();
-      foreach ($sets as $set)
-      {
-        if ($set{0}=='-')
-          array_push($rem_sets, substr($set, 1));
-        else
-          array_push($add_sets, $set);
-      }
-      $iptc->add_records("2:020", $add_sets); 
-      if ($this->_check_iptc_error(&$iptc))
-      {
-        unset($img);
-        continue;
-      }
-      $iptc->rem_records("2:020", $rem_sets); 
-      if ($this->_check_iptc_error(&$iptc))
-      {
-        unset($img);
-        continue;
-      }
-    }
-
-    // Add captions
-    if (isset($_REQUEST['js_caption']))
-    {
-      $caption=$_REQUEST['js_caption'];
-      $iptc->add_record("2:120", $caption);
-      if ($this->_check_iptc_error(&$iptc))
-      {
-        unset($img);
-        continue;
-      }
-    }
-    else if (isset($_REQUEST['edit_caption']))
-    {
-      $caption=$_REQUEST['edit_caption'];
-      $iptc->add_record("2:120", $caption);
-      if ($this->_check_iptc_error(&$iptc))
-      {
-        unset($img);
-        continue;
-      }
-    }
-   
-    $this->handle_iptc_location(&$iptc);
-    
-    if ($iptc->is_changed())
+    if (!$this->_check_iptc_error(&$iptc) &&
+      $iptc->is_changed())
     {
       $iptc->save_to_file();
       $img->update(true);
-      if ($this->_check_iptc_error(&$iptc))
-      {
-        unset($img);
-        continue;
-      }
     }
+    unset($iptc);
 
     if (isset($_REQUEST['js_acl']) ||
       isset($_REQUEST['aacl_edit']))
@@ -263,12 +129,133 @@ function execute()
   return true;
 }
 
+/** Add captions
+  @param iptc Pointer to the IPTC object */
+function _handle_iptc_caption(&$iptc)
+{
+  if ($this->_check_iptc_error(&$iptc))
+    return false;
+
+  if (isset($_REQUEST['js_caption']))
+  {
+    $caption=$_REQUEST['js_caption'];
+    $iptc->add_record("2:120", $caption);
+  }
+  else if (isset($_REQUEST['edit_caption']))
+  {
+    $caption=$_REQUEST['edit_caption'];
+    $iptc->add_record("2:120", $caption);
+  }
+}
+
+/** Set the date
+  @param iptc Pointer to the IPTC object */
+function _handle_iptc_date(&$iptc)
+{
+  if ($this->_check_iptc_error(&$iptc))
+    return false;
+
+  $date=null;
+
+  if (isset($_REQUEST['js_date']))
+    $date=$_REQUEST['js_date'];
+  else if (isset($_REQUEST['edit_caption']))
+    $date=$_REQUEST['edit_date'];
+
+  if ($date!=null)
+    $iptc->set_date($date);
+}
+
+function _handle_iptc_tags(&$iptc)
+{
+  if ($this->_check_iptc_error(&$iptc))
+    return false;
+
+  // Distinguish between javascript values and global values
+  if (isset($_REQUEST['js_tags']))
+  {
+    $tags=split(" ", $_REQUEST['js_tags']);
+    /** @todo optimize set of this operation. Do only delete required tags */
+    $iptc->rem_record("2:025");
+
+    // only positive tags
+    $add_tags=array();
+    foreach ($tags as $tag)
+    {
+      if ($tag{0}!='-')
+        array_push($add_tags, $tag);
+    }
+    
+    $iptc->add_records("2:025", $add_tags); 
+  }
+  else if (isset($_REQUEST['edit_tags']))
+  {
+    $tags=split(" ", $_REQUEST['edit_tags']);
+  
+    // distinguish between add and remove operation.
+    $add_tags=array();
+    $rem_tags=array();
+    foreach ($tags as $tag)
+    {
+      if ($tag{0}=='-')
+        array_push($rem_tags, substr($tag, 1));
+      else
+        array_push($add_tags, $tag);
+    }
+    $iptc->add_records("2:025", $add_tags); 
+    $iptc->rem_records("2:025", $rem_tags); 
+  }
+
+}
+function _handle_iptc_sets(&$iptc)
+{
+  if ($this->_check_iptc_error(&$iptc))
+    return false;
+
+  // Distinguish between javascript values and global values
+  if (isset($_REQUEST['js_sets']))
+  {
+    $sets=split(" ", $_REQUEST['js_sets']);
+    /** @todo optimize set of this operation. Do only delete required sets */
+    $iptc->rem_record("2:020");
+    // only positive sets
+    $add_sets=array();
+    foreach ($sets as $set)
+    {
+      if ($set{0}!='-')
+        array_push($add_sets, $set);
+    }
+    
+    $iptc->add_records("2:020", $add_sets); 
+  }
+  else if (isset($_REQUEST['edit_sets']))
+  {
+    $sets=split(" ", $_REQUEST['edit_sets']);
+  
+    // distinguish between add and remove operation.
+    $add_sets=array();
+    $rem_sets=array();
+    foreach ($sets as $set)
+    {
+      if ($set{0}=='-')
+        array_push($rem_sets, substr($set, 1));
+      else
+        array_push($add_sets, $set);
+    }
+    $iptc->add_records("2:020", $add_sets); 
+    $iptc->rem_records("2:020", $rem_sets); 
+  }
+}
+
 /** Change the location information of the image. Location types are state,
  * sublocation, state and country. If a location type starts with an minus sign
  * in the multi-select mode, the location type will be removed. 
  @param iptc Pointer to the IPTC object of the image */
-function handle_iptc_location(&$iptc)
+function _handle_iptc_location(&$iptc)
 {
+  if ($this->_check_iptc_error(&$iptc))
+    return false;
+
   if (isset($_REQUEST['js_city']))
   {
     if ($_REQUEST['js_city']!='')
@@ -402,7 +389,7 @@ function _handle_request_acl(&$img)
   
   if (!$img)
     return false;
-  if (!$user->is_owner(&$img))
+  if (!$img->is_owner(&$user))
     return false;
     
   $acl=array();
@@ -479,36 +466,42 @@ function print_bar()
 /** Print the inputs to edit IPTC tags like comment, tags or sets. */
 function print_edit_inputs()
 {
-  echo "
-<div class=\"edit\">
+  global $user;
+  echo "\n<div class=\"edit\">
 
 <p><a href=\"javascript:void(0)\" id=\"btnEdit\" class=\"jsbutton\" onclick=\"toggle_visibility('toggleEdit', 'btnEdit')\">-&gt; "._("Edit Image Data")."</a></p>
 
 <fieldset id='toggleEdit' style=\"display:none\"><legend>Edit Image Data <a href=\"javascript:void(0)\" class=\"jsbutton\" onclick=\"toggle_visibility('toggleEdit', 'btnEdit')\">[Hide]</a></legend>
   <table>
     <tr>
-      <th>Caption:</th>
+      <th>"._("Caption:")."</th>
       <td><textarea name=\"edit_caption\" cols=\"24\" rows=\"3\" ></textarea></td>
     </tr>
     <tr>
-      <th>Tags:</th>
+      <th>"._("Date:")."</th>
+      <td><input type=\"text\" name=\"edit_date\" size=\"19\"/></td>
+    </tr>
+    <tr>
+      <th>"._("Tags:")."</th>
       <td><input type=\"text\" name=\"edit_tags\" size=\"60\"/></td>
     </tr>
     <tr>
-      <th>Set:</th>
+      <th>"._("Set:")."</th>
       <td><input type=\"text\" name=\"edit_sets\" size=\"60\"/></td>
     </tr>
     <tr>
-      <th>Location:</th>
-      <td>City: <input type=\"text\" name=\"edit_city\" size=\"60\"/><br/>
-        Sublocation: <input type=\"text\" name=\"edit_sublocation\" size=\"60\"/><br/> 
-        State: <input type=\"text\" name=\"edit_province\" size=\"60\"/><br/>
-        Country: <input type=\"text\" name=\"edit_country\" size=\"60\"/></td>
+      <th>"._("Location:")."</th>
+      <td>"._("City:")." <input type=\"text\" name=\"edit_city\" size=\"60\"/><br/>
+        "._("Sublocation:")." <input type=\"text\" name=\"edit_sublocation\" size=\"60\"/><br/> 
+        "._("State:")." <input type=\"text\" name=\"edit_province\" size=\"60\"/><br/>
+        "._("Country:")." <input type=\"text\" name=\"edit_country\" size=\"60\"/></td>
     </tr>
   </table>
-</fieldset>
+</fieldset>\n";
 
-<p><a href=\"javascript:void(0)\" id=\"btnAcl\" class=\"jsbutton\" onclick=\"toggle_visibility('toggleAcl', 'btnAcl')\">-&gt; "._("Edit Access Control Lists (ACL)")."</a></p>
+  if ($user->is_member())
+  {
+    echo "<p><a href=\"javascript:void(0)\" id=\"btnAcl\" class=\"jsbutton\" onclick=\"toggle_visibility('toggleAcl', 'btnAcl')\">-&gt; "._("Edit Access Control Lists (ACL)")."</a></p>
 
 <fieldset id='toggleAcl' style=\"display:none\"><legend>Access Control List <a href=\"javascript:void(0)\" class=\"jsbutton\" onclick=\"toggle_visibility('toggleAcl', 'btnAcl')\">[Hide]</a></legend>
   <table>
@@ -568,17 +561,18 @@ function print_edit_inputs()
     </tr>
   </table>
   <p>Set the access level to the selected images.</p>
-</fieldset>
+</fieldset>\n";
+  }
 
-<input type=\"hidden\" name=\"action\" value=\"edit\"/></div>
+  echo "<input type=\"hidden\" name=\"action\" value=\"edit\"/></div>
 ";
 }
 
 /** Pirnt the submit and reset buttons */
 function print_buttons()
 {
-  echo "<div><input type=\"submit\" value=\"OK\" />
-<input type=\"reset\" value=\"Reset fields\" /></div>
+  echo "<div><input type=\"submit\" class=\"submit\" value=\""._("Update")."\" />
+<input type=\"reset\" class=\"reset\" value=\""._("Reset")."\" /></div>
 ";
 }
 

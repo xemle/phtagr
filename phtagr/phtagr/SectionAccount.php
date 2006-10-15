@@ -29,24 +29,49 @@ function SectionAccount()
 function check_username($name)
 {
   if (strlen($name)<4)
-    return "The username is to short. It must have at least 4 characters";
+    return _("The username is to short. It must have at least 4 characters");
   if (strlen($name)>32)
-    return "The username is to long. Maximum length is 32 characters";
+    return _("The username is to long. Maximum length is 32 characters");
     
   if (!preg_match('/^[a-z][a-z0-9\-_\.\@]+$/', $name))
-  {
-    return "Username contains invalid characters. The name must start with an letter, followed by letters, numbers, or characters of '-', '_', '.', '@'.";
-  }
-
+    return _("Username contains invalid characters. The name must start with an letter, followed by letters, numbers, or characters of '-', '_', '.', '@'.");
+  
   global $db;
   $sql="SELECT name 
         FROM $db->user
         WHERE name='$name'";
   $result=$db->query($sql);
   if (mysql_num_rows($result)>0)
-  {
-    return "The username is already taken";
-  }
+    return _("The username is already taken");
+  return true;
+}
+
+/** Checks the vality of the password. At least 6 and maximum of 32 chars. 2
+ * lower, 2 upper and 2 special characters
+  @param pwd Password
+  @return True on success. Otherwise it returns a reason message */
+function check_password($pwd)
+{
+  if (strlen($pwd)<6)
+    return _("The password is to short. It must have at least 6 characters");
+  if (strlen($pwd)>32)
+    return _("The password is to long. Maximum length is 32 characters");
+    
+  if (!preg_match('/[A-Z].*[A-Z]/', $pwd))
+    return _("The password must contain 2 captialized characters");
+  if (!preg_match('/[a-z].*[a-z]/', $pwd))
+    return _("The password must contain 2 lower characters");
+
+  $special="!@#$%^&*()_-=+{};:,<.>/?";
+  $out='';
+  for ($i=0; $i<strlen($special); $i++)
+    $out.="'".$special{$i}."' ";
+  $out.=".";
+
+  if (!preg_match("/[".$special."].*[".$special."]/", $pwd))
+    return sprintf(_("The password must contain 2 secial characters of %s"),
+      htmlentities($out));
+
   return true;
 }
 
@@ -80,14 +105,13 @@ function set_info($info)
 
   $sql="UPDATE $db->user
         SET firstname='".$info['firstname']."',
-	lastname='".$info['lastname']."',
-	email='".$info['email']."',
-	fsroot='".$info['fsroot']."',
-	quota='".$info['quota']."',
-	quota_interval='".$info['quota_interval']."',
-	quota_max='".$info['quota_max']."',
-	data='".$info['data']."'
-	WHERE id=".$info['id'];
+        lastname='".$info['lastname']."',
+        email='".$info['email']."',
+        quota='".$info['quota']."',
+        quota_interval='".$info['quota_interval']."',
+        quota_max='".$info['quota_max']."',
+        data='".$info['data']."'
+        WHERE id=".$info['id'];
   $result=$db->query($sql);
   if(!$result)
     return false;
@@ -106,17 +130,22 @@ function user_create($name, $password)
   $pref=$db->read_pref();
   if (!($pref['allow_user_self_register']) && !($user->is_admin()))
   {
-    $this->error("You are not allowed to create a new user!");
+    $this->error(_("You are not allowed to create a new user!"));
     return false;
   }
 
   $result=$this->check_username($name);
   if (!is_bool($result) || $result==false)
   {
-    $this->warning("Sorry, the username '$name' could not be created. $result");
+    $this->warning(sprintf(_("Sorry, the username '%s' could not be created. %s"), $name, $result));
     return false;
   }
-  
+  $result=$this->check_password($password);
+  if (!is_bool($result) || $result==false)
+  {
+    $this->warning(_("Sorry, the password could not be created.")." ".$result);
+    return false;
+  }
   $sql="INSERT INTO 
         $db->user ( 
           name, password, email

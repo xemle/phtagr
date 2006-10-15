@@ -38,11 +38,11 @@ $page->add_section(&$hdr);
 $body = new SectionBase("body");
 $page->add_section(&$body);
 
-$menu = new SectionMenu();
-$body->add_section(&$menu);
-
 $cnt = new SectionBase("content");
 $body->add_section(&$cnt);
+
+$menu = new SectionMenu();
+$body->add_section(&$menu);
 
 $footer = new SectionBase("footer");
 $fcnt = new SectionFooter("content");
@@ -99,7 +99,7 @@ $menu->set_item_param('section');
 $menu->add_item('home', _("Home"));
 $menu->add_item('explorer', _("Explorer"));
 $menu->add_item('search', _("Search"));
-$menu->add_item_param('search', 'mode', 'full');
+
 if ($user->can_browse())
 {
   $menu->add_item('browser', _("Browser"));

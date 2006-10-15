@@ -23,9 +23,35 @@ Other image communities: http://holocore.com/?PictureSync_services
   - Add popular values as last view and current value. Done 2006-02-16
     Popular index = current value*0.8 + 0.2*(1/(current time+1 - last view))
     The value is updated every time if a image is clicked and only one per
-    session. 
-  - Add flag for uploaded image. Done
-  - Add table for sets. Done.
+    session. This function must be reviewed
+  - User
+    - add user type: Memeber or guest
+    - add cookie: Replace the username=password cookie by a random value
+    - add cookie expire
+    - add expire
+    - remove fsroot: Move this info to pref, since a user can have multiple
+      roots
+  - Image
+    - Add duration: Seconds for a web video
+    - Add HSV value: H, S, and V separated, used to identify/sort images by
+      HSV. See http://en.wikipedia.org/wiki/HSV_color_space or
+      http://en.wikipedia.org/wiki/HSL_color_space for more details.
+  - Comments
+    - add reply-to-id, which is refering
+    - add auth string for modifying, deleting comment
+    - Add notify-by-email flag to send an email/message to the replied comment
+  - Add message
+    A message can be used for intercommunication between phtagr users. E.g. for
+    group invitations, plain messages, etc.
+    - Id: Message id
+    - from: Id of creator
+    - to: Id of recipient
+    - date: Date of creation
+    - expire
+    - type: Message, Invitation, Invitation reply
+    - private: private data for phtagr internal use. Indicates special actions
+    - subject
+    - body
 
 - User
   Setting of a user account.
@@ -67,6 +93,8 @@ Other image communities: http://holocore.com/?PictureSync_services
   - A special user can be a GUEST. A guest has a username and a password. He is
     handle like an anonymous uses but can view all images of his assigned
     groups. A guest does not own images and has now quota.
+  - To set a password, special requirement must fit. E.g. at least 6 chars, 2
+    uperr and 2 lower chars, 2 speczial chars
 
 - Images
   An image is owned by an phTagr user. It could be places on any place for
@@ -145,7 +173,8 @@ Other image communities: http://holocore.com/?PictureSync_services
     - function query_images() Returns a list of images ids
     - function from_URL and to_URL. Done.
     - clone function to create search URLs
-  - Add JavaScript object of image with all important or meta data. This replaces complicated
+  - Add JavaScript object of image with all important or meta data. This
+    replaces complicated
 
 - Comment
   An image can be commented by other users or memebers. The image ACL defines
