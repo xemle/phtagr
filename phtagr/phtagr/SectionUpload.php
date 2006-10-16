@@ -71,7 +71,7 @@ function delete_upload()
 
   $pref = $db->read_pref();
   $upload_dir = $pref['upload_dir'];
-  $fullpath = $upload_dir . DIRECTORY_SEPARATOR . $user->get_username() . DIRECTORY_SEPARATOR;
+  $fullpath = $upload_dir . DIRECTORY_SEPARATOR . $user->get_name() . DIRECTORY_SEPARATOR;
   $files = glob ( $fullpath . "*");
 
   $found = false;
@@ -237,7 +237,7 @@ function upload_process()
   $upload_dir = $pref['upload_dir'];
 
   # At first we must ensure, that the directories exist:
-  $path = $upload_dir . DIRECTORY_SEPARATOR. $user->get_username() . DIRECTORY_SEPARATOR;
+  $path = $upload_dir . DIRECTORY_SEPARATOR. $user->get_name() . DIRECTORY_SEPARATOR;
   if (!file_exists($path))
   {
     if (!mkdir ($path))

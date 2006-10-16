@@ -119,7 +119,7 @@ function insert($filename, $is_upload=0)
     return 1;
   }
   
-  $userid=$user->get_userid();
+  $userid=$user->get_id();
   $groupid=$user->get_groupid();
 
   $gacl=$user->get_gacl();
@@ -380,7 +380,7 @@ function is_owner($user=null)
     return true;
 
   if ($this->get_userid()==
-    $user->get_userid())
+    $user->get_id())
     return true;
   return false;
 }
@@ -398,7 +398,7 @@ function _check_acl($user, $flag)
   if ($user->is_admin())
     return true;
   
-  if ($user->get_userid()==$this->get_userid())
+  if ($user->get_id()==$this->get_userid())
     return true;
     
   // If acls are calculated within if statement, I got wrong evaluation.

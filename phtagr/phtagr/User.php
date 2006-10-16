@@ -28,6 +28,7 @@ class User extends Base
 
 function User()
 {
+  $this->_data=array();
   $this->init_session();
 }
 
@@ -38,11 +39,10 @@ function init_session()
   if (!isset($_SESSION['created']))
   {
     $_SESSION['created']=time();
-    $_SESSION['userid']=-1;
-    $_SESSION['username']='anonymous';
     $_SESSION['img_viewed']=array();
     $_SESSION['img_voted']=array();
     $_SESSION['nrequests']=0;
+    $_SESSION['nqueries']=0;
   } else {
     if (isset($_SESSION['lang']))
       $this->_set_lang($_SESSION['lang']);
@@ -65,17 +65,15 @@ function _check_login($name, $password)
     
   $sname=mysql_escape_string($name);
   $spassword=mysql_escape_string($password);
-  $sql="SELECT id,name,password
+  $sql="SELECT id
         FROM $db->user 
         WHERE name='$sname' AND password='$spassword'";
   $result=$db->query($sql);
   if (!$result || mysql_num_rows($result)!=1)
     return false;
 
-  $row=mysql_fetch_assoc($result);
-  $this->_is_auth=true;
-  $_SESSION['username']=$row['name'];
-  $_SESSION['userid']=$row['id'];
+  $row=mysql_fetch_row($result);
+  $this->_init_by_id($row[0]);
   return true;
 }
 
@@ -104,25 +102,58 @@ function _set_lang($lang)
   return true;
 }
 
+function _init_by_id($id)
+{
+  global $db;
+  if (!is_numeric($id))
+    return false;
+
+  $sql="SELECT *
+        FROM $db->user
+        WHERE id=$id";
+  $result=$db->query($sql);
+  if (!$result || mysql_num_rows($result)!=1)
+    return false;
+
+  $this->_data=mysql_fetch_assoc($result);
+}
+
+/** 
+  @param name Name of the db column
+  @param default Default value, if column name not exists. Default value is
+  null.
+  @return If the value is not set, returns default */
+function _get_data($name, $default=null)
+{
+  if (isset($this->_data[$name]))
+    return $this->_data[$name];
+  else 
+    return $default;
+}
+
 /** Returns the userid of the current session 
   @return The value for an member is greater 0, an anonymous user has the ID
   -1.*/
-function get_userid()
+function get_id()
 {
-  if (isset($_SESSION['userid']))
-    return $_SESSION['userid'];
-  return -1;
+  return $this->_get_data('id', -1);
+}
+
+function get_name()
+{
+  return $this->_get_data('name', 'anonymous');
 }
 
 /** returns the userid */
 function get_groupid()
 {
-  return $this->get_userid();
+  return $this->get_id();
 }
 
-function get_username()
+/* @return Returns the current cookie value in the database */
+function _get_cookie()
 {
-  return $_SESSION['username'];
+  $this->_get_data('cookie', null);
 }
 
 /** Return the default ACL for the group */
@@ -150,7 +181,7 @@ function is_in_group($groupid=-1)
 
   $sql="SELECT userid
         FROM $db->usergroup
-        WHERE userid=".$this->get_userid()."
+        WHERE userid=".$this->get_id()."
           AND groupid=$groupid";
   $result=$db->query($sql);
   if (mysql_num_rows($result)>0)
@@ -161,7 +192,7 @@ function is_in_group($groupid=-1)
 /** Return true if the current user is an super user and has admin rights */
 function is_admin()
 {
-  if ($this->get_username()=='admin')
+  if ($this->get_name()=='admin')
     return true;
   return false;
 }
@@ -184,7 +215,7 @@ function is_guest()
 /* Return true if the given user is anonymous */
 function is_anonymous()
 {
-  if ($_SESSION['userid']==-1)
+  if ($this->get_id()==-1)
     return true;
   return false;
 }
@@ -239,10 +270,11 @@ function can_upload_size($size=0)
 }
 
 /** Checks if the session is valid. 
- @param docookierefresh If false, no not send a new cookie to refresh the
+ @param setcookie If false, no not send a new cookie to refresh the
  timeout. Default is true.
- @return true If the session is valid */
-function check_session($docookierefresh=true)
+ @return true If the session is valid 
+ @note A cookie is also set, if the request contains a 'remember' with true */
+function check_session($setcookie=true)
 {
   global $db;
   $cookie_name=$this->_get_cookie_name();
@@ -251,8 +283,13 @@ function check_session($docookierefresh=true)
   {
     if ($_REQUEST['action']=='login')
     {
+      if ($_REQUEST['remember'])
+        $setcookie=true;
+      else 
+        $setcookie=false;
+
       if ($this->_check_login($_REQUEST['user'], $_REQUEST['password']) && 
-          $docookierefresh)
+          $setcookie)
       {
         $this->_set_cookie($_REQUEST['user'], $_REQUEST['password']);
       }
@@ -273,6 +310,7 @@ function check_session($docookierefresh=true)
       $this->_update_cookie($cookie_name, $_COOKIE[$cookie_name]);
     }
   }
+
   if (isset($_REQUEST['lang']))
   {
     $this->_set_lang($_REQUEST['lang']);
@@ -290,22 +328,8 @@ function _remove_session()
   $this->init_session();
 }
 
-/* @return Returns the current cookie value in the database */
-function _get_db_cookie()
-{
-  global $db;
-  $sql="SELECT cookie
-        FROM $db->user
-        WHERE name='".$this->get_username()."'";
-  $result=$db->query($sql);
-  if (!$result || mysql_num_rows($result)!=1)
-    return null;
-
-  $row=mysql_fetch_row($result);
-  return $row[0];
-}
-
-/** Checks the cookie with the cookie from the database
+/** Checks the cookie with the cookie from the database. If a given cookie is
+ * found, the user is authenticated and will be initialized.
   @param cookie HTTP cookie
   @return True if the cookie matches the stored cookie. False otherwise */
 function _check_cookie($cookie)
@@ -315,37 +339,58 @@ function _check_cookie($cookie)
   if (strlen($cookie)<10)
     return false;
 
-  $db_cookie=$this->_get_db_cookie();
-  if ($db_cookie==$cookie)
-    return true;
+  $scookie=mysql_escape_string($cookie);
+  $sql="SELECT id
+        FROM $db->user
+        WHERE cookie='".$scookie."'";
+  $result=$db->query($sql);
+  if (!$result || mysql_num_rows($result)!=1)
+    return false;
 
-  return false;
+  $row=mysql_fetch_row($result);
+  $this->_init_by_id($row[0]);
+
+  return true;
 }
 
 /** Sets the cookie of the current user. If a cookie value is already set in
  * the database, the value is set to the cookie. The cookie is valid for one
- * year.*/
-function _set_cookie($username, $password)
+ * year.
+  @note A cookie is only set, if the user is already inialized and the ID is
+  greater 0. */
+function _set_cookie()
 {
   global $db;
+
+  $id=$this->get_id();
+  if ($id<=0)
+    return;
+
   $name=$this->_get_cookie_name();
-  $value=$this->_get_db_cookie();
+  $value=$this->_get_cookie();
   //$this->debug("name: $name, value=$value");
   if ($value==null)
   {
-    $value=$this->_create_cookie($username, $password);
+    $value=$this->_create_cookie();
     $svalue=mysql_escape_string($value);
     $sql="UPDATE $db->user
           SET cookie='$svalue'
-          WHERE name='$username'";
+          WHERE id=$id";
     $db->query($sql);
   }
   $this->_update_cookie($name, $value);
 }
 
-function _update_cookie($name, $value)
+/** Updates the the cookie 
+  @param name Cookie name
+  @param value Cookie value 
+  @param time valid time in seconds in UNIX time. If this value is 0, the time
+  will be set to current time plus one year. Default is 0. */
+function _update_cookie($name, $value, $time=0)
 {
-  setcookie($name, $value, time()+31536000, '/');
+  if ($time==0)
+    $tims=time()+31536000;
+  setcookie($name, $value, $time, '/');
 }
 
 /** @return Returns the name of the cookie */
@@ -360,26 +405,23 @@ function _get_cookie_name()
   @param username Name of the user
   @param password User's password
   @return MD5 hash of username, password and random data */
-function _create_cookie($username, $password)
+function _create_cookie()
 {
   $sec=time();
   srand($sec);
   for ($i=0; $i<64; $i++)
     $s.=chr(rand(0, 255));
-  return substr(md5($username.$s.$password),0,64);
+  $name=$this->get_name();
+  $pwd=$this->_get_data('password');
+  return substr(md5($name.$s.$pwd),0,64);
 }
 
-/** Removes a cookie from the client */
+/** Removes a cookie from the client.
+  @note It does not removes the cookie from the database */
 function _remove_cookie()
 {
-  global $db;
   $name=$this->_get_cookie_name();
   setcookie($name, "", time() - 3600, '/');   
-
-  $sql="UPDATE $db->user
-        SET cookie=NULL
-        WHERE name='".$this->get_username()."'";
-  $db->query($sql);
 }
 
 }

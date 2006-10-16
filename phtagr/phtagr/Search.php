@@ -398,7 +398,7 @@ function _handle_acl()
   $acl='';
   $userid=$this->get_param('user', null);
   if ($user->is_admin() || 
-    ($userid!=null && $userid == $user->get_userid()))
+    ($userid!=null && $userid == $user->get_id()))
     return $acl;
     
   // if requested user id is not the own user id
@@ -408,7 +408,7 @@ function _handle_acl()
                (i.groupid in ( 
                 SELECT groupid
                 FROM $db->usergroup
-                WHERE userid=".$user->get_userid().")
+                WHERE userid=".$user->get_id().")
               AND i.gacl>=".ACL_PREVIEW." )";
     if ($user->is_member())
       $acl .= " OR i.oacl>=".ACL_PREVIEW;

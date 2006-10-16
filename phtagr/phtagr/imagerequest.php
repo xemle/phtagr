@@ -76,7 +76,7 @@ if (!$db->connect())
 $user=new User();
 $user->check_session(false);
 
-$pref=$db->read_pref($user->get_userid());
+$pref=$db->read_pref($user->get_id());
 
 $img=new Thumbnail($_REQUEST['id']);
 if (!$img)

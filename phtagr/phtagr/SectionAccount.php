@@ -289,11 +289,12 @@ function print_login()
   echo "<form section=\"index.php\" method=\"post\">
 ".$url->to_form()."
 <table>
-  <tr><td>Username:</td><td><input type=\"text\" name=\"user\"/><td></tr>
-  <tr><td>Password:</td><td><input type=\"password\" name=\"password\"/><td></tr>
+  <tr><td>"._("Username:")."</td><td><input type=\"text\" name=\"user\"/><td></tr>
+  <tr><td>"._("Password:")."</td><td><input type=\"password\" name=\"password\"/><td></tr>
+  <tr><td></td><td><input type=\"checkbox\" name=\"remember\" checked=\"checked\" /> "._("Remeber me on the next login")."</td></td>
   <tr><td></td>
-      <td><input type=\"submit\" value=\"Login\"/>&nbsp;&nbsp;
-      <input type=\"reset\" value=\"Reset\"/></td></tr>
+      <td><input type=\"submit\" class=\"submit\" value=\""._("Login")."\"/>
+      <input type=\"reset\" class=\"reset\"value=\""._("Cancel")."\"/></td></tr>
 </table>
 </form>";
 

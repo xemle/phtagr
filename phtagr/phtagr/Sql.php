@@ -187,6 +187,7 @@ function query($sql, $quiet=false)
     $this->error("Could not run Query: '$sql'");
     return NULL;
   }
+  $_SESSION['nqueries']++;
   return $result;
 }
 

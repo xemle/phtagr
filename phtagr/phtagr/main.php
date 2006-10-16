@@ -89,7 +89,7 @@ $search= new Search();
 $search->from_URL();
 
 
-$pref=$db->read_pref($user->get_userid());
+$pref=$db->read_pref($user->get_id());
 $pref['theme']='default';
 $pref['path.theme']="./themes/".$pref['theme'];
 

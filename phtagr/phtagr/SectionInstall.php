@@ -143,12 +143,10 @@ function exec_stage_authenticate()
   {
     if ($this->check_install_id($_SESSION['install_id']))
     {
-      $_SESSION['username']='admin';
       return true;
     }
   }
 
-  unset($_SESSION['username']);
   return false;
 }
 
