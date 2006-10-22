@@ -59,18 +59,11 @@ function check_password($pwd)
     
   if (!preg_match('/[A-Z].*[A-Z]/', $pwd))
     return _("The password must contain 2 captialized characters");
-  if (!preg_match('/[a-z].*[a-z]/', $pwd))
-    return _("The password must contain 2 lower characters");
+  if (!preg_match('/[a-z].*[a-z].*[a-z]/', $pwd))
+    return _("The password must contain 3 lower characters");
 
-  $special="!@#$%^&*()_-=+{};:,<.>/?";
-  $out='';
-  for ($i=0; $i<strlen($special); $i++)
-    $out.="'".$special{$i}."' ";
-  $out.=".";
-
-  if (!preg_match("/[".$special."].*[".$special."]/", $pwd))
-    return sprintf(_("The password must contain 2 secial characters of %s"),
-      htmlentities($out));
+  if (!preg_match("/[0-9]/", $pwd))
+    return _("The password must contain at least one number");
 
   return true;
 }
@@ -128,7 +121,7 @@ function user_create($name, $password)
   global $user;
 
   $pref=$db->read_pref();
-  if (!($pref['allow_user_self_register']) && !($user->is_admin()))
+  if (!($pref['allow_user_self_register']) && $name!='admin')
   {
     $this->error(_("You are not allowed to create a new user!"));
     return false;

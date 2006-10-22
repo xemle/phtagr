@@ -391,7 +391,7 @@ function create_tables()
         email         VARCHAR(64),
         
         cookie        VARCHAR(64) DEFAULT NULL,
-        cookie_expire DATETIME DEFAUTL NULL,
+        cookie_expire DATETIME DEFAULT NULL,
 
         quota         INT,              /* Users quota in bytes */
         quota_interval INT,             /* Upload quota interval in seconds.
@@ -549,12 +549,13 @@ function create_tables()
         to_id         INT NOT NULL,
         date          DATETIME NOT NULL,
         expire        DATETIME DEFAULT NULL,
-        type          TINYINT UNSIGNED DEFAAULT 0,
+        type          TINYINT UNSIGNED DEFAULT 0,
         private       BLOB,
         subject       VARCHAR(128),
         body          BLOB,
-        INDEX to,
-        PRIMARY KEY(id)";
+
+        INDEX (to_id),
+        PRIMARY KEY(id))";
   if (!$this->query($sql)) { return false; }
 
   return true;

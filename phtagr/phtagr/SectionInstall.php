@@ -478,7 +478,10 @@ function exec_stage_admin()
   if ($confirm==$password)
   {
     $account = new SectionAccount();
-    $account->user_create("admin",$password);
+    if (!$account->user_create("admin",$password))
+    {
+      return false;
+    }
     $this->success(_("Admin account successfully created!"));
     return true;
   }

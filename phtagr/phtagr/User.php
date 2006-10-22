@@ -389,7 +389,7 @@ function _set_cookie()
 function _update_cookie($name, $value, $time=0)
 {
   if ($time==0)
-    $tims=time()+31536000;
+    $time=time()+31536000;
   setcookie($name, $value, $time, '/');
 }
 
