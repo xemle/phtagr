@@ -24,7 +24,10 @@ Other image communities: http://holocore.com/?PictureSync_services
     Popular index = current value*0.8 + 0.2*(1/(current time+1 - last view))
     The value is updated every time if a image is clicked and only one per
     session. This function must be reviewed
+  - rename pref to conf
   - User
+    - add creator: Id of the creator user. This is used to identify the user
+      created guest account.
     - add user type: Memeber or guest
     - add cookie: Replace the username=password cookie by a random value
     - add cookie expire
@@ -40,7 +43,7 @@ Other image communities: http://holocore.com/?PictureSync_services
     - add reply-to-id, which is refering
     - add auth string for modifying, deleting comment
     - Add notify-by-email flag to send an email/message to the replied comment
-  - Add message
+  - message
     A message can be used for intercommunication between phtagr users. E.g. for
     group invitations, plain messages, etc.
     - Id: Message id
@@ -52,6 +55,18 @@ Other image communities: http://holocore.com/?PictureSync_services
     - private: private data for phtagr internal use. Indicates special actions
     - subject
     - body
+
+- SqlObject: Represents a row, which is identified by an ID
+  User, Image, Comment, Message can be inherited from it
+  - _table
+  - _data
+  - init_by_id()
+  - _get_param(name, default)
+  - _set_param(param, value)
+  - _store_param(param, value)
+  - is_changed()
+  - commit()
+  - update()
 
 - User
   Setting of a user account.
@@ -72,7 +87,7 @@ Other image communities: http://holocore.com/?PictureSync_services
       - Synchronize files with the database
       - Reset of tables (while developing the database structure)
   - A user can
-    - hava a user image which will be shown in the explorer
+    - have a user image which will be shown in the explorer
     - set the default ACLs and some image values like Name of Creator on
       uploading files
     - User can browse and reorder his uploaded images by directories (by
@@ -258,6 +273,26 @@ Other image communities: http://holocore.com/?PictureSync_services
   - Save and transmit password in MD5
   - Secure and improve the login by adding turing test image
   - Support HTTPS
+
+- configuration
+  + user
+    + gacl, oacl, oacl
+    + theme
+    + lang
+    + fsroot[]
+    + image
+  + path
+    + htdocs
+    + lib
+    + cache
+    + theme
+    + upload
+  + cmd
+    + convert
+  + image
+    + gacl
+    + oacl
+    + aacl
 
 - Accounts
   - Verify a account creation by an image

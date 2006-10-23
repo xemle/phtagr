@@ -24,4 +24,18 @@ define("LOCATION_STATE", 0x03);
 define("LOCATION_COUNTRY", 0x04);
 
 define("VOTING_MAX", 0x05);
+
+define("ERR_DB_GENERAL",          -1);
+define("ERR_DB_CONNECT",          -2);
+define("ERR_DB_SELECT",           -3);
+define("ERR_DB_INSERT",           -4);
+define("ERR_DB_UPDATE",           -5);
+define("ERR_USER_GERNERAL",       -6);
+define("ERR_USER_ALREADY_EXISTS", -7);
+define("ERR_USER_NAME_LEN",       -8);
+define("ERR_USER_NAME_INVALID",   -9);
+define("ERR_USER_PWD_LEN",       -10);
+define("ERR_USER_PWD_INVALID",   -11);
+define("ERR_FS_GENERAL",         -12);
+
 ?>

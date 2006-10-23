@@ -23,12 +23,13 @@ function SectionAdmin()
 function exec_general ()
 {
   global $db;
+  global $conf;
   $result=false;
 
   if (isset ($_REQUEST['user_self_register']))
-    $result=$db->set_pref ('allow_user_self_register', '1');
+    $result=$conf->set(0, 'allow_user_self_register', '1');
   else
-    $result=$db->set_pref ('allow_user_self_register', '0');
+    $result=$conf->set(0, 'allow_user_self_register', '0');
   
   if ($result)
     $this->success("Settings saved successfully!");
@@ -39,11 +40,10 @@ function exec_general ()
 function print_general ()
 {
   global $db;
+  global $conf;
+  $user_self_register = $conf->get('allow_user_self_register', '0');
 
-  $pref = $db->read_pref();
-  $user_self_register = $pref['allow_user_self_register'];
-
-  echo "<h3>General</h3>\n";
+  echo "<h3>"._("General")."</h3>\n";
 
   echo "<form action=\"./index.php\" method=\"POST\">\n";
 
@@ -63,6 +63,60 @@ function print_general ()
   echo "<p></p>\n";
 }
 
+/** Prints the details of an user
+  @param u User object */
+function print_user_details($u=null) 
+{
+  if ($u==null)
+    return;
+
+  // If we don't have a update request we show all the values we can
+  // update.
+  echo "<form action=\"./index.php\" method=\"post\">\n";
+
+  $url=new Url();
+  $url->add_param('section', 'admin');
+  $url->add_param('page', ADMIN_TAB_USER);
+  $url->add_param('action', 'edit');
+  $url->add_param('id', $u->get_id());
+  echo $url->to_form();
+  echo "<table>
+  <tr>
+    <td>"._("First Name:")."</td>
+    <td><input type=\"text\" name=\"firstname\" value=\"".$u->get_firstname()."\" /><td>
+  </tr>
+  <tr>
+    <td>"._("Last Name:")."</td>
+    <td><input type=\"text\" name=\"lastname\" value=\"".$u->get_lastname()."\" /><td>
+  </tr>
+  <tr>
+    <td>"._("Email:")."</td>
+    <td><input type=\"text\" name=\"email\" value=\"".$u->get_email()."\" /><td>
+  </tr>
+  <tr>
+    <td>"._("Quota (MB)")."</td>
+    <td><input type=\"text\" name=\"quota\" value=\"".
+      sprintf("%.2f", $u->get_quota()/1048576)."\" /><td>
+  </tr>
+  <tr>
+    <td>"._("Quota Slice (MB)")."</td>
+    <td><input type=\"text\" name=\"qslice\" value=\"".
+      sprintf("%.2f", $u->get_qslice()/1048576)."\" /><td>
+  </tr>
+  <tr>
+    <td>"._("Quota Interval (Days)")."</td>
+    <td><input type=\"text\" name=\"qinterval\" value=\"".
+      sprintf("%.2f", $u->get_qinterval()/86400)."\" /><td>
+  </tr>
+  <tr>
+    <td></td>
+    <td><input type=\"submit\" class=\"submit\"value=\"Save\"/>
+      <input type=\"reset\" class=\"reset\" value=\"Reset\"/></td>
+  </tr>
+</table>
+</form>\n\n";
+  return;
+}
 function exec_user()
 {
   if (!isset ($_REQUEST['action']))
@@ -96,71 +150,40 @@ function exec_user()
   }
   else if (($action=="edit") && (isset ($_REQUEST['id'])))
   {
-    $account=new SectionAccount();
-    $info=$account->get_info($_REQUEST['id']);
-    echo "<h3>".sprintf(_("Editing User '%s'"), $info['name'])."'</h3>\n";
+    $u=new User($_REQUEST['id']);
+    echo "<h3>".sprintf(_("Editing User '%s'"), $u->get_name())."</h3>\n";
 
     // If 'email' is set in the request, we assume that this current request
     // is already an update request with all the values we want to update.
     if (isset($_REQUEST['email']))
-    {
-      $info['email']=$_REQUEST['email'];
-      $info['firstname']=$_REQUEST['firstname'];
-      $info['lastname']=$_REQUEST['lastname'];
-      if ($account->set_info($info))
-        $this->success(_("Update successful!"));
-      else
-        $this->error(_("Error updating userdata!"));
+      $u->set_email($_REQUEST['email']);
+    if (isset($_REQUEST['firstname']))
+      $u->set_firstname($_REQUEST['firstname']);
+    if (isset($_REQUEST['lastname']))
+      $u->set_lastname($_REQUEST['lastname']);
 
-      return;
-    }
+    if (isset($_REQUEST['quota']))
+      $u->set_quota($_REQUEST['quota']*1048576);
+    if (isset($_REQUEST['qslice']))
+      $u->set_qslice($_REQUEST['qslice']*1048576);
+    if (isset($_REQUEST['qinterval']))
+      $u->set_qinterval($_REQUEST['qinterval']*86400);
 
-    // If we don't have a update request we show all the values we can
-    // update.
-    echo "<form action=\"./index.php\" method=\"post\">\n";
+    $u->commit_changes();
 
-    $url=new Url();
-    $url->add_param('section', 'admin');
-    $url->add_param('page', ADMIN_TAB_USER);
-    $url->add_param('action', 'edit');
-    $url->add_param('id', $_REQUEST['id']);
-    echo $url->to_form();
-    echo "<table>
-  <tr>
-    <td>"._("First Name:")."</td>
-    <td><input type=\"text\" name=\"firstname\" value=\"".$info['firstname']."\" /><td>
-  </tr>
-  <tr>
-    <td>"._("Last Name:")."</td>
-    <td><input type=\"text\" name=\"lastname\" value=\"".$info['lastname']."\" /><td>
-  </tr>
-  <tr>
-    <td>"._("Email:")."</td>
-    <td><input type=\"text\" name=\"email\" value=\"".$info['email']."\" /><td>
-  </tr>
-  <tr>
-    <td></td>
-    <td><input type=\"submit\" value=\"Save\"/>&nbsp;&nbsp;
-      <input type=\"reset\" value=\"Reset\"/></td>
-  </tr>
-</table>
-</form>\n\n";
-
-    return;
+    $this->print_user_details($u);
   }
 
 }
 
-function print_user ()
+function print_user_create()
 {
-  global $db;
-
   $url=new Url();
   $url->add_param('section', 'admin');
   $url->add_param('page', ADMIN_TAB_USER);
   $url->add_param('action', 'create');
 
-  echo "<h3>Create User</h3>\n";
+  echo "<h3>"._("Create User")."</h3>\n";
   echo "<form action=\"./index.php\" method=\"post\">\n";
   echo $url->to_form();
   echo "<table>
@@ -182,11 +205,18 @@ function print_user ()
   </tr>
   <tr>
     <td></td>
-    <td><input type=\"submit\" value=\"Create\"/>&nbsp;&nbsp;
-      <input type=\"reset\" value=\"Reset\"/></td>
+    <td><input type=\"submit\" class=\"submit\" value=\"Create\"/>&nbsp;&nbsp;
+      <input type=\"reset\" class=\"reset\" value=\"Reset\"/></td>
   </tr>
 </table>
 </form>\n\n";
+}
+
+function print_user ()
+{
+  global $db;
+
+  $this->print_user_create();
 
   echo "<h3>"._("Available Users")."</h3>\n";
 
@@ -198,6 +228,9 @@ function print_user ()
     return;
 
   echo "<form action=\"./index.php\" method=\"post\">\n";
+  $url=new Url();
+  $url->add_param('section', 'admin');
+  $url->add_param('page', ADMIN_TAB_USER);
   
   echo "<table>
   <tr> 
@@ -205,8 +238,6 @@ function print_user ()
     <th>"._("Name")."</th>
     <th>"._("Actions")."</th>
   </tr>\n";
-  $delete="index.php?section=admin&page=".ADMIN_TAB_USER."&action=delete&id=";
-  $edit="index.php?section=admin&page=".ADMIN_TAB_USER."&action=edit&id=";
   while ($row=mysql_fetch_assoc($result))
   {
     $url->add_param('id', $row['id']);
@@ -251,55 +282,30 @@ function print_user ()
 function exec_upload ()
 {
   global $db;
-
+  global $conf;
   $request_upload_dir=$_REQUEST['set_dir'];
   if ($request_upload_dir != "")
   {
-    // Check if upload is already exists
-    $sql = "SELECT value 
-            FROM $db->pref 
-            WHERE name='upload_dir'";
-    $result= $db->query($sql);
-    if (!$result)
-      return false;
-
-    if (mysql_num_rows($result)>0)
-      $sql="UPDATE $db->pref 
-            SET value='${request_upload_dir}'
-            WHERE name='upload_dir'";
-    else
-      $sql="INSERT INTO $db->pref (name, value) 
-            VALUES('upload_dir', '${request_upload_dir}')";
-    $result = $db->query ($sql);
-    if (!$result)
-    {
-      $this->warning( "Could not update 'update_dir'!\n");
-      return false;
-    }
-    else
-      $this->success( "Update successful!\n");
+    $this->warning("NIY");
   }
 }
 
 function print_upload ()
 {
   global $db;
-
-  $pref = $db->read_pref();
-  $upload_dir = $pref['upload_dir'];
+  global $conf;
+  $upload_dir = $conf->get('upload_dir', '');
 
   $url=new Url();
   $url->add_param('section', 'admin');
   $url->add_param('page', ADMIN_TAB_UPLOAD);
   $url->add_param('action', upload_dir);
 
-  echo "<h3>Upload Settings</h3>\n";
+  echo "<h3>"._("Upload Settings")."</h3>\n";
 
   echo "<form action=\"./index.php\" method=\"POST\">\n";
 
-  echo "<p>All uploads go below this folder. For each user a subfolder will be ";
-  echo "created under which his images will reside. If a file exists, it ";
-  echo "will be saved as FILENAME-xyz.EXTENSION.<br>\n";
+  echo "<p>"._("All uploads go below this folder. For each user a subfolder will be created under which his images will reside. If a file exists, it will be saved as FILENAME-xyz.EXTENSION.");
   echo $url->to_form();
   echo "<input type=\"text\" name=\"set_dir\" value=\"" . $upload_dir . "\" size=\"60\"/>\n";
   echo "<input type=\"submit\" value=\"Save\" class=\"submit\" />\n";
@@ -319,37 +325,37 @@ function exec_debug ()
 
   if ($action=="sync")
   {
-    echo "<h3>Synchroning image data...</h3>\n";
-    $this->info("This operation may take some time");
+    echo "<h3>"._("Synchroning image data...")."</h3>\n";
+    $this->info(_("This operation may take some time"));
     sync_files();
   }
   else if ($action=="delete_tables")
   {
-    echo "<h3>Deleting Tables...</h3>\n";
+    echo "<h3>"._("Deleting Tables...")."</h3>\n";
     $db->delete_tables();
-    $this->warning("Tables deleted!");
+    $this->warning(_("Tables deleted!"));
   }
   else if ($action=="delete_images")
   {
     echo "<h3>Deleting Images...</h3>\n";
     $db->delete_images();
-    $this->warning("All image data is deleted");
+    $this->warning(_("All image data are deleted"));
   }
   else if ($action=="create_all_previews")
   {
-    echo "<h3>Creating preview images...</h3>\n";
-    $this->info("This operation may take some time");
+    echo "<h3>"._("Creating preview images...")."</h3>\n";
+    $this->info(_("This operation may take some time"));
     create_all_previews();
   }
   else
   {
-   $this->error ("Unknown action: ". $action);
+   $this->error (_("Unknown action: "). $action);
   }
 }
 
 function print_debug ()
 {
-  echo "<h3>Debug</h3>\n";
+  echo "<h3>"._("Debug")."</h3>\n";
   $this->warning(_("Please handle these operations carefully!"));
   $url=new Url();
   $url->add_param('section', 'admin');
@@ -357,18 +363,18 @@ function print_debug ()
   echo "<ul>\n";
   echo "<li>";
   $url->add_param('action', 'sync'); $href=$url->to_URL();
-  echo "<a href=\"$href\">Synchronize</a> files with the database</li>\n";
+  echo "<a href=\"$href\">"._("Synchronize files with the database")."</a></li>\n";
   $url->add_param('action', 'delete_tables'); $href=$url->to_URL();
-  echo "<li><a href=\"$href\">Delete Tables</a></li>\n";
+  echo "<li><a href=\"$href\">"._("Delete Tables")."</a></li>\n";
   $url->add_param('action', 'delete_images'); $href=$url->to_URL();
-  echo "<li><a href=\"$href\">Delete all images</a></li>\n";
+  echo "<li><a href=\"$href\">"._("Delete all images")."</a></li>\n";
   $url->add_param('action', 'create_all_previews'); $href=$url->to_URL();
-  echo "<li><a href=\"$href\">Create all preview images</a></li>\n";
+  echo "<li><a href=\"$href\">"._("Create all preview images")."</a></li>\n";
   $url->rem_param('section');
   $url->rem_param('page');
   $url->rem_param('action');
   $href=$url->to_URL();
-  echo "<li><a href=\"$href\">Go to phTagr</a></li>\n";
+  echo "<li><a href=\"$href\">"._("Go to phTagr")."</a></li>\n";
   echo "</ul>\n";
 }
 

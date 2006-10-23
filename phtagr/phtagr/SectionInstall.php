@@ -54,6 +54,7 @@ function clear_session()
 function init_tables()
 {
   global $db;
+  global $conf;
   $fs=new Filesystem();
   $directory="";
   $data_directory="";
@@ -77,15 +78,8 @@ function init_tables()
   }
   
   // Escape strings for sql database
-  $scache=mysql_escape_string($cache);
-  $sql="INSERT $db->pref (
-          userid, name, value
-        ) VALUES ( 
-          0, 'cache', '$scache'
-        )";
-  $result=$db->query($sql);
-  if (!$result) { 
-    $this->warning(sprintf(_("Could not run SQL query '%s'"), $sql)); 
+  if (!$conf->set(0, 'path.cache', $cache)) {
+    $this->warning(_("Could not set the cache path")); 
     return false;
   }
 
@@ -97,12 +91,7 @@ function init_tables()
     return false;
   }
 
-  $supload=mysql_escape_string($upload);
-  $sql="INSERT $db->pref (
-          userid, name, value
-        ) VALUES ( 
-          0, 'upload_dir', '$supload')";
-  if (!$result) { 
+  if (!$conf->set(0, 'path.upload', $upload)) {
     $this->warning(sprintf(_("Could not run SQL query '%s'"), $sql)); 
     return false;
   }

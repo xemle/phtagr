@@ -226,15 +226,14 @@ function upload_process()
 {
   global $db;
   global $user;
-  
+  global $conf; 
   if (!$user->can_upload())
   {
     $this->warning("You are not allowed to upload a file.");
     return false;
   }
   
-  $pref = $db->read_pref();
-  $upload_dir = $pref['upload_dir'];
+  $upload_dir = $conf->get('upload_dir');
 
   # At first we must ensure, that the directories exist:
   $path = $upload_dir . DIRECTORY_SEPARATOR. $user->get_name() . DIRECTORY_SEPARATOR;

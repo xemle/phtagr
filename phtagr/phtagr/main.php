@@ -4,6 +4,7 @@ session_start();
 
 include "$phtagr_lib/User.php";
 include "$phtagr_lib/Sql.php";
+include "$phtagr_lib/Config.php";
 include "$phtagr_lib/Search.php";
 include "$phtagr_lib/Edit.php";
 
@@ -89,10 +90,9 @@ $user->check_session();
 $search= new Search();
 $search->from_URL();
 
-
-$pref=$db->read_pref($user->get_id());
-$pref['theme']='default';
-$pref['path.theme']="./themes/".$pref['theme'];
+$conf=new Config($user->get_id());
+$conf->set(0, 'theme', 'default');
+$conf->set(0, 'path.theme', "./themes/".$conf->get('theme'));
 
 $menu=new SectionMenu('menu', _("Menu"));
 $menu->set_item_param('section');

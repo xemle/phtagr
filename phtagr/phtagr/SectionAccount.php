@@ -19,98 +19,6 @@ function SectionAccount()
   $this->user='';
 }
 
-/** Checks the username for validity. 
-  The Username must start with an letter, followed by letters, numbers, or
-  special characters (-, _, ., @). All letters must be lowered.
-  
-  @param name Username to check
-  @return true if the name is possible, an error string of the error message
-  otherwise */
-function check_username($name)
-{
-  if (strlen($name)<4)
-    return _("The username is to short. It must have at least 4 characters");
-  if (strlen($name)>32)
-    return _("The username is to long. Maximum length is 32 characters");
-    
-  if (!preg_match('/^[a-z][a-z0-9\-_\.\@]+$/', $name))
-    return _("Username contains invalid characters. The name must start with an letter, followed by letters, numbers, or characters of '-', '_', '.', '@'.");
-  
-  global $db;
-  $sql="SELECT name 
-        FROM $db->user
-        WHERE name='$name'";
-  $result=$db->query($sql);
-  if (mysql_num_rows($result)>0)
-    return _("The username is already taken");
-  return true;
-}
-
-/** Checks the vality of the password. At least 6 and maximum of 32 chars. 2
- * lower, 2 upper and 2 special characters
-  @param pwd Password
-  @return True on success. Otherwise it returns a reason message */
-function check_password($pwd)
-{
-  if (strlen($pwd)<6)
-    return _("The password is to short. It must have at least 6 characters");
-  if (strlen($pwd)>32)
-    return _("The password is to long. Maximum length is 32 characters");
-    
-  if (!preg_match('/[A-Z].*[A-Z]/', $pwd))
-    return _("The password must contain 2 captialized characters");
-  if (!preg_match('/[a-z].*[a-z].*[a-z]/', $pwd))
-    return _("The password must contain 3 lower characters");
-
-  if (!preg_match("/[0-9]/", $pwd))
-    return _("The password must contain at least one number");
-
-  return true;
-}
-
-/** Reads all the saved data we have about an user
-  @param id ID of the user
-  @return an array of all the saved data */
-function get_info($id)
-{
-  global $db;
-
-  $sql="SELECT *
-        FROM $db->user
-        WHERE id=$id";
-
-  $result=$db->query($sql);
-  $info=array();
-  if ($result)
-  {
-    return mysql_fetch_array($result, MYSQL_ASSOC);
-  }
-
-  return $info;
-}
-
-/** Updates the data of an user 
-  @param info the new values for the info of the user
-  @return true on success, false otherwise */
-function set_info($info)
-{
-  global $db;
-
-  $sql="UPDATE $db->user
-        SET firstname='".$info['firstname']."',
-        lastname='".$info['lastname']."',
-        email='".$info['email']."',
-        quota='".$info['quota']."',
-        quota_interval='".$info['quota_interval']."',
-        quota_max='".$info['quota_max']."',
-        data='".$info['data']."'
-        WHERE id=".$info['id'];
-  $result=$db->query($sql);
-  if(!$result)
-    return false;
-
-  return true;
-}
 /** Creats a new user.
   @param name Name of the new user
   @param password password of the new user
@@ -119,35 +27,55 @@ function user_create($name, $password)
 {
   global $db;
   global $user;
+  global $pref;
 
-  $pref=$db->read_pref();
   if (!($pref['allow_user_self_register']) && !$user->is_admin())
   {
     $this->error(_("You are not allowed to create a new user!"));
     return false;
   }
 
-  $result=$this->check_username($name);
-  if (!is_bool($result) || $result==false)
+  $result=$user->create($name, $password);
+  if ($result<0)
   {
-    $this->warning(sprintf(_("Sorry, the username '%s' could not be created. %s"), $name, $result));
+    $msg='';
+    switch ($result) {
+    case ERR_USER_NAME_LEN:
+      $msg=_("The name is to short or to long. It must have at least 4 characters");
+      break;
+    case ERR_USER_NAME_INVALID:
+      $msg=_("Username contains invalid characters. The name must start with an letter, followed by letters, numbers, or characters of '-', '_', '.', '@'.");
+      break;
+    case ERR_USER_ALREADY_EXISTS:
+      $msg=_("The username is already taken");
+      break;
+    case ERR_USER_PWD_LEN:
+      $msg=_("The password is too short or too long. It must have at least 6 characters and maximum 32 chars.");
+      break;
+    case ERR_USER_PWD_INVALID:
+      $special=$user->get_special_chars();
+      $out='';
+      for ($i=0; $i<strlen($special); $i++)
+      {
+        $out.="'".$special{$i}."'";
+        if ($i+1<strlen($special))
+          $out.=", ";
+      }
+      $out=htmlentities($out);
+      $msg=sprintf(_("The password is invalid. Use at least two lower letters, to upper letters and two special chars of %s"), $out);
+      break;
+    default:
+      break;
+    }
+    $this->warning(sprintf(_("Sorry, the account could not be created. %s"), $msg));
     return false;
   }
-  $result=$this->check_password($password);
-  if (!is_bool($result) || $result==false)
-  {
-    $this->warning(_("Sorry, the password could not be created.")." ".$result);
-    return false;
-  }
-  $sql="INSERT INTO 
-        $db->user ( 
-          name, password, email
-        ) VALUES (
-          '$name', '$password', 'email'
-        )";
-  if (!$db->query($sql))
-    return false;
-    
+
+  $new=new User(intval($result));
+  $new->set_email($_REQUEST['email']);
+  $new->set_fullname($_REQUEST['firstname'], $_REQUEST['surname']);
+  unset($new);
+
   return true;
 }
 
@@ -159,65 +87,16 @@ function print_form_new()
   $url->add_param('action', 'create');
   echo "<form method=\"post\">".$url->to_form()."
 <table>
-  <tr><td>Username:</td><td><input type=\"text\" name=\"name\" value=\"$this->user\"/><td></tr>
-  <tr><td>Password:</td><td><input type=\"password\" name=\"password\"/><td></tr>
-  <tr><td>Confirm:</td><td><input type=\"password\" name=\"confirm\"/><td></tr>
-  <tr><td>Email:</td><td><input type=\"text\" name=\"email\"/><td></tr>
+  <tr><td>"._("Username:")."</td><td><input type=\"text\" name=\"name\" value=\"$this->user\"/><td></tr>
+  <tr><td>"._("Password:")."</td><td><input type=\"password\" name=\"password\"/><td></tr>
+  <tr><td>"._("Confirm:")."</td><td><input type=\"password\" name=\"confirm\"/><td></tr>
+  <tr><td>"._("Email:")."</td><td><input type=\"text\" name=\"email\"/><td></tr>
   <tr><td></td>
-      <td><input type=\"submit\" value=\"Create\"/>&nbsp;&nbsp;
-      <input type=\"reset\" value=\"Reset\"/></td></tr>
+      <td><input type=\"submit\" class=\"submit\" value=\"Create\"/>
+      <input type=\"reset\" class=\"reset\" value=\"Reset\"/></td></tr>
 </table>
 
 </form>";
-}
-
-/** Delte all data from a user
-  @todo ensure to delete all data from the user */
-function _delete_user_data($id)
-{
-  global $db;
-
-  // delete all tags
-  $sql="DELETE $db->tag 
-        FROM $db->tag, $db->image
-        WHERE $db->image.userid=$id AND $db->image.id=$db->tag.imageid";
-  $db->query($sql);
-
-  // Delete cached image data
-  $sql="SELECT id 
-        FROM $db->image
-        WHERE id=$id";
-  $result=$db->query($sql);
-  if (!$result)
-    return;
-
-  while ($row=mysql_fetch_assoc($result))
-  {
-    // @todo delete all cached data
-  }
-  
-  // Delete all image data
-  $sql="DELETE $db->image 
-        FROM $db->image
-        WHERE id=$id";
-  $result=$db->query($sql);
-
-  // Delete all preferences
-  $sql="DELETE $db->pref
-        FROM $db->pref
-        WHERE userid=$id";
-  $result=$db->query($sql);
-  
-  // @todo delete the group of the user
-  // @todo delete users upload directory
-  
-  // Delete the user data
-  $sql="DELETE $db->user
-        FROM $db->user
-        WHERE id=$id";
-
-  $result=$db->query($sql);
-  return true;
 }
 
 /** Delete a specific user */

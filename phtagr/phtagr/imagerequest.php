@@ -7,6 +7,7 @@ session_start();
 
 include "$phtagr_lib/User.php";
 include "$phtagr_lib/Sql.php";
+include "$phtagr_lib/Config.php";
 include "$phtagr_lib/Thumbnail.php";
 
 
@@ -76,7 +77,7 @@ if (!$db->connect())
 $user=new User();
 $user->check_session(false);
 
-$pref=$db->read_pref($user->get_id());
+$conf=new Config($user->get_id());
 
 $img=new Thumbnail($_REQUEST['id']);
 if (!$img)

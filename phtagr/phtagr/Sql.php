@@ -13,8 +13,8 @@ class Sql extends Base
 var $user;
 var $group;
 var $usergroup;
-/** Table name of preferences */
-var $pref;
+/** Table name of configurations */
+var $conf;
 /** Tablename of images */
 var $image;
 /** Tablename of tags */
@@ -60,7 +60,7 @@ function read_config($config='')
   $this->imagelocation=$db_prefix."imagelocation";
   $this->comment=$db_prefix."comment";
   $this->message=$db_prefix."message";
-  $this->pref=$db_prefix."pref";
+  $this->conf=$db_prefix."pref";
 
   return true;
 }
@@ -138,7 +138,7 @@ function _get_table_names()
     $this->user,
     $this->group,
     $this->usergroup,
-    $this->pref,
+    $this->conf,
     $this->image,
     $this->tag,
     $this->imagetag,
@@ -190,58 +190,6 @@ function query($sql, $quiet=false)
   }
   $_SESSION['nqueries']++;
   return $result;
-}
-
-/** Read the global preferences from the sql database */
-function read_pref($userid=-1)
-{
-  // read global preferences first
-  $sql="SELECT * 
-        FROM $this->pref
-        WHERE userid=0";
-  $result=$this->query($sql);
-  if (!$result)
-    return NULL;
-
-  $pref=array();
-  while($row = mysql_fetch_array($result, MYSQL_ASSOC)) {
-    $pref[$row['name']]=$row['value'];
-  }
-  
-  // read user preferences
-  $sql="SELECT * 
-        FROM $this->pref
-        WHERE userid=$userid";
-  $result=$this->query($sql);
-  if ($result)
-  {
-    while($row = mysql_fetch_array($result, MYSQL_ASSOC)) {
-      $pref[$row['name']]=$row['value'];
-    }
-  }
-  
-  return $pref;
-}
-
-/** Adds or updates a tag-value pair in the preference table. */
-function set_pref($tag, $value)
-{
-  $stag=mysql_escape_string($tag);
-  $svalue=mysql_escape_string($value);
-
-  echo "Saving tag: $stag value: $svalue";
-
-  $sql="SELECT *
-        FROM $this->pref
-	WHERE name=\"$stag\"";
-  $result=$this->query($sql);
-
-  if ($result==NULL || mysql_num_rows($result)==0)
-    $sql="INSERT INTO $this->pref VALUES (0,0,'$stag','$svalue')";    
-  else
-    $sql="UPDATE $this->pref SET value='$svalue' WHERE name='$stag'";
-
-  return $this->query($sql);
 }
 
 /** Gets the tag id of a tag name 

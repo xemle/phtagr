@@ -21,7 +21,6 @@ function print_general ()
 {
   global $user;
   $account=new SectionAccount();
-  $userinfo=$account->get_info($user->get_id());
 
   $url=new Url();
   $url->add_param('section', 'myaccount');
@@ -32,34 +31,45 @@ function print_general ()
   echo "<form action=\"./index.php\" method=\"post\">\n";
   echo $url->to_form();
   echo "<table>
-  <tr><td>First Name:</td><td><input name=\"firstname\" type=\"text\" value=\"".$userinfo['firstname']."\"></td></tr>
-  <tr><td>Last Name:</td><td><input name=\"lastname\" type=\"text\" value=\"".$userinfo['lastname']."\"></td></tr>
-  <tr><td>email:</td><td><input name=\"email\" type=\"text\" value=\"".$userinfo['email']."\"></td></tr>
-</table>\n";
-  echo "<input type=\"submit\" value=\"Save\" />\n";
-
-  echo "</form>\n";
+  <tr>
+    <td>"._("First Name:")."</td>
+    <td><input type=\"text\" name=\"firstname\" value=\"".$user->get_firstname()."\" /><td>
+  </tr>
+  <tr>
+    <td>"._("Last Name:")."</td>
+    <td><input type=\"text\" name=\"lastname\" value=\"".$user->get_lastname()."\" /><td>
+  </tr>
+  <tr>
+    <td>"._("Email:")."</td>
+    <td><input type=\"text\" name=\"email\" value=\"".$user->get_email()."\" /><td>
+  </tr>
+  <tr>
+    <td></td>
+    <td><input type=\"submit\" class=\"submit\"value=\"Save\"/>
+      <input type=\"reset\" class=\"reset\" value=\"Reset\"/></td>
+  </tr>
+</table>
+</form>\n\n";
 }
 
 function exec_general ()
 {
   global $user;
-  $action="";
 
+  $action="";
   if (isset($_REQUEST['action']))
     $action=$_REQUEST['action'];
 
   if($action=='edit')
   {
-    $account=new SectionAccount();
-    $info=$account->get_info($user->get_id());
-    $info['email']=$_REQUEST['email'];
-    $info['firstname']=$_REQUEST['firstname'];
-    $info['lastname']=$_REQUEST['lastname'];
-    if ($account->set_info($info))
-      $this->success(_("Update successful!"));
-    else
-      $this->error(_("Error updating userdata!"));
+    if (isset($_REQUEST['email']))
+      $user->set_email($_REQUEST['email']);
+    if (isset($_REQUEST['firstname']))
+      $user->set_firstname($_REQUEST['firstname']);
+    if (isset($_REQUEST['lastname']))
+      $user->set_lastname($_REQUEST['lastname']);
+
+    $user->commit_changes();
 
     return;
   }
@@ -69,7 +79,7 @@ function print_upload ()
 {
   global $user;
 
-  echo "<h3>Upload</h3>\n";
+  echo "<h3>"._("Upload")."</h3>\n";
   $url=new Url();
   $url->add_param('section', 'myaccount');
   $url->add_param('page', MYACCOUNT_TAB_UPLOAD);
@@ -80,17 +90,17 @@ function print_upload ()
   echo "<div class=\"upload_files\" \>\n";
   echo "<table id=\"upload_files\">
 <tr id=\"upload_file-1\">
-<td>Upload image: </td><td><input name=\"images[]\" type=\"file\"/></td>
+<td>"._("Upload image:")."</td><td><input name=\"images[]\" type=\"file\"/></td>
 <td id=\"action-1\" class=\"add\" onclick=\"add_file_input(1)\"></td>
 </tr>
 </table>\n";
   echo "</div>\n";
-  echo "<input type=\"submit\" value=\"Upload\" />\n";
+  echo "<input type=\"submit\" class=\"submit\" value=\"Upload\" />\n";
 
   echo "</form>\n";
 }
 
-function exec_upload ()
+function exec_upload()
 {
   $upload=new SectionUpload();
   $upload->upload_process();
