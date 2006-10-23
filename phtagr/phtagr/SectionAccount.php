@@ -121,7 +121,7 @@ function user_create($name, $password)
   global $user;
 
   $pref=$db->read_pref();
-  if (!($pref['allow_user_self_register']) && $name!='admin')
+  if (!($pref['allow_user_self_register']) && !$user->is_admin())
   {
     $this->error(_("You are not allowed to create a new user!"));
     return false;
@@ -372,14 +372,11 @@ function print_content()
       $this->user_delete($_REQUEST['id']);
     else
       $this->user_delete(-1);
-  }
-  if ($action=='login')
+  } else
   {
     $this->print_login();
   }
 
-  if ($user->is_admin())
-    echo "<a href=\"index.php?section=account&amp;action=list\">List users</a>\n";
 }
 
 }

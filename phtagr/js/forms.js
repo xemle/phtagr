@@ -662,3 +662,57 @@ function _get_row_buttons(nodeId)
 
   return tr;
 }
+
+/** Removes an input field for uploads
+*/
+function remove_file_input(id)
+{
+  var row=document.getElementById("upload_file-"+id);
+  if (row==null)
+    return;
+
+  row.parentNode.removeChild (row);
+}
+
+/** Adds another input field for uploads
+*/
+function add_file_input(id)
+{
+  var new_id=id+1;
+  var upload_table="upload_files";
+  var nodeId="upload_file-"+id;
+
+  var table=document.getElementById(upload_table);
+  if (table==null)
+    return;
+
+  var old_row=document.getElementById(nodeId);
+  var added_row=old_row.cloneNode(true);
+
+  var old_action=document.getElementById("action-"+id);
+  old_action.setAttribute("onclick","remove_file_input("+id+")");
+  old_action.setAttribute("class","remove");
+
+  var cells=added_row.getElementsByTagName("td");
+  cells[1].firstChild.value="";
+  added_row.setAttribute ("id", "upload_file-"+new_id);
+
+  while (added_row.lastChild.nodeName=="#text")
+  {
+    added_row.removeChild (added_row.lastChild);
+  }
+  added_row.lastChild.setAttribute ("id", "action-"+new_id);
+  added_row.lastChild.setAttribute ("onclick", "add_file_input("+new_id+")");
+
+  while (old_row.lastChild.nodeName=="#text")
+  {
+    old_row.removeChild (old_row.lastChild);
+  }
+
+  old_row.lastChild.setAttribute("class","remove");
+  old_row.lastChild.setAttribute("onclick","remove_file_input("+id+")");
+
+  table.appendChild(added_row);
+}
+
+

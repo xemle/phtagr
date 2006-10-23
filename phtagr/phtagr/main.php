@@ -24,6 +24,7 @@ include "$phtagr_lib/SectionSearch.php";
 include "$phtagr_lib/SectionUpload.php";
 include "$phtagr_lib/SectionInstall.php";
 include "$phtagr_lib/SectionAdmin.php";
+include "$phtagr_lib/SectionMyAccount.php";
 
 $page = new PageBase("phTagr");
 
@@ -104,9 +105,9 @@ if ($user->can_browse())
 {
   $menu->add_item('browser', _("Browser"));
 }
-if ($user->can_upload())
+if ($user->is_member())
 {
-  $menu->add_item('upload', _("Upload"));
+  $menu->add_item('myaccount', _("MyAccount"));
 }
 if ($user->is_admin())
 {
@@ -120,6 +121,9 @@ if (isset($_REQUEST['section']))
   if ($user->is_member() && 
       $_REQUEST['section']=='account' && isset($_REQUEST['goto']))
   {
+    // We need to unset the action field otherwise we might
+    // execute an action we did not intend to perform.
+    unset ($_REQUEST['action']);
     $section=$_REQUEST['goto'];
   } 
 
@@ -174,6 +178,22 @@ if (isset($_REQUEST['section']))
       $login->message=_("You are not loged in!");
       $cnt->add_section(&$login);
     }
+  }
+  else if($section=='myaccount')
+  {
+    if ($user->is_member())
+    {
+      $myaccount=new SectionMyAccount();
+      $cnt->add_section(&$myaccount);
+    }
+    else
+    {
+      $login=new SectionAccount();
+      $login->message=_('You have to be logged in to access the queried page.');
+      $login->section='myaccount';
+      $login->
+      $cnt->add_section(&$login);
+    }
   } 
   else if($section=='admin')
   {
@@ -183,17 +203,9 @@ if (isset($_REQUEST['section']))
       $cnt->add_section(&$admin);
     } else {
       $login=new SectionAccount();
-      $login->message=_('You are not loged in as an admin');
+      $login->message=_('You have to be logged in to access the queried page.');
       $login->section='admin';
       $cnt->add_section(&$login);
-    }
-  }
-   else if($section=='upload')
-  {
-    if ($user->can_upload())
-    {
-      $upload = new SectionUpload();
-      $cnt->add_section(&$upload);
     }
   }
   else if($section=='help')

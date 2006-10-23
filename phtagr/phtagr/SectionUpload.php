@@ -328,7 +328,7 @@ function print_uploaded()
   # Now we want to list all files, the user has already uploaded
   $pref = $db->read_pref();
   $upload_dir = $pref['upload_dir'];
-  $fullpath = $upload_dir . DIRECTORY_SEPARATOR . $user->get_username() . DIRECTORY_SEPARATOR;
+  $fullpath = $upload_dir . DIRECTORY_SEPARATOR . $user->get_name() . DIRECTORY_SEPARATOR;
   $files = glob ( $fullpath . "*");
   if (count ($files) == 0)
     return;

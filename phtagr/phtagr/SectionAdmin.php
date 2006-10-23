@@ -413,7 +413,6 @@ function print_content()
       $this->exec_general();
       break;
     default:
-      $this->waring(_("No valid action found"));
       break;
     }
 

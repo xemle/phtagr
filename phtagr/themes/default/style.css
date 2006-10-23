@@ -512,3 +512,19 @@ input, select, submit, reset, textarea {
   background: #9797ff url(./question.png) no-repeat 5px 5px;
 }
 
+/** Upload form  */
+.add {
+  display: block;
+  width: 32px;
+  height: 32px;
+  background: url(./add.png) no-repeat;
+}
+
+.remove {
+  display: block;
+  width: 32px;
+  height: 32px;
+  background: url(./remove.png) no-repeat;
+}
+
+

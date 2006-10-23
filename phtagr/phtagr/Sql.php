@@ -146,6 +146,7 @@ function _get_table_names()
     $this->imageset,
     $this->location,
     $this->imagelocation,
+    $this->message,
     $this->comment);
 }
 
@@ -227,12 +228,15 @@ function set_pref($tag, $value)
 {
   $stag=mysql_escape_string($tag);
   $svalue=mysql_escape_string($value);
+
+  echo "Saving tag: $stag value: $svalue";
+
   $sql="SELECT *
         FROM $this->pref
 	WHERE name=\"$stag\"";
   $result=$this->query($sql);
 
-  if (mysql_num_rows($result)==0)
+  if ($result==NULL || mysql_num_rows($result)==0)
     $sql="INSERT INTO $this->pref VALUES (0,0,'$stag','$svalue')";    
   else
     $sql="UPDATE $this->pref SET value='$svalue' WHERE name='$stag'";

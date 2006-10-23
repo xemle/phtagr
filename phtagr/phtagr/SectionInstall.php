@@ -354,7 +354,7 @@ $phtagr_data_directory=\''.$data_directory.'\';
     // remove the configuration file
     return false;
   }
- 
+
   $this->success(_("Configuration file created successfully"));
   
   return true;
@@ -423,6 +423,9 @@ function exec_stage_tables()
       $this->warning(_("Could not init the tables correctly"));
       return false;
     }
+  
+    // Here we set some default settings for the database  
+    $db->set_pref ("upload_dir", $data_directory.DIRECTORY_SEPARATOR."upload");
   }
 
   return true;
@@ -431,6 +434,8 @@ function exec_stage_tables()
 function exec_stage_admin()
 {
   global $db;
+  global $user;
+
 
   $install_id="";
   $directory="";
@@ -477,11 +482,22 @@ function exec_stage_admin()
 
   if ($confirm==$password)
   {
+    global $user;
+
+    // We must set the name of the current user to admin
+    // so that we gain admin rights. Otherwise we cannot
+    // add another user.
+    $user->_data["name"]="admin";
+
     $account = new SectionAccount();
     if (!$account->user_create("admin",$password))
     {
       return false;
     }
+
+    // Here we unset the admin status.
+    unset ($user->_data["name"]);
+
     $this->success(_("Admin account successfully created!"));
     return true;
   }
