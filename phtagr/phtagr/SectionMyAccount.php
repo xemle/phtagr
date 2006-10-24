@@ -85,6 +85,13 @@ function print_upload ()
   $url->add_param('page', MYACCOUNT_TAB_UPLOAD);
   $url->add_param('action', 'upload');
 
+  $qslice=$user->get_qslice();
+  $qinterval=$user->get_qinterval();
+  $quota=$user->get_quota();
+  $used=$user->get_image_bytes(true);
+  $upload_max=$user->get_upload_max();
+  printf(_("You have %.3f MB already uploaded. Your total limit is %.3f MB. Currently you are allowed to upload %.3f MB."), $used/(1024*1024), $quota/(1024*1024), $upload_max/(1024*1024));
+
   echo "<form action=\"./index.php\" method=\"post\" enctype=\"multipart/form-data\">\n";
   echo $url->to_form();
   echo "<div class=\"upload_files\" \>\n";

@@ -398,15 +398,8 @@ function print_js()
   $img=$this->img;
   if (!$img)
     return;
-  if (!$img->can_edit(&$user))
-    return;
 
   $id=$img->get_id();
-  $caption=$img->get_caption();
-  $date=$img->get_date();
-  $tags=$img->get_tags();
-  $sets=$img->get_sets();
-  $locs=$img->get_locations();
   echo "<script type=\"text/javascript\">\n";
   echo "  images[$id]=new Array();\n";
   if ($img->is_owner(&$user)) 
@@ -415,25 +408,35 @@ function print_js()
     echo "  images[$id]['oacl']=".$img->get_oacl().";\n";
     echo "  images[$id]['aacl']=".$img->get_aacl().";\n";
   }
+  $caption=$img->get_caption();
   echo "  images[$id]['caption']='".$this->_escape_js($caption)."';\n";
-  echo "  images[$id]['date']='".$this->_escape_js($date)."';\n";
-  $ltags='';
-  foreach ($tags as $tag)
-    $ltags.=$tag.' ';
-  echo "  images[$id]['tags']='".$this->_escape_js($ltags)."';\n";
-  $lsets='';
-  foreach ($sets as $set)
-    $lsets.=$set.' ';
-  echo "  images[$id]['sets']='".$this->_escape_js($lsets)."';\n";
+  if ($img->can_edit(&$user))
+  {
+    $date=$img->get_date();
+    echo "  images[$id]['date']='".$this->_escape_js($date)."';\n";
 
-  echo "  images[$id]['city']='".
-    $this->_escape_js($locs[LOCATION_CITY])."';\n";
-  echo "  images[$id]['sublocation']='".
-    $this->_escape_js($locs[LOCATION_SUBLOCATION])."';\n";
-  echo "  images[$id]['state']='".
-    $this->_escape_js($locs[LOCATION_STATE])."';\n";
-  echo "  images[$id]['country']='".
-    $this->_escape_js($locs[LOCATION_COUNTRY])."';\n";
+    $tags=$img->get_tags();
+    $ltags='';
+    foreach ($tags as $tag)
+      $ltags.=$tag.' ';
+    echo "  images[$id]['tags']='".$this->_escape_js($ltags)."';\n";
+
+    $sets=$img->get_sets();
+    $lsets='';
+    foreach ($sets as $set)
+      $lsets.=$set.' ';
+    echo "  images[$id]['sets']='".$this->_escape_js($lsets)."';\n";
+
+    $locs=$img->get_locations();
+    echo "  images[$id]['city']='".
+      $this->_escape_js($locs[LOCATION_CITY])."';\n";
+    echo "  images[$id]['sublocation']='".
+      $this->_escape_js($locs[LOCATION_SUBLOCATION])."';\n";
+    echo "  images[$id]['state']='".
+      $this->_escape_js($locs[LOCATION_STATE])."';\n";
+    echo "  images[$id]['country']='".
+      $this->_escape_js($locs[LOCATION_COUNTRY])."';\n";
+  }
   echo "</script>\n";
 }
 
@@ -467,7 +470,8 @@ function print_preview($search=null)
   echo "<div class=\"imginfo\" id=\"info-$id\"><table>\n";
   if ($img->is_owner(&$user))
   {
-    $this->print_row_filename();
+    if (!$img->is_upload())
+      $this->print_row_filename();
     $this->print_row_acl();
   }
   $this->print_row_date();

@@ -479,7 +479,9 @@ function is_admin()
 /* Return true if the given user has an phtagr account */
 function is_member()
 {
-  return !$this->is_anonymous();
+  if ($this->get_id()>0)
+    return true;
+  return false;
 }
 
 function is_guest()
@@ -554,7 +556,55 @@ function can_upload()
   if ($this->is_admin())
     return true;
 
+  // Check if user exhausts his quota
+  if ($this->is_member())
+  {
+    $quota=$this->get_quota();
+    $used=$this->get_image_bytes(true);
+    if ($used<$quota)
+      return true;
+  }
+
   return false;
+}
+
+/** Returns the used quota in percent 
+  @return Value between 0.0 and 1.0*/
+function get_quota_used()
+{
+  $quota=$this->get_quota();
+  $used=$this->get_image_bytes(true);
+  if ($quota==0)
+    return 0.0;
+  if ($used>=$quota)
+    return 1.0;
+  return $used/$quota;
+}
+
+/** @return Returns the maxium bytes, which can be uploaded */
+function get_upload_max()
+{
+  if ($this->get_id()<0)
+    return 0;
+
+  $quota=$this->get_quota();
+  $qslice=$this->get_qslice();
+  $qinterval=$this->get_qinterval();
+
+  // Check the absolute quota
+  $quota_free=$quota-$this->get_image_bytes(true);
+  if ($quota_free<=0)
+    return 0;
+
+  // Check the last upload interval as quota slice
+  $slice_free=$qslice-$this->get_image_bytes(true, time()-$qinterval);
+  if ($slice_free<=0)
+    return 0;
+
+  if ($slice_free<$quota_free)
+    return $slice_free;
+  else
+    return $quota_free;
 }
 
 /** Return true if user can upload a file with the given size
@@ -573,7 +623,7 @@ function can_upload_size($size=0)
 
   $quota=$this->get_quota();
   $qslice=$this->get_qslice();
-  $qduration=$this->get_qduration();
+  $qinterval=$this->get_qinterval();
 
   // Check the absolute quota
   $cur_bytes=$this->get_image_bytes(true);
@@ -581,8 +631,8 @@ function can_upload_size($size=0)
     return false;
 
   // Check the last upload interval as quota slice
-  $cur_slice=$this->get_image_bytes(true, time()-$qduration);
-  if ($cur_slice+$sie>$qslice)
+  $cur_slice=$this->get_image_bytes(true, time()-$qinterval);
+  if ($cur_slice+$size>$qslice)
     return false;
 
   return true;

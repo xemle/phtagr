@@ -256,6 +256,15 @@ function get_synced($in_unix=false)
     return $synced;
 }
 
+/** @return True if the image was uploaded. Fals otherwise */
+function is_upload()
+{
+  if ($this->_get_data('is_upload')==1)
+    return true;
+  else
+    return false;
+}
+
 /** Returns the group ACL */
 function get_gacl()
 {

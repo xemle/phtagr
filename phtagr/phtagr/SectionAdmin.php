@@ -220,7 +220,7 @@ function print_user ()
 
   echo "<h3>"._("Available Users")."</h3>\n";
 
-  $sql="SELECT *
+  $sql="SELECT id
         FROM $db->user";
 
   $result=$db->query($sql);
@@ -234,45 +234,24 @@ function print_user ()
   
   echo "<table>
   <tr> 
-    <th></td>
     <th>"._("Name")."</th>
-    <th>"._("Actions")."</th>
+    <th>"._("Quota")."</th>
   </tr>\n";
   while ($row=mysql_fetch_assoc($result))
   {
-    $url->add_param('id', $row['id']);
-    if ($row['id'] == 1)
-    {
-      echo "  <tr>
-    <td><input type=\"checkbox\" disabled=\"disabled\"></td>
-    <td>${row['name']}</td>
-    <td>
-    <div class=\"button\">\n";
-      $url->add_param('action', 'edit');
-      echo "<a href=\"".$url->to_URL()."\" class=\"button\">edit</a>\n";
-      echo "    </div>
-    </td>
-  </tr>\n";
-    }
-    else
-    {
-      echo "  <tr>
-    <td><input type=\"checkbox\"></td>
-    <td>${row['name']}</td>
-    <td>
-      <div class=\"button\">";
-      $url->add_param('action', 'edit');
-      echo "<a href=\"".$url->to_URL()."\" class=\"button\">edit</a>";
-      $url->add_param('action', 'delete');
-      $warning=htmlspecialchars(
-        sprintf(_("You are about to delete the user '%s' (ID %d). "
-        ."Do you want to proceed?"), $row['name'], $row['id']));
-      echo "<a href=\"".$url->to_URL()."\" "
-        ."onclick=\"return confirm('$warning');\">delete</a>\n
-    </div>
-    </td>
-  </tr>\n";
-    }
+    $id=$row['id'];
+    $u=new User($id);
+    echo "<tr>";
+
+    $url->add_param('id', $id);
+    $url->add_param('action', 'edit');
+    echo "<td><a href=\"".$url->to_URL()."\">".$u->get_name()."</a></td>";
+
+    echo "<td>".sprintf("%.1f MB (%d %% used)", 
+      $u->get_quota()/(1024*1024),
+      $u->get_quota_used()*100)."</td>";
+
+    echo "</tr>\n";
   } 
   echo "</table>\n";
 
