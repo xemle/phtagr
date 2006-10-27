@@ -17,17 +17,17 @@ function SectionUpload()
 /** Returns the final filename of the uploaded image */
 function get_upload_filename($path, $filename)
 {
-  $fileext = substr (strrchr ($filename, '.'), 0);
-  $basename = substr ($filename, 0, strlen ($filename)
-              - strlen ($fileext));
-  $iter_name = $path . $basename . $fileext;
-  $i = 0;
+  $fileext=substr(strrchr($filename, '.'), 0);
+  $basename=substr($filename, 0, strlen($filename)
+              - strlen($fileext));
+  $iter_name=$path.DIRECTORY_SEPARATOR.$basename.$fileext;
   
   # Then we need to check, whether there is already a file with
   # the same name:
-  while (file_exists ($iter_name))
+  $i = 0;
+  while (file_exists($iter_name))
   {
-    $iter_name = $path . $basename . '-' . $i . $fileext;
+    $iter_name=$path.DIRECTORY_SEPARATOR.$basename.'-'.$i.$fileext;
     $i++;
   }
   return $iter_name;
@@ -69,9 +69,8 @@ function delete_upload()
     return false;
   }
 
-  $pref = $db->read_pref();
-  $upload_dir = $pref['upload_dir'];
-  $fullpath = $upload_dir . DIRECTORY_SEPARATOR . $user->get_name() . DIRECTORY_SEPARATOR;
+  $upload_dir=$user->get_upload_dir();
+  $fullpath=$upload_dir;
   $files = glob ( $fullpath . "*");
 
   $found = false;
@@ -233,10 +232,9 @@ function upload_process()
     return false;
   }
   
-  $upload_dir = $conf->get('upload_dir');
+  $path=$user->get_upload_dir();
 
   # At first we must ensure, that the directories exist:
-  $path = $upload_dir . DIRECTORY_SEPARATOR. $user->get_name() . DIRECTORY_SEPARATOR;
   if (!file_exists($path))
   {
     if (!mkdir ($path))
@@ -257,7 +255,7 @@ function upload_process()
       $size = $_FILES["images"]["size"][$i];
       if (!$user->can_upload_size($size))
       {
-        $this->error("Could not upload file. Filesize of $size bytes exceeds your account");
+        $this->error(sprintf(_("Could not upload file. Filesize of %.2f MB exceeds your account"), $size/(1024*1024)));
         return false;
       }
       $upload_name=$this->get_upload_filename($path, $name);

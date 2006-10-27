@@ -8,17 +8,17 @@ if (file_exists ('config.php'))
 
 $cwd=getcwd();
 
-if (!isset ($phtagr_prefix))
+if (!isset($phtagr_prefix))
   $phtagr_prefix='.';
 
 $phtagr_lib=$phtagr_prefix.DIRECTORY_SEPARATOR.'phtagr';
 
-if (!isset ($phtagr_data_directory))
-  $phtagr_data_directory=$cwd.DIRECTORY_SEPARATOR."data".DIRECTORY_SEPARATOR;
+if (!isset($phtagr_data))
+  $phtagr_data=$cwd.DIRECTORY_SEPARATOR."data";
 
-if (!isset ($phtagr_url_prefix))
+if (!isset($phtagr_htdocs))
 {
-  $phtagr_url_prefix=dirname($_SERVER['PHP_SELF']);
+  $phtagr_htdocs=dirname($_SERVER['PHP_SELF']);
 }
 
 include "$phtagr_lib/main.php";

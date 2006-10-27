@@ -37,5 +37,6 @@ define("ERR_USER_NAME_INVALID",   -9);
 define("ERR_USER_PWD_LEN",       -10);
 define("ERR_USER_PWD_INVALID",   -11);
 define("ERR_FS_GENERAL",         -12);
+define("ERR_GENERAL",            -13);
 
 ?>

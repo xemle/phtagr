@@ -167,12 +167,12 @@ function print_row_clicks()
 function print_voting()
 {
   global $search;
-  global $conf;
+  global $user;
+
   $img=$this->img;
   $id=$img->get_id();
   $votes=$img->get_votes();
   $voting=sprintf("%.2f", $img->get_voting());
-
 
   $can_vote=false;
   if (!isset($_SESSION['img_voted'][$id]) && $_SESSION['nrequests']>1)
@@ -184,8 +184,8 @@ function print_voting()
     $vote_url->set_anchor('img-'.$id);
   }
 
-  $none=$conf->get('path.theme').'/vote-none.png';
-  $set=$conf->get('path.theme').'/vote-set.png';
+  $none=$user->get_theme_dir().'/vote-none.png';
+  $set=$user->get_theme_dir().'/vote-set.png';
 
   echo "<div class=\"voting\"><p>\n";
   for ($i=0; $i<=VOTING_MAX; $i++)

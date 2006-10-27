@@ -16,9 +16,8 @@ function PageBase($title='phtagr', $cssclass='page')
 
 function print_header_html()
 {
-  global $phtagr_url_prefix;
-
-  $theme="default";
+  global $phtagr_htdocs;
+  global $user;
   
   echo "<?xml version=\"1.0\" encoding=\"utf-8\"?>
 <!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"
@@ -28,12 +27,16 @@ function print_header_html()
   echo "<head>\n";
   echo "<title>".$this->title."</title>\n";
   echo "<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\"/>\n";
-  echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"$phtagr_url_prefix/themes/$theme/style.css\"/>\n";
-  if (file_exists("$phtagr_prefix/themes/$theme/favicon.ico"))
+
+  $theme_dir=$user->get_theme_dir();
+  $theme=$theme_dir.'/style.css';
+  echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"".$theme."\"/>\n";
+  $icon=$theme_dir.'/favicon.ico';
+  if (file_exists($icon))
   {
-    echo "<link rel=\"shortcut icon\" type=\"image/x-icon\" href=\"$phtagr_url_prefix/themes/$theme/favicon.ico\" />\n"; 
+    echo "<link rel=\"shortcut icon\" type=\"image/x-icon\" href=\"$icon\" />\n"; 
   }
-  echo "<script src=\"$phtagr_url_prefix/js/forms.js\" type=\"text/javascript\"></script>\n";
+  echo "<script src=\"$phtagr_htdocs/js/forms.js\" type=\"text/javascript\"></script>\n";
   echo "</head>\n\n";
 }
 

@@ -667,52 +667,85 @@ function _get_row_buttons(nodeId)
 */
 function remove_file_input(id)
 {
-  var row=document.getElementById("upload_file-"+id);
-  if (row==null)
+  var e=document.getElementById('upload-'+id);
+  if (e==null)
     return;
+  var p=e.parentNode;
+  p.removeChild(e);
+}
 
-  row.parentNode.removeChild (row);
+/** @param e Current node
+  @param name Name of element
+  @param i Index. If index is negative, it searches backwards */
+function _getChildByName(e, name, i)
+{
+  if (e==null)
+    return null;
+  name=name.toUpperCase();
+  if (i>=0) 
+  {
+    var c=-1;
+    for (j=0; j<e.childNodes.length; j++)
+    {
+      if (e.childNodes[j].nodeName==name)
+        c++;
+      if (c==i)
+        return e.chileNodes[j];
+      }
+  }
+  else 
+  {
+    var c=0;
+    for (j=e.childNodes.length-1; j>=0; j--)
+    {
+      if (e.childNodes[j].nodeName==name)
+        c--;
+      if (c==i)
+        return e.childNodes[j];
+      }
+  }
+}
+
+function _getLastChildByName(e, name)
+{
+  return _getChildByName(e, name, -1);
+}
+
+function _getFistChildByName(e, name)
+{
+  return _getChildByName(e, name, 0);
 }
 
 /** Adds another input field for uploads
 */
-function add_file_input(id)
+function add_file_input(id, text)
 {
-  var new_id=id+1;
-  var upload_table="upload_files";
-  var nodeId="upload_file-"+id;
-
-  var table=document.getElementById(upload_table);
-  if (table==null)
+  var row=document.getElementById('upload-'+id);
+  if (row==null)
     return;
 
-  var old_row=document.getElementById(nodeId);
-  var added_row=old_row.cloneNode(true);
+  var new_row=row.cloneNode(true);
 
-  var old_action=document.getElementById("action-"+id);
-  old_action.setAttribute("onclick","remove_file_input("+id+")");
-  old_action.setAttribute("class","remove");
-
-  var cells=added_row.getElementsByTagName("td");
-  cells[1].firstChild.value="";
-  added_row.setAttribute ("id", "upload_file-"+new_id);
-
-  while (added_row.lastChild.nodeName=="#text")
+  var td=_getLastChildByName(row, 'td');
+  var a=_getLastChildByName(td, 'a');
+  if (a!=null)
   {
-    added_row.removeChild (added_row.lastChild);
-  }
-  added_row.lastChild.setAttribute ("id", "action-"+new_id);
-  added_row.lastChild.setAttribute ("onclick", "add_file_input("+new_id+")");
-
-  while (old_row.lastChild.nodeName=="#text")
-  {
-    old_row.removeChild (old_row.lastChild);
+    a.setAttribute("onclick", "remove_file_input("+id+")");
+    a.firstChild.nodeValue=text;
   }
 
-  old_row.lastChild.setAttribute("class","remove");
-  old_row.lastChild.setAttribute("onclick","remove_file_input("+id+")");
+  id++;
+  new_row.setAttribute("id", "upload-"+id);
+  td=_getLastChildByName(new_row, 'td');
+  a=_getLastChildByName(td, 'a');
+  if (a!=null)
+  {
+    a.setAttribute("onclick", "add_file_input("+id+", '"+text+"')");
+  }
 
-  table.appendChild(added_row);
+  p=row.parentNode;
+  p.appendChild(new_row);
+  return;
 }
 
 

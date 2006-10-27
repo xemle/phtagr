@@ -8,8 +8,8 @@ include_once("$phtagr_lib/Thumbnail.php");
 include_once("$phtagr_lib/Debug.php");
 
 define("ADMIN_TAB_GENERAL", "0");
-define("ADMIN_TAB_USER", "1");
-define("ADMIN_TAB_UPLOAD", "2");
+define("ADMIN_TAB_USERS", "1");
+define("ADMIN_TAB_CREATE_USER", "2");
 define("ADMIN_TAB_DEBUG", "3");
 
 class SectionAdmin extends SectionBase
@@ -76,7 +76,7 @@ function print_user_details($u=null)
 
   $url=new Url();
   $url->add_param('section', 'admin');
-  $url->add_param('page', ADMIN_TAB_USER);
+  $url->add_param('page', ADMIN_TAB_USERS);
   $url->add_param('action', 'edit');
   $url->add_param('id', $u->get_id());
   echo $url->to_form();
@@ -117,7 +117,8 @@ function print_user_details($u=null)
 </form>\n\n";
   return;
 }
-function exec_user()
+
+function exec_create_user()
 {
   if (!isset ($_REQUEST['action']))
     return false;
@@ -143,44 +144,13 @@ function exec_user()
 
     return;
   }
-  else if ($action=='delete')
-  {
-    if (isset($_REQUEST['id']))
-      $account->user_delete($_REQUEST['id']);
-  }
-  else if (($action=="edit") && (isset ($_REQUEST['id'])))
-  {
-    $u=new User($_REQUEST['id']);
-    echo "<h3>".sprintf(_("Editing User '%s'"), $u->get_name())."</h3>\n";
-
-    // If 'email' is set in the request, we assume that this current request
-    // is already an update request with all the values we want to update.
-    if (isset($_REQUEST['email']))
-      $u->set_email($_REQUEST['email']);
-    if (isset($_REQUEST['firstname']))
-      $u->set_firstname($_REQUEST['firstname']);
-    if (isset($_REQUEST['lastname']))
-      $u->set_lastname($_REQUEST['lastname']);
-
-    if (isset($_REQUEST['quota']))
-      $u->set_quota($_REQUEST['quota']*1048576);
-    if (isset($_REQUEST['qslice']))
-      $u->set_qslice($_REQUEST['qslice']*1048576);
-    if (isset($_REQUEST['qinterval']))
-      $u->set_qinterval($_REQUEST['qinterval']*86400);
-
-    $u->commit_changes();
-
-    $this->print_user_details($u);
-  }
-
 }
 
-function print_user_create()
+function print_create_user()
 {
   $url=new Url();
   $url->add_param('section', 'admin');
-  $url->add_param('page', ADMIN_TAB_USER);
+  $url->add_param('page', ADMIN_TAB_CREATE_USER);
   $url->add_param('action', 'create');
 
   echo "<h3>"._("Create User")."</h3>\n";
@@ -212,11 +182,53 @@ function print_user_create()
 </form>\n\n";
 }
 
-function print_user ()
+function exec_users()
+{
+  if (!isset($_REQUEST['action']) ||!isset($_REQUEST['id']))
+    return false;
+
+  $id=intval($_REQUEST['id']);
+  if ($id<0)
+    return false;
+
+  $account=new SectionAccount();
+  $action=$_REQUEST['action'];
+  if ($action=='delete')
+  {
+    $account->user_delete($id);
+  }
+  else if ($action=="edit")
+  {
+    $u=new User($id);
+    echo "<h3>".sprintf(_("Editing User '%s'"), $u->get_name())."</h3>\n";
+
+    // If 'email' is set in the request, we assume that this current request
+    // is already an update request with all the values we want to update.
+    if (isset($_REQUEST['email']))
+      $u->set_email($_REQUEST['email']);
+    if (isset($_REQUEST['firstname']))
+      $u->set_firstname($_REQUEST['firstname']);
+    if (isset($_REQUEST['lastname']))
+      $u->set_lastname($_REQUEST['lastname']);
+
+    if (isset($_REQUEST['quota']))
+      $u->set_quota($_REQUEST['quota']*1048576);
+    if (isset($_REQUEST['qslice']))
+      $u->set_qslice($_REQUEST['qslice']*1048576);
+    if (isset($_REQUEST['qinterval']))
+      $u->set_qinterval($_REQUEST['qinterval']*86400);
+
+    $u->commit_changes();
+
+    $this->print_user_details($u);
+    unset($u);
+  }
+
+}
+
+function print_users()
 {
   global $db;
-
-  $this->print_user_create();
 
   echo "<h3>"._("Available Users")."</h3>\n";
 
@@ -230,7 +242,7 @@ function print_user ()
   echo "<form action=\"./index.php\" method=\"post\">\n";
   $url=new Url();
   $url->add_param('section', 'admin');
-  $url->add_param('page', ADMIN_TAB_USER);
+  $url->add_param('page', ADMIN_TAB_USERS);
   
   echo "<table>
   <tr> 
@@ -369,8 +381,9 @@ function print_content()
   $tabs2->set_item_param('page');
 
   $tabs2->add_item(ADMIN_TAB_GENERAL, _("General"), ADMIN_TAB_GENERAL==$curid );
-  $tabs2->add_item(ADMIN_TAB_USER, _("User"));
-  $tabs2->add_item(ADMIN_TAB_UPLOAD, _("Upload"));
+  $tabs2->add_item(ADMIN_TAB_USERS, _("Users"));
+  $tabs2->add_item(ADMIN_TAB_CREATE_USER, _("Create User"));
+  //$tabs2->add_item(ADMIN_TAB_UPLOAD, _("Upload"));
   $tabs2->add_item(ADMIN_TAB_DEBUG, _("Debug"));
   $tabs2->print_sections();
   $cur=$tabs2->get_current();
@@ -385,12 +398,17 @@ function print_content()
 
     switch ($cur)
     {
-    case ADMIN_TAB_USER: 
-      $this->exec_user();
+    case ADMIN_TAB_USERS: 
+      $this->exec_users();
       break;
+    case ADMIN_TAB_CREATE_USER: 
+      $this->exec_create_user();
+      break;
+    /*
     case ADMIN_TAB_UPLOAD: 
       $this->exec_upload();
       break;
+    */
     case ADMIN_TAB_DEBUG: 
       $this->exec_debug();
       break;
@@ -415,12 +433,17 @@ function print_content()
 
   switch ($cur)
   {
-  case ADMIN_TAB_USER: 
-    $this->print_user (); 
+  case ADMIN_TAB_USERS: 
+    $this->print_users(); 
     break;
+  case ADMIN_TAB_CREATE_USER: 
+    $this->print_create_user(); 
+    break;
+  /*
   case ADMIN_TAB_UPLOAD: 
     $this->print_upload (); 
     break;
+  */
   case ADMIN_TAB_DEBUG: 
     $this->print_debug (); 
     break;

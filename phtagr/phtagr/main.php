@@ -64,6 +64,7 @@ if (isset($_REQUEST['action']))
 
 if ($section=="install")
 {
+  $conf=new Config(0);
   $install = new SectionInstall();
   $cnt->add_section(&$install);
   $page->layout();
@@ -75,6 +76,7 @@ if (!$db->connect() && $section!="install")
   $msg = new SectionBase();
   $cnt->add_section(&$msg);
     
+  $conf=new Config(0);
   $msg->h(_("No Installation found"));
   $link=sprintf("<a href=\"./index.php?section=install\">%s</a>",
     _("this link"));
@@ -91,8 +93,6 @@ $search= new Search();
 $search->from_URL();
 
 $conf=new Config($user->get_id());
-$conf->set(0, 'theme', 'default');
-$conf->set(0, 'path.theme', "./themes/".$conf->get('theme'));
 
 $menu=new SectionMenu('menu', _("Menu"));
 $menu->set_item_param('section');

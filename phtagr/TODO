@@ -264,6 +264,10 @@ Other image communities: http://holocore.com/?PictureSync_services
       - What is about rewritten links like /phtagr/tags/foo ?
     - If no cookies are available add the session id to all links and
       formulars. This is also the case for the first visit.
+  - Cookie
+    - Stores MD5 ID for authentication
+    - Stores the login time. This can be used to show new images since the last
+      login
   - Remember visited image. This information will be used for counting the
     clicks on the images. Done.
   - Storing of users preferences. These are loaded at a session beginning or
@@ -283,16 +287,10 @@ Other image communities: http://holocore.com/?PictureSync_services
     + image
   + path
     + htdocs
-    + lib
-    + cache
-    + theme
-    + upload
+    + phtagr 
+    + data
   + cmd
     + convert
-  + image
-    + gacl
-    + oacl
-    + aacl
 
 - Accounts
   - Verify a account creation by an image
@@ -342,6 +340,8 @@ Other image communities: http://holocore.com/?PictureSync_services
   - Add IPTC place and set to images if they are available
   - Add all used tags of the preview windows in a sidebar
   - Remove the last comma in the tag list
+  - Edit date by offset e.g. +1Y to add 1 year, -3D5h substract 3 days and 5
+    hours.
   - Add checkboxes to images to add collaborative image edit
   - Add total count of previewed images
   - Enable AJAX update of image properties. 

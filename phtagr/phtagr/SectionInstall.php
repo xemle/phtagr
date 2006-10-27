@@ -77,25 +77,14 @@ function init_tables()
     return false;
   }
   
-  // Escape strings for sql database
-  if (!$conf->set(0, 'path.cache', $cache)) {
-    $this->warning(_("Could not set the cache path")); 
-    return false;
-  }
-
   // upload dir
-  $upload=$data_directory.DIRECTORY_SEPARATOR."upload";
+  $upload=$data_directory.DIRECTORY_SEPARATOR."users";
   if (!$fs->mkdir($upload, true))
   {
     $this->warning(sprintf(_("Could not create directory '%s'"), $upload)); 
     return false;
   }
 
-  if (!$conf->set(0, 'path.upload', $upload)) {
-    $this->warning(sprintf(_("Could not run SQL query '%s'"), $sql)); 
-    return false;
-  }
-  
   return true;
 }
 
@@ -308,7 +297,7 @@ function exec_stage_database()
 
   // The url_prefix is needed to have valid links to the themes in the
   // main repository of phTagr.
-  $url_prefix=dirname($_SERVER['PHP_SELF']);
+  $htdocs=dirname($_SERVER['PHP_SELF']);
 
   fwrite($f, '<?php
 // Configuration file for phTagr
@@ -323,15 +312,15 @@ $db_database=\''.$_REQUEST['database'].'\';
 // Prefix of phTagr tables.
 $db_prefix=\''.$_REQUEST['prefix'].'\';
 
-// The prefix to the actual phtagr sources
+// The path to the actual phtagr sources
 $phtagr_prefix=\''.getcwd().'\';
 
 // The url to the phtagr base (needed for including the
-// css and javascript files
-$phtagr_url_prefix=\''.$url_prefix.'\';
+// css and javascript files)
+$phtagr_htdocs=\''.$htdocs.'\';
 
-// The directory for the images, upload, cache, etc.
-$phtagr_data_directory=\''.$data_directory.'\';
+// The directory for the uploaded images, cache, etc.
+$phtagr_data=\''.$data_directory.'\';
 
 ?>');
 
@@ -403,7 +392,7 @@ function exec_stage_tables()
       return false;
     }
 
-    if ($this->init_tables($directory."data"))
+    if ($this->init_tables())
     {
       $this->success(_("Tables initialized successfully!"));
     }
@@ -413,8 +402,6 @@ function exec_stage_tables()
       return false;
     }
   
-    // Here we set some default settings for the database  
-    $db->set_pref ("upload_dir", $data_directory.DIRECTORY_SEPARATOR."upload");
   }
 
   return true;

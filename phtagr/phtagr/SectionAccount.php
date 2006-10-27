@@ -72,8 +72,10 @@ function user_create($name, $password)
   }
 
   $new=new User(intval($result));
+  $new->set_firstname($_REQUEST['firstname']);
+  $new->set_lastname($_REQUEST['surname']);
+  $new->commit_changes();
   $new->set_email($_REQUEST['email']);
-  $new->set_fullname($_REQUEST['firstname'], $_REQUEST['surname']);
   unset($new);
 
   return true;

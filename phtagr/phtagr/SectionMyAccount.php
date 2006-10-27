@@ -6,8 +6,9 @@ include_once("$phtagr_lib/SectionUpload.php");
 include_once("$phtagr_lib/Image.php");
 include_once("$phtagr_lib/Thumbnail.php");
 
-define("MYACCOUNT_TAB_GENERAL", "1");
-define("MYACCOUNT_TAB_UPLOAD", "2");
+define("MYACCOUNT_TAB_UPLOAD", "1");
+define("MYACCOUNT_TAB_GENERAL", "2");
+define("MYACCOUNT_TAB_DETAILS", "3");
 
 class SectionMyAccount extends SectionBase
 {
@@ -95,14 +96,17 @@ function print_upload ()
   echo "<form action=\"./index.php\" method=\"post\" enctype=\"multipart/form-data\">\n";
   echo $url->to_form();
   echo "<div class=\"upload_files\" \>\n";
-  echo "<table id=\"upload_files\">
-<tr id=\"upload_file-1\">
-<td>"._("Upload image:")."</td><td><input name=\"images[]\" type=\"file\"/></td>
-<td id=\"action-1\" class=\"add\" onclick=\"add_file_input(1)\"></td>
-</tr>
-</table>\n";
+  echo "<table id=\"upload_files\"><tbody>
+  <tr id=\"upload-1\">
+    <td>"._("Upload image:")."</td>
+    <td>
+      <input name=\"images[]\" type=\"file\" size=\"40\" />
+      <a href=\"javascript:void(0)\" class=\"jsbutton\" onclick=\"add_file_input(1,'"._("Remove file")."')\">"._("Add another file")."</a>
+    </td>
+  </tr>
+</tbody></table>\n";
   echo "</div>\n";
-  echo "<input type=\"submit\" class=\"submit\" value=\"Upload\" />\n";
+  echo "<input type=\"submit\" class=\"submit\" value=\""._("Upload")."\" />\n";
 
   echo "</form>\n";
 }
@@ -111,6 +115,25 @@ function exec_upload()
 {
   $upload=new SectionUpload();
   $upload->upload_process();
+}
+
+function print_details()
+{
+  global $user;
+  echo "<h3>"._("Details")."</h3>\n";
+  
+  echo "<table>
+  <tr>
+    <td>Total Images:</td>
+    <td>".$user->get_image_count()."</td>
+    <td>".sprintf(_("%.2f MB"), $user->get_image_bytes()/(1024*1024))."</td>
+  </tr>
+  <tr>
+    <td>Uploded Images:</td>
+    <td>".$user->get_image_count(true)."</td>
+    <td>".sprintf(_("%.2f MB"), $user->get_image_bytes(true)/(1024*1024))."</td>
+  </tr>
+</table>\n";
 }
 
 function print_content()
@@ -124,8 +147,14 @@ function print_content()
   $tabs2->add_param('section', 'myaccount');
   $tabs2->set_item_param('page');
 
-  $tabs2->add_item(MYACCOUNT_TAB_GENERAL, _("General"), MYACCOUNT_TAB_GENERAL==$curid );
   $tabs2->add_item(MYACCOUNT_TAB_UPLOAD, _("Upload"));
+  $tabs2->add_item(MYACCOUNT_TAB_GENERAL, _("General"));
+  $tabs2->add_item(MYACCOUNT_TAB_DETAILS, _("Details"));
+  if (isset($_REQUEST['page']))
+    $cur=intval($_REQUEST['page']);
+  else
+    $cur=MYACCOUNT_TAB_UPLOAD;
+  $tabs2->set_current($cur);
   $tabs2->print_sections();
   $cur=$tabs2->get_current();
 
@@ -165,10 +194,13 @@ function print_content()
   switch ($cur)
   {
   case MYACCOUNT_TAB_UPLOAD: 
-    $this->print_upload (); 
+    $this->print_upload(); 
+    break;
+  case MYACCOUNT_TAB_DETAILS: 
+    $this->print_details(); 
     break;
   default:
-    $this->print_general (); 
+    $this->print_general(); 
     break;
   }
 }

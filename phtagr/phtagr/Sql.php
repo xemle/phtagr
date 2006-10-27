@@ -60,7 +60,7 @@ function read_config($config='')
   $this->imagelocation=$db_prefix."imagelocation";
   $this->comment=$db_prefix."comment";
   $this->message=$db_prefix."message";
-  $this->conf=$db_prefix."pref";
+  $this->conf=$db_prefix."conf";
 
   return true;
 }
@@ -355,7 +355,7 @@ function create_tables()
         PRIMARY KEY(id))";
   if (!$this->query($sql)) { return false; }
 
-  $sql="CREATE TABLE $this->pref (
+  $sql="CREATE TABLE $this->conf (
         userid        INT NOT NULL,
         groupid       INT NOT NULL,
         name          VARCHAR(64),

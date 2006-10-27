@@ -18,36 +18,39 @@ function Thumbnail($id)
   $this->Image($id);
 }
 
+function _get_cache_path()
+{
+  global $phtagr_data;
+  $path.=$phtagr_data.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR;
+  return $path;
+}
+
 /** @return Returns the filename of the mini image */
 function get_filename_mini()
 {
-  global $conf;
   $file=sprintf("img%d.mini.jpg",$this->get_id());
-  return $conf->get('cache').DIRECTORY_SEPARATOR.$file;
+  return $this->_get_cache_path().$file;
 }
 
 /** @return Returns the filename of the thumb image */
 function get_filename_thumb()
 {
-  global $conf;
   $file=sprintf("img%d.thumb.jpg",$this->get_id());
-  return $conf->get('cache').DIRECTORY_SEPARATOR.$file;
+  return $this->_get_cache_path().$file;
 }
 
 /** @return Returns the filename of the preview */
 function get_filename_preview()
 {
-  global $conf;
   $file=sprintf("img%d.preview.jpg",$this->get_id());
-  return $conf->get('cache').DIRECTORY_SEPARATOR.$file;
+  return $this->_get_cache_path().$file;
 }
 
 /** @return Returns the filename of the hight solution image */
 function get_filename_high()
 {
-  global $conf;
   $file=sprintf("img%d.high.jpg",$this->get_id());
-  return $conf->get('cache').DIRECTORY_SEPARATOR.$file;
+  return $this->_get_cache_path().$file;
 }
 
 /** Initate the image operations 

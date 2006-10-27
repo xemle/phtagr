@@ -19,7 +19,7 @@ function Config($userid=0)
 function load($userid=0)
 {
   global $db;
-  if ($userid>0)
+  if ($userid!=0)
     $this->load(0);
 
   if ($userid<0)

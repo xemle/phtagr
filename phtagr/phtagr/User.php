@@ -225,27 +225,27 @@ function set_quota($quota)
  * quota slice in a quoat interval. */
 function get_qslice()
 {
-  return $this->_get_data('quota_max', 0);
+  return $this->_get_data('qslice', 0);
 }
 
 /** Set a new quota slice of the user 
   @param name New quota slice in bytes */
 function set_qslice($qslice)
 {
-  return $this->_set_data('quota_max', $qslice);
+  return $this->_set_data('qslice', $qslice);
 }
 
 /** @return Returns the current quota interval for a quota slice  */
 function get_qinterval()
 {
-  return $this->_get_data('quota_interval', 0);
+  return $this->_get_data('qinterval', 0);
 }
 
 /** Set a new quota interval of quota slice
   @param name New quota interval in seconds */
 function set_qinterval($qinterval)
 {
-  return $this->_set_data('quota_interval', $qinterval);
+  return $this->_set_data('qinterval', $qinterval);
 }
 
 /** Checks the username for validity. 
@@ -405,7 +405,7 @@ function create($name, $pwd)
 
   $id=$this->get_id_by_name($name);
   $u=new User($id);
-  $err=$u->_init_user();
+  $err=$u->_init_data();
   if ($err<0)
     return $err;
 
@@ -414,16 +414,21 @@ function create($name, $pwd)
 
 /** Initialize a new user 
   @return On failure it returns a global Error code */
-function init_user()
+function _init_data()
 {
   global $conf;
   global $db;
+  global $phtagr_data;
+
   $id=$this->get_id();
-  $fs=new Filesystem();
-  $upload=$conf->get('upload', false);
+  if ($id<=0)
+    return ERR_GERNERAL;
+
+  $upload=$this->get_upload_dir();
   if (!$upload)
   {
-    if (!$fs->mkdir($upload.DIRECTORY_SEPARATOR.$name))
+    $fs=new Filesystem();
+    if (!$fs->mkdir($upload))
     return ERR_FS_GENERAL;
   }
 
@@ -497,6 +502,33 @@ function is_anonymous()
   return false;
 }
 
+/** Get the count of the own images 
+  @param only_uploads Consider only uploaded files
+  @param since UNIX timestamp from the oldest image. This parameter is
+  optional. If this parameter is not set, it returns the bytes of all images 
+  @return Number of images */
+function get_image_count($only_uploads=false, $since=-1)
+{
+  global $db;
+  if (!$this->is_member())
+    return -1;
+
+  $id=$this->get_id();
+  $sql="SELECT COUNT(*)
+        FROM $db->image
+        WHERE userid=$id";
+  if ($only_uploads)
+    $sql.=" AND is_upload=1";
+  if ($since>0)
+    $sql.=" AND created>FROM_UNIXTIME($since)";
+
+  $result=$db->query($sql);
+  if (!$result || mysql_num_rows($result)<1)
+    return -1;
+  $row=mysql_fetch_row($result);
+  return intval($row[0]);
+}
+
 /** Returns all the bytes of the images from the user. 
   @param only_uploads If true, only uploaded images are counted. If false, all
   images are considered. Default is false.
@@ -508,14 +540,16 @@ function get_image_bytes($only_uploads=false, $since=-1)
   global $db;
   if (!$this->is_member())
     return -1;
+
   $id=$this->get_id();
   $sql="SELECT SUM(bytes)
         FROM $db->image
-        WHERE userid=$id AND is_upload=1";
-  if (!$only_uploads)
+        WHERE userid=$id";
+  if ($only_uploads)
     $sql.=" AND is_upload=1";
   if ($since>0)
     $sql.=" AND created>FROM_UNIXTIME($since)";
+
   $result=$db->query($sql);
   if (!$result || mysql_num_rows($result)<1)
     return -1;
@@ -615,27 +649,30 @@ function can_upload_size($size=0)
   if ($size<10)
   return false;
   
-  if ($this->is_admin())
+  $max=$this->get_upload_max();
+  if ($size<=$max)
     return true;
 
-  if (!$this->can_upload())
+  return false;
+}
+
+function get_upload_dir()
+{
+  global $phtagr_data;
+  if ($this->get_id()<=0)
     return false;
 
-  $quota=$this->get_quota();
-  $qslice=$this->get_qslice();
-  $qinterval=$this->get_qinterval();
+  $name=$this->get_name();
+  $path=$phtagr_data.DIRECTORY_SEPARATOR.'users'.DIRECTORY_SEPARATOR.$name;
+  return $path;
+}
 
-  // Check the absolute quota
-  $cur_bytes=$this->get_image_bytes(true);
-  if ($cur_bytes+$size>$quota)
-    return false;
-
-  // Check the last upload interval as quota slice
-  $cur_slice=$this->get_image_bytes(true, time()-$qinterval);
-  if ($cur_slice+$size>$qslice)
-    return false;
-
-  return true;
+function get_theme_dir()
+{
+  global $phtagr_htdocs;
+  global $conf;
+  $path=$phtagr_htdocs.'/themes/'.$conf->get('theme', 'default');
+  return $path;
 }
 
 /** Checks if the session is valid. 
