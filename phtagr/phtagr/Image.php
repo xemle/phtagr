@@ -244,6 +244,20 @@ function get_groupid()
   return $this->_get_data('groupid');
 }
 
+function set_groupid($gid)
+{
+  global $db;
+  $id=$this->get_id();
+  $gid=intval($gid);
+  $sql="UPDATE $db->image
+        SET groupid=$gid
+        WHERE id=$id";
+  $result=$db->query($sql);
+  if (!$result)
+    return false;
+  return true;
+}
+
 /** Returns the syncronization date of the image
   @param in_unix Return time in unix timestamp if true. If false return the
   mysql time string */

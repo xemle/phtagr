@@ -439,6 +439,8 @@ function edit_acl(id)
   form.appendChild(_new_hidden('js_acl', 1));
 
   var t=document.createElement('table');
+
+  t.appendChild(_get_row_groups(id));
   if (images[id]['gacl']!=null)
     t.appendChild(_get_row_acls(id));
   t.appendChild(_get_row_buttons(nodeId));
@@ -448,6 +450,44 @@ function edit_acl(id)
   form.appendChild(t);
   e.appendChild(form);
   document.getElementById(focusId).focus();
+}
+
+function _get_row_groups(id)
+{
+  groups=document.getElementById('acl_grouplist');
+  if (groups==null)
+    return null;
+
+  var gid=0;
+  if (images[id]['gid']!=null)
+    gid=images[id]['gid'];
+
+  new_groups=groups.cloneNode(true);
+  new_groups.setAttribute('id', 'js_'+groups.getAttribute('id'));
+  new_groups.setAttribute('name', 'js_'+groups.getAttribute('name'));
+  
+  // Select current group
+  for(var i=0; i<new_groups.childNodes.length; i++)
+  {
+    var child=new_groups.childNodes[i];
+    if (child.nodeName=='OPTION' && 
+      child.getAttribute('value')==gid)
+    {
+      child.setAttribute('selected', 'selected');
+    }
+  }
+
+  var row=document.createElement("tr");
+  var th=document.createElement("th");
+  th.appendChild(document.createTextNode('Group:'));
+  row.appendChild(th);
+
+  var td=document.createElement('td');
+  row.appendChild(td);
+
+  td.appendChild(new_groups);
+
+  return row;
 }
 
 function _get_row_acls(id)

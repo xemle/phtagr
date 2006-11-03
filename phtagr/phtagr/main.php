@@ -40,11 +40,11 @@ $page->add_section(&$hdr);
 $body = new SectionBase("body");
 $page->add_section(&$body);
 
-$cnt = new SectionBase("content");
-$body->add_section(&$cnt);
-
 $menu = new SectionMenu();
 $body->add_section(&$menu);
+
+$cnt = new SectionBase("content");
+$body->add_section(&$cnt);
 
 $footer = new SectionBase("footer");
 $fcnt = new SectionFooter("content");

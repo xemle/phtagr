@@ -228,14 +228,30 @@ function print_row_filename()
     ."<td>".htmlentities($img->get_filename())."</td></tr>\n";
 }
 
+function _acl_to_text($acl)
+{
+  $t='';
+  if (($acl & ACL_EDIT) > 0) $t.='e';
+  if (($acl & ACL_DOWNLOAD) > 0) $t.='d';
+  if (($acl & ACL_PREVIEW) > 0) $t.='v';
+  if ($t=='') $t='-';
+  return $t;
+}
 function print_row_acl()
 {
   $img=$this->img;
-  $id=$img->get_id();
-  $gacl=$img->get_gacl();
-  $oacl=$img->get_oacl();
-  $aacl=$img->get_aacl();
-  echo "  <tr><th>"._("ACL:")."</th><td id=\"acl-$id\">$gacl,$oacl,$aacl";
+  echo "  <tr><th>"._("ACL:")."</th><td>";
+
+  $gid=$img->get_groupid();
+  if ($gid>0)
+  {
+    $group=new Group($gid);
+    $name=$group->get_name();
+    echo "$name: ";
+  }
+  echo $this->_acl_to_text($img->get_gacl()).',';
+  echo $this->_acl_to_text($img->get_oacl()).',';
+  echo $this->_acl_to_text($img->get_aacl());
   echo "</td></tr>\n";
 }
 
@@ -301,7 +317,10 @@ function print_row_tags()
   $id=$img->get_id();
   $tags=$img->get_tags();
   $num_tags=count($tags);
-  
+ 
+  if ($num_tags==0)
+    return;
+
   echo "  <tr>
     <th>"._("Tags:")."</th>
     <td id=\"tag-$id\">";  
@@ -330,6 +349,9 @@ function print_row_sets()
   $sets=$img->get_sets();
   $num_sets=count($sets);
   
+  if ($num_sets==0)
+    return;
+
   echo "  <tr>
     <th>"._("Sets:")."</th>
     <td id=\"set-$id\">";  
@@ -358,6 +380,9 @@ function print_row_location()
   $id=$img->get_id();
   $locations=$img->get_locations();
   $num_locations=count($locations);
+
+  if ($num_locations==0)
+    return;
   
   echo "  <tr>
     <th>"._("Location:")."</th>
@@ -404,6 +429,7 @@ function print_js()
   echo "  images[$id]=new Array();\n";
   if ($img->is_owner(&$user)) 
   {
+    echo "  images[$id]['gid']=".$img->get_groupid().";\n";
     echo "  images[$id]['gacl']=".$img->get_gacl().";\n";
     echo "  images[$id]['oacl']=".$img->get_oacl().";\n";
     echo "  images[$id]['aacl']=".$img->get_aacl().";\n";

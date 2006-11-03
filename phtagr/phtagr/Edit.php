@@ -83,6 +83,9 @@ function execute()
       {
         if ($img->is_owner(&$user))
         {
+          $img->delete_previews();
+          if ($img->is_upload())
+            @unlink($img->get_filename());
           $img->remove_from_db();
           unset($img);
           continue;
@@ -401,6 +404,12 @@ function _handle_request_acl(&$img)
   // JavaScript formular or set selection?
   if (isset($_REQUEST['js_acl']))
   {
+    if (isset($_REQUEST['js_acl_setgroup']))
+    {
+      $gid=intval($_REQUEST['js_acl_setgroup']);
+      if ($gid>=0)
+        $img->set_groupid($gid);
+    }
     $this->_handle_acl(&$acl, $_REQUEST['js_aacl_edit'], ACL_ALL, ACL_EDIT, ACL_EDIT_MASK);
     $this->_handle_acl(&$acl, $_REQUEST['js_oacl_edit'], ACL_OTHER, ACL_EDIT, ACL_EDIT_MASK);
     $this->_handle_acl(&$acl, $_REQUEST['js_gacl_edit'], ACL_GROUP, ACL_EDIT, ACL_EDIT_MASK);
@@ -411,6 +420,12 @@ function _handle_request_acl(&$img)
   }
   else 
   {
+    if (isset($_REQUEST['acl_setgroup']))
+    {
+      $gid=intval($_REQUEST['acl_setgroup']);
+      if ($gid>=0)
+        $img->set_groupid($gid);
+    }
     $this->_handle_acl(&$acl, $_REQUEST['aacl_edit'], ACL_ALL, ACL_EDIT, ACL_EDIT_MASK);
     $this->_handle_acl(&$acl, $_REQUEST['oacl_edit'], ACL_OTHER, ACL_EDIT, ACL_EDIT_MASK);
     $this->_handle_acl(&$acl, $_REQUEST['gacl_edit'], ACL_GROUP, ACL_EDIT, ACL_EDIT_MASK);
@@ -464,6 +479,56 @@ function print_bar()
 </div>";
 }
 
+function _print_edit_acl_row($param, $text)
+{
+  echo "  <tr>
+    <td>$text</td>\n";
+  $levels=array('g', 'o','a');
+  foreach ($levels as $level)
+  {
+    echo "    <td>
+      <select size=\"1\" name=\"".$level."acl_$param\">
+        <option selected=\"selected\" value=\"keep\">"._("Keep")."</option>
+        <option value=\"del\">"._("Deny")."</option>
+        <option value=\"add\">"._("Permit")."</option>
+      </select>
+    </td>\n";
+  }
+  echo "  </tr>\n";
+}
+
+function print_edit_acl()
+{
+  global $user;
+  if (!$user->is_member())
+    return;
+
+  echo "<p><a href=\"javascript:void(0)\" id=\"btnAcl\" class=\"jsbutton\" onclick=\"toggle_visibility('toggleAcl', 'btnAcl')\">-&gt; "._("Edit Access Control Lists (ACL)")."</a></p>
+
+<fieldset id='toggleAcl' style=\"display:none\"><legend>Access Control List <a href=\"javascript:void(0)\" class=\"jsbutton\" onclick=\"toggle_visibility('toggleAcl', 'btnAcl')\">[Hide]</a></legend>\n";
+  $groups=$user->get_groups();
+  if (count($groups)>0)
+  {
+    echo "Group <select id=\"acl_grouplist\" name=\"acl_setgroup\" size=\"1\">
+    <option value=\"-1\">"._("Keep")."</option>\n";
+    foreach ($groups as $gid => $name)
+      echo "    <option value=\"$gid\">$name</option>\n";
+    echo "</select><br/>\n";
+  }
+  echo "<table>
+  <tr>
+    <th></th>
+    <th>Friends</th>
+    <th>Members</th>
+    <th>All</th>
+  </tr>\n";
+  $this->_print_edit_acl_row("edit", _("Edit"));
+  $this->_print_edit_acl_row("preview", _("Preview"));
+  echo "</table>
+  <p>Set the access level to the selected images.</p>
+</fieldset>\n";  
+}
+
 /** Print the inputs to edit IPTC tags like comment, tags or sets. */
 function print_edit_inputs()
 {
@@ -501,69 +566,7 @@ function print_edit_inputs()
 </fieldset>\n";
 
   if ($user->is_member())
-  {
-    echo "<p><a href=\"javascript:void(0)\" id=\"btnAcl\" class=\"jsbutton\" onclick=\"toggle_visibility('toggleAcl', 'btnAcl')\">-&gt; "._("Edit Access Control Lists (ACL)")."</a></p>
-
-<fieldset id='toggleAcl' style=\"display:none\"><legend>Access Control List <a href=\"javascript:void(0)\" class=\"jsbutton\" onclick=\"toggle_visibility('toggleAcl', 'btnAcl')\">[Hide]</a></legend>
-  <table>
-    <tr>
-      <th></th>
-      <th>Friends</th>
-      <th>Members</th>
-      <th>All</th>
-    </tr>
-    <tr>
-      <td>Edit</td>
-      <td>
-        <select size=\"1\" name=\"gacl_edit\">
-          <option selected=\"selected\" value=\"keep\">Keep</option>
-          <option value=\"del\">Deny</option>
-          <option value=\"add\">Permit</option>
-        </select>
-      </td>
-      <td>
-        <select size=\"1\" name=\"oacl_edit\">
-          <option selected=\"selected\" value=\"keep\">Keep</option>
-          <option value=\"del\">Deny</option>
-          <option value=\"add\">Permit</option>
-        </select>
-      </td>
-      <td>
-        <select size=\"1\" name=\"aacl_edit\">
-          <option selected=\"selected\" value=\"keep\">Keep</option>
-          <option value=\"del\">Deny</option>
-          <option value=\"add\">Permit</option>
-        </select>
-      </td>
-    </tr>
-    <tr>
-      <td>Preview</td>
-      <td>
-        <select size=\"1\" name=\"gacl_preview\">
-          <option selected=\"selected\" value=\"keep\">Keep</option>
-          <option value=\"del\">Deny</option>
-          <option value=\"add\">Permit</option>
-        </select>
-      </td>
-      <td>
-        <select size=\"1\" name=\"oacl_preview\">
-          <option selected=\"selected\" value=\"keep\">Keep</option>
-          <option value=\"del\">Deny</option>
-          <option value=\"add\">Permit</option>
-        </select>
-      </td>
-      <td>
-        <select size=\"1\" name=\"aacl_preview\">
-          <option selected=\"selected\" value=\"keep\">Keep</option>
-          <option value=\"del\">Deny</option>
-          <option value=\"add\">Permit</option>
-        </select>
-      </td>
-    </tr>
-  </table>
-  <p>Set the access level to the selected images.</p>
-</fieldset>\n";
-  }
+    $this->print_edit_acl();
 
   echo "<input type=\"hidden\" name=\"action\" value=\"edit\"/></div>
 ";
