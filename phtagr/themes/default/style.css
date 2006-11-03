@@ -414,12 +414,19 @@ input, select, submit, reset, textarea {
 
 .jsbutton {
   text-decoration: none;
+  color: #888888;
   font-size: 8pt;
   font-style: normal;
   padding: 0px 2px 0px 2px;
   margin: 0px 3px 0px 3px;
   border: 1px solid #aaaaaa;
   background-color: #ffffff;
+}
+
+a.jsbutton:hover {
+  color: #ffffff;
+  background: url(./headline.png) no-repeat -5px 0px;
+  border: 1px solid #000000;
 }
 
 .button a {

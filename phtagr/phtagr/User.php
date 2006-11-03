@@ -1,6 +1,6 @@
 <?php
 
-include_once("$phtagr_lib/Base.php");
+include_once("$phtagr_lib/SqlObject.php");
 include_once("$phtagr_lib/Constants.php");
 
 /** This class handles the authentication of an user.
@@ -23,107 +23,14 @@ members or guest to his groups.
 
 @class User
 */
-class User extends Base
+class User extends SqlObject
 {
 
 function User($id=-1)
 {
-  $this->_data=array();
-  $this->_changes=array();
+  global $db;
+  $this->SqlObject($db->user, $id);
   $this->init_session();
-  if ($id>0)
-    $this->_init_by_id($id);
-}
-
-function _init_by_id($id)
-{
-  global $db;
-  if (!is_numeric($id))
-    return false;
-
-  $sql="SELECT *
-        FROM $db->user
-        WHERE id=$id";
-  $result=$db->query($sql);
-  if (!$result || mysql_num_rows($result)!=1)
-    return false;
-
-  $this->_data=mysql_fetch_assoc($result);
-}
-
-/** 
-  @param name Name of the db column
-  @param default Default value, if column name not exists. Default value is
-  null.
-  @return If the value is not set, returns default */
-function _get_data($name, $default=null)
-{
-  if (isset($this->_data[$name]))
-    return $this->_data[$name];
-  else 
-    return $default;
-}
-
-/** Stores the data for the database temporary to save database accesses. After
- * all changes, the function commit_changes must be called.
-  @param name Name of the column
-  @param value Value of the column
-  @result True on success. False otherwise 
-  @note The changed data updates not the internal representation
-  @see commit_changes */
-function _set_data($name, $value)
-{
-  if ($this->get_id()<=0)
-    return false;
-
-  if ($this->_data[$name]==$value)
-  {
-    if (isset($this->_changes[$name]))
-      unset($this->_changes[$name]);
-    return true;
-  }
-
-  $this->_changes[$name]=$value;
-  return true;
-}
-
-/** Writes all changes to the database. It also updated the internal data of
- * the object 
-  @return True if changes where writen */
-function commit_changes()
-{
-  global $db;
-
-  $id=$this->get_id();
-  if ($id<=0)
-    return false;
-
-  if (count($this->_changes)==0)
-    return false;
-
-  $changes='';
-  foreach ($this->_changes as $name => $value)
-  {
-    if ($value=="NULL")
-      $svalue="NULL";
-    else
-      $svalue="'".mysql_escape_string(strval($value))."'";
-    $changes.=",$name=$svalue";
-  }
-  $changes=substr($changes,1);
-
-  $sql="UPDATE $db->user
-        SET $changes
-        WHERE id=$id";
-  $result=$db->query($sql);
-  if (!$result)
-    return false;
-
-  // Successful changes. Update to the data structure and delete changes
-  foreach ($this->_changes as $name => $value)
-    $this->_data[$name]=$value;
-  $this->_changes=array();
-  return true;
 }
 
 /** 
@@ -143,12 +50,23 @@ function get_id_by_name($name)
   return $row[0];
 }
 
-/** Returns the userid of the current session 
-  @return The value for an member is greater 0, an anonymous user has the ID
-  -1.*/
-function get_id()
+/** @param id Id of the user
+  @return Name of the user. Returns '' if user does not exists */
+function get_name_by_id($id)
 {
-  return $this->_get_data('id', -1);
+  global $db;
+  $id=intval($id);
+  if ($id<=0)
+    return '';
+
+  $sql="SELECT name
+        FROM $db->user
+        WHERE id=$id";
+  $result=$db->query($sql);
+  if (!$result || mysql_num_rows($result)<1)
+    return '';
+  $row=mysql_fetch_row($result);
+  return $row[0];
 }
 
 /** @return Returns the name of the user */
@@ -500,6 +418,23 @@ function is_anonymous()
   if ($this->get_id()==-1)
     return true;
   return false;
+}
+
+/** @return Returns an hash of ids with group names of the users group */
+function get_groups()
+{
+  global $db;
+  $groups=array();
+  $sql="SELECT id,name 
+        FROM $db->group
+        WHERE owner=".$this->get_id();
+  $result=$db->query($sql);
+  if (!$result || mysql_num_rows($result)<0)
+    return $groups;
+  while ($row=mysql_fetch_row($result))
+    $groups[$row[0]]=$row[1];
+
+  return $groups;
 }
 
 /** Get the count of the own images 

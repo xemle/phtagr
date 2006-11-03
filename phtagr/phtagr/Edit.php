@@ -69,7 +69,7 @@ function execute()
     if (!is_numeric($id))
       continue;
 
-    $img=new Image($id);
+    $img=new Thumbnail($id);
     if ($img->get_id()!=$id)
     {
       unset($img);
@@ -116,6 +116,7 @@ function execute()
       $iptc->is_changed())
     {
       $iptc->save_to_file();
+      $img->touch_previews();
       $img->update(true);
     }
     unset($iptc);

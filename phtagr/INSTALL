@@ -9,7 +9,7 @@ Installation:
 - Checkout the newest branch from svn to a webbrowser directory like
   ~/.public_html or /var/www
 
-  $ svn checkout svn://inspirationslos.de/phtagr/trunk/phtagr
+  $ svn co http://svn.inspirationslos.de/phtagr/trunk/phtagr
 
 - Open the index.php with your webbrowser and follow the installation
   instructions.

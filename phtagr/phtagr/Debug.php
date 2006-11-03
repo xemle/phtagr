@@ -63,7 +63,7 @@ function create_all_previews()
     $count++;
     
     $img=new Thumbnail($id);
-    $img->create_all_previews();
+    $img->create_previews();
   }
   echo "<p>All preview images of $count images are now created.</p>\n";
 }

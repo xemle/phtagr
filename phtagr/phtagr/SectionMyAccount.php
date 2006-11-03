@@ -5,10 +5,12 @@ include_once("$phtagr_lib/SectionAccount.php");
 include_once("$phtagr_lib/SectionUpload.php");
 include_once("$phtagr_lib/Image.php");
 include_once("$phtagr_lib/Thumbnail.php");
+include_once("$phtagr_lib/Group.php");
 
 define("MYACCOUNT_TAB_UPLOAD", "1");
 define("MYACCOUNT_TAB_GENERAL", "2");
 define("MYACCOUNT_TAB_DETAILS", "3");
+define("MYACCOUNT_TAB_GROUPS", "4");
 
 class SectionMyAccount extends SectionBase
 {
@@ -25,7 +27,7 @@ function print_general ()
 
   $url=new Url();
   $url->add_param('section', 'myaccount');
-  $url->add_param('page', MYACCOUNT_TAB_GENERAL);
+  $url->add_param('tab', MYACCOUNT_TAB_GENERAL);
   $url->add_param('action', 'edit');
 
   echo "<h3>General</h3>\n";
@@ -83,7 +85,7 @@ function print_upload ()
   echo "<h3>"._("Upload")."</h3>\n";
   $url=new Url();
   $url->add_param('section', 'myaccount');
-  $url->add_param('page', MYACCOUNT_TAB_UPLOAD);
+  $url->add_param('tab', MYACCOUNT_TAB_UPLOAD);
   $url->add_param('action', 'upload');
 
   $qslice=$user->get_qslice();
@@ -136,6 +138,298 @@ function print_details()
 </table>\n";
 }
 
+function exec_groups()
+{
+  global $user;
+
+  if ($_REQUEST['action']=='add' &&
+    isset($_REQUEST['name']))
+  {
+    $name=$_REQUEST['name'];
+    if ($name=='')
+      return;
+    $groups=$user->get_groups();
+    if (count($groups)>10)
+      return;
+    $group=new Group();
+    $result=$group->create($_REQUEST['name']);
+    if ($result<0)
+    {
+      $this->error(_("The group could not created"));
+      return;
+    }
+    $this->success(_("The group could be created"));
+  }
+  elseif ($_REQUEST['action']=='remove' &&
+    isset($_REQUEST['gid']))
+  {
+    $gid=$_REQUEST['gid'];
+    $group=new Group($gid);
+    if ($group->get_id()!=$gid)
+      return;
+    $name=$group->get_name();
+    $group->delete();
+    unset($group);
+    $this->success(sprintf(_("The group '%s' was successfully deleted"), $name));
+    // remove group id from request to jumb to the group list overview
+    unset($_REQUEST['gid']);
+  }
+  elseif ($_REQUEST['action']=='none' &&
+    isset($_REQUEST['add_member']) &&
+    isset($_REQUEST['gid']))
+  {
+    $id=$_REQUEST['gid'];
+    $name=$_REQUEST['add_member'];
+    $group=new Group($id);
+    if ($group->get_id()!=$id)
+      return;
+    if ($group->add_member($name))
+      $this->success(sprintf(_("Member '%s' was successfully added to your group '%s'"), $name, $group->get_name()));
+    else
+      $this->warning(sprintf(_("Member '%s' could not added to your group '%s'"), $name, $group->get_name()));
+  }
+  elseif ($_REQUEST['action']=='remove_member' &&
+    isset($_REQUEST['gid']) && 
+    isset($_REQUEST['name']))
+  {
+    $id=$_REQUEST['gid'];
+    $name=$_REQUEST['name'];
+    $group=new Group($id);
+    if ($group->get_id()!=$id)
+      return;
+    if ($group->remove_member($name))
+      $this->success(sprintf(_("Member '%s' was deleted from group '%s'"), $name, $group->get_name()));
+  }
+  elseif ($_REQUEST['action']=='remove_members' &&
+    isset($_REQUEST['gid']) && 
+    isset($_REQUEST['members']))
+  {
+    $id=$_REQUEST['gid'];
+    $members=$_REQUEST['members'];
+    $group=new Group($id);
+    if ($group->get_id()!=$id)
+      return;
+    foreach ($members as $name)
+      if ($group->remove_member($name))
+        $this->success(sprintf(_("Member '%s' was deleted from group"), $name));
+  }
+  elseif ($_REQUEST['action']=='copy_members' &&
+    isset($_REQUEST['gid']) && 
+    isset($_REQUEST['dst_gid']) && 
+    isset($_REQUEST['members']))
+  {
+    $id=$_REQUEST['gid'];
+    $dst_id=$_REQUEST['dst_gid'];
+    $members=$_REQUEST['members'];
+    $group=new Group($id);
+    if ($group->get_id()!=$id)
+      return;
+    $dst_group=new Group($dst_id);
+    if ($dst_group->get_id()!=$dst_id)
+      return;
+    $success=0;
+    $failed=0;
+    foreach ($members as $name)
+    {
+      if (!$group->has_member($name))
+        continue;
+      if ($dst_group->add_member($name))
+        $success++;
+      else 
+        $failed++;
+    }
+    if ($success==1)
+      $this->success(sprintf(_("Member '%s' was copied from group '%s' to group '%s'"), $name, $group->get_name(), $dst_group->get_name()));
+    elseif ($success>1)
+      $this->success(sprintf(_("%d members were copied from group '%s' to group '%s'"), $success, $group->get_name(), $dst_group->get_name()));
+  }
+  elseif ($_REQUEST['action']=='move_members' &&
+    isset($_REQUEST['gid']) && 
+    isset($_REQUEST['dst_gid']) && 
+    isset($_REQUEST['members']))
+  {
+    $id=$_REQUEST['gid'];
+    $dst_id=$_REQUEST['dst_gid'];
+    $members=$_REQUEST['members'];
+    $group=new Group($id);
+    if ($group->get_id()!=$id)
+      return;
+    $dst_group=new Group($dst_id);
+    if ($dst_group->get_id()!=$dst_id)
+      return;
+    $success=0;
+    $failed=0;
+    foreach ($members as $name)
+    {
+      if (!$group->has_member($name))
+        continue;
+      if ($dst_group->add_member($name))
+      {
+        $group->remove_member($name);
+        $success++;
+      }
+      else 
+        $failed++;
+    }
+    if ($success==1)
+      $this->success(sprintf(_("Member '%s' was moved from group '%s' to group '%s'"), $name, $group->get_name(), $dst_group->get_name()));
+    elseif ($success>1)
+      $this->success(sprintf(_("%d members were moved from group '%s' to group '%s'"), $success, $group->get_name(), $dst_group->get_name()));
+    
+  }
+}
+
+function print_group_list()
+{
+  global $user;
+
+  echo "<h3>"._("Groups")."</h3>\n";
+
+  $url=new Url();
+  $url->add_param('section', 'myaccount');
+  $url->add_param('tab', MYACCOUNT_TAB_GROUPS);
+
+  $groups=$user->get_groups();
+  // Group Tables
+  if (count($groups)>0)
+  {
+    $url->add_param('action', 'edit');
+    echo "<table>
+    <tr>
+      <th>"._("Name")."</th>
+      <th>"._("Members")."</th>
+      <th></th>
+    </tr>\n";
+    foreach ($groups as $gid => $name)
+    {
+      $group=new Group($gid);
+      if ($group->get_id()!=$gid)
+        continue;
+      $url->add_param('gid', $gid);
+      echo "  <tr>
+      <td><a href=\"".$url->to_URL()."\">".$group->get_name()."</a></td>
+      <td>".$group->get_num_members()."</td>\n";
+      $url->add_param("action", "remove");
+      echo "<td><a href=\"".$url->to_URL()."\" class=\"jsbutton\">"._("Remove")."</a></td>
+    </tr>\n";
+      $url->rem_param("action");
+      unset($group);
+    }
+    echo "</table>\n";
+    $url->rem_param('gid');
+  }
+  else
+  {
+    echo _("Currently you have now groups defined");
+  }
+
+  if (count($group)<11) 
+  {
+    $url->add_param('action', 'add');
+    echo "<form action=\"./index.php\" method=\"post\">\n";
+    echo $url->to_form();
+    echo "<input type=\"text\" name=\"name\" />
+    <input type=\"submit\" class=\"submit\" value=\""._("Add new group")."\" />\n";
+    echo "</form>\n";
+  }
+}
+
+function print_group($gid)
+{
+  global $user;
+
+  $group=new Group($gid);
+  if ($group->get_id()!=$gid)
+  {
+    $this->warning(sprintf(_("Could not load group with ID %d"),$gid));
+    return;
+  }
+  $url=new Url();
+  $url->add_param('section', 'myaccount');
+  $url->add_param('tab', MYACCOUNT_TAB_GROUPS);
+  $url->add_param('gid', $gid);
+
+  echo "<h3>"._("Group").": ".$group->get_name()."</h3>\n";
+  echo "<form action=\"./index.php\" method=\"post\">\n";
+  echo $url->to_form();
+
+  // Group Tables
+  $members=$group->get_members();
+  if (count($members)>0)
+  {
+
+    $url->add_param('action', 'remove_member');
+    echo "<table>
+    <tr>
+      <th></th>
+      <th>"._("Members")."</th>
+      <th></th>
+    </tr>\n";
+    foreach ($members as $uid => $name)
+    {
+      $url->add_param('name', $name);
+      echo "  <tr>
+      <td><input type=\"checkbox\" name=\"members[]\" value=\"".$name."\"/></td>
+      <td>".$name."</td>
+      <td><a href=\"".$url->to_URL()."\" class=\"jsbutton\">"._("Delete")."</a></td>
+    </tr>\n";
+      unset($group);
+    }
+    echo "</table>\n";
+    $url->rem_param('action');
+    $url->rem_param('name');
+
+    echo "<select size=\"1\" name=\"action\">
+    <option value=\"none\">"._("Select action")."</option>
+    <option value=\"remove_members\">"._("Delete")."</option>
+    <option value=\"copy_members\">"._("Copy")."</option>
+    <option value=\"move_members\">"._("Move")."</option>
+    </select>\n";
+    $groups=$user->get_groups();
+    echo " to <select size=\"1\" name=\"dst_gid\">
+    <option value=\"none\">"._("Select Group")."</option>\n";
+    // List all other groups without itself
+    if (count($groups)>1)
+    {
+      foreach ($groups as $dst => $name)
+      {
+        if ($dst==$gid) continue;
+        echo "<option value=\"$dst\">$name</option>\n";
+      }
+    }
+    echo "</select>
+    <input type=\"submit\" class=\"submit\" value=\""._("Execute")."\" />
+    <br />\n";
+  }
+  else
+  {
+    echo _("Currently you have now members in the group");
+    echo "<br />\n";
+    echo "<input type=\"hidden\" name=\"action\" value=\"none\" />\n";
+  }
+
+  echo "<input type=\"text\" name=\"add_member\" />
+  <input type=\"submit\" class=\"submit\" value=\""._("Add member")."\" />\n";
+  echo "</form>\n";
+
+  $url=new Url();
+  $url->add_param('section', 'myaccount');
+  $url->add_param('tab', MYACCOUNT_TAB_GROUPS);
+  echo "<a href=\"".$url->to_URL()."\" class=\"jsbutton\">"._("Show all groups")."</a>\n";
+}
+
+function print_groups()
+{
+  global $user;
+  global $db;
+  global $conf;
+
+  if (isset($_REQUEST['gid']))
+    $this->print_group($_REQUEST['gid']);
+  else
+    $this->print_group_list();
+}
+
 function print_content()
 {
   global $db;
@@ -145,13 +439,14 @@ function print_content()
   echo "<h2>"._("My Account")."</h2>\n";
   $tabs2=new SectionMenu('tab', _("Actions:"));
   $tabs2->add_param('section', 'myaccount');
-  $tabs2->set_item_param('page');
+  $tabs2->set_item_param('tab');
 
   $tabs2->add_item(MYACCOUNT_TAB_UPLOAD, _("Upload"));
+  $tabs2->add_item(MYACCOUNT_TAB_GROUPS, _("Groups"));
   $tabs2->add_item(MYACCOUNT_TAB_GENERAL, _("General"));
   $tabs2->add_item(MYACCOUNT_TAB_DETAILS, _("Details"));
-  if (isset($_REQUEST['page']))
-    $cur=intval($_REQUEST['page']);
+  if (isset($_REQUEST['tab']))
+    $cur=intval($_REQUEST['tab']);
   else
     $cur=MYACCOUNT_TAB_UPLOAD;
   $tabs2->set_current($cur);
@@ -160,12 +455,8 @@ function print_content()
 
   echo "\n";
 
-  if (isset ($_REQUEST["action"]))
+  if (isset($_REQUEST["action"]))
   {
-    // @todo: Get rid of the <br> but keep the success boxes in correct
-    //        positions.
-    echo "<br/>\n";
-
     switch ($cur)
     {
     case MYACCOUNT_TAB_UPLOAD: 
@@ -174,21 +465,13 @@ function print_content()
     case MYACCOUNT_TAB_GENERAL:
       $this->exec_general();
       break;
+    case MYACCOUNT_TAB_GROUPS:
+      $this->exec_groups();
+      break;
     default:
-      $this->warning(_("No valid action found"));
+      $this->warning(_("No action found for this tab"));
       break;
     }
-
-    $url=new Url();
-    $url->add_param('section', 'myaccount');
-    $url->add_param('page', $cur);
-    $href=$url->to_URL();
-    echo "<div class=\"button\">
-<a href=\"$href\">Back</a>
-</div>\n";
-    echo "<p></p>\n";
- 
-    return; // Uncomment this if you still want to see the contents.
   }
 
   switch ($cur)
@@ -198,6 +481,9 @@ function print_content()
     break;
   case MYACCOUNT_TAB_DETAILS: 
     $this->print_details(); 
+    break;
+  case MYACCOUNT_TAB_GROUPS: 
+    $this->print_groups(); 
     break;
   default:
     $this->print_general(); 

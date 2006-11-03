@@ -239,10 +239,46 @@ function create_high()
   return true;
 }
 
+/** @return Returns an array with all preview filenames */
+function _get_filenames()
+{
+  $files=array();
+  array_push($files, $this->get_filename_mini());
+  array_push($files, $this->get_filename_thumb());
+  array_push($files, $this->get_filename_preview());
+  array_push($files, $this->get_filename_high());
+  return $files;
+}
+
+/** Renews all timestamps of the previews. This function is usefull, if meta data changes but not the image itself */
+function touch_previews()
+{
+  if (!function_exists("touch"))
+    return;
+
+  $files=$this->_get_filenames();
+  foreach ($files as $file)
+  {
+    if (file_exists($file))
+      @touch($file);
+  }
+}
+
 /** Create all previe images */
-function create_all_previews()
+function create_previews()
 {
   $this->create_mini(true);
+}
+
+/** Delete all previes of the image */
+function delete_previews()
+{
+  $files=$this->get_filenames();
+  foreach ($files as $file)
+  {
+    if (file_exists($file))
+      unlink($file);
+  }
 }
 
 }

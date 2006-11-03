@@ -154,7 +154,7 @@ function print_content()
       {
         $thumb=new Thumbnail();
         $thumb->init_by_filename($fs->get_realname($img));
-        $thumb->create_all_previews();
+        $thumb->create_previews();
         unset($thumb);
       }
       $this->info(_("All previews successfully created"));

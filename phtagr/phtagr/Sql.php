@@ -29,40 +29,27 @@ var $message;
 
 function Sql()
 {
-  $this->link=NULL;
-  $this->prefix='';
+  global $db_prefix;
+  $this->link=null;
+  $this->_set_table_names($db_prefix);
 }
 
-/** Reads the configuration file for the mySQL database 
-  @param config Optional filename of configruation file
-  @return Array of data values on success, false otherwise 
- */
-function read_config($config='')
+function _set_table_names($prefix)
 {
-  if ($config=='')
-    $config=getcwd().DIRECTORY_SEPARATOR."config.php";
-
-  if (!file_exists($config) || !is_readable($config))
-    return false;
- 
-  include "$config";
-
-  $this->prefix=$db_prefix;
-  $this->user=$db_prefix."user";
-  $this->usergroup=$db_prefix."usergroup";
-  $this->group=$db_prefix."groups";
-  $this->image=$db_prefix."image";
-  $this->tag=$db_prefix."tag";
-  $this->imagetag=$db_prefix."imagetag";
-  $this->set=$db_prefix."sets";
-  $this->imageset=$db_prefix."imageset";
-  $this->location=$db_prefix."location";
-  $this->imagelocation=$db_prefix."imagelocation";
-  $this->comment=$db_prefix."comment";
-  $this->message=$db_prefix."message";
-  $this->conf=$db_prefix."conf";
-
-  return true;
+  $this->prefix=$prefix;
+  $this->user=$prefix."user";
+  $this->usergroup=$prefix."usergroup";
+  $this->group=$prefix."groups";
+  $this->image=$prefix."image";
+  $this->tag=$prefix."tag";
+  $this->imagetag=$prefix."imagetag";
+  $this->set=$prefix."sets";
+  $this->imageset=$prefix."imageset";
+  $this->location=$prefix."location";
+  $this->imagelocation=$prefix."imagelocation";
+  $this->comment=$prefix."comment";
+  $this->message=$prefix."message";
+  $this->conf=$prefix."conf";
 }
 
 /** Connect to the sql database 
@@ -70,14 +57,14 @@ function read_config($config='')
   @return true on success, false otherwise */
 function connect($config='')
 {
-  if (!$this->read_config($config))
-      return false;
-  
   if ($config=='')
     $config=getcwd().DIRECTORY_SEPARATOR."config.php";
 
   if (!file_exists($config) || !is_readable($config))
+  {
+    $this->error(_("Could not find the configuration file config.php. Please install phTagr properly"));
     return false;
+  }
  
   include "$config";
 
@@ -104,6 +91,14 @@ function test_database($host, $username, $password, $database)
 {
   $prefix=intval(rand(1, 100))."_";
   
+  if (!function_exists('mysql_connect') ||
+    !function_exists('mysql_select_db') ||
+    !function_exists('mysql_query'))
+  {
+    $this->error(_("mySQL functions are missing. Install PHP properly"));
+    return null;
+  }
+
   error_reporting(0);
   $link=mysql_connect($host,$username,$password);
   error_reporting(E_ERROR | E_WARNING | E_PARSE);
@@ -128,7 +123,7 @@ function test_database($host, $username, $password, $database)
   if ($this->link)
     mysql_close($this->link);
   
-  return NULL;
+  return null;
 }
 
 /* @return Array of all used or required table names */
@@ -334,6 +329,7 @@ function create_tables()
         password      VARCHAR(32) NOT NULL,
         
         created       DATETIME NOT NULL DEFAULT 0,
+        creator       INT DEFAULT 0,
         updated       TIMESTAMP,
         expire        DATETIME DEFAULT NULL,
         type          TINYINT UNSIGNED,
@@ -345,24 +341,24 @@ function create_tables()
         cookie        VARCHAR(64) DEFAULT NULL,
         cookie_expire DATETIME DEFAULT NULL,
 
-        quota         INT,              /* Users quota in bytes */
-        quota_interval INT,             /* Upload quota interval in seconds.
-                                           The user is allowed to upload quota
-                                           bytes in quota_interval seconds. */
-        quota_max     INT,              /* Maximum upload limit in bytes */
+        quota         INT DEFAULT 0,    /* Absolut quota in bytes */
+        qslice        INT DEFAULT 0,    /* Upload slice in bytes */
+        qinterval     INT DEFAULT 0,    /* Upload quota interval in seconds.
+                                           The user is allowed to upload qslice
+                                           bytes in qinterval seconds. */
         data          BLOB,             /* For optional and individual values */
 
-        PRIMARY KEY(id))";
+        PRIMARY KEY(id)
+        INDEX(cookie))";
   if (!$this->query($sql)) { return false; }
 
   $sql="CREATE TABLE $this->conf (
         userid        INT NOT NULL,
-        groupid       INT NOT NULL,
         name          VARCHAR(64),
         value         VARCHAR(192),
         
         INDEX(userid),
-        INDEX(groupid))";
+        INDEX(name))";
   if (!$this->query($sql)) { return false; }
   
   $sql="CREATE TABLE $this->group (
