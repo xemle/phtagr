@@ -466,6 +466,20 @@ function print_js()
   echo "</script>\n";
 }
 
+function print_js_groups()
+{
+  global $user;
+  $groups=$user->get_groups();
+  if (count($groups)==0)
+    return;
+
+  echo "<script type=\"text/javascript\">
+  var groups=new Array();\n";
+  foreach ($groups as $gid => $name)
+    echo "  groups[$gid]='".$this->_escape_js($name)."';\n";
+  echo "</script>\n";
+}
+
 function print_preview($search=null) 
 {
   global $db;
@@ -542,6 +556,7 @@ function print_content()
 
   echo "<div class=\"name\">$name</div>\n";
   $this->print_js();
+  $this->print_js_groups();
 
   $size=$img->get_size(600);
   $url=new Url('image.php');

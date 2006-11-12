@@ -143,6 +143,7 @@ function print_delete_account()
 
 function print_login()
 {
+  global $user;
   $url=new Url();
   $url->from_URL();
   $url->add_param('section', 'account');

@@ -221,25 +221,15 @@ function vote_reset(id, voting)
   }
 }
 
-/** Return a new hidden input
-  @param name
-  @param value */
-function _new_hidden(name, value)
+/** Returns a new input
+  @param type Input type
+  @param name Input name
+  @param value optional input value
+  @return INPUT element */
+function _new_input(type, name, value)
 {
   var input=document.createElement("input");
-  input.setAttribute("type", "hidden");
-  input.setAttribute("name", name);
-  input.setAttribute("value", value);
-  return input;
-}
-
-/** Returns a new text input 
-  @param name
-  @param value */
-function _new_text(name, value)
-{
-  var input=document.createElement("input");
-  input.setAttribute("type", "text");
+  input.setAttribute("type", type);
   input.setAttribute("name", name);
   if (value!='')
     input.setAttribute("value", value);
@@ -276,7 +266,7 @@ function _init_form(id)
     srcForm=document.getElementById("formImage");
   _clone_hidden_input(srcForm, form);
  
-  form.appendChild(_new_hidden('image', id));
+  form.appendChild(_new_input('hidden', 'image', id));
   return form;
 }
 
@@ -436,11 +426,11 @@ function edit_acl(id)
   Data[nodeId]=e.cloneNode(true);
 
   var form=_init_form(id);
-  form.appendChild(_new_hidden('js_acl', 1));
+  form.appendChild(_new_input('hidden', 'js_acl', 1));
 
   var t=document.createElement('table');
 
-  t.appendChild(_get_row_groups(id));
+  t.appendChild(_get_row_groups(id, images[id]['gid']));
   if (images[id]['gacl']!=null)
     t.appendChild(_get_row_acls(id));
   t.appendChild(_get_row_buttons(nodeId));
@@ -452,24 +442,64 @@ function edit_acl(id)
   document.getElementById(focusId).focus();
 }
 
-function _get_row_groups(id)
+/** @param gid Current group id */
+function _get_row_groups_from_js(gid)
 {
-  groups=document.getElementById('acl_grouplist');
-  if (groups==null)
-    return null;
+  var row=document.createElement("tr");
+  var th=document.createElement("th");
+  th.appendChild(document.createTextNode("Group:"));
+  row.appendChild(th);
+
+  var td=document.createElement("td");
+  row.appendChild(td);
+  var s=document.createElement("select");
+  s.setAttribute("size", "1");
+  s.setAttribute("name", "js_acl_setgroup");
+
+  var o=document.createElement("option");
+  o.setAttribute("value", "-1");
+  o.appendChild(document.createTextNode("Keep"));
+  s.appendChild(o);
+
+  if (groups!=null)
+  {
+    for(var groupid in groups)
+    {
+      // skip current group
+      if (groupid==gid)
+        continue;
+
+      var o=document.createElement("option");
+      o.setAttribute("value", groupid);
+      o.appendChild(document.createTextNode(groups[groupid]));
+      s.appendChild(o);
+    }
+  }
+  td.appendChild(s);
+  return row;
+}
+
+/** @param id Image id
+  @param gid Group id
+  @return Row element of ACL */
+function _get_row_groups(id, gid)
+{
+  var list=document.getElementById('acl_list');
+  if (list==null)
+    return _get_row_groups_from_js(gid);
 
   var gid=0;
   if (images[id]['gid']!=null)
     gid=images[id]['gid'];
 
-  new_groups=groups.cloneNode(true);
-  new_groups.setAttribute('id', 'js_'+groups.getAttribute('id'));
-  new_groups.setAttribute('name', 'js_'+groups.getAttribute('name'));
+  new_list=list.cloneNode(true);
+  new_list.setAttribute('id', 'js_'+list.getAttribute('id'));
+  new_list.setAttribute('name', 'js_'+list.getAttribute('name'));
   
   // Select current group
-  for(var i=0; i<new_groups.childNodes.length; i++)
+  for(var i=0; i<new_list.childNodes.length; i++)
   {
-    var child=new_groups.childNodes[i];
+    var child=new_list.childNodes[i];
     if (child.nodeName=='OPTION' && 
       child.getAttribute('value')==gid)
     {
@@ -485,7 +515,7 @@ function _get_row_groups(id)
   var td=document.createElement('td');
   row.appendChild(td);
 
-  td.appendChild(new_groups);
+  td.appendChild(new_list);
 
   return row;
 }
@@ -584,7 +614,9 @@ function _get_row_date(id)
   tr.appendChild(th);
 
   var td=document.createElement("td");
-  td.appendChild(_new_text('js_date', images[id]['date']));
+  var input=_new_input('text', 'js_date', images[id]['date']);
+  input.setAttribute('class', 'cell');
+  td.appendChild(input);
   tr.appendChild(td);
   
   return tr;
@@ -601,9 +633,17 @@ function _get_row_tags(id)
   tr.appendChild(th);
 
   var td=document.createElement("td");
-  input=_new_text('js_tags', images[id]['tags']);
-  input.setAttribute('id', 'focus-'+id);
-  td.appendChild(input);
+  var te=document.createElement("textarea");
+  te.setAttribute('name', 'js_tags');
+  te.setAttribute('cols', '24');
+  te.setAttribute('rows', '1');
+  if (images[id]['tags']!='')
+  {
+    te.appendChild(document.createTextNode(images[id]['tags']));
+  }
+  te.setAttribute('id', 'focus-'+id);
+  te.setAttribute('class', 'cell');
+  td.appendChild(te);
   tr.appendChild(td);
   
   return tr;
@@ -620,13 +660,15 @@ function _get_row_sets(id)
   tr.appendChild(th);
 
   var td=document.createElement("td");
-  td.appendChild(_new_text('js_sets', images[id]['sets']));
+  var input=_new_input('text', 'js_sets', images[id]['sets']);
+  input.setAttribute('class', 'cell');
+  td.appendChild(input);
   tr.appendChild(td);
   
   return tr;
 }
 
-/** Row for sets
+/** Row for location
   @param id ID of the image */
 function _append_row_locations(id, t)
 {
@@ -636,7 +678,9 @@ function _append_row_locations(id, t)
   tr.appendChild(th);
 
   var td=document.createElement("td");
-  td.appendChild(_new_text('js_city', images[id]['city']));
+  var input=_new_input('text', 'js_city', images[id]['city']);
+  input.setAttribute('class', 'cell');
+  td.appendChild(input);
   tr.appendChild(td);
   t.appendChild(tr);
 
@@ -646,7 +690,9 @@ function _append_row_locations(id, t)
   tr.appendChild(th);
 
   td=document.createElement('td');
-  td.appendChild(_new_text('js_sublocation', images[id]['sublocation']));
+  var input=_new_input('text', 'js_sublocation', images[id]['sublocation']);
+  input.setAttribute('class', 'cell');
+  td.appendChild(input);
   tr.appendChild(td);
   t.appendChild(tr);
 
@@ -656,7 +702,9 @@ function _append_row_locations(id, t)
   tr.appendChild(th);
 
   td=document.createElement('td');
-  td.appendChild(_new_text('js_state', images[id]['state']));
+  var input=_new_input('text', 'js_state', images[id]['state']);
+  input.setAttribute('class', 'cell');
+  td.appendChild(input);
   tr.appendChild(td);
   t.appendChild(tr);
 
@@ -666,7 +714,9 @@ function _append_row_locations(id, t)
   tr.appendChild(th);
 
   td=document.createElement('td');
-  td.appendChild(_new_text('js_country', images[id]['country']));
+  var input=_new_input('text', 'js_country', images[id]['country']);
+  input.setAttribute('class', 'cell');
+  td.appendChild(input);
   tr.appendChild(td);
   t.appendChild(tr);
 }

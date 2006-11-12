@@ -290,10 +290,6 @@ input, select, submit, reset, textarea {
   vertical-align: top;
 }
 
-.thumbcell * textarea {
-  width: 270px;
-}
-
 .name {
   font-size: 14pt;
   background-color: #dddddd;
@@ -334,6 +330,10 @@ input, select, submit, reset, textarea {
   font-style: italic;
 }
 
+.caption * textarea {
+  width: 270px;
+}
+
 .voting {
   margin: 5px auto;
   display: block;
@@ -359,10 +359,14 @@ input, select, submit, reset, textarea {
   display: block;
 }
 
-.imginfo * input {
+.imginfo * input, .imginfo * textarea {
   padding: 1px 3px 1px 3px;
   margin: 0;
   border: 1px solid #cccccc;
+}
+
+.imginfo * input.cell, .imginfo * textarea.cell {
+  width: 200px;
 }
 
 .row2 {

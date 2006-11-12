@@ -69,16 +69,136 @@ function get_name_by_id($id)
   return $row[0];
 }
 
+function get_type()
+{
+  return $this->_get_data('type');
+}
+
+function set_type($type)
+{
+  global $user;
+  if ($type<USER_ADMIN || 
+      $type>USER_GUEST)
+    return false;
+
+  // Allow only admins to set a user to admin
+  if ($type==USER_ADMIN && !$user->is_admin())
+    return false;
+
+  $this->_set_data('type', $type);
+}
+
+function get_creator()
+{
+  return $this->_get_data('creator');
+}
+
+function set_creator($creator)
+{
+  $this->_set_data('creator', $creator);
+}
+
 /** @return Returns the name of the user */
 function get_name()
 {
   return $this->_get_data('name', 'anonymous');
 }
 
+/** Match a password against the own password
+  @param passwd Password to check
+  @return True, if password matches the current */
+function match_passwd($passwd)
+{
+  if (strlen($passwd)==0)
+    return false;
+
+  $cur_passwd=$this->_get_data('password');
+  if ($passwd!=$cur_passwd)
+    return false;
+  return true;
+}
+
+/** Change the password of the user. Only Members are allowed to change the
+ * password of the user. If the user is a guest, only the create can change the
+ * password. 
+  @param oldpasswd Current Password
+  @param passwd New password
+  @result Returns 0 on success. An global error code otherwise
+  @note This function resets the authentication cookie */
+function passwd($oldpasswd, $passwd)
+{
+  global $db;
+  global $user;
+
+  // Deny anonymous and guests to change the password
+  if ($user->get_id()<=0 || $user->get_type()==USER_GUEST) 
+    return ERR_NOT_PERMITTED;
+
+  // Permit only guest owner 
+  if (!$user->is_admin() && $this->is_guest() &&
+      $this->get_creator()!=$user->get_id())
+    return ERR_NOT_PERMITTED;
+
+  if (!$this->match_passwd($oldpasswd))
+    return ERR_PASSWD_MISMATCH;
+
+  $result=$this->_check_password($passwd);
+  if ($result<0)
+    return $result;
+
+  $spasswd=mysql_escape_string($passwd);
+  $sql="UPDATE $db->user
+        SET password='$spasswd',cookie=''
+        WHERE id=".$this->get_id();
+  $result=$db->query($sql);
+  if (!$result)
+    return ERR_DB_UPDATE;
+  return 0;
+}
+
 /** returns the userid */
 function get_groupid()
 {
-  return $this->get_id();
+  return 0;
+}
+
+function get_expire()
+{
+  return $this->_get_data('expire');
+}
+
+/** Set the expire date. The date must be in the future until now
+  @param date Date in Format of YYYY[-MM[-DD]] or UNIX time stamp
+  @return True if date could be set. False otherwise*/
+function set_expire($date)
+{
+  if (is_numeric($date) && strlen($date)!=4)
+    $sec=$date;
+  else
+  {
+    // Check format of YYYY-MM-DD hh:mm:ss
+    if (!preg_match('/^[0-9]{4}(-[0-9]{2}(-[0-9]{2}?)?)?$/', $date))
+      return false;
+
+    $y=intval(substr($date, 0, 4));
+    $m=intval(substr($date, 5, 2));
+    $d=intval(substr($date, 8, 2));
+    if ($y<2000 || $y>2050) $y=2006;
+    if ($m<1 || $m>12) $m=1;
+    if ($d<1 || $d>31) $d=1;
+    
+    $sec=mktime(0, 0, 0,$m, $d, $y);
+    // Error?
+    if ($sec<0 || $sec===false)
+      return false;
+  }
+
+  // Date before now?
+  if ($sec<time())
+    return false;
+
+  $this->_set_data('expire', date("Y-m-d", $sec));
+  return true;
 }
 
 /* @return Returns the current cookie value in the database. If no cookie is set null is returned. */
@@ -330,6 +450,19 @@ function create($name, $pwd)
   return $id;
 }
 
+function create_guest($name, $pwd)
+{
+  $id=$this->create($name, $pwd);
+  if ($id<0)
+    return $id;
+  $guest=new User($id);
+  $guest->set_type(USER_GUEST);
+  $guest->set_creator($this->get_id());
+  $guest->commit_changes();
+  unset($guest);
+  return $id;
+}
+
 /** Initialize a new user 
   @return On failure it returns a global Error code */
 function _init_data()
@@ -394,7 +527,8 @@ function is_in_group($groupid=-1)
 /** Return true if the current user is an super user and has admin rights */
 function is_admin()
 {
-  if ($this->get_name()=='admin')
+  if ($this->get_name()=='admin' ||
+    $this->get_type()==USER_ADMIN)
     return true;
   return false;
 }
@@ -402,13 +536,17 @@ function is_admin()
 /* Return true if the given user has an phtagr account */
 function is_member()
 {
-  if ($this->get_id()>0)
+  if ($this->is_admin() ||
+    $this->get_type()==USER_MEMBER)
     return true;
   return false;
 }
 
 function is_guest()
 {
+  if ($this->is_admin() ||
+    $this->get_type()==USER_GUEST)
+    return true;
   return false;
 }
 
@@ -418,6 +556,25 @@ function is_anonymous()
   if ($this->get_id()==-1)
     return true;
   return false;
+}
+
+/** @return Returns the hash of all guests account ids. The index is the id,
+ * the value is the name of the guest */
+function get_guests()
+{
+  global $db;
+  $guests=array();
+
+  $sql="SELECT id,name
+        FROM $db->user
+        WHERE creator=".$this->get_id();
+  $result=$db->query($sql);
+  if (!$result || mysql_num_rows($result)<1)
+    return $guests;
+
+  while ($row=mysql_fetch_row($result))
+    $guests[$row[0]]=$row[1];
+  return $guests;
 }
 
 /** @return Returns an hash of ids with group names of the users group */
@@ -817,8 +974,9 @@ function _delete_user_data($id)
 
   while ($row=mysql_fetch_assoc($result))
   {
-    $img=new Thumb($row[0]);
-    // @todo delete all cached data
+    $img=new Thumbnail($row[0]);
+    $img->delete_previews();
+    unset($img);
   }
   
   // Delete all image data
@@ -843,6 +1001,28 @@ function _delete_user_data($id)
   return true;
 }
 
+function delete()
+{
+  global $user;
+
+  $permit=false;
+
+  // Allow admin
+  if ($this->is_admin()) 
+    $permit=true;
+  // Allow gruest creator
+  if ($this->get_type()==USER_GUEST &&
+    $this->get_creator()==$user->get_id())
+    $permit=true;
+  // Allow itself
+  if ($this->is_member() && $user->get_id()==$this->get_id())
+    $permit=true;
+
+  if (!$permit)
+    return ERR_NOT_PERMITTED;
+
+  $this->_delete_user_data($this->get_id());
+}
 
 }
 ?>

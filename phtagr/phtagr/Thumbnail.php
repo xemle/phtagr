@@ -273,7 +273,7 @@ function create_previews()
 /** Delete all previes of the image */
 function delete_previews()
 {
-  $files=$this->get_filenames();
+  $files=$this->_get_filenames();
   foreach ($files as $file)
   {
     if (file_exists($file))

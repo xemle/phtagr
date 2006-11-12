@@ -24,7 +24,7 @@ function print_content()
 </form>\n";
   $url->add_param('section', 'search');
   echo "<a href=\"".$url->to_URL()."\">"._("Advanced search")."</a>&nbsp;-&nbsp;";
-  if (!$user->is_member()) {
+  if ($user->is_anonymous()) {
     $url->add_param('section', 'account');
     $url->add_param('action', 'login');
     $url->add_param('goto', 'home');

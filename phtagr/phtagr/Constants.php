@@ -1,5 +1,9 @@
 <?php
 
+define("USER_ADMIN",  0x01);
+define("USER_MEMBER", 0x02);
+define("USER_GUEST",  0x03);
+
 // ACL constants
 define("ACL_DOWNLOAD", 0x80);
 define("ACL_DOWNLOAD_MASK", 0x80);
@@ -38,5 +42,7 @@ define("ERR_USER_PWD_LEN",       -10);
 define("ERR_USER_PWD_INVALID",   -11);
 define("ERR_FS_GENERAL",         -12);
 define("ERR_GENERAL",            -13);
+define("ERR_NOT_PERMITTED",      -14);
+define("ERR_PASSWD_MISMATCH",    -15);
 
 ?>

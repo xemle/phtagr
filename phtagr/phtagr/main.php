@@ -118,7 +118,7 @@ if (isset($_REQUEST['section']))
 {
   $section=$_REQUEST['section'];
     
-  if ($user->is_member() && 
+  if (!$user->is_anonymous() && 
       $_REQUEST['section']=='account' && isset($_REQUEST['goto']))
   {
     // We need to unset the action field otherwise we might
@@ -191,7 +191,6 @@ if (isset($_REQUEST['section']))
       $login=new SectionAccount();
       $login->message=_('You have to be logged in to access the queried page.');
       $login->section='myaccount';
-      $login->
       $cnt->add_section(&$login);
     }
   } 
