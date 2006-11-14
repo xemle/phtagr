@@ -62,43 +62,6 @@ function print_navigator($search, $current, $count)
   echo "</div>\n\n";
 }
 
-function print_tags($tags, $sets, $locations)
-{
-  echo "<div style=\"clear: both\">";
-  $url=new Url();
-  $url->add_param('section', 'explorer');
-  echo "Tags: ";
-  arsort($tags);
-  foreach ($tags as $tag => $nums) 
-  {
-    $url->add_param('tags', $tag);
-    $href=$url->to_URL();
-    echo "<a href=\"$href\">$tag ($nums)</a>\n";
-  }
-  $url->rem_param('tags');
-
-  echo "<br/>\nSets: ";
-  arsort($sets);
-  foreach ($sets as $set => $nums) 
-  {
-    $url->add_param('sets', $set);
-    $href=$url->to_URL();
-    echo "<a href=\"$href\">$set ($nums)</a>\n";
-  }
-  $url->rem_param('sets');
-
-  echo "<br/>\nLocations: ";
-  arsort($locations);
-  foreach ($locations as $loc => $nums) 
-  {
-    $url->add_param('location', $loc);
-    $href=$url->to_URL();
-    echo "<a href=\"$href\">$loc ($nums)</a>\n";
-  }
-
-  echo "</div>\n";
-}
-
 /** Merge an array and count the entries
   @param counter Pointer to the merged array
   @param add Array to add */
@@ -193,8 +156,6 @@ function print_content()
 
   echo "</div>\n\n";
 
-  //$this->print_tags($tags, $sets, $locs);
-
   $this->print_navigator($nav_search, $nav_current, ceil($count/$nav_size));
 
   echo "<div class=\"edit\">";
@@ -207,6 +168,10 @@ function print_content()
   $edit->print_buttons();
   echo "</div>\n";
   echo "</form>\n";
+
+  global $bulb;
+  if (isset($bulb))
+    $bulb->set_data($tags, $sets, $locs);
 }
 
 }

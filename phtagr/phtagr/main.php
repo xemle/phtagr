@@ -19,6 +19,7 @@ include "$phtagr_lib/SectionHelp.php";
 include "$phtagr_lib/SectionAccount.php";
 
 include "$phtagr_lib/SectionExplorer.php";
+include "$phtagr_lib/SectionBulb.php";
 include "$phtagr_lib/SectionImage.php";
 include "$phtagr_lib/SectionBrowser.php";
 include "$phtagr_lib/SectionSearch.php";
@@ -147,6 +148,8 @@ if (isset($_REQUEST['section']))
     }
     $explorer= new SectionExplorer();
     $cnt->add_section(&$explorer);
+    $bulb = new SectionBulb();
+    $body->add_section(&$bulb);
   } 
   else if($section=='image' && isset($_REQUEST['id']))
   {

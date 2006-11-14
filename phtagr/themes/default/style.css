@@ -38,7 +38,7 @@ body {
   background-repeat: repeat-y;
 }
 
-.menu {
+.menu, .bulb {
   float: left;
   width: 98px;
   padding: 0;
@@ -109,6 +109,7 @@ td {
 input, select, submit, reset, textarea {
   text-decoration: none;
   font-size: 8pt;
+  font-family:sans-serif;
   padding: 2px 5px 2px 5px;
   margin: 5px 0 3px 0;
   background-color: #ffffff;
@@ -143,9 +144,6 @@ input, select, submit, reset, textarea {
   color: #ffffff;
 }
 
-.menu {
-}
-
 .menu * li, .menu ul {
   padding: 1px 0 1px 5px;
   margin: 0;
@@ -156,7 +154,7 @@ input, select, submit, reset, textarea {
   font-weight: bold;
 }
 
-.menu h2 {
+.menu h2, .bulb h2 {
   margin: 0;
   padding: 1px 1px 1px 5px;
   font-size: 10pt;
@@ -171,6 +169,18 @@ input, select, submit, reset, textarea {
   display: block;
   color: #000000;
   background-color: #cccccc;
+}
+
+.bulb * h3 {
+  font-size: 10pt;
+  padding: 0px 0px 0px 3px;
+  margin: 0px;
+  border-bottom: 1px solid #000000;
+}
+
+.bulb * p {
+  margin: 0px;
+  padding: 3px;
 }
 
 .footer .content {

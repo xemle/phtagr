@@ -461,7 +461,7 @@ function _get_row_groups_from_js(gid)
   o.appendChild(document.createTextNode("Keep"));
   s.appendChild(o);
 
-  if (groups!=null)
+  if (typeof groups !="undefined")
   {
     for(var groupid in groups)
     {
@@ -484,7 +484,7 @@ function _get_row_groups_from_js(gid)
   @return Row element of ACL */
 function _get_row_groups(id, gid)
 {
-  var list=document.getElementById('acl_list');
+  var list=document.getElementById('acl_grouplist');
   if (list==null)
     return _get_row_groups_from_js(gid);
 

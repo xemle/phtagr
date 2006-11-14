@@ -453,9 +453,8 @@ function print_bar()
   global $search;
   $size=$search->get_page_size();
   echo "<div class=\"tab\">
-<h2>"._("Actions:")."</h2>
 <ul>
-  <li>"._("Images per page:")." <select size=\"1\" name=\"pagesize\">\n";
+  <li>"._("Pagesize:")." <select size=\"1\" name=\"pagesize\">\n";
   if ($size!=10)
     echo "    <option value=\"$size\">$size</option>\n";
   echo "    <option value=\"10\">"._("Default")."</option>
@@ -467,7 +466,7 @@ function print_bar()
   <option value=\"150\">150</option>
   <option value=\"200\">200</option>
 </select></li>
-  <li>"._("Images:")." <select size=\"1\" name=\"command\">
+  <li>"._("Action:")." <select size=\"1\" name=\"command\">
     <option value=\"none\">"._("Nothing")."</option>
     <option value=\"mark\">"._("Mark")."</option>
     <option value=\"demark\">"._("Demark")."</option>\n";

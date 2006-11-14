@@ -32,10 +32,7 @@ function print_header_html()
   $theme=$theme_dir.'/style.css';
   echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"".$theme."\"/>\n";
   $icon=$theme_dir.'/favicon.ico';
-  if (file_exists($icon))
-  {
-    echo "<link rel=\"shortcut icon\" type=\"image/x-icon\" href=\"$icon\" />\n"; 
-  }
+  echo "<link rel=\"shortcut icon\" type=\"image/x-icon\" href=\"$icon\" />\n"; 
   echo "<script src=\"$phtagr_htdocs/js/forms.js\" type=\"text/javascript\"></script>\n";
   echo "</head>\n\n";
 }
