@@ -27,9 +27,9 @@ function exec_general ()
   $result=false;
 
   if (isset ($_REQUEST['user_self_register']))
-    $result=$conf->set(0, 'allow_user_self_register', '1');
+    $result=$conf->set_default('allow_user_self_register', '1');
   else
-    $result=$conf->set(0, 'allow_user_self_register', '0');
+    $result=$conf->set_default('allow_user_self_register', '0');
   
   if ($result)
     $this->success("Settings saved successfully!");
@@ -58,7 +58,7 @@ function print_general ()
     echo "<input type=\"checkbox\" name=\"user_self_register\"/>";
   echo " Allow users to register themselves.\n";
 
-  echo "<input type=\"submit\" value=\"Save\" />\n";
+  echo "<input type=\"submit\" class=\"submit\" value=\"Save\" />\n";
   echo "</form>\n";
   echo "<p></p>\n";
 }
@@ -69,6 +69,9 @@ function print_user_details($u=null)
 {
   if ($u==null)
     return;
+  $c=new Config($u->get_id());
+
+  echo "<h3>".sprintf(_("Editing User '%s'"), $u->get_name())."</h3>\n";
 
   // If we don't have a update request we show all the values we can
   // update.
@@ -93,6 +96,15 @@ function print_user_details($u=null)
     <td>"._("Email:")."</td>
     <td><input type=\"text\" name=\"email\" value=\"".$u->get_email()."\" /><td>
   </tr>
+</table>
+
+<h3>"._("Quota")."</h3>\n";
+
+echo "<p>"._("You can set the quoata limit for uploads of the user. Quota is the
+absolut limit. Quota Slice is the size which can be uploaded by the user within
+the time of Quota Interval")."</p>\n";
+
+echo "<table>
   <tr>
     <td>"._("Quota (MB)")."</td>
     <td><input type=\"text\" name=\"quota\" value=\"".
@@ -108,14 +120,135 @@ function print_user_details($u=null)
     <td><input type=\"text\" name=\"qinterval\" value=\"".
       sprintf("%.2f", $u->get_qinterval()/86400)."\" /><td>
   </tr>
-  <tr>
-    <td></td>
-    <td><input type=\"submit\" class=\"submit\"value=\"Save\"/>
-      <input type=\"reset\" class=\"reset\" value=\"Reset\"/></td>
-  </tr>
 </table>
+<h3>"._("Filesystem")."</h3>\n";
+
+echo "<p>"._("Here you can specify the browsable paths for a user. The user can import files from these direcories.")."</p>\n";
+
+echo "<table>\n";
+  $roots=$c->get('path.fsroot[]', null);
+  if ($roots!=null)
+  {
+    foreach($roots as $root)
+    {
+      echo "<tr><td></td><td>".htmlentities($root)." ";
+      $url->add_param('remove_root', $root);
+      echo "<a href=\"".$url->to_URL()."\" class=\"jsbutton\">"._("Remove")."</td></tr>\n";
+    }
+    $url->rem_param('remove_root');
+  }
+  echo "<tr><td>"._("Add root")."</td>\n";
+  echo "<td><input type=\"text\" name=\"add_root\" /></td></tr>\n";
+
+  echo "</table>
+<input type=\"submit\" class=\"submit\"value=\"Save\"/>
+<input type=\"reset\" class=\"reset\" value=\"Reset\"/>
 </form>\n\n";
   return;
+}
+
+function exec_users()
+{
+  if (!isset($_REQUEST['action']) ||!isset($_REQUEST['id']))
+    return false;
+
+  $id=intval($_REQUEST['id']);
+  if ($id<0)
+    return false;
+
+  $account=new SectionAccount();
+  $action=$_REQUEST['action'];
+  if ($action=='delete')
+  {
+    $account->user_delete($id);
+  }
+  else if ($action=="edit")
+  {
+    $u=new User($id);
+    $c=new Config($id);
+
+    // If 'email' is set in the request, we assume that this current request
+    // is already an update request with all the values we want to update.
+    if (isset($_REQUEST['email']))
+      $u->set_email($_REQUEST['email']);
+    if (isset($_REQUEST['firstname']))
+      $u->set_firstname($_REQUEST['firstname']);
+    if (isset($_REQUEST['lastname']))
+      $u->set_lastname($_REQUEST['lastname']);
+
+    // Quota
+    if (isset($_REQUEST['quota']))
+      $u->set_quota($_REQUEST['quota']*1048576);
+    if (isset($_REQUEST['qslice']))
+      $u->set_qslice($_REQUEST['qslice']*1048576);
+    if (isset($_REQUEST['qinterval']))
+      $u->set_qinterval($_REQUEST['qinterval']*86400);
+
+    // Filesystem roots
+    if (isset($_REQUEST['add_root']))
+    {
+      $root=$_REQUEST['add_root'];
+      if (!is_dir($root) || !is_readable($root))
+        $this->error(_("Path could not be added, because given root is not a dirctory or readable."));
+      else
+        $c->set('path.fsroot[]', $root);
+    }
+    
+    if (isset($_REQUEST['remove_root']) &&
+      strlen($_REQUEST['remove_root'])>0)
+      $c->remove('path.fsroot[]', $_REQUEST['remove_root']);
+
+    $u->commit_changes();
+
+    $this->print_user_details($u);
+    unset($u);
+    unset($c);
+  }
+
+}
+
+function print_users()
+{
+  global $db;
+
+  echo "<h3>"._("Available Users")."</h3>\n";
+
+  $sql="SELECT id
+        FROM $db->user
+        WHERE type!='".USER_GUEST."'";
+  $result=$db->query($sql);
+  if (!$result)
+    return;
+
+  echo "<form action=\"./index.php\" method=\"post\">\n";
+  $url=new Url();
+  $url->add_param('section', 'admin');
+  $url->add_param('page', ADMIN_TAB_USERS);
+  
+  echo "<table>
+  <tr> 
+    <th>"._("Name")."</th>
+    <th>"._("Quota")."</th>
+  </tr>\n";
+  while ($row=mysql_fetch_assoc($result))
+  {
+    $id=$row['id'];
+    $u=new User($id);
+    echo "<tr>";
+
+    $url->add_param('id', $id);
+    $url->add_param('action', 'edit');
+    echo "<td><a href=\"".$url->to_URL()."\">".$u->get_name()."</a></td>";
+
+    echo "<td>".sprintf("%.1f MB (%d %% used)", 
+      $u->get_quota()/(1024*1024),
+      $u->get_quota_used()*100)."</td>";
+
+    echo "</tr>\n";
+  } 
+  echo "</table>\n";
+
+  echo "</form>\n";
 }
 
 function exec_create_user()
@@ -143,7 +276,7 @@ function exec_create_user()
     }
 
     return;
-  }
+  } 
 }
 
 function print_create_user()
@@ -182,93 +315,6 @@ function print_create_user()
 </form>\n\n";
 }
 
-function exec_users()
-{
-  if (!isset($_REQUEST['action']) ||!isset($_REQUEST['id']))
-    return false;
-
-  $id=intval($_REQUEST['id']);
-  if ($id<0)
-    return false;
-
-  $account=new SectionAccount();
-  $action=$_REQUEST['action'];
-  if ($action=='delete')
-  {
-    $account->user_delete($id);
-  }
-  else if ($action=="edit")
-  {
-    $u=new User($id);
-    echo "<h3>".sprintf(_("Editing User '%s'"), $u->get_name())."</h3>\n";
-
-    // If 'email' is set in the request, we assume that this current request
-    // is already an update request with all the values we want to update.
-    if (isset($_REQUEST['email']))
-      $u->set_email($_REQUEST['email']);
-    if (isset($_REQUEST['firstname']))
-      $u->set_firstname($_REQUEST['firstname']);
-    if (isset($_REQUEST['lastname']))
-      $u->set_lastname($_REQUEST['lastname']);
-
-    if (isset($_REQUEST['quota']))
-      $u->set_quota($_REQUEST['quota']*1048576);
-    if (isset($_REQUEST['qslice']))
-      $u->set_qslice($_REQUEST['qslice']*1048576);
-    if (isset($_REQUEST['qinterval']))
-      $u->set_qinterval($_REQUEST['qinterval']*86400);
-
-    $u->commit_changes();
-
-    $this->print_user_details($u);
-    unset($u);
-  }
-
-}
-
-function print_users()
-{
-  global $db;
-
-  echo "<h3>"._("Available Users")."</h3>\n";
-
-  $sql="SELECT id
-        FROM $db->user";
-
-  $result=$db->query($sql);
-  if (!$result)
-    return;
-
-  echo "<form action=\"./index.php\" method=\"post\">\n";
-  $url=new Url();
-  $url->add_param('section', 'admin');
-  $url->add_param('page', ADMIN_TAB_USERS);
-  
-  echo "<table>
-  <tr> 
-    <th>"._("Name")."</th>
-    <th>"._("Quota")."</th>
-  </tr>\n";
-  while ($row=mysql_fetch_assoc($result))
-  {
-    $id=$row['id'];
-    $u=new User($id);
-    echo "<tr>";
-
-    $url->add_param('id', $id);
-    $url->add_param('action', 'edit');
-    echo "<td><a href=\"".$url->to_URL()."\">".$u->get_name()."</a></td>";
-
-    echo "<td>".sprintf("%.1f MB (%d %% used)", 
-      $u->get_quota()/(1024*1024),
-      $u->get_quota_used()*100)."</td>";
-
-    echo "</tr>\n";
-  } 
-  echo "</table>\n";
-
-  echo "</form>\n";
-}
 
 function exec_upload ()
 {

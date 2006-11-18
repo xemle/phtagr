@@ -100,6 +100,14 @@ $menu->set_item_param('section');
 
 $menu->add_item('home', _("Home"));
 $menu->add_item('explorer', _("Explorer"));
+if ($user->is_member())
+{
+  $submenu=new SectionMenu('menu','');
+  $submenu->add_param('section', 'explorer');
+  $submenu->set_item_param('user');
+  $submenu->add_item($user->get_id(), _("My images"));
+  $menu->add_submenu('explorer', $submenu);
+}
 $menu->add_item('search', _("Search"));
 
 if ($user->can_browse())
@@ -171,9 +179,12 @@ if (isset($_REQUEST['section']))
   {
     if ($user->can_browse()) {
       $browser = new SectionBrowser();
-      // @todo set roots from preferences
-      // $browser->reset_roots();
-      // $browser->add_root(root, alias);
+      // Set roots of users filesystem
+      $roots=$conf->get('path.fsroot[]');
+      if (!$user->is_admin())
+        $browser->reset_roots();
+      foreach ($roots as $root)
+        $browser->add_root($root, '');
       $cnt->add_section(&$browser);
     } else {
       $login = new SectionLogin();

@@ -15,6 +15,7 @@ function SectionSearch()
 
 function print_content()
 {
+  global $user;
   echo "<h2>"._("Advanced Search")."</h2>\n";
   $url=new Url();
   $url->add_param('section', 'explorer');
@@ -60,7 +61,29 @@ function print_content()
         <option value=\"".LOCATION_COUNTRY."\">"._("Country")."</option>
       </select>
     </td>
+  </tr>
   <tr>
+    <th>"._("User")."</th>
+    <td><input type=\"text\" name=\"user\"/></td>
+  </tr>\n";
+  if ($user->is_member())
+  {
+    $groups=$user->get_groups();
+    if (count($groups)>0)
+    {
+      echo "  <tr>
+    <th>"._("Groups")."</td>
+    <td>
+      <select size=\"1\" name=\"group\">
+        <option value=\"\" selected=\"selected\">None</option>\n";
+      foreach ($groups as $gid => $name)
+        echo "        <option value=\"$gid\">$name</option>\n";
+      echo "      </select>
+    </td>
+  </tr>\n";
+    }
+  }
+  echo "  <tr>
     <th>"._("Sort by:")."</th>
     <td>
       <select name=\"orderby\">
@@ -96,7 +119,6 @@ function print_content()
 </form>
 ";
 }
-
 
 }
 

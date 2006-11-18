@@ -89,14 +89,14 @@ h2 {
 
 h3 {
   padding: 5px 5px 5px 0px;
-  margin: 10px 0px 10px 0px; 
+  margin: 0px 0px 0px 0px; 
   border-bottom: 1px solid #000000;
 }
 
 th {
   vertical-align: top;
   color: #262626;
-  background-color: #cccccc;
+  background-color: #d0d0d0;
   width: 0px;
   text-align: right;
 }
@@ -105,6 +105,9 @@ td {
   text-align: left;
 }
 
+ul {
+  margin: 0px 0px 0px 14px;
+}
 
 input, select, submit, reset, textarea {
   text-decoration: none;
@@ -178,9 +181,14 @@ input, select, submit, reset, textarea {
   border-bottom: 1px solid #000000;
 }
 
-.bulb * p {
+.bulb ul {
+  list-style-type:none;
   margin: 0px;
   padding: 3px;
+}
+
+.bulb * .hits {
+  color: #a0a0a0;
 }
 
 .footer .content {
@@ -204,7 +212,7 @@ input, select, submit, reset, textarea {
   display: block;
   clear: both;
   width: 100%;
-  margin: 10px 0 5px 0;
+  margin: 10px 0 0px 0;
   padding: 0;
   font-size: 10pt;
   background-color: #ccc;
@@ -311,8 +319,14 @@ input, select, submit, reset, textarea {
 }
 
 .thumb * img {
-  margin: 5px 0px 5px 0px;
+  margin: 5px 0px 0px 0px;
+  padding: 0px;
   border: 1px solid black;
+}
+
+.thumb > a {
+  margin: 0px;
+  padding: 0px;
 }
 
 .preview {
@@ -332,6 +346,14 @@ input, select, submit, reset, textarea {
 
 .image * textarea {
   width: 400px;
+}
+
+.from, .from a, .from a:visited{
+  padding: 0px;
+  margin: 0px;
+  color: #a0a0a0;
+  font-size: 8pt;
+  font-style: italic;
 }
 
 .caption {

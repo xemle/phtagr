@@ -135,6 +135,8 @@ function print_content()
     echo "<div class=\"thumbcell\"><a name=\"img-".$row[0]."\"/>\n";
     $search->set_pos($pos);
     $sec_img=new SectionImage($row[0]);
+    if ($cell==0)
+      $sec_img->print_js_groups();
     $sec_img->print_preview(&$search);
     $img=$sec_img->get_img();
     if ($img)

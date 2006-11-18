@@ -31,9 +31,10 @@ function print_browser($dir)
   $fs=$this->_fs;
   $url=new Url();
   $url->add_param('section', 'browser');
-  $href=$url->to_URL();
+
   echo "<div class=\"path\">"._("Current path:")."&nbsp;".
-    "<a href=\"$href\">"._("Root")."</a>";
+    "<a href=\"".$url->to_URL()."\">"._("Root")."</a>";
+
   $path='';
   if ($dir!='')
   {
@@ -51,21 +52,27 @@ function print_browser($dir)
       if ($path!='')
         $path.=DIRECTORY_SEPARATOR.$part;
       else 
-        $path=$part;
+      {
+        /*
+        if (count($fs->get_roots())<2)
+          $path=DIRECTORY_SEPARATOR.$part;
+        else
+        */
+          $path=$part;
+      }
       echo "&nbsp;/&nbsp;";
       
       $url->add_param('cd', $path);
-      $href=$url->to_URL();
-      echo "<a href=\"$href\">$part</a>";
+      echo "<a href=\"".$url->to_URL()."\">".htmlentities($part)."</a>";
     }
+    $url->rem_param('cd');
   }
   echo "&nbsp;/&nbsp;</div>";
   
   echo "<form section=\"./index.php\" method=\"post\">\n<p>\n";
-  $url->rem_param('cd');
   echo $url->to_form();
 
-  echo "<input type=\"checkbox\" name=\"add[]\" value=\"$dir\" />&nbsp;. (this dir)<br />\n";
+  echo "<input type=\"checkbox\" name=\"add[]\" value=\"".htmlentities($dir)."\" />&nbsp;. (this dir)<br />\n";
 
   $alias=$dir; // alias changes, if only one root is set
   if ($fs->is_dir($dir))
@@ -91,13 +98,13 @@ function print_browser($dir)
 
     $url->add_param('cd', $cd);
     $href=$url->to_URL();
-    echo "<input type=\"checkbox\" name=\"add[]\" value=\"$cd\" />&nbsp;<a href=\"$href\">$sub</a><br />\n";
+    echo "<input type=\"checkbox\" name=\"add[]\" value=\"".htmlentities($cd)."\" />&nbsp;<a href=\"$href\">$sub</a><br />\n";
   }
   echo "<br/>\n";
   echo "<input type=\"checkbox\" name=\"create_all_previews\"/>&nbsp;"._("Create all previews.")."<br />\n";
   echo "<input type=\"checkbox\" name=\"insert_recursive\" checked=\"checked\" />&nbsp;"._("Insert images also from subdirectories.")."<br />\n";
-  echo "<input type=\"submit\" value=\""._("Add images")."\" />&nbsp;";
-  echo "<input type=\"reset\" value=\""._("Clear")."\" />";
+  echo "<input type=\"submit\" class=\"submit\" value=\""._("Add images")."\" />&nbsp;";
+  echo "<input type=\"reset\" class=\"reset\" value=\""._("Clear")."\" />";
   
   echo "\n<p>\n<form>\n";
 }

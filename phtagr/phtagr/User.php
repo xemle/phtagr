@@ -33,6 +33,21 @@ function User($id=-1)
   $this->init_session();
 }
 
+/** Returns the number of total users */
+function get_num_users($withguests=false)
+{
+  global $db;
+  $sql="SELECT COUNT(*)
+        FROM $db->user";
+  if ($withguests)
+    $sql.=" WHERE type!=".USER_GUEST ;
+  $result=$db->query($sql);
+  if (!$result)
+    return -1;
+  $row=mysql_fetch_row($result);
+  return $row[0];
+}
+
 /** 
   @param name User name
   @return Returns the id of a given username. If no user found, it returns -1 */
@@ -390,12 +405,15 @@ function _check_login($name, $pwd)
 
   $row=mysql_fetch_row($result);
   $this->_init_by_id($row[0]);
+  $_SESSION['userid']=$row[0];
+
   return true;
 }
 
 /** Sets the initial timestamps and arrays for the session */
 function init_session()
 {
+  session_name('sid');
   // initiating the session
   if (!isset($_SESSION['created']))
   {
@@ -467,7 +485,6 @@ function create_guest($name, $pwd)
   @return On failure it returns a global Error code */
 function _init_data()
 {
-  global $conf;
   global $db;
   global $phtagr_data;
 
@@ -483,9 +500,11 @@ function _init_data()
     return ERR_FS_GENERAL;
   }
 
-  $conf->set($id, 'image.gacl', ACL_FULLSIZE|ACL_EDIT);
-  $conf->set($id, 'image.oacl', ACL_PREVIEW);
-  $conf->set($id, 'image.aacl', ACL_PREVIEW);
+  $conf=new Config($id);
+  $conf->set('image.gacl', ACL_FULLSIZE|ACL_EDIT);
+  $conf->set('image.oacl', ACL_PREVIEW);
+  $conf->set('image.aacl', ACL_PREVIEW);
+  unset($conf);
 }
 
 /** Return the default ACL for the group */
@@ -670,9 +689,13 @@ function can_delete_file()
 /** Return true if the user can browse the filesystem */
 function can_browse()
 {
+  global $conf;
   if ($this->is_admin())
     return true;
-
+  
+  $roots=$conf->get('path.fsroot[]', null);
+  if ($roots!=null && count($roots)>0)
+    return true;
   return false;
 }
 
@@ -807,6 +830,9 @@ function check_session($setcookie=true)
       // refresh cookie
       $this->_update_cookie($cookie_name, $_COOKIE[$cookie_name]);
     }
+  } else if (isset($_SESSION['userid'])) {
+    $id=$_SESSION['userid'];
+    $this->_init_by_id($id);
   }
 
   if (isset($_REQUEST['lang']))
@@ -815,11 +841,9 @@ function check_session($setcookie=true)
   }
 }
 
-/** Removes a session */
+/** Removes a session. It clears all the data and reinitialize it */
 function _remove_session()
 {
-  session_destroy();
-  
   foreach ($_SESSION as $key => $value)
     unset($_SESSION[$key]);
 
@@ -847,6 +871,7 @@ function _check_cookie($cookie)
 
   $row=mysql_fetch_row($result);
   $this->_init_by_id($row[0]);
+  $_SESSION['userid']=$row[0];
 
   return true;
 }

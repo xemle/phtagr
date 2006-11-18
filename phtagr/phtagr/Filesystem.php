@@ -65,6 +65,19 @@ function _init_roots()
   }
 }
 
+/** Initialize the roots from user's configuration */
+function _init_roots_by_conf()
+{
+  global $conf;
+  $this->reset_roots();
+  $roots=$conf->get('path.fsroot[]');
+  if (!$roots)
+  {
+    foreach ($roots as $root)
+      $this->add_root($root);
+  }
+}
+
 /** Add a root to the chroot aliases 
   @param root New root directory. The directory separator will be added to the
   root, if the root does not end with the directory separator, 
@@ -74,6 +87,9 @@ function _init_roots()
   @return True on success. False otherwise */
 function add_root($root, $alias)
 {
+  if ($alias=='')
+    $alias=basename($root);
+
   if (isset($this->_roots[$alias]))
     return false;
 

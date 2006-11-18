@@ -242,10 +242,7 @@ function _new_input(type, name, value)
   @param checked True of greater zero if the checkbox should be checked */
 function _new_cb(name, value, checked)
 {
-  var input=document.createElement("input");
-  input.setAttribute("type", "checkbox");
-  input.setAttribute("name", name);
-  input.setAttribute("value", value);
+  var input=_new_input('checkbox', name, value);
   if (checked || checked>0)
     input.setAttribute("checked", "checked");
   return input;
@@ -430,7 +427,7 @@ function edit_acl(id)
 
   var t=document.createElement('table');
 
-  t.appendChild(_get_row_groups(id, images[id]['gid']));
+  t.appendChild(_get_row_groups(images[id]['gid']));
   if (images[id]['gacl']!=null)
     t.appendChild(_get_row_acls(id));
   t.appendChild(_get_row_buttons(nodeId));
@@ -442,8 +439,10 @@ function edit_acl(id)
   document.getElementById(focusId).focus();
 }
 
-/** @param gid Current group id */
-function _get_row_groups_from_js(gid)
+/**
+  @param gid Group id
+  @return Row element of ACL */
+function _get_row_groups(gid)
 {
   var row=document.createElement("tr");
   var th=document.createElement("th");
@@ -476,47 +475,6 @@ function _get_row_groups_from_js(gid)
     }
   }
   td.appendChild(s);
-  return row;
-}
-
-/** @param id Image id
-  @param gid Group id
-  @return Row element of ACL */
-function _get_row_groups(id, gid)
-{
-  var list=document.getElementById('acl_grouplist');
-  if (list==null)
-    return _get_row_groups_from_js(gid);
-
-  var gid=0;
-  if (images[id]['gid']!=null)
-    gid=images[id]['gid'];
-
-  new_list=list.cloneNode(true);
-  new_list.setAttribute('id', 'js_'+list.getAttribute('id'));
-  new_list.setAttribute('name', 'js_'+list.getAttribute('name'));
-  
-  // Select current group
-  for(var i=0; i<new_list.childNodes.length; i++)
-  {
-    var child=new_list.childNodes[i];
-    if (child.nodeName=='OPTION' && 
-      child.getAttribute('value')==gid)
-    {
-      child.setAttribute('selected', 'selected');
-    }
-  }
-
-  var row=document.createElement("tr");
-  var th=document.createElement("th");
-  th.appendChild(document.createTextNode('Group:'));
-  row.appendChild(th);
-
-  var td=document.createElement('td');
-  row.appendChild(td);
-
-  td.appendChild(new_list);
-
   return row;
 }
 
@@ -743,8 +701,8 @@ function _get_buttons(e, nodeId)
 function _get_row_buttons(nodeId)
 {
   var tr=document.createElement("tr");
-  var th=document.createElement("th");
-  tr.appendChild(th);
+  var td=document.createElement("td");
+  tr.appendChild(td);
 
   var td=document.createElement("td");
   _get_buttons(td, nodeId);

@@ -102,7 +102,8 @@ function add_submenu($id, $submenu)
     return false;
   if ($submenu==null)
     return false;
-  if (!get_class("SectionMenu") && !is_subclass_of("SectionMenu"))
+  if (get_class($submenu)!="SectionMenu" &&
+    !is_subclass_of($submenu, "SectionMenu"))
     return false;
 
   $this->_items[$id]['_sub']=$submenu;

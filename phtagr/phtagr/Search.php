@@ -10,11 +10,16 @@ class Search extends Url
 var $tags;
 var $sets;
 
-function Search()
+function Search($baseurl='')
 {
-  $this->Url();
+  global $search;
+  $this->Url($baseurl);
   $this->tags=array();
   $this->sets=array();
+
+  $this->add_param('section', 'explorer');
+  if ($search && $search->get_userid()>0)
+    $this->set_userid($search->get_userid());
 }
 
 function set_imageid($imageid)
@@ -22,9 +27,19 @@ function set_imageid($imageid)
   $this->add_param('id', $imageid, PARAM_PINT);
 }
 
+/** Set the user id
+  @param userid If the userid is not numeric, it converts the name to the id */
 function set_userid($userid)
 {
+  global $user;
+  if (!is_numeric($userid))
+    $userid=$user->get_id_by_name($userid);
   $this->add_param('user', $userid, PARAM_PINT);
+}
+
+function get_userid()
+{
+  return $this->get_param('user', 0);  
 }
 
 function set_groupid($groupid)
@@ -173,7 +188,7 @@ function set_orderby($orderby)
 
 function get_orderby()
 {
-  $return=$this->get_param('orderby', 'data');
+  $return=$this->get_param('orderby', 'date');
 }
 
 /** Creates a search object from a URL */
@@ -225,6 +240,11 @@ function from_URL()
   $this->add_rparam('location', PARAM_STRING, null);
   $this->add_rparam('location_type', PARAM_PINT, null);
     
+  if (isset($_REQUEST['user']))
+    $this->set_userid($_REQUEST['user']);
+  if (isset($_REQUEST['group']))
+    $this->set_groupid($_REQUEST['group']);
+
   if (isset($_REQUEST['start']))
     $this->set_date_start($_REQUEST['start']);
   if (isset($_REQUEST['end']))

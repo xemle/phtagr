@@ -86,6 +86,27 @@ function print_navigation($search)
   echo "</div>\n";
 }
 
+function print_from()
+{
+  global $db;
+  global $user;
+
+  $num=$user->get_num_users();
+  if ($num==1)
+    return;
+
+  $img=$this->img;
+  $search=new Search();
+  $search->add_param('section', 'explorer');
+  $search->set_userid($img->get_userid());
+  if ($user->get_id() != $img->get_userid()) 
+  {
+    $name=$user->get_name_by_id($img->get_userid());
+  } else {
+    $name=$user->get_name();
+  }
+  echo "<div class=\"from\">by <a href=\"".$search->to_URL()."\">$name</a></div>\n";
+}
 /** Print the caption of an image. 
   @param id ID of current image
   @param caption String of the caption
@@ -138,13 +159,13 @@ function _cut_caption($id, $caption)
 {
   $caption=htmlspecialchars($caption);
 
-  if (strlen($caption)< 60) 
+  if (strlen($caption)< 50) 
     return $caption;
 
   $words=split(" ", $caption);
   foreach ($words as $word)
   {
-    if (strlen($result) > 40)
+    if (strlen($result) > 30)
       break;
 
     $result.=" $word";
@@ -237,6 +258,7 @@ function _acl_to_text($acl)
   if ($t=='') $t='-';
   return $t;
 }
+
 function print_row_acl()
 {
   $img=$this->img;
@@ -267,8 +289,7 @@ function print_row_date()
   if (substr($date, 10)==" 00:00:00")
     $date=substr($date, 0, 10);
 
-  $date_url=new Url();
-  $date_url->add_param('section','explorer');
+  $date_url=new Search();
   $date_url->add_param('start', $sec-(60*30*3));
   $date_url->add_param('end', $sec+(60*30*3));
   $url=$date_url->to_URL();
@@ -325,8 +346,7 @@ function print_row_tags()
     <th>"._("Tags:")."</th>
     <td id=\"tag-$id\">";  
 
-  $tag_url=new Url();
-  $tag_url->add_param('section', 'explorer');
+  $tag_url=new Search();
   for ($i=0; $i<$num_tags; $i++)
   {
     $tag_url->add_param('tags', $tags[$i]);
@@ -356,8 +376,7 @@ function print_row_sets()
     <th>"._("Sets:")."</th>
     <td id=\"set-$id\">";  
 
-  $set_url=new Url();
-  $set_url->add_param('section', 'explorer');
+  $set_url=new Search();
   for ($i=0; $i<$num_sets; $i++)
   {
     $set_url->add_param('sets', $sets[$i]);
@@ -388,8 +407,7 @@ function print_row_location()
     <th>"._("Location:")."</th>
     <td id=\"location-$id\">";  
 
-  $loc_url=new Url();
-  $loc_url->add_param('section', 'explorer');
+  $loc_url=new Search();
   foreach ($locations as $type => $location)
   {
     $loc_url->add_param('location', $location);
@@ -504,6 +522,7 @@ function print_preview($search=null)
   $iurl->add_param('type', 'preview');
   echo "<a href=\"$url\"><img src=\"".$iurl->to_URL()."\" alt=\"$name\" title=\"$name\" ".$size[2]."/></a></div>\n";
   
+  $this->print_from();
   $this->print_caption();
   $this->print_voting();
 
@@ -564,6 +583,7 @@ function print_content()
   $url->add_param('type', 'preview');
   echo "<div class=\"preview\"><img src=\"".$url->to_URL()."\" alt=\"$name\" ".$size[2]."/></div>\n";
 
+  $this->print_from();
   $this->print_caption(false);
   $this->print_voting();
   echo "<div class=\"imginfo\" id=\"info-$id\"><table>\n";

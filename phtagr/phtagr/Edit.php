@@ -178,7 +178,7 @@ function _handle_iptc_tags(&$iptc)
   // Distinguish between javascript values and global values
   if (isset($_REQUEST['js_tags']))
   {
-    $tags=split(" ", $_REQUEST['js_tags']);
+    $tags=preg_split("/\s+/", $_REQUEST['js_tags']);
     /** @todo optimize set of this operation. Do only delete required tags */
     $iptc->rem_record("2:025");
 
@@ -194,7 +194,7 @@ function _handle_iptc_tags(&$iptc)
   }
   else if (isset($_REQUEST['edit_tags']))
   {
-    $tags=split(" ", $_REQUEST['edit_tags']);
+    $tags=preg_split("/\s+/", $_REQUEST['edit_tags']);
   
     // distinguish between add and remove operation.
     $add_tags=array();

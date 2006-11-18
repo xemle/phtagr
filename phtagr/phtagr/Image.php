@@ -399,9 +399,6 @@ function is_owner($user=null)
   if ($user==null)
     return false;
     
-  if ($user->is_admin())
-    return true;
-
   if ($this->get_userid()==
     $user->get_id())
     return true;

@@ -56,8 +56,9 @@ function clear_params()
 function init_params()
 {
   $this->clear_params();
-  if ($_SESSION['withcookie']!=true)
-    $this->add_param('PHPSESSID', session_id());
+  if (!isset($_SESSION['withcookie']) ||
+    $_SESSION['withcookie']!=true)
+    $this->add_param(session_name(), session_id());
 }
 
 /** Returns a parameter 
