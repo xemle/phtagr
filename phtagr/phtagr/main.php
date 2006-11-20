@@ -100,7 +100,7 @@ $menu->set_item_param('section');
 
 $menu->add_item('home', _("Home"));
 $menu->add_item('explorer', _("Explorer"));
-if ($user->is_member())
+if ($user->is_member() && $user->get_num_users()>1)
 {
   $submenu=new SectionMenu('menu','');
   $submenu->add_param('section', 'explorer');

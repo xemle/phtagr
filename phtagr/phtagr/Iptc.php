@@ -195,10 +195,22 @@ function save_to_file($do_rename=true)
       if ($this->_changed_com)
         $this->_replace_seg_com($fout);
 
-      // write rest of file
+      // write rest of file in blocks to save memory and to avoid memory
+      // exhausting
       fseek($fin, $seg['pos'], SEEK_SET);
-      $buf=fread($fin, $jpg['size']-$seg['pos']);
-      fwrite($fout, $buf);
+      $size=$jpg['size']-$seg['pos'];
+      $done=0;
+      $blocksize=1024;
+      while ($done<$size)
+      {
+        if ($done+$blocksize>$size)
+          $blocksize=$size-$done;
+
+        $buf=fread($fin, $blocksize);
+        fwrite($fout, $buf);
+        $done+=$blocksize;
+      }
+      unset($buf);
       break;
     default:
       // copy unchanged segment
