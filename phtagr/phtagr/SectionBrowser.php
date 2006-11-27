@@ -25,8 +25,7 @@ function reset_roots()
   $this->_fs->reset_roots();
 }
 
-/** Prints the subdirctories as list with checkboxes */
-function print_browser($dir)
+function print_paths($dir)
 {
   $fs=$this->_fs;
   $url=new Url();
@@ -53,23 +52,31 @@ function print_browser($dir)
         $path.=DIRECTORY_SEPARATOR.$part;
       else 
       {
-        /*
-        if (count($fs->get_roots())<2)
+        if ($fs->get_num_roots()<2)
           $path=DIRECTORY_SEPARATOR.$part;
         else
-        */
           $path=$part;
       }
       echo "&nbsp;/&nbsp;";
       
       $url->add_param('cd', $path);
-      echo "<a href=\"".$url->to_URL()."\">".htmlentities($part)."</a>";
+      echo "<a href=\"".$url->to_URL()."\">".htmlentities($part)."</a>\n";
     }
-    $url->rem_param('cd');
   }
   echo "&nbsp;/&nbsp;</div>";
-  
-  echo "<form section=\"./index.php\" method=\"post\">\n<p>\n";
+  unset($url);
+}
+
+/** Prints the subdirctories as list with checkboxes */
+function print_browser($dir)
+{
+  $fs=$this->_fs;
+  $url=new Url();
+  $url->add_param('section', 'browser');
+
+  $this->print_paths($dir);
+
+  echo "<form action=\"./index.php\" method=\"post\">\n<p>\n";
   echo $url->to_form();
 
   echo "<input type=\"checkbox\" name=\"add[]\" value=\"".htmlentities($dir)."\" />&nbsp;. (this dir)<br />\n";
@@ -106,7 +113,7 @@ function print_browser($dir)
   echo "<input type=\"submit\" class=\"submit\" value=\""._("Add images")."\" />&nbsp;";
   echo "<input type=\"reset\" class=\"reset\" value=\""._("Clear")."\" />";
   
-  echo "\n<p>\n<form>\n";
+  echo "\n</p>\n</form>\n";
 }
 
 function print_content()

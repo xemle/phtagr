@@ -69,11 +69,12 @@ function init_by_filename($filename)
   if ($filename=='')
     return false;
     
-  $filenamesql=str_replace('\\','\\\\',$filename);
+  //$sfilename=str_replace('\\','\\\\',$filename);
+  $sfilename=mysql_escape_string($filename);
 
   $sql="SELECT * 
         FROM $db->image
-        WHERE filename='$filenamesql'";
+        WHERE filename='$sfilename'";
   $result=$db->query($sql);
   if (!$result || mysql_num_rows($result)==0)
     return false;
@@ -970,6 +971,42 @@ function get_locations()
   return $this->_locations;
 }
 
+/** Deletes all database values from a specific user */
+function delete_from_user($id)
+{
+  global $db;
+
+  if (!is_numeric($id) || $id<1)
+    return;
+
+  // delete all tags
+  $sql="DELETE 
+        FROM it
+        USING $db->imagetag AS it, $db->image AS i
+        WHERE i.userid=$id AND i.id=it.imageid";
+  $db->query($sql);
+
+  // delete all sets
+  $sql="DELETE 
+        FROM iset
+        USING $db->imageset AS iset, $db->image AS i
+        WHERE i.userid=$id AND i.id=iset.imageid";
+  $db->query($sql);
+
+  // delete all locations
+  $sql="DELETE 
+        FROM il
+        USING $db->imagelocation AS il, $db->image AS i
+        WHERE i.userid=$id AND i.id=il.imageid";
+  $db->query($sql);
+
+  // Delete all image data
+  $sql="SELECT id 
+        FROM $db->image
+        WHERE userid=$id";
+  $db->query($sql);
+
+}
 
 }
 

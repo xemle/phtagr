@@ -126,6 +126,11 @@ function reset_roots()
   $this->_roots=array();
 }
 
+function get_num_roots()
+{
+  return count($this->_roots);
+}
+
 /** Return all root aliases in a array
   @return Array of root aliases */
 function get_roots()
@@ -133,7 +138,6 @@ function get_roots()
   $roots=array();
   foreach ($this->_roots as $alias => $dir)
     array_push($roots, $alias);
-
   return $roots;
 }
 
@@ -156,13 +160,13 @@ function _split_alias($file)
   // Note: $pos===0 checks for zero. Otherwise return value false is converted
   // to zero as well.
   } else if ($pos===0 && count($this->_roots)==1) {
-    $alias=key($this->_roots);
+    list($alias)=array_keys($this->_roots);
     $tail=substr($file, 1);
   } else {
-    $alias=$file;
     $tail='';
+    $alias=$file;
   }
-  
+
   if (isset($this->_roots[$alias]))
     return array($alias, $tail);
 
@@ -369,11 +373,57 @@ function mkdir($dir, $withparent=false)
   if (!$withparent)
     return @mkdir($this->get_realname($dir));
   
-  // Call it recursivly to parent directoy
+  // Create parent directoies recursivly
   $base=$this->basename($dir);
   if (!$this->is_dir($base) && !$this->mkdir($base, $withparent))
     return false;
   return @mkdir($this->get_realname($dir));
+}
+
+/** Deletes a file
+  @param file Filename
+  @return True on success, false otherwise */
+function unlink($file)
+{
+  if ($this->file_exists($file))
+    return @unlink($this->get_realname($file));
+  return false;
+}
+
+/** Removes a directory
+  @param dir Directory to be removed
+  @param recursive True if directory is deleted recursivly. Default is true
+  @return True on success, false otherwise */
+function rmdir($dir, $recurive=true)
+{
+  if (!$this->is_dir($dir))
+    return false;
+
+  list($subdirs, $files)=$this->read_dir($dir); 
+
+  // Subdirs found
+  if (count($subdirs)>0)
+  {
+    if (!$recursive)
+      return false;
+
+    // recursive remove of all subdirs
+    foreach ($subdirs as $subdir)
+    {
+      $result=$this->rmdir($subdir, $recursive);
+      if (!$result)
+        return false;
+      if (!@rmdir($this->get_realname($subdir)))
+        return false;
+    }
+  }
+
+  // Remove files
+  foreach ($files as $file)
+  {
+    if (!@unlink($this->get_realname($file)))
+      return false;
+  }
 }
 
 }

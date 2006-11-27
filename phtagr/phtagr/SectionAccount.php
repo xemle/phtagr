@@ -101,32 +101,6 @@ function print_form_new()
 </form>";
 }
 
-/** Delete a specific user */
-function user_delete($id=-1)
-{
-  global $user;
-  global $db;
-
-  /* We only allow to delete non admin users, which means users
-  with an id > 1 */
-  if ($id>1)
-  {
-    /* Only the admin is allowed to delete user. */
-    if (!$user->is_admin())
-    {
-      $this->warning("You are not allowed to delete user.");
-      return false;
-    }
-
-    if ($this->_delete_user_data($id))
-        $this->info("User was deleted successfully");
-    return;
-  }
-  
-  $this->warning("You are not allowed to delete this user!");
-  return;
-}
-
 function print_delete_account()
 {
   echo "<h2>Delete Account</h2>\n";

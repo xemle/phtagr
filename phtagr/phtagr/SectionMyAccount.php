@@ -455,7 +455,7 @@ function exec_guests()
     $result=$user->create_guest($name, $pwd);
     if ($result<0)
     {
-      $this->error(_("The guest could not created"));
+      $this->error(sprintf(_("The guest '%s' could not created. Error %d"), $name, $result));
       return;
     }
     $this->success(_("The guest could be created"));

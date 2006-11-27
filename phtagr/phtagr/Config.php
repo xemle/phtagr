@@ -202,5 +202,22 @@ function remove_default($name, $value=null)
   return $this->_remove(0, $name, $value);
 }
 
+/** Deletes all configuration of a user 
+  @param id Id of the user */
+function delete_from_user($id)
+{
+  global $db;
+  global $user;
+
+  // Delete all preferences
+  $sql="DELETE FROM $db->conf
+        WHERE userid=$id";
+  $db->query($sql);
+
+  // If I delete myself, delete also my configuration
+  if ($this->_userid==$id)
+    $this->_data=array();
+}
+
 }
 ?>

@@ -33,6 +33,36 @@ function User($id=-1)
   $this->init_session();
 }
 
+/** 
+  @param idorname User ID or user name
+  @returns True if user exists with the id or the given name */
+function exists($idorname)
+{
+  global $db;
+  if (is_numeric($idorname))
+  {
+    if ($idorname<1)
+      return false;
+    $sql="SELECT COUNT(*)
+          FROM $db->user 
+          WHERE id=$idorname";
+  } else {
+    if ($idorname=='')
+      return false;
+    $sname=mysql_escape_string($name);
+    $sql="SELECT COUNT(*)
+          FROM $db->user
+          WHERE name='$name'";
+  }
+  $result=$db->query($sql);
+  if (!$result)
+    return false;
+  $row=mysql_fetch_row($result);
+  if ($row[0]==1)
+    return true;
+
+  return false;
+}
 /** Returns the number of total users */
 function get_num_users($withguests=false)
 {
@@ -318,8 +348,7 @@ function _check_name($name)
   if (!preg_match('/^[a-z][a-z0-9\-_\.\@]+$/', $name))
     return ERR_USER_NAME_INVALID;
   
-  $id=$this->get_id_by_name($name);
-  if ($id>0)
+  if ($this->exists($name))
     return ERR_USER_ALREADY_EXISTS;
 
   return 0;
@@ -437,11 +466,12 @@ function init_session()
 /** Creates a new user 
   @param name Name of the user
   @param pwd Password of the user
+  @param type Possible values USER_ADMIN, USER_MEMBER, USER_GUEST
   @return the user id on success. On failure it returns a global error code */
-function create($name, $pwd)
+function create($name, $pwd, $type=USER_MEMBER)
 {
   global $db;
-
+  global $user;
   $err=$this->_check_name($name);
   if ($err<0)
     return $err;
@@ -450,11 +480,20 @@ function create($name, $pwd)
   if ($err<0)
     return $err;
 
+  if ($type<USER_ADMIN || $type>USER_GUEST)
+    return ERR_USER_GERNERAL;
+
+  if ($type==USER_AMDIN && 
+    !($user->is_admin() || $this->get_num_users()==0))
+  {
+    return ERR_NOT_PERMITTED;
+  }
+
   $sname=mysql_escape_string($name);
   $spwd=mysql_escape_string($pwd);
   $sql="INSERT INTO $db->user
-        (name, password) 
-        VALUES ('$sname', '$spwd')";
+        (name, password, type) 
+        VALUES ('$sname', '$spwd', $type)";
   $result=$db->query($sql);
   if (!$result)
     return ERR_USER_INSERT;
@@ -470,11 +509,10 @@ function create($name, $pwd)
 
 function create_guest($name, $pwd)
 {
-  $id=$this->create($name, $pwd);
+  $id=$this->create($name, $pwd, USER_GUEST);
   if ($id<0)
     return $id;
   $guest=new User($id);
-  $guest->set_type(USER_GUEST);
   $guest->set_creator($this->get_id());
   $guest->commit_changes();
   unset($guest);
@@ -492,6 +530,12 @@ function _init_data()
   if ($id<=0)
     return ERR_GERNERAL;
 
+  $conf=new Config($id);
+  $conf->set('image.gacl', ACL_FULLSIZE|ACL_EDIT);
+  $conf->set('image.oacl', ACL_PREVIEW);
+  $conf->set('image.aacl', ACL_PREVIEW);
+  unset($conf);
+
   $upload=$this->get_upload_dir();
   if (!$upload)
   {
@@ -499,12 +543,6 @@ function _init_data()
     if (!$fs->mkdir($upload))
     return ERR_FS_GENERAL;
   }
-
-  $conf=new Config($id);
-  $conf->set('image.gacl', ACL_FULLSIZE|ACL_EDIT);
-  $conf->set('image.oacl', ACL_PREVIEW);
-  $conf->set('image.aacl', ACL_PREVIEW);
-  unset($conf);
 }
 
 /** Return the default ACL for the group */
@@ -951,91 +989,44 @@ function _remove_cookie()
 }
 
 /** Delte all data from a user
+  @param id Id of the user.
   @todo ensure to delete all data from the user */
 function _delete_user_data($id)
 {
   global $db;
+  global $conf;
 
-  // delete all tags
-  $sql="DELETE 
-        FROM $db->imagetag
-        USING $db->imagetag AS it, $db->image AS i
-        WHERE i.userid=$id AND i.id=it.imageid";
-  $db->query($sql);
+  $img=new Thumbnail();
+  $img->delete_from_user($id);
 
-  // delete all sets
-  $sql="DELETE 
-        FROM $db->imageset
-        USING $db->imageset AS iset, $db->image AS i
-        WHERE i.userid=$id AND i.id=iset.imageid";
-  $db->query($sql);
+  $g=new Group();
+  $g->delete_from_user($id);
 
-  // delete all locations
-  $sql="DELETE 
-        FROM $db->imagelocation
-        USING $db->imagelocation AS il, $db->image AS i
-        WHERE i.userid=$id AND i.id=il.imageid";
-  $db->query($sql);
+  $conf->delete_from_user($id);
 
-  // delete all groups
-  $sql="DELETE 
-        FROM $db->group AS g
-        WHERE g.owner=$id";
-  $db->query($sql);
-
-  // reset all comments
-  $sql="UPDATE $db->comment AS c
-        SET c.userid=-1
-        WHERE c.userid=$id";
-  $db->query($sql);
-
-  // Delete cached image data
-  $sql="SELECT id 
-        FROM $db->image
-        WHERE id=$id";
-  $result=$db->query($sql);
-  if (!$result)
-    return;
-
-  while ($row=mysql_fetch_assoc($result))
-  {
-    $img=new Thumbnail($row[0]);
-    $img->delete_previews();
-    unset($img);
-  }
-  
-  // Delete all image data
-  $sql="DELETE FROM $db->image
-        WHERE id=$id";
-  $result=$db->query($sql);
-
-  // Delete all preferences
-  $sql="DELETE FROM $db->conf
-        WHERE userid=$id";
-  $result=$db->query($sql);
-  
-  // @todo delete the group of the user
   // @todo delete users upload directory
   
   // Delete the user data
-  $sql="DELETE $db->user
-        FROM $db->user
+  $sql="DELETE FROM $db->user
         WHERE id=$id";
 
   $result=$db->query($sql);
   return true;
 }
 
+/** Delete a user and all its data
+  @return 0 on success, a global error code otherwise
+  @note the admin account could not be deleted */
 function delete()
 {
   global $user;
 
   $permit=false;
 
-  // Allow admin
-  if ($this->is_admin()) 
+  // Allow admin, but not itself
+  if ($user->is_admin() && $this->get_id()>1) 
     $permit=true;
-  // Allow gruest creator
+  // Allow guest creator
   if ($this->get_type()==USER_GUEST &&
     $this->get_creator()==$user->get_id())
     $permit=true;
@@ -1047,6 +1038,7 @@ function delete()
     return ERR_NOT_PERMITTED;
 
   $this->_delete_user_data($this->get_id());
+  return 0;
 }
 
 }

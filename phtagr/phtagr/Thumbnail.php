@@ -12,9 +12,8 @@ class Thumbnail extends Image
 var $cmd;
 var $src;
 
-function Thumbnail($id)
+function Thumbnail($id=-1)
 {
-  global $cache;
   $this->Image($id);
 }
 
@@ -279,6 +278,31 @@ function delete_previews()
     if (file_exists($file))
       unlink($file);
   }
+}
+
+/** Delete all user data */
+function delete_from_user($id)
+{
+  global $db;
+
+  if (!is_numeric($id) || $id<1)
+    return;
+
+  $sql="SELECT id
+        FROM $db->image
+        WHERE userid=$id";
+  $result=$db->query($sql);
+  if (!$result)
+    return;
+  while ($row=mysql_fetch_row($result))
+  {
+    $id=$row[0];
+    $thumb=new Thumbnail($id);
+    $thumb->delete_previews();
+    unset($thumb);
+  }
+
+  parent::delete_from_user($id);
 }
 
 }

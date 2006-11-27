@@ -208,5 +208,34 @@ function delete()
   $this->_members=array();
 }
 
+/** Deletes all group data of a specific user */
+function delete_from_user($id)
+{
+  global $db;
+
+  if (!is_numeric($id) || $id<1)
+    return;
+
+  // Delete user memberships 
+  $sql="DELETE FROM $db->usergroup
+        WHERE userid=$id";
+  $db->query($sql);
+
+  // Delete all groups from user
+  $sql="DELETE FROM $db->usergroup 
+        WHERE groupid IN (
+          SELECT id 
+          FROM $db->group
+          WHERE owner=$id
+        )";
+  $db->query($sql);
+
+  // delete all groups
+  $sql="DELETE 
+        FROM $db->group 
+        WHERE owner=$id";
+  $db->query($sql);
+}
+
 }
 ?>

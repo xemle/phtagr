@@ -183,8 +183,11 @@ if (isset($_REQUEST['section']))
       $roots=$conf->get('path.fsroot[]');
       if (!$user->is_admin())
         $browser->reset_roots();
-      foreach ($roots as $root)
-        $browser->add_root($root, '');
+      if (count($roots)>0)
+      {
+        foreach ($roots as $root)
+          $browser->add_root($root, '');
+      }
       $cnt->add_section(&$browser);
     } else {
       $login = new SectionLogin();

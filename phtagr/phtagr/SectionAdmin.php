@@ -149,6 +149,8 @@ echo "<table>\n";
 
 function exec_users()
 {
+  global $user;
+
   if (!isset($_REQUEST['action']) ||!isset($_REQUEST['id']))
     return false;
 
@@ -160,7 +162,26 @@ function exec_users()
   $action=$_REQUEST['action'];
   if ($action=='delete')
   {
-    $account->user_delete($id);
+    if (!$user->exists($id))
+    {
+      $this->error(_("User does not exists"));
+      return;
+    }
+    if ($id==1)
+    {
+      $this->error(_("The deletion of the admin is not allowed"));
+      return;
+    }
+    if ($user->get_id()!=$id)
+      $u=new User($id);
+    else 
+      $u=$user;
+    $name=$u->get_name();
+    $err=$u->delete();
+    if ($err==0)
+      $this->success(sprintf(_("The user '%s' was successfully deleted"), $name));
+    else
+      $this->error(sprintf(_("The user '%s' could not deleted. An error occured (%d)"), $name, $err));
   }
   else if ($action=="edit")
   {
@@ -185,7 +206,7 @@ function exec_users()
       $u->set_qinterval($_REQUEST['qinterval']*86400);
 
     // Filesystem roots
-    if (isset($_REQUEST['add_root']))
+    if (isset($_REQUEST['add_root'])&& $_REQUEST['add_root']!='')
     {
       $root=$_REQUEST['add_root'];
       if (!is_dir($root) || !is_readable($root))
@@ -229,6 +250,7 @@ function print_users()
   <tr> 
     <th>"._("Name")."</th>
     <th>"._("Quota")."</th>
+    <th>"._("Action")."</th>
   </tr>\n";
   while ($row=mysql_fetch_assoc($result))
   {
@@ -238,12 +260,19 @@ function print_users()
 
     $url->add_param('id', $id);
     $url->add_param('action', 'edit');
-    echo "<td><a href=\"".$url->to_URL()."\">".$u->get_name()."</a></td>";
+    echo "<td><a href=\"".$url->to_URL()."\">".$u->get_name()."</a></td>\n";
 
     echo "<td>".sprintf("%.1f MB (%d %% used)", 
       $u->get_quota()/(1024*1024),
-      $u->get_quota_used()*100)."</td>";
+      $u->get_quota_used()*100)."</td>\n";
 
+    if ($id!=1)
+    {
+      $url->add_param('action', 'delete');
+      echo "<td><a href=\"".$url->to_URL()."\" class=\"jsbutton\">"._("Remove")."</td>\n";
+    } else {
+      echo "<td></td>\n";
+    }
     echo "</tr>\n";
   } 
   echo "</table>\n";
@@ -253,6 +282,8 @@ function print_users()
 
 function exec_create_user()
 {
+  global $user;
+
   if (!isset ($_REQUEST['action']))
     return false;
 
@@ -270,8 +301,11 @@ function exec_create_user()
       $this->error(_("Password mismatch"));
       return;
     }
-    if ($account->user_create($name, $password)==true)
+    $err=$user->create($name, $password, USER_MEMBER);
+    if ($err<0)
     {
+      $this->error(sprintf(_("User '%s' could not be created. Error %d occur"), $name, $err));
+    } else {
       $this->success(sprintf(_("User '%s' created"), $name));
     }
 
