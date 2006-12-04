@@ -127,7 +127,7 @@ Other image communities: http://holocore.com/?PictureSync_services
   - Edit IPTC data
     Add or remove Keyword, Place, Time, Comment, Category by one-click
     - Change tags, sets, comment, time, acl, author at the bottom
-    - Actions, 
+    - Actions,
   - Advanced search
     by Tags, Comments, Date and Place
   - Number of views. If a image is viewed in detail the count is increased
@@ -164,6 +164,8 @@ Other image communities: http://holocore.com/?PictureSync_services
   - Add color table for images to search a image by color
   - Replace and improve the ranking function of the image
   - Add JavaScript Image Object with meta data to access them easily by JS
+  - Add flag to write image changes only to the database. The image should not
+    be affected. This option can be usefull for demo purpose
   
 - Image Search: Search.php
   - By Set

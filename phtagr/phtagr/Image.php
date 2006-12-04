@@ -124,18 +124,18 @@ function insert($filename, $is_upload=0)
   $groupid=$user->get_groupid();
 
   $gacl=$user->get_gacl();
-  $oacl=$user->get_oacl();
+  $macl=$user->get_macl();
   $aacl=$user->get_aacl();
   
   $sql="INSERT INTO $db->image (
           userid,groupid,synced,created,
           filename,is_upload,
-          gacl,oacl,aacl,
+          gacl,macl,aacl,
           clicks,lastview,ranking
         ) VALUES (
           $userid,$groupid,NOW(),NOW(),
           '$sfilename',$is_upload,
-          $gacl,$oacl,$aacl,
+          $gacl,$macl,$aacl,
           0,NOW(),0.0
         )";
   $result=$db->query($sql);
@@ -287,9 +287,9 @@ function get_gacl()
 }
 
 /** Returns the ACL for other phtagr users*/
-function get_oacl()
+function get_macl()
 {
-  return $this->_get_data('oacl');
+  return $this->_get_data('macl');
 }
 
 /** Returns the ACL for anyone */
@@ -410,7 +410,7 @@ function is_owner($user=null)
   @param image Image object
   @param flag ACL bit mask
   @return True if user is allow to do the action defined by the flag */
-function _check_acl($user, $flag)
+function _check_acl($user, $flag, $mask)
 {
   if (!isset($user))
     return false;
@@ -423,17 +423,17 @@ function _check_acl($user, $flag)
     return true;
     
   // If acls are calculated within if statement, I got wrong evaluation.
-  $gacl=$this->get_gacl() & $flag;
-  $oacl=$this->get_oacl() & $flag;
-  $aacl=$this->get_aacl() & $flag;
+  $gacl=$this->get_gacl() & $mask;
+  $macl=$this->get_macl() & $mask;
+  $aacl=$this->get_aacl() & $mask;
   
-  if ($user->is_in_group($this->get_groupid()) && $gacl > 0)
+  if ($user->is_in_group($this->get_groupid()) && $gacl >= $flag)
     return true;
   
-  if ($user->is_member() && $oacl > 0)
+  if ($user->is_member() && $macl >= $flag)
     return true;
 
-  if ($aacl > 0)
+  if ($aacl >= $flag)
     return true;
   
   return false;
@@ -443,12 +443,12 @@ function _check_acl($user, $flag)
   @param image Image object. Default is null.*/
 function can_edit($user=null)
 {
-  return $this->_check_acl(&$user, ACL_EDIT);
+  return $this->_check_acl(&$user, ACL_EDIT, ACL_WRITE_MASK);
 }
 
 function can_metadata($user=null)
 {
-  return $this->_check_acl(&$user, ACL_METADATA);
+  return $this->_check_acl(&$user, ACL_METADATA, ACL_WRITE_MASK);
 }
 
 /** Return true if user can upload a file with the given size
@@ -456,22 +456,22 @@ function can_metadata($user=null)
   @param user User object. Default is null.*/
 function can_preview($user=null)
 {
-  return $this->_check_acl(&$user, ACL_PREVIEW);
+  return $this->_check_acl(&$user, ACL_PREVIEW, ACL_READ_MASK);
 }
 
 function can_highsolution($user=null)
 {
-  return $this->_check_acl(&$user, ACL_HIGHSOLUTION);
+  return $this->_check_acl(&$user, ACL_HIGHSOLUTION, ACL_READ_MASK);
 }
 
 function can_fullsize($user=null)
 {
-  return $this->_check_acl(&$user, ACL_FULLSIZE);
+  return $this->_check_acl(&$user, ACL_FULLSIZE, ACL_READ_MASK);
 }
 
 function can_download($user=null)
 {
-  return $this->_check_acl(&$user, ACL_DOWNLOAD);
+  return $this->_check_acl(&$user, ACL_DOWNLOAD, ACL_READ_MASK);
 }
 
 /** Returns the size of an thumbnail in an array. This function keeps the
@@ -858,6 +858,7 @@ function remove_from_db()
     $ret=false;
   return $ret;
 }
+
 /** Convert the SQL time string to unix time stamp.
   @param string The time string has the format like "2005-04-06 09:24:56", the
   result is 1112772296
@@ -971,41 +972,106 @@ function get_locations()
   return $this->_locations;
 }
 
-/** Deletes all database values from a specific user */
-function delete_from_user($id)
+/** Synchronize files between the database and the filesystem. If a file not
+ * exists delete its data. If a file is newer since the last update, update its
+ * data. 
+  @param userid Userid which must match current user. If userid -1 and user is
+  admin, all files are synchronized. 
+  @return Array of count files, updated files, and deleted files. On error, the
+  first array value is the global error code */
+function sync_files($userid=-1)
 {
   global $db;
+  global $user;
 
-  if (!is_numeric($id) || $id<1)
-    return;
+  $sql="SELECT id,userid,filename
+        FROM $db->image";
+  if ($userid>0)
+  {
+    if ($userid!=$user->get_id() && !$user->is_admin())
+      return array(ERR_NOT_PERMITTED, 0, 0);
+    $sql.=" AND userid=$userid";
+  } else {
+    if (!$user->is_admin())
+      return array(ERR_NOT_PERMITTED, 0, 0);
+  }
 
-  // delete all tags
+  $result=$db->query($sql);
+  if (!$result)
+    return 0;
+    
+  $count=0;
+  $updated=0;
+  $deleted=0;
+  while ($row=mysql_fetch_row($result))
+  {
+    $id=$row[0];
+    $img_userid=$row[1];
+    $filename=$row[2];
+    $count++;
+    
+    if (!file_exists($filename))
+    {
+      $this->delete_from_user($img_userid, $id);
+      $deleted++;
+    }
+    else 
+    {
+      $image=new Image($id);
+      if ($image->update())
+        $updated++;
+      unset($image);
+    }
+  }
+  return array($count, $updated, $deleted);
+}
+
+/** Deletes one or all images from a specific user
+  @param userid ID of user
+  @param id Image ID, optional. If this parameter is set, only a single image 
+  @return 0 on success. Global error code otherwise */
+function delete_from_user($userid, $id=0)
+{
+  global $db;
+  global $user;
+
+  if (!is_numeric($userid) || $userid<1)
+    return ERR_PARAM;
+  if ($userid!=$user->get_id() && !$user->is_admin())
+    return ERR_NOT_PERMITTED;
+
+  // delete tags
   $sql="DELETE 
         FROM it
         USING $db->imagetag AS it, $db->image AS i
-        WHERE i.userid=$id AND i.id=it.imageid";
+        WHERE i.userid=$userid AND i.id=it.imageid";
+  if ($id>0) $sql.=" AND i.id=$id";
   $db->query($sql);
 
-  // delete all sets
+  // delete sets
   $sql="DELETE 
         FROM iset
         USING $db->imageset AS iset, $db->image AS i
-        WHERE i.userid=$id AND i.id=iset.imageid";
+        WHERE i.userid=$userid AND i.id=iset.imageid";
+  if ($id>0) $sql.=" AND i.id=$id";
   $db->query($sql);
 
-  // delete all locations
+  // delete locations
   $sql="DELETE 
         FROM il
         USING $db->imagelocation AS il, $db->image AS i
-        WHERE i.userid=$id AND i.id=il.imageid";
+        WHERE i.userid=$userid AND i.id=il.imageid";
+  if ($id>0) $sql.=" AND i.id=$id";
   $db->query($sql);
 
-  // Delete all image data
-  $sql="SELECT id 
+  // Delete image data
+  $sql="DELETE
         FROM $db->image
-        WHERE userid=$id";
+        WHERE userid=$userid";
+  if ($id>0) $sql.=" AND id=$id";
   $db->query($sql);
 
+  return 0;
 }
 
 }

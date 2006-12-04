@@ -1,24 +1,25 @@
 <?php
 
+define("DB_VERSION", 1);
+
 define("USER_ADMIN",  0x01);
 define("USER_MEMBER", 0x02);
 define("USER_GUEST",  0x03);
 
 // ACL constants
-define("ACL_DOWNLOAD", 0x80);
-define("ACL_DOWNLOAD_MASK", 0x80);
-define("ACL_FULLSIZE", 0x40);
-define("ACL_FULLSIZE_MASK", 0xc0);
-define("ACL_HIGHSOLUTION", 0x20);
-define("ACL_HIGHSOLUTION_MASK", 0xe0);
-define("ACL_PREVIEW", 0x10);
-define("ACL_PREVIEW_MASK", 0xf0);
+// Reading bits are the three highest bits
+define("ACL_READ_MASK", 0xe0);
+define("ACL_FULLSIZE", 0x60);
+define("ACL_HIGHSOLUTION", 0x40);
+define("ACL_PREVIEW", 0x20);
+
+define("ACL_WRITE_MASK", 0x07); 
+define("ACL_CAPTION", 0x03);
 define("ACL_METADATA", 0x02);
 define("ACL_EDIT", 0x01);
-define("ACL_EDIT_MASK", 0x01);
 
 define("ACL_GROUP", 0x00);
-define("ACL_OTHER", 0x01);
+define("ACL_MEMBER", 0x01);
 define("ACL_ALL", 0x02);
 
 define("LOCATION_UNDEFINED", 0x00);
@@ -44,5 +45,6 @@ define("ERR_FS_GENERAL",         -12);
 define("ERR_GENERAL",            -13);
 define("ERR_NOT_PERMITTED",      -14);
 define("ERR_PASSWD_MISMATCH",    -15);
+define("ERR_PARAM",              -16); // Functions parameters are wrong
 
 ?>

@@ -220,6 +220,7 @@ function create_preview($inherit=false)
   }
   return true;
 }
+
 /** Create a high solution image 
   @return False on error */
 function create_high() 
@@ -269,6 +270,42 @@ function create_previews()
   $this->create_mini(true);
 }
 
+/** Create all preview images 
+  @param userid Optional user ID. If set, only previews of this user are
+  created. Otherwise all previews of all users are created. This requires admin
+  rights. */
+function create_all_previews($userid=-1)
+{
+  global $db;
+  global $user;
+
+  $sql="SELECT id
+        FROM $db->image";
+  if ($userid>0)
+  {
+    if ($userid!=$user->get_id() && !$user->is_admin())
+      return ERR_NOT_PERMITTED;
+    $sql.=" AND userid=$userid";
+  } else {
+    if (!$user->is_admin())
+      return ERR_NOT_PERMITTED;
+  }
+  $result=$db->query($sql);
+  if (!$result)
+    return;
+    
+  while ($row=mysql_fetch_row($result))
+  {
+    $id=$row[0];
+    $count++;
+    
+    $img=new Thumbnail($id);
+    $img->create_previews();
+    unset($img);
+  }
+  return $count;
+}
+
 /** Delete all previes of the image */
 function delete_previews()
 {
@@ -280,29 +317,36 @@ function delete_previews()
   }
 }
 
-/** Delete all user data */
-function delete_from_user($id)
+/** Delete all user data 
+  @param userid ID of the specific user
+  @param id Image ID, if only one image should be delted. 
+  @return 0 on success, global error code otherwise */
+function delete_from_user($userid, $id=0)
 {
   global $db;
+  global $user;
 
-  if (!is_numeric($id) || $id<1)
-    return;
+  if (!is_numeric($userid) || $userid<1)
+    return ERR_PARAM;
+  if ($userid!=$user->get_id() && !$user->is_admin())
+    return ERR_NOT_PERMITTED;
 
   $sql="SELECT id
         FROM $db->image
-        WHERE userid=$id";
+        WHERE userid=$userid";
+  if ($id>0) $sql.=" AND id=$id";
   $result=$db->query($sql);
   if (!$result)
     return;
   while ($row=mysql_fetch_row($result))
   {
-    $id=$row[0];
-    $thumb=new Thumbnail($id);
+    $img_id=$row[0];
+    $thumb=new Thumbnail($img_id);
     $thumb->delete_previews();
     unset($thumb);
   }
 
-  parent::delete_from_user($id);
+  return parent::delete_from_user($userid, $id);
 }
 
 }

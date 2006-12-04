@@ -820,7 +820,7 @@ function get_records($name)
   @param value Value of IPTC record. If this is an empty string, the record
   will be removed, especially whole multiple records.
   @return true if the iptc changes */
-function rem_record($name, $value='')
+function del_record($name, $value='')
 {
   if (!isset($this->iptc))
   {
@@ -859,7 +859,7 @@ function rem_record($name, $value='')
   @param name IPTC name of the record. 
   @param values array of values. This must be set, otherwise it returns false.
   @return true if iptc changes */
-function rem_records($name, $values)
+function del_records($name, $values)
 {
   if (count($values)==0)
     return false;
@@ -867,7 +867,7 @@ function rem_records($name, $values)
   $changed=false;
   foreach ($values as $value)
   {
-    if ($this->rem_record($name, $value))
+    if ($this->del_record($name, $value))
       $changed=true;
   }
   return $changed;
@@ -891,7 +891,7 @@ function _set_date($year, $month, $day, $hour, $min, $sec)
   if ($time!='000000')
     $this->add_record('2:060', $time);
   else
-    $this->rem_record('2:060');
+    $this->del_record('2:060');
 }
 
 /** Sets the date. 
@@ -903,8 +903,8 @@ function set_date($s)
 {
   if ($s{0}=='-')
   {
-    $this->rem_record('2:055');
-    $this->rem_record('2:060');
+    $this->del_record('2:055');
+    $this->del_record('2:060');
     return true;
   }
 

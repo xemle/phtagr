@@ -78,6 +78,12 @@ function _init_roots_by_conf()
   }
 }
 
+/** @return True if you running this under Windows */
+function is_windows()
+{
+  return $this->_is_windows;
+}
+
 /** Add a root to the chroot aliases 
   @param root New root directory. The directory separator will be added to the
   root, if the root does not end with the directory separator, 
@@ -322,7 +328,10 @@ function find($dir, $regex, $maxdepth=255, $_depth=0)
   {
     foreach ($subdirs as $subdir)
     {
-      $subdir=$dir.DIRECTORY_SEPARATOR.$subdir;
+      if ($dir!=DIRECTORY_SEPARATOR)
+        $subdir=$dir.DIRECTORY_SEPARATOR.$subdir;
+      else 
+        $subdir=DIRECTORY_SEPARATOR.$subdir;
       $matches=array_merge($matches, 
         $this->find($subdir, $regex, $maxdepth, $_depth+1));
     }
@@ -331,7 +340,10 @@ function find($dir, $regex, $maxdepth=255, $_depth=0)
   {
     foreach ($files as $file)
     {
-      $file=$dir.DIRECTORY_SEPARATOR.$file;
+      if ($dir!=DIRECTORY_SEPARATOR)
+        $file=$dir.DIRECTORY_SEPARATOR.$file;
+      else 
+        $file=DIRECTORY_SEPARATOR.$file;
       if (preg_match($regex, $file))
         array_push($matches, $file);
     }

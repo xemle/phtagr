@@ -61,12 +61,12 @@ function print_navigation($search)
     if ($cur_pos==$pos)
     {
       $search->add_param('section', 'explorer');
-      $search->rem_param('id');
+      $search->del_param('id');
       if ($this->img) {
         $search->set_anchor('img-'.$this->img->get_id());
       }
       $url=$search->to_URL();
-      $search->rem_anchor();
+      $search->del_anchor();
       echo "<a href=\"$url\">"._("up")."</a>&nbsp;";
       $cur_pos++;
       continue;
@@ -108,8 +108,6 @@ function print_from()
   echo "<div class=\"from\">by <a href=\"".$search->to_URL()."\">$name</a></div>\n";
 }
 /** Print the caption of an image. 
-  @param id ID of current image
-  @param caption String of the caption
   @param docut True if a long caption will be shorted. False if the whole
   caption will be printed. Default true */
 function print_caption($docut=true)
@@ -252,9 +250,9 @@ function print_row_filename()
 function _acl_to_text($acl)
 {
   $t='';
-  if (($acl & ACL_EDIT) > 0) $t.='e';
-  if (($acl & ACL_DOWNLOAD) > 0) $t.='d';
-  if (($acl & ACL_PREVIEW) > 0) $t.='v';
+  if (($acl & ACL_WRITE_MASK) == ACL_EDIT) $t.='e';
+  if (($acl & ACL_READ_MASK) == ACL_PREVIEW) $t.='v';
+  if (($acl & ACL_READ_MASK) == ACL_HIGHSOLUTION) $t.='f';
   if ($t=='') $t='-';
   return $t;
 }
@@ -272,7 +270,7 @@ function print_row_acl()
     echo "$name: ";
   }
   echo $this->_acl_to_text($img->get_gacl()).',';
-  echo $this->_acl_to_text($img->get_oacl()).',';
+  echo $this->_acl_to_text($img->get_macl()).',';
   echo $this->_acl_to_text($img->get_aacl());
   echo "</td></tr>\n";
 }
@@ -296,7 +294,7 @@ function print_row_date()
   echo "<a href=\"$url\">$date</a>\n";
 
   // before
-  $date_url->rem_param('start');
+  $date_url->del_param('start');
   $date_url->add_param('end', $sec+1);
   $url=$date_url->to_URL();
   $title=_("Show older images");
@@ -321,7 +319,7 @@ function print_row_date()
   $title=_("Show images within the same month");
   echo "<span class=\"month\"><a href=\"$url\" title=\"$title\">m</a></span>";
   // after
-  $date_url->rem_param('end');
+  $date_url->del_param('end');
   $date_url->add_param('start', $sec-1);
   $date_url->add_param('orderby', '-date');
   $url=$date_url->to_URL();
@@ -349,9 +347,10 @@ function print_row_tags()
   $tag_url=new Search();
   for ($i=0; $i<$num_tags; $i++)
   {
-    $tag_url->add_param('tags', $tags[$i]);
+    $tag_url->add_tag($tags[$i]);
     $url=$tag_url->to_URL();
     echo "<a href=\"$url\">" . htmlentities($tags[$i]) . "</a>";
+    $tag_url->del_tag($tags[$i]);
     if ($i<$num_tags-1)
         echo ", ";
   }
@@ -379,9 +378,10 @@ function print_row_sets()
   $set_url=new Search();
   for ($i=0; $i<$num_sets; $i++)
   {
-    $set_url->add_param('sets', $sets[$i]);
+    $set_url->add_set($sets[$i]);
     $url=$set_url->to_URL();
     echo "<a href=\"$url\">" . htmlentities($sets[$i]) . "</a>";
+    $set_url->del_set($sets[$i]);
     if ($i<$num_sets-1)
         echo ", ";
   }
@@ -449,7 +449,7 @@ function print_js()
   {
     echo "  images[$id]['gid']=".$img->get_groupid().";\n";
     echo "  images[$id]['gacl']=".$img->get_gacl().";\n";
-    echo "  images[$id]['oacl']=".$img->get_oacl().";\n";
+    echo "  images[$id]['macl']=".$img->get_macl().";\n";
     echo "  images[$id]['aacl']=".$img->get_aacl().";\n";
   }
   $caption=$img->get_caption();

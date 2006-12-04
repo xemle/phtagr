@@ -9,6 +9,10 @@ define('PARAM_STRING', 0x03);
 
 /**
   @class Url Abstracts a URL with parameters and anchors
+  @todo Rename private properts with underscore prefix
+  @todo Rename to_url to get_url
+  @todo Rename to_form to get_from
+  @todo Rename PARAM_PINT to PARAM_UINT
 */
 class Url extends Base
 {
@@ -74,7 +78,8 @@ function get_param($name, $default=null)
 
 /** Add a parameter. An existing parameter will be overwritten.
   @param name Name of the parameter
-  @param value Value of the parameter 
+  @param value Value of the parameter. If a value is already set, it will be
+  overwritten.
   @param check Type of value checks. If the value does not match the check, the
   default value is taken. There is no check for the default value. If the final
   value is null, the parameter is removed from the list. Possible values are
@@ -106,7 +111,7 @@ function add_param($name, $value, $check=PARAM_UNKNOWN, $default=null)
 
   if ($value==null || $value==='')
   {
-    $this->rem_param($name);
+    $this->del_param($name);
     return false;
   }
   
@@ -141,7 +146,7 @@ function add_iparam($name, $value, $default, $lbound=0, $ubound=null)
     $value=$default;
 
   if ($value===null)
-    return $this->rem_param($name);
+    return $this->del_param($name);
 
   $this->params[$name]=$value;
   return true;
@@ -150,7 +155,7 @@ function add_iparam($name, $value, $default, $lbound=0, $ubound=null)
 /** Removes a parameter
   @param name Name of the parameter
   @return True on success. False otherwise. */
-function rem_param($name)
+function del_param($name)
 {
   if ($name==null || $name=='')
     return false;
@@ -177,7 +182,7 @@ function set_anchor($name)
 }
 
 /** Removes the anchor */
-function rem_anchor()
+function del_anchor()
 {
   $this->anchor='';
 }

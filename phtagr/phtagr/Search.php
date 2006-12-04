@@ -3,19 +3,21 @@
 include_once("$phtagr_lib/Url.php");
 /**
   @class Search Mapping between URLs, HTML forms and SQL queries.
+  @todo Rename to_URL to get_url
+  @todo Rename to_form to get_form
 */
 class Search extends Url
 {
 
-var $tags;
-var $sets;
+var $_tags;
+var $_sets;
 
 function Search($baseurl='')
 {
   global $search;
   $this->Url($baseurl);
-  $this->tags=array();
-  $this->sets=array();
+  $this->_tags=array();
+  $this->_sets=array();
 
   $this->add_param('section', 'explorer');
   if ($search && $search->get_userid()>0)
@@ -50,8 +52,35 @@ function set_groupid($groupid)
 function add_tag($tag)
 {
   if ($tag=='') return;
-  array_push($this->tags, $tag);
-  $this->tags=array_unique($this->tags);
+  array_push($this->_tags, $tag);
+  $this->_tags=array_unique($this->_tags);
+}
+
+/** @param tag Tag name
+  @return True of the search has already that given tag */
+function has_tag($tag)
+{
+  for ($i=0; $i<count($this->_tags); $i++)
+    if ($this->_tags[$i]==$tag)
+      return true;
+  return false;
+}
+
+/** @param tag Tag to delete
+  @return True if the tag could be deleted. Otherwise false (e.g. if the tag
+  could not be found) */
+function del_tag($tag)
+{
+  for ($i=0; $i<count($this->_tags); $i++)
+  {
+    if ($this->_tags[$i]==$tag)
+    {
+      array_splice($this->_tags, $i, 1);
+      $this->_tags=array_merge($this->_tags);
+      return true;
+    }
+  }
+  return false;
 }
 
 /** Sets the operator of tags
@@ -63,15 +92,42 @@ function set_tagop($tagop)
 
 function clear_tags()
 {
-  unset($this->tags);
-  $this->tags=array();
+  unset($this->_tags);
+  $this->_tags=array();
 }
 
 function add_set($set)
 {
   if ($set=='') return;
-  array_push($this->sets, $set);
-  $this->sets=array_unique($this->sets);
+  array_push($this->_sets, $set);
+  $this->_sets=array_unique($this->_sets);
+}
+
+/** @param set Set name
+  @return True of the search has already that given set */
+function has_set($set)
+{
+  for ($i=0; $i<count($this->_sets); $i++)
+    if ($this->_sets[$i]==$set)
+      return true;
+  return false;
+}
+
+/** @param set Set to delete
+  @return True if the set could be deleted. Otherwise false (e.g. if the set
+  could not be found) */
+function del_set($set)
+{
+  for ($i=0; $i<count($this->_sets); $i++)
+  {
+    if ($this->_sets[$i]==$set)
+    {
+      unset($this->_sets[$i]);
+      $this->_sets=array_merge($this->_sets);
+      return true;
+    }
+  }
+  return false;
 }
 
 /** Sets the operator of sets
@@ -83,8 +139,30 @@ function set_setop($setop)
 
 function clear_sets()
 {
-  unset($this->sets);
-  $this->sets=array();
+  unset($this->_sets);
+  $this->_sets=array();
+}
+
+function set_location($location)
+{
+  $this->add_param('location', $location);
+}
+
+function get_location()
+{
+  return $this->get_param('location', null);
+}
+function del_location()
+{
+  $this->del_param('location');
+}
+
+function has_location()
+{
+  if ($this->get_param('location', null)!=null)
+    return true;
+  else 
+    false;
 }
 
 function set_location_type($location_type)
@@ -129,7 +207,7 @@ function set_date_end($end)
 function set_pos($pos)
 {
   if (!is_numeric($pos) || $pos<0)
-    $this->rem_param('pos');
+    $this->del_param('pos');
   else
     $this->add_iparam('pos', $pos, null, 1);
 
@@ -163,7 +241,7 @@ function set_page_size($size)
   if ($size!=10)
     $this->add_iparam('pagesize', $size, 10, 2, 250);
   else
-    $this->rem_param('pagesize');
+    $this->del_param('pagesize');
 }
 
 function get_page_size()
@@ -182,7 +260,7 @@ function set_orderby($orderby)
       $orderby=='-newest' )
     $this->add_param('orderby', $orderby);
   else 
-    $this->rem_param('orderby');
+    $this->del_param('orderby');
   
 }
 
@@ -259,33 +337,38 @@ function from_URL()
     $this->set_orderby($_REQUEST['orderby']);
 }
 
+/** Sets the tag and set array as parameter */
 function _to_params()
 {
-  $num_tags=count($this->tags);
+  $num_tags=count($this->_tags);
   if ($num_tags>0)
   {
     $v='';
     for ($i=0; $i<$num_tags; $i++)
     {
-      $v.=$this->tags[$i];
+      $v.=$this->_tags[$i];
       if ($i<$num_tags-1)
         $v.='+';
     }
     $this->add_param('tags', $v);
   }
+  else 
+    $this->del_param('tags');
   
-  $num_sets=count($this->sets);
+  $num_sets=count($this->_sets);
   if ($num_sets>0)
   {
     $v='';
     for ($i=0; $i<$num_sets; $i++)
     {
-      $v.=$this->sets[$i];
+      $v.=$this->_sets[$i];
       if ($i<$num_sets-1)
         $v.='+';
     }
     $this->add_param('sets', $v);
   }
+  else
+    $this->del_param('sets');
 }
 
 /** Converts the search to a URL */
@@ -416,9 +499,8 @@ function _handle_acl()
   global $user;
   
   $acl='';
-  $userid=$this->get_param('user', null);
   if ($user->is_admin() || 
-    ($userid!=null && $userid == $user->get_id()))
+    $this->get_userid()==$user->get_id())
     return $acl;
     
   // if requested user id is not the own user id
@@ -431,7 +513,7 @@ function _handle_acl()
                 WHERE userid=".$user->get_id().")
               AND i.gacl>=".ACL_PREVIEW." )";
     if ($user->is_member())
-      $acl .= " OR i.oacl>=".ACL_PREVIEW;
+      $acl .= " OR i.macl>=".ACL_PREVIEW;
     else
       $acl .= " OR i.aacl>=".ACL_PREVIEW;
     $acl .= " )";
@@ -524,8 +606,8 @@ function _handle_orderby()
 }
 
 /** 
-  @para num_tags Count of tags. Should be zero or greater zero
-  @para tagop Tag operand (0 is and, 1 is or, 2 is fuzzy)
+  @param num_tags Count of tags. Should be zero or greater zero
+  @param tagop Tag operand (0 is and, 1 is or, 2 is fuzzy)
   @return Returns the having statement */
 function _handle_having($num_tags, $tagop)
 {
@@ -587,7 +669,7 @@ function get_query($limit=1, $order=true)
   $pos_tags=array();
   $neg_tags=array();
   $tagop=$this->get_param('tagop', 0);
-  foreach ($this->tags as $tag)
+  foreach ($this->_tags as $tag)
   {
     if ($tag{0}=='-')
       array_push($neg_tags, substr($tag, 1));
@@ -599,7 +681,7 @@ function get_query($limit=1, $order=true)
   
   $pos_sets=array();
   $neg_sets=array();
-  foreach ($this->sets as $set)
+  foreach ($this->_sets as $set)
   {
     if ($set{0}=='-')
       array_push($neg_sets, substr($set, 1));

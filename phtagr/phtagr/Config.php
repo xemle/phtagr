@@ -1,7 +1,6 @@
 <?php
 
 include_once("$phtagr_lib/Base.php");
-include_once("$phtagr_lib/Constants.php");
 
 /** @class Config Configuration of a user 
   This objects holds the parameter and configuration of an user. A parameter
@@ -75,7 +74,7 @@ function get($name, $default=null)
 function _set($userid, $name, $value)
 {
   global $db;
-  if ($value==null)
+  if ($value===null)
     return false;
 
   $sname=mysql_escape_string($name);
@@ -157,7 +156,7 @@ function set_default($name, $value)
   @param value Optional parameter value. This is usefull for array parameters.
   Default is null.
   @return True on successful deletion. False otherwise */
-function _remove($userid, $name, $value=null)
+function _del($userid, $name, $value=null)
 {
   global $db;
   $sname=mysql_escape_string($name);
@@ -174,44 +173,44 @@ function _remove($userid, $name, $value=null)
   return true;
 }
 
-/** Removes a parameter
+/** Deletes a parameter
   @param name Parameter name
   @param value Optional parameter value. This is usefull for array parameters.
   Default is null.
   @return True on successful deletion. False otherwise */
-function remove($name, $value)
+function del($name, $value)
 {
   if ($this->_userid<=0)
     return false;
 
-  return $this->_remove($this->_userid, $name, $value);
+  return $this->_del($this->_userid, $name, $value);
 }
 
-/** Removes a parameter
+/** Deletes a parameter
   @param name Parameter name
   @param value Optional parameter value. This is usefull for array parameters.
   Default is null.
   @return True on successful deletion. False otherwise
   @note Only an admin user is allowd to remove a default value */
-function remove_default($name, $value=null)
+function del_default($name, $value=null)
 {
   global $user;
   if (!$this->is_admin())
     return false;
 
-  return $this->_remove(0, $name, $value);
+  return $this->_del(0, $name, $value);
 }
 
 /** Deletes all configuration of a user 
   @param id Id of the user */
-function delete_from_user($id)
+function delete_from_user($userid)
 {
   global $db;
   global $user;
 
   // Delete all preferences
   $sql="DELETE FROM $db->conf
-        WHERE userid=$id";
+        WHERE userid=$userid";
   $db->query($sql);
 
   // If I delete myself, delete also my configuration

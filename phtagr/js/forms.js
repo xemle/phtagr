@@ -248,6 +248,50 @@ function _new_cb(name, value, checked)
   return input;
 }
 
+
+/** @param name Name of the select
+  @return Returns a new select node */
+function _new_select(name)
+{
+  var select=document.createElement("select");
+  select.setAttribute("size", "1");
+  select.setAttribute("name", name);
+  return select;
+}
+
+/** Create an option
+  @param value Option value
+  @param text Text of the option
+  @param selected If true the option will be selected 
+  @return The option node */
+function _new_option(value, text, selected)
+{
+  var option=document.createElement("option");
+  option.setAttribute("value", value);
+  if (selected)
+    option.setAttribute("selected", "selected");
+  option.appendChild(document.createTextNode(text));
+  return option;
+}
+
+function _new_acl_write(name, value)
+{
+  var s=_new_select(name);
+  s.appendChild(_new_option('keep', 'Keep', true));
+  s.appendChild(_new_option('edit', 'Edit', false));
+  s.appendChild(_new_option('deny', 'Deny', false));
+  return s;
+}
+
+function _new_acl_read(name, value)
+{
+  var s=_new_select(name);
+  s.appendChild(_new_option('keep', 'Keep', true));
+  s.appendChild(_new_option('preview', 'Preview', false));
+  s.appendChild(_new_option('deny', 'Deny', false));
+  return s;
+}
+
 function _init_form(id)
 {
   var form=document.createElement("form");
@@ -481,7 +525,7 @@ function _get_row_groups(gid)
 function _get_row_acls(id)
 {
   var gacl=images[id]['gacl'];
-  var oacl=images[id]['oacl'];
+  var macl=images[id]['macl'];
   var aacl=images[id]['aacl'];
 
   var row=document.createElement("tr");
@@ -502,15 +546,11 @@ function _get_row_acls(id)
   tr.appendChild(td);
 
   td=td.cloneNode(false);
-  td.appendChild(document.createTextNode("Friends"));
+  td.appendChild(document.createTextNode("Write"));
   tr.appendChild(td);
 
   td=td.cloneNode(false);
-  td.appendChild(document.createTextNode("Members"));
-  tr.appendChild(td);
-
-  td=td.cloneNode(false);
-  td.appendChild(document.createTextNode("All"));
+  td.appendChild(document.createTextNode("Read"));
   tr.appendChild(td);
 
   table.appendChild(tr);
@@ -519,42 +559,49 @@ function _get_row_acls(id)
   tr=tr.cloneNode(false);
 
   td=td.cloneNode(false);
-  td.appendChild(document.createTextNode("Edit"));
+  td.appendChild(document.createTextNode("Friends"));
   tr.appendChild(td);
   
   td=document.createElement('td');
-  td.appendChild(_new_cb('js_gacl_edit', 'add', (gacl & 0x01)));
+  td.appendChild(_new_acl_write('js_gacl_write', gacl));
   tr.appendChild(td);
   
   td=document.createElement('td');
-  td.appendChild(_new_cb('js_oacl_edit', 'add', (oacl & 0x01)));
+  td.appendChild(_new_acl_read('js_gacl_read', gacl));
   tr.appendChild(td);
-
-  td=document.createElement('td');
-  td.appendChild(_new_cb('js_aacl_edit', 'add', (aacl & 0x01)));
-  tr.appendChild(td);
-
   table.appendChild(tr);
-  
+
   // third row
   tr=tr.cloneNode(false);
 
   td=td.cloneNode(false);
-  td.appendChild(document.createTextNode("Preview"));
+  td.appendChild(document.createTextNode("Members"));
   tr.appendChild(td);
   
   td=document.createElement('td');
-  td.appendChild(_new_cb('js_gacl_preview', 'add', (gacl & 0xf0)));
+  td.appendChild(_new_acl_write('js_macl_write', macl));
   tr.appendChild(td);
   
   td=document.createElement('td');
-  td.appendChild(_new_cb('js_oacl_preview', 'add', (oacl & 0xf0)));
+  td.appendChild(_new_acl_read('js_macl_read', macl));
   tr.appendChild(td);
+  table.appendChild(tr);
 
+  // fouth row
+  tr=tr.cloneNode(false);
+
+  td=td.cloneNode(false);
+  td.appendChild(document.createTextNode("All"));
+  tr.appendChild(td);
+  
   td=document.createElement('td');
-  var cb=_new_cb('js_aacl_preview', 'add', (aacl & 0xf0));
-  cb.setAttribute('id', 'focus-'+id);
-  td.appendChild(cb);
+  td.appendChild(_new_acl_write('js_aacl_write', aacl));
+  tr.appendChild(td);
+  
+  td=document.createElement('td');
+  var s=_new_acl_read('js_aacl_read', aacl);
+  s.setAttribute('id', 'focus-'+id);
+  td.appendChild(s);
   tr.appendChild(td);
   
   table.appendChild(tr);

@@ -460,20 +460,12 @@ function exec_stage_admin()
   {
     global $user;
 
-    // We must set the name of the current user to admin
-    // so that we gain admin rights. Otherwise we cannot
-    // add another user.
-    $user->_data["name"]="admin";
-
-    $account = new SectionAccount();
-    if (!$account->user_create("admin",$password))
+    $result=$user->create("admin",$password,USER_ADMIN);
+    if ($result<0)
     {
+      $this->error(sprintf(_("The admin account could not be created! Error %d"), $result));
       return false;
     }
-
-    // Here we unset the admin status.
-    unset ($user->_data["name"]);
-
     $this->success(_("Admin account successfully created!"));
     return true;
   }

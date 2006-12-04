@@ -2,10 +2,9 @@
 
 include_once("$phtagr_lib/SectionBase.php");
 include_once("$phtagr_lib/SectionAccount.php");
-include_once("$phtagr_lib/SectionTab.php");
 include_once("$phtagr_lib/Image.php");
 include_once("$phtagr_lib/Thumbnail.php");
-include_once("$phtagr_lib/Debug.php");
+include_once("$phtagr_lib/Upgrade.php");
 
 define("ADMIN_TAB_GENERAL", "0");
 define("ADMIN_TAB_USERS", "1");
@@ -135,7 +134,7 @@ echo "<table>\n";
       $url->add_param('remove_root', $root);
       echo "<a href=\"".$url->to_URL()."\" class=\"jsbutton\">"._("Remove")."</td></tr>\n";
     }
-    $url->rem_param('remove_root');
+    $url->del_param('remove_root');
   }
   echo "<tr><td>"._("Add root")."</td>\n";
   echo "<td><input type=\"text\" name=\"add_root\" /></td></tr>\n";
@@ -398,7 +397,13 @@ function exec_debug ()
   {
     echo "<h3>"._("Synchroning image data...")."</h3>\n";
     $this->info(_("This operation may take some time"));
-    sync_files();
+    $thumb=new Thumbnail();
+    list($count, $updated, $deleted)=$thumb->sync_files();
+    if ($count>0) {
+      $this->success(sprintf(_("All %d files where synchronized. %d were updated, %d were deleted"), $count, $updated, $deleted));
+    } else {
+      $this->error(sprintf(_("Synchronization of files failed. Error %d returned"), $count));
+    }
   }
   else if ($action=="delete_tables")
   {
@@ -416,11 +421,29 @@ function exec_debug ()
   {
     echo "<h3>"._("Creating preview images...")."</h3>\n";
     $this->info(_("This operation may take some time"));
-    create_all_previews();
+    $thumb=new Thumbnail();
+    $thumb->create_all_previews();
+    $this->success(_("All previews are now created"));
+  }
+  else if ($action=="upgrade")
+  {
+    echo "<h3>"._("Upgrade")."</h3>\n";
+    $upgrade=new Upgrade();
+    if ($upgrade->is_upgradable())
+    {
+      $upgrade->do_upgrade();
+      $old=$upgrade->get_old_version();
+      $cur=$upgrade->get_cur_version();
+      $this->success(sprintf(_("Your phtagr instance was upgraded from version %d to version %d."), $old, $cur));
+    }
+    else
+    {
+      $this->info(_("Your phtagr instance runs up-to-date"));
+    }
   }
   else
   {
-   $this->error (_("Unknown action: "). $action);
+   $this->error(_("Unknown action: "). $action);
   }
 }
 
@@ -441,9 +464,11 @@ function print_debug ()
   echo "<li><a href=\"$href\">"._("Delete all images")."</a></li>\n";
   $url->add_param('action', 'create_all_previews'); $href=$url->to_URL();
   echo "<li><a href=\"$href\">"._("Create all preview images")."</a></li>\n";
-  $url->rem_param('section');
-  $url->rem_param('page');
-  $url->rem_param('action');
+  $url->add_param('action', 'upgrade'); $href=$url->to_URL();
+  echo "<li><a href=\"$href\">"._("Upgrade this instance")."</a></li>\n";
+  $url->del_param('section');
+  $url->del_param('page');
+  $url->del_param('action');
   $href=$url->to_URL();
   echo "<li><a href=\"$href\">"._("Go to phTagr")."</a></li>\n";
   echo "</ul>\n";

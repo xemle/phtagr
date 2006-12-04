@@ -4,9 +4,13 @@ global $phtagr_lib;
 include_once("$phtagr_lib/Iptc.php");
 include_once("$phtagr_lib/Base.php");
 include_once("$phtagr_lib/Constants.php");
+include_once("$phtagr_lib/Acl.php");
+include_once("$phtagr_lib/SectionAcl.php");
 
 /** This class handles modifications and checks the access rights.
-  @class Edit */
+  @class Edit 
+  @todo rename from Edit to ImageEdit
+  @todo move set method to Image class */
 class Edit extends Base
 {
 
@@ -125,7 +129,7 @@ function execute()
     unset($iptc);
 
     if (isset($_REQUEST['js_acl']) ||
-      isset($_REQUEST['aacl_edit']))
+      isset($_REQUEST['aacl_read']))
       $this->_handle_request_acl(&$img);
     
     unset($img);
@@ -180,7 +184,7 @@ function _handle_iptc_tags(&$iptc)
   {
     $tags=preg_split("/\s+/", $_REQUEST['js_tags']);
     /** @todo optimize set of this operation. Do only delete required tags */
-    $iptc->rem_record("2:025");
+    $iptc->del_record("2:025");
 
     // only positive tags
     $add_tags=array();
@@ -207,7 +211,7 @@ function _handle_iptc_tags(&$iptc)
         array_push($add_tags, $tag);
     }
     $iptc->add_records("2:025", $add_tags); 
-    $iptc->rem_records("2:025", $rem_tags); 
+    $iptc->del_records("2:025", $rem_tags); 
   }
 
 }
@@ -221,7 +225,7 @@ function _handle_iptc_sets(&$iptc)
   {
     $sets=split(" ", $_REQUEST['js_sets']);
     /** @todo optimize set of this operation. Do only delete required sets */
-    $iptc->rem_record("2:020");
+    $iptc->del_record("2:020");
     // only positive sets
     $add_sets=array();
     foreach ($sets as $set)
@@ -247,7 +251,7 @@ function _handle_iptc_sets(&$iptc)
         array_push($add_sets, $set);
     }
     $iptc->add_records("2:020", $add_sets); 
-    $iptc->rem_records("2:020", $rem_sets); 
+    $iptc->del_records("2:020", $rem_sets); 
   }
 }
 
@@ -265,29 +269,29 @@ function _handle_iptc_location(&$iptc)
     if ($_REQUEST['js_city']!='')
       $iptc->add_record("2:090", $_REQUEST['js_city']);
     else
-      $iptc->rem_record("2:090");
+      $iptc->del_record("2:090");
     
     if ($_REQUEST['js_sublocation']!='')
       $iptc->add_record("2:092", $_REQUEST['js_sublocation']);
     else
-      $iptc->rem_record("2:092");
+      $iptc->del_record("2:092");
     
     if ($_REQUEST['js_state']!='')
       $iptc->add_record("2:095", $_REQUEST['js_state']);
     else
-      $iptc->rem_record("2:095");
+      $iptc->del_record("2:095");
     
     if ($_REQUEST['js_country']!='')
       $iptc->add_record("2:101", $_REQUEST['js_country']);
     else
-      $iptc->rem_record("2:101");
+      $iptc->del_record("2:101");
   }
   else 
   {
     if ($_REQUEST['edit_city']!='')
     {
       if ($_REQUEST['edit_city'][0]=='-')
-        $iptc->rem_record("2:090", substr($_REQUEST['edit_city'],1));
+        $iptc->del_record("2:090", substr($_REQUEST['edit_city'],1));
       else
         $iptc->add_record("2:090", $_REQUEST['edit_city']);
     }
@@ -295,7 +299,7 @@ function _handle_iptc_location(&$iptc)
     if ($_REQUEST['edit_sublocation']!='')
     {
       if ($_REQUEST['edit_sublocation'][0]=='-')
-        $iptc->rem_record("2:092", substr($_REQUEST['edit_sublocation'],1));
+        $iptc->del_record("2:092", substr($_REQUEST['edit_sublocation'],1));
       else
         $iptc->add_record("2:092", $_REQUEST['edit_sublocation']);
     }
@@ -303,7 +307,7 @@ function _handle_iptc_location(&$iptc)
     if ($_REQUEST['edit_state']!='')
     {
       if ($_REQUEST['edit_state'][0]=='-')
-        $iptc->rem_record("2:095", substr($_REQUEST['edit_state'],1));
+        $iptc->del_record("2:095", substr($_REQUEST['edit_state'],1));
       else
         $iptc->add_record("2:095", $_REQUEST['edit_state']);
     }
@@ -311,76 +315,12 @@ function _handle_iptc_location(&$iptc)
     if ($_REQUEST['edit_country']!='')
     {
       if ($_REQUEST['edit_country'][0]=='-')
-        $iptc->rem_record("2:101", substr($_REQUEST['edit_country'],1));
+        $iptc->del_record("2:101", substr($_REQUEST['edit_country'],1));
       else
         $iptc->add_record("2:101", $_REQUEST['edit_country']);
     }
   }
 }
-
-/* Permit a new flag. The ACL flag influence lower levels. E.g. if a member is
- * allowed to access some data, the group member is also allowed.
-  @param acl Pointer to acl array
-  @param level Level of flag. 0 for group, 1 for member, 2 for all
-  @param flag ACL flag */
-function _add_acl(&$acl, $level, $flag)
-{
-  switch ($level) {
-  case ACL_GROUP:
-    $acl[ACL_GROUP]|=$flag;
-    break;
-  case ACL_OTHER:
-    $acl[ACL_OTHER]|=$flag;
-    $acl[ACL_GROUP]|=$flag;
-    break;
-  case ACL_ALL:
-    $acl[ACL_ALL]|=$flag;
-    $acl[ACL_OTHER]|=$flag;
-    $acl[ACL_GROUP]|=$flag;
-    break;
-  default:
-  }
-}
-
-/* Deny a resource. The ACL flag influence higher levels. E.g. if a member is
- * denied to access some data, a non-member is also denied.
-  @param acl Pointer to acl array
-  @param level Level of flag. 0 for group, 1 for member, 2 for all
-  @param mask Mask to deny higher data. */
-function _del_acl(&$acl, $level, $mask)
-{
-  switch ($level) {
-  case ACL_GROUP:
-    $acl[ACL_GROUP]&=~$mask;
-    $acl[ACL_OTHER]&=~$mask;
-    $acl[ACL_ALL]&=~$mask;
-    break;
-  case ACL_OTHER:
-    $acl[ACL_OTHER]&=~$mask;
-    $acl[ACL_ALL]&=~$mask;
-    break;
-  case ACL_ALL:
-    $acl[ACL_ALL]&=~$mask;
-    break;
-  default:
-  }
-}
-
-/** 
-  @param acl ACL array of current image
-  @param op Operant. Possible values are strings of 'add', 'del', 'keep' or
-  null. If op is null, the operant is handled as 'del' and will remove the ACL.
-  The operand 'keep' changes nothing.
-  @param flag Permit bit of the current ACL
-  @param mask Deny mask of current ACL */
-function _handle_acl(&$acl, $op, $level, $flag, $mask)
-{
-  if ($op=='add')
-    $this->_add_acl(&$acl, $level, $flag);
-  else if ($op=='del' || $op==null)
-    $this->_del_acl(&$acl, $level, $mask);
-}
-
 /** Handle the ACL requests of an specific image. Only the image owner can
  * modify the ACL levels.
   @param img Pointer to the image object
@@ -396,11 +336,9 @@ function _handle_request_acl(&$img)
   if (!$img->is_owner(&$user))
     return false;
     
-  $acl=array();
-  $acl[ACL_GROUP]=$img->get_gacl();
-  $acl[ACL_OTHER]=$img->get_oacl();
-  $acl[ACL_ALL]=$img->get_aacl();
-  
+  $this->debug($_REQUEST);
+  $acl=new Acl($img->get_gacl(), $img->get_macl(), $img->get_aacl());
+ 
   // JavaScript formular or set selection?
   if (isset($_REQUEST['js_acl']))
   {
@@ -410,13 +348,7 @@ function _handle_request_acl(&$img)
       if ($gid>=0)
         $img->set_groupid($gid);
     }
-    $this->_handle_acl(&$acl, $_REQUEST['js_aacl_edit'], ACL_ALL, ACL_EDIT, ACL_EDIT_MASK);
-    $this->_handle_acl(&$acl, $_REQUEST['js_oacl_edit'], ACL_OTHER, ACL_EDIT, ACL_EDIT_MASK);
-    $this->_handle_acl(&$acl, $_REQUEST['js_gacl_edit'], ACL_GROUP, ACL_EDIT, ACL_EDIT_MASK);
-      
-    $this->_handle_acl(&$acl, $_REQUEST['js_aacl_preview'], ACL_ALL, ACL_PREVIEW, ACL_PREVIEW_MASK);
-    $this->_handle_acl(&$acl, $_REQUEST['js_oacl_preview'], ACL_OTHER, ACL_PREVIEW, ACL_PREVIEW_MASK);
-    $this->_handle_acl(&$acl, $_REQUEST['js_gacl_preview'], ACL_GROUP, ACL_PREVIEW, ACL_PREVIEW_MASK);
+    $acl->handle_request('js_');
   }
   else 
   {
@@ -426,20 +358,13 @@ function _handle_request_acl(&$img)
       if ($gid>=0)
         $img->set_groupid($gid);
     }
-    $this->_handle_acl(&$acl, $_REQUEST['aacl_edit'], ACL_ALL, ACL_EDIT, ACL_EDIT_MASK);
-    $this->_handle_acl(&$acl, $_REQUEST['oacl_edit'], ACL_OTHER, ACL_EDIT, ACL_EDIT_MASK);
-    $this->_handle_acl(&$acl, $_REQUEST['gacl_edit'], ACL_GROUP, ACL_EDIT, ACL_EDIT_MASK);
-
-    $this->_handle_acl(&$acl, $_REQUEST['aacl_preview'], ACL_ALL, ACL_PREVIEW, ACL_PREVIEW_MASK);
-    $this->_handle_acl(&$acl, $_REQUEST['oacl_preview'], ACL_OTHER, ACL_PREVIEW, ACL_PREVIEW_MASK);
-    $this->_handle_acl(&$acl, $_REQUEST['gacl_preview'], ACL_GROUP, ACL_PREVIEW, ACL_PREVIEW_MASK);
+    $acl->handle_request();
   }
   
+  list($gacl, $macl, $aacl)=$acl->get_values();
   $id=$img->get_id();
   $sql="UPDATE $db->image
-        SET gacl=".$acl[ACL_GROUP].
-        ",oacl=".$acl[ACL_OTHER].
-        ",aacl=".$acl[ACL_ALL]."
+        SET gacl=$gacl,macl=$macl,aacl=$aacl
         WHERE id=$id";
   if ($db->query($sql))
     return true;
@@ -471,7 +396,7 @@ function print_bar()
     <option value=\"mark\">"._("Mark")."</option>
     <option value=\"demark\">"._("Demark")."</option>\n";
     if ($user->is_member())
-      echo "<option value=\"remove\">"._("Remove from DB")."</option>\n";
+      echo "<option value=\"remove\">"._("Delete")."</option>\n";
   echo "  </select></li>
   <li><input type=\"checkbox\" id=\"selectall\" onclick=\"checkbox('selectall', 'images[]')\"/>"._("Select all images")."</li>
 </ul>
@@ -514,17 +439,9 @@ function print_edit_acl()
       echo "    <option value=\"$gid\">$name</option>\n";
     echo "</select><br/>\n";
   }
-  echo "<table>
-  <tr>
-    <th></th>
-    <th>Friends</th>
-    <th>Members</th>
-    <th>All</th>
-  </tr>\n";
-  $this->_print_edit_acl_row("edit", _("Edit"));
-  $this->_print_edit_acl_row("preview", _("Preview"));
-  echo "</table>
-  <p>Set the access level to the selected images.</p>
+  $acl=new SectionAcl();
+  $acl->print_table();
+  echo "<p>Set the access level to the selected images.</p>
 </fieldset>\n";  
 }
 

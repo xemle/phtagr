@@ -48,9 +48,9 @@ function add_param($name, $value)
 }
 
 /** @param name Removes a parameter of name */
-function rem_param($name)
+function del_param($name)
 {
-  return $this->_url->rem_param($name);
+  return $this->_url->del_param($name);
 }
 
 /** 

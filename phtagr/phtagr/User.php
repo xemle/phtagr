@@ -63,7 +63,10 @@ function exists($idorname)
 
   return false;
 }
-/** Returns the number of total users */
+
+/** 
+  @param withguests True if also guests are counted 
+  @param Returns the number of total users */
 function get_num_users($withguests=false)
 {
   global $db;
@@ -530,11 +533,13 @@ function _init_data()
   if ($id<=0)
     return ERR_GERNERAL;
 
+  /*
   $conf=new Config($id);
-  $conf->set('image.gacl', ACL_FULLSIZE|ACL_EDIT);
-  $conf->set('image.oacl', ACL_PREVIEW);
+  $conf->set('image.gacl', ACL_PREVIEW|ACL_EDIT);
+  $conf->set('image.macl', ACL_PREVIEW);
   $conf->set('image.aacl', ACL_PREVIEW);
   unset($conf);
+  */
 
   $upload=$this->get_upload_dir();
   if (!$upload)
@@ -549,14 +554,14 @@ function _init_data()
 function get_gacl()
 {
   global $conf;
-  return $conf->get('image.aacl', ACL_FULLSIZE|ACL_EDIT);
+  return $conf->get('image.aacl', ACL_PREVIEW | ACL_EDIT);
 }
 
-/** Return the default ACL for other phtagr users */
-function get_oacl()
+/** Return the default ACL for phtagr members */
+function get_macl()
 {
   global $conf;
-  return $conf->get('image.oacl', ACL_PREVIEW);
+  return $conf->get('image.macl', ACL_PREVIEW);
 }
 
 /** Return the default ACL for all */

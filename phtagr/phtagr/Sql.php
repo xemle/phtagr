@@ -5,6 +5,7 @@ include_once("$phtagr_lib/Base.php");
 /** 
   @class Sql Handles the SQL database operation like connection, creation,
   queries and queries clean ups 
+  @todo Rename class Sql to Database
 */
 class Sql extends Base
 {
@@ -348,8 +349,8 @@ function create_tables()
                                            bytes in qinterval seconds. */
         data          BLOB,             /* For optional and individual values */
 
-        PRIMARY KEY(id)
-        INDEX(cookie))";
+        INDEX(cookie),
+        PRIMARY KEY(id))";
   if (!$this->query($sql)) { return false; }
 
   $sql="CREATE TABLE $this->conf (
@@ -379,7 +380,7 @@ function create_tables()
   $sql="CREATE TABLE $this->image (
         id            INT NOT NULL AUTO_INCREMENT,
         userid        INT NOT NULL,
-        groupid       INT NOT NULL,
+        groupid       INT DEFAULT 0,
         synced        DATETIME,           /* Syncing time between image and the
                                              database */
         created       DATETIME,           /* Insert time of the image */
@@ -387,7 +388,7 @@ function create_tables()
         bytes         INT NOT NULL,       /* Size of image in bytes */
         is_upload     TINYINT UNSIGNED,   /* 0=local, 1=upload */
         gacl          TINYINT UNSIGNED,   /* Group/Friend access control list */
-        oacl          TINYINT UNSIGNED,   /* Other/Member access control list */
+        macl          TINYINT UNSIGNED,   /* Member access control list */
         aacl          TINYINT UNSIGNED,   /* All access control list */
         
         name          VARCHAR(128),
@@ -506,7 +507,16 @@ function create_tables()
         PRIMARY KEY(id))";
   if (!$this->query($sql)) { return false; }
 
+  $this->init_tables();
   return true;
+}
+
+/** Inalizes the databases. Currently, it justs writes the table version */
+function init_tables()
+{
+  $sql="INSERT INTO $this->conf (userid, name, value)
+        VALUES ('0', 'db.version', '".DB_VERSION."')";
+  $this->query($sql);
 }
 
 /** Deletes all tabels used by the phtagr instance */

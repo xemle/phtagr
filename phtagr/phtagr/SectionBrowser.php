@@ -79,7 +79,10 @@ function print_browser($dir)
   echo "<form action=\"./index.php\" method=\"post\">\n<p>\n";
   echo $url->to_form();
 
-  echo "<input type=\"checkbox\" name=\"add[]\" value=\"".htmlentities($dir)."\" />&nbsp;. (this dir)<br />\n";
+  $cur=$dir;
+  if ($cur=='')
+    $cur=DIRECTORY_SEPARATOR;
+  echo "<input type=\"checkbox\" name=\"add[]\" value=\"".htmlentities($cur)."\" />&nbsp;. (this dir)<br />\n";
 
   $alias=$dir; // alias changes, if only one root is set
   if ($fs->is_dir($dir))
@@ -130,7 +133,7 @@ function print_content()
 
     foreach ($_REQUEST['add'] as $d)
     {
-      if (DIRECTORY_SEPARATOR=="\\")
+      if ($fs->is_windows())
         $d=str_replace(DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR, $d);
       $images=array_merge($images, $fs->find_images($d, $recursive));
     }

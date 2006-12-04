@@ -6,6 +6,7 @@ include_once("$phtagr_lib/SectionUpload.php");
 include_once("$phtagr_lib/Image.php");
 include_once("$phtagr_lib/Thumbnail.php");
 include_once("$phtagr_lib/Group.php");
+include_once("$phtagr_lib/SectionAcl.php");
 
 define("MYACCOUNT_TAB_UPLOAD", "1");
 define("MYACCOUNT_TAB_GENERAL", "2");
@@ -24,6 +25,7 @@ function SectionMyAccount()
 function print_general ()
 {
   global $user;
+  global $conf;
   $account=new SectionAccount();
 
   $url=new Url();
@@ -31,7 +33,7 @@ function print_general ()
   $url->add_param('tab', MYACCOUNT_TAB_GENERAL);
   $url->add_param('action', 'edit');
 
-  echo "<h3>General</h3>\n";
+  echo "<h3>"._("General")."</h3>\n";
   echo "<form action=\"./index.php\" method=\"post\">\n";
   echo $url->to_form();
   echo "<table>
@@ -48,17 +50,39 @@ function print_general ()
     <td><input type=\"text\" name=\"email\" value=\"".$user->get_email()."\" /><td>
   </tr>
   <tr>
-    <td></td>
-    <td><input type=\"submit\" class=\"submit\"value=\"Save\"/>
-      <input type=\"reset\" class=\"reset\" value=\"Reset\"/></td>
+    <td>"._("Current Password:")."</td>
+    <td><input type=\"password\" name=\"oldpasswd\" /><td>
   </tr>
-</table>
+  <tr>
+    <td>"._("Password:")."</td>
+    <td><input type=\"password\" name=\"passwd\" /><td>
+  </tr>
+  <tr>
+    <td>"._("Confirm:")."</td>
+    <td><input type=\"password\" name=\"confirm\" /><td>
+  </tr>
+</table>\n";
+
+  $gacl=$conf->get('user.gacl', (ACL_EDIT | ACL_PREVIEW));
+  $macl=$conf->get('user.macl', ACL_PREVIEW);
+  $aacl=$conf->get('user.aacl', ACL_PREVIEW);
+
+  echo "<h3>"._("Default ACL")."</h3>\n";
+
+  $acl=new SectionAcl($gacl, $macl, $aacl);
+  $acl->print_table();
+  echo "<p>"._("The default ACL values are used when new images are
+  added.")."</p>";
+
+  echo "<input type=\"submit\" class=\"submit\"value=\"Save\"/>
+<input type=\"reset\" class=\"reset\" value=\"Reset\"/>
 </form>\n\n";
 }
 
 function exec_general ()
 {
   global $user;
+  global $conf;
 
   $action="";
   if (isset($_REQUEST['action']))
@@ -73,7 +97,34 @@ function exec_general ()
     if (isset($_REQUEST['lastname']))
       $user->set_lastname($_REQUEST['lastname']);
 
+    if ($_REQUEST['passwd']!='' &
+      $_REQUEST['oldpasswd']!='' &&
+      $_REQUEST['confirm']!='')
+    {
+      $oldpasswd=$_REQUEST['oldpasswd'];
+      $passwd=$_REQUEST['passwd'];
+      $confirm=$_REQUEST['confirm'];
+      if ($passwd!==$confirm)
+        $this->error(_("Passwords do not match together"));
+      else {
+        $result=$user->passwd($oldpasswd, $passwd);
+        if ($result<0)
+          $this->error(sprintf(_("Could not set the password. Error %d"), $result));
+        else
+          $this->success(_("Password was changed successfully"));
+      }
+    }
+
     $user->commit_changes();
+
+    $acl=new Acl(
+      $conf->get('user.gacl', (ACL_EDIT|ACL_PREVIEW)),
+      $conf->get('user.macl', (ACL_PREVIEW)),
+      $conf->get('user.aacl', (ACL_PREVIEW)));
+    $acl->handle_request();
+    $conf->set('user.gacl', $acl->get_gacl());
+    $conf->set('user.macl', $acl->get_macl());
+    $conf->set('user.aacl', $acl->get_aacl());
 
     return;
   }
@@ -276,7 +327,6 @@ function exec_groups()
       $this->success(sprintf(_("Member '%s' was moved from group '%s' to group '%s'"), $name, $group->get_name(), $dst_group->get_name()));
     elseif ($success>1)
       $this->success(sprintf(_("%d members were moved from group '%s' to group '%s'"), $success, $group->get_name(), $dst_group->get_name()));
-    
   }
 }
 
@@ -313,19 +363,26 @@ function print_group_list()
       $url->add_param("action", "remove");
       echo "<td><a href=\"".$url->to_URL()."\" class=\"jsbutton\">"._("Remove")."</a></td>
     </tr>\n";
-      $url->rem_param("action");
+      $url->del_param("action");
       unset($group);
     }
     echo "</table>\n";
-    $url->rem_param('gid');
+    $url->del_param('gid');
   }
   else
   {
-    echo _("Currently you have now groups defined");
+    echo "<p>"._("Currently you have now groups defined.")."</p>";
   }
+  echo "<p>"._("Groups are used for the access right managment. Images can be
+  assigned to groups which have different access rights. You can manage the
+  groups here and can add or remove other phtagr members or guests to your
+  groups.")."</p>";
 
   if (count($group)<11) 
   {
+    echo "<h3>"._("Add new group")."</h3>";
+    echo "<p>"._("Add a new group here. You are allowed to create 10 different
+    groups.")."</p>";
     $url->add_param('action', 'add');
     echo "<form action=\"./index.php\" method=\"post\">\n";
     echo $url->to_form();
@@ -377,8 +434,8 @@ function print_group($gid)
       unset($group);
     }
     echo "</table>\n";
-    $url->rem_param('action');
-    $url->rem_param('name');
+    $url->del_param('action');
+    $url->del_param('name');
 
     echo "<select size=\"1\" name=\"action\">
     <option value=\"none\">"._("Select action")."</option>
@@ -554,19 +611,23 @@ function print_guest_list()
       $url->add_param("action", "remove");
       echo "<td><a href=\"".$url->to_URL()."\" class=\"jsbutton\">"._("Remove")."</a></td>
     </tr>\n";
-      $url->rem_param("action");
+      $url->del_param("action");
       unset($group);
     }
     echo "</table>\n";
-    $url->rem_param('guestid');
+    $url->del_param('guestid');
   }
   else
   {
     echo _("Currently your guest list is empty");
   }
+  echo "<p>"._("A guest can view all images, which is assigned to the guest's
+  group.")."</p>";
 
   if (count($guests)<11) 
   {
+    echo "<h3>"._("New guest account")."</h3>\n";
+    echo "<p>"._("Add a new guest account here. You are allowed to create 10 guest accounts.")."</p>";
     $url->add_param('action', 'add');
     echo "<form action=\"./index.php\" method=\"post\">\n";
     echo $url->to_form();

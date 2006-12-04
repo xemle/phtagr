@@ -17,7 +17,7 @@ function SectionExplorer()
 }
 
 /** Print the page navigation bar. It prints the first, the current and the last pagest. Also a preview and a next page link. 
-  @param link Base link for pages
+  @param search Search object for the naviagator
   @param current Index of current page 
   @param count Absolut count of pages*/
 function print_navigator($search, $current, $count)
@@ -165,7 +165,7 @@ function print_content()
 
   $edit=new Edit();
   $edit->print_bar();
-  if ($user->is_member())
+  if ($user->is_member()||$user->is_guest())
     $edit->print_edit_inputs();
   $edit->print_buttons();
   echo "</div>\n";
