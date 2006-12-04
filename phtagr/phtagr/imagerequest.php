@@ -6,7 +6,7 @@
 session_start();
 
 include "$phtagr_lib/User.php";
-include "$phtagr_lib/Sql.php";
+include "$phtagr_lib/Database.php";
 include "$phtagr_lib/Config.php";
 include "$phtagr_lib/Thumbnail.php";
 
@@ -67,7 +67,7 @@ switch ($type)
 }
 
 /** Check the database connection */
-$db=new Sql();
+$db=new Database();
 if (!$db->connect())
 {
   internal_error();

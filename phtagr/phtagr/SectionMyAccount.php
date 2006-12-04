@@ -63,9 +63,9 @@ function print_general ()
   </tr>
 </table>\n";
 
-  $gacl=$conf->get('user.gacl', (ACL_EDIT | ACL_PREVIEW));
-  $macl=$conf->get('user.macl', ACL_PREVIEW);
-  $aacl=$conf->get('user.aacl', ACL_PREVIEW);
+  $gacl=$conf->get('image.gacl', (ACL_EDIT | ACL_PREVIEW));
+  $macl=$conf->get('image.macl', ACL_PREVIEW);
+  $aacl=$conf->get('image.aacl', ACL_PREVIEW);
 
   echo "<h3>"._("Default ACL")."</h3>\n";
 
@@ -118,13 +118,13 @@ function exec_general ()
     $user->commit_changes();
 
     $acl=new Acl(
-      $conf->get('user.gacl', (ACL_EDIT|ACL_PREVIEW)),
-      $conf->get('user.macl', (ACL_PREVIEW)),
-      $conf->get('user.aacl', (ACL_PREVIEW)));
+      $conf->get('image.gacl', (ACL_EDIT|ACL_PREVIEW)),
+      $conf->get('image.macl', (ACL_PREVIEW)),
+      $conf->get('image.aacl', (ACL_PREVIEW)));
     $acl->handle_request();
-    $conf->set('user.gacl', $acl->get_gacl());
-    $conf->set('user.macl', $acl->get_macl());
-    $conf->set('user.aacl', $acl->get_aacl());
+    $conf->set('image.gacl', $acl->get_gacl());
+    $conf->set('image.macl', $acl->get_macl());
+    $conf->set('image.aacl', $acl->get_aacl());
 
     return;
   }

@@ -31,7 +31,7 @@ function _print_row_read($keep)
       $value=$this->_acl[ACL_GROUP] & ACL_READ_MASK;
       break;
     case ACL_MEMBER:
-      $prefix='o';
+      $prefix='m';
       $value=$this->_acl[ACL_MEMBER] & ACL_READ_MASK;
       break;
     case ACL_ALL:
@@ -76,7 +76,7 @@ function _print_row_write($keep)
       $value=$this->_acl[ACL_GROUP] & ACL_WRITE_MASK;
       break;
     case ACL_MEMBER:
-      $prefix='o';
+      $prefix='m';
       $value=$this->_acl[ACL_MEMBER] & ACL_WRITE_MASK;
       break;
     case ACL_ALL:

@@ -3,11 +3,11 @@
 include_once("$phtagr_lib/Base.php");
 
 /** 
-  @class Sql Handles the SQL database operation like connection, creation,
+  @class Database Handles the SQL database operation like connection, creation,
   queries and queries clean ups 
   @todo Rename class Sql to Database
 */
-class Sql extends Base
+class Database extends Base
 {
 
 /** Table name of users */
@@ -28,7 +28,7 @@ var $imagelocation;
 var $comment;
 var $message;
 
-function Sql()
+function Database()
 {
   global $db_prefix;
   $this->link=null;

@@ -2,7 +2,7 @@
 
 include_once("$phtagr_lib/SectionBase.php");
 include_once("$phtagr_lib/Image.php");
-include_once("$phtagr_lib/Sql.php");
+include_once("$phtagr_lib/Database.php");
 
 class SectionImage extends SectionBase
 {

@@ -3,7 +3,7 @@
 session_start();
 
 include "$phtagr_lib/User.php";
-include "$phtagr_lib/Sql.php";
+include "$phtagr_lib/Database.php";
 include "$phtagr_lib/Config.php";
 include "$phtagr_lib/Search.php";
 include "$phtagr_lib/Edit.php";
@@ -52,7 +52,7 @@ $fcnt = new SectionFooter("content");
 $footer->add_section(&$fcnt);
 $page->add_section(&$footer);
 
-$db = new Sql();
+$db = new Database();
 $user = new User();
 
 $section="";

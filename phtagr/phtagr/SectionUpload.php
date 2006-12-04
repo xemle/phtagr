@@ -3,7 +3,7 @@
 include_once("$phtagr_lib/SectionBase.php");
 include_once("$phtagr_lib/User.php");
 include_once("$phtagr_lib/Image.php");
-include_once("$phtagr_lib/Sql.php");
+include_once("$phtagr_lib/Database.php");
 include_once("$phtagr_lib/Url.php");
 
 class SectionUpload extends SectionBase

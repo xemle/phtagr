@@ -4,7 +4,7 @@ include_once("$phtagr_lib/SectionBase.php");
 include_once("$phtagr_lib/Search.php");
 include_once("$phtagr_lib/Edit.php");
 include_once("$phtagr_lib/Image.php");
-include_once("$phtagr_lib/Sql.php");
+include_once("$phtagr_lib/Database.php");
 
 /** Explore the images.
   @class SectionExplorer */
