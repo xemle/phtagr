@@ -32,7 +32,7 @@ function print_paths($dir)
   $url->add_param('section', 'browser');
 
   echo "<div class=\"path\">"._("Current path:")."&nbsp;".
-    "<a href=\"".$url->to_URL()."\">"._("Root")."</a>";
+    "<a href=\"".$url->get_url()."\">"._("Root")."</a>";
 
   $path='';
   if ($dir!='')
@@ -60,7 +60,7 @@ function print_paths($dir)
       echo "&nbsp;/&nbsp;";
       
       $url->add_param('cd', $path);
-      echo "<a href=\"".$url->to_URL()."\">".htmlentities($part)."</a>\n";
+      echo "<a href=\"".$url->get_url()."\">".htmlentities($part)."</a>\n";
     }
   }
   echo "&nbsp;/&nbsp;</div>";
@@ -77,7 +77,7 @@ function print_browser($dir)
   $this->print_paths($dir);
 
   echo "<form action=\"./index.php\" method=\"post\">\n<p>\n";
-  echo $url->to_form();
+  echo $url->get_form();
 
   $cur=$dir;
   if ($cur=='')
@@ -107,7 +107,7 @@ function print_browser($dir)
       $cd=$sub;
 
     $url->add_param('cd', $cd);
-    $href=$url->to_URL();
+    $href=$url->get_url();
     echo "<input type=\"checkbox\" name=\"add[]\" value=\"".htmlentities($cd)."\" />&nbsp;<a href=\"$href\">$sub</a><br />\n";
   }
   echo "<br/>\n";
@@ -180,7 +180,7 @@ function print_content()
     $url=new Url();
     $url->add_param('section', 'browser');
     $url->add_param('cd', $_REQUEST['cd']);
-    $href=$url->to_URL();
+    $href=$url->get_url();
     echo "<br/><a href=\"$href\">"._("Search again")."</a><br/>\n";
   } else if (isset($_REQUEST['cd'])) 
   {

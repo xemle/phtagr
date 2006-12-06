@@ -16,7 +16,7 @@ function Acl($gacl, $macl, $aacl)
   $this->_acl=array();
   $this->_acl[ACL_GROUP]=$gacl;
   $this->_acl[ACL_MEMBER]=$macl;
-  $this->_acl[ACL_ALL]=$aacl;
+  $this->_acl[ACL_ANY]=$aacl;
 }
 
 /* Permit a new flag. The ACL flag influence lower levels. E.g. if a member is
@@ -33,10 +33,10 @@ function _add_acl($level, $flag, $mask)
     $this->_acl[ACL_GROUP]=($this->_acl[ACL_GROUP] & (~$mask)) | $flag;
     $this->_acl[ACL_MEMBER]=($this->_acl[ACL_MEMBER] & (~$mask)) | $flag;
     break;
-  case ACL_ALL:
+  case ACL_ANY:
     $this->_acl[ACL_GROUP]=($this->_acl[ACL_GROUP] & (~$mask)) | $flag;
     $this->_acl[ACL_MEMBER]=($this->_acl[ACL_MEMBER] & (~$mask)) | $flag;
-    $this->_acl[ACL_ALL]=($this->_acl[ACL_ALL] & ~$mask) | $flag;
+    $this->_acl[ACL_ANY]=($this->_acl[ACL_ANY] & ~$mask) | $flag;
     break;
   default:
   }
@@ -52,14 +52,14 @@ function _del_acl($level, $mask)
   case ACL_GROUP:
     $this->_acl[ACL_GROUP]&=~$mask;
     $this->_acl[ACL_MEMBER]&=~$mask;
-    $this->_acl[ACL_ALL]&=~$mask;
+    $this->_acl[ACL_ANY]&=~$mask;
     break;
   case ACL_MEMBER:
     $this->_acl[ACL_MEMBER]&=~$mask;
-    $this->_acl[ACL_ALL]&=~$mask;
+    $this->_acl[ACL_ANY]&=~$mask;
     break;
-  case ACL_ALL:
-    $this->_acl[ACL_ALL]&=~$mask;
+  case ACL_ANY:
+    $this->_acl[ACL_ANY]&=~$mask;
     break;
   default:
   }
@@ -83,11 +83,11 @@ function _set_acl($op, $level, $mask)
 
 function handle_request($prefix='')
 {
-  $this->_set_acl($_REQUEST[$prefix.'aacl_write'], ACL_ALL, ACL_WRITE_MASK);
+  $this->_set_acl($_REQUEST[$prefix.'aacl_write'], ACL_ANY, ACL_WRITE_MASK);
   $this->_set_acl($_REQUEST[$prefix.'macl_write'], ACL_MEMBER, ACL_WRITE_MASK);
   $this->_set_acl($_REQUEST[$prefix.'gacl_write'], ACL_GROUP, ACL_WRITE_MASK);
     
-  $this->_set_acl($_REQUEST[$prefix.'aacl_read'], ACL_ALL, ACL_READ_MASK);
+  $this->_set_acl($_REQUEST[$prefix.'aacl_read'], ACL_ANY, ACL_READ_MASK);
   $this->_set_acl($_REQUEST[$prefix.'macl_read'], ACL_MEMBER, ACL_READ_MASK);
   $this->_set_acl($_REQUEST[$prefix.'gacl_read'], ACL_GROUP, ACL_READ_MASK);
 }
@@ -97,7 +97,7 @@ function get_values()
   return array(
     $this->_acl[ACL_GROUP] & 0xff, 
     $this->_acl[ACL_MEMBER] & 0xff, 
-    $this->_acl[ACL_ALL]   & 0xff);
+    $this->_acl[ACL_ANY]   & 0xff);
 }
 
 function get_gacl()
@@ -112,7 +112,7 @@ function get_macl()
 
 function get_aacl()
 {
-  return $this->_acl[ACL_ALL] & 0xff;
+  return $this->_acl[ACL_ANY] & 0xff;
 }
 
 }

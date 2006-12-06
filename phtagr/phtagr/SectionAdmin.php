@@ -50,7 +50,7 @@ function print_general ()
   $url->add_param('section', 'admin');
   $url->add_param('page', ADMIN_TAB_GENERAL);
   $url->add_param('action', 'settings');
-  echo $url->to_form();
+  echo $url->get_form();
   if ($user_self_register)
     echo "<input type=\"checkbox\" name=\"user_self_register\" checked/>";
   else
@@ -81,7 +81,7 @@ function print_user_details($u=null)
   $url->add_param('page', ADMIN_TAB_USERS);
   $url->add_param('action', 'edit');
   $url->add_param('id', $u->get_id());
-  echo $url->to_form();
+  echo $url->get_form();
   echo "<table>
   <tr>
     <td>"._("First Name:")."</td>
@@ -132,7 +132,7 @@ echo "<table>\n";
     {
       echo "<tr><td></td><td>".htmlentities($root)." ";
       $url->add_param('remove_root', $root);
-      echo "<a href=\"".$url->to_URL()."\" class=\"jsbutton\">"._("Remove")."</td></tr>\n";
+      echo "<a href=\"".$url->get_url()."\" class=\"jsbutton\">"._("Remove")."</td></tr>\n";
     }
     $url->del_param('remove_root');
   }
@@ -259,7 +259,7 @@ function print_users()
 
     $url->add_param('id', $id);
     $url->add_param('action', 'edit');
-    echo "<td><a href=\"".$url->to_URL()."\">".$u->get_name()."</a></td>\n";
+    echo "<td><a href=\"".$url->get_url()."\">".$u->get_name()."</a></td>\n";
 
     echo "<td>".sprintf("%.1f MB (%d %% used)", 
       $u->get_quota()/(1024*1024),
@@ -268,7 +268,7 @@ function print_users()
     if ($id!=1)
     {
       $url->add_param('action', 'delete');
-      echo "<td><a href=\"".$url->to_URL()."\" class=\"jsbutton\">"._("Remove")."</td>\n";
+      echo "<td><a href=\"".$url->get_url()."\" class=\"jsbutton\">"._("Remove")."</td>\n";
     } else {
       echo "<td></td>\n";
     }
@@ -321,7 +321,7 @@ function print_create_user()
 
   echo "<h3>"._("Create User")."</h3>\n";
   echo "<form action=\"./index.php\" method=\"post\">\n";
-  echo $url->to_form();
+  echo $url->get_form();
   echo "<table>
   <tr>
     <td>"._("Username:")."</td>
@@ -376,7 +376,7 @@ function print_upload ()
   echo "<form action=\"./index.php\" method=\"POST\">\n";
 
   echo "<p>"._("All uploads go below this folder. For each user a subfolder will be created under which his images will reside. If a file exists, it will be saved as FILENAME-xyz.EXTENSION.");
-  echo $url->to_form();
+  echo $url->get_form();
   echo "<input type=\"text\" name=\"set_dir\" value=\"" . $upload_dir . "\" size=\"60\"/>\n";
   echo "<input type=\"submit\" value=\"Save\" class=\"submit\" />\n";
   echo "</form>\n";
@@ -438,7 +438,7 @@ function exec_debug ()
     }
     else
     {
-      $this->info(_("Your phtagr instance runs up-to-date"));
+      $this->info(_("Your phtagr instance is up-to-date"));
     }
   }
   else
@@ -456,20 +456,20 @@ function print_debug ()
   $url->add_param('page', ADMIN_TAB_DEBUG);
   echo "<ul>\n";
   echo "<li>";
-  $url->add_param('action', 'sync'); $href=$url->to_URL();
+  $url->add_param('action', 'sync'); $href=$url->get_url();
   echo "<a href=\"$href\">"._("Synchronize files with the database")."</a></li>\n";
-  $url->add_param('action', 'delete_tables'); $href=$url->to_URL();
+  $url->add_param('action', 'delete_tables'); $href=$url->get_url();
   echo "<li><a href=\"$href\">"._("Delete Tables")."</a></li>\n";
-  $url->add_param('action', 'delete_images'); $href=$url->to_URL();
+  $url->add_param('action', 'delete_images'); $href=$url->get_url();
   echo "<li><a href=\"$href\">"._("Delete all images")."</a></li>\n";
-  $url->add_param('action', 'create_all_previews'); $href=$url->to_URL();
+  $url->add_param('action', 'create_all_previews'); $href=$url->get_url();
   echo "<li><a href=\"$href\">"._("Create all preview images")."</a></li>\n";
-  $url->add_param('action', 'upgrade'); $href=$url->to_URL();
+  $url->add_param('action', 'upgrade'); $href=$url->get_url();
   echo "<li><a href=\"$href\">"._("Upgrade this instance")."</a></li>\n";
   $url->del_param('section');
   $url->del_param('page');
   $url->del_param('action');
-  $href=$url->to_URL();
+  $href=$url->get_url();
   echo "<li><a href=\"$href\">"._("Go to phTagr")."</a></li>\n";
   echo "</ul>\n";
 }
@@ -527,7 +527,7 @@ function print_content()
     $url=new Url();
     $url->add_param('section', 'admin');
     $url->add_param('page', $cur);
-    $href=$url->to_URL();
+    $href=$url->get_url();
     echo "<div class=\"button\">
 <a href=\"$href\">Back</a>
 </div>\n";

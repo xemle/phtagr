@@ -12,7 +12,7 @@ function SectionAcl($gacl=0, $macl=0, $aacl=0)
   $this->name="acl";
   $this->_acl=array(ACL_GROUP => $gacl, 
                 ACL_MEMBER => $macl, 
-                ACL_ALL => $aacl);
+                ACL_ANY => $aacl);
 }
 
 function _print_row_read($keep)
@@ -22,7 +22,7 @@ function _print_row_read($keep)
 
   $levels=array(ACL_PREVIEW);
 
-  for ($i=ACL_GROUP ; $i<=ACL_ALL ; $i++)
+  for ($i=ACL_GROUP ; $i<=ACL_ANY ; $i++)
   {
     switch ($i)
     {
@@ -34,9 +34,9 @@ function _print_row_read($keep)
       $prefix='m';
       $value=$this->_acl[ACL_MEMBER] & ACL_READ_MASK;
       break;
-    case ACL_ALL:
+    case ACL_ANY:
       $prefix='a';
-      $value=$this->_acl[ACL_ALL] & ACL_READ_MASK;
+      $value=$this->_acl[ACL_ANY] & ACL_READ_MASK;
       break;
     default:
     }
@@ -67,7 +67,7 @@ function _print_row_write($keep)
 
   $levels=array(ACL_EDIT);
 
-  for ($i=ACL_GROUP ; $i<=ACL_ALL ; $i++)
+  for ($i=ACL_GROUP ; $i<=ACL_ANY ; $i++)
   {
     switch ($i)
     {
@@ -79,9 +79,9 @@ function _print_row_write($keep)
       $prefix='m';
       $value=$this->_acl[ACL_MEMBER] & ACL_WRITE_MASK;
       break;
-    case ACL_ALL:
+    case ACL_ANY:
       $prefix='a';
-      $value=$this->_acl[ACL_ALL] & ACL_WRITE_MASK;
+      $value=$this->_acl[ACL_ANY] & ACL_WRITE_MASK;
       break;
     default:
     }

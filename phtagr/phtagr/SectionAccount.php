@@ -87,7 +87,7 @@ function print_form_new()
   $url->from_URL();
   $url->add_param('section', 'account');
   $url->add_param('action', 'create');
-  echo "<form method=\"post\">".$url->to_form()."
+  echo "<form method=\"post\">".$url->get_form()."
 <table>
   <tr><td>"._("Username:")."</td><td><input type=\"text\" name=\"name\" value=\"$this->user\"/><td></tr>
   <tr><td>"._("Password:")."</td><td><input type=\"password\" name=\"password\"/><td></tr>
@@ -136,7 +136,7 @@ function print_login()
     $this->warning($this->message);
   }
   echo "<form section=\"index.php\" method=\"post\">
-".$url->to_form()."
+".$url->get_form()."
 <table>
   <tr><td>"._("Username:")."</td><td><input type=\"text\" name=\"user\"/><td></tr>
   <tr><td>"._("Password:")."</td><td><input type=\"password\" name=\"password\"/><td></tr>

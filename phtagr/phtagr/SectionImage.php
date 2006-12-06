@@ -65,7 +65,7 @@ function print_navigation($search)
       if ($this->img) {
         $search->set_anchor('img-'.$this->img->get_id());
       }
-      $url=$search->to_URL();
+      $url=$search->get_url();
       $search->del_anchor();
       echo "<a href=\"$url\">"._("up")."</a>&nbsp;";
       $cur_pos++;
@@ -74,7 +74,7 @@ function print_navigation($search)
 
     $search->add_param('section', 'image');
     $search->set_imageid($id);
-    $url=$search->to_URL();
+    $url=$search->get_url();
     
     if ($cur_pos<$pos)
       echo "<a href=\"$url\">"._("prev")."</a>&nbsp;";
@@ -105,7 +105,7 @@ function print_from()
   } else {
     $name=$user->get_name();
   }
-  echo "<div class=\"from\">by <a href=\"".$search->to_URL()."\">$name</a></div>\n";
+  echo "<div class=\"from\">by <a href=\"".$search->get_url()."\">$name</a></div>\n";
 }
 /** Print the caption of an image. 
   @param docut True if a long caption will be shorted. False if the whole
@@ -213,7 +213,7 @@ function print_voting()
     $fx='';
     if ($can_vote) {
       $vote_url->add_param('voting', $i);
-      $url=$vote_url->to_URL();
+      $url=$vote_url->get_url();
       echo "<a href=\"$url\">";
       $title=" title=\"".
         sprintf(_("Vote the image with %d points!"), $i)."\"";
@@ -290,39 +290,39 @@ function print_row_date()
   $date_url=new Search();
   $date_url->add_param('start', $sec-(60*30*3));
   $date_url->add_param('end', $sec+(60*30*3));
-  $url=$date_url->to_URL();
+  $url=$date_url->get_url();
   echo "<a href=\"$url\">$date</a>\n";
 
   // before
   $date_url->del_param('start');
   $date_url->add_param('end', $sec+1);
-  $url=$date_url->to_URL();
+  $url=$date_url->get_url();
   $title=_("Show older images");
   echo "[<span class=\"prev\"><a href=\"$url\" title=\"$title\">&lt;</a></span>";
 
   // day
   $date_url->add_param('start', $sec-(60*60*12));
   $date_url->add_param('end', $sec+(60*60*12));
-  $url=$date_url->to_URL();
+  $url=$date_url->get_url();
   $title=_("Show images within the same day");
   echo "<span class=\"day\"><a href=\"$url\" title=\"$title\">d</a></span>";
   // week 
   $date_url->add_param('start', $sec-(60*60*12*7));
   $date_url->add_param('end', $sec+(60*60*12*7));
-  $url=$date_url->to_URL();
+  $url=$date_url->get_url();
   $title=_("Show images within the same week");
   echo "<span class=\"week\"><a href=\"$url\" title=\"$title\">w</a></span>";
   // month 
   $date_url->add_param('start', $sec-(60*60*12*30));
   $date_url->add_param('end', $sec+(60*60*12*30));
-  $url=$date_url->to_URL();
+  $url=$date_url->get_url();
   $title=_("Show images within the same month");
   echo "<span class=\"month\"><a href=\"$url\" title=\"$title\">m</a></span>";
   // after
   $date_url->del_param('end');
   $date_url->add_param('start', $sec-1);
   $date_url->add_param('orderby', '-date');
-  $url=$date_url->to_URL();
+  $url=$date_url->get_url();
   $title=_("Show newer images");
   echo "<span class=\"next\"><a href=\"$url\" title=\"$title\">&gt;</a></span>";
   echo "]\n    </td>\n  </tr>\n";
@@ -348,7 +348,7 @@ function print_row_tags()
   for ($i=0; $i<$num_tags; $i++)
   {
     $tag_url->add_tag($tags[$i]);
-    $url=$tag_url->to_URL();
+    $url=$tag_url->get_url();
     echo "<a href=\"$url\">" . htmlentities($tags[$i]) . "</a>";
     $tag_url->del_tag($tags[$i]);
     if ($i<$num_tags-1)
@@ -379,7 +379,7 @@ function print_row_sets()
   for ($i=0; $i<$num_sets; $i++)
   {
     $set_url->add_set($sets[$i]);
-    $url=$set_url->to_URL();
+    $url=$set_url->get_url();
     echo "<a href=\"$url\">" . htmlentities($sets[$i]) . "</a>";
     $set_url->del_set($sets[$i]);
     if ($i<$num_sets-1)
@@ -411,7 +411,7 @@ function print_row_location()
   foreach ($locations as $type => $location)
   {
     $loc_url->add_param('location', $location);
-    $url=$loc_url->to_URL();
+    $url=$loc_url->get_url();
     echo "<a href=\"$url\">" . htmlentities($location) . "</a>";
     if ($i<$num_locations-1)
         echo ", ";
@@ -514,13 +514,13 @@ function print_preview($search=null)
   $img_url=clone $search;
   $img_url->add_param('section', 'image');
   $img_url->add_param('id', $id);
-  $url=$img_url->to_URL(); 
+  $url=$img_url->get_url(); 
   $size=$img->get_size(220);
 
   $iurl=new Url('image.php');
   $iurl->add_param('id', $id);
   $iurl->add_param('type', 'preview');
-  echo "<a href=\"$url\"><img src=\"".$iurl->to_URL()."\" alt=\"$name\" title=\"$name\" ".$size[2]."/></a></div>\n";
+  echo "<a href=\"$url\"><img src=\"".$iurl->get_url()."\" alt=\"$name\" title=\"$name\" ".$size[2]."/></a></div>\n";
   
   $this->print_from();
   $this->print_caption();
@@ -581,7 +581,7 @@ function print_content()
   $url=new Url('image.php');
   $url->add_param('id', $id);
   $url->add_param('type', 'preview');
-  echo "<div class=\"preview\"><img src=\"".$url->to_URL()."\" alt=\"$name\" ".$size[2]."/></div>\n";
+  echo "<div class=\"preview\"><img src=\"".$url->get_url()."\" alt=\"$name\" ".$size[2]."/></div>\n";
 
   $this->print_from();
   $this->print_caption(false);
@@ -615,7 +615,7 @@ function print_content()
   echo "<input type=\"hidden\" name=\"action\" value=\"edit\" />\n";
   echo "<input type=\"hidden\" name=\"image\" value=\"$id\" />\n";
 
-  echo $search->to_form();
+  echo $search->get_form();
   echo "</div></form>\n";
   if (!isset($_SESSION['img_viewed'][$id]))
     $img->update_ranking();

@@ -336,30 +336,20 @@ function _handle_request_acl(&$img)
   if (!$img->is_owner(&$user))
     return false;
     
-  $this->debug($_REQUEST);
+  //$this->debug($_REQUEST);
   $acl=new Acl($img->get_gacl(), $img->get_macl(), $img->get_aacl());
  
-  // JavaScript formular or set selection?
+  // JavaScript formular or a multiple selection?
+  $prefix='';
   if (isset($_REQUEST['js_acl']))
+    $prefix='js_';
+  if (isset($_REQUEST[$prefix.'acl_setgroup']))
   {
-    if (isset($_REQUEST['js_acl_setgroup']))
-    {
-      $gid=intval($_REQUEST['js_acl_setgroup']);
-      if ($gid>=0)
-        $img->set_groupid($gid);
-    }
-    $acl->handle_request('js_');
+    $gid=intval($_REQUEST[$prefix.'acl_setgroup']);
+    if ($gid>=0)
+      $img->set_groupid($gid);
   }
-  else 
-  {
-    if (isset($_REQUEST['acl_setgroup']))
-    {
-      $gid=intval($_REQUEST['acl_setgroup']);
-      if ($gid>=0)
-        $img->set_groupid($gid);
-    }
-    $acl->handle_request();
-  }
+  $acl->handle_request($prefix);
   
   list($gacl, $macl, $aacl)=$acl->get_values();
   $id=$img->get_id();

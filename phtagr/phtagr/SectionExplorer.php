@@ -30,7 +30,7 @@ function print_navigator($search, $current, $count)
   {
     $i=$current-1;
     $search->set_page_num($i);
-    $url=$search->to_URL();
+    $url=$search->get_url();
     echo "<a href=\"$url\">&lt;</a>&nbsp;\n";
   }
     
@@ -46,7 +46,7 @@ function print_navigator($search, $current, $count)
             ($i-$current < 4 && $current-$i<4)))
     {
       $search->set_page_num($i);
-      $url=$search->to_URL();
+      $url=$search->get_url();
       printf("<a href=\"$url\">%d</a>\n",$i);
     }
     else if ($i == $count-4 || $i == 3) 
@@ -56,7 +56,7 @@ function print_navigator($search, $current, $count)
   {
     $i=$current+1;
     $search->set_page_num($i);
-    $url=$search->to_URL();
+    $url=$search->get_url();
     echo "&nbsp;<a href=\"$url\">&gt;</a>\n";
   }
   echo "</div>\n\n";
@@ -161,7 +161,7 @@ function print_content()
   $this->print_navigator($nav_search, $nav_current, ceil($count/$nav_size));
 
   echo "<div class=\"edit\">";
-  echo $search->to_form();
+  echo $search->get_form();
 
   $edit=new Edit();
   $edit->print_bar();

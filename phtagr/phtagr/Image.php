@@ -451,7 +451,6 @@ function can_metadata($user=null)
   return $this->_check_acl(&$user, ACL_METADATA, ACL_WRITE_MASK);
 }
 
-/** Return true if user can upload a file with the given size
 /** Return true if user can preview the image 
   @param user User object. Default is null.*/
 function can_preview($user=null)

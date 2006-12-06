@@ -20,7 +20,7 @@ define("ACL_EDIT", 0x01);
 
 define("ACL_GROUP", 0x00);
 define("ACL_MEMBER", 0x01);
-define("ACL_ALL", 0x02);
+define("ACL_ANY", 0x02);
 
 define("LOCATION_UNDEFINED", 0x00);
 define("LOCATION_CITY", 0x01);

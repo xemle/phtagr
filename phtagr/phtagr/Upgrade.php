@@ -89,7 +89,6 @@ function _upgrade_to_1()
   $db->query($sql);
 
   $conf->set_default('db.version', '1');
-  $this->success(_("Your phtagr instance is upgraded to version 1"));
 }
 
 }

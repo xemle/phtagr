@@ -57,18 +57,18 @@ function print_content()
       if ($userid>0) 
       {
         $url->set_userid(0);
-        echo "<a href=\"".$url->to_URL()."\">$img</a> ";
+        echo "<a href=\"".$url->get_url()."\">$img</a> ";
         $url->set_userid($userid);
       }
       if (!$add_url->has_tag($tag))
       {
         $add_url->add_tag($tag);
-        echo "<a href=\"".$add_url->to_URL()."\">+</a> ";
+        echo "<a href=\"".$add_url->get_url()."\">+</a> ";
         $add_url->del_tag($tag);
       } else {
         echo "+ ";
       }
-      echo "<a href=\"".$url->to_URL()."\">".htmlentities($tag)."</a>";
+      echo "<a href=\"".$url->get_url()."\">".htmlentities($tag)."</a>";
       echo " <span class=\"hits\">($nums)</span></li>\n";
       $url->del_tag($tag);
     }
@@ -87,18 +87,18 @@ function print_content()
       if ($userid>0) 
       {
         $url->set_userid(0);
-        echo "<a href=\"".$url->to_URL()."\">$img</a> ";
+        echo "<a href=\"".$url->get_url()."\">$img</a> ";
         $url->set_userid($userid);
       }
       if (!$add_url->has_set($set))
       {
         $add_url->add_set($set);
-        echo "<a href=\"".$add_url->to_URL()."\">+</a> ";
+        echo "<a href=\"".$add_url->get_url()."\">+</a> ";
         $add_url->del_set($set);
       } else {
         echo "+ ";
       }
-      echo "<a href=\"".$url->to_URL()."\">".htmlentities($set)."</a>";
+      echo "<a href=\"".$url->get_url()."\">".htmlentities($set)."</a>";
       echo " <span class=\"hits\">($nums)</span></li>\n";
       $url->del_set($set);
     }
@@ -116,19 +116,19 @@ function print_content()
       if ($userid>0) 
       {
         $url->set_userid(0);
-        echo "<a href=\"".$url->to_URL()."\">$img</a> ";
+        echo "<a href=\"".$url->get_url()."\">$img</a> ";
         $url->set_userid($userid);
       }
       if (!$add_url->has_location($loc))
       {
         $loc_old=$add_url->get_location();
         $add_url->set_location($loc);
-        echo "<a href=\"".$add_url->to_URL()."\">+</a> ";
+        echo "<a href=\"".$add_url->get_url()."\">+</a> ";
         $add_url->set_location($loc_old);
       } else {
         echo "+ ";
       }
-      echo "<a href=\"".$url->to_URL()."\">".htmlentities($loc)."</a>";
+      echo "<a href=\"".$url->get_url()."\">".htmlentities($loc)."</a>";
       echo " <span class=\"hits\">($nums)</span></li>\n";
       $url->del_location($loc);
     }

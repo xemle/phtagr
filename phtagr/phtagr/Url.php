@@ -11,7 +11,7 @@ define('PARAM_STRING', 0x03);
   @class Url Abstracts a URL with parameters and anchors
   @todo Rename private properts with underscore prefix
   @todo Rename to_url to get_url
-  @todo Rename to_form to get_from
+  @todo Rename get_form to get_from
   @todo Rename PARAM_PINT to PARAM_UINT
 */
 class Url extends Base
@@ -194,7 +194,7 @@ function from_URL()
 }
 
 /** Returns the link as URL string */
-function to_URL()
+function get_url()
 {
   $url=$this->base;
   $n=count($this->params);
@@ -225,7 +225,7 @@ function _input($name, $value)
 }
 
 /** Returns a string of hidden form inputs */
-function to_form()
+function get_form()
 {
   $input='';
   foreach ($this->params as $p => $v)

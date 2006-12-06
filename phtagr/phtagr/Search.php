@@ -3,8 +3,8 @@
 include_once("$phtagr_lib/Url.php");
 /**
   @class Search Mapping between URLs, HTML forms and SQL queries.
-  @todo Rename to_URL to get_url
-  @todo Rename to_form to get_form
+  @todo Rename get_url to get_url
+  @todo Rename get_form to get_form
 */
 class Search extends Url
 {
@@ -372,18 +372,18 @@ function _to_params()
 }
 
 /** Converts the search to a URL */
-function to_URL()
+function get_url()
 {
   $this->_to_params();
-  return parent::to_URL();
+  return parent::get_url();
 }
 
 
 /** Print the search as a HTML form */
-function to_form()
+function get_form()
 {
   $this->_to_params();
-  return parent::to_form();  
+  return parent::get_form();  
 }
 
 /** Create a SQL query from a tag array 

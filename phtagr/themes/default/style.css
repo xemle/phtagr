@@ -302,8 +302,9 @@ input, select, submit, reset, textarea {
 .thumbcell {
   float: left;
   width: 270px;
-  margin: 0;
-  padding: 10px 10px 10px 10px;
+  //margin: 10px 10px 10px 10px;
+  margin: 0px;
+  padding: 10px;
   text-align: center; 
   vertical-align: top;
 }
@@ -313,6 +314,7 @@ input, select, submit, reset, textarea {
   background-color: #dddddd;
   border-left: 10px solid #00a800;
   border-bottom: 1px solid #00a800;
+  margin: 0;
   padding: 2px 0 2px 5px;
   font-weight: bold;
   text-align: left;
@@ -363,13 +365,13 @@ input, select, submit, reset, textarea {
 }
 
 .caption * textarea {
-  width: 270px;
+  width: 100%;
 }
 
 .voting {
   margin: 5px auto;
   display: block;
-  width: 270px;
+  width: 100%;
   text-align: center;
   font-size: 8pt;
 }
@@ -422,7 +424,7 @@ input, select, submit, reset, textarea {
 }
 
 .thumbcell .imginfo > table {
-  width: 280px;
+  width: 100%;
 }
 
 .imginfo * a, .tags * a {

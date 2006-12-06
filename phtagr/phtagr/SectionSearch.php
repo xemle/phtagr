@@ -21,7 +21,7 @@ function print_content()
   $url->add_param('section', 'explorer');
 
   echo "<form action=\"index.php\" method=\"post\">\n";
-  echo $url->to_form();
+  echo $url->get_form();
   echo "<table>
   <tr>
     <th>"._("Tags:")."</th>

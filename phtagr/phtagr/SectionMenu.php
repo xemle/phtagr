@@ -159,7 +159,7 @@ function print_content()
       if ($p{0}!='_')
         $li->add_param($p, $v);
     }
-    $href=$li->to_URL();
+    $href=$li->get_url();
 
     echo "  <li><a href=\"$href\"$cur>$name</a>";
     if (isset($item['_sub']))

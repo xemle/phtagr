@@ -53,7 +53,7 @@ function print_all_tags() {
   {
     $size=intval(8+($hit-$min)*$grad);
     $tag_url->add_param('tags', $tag);
-    $url=$tag_url->to_URL();
+    $url=$tag_url->get_url();
     echo "<span style=\"font-size:${size}pt;\"><a href=\"$url\">$tag</a></span>&nbsp;\n";
   }
   echo "</div>\n</p>\n";
@@ -113,11 +113,11 @@ function print_popular_images()
       $name=$image->get_name();
       $search->set_pos($pos);
       $search->add_param('id', $id);
-      $url=$search->to_URL();
+      $url=$search->get_url();
       $iurl=new Url('image.php');
       $iurl->add_param('id', $id);
       $iurl->add_param('type', 'mini');
-      echo "<a href=\"$url\"><img src=\"".$iurl->to_URL()."\" alt=\"$name\" width=\"75\" height=\"75\"/></a>";
+      echo "<a href=\"$url\"><img src=\"".$iurl->get_url()."\" alt=\"$name\" width=\"75\" height=\"75\"/></a>";
       unset($image);
     }    
     echo "</td>\n";

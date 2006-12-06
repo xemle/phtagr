@@ -296,7 +296,7 @@ function print_form_upload($dir)
   $url=new Url();
   $url->add_param('section', 'upload');
   echo "<form action=\"./index.php\" method=\"POST\" enctype=\"multipart/form-data\">\n";
-  echo $url->to_form();
+  echo $url->get_form();
   echo "<input type=\"hidden\" name=\"MAX_FILE_SIZE\" value=\"8000000\" />
 <table>
   <tr>

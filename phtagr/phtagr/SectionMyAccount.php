@@ -35,7 +35,7 @@ function print_general ()
 
   echo "<h3>"._("General")."</h3>\n";
   echo "<form action=\"./index.php\" method=\"post\">\n";
-  echo $url->to_form();
+  echo $url->get_form();
   echo "<table>
   <tr>
     <td>"._("First Name:")."</td>
@@ -148,7 +148,7 @@ function print_upload ()
   printf(_("You have %.3f MB already uploaded. Your total limit is %.3f MB. Currently you are allowed to upload %.3f MB."), $used/(1024*1024), $quota/(1024*1024), $upload_max/(1024*1024));
 
   echo "<form action=\"./index.php\" method=\"post\" enctype=\"multipart/form-data\">\n";
-  echo $url->to_form();
+  echo $url->get_form();
   echo "<div class=\"upload_files\" \>\n";
   echo "<table id=\"upload_files\"><tbody>
   <tr id=\"upload-1\">
@@ -358,10 +358,10 @@ function print_group_list()
         continue;
       $url->add_param('gid', $gid);
       echo "  <tr>
-      <td><a href=\"".$url->to_URL()."\">".$group->get_name()."</a></td>
+      <td><a href=\"".$url->get_url()."\">".$group->get_name()."</a></td>
       <td>".$group->get_num_members()."</td>\n";
       $url->add_param("action", "remove");
-      echo "<td><a href=\"".$url->to_URL()."\" class=\"jsbutton\">"._("Remove")."</a></td>
+      echo "<td><a href=\"".$url->get_url()."\" class=\"jsbutton\">"._("Remove")."</a></td>
     </tr>\n";
       $url->del_param("action");
       unset($group);
@@ -385,7 +385,7 @@ function print_group_list()
     groups.")."</p>";
     $url->add_param('action', 'add');
     echo "<form action=\"./index.php\" method=\"post\">\n";
-    echo $url->to_form();
+    echo $url->get_form();
     echo "<input type=\"text\" name=\"name\" />
     <input type=\"submit\" class=\"submit\" value=\""._("Add new group")."\" />\n";
     echo "</form>\n";
@@ -409,7 +409,7 @@ function print_group($gid)
 
   echo "<h3>"._("Group").": ".$group->get_name()."</h3>\n";
   echo "<form action=\"./index.php\" method=\"post\">\n";
-  echo $url->to_form();
+  echo $url->get_form();
 
   // Group Tables
   $members=$group->get_members();
@@ -429,7 +429,7 @@ function print_group($gid)
       echo "  <tr>
       <td><input type=\"checkbox\" name=\"members[]\" value=\"".$name."\"/></td>
       <td>".$name."</td>
-      <td><a href=\"".$url->to_URL()."\" class=\"jsbutton\">"._("Delete")."</a></td>
+      <td><a href=\"".$url->get_url()."\" class=\"jsbutton\">"._("Delete")."</a></td>
     </tr>\n";
       unset($group);
     }
@@ -473,7 +473,7 @@ function print_group($gid)
   $url=new Url();
   $url->add_param('section', 'myaccount');
   $url->add_param('tab', MYACCOUNT_TAB_GROUPS);
-  echo "<a href=\"".$url->to_URL()."\" class=\"jsbutton\">"._("Show all groups")."</a>\n";
+  echo "<a href=\"".$url->get_url()."\" class=\"jsbutton\">"._("Show all groups")."</a>\n";
 }
 
 function print_groups()
@@ -607,9 +607,9 @@ function print_guest_list()
     {
       $url->add_param('guestid', $guestid);
       echo "  <tr>
-      <td><a href=\"".$url->to_URL()."\">".$name."</a></td>\n";
+      <td><a href=\"".$url->get_url()."\">".$name."</a></td>\n";
       $url->add_param("action", "remove");
-      echo "<td><a href=\"".$url->to_URL()."\" class=\"jsbutton\">"._("Remove")."</a></td>
+      echo "<td><a href=\"".$url->get_url()."\" class=\"jsbutton\">"._("Remove")."</a></td>
     </tr>\n";
       $url->del_param("action");
       unset($group);
@@ -630,7 +630,7 @@ function print_guest_list()
     echo "<p>"._("Add a new guest account here. You are allowed to create 10 guest accounts.")."</p>";
     $url->add_param('action', 'add');
     echo "<form action=\"./index.php\" method=\"post\">\n";
-    echo $url->to_form();
+    echo $url->get_form();
 
     echo "<table>
   <tr>
@@ -672,7 +672,7 @@ function print_guest($guestid)
 
   echo "<h3>"._("Guest").": ".$guest->get_name()."</h3>\n";
   echo "<form action=\"./index.php\" method=\"post\">\n";
-  echo $url->to_form();
+  echo $url->get_form();
 
   echo "<table>
   <tr>
@@ -703,7 +703,7 @@ function print_guest($guestid)
   $url=new Url();
   $url->add_param('section', 'myaccount');
   $url->add_param('tab', MYACCOUNT_TAB_GUESTS);
-  echo "<a href=\"".$url->to_URL()."\" class=\"jsbutton\">"._("Show all guests")."</a>\n";
+  echo "<a href=\"".$url->get_url()."\" class=\"jsbutton\">"._("Show all guests")."</a>\n";
 }
 
 function print_guests()
