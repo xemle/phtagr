@@ -12,6 +12,7 @@ var $_iptc;
 function ImageSync($id=-1)
 {
   $this->Image($id);
+  $_iptc=null;
 }
 
 /** Import an image by a filename to the database. If an image with the same

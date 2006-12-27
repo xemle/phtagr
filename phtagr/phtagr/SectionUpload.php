@@ -192,14 +192,15 @@ function zipfile_process($path, $filename)
       unlink ($name[1]);
       
       $image = new ImageSync();
-      if ($image->import($upload_name, 1) == false)
+      $result=$image->import($upload_name, 1);
+      if ($result<0)
       {
         /* If something went wrong, we try to delete as much as possible. */
-        $this->error("Uploading $zip_content.");
+        $this->error(sprintf(_("Uploading of file '%s' went wrong. Error %d returnd."), $zip_content, $result));
         $this->rm_rf ($filename);
         return false;
       }
-      $this->success("File $zip_content uploaded.");
+      $this->success(sprintf(_("Uploading of file '%s' was successful."), $zip_content));
       $count++;
     }
     

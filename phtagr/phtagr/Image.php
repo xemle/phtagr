@@ -960,7 +960,7 @@ function set_location($value, $type)
     $sql="INSERT INTO $db->imagelocation ( imageid, locationid )
           VALUES ( $id, $locationid )";
   }
-  $result = $db->query($sql);
+  $result=$db->query($sql);
   if (!$result)
     return false;
 
@@ -982,6 +982,9 @@ function del_location($value, $type)
     return false;
 
   $this->get_locations();
+  if (!isset($this->_locations[$type]))
+    return true;
+
   if ($value!='')
   {
     if ($this->_locations[$type]!=$value)
@@ -993,7 +996,7 @@ function del_location($value, $type)
   } else {
     $sql="DELETE FROM il
           USING $db->imagelocation as il, $db->location as l
-          WHERE il.locationid=l.id AND l.type=$type";
+          WHERE il.imageid=$id AND il.locationid=l.id AND l.type=$type";
   }
   $result=$db->query($sql);
   if (!$result)
