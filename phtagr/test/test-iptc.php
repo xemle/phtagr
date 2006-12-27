@@ -19,7 +19,7 @@ if ($img->get_errno()!=0)
   echo $img->error."\n";
 } else {
   echo "Reinsert keyword record...\n";
-  $img->rem_record('2:025', "Keyword");
+  $img->del_record('2:025', "Keyword");
   $img->add_record('2:025', "Keyword");
   echo "Save changes...\n";
   $img->save_to_file(false);

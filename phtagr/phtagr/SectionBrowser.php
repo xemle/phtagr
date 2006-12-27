@@ -3,6 +3,7 @@
 include_once("$phtagr_lib/SectionBase.php");
 include_once("$phtagr_lib/Filesystem.php");
 include_once("$phtagr_lib/Url.php");
+include_once("$phtagr_lib/ImageSync.php");
 
 class SectionBrowser extends SectionBase
 {
@@ -144,8 +145,8 @@ function print_content()
     printf (_("Found %d images")."<br/>\n", count($images));
     foreach ($images as $img)
     {
-      $image=new Image();
-      $result=$image->insert($fs->get_realname($img), 0);
+      $image=new ImageSync();
+      $result=$image->import($fs->get_realname($img), 0);
 
       switch ($result)
       {

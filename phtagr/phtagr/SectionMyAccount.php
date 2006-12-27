@@ -70,7 +70,7 @@ function print_general ()
   echo "<h3>"._("Default ACL")."</h3>\n";
 
   $acl=new SectionAcl($gacl, $macl, $aacl);
-  $acl->print_table();
+  $acl->print_table(false);
   echo "<p>"._("The default ACL values are used when new images are
   added.")."</p>";
 
@@ -115,7 +115,7 @@ function exec_general ()
       }
     }
 
-    $user->commit_changes();
+    $user->commit();
 
     $acl=new Acl(
       $conf->get('image.gacl', (ACL_EDIT|ACL_PREVIEW)),
@@ -201,7 +201,7 @@ function exec_groups()
     if ($name=='')
       return;
     $groups=$user->get_groups();
-    if (count($groups)>10)
+    if (count($groups)>GROUP_MAX)
       return;
     $group=new Group();
     $result=$group->create($_REQUEST['name']);
@@ -235,6 +235,11 @@ function exec_groups()
     $group=new Group($id);
     if ($group->get_id()!=$id)
       return;
+    if ($group->get_num_members()>GROUP_MEMBER_MAX)
+    {
+      $this->warning(_("Your group member list full."));
+      return;
+    }
     if ($group->add_member($name))
       $this->success(sprintf(_("Member '%s' was successfully added to your group '%s'"), $name, $group->get_name()));
     else
@@ -285,6 +290,8 @@ function exec_groups()
     {
       if (!$group->has_member($name))
         continue;
+      if ($dst_group->get_num_members()>GROUP_MEMBER_MAX)
+        continue;
       if ($dst_group->add_member($name))
         $success++;
       else 
@@ -314,6 +321,8 @@ function exec_groups()
     foreach ($members as $name)
     {
       if (!$group->has_member($name))
+        continue;
+      if ($dst_group->get_num_members()>GROUP_MEMBER_MAX)
         continue;
       if ($dst_group->add_member($name))
       {
@@ -381,8 +390,8 @@ function print_group_list()
   if (count($group)<11) 
   {
     echo "<h3>"._("Add new group")."</h3>";
-    echo "<p>"._("Add a new group here. You are allowed to create 10 different
-    groups.")."</p>";
+    echo "<p>".sprintf(_("Add a new group here. You are allowed to create %d different
+    groups."), GROUP_MAX)."</p>";
     $url->add_param('action', 'add');
     echo "<form action=\"./index.php\" method=\"post\">\n";
     echo $url->get_form();
@@ -466,13 +475,18 @@ function print_group($gid)
     echo "<input type=\"hidden\" name=\"action\" value=\"none\" />\n";
   }
 
-  echo "<input type=\"text\" name=\"add_member\" />
-  <input type=\"submit\" class=\"submit\" value=\""._("Add member")."\" />\n";
-  echo "</form>\n";
+  if ($group->get_num_members()<=GROUP_MEMBER_MAX)
+  {
+    echo "<h3>"._("Add new group member")."</h3>\n";
+    echo "<input type=\"text\" name=\"add_member\" />
+    <input type=\"submit\" class=\"submit\" value=\""._("Add member")."\" />\n";
+    echo "</form>\n";
 
-  $url=new Url();
-  $url->add_param('section', 'myaccount');
-  $url->add_param('tab', MYACCOUNT_TAB_GROUPS);
+    $url=new Url();
+    $url->add_param('section', 'myaccount');
+    $url->add_param('tab', MYACCOUNT_TAB_GROUPS);
+  }
+
   echo "<a href=\"".$url->get_url()."\" class=\"jsbutton\">"._("Show all groups")."</a>\n";
 }
 
@@ -506,7 +520,7 @@ function exec_guests()
       return;
 
     $guests=$user->get_guests();
-    if (count($guests)>10)
+    if (count($guests)>GUEST_MAX)
       return;
 
     $result=$user->create_guest($name, $pwd);
@@ -575,7 +589,7 @@ function exec_guests()
       $expire=$_REQUEST['expire'];
       if ($guest->set_expire($expire))
       {
-        $guest->commit_changes();
+        $guest->commit();
         $this->success(_("Expire date successfully changed"));
       }
     }
@@ -627,7 +641,7 @@ function print_guest_list()
   if (count($guests)<11) 
   {
     echo "<h3>"._("New guest account")."</h3>\n";
-    echo "<p>"._("Add a new guest account here. You are allowed to create 10 guest accounts.")."</p>";
+    echo "<p>".sprintf(_("Add a new guest account here. You are allowed to create %d guest accounts."), GUEST_MAX)."</p>";
     $url->add_param('action', 'add');
     echo "<form action=\"./index.php\" method=\"post\">\n";
     echo $url->get_form();

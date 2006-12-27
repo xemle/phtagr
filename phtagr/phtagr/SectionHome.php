@@ -16,17 +16,13 @@ function SectionHome()
   $this->name="home";
 }
 
-function print_all_tags() {
-  global $db;
-  
+function print_all_tags() 
+{
   echo "<h3>"._("Popular tags:")."</h3>\n\n<p>";
-  // best of tags
-  $sql="SELECT t.name,COUNT(t.name) AS hits 
-        FROM $db->tag AS t, $db->imagetag AS it 
-        WHERE t.id=it.tagid
-        GROUP BY t.name 
-        ORDER BY hits DESC LIMIT 0,50";
-  $result = $db->query($sql);
+
+  $search=new Search();
+  $result=$search->get_popular_tags();
+
   $tags=array();
   $hits=array();
   $data=array();

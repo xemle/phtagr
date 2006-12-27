@@ -107,7 +107,8 @@ function resetNode(nodeId)
 
 /** Clones all hidden input elements from one form to another recursivly
   @param src Source element
-  @param dstForm Element of the destination form */
+  @param dstForm Element of the destination form 
+  @note It copies all hidden input except with the name 'edit' */
 function _clone_hidden_input(src, dstForm)
 {
   if (src==null || dstForm==null)
@@ -122,7 +123,8 @@ function _clone_hidden_input(src, dstForm)
     e=src.childNodes[i];
     if (e.nodeType==1 &&
       e.nodeName=="INPUT" && 
-      e.getAttribute("type")=="hidden")
+      e.getAttribute("type")=="hidden" &&
+      e.getAttribute("name")!="edit")
       dstForm.appendChild(e.cloneNode(true))
     else
       _clone_hidden_input(e, dstForm);
@@ -375,6 +377,7 @@ function edit_caption(id)
   var caption=images[id]['caption'];
 
   var form=_init_form(id);
+  form.appendChild(_new_input('hidden', 'edit', 'js_caption'));
   var t=document.createElement('table');
   var tr=document.createElement('tr');
   var td=document.createElement('td');
@@ -429,6 +432,7 @@ function edit_meta(id)
   Data[nodeId]=e.cloneNode(true);
 
   var form=_init_form(id);
+  form.appendChild(_new_input('hidden', 'edit', 'js_meta'));
 
   var t=document.createElement('table');
   t.appendChild(_get_row_date(id));
@@ -500,7 +504,7 @@ function _get_row_groups(gid)
   s.setAttribute("name", "js_acl_setgroup");
 
   var o=document.createElement("option");
-  o.setAttribute("value", "-1");
+  o.setAttribute("value", "0");
   o.appendChild(document.createTextNode("Keep"));
   s.appendChild(o);
 
@@ -518,11 +522,100 @@ function _get_row_groups(gid)
       s.appendChild(o);
     }
   }
+  var o=document.createElement("option");
+  o.setAttribute("value", -1);
+  o.appendChild(document.createTextNode('Delete group'));
+  s.appendChild(o);
+
   td.appendChild(s);
   return row;
 }
 
 function _get_row_acls(id)
+{
+  var gacl=images[id]['gacl'];
+  var macl=images[id]['macl'];
+  var aacl=images[id]['aacl'];
+
+  var row=document.createElement("tr");
+  var th=document.createElement("th");
+  th.appendChild(document.createTextNode('ACL:'));
+  row.appendChild(th);
+
+  var td=document.createElement('td');
+  row.appendChild(td);
+
+  var table=document.createElement("table");
+  td.appendChild(table);
+
+  // first row
+  var tr=document.createElement("tr");
+  
+  var td=document.createElement("td");
+  tr.appendChild(td);
+
+  td=td.cloneNode(false);
+  td.appendChild(document.createTextNode("Friends"));
+  tr.appendChild(td);
+
+  td=td.cloneNode(false);
+  td.appendChild(document.createTextNode("Members"));
+  tr.appendChild(td);
+
+  td=td.cloneNode(false);
+  td.appendChild(document.createTextNode("Public"));
+  tr.appendChild(td);
+
+  table.appendChild(tr);
+
+  // second row
+  tr=tr.cloneNode(false);
+
+  td=td.cloneNode(false);
+  td.appendChild(document.createTextNode("Edit"));
+  tr.appendChild(td);
+  
+  td=document.createElement('td');
+  td.appendChild(_new_cb('js_gacl_write', 'edit', (gacl & 0x01)));
+  tr.appendChild(td);
+  
+  td=document.createElement('td');
+  td.appendChild(_new_cb('js_macl_write', 'edit', (macl & 0x01)));
+  tr.appendChild(td);
+
+  td=document.createElement('td');
+  td.appendChild(_new_cb('js_aacl_write', 'edit', (aacl & 0x01)));
+  tr.appendChild(td);
+
+  table.appendChild(tr);
+  
+  // third row
+  tr=tr.cloneNode(false);
+
+  td=td.cloneNode(false);
+  td.appendChild(document.createTextNode("View"));
+  tr.appendChild(td);
+  
+  td=document.createElement('td');
+  td.appendChild(_new_cb('js_gacl_read', 'preview', (gacl & 0xf0)));
+  tr.appendChild(td);
+  
+  td=document.createElement('td');
+  td.appendChild(_new_cb('js_macl_read', 'preview', (macl & 0xf0)));
+  tr.appendChild(td);
+
+  td=document.createElement('td');
+  var cb=_new_cb('js_aacl_read', 'preview', (aacl & 0xf0));
+  cb.setAttribute('id', 'focus-'+id);
+  td.appendChild(cb);
+  tr.appendChild(td);
+  
+  table.appendChild(tr);
+  return row;
+}
+
+/** Change advanced the settings 
+function _get_row_acls_advanced(id)
 {
   var gacl=images[id]['gacl'];
   var macl=images[id]['macl'];
@@ -607,6 +700,7 @@ function _get_row_acls(id)
   table.appendChild(tr);
   return row;
 }
+*/
 
 /** Row for date
   @param id ID of the image */

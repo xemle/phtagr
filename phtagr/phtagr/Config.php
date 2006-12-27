@@ -70,7 +70,33 @@ function get($name, $default=null)
   return $default;
 }
 
-/** Adds or updates a name-value pair in the configuration table. */
+/** Queries a parameter from the database directly
+  @param userid User ID
+  @param name Parameter name
+  @param default Default parameter, if the parameter does not exists 
+  @return Return the parameter is exists. Otherwise the given default name */
+function query($userid, $name, $default)
+{
+  global $db;
+  $sname=mysql_escape_string($name);
+  $sql="SELECT value 
+        FROM $db->conf
+        WHERE (id=0 OR id=$userid) AND name='$sname'
+        ORDER BY id DESC
+        LIMIT 0,1";
+  $result=$db->query($sql);
+  if (!$result || mysql_num_rows($result)==0)
+    return $default;
+
+  $row=mysql_fetch_row($result);
+  return $row[0];
+}
+
+/** Adds or updates a name-value pair in the configuration table. 
+  @param userid User ID of the parameter
+  @param name Parameter name
+  @param value Parameter value
+  @return True on success, false otherwise */
 function _set($userid, $name, $value)
 {
   global $db;
@@ -88,7 +114,7 @@ function _set($userid, $name, $value)
   if (mysql_num_rows($result)==0)
     $sql="INSERT INTO $db->conf 
           (userid, name, value) VALUES 
-          (".$this->_userid.",'$sname','$svalue')";    
+          ($userid,'$sname','$svalue')";    
   // Update single parameter 
   elseif (substr($name, -2)!='[]')
   {

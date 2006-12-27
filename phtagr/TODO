@@ -24,28 +24,29 @@ Other image communities: http://holocore.com/?PictureSync_services
     Popular index = current value*0.8 + 0.2*(1/(current time+1 - last view))
     The value is updated every time if a image is clicked and only one per
     session. This function must be reviewed
-  - rename pref to conf
+  - rename pref to conf. Done.
   - User
     - add creator: Id of the creator user. This is used to identify the user
-      created guest account.
-    - add user type: Memeber or guest
-    - add cookie: Replace the username=password cookie by a random value
-    - add cookie expire
-    - add expire
+      created guest account. Done.
+    - add user type: Memeber or guest. Done.
+    - add cookie: Replace the username=password cookie by a random value. Done.
+    - add cookie expire. Done but has to be checked.
+    - add expire. Done but has to be checked.
     - remove fsroot: Move this info to pref, since a user can have multiple
-      roots
+      roots. Done.
   - Image
-    - Add duration: Seconds for a web video
+    - Add duration: Seconds for a web video. Done.
     - Add HSV value: H, S, and V separated, used to identify/sort images by
       HSV. See http://en.wikipedia.org/wiki/HSV_color_space or
-      http://en.wikipedia.org/wiki/HSL_color_space for more details.
+      http://en.wikipedia.org/wiki/HSL_color_space for more details. Done.
   - Comments
-    - add reply-to-id, which is refering
-    - add auth string for modifying, deleting comment
-    - Add notify-by-email flag to send an email/message to the replied comment
+    - add reply-to-id, which is refering. Done.
+    - add auth string for modifying, deleting comment. Done.
+    - Add notify-by-email flag to send an email/message to the replied comment.
+      Done. 
   - message
     A message can be used for intercommunication between phtagr users. E.g. for
-    group invitations, plain messages, etc.
+    group invitations, plain messages, etc. Done.
     - Id: Message id
     - from: Id of creator
     - to: Id of recipient
@@ -57,7 +58,7 @@ Other image communities: http://holocore.com/?PictureSync_services
     - body
 
 - SqlObject: Represents a row, which is identified by an ID
-  User, Image, Comment, Message can be inherited from it
+  User, Image, Comment, Message can be inherited from it. Done.
   - _table
   - _data
   - init_by_id()
@@ -270,6 +271,11 @@ Other image communities: http://holocore.com/?PictureSync_services
     - Stores MD5 ID for authentication
     - Stores the login time. This can be used to show new images since the last
       login
+    - Add several values to the cookie like (<name>=<value>;)+
+      - login
+      - visited
+      - lang
+      - theme
   - Remember visited image. This information will be used for counting the
     clicks on the images. Done.
   - Storing of users preferences. These are loaded at a session beginning or
@@ -303,13 +309,16 @@ Other image communities: http://holocore.com/?PictureSync_services
     - ACL
     - Upload
 
-- Setup
+- Setup/Installation
   - Easy setup of phTagr via HTML. 
     - An other aproach is to have a single configuration page. E.g. Creation
       tables and the admin account at one step.
   - Connection to the SQL databas
   - Creation of SQL tables
   - Creation of the admin account
+  - If a configuration file is copied to another place, the installation
+    procedure should skip these topic and should initialize the table and the
+    admin account.
 
 - Themes
   - Diffent themes by CSS

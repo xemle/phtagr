@@ -191,8 +191,8 @@ function zipfile_process($path, $filename)
       copy ($name[1],$upload_name);
       unlink ($name[1]);
       
-      $image = new Image();
-      if ($image->insert($upload_name, 1) == false)
+      $image = new ImageSync();
+      if ($image->import($upload_name, 1) == false)
       {
         /* If something went wrong, we try to delete as much as possible. */
         $this->error("Uploading $zip_content.");
@@ -275,8 +275,8 @@ function upload_process()
         }
     
         chmod($upload_name, 0644);
-        $image = new Image();
-        $image->insert($upload_name, 1);
+        $image = new ImageSync();
+        $image->import($upload_name, 1);
         
         $this->success("File $name uploaded.");
       }

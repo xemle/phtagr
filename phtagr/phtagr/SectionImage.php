@@ -429,8 +429,10 @@ function _escape_js($s)
 {
   $patterns[0]='/\'/';
   $patterns[1]="/\//";
+  $patterns[2]="/[\r]?\n/si";
   $replaces[0]="\'";
   $replaces[1]="\/";
+  $replaces[2]="\\n";
   return preg_replace($patterns, $replaces, $s);
 }
 
@@ -522,8 +524,8 @@ function print_preview($search=null)
   $iurl->add_param('type', 'preview');
   echo "<a href=\"$url\"><img src=\"".$iurl->get_url()."\" alt=\"$name\" title=\"$name\" ".$size[2]."/></a></div>\n";
   
-  $this->print_from();
   $this->print_caption();
+  $this->print_from();
   $this->print_voting();
 
   echo "<div class=\"imginfo\" id=\"info-$id\"><table>\n";

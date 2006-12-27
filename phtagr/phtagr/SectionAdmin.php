@@ -218,7 +218,7 @@ function exec_users()
       strlen($_REQUEST['remove_root'])>0)
       $c->remove('path.fsroot[]', $_REQUEST['remove_root']);
 
-    $u->commit_changes();
+    $u->commit();
 
     $this->print_user_details($u);
     unset($u);

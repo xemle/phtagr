@@ -4,7 +4,7 @@ include_once("$phtagr_lib/Base.php");
 include_once("$phtagr_lib/Constants.php");
 
 /**
-@class Group
+  @class SqlObject 
 */
 class SqlObject extends Base
 {
@@ -13,16 +13,22 @@ var $_table;
 var $_data;
 var $_changes;
 
+/** Constructor of an SQL object
+  @param table Table name which should be used
+  @param id ID of the table row. If the ID is greater 0, the object is
+  initialized by the constructor  */
 function SqlObject($table, $id=-1)
 {
   $this->_table=$table;
   $this->_data=array();
   $this->_changes=array();
   if ($id>0)
-    $this->_init_by_id($id);
+    $this->init_by_id($id);
 }
 
-function _init_by_id($id)
+/** Initialize the object by an ID
+  @param id Id of the Sql object */
+function init_by_id($id)
 {
   global $db;
   if (!is_numeric($id))
@@ -31,6 +37,16 @@ function _init_by_id($id)
   $sql="SELECT *
         FROM ".$this->_table."
         WHERE id=$id";
+
+  $this->init_by_query($sql);
+}
+
+/** Initialize the object via an SQL query.
+  @param sql SQL query. There is no check on the query.
+  @note Do not use this function until you know what you are doing. */
+function init_by_query($sql)
+{
+  global $db;
   $result=$db->query($sql);
   if (!$result || mysql_num_rows($result)!=1)
     return false;
@@ -38,19 +54,17 @@ function _init_by_id($id)
   $this->_data=mysql_fetch_assoc($result);
 }
 
-/** Returns the userid of the current session 
-  @return The value for an member is greater 0, an anonymous user has the ID
-  -1.*/
+/** @return Returns the unique id of the sql object */
 function get_id()
 {
   return $this->_get_data('id', -1);
 }
 
+/** @return Returns the table name of the SQL object */
 function get_table_name()
 {
   return $this->_table;
 }
-
 
 /** 
   @param name Name of the db column
@@ -66,18 +80,18 @@ function _get_data($name, $default=null)
 }
 
 /** Stores the data for the database temporary to save database accesses. After
- * all changes, the function commit_changes must be called.
+ * all changes, the function commit must be called.
   @param name Name of the column
-  @param value Value of the column
+  @param value Value of the column. 
   @result True on success. False otherwise 
   @note The changed data updates not the internal representation
-  @see commit_changes */
+  @see commit */
 function _set_data($name, $value)
 {
   if ($this->get_id()<=0)
     return false;
 
-  if ($this->_data[$name]==$value)
+  if ($this->_data[$name]===$value)
   {
     if (isset($this->_changes[$name]))
       unset($this->_changes[$name]);
@@ -91,7 +105,7 @@ function _set_data($name, $value)
 /** Writes all changes to the database. It also updated the internal data of
  * the object 
   @return True if changes where writen */
-function commit_changes()
+function commit()
 {
   global $db;
 
@@ -105,8 +119,10 @@ function commit_changes()
   $changes='';
   foreach ($this->_changes as $name => $value)
   {
-    if ($value=="NULL")
+    if ($value=="NULL" || $value===null)
       $svalue="NULL";
+    else if ($value=="NOW()")
+      $svalue=$value;
     else
       $svalue="'".mysql_escape_string(strval($value))."'";
     $changes.=",$name=$svalue";

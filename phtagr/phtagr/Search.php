@@ -734,6 +734,20 @@ function get_num_query()
   return $sql;
 }
 
+function get_popular_tags()
+{
+  global $db;
+
+  $sql="SELECT t.name,COUNT(t.name) AS hits 
+        FROM $db->tag AS t, $db->imagetag AS it, $db->image as i 
+        WHERE t.id=it.tagid and it.imageid=i.id";
+  $sql.=$this->_handle_acl();
+  $sql.=" GROUP BY t.name 
+        ORDER BY hits DESC LIMIT 0,50";
+  
+  return $db->query($sql);
+}
+
 }
 
 ?>

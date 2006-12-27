@@ -15,6 +15,8 @@ function SectionAcl($gacl=0, $macl=0, $aacl=0)
                 ACL_ANY => $aacl);
 }
 
+/** Print ACLs for read access
+  @param keep If true add the option 'keep', which will be selected */
 function _print_row_read($keep)
 {
   echo "  <tr>
@@ -47,12 +49,12 @@ function _print_row_read($keep)
       echo "<option value=\"keep\">"._("Keep")."</option>\n";
     foreach ($levels as $level)
     {
-      $select=($value==$level)?"selected=\"selected\" ":"";
+      $select=(!$keep && $value==$level)?"selected=\"selected\" ":"";
       if ($level==ACL_PREVIEW)
         echo "<option value=\"preview\"$select>"._("Preview")."</option>\n";
 
     }
-    $select=($value==0)?"selected=\"selected\" ":"";
+    $select=(!$keep && $value==0)?"selected=\"selected\" ":"";
     echo "<option value=\"deny\"$select>"._("Deny")."</option>
       </select>
     </td>\n";
@@ -60,6 +62,8 @@ function _print_row_read($keep)
   echo "  </tr>\n";
 }
 
+/** Print ACLs for write access
+  @param keep If true add the option 'keep', which will be selected */
 function _print_row_write($keep)
 {
   echo "  <tr>
@@ -67,7 +71,7 @@ function _print_row_write($keep)
 
   $levels=array(ACL_EDIT);
 
-  for ($i=ACL_GROUP ; $i<=ACL_ANY ; $i++)
+  for ($i=ACL_GROUP ; $i<= ACL_ANY ; $i++)
   {
     switch ($i)
     {
@@ -84,20 +88,21 @@ function _print_row_write($keep)
       $value=$this->_acl[ACL_ANY] & ACL_WRITE_MASK;
       break;
     default:
+      break;
     }
-
     echo "    <td>
       <select size=\"1\" name=\"".$prefix."acl_write\">\n";
-    if ($keep)
-      echo "<option value=\"keep\">"._("Keep")."</option>\n";
+    if ($keep) {
+      echo "<option value=\"keep\" selected=\"selected\">"._("Keep")."</option>\n";
+    }
     foreach ($levels as $level)
     {
-      $select=($value==$level)?"selected=\"selected\" ":"";
+      $select=(!$keep && $value==$level)?" selected=\"selected\"":"";
       if ($level==ACL_EDIT)
         echo "<option value=\"edit\"$select>"._("Edit")."</option>\n";
 
     }
-    $select=($value==0)?"selected=\"selected\" ":"";
+    $select=(!$keep && $value==0)?" selected=\"selected\"":"";
     echo "<option value=\"deny\"$select>"._("Deny")."</option>
       </select>
     </td>\n";

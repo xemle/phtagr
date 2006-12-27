@@ -15,11 +15,9 @@ include_once("$phtagr_lib/Constants.php");
 
   @class Image Models the image data object.
 */
-class Image extends Base
+class Image extends SqlObject
 {
 
-/** Array of the database values from table image */
-var $_data;
 var $_tags;
 var $_sets;
 var $_locations;
@@ -28,34 +26,11 @@ var $_locations;
   @param id Id of the image. */
 function Image($id=-1)
 {
-  $_data=null;
+  global $db;
+  $this->SqlObject($db->image, $id);
   $_tags=null;
   $_sets=null;
   $_locations=null;
-  $this->init_by_id($id);
-}
-
-/** Initialize the values from the database into the object 
-  @param id ID from a specific image
-  @return True on success. False on failure
-*/
-function init_by_id($id)
-{
-  global $db;
-  
-  if ($id<=0)
-    return false;
-    
-  $sql="SELECT * 
-        FROM $db->image
-        WHERE id=$id";
-  $result=$db->query($sql);
-  if (!$result || mysql_num_rows($result)==0)
-    return false;
-    
-  unset($this->_data);
-  $this->_data=mysql_fetch_array($result, MYSQL_ASSOC);
-  return true;
 }
 
 /** Initialize the values from the database into the object 
@@ -84,77 +59,6 @@ function init_by_filename($filename)
   return true;
 }
 
-/** Insert an image by a filename to the database. If an image with the same
- * filename exists, the function update() is called.
-  @param filename Filename of the image
-  @param is_upload 1 if the image is uploaded. 0 if the image is local. Default
-  is 0.
-  @return Returns 0 on success, -1 for failure. On update the return value is
-  1. If the file already exists and has no changes, the return value is 2.
-  @see update() */
-function insert($filename, $is_upload=0)
-{
-  global $db;
-  global $user;
-  
-  if (!file_exists($filename))
-  {
-    $this->error(sprintf(_("File '%s' does not exists"), $filename));
-    return -1;
-  } 
-  
-  $sfilename=mysql_escape_string($filename);
-  
-  $sql="SELECT * 
-        FROM $db->image
-        WHERE filename='$sfilename'";
-  $result=$db->query($sql);
-  if (!$result)
-    return -1;
-
-  // image found in the database. Update it
-  if (mysql_num_rows($result)!=0)
-  {
-    $this->_data=mysql_fetch_array($result, MYSQL_ASSOC);
-    $this->update();
-    return 1;
-  }
-  
-  $userid=$user->get_id();
-  $groupid=$user->get_groupid();
-
-  $gacl=$user->get_gacl();
-  $macl=$user->get_macl();
-  $aacl=$user->get_aacl();
-  
-  $sql="INSERT INTO $db->image (
-          userid,groupid,synced,created,
-          filename,is_upload,
-          gacl,macl,aacl,
-          clicks,lastview,ranking
-        ) VALUES (
-          $userid,$groupid,NOW(),NOW(),
-          '$sfilename',$is_upload,
-          $gacl,$macl,$aacl,
-          0,NOW(),0.0
-        )";
-  $result=$db->query($sql);
-  if (!$result)
-    return -1;
-  $sql="SELECT *
-        FROM $db->image
-        WHERE filename='$sfilename'";
-  
-  $result=$db->query($sql);
-  if (!$result)
-    return -1;
-  
-  $this->_data=mysql_fetch_array($result, MYSQL_ASSOC);
-
-  $this->reinsert();
-  
-  return 0; 
-}
 
 /** Update the image data if the file modification time is after the
  * synchronization time of the image data set. 
@@ -168,7 +72,6 @@ function update($force=false)
   $ctime=filectime($this->get_filename());
   if (!$force && $ctime < $synced)
   {
-    //$this->debug("Synced: $ctime $synced");
     return false;
   }
   
@@ -201,18 +104,9 @@ function reinsert()
   $this->_insert_static();
   $this->_insert_exif();
   $this->_insert_iptc();
-  
-  return true; 
-}
 
-/** Returns the database value to the given fieldname.
-  @return null if the given field is not set */
-function _get_data($name)
-{
-  if (isset($this->_data[$name]))
-    return $this->_data[$name];
-  else
-    return null;
+  $this->commit();  
+  return true; 
 }
 
 /** Returns the id of the image */
@@ -224,13 +118,18 @@ function get_id()
 /** Returns the filename of the image */
 function get_filename()
 {
-  return $this->_get_data('filename');
+  return stripslashes($this->_get_data('filename'));
 }
 
 /** Returns the name of the image */
 function get_name()
 {
-  return $this->_get_data('name');
+  return stripslashes($this->_get_data('name'));
+}
+
+function set_name($name)
+{
+  $this->_set_data('name', $name);
 }
 
 /** Returns the user ID of the image */
@@ -247,16 +146,7 @@ function get_groupid()
 
 function set_groupid($gid)
 {
-  global $db;
-  $id=$this->get_id();
-  $gid=intval($gid);
-  $sql="UPDATE $db->image
-        SET groupid=$gid
-        WHERE id=$id";
-  $result=$db->query($sql);
-  if (!$result)
-    return false;
-  return true;
+  $this->_set_data('groupid', $gid);
 }
 
 /** Returns the syncronization date of the image
@@ -304,9 +194,22 @@ function get_bytes()
   return $this->_get_data('bytes');
 }
 
+function set_bytes($bytes)
+{
+  $this->_set_data('bytes', $bytes);
+}
+
 function get_caption()
 {
   return stripslashes($this->_get_data('caption'));
+}
+
+/** Sets a caption
+  @param caption Set the new caption. To remove the caption, set value to null
+  */
+function set_caption($caption)
+{
+  $this->_set_data('caption', $caption);
 }
 
 /** Return the date of the image
@@ -321,9 +224,19 @@ function get_date($in_unix=false)
     return $date;
 }
 
+function set_date($date)
+{
+  $this->_set_data('date', $date);
+}
+
 function get_height()
 {
   return $this->_get_data('height');
+}
+
+function set_height($height)
+{
+  $this->_set_data('height', $height);
 }
 
 function get_width()
@@ -331,10 +244,20 @@ function get_width()
   return $this->_get_data('width');
 }
 
+function set_width($width)
+{
+  $this->_set_data('width', $width);
+}
+
 /** Returns the count of views */
 function get_clicks()
 {
   return $this->_get_data('clicks');
+}
+
+function add_click()
+{
+  $this->_set_data('clicks', $this->get_clicks()+1);
 }
 
 function get_ranking()
@@ -355,21 +278,23 @@ function get_votes()
 }
 
 /** Set a now vote to the image 
-  @param voting Vote of the image
+  @param voting Vote of the imagev
   @return True on success, false otherwise */
-function new_vote($voting) 
+function add_voting($voting) 
 {
   global $db;
   $voting=intval($voting);
   if ($voting<0 || $voting>VOTING_MAX)
     return false;
 
-  $id=$this->get_id();
-  $sql="UPDATE $db->image 
-        SET voting=((voting*votes+$voting)/(votes+1)), votes=votes+1
-        WHERE id=$id";
-  if (!$db->query($sql))
-    return false;
+  $_voting=$this->_get_data('voting');
+  $_votes=$this->_get_data('votes');
+  
+  $_voting=(($_voting*$_votes+$voting)/($_votes+1));
+  $_votes+=1;
+  
+  $this->_set_data('voting', $_voting);
+  $this->_set_data('votes', $_votes);
 
   return true;
 }
@@ -536,13 +461,10 @@ function _insert_static()
     $height=0;
   }
 
-  $sql="UPDATE $db->image 
-        SET bytes=$bytes,name='$name',
-          width=$width,height=$height
-        WHERE id=".$this->get_id();
-  $result=$db->query($sql);
-  if (!$result)
-    return false;
+  $this->_set_data('bytes', $bytes);
+  $this->_set_data('name', $name);
+  $this->_set_data('width', $width);
+  $this->_set_data('height', $height);
 
   return true;
 }
@@ -568,12 +490,8 @@ function _insert_exif()
       $orientation=$exif['IFD0']['Orientation'];
   }
    
-  $sql="UPDATE $db->image 
-        SET date=$date,orientation=$orientation
-        WHERE id=".$this->get_id();
-  $result = $db->query($sql);
-  if (!$result)
-    return false;
+  $this->_set_data('date', $date);
+  $this->_set_data('orientation', $orientation);
 
   return true;
 }
@@ -665,16 +583,8 @@ function _insert_iptc_caption($iptc=null)
   $id=$this->get_id();
   
   $caption=$iptc->get_record('2:120');
-  $scaption=mysql_escape_string($caption);
   if ($caption!=null)
-  {
-    $sql="UPDATE $db->image
-          SET caption='$scaption'
-          WHERE id=$id";
-    $result = $db->query($sql);
-    if (!$result)
-      return false;
-  }
+    $this->_set_data('caption', $caption);
   return true;
 }
 
@@ -687,30 +597,8 @@ function _insert_iptc_date($iptc=null)
     return false;
 
   $id=$this->get_id();
-  // Extract IPTC date and time
-  $date=$iptc->get_record('2:055');
-  if ($date!=null)
-  {
-    // Convert IPTC date/time to sql timestamp "YYYY-MM-DD hh:mm:ss"
-    // IPTC date formate is YYYYMMDD
-    $date=substr($date, 0, 4)."-".substr($date, 4, 2)."-".substr($date, 6, 2);
-    $time=$iptc->get_record('2:060');
-    // IPTC time format is hhmmss[+offset]
-    if ($time!=null)
-    {
-      $time=" ".substr($time, 0, 2).":".substr($time, 2, 2).":".substr($time, 4, 2);
-    }
-    $date=$date.$time;
-    $sql="UPDATE $db->image
-          SET date='$date'
-          WHERE id=$id";
-    $result = $db->query($sql);
-    if (!$result)
-      return false;
-  }
   return true;
 } 
-
 
 /** Read the location data from the IPTC segment and insert it to the database
   @param iptc The Iptc object of the current image */
@@ -728,46 +616,11 @@ function _insert_iptc_location($iptc=null)
   $result=$db->query($sql);
   
   // Extract IPTC city
-  $city=$iptc->get_record('2:090');
-  if ($city!=null)
-  {
-    $locationid=$db->location2id($city, LOCATION_CITY, true);
-    $sql="INSERT INTO $db->imagelocation ( imageid, locationid )
-          VALUES ( $id, $locationid )";
-    $result = $db->query($sql);
-    if (!$result)
-      return false;
-  }
-  $sublocation=$iptc->get_record('2:092');
-  if ($sublocation!=null)
-  {
-    $locationid=$db->location2id($sublocation, LOCATION_SUBLOCATION, true);
-    $sql="INSERT INTO $db->imagelocation ( imageid, locationid )
-          VALUES ( $id, $locationid )";
-    $result = $db->query($sql);
-    if (!$result)
-      return false;
-  }
-  $state=$iptc->get_record('2:095');
-  if ($state!=null)
-  {
-    $locationid=$db->location2id($state, LOCATION_STATE, true);
-    $sql="INSERT INTO $db->imagelocation ( imageid, locationid )
-          VALUES ( $id, $locationid )";
-    $result = $db->query($sql);
-    if (!$result)
-      return false;
-  }
-  $country=$iptc->get_record('2:101');
-  if ($country!=null)
-  {
-    $locationid=$db->location2id($country, LOCATION_COUNTRY, true);
-    $sql="INSERT INTO $db->imagelocation ( imageid, locationid )
-          VALUES ( $id, $locationid )";
-    $result = $db->query($sql);
-    if (!$result)
-      return false;
-  }
+  $this->set_location($iptc->get_record('2:090'), LOCATION_CITY);
+  $this->set_location($iptc->get_record('2:092'), LOCATION_SUBLOCATION);
+  $this->set_location($iptc->get_record('2:095'), LOCATION_STATE);
+  $this->set_location($iptc->get_record('2:101'), LOCATION_COUNTRY);
+
   return true;
 } 
 
@@ -870,7 +723,8 @@ function _sqltime2unix($string)
   $s=strtr($string, ":", " ");
   $s=strtr($s, "-", " ");
   $a=split(' ', $s);
-  $time=mktime($a[3],$a[4],$a[5],$a[1],$a[2],$a[0]);
+  $time=mktime(intval($a[3]),intval($a[4]),intval($a[5]),
+    intval($a[1]),intval($a[2]),intval($a[0]));
   return $time;
 }
 
@@ -886,16 +740,10 @@ function update_ranking()
 
   $ranking=0.8*$ranking+100/log((1+time()-$lastview));     
 
-  $sql="UPDATE $db->image
-        SET ranking=$ranking
-        WHERE id=$id";
-  $result=$db->query($sql);
-  
-  $sql="UPDATE $db->image
-        SET clicks=clicks+1, lastview=NOW()
-        WHERE id=$id";
-  $result = $db->query($sql);
-}
+  $this->_set_data('ranking', $ranking);
+  $this->_set_data('clicks', $this->_get_data('clicks', 0)+1);
+  $this->_set_data('lastview', "NOW()");
+} 
 
 /** Returns an array of tags. The tags are sorted by name */
 function get_tags()
@@ -920,6 +768,57 @@ function get_tags()
   }
   sort($this->_tags);
   return $this->_tags;
+}
+
+/** Add tags to the image
+  @param tags Array of new tags for the image */
+function add_tags($tags)
+{
+  global $db;
+  if ($this->_tags==null)
+    $this->get_tags();
+
+  $id=$this->get_id();
+  foreach ($tags as $tag)
+  {
+    if ($tag=='')
+      continue;
+
+    if (!in_array($tag, $this->_tags))
+    {
+      $tagid=$db->tag2id($tag, true);
+      if ($tagid<0)
+        continue; 
+      $sql="INSERT INTO $db->imagetag
+            (imageid, tagid) 
+            VALUES ($id, $tagid)";
+      $db->query($sql);
+      array_push($this->_tags, $tag);
+    }
+  }
+}
+
+/** Deletes tags from the image.
+  @param tags Tags to be removed from the image */
+function del_tags($tags)
+{
+  global $db;
+  if ($this->_tags==null)
+    $this->get_tags();
+
+  $id=$this->get_id();
+  foreach ($tags as $tag)
+  {
+    $key=array_search($tag, $this->_tags);
+    if ($key!==false)
+    {
+      $tagid=$db->tag2id($tag);
+      $sql="DELETE FROM $db->imagetag
+            WHERE imageid=$id AND tagid=$tagid";
+      $db->query($sql);
+      array_splice($this->_tags, $key, 1);
+    }
+  }
 }
 
 /** Returns an array of sets. The sets are sorted by name */
@@ -947,7 +846,70 @@ function get_sets()
   return $this->_sets;
 }
 
-/** Returns an array of location. The locations are sorted by name */
+/** Add sets to the image
+  @param sets Array of new sets for the image */
+function add_sets($sets)
+{
+  global $db;
+  if ($this->_sets==null)
+    $this->get_sets();
+
+  $id=$this->get_id();
+  foreach ($sets as $set)
+  {
+    if ($set=='')
+      continue;
+
+    if (!in_array($set, $this->_sets))
+    {
+      $setid=$db->set2id($set, true);
+      if ($setid<0)
+        continue; 
+      $sql="INSERT INTO $db->imageset
+            (imageid, setid) 
+            VALUES ($id, $setid)";
+      $db->query($sql);
+      array_push($this->_sets, $set);
+    }
+  }
+}
+
+/** Deletes sets from the image.
+  @param sets Tags to be removed from the image */
+function del_sets($sets)
+{
+  global $db;
+  if ($this->_sets==null)
+    $this->get_sets();
+
+  $id=$this->get_id();
+  foreach ($sets as $set)
+  {
+    $key=array_search($set, $this->_sets);
+    if ($key!==false)
+    {
+      $setid=$db->set2id($set);
+      $sql="DELETE FROM $db->imageset
+            WHERE imageid=$id AND setid=$setid";
+      $db->query($sql);
+      array_splice($this->_sets, $key, 1);
+    }
+  }
+}
+
+/** Returns the location of a given type 
+  @param type Location type 
+  @return Value of the location. Null if no location is set */
+function get_location($type)
+{
+  $this->get_locations();
+  if ($type<LOCATION_UNDEFINED || $type > LOCATION_COUNTRY)
+    return false;
+
+  return $this->_locations[$type];
+}
+
+/** Returns an array of location. The locations are sorted by type */
 function get_locations()
 {
   if ($this->_locations)
@@ -969,6 +931,88 @@ function get_locations()
     $this->_locations[$row[1]]=stripslashes($row[0]);
   }
   return $this->_locations;
+}
+
+/** Set a location and overwrites an existing one 
+  @param value Location value. If value is null, the given location type is
+  deleted
+  @param type Location type */
+function set_location($value, $type)
+{
+  global $db;
+  if ($value==null || $value=='')
+    return false;
+  if ($type<LOCATION_UNDEFINED || $type > LOCATION_COUNTRY)
+    return false;
+
+  $this->get_locations();
+  if ($this->_locations[$type]==$value)
+    return true;
+  $id=$this->get_id();
+  $locationid=$db->location2id($value, $type, true);
+  if (isset($this->_locations[$type]))
+  {
+    $oldlocationid=$db->location2id($this->_locations[$type], $type);
+    $sql="UPDATE $db->imagelocation
+          SET locationid=$locationid
+          WHERE imageid=$id AND locationid=$oldlocationid";
+  } else {
+    $sql="INSERT INTO $db->imagelocation ( imageid, locationid )
+          VALUES ( $id, $locationid )";
+  }
+  $result = $db->query($sql);
+  if (!$result)
+    return false;
+
+  $this->_locations[$type]=$value;
+  return true;
+}
+
+/** Deletes a location
+  @param value Value of the location. Can be an empty string. If a value is
+  given, the value must match the current one to delete it. If an empty string
+  is given, the type is deleted 
+  @param type Type of the location.
+  @return True on success, false otherwise */
+function del_location($value, $type)
+{
+  global $db;
+  $id=$this->get_id();
+  if ($type<LOCATION_UNDEFINED || $type>LOCATION_COUNTRY)
+    return false;
+
+  $this->get_locations();
+  if ($value!='')
+  {
+    if ($this->_locations[$type]!=$value)
+      return false;
+
+    $locid=$db->location2id($value, $type);
+    $sql="DELETE FROM $db->imagelocation as il
+          WHERE il.imageid=$id AND il.locationid=$locid";
+  } else {
+    $sql="DELETE FROM il
+          USING $db->imagelocation as il, $db->location as l
+          WHERE il.locationid=l.id AND l.type=$type";
+  }
+  $result=$db->query($sql);
+  if (!$result)
+    return false;
+
+  unset($this->_locations[$type]);
+  return true;
+}
+
+/** Sets the location and overwrites the current one */
+function set_locations($locations)
+{
+  for ($type=LOCATION_CITY ; $type<=LOCACTION_COUNTRY ; $type++)
+  {
+    if ($locations[$type]==null)
+      $this->del_location('', $type);
+    else
+      $this->set_location($locations[$type], $type);
+  }
 }
 
 /** Synchronize files between the database and the filesystem. If a file not

@@ -34,7 +34,7 @@ var $_changed_iptc;
 /** This flag is true if the JPEG comment segment changes */
 var $_changed_com;
 
-function Iptc()
+function Iptc($filename='')
 {
   $this->_errno=0;
   $this->_errmsg='';
@@ -43,6 +43,8 @@ function Iptc()
   $this->iptc=null;
   $this->_changed_com=false;
   $this->_changed_iptc=false;
+  if ($filename!='')
+    $this->load_from_file($filename);
 }
 
 /** Return true if IPTC records changed */
@@ -149,7 +151,30 @@ function save_to_file($do_rename=true)
     return false;
   $jpg=&$this->_jpg;
 
+  // Open image for reading
+  $fin=fopen($jpg['filename'], 'rb');
+  if (!$fin)
+  {
+    $this->_errno=-1;
+    $this->_errmsg="Could not read the file ".$jpg['filename'];
+    return false;
+  }
+
+  // Check writeable directory
+  if (!is_writeable(dirname($jpg['filename'])))
+  {
+    $this->_errno=-1;
+    $this->_errmsg="Could not write to file directory";
+    return false;
+  }
+
+  // Create unique temporary filename
   $tmp=$jpg['filename'].'.tmp';
+  $i=1;
+  while (file_exists($tmp)) {
+    $tmp=$jpg['filename'].".$i.tmp";
+    $i++;
+  }
   $fout=@fopen($tmp, 'wb');
   if ($fout==false) 
   {
@@ -158,14 +183,7 @@ function save_to_file($do_rename=true)
     return false;
   }
 
-  $fin=fopen($jpg['filename'], 'rb');
-  if (!$fin)
-  {
-    $this->_errno=-1;
-    $this->_errmsg="Could not read the file ".$jpg['filename'];
-    return false;
-  }
-  
+  // Copy and modifiy file 
   $buf=fread($fin, 2);
   fwrite($fout, $buf);
   $offset=2;
@@ -222,7 +240,16 @@ function save_to_file($do_rename=true)
   fclose($fout);
 
   if ($do_rename)
-    rename($jpg['filename'].'.tmp', $jpg['filename']);
+    rename($tmp, $jpg['filename']);
+}
+
+/** @return Returns the filename */
+function get_filename()
+{
+  if (!isset($this->_jpg))
+    return '';
+
+  return $this->_jpg['filename'];
 }
 
 /** Read all segments of an JPEG image until the data segment. Each JPEG
@@ -533,22 +560,23 @@ function _iptc2bytes()
   if (!isset($this->iptc))
     return false;
   
+  $buf='';
   foreach ($this->iptc as $key => $values)
   {  
     list($rec, $type) = split (':', $key, 2);
     foreach ($values as $value)
     {
-      $content.=chr(0x1c);
-      $content.=chr(intval($rec));
-      $content.=chr(intval($type));
-      $content.=$this->_short2byte(strlen($value));
-      $content.=$value;
+      $buf.=chr(0x1c);
+      $buf.=chr(intval($rec));
+      $buf.=chr(intval($type));
+      $buf.=$this->_short2byte(strlen($value));
+      $buf.=$value;
     }
   }
   $hdr='8BIM'.chr(0x04).chr(0x04);            // PS header and type
   $hdr.=chr(0).chr(0).chr(0).chr(0);          // padding
-  $hdr.=$this->_short2byte(strlen($content));  // size
-  return $hdr.$content;
+  $hdr.=$this->_short2byte(strlen($buf));  // size
+  return $hdr.$buf;
 }
 
 /** Replaces the photoshop segment with new IPTC data block and writes it to
@@ -734,7 +762,6 @@ function add_record($name, $value)
   if ($value=='')
     return false;
 
-  // echo "Add tag $name=$value<br/>\n";
   if (!isset($this->iptc))
   {
     $this->iptc=array();
@@ -763,7 +790,6 @@ function add_record($name, $value)
 
   // List tags
   $key=array_search($value, $iptc[$name]);
-  
   if (is_int($key) && $key>=0)
     return false;
 
@@ -804,23 +830,23 @@ function get_record($name)
 }
 
 /** Return an array of a given record name
-  @return Returns null if no record is available. */
+  @return Returns empty array if no record is available. */
 function get_records($name)
 {
   if ($this->_is_single_record($name))
-    return null;
+    return array();
     
   if (isset($this->iptc) && isset($this->iptc[$name]))
     return $this->iptc[$name];
-  return null;
+  return array();
 }
 
 /** Remove an record with an optional value for multi records
   @param name Name of IPTC record
-  @param value Value of IPTC record. If this is an empty string, the record
-  will be removed, especially whole multiple records.
+  @param value Value of IPTC record. If null, the record will be removed,
+  especially whole multiple records.
   @return true if the iptc changes */
-function del_record($name, $value='')
+function del_record($name, $value=null)
 {
   if (!isset($this->iptc))
   {
@@ -833,7 +859,7 @@ function del_record($name, $value='')
   }
   
   // Single tags
-  if ($this->_is_single_record($name) || $value=='')
+  if ($this->_is_single_record($name) || $value===null)
   {
     unset($iptc[$name]);
     $this->_changed_iptc=true;
@@ -871,69 +897,6 @@ function del_records($name, $values)
       $changed=true;
   }
   return $changed;
-}
-
-function _set_date($year, $month, $day, $hour, $min, $sec)
-{
-  $year=$year<1000?1000:($year>3000?3000:$year);
-  $month=$month<1?1:($month>12?12:$month);
-  $day=$day<1?1:($day>31?31:$day);
-
-  $hour=$hour<0?0:($hour>23?23:$hour);
-  $min=$min<0?0:($min>59?59:$min);
-  $sec=$sec<0?0:($sec>59?59:$sec);
-
-  $date=sprintf("%04d%02d%02d", $year, $month, $day);
-  $time=sprintf("%02d%02d%02d", $hour, $min, $sec);
-
-  $this->add_record('2:055', $date);
-
-  if ($time!='000000')
-    $this->add_record('2:060', $time);
-  else
-    $this->del_record('2:060');
-}
-
-/** Sets the date. 
-  @param s The input can be in UNIX time or the format of 'YYYY-MM-DD
-  hh:mm:ss'. Valid prefixes are also allowed like 'YYYY-MM' or 'YYYY-MM-DD
-  hh:mm'. If the input starts with an minus sign '-', the date is removed 
-  @return True on success, false otherwise */
-function set_date($s)
-{
-  if ($s{0}=='-')
-  {
-    $this->del_record('2:055');
-    $this->del_record('2:060');
-    return true;
-  }
-
-  // If just a number, check for year or seconds 
-  if (is_numeric($s))
-  {
-    if (strlen($s)==4)
-    {
-      $year=$s;
-      $this->_set_date($year, 1, 1, 0, 0, 0);
-      return true;
-    }
-    $s=gmdate("Y-m-d H:i:s", intval($s));
-    return $this->set_date($s);
-  }
-  
-  // Check format of YYYY-MM-DD hh:mm:ss
-  if (!preg_match('/^[0-9]{4}(-[0-9]{2}(-[0-9]{2}( [0-9]{2}(:[0-9]{2}(:[0-9]{2})?)?)?)?)?$/', $s))
-    return false;
-
-  $this->_set_date(
-    intval(substr($s, 0, 4)), 
-    intval(substr($s, 5, 2)), 
-    intval(substr($s, 8, 2)),
-    intval(substr($s, 11, 2)), 
-    intval(substr($s, 14, 2)), 
-    intval(substr($s, 17, 2)));
-
-  return true;
 }
 
 }?>

@@ -30,6 +30,10 @@ define("LOCATION_COUNTRY", 0x04);
 
 define("VOTING_MAX", 0x05);
 
+define("GUEST_MAX", 10);
+define("GROUP_MAX", 10);
+define("GROUP_MEMBER_MAX", 30);
+
 define("ERR_DB_GENERAL",          -1);
 define("ERR_DB_CONNECT",          -2);
 define("ERR_DB_SELECT",           -3);
@@ -42,6 +46,7 @@ define("ERR_USER_NAME_INVALID",   -9);
 define("ERR_USER_PWD_LEN",       -10);
 define("ERR_USER_PWD_INVALID",   -11);
 define("ERR_FS_GENERAL",         -12);
+define("ERR_FS_NOT_EXISTS",      -17);
 define("ERR_GENERAL",            -13);
 define("ERR_NOT_PERMITTED",      -14);
 define("ERR_PASSWD_MISMATCH",    -15);

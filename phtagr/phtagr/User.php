@@ -436,7 +436,7 @@ function _check_login($name, $pwd)
     return false;
 
   $row=mysql_fetch_row($result);
-  $this->_init_by_id($row[0]);
+  $this->init_by_id($row[0]);
   $_SESSION['userid']=$row[0];
 
   return true;
@@ -517,7 +517,7 @@ function create_guest($name, $pwd)
     return $id;
   $guest=new User($id);
   $guest->set_creator($this->get_id());
-  $guest->commit_changes();
+  $guest->commit();
   unset($guest);
   return $id;
 }
@@ -875,7 +875,7 @@ function check_session($setcookie=true)
     }
   } else if (isset($_SESSION['userid'])) {
     $id=$_SESSION['userid'];
-    $this->_init_by_id($id);
+    $this->init_by_id($id);
   }
 
   if (isset($_REQUEST['lang']))
@@ -913,7 +913,7 @@ function _check_cookie($cookie)
     return false;
 
   $row=mysql_fetch_row($result);
-  $this->_init_by_id($row[0]);
+  $this->init_by_id($row[0]);
   $_SESSION['userid']=$row[0];
 
   return true;

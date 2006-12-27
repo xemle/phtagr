@@ -24,14 +24,14 @@ function print_navigator($search, $current, $count)
 {
   if ($count<2) return;
 
-  echo "<div class=\"navigator\">\nPage:&nbsp;";
+  echo "<div class=\"navigator\">";
   
   if ($current>0)
   {
     $i=$current-1;
     $search->set_page_num($i);
     $url=$search->get_url();
-    echo "<a href=\"$url\">&lt;</a>&nbsp;\n";
+    echo "<a href=\"$url\">"._("Prev")."</a>&nbsp;\n";
   }
     
   for ($i=0; $i < $count; $i++)
@@ -57,7 +57,7 @@ function print_navigator($search, $current, $count)
     $i=$current+1;
     $search->set_page_num($i);
     $url=$search->get_url();
-    echo "&nbsp;<a href=\"$url\">&gt;</a>\n";
+    echo "&nbsp;<a href=\"$url\">"._("Next")."</a>\n";
   }
   echo "</div>\n\n";
 }
