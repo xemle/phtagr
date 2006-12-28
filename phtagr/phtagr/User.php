@@ -569,7 +569,7 @@ function _init_data()
 function get_gacl()
 {
   global $conf;
-  return $conf->get('image.aacl', ACL_PREVIEW | ACL_EDIT);
+  return $conf->get('image.gacl', ACL_PREVIEW | ACL_EDIT);
 }
 
 /** @return the default ACL for phtagr members */

@@ -108,7 +108,7 @@ switch ($type)
     break;
   case 'high':
     if ($img->can_preview(&$user))
-      $fn=$img->get_filename_hight();
+      $fn=$img->get_filename_high();
     else
       unauthorized();
     break;
