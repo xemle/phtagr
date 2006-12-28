@@ -433,15 +433,13 @@ function _get_query_from_tags($tags, $sets, $order=false)
   // handle IDs of image
   $imageid=$this->get_param('id', 0);
   $userid=$this->get_param('user', 0);
-  $groupid=$this->get_param('group', 0);
-  if ($imageid>0)
-    $sql .= " AND i.id=".$imageid;
-  if ($userid>0)
-    $sql .= " AND i.userid=".$userid;
-  if ($groupid>=0)
-    $sql .= " AND i.groupid=".$groupid;
+  $groupid=$this->get_param('group', -1);
+
+  if ($imageid>0)  $sql .= " AND i.id=".$imageid;
+  if ($userid>0)   $sql .= " AND i.userid=".$userid;
+  if ($groupid>=0) $sql .= " AND i.groupid=".$groupid;
   
-  // handle the acl
+  // handle the acl and visibility level
   $sql .= $this->_handle_acl();
   $sql .= $this->_handle_visibility();
   
@@ -540,6 +538,8 @@ function _handle_acl()
   return $acl;
 }
 
+/** Sets the visiblity of an image. It selects images which are only visible
+ * for the group, only for members or visible for the public */
 function _handle_visibility()
 {
   $acl='';
