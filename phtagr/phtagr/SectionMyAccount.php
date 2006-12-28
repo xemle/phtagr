@@ -440,7 +440,6 @@ function print_group($gid)
       <td>".$name."</td>
       <td><a href=\"".$url->get_url()."\" class=\"jsbutton\">"._("Delete")."</a></td>
     </tr>\n";
-      unset($group);
     }
     echo "</table>\n";
     $url->del_param('action');
