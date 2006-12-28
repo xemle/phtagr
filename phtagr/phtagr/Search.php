@@ -26,7 +26,7 @@ function Search($baseurl='')
 
 function set_imageid($imageid)
 {
-  $this->add_param('id', $imageid, PARAM_PINT);
+  $this->add_iparam('id', $imageid, null, 1);
 }
 
 /** Set the user id
@@ -36,7 +36,7 @@ function set_userid($userid)
   global $user;
   if (!is_numeric($userid))
     $userid=$user->get_id_by_name($userid);
-  $this->add_param('user', $userid, PARAM_PINT);
+  $this->add_iparam('user', $userid, null, 1);
 }
 
 function get_userid()
@@ -46,7 +46,20 @@ function get_userid()
 
 function set_groupid($groupid)
 {
-  $this->add_param('group', $groupid, PARAM_PINT);
+  $this->add_iparam('group', $groupid, null, 0);
+}
+
+function set_visibility($visibility)
+{
+  switch ($visibility) {
+  case 'group': 
+  case 'member':
+  case 'public':
+    $this->add_param('visibility', $visibility);
+    break;
+  default:
+    break;
+  }
 }
 
 function add_tag($tag)
@@ -274,10 +287,8 @@ function from_URL()
 {
   parent::from_URL();
 
-  $this->add_rparam('id', PARAM_PINT, null);
-  $this->add_rparam('user', PARAM_PINT, null);
-  $this->add_rparam('group', PARAM_PINT, null);
-    
+  $this->add_riparam('id', null, 1);
+   
   if (isset($_REQUEST['tags']))
   {
     if (strpos($_REQUEST['tags'], ' ')>0)
@@ -316,12 +327,14 @@ function from_URL()
     $this->set_setop($_REQUEST['setop']);
 
   $this->add_rparam('location', PARAM_STRING, null);
-  $this->add_rparam('location_type', PARAM_PINT, null);
+  $this->add_riparam('location_type', null, LOCATION_UNKNOWN, LOCATION_COUNTRY);
     
   if (isset($_REQUEST['user']))
     $this->set_userid($_REQUEST['user']);
   if (isset($_REQUEST['group']))
     $this->set_groupid($_REQUEST['group']);
+  if (isset($_REQUEST['visibility'])) 
+    $this->set_visibility($_REQUEST['visibility']);
 
   if (isset($_REQUEST['start']))
     $this->set_date_start($_REQUEST['start']);
@@ -425,11 +438,12 @@ function _get_query_from_tags($tags, $sets, $order=false)
     $sql .= " AND i.id=".$imageid;
   if ($userid>0)
     $sql .= " AND i.userid=".$userid;
-  if ($groupid>0)
+  if ($groupid>=0)
     $sql .= " AND i.groupid=".$groupid;
   
   // handle the acl
   $sql .= $this->_handle_acl();
+  $sql .= $this->_handle_visibility();
   
   // handle tags
   if ($num_tags)
@@ -517,6 +531,7 @@ function _handle_acl()
     else
       $acl .= " OR i.aacl>=".ACL_PREVIEW;
     $acl .= " )";
+
   }
   else {
     $acl .= " AND i.aacl>=".ACL_PREVIEW;
@@ -525,6 +540,25 @@ function _handle_acl()
   return $acl;
 }
 
+function _handle_visibility()
+{
+  $acl='';
+  $visible=$this->get_param('visibility', '');
+  switch ($visible) {
+  case 'group':
+    $acl .= " AND i.gacl>=".ACL_PREVIEW." AND i.macl<".ACL_PREVIEW; 
+    break;
+  case 'member':
+    $acl .= " AND i.macl>=".ACL_PREVIEW." AND i.aacl<".ACL_PREVIEW; 
+    break;
+  case 'public':
+    $acl .= " AND i.aacl>=".ACL_PREVIEW; 
+    break;
+  default:
+    break;
+  }
+  return $acl;
+}
 /** 
   @return Returns the column order for the selected column. This is needed for
   passing the order from subqueries to upper queries.*/

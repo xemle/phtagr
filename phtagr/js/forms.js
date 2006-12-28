@@ -276,6 +276,8 @@ function _new_option(value, text, selected)
   return option;
 }
 
+/** @param name Select name
+  @param value Current ACL value (niy) */
 function _new_acl_write(name, value)
 {
   var s=_new_select(name);
@@ -285,6 +287,8 @@ function _new_acl_write(name, value)
   return s;
 }
 
+/** @param name Select name
+  @param value Current ACL value (niy) */
 function _new_acl_read(name, value)
 {
   var s=_new_select(name);
@@ -294,6 +298,7 @@ function _new_acl_read(name, value)
   return s;
 }
 
+/** @param id ID of the image */
 function _init_form(id)
 {
   var form=document.createElement("form");
@@ -409,6 +414,8 @@ function edit_caption(id)
   document.getElementById(focusId).focus();
 }
 
+/** @param id Image ID
+  @retrun Input for Meta information */
 function edit_meta(id)
 {
   var e=document.getElementById('info-'+id);
@@ -448,6 +455,8 @@ function edit_meta(id)
   document.getElementById(focusId).focus();
 }
 
+/** @param id Image ID
+  @return Input for ACL */
 function edit_acl(id)
 {
   var e=document.getElementById('info-'+id);
@@ -487,7 +496,7 @@ function edit_acl(id)
   document.getElementById(focusId).focus();
 }
 
-/**
+/** Creates Group selection box 
   @param gid Group id
   @return Row element of ACL */
 function _get_row_groups(gid)
@@ -531,6 +540,8 @@ function _get_row_groups(gid)
   return row;
 }
 
+/** @param id Image id
+  @return Table row with ACL input */
 function _get_row_acls(id)
 {
   var gacl=images[id]['gacl'];
@@ -768,7 +779,8 @@ function _get_row_sets(id)
 }
 
 /** Row for location
-  @param id ID of the image */
+  @param id ID of the image 
+  @param t Table object */
 function _append_row_locations(id, t)
 {
   var tr=document.createElement("tr");
@@ -820,6 +832,9 @@ function _append_row_locations(id, t)
   t.appendChild(tr);
 }
 
+/** Create an Update and an Reset button
+  @param e Parent node for the buttons
+  @param nodeId Node ID for the reset button */
 function _get_buttons(e, nodeId)
 {
   if (e==null || nodeId=='')
@@ -839,6 +854,9 @@ function _get_buttons(e, nodeId)
   e.appendChild(input);
 }
 
+/** 
+  @param nodeId Node ID for the reset button 
+  @return the Buttons in a two-column table row */
 function _get_row_buttons(nodeId)
 {
   var tr=document.createElement("tr");
@@ -853,7 +871,7 @@ function _get_row_buttons(nodeId)
 }
 
 /** Removes an input field for uploads
-*/
+  @param id ID of the file input */
 function remove_file_input(id)
 {
   var e=document.getElementById('upload-'+id);
@@ -895,18 +913,25 @@ function _getChildByName(e, name, i)
   }
 }
 
+/** @param e Current nodw
+  @param name Node name
+  @return The last child with the given name */
 function _getLastChildByName(e, name)
 {
   return _getChildByName(e, name, -1);
 }
 
+/** @param e current node
+  @param name Node name
+  @return The first child with the given node name 
 function _getFistChildByName(e, name)
 {
   return _getChildByName(e, name, 0);
 }
 
 /** Adds another input field for uploads
-*/
+  @param id ID of last file input 
+  @param text Text of new file input button */
 function add_file_input(id, text)
 {
   var row=document.getElementById('upload-'+id);

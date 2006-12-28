@@ -4,7 +4,7 @@ include_once("$phtagr_lib/Base.php");
 
 define('PARAM_UNKNOWN', 0x00);
 define('PARAM_INT', 0x01);
-define('PARAM_PINT', 0x02);
+define('PARAM_UINT', 0x02);
 define('PARAM_STRING', 0x03);
 
 /**
@@ -12,7 +12,6 @@ define('PARAM_STRING', 0x03);
   @todo Rename private properts with underscore prefix
   @todo Rename to_url to get_url
   @todo Rename get_form to get_from
-  @todo Rename PARAM_PINT to PARAM_UINT
 */
 class Url extends Base
 {
@@ -84,7 +83,7 @@ function get_param($name, $default=null)
   default value is taken. There is no check for the default value. If the final
   value is null, the parameter is removed from the list. Possible values are
   PARAM_UNKNOWN, PARAM_INT, PARAM_UINT, PARAM_STRING. There is no check for
-  PARAM_UNKNOWN. PARAM_PINT is a positive integer Default is PARAM_UNKNOWN.
+  PARAM_UNKNOWN. PARAM_UINT is a unsigned integer Default is PARAM_UNKNOWN.
   @param default Default value, if the value does not match the type check.
   @return True on success, false otherwise */
 function add_param($name, $value, $check=PARAM_UNKNOWN, $default=null)
@@ -97,8 +96,8 @@ function add_param($name, $value, $check=PARAM_UNKNOWN, $default=null)
     if (!is_numeric($value))
       $value=$default;
     break;
-  case PARAM_PINT:
-    if (!is_numeric($value) || $value <= 0)
+  case PARAM_UINT:
+    if (!is_numeric($value) || $value < 0)
       $value=$default;
     break;
   case PARAM_STRING:
@@ -123,6 +122,12 @@ function add_param($name, $value, $check=PARAM_UNKNOWN, $default=null)
 function add_rparam($name, $check=PARAM_UNKNOWN, $default=null)
 {
   return $this->add_param($name, $_REQUEST[$name], $check, $default);
+}
+
+/** Like add_iparam, but uses $_REQUEST as name and value */
+function add_riparam($name, $default=null, $lbound=0, $ubound=null)
+{
+  return $this->add_iparam($name, $_REQUEST[$name], $default, $lbound, $ubound);
 }
 
 /** Add an integer paramter with lower and upper bounds

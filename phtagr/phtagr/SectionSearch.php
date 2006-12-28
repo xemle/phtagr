@@ -75,13 +75,24 @@ function print_content()
     <th>"._("Groups")."</td>
     <td>
       <select size=\"1\" name=\"group\">
-        <option value=\"\" selected=\"selected\">None</option>\n";
+        <option value=\"\" selected=\"selected\">"._("None")."</option>\n";
       foreach ($groups as $gid => $name)
         echo "        <option value=\"$gid\">$name</option>\n";
+      echo "        <option value=\"0\">"._("Not assigned")."</option>\n";
       echo "      </select>
     </td>
   </tr>\n";
     }
+    echo "   <tr>
+    <th>"._("Visibility")."</th>
+    <td>
+      <select size=\"1\" name=\"visibility\">
+        <option value=\"\" selected=\"selected\">"._("None")."</option>
+        <option value=\"group\">"._("Group")."</option>
+        <option value=\"member\">"._("Member")."</option>
+        <option value=\"public\">"._("Public")."</option>
+      </select>
+    </td>\n";
   }
   echo "  <tr>
     <th>"._("Sort by:")."</th>
