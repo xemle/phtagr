@@ -66,7 +66,7 @@ function exists($idorname)
 
 /** 
   @param withguests True if also guests are counted 
-  @param Returns the number of total users */
+  @return The number of total users */
 function get_num_users($withguests=false)
 {
   global $db;
@@ -117,11 +117,15 @@ function get_name_by_id($id)
   return $row[0];
 }
 
+/** 
+  @return Type of user */
 function get_type()
 {
   return $this->_get_data('type');
 }
 
+/** Sets the user type. Only admin user are permitted to change the types
+  @param type new type of user */
 function set_type($type)
 {
   global $user;
@@ -136,11 +140,16 @@ function set_type($type)
   $this->_set_data('type', $type);
 }
 
+/** Returns the creator id. The creator id can be used to identify the guest
+ * owner.
+  @return The user id of the creator. */
 function get_creator()
 {
   return $this->_get_data('creator');
 }
 
+/** Sets the creator ID
+  @param creator User ID of the creator. */
 function set_creator($creator)
 {
   $this->_set_data('creator', $creator);
@@ -210,6 +219,7 @@ function get_groupid()
   return 0;
 }
 
+/** @return The expired date of the account */
 function get_expire()
 {
   return $this->_get_data('expire');
@@ -288,7 +298,7 @@ function get_email()
 }
 
 /** Set a new email address of the user 
-  @param name New email address */
+  @param email New email address */
 function set_email($email)
 {
   return $this->_set_data('email', $email);
@@ -301,7 +311,7 @@ function get_quota()
 }
 
 /** Set a new quota of the user 
-  @param name New quota address */
+  @param quota New quota address */
 function set_quota($quota)
 {
   return $this->_set_data('quota', $quota);
@@ -315,7 +325,7 @@ function get_qslice()
 }
 
 /** Set a new quota slice of the user 
-  @param name New quota slice in bytes */
+  @param qslice New quota slice in bytes */
 function set_qslice($qslice)
 {
   return $this->_set_data('qslice', $qslice);
@@ -328,7 +338,7 @@ function get_qinterval()
 }
 
 /** Set a new quota interval of quota slice
-  @param name New quota interval in seconds */
+  @param qinterval New quota interval in seconds */
 function set_qinterval($qinterval)
 {
   return $this->_set_data('qinterval', $qinterval);
@@ -393,7 +403,8 @@ function _check_password($pwd)
   return 0;
 }
 
-/** Sets the language of the page */
+/** Sets the language of the page 
+  @param lang New language */
 function _set_lang($lang)
 {
   global $phtagr_prefix;
@@ -469,7 +480,7 @@ function init_session()
 /** Creates a new user 
   @param name Name of the user
   @param pwd Password of the user
-  @param type Possible values USER_ADMIN, USER_MEMBER, USER_GUEST
+  @param type Possible values USER_ADMIN, USER_MEMBER, USER_GUEST. Default is USER_MEMBER
   @return the user id on success. On failure it returns a global error code */
 function create($name, $pwd, $type=USER_MEMBER)
 {
@@ -510,6 +521,10 @@ function create($name, $pwd, $type=USER_MEMBER)
   return $id;
 }
 
+/** Creates a new guest account of the current user 
+  @param name Guest's name
+  @param pwd Guest's password 
+  @return ID of the guest account or an global error (ERROR < 0) */
 function create_guest($name, $pwd)
 {
   $id=$this->create($name, $pwd, USER_GUEST);
@@ -550,28 +565,30 @@ function _init_data()
   }
 }
 
-/** Return the default ACL for the group */
+/** @return the default ACL for the group */
 function get_gacl()
 {
   global $conf;
   return $conf->get('image.aacl', ACL_PREVIEW | ACL_EDIT);
 }
 
-/** Return the default ACL for phtagr members */
+/** @return the default ACL for phtagr members */
 function get_macl()
 {
   global $conf;
   return $conf->get('image.macl', ACL_PREVIEW);
 }
 
-/** Return the default ACL for all */
+/** @return the default ACL for all */
 function get_aacl()
 {
   global $conf;
   return $conf->get('image.aacl', ACL_PREVIEW);
 }
 
-/* Return true if the given user is member of a group */
+/** Evaluates, if a given user is member of a given group
+  @param groupid ID of the group
+  @return true if the given user is member of a group */
 function is_in_group($groupid=-1)
 {
   global $db;
@@ -586,7 +603,7 @@ function is_in_group($groupid=-1)
   return false;
 }
 
-/** Return true if the current user is an super user and has admin rights */
+/** @return true if the current user is an super user and has admin rights */
 function is_admin()
 {
   if ($this->get_name()=='admin' ||
@@ -595,7 +612,7 @@ function is_admin()
   return false;
 }
 
-/* Return true if the given user has an phtagr account */
+/* @return true if the given user has an phtagr account */
 function is_member()
 {
   if ($this->is_admin() ||
@@ -604,6 +621,7 @@ function is_member()
   return false;
 }
 
+/** @return True if user is a guest. If user is an admin, it returns also true */
 function is_guest()
 {
   if ($this->is_admin() ||
@@ -814,6 +832,7 @@ function can_upload_size($size=0)
   return false;
 }
 
+/** @return The upload directory of the user */
 function get_upload_dir()
 {
   global $phtagr_data;
@@ -825,6 +844,7 @@ function get_upload_dir()
   return $path;
 }
 
+/** @return The theme directory of the user */
 function get_theme_dir()
 {
   global $phtagr_htdocs;
@@ -971,8 +991,6 @@ function _get_cookie_name()
 
 /** Creates a new cookie value. It is a MD5 hash computed by username, password
  * and a random number.
-  @param username Name of the user
-  @param password User's password
   @return MD5 hash of username, password and random data */
 function _create_cookie()
 {

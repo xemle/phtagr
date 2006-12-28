@@ -318,23 +318,26 @@ function can_select($user=null)
 }
 
 /** Return if the given user has the same user id than an object 
-  @param image image object
+  @param user User object
 */
 function is_owner($user=null)
 {
   if ($user==null)
     return false;
     
-  if ($this->get_userid()==
-    $user->get_id())
+  if ($this->get_userid()==$user->get_id())
     return true;
+
   return false;
 }
 
-/** Checks the acl of an image 
-  @param image Image object
-  @param flag ACL bit mask
-  @return True if user is allow to do the action defined by the flag */
+/** Checks the acl of an image. 
+  @param user User object
+  @param flag ACL value
+  @param mask ACL bis mask 
+  @return True if user is allow to do the action defined by the flag. Admins
+  and image owners are allows in any case. Otherwise the ACL values are
+  checked. */
 function _check_acl($user, $flag, $mask)
 {
   if (!isset($user))
@@ -365,7 +368,7 @@ function _check_acl($user, $flag, $mask)
 }
 
 /** Return true if user can edit the image 
-  @param image Image object. Default is null.*/
+  @param user User object. Default is null.*/
 function can_edit($user=null)
 {
   return $this->_check_acl(&$user, ACL_EDIT, ACL_WRITE_MASK);
@@ -400,7 +403,7 @@ function can_download($user=null)
 
 /** Returns the size of an thumbnail in an array. This function keeps the
  * ratio.
-  @param Size of the longes side. Default is 220. If the size is larger than
+  @param size of the longes side. Default is 220. If the size is larger than
   the largest side, the size is cutted.
   @return Array of (width, height, str), wherease the string is the string for
   html img tag. On an error it returns an empty array */

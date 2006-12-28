@@ -152,7 +152,7 @@ function get_roots()
  * "user/bob". If only one root is used, the alias can be ommited and the file
  * must start with the directory separator. If "image" is the only root alias,
  * the return of "/user/bob" is also "image" and "user/bob".
-  @param dir Current directory
+  @param file Current file
   @return Array of root alias and filename. Otherwise return array of (false,
   false) */
 function _split_alias($file) 
@@ -406,7 +406,7 @@ function unlink($file)
   @param dir Directory to be removed
   @param recursive True if directory is deleted recursivly. Default is true
   @return True on success, false otherwise */
-function rmdir($dir, $recurive=true)
+function rmdir($dir, $recursive=true)
 {
   if (!$this->is_dir($dir))
     return false;

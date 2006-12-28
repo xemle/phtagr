@@ -2,8 +2,8 @@
 
 include_once("$phtagr_lib/Constants.php");
 
-/** Base class of all classes. It provides basic wrappers for HTML output.
-@class Base */
+/** @class Base 
+  Base class of all classes. It provides basic wrappers for HTML output. */
 class Base
 {
 

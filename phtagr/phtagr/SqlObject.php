@@ -4,7 +4,7 @@ include_once("$phtagr_lib/Base.php");
 include_once("$phtagr_lib/Constants.php");
 
 /**
-  @class SqlObject 
+  @class SqlObject Class for a database row
 */
 class SqlObject extends Base
 {

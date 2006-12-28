@@ -2,8 +2,8 @@
 
 include_once("$phtagr_lib/Base.php");
 
-/** @class Upgrade Upgrades the database 
-  This class handles the access control list (ACL) operations. It proceeds the
+/** @class Acl 
+  handles the access control list (ACL) operations. It proceeds the
   HTML requests and sets the acl levels. */
 class Acl extends Base
 {
@@ -69,7 +69,7 @@ function _del_acl($level, $mask)
   @param op Operant. Possible values are strings of 'add', 'del', 'keep' or
   null. If op is null, the operant is handled as 'del' and will remove the ACL.
   The operand 'keep' changes nothing.
-  @param flag Permit bit of the current ACL
+  @param level Level of flag. 0 for group, 1 for member, 2 for all
   @param mask Deny mask of current ACL */
 function _set_acl($op, $level, $mask)
 {

@@ -2,8 +2,9 @@
 
 include_once("$phtagr_lib/Base.php");
 
-/** @class Config Configuration of a user 
-  This objects holds the parameter and configuration of an user. A parameter
+/** @class Config 
+  Configuration of a user.
+  This class holds the parameter and configuration of an user. A parameter
   has a userid, a name and a value. Default parameters have the userid 0. If
   the name ends with brackest '[]', the parameter is an array. */
 class Config extends Base
@@ -228,7 +229,7 @@ function del_default($name, $value=null)
 }
 
 /** Deletes all configuration of a user 
-  @param id Id of the user */
+  @param userid Id of the user */
 function delete_from_user($userid)
 {
   global $db;

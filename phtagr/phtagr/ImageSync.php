@@ -3,7 +3,7 @@
 include_once("$phtagr_lib/Image.php");
 include_once("$phtagr_lib/IptcImage.php");
 
-/** @class Upgrade Upgrades the database */
+/** @class ImageSync Handels the synchronisation between database and the image */ 
 class ImageSync extends Image
 {
 
