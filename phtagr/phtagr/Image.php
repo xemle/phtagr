@@ -279,7 +279,8 @@ function get_votes()
 
 /** Set a now vote to the image 
   @param voting Vote of the imagev
-  @return True on success, false otherwise */
+  @return True on success, false otherwise 
+  @note This function will commit all changes */
 function add_voting($voting) 
 {
   global $db;
@@ -295,6 +296,7 @@ function add_voting($voting)
   
   $this->_set_data('voting', $_voting);
   $this->_set_data('votes', $_votes);
+  $this->commit();
 
   return true;
 }
@@ -732,7 +734,8 @@ function _sqltime2unix($string)
 }
 
 /** Update the ranking value of the image. This is calculated by the current
- * ranking value and the interval to the last view */
+ * ranking value and the interval to the last view 
+  @note This function will commit all changes */
 function update_ranking()
 {
   global $db;
@@ -746,6 +749,7 @@ function update_ranking()
   $this->_set_data('ranking', $ranking);
   $this->_set_data('clicks', $this->_get_data('clicks', 0)+1);
   $this->_set_data('lastview', "NOW()");
+  $this->commit();
 } 
 
 /** Returns an array of tags. The tags are sorted by name */

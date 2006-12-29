@@ -99,12 +99,21 @@ function execute()
       }
     }
 
-    /* Accept only votes of unvoted images for this session */
+    /* Accept only votes of unvoted images for this session. The votes needs
+     * also a minimum time difference of 2 seconds */
     if (isset($_REQUEST['voting']) && 
       !isset($_SESSION['img_voted'][$id]))
     {
-      if ($img->add_voting($_REQUEST['voting']))
+      $now=time();
+      if (isset($_SESSION['voting_time']))
+        $diff=$now-$_SESSION['voting_time'];
+      else
+        $diff=60;
+
+      if ($diff>2 && $img->add_voting($_REQUEST['voting'])) {
         $_SESSION['img_voted'][$id]=$_REQUEST['voting'];
+        $_SESSION['voting_time']=$now;
+      }
     }
 
     if (!$img->can_edit(&$user))

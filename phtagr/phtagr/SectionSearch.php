@@ -63,7 +63,7 @@ function print_content()
     </td>
   </tr>
   <tr>
-    <th>"._("User")."</th>
+    <th>"._("User:")."</th>
     <td><input type=\"text\" name=\"user\"/></td>
   </tr>\n";
   if ($user->is_member())
@@ -72,7 +72,7 @@ function print_content()
     if (count($groups)>0)
     {
       echo "  <tr>
-    <th>"._("Groups")."</td>
+    <th>"._("Groups:")."</td>
     <td>
       <select size=\"1\" name=\"group\">
         <option value=\"\" selected=\"selected\">"._("None")."</option>\n";
@@ -84,7 +84,7 @@ function print_content()
   </tr>\n";
     }
     echo "   <tr>
-    <th>"._("Visibility")."</th>
+    <th>"._("Visibility:")."</th>
     <td>
       <select size=\"1\" name=\"visibility\">
         <option value=\"\" selected=\"selected\">"._("None")."</option>
