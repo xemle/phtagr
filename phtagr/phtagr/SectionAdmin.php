@@ -404,6 +404,7 @@ function exec_debug ()
     } else {
       $this->error(sprintf(_("Synchronization of files failed. Error %d returned"), $count));
     }
+    unset($thumb);
   }
   else if ($action=="delete_tables")
   {

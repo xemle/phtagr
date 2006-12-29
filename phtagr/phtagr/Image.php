@@ -60,55 +60,6 @@ function init_by_filename($filename)
 }
 
 
-/** Update the image data if the file modification time is after the
- * synchronization time of the image data set. 
-  @param force If true, force the update procedure. Default is false.
-  @return True if the image was updated. False otherwise */
-function update($force=false)
-{
-  global $db;
-  
-  $synced=$this->get_synced(true);
-  $ctime=filectime($this->get_filename());
-  if (!$force && $ctime < $synced)
-  {
-    return false;
-  }
-  
-  $this->reinsert();
-
-  $sql="UPDATE $db->image 
-        SET synced=NOW()
-        WHERE id=".$this->get_id();
-  $result=$db->query($sql);
-  if ($result)
-    return true;
-}
-
-/** Reinsert the image data to the database. It will remove all tags and the
- * caption of the image.
-  @return True on success, false on failure 
-  @note This function does not change the synchronization timestamp of the
-  database. */
-function reinsert()
-{
-  global $db;
-  if (!isset($this->_data))
-    return false;
-  
-  $this->remove_tags();
-  $this->remove_sets();
-  $this->remove_locations();
-  $this->remove_caption();
-
-  $this->_insert_static();
-  $this->_insert_exif();
-  $this->_insert_iptc();
-
-  $this->commit();  
-  return true; 
-}
-
 /** Returns the id of the image */
 function get_id()
 {
@@ -161,6 +112,12 @@ function get_synced($in_unix=false)
     return $synced;
 }
 
+/** Sets the synchronisation date to now */
+function set_synced()
+{
+  $this->_set_data('synced', "NOW()");
+}
+
 /** @return True if the image was uploaded. Fals otherwise */
 function is_upload()
 {
@@ -196,7 +153,19 @@ function get_bytes()
 
 function set_bytes($bytes)
 {
+  $bytes=($bytes<0)?0:$bytes;
   $this->_set_data('bytes', $bytes);
+}
+
+function get_orientation()
+{
+  $this->_get_data('orientation');
+}
+
+function set_orientation($orientation)
+{
+  $orientation=($orientation<1)?1:(($orientation>8)?1:$orientation);
+  $this->_set_data('orientation', $orientation);
 }
 
 function get_caption()
@@ -439,195 +408,6 @@ function get_size($size=220)
   
   return array($w, $h, $s);
 }
-
-/** Read static values from an image and insert them into the database. The
- * static values are filesize, name, width and height */
-function _insert_static()
-{
-  global $db;
-  if (!isset($this->_data))
-    return false;
-
-  $filename=$this->get_filename();
-  
-  $bytes=filesize($filename);
-  $name=basename($filename);
-  $name=preg_replace("/'/s", "\\'", $name);
-
-  $size=getimagesize($filename);
-  if ($size)
-  {
-    $width=$size[0];
-    $height=$size[1];
-  }
-  else
-  {
-    $width=0;
-    $height=0;
-  }
-
-  $this->_set_data('bytes', $bytes);
-  $this->_set_data('name', $name);
-  $this->_set_data('width', $width);
-  $this->_set_data('height', $height);
-
-  return true;
-}
-
-/** Reads the exif data. Currently, it reads only the time of the shot and the image orientation */
-function _insert_exif()
-{
-  global $db;
-
-  if (!isset($this->_data))
-    return false;
-    
-  $date="NOW()";
-  $orientation=1;
-  if (function_exists('exif_read_data'))
-  {
-    $exif = @exif_read_data($this->get_filename(), 0, true);
-    
-    if (isset($exif['EXIF']) && isset($exif['EXIF']['DateTimeOriginal']))
-      $date="'".$exif['EXIF']['DateTimeOriginal']."'";
-   
-    if (isset($exif['IFD0']) && isset($exif['IFD0']['Orientation']))
-      $orientation=$exif['IFD0']['Orientation'];
-  }
-   
-  $this->_set_data('date', $date);
-  $this->_set_data('orientation', $orientation);
-
-  return true;
-}
-
-/** Read the iptc from the image and insert the values to the database */
-function _insert_iptc()
-{
-  if (!isset($this->_data))
-    return false;
-
-  $iptc=new Iptc();
-  $iptc->load_from_file($this->get_filename());
-  if ($iptc->get_errno()<0)
-  {
-    echo $iptc->get_errmsg();
-    return false;
-  }
-
-  $this->_insert_iptc_tags(&$iptc);
-  $this->_insert_iptc_sets(&$iptc);
-  $this->_insert_iptc_caption(&$iptc);
-  $this->_insert_iptc_date(&$iptc);
-  $this->_insert_iptc_location(&$iptc);
-  
-  return true;
-}
-
-/** Read the tags from the IPTC segment and insert the tags to the database 
-  @param iptc The Iptc object of the current image */
-function _insert_iptc_tags($iptc=null)
-{
-  global $db;
-  if (!isset($this->_data) || !isset($iptc))
-    return false;
-
-  $id=$this->get_id();
-  
-  $tags=$iptc->get_records('2:025');
-  if ($tags!=null)
-  {
-    foreach ($tags as $index => $tag)
-    {
-      $tagid=$db->tag2id($tag, true);
-      $sql="INSERT INTO $db->imagetag ( imageid, tagid )
-            VALUES ( $id, $tagid )";
-      $result = $db->query($sql);
-      if (!$result)
-        return false;
-    }
-  }
-  return true;    
-}
-
-
-/** Read the sets from the IPTC segment and insert the sets to the database 
-  @param iptc The Iptc object of the current image */
-function _insert_iptc_sets($iptc=null)
-{
-  global $db;
-  if (!isset($this->_data) || !isset($iptc))
-    return false;
-
-  $id=$this->get_id();
-  
-  $sets=$iptc->get_records('2:020');
-  if ($sets!=null)
-  {
-    foreach ($sets as $index => $set)
-    {
-      $setid=$db->set2id($set, true);
-      $sql="INSERT INTO $db->imageset ( imageid, setid )
-            VALUES ( $id, $setid )";
-      $result = $db->query($sql);
-      if (!$result)
-        return false;
-    }
-  }
-  return true;    
-}
-
-/** Read the caption from the IPTC segment and insert it to the database
-  @param iptc The Iptc object of the current image */
-function _insert_iptc_caption($iptc=null)
-{
-  global $db;
-  if (!isset($this->_data) || !isset($iptc))
-    return false;
-
-  $id=$this->get_id();
-  
-  $caption=$iptc->get_record('2:120');
-  if ($caption!=null)
-    $this->_set_data('caption', $caption);
-  return true;
-}
-
-/** Read the date from the IPTC segment and insert it to the database
-  @param iptc The Iptc object of the current image */
-function _insert_iptc_date($iptc=null)
-{
-  global $db;
-  if (!isset($this->_data) || !isset($iptc))
-    return false;
-
-  $id=$this->get_id();
-  return true;
-} 
-
-/** Read the location data from the IPTC segment and insert it to the database
-  @param iptc The Iptc object of the current image */
-function _insert_iptc_location($iptc=null)
-{
-  global $db;
-  if (!isset($this->_data) || !isset($iptc))
-    return false;
-
-  $id=$this->get_id();
-  
-  // Remove old stuff
-  $sql="DELETE FROM $db->imagelocation 
-        WHERE imageid=$id";
-  $result=$db->query($sql);
-  
-  // Extract IPTC city
-  $this->set_location($iptc->get_record('2:090'), LOCATION_CITY);
-  $this->set_location($iptc->get_record('2:092'), LOCATION_SUBLOCATION);
-  $this->set_location($iptc->get_record('2:095'), LOCATION_STATE);
-  $this->set_location($iptc->get_record('2:101'), LOCATION_COUNTRY);
-
-  return true;
-} 
 
 /** Remove tags from the database 
   @return true on success, false on failure */
@@ -1023,60 +803,6 @@ function set_locations($locations)
     else
       $this->set_location($locations[$type], $type);
   }
-}
-
-/** Synchronize files between the database and the filesystem. If a file not
- * exists delete its data. If a file is newer since the last update, update its
- * data. 
-  @param userid Userid which must match current user. If userid -1 and user is
-  admin, all files are synchronized. 
-  @return Array of count files, updated files, and deleted files. On error, the
-  first array value is the global error code */
-function sync_files($userid=-1)
-{
-  global $db;
-  global $user;
-
-  $sql="SELECT id,userid,filename
-        FROM $db->image";
-  if ($userid>0)
-  {
-    if ($userid!=$user->get_id() && !$user->is_admin())
-      return array(ERR_NOT_PERMITTED, 0, 0);
-    $sql.=" AND userid=$userid";
-  } else {
-    if (!$user->is_admin())
-      return array(ERR_NOT_PERMITTED, 0, 0);
-  }
-
-  $result=$db->query($sql);
-  if (!$result)
-    return 0;
-    
-  $count=0;
-  $updated=0;
-  $deleted=0;
-  while ($row=mysql_fetch_row($result))
-  {
-    $id=$row[0];
-    $img_userid=$row[1];
-    $filename=$row[2];
-    $count++;
-    
-    if (!file_exists($filename))
-    {
-      $this->delete_from_user($img_userid, $id);
-      $deleted++;
-    }
-    else 
-    {
-      $image=new Image($id);
-      if ($image->update())
-        $updated++;
-      unset($image);
-    }
-  }
-  return array($count, $updated, $deleted);
 }
 
 /** Deletes one or all images from a specific user

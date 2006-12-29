@@ -521,7 +521,7 @@ function print_preview($search=null)
 
   $iurl=new Url('image.php');
   $iurl->add_param('id', $id);
-  $iurl->add_param('type', 'preview');
+  $iurl->add_param('type', 'thumb');
   echo "<a href=\"$url\"><img src=\"".$iurl->get_url()."\" alt=\"$name\" title=\"$name\" ".$size[2]."/></a></div>\n";
   
   $this->print_caption();

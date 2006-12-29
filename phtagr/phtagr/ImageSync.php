@@ -86,6 +86,80 @@ function export($filename)
 {
 }
 
+/** Update the image data if the file modification time is after the
+ * synchronization time of the image data set. 
+  @param force If true, force the update procedure. Default is false.
+  @return True if the image was updated. False otherwise */
+function update($force=false)
+{
+  $synced=$this->get_synced(true);
+  $ctime=filectime($this->get_filename());
+  if (!$force && $ctime < $synced)
+  {
+    return false;
+  }
+  
+  $this->_import_static();
+  $this->_import_meta();
+  $this->set_synced();
+  $this->commit();
+  return true;
+}
+
+/** Synchronize files between the database and the filesystem. If a file not
+ * exists delete its data. If a file is newer since the last update, update its
+ * data. 
+  @param userid Userid which must match current user. If userid -1 and user is
+  admin, all files are synchronized. 
+  @return Array of count files, updated files, and deleted files. On error, the
+  first array value is the global error code */
+function sync_files($userid=-1)
+{
+  global $db;
+  global $user;
+
+  $sql="SELECT id,userid,filename
+        FROM $db->image";
+  if ($userid>0)
+  {
+    if ($userid!=$user->get_id() && !$user->is_admin())
+      return array(ERR_NOT_PERMITTED, 0, 0);
+    $sql.=" AND userid=$userid";
+  } else {
+    if (!$user->is_admin())
+      return array(ERR_NOT_PERMITTED, 0, 0);
+  }
+
+  $result=$db->query($sql);
+  if (!$result)
+    return 0;
+    
+  $count=0;
+  $updated=0;
+  $deleted=0;
+  while ($row=mysql_fetch_row($result))
+  {
+    $id=$row[0];
+    $img_userid=$row[1];
+    $filename=$row[2];
+    $count++;
+    
+    if (!file_exists($filename))
+    {
+      $this->delete_from_user($img_userid, $id);
+      $deleted++;
+    }
+    else 
+    {
+      $image=new ImageSync($id);
+      if ($image->update())
+        $updated++;
+      unset($image);
+    }
+  }
+  return array($count, $updated, $deleted);
+}
+
 /** Reads the IPTC header from the file */
 function _read_iptc()
 {
@@ -133,7 +207,6 @@ function _import_static()
   $this->set_name($name);
   $this->set_width($width);
   $this->set_height($height);
-
   return true;
 }
 
@@ -144,6 +217,7 @@ function _import_meta($merge=false)
   if ($this->_check_iptc_error())
     return false;
 
+  $this->set_orientation($iptc->get_orientation());
   $this->_import_meta_date($merge);
 
   // Caption
@@ -437,6 +511,7 @@ function handle_request()
   }
 
   // Commit changes to update the values
+  $this->set_synced();
   $this->commit();
   $this->_export_meta(false);
   $this->_save_iptc();

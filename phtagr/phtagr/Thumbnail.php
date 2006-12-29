@@ -1,12 +1,12 @@
 <?php
 
 include_once("$phtagr_lib/Search.php");
-include_once("$phtagr_lib/Image.php");
+include_once("$phtagr_lib/ImageSync.php");
 
 /** 
   @class Thumbnail Create thumbnails, image previews
 */
-class Thumbnail extends Image
+class Thumbnail extends ImageSync
 {
 
 var $cmd;
@@ -14,7 +14,7 @@ var $src;
 
 function Thumbnail($id=-1)
 {
-  $this->Image($id);
+  $this->ImageSync($id);
 }
 
 function _get_cache_path()
