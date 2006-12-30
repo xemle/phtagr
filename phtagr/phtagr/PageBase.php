@@ -44,11 +44,13 @@ function print_footer_html()
 
 function layout()
 {
+  ob_start();
   $this->print_header_html();
   echo "<body>\n";
   $this->print_sections();
   echo "</body>\n";
   $this->print_footer_html();
+  while (@ob_end_flush());
 }
 
 }

@@ -3,18 +3,20 @@
 include_once("$phtagr_lib/Search.php");
 include_once("$phtagr_lib/ImageSync.php");
 
-/** 
-  @class Thumbnail Create thumbnails, image previews
+/** Create thumbnails and image previews 
+  @class Thumbnail 
 */
 class Thumbnail extends ImageSync
 {
 
-var $cmd;
-var $src;
+var $_cmd;
+var $_src;
 
 function Thumbnail($id=-1)
 {
   $this->ImageSync($id);
+  $this->_cmd="";
+  $this->_src="";
 }
 
 function _get_cache_path()
@@ -56,8 +58,8 @@ function get_filename_high()
   @param src Filename of the soure image */
 function init($src)
 {
-  $this->src=$src;
-  $this->cmd="convert";
+  $this->_src=$src;
+  $this->_cmd="convert";
 }
 
 /** Resize the original
@@ -72,7 +74,7 @@ function resize($width, $height, $expand=false)
     $width=$width<=$this->get_width()?$width:$this->get_width();
     $height=$height<=$this->get_height()?$height:$this->get_height();
   }
-  $this->cmd.=" -resize ${width}x$height";
+  $this->_cmd.=" -resize ${width}x$height";
 }
 
 /** Crop the image. The crop region must be inside the image. If the region is
@@ -94,33 +96,33 @@ function crop($width, $height, $left=0, $top=0)
   if ($height>$this->get_height()-$top)
     $height=$this->get_height()-top;
 
-  $this->cmd.=" -crop ${width}x${height}+$left+$top";
+  $this->_cmd.=" -crop ${width}x${height}+$left+$top";
 }
 
 /** Set to quality of the output image 
   @param quality Value between 0 (worset) and 100 (best). Default is 85 */
-function setQuality($quality=85)
+function set_quality($quality=85)
 {
   if ($quality<0 || $quality > 100)
     $quality=85;
     
-  $this->cmd.=" -quality $quality";
+  $this->_cmd.=" -quality $quality";
 }
 
 /** Save the modified image to $dst
   @param dst Filename of the modified image
   @return false Returns false on error */
-function saveTo($dst)
+function save_to($dst)
 {
-  $this->cmd.=" \"$this->src\" \"$dst\"";
-  system ($this->cmd, $retval);
+  $this->_cmd.=" \"".$this->_src."\" \"$dst\"";
+  system ($this->_cmd, $retval);
   if ($retval!=0)
   {
-    $this->error("Could not execute command '".$this->cmd."'. Exit with code $retval");
+    $this->error(sprintf(_("Could not execute command '%s'. Exit with code %d"), $this->_cmd, $retval));
     return false;
   }
 
-  chmod($dst, 0644);
+  @chmod($dst, 0644);
   return true;
 }
 
@@ -163,8 +165,8 @@ function create_mini($inherit=false)
     }
     $this->resize($w, $h);
     $this->crop(75, 75, $l, $t);
-    $this->setQuality(85);
-    return $this->saveTo($mini);
+    $this->set_quality(85);
+    return $this->save_to($mini);
   }
   return true;
 }
@@ -189,8 +191,8 @@ function create_thumb($inherit=false)
       $this->init($this->get_filename_preview());
     }
     $this->resize(220, 220);
-    $this->setQuality(85);
-    return $this->saveTo($thumb);
+    $this->set_quality(85);
+    return $this->save_to($thumb);
   }
   return true;
 }
@@ -215,8 +217,8 @@ function create_preview($inherit=false)
       $this->init($this->get_filename_high());
     }
     $this->resize(600, 600);
-    $this->setQuality(90);
-    return $this->saveTo($preview);
+    $this->set_quality(90);
+    return $this->save_to($preview);
   }
   return true;
 }
@@ -233,8 +235,8 @@ function create_high()
   {
     $this->init($this->get_filename());
     $this->resize(1024, 1024);
-    $this->setQuality(90);
-    return $this->saveTo($high);
+    $this->set_quality(90);
+    return $this->save_to($high);
   }
   return true;
 }
@@ -250,7 +252,8 @@ function _get_filenames()
   return $files;
 }
 
-/** Renews all timestamps of the previews. This function is usefull, if meta data changes but not the image itself */
+/** Renews all timestamps of the previews. This function is usefull, if meta
+ * data changes but not the image itself */
 function touch_previews()
 {
   if (!function_exists("touch"))
