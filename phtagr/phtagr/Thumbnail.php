@@ -19,10 +19,19 @@ function Thumbnail($id=-1)
   $this->_src="";
 }
 
+/** Returns the cache path for the image. The images are separated into
+ * subdirectories as cache pages to avoid to many files per directory. These
+ * cache pages are created on demand. */
 function _get_cache_path()
 {
   global $phtagr_data;
   $path.=$phtagr_data.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR;
+
+  $page=intval($this->get_id() / 1024);
+  $path.=$page.DIRECTORY_SEPARATOR;
+
+  if (!file_exists($path) || !is_dir($path))
+    @mkdir($path, 0755, true);
   return $path;
 }
 
@@ -114,6 +123,9 @@ function set_quality($quality=85)
   @return false Returns false on error */
 function save_to($dst)
 {
+  if ($this->get_id()<=0)
+    return false;
+
   $this->_cmd.=" \"".$this->_src."\" \"$dst\"";
   system ($this->_cmd, $retval);
   if ($retval!=0)
