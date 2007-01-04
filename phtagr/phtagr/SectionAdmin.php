@@ -383,7 +383,16 @@ function print_upload ()
   echo "</p>\n";
 }
 
-function exec_debug ()
+/** Static callback function for image deletion 
+  @param id Image ID to delete */
+static function cb_delete($id)
+{
+  $thumb=new Thumbnail($id);
+  $thumb->delete();
+  unset($thumb);
+}
+
+function exec_debug()
 {
   global $db;
   $action="";
@@ -398,7 +407,7 @@ function exec_debug ()
     echo "<h3>"._("Synchroning image data...")."</h3>\n";
     $this->info(_("This operation may take some time"));
     $thumb=new Thumbnail();
-    list($count, $updated, $deleted)=$thumb->sync_files();
+    list($count, $updated, $deleted)=$thumb->sync_files(array("SectionAdmin", "cb_delete"));
     if ($count>0) {
       $this->success(sprintf(_("All %d files where synchronized. %d were updated, %d were deleted"), $count, $updated, $deleted));
     } else {

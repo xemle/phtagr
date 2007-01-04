@@ -109,11 +109,12 @@ function update($force=false)
 /** Synchronize files between the database and the filesystem. If a file not
  * exists delete its data. If a file is newer since the last update, update its
  * data. 
+  @param del_func Callback function for image deletion 
   @param userid Userid which must match current user. If userid -1 and user is
   admin, all files are synchronized. 
   @return Array of count files, updated files, and deleted files. On error, the
   first array value is the global error code */
-function sync_files($userid=-1)
+function sync_files($del_func, $userid=-1)
 {
   global $db;
   global $user;
@@ -146,7 +147,8 @@ function sync_files($userid=-1)
     
     if (!file_exists($filename))
     {
-      $this->delete_from_user($img_userid, $id);
+      if (is_callable($del_func))
+        call_user_func($del_func, $id);
       $deleted++;
     }
     else 
@@ -158,6 +160,51 @@ function sync_files($userid=-1)
     }
   }
   return array($count, $updated, $deleted);
+}
+
+/** Deletes the file if it was uploaded */
+function delete()
+{
+  global $user;
+
+  if ($user->get_id()!=$this->get_userid() && !$user->is_admin())
+    return;
+
+  if ($this->is_upload())
+    @unlink($this->get_filename());
+
+  parent::delete();
+}
+
+/** Delets all uploaded files */
+function delete_from_user($userid, $id)
+{
+  global $user;
+  global $db;
+
+  if (!is_numeric($userid) || $userid<1)
+    return ERR_PARAM;
+  if ($userid!=$user->get_id() && !$user->is_admin())
+    return ERR_NOT_PERMITTED;
+
+  $userid=$user->get_id();
+  $sql="SELECT filename
+        FROM $db->image
+        WHERE userid=$userid AND is_upload=1";
+  $result=$db->query($sql);
+  if ($result) {
+    while ($row=mysql_fetch_row($result)) {
+      @unlink($row[0]);
+    }
+  }
+  return parent::delete_from_user($userid, $id);
+}
+
+/** This is a dummy function for inherited classes. This function will be
+ * called, if the meta data changes, but not the image itself  */
+function touch_cache()
+{
+  return true;
 }
 
 /** Reads the IPTC header from the file */
@@ -513,6 +560,8 @@ function handle_request()
   // Commit changes to update the values
   $this->set_synced();
   $this->commit();
+  $this->touch_cache();
+
   $this->_export_meta(false);
   $this->_save_iptc();
   $iptc=$this->_iptc;

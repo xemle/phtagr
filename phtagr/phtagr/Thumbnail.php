@@ -2,6 +2,7 @@
 
 include_once("$phtagr_lib/Search.php");
 include_once("$phtagr_lib/ImageSync.php");
+include_once("$phtagr_lib/Filesystem.php");
 
 /** Create thumbnails and image previews 
   @class Thumbnail 
@@ -27,39 +28,41 @@ function _get_cache_path()
   global $phtagr_data;
   $path.=$phtagr_data.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR;
 
-  $page=intval($this->get_id() / 1024);
-  $path.=$page.DIRECTORY_SEPARATOR;
+  $page=intval($this->get_id() / 1000);
+  $path.=sprintf("%04d", $page).DIRECTORY_SEPARATOR;
 
-  if (!file_exists($path) || !is_dir($path))
-    @mkdir($path, 0755, true);
+  if (!file_exists($path) || !is_dir($path)) {
+    $fs=new Filesystem();
+    $fs->mkdir($path, true);
+  }
   return $path;
 }
 
 /** @return Returns the filename of the mini image */
 function get_filename_mini()
 {
-  $file=sprintf("img%d.mini.jpg",$this->get_id());
+  $file=sprintf("img%07d.mini.jpg",$this->get_id());
   return $this->_get_cache_path().$file;
 }
 
 /** @return Returns the filename of the thumb image */
 function get_filename_thumb()
 {
-  $file=sprintf("img%d.thumb.jpg",$this->get_id());
+  $file=sprintf("img%07d.thumb.jpg",$this->get_id());
   return $this->_get_cache_path().$file;
 }
 
 /** @return Returns the filename of the preview */
 function get_filename_preview()
 {
-  $file=sprintf("img%d.preview.jpg",$this->get_id());
+  $file=sprintf("img%07d.preview.jpg",$this->get_id());
   return $this->_get_cache_path().$file;
 }
 
 /** @return Returns the filename of the hight solution image */
 function get_filename_high()
 {
-  $file=sprintf("img%d.high.jpg",$this->get_id());
+  $file=sprintf("img%07d.high.jpg",$this->get_id());
   return $this->_get_cache_path().$file;
 }
 
@@ -266,10 +269,10 @@ function _get_filenames()
 
 /** Renews all timestamps of the previews. This function is usefull, if meta
  * data changes but not the image itself */
-function touch_previews()
+function touch_cache()
 {
   if (!function_exists("touch"))
-    return;
+    return false;
 
   $files=$this->_get_filenames();
   foreach ($files as $file)
@@ -332,6 +335,20 @@ function delete_previews()
   }
 }
 
+/** Deletes all previews */
+function delete()
+{
+  global $user;
+
+  if ($user->get_id()!=$this->get_userid() && !$user->is_admin())
+    return;
+
+  $this->delete_previews();
+
+  parent::delete();
+}
+
+
 /** Delete all user data 
   @param userid ID of the specific user
   @param id Image ID, if only one image should be delted. 
@@ -357,7 +374,7 @@ function delete_from_user($userid, $id=0)
   {
     $img_id=$row[0];
     $thumb=new Thumbnail($img_id);
-    $thumb->delete_previews();
+    $thumb->delete();
     unset($thumb);
   }
 

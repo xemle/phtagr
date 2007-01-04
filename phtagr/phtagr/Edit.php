@@ -1,8 +1,7 @@
 <?php
 
 global $phtagr_lib;
-include_once("$phtagr_lib/Iptc.php");
-include_once("$phtagr_lib/Base.php");
+include_once("$phtagr_lib/Thumbnail.php");
 include_once("$phtagr_lib/Constants.php");
 include_once("$phtagr_lib/Acl.php");
 include_once("$phtagr_lib/SectionAcl.php");
@@ -73,7 +72,7 @@ function execute()
     if (!is_numeric($id))
       continue;
 
-    $img=new ImageSync($id);
+    $img=new Thumbnail($id);
     if ($img->get_id()!=$id)
     {
       unset($img);
@@ -87,12 +86,7 @@ function execute()
       {
         if ($img->is_owner(&$user))
         {
-          $thumb=new Thumbnail($id);
-          $thumb->delete_previews();
-          if ($thumb->is_upload())
-            @unlink($thumb->get_filename());
-          $thumb->remove_from_db();
-          unset($thumb);
+          $img->delete();
           unset($img);
           continue;
         }

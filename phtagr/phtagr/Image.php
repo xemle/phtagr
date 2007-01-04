@@ -409,93 +409,6 @@ function get_size($size=220)
   return array($w, $h, $s);
 }
 
-/** Remove tags from the database 
-  @return true on success, false on failure */
-function remove_tags()
-{
-  global $db;
-  if (!isset($this->_data))
-    return false;
-    
-  $sql="DELETE FROM $db->imagetag
-        WHERE imageid=".$this->get_id();
-  $result = $db->query($sql);
-  if (!$result)
-    return false;
-
-  return true;
-}
-
-/** Remove sets from the database 
-  @return true on success, false on failure */
-function remove_sets()
-{
-  global $db;
-  if (!isset($this->_data))
-    return false;
-    
-  $sql="DELETE FROM $db->imageset
-        WHERE imageid=".$this->get_id();
-  $result = $db->query($sql);
-  if (!$result)
-    return false;
-
-  return true;
-}
-
-/** Remove locations from the database 
-  @return true on success, false on failure */
-function remove_locations()
-{
-  global $db;
-  if (!isset($this->_data))
-    return false;
-    
-  $sql="DELETE FROM $db->imagelocation
-        WHERE imageid=".$this->get_id();
-  $result = $db->query($sql);
-  if (!$result)
-    return false;
-
-  return true;
-}
-
-/** Remove caption from the database 
-  @return true on success, false on failure */
-function remove_caption()
-{
-  global $db;
-  if (!isset($this->_data))
-    return false;
-  
-  // remove caption
-  $sql="UPDATE $db->image
-        SET caption=NULL
-        WHERE id=".$this->get_id();
-  $result = $db->query($sql);
-  if (!$result)
-    return false;
-
-  return true;
-}
-
-/** Removes an image from the database
-  @return True on success, false otherwise */
-function remove_from_db()
-{
-  global $db;
-  $ret=true;
-  $ret&=$this->remove_tags();
-  $ret&=$this->remove_sets();
-  $ret&=$this->remove_locations();
-  $sql="DELETE FROM $db->image
-        WHERE id=".$this->get_id();
-  $result=$db->query($sql);
-  if (!$result)
-    $ret=false;
-  return $ret;
-}
-
 /** Convert the SQL time string to unix time stamp.
   @param string The time string has the format like "2005-04-06 09:24:56", the
   result is 1112772296
@@ -804,6 +717,37 @@ function set_locations($locations)
       $this->set_location($locations[$type], $type);
   }
 }
+
+/** Deletes the image from the database
+  @return True on success, false otherwise */
+function delete()
+{
+  global $db;
+  global $user;
+
+  if ($user->get_id()!=$this->get_userid() && !$user->is_admin())
+    return false;
+
+  $id=$this->get_id();
+  $sql="DELETE FROM $db->imagetag
+        WHERE imageid=$id";
+  $db->query($sql);
+
+  $sql="DELETE FROM $db->imageset
+        WHERE imageid=$id";
+  $db->query($sql);
+  
+  $sql="DELETE FROM $db->imagelocation
+        WHERE imageid=$id";
+  $db->query($sql);
+
+  $sql="DELETE FROM $db->image
+        WHERE id=$id";
+  $db->query($sql);
+
+  return true;
+}
+
 
 /** Deletes one or all images from a specific user
   @param userid ID of user

@@ -382,14 +382,8 @@ function mkdir($dir, $withparent=false)
       return true;
   }
   
-  if (!$withparent)
-    return @mkdir($this->get_realname($dir));
-  
-  // Create parent directoies recursivly
-  $base=$this->basename($dir);
-  if (!$this->is_dir($base) && !$this->mkdir($base, $withparent))
-    return false;
-  return @mkdir($this->get_realname($dir));
+  $real_dir=$this->get_realname($dir);
+  return @mkdir($real_dir, 0755, $withparent);
 }
 
 /** Deletes a file

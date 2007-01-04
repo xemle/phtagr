@@ -1019,6 +1019,7 @@ function _delete_user_data($id)
   global $db;
   global $conf;
 
+  // Deleting cached previes, uploads and image sql data
   $img=new Thumbnail();
   $img->delete_from_user($id);
 
