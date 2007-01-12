@@ -2,13 +2,13 @@
 
 include_once("$phtagr_lib/SectionBase.php");
 
-class SectionHeaderRight extends SectionBase
+class SectionQuickSearch extends SectionBase
 {
 
 
-function SectionHeaderRight()
+function SectionQuickSearch()
 {
-  $this->SectionBase('headerright');
+  $this->SectionBase('quicksearch');
 }
 
 function print_content()

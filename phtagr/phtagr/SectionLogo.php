@@ -2,12 +2,12 @@
 
 include_once("$phtagr_lib/SectionBase.php");
 
-class SectionHeaderLeft extends SectionBase
+class SectionLogo extends SectionBase
 {
 
-function SectionHeaderLeft()
+function SectionLogo()
 {
-  $this->SectionBase("headerleft");
+  $this->SectionBase("logo");
 }
 
 function print_content()

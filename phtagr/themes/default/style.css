@@ -98,7 +98,7 @@ th {
   color: #262626;
   background-color: #d0d0d0;
   width: 0px;
-  text-align: right;
+  text-align: left;
 }
 
 td {
@@ -120,7 +120,7 @@ input, select, submit, reset, textarea {
 }
 
 /** Detailed layout */
-.headerleft {
+.logo {
   float: left;
   width: 400px;
   height: 50px;
@@ -132,7 +132,7 @@ input, select, submit, reset, textarea {
   background-position: 15px 13px;
 }
 
-.headerright {
+.quicksearch {
   float:right;
   width: 250px;
   margin: 0px;
@@ -140,7 +140,7 @@ input, select, submit, reset, textarea {
   text-align: right;
 }
 
-.headerright * p, .headerright a, .headerright form {
+.quicksearch * p, .quicksearch a, .quicksearch form {
   margin: 0px;
   padding: 0px;
   font-size: 8pt;

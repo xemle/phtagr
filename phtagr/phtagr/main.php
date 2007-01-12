@@ -9,8 +9,8 @@ include "$phtagr_lib/Search.php";
 include "$phtagr_lib/Edit.php";
 
 include "$phtagr_lib/PageBase.php";
-include "$phtagr_lib/SectionHeaderLeft.php";
-include "$phtagr_lib/SectionHeaderRight.php";
+include "$phtagr_lib/SectionLogo.php";
+include "$phtagr_lib/SectionQuickSearch.php";
 include "$phtagr_lib/SectionMenu.php";
 include "$phtagr_lib/SectionHome.php";
 include "$phtagr_lib/SectionFooter.php";
@@ -31,10 +31,10 @@ include "$phtagr_lib/SectionMyAccount.php";
 $page = new PageBase("phTagr");
 
 $hdr = new SectionBase('header');
-$headerleft = new SectionHeaderLeft();
-$hdr->add_section($headerleft);
-$headerright = new SectionHeaderRight();
-$hdr->add_section(&$headerright);
+$logo = new SectionLogo();
+$hdr->add_section($logo);
+$qsearch = new SectionQuickSearch();
+$hdr->add_section(&$qsearch);
 
 $page->add_section(&$hdr);
 
