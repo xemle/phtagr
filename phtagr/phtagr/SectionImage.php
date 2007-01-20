@@ -585,8 +585,8 @@ function print_content()
   $url->add_param('type', 'preview');
   echo "<div class=\"preview\"><img src=\"".$url->get_url()."\" alt=\"$name\" ".$size[2]."/></div>\n";
 
-  $this->print_from();
   $this->print_caption(false);
+  $this->print_from();
   $this->print_voting();
   echo "<div class=\"imginfo\" id=\"info-$id\"><table>\n";
   

@@ -28,10 +28,6 @@ function print_content()
 {
   global $search;
   global $user;
-  if (count($this->tags)==0 && 
-    count($this->sets)==0 &&
-    count($this->locations)==0)
-    return;
 
   $userid=$search->get_userid();
   $src=$user->get_theme_dir().'/globe.png';
@@ -134,6 +130,30 @@ function print_content()
     }
     echo "</ul>\n";
   }
+
+  echo "<h3>"._("Sort by")."</h3>\n<ul>\n";
+  $order=array('date' => _("Date"), 
+              '-date' => _("Date desc"),
+              'ranking' => _("Ranking"),
+              'voting' => _("Voting"),
+              'newest' => _("Newest"));
+  foreach ($order as $key => $text) {
+    $url->set_orderby($key);
+    $add_url->set_orderby($key);
+    echo "  <li>";
+    // Add global search
+    if ($userid>0) 
+    {
+      $url->set_userid(0);
+      echo "<a href=\"".$url->get_url()."\">$img</a> ";
+      $url->set_userid($userid);
+    }
+    echo "<a href=\"".$add_url->get_url()."\">+</a> ";
+    echo "<a href=\"".$url->get_url()."\">$text</a></li>\n";
+    $url->del_orderby();
+    $add_url->del_orderby();
+  }
+  echo "</ul>\n";
 }
 
 }

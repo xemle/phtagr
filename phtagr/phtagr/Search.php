@@ -282,6 +282,11 @@ function get_orderby()
   $return=$this->get_param('orderby', 'date');
 }
 
+function del_orderby()
+{
+  $this->del_param('orderby');
+}
+
 /** Creates a search object from a URL */
 function from_URL()
 {
