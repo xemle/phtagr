@@ -415,6 +415,12 @@ function exec_debug()
     }
     unset($thumb);
   }
+  else if ($action=="delete_unassigned_data")
+  {
+    echo "<h3>"._("Deleting unassigned meta data...")."</h3>\n";
+    $db->delete_unassigned_data();
+    $this->warning(_("Unassigned data deleted!"));
+  }
   else if ($action=="delete_tables")
   {
     echo "<h3>"._("Deleting Tables...")."</h3>\n";
@@ -468,6 +474,8 @@ function print_debug ()
   echo "<li>";
   $url->add_param('action', 'sync'); $href=$url->get_url();
   echo "<a href=\"$href\">"._("Synchronize files with the database")."</a></li>\n";
+  $url->add_param('action', 'delete_unassigned_data'); $href=$url->get_url();
+  echo "<li><a href=\"$href\">"._("Delete unassigned meta data")."</a></li>\n";
   $url->add_param('action', 'delete_tables'); $href=$url->get_url();
   echo "<li><a href=\"$href\">"._("Delete Tables")."</a></li>\n";
   $url->add_param('action', 'delete_images'); $href=$url->get_url();

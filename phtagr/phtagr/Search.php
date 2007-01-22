@@ -265,12 +265,14 @@ function get_page_size()
 function set_orderby($orderby)
 {
   if ($orderby=='-date' ||
-      $orderby=='ranking' ||
-      $orderby=='-ranking' ||
+      $orderby=='popularity' ||
+      $orderby=='-popularity' ||
       $orderby=='voting' ||
       $orderby=='-voting' ||
       $orderby=='newest' ||
-      $orderby=='-newest' )
+      $orderby=='-newest' ||
+      $orderby=='changes' ||
+      $orderby=='-changes' )
     $this->add_param('orderby', $orderby);
   else 
     $this->del_param('orderby');
@@ -576,8 +578,8 @@ function _get_column_order()
   case '-date':
     $order.=",date";
     break;
-  case 'ranking':
-  case '-ranking':
+  case 'popularity':
+  case '-popularity':
     $order.=",ranking";
     break;
   case 'voting':
@@ -587,6 +589,10 @@ function _get_column_order()
   case 'newest':
   case '-newest':
     $order.=",created";
+    break;
+  case 'changes':
+  case '-changes':
+    $order.=",synced";
     break;
   default:
     break;
@@ -613,10 +619,10 @@ function _handle_orderby()
   case '-date':
     $order.=" i.date ASC";
     break;
-  case 'ranking':
+  case 'popularity':
     $order.=" i.ranking DESC";
     break;
-  case '-ranking':
+  case '-popularity':
     $order.=" i.ranking ASC";
     break;
   case 'voting':
@@ -630,6 +636,12 @@ function _handle_orderby()
     break;
   case '-newest':
     $order.=" i.created ASC";
+    break;
+  case 'changes':
+    $order.=" i.synced DESC";
+    break;
+  case '-changes':
+    $order.=" i.synced ASC";
     break;
   default:
     break;

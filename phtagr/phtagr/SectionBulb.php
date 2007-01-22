@@ -131,12 +131,13 @@ function print_content()
     echo "</ul>\n";
   }
 
-  echo "<h3>"._("Sort by")."</h3>\n<ul>\n";
+  echo "<h3>"._("Sort by:")."</h3>\n<ul>\n";
   $order=array('date' => _("Date"), 
               '-date' => _("Date desc"),
-              'ranking' => _("Ranking"),
+              'popularity' => _("Popularity"),
               'voting' => _("Voting"),
-              'newest' => _("Newest"));
+              'newest' => _("Newest"),
+              'changes' => _("Changes"));
   foreach ($order as $key => $text) {
     $url->set_orderby($key);
     $add_url->set_orderby($key);

@@ -100,12 +100,14 @@ function print_content()
       <select name=\"orderby\">
         <option value=\"date\" selected=\"selected\">"._("date")."</option>
         <option value=\"-date\">"._("date asc")."</option>
-        <option value=\"ranking\">"._("popular")."</option>
-        <option value=\"-ranking\">"._("popular asc")."</option>
-        <option value=\"voting\">"._("voting")."</option>
-        <option value=\"-voting\">"._("voting asc")."</option>
-        <option value=\"newest\">"._("newest")."</option>
-        <option value=\"-newest\">"._("newest desc")."</option>
+        <option value=\"popularity\">"._("Popularity")."</option>
+        <option value=\"-popularity\">"._("Popularity asc")."</option>
+        <option value=\"voting\">"._("Voting")."</option>
+        <option value=\"-voting\">"._("Voting asc")."</option>
+        <option value=\"newest\">"._("Newest")."</option>
+        <option value=\"-newest\">"._("Newest desc")."</option>
+        <option value=\"changes\">"._("Changes")."</option>
+        <option value=\"-changes\">"._("Changes desc")."</option>
       </select>
     </td>
   </tr>

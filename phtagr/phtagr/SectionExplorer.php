@@ -103,8 +103,12 @@ function print_content()
   {
     echo "<p>"._("No images found!")."</p>\n";
     return;
+  } else {
+    $num_pages=floor($count / $search->get_page_size());
+    if ($num_pages<$search->get_page_num())
+      $search->set_page_num($num_pages);
   }
-  
+
   $sql=$search->get_query();
   //$this->comment($sql);
   $result = $db->query($sql);

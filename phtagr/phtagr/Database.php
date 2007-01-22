@@ -558,6 +558,35 @@ function delete_images()
   return true;
 }
 
+/** Deletes all unassigned meta data from tags, sets, and locations. It deletes
+ * only these values, which are not assigned to any images. */
+function delete_unassigned_data() 
+{
+  // tags
+  $sql="DELETE FROM $this->tag 
+        WHERE id NOT IN (
+          SELECT tagid
+          FROM $this->imagetag
+        )";
+  $this->query($sql);
+
+  // sets
+  $sql="DELETE FROM $this->set
+        WHERE id NOT IN (
+          SELECT setid
+          FROM $this->imageset
+        )";
+  $this->query($sql);
+
+  // locations
+  $sql="DELETE FROM $this->location
+        WHERE id NOT IN (
+          SELECT locationid
+          FROM $this->imagelocation
+        )";
+  $this->query($sql);
+}
+
 }
 
 ?>
