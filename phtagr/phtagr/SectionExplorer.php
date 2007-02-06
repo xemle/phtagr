@@ -80,7 +80,7 @@ function print_content()
 
   $sql=$search->get_num_query();
   // for debugging
-  // $this->comment($sql);
+  //$this->comment($sql);
   $result = $db->query($sql);
   if (!$result)
   {
@@ -110,7 +110,7 @@ function print_content()
   }
 
   $sql=$search->get_query();
-  //$this->comment($sql);
+  $this->comment($sql);
   $result = $db->query($sql);
   if (!$result)
   {

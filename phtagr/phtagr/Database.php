@@ -320,6 +320,22 @@ function location2id($location, $type, $create=false)
   return $row[0];
 }
 
+/** @location Untyped location name
+  @return Array of IDs of a location */
+function location2ids($location)
+{
+  $slocation=mysql_escape_string($location);
+  $sql="SELECT id
+        FROM $this->location
+        WHERE name='$slocation'";
+  $result=$this->query($sql);
+  $ids=array();
+  while($row=mysql_fetch_row($result))
+  {
+    array_push($ids, $row[0]);
+  }
+  return $ids;
+}
 /** Creates the phTagr tables
   @return Returns true on success. False otherwise */
 function create_tables()

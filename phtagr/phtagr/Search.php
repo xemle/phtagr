@@ -406,108 +406,85 @@ function get_form()
   return parent::get_form();  
 }
 
-/** Create a SQL query from a tag array 
-  @param tags Array of tags, could be NULL
-  @param sets Array of sets, could be NULL
-  @param order Insert order column to select statement if true
-  @return Return the sql statement of the query object corresponding to the
-  Seach parameters */
-function _get_query_from_tags($tags, $sets, $order=false)
+/** Join tags. Add a query for specific tags and/or specific tag count
+  @param tags Array of required tags. Could be an empty array, to query a
+  specific tag count
+  @param count Count of required tags. If count is greater zero, the tags will
+  be counted. Default is 0.
+  @param op Count operant. -2 for not equal, -1 for less or equal, 0 for equal,
+  1 for greater or equal. Default is 1 (greater) */
+function _join_tags($tags, $count=0, $op=1)
 {
   global $db;
-  global $user;
   $num_tags=count($tags);
-  $num_sets=count($sets);
-    
-  $sql="SELECT i.id";
-  if ($order)
-    $sql.=$this->_get_column_order();
-  $tagop=$this->get_param('tagop', 0);
-  if ($tagop==1 || $tagop==2)
-    $sql.=", COUNT(i.id) AS hits";
-
-  $sql.=" FROM $db->image AS i";
-  if ($num_tags)
-    $sql .= ",$db->imagetag AS it";
-  if ($num_sets)
-    $sql .= ",$db->imageset AS iset";
-  $location=$this->get_param('location', '');
-  if ($location!='') 
-    $sql .= ",$db->imagelocation AS il";
-    
-  $sql .= " WHERE 1=1"; // dummy where clause
-  
-  // handle IDs of image
-  $imageid=$this->get_param('id', 0);
-  $userid=$this->get_param('user', 0);
-  $groupid=$this->get_param('group', -1);
-
-  if ($imageid>0)  $sql .= " AND i.id=".$imageid;
-  if ($userid>0)   $sql .= " AND i.userid=".$userid;
-  if ($groupid>=0) $sql .= " AND i.groupid=".$groupid;
-  
-  // handle the acl and visibility level
-  $sql .= $this->_handle_acl();
-  $sql .= $this->_handle_visibility();
-  
-  // handle tags
-  if ($num_tags)
-    $sql .= " AND i.id=it.imageid";
-  if ($num_tags>1)
+  $sql=" JOIN ( SELECT imageid, COUNT(imageid) AS thits
+        FROM $db->imagetag";
+  if ($num_tags>0) 
   {
-    $sql .= " AND (";
+    $sql.=" WHERE";
     for ($i=0; $i<$num_tags; $i++)
     {
       $tagid=$db->tag2id($tags[$i]);
-      $sql .= " it.tagid=$tagid";
+      $sql.=" tagid=$tagid";
       if ($i != $num_tags-1)
-        $sql .= " OR";
+        $sql.=" OR";
     }
-    $sql .= " )";
   }
-  else if ($num_tags==1)
+  $sql.=" GROUP BY imageid";
+  if ($count>0) 
   {
-    $tagid=$db->tag2id($tags[0]);
-    $sql .= " AND it.tagid=$tagid";
+    $sql.=" HAVING COUNT(imageid)";
+    switch ($op) 
+    {
+      case -2: $sql.="!="; break;
+      case -1: $sql.="<="; break;
+      case 0: $sql.="="; break;
+      default: $sql.=">="; break;
+    }
+    $sql.="$count";
   }
+  $sql.=" ) AS it ON i.id=it.imageid";
+  return $sql;
+}
 
-  // handle sets
-  if ($num_sets)
-    $sql .= " AND i.id=iset.imageid";
-  if ($num_sets>1)
+/** Join sets. Add a query for specific sets and/or specific set count
+  @param sets Array of required sets. Could be an empty array, to query a
+  specific set count
+  @param count Count of required sets. If count is greater zero, the sets will
+  be counted. Default is 0.
+  @param op Count operant. -2 for not equal, -1 for less or equal, 0 for equal,
+  1 for greater or equal. Default is 1 (greater) */
+function _join_sets($sets, $count=0, $op=1)
+{
+  global $db;
+  $num_sets=count($sets);
+  $sql=" JOIN ( SELECT imageid, COUNT(imageid) AS shits
+        FROM $db->imageset";
+  if ($num_sets>0) 
   {
-    $sql .= " AND (";
+    $sql.=" WHERE";
     for ($i=0; $i<$num_sets; $i++)
     {
       $setid=$db->set2id($sets[$i]);
-      $sql .= " iset.setid=$setid";
+      $sql.=" setid=$setid";
       if ($i != $num_sets-1)
-        $sql .= " OR";
+        $sql.=" OR";
     }
-    $sql .= " )";
   }
-  else if ($num_sets==1)
+  $sql.=" GROUP BY imageid";
+  if ($count>0) 
   {
-    $setid=$db->set2id($sets[0]);
-    $sql .= " AND iset.setid=$setid";
+    $sql.=" HAVING COUNT(imageid)";
+    switch ($op) 
+    {
+      case -2: $sql.="!="; break;
+      case -1: $sql.="<="; break;
+      case 0: $sql.="="; break;
+      default: $sql.=">="; break;
+    }
+    $sql.="$count";
   }
-
-  // handle location
-  if ($location!='')
-  {
-    $locationtype=$this->get_param('location_type', 0);
-    $locationid=$db->location2id($location, $location_type);
-    $sql .= " AND i.id=il.imageid AND il.locationid=$locationid";
-  }
-
-  // handle date
-  $start=$this->get_param('start', 0);
-  $end=$this->get_param('end', 0);
-  if ($start>0)
-    $sql .= " AND i.date>=FROM_UNIXTIME($start)";
-  if ($end>0)
-    $sql .= " AND i.date<FROM_UNIXTIME($end)";
-
+  $sql.=" ) AS iset ON i.id=iset.imageid";
   return $sql;
 }
 
@@ -569,7 +546,7 @@ function _handle_visibility()
 /** 
   @return Returns the column order for the selected column. This is needed for
   passing the order from subqueries to upper queries.*/
-function _get_column_order()
+function _get_column_order($num_tags, $num_sets)
 {
   $order='';
   $orderby=$this->get_param('orderby', 'date');
@@ -598,86 +575,59 @@ function _get_column_order()
     break;
   }
 
+  if ($num_tags>0)
+    $order.=",thits";
+  if ($num_sets>0)
+    $order.=",shits";
+  if ($num_tags>0 && $num_sets>0)
+    $order.=",thits*shits as hits";
+
   return $order;
 }
 
 /** Adds a SQL sort statement 
   @return Retruns an SQL order by statement string */
-function _handle_orderby()
+function _handle_orderby($num_tags, $num_sets)
 {
-  $hits='';
+  $order=array();
+
+  if ($num_tags>0 && $num_sets>0)
+    array_push($order, "hits DESC");
+
   $tagop=$this->get_param('tagop', 0);
-  if ($tagop==1 || $tagop==2)
-    $hits.=" hits DESC";
+  if ($num_tags>0 && ($tagop==1 || $tagop==2))
+    array_push($order, "thits DESC");
 
-  $order='';
+  $setop=$this->get_param('setop', 0);
+  if ($num_sets>0 && ($setop==1 || $setop==2))
+    array_push($order, "shits DESC");
+
   $orderby=$this->get_param('orderby', 'date');
-  switch ($orderby) {
-  case 'date':
-    $order.=" i.date DESC";
-    break;
-  case '-date':
-    $order.=" i.date ASC";
-    break;
-  case 'popularity':
-    $order.=" i.ranking DESC";
-    break;
-  case '-popularity':
-    $order.=" i.ranking ASC";
-    break;
-  case 'voting':
-    $order.=" i.voting DESC, i.votes DESC";
-    break;
-  case '-voting':
-    $order.=" i.voting ASC, i.votes ASC";
-    break;
-  case 'newest':
-    $order.=" i.created DESC";
-    break;
-  case '-newest':
-    $order.=" i.created ASC";
-    break;
-  case 'changes':
-    $order.=" i.synced DESC";
-    break;
-  case '-changes':
-    $order.=" i.synced ASC";
-    break;
-  default:
-    break;
-  }
-  if ($hits!='' && $order!='')
-    return " ORDER BY".$hits.",".$order;
-  else if ($hits!='')
-    return " ORDER BY".$hits;
-  else if ($order!='')
-    return " ORDER BY".$order;
-    
-  return '';
-}
+  $values=array('date' => "date DESC", 
+         '-date' => "date ASC", 
+         'popularity' => "ranking DESC",
+         '-popularity' => "ranking ASC",
+         'voting' => "voting DESC,votes DESC",
+         '-voting' => "voting ASC,votes ASD",
+         'newest' => "created DESC",
+         '-newest' => "created ASC",
+         'changes' => "synced DESC",
+         '-changes' => "synced ASC");
+  if (isset($values[$orderby]))
+    array_push($order, $values[$orderby]);
 
-/** 
-  @param num_tags Count of tags. Should be zero or greater zero
-  @param tagop Tag operand (0 is and, 1 is or, 2 is fuzzy)
-  @return Returns the having statement */
-function _handle_having($num_tags, $tagop)
-{
-  // handle tag operation
-  if ($num_tags>1)
+  $sql='';
+  if (count($order)>0) 
   {
-    switch ($tagop) {
-    case 0:
-      $sql .= " HAVING COUNT(i.id)=$num_tags";
-      break;
-    case 1:
-      //$sql .= " HAVING COUNT(i.id)>=1";
-      break;
-    case 2:
-      $fuzzy=intval($num_tags*0.75);
-      $sql .= " HAVING COUNT(i.id)>=$fuzzy";
-      break;
+    $sql=" ORDER BY ";
+    for ($i=0; $i<count($order); $i++)
+    {
+      $sql.=$order[$i];
+      if ($i<count($order)-1)
+        $sql.=",";
     }
   }
+    
   return $sql;
 }
 
@@ -705,6 +655,97 @@ function _handle_limit($limit=0)
   return '';
 }
 
+/** Create a SQL query from a tags, sets and location and other conditions like
+ * user, group, acl, etc.
+  @param tags Array of tags, could be NULL
+  @param sets Array of sets, could be NULL
+  @param location Array of locations, could be NULL
+  @param order Insert order column to select statement if true
+  @return Return the sql statement of the query object corresponding to the
+  Seach parameters */
+function _get_sub_query($tags, $sets, $location, $order=false)
+{
+  global $db;
+  global $user;
+  $num_tags=count($tags);
+  $num_sets=count($sets);
+    
+  $sql="SELECT i.id";
+  if ($order)
+    $sql.=$this->_get_column_order($num_tags, $num_sets);
+
+  $sql.=" FROM $db->image AS i";
+  if ($num_tags) 
+  {
+    $tagop=$this->get_param('tagop', 0);
+    switch ($tagop)
+    {
+      case 1: $count=0; break; /* OR */
+      case 2: $count=intval($num_tags*0.75); break; /* FUZZY */
+      default: $count=$num_tags; break; /* AND */
+    }
+    $sql.=$this->_join_tags($tags, $count, 1);
+  }
+  if ($num_sets) {
+    $setop=$this->get_param('setop', 0);
+    switch ($setop)
+    {
+      case 1: $count=0; break; /* OR */
+      case 2: $count=intval($num_sets*0.75); break; /* FUZZY */
+      default: $count=$num_sets; break; /* AND */
+    }
+    $sql.=$this->_join_sets($sets, $count, 1);
+  }
+  if ($location!='') 
+    $sql .= ",$db->imagelocation AS il";
+    
+  $sql .= " WHERE 1=1"; // dummy where clause
+  
+  // handle IDs of image
+  $imageid=$this->get_param('id', 0);
+  $userid=$this->get_param('user', 0);
+  $groupid=$this->get_param('group', -1);
+
+  if ($imageid>0)  $sql .= " AND i.id=".$imageid;
+  if ($userid>0)   $sql .= " AND i.userid=".$userid;
+  if ($groupid>=0) $sql .= " AND i.groupid=".$groupid;
+  
+  // handle the acl and visibility level
+  $sql .= $this->_handle_acl();
+  $sql .= $this->_handle_visibility();
+  
+  // handle location
+  if ($location!='')
+  {
+    $location_type=$this->get_param('location_type', 0);
+    if ($location_type==LOCATION_UNDEFINED) 
+    {
+      $locations=$db->location2ids($location);
+    } else {
+      $locationid=$db->location2id($location, $location_type);
+      $locations=array($locationid);
+    }
+    $sql.=" AND i.id=il.imageid AND (";
+    for ($i=0; $i<count($locations); $i++)
+    {
+      $sql.=" il.locationid=".$locations[$i];
+      if ($i<count($locations)-1)
+        $sql.=" OR";
+    }
+    $sql.=" )";
+  }
+
+  // handle date
+  $start=$this->get_param('start', 0);
+  $end=$this->get_param('end', 0);
+  if ($start>0)
+    $sql .= " AND i.date>=FROM_UNIXTIME($start)";
+  if ($end>0)
+    $sql .= " AND i.date<FROM_UNIXTIME($end)";
+
+  return $sql;
+}
+
 /** Returns the SQL query of the search. It splits the tags according to
  * positiv or negative tags (negative tags have a minus sign as prefix) and
  * creates subqueries for positive and negative tags.
@@ -713,12 +754,14 @@ function _handle_limit($limit=0)
   @param order If this flag is true, the order column will be included into the
   select statement. Otherwise not. Default is true.
   @return SQL query string 
-  @see _get_query_from_tags, _handle_limit, _get_column_order  */
+  @see _get_sub_query, _handle_limit, _get_column_order  */
 function get_query($limit=1, $order=true)
 {
   global $db;
   $pos_tags=array();
   $neg_tags=array();
+  $location=$this->get_param('location', '');
+
   $tagop=$this->get_param('tagop', 0);
   foreach ($this->_tags as $tag)
   {
@@ -741,33 +784,42 @@ function get_query($limit=1, $order=true)
   }
   $num_pos_sets=count($pos_sets);
   $num_neg_sets=count($neg_sets);
-  
-  if (($num_pos_tags || $num_pos_sets) && 
-      ($num_neg_tags || $num_neg_sets))
+ 
+  if ($location{0}=='-') 
   {
-    $sql="SELECT id";
-    if ($order)
-      $sql.=$this->_get_column_order();
-    $sql.=" FROM ( ";
-    $sql.=$this->_get_query_from_tags($pos_tags, $pos_sets, $order);
-    $sql.=" AND id NOT IN ( ";
-    $sql.=$this->_get_query_from_tags($neg_tags, $neg_sets, false);
-    $sql.=" ) ) AS i";
-    $sql.=" GROUP BY i.id";
-    $sql.=$this->_handle_having($num_pos_tags, $tagop);
+    $neg_location=substr($location, 1);
+    $location='';
+  }
 
+  if ($num_neg_tags || $num_neg_sets || $neg_location!='')
+  {
+    $sql="SELECT i.id";
     if ($order)
-      $sql.=$this->_handle_orderby();
+      $sql.=$this->_get_column_order($num_pos_tags, $num_pos_sets);
+    $sql.=" FROM";
+    if ($num_pos_tags || $num_pos_sets) {
+      $sql.=" ( ".$this->_get_sub_query($pos_tags, $pos_sets, $location, $order)." AND ";
+    } else {
+      $sql.=" image AS i WHERE";
+    }
+    $sql.=" id NOT IN ( ";
+    $sql.=$this->_get_sub_query($neg_tags, $neg_sets, $neg_location, false);
+    $sql.=" )";
+    if ($num_pos_tags || $num_pos_sets) {
+      $sql.=" ) AS i";
+    }
+    $sql.=" GROUP BY i.id";
+    if ($order)
+      $sql.=$this->_handle_orderby($num_pos_tags, $num_pos_sets);
     $sql.=$this->_handle_limit($limit);
   }
   else 
   {
-    $sql=$this->_get_query_from_tags($pos_tags, $pos_sets);
+    $sql=$this->_get_sub_query($pos_tags, $pos_sets, $location, $order);
     $sql.=" GROUP BY i.id";
-    $sql.=$this->_handle_having($num_pos_tags, $tagop);
 
     if ($order)
-      $sql.=$this->_handle_orderby();
+      $sql.=$this->_handle_orderby($num_pos_tags, $num_pos_sets);
     $sql.=$this->_handle_limit($limit);
   }
 
