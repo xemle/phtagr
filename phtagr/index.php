@@ -19,6 +19,11 @@ if (!isset($phtagr_data))
 if (!isset($phtagr_htdocs))
 {
   $phtagr_htdocs=dirname($_SERVER['PHP_SELF']);
+  $len=strlen($phtagr_htdocs);
+  if ($phtagr_htdocs{$len-1}=='/')
+  {
+    $phtagr_htdocs=substr($phtagr_htdocs, 0, $len-1);
+  }
 }
 
 include "$phtagr_lib/main.php";

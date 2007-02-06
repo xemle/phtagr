@@ -4,22 +4,30 @@ include_once("$phtagr_lib/SectionBase.php");
 include_once("$phtagr_lib/Image.php");
 include_once("$phtagr_lib/Database.php");
 
+/** Prints preview of an image
+  @class SectionImage
+*/
 class SectionImage extends SectionBase
 {
 
-var $img;
+var $_img;
+
+/** Creates a new section for an image. 
+  @param id Image id. If it is positiv, the image will be loaded
+  @note The access rights of the image havte be checked on the output functions
+  */
 function SectionImage($id=0)
 {
   $this->SectionBase("image");
-  $this->img=null;
-  if ($id>0)
-    $this->img=new Image($id);
+  $this->_img=null;
+  if ($id>0) 
+    $this->_img=new Image($id);
 }
 
 /** Returns the image object of the section */
 function get_img()
 {
-  return $this->img;
+  return $this->_img;
 }
 
 /** print image preview table */
@@ -29,7 +37,10 @@ function print_navigation($search)
   
   if ($search==null)
     return;
-  
+  $img=$this->get_img();
+  if (!$img)
+    return;
+
   $pos=$search->get_pos();
   $page_size=$search->get_page_size();
 
@@ -62,9 +73,7 @@ function print_navigation($search)
     {
       $search->add_param('section', 'explorer');
       $search->del_param('id');
-      if ($this->img) {
-        $search->set_anchor('img-'.$this->img->get_id());
-      }
+      $search->set_anchor('img-'.$img->get_id());
       $url=$search->get_url();
       $search->del_anchor();
       echo "<a href=\"$url\">"._("up")."</a>&nbsp;";
@@ -95,7 +104,10 @@ function print_from()
   if ($num==1)
     return;
 
-  $img=$this->img;
+  $img=$this->get_img();
+  if (!$img)
+    return;
+
   $search=new Search();
   $search->add_param('section', 'explorer');
   $search->set_userid($img->get_userid());
@@ -107,6 +119,7 @@ function print_from()
   }
   echo "<div class=\"from\">by <a href=\"".$search->get_url()."\">$name</a></div>\n";
 }
+
 /** Print the caption of an image. 
   @param docut True if a long caption will be shorted. False if the whole
   caption will be printed. Default true */
@@ -114,7 +127,10 @@ function print_caption($docut=true)
 {
   global $user;
 
-  $img=$this->img;
+  $img=$this->get_img();
+  if (!$img)
+    return;
+
   $id=$img->get_id();
   $caption=$img->get_caption();
   
@@ -176,7 +192,10 @@ function _cut_caption($id, $caption)
 
 function print_row_clicks()
 {
-  $img=$this->img;
+  $img=$this->get_img();
+  if (!$img)
+    return;
+
   $ranking=sprintf("%.3f", $img->get_ranking());
   echo "  <tr><th>"._("Clicks:")."</th><td>"
     .sprintf(_("%d (Popularity: %.3f)"), $img->get_clicks(), $ranking)
@@ -188,7 +207,10 @@ function print_voting()
   global $search;
   global $user;
 
-  $img=$this->img;
+  $img=$this->get_img();
+  if (!$img)
+    return;
+
   $id=$img->get_id();
   $votes=$img->get_votes();
   $voting=sprintf("%.2f", $img->get_voting());
@@ -242,7 +264,10 @@ function print_voting()
 
 function print_row_filename()
 {
-  $img=$this->img;
+  $img=$this->get_img();
+  if (!$img)
+    return;
+
   echo "  <tr><th>"._("File:")."</th>"
     ."<td>".htmlentities($img->get_filename())."</td></tr>\n";
 }
@@ -259,7 +284,10 @@ function _acl_to_text($acl)
 
 function print_row_acl()
 {
-  $img=$this->img;
+  $img=$this->get_img();
+  if (!$img)
+    return;
+
   echo "  <tr><th>"._("ACL:")."</th><td>";
 
   $gid=$img->get_groupid();
@@ -277,7 +305,10 @@ function print_row_acl()
 
 function print_row_date()
 {
-  $img=$this->img;
+  $img=$this->get_img();
+  if (!$img)
+    return;
+
   $sec=$img->_sqltime2unix($img->get_date());
   
   echo "  <tr>
@@ -332,7 +363,10 @@ function print_row_date()
 function print_row_tags()
 {
   global $user;
-  $img=$this->img;
+  $img=$this->get_img();
+  if (!$img)
+    return;
+
   $id=$img->get_id();
   $tags=$img->get_tags();
   $num_tags=count($tags);
@@ -363,7 +397,10 @@ function print_row_sets()
 {
   global $db;
   global $user;
-  $img=$this->img;
+  $img=$this->get_img();
+  if (!$img)
+    return;
+
   $id=$img->get_id();
   $sets=$img->get_sets();
   $num_sets=count($sets);
@@ -395,7 +432,10 @@ function print_row_location()
   global $db;
   global $user;
 
-  $img=$this->img;
+  $img=$this->get_img();
+  if (!$img)
+    return;
+
   $id=$img->get_id();
   $locations=$img->get_locations();
   $num_locations=count($locations);
@@ -440,7 +480,7 @@ function _escape_js($s)
 function print_js()
 {
   global $user;
-  $img=$this->img;
+  $img=$this->get_img();
   if (!$img)
     return;
 
@@ -505,9 +545,15 @@ function print_preview($search=null)
   global $db;
   global $user;
   
-  $img=$this->img;
+  $img=$this->get_img();
+  if (!$img)
+    return;
+
   $id=$img->get_id();
   $name=$img->get_name();
+
+  if ($id<0 || !$img->can_preview($user))
+    return;
   
   $this->print_js();
   echo "\n<div class=\"name\">$name</div>\n";
@@ -565,10 +611,16 @@ function print_content()
  
   echo "<h2>"._("Image")."</h2>\n";
   
-  $img=$this->img;
-  if (!$img)
+  $img=$this->get_img();
+  if (!$img || $img->get_id()<0) 
+  {
+    $this->warning(_("Sorry, the requested image is not available."));
     return;
- 
+  } elseif (!$img->can_preview($user)) {
+    $this->warning(_("Sorry, you are not allowed to access this file."));
+    return;
+  }
+
   $id=$img->get_id();
   $name=$img->get_name();
   

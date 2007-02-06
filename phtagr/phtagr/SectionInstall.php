@@ -251,6 +251,7 @@ function exec_stage_directory()
   return false;
 }
 
+/** @todo Check database values from REQUEST */
 function exec_stage_database()
 {
   // check sql parameters
@@ -283,9 +284,9 @@ function exec_stage_database()
   
   // check for writing the minimalistic configure file
   if (!$this->check_file_permissions ($directory, "config.php"))
-    $config=$data_directory."config.php";
+    $config=$data_directory.DIRECTORY_SEPARATOR."config.php";
   else
-    $config=$directory."config.php";
+    $config=$directory.DIRECTORY_SEPARATOR."config.php";
   
   // write minimalistic configuration file
   $f=fopen($config, "w+");
@@ -297,7 +298,7 @@ function exec_stage_database()
 
   // The url_prefix is needed to have valid links to the themes in the
   // main repository of phTagr.
-  $htdocs=dirname($_SERVER['PHP_SELF']);
+  $htdocs=$this->_escape_dir(dirname($_SERVER['PHP_SELF']));
 
   fwrite($f, '<?php
 // Configuration file for phTagr

@@ -63,19 +63,19 @@ function init_by_filename($filename)
 /** Returns the id of the image */
 function get_id()
 {
-  return $this->_get_data('id');
+  return $this->_get_data('id', -1);
 }
 
 /** Returns the filename of the image */
 function get_filename()
 {
-  return stripslashes($this->_get_data('filename'));
+  return stripslashes($this->_get_data('filename', ''));
 }
 
 /** Returns the name of the image */
 function get_name()
 {
-  return stripslashes($this->_get_data('name'));
+  return stripslashes($this->_get_data('name', ''));
 }
 
 function set_name($name)
@@ -86,13 +86,13 @@ function set_name($name)
 /** Returns the user ID of the image */
 function get_userid()
 {
-  return $this->_get_data('userid');
+  return $this->_get_data('userid', -1);
 }
 
 /** Returns the group ID of the image */
 function get_groupid()
 {
-  return $this->_get_data('groupid');
+  return $this->_get_data('groupid', -1);
 }
 
 function set_groupid($gid)
