@@ -4,8 +4,8 @@ include_once("$phtagr_lib/Base.php");
 
 /** 
   @class Database Handles the SQL database operation like connection, creation,
-  queries and queries clean ups 
-  @todo Rename class Sql to Database
+  queries and queries clean ups
+  @todo Rename table names from sigular to plural forms
 */
 class Database extends Base
 {
@@ -79,10 +79,15 @@ function connect($config='')
                 $db_host,
                 $db_user,
                 $db_password);
-  if ($this->link)
-    return mysql_select_db($db_database, $this->link);
- 
-  return false;
+  if (!$this->link)
+    return false;
+
+  if (!mysql_select_db($db_database, $this->link))
+    return false;
+
+  $this->query("SET NAMES 'utf8'");
+  $this->query("SET CHARACTER SET 'utf8'");
+  return true;
 }
 
 /** Test a mySQL connection 
@@ -575,9 +580,11 @@ function delete_images()
 }
 
 /** Deletes all unassigned meta data from tags, sets, and locations. It deletes
- * only these values, which are not assigned to any images. */
+ * only these values, which are not assigned to any images. 
+ @return Count of deleted data */
 function delete_unassigned_data() 
 {
+  $affected=0;
   // tags
   $sql="DELETE FROM $this->tag 
         WHERE id NOT IN (
@@ -585,6 +592,7 @@ function delete_unassigned_data()
           FROM $this->imagetag
         )";
   $this->query($sql);
+  $affected+=mysql_affected_rows($this->link);
 
   // sets
   $sql="DELETE FROM $this->set
@@ -593,6 +601,7 @@ function delete_unassigned_data()
           FROM $this->imageset
         )";
   $this->query($sql);
+  $affected+=mysql_affected_rows($this->link);
 
   // locations
   $sql="DELETE FROM $this->location
@@ -601,6 +610,9 @@ function delete_unassigned_data()
           FROM $this->imagelocation
         )";
   $this->query($sql);
+  $affected+=mysql_affected_rows($this->link);
+
+  return $affected;
 }
 
 }

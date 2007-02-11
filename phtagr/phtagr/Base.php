@@ -35,6 +35,21 @@ function div($css_class, $text)
   echo "<div class=\"$css_class\">".$text."</div>\n";
 }
 
+/** Escape the string for html output 
+  @param str String to escape
+  @param print If true, print the output directly
+  @return Escaped string */
+function escape_html($str, $print=false)
+{
+  $esc=htmlentities($str, ENT_QUOTES, "UTF-8");
+  if ($print) 
+  {
+    echo $esc;
+    return;
+  }
+  return $esc;
+}
+
 function warning($message)
 {
   $this->div('warning', $message);

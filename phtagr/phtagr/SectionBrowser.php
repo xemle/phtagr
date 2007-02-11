@@ -61,7 +61,7 @@ function print_paths($dir)
       echo "&nbsp;/&nbsp;";
       
       $url->add_param('cd', $path);
-      echo "<a href=\"".$url->get_url()."\">".htmlentities($part)."</a>\n";
+      echo "<a href=\"".$url->get_url()."\">".$this->escape_html($part)."</a>\n";
     }
   }
   echo "&nbsp;/&nbsp;</div>";
@@ -83,7 +83,7 @@ function print_browser($dir)
   $cur=$dir;
   if ($cur=='')
     $cur=DIRECTORY_SEPARATOR;
-  echo "<input type=\"checkbox\" name=\"add[]\" value=\"".htmlentities($cur)."\" />&nbsp;. (this dir)<br />\n";
+  echo "<input type=\"checkbox\" name=\"add[]\" value=\"".$this->escape_html($cur)."\" />&nbsp;. (this dir)<br />\n";
 
   $alias=$dir; // alias changes, if only one root is set
   if ($fs->is_dir($dir))
@@ -109,7 +109,7 @@ function print_browser($dir)
 
     $url->add_param('cd', $cd);
     $href=$url->get_url();
-    echo "<input type=\"checkbox\" name=\"add[]\" value=\"".htmlentities($cd)."\" />&nbsp;<a href=\"$href\">$sub</a><br />\n";
+    echo "<input type=\"checkbox\" name=\"add[]\" value=\"".$this->escape_html($cd)."\" />&nbsp;<a href=\"$href\">$sub</a><br />\n";
   }
   echo "<br/>\n";
   echo "<input type=\"checkbox\" name=\"create_all_previews\"/>&nbsp;"._("Create all previews.")."<br />\n";

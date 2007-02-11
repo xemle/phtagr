@@ -210,13 +210,13 @@ function get_url()
     foreach ($this->params as $p => $v)
     {
       $i++;
-      $url.=htmlentities($p).'='.htmlentities($v);
+      $url.=$this->escape_html($p).'='.$this->escape_html($v);
       if ($i<$n)
         $url.='&amp;';
     }
   }
   if ($this->anchor!='')
-    $url.='#'.htmlentities($this->anchor);
+    $url.='#'.$this->escape_html($this->anchor);
 
   return $url;
 }
@@ -234,7 +234,7 @@ function get_form()
 {
   $input='';
   foreach ($this->params as $p => $v)
-    $input.=$this->_input(htmlentities($p), htmlentities($v));
+    $input.=$this->_input($this->escape_html($p), $this->escape_html($v));
   return $input;
 }
 

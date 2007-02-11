@@ -61,7 +61,7 @@ function user_create($name, $password)
         if ($i+1<strlen($special))
           $out.=", ";
       }
-      $out=htmlentities($out);
+      $out=$this->escape_html($out);
       $msg=sprintf(_("The password is invalid. Use at least two lower letters, to upper letters and two special chars of %s"), $out);
       break;
     default:

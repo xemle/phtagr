@@ -423,7 +423,7 @@ function _set_lang($lang)
   $domain='messages';
   bindtextdomain($domain, $locale_dir);
   textdomain($domain);
-  //bind_textdomain_codeset($domain, 'UTF-8');
+  bind_textdomain_codeset($domain, 'UTF-8');
 
   $_SESSION['lang']=$lang;
   return true;

@@ -153,7 +153,7 @@ function print_caption($docut=true)
     if ($docut=true)
       $text=$this->_cut_caption($id, &$caption);
     else {
-      $text=htmlspecialchars($caption);
+      $text=$this->escape_html($caption);
     }
 
     echo "$text <a href=\"javascript:void();\" class=\"jsbutton\" onclick=\"edit_caption($id) \">"._("edit")."</a>";
@@ -269,7 +269,7 @@ function print_row_filename()
     return;
 
   echo "  <tr><th>"._("File:")."</th>"
-    ."<td>".htmlentities($img->get_filename())."</td></tr>\n";
+    ."<td>".$this->escape_html($img->get_filename())."</td></tr>\n";
 }
 
 function _acl_to_text($acl)
@@ -383,7 +383,7 @@ function print_row_tags()
   {
     $tag_url->add_tag($tags[$i]);
     $url=$tag_url->get_url();
-    echo "<a href=\"$url\">" . htmlentities($tags[$i]) . "</a>";
+    echo "<a href=\"$url\">".$this->escape_html($tags[$i])."</a>";
     $tag_url->del_tag($tags[$i]);
     if ($i<$num_tags-1)
         echo ", ";
@@ -417,7 +417,7 @@ function print_row_sets()
   {
     $set_url->add_set($sets[$i]);
     $url=$set_url->get_url();
-    echo "<a href=\"$url\">" . htmlentities($sets[$i]) . "</a>";
+    echo "<a href=\"$url\">".$this->escape_html($sets[$i])."</a>";
     $set_url->del_set($sets[$i]);
     if ($i<$num_sets-1)
         echo ", ";
@@ -452,7 +452,7 @@ function print_row_location()
   {
     $loc_url->add_param('location', $location);
     $url=$loc_url->get_url();
-    echo "<a href=\"$url\">" . htmlentities($location) . "</a>";
+    echo "<a href=\"$url\">".$this->escape_html($location)."</a>";
     if ($i<$num_locations-1)
         echo ", ";
     $i++;
@@ -502,16 +502,12 @@ function print_js()
     echo "  images[$id]['date']='".$this->_escape_js($date)."';\n";
 
     $tags=$img->get_tags();
-    $ltags='';
-    foreach ($tags as $tag)
-      $ltags.=$tag.' ';
-    echo "  images[$id]['tags']='".$this->_escape_js($ltags)."';\n";
+    $tag_list=$this->_escape_js(implode(' ', $tags));
+    echo "  images[$id]['tags']='$tag_list';\n";
 
     $sets=$img->get_sets();
-    $lsets='';
-    foreach ($sets as $set)
-      $lsets.=$set.' ';
-    echo "  images[$id]['sets']='".$this->_escape_js($lsets)."';\n";
+    $set_list=$this->_escape_js(implode(' ', $sets));
+    echo "  images[$id]['sets']='$set_list';\n";
 
     $locs=$img->get_locations();
     echo "  images[$id]['city']='".
@@ -664,7 +660,7 @@ function print_content()
   }
   echo "</table></div>\n";
 
-  echo "<form id=\"formImage\" action=\"index.php\" method=\"post\"><div>\n";
+  echo "<form id=\"formImage\" action=\"index.php\" method=\"post\" accept-charset=\"UTF-8\"><div>\n";
   echo "<input type=\"hidden\" name=\"section\" value=\"image\" />\n";
   echo "<input type=\"hidden\" name=\"action\" value=\"edit\" />\n";
   echo "<input type=\"hidden\" name=\"image\" value=\"$id\" />\n";

@@ -304,6 +304,7 @@ function _init_form(id)
   var form=document.createElement("form");
   form.setAttribute("action", "index.php");
   form.setAttribute("method", "post");
+  form.setAttribute("accept-charset", "UTF-8");
 
   // copy all hidden inputs from formExplorer or formImage
   // whichever exists

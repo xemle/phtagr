@@ -130,7 +130,7 @@ echo "<table>\n";
   {
     foreach($roots as $root)
     {
-      echo "<tr><td></td><td>".htmlentities($root)." ";
+      echo "<tr><td></td><td>".$this->escape_html($root)." ";
       $url->add_param('remove_root', $root);
       echo "<a href=\"".$url->get_url()."\" class=\"jsbutton\">"._("Remove")."</td></tr>\n";
     }
@@ -418,8 +418,8 @@ function exec_debug()
   else if ($action=="delete_unassigned_data")
   {
     echo "<h3>"._("Deleting unassigned meta data...")."</h3>\n";
-    $db->delete_unassigned_data();
-    $this->warning(_("Unassigned data deleted!"));
+    $affected=$db->delete_unassigned_data();
+    $this->warning(sprintf(_("Deleted %d unassigned data."), $affected));
   }
   else if ($action=="delete_tables")
   {
