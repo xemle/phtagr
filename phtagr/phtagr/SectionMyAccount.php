@@ -74,6 +74,28 @@ function print_general ()
   echo "<p>"._("The default ACL values are used when new images are
   added.")."</p>";
 
+  echo "<h3>"._("Other")."</h3>";
+  echo "<table>
+  <tr>
+    <td>"._("Metadata Seperator")."</td>
+    <td><select size=\"1\" name=\"meta_separator\">\n";
+  $sep=array( " " => _("Space"), 
+              "," => _("Comma"),
+              "." => _("Dot"),
+              ";" => _("Semicolon"));
+  $cur_sep=$conf->get('meta.separator', ';');
+  foreach ($sep as $k => $v)
+  {
+    echo "      <option value=\"$k\"";
+    if ($k==$cur_sep)
+      echo " selected=\"selected\"";
+    echo ">$v</option>\n";
+  }
+  echo "      </select>
+    </td>
+  </tr>
+</table>\n";
+
   echo "<input type=\"submit\" class=\"submit\"value=\"Save\"/>
 <input type=\"reset\" class=\"reset\" value=\"Reset\"/>
 </form>\n\n";
@@ -125,6 +147,10 @@ function exec_general ()
     $conf->set('image.gacl', $acl->get_gacl());
     $conf->set('image.macl', $acl->get_macl());
     $conf->set('image.aacl', $acl->get_aacl());
+
+    $sep=$_REQUEST['meta_separator'];
+    if ($sep==' ' || $sep=='.' || $sep==';' || $sep==',')
+      $conf->set('meta.separator', $sep);
 
     return;
   }

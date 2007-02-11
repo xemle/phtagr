@@ -292,24 +292,22 @@ function del_orderby()
 /** Creates a search object from a URL */
 function from_URL()
 {
+  global $conf;
   parent::from_URL();
 
   $this->add_riparam('id', null, 1);
    
   if (isset($_REQUEST['tags']))
   {
-    if (strpos($_REQUEST['tags'], ' ')>0)
+    $tags=preg_split("/".$conf->get('meta.separator', ';')."/", $_REQUEST['tags']);
+    foreach ($tags as $tag)
     {
-      foreach (split("[ ]",$_REQUEST['tags']) as $tag)
-        $this->add_tag($tag);
+      $tag=preg_replace("/^\s+/", "", $tag);
+      $tag=preg_replace("/\s+$/", "", $tag);
+      if ($tag=='')
+        continue;
+      $this->add_tag($tag);
     }
-    else if (strpos($_REQUEST['tags'], "+")>0)
-    {
-      foreach (split("[+]",$_REQUEST['tags']) as $tag)
-        $this->add_tag($tag);
-    }
-    else
-      $this->add_tag($_REQUEST['tags']);
   }
 
   if (isset($_REQUEST['tagop']))
@@ -317,18 +315,15 @@ function from_URL()
   
   if (isset($_REQUEST['sets']))
   {
-    if (strpos($_REQUEST['sets'], ' ')>0)
+    $sets=preg_split("/".$conf->get('meta.separator', ';')."/", $_REQUEST['sets']);
+    foreach ($sets as $set)
     {
-      foreach (split("[ ]",$_REQUEST['sets']) as $set)
-        $this->add_set($set);
+      $set=preg_replace("/^\s+/", "", $set);
+      $set=preg_replace("/\s+$/", "", $set);
+      if ($set=='')
+        continue;
+      $this->add_set($set);
     }
-    else if (strpos($_REQUEST['sets'], "+")>0)
-    {
-      foreach (split("[+]",$_REQUEST['sets']) as $set)
-        $this->add_set($set);
-    }
-    else 
-      $this->add_set($_REQUEST['sets']);
   }
   if (isset($_REQUEST['setop']))
     $this->set_setop($_REQUEST['setop']);

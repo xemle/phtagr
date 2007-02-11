@@ -363,6 +363,7 @@ function print_row_date()
 function print_row_tags()
 {
   global $user;
+  global $conf;
   $img=$this->get_img();
   if (!$img)
     return;
@@ -386,7 +387,7 @@ function print_row_tags()
     echo "<a href=\"$url\">".$this->escape_html($tags[$i])."</a>";
     $tag_url->del_tag($tags[$i]);
     if ($i<$num_tags-1)
-        echo ", ";
+        echo $conf->get('meta.separator', ';')." ";
   }
   echo "</td>
   </tr>\n";
@@ -395,8 +396,8 @@ function print_row_tags()
 
 function print_row_sets()
 {
-  global $db;
   global $user;
+  global $conf;
   $img=$this->get_img();
   if (!$img)
     return;
@@ -420,7 +421,7 @@ function print_row_sets()
     echo "<a href=\"$url\">".$this->escape_html($sets[$i])."</a>";
     $set_url->del_set($sets[$i]);
     if ($i<$num_sets-1)
-        echo ", ";
+        echo $conf->get('meta.separator', ';')." ";
   }
   echo "</td>
   </tr>\n";
@@ -431,6 +432,7 @@ function print_row_location()
 {
   global $db;
   global $user;
+  global $conf;
 
   $img=$this->get_img();
   if (!$img)
@@ -454,7 +456,7 @@ function print_row_location()
     $url=$loc_url->get_url();
     echo "<a href=\"$url\">".$this->escape_html($location)."</a>";
     if ($i<$num_locations-1)
-        echo ", ";
+        echo $conf->get('meta.separator', ';')." ";
     $i++;
   }
   echo "</td>
@@ -480,6 +482,7 @@ function _escape_js($s)
 function print_js()
 {
   global $user;
+  global $conf;
   $img=$this->get_img();
   if (!$img)
     return;
@@ -502,11 +505,12 @@ function print_js()
     echo "  images[$id]['date']='".$this->_escape_js($date)."';\n";
 
     $tags=$img->get_tags();
-    $tag_list=$this->_escape_js(implode(' ', $tags));
+    $sep=$conf->get('meta.separator', ';')." ";
+    $tag_list=$this->_escape_js(implode($sep, $tags));
     echo "  images[$id]['tags']='$tag_list';\n";
 
     $sets=$img->get_sets();
-    $set_list=$this->_escape_js(implode(' ', $sets));
+    $set_list=$this->_escape_js(implode($sep, $sets));
     echo "  images[$id]['sets']='$set_list';\n";
 
     $locs=$img->get_locations();

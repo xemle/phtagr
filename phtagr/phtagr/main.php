@@ -90,10 +90,10 @@ if (!$db->connect() && $section!="install")
 }
 
 $user->check_session();
+$conf=new Config($user->get_id());
+
 $search= new Search();
 $search->from_URL();
-
-$conf=new Config($user->get_id());
 
 $menu=new SectionMenu('menu', _("Menu"));
 $menu->set_item_param('section');

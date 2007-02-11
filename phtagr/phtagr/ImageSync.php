@@ -456,7 +456,8 @@ function _handle_request_date($prefix='', $merge)
   current data */
 function _handle_request_tags($prefix='', $merge)
 {
-  $tags=preg_split("/\s+/", $_REQUEST[$prefix.'tags']);
+  global $conf;
+  $tags=preg_split("/".$conf->get('meta.separator', ';')."/", $_REQUEST[$prefix.'tags']);
   if (count($tags)==0)
     return false;
 
@@ -465,6 +466,11 @@ function _handle_request_tags($prefix='', $merge)
   $del_tags=array();
   foreach ($tags as $tag)
   {
+    $tag=preg_replace("/^\s+/", "", $tag); 
+    $tag=preg_replace("/\s+$/", "", $tag); 
+    if ($tag=='-' || $tag=='')
+      continue;
+
     if ($tag{0}=='-')
       array_push($del_tags, substr($tag, 1));
     else
@@ -486,7 +492,8 @@ function _handle_request_tags($prefix='', $merge)
   current data */
 function _handle_request_sets($prefix='', $merge)
 {
-  $sets=preg_split("/\s+/", $_REQUEST[$prefix.'sets']);
+  global $conf;
+  $sets=preg_split("/".$conf->get('meta.separator', ';')."/", $_REQUEST[$prefix.'sets']);
   if (count($sets)==0)
     return false;
 
@@ -495,6 +502,11 @@ function _handle_request_sets($prefix='', $merge)
   $del_sets=array();
   foreach ($sets as $set)
   {
+    $set=preg_replace("/^\s+/", "", $set); 
+    $set=preg_replace("/\s+$/", "", $set); 
+    if ($set=='-' || $set=='')
+      continue;
+
     if ($set{0}=='-')
       array_push($del_sets, substr($set, 1));
     else
