@@ -3,6 +3,7 @@
 include_once("$phtagr_lib/Search.php");
 include_once("$phtagr_lib/Base.php");
 include_once("$phtagr_lib/Constants.php");
+include_once("$phtagr_lib/FileJpg.php");
 
 /** 
   An image is assigned to a user and a group. With the access control lists
@@ -21,6 +22,10 @@ class Image extends SqlObject
 var $_tags;
 var $_sets;
 var $_locations;
+var $_file;
+var $_previewer;
+var $_meta_modified;
+
 
 /** Creates an Image object 
   @param id Id of the image. */
@@ -28,9 +33,13 @@ function Image($id=-1)
 {
   global $db;
   $this->SqlObject($db->image, $id);
-  $_tags=null;
-  $_sets=null;
-  $_locations=null;
+  $this->_tags=null;
+  $this->_sets=null;
+  $this->_locations=null;
+  $this->_meta_modified=array();
+
+  $this->_file=null;
+  $this->_previewer=null;
 }
 
 /** Initialize the values from the database into the object 
@@ -59,6 +68,63 @@ function init_by_filename($filename)
   return true;
 }
 
+/** 
+  @param filename Filename. If filename is empty, the filename of the object 
+  is taken
+  @return Returns and sets the default file handler for import and export */
+function get_file_handler($filename='')
+{
+  if ($this->_file!=null)  
+    return $this->_file;
+  
+  if ($filename=='')
+    $filename=$this->get_filename();
+  
+  $file=null;
+
+  $pos=strrpos($filename, ".");
+  if ($pos===false)
+    return null;
+
+  $ext=strtolower(substr($filename, $pos+1));
+  switch ($ext)
+  {
+    case "jpg":
+    case "jpeg":
+      $file=new FileJpg($filename);
+      break;
+    default:
+      $this->warning(sprintf(_("Unsupported file tpye '%d'", $ext)));
+      return null;
+  }
+  $this->_file=$file;
+  return $file;
+}
+
+/** Returns and sets the default preview handler */
+function get_preview_handler()
+{
+  if ($this->_previewer!=null)  
+    return $this->_previewer;
+  
+  $file=$this->get_file_handler($filename);
+  if ($file==null)
+    return null;
+
+  $previewer=$file->get_preview_handler();
+  if ($previewer==null)
+    return null;
+
+  // initialize the previewer
+  $previewer->set_id($this->get_id());
+  $previewer->set_filename($this->get_filename());
+  $previewer->set_modified($this->get_modified(true));
+  $previewer->set_width($this->get_width());
+  $previewer->set_height($this->get_height());
+  $this->_previewer=$previewer;
+
+  return $this->_previewer;
+}
 
 /** Returns the id of the image */
 function get_id()
@@ -103,19 +169,23 @@ function set_groupid($gid)
 /** Returns the syncronization date of the image
   @param in_unix Return time in unix timestamp if true. If false return the
   mysql time string */
-function get_synced($in_unix=false)
+function get_modified($in_unix=false)
 {
-  $synced=$this->_get_data('synced');
+  global $db;
+  $time=$this->_get_data('synced');
   if ($in_unix)
-    return $this->_sqltime2unix($synced);
+    return $db->date_mysql_to_unix($time);
   else
-    return $synced;
+    return $time;
 }
 
 /** Sets the synchronisation date to now */
-function set_synced()
+function set_modified($time, $in_unix)
 {
-  $this->_set_data('synced', "NOW()");
+  global $db;
+  if ($in_unix)
+    $time=$db->date_unix_to_mysql($time);
+  $this->_set_data('synced', $time);
 }
 
 /** @return True if the image was uploaded. Fals otherwise */
@@ -186,15 +256,22 @@ function set_caption($caption)
   time string */
 function get_date($in_unix=false)
 {
+  global $db;
+
   $date=$this->_get_data('date');
   if ($in_unix)
-    return $this->_sqltime2unix($date);
+    return $db->date_mysql_to_unix($date);
   else
     return $date;
 }
 
-function set_date($date)
+function set_date($date, $in_unix=false)
 {
+  global $db;
+
+  if ($in_unix)
+    $date=$db->date_unix_to_mysql($date);
+
   $this->_set_data('date', $date);
 }
 
@@ -275,9 +352,10 @@ function add_voting($voting)
   time string */
 function get_lastview($in_unix=false)
 {
+  global $db;
   $lastview=$this->_get_data('lastview');
   if ($in_unix)
-    return $this->_sqltime2unix($lastview);
+    return $db->date_mysql_to_unix($lastview);
   else
     return $lastview;
 }
@@ -409,23 +487,6 @@ function get_size($size=220)
   return array($w, $h, $s);
 }
 
-/** Convert the SQL time string to unix time stamp.
-  @param string The time string has the format like "2005-04-06 09:24:56", the
-  result is 1112772296
-  @return Unix time in seconds */
-function _sqltime2unix($string)
-{
-  if (strlen($string)!=19)
-    return 0;
-
-  $s=strtr($string, ":", " ");
-  $s=strtr($s, "-", " ");
-  $a=split(' ', $s);
-  $time=mktime(intval($a[3]),intval($a[4]),intval($a[5]),
-    intval($a[1]),intval($a[2]),intval($a[0]));
-  return $time;
-}
-
 /** Update the ranking value of the image. This is calculated by the current
  * ranking value and the interval to the last view 
   @note This function will commit all changes */
@@ -444,6 +505,29 @@ function update_ranking()
   $this->_set_data('lastview', "NOW()");
   $this->commit();
 } 
+
+/** @param name Name of the meta data. If null, every meta data is considered.
+  Default is null.
+  @return Returns true if the meta data modified */
+function is_meta_modified($name=null)
+{
+  $modified=false;
+  if ($name==null)
+  {
+    foreach ($this->_meta_modified as $name => $c)
+      $modified |= $c;
+  } else {
+    return (true == $this->_meta_modified[$name]);
+  }
+  return $modified;
+}
+
+/** @param name Name of the meta data like 'tags' or 'sets'
+  @param value Ste True or false. Default is true */
+function set_meta_modified($name, $value=true)
+{
+  $this->_meta_modified[$name]=$value;
+}
 
 /** Returns an array of tags. The tags are sorted by name */
 function get_tags()
@@ -494,17 +578,22 @@ function add_tags($tags)
             VALUES ($id, $tagid)";
       $db->query($sql);
       array_push($this->_tags, $tag);
+      $this->set_meta_modified('tags');
     }
   }
 }
 
 /** Deletes tags from the image.
-  @param tags Tags to be removed from the image */
-function del_tags($tags)
+  @param tags Tags to be removed from the image. If null it removes all tags. 
+  Default is null */
+function del_tags($tags=null)
 {
   global $db;
   if ($this->_tags==null)
     $this->get_tags();
+  
+  if ($tags==null)
+    $tags=$this->get_tags();
 
   $id=$this->get_id();
   foreach ($tags as $tag)
@@ -517,6 +606,7 @@ function del_tags($tags)
             WHERE imageid=$id AND tagid=$tagid";
       $db->query($sql);
       array_splice($this->_tags, $key, 1);
+      $this->set_meta_modified('tags');
     }
   }
 }
@@ -570,17 +660,22 @@ function add_sets($sets)
             VALUES ($id, $setid)";
       $db->query($sql);
       array_push($this->_sets, $set);
+      $this->set_meta_modified('sets');
     }
   }
 }
 
 /** Deletes sets from the image.
-  @param sets Tags to be removed from the image */
-function del_sets($sets)
+  @param sets Sets to be removed from the image. If null, it removes all sets. 
+  Default is null */
+function del_sets($sets=null)
 {
   global $db;
   if ($this->_sets==null)
     $this->get_sets();
+
+  if ($sets==null)
+    $sets=$this->get_sets();
 
   $id=$this->get_id();
   foreach ($sets as $set)
@@ -593,6 +688,7 @@ function del_sets($sets)
             WHERE imageid=$id AND setid=$setid";
       $db->query($sql);
       array_splice($this->_sets, $key, 1);
+      $this->set_meta_modified('sets');
     }
   }
 }
@@ -665,6 +761,7 @@ function set_location($value, $type)
     return false;
 
   $this->_locations[$type]=$value;
+  $this->set_meta_modified('locations');
   return true;
 }
 
@@ -703,9 +800,23 @@ function del_location($value, $type)
     return false;
 
   unset($this->_locations[$type]);
+  $this->set_meta_modified('locations');
   return true;
 }
 
+/** Delets an array of location
+  @param Array of location. If null, it deletes all locations. Default is null */
+function del_locations($locations=null)
+{
+  if ($locations==null)
+    $locations=$this->get_locations();
+
+  for ($type=LOCATION_CITY ; $type<=LOCACTION_COUNTRY ; $type++)
+  {
+    if (isset($locations[$type]))
+      $this->del_location($locations[$type]);
+  }
+}
 /** Sets the location and overwrites the current one */
 function set_locations($locations)
 {

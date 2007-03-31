@@ -2,6 +2,7 @@
 
 include_once("$phtagr_lib/SqlObject.php");
 include_once("$phtagr_lib/Constants.php");
+include_once("$phtagr_lib/Image.php");
 
 /** This class handles the authentication of an user.
 
@@ -1020,7 +1021,7 @@ function _delete_user_data($id)
   global $conf;
 
   // Deleting cached previes, uploads and image sql data
-  $img=new Thumbnail();
+  $img=new ImageSync();
   $img->delete_from_user($id);
 
   $g=new Group();

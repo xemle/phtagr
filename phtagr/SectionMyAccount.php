@@ -4,7 +4,6 @@ include_once("$phtagr_lib/SectionBase.php");
 include_once("$phtagr_lib/SectionAccount.php");
 include_once("$phtagr_lib/SectionUpload.php");
 include_once("$phtagr_lib/Image.php");
-include_once("$phtagr_lib/Thumbnail.php");
 include_once("$phtagr_lib/Group.php");
 include_once("$phtagr_lib/SectionAcl.php");
 

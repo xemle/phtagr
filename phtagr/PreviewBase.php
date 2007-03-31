@@ -1,23 +1,78 @@
 <?php
 
-include_once("$phtagr_lib/Search.php");
-include_once("$phtagr_lib/ImageSync.php");
-include_once("$phtagr_lib/Filesystem.php");
+include_once("$phtagr_lib/Base.php");
 
-/** Create thumbnails and image previews 
-  @class Thumbnail 
+/** Create Preview base
 */
-class Thumbnail extends ImageSync
+class PreviewBase extends Base
 {
 
-var $_cmd;
-var $_src;
+var $_id;
+var $_width;
+var $_height;
+var $_filename;
+var $_modified;
 
-function Thumbnail($id=-1)
+/** @param id Image id */
+function PreviewBase($id=-1)
 {
-  $this->ImageSync($id);
-  $this->_cmd="";
-  $this->_src="";
+  $this->_id=$id;
+  $this->_filename='';
+  $this->_width=-1;
+  $this->_height=-1;
+  $this->_modified=-1;
+}
+
+function set_id($id)
+{
+  $this->_id=$id;  
+}
+
+function get_id()
+{
+  return $this->_id;
+}
+
+function set_filename($filename)
+{
+  $this->_filename=$filename;
+}
+
+function get_filename()
+{
+  return $this->_filename;
+}
+
+function set_width($width)
+{
+  $this->_width=$width;
+}
+
+function get_width()
+{
+  return $this->_width;
+}
+
+function set_height($height)
+{
+  $this->_height=$height;
+}
+
+function get_height()
+{
+  return $this->_height;
+}
+
+/** Sets the last modification time of the image 
+  @param modified Unix time stamp */
+function set_modified($modified)
+{
+  $this->_modified=$modified;
+}
+
+function get_modified()
+{
+  return $this->_modified;
 }
 
 /** Returns the cache path for the image. The images are separated into
@@ -41,28 +96,28 @@ function _get_cache_path()
 /** @return Returns the filename of the mini image */
 function get_filename_mini()
 {
-  $file=sprintf("img%07d.mini.jpg",$this->get_id());
+  $file=sprintf("img%07d.mini.jpg",$this->_id);
   return $this->_get_cache_path().$file;
 }
 
 /** @return Returns the filename of the thumb image */
 function get_filename_thumb()
 {
-  $file=sprintf("img%07d.thumb.jpg",$this->get_id());
+  $file=sprintf("img%07d.thumb.jpg",$this->_id);
   return $this->_get_cache_path().$file;
 }
 
 /** @return Returns the filename of the preview */
 function get_filename_preview()
 {
-  $file=sprintf("img%07d.preview.jpg",$this->get_id());
+  $file=sprintf("img%07d.preview.jpg",$this->_id);
   return $this->_get_cache_path().$file;
 }
 
 /** @return Returns the filename of the hight solution image */
 function get_filename_high()
 {
-  $file=sprintf("img%07d.high.jpg",$this->get_id());
+  $file=sprintf("img%07d.high.jpg",$this->_id);
   return $this->_get_cache_path().$file;
 }
 
@@ -70,8 +125,6 @@ function get_filename_high()
   @param src Filename of the soure image */
 function init($src)
 {
-  $this->_src=$src;
-  $this->_cmd="convert";
 }
 
 /** Resize the original
@@ -81,12 +134,6 @@ function init($src)
   false */
 function resize($width, $height, $expand=false)
 {
-  if (!$expand)
-  {
-    $width=$width<=$this->get_width()?$width:$this->get_width();
-    $height=$height<=$this->get_height()?$height:$this->get_height();
-  }
-  $this->_cmd.=" -resize ${width}x$height";
 }
 
 /** Crop the image. The crop region must be inside the image. If the region is
@@ -97,28 +144,12 @@ function resize($width, $height, $expand=false)
   @param top Top offset. Default is 0. */
 function crop($width, $height, $left=0, $top=0)
 {
-  $left=$left<0?0:$left;
-  $left=$left>=$this->get_width()?$this->get_width()-1:$left;
-  
-  $top=$top<0?0:$top;
-  $top=$top>=$this->get_height()?$this->get_height()-1:$top;
-  
-  if ($width>$this->get_width()-$left)
-    $width=$this->get_width()-left;
-  if ($height>$this->get_height()-$top)
-    $height=$this->get_height()-top;
-
-  $this->_cmd.=" -crop ${width}x${height}+$left+$top";
 }
 
 /** Set to quality of the output image 
   @param quality Value between 0 (worset) and 100 (best). Default is 85 */
 function set_quality($quality=85)
 {
-  if ($quality<0 || $quality > 100)
-    $quality=85;
-    
-  $this->_cmd.=" -quality $quality";
 }
 
 /** Save the modified image to $dst
@@ -126,19 +157,6 @@ function set_quality($quality=85)
   @return false Returns false on error */
 function save_to($dst)
 {
-  if ($this->get_id()<=0)
-    return false;
-
-  $this->_cmd.=" \"".$this->_src."\" \"$dst\"";
-  system ($this->_cmd, $retval);
-  if ($retval!=0)
-  {
-    $this->error(sprintf(_("Could not execute command '%s'. Exit with code %d"), $this->_cmd, $retval));
-    return false;
-  }
-
-  @chmod($dst, 0644);
-  return true;
 }
 
 /** Create a mini square image with size of 75x75 pixels. 
@@ -148,6 +166,9 @@ function save_to($dst)
 */
 function create_mini($inherit=false) 
 {
+  if ($inherit)
+    $this->create_thumb($inherit);
+
   // Get the mini filename
   $mini=$this->get_filename_mini();
 
@@ -158,7 +179,7 @@ function create_mini($inherit=false)
     return false;
   
   if (! file_exists($mini) || 
-    filectime($mini) < $this->get_synced(true)) 
+    filemtime($mini) < $this->get_modified(true)) 
   {
     if ($width<$height) {
       $w=105;
@@ -175,7 +196,6 @@ function create_mini($inherit=false)
     {
       $this->init($this->get_filename());
     } else { 
-      $this->create_thumb($inherit);
       $this->init($this->get_filename_thumb());
     }
     $this->resize($w, $h);
@@ -192,17 +212,19 @@ function create_mini($inherit=false)
   @return False on error */
 function create_thumb($inherit=false) 
 {
+  if ($inherit)
+    $this->create_preview($inherit);
+
   // Get the thumbnail filename
   $thumb=$this->get_filename_thumb();
 
   if (! file_exists($thumb) || 
-    filectime($thumb) < $this->get_synced(true)) 
+    filemtime($thumb) < $this->get_modified(true)) 
   {
     if (!$inherit)
     {
       $this->init($this->get_filename());
     } else { 
-      $this->create_preview($inherit);
       $this->init($this->get_filename_preview());
     }
     $this->resize(220, 220);
@@ -218,17 +240,19 @@ function create_thumb($inherit=false)
   @return False on error */
 function create_preview($inherit=false) 
 {
+  if ($inherit)
+    $this->create_high();
+
   // Get the preview filename
   $preview=$this->get_filename_preview();
 
   if (! file_exists($preview) || 
-    filectime($preview) < $this->get_synced(true)) 
+    filemtime($preview) < $this->get_modified(true)) 
   {
     if (!$inherit)
     {
       $this->init($this->get_filename());
     } else { 
-      $this->create_high();
       $this->init($this->get_filename_high());
     }
     $this->resize(600, 600);
@@ -246,7 +270,7 @@ function create_high()
   $high=$this->get_filename_high();
 
   if (! file_exists($high) || 
-    filectime($high) < $this->get_synced(true)) 
+    filemtime($high) < $this->get_modified(true)) 
   {
     $this->init($this->get_filename());
     $this->resize(1024, 1024);
@@ -269,7 +293,7 @@ function _get_filenames()
 
 /** Renews all timestamps of the previews. This function is usefull, if meta
  * data changes but not the image itself */
-function touch_cache()
+function touch_previews()
 {
   if (!function_exists("touch"))
     return false;
@@ -288,10 +312,22 @@ function create_previews()
   $this->create_mini(true);
 }
 
+/** Delete all previes of the image */
+function delete_previews()
+{
+  $files=$this->_get_filenames();
+  foreach ($files as $file)
+  {
+    if (file_exists($file))
+      unlink($file);
+  }
+}
+
 /** Create all preview images 
   @param userid Optional user ID. If set, only previews of this user are
   created. Otherwise all previews of all users are created. This requires admin
-  rights. */
+  rights. 
+  @todo Move this function out of this class */
 function create_all_previews($userid=-1)
 {
   global $db;
@@ -317,51 +353,29 @@ function create_all_previews($userid=-1)
     $id=$row[0];
     $count++;
     
-    $img=new Thumbnail($id);
-    $img->create_previews();
-    unset($img);
+    $img=new Image($id);
+    if (!$img)
+      continue;
+    $previewer=$img->get_preview_handler();
+    if (!$previewer)
+    {
+      unset($img);
+      continue;
+    }
+    $previewer->create_previews();
   }
   return $count;
 }
 
-/** Delete all previes of the image */
-function delete_previews()
-{
-  $files=$this->_get_filenames();
-  foreach ($files as $file)
-  {
-    if (file_exists($file))
-      unlink($file);
-  }
-}
-
-/** Deletes all previews */
-function delete()
-{
-  global $user;
-
-  if ($user->get_id()!=$this->get_userid() && !$user->is_admin())
-    return;
-
-  $this->delete_previews();
-
-  parent::delete();
-}
-
-
 /** Delete all user data 
   @param userid ID of the specific user
   @param id Image ID, if only one image should be delted. 
-  @return 0 on success, global error code otherwise */
+  @return 0 on success, global error code otherwise 
+  @note This function does not check the user's authorization */
 function delete_from_user($userid, $id=0)
 {
   global $db;
   global $user;
-
-  if (!is_numeric($userid) || $userid<1)
-    return ERR_PARAM;
-  if ($userid!=$user->get_id() && !$user->is_admin())
-    return ERR_NOT_PERMITTED;
 
   $sql="SELECT id
         FROM $db->image
@@ -369,16 +383,23 @@ function delete_from_user($userid, $id=0)
   if ($id>0) $sql.=" AND id=$id";
   $result=$db->query($sql);
   if (!$result)
-    return;
+    return -1;
   while ($row=mysql_fetch_row($result))
   {
     $img_id=$row[0];
-    $thumb=new Thumbnail($img_id);
-    $thumb->delete();
-    unset($thumb);
+    $img=new Image($img_id);
+    if (!$img)
+      continue;
+    $previewer=$img->get_preview_handler();
+    if (!$previewer)
+    {
+      unset($img);
+      continue;
+    }
+    $previewer->delete();
   }
 
-  return parent::delete_from_user($userid, $id);
+  return 0;
 }
 
 }

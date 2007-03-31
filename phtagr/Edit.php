@@ -1,7 +1,7 @@
 <?php
 
 global $phtagr_lib;
-include_once("$phtagr_lib/Thumbnail.php");
+include_once("$phtagr_lib/ImageSync.php");
 include_once("$phtagr_lib/Constants.php");
 include_once("$phtagr_lib/Acl.php");
 include_once("$phtagr_lib/SectionAcl.php");
@@ -72,7 +72,7 @@ function execute()
     if (!is_numeric($id))
       continue;
 
-    $img=new Thumbnail($id);
+    $img=new ImageSync($id);
     if ($img->get_id()!=$id)
     {
       unset($img);

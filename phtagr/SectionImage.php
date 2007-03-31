@@ -305,11 +305,12 @@ function print_row_acl()
 
 function print_row_date()
 {
+  $db;
   $img=$this->get_img();
   if (!$img)
     return;
 
-  $sec=$img->_sqltime2unix($img->get_date());
+  $sec=$img->get_date(true);
   
   echo "  <tr>
     <th>"._("Date:")."</th>

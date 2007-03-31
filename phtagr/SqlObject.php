@@ -91,7 +91,7 @@ function _set_data($name, $value)
   if ($this->get_id()<=0)
     return false;
 
-  if ($this->_data[$name]===$value)
+  if ($this->_data[$name]==$value)
   {
     if (isset($this->_changes[$name]))
       unset($this->_changes[$name]);
@@ -100,6 +100,14 @@ function _set_data($name, $value)
 
   $this->_changes[$name]=$value;
   return true;
+}
+
+/** @return True if data were modified, false otherwise */
+function is_modified()
+{
+  if (count($this->_changes)>0)
+    return true;
+  return false;
 }
 
 /** Writes all changes to the database. It also updated the internal data of

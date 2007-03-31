@@ -7,12 +7,9 @@ include_once("$phtagr_lib/IptcImage.php");
 class ImageSync extends Image
 {
 
-var $_iptc;
-
 function ImageSync($id=-1)
 {
   $this->Image($id);
-  $_iptc=null;
 }
 
 /** Import an image by a filename to the database. If an image with the same
@@ -30,7 +27,7 @@ function import($filename, $is_upload=0)
   
   if (!file_exists($filename))
     return ERR_FS_NOT_EXISTS;
-  
+
   $sfilename=mysql_escape_string($filename);
   
   $sql="SELECT * 
@@ -44,7 +41,8 @@ function import($filename, $is_upload=0)
   if (mysql_num_rows($result)!=0)
   {
     $this->init_by_query($sql);
-    $this->update();
+    $this->_import();
+    $this->commit();
     return 1;
   }
   
@@ -56,12 +54,12 @@ function import($filename, $is_upload=0)
   $aacl=$user->get_aacl();
   
   $sql="INSERT INTO $db->image (
-          userid,groupid,synced,created,
+          userid,groupid,created,
           filename,is_upload,
           gacl,macl,aacl,
           clicks,lastview,ranking
         ) VALUES (
-          $userid,$groupid,NOW(),NOW(),
+          $userid,$groupid,NOW(),
           '$sfilename',$is_upload,
           $gacl,$macl,$aacl,
           0,NOW(),0.0
@@ -75,46 +73,82 @@ function import($filename, $is_upload=0)
         WHERE filename='$sfilename'";
   $this->init_by_query($sql);
 
-  $this->_import_static();
-  $this->_import_meta();
+  $file=$this->get_file_handler();  
+  if ($file==null)
+    return -1;
+
+  $file->import($this);
+  $this->set_modified($file->get_filetime(), true);
   $this->commit();
   
   return 0; 
 }
 
-function export($filename)
-{
-}
-
-/** Update the image data if the file modification time is after the
- * synchronization time of the image data set. 
+/** Import the image data if the file modification time is after the
+ * changed time of the image data set or modification of time
   @param force If true, force the update procedure. Default is false.
   @return True if the image was updated. False otherwise */
-function update($force=false)
+function _import($force=false)
 {
-  $synced=$this->get_synced(true);
-  $ctime=filectime($this->get_filename());
-  if (!$force && $ctime < $synced)
+  $file=$this->get_file_handler();
+  if ($file==null)
+    return false;
+
+  $modified=$this->get_modified(true);
+  $time_file=$file->get_filetime();
+
+  // Skip if not forced or if file has the same time
+  if (!$force && $time_file<=$modified)
   {
     return false;
   }
   
-  $this->_import_static();
-  $this->_import_meta();
-  $this->set_synced();
-  $this->commit();
+  // Clear the file stat chache to get updated stats  
+  @clearstatcache();
+  $file->import($this);
+
+  $this->set_modified($file->get_filetime(), true);
+
+  return true;
+}
+
+function export()
+{
+  $this->_export();
+}
+
+function _export($force=false)
+{
+  $file=$this->get_file_handler();
+  if ($file==null)
+    return;
+
+  $modified=$this->get_modified(true);
+  $time_file=$file->get_filetime();
+
+  $changed=$this->is_modified() || $this->is_meta_modified();
+  if (!$force && ($time_file>=$modified || !$changed))
+  {
+    return false;
+  }
+  
+  $file->export($this);
+
+  // Clear the file stat chache to get updated stats  
+  @clearstatcache();
+  $this->set_modified($file->get_filetime(), true);
+
   return true;
 }
 
 /** Synchronize files between the database and the filesystem. If a file not
  * exists delete its data. If a file is newer since the last update, update its
  * data. 
-  @param del_func Callback function for image deletion 
   @param userid Userid which must match current user. If userid -1 and user is
   admin, all files are synchronized. 
   @return Array of count files, updated files, and deleted files. On error, the
   first array value is the global error code */
-function sync_files($del_func, $userid=-1)
+function sync_files($userid=-1)
 {
   global $db;
   global $user;
@@ -135,6 +169,7 @@ function sync_files($del_func, $userid=-1)
   if (!$result)
     return 0;
     
+  @clearstatcache();
   $count=0;
   $updated=0;
   $deleted=0;
@@ -147,15 +182,18 @@ function sync_files($del_func, $userid=-1)
     
     if (!file_exists($filename))
     {
-      if (is_callable($del_func))
-        call_user_func($del_func, $id);
+      $image=new ImageSync($id);
+      $image->delete();
       $deleted++;
     }
     else 
     {
       $image=new ImageSync($id);
-      if ($image->update())
+      if ($image->_import())
+      {
+        $image->commit();
         $updated++;
+      }
       unset($image);
     }
   }
@@ -169,6 +207,10 @@ function delete()
 
   if ($user->get_id()!=$this->get_userid() && !$user->is_admin())
     return;
+
+  $previewer=$this->get_preview_handler();
+  if ($previewer!=null)
+    $previewer->delete_previews();
 
   if ($this->is_upload())
     @unlink($this->get_filename());
@@ -187,6 +229,9 @@ function delete_from_user($userid, $id)
   if ($userid!=$user->get_id() && !$user->is_admin())
     return ERR_NOT_PERMITTED;
 
+  $previewer=new PreviewerBase();
+  $previewer->delete_from_user($userid, $id);
+
   $userid=$user->get_id();
   $sql="SELECT filename
         FROM $db->image
@@ -198,184 +243,6 @@ function delete_from_user($userid, $id)
     }
   }
   return parent::delete_from_user($userid, $id);
-}
-
-/** This is a dummy function for inherited classes. This function will be
- * called, if the meta data changes, but not the image itself  */
-function touch_cache()
-{
-  return true;
-}
-
-/** Reads the IPTC header from the file */
-function _read_iptc()
-{
-  if ($this->_iptc!=null)
-    return true;
-
-  $this->_iptc=new IptcImage($this->get_filename());
-  return true;
-}
-
-function _check_iptc_error()
-{
-  if ($this->_iptc==null ||
-    $this->_iptc->get_errno()>0)
-    return true;
-  return false;
-}
-
-/** Read static values from an image and insert them into the database. The
- * static values are filesize, name, width and height */
-function _import_static()
-{
-  global $db;
-  if (!isset($this->_data))
-    return false;
-
-  $filename=$this->get_filename();
-  
-  $bytes=filesize($filename);
-  $name=basename($filename);
-
-  $size=getimagesize($filename);
-  if ($size)
-  {
-    $width=$size[0];
-    $height=$size[1];
-  }
-  else
-  {
-    $width=0;
-    $height=0;
-  }
-
-  $this->set_bytes($bytes);
-  $this->set_name($name);
-  $this->set_width($width);
-  $this->set_height($height);
-  return true;
-}
-
-function _import_meta($merge=false)
-{
-  $this->_read_iptc();
-  $iptc=&$this->_iptc;
-  if ($this->_check_iptc_error())
-    return false;
-
-  $this->set_orientation($iptc->get_orientation());
-  $this->_import_meta_date($merge);
-
-  // Caption
-  $caption=$iptc->get_caption();
-  if (!$merge || $caption!=null) 
-    $this->set_caption($caption);
-
-  // Tags
-  $iptc_tags=$iptc->get_tags();
-  $db_tags=$this->get_tags();
-  $add_tags=array_diff($iptc_tags, $db_tags);
-  $this->add_tags($add_tags);
-  if (!$merge)
-  {
-    $del_tags=array_diff($db_tags, $iptc_tags);
-    $this->del_tags($del_tags);
-  }
-
-  // Sets
-  $iptc_sets=$iptc->get_sets();
-  $db_sets=$this->get_sets();
-  $add_sets=array_diff($iptc_sets, $db_sets);
-  $this->add_sets($add_sets);
-  if (!$merge)
-  {
-    $del_sets=array_diff($db_sets, $iptc_sets);
-    $this->del_sets($del_sets);
-  }
-
-  // Locations
-  $locations=$iptc->get_locations();
-  for ($type=LOCATION_CITY ; $type<=LOCATION_COUNTRY ; $type++)
-  {
-    if ($locations[$type]!=null)
-      $this->set_location($locations[$type], $type);
-    else if (!$merge)
-      $this->del_location(null, $type);
-  }
-}
-
-function _import_meta_date($merge)
-{
-  $this->_read_iptc();
-  $iptc=&$this->_iptc;
-  if ($this->_check_iptc_error())
-    return false;
-
-  $date=$iptc->get_date();
-  if (!$merge || $date!=null)
-    $this->set_date($date);
-}
-
-function _export_meta($merge=false)
-{
-  $this->_read_iptc();
-  $iptc=&$this->_iptc;
-  if ($this->_check_iptc_error())
-    return false;
-
-  // Date
-  $date=$this->get_date(true);
-  if (!$merge || $date!=null)
-    $iptc->set_date($date);
-
-  // Caption
-  $caption=$this->get_caption();
-  if (!$merge || $caption!=null) 
-    $iptc->set_caption($caption);
-
-  // Tags
-  $db_tags=$this->get_tags();
-  $iptc_tags=$iptc->get_tags();
-  $add_tags=array_diff($db_tags, $iptc_tags);
-  $iptc->add_tags($add_tags);
-  if (!$merge)
-  {
-    $del_tags=array_diff($iptc_tags, $db_tags);
-    $iptc->del_tags($del_tags);
-  }
-
-  // Sets
-  $db_sets=$this->get_sets();
-  $iptc_sets=$iptc->get_sets();
-  $add_sets=array_diff($db_sets, $iptc_sets);
-  $iptc->add_sets($add_sets);
-  if (!$merge)
-  {
-    $del_sets=array_diff($iptc_sets, $db_sets);
-    $iptc->del_sets($del_sets);
-  }
-
-  // Locations
-  $locations=$this->get_locations();
-  for ($type=LOCATION_CITY ; $type<=LOCATION_COUNTRY ; $type++)
-  {
-    if ($locations[$type]!=null) {
-      $iptc->set_location($locations[$type], $type);
-    } else if (!$merge) {
-      $iptc->del_location(null, $type);
-    }
-  }
-}
-
-/** Saves the IPTC changes to the file */
-function _save_iptc()
-{
-  $this->_read_iptc();
-  $iptc=&$this->_iptc;
-  if ($this->_check_iptc_error())
-    return false;
-  $iptc->save_to_file();
 }
 
 /** Handle the caption input 
@@ -425,14 +292,11 @@ function _handle_request_date($prefix='', $merge)
 {
   if (!isset($_REQUEST[$prefix.'date']) || 
     $_REQUEST[$prefix.'date']=='') {
-    if ($merge) 
-      $this->_import_meta_date($merge);
-    return;
+    return true;
   }
 
   $date=$_REQUEST[$prefix.'date'];
   if ($date=='-') {
-    $this->_import_meta_date($merge);
     return true;
   }
 
@@ -544,7 +408,7 @@ function _handle_request_location($prefix='', $merge)
 
 function handle_request()
 {
-  $this->_import_meta(false);
+  $this->_import(false);
 
   if (!isset($_REQUEST['edit']))
     return false;
@@ -570,15 +434,19 @@ function handle_request()
   }
 
   // Commit changes to update the values
-  $this->set_synced();
-  $this->commit();
-  $this->touch_cache();
+  $changed=$this->is_modified() || $this->is_meta_modified();  
+  if (!$changed)
+  {
+    return;
+  }
 
-  $this->_export_meta(false);
-  $this->_save_iptc();
-  $iptc=$this->_iptc;
-  if ($iptc->get_errmsg()!='')
-    $this->warning($iptc->get_errmsg());
+  $this->_export(false);
+  $this->set_modified(time(), true);
+  $this->commit();
+
+  $previewer=$this->get_preview_handler();
+  if ($previewer!=null)
+    $previewer->touch_previews();
 }
 
 }

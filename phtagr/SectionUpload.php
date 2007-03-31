@@ -356,7 +356,7 @@ function print_uploaded()
             !is_dir($file) && 
             file_exists($fullpath.$file))
         {
-          $image=new Thumbnail(-1);
+          $image=new Image(-1);
           if (!$image->init_by_filename($fullpath.$file))
             continue;
 
@@ -364,10 +364,15 @@ function print_uploaded()
           echo "      <td align=\"center\" width=\"5\"><input type=\"checkbox\" name=\"".$file."\" /></td>\n";
           echo "      <td align=\"center\">\n";
           
-          $src=$image->create_mini();
-	  echo "<a href=\"./index.php?section=image&id=".$image->get_id()."\">";
-          echo "<img src=\"./image.php?id=".$image->get_id()."&amp;type=mini\" alt=\"".$image->get_name()."\">";
-	  echo "</a>\n";
+          $url=new Url();
+          $url->add_param("section", "image");
+          $url->add_param("id", $image->get_id());
+          echo "<a href=\"".$url->get_url()."\">";
+          $url=new Url("image.php");
+          $url->add_param("id", $image->get_id());
+          $url->add_param("type", "mini");
+          echo "<img src=\"".$url->get_url()."\" alt=\"".$image->get_name()."\">";
+          echo "</a>\n";
           echo "</td>\n";
           echo "      <td align=\"center\">$file</td>\n";
           echo "      <td align=\"right\">"

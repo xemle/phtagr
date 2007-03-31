@@ -741,6 +741,16 @@ function get_iptc()
   return $this->iptc;
 }
 
+/** Resets the iptc data */
+function reset_iptc()
+{
+  if (!isset($this->iptc))
+    return;
+
+  unset($this->iptc);
+  $this->iptc=array();
+}
+
 /** Return, if the record occurs only one time */
 function _is_single_record($name)
 {

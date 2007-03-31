@@ -341,6 +341,46 @@ function location2ids($location)
   }
   return $ids;
 }
+
+
+/** Converts the mysql time stamp to the unix timestamp 
+  @param date Date could have the format of 'YYYY-MM-DD HH:MM:SS' or 
+  'YYYY-MM-DD' or 'HH:MM:SS'
+  @return Unix timestamp. On error it returns -1. */
+function date_mysql_to_unix($date)
+{
+  $time=false;
+
+  if (strlen($date)==10 &&
+    preg_match('/^(\\d{4})-(\\d{2})-(\\d{2})$/', $date, $m)) 
+    $time=mktime(0, 0, 0, $m[2], $m[3], $m[1]);
+
+  if (strlen($date)==8&&
+    preg_match('/^(\\d{2}):(\\d{2}):(\\d{2})$/', $date, $m)) 
+    $time=mktime($m[1], $m[2], $m[3], 0, 0, 0);
+
+  if (strlen($date)==19 && 
+    preg_match('/^(\\d{4})-(\\d{2})-(\\d{2}) (\\d{2}):(\\d{2}):(\\d{2})$/', $date, $m));
+    $time=mktime($m[4], $m[5], $m[6], $m[2], $m[3], $m[1]);
+
+  if ($time===false)
+    return -1;
+
+  return $time;
+}
+
+/** Converts the unix time to mysql time stamp
+  @param sec Seconds sind 1.1.1970 
+  @return mysql time string */
+function date_unix_to_mysql($sec)
+{
+  if (!is_numeric($sec))  
+    $sec=0;
+  if ($sec<0)
+    $sec=0;
+  return strftime("%G-%m-%d %H:%M:%S", $sec);
+}
+
 /** Creates the phTagr tables
   @return Returns true on success. False otherwise */
 function create_tables()

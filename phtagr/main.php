@@ -2,31 +2,31 @@
 
 session_start();
 
-include "$phtagr_lib/User.php";
-include "$phtagr_lib/Database.php";
-include "$phtagr_lib/Config.php";
-include "$phtagr_lib/Search.php";
-include "$phtagr_lib/Edit.php";
+include_once("$phtagr_lib/User.php");
+include_once("$phtagr_lib/Database.php");
+include_once("$phtagr_lib/Config.php");
+include_once("$phtagr_lib/Search.php");
+include_once("$phtagr_lib/Edit.php");
 
-include "$phtagr_lib/PageBase.php";
-include "$phtagr_lib/SectionLogo.php";
-include "$phtagr_lib/SectionQuickSearch.php";
-include "$phtagr_lib/SectionMenu.php";
-include "$phtagr_lib/SectionHome.php";
-include "$phtagr_lib/SectionFooter.php";
-include "$phtagr_lib/SectionHelp.php";
+include_once("$phtagr_lib/PageBase.php");
+include_once("$phtagr_lib/SectionLogo.php");
+include_once("$phtagr_lib/SectionQuickSearch.php");
+include_once("$phtagr_lib/SectionMenu.php");
+include_once("$phtagr_lib/SectionHome.php");
+include_once("$phtagr_lib/SectionFooter.php");
+include_once("$phtagr_lib/SectionHelp.php");
 
-include "$phtagr_lib/SectionAccount.php";
+include_once("$phtagr_lib/SectionAccount.php");
 
-include "$phtagr_lib/SectionExplorer.php";
-include "$phtagr_lib/SectionBulb.php";
-include "$phtagr_lib/SectionImage.php";
-include "$phtagr_lib/SectionBrowser.php";
-include "$phtagr_lib/SectionSearch.php";
-include "$phtagr_lib/SectionUpload.php";
-include "$phtagr_lib/SectionInstall.php";
-include "$phtagr_lib/SectionAdmin.php";
-include "$phtagr_lib/SectionMyAccount.php";
+include_once("$phtagr_lib/SectionExplorer.php");
+include_once("$phtagr_lib/SectionBulb.php");
+include_once("$phtagr_lib/SectionImage.php");
+include_once("$phtagr_lib/SectionBrowser.php");
+include_once("$phtagr_lib/SectionSearch.php");
+include_once("$phtagr_lib/SectionUpload.php");
+include_once("$phtagr_lib/SectionInstall.php");
+include_once("$phtagr_lib/SectionAdmin.php");
+include_once("$phtagr_lib/SectionMyAccount.php");
 
 $page = new PageBase("phTagr");
 

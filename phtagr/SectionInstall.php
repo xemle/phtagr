@@ -716,7 +716,7 @@ that no one will create instances of phTagr that you do not want."),"<code><b>".
   }
 
 echo "
-<p><a href=\"".$_SERVER['PHP_SELF']."/index.php\">"._("Have fun!")."</a></p>
+<p><a href=\"".$_SERVER['PHP_SELF']."\">"._("Have fun!")."</a></p>
 ";
   $this->clear_session();
 }

@@ -2,8 +2,7 @@
 
 include_once("$phtagr_lib/SectionBase.php");
 include_once("$phtagr_lib/SectionAccount.php");
-include_once("$phtagr_lib/Image.php");
-include_once("$phtagr_lib/Thumbnail.php");
+include_once("$phtagr_lib/ImageSync.php");
 include_once("$phtagr_lib/Upgrade.php");
 
 define("ADMIN_TAB_GENERAL", "0");
@@ -383,15 +382,6 @@ function print_upload ()
   echo "</p>\n";
 }
 
-/** Static callback function for image deletion 
-  @param id Image ID to delete */
-static function cb_delete($id)
-{
-  $thumb=new Thumbnail($id);
-  $thumb->delete();
-  unset($thumb);
-}
-
 function exec_debug()
 {
   global $db;
@@ -406,14 +396,14 @@ function exec_debug()
   {
     echo "<h3>"._("Synchroning image data...")."</h3>\n";
     $this->info(_("This operation may take some time"));
-    $thumb=new Thumbnail();
-    list($count, $updated, $deleted)=$thumb->sync_files(array("SectionAdmin", "cb_delete"));
+    $sync=new ImageSync();
+    list($count, $updated, $deleted)=$sync->sync_files();
     if ($count>0) {
       $this->success(sprintf(_("All %d files where synchronized. %d were updated, %d were deleted"), $count, $updated, $deleted));
     } else {
       $this->error(sprintf(_("Synchronization of files failed. Error %d returned"), $count));
     }
-    unset($thumb);
+    unset($sync);
   }
   else if ($action=="delete_unassigned_data")
   {
@@ -437,8 +427,8 @@ function exec_debug()
   {
     echo "<h3>"._("Creating preview images...")."</h3>\n";
     $this->info(_("This operation may take some time"));
-    $thumb=new Thumbnail();
-    $thumb->create_all_previews();
+    $previewer=new PreviewBase();
+    $previewer->create_all_previews();
     $this->success(_("All previews are now created"));
   }
   else if ($action=="upgrade")

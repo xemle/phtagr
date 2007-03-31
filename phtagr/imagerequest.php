@@ -5,10 +5,10 @@
 
 session_start();
 
-include "$phtagr_lib/User.php";
-include "$phtagr_lib/Database.php";
-include "$phtagr_lib/Config.php";
-include "$phtagr_lib/Thumbnail.php";
+include_once("$phtagr_lib/User.php");
+include_once("$phtagr_lib/Database.php");
+include_once("$phtagr_lib/Config.php");
+include_once("$phtagr_lib/Image.php");
 
 
 function unauthorized()
@@ -79,8 +79,14 @@ $user->check_session(false);
 
 $conf=new Config($user->get_id());
 
-$img=new Thumbnail($_REQUEST['id']);
+$img=new Image($_REQUEST['id']);
 if (!$img)
+{
+  internal_error();
+}
+
+$previewer=$img->get_preview_handler();
+if ($previewer==null)
 {
   internal_error();
 }
@@ -90,31 +96,31 @@ switch ($type)
 {
   case 'mini':
     if ($img->can_preview(&$user))
-      $fn=$img->get_filename_mini();
+      $fn=$previewer->get_filename_mini();
     else
       unauthorized();
     break;
   case 'thumb':
     if ($img->can_preview(&$user))
-      $fn=$img->get_filename_thumb();
+      $fn=$previewer->get_filename_thumb();
     else
       unauthorized();
     break;
   case 'preview':
     if ($img->can_preview(&$user))
-      $fn=$img->get_filename_preview();
+      $fn=$previewer->get_filename_preview();
     else
       unauthorized();
     break;
   case 'high':
     if ($img->can_preview(&$user))
-      $fn=$img->get_filename_high();
+      $fn=$previewer->get_filename_high();
     else
       unauthorized();
     break;
   case 'full':
     if ($img->can_fullsize(&$user))
-      $fn=$img->get_filename();
+      $fn=$previewer->get_filename();
     else
       unauthorized();
     break;
@@ -142,11 +148,11 @@ else
 
 // Checking if the client is validating his cache and if it is current.
 if ($_SESSION['withcookie'] && isset($headers['if-modified-since']) && 
-    (strtotime($headers['if-modified-since']) == $img->get_synced(true))) 
+    (strtotime($headers['if-modified-since']) == $img->get_modified(true))) 
 {
   // Client's cache IS current, so we just respond '304 Not Modified'.
   header('Last-Modified: '.
-    gmdate('D, d M Y H:i:s', $img->get_synced(true)).' GMT', true, 304);
+    gmdate('D, d M Y H:i:s', $img->get_modified(true)).' GMT', true, 304);
   // Allow further caching for 30 days
   header('Cache-Control: max-age=2592000, must-revalidate');
   exit;
@@ -157,7 +163,7 @@ if ($_SESSION['withcookie'])
 {
   // Allow caching
   header('Last-Modified: '.gmdate('D, d M Y H:i:s', 
-    $img->get_synced(true)).' GMT', true, 200);
+    $img->get_modified(true)).' GMT', true, 200);
   header('Cache-Control: max-age=2592000');
 } else {
   header('Cache-Control: max-age=0');
@@ -166,16 +172,16 @@ if ($_SESSION['withcookie'])
 switch ($type)
 {
   case 'mini':
-    $img->create_mini();
+    $previewer->create_mini();
     break;
   case 'thumb':
-    $img->create_thumb();
+    $previewer->create_thumb();
     break;
   case 'preview':
-    $img->create_preview();
+    $previewer->create_preview();
     break;
   case 'high':
-    $img->create_high();
+    $previewer->create_high();
     break;
   case 'full':
     break;

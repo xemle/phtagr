@@ -170,10 +170,14 @@ function print_content()
       echo _("Now creating the previews. This can take a while...")."<br/>";
       foreach ($images as $img)
       {
-        $thumb=new Thumbnail();
-        $thumb->init_by_filename($fs->get_realname($img));
-        $thumb->create_previews();
-        unset($thumb);
+        $image=new Image();
+        $image->init_by_filename($fs->get_realname($img));
+        $previewer=$image->get_preview_handler();
+        if ($previewer)
+        {
+          $previewer->create_previews();
+          unset($previewer);
+        }
       }
       $this->info(_("All previews successfully created"));
     }
