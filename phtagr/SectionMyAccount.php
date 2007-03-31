@@ -203,12 +203,17 @@ function print_details()
   
   echo "<table>
   <tr>
-    <td>Total Images:</td>
+    <td></td>
+    <td>"._("Count")."</td>
+    <td>"._("Size")."</td>
+  </tr>
+  <tr>
+    <td>"._("Total Images:")."</td>
     <td>".$user->get_image_count()."</td>
     <td>".sprintf(_("%.2f MB"), $user->get_image_bytes()/(1024*1024))."</td>
   </tr>
   <tr>
-    <td>Uploded Images:</td>
+    <td>"._("Uploded Images:")."</td>
     <td>".$user->get_image_count(true)."</td>
     <td>".sprintf(_("%.2f MB"), $user->get_image_bytes(true)/(1024*1024))."</td>
   </tr>

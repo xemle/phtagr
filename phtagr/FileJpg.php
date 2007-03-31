@@ -59,6 +59,9 @@ function import($image)
 
 function export($image)
 {
+  if (!$this->is_writeable())
+    return;
+
   if (!$this->_iptc)
     $this->_iptc=new Iptc($this->get_filename());
   $iptc=$this->_iptc;
@@ -81,7 +84,7 @@ function export($image)
   }
   else
   {
-  	$this->_set_date_iptc($date);
+    $this->_set_date_iptc($date);
   }
 
   $iptc->save_to_file();

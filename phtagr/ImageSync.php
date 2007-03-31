@@ -1,7 +1,6 @@
 <?php
 
 include_once("$phtagr_lib/Image.php");
-include_once("$phtagr_lib/IptcImage.php");
 
 /** @class ImageSync Handels the synchronisation between database and the image */ 
 class ImageSync extends Image
@@ -330,8 +329,7 @@ function _handle_request_tags($prefix='', $merge)
   $del_tags=array();
   foreach ($tags as $tag)
   {
-    $tag=preg_replace("/^\s+/", "", $tag); 
-    $tag=preg_replace("/\s+$/", "", $tag); 
+    $tag=trim($tag);
     if ($tag=='-' || $tag=='')
       continue;
 
@@ -366,8 +364,7 @@ function _handle_request_sets($prefix='', $merge)
   $del_sets=array();
   foreach ($sets as $set)
   {
-    $set=preg_replace("/^\s+/", "", $set); 
-    $set=preg_replace("/\s+$/", "", $set); 
+    $set=trim($set);
     if ($set=='-' || $set=='')
       continue;
 

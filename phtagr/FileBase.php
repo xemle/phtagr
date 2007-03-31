@@ -1,8 +1,8 @@
 <?php
 
-include_once("$phtagr_lib/Iptc.php");
+include_once("$phtagr_lib/Base.php");
 
-/** @class IptcImage
+/** @class FileBase
   Class for adding and setting database relevant IPTC records. */
 class FileBase extends Base
 {

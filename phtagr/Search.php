@@ -302,11 +302,7 @@ function from_URL()
     $tags=preg_split("/".$conf->get('meta.separator', ';')."/", $_REQUEST['tags']);
     foreach ($tags as $tag)
     {
-      $tag=preg_replace("/^\s+/", "", $tag);
-      $tag=preg_replace("/\s+$/", "", $tag);
-      if ($tag=='')
-        continue;
-      $this->add_tag($tag);
+      $this->add_tag(trim($tag));
     }
   }
 
@@ -318,11 +314,7 @@ function from_URL()
     $sets=preg_split("/".$conf->get('meta.separator', ';')."/", $_REQUEST['sets']);
     foreach ($sets as $set)
     {
-      $set=preg_replace("/^\s+/", "", $set);
-      $set=preg_replace("/\s+$/", "", $set);
-      if ($set=='')
-        continue;
-      $this->add_set($set);
+      $this->add_set(trim($set));
     }
   }
   if (isset($_REQUEST['setop']))

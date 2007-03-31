@@ -295,7 +295,10 @@ function print_row_acl()
   {
     $group=new Group($gid);
     $name=$group->get_name();
-    echo "$name: ";
+
+    $url=new Search();
+    $url->set_groupid($gid);
+    echo "<a href=\"".$url->get_url()."\">$name</a>: ";
   }
   echo $this->_acl_to_text($img->get_gacl()).',';
   echo $this->_acl_to_text($img->get_macl()).',';

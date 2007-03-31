@@ -147,6 +147,7 @@ function save_to_file($do_rename=true)
   if ($this->_changed_iptc==false && $this->_changed_com==false)
     return;
 
+  //$this->warning("Saving file");
   if (!isset($this->_jpg))
     return false;
   $jpg=&$this->_jpg;
@@ -164,7 +165,7 @@ function save_to_file($do_rename=true)
   if (!is_writeable(dirname($jpg['filename'])))
   {
     $this->_errno=-1;
-    $this->_errmsg="Could not write to file directory";
+    $this->_errmsg=sprintf(_("Could not write to file directory '%s'"), dirname($jpg['filename']));
     return false;
   }
 
