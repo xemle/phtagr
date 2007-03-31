@@ -592,7 +592,7 @@ function del_tags($tags=null)
   if ($this->_tags==null)
     $this->get_tags();
   
-  if ($tags==null)
+  if ($tags===null)
     $tags=$this->get_tags();
 
   $id=$this->get_id();
@@ -674,7 +674,7 @@ function del_sets($sets=null)
   if ($this->_sets==null)
     $this->get_sets();
 
-  if ($sets==null)
+  if ($sets===null)
     $sets=$this->get_sets();
 
   $id=$this->get_id();
@@ -808,7 +808,7 @@ function del_location($value, $type)
   @param Array of location. If null, it deletes all locations. Default is null */
 function del_locations($locations=null)
 {
-  if ($locations==null)
+  if ($locations===null)
     $locations=$this->get_locations();
 
   for ($type=LOCATION_CITY ; $type<=LOCACTION_COUNTRY ; $type++)

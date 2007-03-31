@@ -338,12 +338,15 @@ function _handle_request_tags($prefix='', $merge)
     else
       array_push($add_tags, $tag);
   }
-  $this->del_tags($del_tags);
+  if (count($del_tags))
+    $this->del_tags($del_tags);
+
   if (!$merge)
   {
     $db_tags=$this->get_tags();
     $del_tags=array_diff($db_tags, $add_tags);
-    $this->del_tags($del_tags);
+    if (count($del_tags))
+      $this->del_tags($del_tags);
   }
   $this->add_tags($add_tags);
 }
@@ -373,12 +376,14 @@ function _handle_request_sets($prefix='', $merge)
     else
       array_push($add_sets, $set);
   }
-  $this->del_sets($del_sets);
+  if (count($del_sets))
+    $this->del_sets($del_sets);
   if (!$merge)
   {
     $db_sets=$this->get_sets();
     $del_sets=array_diff($db_sets, $add_sets);
-    $this->del_sets($del_sets);
+    if (count($del_sets))
+      $this->del_sets($del_sets);
   }
   $this->add_sets($add_sets);
 }

@@ -2,6 +2,7 @@
 
 include_once("$phtagr_lib/FileBase.php");
 include_once("$phtagr_lib/PreviewImage.php");
+include_once("$phtagr_lib/Iptc.php");
 
 /** @class FileJpg
   Class for adding and setting database relevant IPTC records from a JPEG 
