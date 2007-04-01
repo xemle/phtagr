@@ -23,7 +23,7 @@ function _get_filename($id)
 {
   global $db;
   $sql="SELECT filename 
-        FROM $db->image
+        FROM $db->images
         WHERE id=$id";
   $result=$db->query($sql);
   if (!$result)
@@ -162,7 +162,7 @@ function _handle_request_acl(&$img)
   
   list($gacl, $macl, $aacl)=$acl->get_values();
   $id=$img->get_id();
-  $sql="UPDATE $db->image
+  $sql="UPDATE $db->images
         SET gacl=$gacl,macl=$macl,aacl=$aacl
         WHERE id=$id";
   if ($db->query($sql))

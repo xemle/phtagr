@@ -62,27 +62,27 @@ function _upgrade_to_1()
   global $db;
   global $conf;
 
-  $sql="ALTER TABLE $db->image
+  $sql="ALTER TABLE $db->images
         CHANGE oacl macl TINYINT UNSIGNED";
   $db->query($sql);
 
-  $sql="UPDATE $db->image
+  $sql="UPDATE $db->images
         SET gacl=32 WHERE gacl=16";
   $db->query($sql);
 
-  $sql="UPDATE $db->image
+  $sql="UPDATE $db->images
         SET gacl=33 WHERE gacl!=32 AND gacl!=0";
   $db->query($sql);
 
-  $sql="UPDATE $db->image
+  $sql="UPDATE $db->images
         SET macl=32 WHERE macl=16";
   $db->query($sql);
 
-  $sql="UPDATE $db->image
+  $sql="UPDATE $db->images
         SET aacl=32 WHERE aacl=16";
   $db->query($sql);
 
-  $sql="DELETE FROM $db->conf
+  $sql="DELETE FROM $db->confs
         WHERE name='image.gacl'
           OR name='image.macl'
           OR name='image.aacl'";

@@ -334,7 +334,7 @@ function create_all_previews($userid=-1)
   global $user;
 
   $sql="SELECT id
-        FROM $db->image";
+        FROM $db->images";
   if ($userid>0)
   {
     if ($userid!=$user->get_id() && !$user->is_admin())
@@ -378,7 +378,7 @@ function delete_from_user($userid, $id=0)
   global $user;
 
   $sql="SELECT id
-        FROM $db->image
+        FROM $db->images
         WHERE userid=$userid";
   if ($id>0) $sql.=" AND id=$id";
   $result=$db->query($sql);

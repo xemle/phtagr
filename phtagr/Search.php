@@ -661,7 +661,7 @@ function _get_sub_query($tags, $sets, $location, $order=false)
   if ($order)
     $sql.=$this->_get_column_order($num_tags, $num_sets);
 
-  $sql.=" FROM $db->image AS i";
+  $sql.=" FROM $db->images AS i";
   if ($num_tags) 
   {
     $tagop=$this->get_param('tagop', 0);
@@ -787,7 +787,7 @@ function get_query($limit=1, $order=true)
     if ($num_pos_tags || $num_pos_sets) {
       $sql.=" ( ".$this->_get_sub_query($pos_tags, $pos_sets, $location, $order)." AND ";
     } else {
-      $sql.=" image AS i WHERE";
+      $sql.=" images AS i WHERE";
     }
     $sql.=" id NOT IN ( ";
     $sql.=$this->_get_sub_query($neg_tags, $neg_sets, $neg_location, false);
@@ -829,7 +829,7 @@ function get_popular_tags()
   global $db;
 
   $sql="SELECT t.name,COUNT(t.name) AS hits 
-        FROM $db->tag AS t, $db->imagetag AS it, $db->image as i 
+        FROM $db->tags AS t, $db->imagetag AS it, $db->images as i 
         WHERE t.id=it.tagid and it.imageid=i.id";
   $sql.=$this->_handle_acl();
   $sql.=" GROUP BY t.name 

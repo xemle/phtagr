@@ -30,7 +30,7 @@ class User extends SqlObject
 function User($id=-1)
 {
   global $db;
-  $this->SqlObject($db->user, $id);
+  $this->SqlObject($db->users, $id);
   $this->init_session();
 }
 
@@ -45,14 +45,14 @@ function exists($idorname)
     if ($idorname<1)
       return false;
     $sql="SELECT COUNT(*)
-          FROM $db->user 
+          FROM $db->users 
           WHERE id=$idorname";
   } else {
     if ($idorname=='')
       return false;
     $sname=mysql_escape_string($name);
     $sql="SELECT COUNT(*)
-          FROM $db->user
+          FROM $db->users
           WHERE name='$name'";
   }
   $result=$db->query($sql);
@@ -72,7 +72,7 @@ function get_num_users($withguests=false)
 {
   global $db;
   $sql="SELECT COUNT(*)
-        FROM $db->user";
+        FROM $db->users";
   if ($withguests)
     $sql.=" WHERE type!=".USER_GUEST ;
   $result=$db->query($sql);
@@ -90,7 +90,7 @@ function get_id_by_name($name)
   global $db;
   $sname=mysql_escape_string($name);
   $sql="SELECT id
-        FROM $db->user
+        FROM $db->users
         WHERE name='$sname'";
   $result=$db->query($sql);
   if (!$result || mysql_num_rows($result)<1)
@@ -109,7 +109,7 @@ function get_name_by_id($id)
     return '';
 
   $sql="SELECT name
-        FROM $db->user
+        FROM $db->users
         WHERE id=$id";
   $result=$db->query($sql);
   if (!$result || mysql_num_rows($result)<1)
@@ -205,7 +205,7 @@ function passwd($oldpasswd, $passwd)
     return $result;
 
   $spasswd=mysql_escape_string($passwd);
-  $sql="UPDATE $db->user
+  $sql="UPDATE $db->users
         SET password='$spasswd',cookie=''
         WHERE id=".$this->get_id();
   $result=$db->query($sql);
@@ -441,7 +441,7 @@ function _check_login($name, $pwd)
   $sname=mysql_escape_string($name);
   $spwd=mysql_escape_string($pwd);
   $sql="SELECT id
-        FROM $db->user 
+        FROM $db->users 
         WHERE name='$sname' AND password='$spwd'";
   $result=$db->query($sql);
   if (!$result || mysql_num_rows($result)!=1)
@@ -506,7 +506,7 @@ function create($name, $pwd, $type=USER_MEMBER)
 
   $sname=mysql_escape_string($name);
   $spwd=mysql_escape_string($pwd);
-  $sql="INSERT INTO $db->user
+  $sql="INSERT INTO $db->users
         (name, password, type) 
         VALUES ('$sname', '$spwd', $type)";
   $result=$db->query($sql);
@@ -647,7 +647,7 @@ function get_guests()
   $guests=array();
 
   $sql="SELECT id,name
-        FROM $db->user
+        FROM $db->users
         WHERE creator=".$this->get_id();
   $result=$db->query($sql);
   if (!$result || mysql_num_rows($result)<1)
@@ -664,7 +664,7 @@ function get_groups()
   global $db;
   $groups=array();
   $sql="SELECT id,name 
-        FROM $db->group
+        FROM $db->groups
         WHERE owner=".$this->get_id();
   $result=$db->query($sql);
   if (!$result || mysql_num_rows($result)<0)
@@ -688,7 +688,7 @@ function get_image_count($only_uploads=false, $since=-1)
 
   $id=$this->get_id();
   $sql="SELECT COUNT(*)
-        FROM $db->image
+        FROM $db->images
         WHERE userid=$id";
   if ($only_uploads)
     $sql.=" AND is_upload=1";
@@ -716,7 +716,7 @@ function get_image_bytes($only_uploads=false, $since=-1)
 
   $id=$this->get_id();
   $sql="SELECT SUM(bytes)
-        FROM $db->image
+        FROM $db->images
         WHERE userid=$id";
   if ($only_uploads)
     $sql.=" AND is_upload=1";
@@ -927,7 +927,7 @@ function _check_cookie($cookie)
 
   $scookie=mysql_escape_string($cookie);
   $sql="SELECT id
-        FROM $db->user
+        FROM $db->users
         WHERE cookie='".$scookie."'";
   $result=$db->query($sql);
   if (!$result || mysql_num_rows($result)!=1)
@@ -960,7 +960,7 @@ function _set_cookie()
   {
     $value=$this->_create_cookie();
     $svalue=mysql_escape_string($value);
-    $sql="UPDATE $db->user
+    $sql="UPDATE $db->users
           SET cookie='$svalue'
           WHERE id=$id";
     $db->query($sql);
@@ -1032,7 +1032,7 @@ function _delete_user_data($id)
   // @todo delete users upload directory
   
   // Delete the user data
-  $sql="DELETE FROM $db->user
+  $sql="DELETE FROM $db->users
         WHERE id=$id";
 
   $result=$db->query($sql);

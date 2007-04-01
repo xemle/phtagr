@@ -11,22 +11,22 @@ class Database extends Base
 {
 
 /** Table name of users */
-var $user;
-var $group;
+var $users;
+var $groups;
 var $usergroup;
 /** Table name of configurations */
-var $conf;
+var $confs;
 /** Tablename of images */
-var $image;
+var $images;
 /** Tablename of tags */
-var $tag;
+var $tags;
 var $imagetag;
-var $set;
+var $sets;
 var $imageset;
-var $location;
+var $locations;
 var $imagelocation;
-var $comment;
-var $message;
+var $comments;
+var $messages;
 
 function Database()
 {
@@ -38,19 +38,19 @@ function Database()
 function _set_table_names($prefix)
 {
   $this->prefix=$prefix;
-  $this->user=$prefix."user";
+  $this->users=$prefix."user";
   $this->usergroup=$prefix."usergroup";
-  $this->group=$prefix."groups";
-  $this->image=$prefix."image";
-  $this->tag=$prefix."tag";
+  $this->groups=$prefix."groups";
+  $this->images=$prefix."image";
+  $this->tags=$prefix."tag";
   $this->imagetag=$prefix."imagetag";
-  $this->set=$prefix."sets";
+  $this->sets=$prefix."sets";
   $this->imageset=$prefix."imageset";
-  $this->location=$prefix."location";
+  $this->locations=$prefix."location";
   $this->imagelocation=$prefix."imagelocation";
-  $this->comment=$prefix."comment";
-  $this->message=$prefix."message";
-  $this->conf=$prefix."conf";
+  $this->comments=$prefix."comment";
+  $this->messages=$prefix."message";
+  $this->confs=$prefix."conf";
 }
 
 /** Connect to the sql database 
@@ -136,19 +136,19 @@ function test_database($host, $username, $password, $database)
 function _get_table_names()
 {
   return array(
-    $this->user,
-    $this->group,
+    $this->users,
+    $this->groups,
     $this->usergroup,
-    $this->conf,
-    $this->image,
-    $this->tag,
+    $this->confs,
+    $this->images,
+    $this->tags,
     $this->imagetag,
-    $this->set,
+    $this->sets,
     $this->imageset,
-    $this->location,
+    $this->locations,
     $this->imagelocation,
-    $this->message,
-    $this->comment);
+    $this->messages,
+    $this->comments);
 }
 
 /** Checks whether the required tables for phTagr already exist
@@ -203,7 +203,7 @@ function tag2id($tag, $create=false)
   $stag=mysql_escape_string($tag);
 
   $sql="SELECT id 
-        FROM $this->tag 
+        FROM $this->tags 
         WHERE name='$stag'";
   $result=$this->query($sql);
   if (!$result)
@@ -214,7 +214,7 @@ function tag2id($tag, $create=false)
   {
     if ($create)
     {
-      $sql="INSERT INTO $this->tag (name) VALUES('$stag')";
+      $sql="INSERT INTO $this->tags (name) VALUES('$stag')";
       $result=$this->query($sql);
       if ($result)
         return $this->tag2id($tag);
@@ -239,7 +239,7 @@ function set2id($set, $create=false)
 {
   $sset=mysql_escape_string($set);
   $sql="SELECT id 
-        FROM $this->set 
+        FROM $this->sets 
         WHERE name='$sset'";
   $result=$this->query($sql);
   if (!$result)
@@ -250,7 +250,7 @@ function set2id($set, $create=false)
   {
     if ($create)
     {
-      $sql="INSERT INTO $this->set (name) VALUES('$sset')";
+      $sql="INSERT INTO $this->sets (name) VALUES('$sset')";
       $result=$this->query($sql);
       if ($result)
         return $this->set2id($set);
@@ -271,11 +271,10 @@ function set2id($set, $create=false)
   @return Name of the tag, null if it does not exists */
 function id2tag($id)
 {
-  global $db;
   $sql="SELECT name
-        FROM $db->tag
+        FROM $this->tags
         WEHERE id=$id";
-  $result=$db->query($sql);
+  $result=$this->query($sql);
   if (!$result)
   {
     return null;
@@ -297,9 +296,9 @@ function location2id($location, $type, $create=false)
 {
   $slocation=mysql_escape_string($location);
   if ($type==LOCATION_UNDEFINED && $create==false)
-    $sql="SELECT id FROM $this->location WHERE name='$slocation'";
+    $sql="SELECT id FROM $this->locations WHERE name='$slocation'";
   else
-    $sql="SELECT id FROM $this->location WHERE name='$slocation' AND type=$type";
+    $sql="SELECT id FROM $this->locations WHERE name='$slocation' AND type=$type";
   $result=$this->query($sql);
   if (!$result)
   {
@@ -309,7 +308,7 @@ function location2id($location, $type, $create=false)
   {
     if ($create)
     {
-      $sql="INSERT INTO $this->location (name, type) VALUES('$slocation', $type)";
+      $sql="INSERT INTO $this->locations (name, type) VALUES('$slocation', $type)";
       $result=$this->query($sql);
       if ($result)
         return $this->location2id($location, $type);
@@ -331,7 +330,7 @@ function location2ids($location)
 {
   $slocation=mysql_escape_string($location);
   $sql="SELECT id
-        FROM $this->location
+        FROM $this->locations
         WHERE name='$slocation'";
   $result=$this->query($sql);
   $ids=array();
@@ -385,7 +384,7 @@ function date_unix_to_mysql($sec)
   @return Returns true on success. False otherwise */
 function create_tables()
 { 
-  $sql="CREATE TABLE $this->user (
+  $sql="CREATE TABLE $this->users (
         id            INT NOT NULL AUTO_INCREMENT,
         name          VARCHAR(32) NOT NULL,
         password      VARCHAR(32) NOT NULL,
@@ -414,7 +413,7 @@ function create_tables()
         PRIMARY KEY(id))";
   if (!$this->query($sql)) { return false; }
 
-  $sql="CREATE TABLE $this->conf (
+  $sql="CREATE TABLE $this->confs (
         userid        INT NOT NULL,
         name          VARCHAR(64),
         value         VARCHAR(192),
@@ -423,7 +422,7 @@ function create_tables()
         INDEX(name))";
   if (!$this->query($sql)) { return false; }
   
-  $sql="CREATE TABLE $this->group (
+  $sql="CREATE TABLE $this->groups (
         id            INT NOT NULL AUTO_INCREMENT,
         owner         INT NOT NULL,       /* User ID of the owner */
         name          VARCHAR(32) NOT NULL,
@@ -438,7 +437,7 @@ function create_tables()
         PRIMARY KEY(userid,groupid))";
   if (!$this->query($sql)) { return false; }
   
-  $sql="CREATE TABLE $this->image (
+  $sql="CREATE TABLE $this->images (
         id            INT NOT NULL AUTO_INCREMENT,
         userid        INT NOT NULL,
         groupid       INT DEFAULT 0,
@@ -485,7 +484,7 @@ function create_tables()
         PRIMARY KEY(id))";
   if (!$this->query($sql)) { return false; }
 
-  $sql="CREATE TABLE $this->tag (
+  $sql="CREATE TABLE $this->tags (
         id            INT NOT NULL AUTO_INCREMENT,
         name          VARCHAR(64) NOT NULL,
         
@@ -501,7 +500,7 @@ function create_tables()
   if (!$this->query($sql)) { return false; }
   
   // 'set' is a reserved word
-  $sql="CREATE TABLE $this->set (
+  $sql="CREATE TABLE $this->sets (
         id            INT NOT NULL AUTO_INCREMENT,
         name          VARCHAR(64) NOT NULL,
         
@@ -516,7 +515,7 @@ function create_tables()
         PRIMARY KEY(imageid,setid))";
   if (!$this->query($sql)) { return false; }
   
-  $sql="CREATE TABLE $this->location (
+  $sql="CREATE TABLE $this->locations (
         id            INT NOT NULL AUTO_INCREMENT,
         name          VARCHAR(64) NOT NULL,
         type          TINYINT UNSIGNED,    /* Country, State, City, ... */
@@ -532,7 +531,7 @@ function create_tables()
         PRIMARY KEY(imageid,locationid))";
   if (!$this->query($sql)) { return false; }
     
-  $sql="CREATE TABLE $this->comment (
+  $sql="CREATE TABLE $this->comments (
         id            INT NOT NULL AUTO_INCREMENT, 
         imageid       INT NOT NULL,
         reply         INT DEFAULT NULL,
@@ -553,7 +552,7 @@ function create_tables()
         PRIMARY KEY (id))";
   if (!$this->query($sql)) { return false; }
 
-  $sql="CREATE TABLE $this->message (
+  $sql="CREATE TABLE $this->messages (
         id            INT NOT NULL AUTO_INCREMENT,
         from_id       INT NOT NULL,
         to_id         INT NOT NULL,
@@ -575,7 +574,7 @@ function create_tables()
 /** Inalizes the databases. Currently, it justs writes the table version */
 function init_tables()
 {
-  $sql="INSERT INTO $this->conf (userid, name, value)
+  $sql="INSERT INTO $this->confs (userid, name, value)
         VALUES ('0', 'db.version', '".DB_VERSION."')";
   $this->query($sql);
 }
@@ -598,23 +597,23 @@ function delete_tables()
 /** Delete all image information from the databases */
 function delete_images()
 {
-  $sql="DELETE FROM $this->image";
+  $sql="DELETE FROM $this->images";
   if (!$this->query($sql)) { return false; }
-  $sql="DELETE FROM $this->tag";
+  $sql="DELETE FROM $this->tags";
   if (!$this->query($sql)) { return false; }
   $sql="DELETE FROM $this->imagetag";
   if (!$this->query($sql)) { return false; }
-  $sql="DELETE FROM $this->set";
+  $sql="DELETE FROM $this->sets";
   if (!$this->query($sql)) { return false; }
   $sql="DELETE FROM $this->imageset";
   if (!$this->query($sql)) { return false; }
-  $sql="DELETE FROM $this->location";
+  $sql="DELETE FROM $this->locations";
   if (!$this->query($sql)) { return false; }
   $sql="DELETE FROM $this->imagelocation";
   if (!$this->query($sql)) { return false; }
-  $sql="DELETE FROM $this->comment";
+  $sql="DELETE FROM $this->comments";
   if (!$this->query($sql)) { return false; }
-  $sql="DELETE FROM $this->message";
+  $sql="DELETE FROM $this->messages";
   if (!$this->query($sql)) { return false; }
   return true;
 }
@@ -626,7 +625,7 @@ function delete_unassigned_data()
 {
   $affected=0;
   // tags
-  $sql="DELETE FROM $this->tag 
+  $sql="DELETE FROM $this->tags 
         WHERE id NOT IN (
           SELECT tagid
           FROM $this->imagetag
@@ -635,7 +634,7 @@ function delete_unassigned_data()
   $affected+=mysql_affected_rows($this->link);
 
   // sets
-  $sql="DELETE FROM $this->set
+  $sql="DELETE FROM $this->sets
         WHERE id NOT IN (
           SELECT setid
           FROM $this->imageset
@@ -644,7 +643,7 @@ function delete_unassigned_data()
   $affected+=mysql_affected_rows($this->link);
 
   // locations
-  $sql="DELETE FROM $this->location
+  $sql="DELETE FROM $this->locations
         WHERE id NOT IN (
           SELECT locationid
           FROM $this->imagelocation

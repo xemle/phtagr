@@ -64,7 +64,7 @@ function print_popular_images()
   
   // get total count of images
   $sql="SELECT COUNT(*)
-        FROM $db->image";
+        FROM $db->images";
   $result=$db->query($sql);
   if (!$result)
     return;

@@ -154,7 +154,7 @@ function print_user_list()
 {
   global $db;
   $sql="SELECT *
-        FROM $db->user";
+        FROM $db->users";
 
   $result=$db->query($sql);
   if (!$result)

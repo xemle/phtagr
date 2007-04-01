@@ -28,7 +28,7 @@ function init_by_id($id)
     return false;
 
   $sql="SELECT name
-        FROM $db->group 
+        FROM $db->groups 
         WHERE id=$id";
   $result=$db->query($sql);
   if (!$result || mysql_num_rows($result)<1)
@@ -40,7 +40,7 @@ function init_by_id($id)
 
   // Fetch all members
   $sql="SELECT u.id,u.name
-        FROM $db->user AS u, $db->usergroup AS ug
+        FROM $db->users AS u, $db->usergroup AS ug
         WHERE u.id=ug.userid AND ug.groupid=$id
         ORDER BY u.name";
   $result=$db->query($sql);
@@ -59,7 +59,7 @@ function get_id_by_name($name)
 
   $sname=mysql_escape_string($name);
   $sql="SELECT id
-        FROM $db->group
+        FROM $db->groups
         WHERE owner=".$user->get_id()."
           AND name='$sname'";
   $result=$db->query($sql);
@@ -95,7 +95,7 @@ function create($name)
     return $id;
 
   $sname=mysql_escape_string($name);
-  $sql="INSERT INTO $db->group
+  $sql="INSERT INTO $db->groups
         (owner, name) VALUES (".$user->get_id().",'$sname')";
   $result=$db->query($sql);
   if (!$result)
@@ -194,11 +194,11 @@ function delete()
   $sql="DELETE FROM $db->usergroup
         WHERE groupid=$id";
   $result=$db->query($sql);
-  $sql="DELETE FROM $db->group
+  $sql="DELETE FROM $db->groups
         WHERE id=$id";
   $result=$db->query($sql);
   // reset images which are affected with this group
-  $sql="UPDATE $db->image
+  $sql="UPDATE $db->images
         SET groupid=$new_gid
         WHERE groupid=$id";
   $result=$db->query($sql);
@@ -225,14 +225,14 @@ function delete_from_user($id)
   $sql="DELETE FROM $db->usergroup 
         WHERE groupid IN (
           SELECT id 
-          FROM $db->group
+          FROM $db->groups
           WHERE owner=$id
         )";
   $db->query($sql);
 
   // delete all groups
   $sql="DELETE 
-        FROM $db->group 
+        FROM $db->groups 
         WHERE owner=$id";
   $db->query($sql);
 }

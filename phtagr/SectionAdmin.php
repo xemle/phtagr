@@ -233,7 +233,7 @@ function print_users()
   echo "<h3>"._("Available Users")."</h3>\n";
 
   $sql="SELECT id
-        FROM $db->user
+        FROM $db->users
         WHERE type!='".USER_GUEST."'";
   $result=$db->query($sql);
   if (!$result)

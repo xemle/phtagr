@@ -32,7 +32,7 @@ var $_meta_modified;
 function Image($id=-1)
 {
   global $db;
-  $this->SqlObject($db->image, $id);
+  $this->SqlObject($db->images, $id);
   $this->_tags=null;
   $this->_sets=null;
   $this->_locations=null;
@@ -57,7 +57,7 @@ function init_by_filename($filename)
   $sfilename=mysql_escape_string($filename);
 
   $sql="SELECT * 
-        FROM $db->image
+        FROM $db->images
         WHERE filename='$sfilename'";
   $result=$db->query($sql);
   if (!$result || mysql_num_rows($result)==0)
@@ -539,7 +539,7 @@ function get_tags()
   $id=$this->get_id();
   $this->_tags=array();
   $sql="SELECT t.name
-        FROM $db->tag AS t, $db->imagetag AS it
+        FROM $db->tags AS t, $db->imagetag AS it
         WHERE it.imageid=$id 
           AND it.tagid=t.id
         GROUP BY t.name";
@@ -621,7 +621,7 @@ function get_sets()
   $id=$this->get_id();
   $this->_sets=array();
   $sql="SELECT s.name
-        FROM $db->set AS s, $db->imageset AS iset
+        FROM $db->sets AS s, $db->imageset AS iset
         WHERE iset.imageid=$id 
           AND iset.setid=s.id
         GROUP BY s.name";
@@ -715,7 +715,7 @@ function get_locations()
   $this->_locations=array();
   $id=$this->get_id();
   $sql="SELECT l.name, l.type
-        FROM $db->location as l, $db->imagelocation as il
+        FROM $db->locations as l, $db->imagelocation as il
         WHERE il.imageid=$id 
           AND il.locationid=l.id
         ORDER BY l.type";
@@ -792,7 +792,7 @@ function del_location($value, $type)
           WHERE il.imageid=$id AND il.locationid=$locid";
   } else {
     $sql="DELETE FROM il
-          USING $db->imagelocation as il, $db->location as l
+          USING $db->imagelocation as il, $db->locations as l
           WHERE il.imageid=$id AND il.locationid=l.id AND l.type=$type";
   }
   $result=$db->query($sql);
@@ -852,7 +852,7 @@ function delete()
         WHERE imageid=$id";
   $db->query($sql);
 
-  $sql="DELETE FROM $db->image
+  $sql="DELETE FROM $db->images
         WHERE id=$id";
   $db->query($sql);
 
@@ -877,7 +877,7 @@ function delete_from_user($userid, $id=0)
   // delete tags
   $sql="DELETE 
         FROM it
-        USING $db->imagetag AS it, $db->image AS i
+        USING $db->imagetag AS it, $db->images AS i
         WHERE i.userid=$userid AND i.id=it.imageid";
   if ($id>0) $sql.=" AND i.id=$id";
   $db->query($sql);
@@ -885,7 +885,7 @@ function delete_from_user($userid, $id=0)
   // delete sets
   $sql="DELETE 
         FROM iset
-        USING $db->imageset AS iset, $db->image AS i
+        USING $db->imageset AS iset, $db->images AS i
         WHERE i.userid=$userid AND i.id=iset.imageid";
   if ($id>0) $sql.=" AND i.id=$id";
   $db->query($sql);
@@ -893,14 +893,14 @@ function delete_from_user($userid, $id=0)
   // delete locations
   $sql="DELETE 
         FROM il
-        USING $db->imagelocation AS il, $db->image AS i
+        USING $db->imagelocation AS il, $db->images AS i
         WHERE i.userid=$userid AND i.id=il.imageid";
   if ($id>0) $sql.=" AND i.id=$id";
   $db->query($sql);
 
   // Delete image data
   $sql="DELETE
-        FROM $db->image
+        FROM $db->images
         WHERE userid=$userid";
   if ($id>0) $sql.=" AND id=$id";
   $db->query($sql);

@@ -30,7 +30,7 @@ function import($filename, $is_upload=0)
   $sfilename=mysql_escape_string($filename);
   
   $sql="SELECT * 
-        FROM $db->image
+        FROM $db->images
         WHERE filename='$sfilename'";
   $result=$db->query($sql);
   if (!$result)
@@ -52,7 +52,7 @@ function import($filename, $is_upload=0)
   $macl=$user->get_macl();
   $aacl=$user->get_aacl();
   
-  $sql="INSERT INTO $db->image (
+  $sql="INSERT INTO $db->images (
           userid,groupid,created,
           filename,is_upload,
           gacl,macl,aacl,
@@ -68,7 +68,7 @@ function import($filename, $is_upload=0)
     return ERR_DB_INSERT;
 
   $sql="SELECT *
-        FROM $db->image
+        FROM $db->images
         WHERE filename='$sfilename'";
   $this->init_by_query($sql);
 
@@ -153,7 +153,7 @@ function sync_files($userid=-1)
   global $user;
 
   $sql="SELECT id,userid,filename
-        FROM $db->image";
+        FROM $db->images";
   if ($userid>0)
   {
     if ($userid!=$user->get_id() && !$user->is_admin())
@@ -233,7 +233,7 @@ function delete_from_user($userid, $id)
 
   $userid=$user->get_id();
   $sql="SELECT filename
-        FROM $db->image
+        FROM $db->images
         WHERE userid=$userid AND is_upload=1";
   $result=$db->query($sql);
   if ($result) {
