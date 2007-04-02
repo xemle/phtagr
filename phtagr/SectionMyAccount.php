@@ -76,7 +76,7 @@ function print_general ()
   echo "<h3>"._("Other")."</h3>";
   echo "<table>
   <tr>
-    <td>"._("Metadata Seperator")."</td>
+    <td>"._("Metadata Seperator:")."</td>
     <td><select size=\"1\" name=\"meta_separator\">\n";
   $sep=array( " " => _("Space"), 
               "," => _("Comma"),
@@ -91,6 +91,19 @@ function print_general ()
     echo ">$v</option>\n";
   }
   echo "      </select>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      "._("Lazy Sync:")."  
+    </td>
+    <td>\n";
+  $selected="";
+  if ($conf->get('image.lazysync', '0')==1)
+    $checked="checked=\"checked\" ";
+  $url->add_param("action", "imagesync");
+  echo "      <input type=\"checkbox\" name=\"lazysync\" value=\"1\" $checked> 
+  <a href=\"".$url->get_url()."\">"._("Syncronize images now")."</a>
     </td>
   </tr>
 </table>\n";
@@ -150,8 +163,23 @@ function exec_general ()
     $sep=$_REQUEST['meta_separator'];
     if ($sep==' ' || $sep=='.' || $sep==';' || $sep==',')
       $conf->set('meta.separator', $sep);
-
+    
+    $lazysync=$_REQUEST['lazysync'];
+    if ($lazysync==1)
+      $conf->set('image.lazysync', 1);
+    else
+      $conf->set('image.lazysync', 0);
+  
     return;
+  }
+  elseif ($action=="imagesync")
+  {
+    if ($user->get_id()<=0 || !$user->is_member())
+      return;
+
+    $sync=new ImageSync();
+    list($count, $updated, $deleted)=$sync->sync_files($user->get_id());
+    $this->success(sprintf(_("Files are now synchronized (%d in total, %d updated, %d deleted)"), $count, $updated, $deleted));
   }
 }
 

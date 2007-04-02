@@ -1,6 +1,7 @@
 <?php
 
 include_once("$phtagr_lib/Base.php");
+include_once("$phtagr_lib/Filesystem.php");
 
 /** Create Preview base
 */

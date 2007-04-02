@@ -82,8 +82,8 @@ function query($userid, $name, $default)
   $sname=mysql_escape_string($name);
   $sql="SELECT value 
         FROM $db->confs
-        WHERE (id=0 OR id=$userid) AND name='$sname'
-        ORDER BY id DESC
+        WHERE (userid=0 OR userid=$userid) AND name='$sname'
+        ORDER BY userid DESC
         LIMIT 0,1";
   $result=$db->query($sql);
   if (!$result || mysql_num_rows($result)==0)

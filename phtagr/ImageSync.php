@@ -2,7 +2,11 @@
 
 include_once("$phtagr_lib/Image.php");
 
-/** @class ImageSync Handels the synchronisation between database and the image */ 
+/** @class ImageSync Handels the synchronisation between database and the image
+  @todo Improve the lazysync with a better modification granularity. If only
+the ACL changes, an image will be exported and only the IPTC writen to an JPEG
+file.
+ * */ 
 class ImageSync extends Image
 {
 
@@ -122,18 +126,17 @@ function _export($force=false)
   if ($file==null)
     return;
 
+  @clearstatcache();
   $modified=$this->get_modified(true);
   $time_file=$file->get_filetime();
 
   $changed=$this->is_modified() || $this->is_meta_modified();
-  if (!$force && ($time_file>=$modified || !$changed))
+  if (!$force && $time_file>=$modified && !$changed)
   {
     return false;
   }
   
   $file->export($this);
-
-  // Clear the file stat chache to get updated stats  
   @clearstatcache();
   $this->set_modified($file->get_filetime(), true);
 
@@ -156,9 +159,9 @@ function sync_files($userid=-1)
         FROM $db->images";
   if ($userid>0)
   {
-    if ($userid!=$user->get_id() && !$user->is_admin())
+    if ($userid!=$user->get_id() && !$user->is_member())
       return array(ERR_NOT_PERMITTED, 0, 0);
-    $sql.=" AND userid=$userid";
+    $sql.=" WHERE userid=$userid";
   } else {
     if (!$user->is_admin())
       return array(ERR_NOT_PERMITTED, 0, 0);
@@ -189,6 +192,11 @@ function sync_files($userid=-1)
     {
       $image=new ImageSync($id);
       if ($image->_import())
+      {
+        $image->commit();
+        $updated++;
+      }
+      if ($image->_export())
       {
         $image->commit();
         $updated++;
@@ -410,6 +418,7 @@ function _handle_request_location($prefix='', $merge)
 
 function handle_request()
 {
+  global $conf;
   $this->_import(false);
 
   if (!isset($_REQUEST['edit']))
@@ -442,7 +451,10 @@ function handle_request()
     return;
   }
 
-  $this->_export(false);
+  // Dont export on lazy sync 
+  if ($conf->query($this->get_userid(), 'image.lazysync', 0)!=1)
+    $this->_export(false);
+
   $this->set_modified(time(), true);
   $this->commit();
 
