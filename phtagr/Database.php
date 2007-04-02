@@ -359,7 +359,7 @@ function date_mysql_to_unix($date)
     $time=mktime($m[1], $m[2], $m[3], 0, 0, 0);
 
   if (strlen($date)==19 && 
-    preg_match('/^(\\d{4})-(\\d{2})-(\\d{2}) (\\d{2}):(\\d{2}):(\\d{2})$/', $date, $m));
+    preg_match('/^(\\d{4})-(\\d{2})-(\\d{2}) (\\d{2}):(\\d{2}):(\\d{2})$/', $date, $m))
     $time=mktime($m[4], $m[5], $m[6], $m[2], $m[3], $m[1]);
 
   if ($time===false)
@@ -377,7 +377,7 @@ function date_unix_to_mysql($sec)
     $sec=0;
   if ($sec<0)
     $sec=0;
-  return strftime("%G-%m-%d %H:%M:%S", $sec);
+  return strftime("%Y-%m-%d %H:%M:%S", $sec);
 }
 
 /** Creates the phTagr tables

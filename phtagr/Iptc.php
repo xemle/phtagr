@@ -544,14 +544,27 @@ function _copy_jpeg_seg($fin, $fout, $seg)
 {
   if ($fin==0 || $fout==0 || $seg==null)
   fseek($fin, $seg['pos'], SEEK_SET);
-  $len=$seg['size']+2;
-  $buf=fread($fin, $len);
-  if ($len!=fwrite($fout, $buf)) {
-    $this->_errno=1;
-    $this->_errmsg='Could not write all buffered data';
-    return false;
+  $size=$seg['size']+2;
+
+  // copy segment in blocks to save memory and to avoid memory exhausting
+  $done=0;
+  $blocksize=1024;
+  while ($done<$size)
+  {
+    if ($done+$blocksize>$size)
+      $blocksize=$size-$done;
+
+    $buf=fread($fin, $blocksize);
+    if ($blocksize!=fwrite($fout, $buf))
+    {
+      $this->_errno=1;
+      $this->_errmsg='Could not write all buffered data';
+      return false;
+    }
+    $done+=$blocksize;
   }
-  return $len;
+  unset($buf);
+  return $size;
 }
 
 /** convert iptc values to 8BIM segment in bytes 

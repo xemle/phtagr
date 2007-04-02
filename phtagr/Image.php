@@ -179,13 +179,16 @@ function get_modified($in_unix=false)
     return $time;
 }
 
-/** Sets the synchronisation date to now */
-function set_modified($time, $in_unix)
+/** Sets the synchronisation date to now 
+  @param date Mysql date string or UNIX timestamp.
+  @param in_unix If true, time is in UNIX format. Otherwise it is an mysql time
+string*/
+function set_modified($date, $in_unix=false)
 {
   global $db;
   if ($in_unix)
-    $time=$db->date_unix_to_mysql($time);
-  $this->_set_data('synced', $time);
+    $date=$db->date_unix_to_mysql($date);
+  $this->_set_data('synced', $date);
 }
 
 /** @return True if the image was uploaded. Fals otherwise */
