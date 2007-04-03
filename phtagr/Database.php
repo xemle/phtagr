@@ -32,7 +32,7 @@ var $logs;
 function Database()
 {
   global $db_prefix;
-  $this->link=null;
+  $this->_link=null;
   $this->_set_table_names($db_prefix);
 }
 
@@ -52,7 +52,7 @@ function _set_table_names($prefix)
   $this->comments=$prefix."comments";
   $this->messages=$prefix."messages";
   $this->configs=$prefix."configs";
-  $this->log=$prefix."logs";
+  $this->logs=$prefix."logs";
 }
 
 /** Connect to the sql database 
@@ -77,19 +77,25 @@ function connect($config='')
     return false;
   }
 
-  $this->link=@mysql_connect(
+  $this->_link=@mysql_connect(
                 $db_host,
                 $db_user,
                 $db_password);
-  if (!$this->link)
+  if (!$this->_link)
     return false;
 
-  if (!mysql_select_db($db_database, $this->link))
+  if (!mysql_select_db($db_database, $this->_link))
     return false;
 
   $this->query("SET NAMES 'utf8'");
   $this->query("SET CHARACTER SET 'utf8'");
   return true;
+}
+
+/** @return Returns true, if the database is connected */
+function is_connected()
+{
+  return ($this->_link!=null)?true:false;
 }
 
 /** Test a mySQL connection 
@@ -128,8 +134,8 @@ function test_database($host, $username, $password, $database)
   if (!$result)
     return "Could not delete test tables";
   
-  if ($this->link)
-    mysql_close($this->link);
+  if ($this->_link)
+    mysql_close($this->_link);
   
   return null;
 }
@@ -184,9 +190,9 @@ function tables_exist()
  * */
 function query($sql, $quiet=false)
 {
-  if (!$this->link) return null;
+  if (!$this->_link) return null;
   
-  $result=@mysql_query($sql, $this->link);
+  $result=@mysql_query($sql, $this->_link);
   if (!$result && !$quiet)
   {
     $this->error("Could not run Query: '$sql'");
@@ -647,7 +653,7 @@ function delete_unassigned_data()
           FROM $this->imagetag
         )";
   $this->query($sql);
-  $affected+=mysql_affected_rows($this->link);
+  $affected+=mysql_affected_rows($this->_link);
 
   // sets
   $sql="DELETE FROM $this->sets
@@ -656,7 +662,7 @@ function delete_unassigned_data()
           FROM $this->imageset
         )";
   $this->query($sql);
-  $affected+=mysql_affected_rows($this->link);
+  $affected+=mysql_affected_rows($this->_link);
 
   // locations
   $sql="DELETE FROM $this->locations
@@ -665,7 +671,7 @@ function delete_unassigned_data()
           FROM $this->imagelocation
         )";
   $this->query($sql);
-  $affected+=mysql_affected_rows($this->link);
+  $affected+=mysql_affected_rows($this->_link);
 
   return $affected;
 }

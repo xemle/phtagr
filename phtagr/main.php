@@ -1,10 +1,13 @@
 <?php
 
+$time_start=microtime();
 session_start();
 
-include_once("$phtagr_lib/User.php");
 include_once("$phtagr_lib/Database.php");
+include_once("$phtagr_lib/User.php");
 include_once("$phtagr_lib/Config.php");
+include_once("$phtagr_lib/Logger.php");
+
 include_once("$phtagr_lib/Search.php");
 include_once("$phtagr_lib/Edit.php");
 
@@ -27,6 +30,27 @@ include_once("$phtagr_lib/SectionUpload.php");
 include_once("$phtagr_lib/SectionInstall.php");
 include_once("$phtagr_lib/SectionAdmin.php");
 include_once("$phtagr_lib/SectionMyAccount.php");
+
+$db = new Database();
+$user = new User();
+$conf = null;
+
+// initialize the basic objects
+$db->connect();
+if ($db->is_connected())
+{
+  $user->check_session();
+  $conf=new Config($user->get_id());
+  $log=new Logger();
+  if ($conf->get('log.enabled', 0)==1)
+  {
+    $log->set_level($conf->get('log.level', LOG_INFO));
+    $log->set_type($conf->get('log.type', LOG_DB),
+      $conf->get('log.filename', ''));
+    $log->enable();
+  }
+  $log->debug("phtagr initialized");
+}
 
 $page = new PageBase("phTagr");
 
@@ -52,9 +76,6 @@ $fcnt = new SectionFooter("content");
 $footer->add_section(&$fcnt);
 $page->add_section(&$footer);
 
-$db = new Database();
-$user = new User();
-
 $section="";
 $action="";
 
@@ -63,16 +84,21 @@ if (isset($_REQUEST['section']))
 if (isset($_REQUEST['action']))
   $action=$_REQUEST['action'];
 
+// Installation procedure 
 if ($section=="install")
 {
+  $log=new Logger(LOG_FILE, LOG_DEBUG, getcwd().DIRECTORY_SEPARATOR.'phtagr.log');
+  $log->enable();
   $conf=new Config(0);
   $install = new SectionInstall();
   $cnt->add_section(&$install);
   $page->layout();
+  $log->disable();
   return;
 }
 
-if (!$db->connect() && $section!="install")
+// Error
+if (!$db->is_connected() && $section!="install")
 {
   $msg = new SectionBase();
   $cnt->add_section(&$msg);
@@ -89,8 +115,6 @@ if (!$db->connect() && $section!="install")
   return;
 }
 
-$user->check_session();
-$conf=new Config($user->get_id());
 
 $search= new Search();
 $search->from_URL();
@@ -244,5 +268,10 @@ if (isset($_REQUEST['section']))
 }
 
 $page->layout();
+
+// statistics for logger
+$gentime=sprintf("%.3f", abs(microtime()-$time_start));
+$log->warn("phtagr runs for $gentime seconds");
+$log->disable();
 
 ?>

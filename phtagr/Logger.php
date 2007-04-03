@@ -9,12 +9,18 @@ define("LOG_TRACE", 0);
 define("LOG_ERR", -1);
 define("LOG_FATAL", -2);
 
-define("LOG_CONSOLE", 1);
-define("LOG_BUF", 2);
+define("LOG_BUF", 1);
+define("LOG_CONSOLE", 2);
 define("LOG_FILE", 3);
 define("LOG_HTML", 4);
 define("LOG_DB", 5);
 
+/** @class Logger
+  Class to log messages with different backends. Available backends are
+LOG_CONSOLE which prints message directly to the console. LOG_BUF which saves
+the log mesages in a internal buffer. LOG_FILE which dumps the log message to a
+file, LOG_HTML which logs formats the log message for HTML output. And finally
+LOG_DB which writes the logmessage to the database */
 class Logger extends Base {
 
 var $_level;
@@ -24,6 +30,13 @@ var $_buf;
 var $_lines;
 var $_enabled;
 
+/** Initialize the logger
+  @param type Type of logging. Possible values are LOG_CONSOLE, LOG_BUF,
+LOG_FILE, LOG_HTML, or LOG_DB. Default is LOG_BUF.  @param level Log level
+threshold. Default is LOG_INFO
+  @param filename Optional filename. Default is an empty string i
+  @note By the default, the logger is disabled and has to be enabled by Logger::enable() 
+  @note If LOG_DB is used, the global variable $db must be set. */
 function Logger($type=LOG_BUF, $level=LOG_INFO, $filename="")
 {
   $this->_level=LOG_INFO;
@@ -36,75 +49,104 @@ function Logger($type=LOG_BUF, $level=LOG_INFO, $filename="")
   $this->set_type($type, $filename);
 }
 
+/** Sets the new log threshold 
+  @param level new log threshold */
 function set_level($level)
 {
   if ($level >= LOG_FATAL && $level <= LOG_INFO)
     $this->_level=$level;
 }
 
+/** @return Returns the current log threshold */
 function get_level()
 {
   return $this->_level;
 }
 
+/** Enables the logger. By default, the loger is disabled */
 function enable()
 {
+  if ($this->_enabled)
+    return;
+
   $this->_enabled=true;
+  if ($this->_type==LOG_FILE)
+    $this->_open_file();
 }
 
+/** Disables the logger */
 function disable()
 {
+  if (!$this->_enabled)
+    return;
+
   $this->_enabled=false;
+  if ($this->_type==LOG_FILE)
+    $this->_close_file();
 }
 
+/** @return returns true if the logger is enables */
 function is_enabled()
 {
   return $this->_enabled;
 }
 
-function set_type($type, $filename)
+/** Sets a new logger backend
+  @param type logging backend type
+  @param filename Filename if backend type is LOG_FILE 
+  @note If the logger is enabled, it will be disabled and enabled again to
+invoke backend finalizations and initialisations */
+function set_type($type, $filename="")
 {
   if ($type<LOG_CONSOLE || $type>LOG_DB)
     return;
+
+  // parameter checks
   if ($type==LOG_FILE)
   {
     if ($filename=='')
       return;
     $this->_filename=$filename;
-    $this->_open_file();
   }
+
+  // restarting
+  $is_running=$this->_enabled;
+  if ($is_running)
+    $this->disable();
+
   $this->_type=$type;
+
+  if ($is_running)
+    $this->enable();
 }
 
+/** @return Returns current backend type */
 function get_type()
 {
   return $this->_type;
 }
 
+/** @return Returns the internal log buffer, if LOG_BUF is used */
 function get_buf()
 {
-  return $this->_buf;
+  if ($this->_type==LOG_BUF)
+    return $this->_buf;
+  return null;
 }
 
+/** @return Returns the lines if LOG_HTML is used */
 function get_lines()
 {
-  return $this->_lines;
+  if ($this->_type==LOG_HTML)
+    return $this->_lines;
 }
 
-function flush()
-{
-  
-}
-
-function stop()
-{
-  if ($this->_type==LOG_FILE)
-  {
-    if ($this->_file!=null)
-      fclose($this->_file);
-  }
-}
-
+/** Generates the log message and dispatch the logs to the backends.
+  @param level Log level. If the level lower than the current threshold (but no
+error or fatal error), the function returns immediately 
+  @param msg Log message
+  @param image Image ID if any
+  @param user User ID if any */
 function _log($level, $msg, $image, $user)
 {
   global $db;
@@ -130,7 +172,8 @@ function _log($level, $msg, $image, $user)
   if (!isset($line))
     $line=-1;
 
-  $time=date("Y-d-m H:i:s");
+  $now=time();
+  $time=date("Y-d-m H:i:s", $now);
   if ($this->_type==LOG_CONSOLE || $this->_type==LOG_FILE)
   {
     $line=sprintf("%s [%s] i:%d u:%d %s:%d %s\n",
@@ -146,22 +189,23 @@ function _log($level, $msg, $image, $user)
   } 
   elseif ($this->_type==LOG_BUF)
   {
-    $log=array('time' => time(), 'level' => $slevel,
+    $log=array('time' => $now, 'level' => $slevel,
                'image' => $image, 'user' => $user,
                'file' => $file, 'line' => $line,
                'msg' => $msg);
     array_push($this->_buf, $log);
   }
-  elseif ($this->_type==LOG_DB)
+  elseif ($this->_type==LOG_DB && $db!=null && $db->is_connected())
   {
     $sfile=mysql_escape_string($file);
     $smsg=mysql_escape_string($msg);
-    $sql="INSERT INTO $db->logs (time, level, image, user, file, line, msg)
-          VALUES (NOW(), $level, $image, $user, '$sfile', '$msg')";
+    $sql="INSERT INTO $db->logs (time, level, image, user, file, line, message)
+          VALUES (NOW(), $level, $image, $user, '$sfile', $line, '$msg')";
     $db->query($sql);
   }
 }
 
+/** Add span block around the level message */
 function _log_html($time, $level, $image, $user, $file, $lineno, $msg)
 {
   $line="<span class=\"time\">$time </span>"
@@ -180,6 +224,9 @@ function _log_html($time, $level, $image, $user, $file, $lineno, $msg)
 
 function _open_file()
 {
+  if ($this->_filename=='')
+    return;
+
   $this->_file=fopen($this->_filename, 'a');
   if (!$this->_file)
     $this->_file=null;
