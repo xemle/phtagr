@@ -35,7 +35,7 @@ function load($userid=0)
     return;
 
   $sql="SELECT name, value
-        FROM $db->confs
+        FROM $db->configs
         WHERE userid=$userid";
   $result=$db->query($sql);
   if (!$result)
@@ -81,7 +81,7 @@ function query($userid, $name, $default)
   global $db;
   $sname=mysql_escape_string($name);
   $sql="SELECT value 
-        FROM $db->confs
+        FROM $db->configs
         WHERE (userid=0 OR userid=$userid) AND name='$sname'
         ORDER BY userid DESC
         LIMIT 0,1";
@@ -107,13 +107,13 @@ function _set($userid, $name, $value)
   $sname=mysql_escape_string($name);
   $svalue=mysql_escape_string($value);
   $sql="SELECT value
-        FROM $db->confs
+        FROM $db->configs
         WHERE userid=$userid AND name=\"$sname\"";
   $result=$db->query($sql);
 
   // Insert new value
   if (mysql_num_rows($result)==0)
-    $sql="INSERT INTO $db->confs 
+    $sql="INSERT INTO $db->configs 
           (userid, name, value) VALUES 
           ($userid,'$sname','$svalue')";    
   // Update single parameter 
@@ -124,7 +124,7 @@ function _set($userid, $name, $value)
     if ($row[0]==$value)
       return true;
 
-    $sql="UPDATE $db->confs 
+    $sql="UPDATE $db->configs 
           SET value='$svalue' 
           WHERE userid=$userid AND name='$sname'";
   }
@@ -137,7 +137,7 @@ function _set($userid, $name, $value)
       if ($row[0]==$value)
         return true;
     }
-    $sql="INSERT INTO $db->confs 
+    $sql="INSERT INTO $db->configs 
           (userid, name, value) VALUES 
           ($userid,'$sname','$svalue')";    
   }
@@ -187,7 +187,7 @@ function _del($userid, $name, $value=null)
 {
   global $db;
   $sname=mysql_escape_string($name);
-  $sql="DELETE FROM $db->confs
+  $sql="DELETE FROM $db->configs
         WHERE userid=$userid AND name='$sname'";
   if ($value!=null)
   {
@@ -236,7 +236,7 @@ function delete_from_user($userid)
   global $user;
 
   // Delete all preferences
-  $sql="DELETE FROM $db->confs
+  $sql="DELETE FROM $db->configs
         WHERE userid=$userid";
   $db->query($sql);
 

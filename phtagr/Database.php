@@ -15,7 +15,7 @@ var $users;
 var $groups;
 var $usergroup;
 /** Table name of configurations */
-var $confs;
+var $configs;
 /** Tablename of images */
 var $images;
 /** Tablename of tags */
@@ -27,6 +27,7 @@ var $locations;
 var $imagelocation;
 var $comments;
 var $messages;
+var $logs;
 
 function Database()
 {
@@ -38,19 +39,20 @@ function Database()
 function _set_table_names($prefix)
 {
   $this->prefix=$prefix;
-  $this->users=$prefix."user";
+  $this->users=$prefix."users";
   $this->usergroup=$prefix."usergroup";
   $this->groups=$prefix."groups";
-  $this->images=$prefix."image";
-  $this->tags=$prefix."tag";
+  $this->images=$prefix."images";
+  $this->tags=$prefix."tags";
   $this->imagetag=$prefix."imagetag";
   $this->sets=$prefix."sets";
   $this->imageset=$prefix."imageset";
-  $this->locations=$prefix."location";
+  $this->locations=$prefix."locations";
   $this->imagelocation=$prefix."imagelocation";
-  $this->comments=$prefix."comment";
-  $this->messages=$prefix."message";
-  $this->confs=$prefix."conf";
+  $this->comments=$prefix."comments";
+  $this->messages=$prefix."messages";
+  $this->configs=$prefix."configs";
+  $this->log=$prefix."logs";
 }
 
 /** Connect to the sql database 
@@ -139,7 +141,7 @@ function _get_table_names()
     $this->users,
     $this->groups,
     $this->usergroup,
-    $this->confs,
+    $this->configs,
     $this->images,
     $this->tags,
     $this->imagetag,
@@ -148,7 +150,8 @@ function _get_table_names()
     $this->locations,
     $this->imagelocation,
     $this->messages,
-    $this->comments);
+    $this->comments,
+    $this->logs);
 }
 
 /** Checks whether the required tables for phTagr already exist
@@ -413,7 +416,7 @@ function create_tables()
         PRIMARY KEY(id))";
   if (!$this->query($sql)) { return false; }
 
-  $sql="CREATE TABLE $this->confs (
+  $sql="CREATE TABLE $this->configs (
         userid        INT NOT NULL,
         name          VARCHAR(64),
         value         VARCHAR(192),
@@ -567,6 +570,19 @@ function create_tables()
         PRIMARY KEY(id))";
   if (!$this->query($sql)) { return false; }
 
+  $sql="CREATE TABLE $this->logs (
+        time          DATETIME,
+        level         TINYINT,
+        image         INT DEFAULT NULL,
+        user          INT DEFAULT NULL,
+        file          BLOB,
+        line          INT,
+        message       BLOB,
+
+        INDEX (time),
+        INDEX (level))";
+  if (!$this->query($sql)) { return false; }
+
   $this->init_tables();
   return true;
 }
@@ -574,7 +590,7 @@ function create_tables()
 /** Inalizes the databases. Currently, it justs writes the table version */
 function init_tables()
 {
-  $sql="INSERT INTO $this->confs (userid, name, value)
+  $sql="INSERT INTO $this->configs (userid, name, value)
         VALUES ('0', 'db.version', '".DB_VERSION."')";
   $this->query($sql);
 }

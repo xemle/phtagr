@@ -1,6 +1,6 @@
 <?php
 
-define("DB_VERSION", 1);
+define("DB_VERSION", 2);
 
 define("USER_ADMIN",  0x01);
 define("USER_MEMBER", 0x02);
