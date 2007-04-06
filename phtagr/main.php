@@ -47,9 +47,10 @@ if ($db->is_connected())
     $log->set_level($conf->get('log.level', LOG_INFO));
     $log->set_type($conf->get('log.type', LOG_DB),
       $conf->get('log.filename', ''));
+    // drop old messages
+    $log->drop_db_logs(3600*60, 3600*7, 3600, 1800, 3600*7, 3600*3);
     $log->enable();
   }
-  $log->debug("phtagr initialized");
 }
 
 $page = new PageBase("phTagr");
@@ -271,7 +272,7 @@ $page->layout();
 
 // statistics for logger
 $gentime=sprintf("%.3f", abs(microtime()-$time_start));
-$log->warn("phtagr runs for $gentime seconds");
+$log->warn("phtagr runs for $gentime seconds", -1, $user->get_id());
 $log->disable();
 
 ?>

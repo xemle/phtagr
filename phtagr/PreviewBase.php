@@ -8,83 +8,29 @@ include_once("$phtagr_lib/Filesystem.php");
 class PreviewBase extends Base
 {
 
-var $_id;
-var $_width;
-var $_height;
-var $_filename;
-var $_modified;
+var $_image;
 
 /** @param id Image id */
-function PreviewBase($id=-1)
+function PreviewBase($image)
 {
-  $this->_id=$id;
-  $this->_filename='';
-  $this->_width=-1;
-  $this->_height=-1;
-  $this->_modified=-1;
+  $this->_image=$image;
 }
 
-function set_id($id)
+function get_image()
 {
-  $this->_id=$id;  
-}
-
-function get_id()
-{
-  return $this->_id;
-}
-
-function set_filename($filename)
-{
-  $this->_filename=$filename;
-}
-
-function get_filename()
-{
-  return $this->_filename;
-}
-
-function set_width($width)
-{
-  $this->_width=$width;
-}
-
-function get_width()
-{
-  return $this->_width;
-}
-
-function set_height($height)
-{
-  $this->_height=$height;
-}
-
-function get_height()
-{
-  return $this->_height;
-}
-
-/** Sets the last modification time of the image 
-  @param modified Unix time stamp */
-function set_modified($modified)
-{
-  $this->_modified=$modified;
-}
-
-function get_modified()
-{
-  return $this->_modified;
+  return $this->_image;
 }
 
 /** Returns the cache path for the image. The images are separated into
  * subdirectories as cache pages to avoid to many files per directory. These
  * cache pages are created on demand. */
-function _get_cache_path()
+function get_cache_path()
 {
   global $phtagr_data;
   $path.=$phtagr_data.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR;
 
-  $page=intval($this->get_id() / 1000);
+  $image=$this->get_image();
+  $page=intval($image->get_id() / 1000);
   $path.=sprintf("%04d", $page).DIRECTORY_SEPARATOR;
 
   if (!file_exists($path) || !is_dir($path)) {
@@ -97,29 +43,37 @@ function _get_cache_path()
 /** @return Returns the filename of the mini image */
 function get_filename_mini()
 {
-  $file=sprintf("img%07d.mini.jpg",$this->_id);
-  return $this->_get_cache_path().$file;
+  $id=$this->_image->get_id();
+
+  $file=sprintf("img%07d.mini.jpg",$id);
+  return $this->get_cache_path().$file;
 }
 
 /** @return Returns the filename of the thumb image */
 function get_filename_thumb()
 {
-  $file=sprintf("img%07d.thumb.jpg",$this->_id);
-  return $this->_get_cache_path().$file;
+  $id=$this->_image->get_id();
+
+  $file=sprintf("img%07d.thumb.jpg",$id);
+  return $this->get_cache_path().$file;
 }
 
 /** @return Returns the filename of the preview */
 function get_filename_preview()
 {
-  $file=sprintf("img%07d.preview.jpg",$this->_id);
-  return $this->_get_cache_path().$file;
+  $id=$this->_image->get_id();
+
+  $file=sprintf("img%07d.preview.jpg",$id);
+  return $this->get_cache_path().$file;
 }
 
 /** @return Returns the filename of the hight solution image */
 function get_filename_high()
 {
-  $file=sprintf("img%07d.high.jpg",$this->_id);
-  return $this->_get_cache_path().$file;
+  $id=$this->_image->get_id();
+
+  $file=sprintf("img%07d.high.jpg",$id);
+  return $this->get_cache_path().$file;
 }
 
 /** Initate the image operations 
@@ -167,44 +121,47 @@ function save_to($dst)
 */
 function create_mini($inherit=false) 
 {
+  global $user, $log;
+  $image=$this->get_image();
+
   if ($inherit)
     $this->create_thumb($inherit);
 
   // Get the mini filename
   $mini=$this->get_filename_mini();
 
-  $height=$this->get_height();
-  $width=$this->get_width();
+  $height=$image->get_height();
+  $width=$image->get_width();
   
   if ($height<=0 || $width<=0)
     return false;
   
-  if (! file_exists($mini) || 
-    filemtime($mini) < $this->get_modified(true)) 
-  {
-    if ($width<$height) {
-      $w=105;
-      $h=intval(95*$height/$width);
-      $l=10;
-      $t=intval(($h-75)/2);
-    } else {
-      $w=intval(95*$width/$height);
-      $h=105;
-      $l=intval(($w-75)/2);
-      $t=10;
-    }
-    if (!$inherit)
-    {
-      $this->init($this->get_filename());
-    } else { 
-      $this->init($this->get_filename_thumb());
-    }
-    $this->resize($w, $h);
-    $this->crop(75, 75, $l, $t);
-    $this->set_quality(85);
-    return $this->save_to($mini);
+  if (file_exists($mini) &&
+    filemtime($mini) >= $image->get_modified()) 
+    return true;
+
+  if ($width<$height) {
+    $w=105;
+    $h=intval(95*$height/$width);
+    $l=10;
+    $t=intval(($h-75)/2);
+  } else {
+    $w=intval(95*$width/$height);
+    $h=105;
+    $l=intval(($w-75)/2);
+    $t=10;
   }
-  return true;
+  if (!$inherit)
+  {
+    $this->init($image->get_filename());
+  } else { 
+    $this->init($this->get_filename_thumb());
+  }
+  $this->resize($w, $h);
+  $this->crop(75, 75, $l, $t);
+  $this->set_quality(85);
+  $log->warn("Creating image mini", $image->get_id(), $user->get_id());
+  return $this->save_to($mini);
 }
 
 /** Create a thumbnail image 
@@ -213,26 +170,29 @@ function create_mini($inherit=false)
   @return False on error */
 function create_thumb($inherit=false) 
 {
+  global $user, $log;
+  $image=$this->get_image();
+
   if ($inherit)
     $this->create_preview($inherit);
 
   // Get the thumbnail filename
   $thumb=$this->get_filename_thumb();
 
-  if (! file_exists($thumb) || 
-    filemtime($thumb) < $this->get_modified(true)) 
+  if (file_exists($thumb) && 
+    filemtime($thumb) >= $image->get_modified()) 
+    return true;
+
+  if (!$inherit)
   {
-    if (!$inherit)
-    {
-      $this->init($this->get_filename());
-    } else { 
-      $this->init($this->get_filename_preview());
-    }
-    $this->resize(220, 220);
-    $this->set_quality(85);
-    return $this->save_to($thumb);
+    $this->init($image->get_filename());
+  } else { 
+    $this->init($this->get_filename_preview());
   }
-  return true;
+  $this->resize(220, 220);
+  $this->set_quality(85);
+  $log->warn("Creating image thumb", $image->get_id(), $user->get_id());
+  return $this->save_to($thumb);
 }
 
 /** Create a preview image 
@@ -241,48 +201,54 @@ function create_thumb($inherit=false)
   @return False on error */
 function create_preview($inherit=false) 
 {
+  global $user, $log;
+  $image=$this->get_image();
+
   if ($inherit)
     $this->create_high();
 
   // Get the preview filename
   $preview=$this->get_filename_preview();
 
-  if (! file_exists($preview) || 
-    filemtime($preview) < $this->get_modified(true)) 
+  if (file_exists($preview) && 
+    filemtime($preview) >= $image->get_modified()) 
+    return true;
+
+  if (!$inherit)
   {
-    if (!$inherit)
-    {
-      $this->init($this->get_filename());
-    } else { 
-      $this->init($this->get_filename_high());
-    }
-    $this->resize(600, 600);
-    $this->set_quality(90);
-    return $this->save_to($preview);
+    $this->init($image->get_filename());
+  } else { 
+    $this->init($this->get_filename_high());
   }
-  return true;
+  $this->resize(600, 600);
+  $this->set_quality(90);
+  $log->warn("Creating image preview", $image->get_id(), $user->get_id());
+  return $this->save_to($preview);
 }
 
 /** Create a high solution image 
   @return False on error */
 function create_high() 
 {
+  global $user, $log;
+  $image=$this->get_image();
+
   // Get the high filename
   $high=$this->get_filename_high();
 
-  if (! file_exists($high) || 
-    filemtime($high) < $this->get_modified(true)) 
-  {
-    $this->init($this->get_filename());
-    $this->resize(1024, 1024);
-    $this->set_quality(90);
-    return $this->save_to($high);
-  }
-  return true;
+  if (file_exists($high) && 
+    filemtime($high) >= $image->get_modified()) 
+    return true;
+
+  $this->init($this->get_filename());
+  $this->resize(1024, 1024);
+  $this->set_quality(90);
+  $log->warn("Creating image high", $image->get_id(), $user->get_id());
+  return $this->save_to($high);
 }
 
 /** @return Returns an array with all preview filenames */
-function _get_filenames()
+function get_filenames()
 {
   $files=array();
   array_push($files, $this->get_filename_mini());
@@ -293,18 +259,20 @@ function _get_filenames()
 }
 
 /** Renews all timestamps of the previews. This function is usefull, if meta
- * data changes but not the image itself */
+ * data changes but not the image itself 
+  @return True if touch was successfull. */
 function touch_previews()
 {
   if (!function_exists("touch"))
     return false;
 
-  $files=$this->_get_filenames();
+  $files=$this->get_filenames();
   foreach ($files as $file)
   {
     if (file_exists($file))
       @touch($file);
   }
+  return true;
 }
 
 /** Create all previe images */
@@ -316,12 +284,16 @@ function create_previews()
 /** Delete all previes of the image */
 function delete_previews()
 {
-  $files=$this->_get_filenames();
+  global $user, $log;
+  $image=$this->get_image();
+
+  $files=$this->get_filenames();
   foreach ($files as $file)
   {
     if (file_exists($file))
       unlink($file);
   }
+  $log->warn("Deleting all previews", $image->get_id(), $user->get_id());
 }
 
 /** Create all preview images 
@@ -331,8 +303,7 @@ function delete_previews()
   @todo Move this function out of this class */
 function create_all_previews($userid=-1)
 {
-  global $db;
-  global $user;
+  global $db, $user;
 
   $sql="SELECT id
         FROM $db->images";
@@ -375,8 +346,7 @@ function create_all_previews($userid=-1)
   @note This function does not check the user's authorization */
 function delete_from_user($userid, $id=0)
 {
-  global $db;
-  global $user;
+  global $db, $user, $log;
 
   $sql="SELECT id
         FROM $db->images
@@ -385,6 +355,7 @@ function delete_from_user($userid, $id=0)
   $result=$db->query($sql);
   if (!$result)
     return -1;
+  $log->warn("Deleting all preview of a user", -1, $user->get_id());
   while ($row=mysql_fetch_row($result))
   {
     $img_id=$row[0];

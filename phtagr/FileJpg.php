@@ -194,9 +194,9 @@ function _set_date_iptc($date)
   $iptc->add_record('2:060', $time);
 }
 
-function get_preview_handler()
+function get_preview_handler($image)
 {
-  $preview=new PreviewImage();
+  $preview=new PreviewImage($image);
   return $preview;
 }
 

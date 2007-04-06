@@ -3,7 +3,9 @@
 include_once("$phtagr_lib/Search.php");
 include_once("$phtagr_lib/Base.php");
 include_once("$phtagr_lib/Constants.php");
+
 include_once("$phtagr_lib/FileJpg.php");
+include_once("$phtagr_lib/FileAvi.php");
 
 /** 
   An image is assigned to a user and a group. With the access control lists
@@ -74,6 +76,8 @@ function init_by_filename($filename)
   @return Returns and sets the default file handler for import and export */
 function get_file_handler($filename='')
 {
+  global $log;
+
   if ($this->_file!=null)  
     return $this->_file;
   
@@ -93,9 +97,12 @@ function get_file_handler($filename='')
     case "jpeg":
       $file=new FileJpg($filename);
       break;
+    case "avi":
+      $file=new FileAvi($filename);
+      break;
     default:
-      $this->warning(sprintf(_("Unsupported file tpye '%d'", $ext)));
-      return null;
+      $log->trace(sprintf(_("Unsupported file tpye '%d'"), $ext));
+      break;
   }
   $this->_file=$file;
   return $file;
@@ -111,18 +118,11 @@ function get_preview_handler()
   if ($file==null)
     return null;
 
-  $previewer=$file->get_preview_handler();
+  $previewer=$file->get_preview_handler(&$this);
   if ($previewer==null)
     return null;
 
-  // initialize the previewer
-  $previewer->set_id($this->get_id());
-  $previewer->set_filename($this->get_filename());
-  $previewer->set_modified($this->get_modified(true));
-  $previewer->set_width($this->get_width());
-  $previewer->set_height($this->get_height());
   $this->_previewer=$previewer;
-
   return $this->_previewer;
 }
 
@@ -147,6 +147,14 @@ function get_name()
 function set_name($name)
 {
   $this->_set_data('name', $name);
+}
+
+/** @return Returns true, if the file is an video */
+function is_video()
+{
+  if ($this->get_duration()>0)
+    return true;
+  return false;
 }
 
 /** Returns the user ID of the image */
@@ -298,6 +306,18 @@ function set_width($width)
   $this->_set_data('width', $width);
 }
 
+function get_duration()
+{
+  return $this->_get_data('duration');
+}
+
+function set_duration($sec)
+{
+  if (!is_numeric($sec) || $sec<-1)
+    return;
+
+  $this->_set_data('duration', intval($sec));
+}
 /** Returns the count of views */
 function get_clicks()
 {

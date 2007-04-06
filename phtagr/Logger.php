@@ -200,7 +200,7 @@ function _log($level, $msg, $image, $user)
     $sfile=mysql_escape_string($file);
     $smsg=mysql_escape_string($msg);
     $sql="INSERT INTO $db->logs (time, level, image, user, file, line, message)
-          VALUES (NOW(), $level, $image, $user, '$sfile', $line, '$msg')";
+          VALUES (NOW(), $level, $image, $user, '$sfile', $line, '$smsg')";
     $db->query($sql);
   }
 }
@@ -242,6 +242,58 @@ function _log_file($line)
 {
   if ($this->_file!=null)
     fwrite($this->_file, $line);
+}
+
+/** Drop older lines according to their level
+  @param info Seconds. Log message older than info seconds are dropped.
+  @param warn same as info
+  @param debug same as info
+  @param trace same as info
+  @param error same as info
+  @param fatal same as info */
+function drop_db_logs($info, $warn, $debug, $trace, $error, $fatal)
+{
+  global $db;
+  if ($this->_type!=LOG_DB || $db==null)
+    return;
+
+  if (!is_numeric($info) || $info<0) return;
+  if (!is_numeric($warn) || $warn<0) return;
+  if (!is_numeric($debug) || $debug<0) return;
+  if (!is_numeric($trace) || $trace<0) return;
+  if (!is_numeric($error) || $error<0) return;
+  if (!is_numeric($fatal) || $fatal<0) return;
+    
+  $now=time();
+  $sql="DELETE FROM $db->logs 
+        WHERE level=".LOG_INFO." 
+          AND time<'".$db->date_unix_to_mysql($now-$info)."'";
+  $db->query($sql);
+  
+  $sql="DELETE FROM $db->logs 
+        WHERE level=".LOG_WARN." 
+          AND time<'".$db->date_unix_to_mysql($now-$warn)."'";
+  $db->query($sql);
+  
+  $sql="DELETE FROM $db->logs 
+        WHERE level=".LOG_DEBUG." 
+          AND time<'".$db->date_unix_to_mysql($now-$debug)."'";
+  $db->query($sql);
+  
+  $sql="DELETE FROM $db->logs 
+        WHERE level=".LOG_TRACE." 
+          AND time<'".$db->date_unix_to_mysql($now-$trace)."'";
+  $db->query($sql);
+  
+  $sql="DELETE FROM $db->logs 
+        WHERE level=".LOG_ERR." 
+          AND time<'".$db->date_unix_to_mysql($now-$error)."'";
+  $db->query($sql);
+  
+  $sql="DELETE FROM $db->logs 
+        WHERE level=".LOG_FATAL." 
+          AND time<'".$db->date_unix_to_mysql($now-$fatal)."'";
+  $db->query($sql);
 }
 
 function fatal($msg, $image=-1, $user=-1)

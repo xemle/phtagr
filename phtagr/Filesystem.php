@@ -364,7 +364,15 @@ function find_images($dir, $recursive=true)
     $maxdepth=255;
   else
     $maxdetph=0;
-  return $this->find($dir, "/\.[Jj][Pp][Gg]$/", $maxdepth);
+  $files=$this->find($dir, "/.*/", $maxdepth);
+  $supported=array();
+  foreach ($files as $file)
+  {
+    $ext=strtolower(substr($file, strrpos($file, ".")+1));
+    if ($ext=="jpeg" || $ext=="jpg" || $ext=="avi")
+      array_push($supported, $file);
+  }
+  return $supported;
 }
 
 /** Creates a directory.

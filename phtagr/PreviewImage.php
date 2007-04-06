@@ -11,9 +11,9 @@ class PreviewImage extends PreviewBase
 var $_cmd;
 var $_src;
 
-function PreviewImage($id=-1)
+function PreviewImage($image)
 {
-  $this->PreviewBase($id);
+  $this->PreviewBase($image);
   $this->_cmd="";
   $this->_src="";
 }
@@ -33,10 +33,14 @@ function init($src)
   false */
 function resize($width, $height, $expand=false)
 {
+  $image=$this->get_image();
+  $image_width=$image->get_width();
+  $image_height=$image->get_height();
+
   if (!$expand)
   {
-    $width=$width<=$this->get_width()?$width:$this->get_width();
-    $height=$height<=$this->get_height()?$height:$this->get_height();
+    $width=$width<=$image_width?$width:$image_width;
+    $height=$height<=$image_height?$height:$image_height;
   }
   $this->_cmd.=" -resize ${width}x$height";
 }
@@ -49,16 +53,20 @@ function resize($width, $height, $expand=false)
   @param top Top offset. Default is 0. */
 function crop($width, $height, $left=0, $top=0)
 {
+  $image=$this->get_image();
+  $image_width=$image->get_width();
+  $image_height=$image->get_height();
+
   $left=$left<0?0:$left;
-  $left=$left>=$this->get_width()?$this->get_width()-1:$left;
+  $left=$left>=$image_width?$image_width-1:$left;
   
   $top=$top<0?0:$top;
-  $top=$top>=$this->get_height()?$this->get_height()-1:$top;
+  $top=$top>=$image_height?$image_height-1:$top;
   
-  if ($width>$this->get_width()-$left)
-    $width=$this->get_width()-left;
-  if ($height>$this->get_height()-$top)
-    $height=$this->get_height()-top;
+  if ($width>$image_width-$left)
+    $width=$image_width-left;
+  if ($height>$image_height-$top)
+    $height=$image_height-top;
 
   $this->_cmd.=" -crop ${width}x${height}+$left+$top";
 }
@@ -78,14 +86,17 @@ function set_quality($quality=85)
   @return false Returns false on error */
 function save_to($dst)
 {
-  if ($this->get_id()<=0)
+  global $log, $user;
+  $image=$this->get_image();
+
+  if ($image->get_id()<=0)
     return false;
 
   $this->_cmd.=" \"".$this->_src."\" \"$dst\"";
   system ($this->_cmd, $retval);
   if ($retval!=0)
   {
-    $this->error(sprintf(_("Could not execute command '%s'. Exit with code %d"), $this->_cmd, $retval));
+    $log->error(sprintf(_("Could not execute command '%s'. Exit with code %d"), $this->_cmd, $retval), $image->get_id(), $user->get_id());
     return false;
   }
 

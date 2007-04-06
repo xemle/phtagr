@@ -31,8 +31,12 @@ function import($filename, $is_upload=0)
   if (!file_exists($filename))
     return ERR_FS_NOT_EXISTS;
 
+  // If no file handler exists, return with an error
+  $file=$this->get_file_handler($filename);
+  if ($file==null)
+    return -1;
+
   $sfilename=mysql_escape_string($filename);
-  
   $sql="SELECT * 
         FROM $db->images
         WHERE filename='$sfilename'";
@@ -76,10 +80,6 @@ function import($filename, $is_upload=0)
         WHERE filename='$sfilename'";
   $this->init_by_query($sql);
 
-  $file=$this->get_file_handler();  
-  if ($file==null)
-    return -1;
-
   $file->import($this);
   $this->set_modified($file->get_filetime(), true);
   $this->commit();
@@ -93,6 +93,8 @@ function import($filename, $is_upload=0)
   @return True if the image was updated. False otherwise */
 function _import($force=false)
 {
+  global $user, $log;
+
   $file=$this->get_file_handler();
   if ($file==null)
     return false;
@@ -108,6 +110,7 @@ function _import($force=false)
   
   // Clear the file stat chache to get updated stats  
   @clearstatcache();
+  $log->warn("Importing file ".$this->get_filename(), $this->get_id(), $user->get_id());
   $file->import($this);
 
   $this->set_modified($file->get_filetime(), true);
@@ -122,6 +125,8 @@ function export()
 
 function _export($force=false)
 {
+  global $user, $log;
+
   $file=$this->get_file_handler();
   if ($file==null)
     return;
@@ -136,6 +141,7 @@ function _export($force=false)
     return false;
   }
   
+  $log->warn("Exporting file ".$this->get_filename(), $this->get_id(), $user->get_id());
   $file->export($this);
   @clearstatcache();
   $this->set_modified($file->get_filetime(), true);

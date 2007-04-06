@@ -75,7 +75,7 @@ function is_writeable()
 /** @return Returns the preview creator. If no preview creator is available, 
   it returns null;
   @note This function should be overwritten by sub classes. */
-function get_preview_handler()
+function get_preview_handler($image)
 {
   return null;
 }

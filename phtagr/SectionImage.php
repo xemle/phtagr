@@ -627,7 +627,7 @@ function print_content()
 
   $id=$img->get_id();
   $name=$img->get_name();
-  
+ 
   $search_nav=clone $search;
   $this->print_navigation($search_nav);
 
@@ -635,11 +635,33 @@ function print_content()
   $this->print_js();
   $this->print_js_groups();
 
-  $size=$img->get_size(600);
   $url=new Url('image.php');
   $url->add_param('id', $id);
-  $url->add_param('type', 'preview');
-  echo "<div class=\"preview\"><img src=\"".$url->get_url()."\" alt=\"$name\" ".$size[2]."/></div>\n";
+
+  if ($img->is_video())
+  {
+    $url->add_param('type', 'vpreview');
+    $url->set_mode(URL_MODE_JS);
+    list($width, $height, $s)=$img->get_size(320);
+    $heigth+=20;
+    $player="$phtagr_htdocs/js/flowplayer/FlowPlayer.swf";
+    echo "<div class=\"preview\">
+  <object type=\"application/x-shockwave-flash\" data=\"$player\" width=\"$width\" height=\"$height\">
+    <param name=\"allowScriptAccess\" value=\"sameDomain\" />
+    <param name=\"movie\" value=\"$player\" />
+    <param name=\"quality\" value=\"high\" />
+    <param name=\"scale\" value=\"noScale\" />
+    <param name=\"wmode\" value=\"transparent\" />
+    <param name=\"flashvars\" value=\"config={videoFile: '".$url->get_url()."', loop: 'false', initialScale: 'orig'}\" />
+  </object>
+</div>";
+  }
+  else
+  {
+    $size=$img->get_size(600);
+    $url->add_param('type', 'preview');
+    echo "<div class=\"preview\"><img src=\"".$url->get_url()."\" alt=\"$name\" ".$size[2]."/></div>\n";
+  }
 
   $this->print_caption(false);
   $this->print_from();

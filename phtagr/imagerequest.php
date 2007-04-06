@@ -3,11 +3,13 @@
  * acces rights of the image and copies the binary image data to html output.
  * If an error occurs exit silently. */
 
+$time_start=microtime();
 session_start();
 
 include_once("$phtagr_lib/User.php");
 include_once("$phtagr_lib/Database.php");
 include_once("$phtagr_lib/Config.php");
+include_once("$phtagr_lib/Logger.php");
 include_once("$phtagr_lib/Image.php");
 
 
@@ -59,6 +61,7 @@ switch ($type)
   case 'mini':
   case 'thumb':
   case 'preview':
+  case 'vpreview':
   case 'high':
   case 'full':
     break;
@@ -78,6 +81,15 @@ $user=new User();
 $user->check_session(false);
 
 $conf=new Config($user->get_id());
+
+$log=new Logger();
+if ($conf->get('log.enabled', 0)==1)
+{
+  $log->set_level($conf->get('log.level', LOG_INFO));
+  $log->set_type($conf->get('log.type', LOG_DB),
+    $conf->get('log.filename', ''));
+  $log->enable();
+}
 
 $img=new Image($_REQUEST['id']);
 if (!$img)
@@ -109,6 +121,12 @@ switch ($type)
   case 'preview':
     if ($img->can_preview(&$user))
       $fn=$previewer->get_filename_preview();
+    else
+      unauthorized();
+    break;
+  case 'vpreview':
+    if ($img->can_preview(&$user))
+      $fn=$previewer->get_filename_preview_movie();
     else
       unauthorized();
     break;
@@ -180,6 +198,9 @@ switch ($type)
   case 'preview':
     $previewer->create_preview();
     break;
+  case 'vpreview':
+    $previewer->create_preview_movie();
+    break;
   case 'high':
     $previewer->create_high();
     break;
@@ -189,18 +210,33 @@ switch ($type)
     bad_request();
 }
 
+$gentime=sprintf("%.3f", abs(microtime()-$time_start));
+$log->warn("Image request: $type. Runs for $gentime seconds.", $img->get_id(), $user->get_id());
+$log->warn("Image request: $fn");
+$log->disable();
+
 if (!file_exists($fn))
 {
   not_found();        
 } else {
-  header('Content-Type: image/jpg');
+  if (!$img->is_video())
+  {
+    header('Content-Type: image/jpg');
+  }
+  else
+  {
+    $name=$img->get_name();
+    $name=substr($name, 0, strrpos(".", $name))."flv";
+    header('Content-Type: video/x-flv');
+    header("Content-Disposition: ".
+      (!strpos($HTTP_USER_AGENT,"MSIE 5.5")?"attachment; ":"").
+      "filename=$name");
+  }
   /* Do not include the filesize of the content. I had bad experience with it 
   */
-  header('Content-Length: '.filesize($fn));
   header("Content-Transfer-Encoding: binary");
-  //print file_get_contents($fn);
-  @readfile($fn) or internal_error();
-  //echo "\n";
+  header('Content-Length: '.filesize($fn));
+  readfile($fn) or internal_error();
   exit;
 }
 

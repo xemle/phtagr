@@ -7,6 +7,9 @@ define('PARAM_INT', 0x01);
 define('PARAM_UINT', 0x02);
 define('PARAM_STRING', 0x03);
 
+define('URL_MODE_HTML', 0x00);
+define('URL_MODE_JS', 0x01);
+
 /**
   @class Url Abstracts a URL with parameters and anchors
   @todo Rename private properts with underscore prefix
@@ -16,25 +19,31 @@ define('PARAM_STRING', 0x03);
 class Url extends Base
 {
 
-var $base;
-var $params;
-var $anchor;
+var $_base;
+var $_params;
+var $_anchor;
+var $_mode;
 
 function Url($base='')
 {
-  if ($base!='')
-    $this->base=$base;
-  else 
-    $this->base="index.php";
+  $path=dirname($_SERVER['PHP_SELF']);
+  if ($path{strlen($path)-1}!="/")
+    $path.="/";
 
-  $this->anchor='';
+  if ($base!='')
+    $this->_base=$path.$base;
+  else 
+    $this->_base=$path."index.php";
+
+  $this->_anchor='';
+  $this->_mode=URL_MODE_HTML;
   $this->init_params();
 }
 
 /** @return Returns the base link */
 function get_base()
 {
-  return $this->base;
+  return $this->_base;
 }
 
 /** @param base New base link without parameters
@@ -43,15 +52,27 @@ function set_base($base)
 {
   if ($base=='' || $base==null)
     return false;
-  $this->base=$base;
+  $this->_base=$base;
   return true;
+}
+
+function set_mode($mode=URL_MODE_HTML)
+{
+  if ($mode<URL_MODE_HTML || $mode>URL_MODE_JS)
+    return;
+  $this->_mode=$mode;
+}
+
+function get_mode()
+{
+  return $this->_mode;
 }
 
 /** Resets all parameters */
 function clear_params()
 {
-  unset($this->params);
-  $this->params=array();
+  unset($this->_params);
+  $this->_params=array();
 }
 
 /** Initiate the basic parameters. If no cookie is set the PHP Session ID is
@@ -70,8 +91,8 @@ function init_params()
   @return Returns default if the parameter is not available */
 function get_param($name, $default=null)
 {
-  if (isset($this->params[$name]))
-    return $this->params[$name];
+  if (isset($this->_params[$name]))
+    return $this->_params[$name];
   return $default;
 }
 
@@ -114,7 +135,7 @@ function add_param($name, $value, $check=PARAM_UNKNOWN, $default=null)
     return false;
   }
   
-  $this->params[$name]=$value;
+  $this->_params[$name]=$value;
   return true;
 }
 
@@ -153,7 +174,7 @@ function add_iparam($name, $value, $default, $lbound=0, $ubound=null)
   if ($value===null)
     return $this->del_param($name);
 
-  $this->params[$name]=$value;
+  $this->_params[$name]=$value;
   return true;
 }
 
@@ -165,15 +186,15 @@ function del_param($name)
   if ($name==null || $name=='')
     return false;
   
-  if (isset($this->params[$name]))
-    unset($this->params[$name]);
+  if (isset($this->_params[$name]))
+    unset($this->_params[$name]);
   return true;
 }
 
 /** @return Returns the anchor */
 function get_anchor()
 {
-  return $this->anchor;
+  return $this->_anchor;
 }
 
 /** Sets a new anchor. An existing one will be overwritten 
@@ -183,13 +204,13 @@ function set_anchor($name)
 {
   if ($name==null || $name=='')
     return false;
-  $this->anchor=$name; 
+  $this->_anchor=$name; 
 }
 
 /** Removes the anchor */
 function del_anchor()
 {
-  $this->anchor='';
+  $this->_anchor='';
 }
 
 /** Creates a the link from the URL. */
@@ -201,22 +222,36 @@ function from_URL()
 /** Returns the link as URL string */
 function get_url()
 {
-  $url=$this->base;
-  $n=count($this->params);
+  $url=$this->_base;
+  $n=count($this->_params);
+
+  $amp="";
+  switch ($this->_mode)
+  {
+    case URL_MODE_HTML:
+      $amp='&amp;';
+      break;
+    case URL_MODE_JS:
+      $amp='\u0026';
+      break;
+    default:
+      return "";
+  }
+
   if ($n>0)
   {
     $url.='?';
     $i=0;
-    foreach ($this->params as $p => $v)
+    foreach ($this->_params as $p => $v)
     {
       $i++;
       $url.=$this->escape_html($p).'='.$this->escape_html($v);
       if ($i<$n)
-        $url.='&amp;';
+        $url.=$amp;
     }
   }
-  if ($this->anchor!='')
-    $url.='#'.$this->escape_html($this->anchor);
+  if ($this->_anchor!='')
+    $url.='#'.$this->escape_html($this->_anchor);
 
   return $url;
 }
@@ -233,7 +268,7 @@ function _input($name, $value)
 function get_form()
 {
   $input='';
-  foreach ($this->params as $p => $v)
+  foreach ($this->_params as $p => $v)
     $input.=$this->_input($this->escape_html($p), $this->escape_html($v));
   return $input;
 }
