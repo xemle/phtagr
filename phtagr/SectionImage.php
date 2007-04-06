@@ -640,6 +640,7 @@ function print_content()
 
   if ($img->is_video())
   {
+    global $phtagr_htdocs;
     $url->add_param('type', 'vpreview');
     $url->set_mode(URL_MODE_JS);
     list($width, $height, $s)=$img->get_size(320);

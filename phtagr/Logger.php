@@ -63,15 +63,21 @@ function get_level()
   return $this->_level;
 }
 
-/** Enables the logger. By default, the loger is disabled */
+/** Enables the logger. By default, the loger is disabled 
+  @return True, if the logger could be enabled  */
 function enable()
 {
+  global $db;
   if ($this->_enabled)
-    return;
+    return true;
+
+  if ($this->_type==LOG_FILE && !$this->_open_file())
+    return false;
+  if ($this->_type==LOG_DB && !$db->is_connected())
+    return false;
 
   $this->_enabled=true;
-  if ($this->_type==LOG_FILE)
-    $this->_open_file();
+  return true;
 }
 
 /** Disables the logger */
@@ -227,7 +233,7 @@ function _open_file()
   if ($this->_filename=='')
     return;
 
-  $this->_file=fopen($this->_filename, 'a');
+  $this->_file=@fopen($this->_filename, 'a');
   if (!$this->_file)
     $this->_file=null;
 }
