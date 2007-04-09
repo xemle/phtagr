@@ -548,6 +548,7 @@ function print_preview($search=null)
 {
   global $db;
   global $user;
+  global $search;
   
   $img=$this->get_img();
   if (!$img)

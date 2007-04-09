@@ -364,6 +364,8 @@ function exec_stage_tables()
   if (file_exists($data_directory."config.php"))
     $config=$data_directory."config.php";
 
+  // @TODO: Tables are not created properly. Missing prefix!!!
+
   $resolve=$_REQUEST['resolve'];
 
   if ($resolve=="delete")
@@ -412,7 +414,6 @@ function exec_stage_admin()
 {
   global $db;
   global $user;
-
 
   $install_id="";
   $directory="";

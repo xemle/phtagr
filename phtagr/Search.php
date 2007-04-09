@@ -787,7 +787,7 @@ function get_query($limit=1, $order=true)
     if ($num_pos_tags || $num_pos_sets) {
       $sql.=" ( ".$this->_get_sub_query($pos_tags, $pos_sets, $location, $order)." AND ";
     } else {
-      $sql.=" images AS i WHERE";
+      $sql.=" $db->images AS i WHERE";
     }
     $sql.=" id NOT IN ( ";
     $sql.=$this->_get_sub_query($neg_tags, $neg_sets, $neg_location, false);
