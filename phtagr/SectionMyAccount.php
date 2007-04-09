@@ -793,7 +793,6 @@ function print_content()
 {
   global $db;
   global $user;
-  global $search;
   
   echo "<h2>"._("My Account")."</h2>\n";
   $tabs2=new SectionMenu('tab', _("Actions:"));

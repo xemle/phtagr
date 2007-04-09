@@ -174,7 +174,9 @@ function _handle_request_acl(&$img)
 function print_bar()
 {
   global $user;
-  global $search;
+
+  $search=new Search();
+  $search->from_url();
   $size=$search->get_page_size();
   echo "<div class=\"tab\">
 <ul>

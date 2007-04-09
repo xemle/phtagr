@@ -17,6 +17,8 @@ var $_item_param;
 var $_items;
 /** Index of current item */
 var $_cur;
+/** The current search */
+var $_search;
 
 /** @param class DIV class of the menu
   @param title Title of the menu (Header level 2) */
@@ -28,6 +30,8 @@ function SectionMenu($class='menu', $title='menu')
   $this->_item_param='';
   $this->_items=array();
   $this->_cur=null;
+  $this->_search=new Search();
+  $this->_search->from_url();
 }
 
 /** param title Sets the title of the menu 
@@ -69,7 +73,7 @@ function set_item_param($name)
   item_parameter. If the $id maches the item_param, this value is also true*/
 function add_item($id, $name, $iscurrent=false)
 {
-  global $search;
+  $search=$this->get_search();
   $cur=$search->get_param($this->_item_param, '');
   $this->_items[$id]['_name']=$name;
   if ($iscurrent || $id===$cur) 
@@ -137,6 +141,11 @@ function set_current($id)
     return true;
   }
   return false;
+}
+
+function get_search()
+{
+  return $this->_search;
 }
 
 function print_content()

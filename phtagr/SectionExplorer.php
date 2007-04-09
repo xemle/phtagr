@@ -14,7 +14,42 @@ class SectionExplorer extends SectionBase
 function SectionExplorer()
 {
   $this->name="explorer";
+  $this->_search=new Search();
+  $this->_search->from_url();
+  $this->_tags=array();
+  $this->_sets=array();
+  $this->_locs=array();
 }
+
+function get_search()
+{
+  return $this->_search;
+}
+
+/** @return Returns an hash of tags from the displayed images of the current 
+ * page.  The hash key is the tag itself and the hash value is the number of 
+ * occurences of the tag */
+function get_tags()
+{
+  return $this->_tags();
+}
+
+/** @return Returns an hash of sets from the displayed images of the current 
+ * page.  The hash key is the set itself and the hash value is the number of 
+ * occurences of the set */
+function get_sets()
+{
+  return $this->_sets();
+}
+
+/** @return Returns an hash of locations from the displayed images of the 
+ * current page.  The hash key is the location itself and the hash value is 
+ * the number of occurences of the location */
+function get_locations()
+{
+  return $this->_locs();
+}
+
 
 /** Print the page navigation bar. It prints the first, the current and the last pagest. Also a preview and a next page link. 
   @param search Search object for the naviagator
@@ -71,13 +106,26 @@ function _array_count_merge(&$counter, $add)
     $counter[$value]=$counter[$value]+1;
 }
 
+/** Collects the meta data from the image like tags, sets and locations. These 
+ * can be accessed by get_tags(), get_sets() and get_locations() 
+ * @param image Image object */
+function collect_meta($image)
+{
+  if (!$image)
+     return;
+
+  $this->_array_count_merge(&$this->_tags, $image->get_tags());
+  $this->_array_count_merge(&$this->_sets, $image->get_sets());
+  $this->_array_count_merge(&$this->_locs, $image->get_locations());
+}
+
 /** Print the current page with an table */
 function print_content()
 {
   global $db;
-  global $search;
   global $user; 
 
+  $search=$this->get_search();
   $sql=$search->get_num_query();
   // for debugging
   //$this->comment($sql);
@@ -127,10 +175,6 @@ function print_content()
   $nav_search->set_pos(0);
   $this->print_navigator($nav_search, $nav_current, ceil($count/$nav_size));
  
-  $tags=array();
-  $sets=array();
-  $locs=array();
-
   echo "<div class=\"images\">\n";
   $cell=0;
   $pos=$search->get_page_size()*$search->get_page_num();
@@ -142,13 +186,7 @@ function print_content()
     if ($cell==0)
       $sec_img->print_js_groups();
     $sec_img->print_preview(&$search);
-    $img=$sec_img->get_img();
-    if ($img)
-    {
-      $this->_array_count_merge(&$tags, $img->get_tags());
-      $this->_array_count_merge(&$sets, $img->get_sets());
-      $this->_array_count_merge(&$locs, $img->get_locations());
-    }
+    $this->collect_meta($sec_img->get_image());
     echo "</div>\n";
     $cell++;
     if ($cell%2==0)
@@ -177,7 +215,7 @@ function print_content()
 
   global $bulb;
   if (isset($bulb))
-    $bulb->set_data($tags, $sets, $locs);
+    $bulb->set_data($this->_tags, $this->_sets, $this->_locs);
 }
 
 }

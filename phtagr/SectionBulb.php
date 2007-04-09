@@ -26,9 +26,10 @@ function set_data($tags, $sets, $locations)
 
 function print_content()
 {
-  global $search;
   global $user;
 
+  $search=new Search();
+  $search->from_url();
   $userid=$search->get_userid();
   $src=$user->get_theme_dir().'/globe.png';
   $img="<img src=\"$src\" border=\"0\" alt=\"@\" title=\""._("Search globaly")."\"/>";

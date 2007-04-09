@@ -116,10 +116,6 @@ if (!$db->is_connected() && $section!="install")
   return;
 }
 
-
-$search= new Search();
-$search->from_URL();
-
 $menu=new SectionMenu('menu', _("Menu"));
 $menu->set_item_param('section');
 

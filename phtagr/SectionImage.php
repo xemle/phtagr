@@ -11,6 +11,7 @@ class SectionImage extends SectionBase
 {
 
 var $_img;
+var $_search;
 
 /** Creates a new section for an image. 
   @param id Image id. If it is positiv, the image will be loaded
@@ -22,12 +23,19 @@ function SectionImage($id=0)
   $this->_img=null;
   if ($id>0) 
     $this->_img=new Image($id);
+  $this->_search=new Search();
+  $this->_search->from_url();
 }
 
 /** Returns the image object of the section */
-function get_img()
+function get_image()
 {
   return $this->_img;
+}
+
+function get_search()
+{
+  return $this->_search;
 }
 
 /** print image preview table */
@@ -37,7 +45,7 @@ function print_navigation($search)
   
   if ($search==null)
     return;
-  $img=$this->get_img();
+  $img=$this->get_image();
   if (!$img)
     return;
 
@@ -104,7 +112,7 @@ function print_from()
   if ($num==1)
     return;
 
-  $img=$this->get_img();
+  $img=$this->get_image();
   if (!$img)
     return;
 
@@ -127,7 +135,7 @@ function print_caption($docut=true)
 {
   global $user;
 
-  $img=$this->get_img();
+  $img=$this->get_image();
   if (!$img)
     return;
 
@@ -192,7 +200,7 @@ function _cut_caption($id, $caption)
 
 function print_row_clicks()
 {
-  $img=$this->get_img();
+  $img=$this->get_image();
   if (!$img)
     return;
 
@@ -204,10 +212,9 @@ function print_row_clicks()
 
 function print_voting()
 {
-  global $search;
   global $user;
 
-  $img=$this->get_img();
+  $img=$this->get_image();
   if (!$img)
     return;
 
@@ -219,7 +226,7 @@ function print_voting()
   if (!isset($_SESSION['img_voted'][$id]) && $_SESSION['nrequests']>1)
   {
     $can_vote=true;
-    $vote_url=clone $search;
+    $vote_url=clone $this->get_search();
     $vote_url->add_param('action', 'edit');
     $vote_url->add_param('image', $id);
     $vote_url->set_anchor('img-'.$id);
@@ -264,7 +271,7 @@ function print_voting()
 
 function print_row_filename()
 {
-  $img=$this->get_img();
+  $img=$this->get_image();
   if (!$img)
     return;
 
@@ -284,7 +291,7 @@ function _acl_to_text($acl)
 
 function print_row_acl()
 {
-  $img=$this->get_img();
+  $img=$this->get_image();
   if (!$img)
     return;
 
@@ -309,7 +316,7 @@ function print_row_acl()
 function print_row_date()
 {
   $db;
-  $img=$this->get_img();
+  $img=$this->get_image();
   if (!$img)
     return;
 
@@ -368,7 +375,7 @@ function print_row_tags()
 {
   global $user;
   global $conf;
-  $img=$this->get_img();
+  $img=$this->get_image();
   if (!$img)
     return;
 
@@ -402,7 +409,7 @@ function print_row_sets()
 {
   global $user;
   global $conf;
-  $img=$this->get_img();
+  $img=$this->get_image();
   if (!$img)
     return;
 
@@ -438,7 +445,7 @@ function print_row_location()
   global $user;
   global $conf;
 
-  $img=$this->get_img();
+  $img=$this->get_image();
   if (!$img)
     return;
 
@@ -487,7 +494,7 @@ function print_js()
 {
   global $user;
   global $conf;
-  $img=$this->get_img();
+  $img=$this->get_image();
   if (!$img)
     return;
 
@@ -548,12 +555,12 @@ function print_preview($search=null)
 {
   global $db;
   global $user;
-  global $search;
   
-  $img=$this->get_img();
+  $img=$this->get_image();
   if (!$img)
     return;
 
+  $search=$this->get_search();
   $id=$img->get_id();
   $name=$img->get_name();
 
@@ -612,11 +619,10 @@ function print_content()
 {
   global $db;
   global $user;
-  global $search;
  
   echo "<h2>"._("Image")."</h2>\n";
   
-  $img=$this->get_img();
+  $img=$this->get_image();
   if (!$img || $img->get_id()<0) 
   {
     $this->warning(_("Sorry, the requested image is not available."));
@@ -625,6 +631,8 @@ function print_content()
     $this->warning(_("Sorry, you are not allowed to access this file."));
     return;
   }
+
+  $search=$this->get_search();
 
   $id=$img->get_id();
   $name=$img->get_name();
