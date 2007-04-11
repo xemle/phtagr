@@ -10,22 +10,34 @@ include_once("$phtagr_lib/Iptc.php");
 class FileJpg extends FileBase
 {
 
-/** Private EXIF array. It will be initialized on demand */
 var $_iptc;
+/** Private EXIF array. It will be initialized on demand */
 var $_exif;
 
 function FileJpg($filename)
 {
   $this->FileBase($filename);
+  $this->_iptc=null;
+  $this->_exif=null;
+  $this->_image_filename=$filename;
 }
 
-function import($image)
+function set_image_filename($filename)
 {
-  global $db;
+  if (!file_exists($filename))
+    return;
 
-  parent::import($image);
+  $this->_image_filename=$filename;
+}
 
-  $filename=$this->get_filename();
+function get_image_filename()
+{
+  return $this->_image_filename;
+}
+
+function _import_from_imagefile($image)
+{
+  $filename=$this->get_image_filename();
 
   $size=getimagesize($filename);
   if ($size)
@@ -35,7 +47,6 @@ function import($image)
   }
 
   $image->set_name(basename($filename));
-
   $this->_iptc=new Iptc($filename);
   $iptc=$this->_iptc;
   if ($iptc==null)
@@ -55,16 +66,16 @@ function import($image)
   $image->set_date($date);
 
   $image->set_orientation($this->_get_orientation_exif());
-
 }
 
-function export($image)
+function _export_to_imagefile($image)
 {
-  if (!$this->is_writeable())
-    return;
+  $filename=$this->get_image_filename();
+  if (!is_writeable($filename) || !is_writeable(dirname($filename)))
+    return false;
 
   if (!$this->_iptc)
-    $this->_iptc=new Iptc($this->get_filename());
+    $this->_iptc=new Iptc($filename);
   $iptc=$this->_iptc;
 
   $iptc->reset_iptc();
@@ -89,8 +100,8 @@ function export($image)
   }
 
   $iptc->save_to_file();
+  return true;
 }
-
 
 /** Reads the exif information 
   @return true on success */
@@ -102,7 +113,7 @@ function _read_exif()
   if (!function_exists('exif_read_data'))
     return false;
 
-  $this->_exif=@exif_read_data($this->get_filename(), 0, true);
+  $this->_exif=@exif_read_data($this->get_image_filename(), 0, true);
   return true;
 }
 
@@ -167,7 +178,6 @@ function _get_date_iptc()
   return $date;
 }
 
-
 function _set_date_iptc($date)
 {
   if (!is_numeric($date))
@@ -181,7 +191,6 @@ function _set_date_iptc($date)
   if ($date_exif!=null)
   {
     $date_ref=strftime("%Y:%m:%d %H:%M:%S", intval($s));
-    $this->info("$date_exif == $date_ref");
     if ($date_exif==$date_ref)
       return true;
   }
@@ -192,6 +201,20 @@ function _set_date_iptc($date)
   $iptc=$this->_iptc;
   $iptc->add_record('2:055', $date);
   $iptc->add_record('2:060', $time);
+}
+
+function import($image)
+{
+  global $db;
+
+  parent::import($image);
+
+  $this->_import_from_imagefile($image);
+}
+
+function export($image)
+{
+  return $this->_export_to_imagefile($image);
 }
 
 function get_preview_handler($image)

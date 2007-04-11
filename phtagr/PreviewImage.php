@@ -93,12 +93,12 @@ function save_to($dst)
     return false;
 
   $this->_cmd.=" \"".$this->_src."\" \"$dst\"";
-  system ($this->_cmd, $retval);
-  if ($retval!=0)
-  {
-    $log->error(sprintf(_("Could not execute command '%s'. Exit with code %d"), $this->_cmd, $retval), $image->get_id(), $user->get_id());
+  $lines=array();
+  $result=-1;
+  exec($this->_cmd, &$lines, &$result);
+  $log->warn("Execute [returned: $result]: ".$this->_cmd, $image->get_id(), $user->get_id());
+  if ($result!=0)
     return false;
-  }
 
   @chmod($dst, 0644);
   return true;

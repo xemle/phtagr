@@ -16,7 +16,6 @@ function FileBase($filename)
   $this->_filename=$filename;
 }
 
-
 /** @return Returns the filename */
 function get_filename()
 {

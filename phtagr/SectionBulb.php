@@ -60,12 +60,16 @@ function print_content()
       if (!$add_url->has_tag($tag))
       {
         $add_url->add_tag($tag);
-        echo "<a href=\"".$add_url->get_url()."\">+</a> ";
+        echo "<a href=\"".$add_url->get_url()."\">+</a>/";
         $add_url->del_tag($tag);
+        $add_url->add_tag("-".$tag);
+        echo "<a href=\"".$add_url->get_url()."\">-</a> ";
+        $add_url->del_tag("-".$tag);
       } else {
-        echo "+ ";
+        echo "+/- ";
       }
       echo "<a href=\"".$url->get_url()."\">".$this->escape_html($tag)."</a>";
+
       if ($nums>1)
         echo " <span class=\"hits\">($nums)</span>";
       echo "</li>\n";
@@ -92,10 +96,13 @@ function print_content()
       if (!$add_url->has_set($set))
       {
         $add_url->add_set($set);
-        echo "<a href=\"".$add_url->get_url()."\">+</a> ";
+        echo "<a href=\"".$add_url->get_url()."\">+</a>/";
         $add_url->del_set($set);
+        $add_url->add_set("-".$set);
+        echo "<a href=\"".$add_url->get_url()."\">-</a> ";
+        $add_url->del_set("-".$set);
       } else {
-        echo "+ ";
+        echo "+/- ";
       }
       echo "<a href=\"".$url->get_url()."\">".$this->escape_html($set)."</a>";
       if ($nums>1)

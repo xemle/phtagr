@@ -651,9 +651,10 @@ function _handle_limit($limit=0)
   @param sets Array of sets, could be NULL
   @param location Array of locations, could be NULL
   @param order Insert order column to select statement if true
+  @param is_negated True if the the subquery will be negated
   @return Return the sql statement of the query object corresponding to the
   Seach parameters */
-function _get_sub_query($tags, $sets, $location, $order=false)
+function _get_sub_query($tags, $sets, $location, $order, $is_negated)
 {
   global $db;
   global $user;
@@ -667,24 +668,35 @@ function _get_sub_query($tags, $sets, $location, $order=false)
   $sql.=" FROM $db->images AS i";
   if ($num_tags) 
   {
-    $tagop=$this->get_param('tagop', 0);
-    switch ($tagop)
+    if (!$is_negated)
     {
-      case 1: $count=0; break; /* OR */
-      case 2: $count=intval($num_tags*0.75); break; /* FUZZY */
-      default: $count=$num_tags; break; /* AND */
+      $tagop=$this->get_param('tagop', 0);
+      switch ($tagop)
+      {
+        case 1: $count=0; break; /* OR */
+        case 2: $count=intval($num_tags*0.75); break; /* FUZZY */
+        default: $count=$num_tags; break; /* AND */
+      }
+      $sql.=$this->_join_tags($tags, $count, 1);
     }
-    $sql.=$this->_join_tags($tags, $count, 1);
+    else
+      $sql.=$this->_join_tags($tags, 0, 1);
   }
-  if ($num_sets) {
-    $setop=$this->get_param('setop', 0);
-    switch ($setop)
+  if ($num_sets) 
+  {
+    if (!$is_negated)
     {
-      case 1: $count=0; break; /* OR */
-      case 2: $count=intval($num_sets*0.75); break; /* FUZZY */
-      default: $count=$num_sets; break; /* AND */
+      $setop=$this->get_param('setop', 0);
+      switch ($setop)
+      {
+        case 1: $count=0; break; /* OR */
+        case 2: $count=intval($num_sets*0.75); break; /* FUZZY */
+        default: $count=$num_sets; break; /* AND */
+      }
+      $sql.=$this->_join_sets($sets, $count, 1);
     }
-    $sql.=$this->_join_sets($sets, $count, 1);
+    else
+      $sql.=$this->_join_sets($sets, 0, 1);
   }
   if ($location!='') 
     $sql .= ",$db->imagelocation AS il";
@@ -788,12 +800,12 @@ function get_query($limit=1, $order=true)
       $sql.=$this->_get_column_order($num_pos_tags, $num_pos_sets);
     $sql.=" FROM";
     if ($num_pos_tags || $num_pos_sets) {
-      $sql.=" ( ".$this->_get_sub_query($pos_tags, $pos_sets, $location, $order)." AND ";
+      $sql.=" ( ".$this->_get_sub_query($pos_tags, $pos_sets, $location, $order, false)." AND ";
     } else {
       $sql.=" $db->images AS i WHERE";
     }
     $sql.=" id NOT IN ( ";
-    $sql.=$this->_get_sub_query($neg_tags, $neg_sets, $neg_location, false);
+    $sql.=$this->_get_sub_query($neg_tags, $neg_sets, $neg_location, false, true);
     $sql.=" )";
     if ($num_pos_tags || $num_pos_sets) {
       $sql.=" ) AS i";
@@ -805,7 +817,7 @@ function get_query($limit=1, $order=true)
   }
   else 
   {
-    $sql=$this->_get_sub_query($pos_tags, $pos_sets, $location, $order);
+    $sql=$this->_get_sub_query($pos_tags, $pos_sets, $location, $order, false);
     $sql.=" GROUP BY i.id";
 
     if ($order)

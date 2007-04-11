@@ -219,14 +219,14 @@ if (!file_exists($fn))
 {
   not_found();        
 } else {
-  if (!$img->is_video())
+  if ($type!="vpreview")
   {
     header('Content-Type: image/jpg');
   }
   else
   {
     $name=$img->get_name();
-    $name=substr($name, 0, strrpos(".", $name))."flv";
+    $name=substr($name, 0, strrpos($name, ".")+1)."flv";
     header('Content-Type: video/x-flv');
     header("Content-Disposition: ".
       (!strpos($HTTP_USER_AGENT,"MSIE 5.5")?"attachment; ":"").

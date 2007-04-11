@@ -1,17 +1,58 @@
 <?php
 
-include_once("$phtagr_lib/FileBase.php");
+include_once("$phtagr_lib/FileJpg.php");
 include_once("$phtagr_lib/PreviewVideo.php");
 include_once("$phtagr_lib/Iptc.php");
 
 /** @class FileAvi
 */
-class FileAvi extends FileBase
+class FileAvi extends FileJpg
 {
 
 function FileAvi($filename)
 {
-  $this->FileBase($filename);
+  $this->FileJpg($filename);
+  $this->create_thumb();
+  $this->set_image_filename($this->get_thumb_filename());
+}
+
+function get_thumb_filename()
+{
+  $filename=$this->get_filename();
+  $thumb=substr($filename, 0, strrpos($filename, ".")+1)."thm";
+  return $thumb;
+}
+
+/** Creates an thumbnail of the movie and return true on success */
+function create_thumb()
+{
+  global $conf, $log;
+  $filename=$this->get_filename();
+  $thumb=$this->get_thumb_filename();
+
+  @clearstatcache();
+  if (file_exists($thumb))
+    return true;
+  if (!is_writeable(dirname($thumb)))
+    return false;
+
+  $cmd=$conf->get('bin.ffmpeg', 'ffmpeg')." -i \"$filename\" -t 0.001 -f mjpeg -y \"$thumb\"";
+  $lines=array();
+  $result=-1;
+  exec($cmd, &$lines, $result);
+  $log->debug("Execute [returned $result]: ".$cmd);
+  if ($result==0)
+    return true;
+  return false;
+}
+
+function is_writeable()
+{
+  $filename=$this->get_thumb_filename();
+  if (is_writeable($filename) &&
+    is_writeable(dirname($filename)))
+    return true;
+  return false;
 }
 
 function import($image)
@@ -47,13 +88,6 @@ function import($image)
   }
   
   $image->set_name(basename($filename));
-}
-
-function export($image)
-{
-  if (!$this->is_writeable())
-    return;
-  return;
 }
 
 function get_preview_handler($image)

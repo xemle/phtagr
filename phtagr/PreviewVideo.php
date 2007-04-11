@@ -20,23 +20,19 @@ function PreviewVideo($image)
 function init($src)
 {
   global $log, $user, $conf;
-  
-  $ext=strtolower(substr($src, strrpos($src, '.') + 1));
-  $img=substr($src, 0, strrpos($src, '.'))."jpg";
+  $image=$this->get_image();
   
   // Generate the screen image first
-  if ($ext=="avi" && (!file_exists($img) || 
-    filemtime($img)<$image->get_modified(true)))
+  if ($image->is_video())
   {
-    $image=$this->get_image();
-    $sec=intval($image->get_duration()*0.1);
-    
-    $cmd=$conf->get('bin.ffmpeg', 'ffmpeg')." -i \"$src\" -f mjpeg -t $sec \"$img\"";
-    $lines=array();
-    $result=-1;
-    exec($cmd, &$lines, &$result);
-    $log->info("Execute [returned: $result]: $cmd", $image->get_id(), $user->get_id());
-    $src=$img;
+    $video=$image->get_file_handler();
+    if ($video)
+    {
+      $thumb=$video->get_thumb_filename();
+      if (!file_exists($thumb)) 
+        $video->create_thumb();
+      $src=$thumb;
+    } 
   }
 
   parent::init($src);

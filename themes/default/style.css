@@ -302,7 +302,7 @@ input, select, submit, reset, textarea {
 .thumbcell {
   float: left;
   width: 270px;
-  //margin: 10px 10px 10px 10px;
+  /*margin: 10px 10px 10px 10px;*/
   margin: 0px;
   padding: 10px;
   text-align: center; 
