@@ -180,13 +180,13 @@ function _set_date_iptc($date)
   $date_exif=$this->_get_date_exif();
   if ($date_exif!=null)
   {
-    $date_ref=strftime("%G:%m:%d %H:%M:%S", intval($s));
+    $date_ref=strftime("%Y:%m:%d %H:%M:%S", intval($s));
     $this->info("$date_exif == $date_ref");
     if ($date_exif==$date_ref)
       return true;
   }
 
-  $date=strftime("%G%m%d", intval($s));
+  $date=strftime("%Y%m%d", intval($s));
   $time=strftime("%H%M%S", intval($s));
 
   $iptc=$this->_iptc;

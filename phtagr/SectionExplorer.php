@@ -119,6 +119,41 @@ function collect_meta($image)
   $this->_array_count_merge(&$this->_locs, $image->get_locations());
 }
 
+function print_image($image, $pos)
+{
+  $sec_img=new SectionImage($image, $pos);
+  $sec_img->print_preview();
+}
+
+function print_inputs()
+{
+  global $user;
+  echo "<div class=\"edit\">";
+  $search=$this->get_search();
+  echo $search->get_form();
+
+  $edit=new Edit();
+  $edit->print_bar();
+  if ($user->is_member()||$user->is_guest())
+    $edit->print_edit_inputs();
+  $edit->print_buttons();
+  echo "</div>\n";
+}
+
+function print_js_groups()
+{   
+  global $user;
+  $groups=$user->get_groups();
+  if (count($groups)==0)
+    return;
+    
+  echo "<script type=\"text/javascript\">
+  var groups=new Array();\n";
+  foreach ($groups as $gid => $name)
+    echo "  groups[$gid]='".$this->_escape_js($name)."';\n";
+  echo "</script>\n";
+}
+
 /** Print the current page with an table */
 function print_content()
 {
@@ -166,7 +201,8 @@ function print_content()
   }
 
   // Formular for further actions
-  echo "<form id=\"formExplorer\" action=\"index.php\" method=\"post\">\n";
+  $url=new Url();
+  echo "<form id=\"formExplorer\" action=\"".$url->get_url()."\" method=\"post\">\n";
   
   $nav_search=clone $search;
   $nav_current=$nav_search->get_page_num();
@@ -180,14 +216,11 @@ function print_content()
   $pos=$search->get_page_size()*$search->get_page_num();
   while($row = mysql_fetch_row($result)) 
   {
-    echo "<div class=\"thumbcell\"><a name=\"img-".$row[0]."\"/>\n";
-    $search->set_pos($pos);
-    $sec_img=new SectionImage($row[0]);
     if ($cell==0)
-      $sec_img->print_js_groups();
-    $sec_img->print_preview(&$search);
-    $this->collect_meta($sec_img->get_image());
-    echo "</div>\n";
+      $this->print_js_groups();
+    $img=new Image($row[0]);
+    $this->print_image($img, $pos);
+    $this->collect_meta($img);
     $cell++;
     if ($cell%2==0)
       echo "<div class=\"row2\" ></div>\n";
@@ -202,15 +235,7 @@ function print_content()
 
   $this->print_navigator($nav_search, $nav_current, ceil($count/$nav_size));
 
-  echo "<div class=\"edit\">";
-  echo $search->get_form();
-
-  $edit=new Edit();
-  $edit->print_bar();
-  if ($user->is_member()||$user->is_guest())
-    $edit->print_edit_inputs();
-  $edit->print_buttons();
-  echo "</div>\n";
+  $this->print_inputs();
   echo "</form>\n";
 
   global $bulb;

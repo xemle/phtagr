@@ -14,17 +14,20 @@ var $_img;
 var $_search;
 
 /** Creates a new section for an image. 
-  @param id Image id. If it is positiv, the image will be loaded
+  @param image The current image object 
+  @param pos Current possition of the image in the current search. This value
+is optional 
   @note The access rights of the image havte be checked on the output functions
   */
-function SectionImage($id=0)
+function SectionImage($image, $pos=-1)
 {
   $this->SectionBase("image");
-  $this->_img=null;
-  if ($id>0) 
-    $this->_img=new Image($id);
+  $this->_img=$image;
+
   $this->_search=new Search();
   $this->_search->from_url();
+  if ($pos>=0)
+    $this->_search->set_pos($pos);
 }
 
 /** Returns the image object of the section */
@@ -38,7 +41,67 @@ function get_search()
   return $this->_search;
 }
 
-/** print image preview table */
+/** @return Returns an hash of tags from the displayed images of the current 
+ * page.  The hash key is the tag itself and the hash value is the number of 
+ * occurences of the tag */
+function get_tags()
+{
+  $img=$this->get_image();
+  if (!$img)
+    return null;
+
+  $tags=$img->get_tags();
+  $hits=array();
+  foreach ($tags as $tag)
+    $hits[$tag]=1;
+  return $hits;
+}
+
+/** @return Returns an hash of sets from the displayed images of the current 
+ * page.  The hash key is the set itself and the hash value is the number of 
+ * occurences of the set */
+function get_sets()
+{
+  $img=$this->get_image();
+  if (!$img)
+    return null;
+
+  $sets=$img->get_sets();
+  $hits=array();
+  foreach ($sets as $set)
+    $hits[$set]=1;
+  return $hits;
+}
+
+/** @return Returns an hash of locations from the displayed images of the 
+ * current page.  The hash key is the location itself and the hash value is 
+ * the number of occurences of the location */
+function get_locations()
+{
+  $img=$this->get_image();
+  if (!$img)
+    return null;
+
+  $locs=$img->get_locations();
+  $hits=array();
+  foreach ($locs as $loc)
+    $hits[$loc]=1;
+  return $hits;
+}
+
+/** Returns the output or prints it
+  @param output String to print or return
+  @param return The output string will be returned if true, otherwise the
+output will be printed via echo */
+function _output($output, $return=false)
+{
+  if ($return)
+    return $output;
+  else
+    echo $output;
+}
+
+/** Prints prev, up, and next buttons */
 function print_navigation($search)
 {
   global $db;
@@ -103,7 +166,7 @@ function print_navigation($search)
   echo "</div>\n";
 }
 
-function print_from()
+function from($return=false)
 {
   global $db;
   global $user;
@@ -125,13 +188,14 @@ function print_from()
   } else {
     $name=$user->get_name();
   }
-  echo "<div class=\"from\">by <a href=\"".$search->get_url()."\">$name</a></div>\n";
+
+  return $this->_output("<div class=\"from\">by <a href=\"".$search->get_url()."\">$name</a></div>\n", $return);
 }
 
 /** Print the caption of an image. 
   @param docut True if a long caption will be shorted. False if the whole
   caption will be printed. Default true */
-function print_caption($docut=true)
+function caption($docut=true, $return=false)
 {
   global $user;
 
@@ -144,15 +208,15 @@ function print_caption($docut=true)
   
   $can_edit=$img->can_edit($user);
   
-  echo "<div class=\"caption\" id=\"caption-$id\">";
+  $output="<div class=\"caption\" id=\"caption-$id\">";
   // the user can not edit the image
   if (!$can_edit)
   {
     if ($caption!="")
       echo $this->_cut_caption($id, &$caption);
 
-    echo "</div>\n";
-    return;
+    $output.="</div>\n";
+    return $this->_output($output, $return);
   }
   
   // The user can edit the image
@@ -164,19 +228,21 @@ function print_caption($docut=true)
       $text=$this->escape_html($caption);
     }
 
-    echo "$text <a href=\"javascript:void();\" class=\"jsbutton\" onclick=\"edit_caption($id) \">"._("edit")."</a>";
+    $output.="$text <a href=\"javascript:void();\" class=\"jsbutton\" onclick=\"edit_caption($id) \">"._("edit")."</a>";
   }
   else
   {
-    echo " <span onclick=\"edit_caption($id)\">"._("Click here to add a caption")."</span>";
+    $output.=" <span onclick=\"edit_caption($id)\">"._("Click here to add a caption")."</span>";
   }
   
-  echo "</div>\n";
+  $output.="</div>\n";
+  return $this->_output($output, $return);
 }
 
 /** Cut the caption by words. If the length of the caption is longer than 20
  * characters, the caption will be cutted into words and reconcartenated to the
- * length of 20.  */
+ * length of 20.  
+  @todo Improve the word split function through a trim() and preg_split() */
 function _cut_caption($id, $caption)
 {
   $caption=htmlspecialchars($caption);
@@ -198,25 +264,27 @@ function _cut_caption($id, $caption)
   return $result;
 }
 
-function print_row_clicks()
+function clicks($return=false)
 {
   $img=$this->get_image();
   if (!$img)
     return;
 
   $ranking=sprintf("%.3f", $img->get_ranking());
-  echo "  <tr><th>"._("Clicks:")."</th><td>"
-    .sprintf(_("%d (Popularity: %.3f)"), $img->get_clicks(), $ranking)
-    ."</td></tr>\n";
+  $output=sprintf(_("%d (Popularity: %.3f)"), $img->get_clicks(), $ranking);
+
+  return $this->_output($output, $return);
 }
 
-function print_voting()
+function voting($return=false)
 {
   global $user;
 
   $img=$this->get_image();
   if (!$img)
     return;
+
+  $output="";
 
   $id=$img->get_id();
   $votes=$img->get_votes();
@@ -235,7 +303,7 @@ function print_voting()
   $none=$user->get_theme_dir().'/vote-none.png';
   $set=$user->get_theme_dir().'/vote-set.png';
 
-  echo "<div class=\"voting\"><p>\n";
+  $output.="<div class=\"voting\"><p>\n";
   for ($i=0; $i<=VOTING_MAX; $i++)
   {
     $title='';
@@ -243,40 +311,42 @@ function print_voting()
     if ($can_vote) {
       $vote_url->add_param('voting', $i);
       $url=$vote_url->get_url();
-      echo "<a href=\"$url\">";
+      $output.="<a href=\"$url\">";
       $title=" title=\"".
         sprintf(_("Vote the image with %d points!"), $i)."\"";
       $fx=" onmouseover=\"vote_highlight($id, $voting, $i)\" onmouseout=\"vote_reset($id, $voting)\"";
     } 
 
     if ($voting>0 && $i<=$voting)
-      echo "<img id=\"voting-$id-$i\" src=\"$set\" alt=\"#\" $title$fx/>\n";
+      $output.="<img id=\"voting-$id-$i\" src=\"$set\" alt=\"#\" $title$fx/>\n";
     else
-      echo "<img id=\"voting-$id-$i\" src=\"$none\" alt=\".\" $title$fx/>\n";
+      $output.="<img id=\"voting-$id-$i\" src=\"$none\" alt=\".\" $title$fx/>\n";
 
     if ($can_vote)
-      echo "</a>\n";
+      $output.="</a>\n";
   }
 
-  echo "&nbsp;";
+  $output.="&nbsp;";
   if ($votes==1)
-    echo sprintf(_("(%.1f, %d vote)"), $img->get_voting(), $votes);
+    $output.=sprintf(_("(%.1f, %d vote)"), $img->get_voting(), $votes);
   else if ($votes>1) 
-    echo sprintf(_("(%.1f, %d votes)"), $img->get_voting(), $votes);
+    $output.=sprintf(_("(%.1f, %d votes)"), $img->get_voting(), $votes);
   else
-    echo _("No votes");
+    $output.=_("No votes");
 
-  echo "</p></div>\n";
+  $output.="</p></div>\n";
+
+  return $this->_output($output, $return);
 }
 
-function print_row_filename()
+function filename($return=false)
 {
   $img=$this->get_image();
   if (!$img)
     return;
 
-  echo "  <tr><th>"._("File:")."</th>"
-    ."<td>".$this->escape_html($img->get_filename())."</td></tr>\n";
+  $output=$this->escape_html($img->get_filename());
+  return $this->_output($output, $return);
 }
 
 function _acl_to_text($acl)
@@ -289,15 +359,14 @@ function _acl_to_text($acl)
   return $t;
 }
 
-function print_row_acl()
+function acl($return=false)
 {
   $img=$this->get_image();
   if (!$img)
     return;
 
-  echo "  <tr><th>"._("ACL:")."</th><td>";
-
   $gid=$img->get_groupid();
+  $output="";
   if ($gid>0)
   {
     $group=new Group($gid);
@@ -305,27 +374,32 @@ function print_row_acl()
 
     $url=new Search();
     $url->set_groupid($gid);
-    echo "<a href=\"".$url->get_url()."\">$name</a>: ";
+    $output.="<a href=\"".$url->get_url()."\">$name</a>: ";
   }
-  echo $this->_acl_to_text($img->get_gacl()).',';
-  echo $this->_acl_to_text($img->get_macl()).',';
-  echo $this->_acl_to_text($img->get_aacl());
-  echo "</td></tr>\n";
+  $output.=$this->_acl_to_text($img->get_gacl()).',';
+  $output.=$this->_acl_to_text($img->get_macl()).',';
+  $output.=$this->_acl_to_text($img->get_aacl());
+
+  return $this->_output($output, $return);
 }
 
-function print_row_date()
+/** Prints the date
+  @param date_fmt Date format. The date is formated with the system function
+date() and the given format. If $date_fmt is null, the format "Y-m-d H:i:s" is
+used.
+  @param return If true, the given output string is returned. Otherwise it is
+printed directly via echo. */
+function date($date_fmt=null, $return=false)
 {
-  $db;
   $img=$this->get_image();
   if (!$img)
     return;
 
   $sec=$img->get_date(true);
   
-  echo "  <tr>
-    <th>"._("Date:")."</th>
-    <td>";
-  $date=date("Y-m-d H:i:s", $sec);
+  if ($date_fmt===null)
+    $date_fmt="Y-m-d H:i:s";
+  $date=date($date_fmt, $sec);
   if (substr($date, 10)==" 00:00:00")
     $date=substr($date, 0, 10);
 
@@ -333,45 +407,65 @@ function print_row_date()
   $date_url->add_param('start', $sec-(60*30*3));
   $date_url->add_param('end', $sec+(60*30*3));
   $url=$date_url->get_url();
-  echo "<a href=\"$url\">$date</a>\n";
+  $title=_("Show images around this time");
+
+  $output="<a href=\"$url\" title=\"$title\">$date</a>\n";
+
+  return $this->_output($output, $return);
+}
+
+/** Prints date navigation with prev images, image within the same day, the
+ * same week, the same month followed by next images */
+function date_navigator($return=false)
+{
+  $img=$this->get_image();
+  if (!$img)
+    return;
+
+  $sec=$img->get_date(true);
+
+  $date_url=new Search();
 
   // before
   $date_url->del_param('start');
   $date_url->add_param('end', $sec+1);
   $url=$date_url->get_url();
   $title=_("Show older images");
-  echo "[<span class=\"prev\"><a href=\"$url\" title=\"$title\">&lt;</a></span>";
+  $output="[<span class=\"prev\"><a href=\"$url\" title=\"$title\">&lt;</a></span>";
 
   // day
   $date_url->add_param('start', $sec-(60*60*12));
   $date_url->add_param('end', $sec+(60*60*12));
   $url=$date_url->get_url();
   $title=_("Show images within the same day");
-  echo "<span class=\"day\"><a href=\"$url\" title=\"$title\">d</a></span>";
+  $output.="<span class=\"day\"><a href=\"$url\" title=\"$title\">d</a></span>";
   // week 
   $date_url->add_param('start', $sec-(60*60*12*7));
   $date_url->add_param('end', $sec+(60*60*12*7));
   $url=$date_url->get_url();
   $title=_("Show images within the same week");
-  echo "<span class=\"week\"><a href=\"$url\" title=\"$title\">w</a></span>";
+  $output.="<span class=\"week\"><a href=\"$url\" title=\"$title\">w</a></span>";
   // month 
   $date_url->add_param('start', $sec-(60*60*12*30));
   $date_url->add_param('end', $sec+(60*60*12*30));
   $url=$date_url->get_url();
   $title=_("Show images within the same month");
-  echo "<span class=\"month\"><a href=\"$url\" title=\"$title\">m</a></span>";
+  $output.="<span class=\"month\"><a href=\"$url\" title=\"$title\">m</a></span>";
   // after
   $date_url->del_param('end');
   $date_url->add_param('start', $sec-1);
   $date_url->add_param('orderby', '-date');
   $url=$date_url->get_url();
   $title=_("Show newer images");
-  echo "<span class=\"next\"><a href=\"$url\" title=\"$title\">&gt;</a></span>";
-  echo "]\n    </td>\n  </tr>\n";
+  $output.="<span class=\"next\"><a href=\"$url\" title=\"$title\">&gt;</a></span>";
+  $output.="]";
   unset($date_url);
+
+  return $this->_output($output, $return);
 }
 
-function print_row_tags()
+/** Prints the list of tags inclusive html links */
+function tags($return=false)
 {
   global $user;
   global $conf;
@@ -386,26 +480,24 @@ function print_row_tags()
   if ($num_tags==0)
     return;
 
-  echo "  <tr>
-    <th>"._("Tags:")."</th>
-    <td id=\"tag-$id\">";  
+  $output="";
 
   $tag_url=new Search();
   for ($i=0; $i<$num_tags; $i++)
   {
     $tag_url->add_tag($tags[$i]);
     $url=$tag_url->get_url();
-    echo "<a href=\"$url\">".$this->escape_html($tags[$i])."</a>";
+    $output.="<a href=\"$url\">".$this->escape_html($tags[$i])."</a>";
     $tag_url->del_tag($tags[$i]);
     if ($i<$num_tags-1)
-        echo $conf->get('meta.separator', ';')." ";
+      $output.=$conf->get('meta.separator', ';')." ";
   }
-  echo "</td>
-  </tr>\n";
   unset($tag_url);
+  return $this->_output($output, $return);
 }
 
-function print_row_sets()
+/** Prints the list of sets inclusive html links */
+function sets($return=false)
 {
   global $user;
   global $conf;
@@ -420,26 +512,24 @@ function print_row_sets()
   if ($num_sets==0)
     return;
 
-  echo "  <tr>
-    <th>"._("Sets:")."</th>
-    <td id=\"set-$id\">";  
+  $output="";
 
   $set_url=new Search();
   for ($i=0; $i<$num_sets; $i++)
   {
     $set_url->add_set($sets[$i]);
     $url=$set_url->get_url();
-    echo "<a href=\"$url\">".$this->escape_html($sets[$i])."</a>";
+    $output.="<a href=\"$url\">".$this->escape_html($sets[$i])."</a>";
     $set_url->del_set($sets[$i]);
     if ($i<$num_sets-1)
-        echo $conf->get('meta.separator', ';')." ";
+      $output.=$conf->get('meta.separator', ';')." ";
   }
-  echo "</td>
-  </tr>\n";
   unset($set_url);
+  return $this->_output($output, $return);
 }
 
-function print_row_location()
+/** Prints the list of locations inclusive html links */
+function locations($return=false)
 {
   global $db;
   global $user;
@@ -448,31 +538,139 @@ function print_row_location()
   $img=$this->get_image();
   if (!$img)
     return;
-
+ 
   $id=$img->get_id();
   $locations=$img->get_locations();
   $num_locations=count($locations);
 
   if ($num_locations==0)
     return;
-  
-  echo "  <tr>
-    <th>"._("Location:")."</th>
-    <td id=\"location-$id\">";  
 
+  $output="";
+  
   $loc_url=new Search();
   foreach ($locations as $type => $location)
   {
     $loc_url->add_param('location', $location);
     $url=$loc_url->get_url();
-    echo "<a href=\"$url\">".$this->escape_html($location)."</a>";
+    $output.="<a href=\"$url\">".$this->escape_html($location)."</a>";
     if ($i<$num_locations-1)
-        echo $conf->get('meta.separator', ';')." ";
+      $output.=$conf->get('meta.separator', ';')." ";
     $i++;
   }
-  echo "</td>
-  </tr>\n";
   unset($loc_url);
+  return $this->_output($output, $return);
+}
+
+/** Prints the preview image or the video object */
+function preview($return=false)
+{
+  $img=$this->get_image();
+
+  if (!$img)
+    return;
+
+  $output="";
+  $url=new Url('image.php');
+  $url->add_param('id', $img->get_id());
+
+  if ($img->is_video())
+  {
+    global $phtagr_htdocs;
+    $url->add_param('type', 'vpreview');
+    $url->set_mode(URL_MODE_JS);
+    list($width, $height, $s)=$img->get_size(320);
+    $heigth+=20;
+    $player="$phtagr_htdocs/js/flowplayer/FlowPlayer.swf";
+    $output.="<div class=\"preview\">
+  <object type=\"application/x-shockwave-flash\" data=\"$player\" width=\"$width\" height=\"$height\">
+    <param name=\"allowScriptAccess\" value=\"sameDomain\" />
+    <param name=\"movie\" value=\"$player\" />
+    <param name=\"quality\" value=\"high\" />
+    <param name=\"scale\" value=\"noScale\" />
+    <param name=\"wmode\" value=\"transparent\" />
+    <param name=\"flashvars\" value=\"config={videoFile: '".$url->get_url()."', loop: 'false', initialScale: 'orig'}\" />
+  </object>
+</div>";
+  }
+  else
+  {
+    $size=$img->get_size(600);
+    $url->add_param('type', 'preview');
+    $output.="<div class=\"preview\"><img src=\"".$url->get_url()."\" alt=\"$name\" ".$size[2]."/></div>\n";
+  }
+  return $this->_output($output, $return);
+}
+
+/** Prints the image info table 
+  @param is_thumb True if image is printed in the explorer
+  @param return If true the output will be returned as string. Otherwise it
+will be printed */
+function imginfo($is_thumb, $return=false)
+{
+  global $user;
+
+  $img=$this->get_image();
+  if (!$img)
+    return;
+    
+  $id=$img->get_id();
+  $output="<div class=\"imginfo\" id=\"info-$id\"><table>\n";
+  if ($img->is_owner(&$user))
+  {
+    if (!$img->is_upload())
+    {
+      $output.="<tr><th>"._("Filename:")."</th><td>".
+        $this->filename(true)."</td></tr>\n";
+    }
+    $output.="<tr><th>"._("ACL:")."</th><td>".
+      $this->acl(true)."</td></tr>\n";
+  }
+  $output.="<tr><th>"._("Date:")."</th><td>".
+    $this->date(null, true)." ".
+    $this->date_navigator(true)."</td></tr>\n";
+  
+  if ($img->has_tags())
+  {
+    $output.="<tr><th>"._("Tags:")."</th><td id=\"#tag-$id\">".
+      $this->tags(true)."</td></tr>\n";
+  }
+
+  if ($img->has_sets())
+  {
+    $output.="<tr><th>"._("Sets:")."</th><td>".
+      $this->sets(true)."</td></tr>\n";
+  }
+
+  if ($img->has_locations())
+  {
+    $output.="<tr><th>"._("Locations:")."</th><td>".
+      $this->locations(true)."</td></tr>\n";
+  }
+  
+  if (!$is_thumb)
+  {
+    $output.="<tr><th>"._("Clicks:")."</th><td>".
+      $this->clicks(true)."</td></tr>\n";
+  }
+
+  if ($img->can_edit(&$user))
+  {
+    $output.="  <tr>
+    <th>"._("Select:")."</th>
+    <td>";
+    if ($is_thumb && $img->can_select($user))    
+      $output.="<input type=\"checkbox\" name=\"images[]\" value=\"$id\" onclick=\"uncheck('selectall')\" /> ";
+
+    $output.=" <a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"edit_meta($id)\">"._("Edit Metadata")."</a>";
+    if ($img->is_owner(&$user))
+      $output.="<a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"edit_acl($id)\">".("Edit ACL")."</a>";
+    $output.="</td>
+  </tr>\n";
+  }
+  $output.="</table></div>\n";
+
+  return $this->_output($output, $return);
 }
 
 /** Escapes all special characters for javascript 
@@ -538,7 +736,7 @@ function print_js()
 }
 
 function print_js_groups()
-{
+{ 
   global $user;
   $groups=$user->get_groups();
   if (count($groups)==0)
@@ -551,7 +749,7 @@ function print_js_groups()
   echo "</script>\n";
 }
 
-function print_preview($search=null) 
+function print_preview() 
 {
   global $db;
   global $user;
@@ -567,6 +765,7 @@ function print_preview($search=null)
   if ($id<0 || !$img->can_preview($user))
     return;
   
+  echo "<div class=\"thumbcell\"><a name=\"img-$id\"/>\n";
   $this->print_js();
   echo "\n<div class=\"name\">$name</div>\n";
   echo "<div class=\"thumb\">&nbsp;";
@@ -582,37 +781,13 @@ function print_preview($search=null)
   $iurl->add_param('type', 'thumb');
   echo "<a href=\"$url\"><img src=\"".$iurl->get_url()."\" alt=\"$name\" title=\"$name\" ".$size[2]."/></a></div>\n";
   
-  $this->print_caption();
-  $this->print_from();
-  $this->print_voting();
+  $this->caption();
+  $this->from();
+  $this->voting();
 
-  echo "<div class=\"imginfo\" id=\"info-$id\"><table>\n";
-  if ($img->is_owner(&$user))
-  {
-    if (!$img->is_upload())
-      $this->print_row_filename();
-    $this->print_row_acl();
-  }
-  $this->print_row_date();
-  
-  $this->print_row_tags();
-  $this->print_row_sets();
-  $this->print_row_location();
-  if ($img->can_select($user))
-  {
-    echo "  <tr>
-    <th>"._("Select:")."</th>
-    <td><input type=\"checkbox\" name=\"images[]\" value=\"$id\" onclick=\"uncheck('selectall')\" />";
-    if ($img->can_edit(&$user))
-    { 
-      echo "<a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"edit_meta($id)\">"._("Edit Metadata")."</a>";
-      if ($img->is_owner(&$user))
-        echo "<a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"edit_acl($id)\">"._("Edit ACL")."</a>";
-    }
-    echo "</td>\n</tr>\n";
-  }
-  
-  echo "</table></div>\n";
+  $this->imginfo(true);
+
+  echo "</div>\n";
 } 
 
 function print_content()
@@ -644,63 +819,16 @@ function print_content()
   $this->print_js();
   $this->print_js_groups();
 
-  $url=new Url('image.php');
-  $url->add_param('id', $id);
+  $this->preview();
 
-  if ($img->is_video())
-  {
-    global $phtagr_htdocs;
-    $url->add_param('type', 'vpreview');
-    $url->set_mode(URL_MODE_JS);
-    list($width, $height, $s)=$img->get_size(320);
-    $heigth+=20;
-    $player="$phtagr_htdocs/js/flowplayer/FlowPlayer.swf";
-    echo "<div class=\"preview\">
-  <object type=\"application/x-shockwave-flash\" data=\"$player\" width=\"$width\" height=\"$height\">
-    <param name=\"allowScriptAccess\" value=\"sameDomain\" />
-    <param name=\"movie\" value=\"$player\" />
-    <param name=\"quality\" value=\"high\" />
-    <param name=\"scale\" value=\"noScale\" />
-    <param name=\"wmode\" value=\"transparent\" />
-    <param name=\"flashvars\" value=\"config={videoFile: '".$url->get_url()."', loop: 'false', initialScale: 'orig'}\" />
-  </object>
-</div>";
-  }
-  else
-  {
-    $size=$img->get_size(600);
-    $url->add_param('type', 'preview');
-    echo "<div class=\"preview\"><img src=\"".$url->get_url()."\" alt=\"$name\" ".$size[2]."/></div>\n";
-  }
-
-  $this->print_caption(false);
-  $this->print_from();
-  $this->print_voting();
-  echo "<div class=\"imginfo\" id=\"info-$id\"><table>\n";
+  $this->caption(false);
+  $this->from();
+  $this->voting();
   
-  if ($img->is_owner(&$user)) {
-    $this->print_row_filename();
-    $this->print_row_acl();
-  }
+  $this->imginfo(false);
 
-  $this->print_row_date();
-  $this->print_row_tags();
-  $this->print_row_sets();
-  $this->print_row_location();
-  $this->print_row_clicks();
-  if ($img->can_edit(&$user))
-  {
-    echo "  <tr>
-    <th>"._("Edit:")."</th>
-    <td><a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"edit_meta($id)\">"._("Edit Metadata")."</a>";
-    if ($img->is_owner(&$user))
-      echo "<a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"edit_acl($id)\">".("Edit ACL")."</a>";
-    echo "</td>
-  </tr>\n";
-  }
-  echo "</table></div>\n";
-
-  echo "<form id=\"formImage\" action=\"index.php\" method=\"post\" accept-charset=\"UTF-8\"><div>\n";
+  $url=new Url();
+  echo "<form id=\"formImage\" action=\"".$url->get_url()."\" method=\"post\" accept-charset=\"UTF-8\"><div>\n";
   echo "<input type=\"hidden\" name=\"section\" value=\"image\" />\n";
   echo "<input type=\"hidden\" name=\"action\" value=\"edit\" />\n";
   echo "<input type=\"hidden\" name=\"image\" value=\"$id\" />\n";
@@ -714,6 +842,10 @@ function print_content()
 
   $search_nav=clone $search;
   $this->print_navigation($search_nav);
+
+  global $bulb;
+  if (isset($bulb))
+    $bulb->set_data($this->get_tags(), $this->get_sets(), $this->get_locations());
 }
 
 }

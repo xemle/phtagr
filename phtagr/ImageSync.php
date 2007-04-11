@@ -141,10 +141,13 @@ function _export($force=false)
     return false;
   }
   
+  $old_time=$file->get_filetime();
   $log->warn("Exporting file ".$this->get_filename(), $this->get_id(), $user->get_id());
   $file->export($this);
   @clearstatcache();
-  $this->set_modified($file->get_filetime(), true);
+  $new_time=$file->get_filetime();
+  if ($new_time>$old_time)
+    $this->set_modified($file->get_filetime(), true);
 
   return true;
 }

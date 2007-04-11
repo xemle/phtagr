@@ -577,6 +577,13 @@ function get_tags()
   return $this->_tags;
 }
 
+/** @return Returns true if the image has tags */
+function has_tags()
+{
+  $this->get_tags();
+  return count($this->_tags)>0?true:false;
+}
+
 /** Add tags to the image
   @param tags Array of new tags for the image */
 function add_tags($tags)
@@ -657,6 +664,13 @@ function get_sets()
   }
   sort($this->_sets);
   return $this->_sets;
+}
+
+/** @return Returns true if the image has tags */
+function has_sets()
+{
+  $this->get_sets();
+  return count($this->_sets)>0?true:false;
 }
 
 /** Add sets to the image
@@ -750,6 +764,13 @@ function get_locations()
     $this->_locations[$row[1]]=stripslashes($row[0]);
   }
   return $this->_locations;
+}
+
+/** @return Returns true if the image has tags */
+function has_locations()
+{
+  $this->get_locations();
+  return count($this->_locations)>0?true:false;
 }
 
 /** Set a location and overwrites an existing one 

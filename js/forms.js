@@ -302,7 +302,7 @@ function _new_acl_read(name, value)
 function _init_form(id)
 {
   var form=document.createElement("form");
-  form.setAttribute("action", "index.php");
+  form.setAttribute("action", "index.php"+"#img-"+id);
   form.setAttribute("method", "post");
   form.setAttribute("accept-charset", "UTF-8");
 

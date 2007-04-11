@@ -188,8 +188,11 @@ if (isset($_REQUEST['section']))
       $edit->execute();
       unset($edit);
     }
-    $image= new SectionImage(intval($_REQUEST['id']));
-    $cnt->add_section(&$image);
+    $image=new Image(intval($_REQUEST['id']));
+    $sec_image= new SectionImage($image, intval($_REQUEST['pos']));
+    $cnt->add_section(&$sec_image);
+    $bulb = new SectionBulb();
+    $body->add_section(&$bulb);
   } 
   else if($section=='search')
   {

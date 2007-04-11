@@ -214,7 +214,7 @@ function del_anchor()
 }
 
 /** Creates a the link from the URL. */
-function from_URL()
+function from_url()
 {
   $this->add_rparam('section');
 }

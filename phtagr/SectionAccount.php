@@ -84,7 +84,7 @@ function user_create($name, $password)
 function print_form_new()
 {
   $url=new Url();
-  $url->from_URL();
+  $url->from_url();
   $url->add_param('section', 'account');
   $url->add_param('action', 'create');
   echo "<form method=\"post\">".$url->get_form()."
@@ -119,7 +119,7 @@ function print_login()
 {
   global $user;
   $url=new Url();
-  $url->from_URL();
+  $url->from_url();
   $url->add_param('section', 'account');
   $url->add_param('action', 'login');
   if ($this->section!='')

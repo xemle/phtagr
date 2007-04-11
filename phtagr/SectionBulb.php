@@ -66,7 +66,9 @@ function print_content()
         echo "+ ";
       }
       echo "<a href=\"".$url->get_url()."\">".$this->escape_html($tag)."</a>";
-      echo " <span class=\"hits\">($nums)</span></li>\n";
+      if ($nums>1)
+        echo " <span class=\"hits\">($nums)</span>";
+      echo "</li>\n";
       $url->del_tag($tag);
     }
     echo "</ul>\n";
@@ -96,7 +98,9 @@ function print_content()
         echo "+ ";
       }
       echo "<a href=\"".$url->get_url()."\">".$this->escape_html($set)."</a>";
-      echo " <span class=\"hits\">($nums)</span></li>\n";
+      if ($nums>1)
+        echo " <span class=\"hits\">($nums)</span>";
+      echo "</li>\n";
       $url->del_set($set);
     }
     echo "</ul>\n";
@@ -126,7 +130,9 @@ function print_content()
         echo "+ ";
       }
       echo "<a href=\"".$url->get_url()."\">".$this->escape_html($loc)."</a>";
-      echo " <span class=\"hits\">($nums)</span></li>\n";
+      if ($nums>1)
+        echo " <span class=\"hits\">($nums)</span>";
+      echo "</li>\n";
       $url->del_location($loc);
     }
     echo "</ul>\n";

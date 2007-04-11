@@ -290,10 +290,10 @@ function del_orderby()
 }
 
 /** Creates a search object from a URL */
-function from_URL()
+function from_url()
 {
   global $conf;
-  parent::from_URL();
+  parent::from_url();
 
   $this->add_riparam('id', null, 1);
    
@@ -342,6 +342,9 @@ function from_URL()
   
   if (isset($_REQUEST['orderby']))
     $this->set_orderby($_REQUEST['orderby']);
+  
+  if (isset($_REQUEST['pos']))
+    $this->set_pos($_REQUEST['pos']);
 }
 
 /** Sets the tag and set array as parameter */
