@@ -208,16 +208,40 @@ function is_upload()
     return false;
 }
 
+function set_gacl($gacl)
+{
+  if (!is_numeric($gacl) || $gacl<0)
+    return;
+
+  $this->_set_data('gacl', $gacl);
+}
+
 /** Returns the group ACL */
 function get_gacl()
 {
   return $this->_get_data('gacl');
 }
 
+function set_macl($macl)
+{
+  if (!is_numeric($macl) || $macl<0)
+    return;
+
+  $this->_set_data('macl', $macl);
+}
+
 /** Returns the ACL for other phtagr users*/
 function get_macl()
 {
   return $this->_get_data('macl');
+}
+
+function set_aacl($aacl)
+{
+  if (!is_numeric($aacl) || $aacl<0)
+    return;
+
+  $this->_set_data('aacl', $aacl);
 }
 
 /** Returns the ACL for anyone */

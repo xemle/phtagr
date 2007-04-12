@@ -162,11 +162,10 @@ function _handle_request_acl(&$img)
   
   list($gacl, $macl, $aacl)=$acl->get_values();
   $id=$img->get_id();
-  $sql="UPDATE $db->images
-        SET gacl=$gacl,macl=$macl,aacl=$aacl
-        WHERE id=$id";
-  if ($db->query($sql))
-    return true;
+  $img->set_gacl($gacl);
+  $img->set_macl($macl);
+  $img->set_aacl($aacl);
+  $img->commit();
 
   return false;
 }

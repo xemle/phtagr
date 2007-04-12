@@ -90,6 +90,21 @@ function import($image)
   $image->set_name(basename($filename));
 }
 
+/** Returns the newest file time of the video or its thumb file */
+function get_filetime()
+{
+  $filename=$this->get_filename();
+  if (!file_exists($filename))
+    return -1;
+
+  $thumb=$this->get_thumb_filename();
+
+  $video_time=filemtime($filename);
+  $thumb_time=filemtime($thumb);
+
+  return ($video_time>$thumb_time)?$video_time:$thumb_time;
+}
+
 function get_preview_handler($image)
 {
   $preview=new PreviewVideo($image);

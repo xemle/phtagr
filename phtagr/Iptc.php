@@ -40,7 +40,7 @@ function Iptc($filename='')
   $this->_errmsg='';
   $this->_jpg=null;
   $this->_xml=null;
-  $this->iptc=null;
+  $this->_iptc=null;
   $this->_changed_com=false;
   $this->_changed_iptc=false;
   if ($filename!='')
@@ -449,8 +449,8 @@ function _read_seg_iptc($jpg)
   $fp=$jpg['_fp'];
   fseek($fp, $iptc['pos']+HDR_SIZE_8BIM, SEEK_SET);
   
-  $this->iptc=array();
-  $iptc_keys=&$this->iptc;
+  $this->_iptc=array();
+  $iptc_keys=&$this->_iptc;
   $iptc['_segs']=array();
 
   /* textual segment is divided in iptc segements:
@@ -571,11 +571,11 @@ function _copy_jpeg_seg($fin, $fout, $seg)
   @return Byte string of IPTC block. On failure it returns false */
 function _iptc2bytes()
 {
-  if (!isset($this->iptc))
+  if (!isset($this->_iptc))
     return false;
   
   $buf='';
-  foreach ($this->iptc as $key => $values)
+  foreach ($this->_iptc as $key => $values)
   {  
     list($rec, $type) = split (':', $key, 2);
     foreach ($values as $value)
@@ -752,17 +752,17 @@ function _str2hex($string) {
   @return null if no iptc tag was found */
 function get_iptc()
 {
-  return $this->iptc;
+  return $this->_iptc;
 }
 
 /** Resets the iptc data */
 function reset_iptc()
 {
-  if (!isset($this->iptc))
+  if (!isset($this->_iptc))
     return;
 
-  unset($this->iptc);
-  $this->iptc=array();
+  unset($this->_iptc);
+  $this->_iptc=array();
 }
 
 /** Return, if the record occurs only one time */
@@ -786,12 +786,12 @@ function add_record($name, $value)
   if ($value=='')
     return false;
 
-  if (!isset($this->iptc))
+  if (!isset($this->_iptc))
   {
-    $this->iptc=array();
+    $this->_iptc=array();
     $this->_changed_iptc=true;
   }
-  $iptc=&$this->iptc;
+  $iptc=&$this->_iptc;
   if (!isset($iptc[$name]))
   {
     $this->_changed_iptc=true;
@@ -848,8 +848,8 @@ function get_record($name)
   if (!$this->_is_single_record($name))
     return null;
     
-  if (isset($this->iptc) && isset($this->iptc[$name]))
-    return $this->iptc[$name][0];
+  if (isset($this->_iptc) && isset($this->_iptc[$name]))
+    return $this->_iptc[$name][0];
   return null;
 }
 
@@ -860,8 +860,8 @@ function get_records($name)
   if ($this->_is_single_record($name))
     return array();
     
-  if (isset($this->iptc) && isset($this->iptc[$name]))
-    return $this->iptc[$name];
+  if (isset($this->_iptc) && isset($this->_iptc[$name]))
+    return $this->_iptc[$name];
   return array();
 }
 
@@ -872,11 +872,11 @@ function get_records($name)
   @return true if the iptc changes */
 function del_record($name, $value=null)
 {
-  if (!isset($this->iptc))
+  if (!isset($this->_iptc))
   {
     return false;
   }
-  $iptc=&$this->iptc;
+  $iptc=&$this->_iptc;
   if (!isset($iptc[$name]))
   {
     return false;

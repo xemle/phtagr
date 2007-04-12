@@ -632,7 +632,7 @@ function imginfo($is_thumb, $return=false)
   
   if ($img->has_tags())
   {
-    $output.="<tr><th>"._("Tags:")."</th><td id=\"#tag-$id\">".
+    $output.="<tr><th>"._("Tags:")."</th><td id=\"tag-$id\">".
       $this->tags(true)."</td></tr>\n";
   }
 

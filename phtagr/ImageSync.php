@@ -141,8 +141,10 @@ function _export($force=false)
     return false;
   }
   
-  $old_time=$file->get_filetime();
+  $this->commit();
   $log->warn("Exporting file ".$this->get_filename(), $this->get_id(), $user->get_id());
+
+  $old_time=$file->get_filetime();
   $file->export($this);
   @clearstatcache();
   $new_time=$file->get_filetime();
@@ -337,7 +339,9 @@ function _handle_request_date($prefix='', $merge)
 function _handle_request_tags($prefix='', $merge)
 {
   global $conf;
-  $tags=preg_split("/".$conf->get('meta.separator', ';')."/", $_REQUEST[$prefix.'tags']);
+  $sep=$conf->get('meta.separator', ';');
+  $sep=($sep=" ")?"\s":$sep;
+  $tags=preg_split("/[$sep]+/", $_REQUEST[$prefix.'tags']);
   if (count($tags)==0)
     return false;
 
@@ -375,7 +379,9 @@ function _handle_request_tags($prefix='', $merge)
 function _handle_request_sets($prefix='', $merge)
 {
   global $conf;
-  $sets=preg_split("/".$conf->get('meta.separator', ';')."/", $_REQUEST[$prefix.'sets']);
+  $sep=$conf->get('meta.separator', ';');
+  $sep=($sep=" ")?"\s":$sep;
+  $sets=preg_split("/[$sep]+/", $_REQUEST[$prefix.'sets']);
   if (count($sets)==0)
     return false;
 
@@ -460,12 +466,17 @@ function handle_request()
     return;
   }
 
-  // Dont export on lazy sync 
-  if ($conf->query($this->get_userid(), 'image.lazysync', 0)!=1)
+  // Dont export on lazy sync but update modified
+  if ($conf->query($this->get_userid(), 'image.lazysync', 0)==1)
+  {
+    $this->set_modified(time(), true);
+    $this->commit();
+  }
+  else
+  {
     $this->_export(false);
-
-  $this->set_modified(time(), true);
-  $this->commit();
+    $this->commit();
+  }
 
   $previewer=$this->get_preview_handler();
   if ($previewer!=null)

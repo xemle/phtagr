@@ -88,6 +88,7 @@ function _get_data($name, $default=null)
   @see commit */
 function _set_data($name, $value)
 {
+  global $log, $user;
   if ($this->get_id()<=0)
     return false;
 
@@ -97,8 +98,12 @@ function _set_data($name, $value)
       unset($this->_changes[$name]);
     return true;
   }
+  else
+  {
+    $log->trace("SQL row change ".$this->_table.":".$name."=".$value, $this->get_id(), $user->get_id());
+    $this->_changes[$name]=$value;
+  }
 
-  $this->_changes[$name]=$value;
   return true;
 }
 
@@ -115,7 +120,7 @@ function is_modified()
   @return True if changes where writen */
 function commit()
 {
-  global $db;
+  global $db, $log, $user;
 
   $id=$this->get_id();
   if ($id<=0)
@@ -127,7 +132,7 @@ function commit()
   $changes='';
   foreach ($this->_changes as $name => $value)
   {
-    if ($value=="NULL" || $value===null)
+    if ($value==='NULL' || is_null($value))
       $svalue="NULL";
     else if ($value=="NOW()")
       $svalue=$value;
@@ -136,7 +141,6 @@ function commit()
     $changes.=",$name=$svalue";
   }
   $changes=substr($changes,1);
-
   $sql="UPDATE ".$this->_table."
         SET $changes
         WHERE id=$id";
@@ -148,6 +152,7 @@ function commit()
   foreach ($this->_changes as $name => $value)
     $this->_data[$name]=$value;
   $this->_changes=array();
+  $log->trace("SQL commit row changes ".$this->_table, $this->get_id(), $user->get_id());
   return true;
 }
 

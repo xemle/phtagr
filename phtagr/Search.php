@@ -299,7 +299,9 @@ function from_url()
    
   if (isset($_REQUEST['tags']))
   {
-    $tags=preg_split("/".$conf->get('meta.separator', ';')."/", $_REQUEST['tags']);
+    $sep=$conf->get('meta.separator', ';');
+    $sep=($sep=" ")?"\s":$sep;
+    $tags=preg_split("/[$sep]+/", $_REQUEST['tags']);
     foreach ($tags as $tag)
     {
       $this->add_tag(trim($tag));
@@ -311,7 +313,9 @@ function from_url()
   
   if (isset($_REQUEST['sets']))
   {
-    $sets=preg_split("/".$conf->get('meta.separator', ';')."/", $_REQUEST['sets']);
+    $sep=$conf->get('meta.separator', ';');
+    $sep=($sep=" ")?"\s":$sep;
+    $sets=preg_split("/[$sep]+/", $_REQUEST['sets']);
     foreach ($sets as $set)
     {
       $this->add_set(trim($set));
