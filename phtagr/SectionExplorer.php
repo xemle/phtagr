@@ -154,6 +154,20 @@ function print_js_groups()
   echo "</script>\n";
 }
 
+/** Escapes all special characters for javascript 
+  @param s String to escape
+  @return Escaped string */
+function _escape_js($s)
+{
+  $patterns[0]='/\'/';
+  $patterns[1]="/\//";
+  $patterns[2]="/[\r]?\n/si";
+  $replaces[0]="\'";
+  $replaces[1]="\/";
+  $replaces[2]="\\n";
+  return preg_replace($patterns, $replaces, $s);
+
+
 /** Print the current page with an table */
 function print_content()
 {
