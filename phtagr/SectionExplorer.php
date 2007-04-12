@@ -166,7 +166,7 @@ function _escape_js($s)
   $replaces[1]="\/";
   $replaces[2]="\\n";
   return preg_replace($patterns, $replaces, $s);
-
+}
 
 /** Print the current page with an table */
 function print_content()
