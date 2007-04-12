@@ -56,6 +56,46 @@ function print_all_tags()
   unset($tag_url);
 }
 
+function print_all_sets() 
+{
+  echo "<h3>"._("Popular sets:")."</h3>\n\n<p>";
+
+  $search=new Search();
+  $result=$search->get_popular_sets();
+
+  $sets=array();
+  $hits=array();
+  $data=array();
+  $max=-1;
+  $min=0x7fffffff;
+  while($row = mysql_fetch_row($result)) {
+    $max=max($max,$row[1]);
+    $min=min($min,$row[1]);
+    array_push($sets, $row[0]);
+    array_push($hits, $row[1]);
+    $data[$row[0]]=$row[1];
+  }
+  array_multisort($sets,SORT_ASC,$hits,SORT_ASC,$data);
+
+  /* What is this? Division thru 0! */
+  if ($max == $min)
+    $grad=20;
+  else
+    $grad=20/($max-$min);
+  echo "<div class=\"sets\">\n";
+  $set_url=new Url();
+  $set_url->add_param('section', 'explorer');
+  foreach ($data as $set => $hit)
+  {
+    $size=intval(8+($hit-$min)*$grad);
+    $set_url->add_param('sets', $set);
+    $url=$set_url->get_url();
+    echo "<span style=\"font-size:${size}pt;\"><a href=\"$url\">$set</a></span>&nbsp;\n";
+  }
+  echo "</div>\n</p>\n";
+  unset($set_url);
+}
+
 /** Prints randomly images as small square images 
   Only 8 of 50 top rated images are shown */
 function print_popular_images()
@@ -126,6 +166,7 @@ function print_content()
 {
   echo "<h2>"._("Home")."</h2>\n";
   $this->print_all_tags();
+  $this->print_all_sets();
   $this->print_popular_images();
 }
 

@@ -63,14 +63,20 @@ function create_preview_movie($inherit=false)
   $lines=array();
   $result=-1;
   exec($cmd, &$lines, &$result);
-  $log->info("Execute [returned: $result]: $cmd", $image->get_id(), $user->get_id());
+  if ($result==127)
+    $log->fatal("Command not found: $cmd", $image->get_id(), $user->get_id());
+  else
+    $log->info("Execute [returned: $result]: $cmd", $image->get_id(), $user->get_id());
   @chmod($flv, 0644);
 
   $cmd=$conf->get('bin.flvtool2', 'flvtool2')." -U \"$flv\"";
   $lines=array();
   $result=-1;
   exec($cmd, &$lines, &$result);
-  $log->info("Execute [returned $result]: $cmd", $image->get_id(), $user->get_id());
+  if ($result==127)
+    $log->fatal("Command not found: $cmd", $image->get_id(), $user->get_id());
+  else
+    $log->info("Execute [returned $result]: $cmd", $image->get_id(), $user->get_id());
 }
 
 function get_filenames()

@@ -857,6 +857,20 @@ function get_popular_tags()
   return $db->query($sql);
 }
 
+function get_popular_sets()
+{
+  global $db;
+
+  $sql="SELECT s.name,COUNT(s.name) AS hits 
+        FROM $db->sets AS s, $db->imageset AS iset, $db->images as i 
+        WHERE s.id=iset.setid and iset.imageid=i.id";
+  $sql.=$this->_handle_acl();
+  $sql.=" GROUP BY s.name 
+        ORDER BY hits DESC LIMIT 0,50";
+  
+  return $db->query($sql);
+}
+
 }
 
 ?>
