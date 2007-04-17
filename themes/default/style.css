@@ -119,6 +119,66 @@ input, select, submit, reset, textarea {
   border: 1px solid #b3b3b3;
 }
 
+/* Comments */
+
+.comment * h2 {
+  background: none;
+  margin: 0;
+  padding: 10px 0px 0px 0px;
+  color: black;
+  font-size: 12pt;
+}
+
+.comment * ul {
+  list-style-type: none;
+  margin: 0px;
+}
+
+.comment * p {
+  font-size: 10pt;
+  margin: 0;
+  padding: 0; 
+}
+
+.comment * .who {
+  font-style: italic;
+  margin: 5px 0px 0px 0px;
+}
+
+.comment * .commenttext {
+  background-color: #eeeeee;
+  margin: 0px 0px 0px 15px;
+  padding: 5px;
+}
+
+/* Comment form */
+.comment * label {
+  font-size: 8pt;
+  color: #808080;
+  float: left;
+  text-align: left;
+  width: 200px;
+  margin: 0 0 0 0;
+  padding: 5px 0px 0px 0px;
+  clear: both;
+}
+
+.comment * input[type=text],
+.comment * textarea {
+  margin: 0 0 0 0;
+  float: left;
+  clear: both;
+}
+
+.comment * input[type=submit] {
+  float: left;
+  clear: both;
+}
+
+.comment * input[type=reset] {
+  float: left;
+}
+
 /** Detailed layout */
 .logo {
   float: left;

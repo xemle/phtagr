@@ -242,10 +242,12 @@ function sync_files($userid=-1)
 /** Deletes the file if it was uploaded */
 function delete()
 {
-  global $user;
+  global $user, $logs;
 
   if ($user->get_id()!=$this->get_userid() && !$user->is_admin())
     return;
+
+  $log->info("Deleting '".$this->get_filename()."' from database", $this->get_id(), $user->get_id());
 
   $previewer=$this->get_preview_handler();
   if ($previewer!=null)
@@ -361,7 +363,7 @@ function _handle_request_tags($prefix='', $merge)
 {
   global $conf;
   $sep=$conf->get('meta.separator', ';');
-  $sep=($sep=" ")?"\s":$sep;
+  $sep=($sep==" ")?"\s":$sep;
   $tags=preg_split("/[$sep]+/", $_REQUEST[$prefix.'tags']);
   if (count($tags)==0)
     return false;
@@ -401,7 +403,7 @@ function _handle_request_sets($prefix='', $merge)
 {
   global $conf;
   $sep=$conf->get('meta.separator', ';');
-  $sep=($sep=" ")?"\s":$sep;
+  $sep=($sep==" ")?"\s":$sep;
   $sets=preg_split("/[$sep]+/", $_REQUEST[$prefix.'sets']);
   if (count($sets)==0)
     return false;

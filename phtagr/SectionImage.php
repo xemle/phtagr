@@ -234,7 +234,7 @@ function caption($docut=true, $return=false)
   if (!$can_edit)
   {
     if ($caption!="")
-      echo $this->_cut_caption($id, &$caption);
+      $output.=$this->_cut_caption($id, &$caption);
 
     $output.="</div>\n";
     return $this->_output($output, $return);

@@ -518,6 +518,15 @@ function can_download($user=null)
   return $this->_check_acl(&$user, ACL_DOWNLOAD, ACL_READ_MASK);
 }
 
+/** @param user Current user
+  @return True if tue user is allowed to comment this image. 
+  @todo Currently this function is equal to can_preview(). Add flags for the
+comment */
+function can_comment($user)
+{
+  return $this->_check_acl(&$user, ACL_PREVIEW, ACL_READ_MASK);
+}
+
 /** Returns the size of an thumbnail in an array. This function keeps the
  * ratio.
   @param size of the longes side. Default is 220. If the size is larger than

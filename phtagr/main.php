@@ -45,6 +45,7 @@ include_once("$phtagr_lib/SectionAccount.php");
 include_once("$phtagr_lib/SectionExplorer.php");
 include_once("$phtagr_lib/SectionBulb.php");
 include_once("$phtagr_lib/SectionImage.php");
+include_once("$phtagr_lib/SectionComment.php");
 include_once("$phtagr_lib/SectionBrowser.php");
 include_once("$phtagr_lib/SectionSearch.php");
 include_once("$phtagr_lib/SectionUpload.php");
@@ -203,15 +204,17 @@ if (isset($_REQUEST['section']))
   } 
   else if($section=='image' && isset($_REQUEST['id']))
   {
+    $image=new Image(intval($_REQUEST['id']));
     if($_REQUEST['action']=='edit')
     {
       $edit=new Edit();
       $edit->execute();
       unset($edit);
     }
-    $image=new Image(intval($_REQUEST['id']));
     $sec_image= new SectionImage($image, intval($_REQUEST['pos']));
     $cnt->add_section(&$sec_image);
+    $sec_comment=new SectionComment($image, intval($_REQUEST['pos']));
+    $cnt->add_section($sec_comment);
     $bulb = new SectionBulb();
     $body->add_section(&$bulb);
   } 

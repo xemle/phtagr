@@ -321,7 +321,7 @@ function from_url()
   if (isset($_REQUEST['tags']))
   {
     $sep=$conf->get('meta.separator', ';');
-    $sep=($sep=" ")?"\s":$sep;
+    $sep=($sep==" ")?"\s":$sep;
     $tags=preg_split("/[$sep]+/", $_REQUEST['tags']);
     foreach ($tags as $tag)
     {
@@ -335,7 +335,7 @@ function from_url()
   if (isset($_REQUEST['sets']))
   {
     $sep=$conf->get('meta.separator', ';');
-    $sep=($sep=" ")?"\s":$sep;
+    $sep=($sep==" ")?"\s":$sep;
     $sets=preg_split("/[$sep]+/", $_REQUEST['sets']);
     foreach ($sets as $set)
     {
