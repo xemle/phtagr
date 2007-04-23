@@ -61,6 +61,7 @@ function do_upgrade()
 {
   global $user;
   global $conf;
+  
   if (!$user->is_admin())
     return ERR_NOT_PERMITTED;
 
@@ -70,10 +71,14 @@ function do_upgrade()
     switch ($cur_version)
     {
     case -1:
-      $this->_upgrade_to_1(); break;
+      $cur_version=$this->_upgrade_to_1(); break;
+    case 1:
+      // This should be done via external php script changedb.svn183.sh
+      break;    
+    case 2:
+      $cur_version=$this->_upgrade_to_3(); break;
     default: break;
     }
-    $cur_version=$conf->get('db.version', -1);
   }
 }
 
@@ -110,6 +115,53 @@ function _upgrade_to_1()
   $db->query($sql);
 
   $conf->set_default('db.version', '1');
+  return 1;
+}
+
+/** Add important index */
+function _upgrade_to_3()
+{
+  global $db, $conf;
+
+  $sql="ALTER TABLE $db->users ".
+       "ADD INDEX(id)";
+  $db->query($sql);
+
+  $sql="ALTER TABLE $db->groups ".
+       "ADD INDEX(id)";
+  $db->query($sql);
+
+  $sql="ALTER TABLE $db->usergroup ".
+       "ADD INDEX(userid), ADD INDEX(groupid)";
+  $db->query($sql);
+
+  $sql="ALTER TABLE $db->images ".
+       "ADD INDEX(id)";
+  $db->query($sql);
+
+  $sql="ALTER TABLE $db->imagetag ".
+       "ADD INDEX(tagid)";
+  $db->query($sql);
+
+  $sql="ALTER TABLE $db->imageset ".
+       "ADD INDEX(setid)";
+  $db->query($sql);
+
+  $sql="ALTER TABLE $db->imagelocation ".
+       "ADD INDEX(locationid)";
+  $db->query($sql);
+
+  $sql="ALTER TABLE $db->logs ".
+       "CHANGE image imageid INT DEFAULT NULL, ".
+       "CHANGE user userid INT DEFAULT NULL";
+  $db->query($sql);
+
+  $sql="ALTER TABLE $db->logs ".
+       "ADD INDEX(imageid), ADD INDEX(userid)";
+  $db->query($sql);
+
+  $conf->set_default('db.version', '3');
+  return 3;
 }
 
 }

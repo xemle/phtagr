@@ -226,7 +226,7 @@ function _log($level, $msg, $image, $user)
   {
     $sfile=mysql_escape_string($file);
     $smsg=mysql_escape_string($msg);
-    $sql="INSERT INTO $db->logs (time, level, image, user, file, line, message)
+    $sql="INSERT INTO $db->logs (time, level, imageid, userid, file, line, message)
           VALUES (NOW(), $level, $image, $user, '$sfile', $line, '$smsg')";
     $db->query($sql);
   }

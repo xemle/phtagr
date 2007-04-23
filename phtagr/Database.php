@@ -439,6 +439,7 @@ function create_tables()
                                            bytes in qinterval seconds. */
         data          BLOB,             /* For optional and individual values */
 
+        INDEX(id),
         INDEX(cookie),
         PRIMARY KEY(id))";
   if (!$this->query($sql)) { return false; }
@@ -457,6 +458,7 @@ function create_tables()
         owner         INT NOT NULL,       /* User ID of the owner */
         name          VARCHAR(32) NOT NULL,
         
+        INDEX(id),
         PRIMARY KEY(id))";
   if (!$this->query($sql)) { return false; }
    
@@ -464,6 +466,8 @@ function create_tables()
         userid        INT NOT NULL,
         groupid       INT NOT NULL,
         
+        INDEX(userid),
+        INDEX(groupid),
         PRIMARY KEY(userid,groupid))";
   if (!$this->query($sql)) { return false; }
   
@@ -507,6 +511,7 @@ function create_tables()
 
         data          BLOB,               /* For optinal data */
         
+        INDEX(id),
         INDEX(date),
         INDEX(ranking),
         INDEX(voting),
@@ -526,6 +531,7 @@ function create_tables()
         imageid       INT NOT NULL,
         tagid         INT NOT NULL,
 
+        INDEX(imageid),
         PRIMARY KEY(imageid,tagid))";
   if (!$this->query($sql)) { return false; }
   
@@ -542,6 +548,7 @@ function create_tables()
         imageid       INT NOT NULL,
         setid         INT NOT NULL,
 
+        INDEX(setid),
         PRIMARY KEY(imageid,setid))";
   if (!$this->query($sql)) { return false; }
   
@@ -558,6 +565,7 @@ function create_tables()
         imageid       INT NOT NULL,
         locationid    INT NOT NULL,
 
+        INDEX(locationid),
         PRIMARY KEY(imageid,locationid))";
   if (!$this->query($sql)) { return false; }
     
@@ -600,14 +608,16 @@ function create_tables()
   $sql="CREATE TABLE $this->logs (
         time          DATETIME,
         level         TINYINT,
-        image         INT DEFAULT NULL,
-        user          INT DEFAULT NULL,
+        imageid       INT DEFAULT NULL,
+        userid        INT DEFAULT NULL,
         file          BLOB,
         line          INT,
         message       BLOB,
 
         INDEX (time),
-        INDEX (level))";
+        INDEX (level),
+        INDEX (imageid),
+        INDEX (userid))";
   if (!$this->query($sql)) { return false; }
 
   $this->init_tables();

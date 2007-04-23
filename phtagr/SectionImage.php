@@ -572,12 +572,13 @@ function locations($return=false)
   $loc_url=new Search();
   foreach ($locations as $type => $location)
   {
-    $loc_url->add_param('location', $location);
+    $loc_url->add_location($location);
     $url=$loc_url->get_url();
     $output.="<a href=\"$url\">".$this->escape_html($location)."</a>";
     if ($i<$num_locations-1)
       $output.=$conf->get('meta.separator', ';')." ";
     $i++;
+    $loc_url->del_location($location);
   }
   unset($loc_url);
   return $this->_output($output, $return);

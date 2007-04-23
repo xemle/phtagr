@@ -33,16 +33,16 @@ var $locations;
 function SectionBulb()
 {
   $this->SectionBase("bulb");
-  $this->tags=array();
-  $this->sets=array();
-  $this->locations=array();
+  $this->_tags=array();
+  $this->_sets=array();
+  $this->_locs=array();
 }
 
 function set_data($tags, $sets, $locations)
 {
-  $this->tags=$tags;
-  $this->sets=$sets;
-  $this->locations=$locations;
+  $this->_tags=$tags;
+  $this->_sets=$sets;
+  $this->_locs=$locations;
 }
 
 function print_content()
@@ -63,11 +63,11 @@ function print_content()
 
   $url=new Search();
   $url->add_param('section', 'explorer');
-  if (count($this->tags)>0)
+  if (count($this->_tags)>0)
   {
     echo "\n<h3>"._("Tags:")."</h3>\n<ul>";
-    arsort($this->tags);
-    foreach ($this->tags as $tag => $nums) 
+    arsort($this->_tags);
+    foreach ($this->_tags as $tag => $nums) 
     {
       echo "<li>";
       $url->add_tag($tag);
@@ -99,11 +99,11 @@ function print_content()
     echo "</ul>\n";
   }
 
-  if (count($this->sets)>0)
+  if (count($this->_sets)>0)
   {
     echo "\n<h3>"._("Sets:")."</h3>\n<ul>";
-    arsort($this->sets);
-    foreach ($this->sets as $set => $nums) 
+    arsort($this->_sets);
+    foreach ($this->_sets as $set => $nums) 
     {
       echo "<li>";
       $url->add_set($set);
@@ -134,14 +134,15 @@ function print_content()
     echo "</ul>\n";
   }
 
-  if (count($this->locations)>0)
+  if (count($this->_locs)>0)
   {
     echo "\n<h3>"._("Locations:")."</h3>\n<ul>";
-    arsort($this->locations);
-    foreach ($this->locations as $loc => $nums) 
+    arsort($this->_locs);
+    foreach ($this->_locs as $loc => $nums) 
     {
       echo "<li>";
-      $url->set_location($loc);
+      $url->add_location($loc);
+      // Add global search
       if ($userid>0) 
       {
         $url->set_userid(0);
@@ -150,12 +151,14 @@ function print_content()
       }
       if (!$add_url->has_location($loc))
       {
-        $loc_old=$add_url->get_location();
-        $add_url->set_location($loc);
-        echo "<a href=\"".$add_url->get_url()."\">+</a> ";
-        $add_url->set_location($loc_old);
+        $add_url->add_location($loc);
+        echo "<a href=\"".$add_url->get_url()."\">+</a>/";
+        $add_url->del_location($loc);
+        $add_url->add_location("-".$loc);
+        echo "<a href=\"".$add_url->get_url()."\">-</a> ";
+        $add_url->del_location("-".$loc);
       } else {
-        echo "+ ";
+        echo "+/- ";
       }
       echo "<a href=\"".$url->get_url()."\">".$this->escape_html($loc)."</a>";
       if ($nums>1)

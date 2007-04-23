@@ -121,7 +121,7 @@ function print_comment_form()
   $id=$img->get_id();
 
   // Can user comment this image?
-  if ($id<0 || $img->can_comment(&$user))
+  if ($id<0 || !$img->can_comment(&$user))
     return;
 
   $search=$this->get_search();
