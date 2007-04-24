@@ -54,7 +54,7 @@ function print_content()
   $userid=$search->get_userid();
   $src=$user->get_theme_dir().'/globe.png';
   $img="<img src=\"$src\" border=\"0\" alt=\"@\" title=\""._("Search globaly")."\"/>";
-  echo "<h2>"._("Summarize")."</h2>\n";
+  echo "<h2>"._("Navigator")."</h2>\n";
 
   // Get current search and reset positions
   $add_url=clone $search;

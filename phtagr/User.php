@@ -206,8 +206,7 @@ function match_passwd($passwd)
   @note This function resets the authentication cookie */
 function passwd($oldpasswd, $passwd)
 {
-  global $db;
-  global $user;
+  global $db, $user, $log;
 
   // Deny anonymous and guests to change the password
   if ($user->get_id()<=0 || $user->get_type()==USER_GUEST) 
@@ -226,12 +225,14 @@ function passwd($oldpasswd, $passwd)
     return $result;
 
   $spasswd=mysql_escape_string($passwd);
-  $sql="UPDATE $db->users
-        SET password='$spasswd',cookie=''
-        WHERE id=".$this->get_id();
+  $sql="UPDATE $db->users".
+       " SET password='$spasswd',cookie=''".
+       " WHERE id=".$this->get_id();
   $result=$db->query($sql);
   if (!$result)
     return ERR_DB_UPDATE;
+
+  $log->info("Changing password by '".$user->get_name()."' (".$user->get_id().")", -1, $this->get_id());
   return 0;
 }
 
@@ -461,9 +462,9 @@ function _check_login($name, $pwd)
     
   $sname=mysql_escape_string($name);
   $spwd=mysql_escape_string($pwd);
-  $sql="SELECT id
-        FROM $db->users 
-        WHERE name='$sname' AND password='$spwd'";
+  $sql="SELECT id".
+       " FROM $db->users".
+       " WHERE name='$sname' AND password='$spwd'";
   $result=$db->query($sql);
   if (!$result || mysql_num_rows($result)!=1)
     return false;
@@ -475,13 +476,16 @@ function _check_login($name, $pwd)
   return true;
 }
 
-/** Sets the initial timestamps and arrays for the session */
+/** Sets the initial timestamps and arrays for the session 
+  @todo Enable log in an early stage */
 function init_session()
 {
+  global $log;
   session_name('sid');
   // initiating the session
   if (!isset($_SESSION['created']))
   {
+    //$log->warn("Create new session", -1, $this->get_id());
     $_SESSION['created']=time();
     $_SESSION['img_viewed']=array();
     $_SESSION['img_voted']=array();
@@ -506,8 +510,8 @@ function init_session()
   @return the user id on success. On failure it returns a global error code */
 function create($name, $pwd, $type=USER_MEMBER)
 {
-  global $db;
-  global $user;
+  global $db, $user, $log;
+
   $err=$this->_check_name($name);
   if ($err<0)
     return $err;
@@ -527,9 +531,9 @@ function create($name, $pwd, $type=USER_MEMBER)
 
   $sname=mysql_escape_string($name);
   $spwd=mysql_escape_string($pwd);
-  $sql="INSERT INTO $db->users
-        (name, password, type) 
-        VALUES ('$sname', '$spwd', $type)";
+  $sql="INSERT INTO $db->users".
+       " (name, password, type)".
+       " VALUES ('$sname', '$spwd', $type)";
   $result=$db->query($sql);
   if (!$result)
     return ERR_USER_INSERT;
@@ -540,6 +544,7 @@ function create($name, $pwd, $type=USER_MEMBER)
   if ($err<0)
     return $err;
 
+  $log->info("Create user '$name' ($id)", -1, $user->get_id());
   return $id;
 }
 
@@ -549,6 +554,8 @@ function create($name, $pwd, $type=USER_MEMBER)
   @return ID of the guest account or an global error (ERROR < 0) */
 function create_guest($name, $pwd)
 {
+  global $user, $log;
+
   $id=$this->create($name, $pwd, USER_GUEST);
   if ($id<0)
     return $id;
@@ -556,6 +563,8 @@ function create_guest($name, $pwd)
   $guest->set_creator($this->get_id());
   $guest->commit();
   unset($guest);
+
+  $log->info("Create guest '$name' ($id)", -1, $user->get_id());
   return $id;
 }
 
@@ -569,14 +578,6 @@ function _init_data()
   $id=$this->get_id();
   if ($id<=0)
     return ERR_GERNERAL;
-
-  /*
-  $conf=new Config($id);
-  $conf->set('image.gacl', ACL_PREVIEW|ACL_EDIT);
-  $conf->set('image.macl', ACL_PREVIEW);
-  $conf->set('image.aacl', ACL_PREVIEW);
-  unset($conf);
-  */
 
   $upload=$this->get_upload_dir();
   if (!$upload)
@@ -615,10 +616,10 @@ function is_in_group($groupid=-1)
 {
   global $db;
 
-  $sql="SELECT userid
-        FROM $db->usergroup
-        WHERE userid=".$this->get_id()."
-          AND groupid=$groupid";
+  $sql="SELECT userid ".
+       " FROM $db->usergroup".
+       " WHERE userid=".$this->get_id().
+       " AND groupid=$groupid";
   $result=$db->query($sql);
   if (mysql_num_rows($result)>0)
     return true;
@@ -667,9 +668,9 @@ function get_guests()
   global $db;
   $guests=array();
 
-  $sql="SELECT id,name
-        FROM $db->users
-        WHERE creator=".$this->get_id();
+  $sql="SELECT id,name".
+       " FROM $db->users".
+       " WHERE type=".USER_GUEST." AND creator=".$this->get_id();
   $result=$db->query($sql);
   if (!$result || mysql_num_rows($result)<1)
     return $guests;
@@ -684,9 +685,9 @@ function get_groups()
 {
   global $db;
   $groups=array();
-  $sql="SELECT id,name 
-        FROM $db->groups
-        WHERE owner=".$this->get_id();
+  $sql="SELECT id,name". 
+       " FROM $db->groups".
+       " WHERE owner=".$this->get_id();
   $result=$db->query($sql);
   if (!$result || mysql_num_rows($result)<0)
     return $groups;
@@ -708,9 +709,9 @@ function get_image_count($only_uploads=false, $since=-1)
     return -1;
 
   $id=$this->get_id();
-  $sql="SELECT COUNT(*)
-        FROM $db->images
-        WHERE userid=$id";
+  $sql="SELECT COUNT(*)".
+       " FROM $db->images".
+       " WHERE userid=$id";
   if ($only_uploads)
     $sql.=" AND is_upload=1";
   if ($since>0)
@@ -736,9 +737,9 @@ function get_image_bytes($only_uploads=false, $since=-1)
     return -1;
 
   $id=$this->get_id();
-  $sql="SELECT SUM(bytes)
-        FROM $db->images
-        WHERE userid=$id";
+  $sql="SELECT SUM(bytes)".
+       " FROM $db->images".
+       " WHERE userid=$id";
   if ($only_uploads)
     $sql.=" AND is_upload=1";
   if ($since>0)
@@ -903,7 +904,7 @@ function check_session($setcookie=true)
     
     else if ($_REQUEST['action']=='logout')
     {
-      $this->_remove_session();
+      $this->_delete_session();
       $this->_remove_cookie();
     }
   }
@@ -926,12 +927,15 @@ function check_session($setcookie=true)
   }
 }
 
-/** Removes a session. It clears all the data and reinitialize it */
-function _remove_session()
+/** Removes a session. It clears all the data and reinitialize it 
+  @todo Enable log in a early stage */
+function _delete_session()
 {
+  global $log;
   foreach ($_SESSION as $key => $value)
     unset($_SESSION[$key]);
 
+  //$log->warn("Delete session", -1, $this->get_id());
   $this->init_session();
 }
 
@@ -1053,8 +1057,8 @@ function _delete_user_data($id)
   // @todo delete users upload directory
   
   // Delete the user data
-  $sql="DELETE FROM $db->users
-        WHERE id=$id";
+  $sql="DELETE FROM $db->users".
+       " WHERE id=$id";
 
   $result=$db->query($sql);
   return true;
@@ -1065,7 +1069,9 @@ function _delete_user_data($id)
   @note the admin account could not be deleted */
 function delete()
 {
-  global $user;
+  global $user, $log;
+
+  $log->info("Delete user '".$this->get_name()."' by '".$user->get_name()."' (".$user->get_id().")", -1, $this->get_id());
 
   $permit=false;
 

@@ -209,7 +209,7 @@ function tables_exist()
 /** Sql query an return the result. 
  @result On failure print an error and return NULL
  * */
-function query($sql, $quiet=false)
+function query($sql, $quiet=true)
 {
   if (!$this->_link) return null;
   

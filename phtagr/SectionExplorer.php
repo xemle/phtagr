@@ -192,8 +192,7 @@ function _escape_js($s)
 /** Print the current page with an table */
 function print_content()
 {
-  global $db;
-  global $user; 
+  global $db, $user, $log;
 
   $search=$this->get_search();
   $sql=$search->get_num_query();
@@ -202,6 +201,8 @@ function print_content()
   $result = $db->query($sql);
   if (!$result)
   {
+    $this->error(_("Could not run SQL query"));
+    $log->err("Could not run SQL query: $sql");
     return;
   }
   $row=mysql_fetch_row($result);
@@ -219,7 +220,7 @@ function print_content()
 
   if ($count==0)
   {
-    echo "<p>"._("No images found!")."</p>\n";
+    $this->info(_("No images found for this search!"));
     return;
   } else {
     $num_pages=floor($count / $search->get_page_size());
@@ -232,6 +233,8 @@ function print_content()
   $result = $db->query($sql);
   if (!$result)
   {
+    $this->error(_("Could not run SQL query"));
+    $log->err("Could not run SQL query: $sql");
     return;
   }
 

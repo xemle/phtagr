@@ -43,7 +43,12 @@ function print_all_tags()
 
   $search=new Search();
   $result=$search->get_popular_tags();
-
+  if (!$result)
+  {
+    $this->warning(_("No popular tags found"));
+    return;
+  }
+    
   $tags=array();
   $hits=array();
   $data=array();
@@ -83,6 +88,11 @@ function print_all_sets()
 
   $search=new Search();
   $result=$search->get_popular_sets();
+  if (!$result)
+  {
+    $this->warning(_("No popular sets found"));
+    return;
+  }
 
   $sets=array();
   $hits=array();

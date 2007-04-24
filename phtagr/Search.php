@@ -508,12 +508,12 @@ function get_form()
   be counted. Default is 0.
   @param op Count operant. -2 for not equal, -1 for less or equal, 0 for equal,
   1 for greater or equal. Default is 1 (greater) */
-function _join_tags($tags, $count=0, $op=1)
+function _add_sql_join_tags($tags, $count=0, $op=1)
 {
   global $db;
   $num_tags=count($tags);
-  $sql=" JOIN ( SELECT imageid, COUNT(imageid) AS thits
-        FROM $db->imagetag";
+  $sql=" JOIN ( SELECT imageid, COUNT(imageid) AS thits".
+       " FROM $db->imagetag";
   if ($num_tags>0) 
   {
     $sql.=" WHERE";
@@ -538,7 +538,7 @@ function _join_tags($tags, $count=0, $op=1)
     }
     $sql.="$count";
   }
-  $sql.=" ) AS it ON i.id=it.imageid";
+  $sql.=" ) AS it ON ( i.id=it.imageid )";
   return $sql;
 }
 
@@ -549,12 +549,12 @@ function _join_tags($tags, $count=0, $op=1)
   be counted. Default is 0.
   @param op Count operant. -2 for not equal, -1 for less or equal, 0 for equal,
   1 for greater or equal. Default is 1 (greater) */
-function _join_sets($sets, $count=0, $op=1)
+function _add_sql_join_sets($sets, $count=0, $op=1)
 {
   global $db;
   $num_sets=count($sets);
-  $sql=" JOIN ( SELECT imageid, COUNT(imageid) AS shits
-        FROM $db->imageset";
+  $sql=" JOIN ( SELECT imageid, COUNT(imageid) AS shits".
+       " FROM $db->imageset";
   if ($num_sets>0) 
   {
     $sql.=" WHERE";
@@ -579,7 +579,7 @@ function _join_sets($sets, $count=0, $op=1)
     }
     $sql.="$count";
   }
-  $sql.=" ) AS iset ON i.id=iset.imageid";
+  $sql.=" ) AS iset ON ( i.id=iset.imageid )";
   return $sql;
 }
 
@@ -590,12 +590,12 @@ function _join_sets($sets, $count=0, $op=1)
   locations will be counted. Default is 0.
   @param op Count operant. -2 for not equal, -1 for less or equal, 0 for equal,
   1 for greater or equal. Default is 1 (greater) */
-function _join_locs($locs, $count=0, $op=1)
+function _add_sql_join_locations($locs, $count=0, $op=1)
 {
   global $db, $log;
   $num_locs=count($locs);
-  $sql=" JOIN ( SELECT imageid, COUNT(imageid) AS lhits
-        FROM $db->imagelocation";
+  $sql=" JOIN ( SELECT imageid, COUNT(imageid) AS lhits".
+       " FROM $db->imagelocation";
   if ($num_locs>0) 
   {
     $sql.=" WHERE";
@@ -627,18 +627,20 @@ function _join_locs($locs, $count=0, $op=1)
     }
     $sql.="$count";
   }
-  $sql.=" ) AS l ON i.id=l.imageid";
+  $sql.=" ) AS l ON ( i.id=l.imageid )";
   return $sql;
 }
 
-/** Create a SQL query from a tags, sets and locations
+/** The meta data inclusion is solved by a conjunction via sql joints in the
+ * sql from statement. The meta data joins are also subqueries to count the
+ * meta data hits.
   @param tags Array of tags, could be NULL
   @param sets Array of sets, could be NULL
   @param locs Array of locations, could be NULL
-  @param is_negated True if the the subquery will be negated
-  @return Return the sql statement of the query object corresponding to the
-  Seach parameters */
-function _add_sql_join_meta($tags, $sets, $locs)
+  @return Returns the sql join statements for meta data inclusion. May be an
+  empty string, if no meta data is given. 
+  @see _add_sql_join_tags _add_sql_join_sets _add_sql_join_locations */
+function _add_sql_join_meta_inclusion($tags, $sets, $locs)
 {
   global $db, $user, $log;
 
@@ -655,7 +657,7 @@ function _add_sql_join_meta($tags, $sets, $locs)
       case 2: $count=intval($num_tags*0.75); break; /* FUZZY */
       default: $count=$num_tags; break; /* AND */
     }
-    $sql.=$this->_join_tags($tags, $count, 1);
+    $sql.=$this->_add_sql_join_tags($tags, $count, 1);
   }
 
   if ($num_sets) 
@@ -667,7 +669,7 @@ function _add_sql_join_meta($tags, $sets, $locs)
       case 2: $count=intval($num_sets*0.75); break; /* FUZZY */
       default: $count=$num_sets; break; /* AND */
     }
-    $sql.=$this->_join_sets($sets, $count, 1);
+    $sql.=$this->_add_sql_join_sets($sets, $count, 1);
   }
 
   if ($num_locs) 
@@ -679,12 +681,18 @@ function _add_sql_join_meta($tags, $sets, $locs)
       case 2: $count=intval($num_locs*0.75); break; /* FUZZY */
       default: $count=$num_locs; break; /* AND */
     }
-    $log->trace("Join for ".implode(", ", $locs));
-    $sql.=$this->_join_locs($locs, $count, 1);
+    $sql.=$this->_add_sql_join_locations($locs, $count, 1);
   }
   return $sql;
 }
 
+/** The meta data exclusion is solved by a disjunction of the meta data set and
+ * is in a negated sql where statement (NOT IN).
+  @param tags Array of exclued tags, could be NULL
+  @param sets Array of exclued sets, could be NULL
+  @param locs Array of exclued locations, could be NULL
+  @return Returns the sql where statements for meta data exclusion. May be an
+  empty string is not meta data exclusion is given */
 function _add_sql_where_meta_exclustion($tags, $sets, $locs)
 {
   global $db;
@@ -696,26 +704,26 @@ function _add_sql_where_meta_exclustion($tags, $sets, $locs)
   if ($num_tags+$num_sets+$num_locs==0)
     return "";
 
-  $sql.=" i.id NOT IN (";
+  $sql.=" AND i.id NOT IN (";
   $sql.=" SELECT i.id".
         " FROM $db->images AS i";
 
   if ($num_tags)
   {
     $sql.=" LEFT JOIN $db->imagetag AS it"
-        ." ON i.id=it.imageid";
+        ." ON ( i.id=it.imageid )";
   }
 
   if ($num_sets)
   {
     $sql.=" LEFT JOIN $db->imageset AS iset"
-        ." ON i.id=iset.imageid";
+        ." ON ( i.id=iset.imageid )";
   }
 
   if ($num_locs)
   {
     $sql.=" LEFT JOIN $db->imagelocation AS il"
-        ." ON i.id=il.imageid";
+        ." ON ( i.id=il.imageid )";
   }
 
   $sql.=" WHERE 1=0";
@@ -771,21 +779,19 @@ function _add_sql_where_acl()
   // if requested user id is not the own user id
   else if ($user->is_member() || $user->is_guest())
   {
-    $acl .= " AND (
-               (i.groupid in ( 
-                SELECT groupid
-                FROM $db->usergroup
-                WHERE userid=".$user->get_id().")
-              AND i.gacl>=".ACL_PREVIEW." )";
+    $acl.=" AND ( i.groupid IN (".
+          " SELECT groupid".
+          " FROM $db->usergroup".
+          " WHERE userid=".$user->get_id().
+          " AND i.gacl>=".ACL_PREVIEW." )";
     if ($user->is_member())
-      $acl .= " OR i.macl>=".ACL_PREVIEW;
+      $acl.=" OR i.macl>=".ACL_PREVIEW;
     else
-      $acl .= " OR i.aacl>=".ACL_PREVIEW;
-    $acl .= " )";
-
+      $acl.=" OR i.aacl>=".ACL_PREVIEW;
+    $acl.=" )";
   }
   else {
-    $acl .= " AND i.aacl>=".ACL_PREVIEW;
+    $acl.=" AND i.aacl>=".ACL_PREVIEW;
   }
 
   return $acl;
@@ -815,7 +821,7 @@ function _add_sql_where_visibility()
 /** 
   @return Returns the column order for the selected column. This is needed for
   passing the order from subqueries to upper queries.*/
-function _add_sql_column_order($num_tags, $num_sets)
+function _add_sql_column_order($num_tags, $num_sets, $num_locs)
 {
   $order='';
   $orderby=$this->get_param('orderby', 'date');
@@ -844,12 +850,19 @@ function _add_sql_column_order($num_tags, $num_sets)
     break;
   }
 
-  if ($num_tags>0)
-    $order.=",thits";
-  if ($num_sets>0)
-    $order.=",shits";
-  if ($num_tags>0 && $num_sets>0)
-    $order.=",thits*shits as hits";
+  $hits=array();
+  if ($num_tags) array_push($hits, "thits");
+  if ($num_sets) array_push($hits, "shits");
+  if ($num_locs) array_push($hits, "lhits");
+
+  if (count($hits))
+  {
+    $order.=",".implode(",", $hits);
+    // hits is the product of all meta hits
+    for ($i=0; $i<count($hits); $i++)
+      $hits[$i]="(".$hits[$i]."+1)";
+    $order.=",".implode("*", $hits)." AS hits";
+  }
 
   return $order;
 }
@@ -960,14 +973,13 @@ function _add_sql_where()
   @param order If this flag is true, the order column will be included into the
   select statement. Otherwise not. Default is true.
   @return SQL query string 
-  @see _get_sub_query, _add_sql_limit, _add_sql_column_order  */
+  @see _add_sql_limit, _add_sql_column_order  */
 function get_query($limit=1, $order=true)
 {
   global $db;
+
   $pos_tags=array();
   $neg_tags=array();
-
-  $tagop=$this->get_param('tagop', 0);
   foreach ($this->_tags as $tag)
   {
     if ($tag{0}=='-')
@@ -1004,169 +1016,20 @@ function get_query($limit=1, $order=true)
   
   $sql="SELECT i.id";
   if ($order)
-    $sql.=$this->_add_sql_column_order($num_pos_tags, $num_pos_sets);
-
-  if ($num_neg_tags || $num_neg_sets || $num_neg_locs)
-  {
-    $sql.=" FROM";
-    if ($num_pos_tags || $num_pos_sets || $num_neg_locs) {
-      $sql.=" ( SELECT i.id";
-      if ($order)
-        $sql.=$this->_add_sql_column_order($num_pos_tags, $num_pos_sets);
-      $sql.=" FROM $db->images AS i";
-      $sql.=$this->_add_sql_join_meta($pos_tags, $pos_sets, $pos_locs);
-      $sql.=" WHERE";
-    } else {
-      $sql.=" $db->images AS i WHERE";
-    }
-    $sql.=$this->_add_sql_where_meta_exclustion($neg_tags, $neg_sets, $neg_locs);
-    if ($num_pos_tags || $num_pos_sets || $num_neg_locs) {
-      $sql.=" ) AS i";
-    }
-    $sql.=$this->_add_sql_where();
-    $sql.=" GROUP BY i.id";
-    if ($order)
-      $sql.=$this->_add_sql_orderby($num_pos_tags, $num_pos_sets);
-    $sql.=$this->_add_sql_limit($limit);
-  }
-  else 
-  {
-    $sql.=" FROM $db->images AS i";
-    $sql.=$this->_add_sql_join_meta($pos_tags, $pos_sets, $pos_locs);
-    $sql.=" WHERE 1=1"; // dummy where clause
-    $sql.=$this->_add_sql_where();
-    $sql.=" GROUP BY i.id";
-
-    if ($order)
-      $sql.=$this->_add_sql_orderby($num_pos_tags, $num_pos_sets);
-    $sql.=$this->_add_sql_limit($limit);
-  }
-
-  return $sql; 
-}
-
-/** Create a SQL query from a tags, sets and location and other conditions like
- * user, group, acl, etc.
-  @param tags Array of tags, could be NULL
-  @param sets Array of sets, could be NULL
-  @param location Array of locations, could be NULL
-  @param order Insert order column to select statement if true
-  @param is_negated True if the the subquery will be negated
-  @return Return the sql statement of the query object corresponding to the
-  Seach parameters */
-function _get_sub_query($tags, $sets, $location, $order, $is_negated)
-{
-  global $db;
-  global $user;
-  $num_tags=count($tags);
-  $num_sets=count($sets);
-  $num_sets=count($locs);
-  $has_neg_join=false;
-
-  $sql="SELECT i.id";
-  if ($order)
-    $sql.=$this->_add_sql_column_order($num_tags, $num_sets);
+    $sql.=$this->_add_sql_column_order($num_pos_tags, $num_pos_sets, $num_pos_locs);
 
   $sql.=" FROM $db->images AS i";
-  if ($num_tags) 
-  {
-    if (!$is_negated)
-    {
-      $tagop=$this->get_param('tagop', 0);
-      switch ($tagop)
-      {
-        case 1: $count=0; break; /* OR */
-        case 2: $count=intval($num_tags*0.75); break; /* FUZZY */
-        default: $count=$num_tags; break; /* AND */
-      }
-      $sql.=$this->_join_tags($tags, $count, 1);
-    }
-    else
-    {
-      $sql.=$this->_join_tags($tags, 0, 1);
-      $has_neg_join=true;
-    }
-  }
-  if ($num_sets) 
-  {
-    $setop=$this->get_param('setop', 0);
-    switch ($setop)
-    {
-      case 1: $count=0; break; /* OR */
-      case 2: $count=intval($num_sets*0.75); break; /* FUZZY */
-      default: $count=$num_sets; break; /* AND */
-    }
-    $sql.=$this->_join_sets($sets, $count, 1);
-  }
-  if ($num_locs) 
-  {
-    if (!$is_negated)
-    {
-      $setop=$this->get_param('locop', 0);
-      switch ($setop)
-      {
-        case 1: $count=0; break; /* OR */
-        case 2: $count=intval($num_locs*0.75); break; /* FUZZY */
-        default: $count=$num_locs; break; /* AND */
-      }
-      $sql.=$this->_join_locs($locs, $count, 1);
-    }
-    else
-    {
-      $sql.=($has_neg_join)?" RIGHT":"";
-      $sql.=$this->_join_locs($locs, 0, 1);
-      $has_neg_join=true;
-    } 
-  }
+  $sql.=$this->_add_sql_join_meta_inclusion($pos_tags, $pos_sets, $pos_locs);
+  $sql.=" WHERE 1=1"; // dummy where clause
+  $sql.=$this->_add_sql_where_meta_exclustion($neg_tags, $neg_sets, $neg_locs);
+  $sql.=$this->_add_sql_where();
+  $sql.=" GROUP BY i.id";
 
-  if ($location!='') 
-    $sql .= ",$db->imagelocation AS il";
-    
-  $sql .= " WHERE 1=1"; // dummy where clause
-  
-  // handle location
-  if ($location!='')
-  {
-    $location_type=$this->get_param('location_type', 0);
-    if ($location_type==LOCATION_UNDEFINED) 
-    {
-      $locations=$db->location2ids($location);
-    } else {
-      $locationid=$db->location2id($location, $location_type);
-      $locations=array($locationid);
-    }
-    $sql.=" AND i.id=il.imageid AND (";
-    for ($i=0; $i<count($locations); $i++)
-    {
-      $sql.=" il.locationid=".$locations[$i];
-      if ($i<count($locations)-1)
-        $sql.=" OR";
-    }
-    $sql.=" )";
-  }
-  
-  // handle IDs of image
-  $imageid=$this->get_param('id', 0);
-  $userid=$this->get_param('user', 0);
-  $groupid=$this->get_param('group', -1);
+  if ($order)
+    $sql.=$this->_add_sql_orderby($num_pos_tags, $num_pos_sets);
+  $sql.=$this->_add_sql_limit($limit);
 
-  if ($imageid>0)  $sql .= " AND i.id=".$imageid;
-  if ($userid>0)   $sql .= " AND i.userid=".$userid;
-  if ($groupid>=0) $sql .= " AND i.groupid=".$groupid;
-  
-  // handle the acl and visibility level
-  $sql .= $this->_add_sql_where_acl();
-  $sql .= $this->_add_sql_where_visibility();
-
-  // handle date
-  $start=$this->get_param('start', 0);
-  $end=$this->get_param('end', 0);
-  if ($start>0)
-    $sql .= " AND i.date>=FROM_UNIXTIME($start)";
-  if ($end>0)
-    $sql .= " AND i.date<FROM_UNIXTIME($end)";
-
-  return $sql;
+  return $sql; 
 }
 
 /** Returns the SQL statement to return the count of the query. The query does
@@ -1174,9 +1037,9 @@ function _get_sub_query($tags, $sets, $location, $order, $is_negated)
 function get_num_query()
 {
   global $db;
-  $sql="SELECT COUNT(*) FROM ( ";
-  $sql .= $this->get_query(0, false);
-  $sql .= " ) AS num";
+  $sql="SELECT COUNT(*) FROM ( ".
+       $this->get_query(0, false).
+       " ) AS num";
   return $sql;
 }
 
@@ -1184,12 +1047,12 @@ function get_popular_tags()
 {
   global $db;
 
-  $sql="SELECT t.name,COUNT(t.name) AS hits 
-        FROM $db->tags AS t, $db->imagetag AS it, $db->images as i 
-        WHERE t.id=it.tagid and it.imageid=i.id";
-  $sql.=$this->_add_sql_where_acl();
-  $sql.=" GROUP BY t.name 
-        ORDER BY hits DESC LIMIT 0,50";
+  $sql="SELECT t.name,COUNT(t.name) AS hits".
+       " FROM $db->tags AS t, $db->imagetag AS it, $db->images as i".
+       " WHERE t.id=it.tagid and it.imageid=i.id".
+       $this->_add_sql_where_acl().
+       " GROUP BY t.name ".
+       " ORDER BY hits DESC LIMIT 0,50";
   
   return $db->query($sql);
 }
@@ -1198,12 +1061,12 @@ function get_popular_sets()
 {
   global $db;
 
-  $sql="SELECT s.name,COUNT(s.name) AS hits 
-        FROM $db->sets AS s, $db->imageset AS iset, $db->images as i 
-        WHERE s.id=iset.setid and iset.imageid=i.id";
-  $sql.=$this->_add_sql_where_acl();
-  $sql.=" GROUP BY s.name 
-        ORDER BY hits DESC LIMIT 0,50";
+  $sql="SELECT s.name,COUNT(s.name) AS hits". 
+       " FROM $db->sets AS s, $db->imageset AS iset, $db->images as i".
+       " WHERE s.id=iset.setid and iset.imageid=i.id".
+       $this->_add_sql_where_acl().
+       " GROUP BY s.name". 
+       " ORDER BY hits DESC LIMIT 0,50";
   
   return $db->query($sql);
 }
