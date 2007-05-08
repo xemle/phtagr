@@ -157,7 +157,9 @@ function print_inputs()
   $edit->print_bar();
   if ($user->is_member()||$user->is_guest())
     $edit->print_edit_inputs();
-  $edit->print_buttons();
+
+  $this->input_submit(_("Apply"));
+  $this->input_reset(_("Reset"));
   echo "</div>\n";
 }
 

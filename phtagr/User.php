@@ -476,8 +476,7 @@ function _check_login($name, $pwd)
   return true;
 }
 
-/** Sets the initial timestamps and arrays for the session 
-  @todo Enable log in an early stage */
+/** Sets the initial timestamps and arrays for the session */
 function init_session()
 {
   global $log;
@@ -485,7 +484,7 @@ function init_session()
   // initiating the session
   if (!isset($_SESSION['created']))
   {
-    //$log->warn("Create new session", -1, $this->get_id());
+    $log->warn("Create new session", -1, $this->get_id());
     $_SESSION['created']=time();
     $_SESSION['img_viewed']=array();
     $_SESSION['img_voted']=array();
@@ -883,7 +882,7 @@ function get_theme_dir()
  @note A cookie is also set, if the request contains a 'remember' with true */
 function check_session($setcookie=true)
 {
-  global $db;
+  global $db, $conf;
   $cookie_name=$this->_get_cookie_name();
     
   if ($_REQUEST['section']=='account')
@@ -921,21 +920,24 @@ function check_session($setcookie=true)
     $this->init_by_id($id);
   }
 
+  // Load user's configuration
+  if ($conf->get_userid()==0 && $this->get_id()>0)
+    $conf->load($this->get_id());
+
   if (isset($_REQUEST['lang']))
   {
     $this->_set_lang($_REQUEST['lang']);
   }
 }
 
-/** Removes a session. It clears all the data and reinitialize it 
-  @todo Enable log in a early stage */
+/** Removes a session. It clears all the data and reinitialize it */
 function _delete_session()
 {
   global $log;
   foreach ($_SESSION as $key => $value)
     unset($_SESSION[$key]);
 
-  //$log->warn("Delete session", -1, $this->get_id());
+  $log->warn("Delete session", -1, $this->get_id());
   $this->init_session();
 }
 

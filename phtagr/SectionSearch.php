@@ -42,116 +42,138 @@ function print_content()
   $url->add_param('section', 'explorer');
 
   echo "<form action=\"index.php\" method=\"post\">\n";
+  echo "<fieldset><legend>"._("General")."</legend>\n";
   echo $url->get_form();
-  echo "<table>
-  <tr>
-    <th>"._("Tags:")."</th>
-    <td>
-      <input type=\"text\" name=\"tags\" size=\"30\" /><br />
-      Operation: <input type=\"radio\" name=\"tagop\" value=\"0\" checked /> AND,  
-      <input type=\"radio\" name=\"tagop\" value=\"1\" /> OR,  
-      <input type=\"radio\" name=\"tagop\" value=\"2\" /> FUZZY
-    </td>
-  </tr>
-  <tr>
-    <th>"._("Sets:")."</th>
-    <td>
-      <input type=\"text\" name=\"sets\" size=\"30\" /><br />
-      Operation: <input type=\"radio\" name=\"setop\" value=\"0\" checked /> AND,  
-      <input type=\"radio\" name=\"setop\" value=\"1\" /> OR,  
-      <input type=\"radio\" name=\"setop\" value=\"2\" /> FUZZY
-    </td>
-  </tr>
-  <tr>
-    <th>"._("Date:")."</th>
-    <td>
-      "._("after:")." <input type=\"text\" name=\"start\" size=\"10\" /><br />
-      "._("before:")." <input type=\"text\" name=\"end\" size=\"10\" /><br />
-      "._("E.g.")." \"2006-04-21\"
-    </td>
-  </tr>
-  <tr>
-    <th>"._("Location:")."</th>
-    <td>
-      <input type=\"text\" name=\"location\" size=\"30\" /><br />
-      Type: <select name=\"location_type\" size=\"1\">
-        <option value=\"".LOCATION_UNDEFINED."\" selected=\"selected\">"._("undefined")."</option>
-        <option value=\"".LOCATION_CITY."\">"._("City")."</option>
-        <option value=\"".LOCATION_SUBLOCATION."\">"._("Sublocation")."</option>
-        <option value=\"".LOCATION_STATE."\">"._("State")."</option>
-        <option value=\"".LOCATION_COUNTRY."\">"._("Country")."</option>
-      </select>
-    </td>
-  </tr>
-  <tr>
-    <th>"._("User:")."</th>
-    <td><input type=\"text\" name=\"user\"/></td>
-  </tr>\n";
+
+  echo "<ol>";
+
+  echo "<li>";
+  $this->label(_("Tags:"));
+  $this->input_text("tags", "", 30);
+  echo "</li>";
+
+  echo "<li>";
+  $this->label(_("Tag Operation:"));
+  echo "<select name=\"tagop\" size=\"1\">\n";
+  $this->option(_("AND"), 0);
+  $this->option(_("OR"), 1);
+  $this->option(_("FUZZY"), 2);
+  echo "</select>";
+  echo "</li>";
+
+  echo "<li>";
+  $this->label(_("Sets:"));
+  $this->input_text("sets", "", 30);
+  echo "</li>";
+  echo "<li>";
+  $this->label(_("Set Operation:"));
+  echo "<select name=\"setop\" size=\"1\">\n";
+  $this->option(_("AND"), 0);
+  $this->option(_("OR"), 1);
+  $this->option(_("FUZZY"), 2);
+  echo "</select>";
+  echo "</li>";
+
+  echo "<li>";
+  $this->label(_("Location:"));
+  echo "<p>";
+  $this->input_text("location", "", 30);
+  echo _("Type:")."<select name=\"location_type\" size=\"1\">\n";
+  $this->option(_("Any"), LOCATION_UNDEFINED);
+  $this->option(_("City"), LOCATION_CITY);
+  $this->option(_("Subloction"), LOCATION_SUBLOCATION);
+  $this->option(_("State"), LOCATION_STATE);
+  $this->option(_("Country"), LOCATION_COUNTRY);
+  echo "</select>\n";
+  echo "</p>";
+  echo "</li>";
+
+  echo "<li>";
+  $this->label(_("From:"));
+  echo "<p>";
+  $this->input_text("start", "", 10, 10); 
+  echo _("(Format: YYYY-MM-DD)")."</p>";
+  echo "</li>";
+
+  echo "<li>";
+  $this->label(_("Until:"));
+  echo "<p>";
+  $this->input_text("end", "", 10, 10); 
+  echo _("(Format: YYYY-MM-DD)")."</p>";
+  echo "</li>";
+  
+  echo "</ol>";
+  echo "</fieldset>\n";
+
+  echo "<fieldset><legend>"._("Advanced")."</legend>\n";
+  echo "<ol>";
+
+  echo "<li>";
+  $this->label(_("User:"));
+  $this->input_text("user");
+  echo "</li>";
+
   if ($user->is_member())
   {
     $groups=$user->get_groups();
     if (count($groups)>0)
     {
-      echo "  <tr>
-    <th>"._("Groups:")."</td>
-    <td>
-      <select size=\"1\" name=\"group\">
-        <option value=\"\" selected=\"selected\">"._("None")."</option>\n";
+      echo "<li>";
+      $this->label(_("Groups:"));
+      echo "<select size=\"1\" name=\"group\">\n";
+      $this->option(_("None"), -1, true);
+
       foreach ($groups as $gid => $name)
-        echo "        <option value=\"$gid\">$name</option>\n";
-      echo "        <option value=\"0\">"._("Not assigned")."</option>\n";
-      echo "      </select>
-    </td>
-  </tr>\n";
+        $this->option($name, $gid);
+      $this->option(_("Not assigned"), 0);
+      echo "</select>\n";
+      echo "</li>";
     }
-    echo "   <tr>
-    <th>"._("Visibility:")."</th>
-    <td>
-      <select size=\"1\" name=\"visibility\">
-        <option value=\"\" selected=\"selected\">"._("None")."</option>
-        <option value=\"group\">"._("Group")."</option>
-        <option value=\"member\">"._("Member")."</option>
-        <option value=\"public\">"._("Public")."</option>
-      </select>
-    </td>\n";
+  
+    echo "<li>";
+    $this->label(_("Visibility:"));
+    echo "<select size=\"1\" name=\"visibility\">\n";
+    $this->option(_("None"), "none", true);
+    $this->option(_("Group"), "group");
+    $this->option(_("Member"), "member");
+    $this->option(_("Public"), "public");
+    echo "</select>\n";
+    echo "</li>";
   }
-  echo "  <tr>
-    <th>"._("Sort by:")."</th>
-    <td>
-      <select name=\"orderby\">
-        <option value=\"date\" selected=\"selected\">"._("date")."</option>
-        <option value=\"-date\">"._("date asc")."</option>
-        <option value=\"popularity\">"._("Popularity")."</option>
-        <option value=\"-popularity\">"._("Popularity asc")."</option>
-        <option value=\"voting\">"._("Voting")."</option>
-        <option value=\"-voting\">"._("Voting asc")."</option>
-        <option value=\"newest\">"._("Newest")."</option>
-        <option value=\"-newest\">"._("Newest desc")."</option>
-        <option value=\"changes\">"._("Changes")."</option>
-        <option value=\"-changes\">"._("Changes desc")."</option>
-      </select>
-    </td>
-  </tr>
-  <tr>
-    <th>"._("Page size:")."</th>
-    <td>
-      <select name=\"pagesize\">
-        <option value=\"10\" selected=\"selected\">10</option>
-        <option value=\"20\">20</option>
-        <option value=\"50\">50</option>
-        <option value=\"100\">100</option>
-        <option value=\"200\">200</option>
-      </select>
-    </td>
-  </tr>
-  <tr>
-    <td></td>
-    <td><input type=\"submit\" class=\"submit\" value=\""._("Search")."\" />
-        <input type=\"reset\" class=\"reset\" value=\""._("Cancel")."\" /></td>
-  </tr>
-</table>
-</form>
-";
+
+  echo "<li>";
+  $this->label(_("Sort by:"));
+  echo "<select name=\"orderby\">\n";
+  $this->option(_("date"), "date", true);
+  $this->option(_("date ascending"), "-date");
+  $this->option(_("Popularity"), "popularity");
+  $this->option(_("Popularity ascending"), "-popularity");
+  $this->option(_("Voting"), "voting");
+  $this->option(_("Voting ascending"), "-voting");
+  $this->option(_("Newest"), "newest");
+  $this->option(_("Newest ascending"), "-newest");
+  $this->option(_("Changes"), "changes");
+  $this->option(_("Changes ascending"), "-changes");
+  echo "</select>\n";
+  echo "</li>";
+
+  echo "<li>";
+  $this->label(_("Page size:"));
+  echo "<select name=\"pagesize\">\n";
+  foreach (array(12, 24, 60, 120, 240) as $size)
+    $this->option($size, $size);
+  echo "</select>\n";
+  echo "</li>";
+
+  echo "</ol>";
+  echo "</fieldset>";
+  
+  echo "<p>";
+  $this->input_submit(_("Search"));
+  $this->input_reset(_("Cancel"));
+  echo "</p>";
+
+  echo "</form>\n";
 }
 
 }

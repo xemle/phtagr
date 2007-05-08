@@ -296,7 +296,7 @@ function upload_process()
           continue;
         }
     
-        chmod($upload_name, 0644);
+        chmod($upload_name, 0664);
         $image = new ImageSync();
         $image->import($upload_name, 1);
         

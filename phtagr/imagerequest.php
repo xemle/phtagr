@@ -96,13 +96,7 @@ if (!$db->connect())
 {
   internal_error();
 }
-
-// Check user login without refresh the cookie
-$user=new User();
-$user->check_session(false);
-
-$conf=new Config($user->get_id());
-
+$conf=new Config(0);
 $log=new Logger();
 if ($conf->get('log.enabled', 0)==1)
 {
@@ -111,6 +105,10 @@ if ($conf->get('log.enabled', 0)==1)
     $conf->get('log.filename', ''));
   $log->enable();
 }
+
+// Check user login without refresh the cookie
+$user=new User();
+$user->check_session(false);
 
 $img=new Image($_REQUEST['id']);
 if (!$img)

@@ -56,49 +56,59 @@ function print_general ()
   echo "<h3>"._("General")."</h3>\n";
   echo "<form action=\"./index.php\" method=\"post\">\n";
   echo $url->get_form();
-  echo "<table>
-  <tr>
-    <td>"._("First Name:")."</td>
-    <td><input type=\"text\" name=\"firstname\" value=\"".$user->get_firstname()."\" /><td>
-  </tr>
-  <tr>
-    <td>"._("Last Name:")."</td>
-    <td><input type=\"text\" name=\"lastname\" value=\"".$user->get_lastname()."\" /><td>
-  </tr>
-  <tr>
-    <td>"._("Email:")."</td>
-    <td><input type=\"text\" name=\"email\" value=\"".$user->get_email()."\" /><td>
-  </tr>
-  <tr>
-    <td>"._("Current Password:")."</td>
-    <td><input type=\"password\" name=\"oldpasswd\" /><td>
-  </tr>
-  <tr>
-    <td>"._("Password:")."</td>
-    <td><input type=\"password\" name=\"passwd\" /><td>
-  </tr>
-  <tr>
-    <td>"._("Confirm:")."</td>
-    <td><input type=\"password\" name=\"confirm\" /><td>
-  </tr>
-</table>\n";
+  echo "<fieldset><legend>"._("User Information")."</legend>\n";
+  echo "<ol>\n";
 
+  echo "<li>";
+  $this->label(_("First Name:"));
+  $this->input_text("firstname", $user->get_firstname());
+  echo "</li>\n";
+
+  echo "<li>";
+  $this->label(_("Last Name:"));
+  $this->input_text("lastname", $user->get_lastname());
+  echo "</li>\n";
+
+  echo "<li>";
+  $this->label(_("Email:"));
+  $this->input_text("email", $user->get_email());
+  echo "</li>\n";
+
+  echo "<li>";
+  $this->label(_("Current Password:"));
+  $this->input_password("oldpasswd");
+  echo "</li>\n";
+
+  echo "<li>";
+  $this->label(_("Password:"));
+  $this->input_password("passwd");
+  echo "</li>\n";
+
+  echo "<li>";
+  $this->label(_("Confirm:"));
+  $this->input_password("confirm");
+  echo "</li>\n";
+
+  echo "</ol>";
+  echo "</fieldset>\n";
+
+  echo "<fieldset><legend>"._("Default Access Rights")."</legend>\n";
+  echo "<ol>\n";
   $gacl=$conf->get('image.gacl', (ACL_EDIT | ACL_PREVIEW));
   $macl=$conf->get('image.macl', ACL_PREVIEW);
   $aacl=$conf->get('image.aacl', ACL_PREVIEW);
 
-  echo "<h3>"._("Default ACL")."</h3>\n";
-
   $acl=new SectionAcl($gacl, $macl, $aacl);
   $acl->print_table(false);
-  echo "<p>"._("The default ACL values are used when new images are
-  added.")."</p>";
+  echo "</li>\n";
+  echo "</ol>"; 
+  echo "</fieldset>\n"; 
 
-  echo "<h3>"._("Other")."</h3>";
-  echo "<table>
-  <tr>
-    <td>"._("Metadata Seperator:")."</td>
-    <td><select size=\"1\" name=\"meta_separator\">\n";
+  echo "<fieldset><legend>"._("Other")."</legend>\n";
+  echo "<ol>";
+  echo "<li>";
+  $this->label(_("Metadata Seperator:"));
+  echo "<select size=\"1\" name=\"meta_separator\">\n";
   $sep=array( " " => _("Space"), 
               "," => _("Comma"),
               "." => _("Dot"),
@@ -106,32 +116,28 @@ function print_general ()
   $cur_sep=$conf->get('meta.separator', ';');
   foreach ($sep as $k => $v)
   {
-    echo "      <option value=\"$k\"";
-    if ($k==$cur_sep)
-      echo " selected=\"selected\"";
-    echo ">$v</option>\n";
+    $this->option($v, $k, ($k==$cur_sep));
   }
-  echo "      </select>
-    </td>
-  </tr>
-  <tr>
-    <td>
-      "._("Lazy Sync:")."  
-    </td>
-    <td>\n";
-  $selected="";
-  if ($conf->get('image.lazysync', '0')==1)
-    $checked="checked=\"checked\" ";
+  echo "</select>\n";
+  echo "</li>\n";
+  
+  echo "<li>";
+  $this->label(_("Lazy Sync:"));
+  echo "<p>";
+  $this->input_checkbox("lazysync", 1, ($conf->get('image.lazysync', '0')==1));
   $url->add_param("action", "imagesync");
-  echo "      <input type=\"checkbox\" name=\"lazysync\" value=\"1\" $checked> 
-  <a href=\"".$url->get_url()."\">"._("Syncronize images now")."</a>
-    </td>
-  </tr>
-</table>\n";
+  echo "<a href=\"".$url->get_url()."\">"._("Syncronize images now")."</a>\n";
+  echo "</p>";
+  echo "</li>\n";
+  echo "</ol>";
+  echo "</fieldset>\n";
 
-  echo "<input type=\"submit\" class=\"submit\"value=\"Save\"/>
-<input type=\"reset\" class=\"reset\" value=\"Reset\"/>
-</form>\n\n";
+  echo "<div class=\"buttons\">";
+  $this->input_submit(_("Apply"));
+  $this->input_reset(_("Reset"));
+  echo "</div>\n";
+
+  echo "</form>\n\n";
 }
 
 function exec_general ()
@@ -234,7 +240,10 @@ function print_upload ()
   </tr>
 </tbody></table>\n";
   echo "</div>\n";
-  echo "<input type=\"submit\" class=\"submit\" value=\""._("Upload")."\" />\n";
+
+  echo "<div class=\"buttons\">";
+  $this->input_submit(_("Upload"));
+  echo "</div>\n";
 
   echo "</form>\n";
 }
@@ -474,8 +483,12 @@ function print_group_list()
     $url->add_param('action', 'add');
     echo "<form action=\"./index.php\" method=\"post\">\n";
     echo $url->get_form();
-    echo "<input type=\"text\" name=\"name\" />
-    <input type=\"submit\" class=\"submit\" value=\""._("Add new group")."\" />\n";
+    $this->input_text('name');
+
+    echo "<div class=\"buttons\">";
+    $this->input_submit(_("Add"));
+    echo "</div>\n";
+
     echo "</form>\n";
   }
 }
@@ -524,33 +537,34 @@ function print_group($gid)
     $url->del_param('action');
     $url->del_param('name');
 
-    echo "<select size=\"1\" name=\"action\">
-    <option value=\"none\">"._("Select action")."</option>
-    <option value=\"remove_members\">"._("Delete")."</option>
-    <option value=\"copy_members\">"._("Copy")."</option>
-    <option value=\"move_members\">"._("Move")."</option>
-    </select>\n";
+    echo "<select size=\"1\" name=\"action\">\n";
+    $this->option(_("Select action"), 'none');
+    $this->option(_("Delete"), 'remove_members');
+    $this->option(_("Copy"), 'copy_members');
+    $this->option(_("Move"), 'move_members');
+    echo "</select>\n";
     $groups=$user->get_groups();
-    echo " to <select size=\"1\" name=\"dst_gid\">
-    <option value=\"none\">"._("Select Group")."</option>\n";
+    echo " to <select size=\"1\" name=\"dst_gid\">\n";
+    $this->option(_("Select Group"), 'none');
     // List all other groups without itself
     if (count($groups)>1)
     {
       foreach ($groups as $dst => $name)
       {
         if ($dst==$gid) continue;
-        echo "<option value=\"$dst\">$name</option>\n";
+        $this->option($name, $value);
       }
     }
-    echo "</select>
-    <input type=\"submit\" class=\"submit\" value=\""._("Execute")."\" />
-    <br />\n";
+    echo "</select>\n";
+    echo "<div class=\"buttons\">";
+    $this->input_submit(_("Execute"));
+    echo "</div>\n";
   }
   else
   {
     echo _("Currently you have now members in the group");
     echo "<br />\n";
-    echo "<input type=\"hidden\" name=\"action\" value=\"none\" />\n";
+    $this->input_hidden('action', 'none');
   }
 
   if ($group->get_num_members()<=GROUP_MEMBER_MAX)
@@ -739,7 +753,7 @@ function print_guest_list()
   </tr>
   <tr>
     <td></td>
-    <td><input type=\"submit\" class=\"submit\" value=\""._("New guest")."\" /></td>
+    <td><input type=\"submit\" value=\""._("New guest")."\" /></td>
   </tr>
 </table>\n";
     echo "</form>\n";
@@ -786,7 +800,7 @@ function print_guest($guestid)
   <tr>
     <td></td>
     <td>
-      <input type=\"submit\" class=\"submit\" value=\""._("Save changes")."\" />
+      <input type=\"submit\" value=\""._("Save changes")."\" />
     </td>
 </table>\n";
 

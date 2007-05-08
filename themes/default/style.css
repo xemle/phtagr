@@ -151,6 +151,135 @@ input, select, submit, reset, textarea {
   padding: 5px;
 }
 
+/* General forms */
+.formularCollapsed {
+  margin: 5px 0px 5px 0px; 
+  padding: 0px;
+  border: none;
+  background-color: #ffffff;
+}
+
+.formularCollapsed ol {
+  display: none;
+}
+
+fieldset {
+  margin: 5px 0 5px 0;
+  border: 1px solid #888888;
+  background-color: #eeeeee;
+}
+
+legend {
+  font-size: 12px;
+  margin: 5px 0px 0 10px;
+  padding: 0px 0px 0px 5px;
+  background: url(./headline.png) no-repeat 0px 0px;
+  color: #ffffff;
+}
+
+legend a {
+  display: inline;
+  margin: 0 0px 0px 3px; 
+  padding: 0px 3px 0px 3px;
+  background-color: #00be00;
+  border-left: 2px solid #ffffff;
+}
+
+legend a:hover {
+  font-weight: bold;
+}
+
+label {
+  font-size: 10pt;
+  float: left;
+  text-align: right;
+  vertical-align: top;
+  width: 140px;
+  margin: 3px;
+  padding: 0px;
+  clear: both;
+}
+
+fieldset * li input,
+fieldset * li select, 
+fieldset * li textarea,
+fieldset * li p,
+fieldset * li a {
+  padding: 0px;
+  margin: 3px 0px 3px 0px;
+  float: left;
+  font-size: 8pt;
+}
+
+fieldset * li input,
+fieldset * li select, 
+fieldset * li textarea {
+  padding: 2px 0px 2px 2px;
+}
+
+fieldset * li p input,
+fieldset * li p select {
+  float: none;
+  font-size: 8pt;
+}
+
+fieldset ol li {
+  clear: both;
+}
+
+fieldset ol {
+  list-style-type: none;
+  margin: 0;
+  padding: 0px;
+}
+
+/* JavaScript fieldset */ 
+
+.embeddedform * li {
+  margin: 2px 0 2px 0;
+}
+
+.embeddedform * label {
+  font-size: 8pt;
+  width: 80px;
+  margin: 2px 3px 2px 0px;
+  padding: 0px;
+}
+
+.embeddedform * li input[type=text],
+.embeddedform * li select, 
+.embeddedform * li textarea {
+  margin: 0px;
+  width: 170px;
+}
+
+.buttons {
+  display: block;
+  width: 100%;
+  margin: 0px;
+  padding: 0px;
+}
+
+.buttons input {
+  margin: 0px 3px 0 0px;
+  float: left;
+}
+
+/* Colorize */
+
+fieldset * li input[type=text]:hover,
+fieldset * li select:hover, 
+fieldset * li textarea:hover {
+  border: 1px solid black;
+}
+
+fieldset * li input[type=text]:focus,
+fieldset * li select:focus, 
+fieldset * li textarea:focus {
+  border: 1px solid black;
+  background-color: #ffffd0;
+}
+
 /* Comment form */
 .comment * label {
   font-size: 8pt;
@@ -410,7 +539,7 @@ input, select, submit, reset, textarea {
   width: 400px;
 }
 
-.from, .from a, .from a:visited{
+.from, .from a, .from a:visited {
   padding: 0px;
   margin: 0px;
   color: #a0a0a0;
@@ -434,6 +563,7 @@ input, select, submit, reset, textarea {
   width: 100%;
   text-align: center;
   font-size: 8pt;
+  clear: both;
 }
 
 .voting a img {
@@ -443,7 +573,7 @@ input, select, submit, reset, textarea {
   border-style: none;
 }
 
-.imginfo > table, .imginfo > form > table {
+.imginfo > table {
   clear: both;
   border-spacing: 0;
   border: solid 1px #dddddd;
@@ -451,16 +581,6 @@ input, select, submit, reset, textarea {
   padding: 0;
   font-size: 8pt;
   display: block;
-}
-
-.imginfo * input, .imginfo * textarea {
-  padding: 1px 3px 1px 3px;
-  margin: 0;
-  border: 1px solid #cccccc;
-}
-
-.imginfo * input.cell, .imginfo * textarea.cell {
-  width: 200px;
 }
 
 .row2 {
@@ -473,12 +593,12 @@ input, select, submit, reset, textarea {
   border: 1px solid #cccccc;
 }
 
-.content * .submit {
+.content * input[type=submit] {
   color: white;
   background: url(./headline.png) no-repeat -5px 0px;
 }
 
-.content * .reset {
+.content * input[type=reset] {
   color: black;
   background-color: #cccccc;
 }

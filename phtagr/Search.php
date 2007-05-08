@@ -311,17 +311,17 @@ function get_page_num()
 function set_page_size($size)
 {
   if (!is_numeric($size))
-    $size=10;
+    $size=12;
 
-  if ($size!=10)
-    $this->add_iparam('pagesize', $size, 10, 2, 250);
+  if ($size!=12)
+    $this->add_iparam('pagesize', $size, 12, 2, 250);
   else
     $this->del_param('pagesize');
 }
 
 function get_page_size()
 {
-  return $this->get_param('pagesize', 10);
+  return $this->get_param('pagesize', 12);
 }
 
 function set_orderby($orderby)

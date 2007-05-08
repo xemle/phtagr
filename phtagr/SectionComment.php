@@ -113,6 +113,7 @@ function print_comments()
   echo "</ul>\n</div>\n";
 }
 
+/** @todo Remind an anonymous commentator within one session */
 function print_comment_form()
 {
   global $user;
@@ -137,7 +138,7 @@ function print_comment_form()
 
   echo "<h2>"._("Leave A Comment:")."</h2>\n";
 
-  if ($user->get_id()<0)
+  if ($user->get_id()<0 && !isset($_SESSION['comment_name']))
   {
     echo "<label>"._("Your Name:")."</label><input type=\"text\" name=\"name\" size=\"30\"/>
     <label>"._("Your Email (will not be published):")."</label><input type=\"text\" name=\"email\" size=\"30\" />\n";

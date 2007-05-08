@@ -31,7 +31,7 @@ include_once("$phtagr_lib/SectionAcl.php");
   @class Edit 
   @todo rename from Edit to ImageEdit
   @todo move set method to Image class */
-class Edit extends Base
+class Edit extends SectionBase
 {
 
 function Edit()
@@ -140,7 +140,7 @@ function execute()
     $img->handle_request();
 
     if (isset($_REQUEST['js_acl']) ||
-      isset($_REQUEST['aacl_read']))
+      isset($_REQUEST['acl_preview']))
       $this->_handle_request_acl(&$img);
     
     $img->commit();
@@ -182,13 +182,14 @@ function _handle_request_acl(&$img)
   $acl->handle_request($prefix);
   
   list($gacl, $macl, $aacl)=$acl->get_values();
-  $id=$img->get_id();
+  global $log;
+  $log->trace("new acl gacl=$gacl, macl=$macl, aacl=$aacl");
   $img->set_gacl($gacl);
   $img->set_macl($macl);
   $img->set_aacl($aacl);
   $img->commit();
 
-  return false;
+  return true;
 }
 
 function print_bar()
@@ -201,45 +202,20 @@ function print_bar()
   echo "<div class=\"tab\">
 <ul>
   <li>"._("Pagesize:")." <select size=\"1\" name=\"pagesize\">\n";
-  if ($size!=10)
-    echo "    <option value=\"$size\">$size</option>\n";
-  echo "    <option value=\"10\">"._("Default")."</option>
-  <option value=\"5\">5</option>
-  <option value=\"10\">10</option>
-  <option value=\"25\">25</option>
-  <option value=\"50\">50</option>
-  <option value=\"100\">100</option>
-  <option value=\"150\">150</option>
-  <option value=\"200\">200</option>
-</select></li>
-  <li>"._("Action:")." <select size=\"1\" name=\"command\">
-    <option value=\"none\">"._("Nothing")."</option>
-    <option value=\"mark\">"._("Mark")."</option>
-    <option value=\"demark\">"._("Demark")."</option>\n";
+  if ($size!=12)
+    $this->option($size, $size);
+  $this->option(_("Default"), 12);
+  foreach (array(12, 24, 60, 120, 240) as $size)
+    $this->option($size, $size);
+  echo "</select></li>
+  <li>"._("Action:")." <select size=\"1\" name=\"command\">\n";
+    $this->option(_("Nothing"), "none");
     if ($user->is_member())
-      echo "<option value=\"remove\">"._("Delete")."</option>\n";
+      $this->option(_("Delete"), "remove");
   echo "  </select></li>
   <li><input type=\"checkbox\" id=\"selectall\" onclick=\"checkbox('selectall', 'images[]')\"/>"._("Select all images")."</li>
 </ul>
 </div>";
-}
-
-function _print_edit_acl_row($param, $text)
-{
-  echo "  <tr>
-    <td>$text</td>\n";
-  $levels=array('g', 'o','a');
-  foreach ($levels as $level)
-  {
-    echo "    <td>
-      <select size=\"1\" name=\"".$level."acl_$param\">
-        <option selected=\"selected\" value=\"keep\">"._("Keep")."</option>
-        <option value=\"del\">"._("Deny")."</option>
-        <option value=\"add\">"._("Permit")."</option>
-      </select>
-    </td>\n";
-  }
-  echo "  </tr>\n";
 }
 
 function print_edit_acl()
@@ -248,75 +224,86 @@ function print_edit_acl()
   if (!$user->is_member())
     return;
 
-  echo "<p><a href=\"javascript:void(0)\" id=\"btnAcl\" class=\"jsbutton\" onclick=\"toggle_visibility('toggleAcl', 'btnAcl')\">-&gt; "._("Edit Access Control Lists (ACL)")."</a></p>
+  $this->fieldset_collapsable(_("Access Rights"), 'acl', true, true);
 
-<fieldset id='toggleAcl' style=\"display:none\"><legend>Access Control List <a href=\"javascript:void(0)\" class=\"jsbutton\" onclick=\"toggle_visibility('toggleAcl', 'btnAcl')\">[Hide]</a></legend>\n";
   $groups=$user->get_groups();
   if (count($groups)>0)
   {
-    echo "Group <select id=\"acl_grouplist\" name=\"acl_setgroup\" size=\"1\">
-    <option value=\"0\">"._("Keep")."</option>\n";
+    echo "<li>";
+    $this->label(_("Image belongs to group"));
+    echo "<select id=\"acl_grouplist\" name=\"acl_setgroup\" size=\"1\">";
+    $this->option(_("Keep"), 0);
     foreach ($groups as $gid => $name)
-      echo "    <option value=\"$gid\">$name</option>\n";
-    echo "    <option value=\"-1\">"._("Delete group")."</option>\n";
-    echo "</select><br/>\n";
+      $this->option($name, $gid);
+    $this->option(_("Delete group"), -1);
+    echo "</select>\n";
+    echo "</li>";
   }
   $acl=new SectionAcl();
   $acl->print_table();
-  echo "<p>Set the access level to the selected images.</p>
-</fieldset>\n";  
+  echo "</ol>";
+  echo "</fieldset>\n";  
 }
 
 /** Print the inputs to edit IPTC tags like comment, tags or sets. */
 function print_edit_inputs()
 {
   global $user;
-  echo "\n<div class=\"edit\">
+  echo "\n<div class=\"edit\">\n";
 
-<p><a href=\"javascript:void(0)\" id=\"btnEdit\" class=\"jsbutton\" onclick=\"toggle_visibility('toggleEdit', 'btnEdit')\">-&gt; "._("Edit Image Data")."</a></p>
+  $this->fieldset_collapsable(_("Tag Images"), 'meta', true, true);
 
-<fieldset id='toggleEdit' style=\"display:none\"><legend>Edit Image Data <a href=\"javascript:void(0)\" class=\"jsbutton\" onclick=\"toggle_visibility('toggleEdit', 'btnEdit')\">[Hide]</a></legend>
-  <input type=\"hidden\" name=\"edit\" value=\"multi\" />
-  <table>
-    <tr>
-      <th>"._("Caption:")."</th>
-      <td><textarea name=\"edit_caption\" cols=\"24\" rows=\"3\" ></textarea></td>
-    </tr>
-    <tr>
-      <th>"._("Date:")."</th>
-      <td><input type=\"text\" name=\"edit_date\" size=\"19\"/></td>
-    </tr>
-    <tr>
-      <th>"._("Tags:")."</th>
-      <td><input type=\"text\" name=\"edit_tags\" size=\"60\"/></td>
-    </tr>
-    <tr>
-      <th>"._("Set:")."</th>
-      <td><input type=\"text\" name=\"edit_sets\" size=\"60\"/></td>
-    </tr>
-    <tr>
-      <th>"._("Location:")."</th>
-      <td>"._("City:")." <input type=\"text\" name=\"edit_city\" size=\"60\"/><br/>
-        "._("Sublocation:")." <input type=\"text\" name=\"edit_sublocation\" size=\"60\"/><br/> 
-        "._("State:")." <input type=\"text\" name=\"edit_province\" size=\"60\"/><br/>
-        "._("Country:")." <input type=\"text\" name=\"edit_country\" size=\"60\"/></td>
-    </tr>
-  </table>
-</fieldset>\n";
+  echo "<ol>";
+
+  echo "<li>";
+  $this->label(_("Caption:"));
+  $this->textarea("edit_caption", 40, 3);
+  echo "</li>\n";
+
+  echo "<li>";
+  $this->label(_("Date:"));
+  $this->input_text("edit_date", "", 19, 19);
+  echo "</li>\n";
+
+  echo "<li>";
+  $this->label(_("Tags:"));
+  $this->input_text("edit_tags", "", 40, 150);
+  echo "</li>\n";
+
+  echo "<li>";
+  $this->label(_("Sets:"));
+  $this->input_text("edit_sets", "", 40, 150);
+  echo "</li>\n";
+
+  echo "<li>";
+  $this->label(_("City:"));
+  $this->input_text("edit_city", "", 40, 64);
+  echo "</li>\n";
+
+  echo "<li>";
+  $this->label(_("Sublocation:"));
+  $this->input_text("edit_sublocation", "", 40, 64);
+  echo "</li>\n";
+
+  echo "<li>";
+  $this->label(_("State:"));
+  $this->input_text("edit_state", "", 40, 64);
+  echo "</li>\n";
+
+  echo "<li>";
+  $this->label(_("Country:"));
+  $this->input_text("edit_country", "", 40, 64);
+  echo "</li>\n";
+
+  echo "</ol>\n";
+  echo "</fieldset>\n";
 
   if ($user->is_member())
     $this->print_edit_acl();
 
-  echo "<input type=\"hidden\" name=\"action\" value=\"edit\"/></div>
-";
-}
-
-/** Pirnt the submit and reset buttons */
-function print_buttons()
-{
-  echo "<div><input type=\"submit\" class=\"submit\" value=\""._("Update")."\" />
-<input type=\"reset\" class=\"reset\" value=\""._("Reset")."\" /></div>
-";
+  $this->input_hidden("edit", "multi");
+  $this->input_hidden("action", "edit");
+  echo "</div>";
 }
 
 }

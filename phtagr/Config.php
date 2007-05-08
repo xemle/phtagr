@@ -42,22 +42,30 @@ function Config($userid=0)
   $this->load($userid);
 }
 
+function get_userid()
+{
+  return $this->_userid;
+}
+
 /** Read the global preferences from the sql database. If the user id is not
  * zero, the default values are loaded first and than the user parameters. 
   @param userid User id for the paramter. */
 function load($userid=0)
 {
   global $db;
+
+  // Load default first
   if ($userid!=0)
     $this->load(0);
+
   $this->_userid=$userid;
 
   if ($userid<0)
     return;
 
-  $sql="SELECT name, value
-        FROM $db->configs
-        WHERE userid=$userid";
+  $sql="SELECT name, value".
+       " FROM $db->configs".
+       " WHERE userid=$userid";
   $result=$db->query($sql);
   if (!$result)
     return false;
@@ -101,11 +109,11 @@ function query($userid, $name, $default)
 {
   global $db;
   $sname=mysql_escape_string($name);
-  $sql="SELECT value 
-        FROM $db->configs
-        WHERE (userid=0 OR userid=$userid) AND name='$sname'
-        ORDER BY userid DESC
-        LIMIT 0,1";
+  $sql="SELECT value".
+       " FROM $db->configs".
+       " WHERE (userid=0 OR userid=$userid) AND name='$sname'".
+       " ORDER BY userid DESC".
+       " LIMIT 0,1";
   $result=$db->query($sql);
   if (!$result || mysql_num_rows($result)==0)
     return $default;
@@ -127,16 +135,16 @@ function _set($userid, $name, $value)
 
   $sname=mysql_escape_string($name);
   $svalue=mysql_escape_string($value);
-  $sql="SELECT value
-        FROM $db->configs
-        WHERE userid=$userid AND name=\"$sname\"";
+  $sql="SELECT value".
+       " FROM $db->configs".
+       " WHERE userid=$userid AND name=\"$sname\"";
   $result=$db->query($sql);
 
   // Insert new value
   if (mysql_num_rows($result)==0)
-    $sql="INSERT INTO $db->configs 
-          (userid, name, value) VALUES 
-          ($userid,'$sname','$svalue')";    
+    $sql="INSERT INTO $db->configs".
+         " (userid, name, value) VALUES".
+         " ($userid,'$sname','$svalue')";    
   // Update single parameter 
   elseif (substr($name, -2)!='[]')
   {
@@ -145,9 +153,9 @@ function _set($userid, $name, $value)
     if ($row[0]==$value)
       return true;
 
-    $sql="UPDATE $db->configs 
-          SET value='$svalue' 
-          WHERE userid=$userid AND name='$sname'";
+    $sql="UPDATE $db->configs".
+         " SET value='$svalue'". 
+         " WHERE userid=$userid AND name='$sname'";
   }
   // Update array
   else
@@ -158,9 +166,9 @@ function _set($userid, $name, $value)
       if ($row[0]==$value)
         return true;
     }
-    $sql="INSERT INTO $db->configs 
-          (userid, name, value) VALUES 
-          ($userid,'$sname','$svalue')";    
+    $sql="INSERT INTO $db->configs".
+         " (userid, name, value) VALUES".
+         " ($userid,'$sname','$svalue')";    
   }
 
   $result=$db->query($sql);
@@ -208,8 +216,8 @@ function _del($userid, $name, $value=null)
 {
   global $db;
   $sname=mysql_escape_string($name);
-  $sql="DELETE FROM $db->configs
-        WHERE userid=$userid AND name='$sname'";
+  $sql="DELETE FROM $db->configs".
+       " WHERE userid=$userid AND name='$sname'";
   if ($value!=null)
   {
     $svalue=mysql_escape_string($value);

@@ -229,11 +229,15 @@ function get_comment_ids($imageid)
   return $ids;
 }
 
+/** Checks the input of the comment and created a new comment if all
+ * requirements fits. It also saved the inputs of an anonymouse user for
+ * further comments 
+  @param image Current image object */
 function handle_request($image)
 {
   global $db, $user, $log;
 
-  if ($image->get_id()<0)
+  if ($image==null || $image->get_id()<0)
     return -1;
 
   if (!$image->can_comment($user))
@@ -252,6 +256,11 @@ function handle_request($image)
   {
     $name=$user->get_name();
     $email=$user->get_email();
+  } 
+  elseif (isset($_SESSION['comment_name']))
+  {
+    $name=$_SESSION['comment_name'];
+    $email=$_SESSION['comment_email'];
   }
   // anonymous comment
   elseif (strlen($name)==0 || strlen($email)==0)
@@ -261,6 +270,12 @@ function handle_request($image)
 
   $commentid=$this->create($image->get_id(), $name, $email, $comment);
 
+  // Remember anonymouse user within the session
+  if ($commentid>0)
+  {
+    $_SESSION['comment_name']=$name;
+    $_SESSION['comment_email']=$email;
+  }
   return $commentid;
 }
 

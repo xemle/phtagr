@@ -88,7 +88,7 @@ function create_preview_movie($inherit=false)
     $log->fatal("Command not found: $cmd", $image->get_id(), $user->get_id());
   else
     $log->info("Execute [returned: $result]: $cmd", $image->get_id(), $user->get_id());
-  @chmod($flv, 0644);
+  @chmod($flv, 0664);
 
   $cmd=$conf->get('bin.flvtool2', 'flvtool2')." -U \"$flv\"";
   $lines=array();

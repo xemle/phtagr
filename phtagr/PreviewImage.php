@@ -121,7 +121,7 @@ function save_to($dst)
   if ($result!=0)
     return false;
 
-  @chmod($dst, 0644);
+  @chmod($dst, 0664);
   return true;
 }
 

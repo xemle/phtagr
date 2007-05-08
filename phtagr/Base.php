@@ -58,17 +58,16 @@ function div($css_class, $text)
 
 /** Escape the string for html output 
   @param str String to escape
-  @param print If true, print the output directly
+  @param return If true, print the output directly. Default is true
   @return Escaped string */
-function escape_html($str, $print=false)
+function escape_html($str, $return=true)
 {
   $esc=htmlentities($str, ENT_QUOTES, "UTF-8");
-  if ($print) 
-  {
-    echo $esc;
-    return;
-  }
-  return $esc;
+  if ($return) 
+    return $esc;
+
+  echo $esc;
+  return "";
 }
 
 function warning($message)

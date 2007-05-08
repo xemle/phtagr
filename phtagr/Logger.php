@@ -35,6 +35,7 @@ define("LOG_CONSOLE", 2);
 define("LOG_FILE", 3);
 define("LOG_HTML", 4);
 define("LOG_DB", 5);
+define("LOG_SESSION", 6);
 
 /** @class Logger
   Class to log messages with different backends. Available backends are
@@ -96,6 +97,12 @@ function enable()
     return false;
   if ($this->_type==LOG_DB && !$db->is_connected())
     return false;
+  if ($this->_type==LOG_SESSION)
+  { 
+    if (!isset($_SESSION))
+      return false;
+    $_SESSION['log_buf']=array();
+  }
 
   $this->_enabled=true;
   return true;
@@ -125,7 +132,7 @@ function is_enabled()
 invoke backend finalizations and initialisations */
 function set_type($type, $filename="")
 {
-  if ($type<LOG_CONSOLE || $type>LOG_DB)
+  if ($type<LOG_CONSOLE || $type>LOG_SESSION)
     return;
 
   // parameter checks
@@ -158,6 +165,8 @@ function get_buf()
 {
   if ($this->_type==LOG_BUF)
     return $this->_buf;
+  if ($this->_type==LOG_SESSION && isset($_SESSION['log_buf']))
+    return $_SESSION['log_buf'];
   return null;
 }
 
@@ -214,13 +223,16 @@ function _log($level, $msg, $image, $user)
   {
     $this->_log_html($time, $slevel, $image, $user, $file, $line, $msg);
   } 
-  elseif ($this->_type==LOG_BUF)
+  elseif ($this->_type==LOG_BUF || $this->_type==LOG_SESSION)
   {
     $log=array('time' => $now, 'level' => $slevel,
                'image' => $image, 'user' => $user,
                'file' => $file, 'line' => $line,
                'msg' => $msg);
-    array_push($this->_buf, $log);
+    if ($this->_type==LOG_BUF)
+      array_push($this->_buf, $log);
+    if ($this->_type==LOG_SESSION && isset($_SESSION['log_buf']))
+      array_push($_SESSION['log_buf'], $log);
   }
   elseif ($this->_type==LOG_DB && $db!=null && $db->is_connected())
   {

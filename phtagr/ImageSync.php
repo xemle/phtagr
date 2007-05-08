@@ -242,7 +242,7 @@ function sync_files($userid=-1)
 /** Deletes the file if it was uploaded */
 function delete()
 {
-  global $user, $logs;
+  global $user, $log;
 
   if ($user->get_id()!=$this->get_userid() && !$user->is_admin())
     return;

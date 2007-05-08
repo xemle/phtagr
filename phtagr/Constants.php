@@ -36,12 +36,15 @@ define("ACL_PREVIEW", 0x20);
 
 define("ACL_WRITE_MASK", 0x07); 
 define("ACL_CAPTION", 0x03);
-define("ACL_METADATA", 0x02);
-define("ACL_EDIT", 0x01);
+define("ACL_EDIT", 0x02);
+define("ACL_METADATA", 0x01);
 
-define("ACL_GROUP", 0x00);
-define("ACL_MEMBER", 0x01);
-define("ACL_ANY", 0x02);
+define("ACL_LEVEL_UNKNOWN",-1);
+define("ACL_LEVEL_KEEP",    0);
+define("ACL_LEVEL_PRIVATE", 1);
+define("ACL_LEVEL_GROUP",   2);
+define("ACL_LEVEL_MEMBER",  4);
+define("ACL_LEVEL_ANY",     5);
 
 define("LOCATION_UNDEFINED", 0x00);
 define("LOCATION_CITY", 0x01);

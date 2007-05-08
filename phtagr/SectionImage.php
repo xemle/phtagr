@@ -110,18 +110,6 @@ function get_locations()
   return $hits;
 }
 
-/** Returns the output or prints it
-  @param output String to print or return
-  @param return The output string will be returned if true, otherwise the
-output will be printed via echo */
-function _output($output, $return=false)
-{
-  if ($return)
-    return $output;
-  else
-    echo $output;
-}
-
 /** Prints prev, up, and next buttons */
 function print_navigation($search)
 {
@@ -210,7 +198,7 @@ function from($return=false)
     $name=$user->get_name();
   }
 
-  return $this->_output("<div class=\"from\">by <a href=\"".$search->get_url()."\">$name</a></div>\n", $return);
+  return $this->output("<div class=\"from\">by <a href=\"".$search->get_url()."\">$name</a></div>\n", $return);
 }
 
 /** Print the caption of an image. 
@@ -237,7 +225,7 @@ function caption($docut=true, $return=false)
       $output.=$this->_cut_caption($id, &$caption);
 
     $output.="</div>\n";
-    return $this->_output($output, $return);
+    return $this->output($output, $return);
   }
   
   // The user can edit the image
@@ -257,7 +245,7 @@ function caption($docut=true, $return=false)
   }
   
   $output.="</div>\n";
-  return $this->_output($output, $return);
+  return $this->output($output, $return);
 }
 
 /** Cut the caption by words. If the length of the caption is longer than 20
@@ -294,7 +282,7 @@ function clicks($return=false)
   $ranking=sprintf("%.3f", $img->get_ranking());
   $output=sprintf(_("%d (Popularity: %.3f)"), $img->get_clicks(), $ranking);
 
-  return $this->_output($output, $return);
+  return $this->output($output, $return);
 }
 
 function voting($return=false)
@@ -357,7 +345,7 @@ function voting($return=false)
 
   $output.="</p></div>\n";
 
-  return $this->_output($output, $return);
+  return $this->output($output, $return);
 }
 
 function filename($return=false)
@@ -367,7 +355,7 @@ function filename($return=false)
     return;
 
   $output=$this->escape_html($img->get_filename());
-  return $this->_output($output, $return);
+  return $this->output($output, $return);
 }
 
 function _acl_to_text($acl)
@@ -401,7 +389,7 @@ function acl($return=false)
   $output.=$this->_acl_to_text($img->get_macl()).',';
   $output.=$this->_acl_to_text($img->get_aacl());
 
-  return $this->_output($output, $return);
+  return $this->output($output, $return);
 }
 
 /** Prints the date
@@ -432,7 +420,7 @@ function date($date_fmt=null, $return=false)
 
   $output="<a href=\"$url\" title=\"$title\">$date</a>\n";
 
-  return $this->_output($output, $return);
+  return $this->output($output, $return);
 }
 
 /** Prints date navigation with prev images, image within the same day, the
@@ -482,7 +470,7 @@ function date_navigator($return=false)
   $output.="]";
   unset($date_url);
 
-  return $this->_output($output, $return);
+  return $this->output($output, $return);
 }
 
 /** Prints the list of tags inclusive html links */
@@ -514,7 +502,7 @@ function tags($return=false)
       $output.=$conf->get('meta.separator', ';')." ";
   }
   unset($tag_url);
-  return $this->_output($output, $return);
+  return $this->output($output, $return);
 }
 
 /** Prints the list of sets inclusive html links */
@@ -546,7 +534,7 @@ function sets($return=false)
       $output.=$conf->get('meta.separator', ';')." ";
   }
   unset($set_url);
-  return $this->_output($output, $return);
+  return $this->output($output, $return);
 }
 
 /** Prints the list of locations inclusive html links */
@@ -581,7 +569,7 @@ function locations($return=false)
     $loc_url->del_location($location);
   }
   unset($loc_url);
-  return $this->_output($output, $return);
+  return $this->output($output, $return);
 }
 
 /** Prints the preview image or the video object */
@@ -602,7 +590,7 @@ function preview($return=false)
     $url->add_param('type', 'vpreview');
     $url->set_mode(URL_MODE_JS);
     list($width, $height, $s)=$img->get_size(320);
-    $heigth+=20;
+    $height+=22;
     $player="$phtagr_htdocs/js/flowplayer/FlowPlayer.swf";
     $output.="<div class=\"preview\">
   <object type=\"application/x-shockwave-flash\" data=\"$player\" width=\"$width\" height=\"$height\">
@@ -621,7 +609,7 @@ function preview($return=false)
     $url->add_param('type', 'preview');
     $output.="<div class=\"preview\"><img src=\"".$url->get_url()."\" alt=\"$name\" ".$size[2]."/></div>\n";
   }
-  return $this->_output($output, $return);
+  return $this->output($output, $return);
 }
 
 /** Prints the image info table 
@@ -645,7 +633,7 @@ function imginfo($is_thumb, $return=false)
       $output.="<tr><th>"._("Filename:")."</th><td>".
         $this->filename(true)."</td></tr>\n";
     }
-    $output.="<tr><th>"._("ACL:")."</th><td>".
+    $output.="<tr><th>"._("Rights:")."</th><td>".
       $this->acl(true)."</td></tr>\n";
   }
   $output.="<tr><th>"._("Date:")."</th><td>".
@@ -692,7 +680,7 @@ function imginfo($is_thumb, $return=false)
   }
   $output.="</table></div>\n";
 
-  return $this->_output($output, $return);
+  return $this->output($output, $return);
 }
 
 /** Escapes all special characters for javascript 
@@ -851,9 +839,9 @@ function print_content()
 
   $url=new Url();
   echo "<form id=\"formImage\" action=\"".$url->get_url()."\" method=\"post\" accept-charset=\"UTF-8\"><div>\n";
-  echo "<input type=\"hidden\" name=\"section\" value=\"image\" />\n";
-  echo "<input type=\"hidden\" name=\"action\" value=\"edit\" />\n";
-  echo "<input type=\"hidden\" name=\"image\" value=\"$id\" />\n";
+  $this->input_hidden("section", "image");
+  $this->input_hidden("action", "edit");
+  $this->input_hidden("image", $id);
 
   echo $search->get_form();
   echo "</div></form>\n";

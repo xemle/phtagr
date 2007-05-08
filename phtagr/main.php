@@ -54,15 +54,12 @@ include_once("$phtagr_lib/SectionAdmin.php");
 include_once("$phtagr_lib/SectionMyAccount.php");
 
 $db = new Database();
-$user = new User();
-$conf = null;
 
 // initialize the basic objects
 $db->connect();
 if ($db->is_connected())
 {
-  $user->check_session();
-  $conf=new Config($user->get_id());
+  $conf = new Config(0);
   $log=new Logger();
   if ($conf->get('log.enabled', 0)==1)
   {
@@ -73,6 +70,15 @@ if ($db->is_connected())
     $log->drop_db_logs(3600*60, 3600*7, 3600, 1800, 3600*7, 3600*3);
     $log->enable();
   }
+  $user = new User();
+  $user->check_session();
+}
+else
+{
+  $conf=new Config(0);
+  $log=new Logger(LOG_SESSION, LOG_WARN);
+  $log->enable();
+  $user = new User();
 }
 
 $page = new PageBase("phTagr");
@@ -110,9 +116,8 @@ if (isset($_REQUEST['action']))
 // Installation procedure 
 if ($section=="install")
 {
-  $log=new Logger(LOG_FILE, LOG_DEBUG, getcwd().DIRECTORY_SEPARATOR.'phtagr.log');
-  $log->enable();
-  $conf=new Config(0);
+  $log->set_type(LOG_FILE, getcwd().DIRECTORY_SEPARATOR.'phtagr.log');
+  $log->set_level(LOG_DEBUG);
   $install = new SectionInstall();
   $cnt->add_section(&$install);
   $page->layout();
@@ -135,6 +140,7 @@ if (!$db->is_connected() && $section!="install")
   $msg->p($text);
   
   $page->layout();
+  $log->disable();
   return;
 }
 

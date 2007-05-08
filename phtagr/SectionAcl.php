@@ -31,121 +31,64 @@ var $_acl;
 function SectionAcl($gacl=0, $macl=0, $aacl=0)
 {
   $this->name="acl";
-  $this->_acl=array(ACL_GROUP => $gacl, 
-                ACL_MEMBER => $macl, 
-                ACL_ANY => $aacl);
+  $this->_acl=array(ACL_LEVEL_GROUP => $gacl, 
+                ACL_LEVEL_MEMBER => $macl, 
+                ACL_LEVEL_ANY => $aacl);
 }
 
-/** Print ACLs for read access
-  @param keep If true add the option 'keep', which will be selected */
-function _print_row_read($keep)
+function _get_acl_level($flag, $mask)
 {
-  echo "  <tr>
-    <td>"._("Read level")."</td>\n";
-
-  $levels=array(ACL_PREVIEW);
-
-  for ($i=ACL_GROUP ; $i<=ACL_ANY ; $i++)
+  for ($l=ACL_LEVEL_ANY; $l>=ACL_LEVEL_GROUP; $l--)
   {
-    switch ($i)
-    {
-    case ACL_GROUP:
-      $prefix='g';
-      $value=$this->_acl[ACL_GROUP] & ACL_READ_MASK;
-      break;
-    case ACL_MEMBER:
-      $prefix='m';
-      $value=$this->_acl[ACL_MEMBER] & ACL_READ_MASK;
-      break;
-    case ACL_ANY:
-      $prefix='a';
-      $value=$this->_acl[ACL_ANY] & ACL_READ_MASK;
-      break;
-    default:
-    }
-
-    echo "    <td>
-      <select size=\"1\" name=\"".$prefix."acl_read\">\n";
-    if ($keep)
-      echo "<option value=\"keep\">"._("Keep")."</option>\n";
-    foreach ($levels as $level)
-    {
-      $select=(!$keep && $value==$level)?"selected=\"selected\" ":"";
-      if ($level==ACL_PREVIEW)
-        echo "<option value=\"preview\"$select>"._("Preview")."</option>\n";
-
-    }
-    $select=(!$keep && $value==0)?"selected=\"selected\" ":"";
-    echo "<option value=\"deny\"$select>"._("Deny")."</option>
-      </select>
-    </td>\n";
+    if (($this->_acl[$l]&($mask))>=$flag)
+      return $l;
   }
-  echo "  </tr>\n";
+  return ACL_LEVEL_PRIVATE;
 }
-
-/** Print ACLs for write access
-  @param keep If true add the option 'keep', which will be selected */
-function _print_row_write($keep)
-{
-  echo "  <tr>
-    <td>"._("Write level")."</td>\n";
-
-  $levels=array(ACL_EDIT);
-
-  for ($i=ACL_GROUP ; $i<= ACL_ANY ; $i++)
-  {
-    switch ($i)
-    {
-    case ACL_GROUP:
-      $prefix='g';
-      $value=$this->_acl[ACL_GROUP] & ACL_WRITE_MASK;
-      break;
-    case ACL_MEMBER:
-      $prefix='m';
-      $value=$this->_acl[ACL_MEMBER] & ACL_WRITE_MASK;
-      break;
-    case ACL_ANY:
-      $prefix='a';
-      $value=$this->_acl[ACL_ANY] & ACL_WRITE_MASK;
-      break;
-    default:
-      break;
-    }
-    echo "    <td>
-      <select size=\"1\" name=\"".$prefix."acl_write\">\n";
-    if ($keep) {
-      echo "<option value=\"keep\" selected=\"selected\">"._("Keep")."</option>\n";
-    }
-    foreach ($levels as $level)
-    {
-      $select=(!$keep && $value==$level)?" selected=\"selected\"":"";
-      if ($level==ACL_EDIT)
-        echo "<option value=\"edit\"$select>"._("Edit")."</option>\n";
-
-    }
-    $select=(!$keep && $value==0)?" selected=\"selected\"":"";
-    echo "<option value=\"deny\"$select>"._("Deny")."</option>
-      </select>
-    </td>\n";
-  }
-  echo "  </tr>\n";
-}
-
 
 /** 
   @param keep If true print also 'keep' option */
 function print_table($keep=true)
 {
-  echo "<table>
-  <tr>
-    <th></th>
-    <th>"._("Friends")."</th>
-    <th>"._("Members")."</th>
-    <th>"._("All")."</th>
-  </tr>\n";
-  $this->_print_row_write($keep);
-  $this->_print_row_read($keep);
-  echo "</table>\n";
+  $prefix="";
+  echo "<li>";
+  $this->label(_("Who can edit the images?"));
+  echo "<select size=\"1\" name=\"acl_edit\">\n";
+  if ($keep)
+  {
+    $this->option(_("Keep settings"), "keep");
+    $level=ACL_LEVEL_KEEP;
+  }
+  else
+  {
+    $level=$this->_get_acl_level(ACL_EDIT, ACL_WRITE_MASK);
+  }
+
+  $this->option(_("Me only"), "private", ($level==ACL_LEVEL_PRIVATE));
+  $this->option(_("Group members"), "group", ($level==ACL_LEVEL_GROUP));
+  $this->option(_("All members"), "member", ($level==ACL_LEVEL_MEMBER));
+  $this->option(_("Everyone"), "any", ($level==ACL_LEVEL_ANY));
+  echo "</select>";
+  echo "</li>\n";
+
+  echo "<li>";
+  $this->label(_("Who can preview the images?"));
+  echo "<select size=\"1\" name=\"acl_preview\">\n";
+  if ($keep)
+  {
+    $this->option(_("Keep settings"), "keep");
+    $level=ACL_LEVEL_KEEP;
+  }
+  else
+  {
+    $level=$this->_get_acl_level(ACL_PREVIEW, ACL_READ_MASK);
+  }
+  $this->option(_("Me only"), "private", ($level==ACL_LEVEL_PRIVATE));
+  $this->option(_("Group members"), "group", ($level==ACL_LEVEL_GROUP));
+  $this->option(_("All members"), "member", ($level==ACL_LEVEL_MEMBER));
+  $this->option(_("Everyone"), "any", ($level==ACL_LEVEL_ANY));
+  echo "</select>";
+  echo "</li>";
 }
 
 }
