@@ -385,15 +385,8 @@ function find_images($dir, $recursive=true)
     $maxdepth=255;
   else
     $maxdetph=0;
-  $files=$this->find($dir, "/.*/", $maxdepth);
-  $supported=array();
-  foreach ($files as $file)
-  {
-    $ext=strtolower(substr($file, strrpos($file, ".")+1));
-    if ($ext=="jpeg" || $ext=="jpg" || $ext=="avi")
-      array_push($supported, $file);
-  }
-  return $supported;
+  $files=$this->find($dir, "/\.(jpe?g|avi|mov|mpe?g)$/i", $maxdepth);
+  return $files;
 }
 
 /** Creates a directory.

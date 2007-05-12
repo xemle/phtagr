@@ -154,7 +154,6 @@ function _auto_rotate()
     return;
 
   $orient=$image->get_orientation();
-  $log->info("Orientation: $orient");
   switch ($orient)
   {
   case 0:

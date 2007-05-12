@@ -26,7 +26,7 @@ include_once("$phtagr_lib/Base.php");
 include_once("$phtagr_lib/Constants.php");
 
 include_once("$phtagr_lib/FileJpg.php");
-include_once("$phtagr_lib/FileAvi.php");
+include_once("$phtagr_lib/FileMovie.php");
 
 /** 
   An image is assigned to a user and a group. With the access control lists
@@ -118,11 +118,14 @@ function get_file_handler($filename='')
     case "jpeg":
       $file=new FileJpg($filename);
       break;
+    case "mov":
+    case "mpeg":
+    case "mpg":
     case "avi":
-      $file=new FileAvi($filename);
+      $file=new FileMovie($filename);
       break;
     default:
-      $log->trace(sprintf(_("Unsupported file tpye '%d'"), $ext));
+      $log->trace(_("Unsupported file tpye '$ext': $filename"));
       break;
   }
   $this->_file=$file;

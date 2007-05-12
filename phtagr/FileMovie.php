@@ -25,12 +25,12 @@ include_once("$phtagr_lib/FileJpg.php");
 include_once("$phtagr_lib/PreviewVideo.php");
 include_once("$phtagr_lib/Iptc.php");
 
-/** @class FileAvi
+/** @class FileMovie
 */
-class FileAvi extends FileJpg
+class FileMovie extends FileJpg
 {
 
-function FileAvi($filename)
+function FileMovie($filename)
 {
   $this->FileJpg($filename);
   $this->create_thumb();
