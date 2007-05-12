@@ -128,11 +128,50 @@ function set_quality($quality=85)
 {
 }
 
+/** Rotates the image 
+  @param angle Rotation angle (clock wise) */
+function rotate($angle)
+{
+}
+
 /** Save the modified image to $dst
   @param dst Filename of the modified image
   @return false Returns false on error */
 function save_to($dst)
 {
+}
+
+/** Rotates the image automatically */
+function _auto_rotate()
+{
+  global $conf, $log, $user;
+
+  $image=$this->get_image();
+  if (!$image)
+    return;
+  
+  if ($conf->query($image->get_userid(), 'image.autorotate', 1)==0)
+    return;
+
+  $orient=$image->get_orientation();
+  $log->info("Orientation: $orient");
+  switch ($orient)
+  {
+  case 0:
+  case 1:
+    break;
+  case 3:
+    $this->rotate(180);
+    break;
+  case 6:
+    $this->rotate(90);
+    break;
+  case 8:
+    $this->rotate(270);
+    break;
+  default:
+    $log->warn("Unhandled orientation $orient", $image->get_id(), $user->get_id());
+  }
 }
 
 /** Create a mini square image with size of 75x75 pixels. 
@@ -151,8 +190,8 @@ function create_mini($inherit=false)
   // Get the mini filename
   $mini=$this->get_filename_mini();
 
-  $height=$image->get_height();
-  $width=$image->get_width();
+  $height=$image->get_height(false);
+  $width=$image->get_width(false);
   
   if ($height<=0 || $width<=0)
     return false;
@@ -180,6 +219,8 @@ function create_mini($inherit=false)
   }
   $this->resize($w, $h);
   $this->crop(75, 75, $l, $t);
+  if (!$inherit)
+    $this->_auto_rotate();
   $this->set_quality(85);
   $log->warn("Creating image mini", $image->get_id(), $user->get_id());
   return $this->save_to($mini);
@@ -211,6 +252,8 @@ function create_thumb($inherit=false)
     $this->init($this->get_filename_preview());
   }
   $this->resize(220, 220);
+  if (!$inherit)
+    $this->_auto_rotate();
   $this->set_quality(85);
   $log->warn("Creating image thumb", $image->get_id(), $user->get_id());
   return $this->save_to($thumb);
@@ -242,6 +285,8 @@ function create_preview($inherit=false)
     $this->init($this->get_filename_high());
   }
   $this->resize(600, 600);
+  if (!$inherit)
+    $this->_auto_rotate();
   $this->set_quality(90);
   $log->warn("Creating image preview", $image->get_id(), $user->get_id());
   return $this->save_to($preview);
@@ -263,6 +308,8 @@ function create_high()
 
   $this->init($this->get_filename());
   $this->resize(1024, 1024);
+  if (!$inherit)
+    $this->_auto_rotate();
   $this->set_quality(90);
   $log->warn("Creating image high", $image->get_id(), $user->get_id());
   return $this->save_to($high);

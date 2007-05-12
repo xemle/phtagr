@@ -279,17 +279,19 @@ function get_bytes()
 
 function set_bytes($bytes)
 {
+  $bytes=intval($bytes);
   $bytes=($bytes<0)?0:$bytes;
   $this->_set_data('bytes', $bytes);
 }
 
 function get_orientation()
 {
-  $this->_get_data('orientation');
+  return $this->_get_data('orientation');
 }
 
 function set_orientation($orientation)
 {
+  $orientation=intval($orientation);
   $orientation=($orientation<1)?1:(($orientation>8)?1:$orientation);
   $this->_set_data('orientation', $orientation);
 }
@@ -331,8 +333,27 @@ function set_date($date, $in_unix=false)
   $this->_set_data('date', $date);
 }
 
-function get_height()
+/** @return Returns true if the image will be autorotated. In this case the
+ * image is saved horizontal, but the orientation flag is set to an vertical
+ * image */
+function is_autorotated()
 {
+  global $conf;
+  if ($conf->query($this->get_userid(), 'image.autorotate', 1)==0)
+    return false;
+  
+  $orientation=$this->get_orientation();
+  if ($orientation==6 || $orientation==8)
+    return true;
+
+  false;
+}
+
+/** @param autorotated If true, consider auto rotation. Default is true */
+function get_height($autorotated=true)
+{
+  if ($autorotated && $this->is_autorotated())
+    return $this->_get_data('width');
   return $this->_get_data('height');
 }
 
@@ -341,8 +362,11 @@ function set_height($height)
   $this->_set_data('height', $height);
 }
 
-function get_width()
+/** @param autorotated If true, consider auto rotation. Default is true */
+function get_width($autorotated=true)
 {
+  if ($autorotated && $this->is_autorotated())
+    return $this->_get_data('height');
   return $this->_get_data('width');
 }
 
@@ -531,12 +555,16 @@ function can_comment($user)
  * ratio.
   @param size of the longes side. Default is 220. If the size is larger than
   the largest side, the size is cutted.
+  @param autorotated If true, consider auto rotation. Default is true 
   @return Array of (width, height, str), wherease the string is the string for
-  html img tag. On an error it returns an empty array */
-function get_size($size=220)
+  html img tag. On an error it returns an empty array 
+  @note This function will call get_height() and get_width() */
+function get_size($size=220, $autorotate=true)
 {
-  $height=$this->get_height();
-  $width=$this->get_width();
+  global $conf;
+
+  $height=$this->get_height($autorotate);
+  $width=$this->get_width($autorotate);
   
   if ($height > $width && $height>0)
   {

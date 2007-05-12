@@ -39,6 +39,7 @@ var $_data;
 function Config($userid=0)
 {
   $this->_data=array();
+  $this->_others=array();
   $this->load($userid);
 }
 
@@ -108,6 +109,19 @@ function get($name, $default=null)
 function query($userid, $name, $default)
 {
   global $db;
+
+  // It's me, take mine
+  if ($userid==$this->_userid)
+    return $this->get($name, $default);
+
+  // Cache hit of others
+  if (isset($this->_others[$userid][$name]))
+  {
+    if ($this->_others[$userid][$name]=='__default__')
+      return $default;
+    return $this->_others[$userid][$name];
+  }
+
   $sname=mysql_escape_string($name);
   $sql="SELECT value".
        " FROM $db->configs".
@@ -116,9 +130,16 @@ function query($userid, $name, $default)
        " LIMIT 0,1";
   $result=$db->query($sql);
   if (!$result || mysql_num_rows($result)==0)
+  {
+    $this->_others[$userid][$name]='__default__';
     return $default;
+  }
 
   $row=mysql_fetch_row($result);
+
+  // set cached value of otheres
+  $this->_others[$userid][$name]=$row[0];
+
   return $row[0];
 }
 
@@ -176,6 +197,11 @@ function _set($userid, $name, $value)
     return false;
 
   $this->_data[$name]=$value;
+
+  // updated cache data from other users
+  if (isset($this->_others[$userid][$name]))
+    $this->_others[$userid][$name]=$value;
+
   return true;
 }
 

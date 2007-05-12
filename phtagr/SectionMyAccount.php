@@ -129,6 +129,11 @@ function print_general ()
   echo "<a href=\"".$url->get_url()."\">"._("Syncronize images now")."</a>\n";
   echo "</p>";
   echo "</li>\n";
+
+  echo "<li>";
+  $this->label(_("Auto Rotation:"));
+  $this->input_checkbox("autorotate", 1, ($conf->get('image.autorotate', 1)==1));
+  echo "</li>";
   echo "</ol>";
   echo "</fieldset>\n";
 
@@ -197,6 +202,11 @@ function exec_general ()
     else
       $conf->set('image.lazysync', 0);
   
+    $autorotate=$_REQUEST['autorotate'];
+    if ($autorotate==1)
+      $conf->set('image.autorotate', 1);
+    else
+      $conf->set('image.autorotate', 0);
     return;
   }
   elseif ($action=="imagesync")

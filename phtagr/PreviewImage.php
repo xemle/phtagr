@@ -102,6 +102,14 @@ function set_quality($quality=85)
   $this->_cmd.=" -quality $quality";
 }
 
+function rotate($angle)
+{
+  if ($angle!=90 && $angle!=180 && $angle!=270)
+    return;
+
+  $this->_cmd.=" -rotate $angle";
+}
+
 /** Save the modified image to $dst
   @param dst Filename of the modified image
   @return false Returns false on error */
