@@ -175,7 +175,8 @@ function print_content()
               'popularity' => _("Popularity"),
               'voting' => _("Voting"),
               'newest' => _("Newest"),
-              'changes' => _("Changes"));
+              'changes' => _("Changes"),
+              'random' => _("Random"));
   foreach ($order as $key => $text) {
     $url->set_orderby($key);
     $add_url->set_orderby($key);

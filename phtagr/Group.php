@@ -38,6 +38,7 @@ function Group($id=-1)
 {
   $this->_members=array();
   $this->_name='';
+  $this->_owner=-1;
   $this->_id=-1;
   $this->init_by_id($id);
 }
@@ -48,7 +49,7 @@ function init_by_id($id)
   if ($id<=0)
     return false;
 
-  $sql="SELECT name
+  $sql="SELECT name,owner
         FROM $db->groups 
         WHERE id=$id";
   $result=$db->query($sql);
@@ -56,6 +57,7 @@ function init_by_id($id)
     return false;
   $row=mysql_fetch_assoc($result);
   $this->_name=$row['name'];
+  $this->_owner=$row['owner'];
   $this->_members=array();
   $this->_id=$id;
 
@@ -135,6 +137,11 @@ function get_name()
   return $this->_name;
 }
 
+function get_owner()
+{
+  return $this->_owner;
+}
+
 function get_num_members()
 {
   return count($this->_members);
@@ -145,23 +152,41 @@ function get_members()
   return $this->_members;
 }
 
-function has_member($name)
+/** 
+  @paran name_or_id Name or ID of a phTagr member 
+  @return Returns true if the name or ID is member of the current group */
+function has_member($name_or_id)
 {
-  foreach ($this->_members as $id => $n)
-    if ($n==$name)
+  if (is_numeric($name_or_id))
+  {
+    if (isset($this->_member[$name_or_id]))
       return true;
+  }
+  else 
+  {
+    foreach ($this->_members as $id => $n)
+      if ($n==$name)
+        return true;
+  }
   return false;
 }
 
 /** Adds a new member to the group.
-  @param name Name of the phTagr user
+  @param name Name or ID of the phTagr user
   @return true on success, false otherwise */
-function add_member($name)
+function add_member($name_or_id)
 {
-  global $db;
-  global $user;
-  $uid=$user->get_id_by_name($name);
+  global $db, $user;
+
+  if (is_numeric($name_or_id))
+    $uid=$name_or_id;
+  else
+    $uid=$user->get_id_by_name($name_or_id);
   if ($uid<=0)
+    return false;
+  
+  // Authorization check
+  if (!$user->is_admin() && $this->get_owner()!=$user->get_id())
     return false;
 
   // Is user already group member?
@@ -169,8 +194,8 @@ function add_member($name)
     return true;
 
   // Add user
-  $sql="INSERT INTO $db->usergroup
-        (userid, groupid) VALUES ($uid, ".$this->get_id().")";
+  $sql="INSERT INTO $db->usergroup".
+       " (userid, groupid) VALUES ($uid, ".$this->get_id().")";
   $result=$db->query($sql);
   if (!$result)
     return false;
@@ -179,22 +204,29 @@ function add_member($name)
 }
 
 /** Removes a member from the group
-  @param name Name of the phTagr user
+  @param name Name or ID of the phTagr user
   @return True on success, false otherwise */
-function remove_member($name)
+function del_member($name_or_id)
 {
-  global $db;
-  global $user;
-  $id=$user->get_id_by_name($name);
+  global $db, $user;
+  if (is_numeric($name_or_id))
+    $id=$name_or_id;
+  else
+    $id=$user->get_id_by_name($name_or_id);
   if ($id<=0)
     return false;
+
+  // Authorization check
+  if (!$user->is_admin() && $this->get_owner()!=$user->get_id())
+    return false;
+
   // Is user really a group member?
   if (!isset($this->_members[$id]))
     return true;
 
   // Delete user
-  $sql="DELETE FROM $db->usergroup
-        WHERE userid=$id AND groupid=".$this->get_id();
+  $sql="DELETE FROM $db->usergroup".
+       " WHERE userid=$id AND groupid=".$this->get_id();
   $result=$db->query($sql);
   if (!$result)
     return false;
@@ -208,20 +240,24 @@ function delete()
   global $db;
   $id=$this->get_id();
 
+  // Authorization check
+  if (!$user->is_admin() && $this->get_owner()!=$user->get_id())
+    return false;
+
   $new_gid=$user->get_groupid();
   if ($new_gid==$id)
     $new_id=0;
 
-  $sql="DELETE FROM $db->usergroup
-        WHERE groupid=$id";
+  $sql="DELETE FROM $db->usergroup".
+       " WHERE groupid=$id";
   $result=$db->query($sql);
-  $sql="DELETE FROM $db->groups
-        WHERE id=$id";
+  $sql="DELETE FROM $db->groups".
+       " WHERE id=$id";
   $result=$db->query($sql);
   // reset images which are affected with this group
-  $sql="UPDATE $db->images
-        SET groupid=$new_gid
-        WHERE groupid=$id";
+  $sql="UPDATE $db->images".
+       " SET groupid=$new_gid".
+       " WHERE groupid=$id";
   $result=$db->query($sql);
   // reset group object
   $this->_id=-1;
@@ -232,29 +268,29 @@ function delete()
 /** Deletes all group data of a specific user */
 function delete_from_user($id)
 {
-  global $db;
+  global $db, $user;
 
   if (!is_numeric($id) || $id<1)
     return;
 
   // Delete user memberships 
-  $sql="DELETE FROM $db->usergroup
-        WHERE userid=$id";
+  $sql="DELETE FROM $db->usergroup".
+       " WHERE userid=$id";
   $db->query($sql);
 
   // Delete all groups from user
-  $sql="DELETE FROM $db->usergroup 
-        WHERE groupid IN (
-          SELECT id 
-          FROM $db->groups
-          WHERE owner=$id
-        )";
+  $sql="DELETE FROM $db->usergroup".
+       " WHERE groupid IN (".
+       "   SELECT id".
+       "   FROM $db->groups".
+       "   WHERE owner=$id".
+       " )";
   $db->query($sql);
 
   // delete all groups
-  $sql="DELETE 
-        FROM $db->groups 
-        WHERE owner=$id";
+  $sql="DELETE".
+       " FROM $db->groups".
+       " WHERE owner=$id";
   $db->query($sql);
 }
 

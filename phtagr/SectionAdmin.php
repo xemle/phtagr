@@ -89,8 +89,8 @@ function print_user_details($u=null)
   if ($u==null)
     return;
   $c=new Config($u->get_id());
-
-  echo "<h3>".sprintf(_("Editing User '%s'"), $u->get_name())."</h3>\n";
+  
+  $this->h3(sprintf(_("Editing User: %s"), $u->get_name()));
 
   // If we don't have a update request we show all the values we can
   // update.
@@ -102,49 +102,57 @@ function print_user_details($u=null)
   $url->add_param('action', 'edit');
   $url->add_param('id', $u->get_id());
   echo $url->get_form();
-  echo "<table>
-  <tr>
-    <td>"._("First Name:")."</td>
-    <td><input type=\"text\" name=\"firstname\" value=\"".$u->get_firstname()."\" /><td>
-  </tr>
-  <tr>
-    <td>"._("Last Name:")."</td>
-    <td><input type=\"text\" name=\"lastname\" value=\"".$u->get_lastname()."\" /><td>
-  </tr>
-  <tr>
-    <td>"._("Email:")."</td>
-    <td><input type=\"text\" name=\"email\" value=\"".$u->get_email()."\" /><td>
-  </tr>
-</table>
+  echo "<fieldset><ol>";
 
-<h3>"._("Quota")."</h3>\n";
+  echo "<li>";
+  $this->label(_("First Name:"));
+  $this->input_text('firstname', $u->get_firstname());
+  echo "</li>\n";
 
-echo "<p>"._("You can set the quoata limit for uploads of the user. Quota is the
-absolut limit. Quota Slice is the size which can be uploaded by the user within
-the time of Quota Interval")."</p>\n";
+  echo "<li>";
+  $this->label(_("Last Name:"));
+  $this->input_text('lastname', $u->get_lastname());
+  echo "</li>\n";
 
-echo "<table>
-  <tr>
-    <td>"._("Quota (MB)")."</td>
-    <td><input type=\"text\" name=\"quota\" value=\"".
-      sprintf("%.2f", $u->get_quota()/1048576)."\" /><td>
-  </tr>
-  <tr>
-    <td>"._("Quota Slice (MB)")."</td>
-    <td><input type=\"text\" name=\"qslice\" value=\"".
-      sprintf("%.2f", $u->get_qslice()/1048576)."\" /><td>
-  </tr>
-  <tr>
-    <td>"._("Quota Interval (Days)")."</td>
-    <td><input type=\"text\" name=\"qinterval\" value=\"".
-      sprintf("%.2f", $u->get_qinterval()/86400)."\" /><td>
-  </tr>
-</table>
-<h3>"._("Filesystem")."</h3>\n";
+  echo "<li>";
+  $this->label(_("Email:"));
+  $this->input_text('email', $u->get_email());
+  echo "</li>\n";
 
-echo "<p>"._("Here you can specify the browsable paths for a user. The user can import files from these direcories.")."</p>\n";
+  echo "</ol></fieldset>\n";
 
-echo "<table>\n";
+  $this->h3(_("Quota"));
+
+  echo "<p>"._("You can set the quoata limit for uploads of the user. Quota is
+the absolut limit. Quota Slice is the size which can be uploaded by the user
+within the time of Quota Interval")."</p>\n";
+
+  echo "<fieldset><ol>";
+
+  echo "<li>";
+  $this->label(_("Quota (MB):"));
+  $this->input_text('quota', sprintf("%.2f", $u->get_quota()/1048576));
+  echo "</li>\n";
+
+  echo "<li>";
+  $this->label(_("Quota Slice (MB):"));
+  $this->input_text('qslice', sprintf("%.2f", $u->get_qslice()/1048576));
+  echo "</li>\n";
+
+  echo "<li>";
+  $this->label(_("Quota Interval (Days):"));
+  $this->input_text('qinterval', sprintf("%.2f", $u->get_qinterval()/86400));
+  echo "</li>\n";
+
+  echo "</ol></fieldset>\n";
+
+  
+  $this->h3(_("Filesystem"));
+
+  echo "<p>"._("Here you can specify the browsable paths for a user. The user
+can import files from these direcories.")."</p>\n";
+
+  echo "<table>\n";
   $roots=$c->get('path.fsroot[]', null);
   if ($roots!=null)
   {
@@ -159,10 +167,14 @@ echo "<table>\n";
   echo "<tr><td>"._("Add root")."</td>\n";
   echo "<td><input type=\"text\" name=\"add_root\" /></td></tr>\n";
 
-  echo "</table>
-<input type=\"submit\" class=\"submit\"value=\"Save\"/>
-<input type=\"reset\" class=\"reset\" value=\"Reset\"/>
-</form>\n\n";
+  echo "</table>\n";
+
+  echo "<div class=\"buttons\">";
+  $this->input_submit(_("Save"));
+  $this->input_reset(_("Reset"));
+  echo "</div>\n";
+
+  echo "</form>\n\n";
   return;
 }
 
@@ -236,7 +248,7 @@ function exec_users()
     
     if (isset($_REQUEST['remove_root']) &&
       strlen($_REQUEST['remove_root'])>0)
-      $c->remove('path.fsroot[]', $_REQUEST['remove_root']);
+      $c->del('path.fsroot[]', $_REQUEST['remove_root']);
 
     $u->commit();
 
@@ -268,6 +280,7 @@ function print_users()
   echo "<table>
   <tr> 
     <th>"._("Name")."</th>
+    <th>"._("Guests")."</th>
     <th>"._("Quota")."</th>
     <th>"._("Action")."</th>
   </tr>\n";
@@ -281,6 +294,7 @@ function print_users()
     $url->add_param('action', 'edit');
     echo "<td><a href=\"".$url->get_url()."\">".$u->get_name()."</a></td>\n";
 
+    echo "<td>".$u->get_num_guests()."</td>\n";
     echo "<td>".sprintf("%.1f MB (%d %% used)", 
       $u->get_quota()/(1024*1024),
       $u->get_quota_used()*100)."</td>\n";
@@ -339,33 +353,40 @@ function print_create_user()
   $url->add_param('page', ADMIN_TAB_CREATE_USER);
   $url->add_param('action', 'create');
 
-  echo "<h3>"._("Create User")."</h3>\n";
+  $this->h3(_("Create User"));
+
   echo "<form action=\"./index.php\" method=\"post\">\n";
   echo $url->get_form();
-  echo "<table>
-  <tr>
-    <td>"._("Username:")."</td>
-    <td><input type=\"text\" name=\"name\" value=\"$this->user\"/><td>
-  </tr>
-  <tr>
-    <td>"._("Password:")."</td>
-    <td><input type=\"password\" name=\"password\"/><td>
-  </tr>   
-  <tr>
-    <td>"._("Confirm:")."</td>
-    <td><input type=\"password\" name=\"confirm\"/><td>
-  </tr>
-  <tr>
-    <td>"._("Email:")."</td>
-    <td><input type=\"text\" name=\"email\"/><td>
-  </tr>
-  <tr>
-    <td></td>
-    <td><input type=\"submit\" class=\"submit\" value=\"Create\"/>&nbsp;&nbsp;
-      <input type=\"reset\" class=\"reset\" value=\"Reset\"/></td>
-  </tr>
-</table>
-</form>\n\n";
+  echo "<fieldset><ol>\n";
+
+  echo "<li>";
+  $this->label(_("Username:"));
+  $this->input_text('name');
+  echo "</li>";
+
+  echo "<li>";
+  $this->label(_("Password:"));
+  $this->input_password('password');
+  echo "</li>";
+
+  echo "<li>";
+  $this->label(_("Confirm:"));
+  $this->input_password('confirm');
+  echo "</li>";
+
+  echo "<li>";
+  $this->label(_("Email:"));
+  $this->input_text('email');
+  echo "</li>";
+
+  echo "</ol></fieldset>\n";
+
+  echo "<div class=\"buttons\">";
+  $this->input_submit(_("Create"));
+  $this->input_reset(_("Reset"));
+  echo "</div>\n";
+
+  echo "</form>\n\n";
 }
 
 

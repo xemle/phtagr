@@ -105,10 +105,31 @@ function output($output, $return=false)
 
 /** Print header
   @param title Header title
-  @param order Order of the headline. Default is 2 */ 
+  @param return The output string will be returned if true, otherwise the
+output will be printed via echo */ 
 function h1($title, $return=false)
 {
   $output="<h1>".$this->escape_html($title)."</h1>";
+  return $this->output($output, $return);
+}
+
+/** Print header
+  @param title Header title
+  @param return The output string will be returned if true, otherwise the
+output will be printed via echo */ 
+function h2($title, $return=false)
+{
+  $output="<h2>".$this->escape_html($title)."</h2>";
+  return $this->output($output, $return);
+}
+
+/** Print header
+  @param title Header title
+  @param return The output string will be returned if true, otherwise the
+output will be printed via echo */ 
+function h3($title, $return=false)
+{
+  $output="<h3>".$this->escape_html($title)."</h3>";
   return $this->output($output, $return);
 }
 

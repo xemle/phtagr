@@ -1,15 +1,17 @@
 Requirements:
 
-- php >= 4
+- php >= 5
 - mySQL >= 4.1
 - php-mysql
 - imagemagick
+- ffmpeg
+- flvtool2
 
 For installation read INSTALL
 
 Source Style:
 
-- Valid php 4 code
+- Valid php 5 code
 - Class names have the first letter capitalized
 - Private functions have a prefix of an underscore ("_")
 - Indent of 2 spaces, no tabs (php and html output)
@@ -19,8 +21,8 @@ Source Style:
 
 Patches:
 
-- Send patches from the currenct subversion repository to sebastian@silef.de.
+- Send patches from the currenct subversion repository to patch@phtagr.org.
 
 Commits:
 
-- Add "- " on comments at a commit
+- Add dash and filename at commit comments (e.g. "- File.php: Fixed")

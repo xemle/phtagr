@@ -3,7 +3,8 @@ phTagr
 An image browser inspired by www.flickr.com. 
 
 Main Idea: Browsing images by Tags/Keywords or searching images by Tags, Place,
-Comment and Date while keeping the data in the single images.
+Comment and Date while keeping the data in the single images through common
+meta data blocks like IPTC.
 
 A PHP frontend synchronize the images data with a SQL database. Adding images
 via scp, rsync, http upload should be suporreted. Download raw images for
@@ -17,14 +18,14 @@ Other image communities: http://holocore.com/?PictureSync_services
   - Generate valid XHTML. Mostly validated. Done.
   - All inputs must be checked for validity (prevent XCS and other intrusions)
     - Comments should not allow HTML tag: e.g.
-      "<script>window.alert('intrusion');</script>"
+      "<script>window.alert('intrusion');</script>". Done
   
 - mySQL database
   - Add popular values as last view and current value. Done 2006-02-16
     Popular index = current value*0.8 + 0.2*(1/(current time+1 - last view))
     The value is updated every time if a image is clicked and only one per
     session. This function must be reviewed
-  - Rename databases from singular to plural
+  - Rename databases from singular to plural. Done
   - rename pref to conf. Done.
   - User
     - add creator: Id of the creator user. This is used to identify the user

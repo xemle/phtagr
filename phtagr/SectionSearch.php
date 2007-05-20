@@ -154,6 +154,7 @@ function print_content()
   $this->option(_("Newest ascending"), "-newest");
   $this->option(_("Changes"), "changes");
   $this->option(_("Changes ascending"), "-changes");
+  $this->option(_("Random"), "random");
   echo "</select>\n";
   echo "</li>";
 

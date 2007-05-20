@@ -334,7 +334,8 @@ function set_orderby($orderby)
       $orderby=='newest' ||
       $orderby=='-newest' ||
       $orderby=='changes' ||
-      $orderby=='-changes' )
+      $orderby=='-changes' ||
+      $orderby=='random' )
     $this->add_param('orderby', $orderby);
   else 
     $this->del_param('orderby');
@@ -846,6 +847,8 @@ function _add_sql_column_order($num_tags, $num_sets, $num_locs)
   case '-changes':
     $order.=",synced";
     break;
+  case 'random':
+    break;
   default:
     break;
   }
@@ -894,21 +897,14 @@ function _add_sql_orderby($num_tags, $num_sets)
          'newest' => "created DESC",
          '-newest' => "created ASC",
          'changes' => "synced DESC",
-         '-changes' => "synced ASC");
+         '-changes' => "synced ASC",
+         'random' => "RAND()");
   if (isset($values[$orderby]))
     array_push($order, $values[$orderby]);
 
   $sql='';
   if (count($order)>0) 
-  {
-    $sql=" ORDER BY ";
-    for ($i=0; $i<count($order); $i++)
-    {
-      $sql.=$order[$i];
-      if ($i<count($order)-1)
-        $sql.=",";
-    }
-  }
+    $sql=" ORDER BY ".implode(",", $order);
     
   return $sql;
 }

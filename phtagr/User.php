@@ -65,16 +65,16 @@ function exists($idorname)
   {
     if ($idorname<1)
       return false;
-    $sql="SELECT COUNT(*)
-          FROM $db->users 
-          WHERE id=$idorname";
+    $sql="SELECT COUNT(*)".
+         " FROM $db->users". 
+         " WHERE id=$idorname";
   } else {
     if ($idorname=='')
       return false;
     $sname=mysql_escape_string($name);
-    $sql="SELECT COUNT(*)
-          FROM $db->users
-          WHERE name='$name'";
+    $sql="SELECT COUNT(*)".
+         " FROM $db->users".
+         " WHERE name='$name'";
   }
   $result=$db->query($sql);
   if (!$result)
@@ -92,8 +92,8 @@ function exists($idorname)
 function get_num_users($withguests=false)
 {
   global $db;
-  $sql="SELECT COUNT(*)
-        FROM $db->users";
+  $sql="SELECT COUNT(*)".
+       " FROM $db->users";
   if ($withguests)
     $sql.=" WHERE type!=".USER_GUEST ;
   $result=$db->query($sql);
@@ -110,9 +110,9 @@ function get_id_by_name($name)
 {
   global $db;
   $sname=mysql_escape_string($name);
-  $sql="SELECT id
-        FROM $db->users
-        WHERE name='$sname'";
+  $sql="SELECT id".
+       " FROM $db->users".
+       " WHERE name='$sname'";
   $result=$db->query($sql);
   if (!$result || mysql_num_rows($result)<1)
     return -1;
@@ -129,9 +129,9 @@ function get_name_by_id($id)
   if ($id<=0)
     return '';
 
-  $sql="SELECT name
-        FROM $db->users
-        WHERE id=$id";
+  $sql="SELECT name".
+       " FROM $db->users".
+       " WHERE id=$id";
   $result=$db->query($sql);
   if (!$result || mysql_num_rows($result)<1)
     return '';
@@ -476,32 +476,6 @@ function _check_login($name, $pwd)
   return true;
 }
 
-/** Sets the initial timestamps and arrays for the session */
-function init_session()
-{
-  global $log;
-  session_name('sid');
-  // initiating the session
-  if (!isset($_SESSION['created']))
-  {
-    $log->warn("Create new session", -1, $this->get_id());
-    $_SESSION['created']=time();
-    $_SESSION['img_viewed']=array();
-    $_SESSION['img_voted']=array();
-    $_SESSION['nrequests']=0;
-    $_SESSION['nqueries']=0;
-  } else {
-    if (isset($_SESSION['lang']))
-      $this->_set_lang($_SESSION['lang']);
-  }
-  $_SESSION['update']=time();
-  $_SESSION['nrequests']++;
-  if (isset($_COOKIE['PHPSESSID']))
-    $_SESSION['withcookie']=true;
-  else
-    $_SESSION['withcookie']=false;
-}
-
 /** Creates a new user 
   @param name Name of the user
   @param pwd Password of the user
@@ -660,6 +634,21 @@ function is_anonymous()
   return false;
 }
 
+/** 
+  @return The number of guests of the user */
+function get_num_guests()
+{
+  global $db;
+  $sql="SELECT COUNT(*)".
+       " FROM $db->users";
+  $sql.=" WHERE creator=".$this->get_id()." AND type=".USER_GUEST ;
+  $result=$db->query($sql);
+  if (!$result)
+    return -1;
+  $row=mysql_fetch_row($result);
+  return $row[0];
+}
+
 /** @return Returns the hash of all guests account ids. The index is the id,
  * the value is the name of the guest */
 function get_guests()
@@ -694,6 +683,25 @@ function get_groups()
     $groups[$row[0]]=$row[1];
 
   return $groups;
+}
+
+/** @return Returns the memberships of the current user */
+function get_memberlist($onlyguests=true)
+{
+  global $db;
+  $members=array();
+  $sql="SELECT g.id,g.name".
+       " FROM $db->usergroup AS ug, $db->groups AS g".
+       " WHERE ug.groupid=g.id AND ug.userid=".$this->get_id();
+  if ($onlyguest)
+    $sql.=" AND g.creator=".$this->get_creator();
+  $result=$db->query($sql);
+  if (!$result || mysql_num_rows($result)<0)
+    return $members;
+  while ($row=mysql_fetch_row($result))
+    $members[$row[0]]=$row[1];
+
+  return $members;
 }
 
 /** Get the count of the own images 
@@ -873,6 +881,43 @@ function get_theme_dir()
   global $conf;
   $path=$phtagr_htdocs.'/themes/'.$conf->get('theme', 'default');
   return $path;
+}
+
+/** Sets the initial timestamps and arrays for the session */
+function init_session()
+{
+  global $log;
+  // initiating the session
+  if (!isset($_SESSION['created']))
+  {
+    $log->warn("Create new session", -1, $this->get_id());
+    $_SESSION['created']=time();
+    $_SESSION['img_viewed']=array();
+    $_SESSION['img_voted']=array();
+    $_SESSION['nrequests']=0;
+    $_SESSION['nqueries']=0;
+    
+    // Save remote identification
+    $_SESSION['user_agent']=$_SERVER['HTTP_USER_AGENT'];
+    $_SESSION['remote_addr']=$_SERVER['REMOTE_ADDR'];
+  } else {
+    // remote check
+    if ($_SESSION['user_agent']!=$_SERVER['HTTP_USER_AGENT'] ||
+      $_SESSION['remote_addr']!=$_SERVER['REMOTE_ADDR'])
+    {
+      $this->_delete_session();
+      return;
+    }
+
+    if (isset($_SESSION['lang']))
+      $this->_set_lang($_SESSION['lang']);
+  }
+  $_SESSION['update']=time();
+  $_SESSION['nrequests']++;
+  if (isset($_COOKIE['PHPSESSID']))
+    $_SESSION['withcookie']=true;
+  else
+    $_SESSION['withcookie']=false;
 }
 
 /** Checks if the session is valid. 

@@ -22,6 +22,7 @@
  */
 
 $time_start=microtime();
+session_name('sid');
 session_start();
 
 include_once("$phtagr_lib/Database.php");

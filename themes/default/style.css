@@ -80,6 +80,7 @@ a:visited {
 }
 
 h2 {
+  clear: both;
   color: #ffffff;
   padding: 5px 5px 5px 5px;
   margin: 0px 0 0 0; 
@@ -88,6 +89,7 @@ h2 {
 }
 
 h3 {
+  clear: both;
   padding: 5px 5px 5px 0px;
   margin: 0px 0px 0px 0px; 
   border-bottom: 1px solid #000000;

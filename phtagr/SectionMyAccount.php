@@ -76,12 +76,12 @@ function print_general ()
 
   echo "<li>";
   $this->label(_("Current Password:"));
-  $this->input_password("oldpasswd");
+  $this->input_password("oldpassword");
   echo "</li>\n";
 
   echo "<li>";
   $this->label(_("Password:"));
-  $this->input_password("passwd");
+  $this->input_password("password");
   echo "</li>\n";
 
   echo "<li>";
@@ -163,17 +163,17 @@ function exec_general ()
     if (isset($_REQUEST['lastname']))
       $user->set_lastname($_REQUEST['lastname']);
 
-    if ($_REQUEST['passwd']!='' &
-      $_REQUEST['oldpasswd']!='' &&
+    if ($_REQUEST['password']!='' &
+      $_REQUEST['oldpassword']!='' &&
       $_REQUEST['confirm']!='')
     {
-      $oldpasswd=$_REQUEST['oldpasswd'];
-      $passwd=$_REQUEST['passwd'];
+      $oldpassword=$_REQUEST['oldpassword'];
+      $password=$_REQUEST['password'];
       $confirm=$_REQUEST['confirm'];
-      if ($passwd!==$confirm)
+      if ($password!==$confirm)
         $this->error(_("Passwords do not match together"));
       else {
-        $result=$user->passwd($oldpasswd, $passwd);
+        $result=$user->password($oldpassword, $password);
         if ($result<0)
           $this->error(sprintf(_("Could not set the password. Error %d"), $result));
         else
@@ -343,7 +343,7 @@ function exec_groups()
     else
       $this->warning(sprintf(_("Member '%s' could not added to your group '%s'"), $name, $group->get_name()));
   }
-  elseif ($_REQUEST['action']=='remove_member' &&
+  elseif ($_REQUEST['action']=='del_member' &&
     isset($_REQUEST['gid']) && 
     isset($_REQUEST['name']))
   {
@@ -352,10 +352,10 @@ function exec_groups()
     $group=new Group($id);
     if ($group->get_id()!=$id)
       return;
-    if ($group->remove_member($name))
+    if ($group->del_member($name))
       $this->success(sprintf(_("Member '%s' was deleted from group '%s'"), $name, $group->get_name()));
   }
-  elseif ($_REQUEST['action']=='remove_members' &&
+  elseif ($_REQUEST['action']=='del_members' &&
     isset($_REQUEST['gid']) && 
     isset($_REQUEST['members']))
   {
@@ -365,7 +365,7 @@ function exec_groups()
     if ($group->get_id()!=$id)
       return;
     foreach ($members as $name)
-      if ($group->remove_member($name))
+      if ($group->del_member($name))
         $this->success(sprintf(_("Member '%s' was deleted from group"), $name));
   }
   elseif ($_REQUEST['action']=='copy_members' &&
@@ -424,7 +424,7 @@ function exec_groups()
         continue;
       if ($dst_group->add_member($name))
       {
-        $group->remove_member($name);
+        $group->del_member($name);
         $success++;
       }
       else 
@@ -454,10 +454,12 @@ function print_group_list()
     $url->add_param('action', 'edit');
     echo "<table>
     <tr>
+      <th>"._("No.")."</th>
       <th>"._("Name")."</th>
       <th>"._("Members")."</th>
       <th></th>
     </tr>\n";
+    $count=1;
     foreach ($groups as $gid => $name)
     {
       $group=new Group($gid);
@@ -465,6 +467,7 @@ function print_group_list()
         continue;
       $url->add_param('gid', $gid);
       echo "  <tr>
+      <td>$count</td>
       <td><a href=\"".$url->get_url()."\">".$group->get_name()."</a></td>
       <td>".$group->get_num_members()."</td>\n";
       $url->add_param("action", "remove");
@@ -472,6 +475,7 @@ function print_group_list()
     </tr>\n";
       $url->del_param("action");
       unset($group);
+      $count++;
     }
     echo "</table>\n";
     $url->del_param('gid');
@@ -526,13 +530,12 @@ function print_group($gid)
   $members=$group->get_members();
   if (count($members)>0)
   {
-
-    $url->add_param('action', 'remove_member');
+    $url->add_param('action', 'del_member');
     echo "<table>
     <tr>
-      <th></th>
+      <th>"._("Select")."</th>
       <th>"._("Members")."</th>
-      <th></th>
+      <th>"._("Action")."</th>
     </tr>\n";
     foreach ($members as $uid => $name)
     {
@@ -549,7 +552,7 @@ function print_group($gid)
 
     echo "<select size=\"1\" name=\"action\">\n";
     $this->option(_("Select action"), 'none');
-    $this->option(_("Delete"), 'remove_members');
+    $this->option(_("Delete"), 'del_members');
     $this->option(_("Copy"), 'copy_members');
     $this->option(_("Move"), 'move_members');
     echo "</select>\n";
@@ -606,17 +609,17 @@ function print_groups()
 
 function exec_guests()
 {
-  global $user;
+  global $user, $log;
 
   if ($_REQUEST['action']=='add' &&
     isset($_REQUEST['name']) &&
-    isset($_REQUEST['passwd']) &&
+    isset($_REQUEST['password']) &&
     isset($_REQUEST['confirm']))
   {
     $name=$_REQUEST['name'];
     if ($name=='')
       return;
-    $pwd=$_REQUEST['passwd'];
+    $pwd=$_REQUEST['password'];
     $confirm=$_REQUEST['confirm'];
     if ($pwd!=$confirm)
       return;
@@ -631,7 +634,7 @@ function exec_guests()
       $this->error(sprintf(_("The guest '%s' could not created. Error %d"), $name, $result));
       return;
     }
-    $this->success(_("The guest could be created"));
+    $log->info("Create new guest $name (ID: $result)", -1, $user->get_id());
   }
   elseif ($_REQUEST['action']=='remove' &&
     isset($_REQUEST['guestid']))
@@ -640,10 +643,11 @@ function exec_guests()
     $guest=new User($gid);
     if ($guest->get_id()!=$gid)
       return;
+
     $name=$guest->get_name();
     $guest->delete();
     unset($guest);
-    $this->success(sprintf(_("The guest '%s' was successfully deleted"), $name));
+    $log->info("Deleted guest $name (ID: $gid)", -1, $user->get_id());
     // remove group id from request to jumb to the group list overview
     unset($_REQUEST['guestid']);
   }
@@ -655,23 +659,27 @@ function exec_guests()
     if ($guest->get_id()!=$gid)
       return;
 
-    if (isset($_REQUEST['oldpasswd']) &&
-      isset($_REQUEST['passwd']) &&
+    // Authorization check
+    if (!$user->is_admin() && $guest->get_creator()!=$user->get_id())
+      return;
+
+    if (isset($_REQUEST['oldpassword']) &&
+      isset($_REQUEST['password']) &&
       isset($_REQUEST['confirm']) &&
-      strlen($_REQUEST['oldpasswd'])>0 &&
-      strlen($_REQUEST['passwd'])>0)
+      strlen($_REQUEST['oldpassword'])>0 &&
+      strlen($_REQUEST['password'])>0)
     {
-      $oldpasswd=$_REQUEST['oldpasswd'];
-      $passwd=$_REQUEST['passwd'];
+      $oldpassword=$_REQUEST['oldpassword'];
+      $password=$_REQUEST['password'];
       $confirm=$_REQUEST['confirm'];
       
-      if ($passwd!=$confirm)
+      if ($password!=$confirm)
       {
         $this->error(_("Passwords do not match!"));
         return;
       } else {
         $name=$guest->get_name();
-        $result=$guest->passwd($oldpasswd, $passwd);
+        $result=$guest->passwd($oldpassword, $password);
         if ($result==0)
           $this->success(sprintf(_("The password of guest '%s' was successfully changed"), $name));
         elseif ($result==ERR_PASSWD_MISMATCH)
@@ -695,7 +703,36 @@ function exec_guests()
         $this->success(_("Expire date successfully changed"));
       }
     }
+
+    if (isset($_REQUEST['add_group']))
+    {
+      $group=new Group($_REQUEST['add_group']);
+      if ($group->get_id()>0 && $group->add_member($gid))
+      {
+        $this->success(sprintf(_("Group membership to '%s' was added"), $group->get_name()));
+        $log->warn(sprintf("Add group member %s to group %s (ID %d)",
+          $guest->get_name(), $group->get_name(), $group->get_id()), -1,
+          $user->get_id());
+      }
+      unset($group);
+    }
+  
     unset($guest);
+  }
+  if ($_REQUEST['action']=='del_group' &&
+    isset($_REQUEST['guestid']) &&
+    isset($_REQUEST['groupid']))
+  {
+    $group=new Group($_REQUEST['groupid']);
+
+    if ($group->get_id()>0 && $group->del_member($_REQUEST['guestid']))
+    {
+      $this->success(sprintf(_("Group membership of '%s' was deleted"), $group->get_name()));
+      $log->warn(sprintf("Deleting group member %s from group %s (ID %d)",
+        $_REQUEST['guestid'], $group->get_name(), $group->get_id()), -1,
+        $user->get_id());
+    }
+    unset($group);
   }
 }
 
@@ -716,19 +753,23 @@ function print_guest_list()
     $url->add_param('action', 'edit');
     echo "<table>
     <tr>
+      <th>"._("No.")."</th>
       <th>"._("Name")."</th>
-      <th></th>
+      <th>"._("Action")."</th>
     </tr>\n";
+    $count=1;
     foreach ($guests as $guestid => $name)
     {
       $url->add_param('guestid', $guestid);
       echo "  <tr>
+      <td>$count</td>
       <td><a href=\"".$url->get_url()."\">".$name."</a></td>\n";
       $url->add_param("action", "remove");
-      echo "<td><a href=\"".$url->get_url()."\" class=\"jsbutton\">"._("Remove")."</a></td>
+      echo "<td><a href=\"".$url->get_url()."\" class=\"jsbutton\">"._("Delete")."</a></td>
     </tr>\n";
       $url->del_param("action");
       unset($group);
+      $count++;
     }
     echo "</table>\n";
     $url->del_param('guestid');
@@ -747,25 +788,28 @@ function print_guest_list()
     $url->add_param('action', 'add');
     echo "<form action=\"./index.php\" method=\"post\">\n";
     echo $url->get_form();
+    echo "<fieldset><ol>\n";
 
-    echo "<table>
-  <tr>
-    <td>"._("Name:")."</td>
-    <td><input type=\"text\" name=\"name\" /></td>
-  </tr>
-  <tr>
-    <td>"._("Password:")."</td>
-    <td><input type=\"password\" name=\"passwd\" /></td>
-  </tr>
-  <tr>
-    <td>"._("Confirm:")."</td>
-    <td><input type=\"password\" name=\"confirm\" /></td>
-  </tr>
-  <tr>
-    <td></td>
-    <td><input type=\"submit\" value=\""._("New guest")."\" /></td>
-  </tr>
-</table>\n";
+    echo "<li>";
+    $this->label(_("Username:"));
+    $this->input_text('name');
+    echo "</li>";
+
+    echo "<li>";
+    $this->label(_("Password:"));
+    $this->input_password('password');
+    echo "</li>";
+
+    echo "<li>";
+    $this->label(_("Confirm:"));
+    $this->input_password('confirm');
+    echo "</li>";
+
+    echo "</ol></fieldset>\n";
+
+    echo "<div class=\"buttons\">";
+    $this->input_submit(_("Create"));
+    echo "</div>\n";
     echo "</form>\n";
   }
 }
@@ -789,30 +833,67 @@ function print_guest($guestid)
   echo "<h3>"._("Guest").": ".$guest->get_name()."</h3>\n";
   echo "<form action=\"./index.php\" method=\"post\">\n";
   echo $url->get_form();
+  echo "<fieldset><ol>\n";
+
+  echo "<li>";
+  $this->label(_("Expires:"));
+  $this->input_text('expire', $guest->get_expire());
+  echo "</li>";
+
+  echo "<li>";
+  $this->label(_("Old password:"));
+  $this->input_password('oldpassword');
+  echo "</li>";
+
+  echo "<li>";
+  $this->label(_("New password:"));
+  $this->input_password('password');
+  echo "</li>";
+
+  echo "<li>";
+  $this->label(_("Confirm:"));
+  $this->input_password('confirm');
+  echo "</li>";
+
+  echo "</ol></fieldset>\n";
+
+  echo "<div class=\"buttons\">";
+  $this->input_submit(_("Save"));
+  $this->input_reset(_("Reset"));
+  echo "</div>\n";
+
+  $this->h3(_("Group Memberships"));
 
   echo "<table>
-  <tr>
-    <td>"._("Expires:")."</td>
-    <td><input type='text' name='expire' value='".$guest->get_expire()."'/></td>
-  </tr>
-  <tr>
-    <td>"._("Old Password:")."</td>
-    <td><input type=\"password\" name=\"oldpasswd\" /></td>
-  </tr>
-  <tr>
-    <td>"._("New Password:")."</td>
-    <td><input type='password' name='passwd' /></td>
-  </tr>
-  <tr>
-    <td>"._("Confirm:")."</td>
-    <td><input type='password' name='confirm' /></td>
-  </tr>
-  <tr>
-    <td></td>
-    <td>
-      <input type=\"submit\" value=\""._("Save changes")."\" />
-    </td>
-</table>\n";
+  <tr><th>"._("No.")."</th><th>"._("Group")."</th><th>Actions</th></tr>\n";
+  $members=$guest->get_memberlist();
+  $count=1;
+  $url_group=new $url();
+  $url_group->add_param('section', 'myaccount');
+  $url_group->add_param('tab', MYACCOUNT_TAB_GROUPS);
+  foreach ($members as $id => $name)
+  {
+    echo "<tr><td>$count</td>";
+    $url_group->add_param('gid', $id);
+    echo "<td><a href=\"".$url_group->get_url()."\">".$this->escape_html($name)."</a></td>";
+    $url->add_param('action', 'del_group');
+    $url->add_param('groupid', $id);
+    echo "<td><a href=\"".$url->get_url()."\" class=\"jsbutton\">"._("Remove")."</a></td></tr>\n";
+    $count++;
+  }
+  echo "</table>\n";
+  
+  echo _("Add Group:");
+  $groups=$user->get_groups();
+  echo "<select name=\"add_group\" size=\"1\">\n";
+  $this->option('None', -1, true);
+  foreach ($groups as $id => $name)
+  {
+    if (!isset($members[$id]))
+      $this->option($name, $id);
+  }
+  echo "</select>\n";
+  $this->input_submit(_("Add"));
 
   echo "</form>\n";
 

@@ -47,7 +47,7 @@ var $_mode;
 
 function Url($base='')
 {
-  $path=dirname($_SERVER['PHP_SELF']);
+  $path=dirname($this->escape_html($_SERVER['PHP_SELF']));
   if ($path{strlen($path)-1}!="/")
     $path.="/";
 

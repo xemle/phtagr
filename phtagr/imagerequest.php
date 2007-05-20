@@ -25,6 +25,7 @@
  * If an error occurs exit silently. */
 
 $time_start=microtime();
+session_name('sid');
 session_start();
 
 include_once("$phtagr_lib/User.php");
