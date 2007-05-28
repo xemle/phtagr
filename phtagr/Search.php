@@ -85,6 +85,24 @@ function set_visibility($visibility)
   }
 }
 
+/** Set the file type. 
+  @param type Valid values are 'any', 'image', and 'video'
+*/
+function set_filetype($type)
+{
+  switch ($type) {
+  case 'any':
+    $this->del_param('filetype');
+    break;
+  case 'image': 
+  case 'video':
+    $this->add_param('filetype', $type);
+    break;
+  default:
+    break;
+  }
+}
+
 function add_tag($tag)
 {
   $tag=trim($tag);
@@ -401,6 +419,9 @@ function from_url()
     }
   }
   $this->add_riparam('location_type', null, LOCATION_UNKNOWN, LOCATION_COUNTRY);
+
+  if (isset($_REQUEST['filetype']))
+    $this->set_filetype($_REQUEST['filetype']);
     
   if (isset($_REQUEST['user']))
     $this->set_userid($_REQUEST['user']);
@@ -957,6 +978,12 @@ function _add_sql_where()
     $sql .= " AND i.date>=FROM_UNIXTIME($start)";
   if ($end>0)
     $sql .= " AND i.date<FROM_UNIXTIME($end)";
+
+  $type=$this->get_param('filetype');
+  if ($type=='image')
+    $sql.=" AND i.duration=-1";
+  if ($type=='video')
+    $sql.=" AND i.duration>=0";
 
   return $sql;
 }

@@ -77,7 +77,7 @@ function print_content()
   echo "<li>";
   $this->label(_("Location:"));
   echo "<p>";
-  $this->input_text("location", "", 30);
+  $this->input_text("locations", "", 30);
   echo _("Type:")."<select name=\"location_type\" size=\"1\">\n";
   $this->option(_("Any"), LOCATION_UNDEFINED);
   $this->option(_("City"), LOCATION_CITY);
@@ -102,6 +102,15 @@ function print_content()
   echo _("(Format: YYYY-MM-DD)")."</p>";
   echo "</li>";
   
+  echo "<li>";
+  $this->label(_("File type:"));
+  echo "<select size=\"1\" name=\"filetype\">\n";
+  $this->option(_("Any"), "any", true);
+  $this->option(_("Image"), "image");
+  $this->option(_("Video"), "video");
+  echo "</select>\n";
+  echo "</li>";
+
   echo "</ol>";
   echo "</fieldset>\n";
 

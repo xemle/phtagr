@@ -264,11 +264,15 @@ function _log_html($time, $level, $image, $user, $file, $lineno, $msg)
 function _open_file()
 {
   if ($this->_filename=='')
-    return;
+    return false;
 
-  $this->_file=@fopen($this->_filename, 'a');
+  $this->_file=fopen($this->_filename, 'a');
   if (!$this->_file)
+  {
+    return false;
     $this->_file=null;
+  }
+  return true;
 }
 
 function _close_file()

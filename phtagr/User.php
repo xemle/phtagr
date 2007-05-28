@@ -914,7 +914,7 @@ function init_session()
   }
   $_SESSION['update']=time();
   $_SESSION['nrequests']++;
-  if (isset($_COOKIE['PHPSESSID']))
+  if (isset($_COOKIE[session_name()]))
     $_SESSION['withcookie']=true;
   else
     $_SESSION['withcookie']=false;
