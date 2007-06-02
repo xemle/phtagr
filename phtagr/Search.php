@@ -533,20 +533,18 @@ function get_form()
 function _add_sql_join_tags($tags, $count=0, $op=1)
 {
   global $db;
-  $num_tags=count($tags);
+  if (!count($tags))
+    return "";
+
   $sql=" JOIN ( SELECT imageid, COUNT(imageid) AS thits".
        " FROM $db->imagetag";
-  if ($num_tags>0) 
-  {
-    $sql.=" WHERE";
-    for ($i=0; $i<$num_tags; $i++)
-    {
-      $tagid=$db->tag2id($tags[$i]);
-      $sql.=" tagid=$tagid";
-      if ($i != $num_tags-1)
-        $sql.=" OR";
-    }
-  }
+  $sql.=" WHERE";
+
+  $ids=array();
+  foreach ($tags as $tag)
+    array_push($ids, "tagid=".$db->tag2id($tag));
+  $sql.=" ".implode(" OR ", $ids);
+
   $sql.=" GROUP BY imageid";
   if ($count>0) 
   {
@@ -574,20 +572,18 @@ function _add_sql_join_tags($tags, $count=0, $op=1)
 function _add_sql_join_sets($sets, $count=0, $op=1)
 {
   global $db;
-  $num_sets=count($sets);
+  if (!count($sets))
+    return "";
+
   $sql=" JOIN ( SELECT imageid, COUNT(imageid) AS shits".
        " FROM $db->imageset";
-  if ($num_sets>0) 
-  {
-    $sql.=" WHERE";
-    for ($i=0; $i<$num_sets; $i++)
-    {
-      $setid=$db->set2id($sets[$i]);
-      $sql.=" setid=$setid";
-      if ($i != $num_sets-1)
-        $sql.=" OR";
-    }
-  }
+  $sql.=" WHERE";
+
+  $ids=array();
+  foreach ($sets as $set)
+    array_push($ids, "setid=".$db->set2id($set));
+  $sql.=" ".implode(" OR ", $ids);
+
   $sql.=" GROUP BY imageid";
   if ($count>0) 
   {
@@ -615,27 +611,22 @@ function _add_sql_join_sets($sets, $count=0, $op=1)
 function _add_sql_join_locations($locs, $count=0, $op=1)
 {
   global $db, $log;
-  $num_locs=count($locs);
+  if (!count($locs))
+    return "";
+
   $sql=" JOIN ( SELECT imageid, COUNT(imageid) AS lhits".
        " FROM $db->imagelocation";
-  if ($num_locs>0) 
+  $sql.=" WHERE";
+
+  $ids=array();
+  foreach ($locs as $loc)
   {
-    $sql.=" WHERE";
-    for ($i=0; $i<$num_locs; $i++)
-    {
-      $log->trace("Get id of ".$locs[$i]);
-      $locids=$db->location2ids($locs[$i]);
-      $log->trace("Got ".count($locids). " ids");
-      for($j=0; $j<count($locids); $j++)
-      {
-        $sql.=" locationid=".$locids[$j];
-        if ($j != count($locids)-1)
-          $sql.=" OR";
-      }
-      if ($i != $num_locs-1)
-        $sql.=" OR";
-    }
+    $locids=$db->location2ids($loc);
+    foreach ($locids as $locid)
+      array_push($ids, "locationid=".$locid);
   }
+  $sql.=" ".implode(" OR ", $ids);
+
   $sql.=" GROUP BY imageid";
   if ($count>0) 
   {

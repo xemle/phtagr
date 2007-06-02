@@ -48,14 +48,14 @@ function print_general ()
   global $conf;
   $account=new SectionAccount();
 
+  echo "<h3>"._("General")."</h3>\n";
+
   $url=new Url();
   $url->add_param('section', 'myaccount');
   $url->add_param('tab', MYACCOUNT_TAB_GENERAL);
   $url->add_param('action', 'edit');
+  echo "<form action=\"".$url->get_url()."\" method=\"post\">\n";
 
-  echo "<h3>"._("General")."</h3>\n";
-  echo "<form action=\"./index.php\" method=\"post\">\n";
-  echo $url->get_form();
   echo "<fieldset><legend>"._("User Information")."</legend>\n";
   echo "<ol>\n";
 
@@ -196,17 +196,8 @@ function exec_general ()
     if ($sep==' ' || $sep=='.' || $sep==';' || $sep==',')
       $conf->set('meta.separator', $sep);
     
-    $lazysync=$_REQUEST['lazysync'];
-    if ($lazysync==1)
-      $conf->set('image.lazysync', 1);
-    else
-      $conf->set('image.lazysync', 0);
-  
-    $autorotate=$_REQUEST['autorotate'];
-    if ($autorotate==1)
-      $conf->set('image.autorotate', 1);
-    else
-      $conf->set('image.autorotate', 0);
+    $conf->set('image.lazysync', $_REQUEST['lazysync']==1?1:0);
+    $conf->set('image.autorotate', $_REQUEST['autorotate']==1?1:0);
     return;
   }
   elseif ($action=="imagesync")
@@ -225,10 +216,6 @@ function print_upload ()
   global $user;
 
   echo "<h3>"._("Upload")."</h3>\n";
-  $url=new Url();
-  $url->add_param('section', 'myaccount');
-  $url->add_param('tab', MYACCOUNT_TAB_UPLOAD);
-  $url->add_param('action', 'upload');
 
   $qslice=$user->get_qslice();
   $qinterval=$user->get_qinterval();
@@ -237,8 +224,12 @@ function print_upload ()
   $upload_max=$user->get_upload_max();
   printf(_("You have %.3f MB already uploaded. Your total limit is %.3f MB. Currently you are allowed to upload %.3f MB."), $used/(1024*1024), $quota/(1024*1024), $upload_max/(1024*1024));
 
-  echo "<form action=\"./index.php\" method=\"post\" enctype=\"multipart/form-data\">\n";
-  echo $url->get_form();
+  $url=new Url();
+  $url->add_param('section', 'myaccount');
+  $url->add_param('tab', MYACCOUNT_TAB_UPLOAD);
+  $url->add_param('action', 'upload');
+  echo "<form action=\"".$url->get_url()."\" method=\"post\" enctype=\"multipart/form-data\">\n";
+
   echo "<div class=\"upload_files\" \>\n";
   echo "<table id=\"upload_files\"><tbody>
   <tr id=\"upload-1\">
@@ -517,14 +508,13 @@ function print_group($gid)
     $this->warning(sprintf(_("Could not load group with ID %d"),$gid));
     return;
   }
+  echo "<h3>"._("Group").": ".$group->get_name()."</h3>\n";
+
   $url=new Url();
   $url->add_param('section', 'myaccount');
   $url->add_param('tab', MYACCOUNT_TAB_GROUPS);
   $url->add_param('gid', $gid);
-
-  echo "<h3>"._("Group").": ".$group->get_name()."</h3>\n";
-  echo "<form action=\"./index.php\" method=\"post\">\n";
-  echo $url->get_form();
+  echo "<form action=\"".$url->get_url()."\" method=\"post\">\n";
 
   // Group Tables
   $members=$group->get_members();
@@ -824,15 +814,15 @@ function print_guest($guestid)
     $this->warning(sprintf(_("Could not load guest with ID %d"),$guestid));
     return;
   }
+  echo "<h3>"._("Guest").": ".$guest->get_name()."</h3>\n";
+
   $url=new Url();
   $url->add_param('section', 'myaccount');
   $url->add_param('tab', MYACCOUNT_TAB_GUESTS);
   $url->add_param('action', 'update');
   $url->add_param('guestid', $guestid);
+  echo "<form action=\"".$url->get_url()."\" method=\"post\">\n";
 
-  echo "<h3>"._("Guest").": ".$guest->get_name()."</h3>\n";
-  echo "<form action=\"./index.php\" method=\"post\">\n";
-  echo $url->get_form();
   echo "<fieldset><ol>\n";
 
   echo "<li>";
@@ -921,24 +911,22 @@ function print_content()
   global $user;
   
   echo "<h2>"._("My Account")."</h2>\n";
-  $tabs2=new SectionMenu('tab', _("Actions:"));
-  $tabs2->add_param('section', 'myaccount');
-  $tabs2->set_item_param('tab');
+  $tabs=new SectionMenu('tab', _("Actions:"));
+  $tabs->add_param('section', 'myaccount');
+  $tabs->set_item_param('tab');
 
-  $tabs2->add_item(MYACCOUNT_TAB_UPLOAD, _("Upload"));
-  $tabs2->add_item(MYACCOUNT_TAB_GROUPS, _("Groups"));
-  $tabs2->add_item(MYACCOUNT_TAB_GUESTS, _("Guests"));
-  $tabs2->add_item(MYACCOUNT_TAB_GENERAL, _("General"));
-  $tabs2->add_item(MYACCOUNT_TAB_DETAILS, _("Details"));
+  $tabs->add_item(MYACCOUNT_TAB_UPLOAD, _("Upload"));
+  $tabs->add_item(MYACCOUNT_TAB_GROUPS, _("Groups"));
+  $tabs->add_item(MYACCOUNT_TAB_GUESTS, _("Guests"));
+  $tabs->add_item(MYACCOUNT_TAB_GENERAL, _("General"));
+  $tabs->add_item(MYACCOUNT_TAB_DETAILS, _("Details"));
   if (isset($_REQUEST['tab']))
     $cur=intval($_REQUEST['tab']);
   else
     $cur=MYACCOUNT_TAB_UPLOAD;
-  $tabs2->set_current($cur);
-  $tabs2->print_sections();
-  $cur=$tabs2->get_current();
-
-  echo "\n";
+  $tabs->set_current($cur);
+  $tabs->print_sections();
+  $cur=$tabs->get_current();
 
   if (isset($_REQUEST["action"]))
   {
@@ -964,21 +952,21 @@ function print_content()
 
   switch ($cur)
   {
-  case MYACCOUNT_TAB_UPLOAD: 
-    $this->print_upload(); 
-    break;
-  case MYACCOUNT_TAB_DETAILS: 
-    $this->print_details(); 
-    break;
-  case MYACCOUNT_TAB_GROUPS: 
-    $this->print_groups(); 
-    break;
-  case MYACCOUNT_TAB_GUESTS: 
-    $this->print_guests(); 
-    break;
-  default:
-    $this->print_general(); 
-    break;
+    case MYACCOUNT_TAB_UPLOAD: 
+      $this->print_upload(); 
+      break;
+    case MYACCOUNT_TAB_DETAILS: 
+      $this->print_details(); 
+      break;
+    case MYACCOUNT_TAB_GROUPS: 
+      $this->print_groups(); 
+      break;
+    case MYACCOUNT_TAB_GUESTS: 
+      $this->print_guests(); 
+      break;
+    default:
+      $this->print_general(); 
+      break;
   }
 }
 

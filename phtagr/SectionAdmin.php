@@ -26,10 +26,10 @@ include_once("$phtagr_lib/SectionAccount.php");
 include_once("$phtagr_lib/ImageSync.php");
 include_once("$phtagr_lib/Upgrade.php");
 
-define("ADMIN_TAB_GENERAL", "0");
 define("ADMIN_TAB_USERS", "1");
 define("ADMIN_TAB_CREATE_USER", "2");
-define("ADMIN_TAB_DEBUG", "3");
+define("ADMIN_TAB_LOG", "3");
+define("ADMIN_TAB_DEBUG", "4");
 
 class SectionAdmin extends SectionBase
 {
@@ -37,49 +37,6 @@ class SectionAdmin extends SectionBase
 function SectionAdmin()
 {
   $this->SectionBase("administration");
-}
-
-function exec_general ()
-{
-  global $db;
-  global $conf;
-  $result=false;
-
-  if (isset ($_REQUEST['user_self_register']))
-    $result=$conf->set_default('allow_user_self_register', '1');
-  else
-    $result=$conf->set_default('allow_user_self_register', '0');
-  
-  if ($result)
-    $this->success("Settings saved successfully!");
-  else
-    $this->error("Settings could not be saved!");
-}
-
-function print_general ()
-{
-  global $db;
-  global $conf;
-  $user_self_register = $conf->get('allow_user_self_register', '0');
-
-  echo "<h3>"._("General")."</h3>\n";
-
-  echo "<form action=\"./index.php\" method=\"POST\">\n";
-
-  $url=new Url();
-  $url->add_param('section', 'admin');
-  $url->add_param('page', ADMIN_TAB_GENERAL);
-  $url->add_param('action', 'settings');
-  echo $url->get_form();
-  if ($user_self_register)
-    echo "<input type=\"checkbox\" name=\"user_self_register\" checked/>";
-  else
-    echo "<input type=\"checkbox\" name=\"user_self_register\"/>";
-  echo " Allow users to register themselves.\n";
-
-  echo "<input type=\"submit\" class=\"submit\" value=\"Save\" />\n";
-  echo "</form>\n";
-  echo "<p></p>\n";
 }
 
 /** Prints the details of an user
@@ -94,14 +51,13 @@ function print_user_details($u=null)
 
   // If we don't have a update request we show all the values we can
   // update.
-  echo "<form action=\"./index.php\" method=\"post\">\n";
-
   $url=new Url();
   $url->add_param('section', 'admin');
   $url->add_param('page', ADMIN_TAB_USERS);
   $url->add_param('action', 'edit');
   $url->add_param('id', $u->get_id());
-  echo $url->get_form();
+  echo "<form action=\"".$url->get_url()."\" method=\"post\">\n";
+
   echo "<fieldset><ol>";
 
   echo "<li>";
@@ -160,7 +116,7 @@ can import files from these direcories.")."</p>\n";
     {
       echo "<tr><td></td><td>".$this->escape_html($root)." ";
       $url->add_param('remove_root', $root);
-      echo "<a href=\"".$url->get_url()."\" class=\"jsbutton\">"._("Remove")."</td></tr>\n";
+      echo "<a href=\"".$url->get_url()."\" class=\"jsbutton\">"._("Remove")."</a></td></tr>\n";
     }
     $url->del_param('remove_root');
   }
@@ -175,7 +131,11 @@ can import files from these direcories.")."</p>\n";
   echo "</div>\n";
 
   echo "</form>\n\n";
-  return;
+
+  $url=new Url();
+  $url->add_param('section', 'admin');
+  $url->add_param('page', ADMIN_TAB_USERS);
+  echo "<div style=\"clear: both\"><a href=\"".$url->get_url()."\" class=\"jsbutton\">"._("Back")."</a></div>\n";
 }
 
 function exec_users()
@@ -263,6 +223,9 @@ function print_users()
 {
   global $db;
 
+  if (isset($_REQUEST['action']))
+    return;
+
   echo "<h3>"._("Available Users")."</h3>\n";
 
   $sql="SELECT id
@@ -272,10 +235,10 @@ function print_users()
   if (!$result)
     return;
 
-  echo "<form action=\"./index.php\" method=\"post\">\n";
   $url=new Url();
   $url->add_param('section', 'admin');
   $url->add_param('page', ADMIN_TAB_USERS);
+  echo "<form action=\"".$url->get_url()."\" method=\"post\">\n";
   
   echo "<table>
   <tr> 
@@ -302,7 +265,7 @@ function print_users()
     if ($id!=1)
     {
       $url->add_param('action', 'delete');
-      echo "<td><a href=\"".$url->get_url()."\" class=\"jsbutton\">"._("Remove")."</td>\n";
+      echo "<td><a href=\"".$url->get_url()."\" class=\"jsbutton\">"._("Remove")."</a></td>\n";
     } else {
       echo "<td></td>\n";
     }
@@ -355,8 +318,7 @@ function print_create_user()
 
   $this->h3(_("Create User"));
 
-  echo "<form action=\"./index.php\" method=\"post\">\n";
-  echo $url->get_form();
+  echo "<form action=\"".$url->get_url()."\" method=\"post\">\n";
   echo "<fieldset><ol>\n";
 
   echo "<li>";
@@ -422,6 +384,112 @@ function print_upload ()
   echo "<input type=\"submit\" value=\"Save\" class=\"submit\" />\n";
   echo "</form>\n";
   echo "</p>\n";
+}
+
+function exec_log()
+{
+  global $user, $conf;
+  if (!$user->is_admin())
+    return;
+ 
+  $type=$_REQUEST['backend'];
+  $filename=$_REQUEST['filename'];
+  $level=$_REQUEST['level'];
+
+  // Parameter checks
+  switch ($type)
+  {
+    case LOG_FILE:
+      if (!strlen($filename))
+      {
+        $this->warning(_("Log file is not set"));
+        return false;
+      }
+    case LOG_DB:
+    case LOG_SESSION:
+      break;
+    default:
+      $this->warning(_("Unknown log backend"));
+      $log->warn('Unknown log backend: '.$type, -1, $user->get_userid());
+      return false;
+  }
+
+  switch ($level)
+  {
+    case LOG_INFO:
+    case LOG_WARN:
+    case LOG_DEBUG:
+    case LOG_TRACE:
+      break;
+    default:
+      $log->warn('Unknown log level: '.$level, -1, $user->get_userid());
+      $this->warning(_("Unknown log level"));
+      return false;
+  }
+
+  // Parameter Execution
+  $conf->set_default('log.enable',$_REQUEST['enable']==1?1:0);
+  $conf->set_default('log.type', $type);
+  $conf->set_default('log.filename', $filename);
+  $conf->set_default('log.level', $level);
+
+  $this->success(_("Settings saved"));
+}
+
+function print_log()
+{
+  global $db, $conf;
+
+  $this->h3(_("Log"));
+  
+  $url=new Url();
+  $url->add_param('section', 'admin');
+  $url->add_param('page', ADMIN_TAB_LOG);
+  $url->add_param('action', 1);
+
+  echo "<form action=\"".$url->get_url()."\" method=\"post\">\n";
+
+  echo "<fieldset>
+  <ol>\n";
+
+  echo "<li>";
+  $this->label(_("Enable Logging:"));
+  $enabled=$conf->get('log.enable', 0);
+  $this->input_checkbox('enable', 1, $enabled!=0);
+  echo "</li>";
+
+  echo "<li>";
+  $this->label(_("Backend:"));
+  echo "<select name=\"backend\" size=\"1\">\n";
+  $type=$conf->get('log.type', -1);
+  $this->option(_("File"), LOG_FILE, $type==LOG_FILE);
+  $this->option(_("Database"), LOG_DB, $type==LOG_DB);
+  $this->option(_("Session"), LOG_SESSION, $type==LOG_SESSION);
+  echo "</select></li>";
+
+  echo "<li>";
+  $this->label(_("Filename:"));
+  $this->input_text("filename", $conf->get('log.filename', ''));
+  echo "</li>";
+
+  echo "<li>";
+  $this->label(_("Log Level:"));
+  echo "<select name=\"level\" size=\"1\">\n";
+  $level=$conf->get('log.level', LOG_INFO);
+  $this->option(_("Info"), LOG_INFO, $level==LOG_INFO);
+  $this->option(_("Warn"), LOG_WARN, $level==LOG_WARN);
+  $this->option(_("Debug"), LOG_DEBUG, $level==LOG_DEBUG);
+  $this->option(_("Trace"), LOG_TRACE, $level==LOG_TRACE);
+  echo "</select></li>";
+
+  echo "</ol>\n";
+  echo "</fieldset>"; 
+
+  echo "<div class=\"buttons\">";
+  $this->input_submit(_("Apply"));
+  $this->input_reset(_("Reset"));
+  echo "</div>\n";
+  echo "</form>\n";
 }
 
 function exec_debug()
@@ -530,27 +598,23 @@ function print_content()
   global $user;
   
   echo "<h2>"._("Administration")."</h2>\n";
-  $tabs2=new SectionMenu('tab', _("Actions:"));
-  $tabs2->add_param('section', 'admin');
-  $tabs2->set_item_param('page');
 
-  $tabs2->add_item(ADMIN_TAB_GENERAL, _("General"), ADMIN_TAB_GENERAL==$curid );
-  $tabs2->add_item(ADMIN_TAB_USERS, _("Users"));
-  $tabs2->add_item(ADMIN_TAB_CREATE_USER, _("Create User"));
-  //$tabs2->add_item(ADMIN_TAB_UPLOAD, _("Upload"));
-  $tabs2->add_item(ADMIN_TAB_DEBUG, _("Debug"));
-  $tabs2->print_sections();
-  $cur=$tabs2->get_current();
-  
-  echo "\n";
+  $tabs=new SectionMenu('tab', _("Actions:"));
+  $tabs->add_param('section', 'admin');
+  $tabs->set_item_param('page');
 
-  if (isset ($_REQUEST["action"]))
+  $tabs->add_item(ADMIN_TAB_USERS, _("Users"));
+  $tabs->add_item(ADMIN_TAB_CREATE_USER, _("Create User"));
+  $tabs->add_item(ADMIN_TAB_LOG, _("Logging"));
+  $tabs->add_item(ADMIN_TAB_DEBUG, _("Debug"));
+
+  $tabs->print_sections();
+  $page=$tabs->get_current();
+
+  // Execute Actions
+  if (isset($_REQUEST["action"]))
   {
-    // @todo: Get rid of the <br> but keep the success boxes in correct
-    //        positions.
-    echo "<br/>\n";
-
-    switch ($cur)
+    switch ($page)
     {
     case ADMIN_TAB_USERS: 
       $this->exec_users();
@@ -558,52 +622,35 @@ function print_content()
     case ADMIN_TAB_CREATE_USER: 
       $this->exec_create_user();
       break;
-    /*
-    case ADMIN_TAB_UPLOAD: 
-      $this->exec_upload();
-      break;
-    */
     case ADMIN_TAB_DEBUG: 
       $this->exec_debug();
       break;
-    case ADMIN_TAB_GENERAL:
-      $this->exec_general();
+    case ADMIN_TAB_LOG: 
+      $this->exec_log();
       break;
     default:
       break;
     }
-
-    $url=new Url();
-    $url->add_param('section', 'admin');
-    $url->add_param('page', $cur);
-    $href=$url->get_url();
-    echo "<div class=\"button\">
-<a href=\"$href\">Back</a>
-</div>\n";
-    echo "<p></p>\n";
- 
-    return; // Uncomment this if you still want to see the contents.
   }
 
-  switch ($cur)
+  // Print tab
+  switch ($page)
   {
-  case ADMIN_TAB_USERS: 
-    $this->print_users(); 
-    break;
-  case ADMIN_TAB_CREATE_USER: 
-    $this->print_create_user(); 
-    break;
-  /*
-  case ADMIN_TAB_UPLOAD: 
-    $this->print_upload (); 
-    break;
-  */
-  case ADMIN_TAB_DEBUG: 
-    $this->print_debug (); 
-    break;
-  default:
-    $this->print_general (); 
-    break;
+    case ADMIN_TAB_USERS:
+      $this->print_users(); 
+      break;
+    case ADMIN_TAB_CREATE_USER: 
+      $this->print_create_user(); 
+      break;
+    case ADMIN_TAB_LOG: 
+      $this->print_log(); 
+      break;
+    case ADMIN_TAB_DEBUG: 
+      $this->print_debug(); 
+      break;
+    default:
+      $this->print_users(); 
+      break;
   }
 }
 

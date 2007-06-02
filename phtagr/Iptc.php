@@ -536,12 +536,18 @@ function _read_seg_iptc($jpg)
   @return True on success, false otherwise */
 function _read_seg_com($jpg)
 {
+  global $user, $log;
   if ($jpg==null || !isset($jpg['_com']))
     return false;
 
   $fp=$jpg['_fp'];
   $com=&$jpg['_com'];
   fseek($fp, $com['pos']+HDR_SIZE_JPG, SEEK_SET);
+  if ($com['size']<2)
+  {
+    $log->error("JPEG comment segment size is negative: ".$jpg['filename'], -1, $user->get_id());
+    return false;
+  }
   $buf=fread($fp, $com['size']-2);
   if (substr($buf, 0, 5)!="<?xml") {
     $this->_xml=null;

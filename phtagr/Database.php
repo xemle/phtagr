@@ -355,7 +355,7 @@ function location2id($location, $type, $create=false)
 }
 
 /** @location Untyped location name
-  @return Array of IDs of a location */
+  @return Array of IDs of a location. If the location is not found, is returns { -1 }. */
 function location2ids($location)
 {
   $slocation=mysql_escape_string($location);
@@ -365,9 +365,9 @@ function location2ids($location)
   $result=$this->query($sql);
   $ids=array();
   while($row=mysql_fetch_row($result))
-  {
     array_push($ids, $row[0]);
-  }
+  if (count($ids)==0)
+    array_push($ids, -1);
   return $ids;
 }
 
