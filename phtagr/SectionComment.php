@@ -63,9 +63,85 @@ function get_search()
   return $this->_search;
 }
 
+/** Checks the input of the comment and created a new comment if all
+ * requirements fits. It also saved the inputs of an anonymouse user for
+ * further comments 
+  @param image Current image object */
+function exec_request()
+{
+  global $db, $user, $log;
+
+  $img=$this->get_image();
+  if ($img==null || $img->get_id()<0)
+    return false;
+
+  if ($_REQUEST['action']=='add_comment')
+  {
+    if (!$img->can_comment($user))
+      return false;
+
+    $name=$_REQUEST['name'];
+    $email=$_REQUEST['email'];
+    $text=$_REQUEST['text'];
+    $userid=$user->get_id();
+
+    if (strlen($text)==0)
+      return false;
+
+    // comment is from a user
+    if ($user->get_id()>0)
+    {
+      $name=$user->get_name();
+      $email=$user->get_email();
+    } 
+    elseif (isset($_SESSION['comment_name']))
+    {
+      $name=$_SESSION['comment_name'];
+      $email=$_SESSION['comment_email'];
+    }
+    // anonymous comment
+    elseif (strlen($name)==0 || strlen($email)==0)
+    {
+      return false;
+    }
+
+    $comment=new Comment();
+    $id=$comment->create($img->get_id(), $name, $email, $text);
+
+    // Remember anonymouse user within the session
+    if ($id>0)
+    {
+      $_SESSION['comment_name']=$name;
+      $_SESSION['comment_email']=$email;
+      $this->success(_("Your comment was added"));
+    }
+    else
+    {
+      $this->warning(_("Could not add the comment"));
+    }
+  }
+  else if ($_REQUEST['action']=='del_comment' && 
+    is_numeric($_REQUEST['comment_id']))
+  {
+    $comment=new Comment($_REQUEST['comment_id']);
+    if ($img->get_userid()==$user->get_id() ||
+      $comment->get_userid()==$user->get_id())
+    {
+      if ($comment->delete())
+        $this->success(_("Comment was deleted"));
+    }
+  }
+  return true;
+}
+
+
 function print_comment($id)
 {
+  global $user;
   $comment=new Comment($id);
+  if ($comment->get_id()!=$id)
+    return;
+
   echo "  <li>";
   echo "    <p class=\"who\">";
 
@@ -84,9 +160,25 @@ function print_comment($id)
     echo $this->escape_html($comment->get_name());
   }
 
+  // head line
   echo " "._("says at ").
-    strftime("%Y-%m-%d %H:%M", $comment->get_date(true)).
-    "</p>";
+    strftime("%Y-%m-%d %H:%M", $comment->get_date(true));
+
+  // Delete button for image owner or comment owner
+  $img=$this->get_image();
+  if ($user->get_id()>0 &&
+    ($img->get_userid()==$user->get_id() ||
+    $comment->get_userid()==$user->get_id()))
+  {
+    $search=new Search();
+    $search->from_url();
+    $search->add_param('action', 'del_comment');
+    $search->add_param('comment_id', $comment->get_id());
+    echo "<a href=\"".$search->get_url()."\" class=\"jsbutton\">"._("Delete")."</a>";
+  }
+  echo  "</p>";
+
+  // comment
   echo "    <p class=\"commenttext\">".
     preg_replace('/\n/', '<br \/>', $this->escape_html($comment->get_comment())).
     "</p>";
@@ -131,7 +223,7 @@ function print_comment_form()
   $url=new Url();
   echo "<form id=\"formImage\" action=\"".$url->get_url()."\" method=\"post\" accept-charset=\"UTF-8\"><div>\n";
   echo "<input type=\"hidden\" name=\"section\" value=\"image\" />\n";
-  echo "<input type=\"hidden\" name=\"action\" value=\"comment\" />\n";
+  echo "<input type=\"hidden\" name=\"action\" value=\"add_comment\" />\n";
   echo "<input type=\"hidden\" name=\"image\" value=\"$id\" />\n";
 
   echo $search->get_form();
@@ -140,11 +232,14 @@ function print_comment_form()
 
   if ($user->get_id()<0 && !isset($_SESSION['comment_name']))
   {
-    echo "<label>"._("Your Name:")."</label><input type=\"text\" name=\"name\" size=\"30\"/>
-    <label>"._("Your Email (will not be published):")."</label><input type=\"text\" name=\"email\" size=\"30\" />\n";
+    $this->label(_("Your Name:"));
+    $this->input_text("name", "", 30);
+    $this->label(_("Your Email (will not be published):"));
+    $this->input_text("email", "", 30);
   }
-  echo "<label>"._("Your Comment:")."</label><textarea name=\"comment\" cols=\"50\" rows=\"5\"></textarea>
-    <input type=\"submit\" value=\""._("Add Comment")."\" class=\"submit\" />";
+  $this->label(_("Your Comment:"));
+  echo "<textarea name=\"text\" cols=\"50\" rows=\"5\"></textarea>";
+  $this->input_submit(_("Add Comment"));
   echo "</div></form>\n";
 }
 
@@ -153,17 +248,11 @@ function print_content()
   global $db;
   global $user;
  
-  if ($_REQUEST['action']=='comment')
-  {
-    $comment=new Comment();
-    $id=$comment->handle_request($this->get_image());
-    if ($id<0)
-      $this->warn(_("Could not add the comment"));
-    else
-      $this->success(_("Your comment was added"));
-  }
-  
   $img=$this->get_image();
+
+  if (strlen($_REQUEST['action']))
+    $this->exec_request();
+ 
   if (!$img || $img->get_id()<0) 
   {
     $this->warning(_("Sorry, the requested image is not available."));

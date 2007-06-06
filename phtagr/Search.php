@@ -75,6 +75,7 @@ function set_groupid($groupid)
 function set_visibility($visibility)
 {
   switch ($visibility) {
+  case 'private': 
   case 'group': 
   case 'member':
   case 'public':
@@ -817,6 +818,9 @@ function _add_sql_where_visibility()
   $acl='';
   $visible=$this->get_param('visibility', '');
   switch ($visible) {
+  case 'private':
+    $acl .= " AND i.gacl<".ACL_PREVIEW; 
+    break;
   case 'group':
     $acl .= " AND i.gacl>=".ACL_PREVIEW." AND i.macl<".ACL_PREVIEW; 
     break;

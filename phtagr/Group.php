@@ -118,13 +118,13 @@ function create($name)
     return $id;
 
   $sname=mysql_escape_string($name);
-  $sql="INSERT INTO $db->groups
-        (owner, name) VALUES (".$user->get_id().",'$sname')";
-  $result=$db->query($sql);
-  if (!$result)
+  $sql="INSERT INTO $db->groups".
+       " (owner, name) VALUES (".$user->get_id().",'$sname')";
+  $id=$db->query_insert($sql);
+  if ($id<0)
     return -1;
-  
-  return $this->get_id_by_name($name);
+
+  return $id;
 }
 
 function get_id()

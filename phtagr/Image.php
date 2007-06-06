@@ -76,12 +76,11 @@ function init_by_filename($filename)
   if ($filename=='')
     return false;
     
-  //$sfilename=str_replace('\\','\\\\',$filename);
   $sfilename=mysql_escape_string($filename);
 
-  $sql="SELECT * 
-        FROM $db->images
-        WHERE filename='$sfilename'";
+  $sql="SELECT *". 
+       " FROM $db->images".
+       " WHERE filename='$sfilename'";
   $result=$db->query($sql);
   if (!$result || mysql_num_rows($result)==0)
     return false;
@@ -646,11 +645,10 @@ function get_tags()
   global $db;
   $id=$this->get_id();
   $this->_tags=array();
-  $sql="SELECT t.name
-        FROM $db->tags AS t, $db->imagetag AS it
-        WHERE it.imageid=$id 
-          AND it.tagid=t.id
-        GROUP BY t.name";
+  $sql="SELECT t.name".
+       " FROM $db->tags AS t, $db->imagetag AS it".
+       " WHERE it.imageid=$id AND it.tagid=t.id".
+       " GROUP BY t.name";
   $result=$db->query($sql);
   if (!$result)
     return $this->_tags;
@@ -688,9 +686,9 @@ function add_tags($tags)
       $tagid=$db->tag2id($tag, true);
       if ($tagid<0)
         continue; 
-      $sql="INSERT INTO $db->imagetag
-            (imageid, tagid) 
-            VALUES ($id, $tagid)";
+      $sql="INSERT INTO $db->imagetag".
+           " (imageid, tagid)".
+           " VALUES ($id, $tagid)";
       $db->query($sql);
       array_push($this->_tags, $tag);
       $this->set_meta_modified('tags');
@@ -717,8 +715,8 @@ function del_tags($tags=null)
     if ($key!==false)
     {
       $tagid=$db->tag2id($tag);
-      $sql="DELETE FROM $db->imagetag
-            WHERE imageid=$id AND tagid=$tagid";
+      $sql="DELETE FROM $db->imagetag".
+           " WHERE imageid=$id AND tagid=$tagid";
       $db->query($sql);
       array_splice($this->_tags, $key, 1);
       $this->set_meta_modified('tags');
@@ -735,11 +733,10 @@ function get_sets()
   global $db;
   $id=$this->get_id();
   $this->_sets=array();
-  $sql="SELECT s.name
-        FROM $db->sets AS s, $db->imageset AS iset
-        WHERE iset.imageid=$id 
-          AND iset.setid=s.id
-        GROUP BY s.name";
+  $sql="SELECT s.name".
+       " FROM $db->sets AS s, $db->imageset AS iset".
+       " WHERE iset.imageid=$id AND iset.setid=s.id".
+       " GROUP BY s.name";
   $result=$db->query($sql);
   if (!$result)
     return $this->_sets;
@@ -777,9 +774,9 @@ function add_sets($sets)
       $setid=$db->set2id($set, true);
       if ($setid<0)
         continue; 
-      $sql="INSERT INTO $db->imageset
-            (imageid, setid) 
-            VALUES ($id, $setid)";
+      $sql="INSERT INTO $db->imageset".
+           " (imageid, setid)".
+           " VALUES ($id, $setid)";
       $db->query($sql);
       array_push($this->_sets, $set);
       $this->set_meta_modified('sets');
@@ -806,8 +803,8 @@ function del_sets($sets=null)
     if ($key!==false)
     {
       $setid=$db->set2id($set);
-      $sql="DELETE FROM $db->imageset
-            WHERE imageid=$id AND setid=$setid";
+      $sql="DELETE FROM $db->imageset".
+           " WHERE imageid=$id AND setid=$setid";
       $db->query($sql);
       array_splice($this->_sets, $key, 1);
       $this->set_meta_modified('sets');
@@ -836,11 +833,10 @@ function get_locations()
   global $db;
   $this->_locations=array();
   $id=$this->get_id();
-  $sql="SELECT l.name, l.type
-        FROM $db->locations as l, $db->imagelocation as il
-        WHERE il.imageid=$id 
-          AND il.locationid=l.id
-        ORDER BY l.type";
+  $sql="SELECT l.name, l.type".
+       " FROM $db->locations as l, $db->imagelocation as il".
+       " WHERE il.imageid=$id AND il.locationid=l.id".
+       " ORDER BY l.type";
   $result = $db->query($sql);
   if (!$result)
     return $this->_locations;
@@ -878,12 +874,12 @@ function set_location($value, $type)
   if (isset($this->_locations[$type]))
   {
     $oldlocationid=$db->location2id($this->_locations[$type], $type);
-    $sql="UPDATE $db->imagelocation
-          SET locationid=$locationid
-          WHERE imageid=$id AND locationid=$oldlocationid";
+    $sql="UPDATE $db->imagelocation".
+         " SET locationid=$locationid".
+         " WHERE imageid=$id AND locationid=$oldlocationid";
   } else {
-    $sql="INSERT INTO $db->imagelocation ( imageid, locationid )
-          VALUES ( $id, $locationid )";
+    $sql="INSERT INTO $db->imagelocation ( imageid, locationid )".
+         " VALUES ( $id, $locationid )";
   }
   $result=$db->query($sql);
   if (!$result)
@@ -917,12 +913,12 @@ function del_location($value, $type)
       return false;
 
     $locid=$db->location2id($value, $type);
-    $sql="DELETE FROM $db->imagelocation as il
-          WHERE il.imageid=$id AND il.locationid=$locid";
+    $sql="DELETE FROM $db->imagelocation as il".
+         " WHERE il.imageid=$id AND il.locationid=$locid";
   } else {
-    $sql="DELETE FROM il
-          USING $db->imagelocation as il, $db->locations as l
-          WHERE il.imageid=$id AND il.locationid=l.id AND l.type=$type";
+    $sql="DELETE FROM il".
+         " USING $db->imagelocation as il, $db->locations as l".
+         " WHERE il.imageid=$id AND il.locationid=l.id AND l.type=$type";
   }
   $result=$db->query($sql);
   if (!$result)
@@ -969,20 +965,20 @@ function delete()
     return false;
 
   $id=$this->get_id();
-  $sql="DELETE FROM $db->imagetag
-        WHERE imageid=$id";
+  $sql="DELETE FROM $db->imagetag".
+       " WHERE imageid=$id";
   $db->query($sql);
 
-  $sql="DELETE FROM $db->imageset
-        WHERE imageid=$id";
+  $sql="DELETE FROM $db->imageset".
+       " WHERE imageid=$id";
   $db->query($sql);
   
-  $sql="DELETE FROM $db->imagelocation
-        WHERE imageid=$id";
+  $sql="DELETE FROM $db->imagelocation".
+       " WHERE imageid=$id";
   $db->query($sql);
 
-  $sql="DELETE FROM $db->images
-        WHERE id=$id";
+  $sql="DELETE FROM $db->images".
+       " WHERE id=$id";
   $db->query($sql);
 
   return true;
@@ -1004,33 +1000,33 @@ function delete_from_user($userid, $id=0)
     return ERR_NOT_PERMITTED;
 
   // delete tags
-  $sql="DELETE 
-        FROM it
-        USING $db->imagetag AS it, $db->images AS i
-        WHERE i.userid=$userid AND i.id=it.imageid";
+  $sql="DELETE".
+       " FROM it".
+       " USING $db->imagetag AS it, $db->images AS i".
+       " WHERE i.userid=$userid AND i.id=it.imageid";
   if ($id>0) $sql.=" AND i.id=$id";
   $db->query($sql);
 
   // delete sets
-  $sql="DELETE 
-        FROM iset
-        USING $db->imageset AS iset, $db->images AS i
-        WHERE i.userid=$userid AND i.id=iset.imageid";
+  $sql="DELETE".
+       " FROM iset".
+       " USING $db->imageset AS iset, $db->images AS i".
+       " WHERE i.userid=$userid AND i.id=iset.imageid";
   if ($id>0) $sql.=" AND i.id=$id";
   $db->query($sql);
 
   // delete locations
-  $sql="DELETE 
-        FROM il
-        USING $db->imagelocation AS il, $db->images AS i
-        WHERE i.userid=$userid AND i.id=il.imageid";
+  $sql="DELETE".
+       " FROM il".
+       " USING $db->imagelocation AS il, $db->images AS i".
+       " WHERE i.userid=$userid AND i.id=il.imageid";
   if ($id>0) $sql.=" AND i.id=$id";
   $db->query($sql);
 
   // Delete image data
-  $sql="DELETE
-        FROM $db->images
-        WHERE userid=$userid";
+  $sql="DELETE".
+       " FROM $db->images".
+       " WHERE userid=$userid";
   if ($id>0) $sql.=" AND id=$id";
   $db->query($sql);
 

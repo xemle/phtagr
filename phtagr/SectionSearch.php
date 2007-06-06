@@ -143,6 +143,7 @@ function print_content()
     $this->label(_("Visibility:"));
     echo "<select size=\"1\" name=\"visibility\">\n";
     $this->option(_("None"), "none", true);
+    $this->option(_("Private"), "private");
     $this->option(_("Group"), "group");
     $this->option(_("Member"), "member");
     $this->option(_("Public"), "public");

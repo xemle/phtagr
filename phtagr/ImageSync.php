@@ -58,9 +58,9 @@ function import($filename, $is_upload=0)
     return -1;
 
   $sfilename=mysql_escape_string($filename);
-  $sql="SELECT * 
-        FROM $db->images
-        WHERE filename='$sfilename'";
+  $sql="SELECT *".
+       " FROM $db->images".
+       " WHERE filename='$sfilename'";
   $result=$db->query($sql);
   if (!$result)
     return ERR_DB_SELECT;
@@ -81,24 +81,24 @@ function import($filename, $is_upload=0)
   $macl=$user->get_macl();
   $aacl=$user->get_aacl();
   
-  $sql="INSERT INTO $db->images (
-          userid,groupid,created,
-          filename,is_upload,
-          gacl,macl,aacl,
-          clicks,lastview,ranking
-        ) VALUES (
-          $userid,$groupid,NOW(),
-          '$sfilename',$is_upload,
-          $gacl,$macl,$aacl,
-          0,NOW(),0.0
-        )";
+  $sql="INSERT INTO $db->images (".
+       "   userid,groupid,created,".
+       "   filename,is_upload,".
+       "   gacl,macl,aacl,".
+       "   clicks,lastview,ranking".
+       " ) VALUES (".
+       "   $userid,$groupid,NOW(),".
+       "   '$sfilename',$is_upload,".
+       "   $gacl,$macl,$aacl,".
+       "   0,NOW(),0.0".
+       " )";
   $result=$db->query($sql);
   if (!$result)
     return ERR_DB_INSERT;
 
-  $sql="SELECT *
-        FROM $db->images
-        WHERE filename='$sfilename'";
+  $sql="SELECT *".
+       " FROM $db->images".
+       " WHERE filename='$sfilename'";
   $this->init_by_query($sql);
 
   $file->import($this);
@@ -187,8 +187,8 @@ function sync_files($userid=-1)
   global $db;
   global $user;
 
-  $sql="SELECT id,userid,filename
-        FROM $db->images";
+  $sql="SELECT id,userid,filename".
+       " FROM $db->images";
   if ($userid>0)
   {
     if ($userid!=$user->get_id() && !$user->is_member())
@@ -274,9 +274,9 @@ function delete_from_user($userid, $id)
   $previewer->delete_from_user($userid, $id);
 
   $userid=$user->get_id();
-  $sql="SELECT filename
-        FROM $db->images
-        WHERE userid=$userid AND is_upload=1";
+  $sql="SELECT filename".
+       " FROM $db->images".
+       " WHERE userid=$userid AND is_upload=1";
   $result=$db->query($sql);
   if ($result) {
     while ($row=mysql_fetch_row($result)) {

@@ -54,12 +54,13 @@ function Database()
 {
   global $db_prefix;
   $this->_link=null;
-  $this->_set_table_names($db_prefix);
+  $this->_prefix="";
+  $this->set_table_prefix($db_prefix);
 }
 
-function _set_table_names($prefix)
+function set_table_prefix($prefix)
 {
-  $this->prefix=$prefix;
+  $this->_prefix=$prefix;
   $this->users=$prefix."users";
   $this->usergroup=$prefix."usergroup";
   $this->groups=$prefix."groups";
@@ -74,6 +75,18 @@ function _set_table_names($prefix)
   $this->messages=$prefix."messages";
   $this->configs=$prefix."configs";
   $this->logs=$prefix."logs";
+}
+
+/** @return Returns the current table prefix */
+function get_table_prefix()
+{
+  return $this->_prefix();
+}
+
+/** @return Returns the database connection resource */
+function get_connection()
+{
+  return $this->_link;
 }
 
 /** Connect to the sql database 
@@ -143,9 +156,9 @@ function test_database($host, $username, $password, $database)
     return "Could not connect to the database";
     
   // check to create tables
-  $sql="CREATE TABLE ${prefix}create_test (
-          id INT NOT NULL AUTO_INCREMENT,
-          PRIMARY KEY(id))";
+  $sql="CREATE TABLE ${prefix}create_test (".
+       " id INT NOT NULL AUTO_INCREMENT,".
+       " PRIMARY KEY(id))";
   $result=mysql_query($sql);
   if ($result==false)
     return "Could not create a test table";
@@ -211,16 +224,96 @@ function tables_exist()
  * */
 function query($sql, $quiet=true)
 {
+  global $log;
   if (!$this->_link) return null;
   
   $result=@mysql_query($sql, $this->_link);
   if (!$result && !$quiet)
   {
-    $this->error("Could not run Query: '$sql'");
+    $log->err("Could not run Query: '$sql'");
     return NULL;
   }
   $_SESSION['nqueries']++;
   return $result;
+}
+
+/** 
+  @param sql SQL statement
+  @return Returns an row of associative array */
+function query_row($sql, $quiet=true)
+{
+  $result=$this->query($sql, $quiet);
+  if ($result===false)
+    return array();
+
+  $row=mysql_fetch_array($result, MYSQL_ASSOC);
+  mysql_free_result($result);
+  return $row;
+}
+
+/** 
+  @param sql SQL statement
+  @param column Column number or name. If null, it fetches the first column.
+  Default is null.
+  @return Returns a column of the query */
+function query_column($sql, $column=null, $quiet=true)
+{
+  $result=$this->query($sql, $quiet);
+  if ($result===false)
+    return array();
+
+  $col=array();
+  while ($row=mysql_fetch_array($result, MYSQL_ASSOC))
+  {
+    if ($coloumn===null)
+      array_push($col, $row[0]);
+    else 
+      array_push($col, $row[$column]);
+  }
+  mysql_free_result($result);
+  return $col;
+}
+
+/** 
+  @param sql SQL statement
+  @return Returns a array of associative row arrays */
+function query_table($sql, $quiet=true)
+{
+  $result=$this->query($sql, $quiet);
+  if ($result===false)
+    return array();
+
+  $table=array();
+  while ($row=mysql_fetch_array($result, MYSQL_ASSOC))
+    array_push($table, $row);
+
+  mysql_free_result($result);
+  return $table;
+
+}
+
+/** Insert sql statement and return the auto generated id
+  @param sql Insert sql statement
+  @return last autoincrement id
+  @see mysql_insert_id */
+function query_insert($sql, $quiet=true)
+{
+  $result=$this->query($sql, $quiet);
+  if ($result===false)
+    return -1;
+  return mysql_insert_id($this->_link);
+}
+
+/** Delete sql statement and return the count of affected rows
+  @param sql Delete sql statement
+  @return count of affected rows
+  @see mysql_affected_rows */
+function query_delete($sql, $quiet=true)
+{
+  $result=$this->query($sql, $quiet);
+  if ($result===false)
+    return -1;
+  return mysql_affected_rows($this->_link);
 }
 
 /** Gets the tag id of a tag name 
@@ -232,9 +325,9 @@ function tag2id($tag, $create=false)
 {
   $stag=mysql_escape_string($tag);
 
-  $sql="SELECT id 
-        FROM $this->tags 
-        WHERE name='$stag'";
+  $sql="SELECT id".
+       " FROM $this->tags".
+       " WHERE name='$stag'";
   $result=$this->query($sql);
   if (!$result)
   {
@@ -268,9 +361,9 @@ function tag2id($tag, $create=false)
 function set2id($set, $create=false)
 {
   $sset=mysql_escape_string($set);
-  $sql="SELECT id 
-        FROM $this->sets 
-        WHERE name='$sset'";
+  $sql="SELECT id". 
+       " FROM $this->sets".
+       " WHERE name='$sset'";
   $result=$this->query($sql);
   if (!$result)
   {
@@ -359,9 +452,9 @@ function location2id($location, $type, $create=false)
 function location2ids($location)
 {
   $slocation=mysql_escape_string($location);
-  $sql="SELECT id
-        FROM $this->locations
-        WHERE name='$slocation'";
+  $sql="SELECT id".
+       " FROM $this->locations".
+       " WHERE name='$slocation'";
   $result=$this->query($sql);
   $ids=array();
   while($row=mysql_fetch_row($result))
@@ -627,8 +720,8 @@ function create_tables()
 /** Inalizes the databases. Currently, it justs writes the table version */
 function init_tables()
 {
-  $sql="INSERT INTO $this->configs (userid, name, value)
-        VALUES ('0', 'db.version', '".DB_VERSION."')";
+  $sql="INSERT INTO $this->configs (userid, name, value)".
+       " VALUES ('0', 'db.version', '".DB_VERSION."')";
   $this->query($sql);
 }
 
@@ -678,29 +771,29 @@ function delete_unassigned_data()
 {
   $affected=0;
   // tags
-  $sql="DELETE FROM $this->tags 
-        WHERE id NOT IN (
-          SELECT tagid
-          FROM $this->imagetag
-        )";
+  $sql="DELETE FROM $this->tags".
+       " WHERE id NOT IN (".
+       "   SELECT tagid".
+       "   FROM $this->imagetag".
+       " )";
   $this->query($sql);
   $affected+=mysql_affected_rows($this->_link);
 
   // sets
-  $sql="DELETE FROM $this->sets
-        WHERE id NOT IN (
-          SELECT setid
-          FROM $this->imageset
-        )";
+  $sql="DELETE FROM $this->sets".
+       " WHERE id NOT IN (".
+       "   SELECT setid".
+       "   FROM $this->imageset".
+       " )";
   $this->query($sql);
   $affected+=mysql_affected_rows($this->_link);
 
   // locations
-  $sql="DELETE FROM $this->locations
-        WHERE id NOT IN (
-          SELECT locationid
-          FROM $this->imagelocation
-        )";
+  $sql="DELETE FROM $this->locations".
+       " WHERE id NOT IN (".
+       "   SELECT locationid".
+       "   FROM $this->imagelocation".
+       " )";
   $this->query($sql);
   $affected+=mysql_affected_rows($this->_link);
 

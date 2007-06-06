@@ -38,6 +38,7 @@ function Comment($id=-1)
 {
   global $db;
   $this->SqlObject($db->comments, $id);
+  $this->_image=null;
 }
 
 function get_id()
@@ -149,6 +150,14 @@ function set_notify($notify)
   $this->_set_data('notify', $notify);
 }
 
+/** @return Returns the image object of the comment */
+function get_image()
+{
+  if ($this->_image=null)
+    $this->_image=new Image($this->get_imageid());
+  return $this->_image;
+}
+
 /** Creates an new comment and returns the comment ID. If the current user has
  * an ID it will be added as well.
   @param imageid ID of the image
@@ -156,7 +165,7 @@ function set_notify($notify)
   @param email Email of the commentator
   @param comment New comment
   @return New comment id. On error it returns -1 */
-function create($imageid, $name, $email, $comment)
+function create($imageid, $name, $email, $text)
 {
   global $db, $log, $user;
 
@@ -165,41 +174,37 @@ function create($imageid, $name, $email, $comment)
   $userid=$user->get_id();
   $sname=mysql_escape_string($name);
   $semail=mysql_escape_string($email);
-  $scomment=mysql_escape_string($comment);
+  $stext=mysql_escape_string($text);
 
-  $sql="INSERT INTO $db->comments
-        (imageid, userid, date, name, email, comment)
-        VALUES ($imageid, $userid, NOW(), '$sname', '$semail', '$scomment')";
-  $result=$db->query($sql);
-  if (!$result)
-    return -1;
-
-  $sql="SELECT LAST_INSERT_ID()";
-  $result=$db->query($sql);
-  $log->warn("Add new comment: '$comment'", $imageid, $user->get_id());
-  if ($result && mysql_num_rows($result)>0)
+  $sql="INSERT INTO $db->comments".
+       " (imageid, userid, date, name, email, comment)".
+       " VALUES ($imageid, $userid, NOW(), '$sname', '$semail', '$stext')";
+  $id=$db->query_insert($sql);
+  if ($id>0)
   {
-    $row=mysql_fetch_row($result);
-    $this->init_by_id($row[0]);
-    $log->trace("New comment has ID: ".$row[0], $imageid, $user->get_id());
-    return $row[0];
+    $this->init_by_id($id);
+    $log->warn("New comment ( ID".$id."): $text", $imageid, $user->get_id());
+    return $id;
   }
   return -1;
 }
 
-function delete($auth)
+function delete($auth=null)
 {
   global $db, $user, $log;
 
+  $image=new Image($this->get_imageid());
   if (($user->get_id()!=$this->get_userid() && !$user->is_admin())
-    || $auth!=$this->get_auth())
+    || $auth!=$this->get_auth()
+    || $image->get_userid()!=$user->get_id())
     return false;
 
   $id=$this->get_id();
-  $sql="DELETE FROM $db->comments
-        WHERE id=$id";
+  $sql="DELETE FROM $db->comments".
+       " WHERE id=$id";
   $db->query($sql);
   $log->warn("Deteting comment $id", $this->get_imageid(), $user->get_id());
+  return true;
 }
 
 /** Return a list of comment ids of a given image
@@ -213,9 +218,9 @@ function get_comment_ids($imageid)
   if (!is_numeric($imageid) || $imageid<=0)
     return array();
 
-  $sql="SELECT id
-        FROM $db->comments
-        WHERE imageid=$imageid";
+  $sql="SELECT id".
+       " FROM $db->comments".
+       " WHERE imageid=$imageid";
   $result=$db->query($sql);
   if (!$result || mysql_num_rows($result)==0)
     return array();
@@ -227,56 +232,6 @@ function get_comment_ids($imageid)
   }
   $log->trace("Request array of comments: ".mysql_num_rows($result), $imageid, $user->get_id());
   return $ids;
-}
-
-/** Checks the input of the comment and created a new comment if all
- * requirements fits. It also saved the inputs of an anonymouse user for
- * further comments 
-  @param image Current image object */
-function handle_request($image)
-{
-  global $db, $user, $log;
-
-  if ($image==null || $image->get_id()<0)
-    return -1;
-
-  if (!$image->can_comment($user))
-    return -1;
-
-  $name=$_REQUEST['name'];
-  $email=$_REQUEST['email'];
-  $comment=$_REQUEST['comment'];
-  $userid=$user->get_id();
-
-  if (strlen($comment)==0)
-    return -1;
-
-  // comment is from a user
-  if ($user->get_id()>0)
-  {
-    $name=$user->get_name();
-    $email=$user->get_email();
-  } 
-  elseif (isset($_SESSION['comment_name']))
-  {
-    $name=$_SESSION['comment_name'];
-    $email=$_SESSION['comment_email'];
-  }
-  // anonymous comment
-  elseif (strlen($name)==0 || strlen($email)==0)
-  {
-    return -1;
-  }
-
-  $commentid=$this->create($image->get_id(), $name, $email, $comment);
-
-  // Remember anonymouse user within the session
-  if ($commentid>0)
-  {
-    $_SESSION['comment_name']=$name;
-    $_SESSION['comment_email']=$email;
-  }
-  return $commentid;
 }
 
 }

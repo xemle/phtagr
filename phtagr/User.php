@@ -507,11 +507,10 @@ function create($name, $pwd, $type=USER_MEMBER)
   $sql="INSERT INTO $db->users".
        " (name, password, type)".
        " VALUES ('$sname', '$spwd', $type)";
-  $result=$db->query($sql);
-  if (!$result)
+  $id=$db->query_insert($sql);
+  if ($id<0)
     return ERR_USER_INSERT;
 
-  $id=$this->get_id_by_name($name);
   $u=new User($id);
   $err=$u->_init_data();
   if ($err<0)
