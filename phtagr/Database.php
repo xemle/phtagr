@@ -237,6 +237,20 @@ function query($sql, $quiet=true)
   return $result;
 }
 
+/** Query a single value or cell 
+  @param sql SQL query
+  @return Single value. Null if the query could not proceed */
+function query_cell($sql, $quiet=true)
+{
+  $result=$this->query($sql, $quiet);
+  if ($result===false)
+    return null;
+
+  $row=mysql_fetch_array($result);
+  mysql_free_result($result);
+  return $row[0];
+}
+
 /** 
   @param sql SQL statement
   @return Returns an row of associative array */
@@ -253,23 +267,17 @@ function query_row($sql, $quiet=true)
 
 /** 
   @param sql SQL statement
-  @param column Column number or name. If null, it fetches the first column.
-  Default is null.
   @return Returns a column of the query */
-function query_column($sql, $column=null, $quiet=true)
+function query_column($sql, $quiet=true)
 {
   $result=$this->query($sql, $quiet);
   if ($result===false)
     return array();
 
   $col=array();
-  while ($row=mysql_fetch_array($result, MYSQL_ASSOC))
-  {
-    if ($coloumn===null)
-      array_push($col, $row[0]);
-    else 
-      array_push($col, $row[$column]);
-  }
+  while ($row=mysql_fetch_array($result))
+    array_push($col, $row[0]);
+
   mysql_free_result($result);
   return $col;
 }
@@ -315,6 +323,16 @@ function query_delete($sql, $quiet=true)
     return -1;
   return mysql_affected_rows($this->_link);
 }
+
+/** Update sql statement and return the count of affected rows
+  @param sql Delete sql statement
+  @return count of affected rows
+  @see mysql_affected_rows */
+function query_update($sql, $quiet=true)
+{
+  return $this->query_delete($sql, $quiet);
+}
+
 
 /** Gets the tag id of a tag name 
   @param tag Name of the tag
@@ -568,22 +586,23 @@ function create_tables()
         id            INT NOT NULL AUTO_INCREMENT,
         userid        INT NOT NULL,
         groupid       INT DEFAULT 0,
-        synced        DATETIME,           /* Syncing time between image and the
+        modified      DATETIME,           /* Syncing time between image and the
                                              database */
         created       DATETIME,           /* Insert time of the image */
-        filename      TEXT NOT NULL,
+        path          TEXT NOT NULL,
+        file          VARCHAR(128) NOT NULL,
         bytes         INT NOT NULL,       /* Size of image in bytes */
-        is_upload     TINYINT UNSIGNED,   /* 0=local, 1=upload */
-        gacl          TINYINT UNSIGNED,   /* Group/Friend access control list */
-        macl          TINYINT UNSIGNED,   /* Member access control list */
-        aacl          TINYINT UNSIGNED,   /* All access control list */
+        flag          TINYINT UNSIGNED DEFAULT 0,   /* 64=upload, 128=imported, 192=upload+imported */
+        gacl          TINYINT UNSIGNED DEFAULT 0,   /* Group/Friend access control list */
+        macl          TINYINT UNSIGNED DEFAULT 0,   /* Member access control list */
+        pacl          TINYINT UNSIGNED DEFAULT 0,   /* All access control list */
         
         name          VARCHAR(128),
         date          DATETIME,           /* Date of image */
-        width         INT UNSIGNED,
-        height        INT UNSIGNED,
-        orientation   TINYINT,
-        caption       TEXT,
+        width         INT UNSIGNED DEFAULT 0,
+        height        INT UNSIGNED DEFAULT 0,
+        orientation   TINYINT UNSIGNED DEFAULT 1,
+        caption       TEXT DEFAULT NULL,
 
         clicks        INT DEFAULT 0,      /* Count of detailed view */
                                           /* Last time of detailed view */
@@ -593,14 +612,14 @@ function create_tables()
         voting        FLOAT DEFAULT 0,
         votes         INT DEFAULT 0,      /* Nuber of votes */
 
-        longitude     FLOAT,
-        latitude      FLOAT,
+        longitude     FLOAT DEFAULT NULL,
+        latitude      FLOAT DEFAULT NULL,
 
         duration      INT DEFAULT -1,     /* duration of a video in seconds */
 
-        hue           FLOAT,              /* 0-359 */
-        saturation    FLOAT,              /* 0-255 */
-        luminosity    FLOAT,              /* 0-255 */
+        hue           FLOAT DEFAULT NULL, /* 0-359 */
+        saturation    FLOAT DEFAULT NULL, /* 0-255 */
+        luminosity    FLOAT DEFAULT NULL, /* 0-255 */
 
         data          BLOB,               /* For optinal data */
         
@@ -608,7 +627,7 @@ function create_tables()
         INDEX(date),
         INDEX(ranking),
         INDEX(voting),
-        INDEX(aacl),
+        INDEX(pacl),
         PRIMARY KEY(id))";
   if (!$this->query($sql)) { return false; }
 

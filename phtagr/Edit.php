@@ -131,7 +131,9 @@ function execute()
       }
     }
 
-    if (!$img->can_edit(&$user))
+    if (!$img->can_write_tag(&$user) &&
+      !$img->can_write_meta(&$user) &&
+      !$img->can_write_caption(&$user))
     {
       unset($img);
       continue;
@@ -165,7 +167,7 @@ function _handle_request_acl(&$img)
     return false;
     
   //$this->debug($_REQUEST);
-  $acl=new Acl($img->get_gacl(), $img->get_macl(), $img->get_aacl());
+  $acl=new Acl($img->get_gacl(), $img->get_macl(), $img->get_pacl());
  
   // JavaScript formular or a multiple selection?
   $prefix='';
@@ -181,12 +183,12 @@ function _handle_request_acl(&$img)
   }
   $acl->handle_request($prefix);
   
-  list($gacl, $macl, $aacl)=$acl->get_values();
+  list($gacl, $macl, $pacl)=$acl->get_values();
   global $log;
-  $log->trace("new acl gacl=$gacl, macl=$macl, aacl=$aacl");
+  $log->trace("new acl gacl=$gacl, macl=$macl, pacl=$pacl");
   $img->set_gacl($gacl);
   $img->set_macl($macl);
-  $img->set_aacl($aacl);
+  $img->set_pacl($pacl);
   $img->commit();
 
   return true;

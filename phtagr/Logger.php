@@ -183,9 +183,9 @@ error or fatal error), the function returns immediately
   @param msg Log message
   @param image Image ID if any
   @param user User ID if any */
-function _log($level, $msg, $image, $user)
+function _log($level, $msg, $imageid, $userid)
 {
-  global $db;
+  global $db, $user;
   if (!$this->_enabled || 
     ($this->_level > $level && $level > 0))
     return;
@@ -197,11 +197,21 @@ function _log($level, $msg, $image, $user)
   elseif ($level==LOG_WARN) $slevel="WARN";
   elseif ($level==LOG_INFO) $slevel="INFO";
   else return;
+
+  if ($userid<0 && isset($user))
+    $userid=$user->get_id();
   
-  $bt=debug_backtrace();
+  $bt=@debug_backtrace();
   $depth=1;
-  $file=@$bt[1]['file'];
-  $line=@$bt[1]['line'];
+
+  $file=$bt[$depth]['file'];
+  $file=substr($file, strrpos($file, '/')+1);
+  if (isset($bt[$depth+1]['class']))
+    $file.="@".$bt[$depth+1]['class'];
+  if (isset($bt[$depth+1]['function']))
+    $file.="::".$bt[$depth+1]['function']."()";
+
+  $line=$bt[$depth]['line'];
 
   if (!isset($file))
     $file="(no file)";
@@ -213,7 +223,7 @@ function _log($level, $msg, $image, $user)
   if ($this->_type==LOG_CONSOLE || $this->_type==LOG_FILE)
   {
     $line=sprintf("%s [%s] i:%d u:%d %s:%d %s\n",
-      $time, $slevel, $image, $user, $file, $line, $msg);
+      $time, $slevel, $imageid, $userid, $file, $line, $msg);
     if ($this->_type==LOG_CONSOLE)
       echo $line;
     else
@@ -221,12 +231,12 @@ function _log($level, $msg, $image, $user)
   }
   elseif ($this->_type==LOG_HTML)
   {
-    $this->_log_html($time, $slevel, $image, $user, $file, $line, $msg);
+    $this->_log_html($time, $slevel, $imageid, $userid, $file, $line, $msg);
   } 
   elseif ($this->_type==LOG_BUF || $this->_type==LOG_SESSION)
   {
     $log=array('time' => $now, 'level' => $slevel,
-               'image' => $image, 'user' => $user,
+               'imageid' => $imageid, 'userid' => $userid,
                'file' => $file, 'line' => $line,
                'msg' => $msg);
     if ($this->_type==LOG_BUF)
@@ -238,8 +248,9 @@ function _log($level, $msg, $image, $user)
   {
     $sfile=mysql_escape_string($file);
     $smsg=mysql_escape_string($msg);
-    $sql="INSERT INTO $db->logs (time, level, imageid, userid, file, line, message)
-          VALUES (NOW(), $level, $image, $user, '$sfile', $line, '$smsg')";
+    $sql="INSERT INTO $db->logs".
+         " (time, level, imageid, userid, file, line, message)".
+         " VALUES (NOW(), $level, $imageid, $userid, '$sfile', $line, '$smsg')";
     $db->query($sql);
   }
 }
@@ -308,65 +319,65 @@ function drop_db_logs($info, $warn, $debug, $trace, $error, $fatal)
   if (!is_numeric($fatal) || $fatal<0) return;
     
   $now=time();
-  $sql="DELETE FROM $db->logs 
-        WHERE level=".LOG_INFO." 
-          AND time<'".$db->date_unix_to_mysql($now-$info)."'";
+  $sql="DELETE FROM $db->logs".
+       " WHERE level=".LOG_INFO.
+       "   AND time<'".$db->date_unix_to_mysql($now-$info)."'";
   $db->query($sql);
   
-  $sql="DELETE FROM $db->logs 
-        WHERE level=".LOG_WARN." 
-          AND time<'".$db->date_unix_to_mysql($now-$warn)."'";
+  $sql="DELETE FROM $db->logs".
+       " WHERE level=".LOG_WARN.
+       "   AND time<'".$db->date_unix_to_mysql($now-$warn)."'";
   $db->query($sql);
   
-  $sql="DELETE FROM $db->logs 
-        WHERE level=".LOG_DEBUG." 
-          AND time<'".$db->date_unix_to_mysql($now-$debug)."'";
+  $sql="DELETE FROM $db->logs".
+       " WHERE level=".LOG_DEBUG.
+       "   AND time<'".$db->date_unix_to_mysql($now-$debug)."'";
   $db->query($sql);
   
-  $sql="DELETE FROM $db->logs 
-        WHERE level=".LOG_TRACE." 
-          AND time<'".$db->date_unix_to_mysql($now-$trace)."'";
+  $sql="DELETE FROM $db->logs".
+       " WHERE level=".LOG_TRACE.
+       "   AND time<'".$db->date_unix_to_mysql($now-$trace)."'";
   $db->query($sql);
   
-  $sql="DELETE FROM $db->logs 
-        WHERE level=".LOG_ERR." 
-          AND time<'".$db->date_unix_to_mysql($now-$error)."'";
+  $sql="DELETE FROM $db->logs".
+       " WHERE level=".LOG_ERR. 
+       "   AND time<'".$db->date_unix_to_mysql($now-$error)."'";
   $db->query($sql);
   
-  $sql="DELETE FROM $db->logs 
-        WHERE level=".LOG_FATAL." 
-          AND time<'".$db->date_unix_to_mysql($now-$fatal)."'";
+  $sql="DELETE FROM $db->logs". 
+       " WHERE level=".LOG_FATAL.
+       "   AND time<'".$db->date_unix_to_mysql($now-$fatal)."'";
   $db->query($sql);
 }
 
-function fatal($msg, $image=-1, $user=-1)
+function fatal($msg, $imageid=-1, $userid=-1)
 {
-  $this->_log(LOG_FATAL, $msg, $image, $user);
+  $this->_log(LOG_FATAL, $msg, $imageid, $userid);
 }
 
-function err($msg, $image=-1, $user=-1)
+function err($msg, $imageid=-1, $userid=-1)
 {
-  $this->_log(LOG_ERR, $msg, $image, $user);
+  $this->_log(LOG_ERR, $msg, $imageid, $userid);
 }
 
-function trace($msg, $image=-1, $user=-1)
+function trace($msg, $imageid=-1, $userid=-1)
 {
-  $this->_log(LOG_TRACE, $msg, $image, $user);
+  $this->_log(LOG_TRACE, $msg, $imageid, $userid);
 }
 
-function debug($msg, $image=-1, $user=-1)
+function debug($msg, $imageid=-1, $userid=-1)
 {
-  $this->_log(LOG_FATAL, $msg, $image, $user);
+  $this->_log(LOG_DEBUG, $msg, $imageid, $userid);
 }
 
-function warn($msg, $image=-1, $user=-1)
+function warn($msg, $imageid=-1, $userid=-1)
 {
-  $this->_log(LOG_WARN, $msg, $image, $user);
+  $this->_log(LOG_WARN, $msg, $imageid, $userid);
 }
 
-function info($msg, $image=-1, $user=-1)
+function info($msg, $imageid=-1, $userid=-1)
 {
-  $this->_log(LOG_INFO, $msg, $image, $user);
+  $this->_log(LOG_INFO, $msg, $imageid, $userid);
 }
 
 }

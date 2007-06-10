@@ -55,9 +55,9 @@ function init_by_id($id)
   if (!is_numeric($id))
     return false;
 
-  $sql="SELECT *
-        FROM ".$this->_table."
-        WHERE id=$id";
+  $sql="SELECT *".
+       " FROM ".$this->_table.
+       " WHERE id=$id";
 
   $this->init_by_query($sql);
 }
@@ -68,11 +68,9 @@ function init_by_id($id)
 function init_by_query($sql)
 {
   global $db;
-  $result=$db->query($sql);
-  if (!$result || mysql_num_rows($result)!=1)
-    return false;
-
-  $this->_data=mysql_fetch_assoc($result);
+  $row=$db->query_row($sql);
+  if (count($row))
+    $this->_data=$row;
 }
 
 /** @return Returns the unique id of the sql object */
@@ -138,7 +136,7 @@ function is_modified()
 
 /** Writes all changes to the database. It also updated the internal data of
  * the object 
-  @return True if changes where writen */
+  @return True if changes where writen or no changes must be commited */
 function commit()
 {
   global $db, $log, $user;
@@ -148,7 +146,7 @@ function commit()
     return false;
 
   if (count($this->_changes)==0)
-    return false;
+    return true;
 
   $changes='';
   foreach ($this->_changes as $name => $value)
@@ -162,12 +160,14 @@ function commit()
     $changes.=",$name=$svalue";
   }
   $changes=substr($changes,1);
-  $sql="UPDATE ".$this->_table."
-        SET $changes
-        WHERE id=$id";
-  $result=$db->query($sql);
-  if (!$result)
+  $sql="UPDATE ".$this->_table.
+       " SET $changes".
+       " WHERE id=$id";
+  if ($db->query_update($sql)!=1)
+  {
+    $log->trace("Commit query failed: $sql");
     return false;
+  }
 
   // Successful changes. Update to the data structure and delete changes
   foreach ($this->_changes as $name => $value)

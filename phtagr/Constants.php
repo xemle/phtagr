@@ -21,7 +21,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-define("DB_VERSION", 3);
+define("DB_VERSION", 4);
 
 define("USER_ADMIN",  0x01);
 define("USER_MEMBER", 0x02);
@@ -30,21 +30,21 @@ define("USER_GUEST",  0x03);
 // ACL constants
 // Reading bits are the three highest bits
 define("ACL_READ_MASK", 0xe0);
-define("ACL_FULLSIZE", 0x60);
-define("ACL_HIGHSOLUTION", 0x40);
-define("ACL_PREVIEW", 0x20);
+define("ACL_READ_ORIGINAL", 0x60);
+define("ACL_READ_HIGHSOLUTION", 0x40);
+define("ACL_READ_PREVIEW", 0x20);
 
 define("ACL_WRITE_MASK", 0x07); 
-define("ACL_CAPTION", 0x03);
-define("ACL_EDIT", 0x02);
-define("ACL_METADATA", 0x01);
+define("ACL_WRITE_CAPTION", 0x03);
+define("ACL_WRITE_META", 0x02);
+define("ACL_WRITE_TAG", 0x01);
 
 define("ACL_LEVEL_UNKNOWN",-1);
 define("ACL_LEVEL_KEEP",    0);
 define("ACL_LEVEL_PRIVATE", 1);
 define("ACL_LEVEL_GROUP",   2);
 define("ACL_LEVEL_MEMBER",  4);
-define("ACL_LEVEL_ANY",     5);
+define("ACL_LEVEL_PUBLIC",  5);
 
 define("LOCATION_UNDEFINED", 0x00);
 define("LOCATION_CITY", 0x01);
@@ -53,6 +53,10 @@ define("LOCATION_STATE", 0x03);
 define("LOCATION_COUNTRY", 0x04);
 
 define("VOTING_MAX", 0x05);
+
+define("IMAGE_FLAG_UPLOADED", 64);
+define("IMAGE_FLAG_IMPORTED", 128);
+define("IMAGE_FLAG_MASK", 192);
 
 define("GUEST_MAX", 10);
 define("GROUP_MAX", 10);

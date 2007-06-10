@@ -28,17 +28,17 @@ class SectionAcl extends SectionBase
 
 var $_acl;
 
-function SectionAcl($gacl=0, $macl=0, $aacl=0)
+function SectionAcl($gacl=0, $macl=0, $pacl=0)
 {
   $this->name="acl";
   $this->_acl=array(ACL_LEVEL_GROUP => $gacl, 
                 ACL_LEVEL_MEMBER => $macl, 
-                ACL_LEVEL_ANY => $aacl);
+                ACL_LEVEL_PUBLIC => $pacl);
 }
 
 function _get_acl_level($flag, $mask)
 {
-  for ($l=ACL_LEVEL_ANY; $l>=ACL_LEVEL_GROUP; $l--)
+  for ($l=ACL_LEVEL_PUBLIC; $l>=ACL_LEVEL_GROUP; $l--)
   {
     if (($this->_acl[$l]&($mask))>=$flag)
       return $l;
@@ -51,9 +51,10 @@ function _get_acl_level($flag, $mask)
 function print_table($keep=true)
 {
   $prefix="";
+
   echo "<li>";
-  $this->label(_("Who can edit the images?"));
-  echo "<select size=\"1\" name=\"acl_edit\">\n";
+  $this->label(_("Who can edit image tags?"));
+  echo "<select size=\"1\" name=\"acl_tag\">\n";
   if ($keep)
   {
     $this->option(_("Keep settings"), "keep");
@@ -61,13 +62,33 @@ function print_table($keep=true)
   }
   else
   {
-    $level=$this->_get_acl_level(ACL_EDIT, ACL_WRITE_MASK);
+    $level=$this->_get_acl_level(ACL_WRITE_TAG, ACL_WRITE_MASK);
   }
 
   $this->option(_("Me only"), "private", ($level==ACL_LEVEL_PRIVATE));
   $this->option(_("Group members"), "group", ($level==ACL_LEVEL_GROUP));
   $this->option(_("All members"), "member", ($level==ACL_LEVEL_MEMBER));
-  $this->option(_("Everyone"), "any", ($level==ACL_LEVEL_ANY));
+  $this->option(_("Everyone"), "any", ($level==ACL_LEVEL_PUBLIC));
+  echo "</select>";
+  echo "</li>\n";
+
+  echo "<li>";
+  $this->label(_("Who can edit the meta data?"));
+  echo "<select size=\"1\" name=\"acl_meta\">\n";
+  if ($keep)
+  {
+    $this->option(_("Keep settings"), "keep");
+    $level=ACL_LEVEL_KEEP;
+  }
+  else
+  {
+    $level=$this->_get_acl_level(ACL_WRITE_META, ACL_WRITE_MASK);
+  }
+
+  $this->option(_("Me only"), "private", ($level==ACL_LEVEL_PRIVATE));
+  $this->option(_("Group members"), "group", ($level==ACL_LEVEL_GROUP));
+  $this->option(_("All members"), "member", ($level==ACL_LEVEL_MEMBER));
+  $this->option(_("Everyone"), "any", ($level==ACL_LEVEL_PUBLIC));
   echo "</select>";
   echo "</li>\n";
 
@@ -81,12 +102,31 @@ function print_table($keep=true)
   }
   else
   {
-    $level=$this->_get_acl_level(ACL_PREVIEW, ACL_READ_MASK);
+    $level=$this->_get_acl_level(ACL_READ_PREVIEW, ACL_READ_MASK);
   }
   $this->option(_("Me only"), "private", ($level==ACL_LEVEL_PRIVATE));
   $this->option(_("Group members"), "group", ($level==ACL_LEVEL_GROUP));
   $this->option(_("All members"), "member", ($level==ACL_LEVEL_MEMBER));
-  $this->option(_("Everyone"), "any", ($level==ACL_LEVEL_ANY));
+  $this->option(_("Everyone"), "any", ($level==ACL_LEVEL_PUBLIC));
+  echo "</select>";
+  echo "</li>";
+
+  echo "<li>";
+  $this->label(_("Who can view the origial images?"));
+  echo "<select size=\"1\" name=\"acl_original\">\n";
+  if ($keep)
+  {
+    $this->option(_("Keep settings"), "keep");
+    $level=ACL_LEVEL_KEEP;
+  }
+  else
+  {
+    $level=$this->_get_acl_level(ACL_READ_ORIGINAL, ACL_READ_MASK);
+  }
+  $this->option(_("Me only"), "private", ($level==ACL_LEVEL_PRIVATE));
+  $this->option(_("Group members"), "group", ($level==ACL_LEVEL_GROUP));
+  $this->option(_("All members"), "member", ($level==ACL_LEVEL_MEMBER));
+  $this->option(_("Everyone"), "any", ($level==ACL_LEVEL_PUBLIC));
   echo "</select>";
   echo "</li>";
 }

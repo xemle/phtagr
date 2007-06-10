@@ -22,6 +22,7 @@
  */
 
 include_once("$phtagr_lib/Url.php");
+include_once("$phtagr_lib/Constants.php");
 /**
   @class Search Mapping between URLs, HTML forms and SQL queries.
   @todo Rename get_url to get_url
@@ -707,7 +708,7 @@ function _add_sql_join_meta_inclusion($tags, $sets, $locs)
   @param locs Array of exclued locations, could be NULL
   @return Returns the sql where statements for meta data exclusion. May be an
   empty string is not meta data exclusion is given */
-function _add_sql_where_meta_exclustion($tags, $sets, $locs)
+function _add_sql_where_meta_exclusion($tags, $sets, $locs)
 {
   global $db;
 
@@ -740,7 +741,7 @@ function _add_sql_where_meta_exclustion($tags, $sets, $locs)
         ." ON ( i.id=il.imageid )";
   }
 
-  $sql.=" WHERE 1=0";
+  $sql.=" WHERE 1";
   
   if ($num_tags)
   {
@@ -797,15 +798,15 @@ function _add_sql_where_acl()
           " SELECT groupid".
           " FROM $db->usergroup".
           " WHERE userid=".$user->get_id().
-          " AND i.gacl>=".ACL_PREVIEW." )";
+          " AND i.gacl>=".ACL_READ_PREVIEW." )";
     if ($user->is_member())
-      $acl.=" OR i.macl>=".ACL_PREVIEW;
+      $acl.=" OR i.macl>=".ACL_READ_PREVIEW;
     else
-      $acl.=" OR i.aacl>=".ACL_PREVIEW;
+      $acl.=" OR i.pacl>=".ACL_READ_PREVIEW;
     $acl.=" )";
   }
   else {
-    $acl.=" AND i.aacl>=".ACL_PREVIEW;
+    $acl.=" AND i.pacl>=".ACL_READ_PREVIEW;
   }
 
   return $acl;
@@ -819,16 +820,16 @@ function _add_sql_where_visibility()
   $visible=$this->get_param('visibility', '');
   switch ($visible) {
   case 'private':
-    $acl .= " AND i.gacl<".ACL_PREVIEW; 
+    $acl .= " AND i.gacl<".ACL_READ_PREVIEW; 
     break;
   case 'group':
-    $acl .= " AND i.gacl>=".ACL_PREVIEW." AND i.macl<".ACL_PREVIEW; 
+    $acl .= " AND i.gacl>=".ACL_READ_PREVIEW." AND i.macl<".ACL_READ_PREVIEW; 
     break;
   case 'member':
-    $acl .= " AND i.macl>=".ACL_PREVIEW." AND i.aacl<".ACL_PREVIEW; 
+    $acl .= " AND i.macl>=".ACL_READ_PREVIEW." AND i.pacl<".ACL_READ_PREVIEW; 
     break;
   case 'public':
-    $acl .= " AND i.aacl>=".ACL_PREVIEW; 
+    $acl .= " AND i.pacl>=".ACL_READ_PREVIEW; 
     break;
   default:
     break;
@@ -861,7 +862,7 @@ function _add_sql_column_order($num_tags, $num_sets, $num_locs)
     break;
   case 'changes':
   case '-changes':
-    $order.=",synced";
+    $order.=",modified";
     break;
   case 'random':
     break;
@@ -912,8 +913,8 @@ function _add_sql_orderby($num_tags, $num_sets)
          '-voting' => "voting ASC,votes ASD",
          'newest' => "created DESC",
          '-newest' => "created ASC",
-         'changes' => "synced DESC",
-         '-changes' => "synced ASC",
+         'changes' => "modified DESC",
+         '-changes' => "modified ASC",
          'random' => "RAND()");
   if (isset($values[$orderby]))
     array_push($order, $values[$orderby]);
@@ -1038,8 +1039,9 @@ function get_query($limit=1, $order=true)
 
   $sql.=" FROM $db->images AS i";
   $sql.=$this->_add_sql_join_meta_inclusion($pos_tags, $pos_sets, $pos_locs);
-  $sql.=" WHERE 1=1"; // dummy where clause
-  $sql.=$this->_add_sql_where_meta_exclustion($neg_tags, $neg_sets, $neg_locs);
+  // Consider only imported files
+  $sql.=" WHERE i.flag && ".IMAGE_FLAG_IMPORTED;
+  $sql.=$this->_add_sql_where_meta_exclusion($neg_tags, $neg_sets, $neg_locs);
   $sql.=$this->_add_sql_where();
   $sql.=" GROUP BY i.id";
 
@@ -1067,11 +1069,12 @@ function get_popular_tags()
 
   $sql="SELECT t.name,COUNT(t.name) AS hits".
        " FROM $db->tags AS t, $db->imagetag AS it, $db->images as i".
-       " WHERE t.id=it.tagid and it.imageid=i.id".
+       " WHERE t.id=it.tagid AND it.imageid=i.id".
+       "   AND i.flag && ".IMAGE_FLAG_IMPORTED.
        $this->_add_sql_where_acl().
        " GROUP BY t.name ".
        " ORDER BY hits DESC LIMIT 0,50";
-  
+ 
   return $db->query($sql);
 }
 
@@ -1082,6 +1085,7 @@ function get_popular_sets()
   $sql="SELECT s.name,COUNT(s.name) AS hits". 
        " FROM $db->sets AS s, $db->imageset AS iset, $db->images as i".
        " WHERE s.id=iset.setid and iset.imageid=i.id".
+       "   AND i.flag && ".IMAGE_FLAG_IMPORTED.
        $this->_add_sql_where_acl().
        " GROUP BY s.name". 
        " ORDER BY hits DESC LIMIT 0,50";

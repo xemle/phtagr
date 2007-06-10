@@ -45,7 +45,7 @@ class Image extends SqlObject
 var $_tags;
 var $_sets;
 var $_locations;
-var $_file;
+var $_file_handler;
 var $_previewer;
 var $_meta_modified;
 
@@ -61,8 +61,22 @@ function Image($id=-1)
   $this->_locations=null;
   $this->_meta_modified=array();
 
-  $this->_file=null;
+  $this->_file_handler=null;
   $this->_previewer=null;
+}
+
+function _slashify($path)
+{
+  if ($path[strlen($path)]!='/')
+    return $path.'/';
+  return $path;
+}
+
+/** Splits the filename into path and file (basename) component
+  @return Array of path and file (basename) */
+function _split_filename($filename)
+{
+  return array($this->_slashify(dirname($filename)), basename($filename));
 }
 
 /** Initialize the values from the database into the object 
@@ -76,11 +90,14 @@ function init_by_filename($filename)
   if ($filename=='')
     return false;
     
-  $sfilename=mysql_escape_string($filename);
+  list($path, $file)=$this->_split_filename($filename);
+  
+  $spath=mysql_escape_string($path);
+  $sfile=mysql_escape_string($file);
 
   $sql="SELECT *". 
        " FROM $db->images".
-       " WHERE filename='$sfilename'";
+       " WHERE path='$spath' AND file='$sfile'";
   $result=$db->query($sql);
   if (!$result || mysql_num_rows($result)==0)
     return false;
@@ -98,37 +115,41 @@ function get_file_handler($filename='')
 {
   global $log;
 
-  if ($this->_file!=null)  
-    return $this->_file;
+  if ($this->_file_handler!=null)  
+    return $this->_file_handler;
   
   if ($filename=='')
     $filename=$this->get_filename();
   
-  $file=null;
+  $handler=null;
 
   $pos=strrpos($filename, ".");
   if ($pos===false)
+  {
+    $log->trace("Could not fetch file handler. File extension not found: $filename");
     return null;
+  }
 
   $ext=strtolower(substr($filename, $pos+1));
   switch ($ext)
   {
     case "jpg":
     case "jpeg":
-      $file=new FileJpg($filename);
+      $handler=new FileJpg($filename);
       break;
     case "mov":
     case "mpeg":
     case "mpg":
     case "avi":
-      $file=new FileMovie($filename);
+      $handler=new FileMovie($filename);
       break;
     default:
-      $log->trace(_("Unsupported file tpye '$ext': $filename"));
+      $log->warn(_("Unsupported file tpye '$ext': $filename"));
+      return null;
       break;
   }
-  $this->_file=$file;
-  return $file;
+  $this->_file_handler=$handler;
+  return $handler;
 }
 
 /** Returns and sets the default preview handler */
@@ -137,11 +158,11 @@ function get_preview_handler()
   if ($this->_previewer!=null)  
     return $this->_previewer;
   
-  $file=$this->get_file_handler($filename);
-  if ($file==null)
+  $handler=$this->get_file_handler();
+  if ($handler==null)
     return null;
 
-  $previewer=$file->get_preview_handler(&$this);
+  $previewer=$handler->get_preview_handler(&$this);
   if ($previewer==null)
     return null;
 
@@ -155,10 +176,22 @@ function get_id()
   return $this->_get_data('id', -1);
 }
 
+/** Returns the base name of the image filename */
+function get_file()
+{
+  return stripslashes($this->_get_data('file', ''));
+}
+
+/** Returns the path of the image filename */
+function get_path()
+{
+  return stripslashes($this->_get_data('path', ''));
+}
+
 /** Returns the filename of the image */
 function get_filename()
 {
-  return stripslashes($this->_get_data('filename', ''));
+  return $this->get_path().$this->get_file();
 }
 
 /** Returns the name of the image */
@@ -203,7 +236,7 @@ function set_groupid($gid)
 function get_modified($in_unix=false)
 {
   global $db;
-  $time=$this->_get_data('synced');
+  $time=$this->_get_data('modified');
   if ($in_unix)
     return $db->date_mysql_to_unix($time);
   else
@@ -219,13 +252,18 @@ function set_modified($date, $in_unix=false)
   global $db;
   if ($in_unix)
     $date=$db->date_unix_to_mysql($date);
-  $this->_set_data('synced', $date);
+  $this->_set_data('modified', $date);
+}
+
+function get_flag()
+{
+  return $this->_get_data('flag', 0);
 }
 
 /** @return True if the image was uploaded. Fals otherwise */
 function is_upload()
 {
-  if ($this->_get_data('is_upload')==1)
+  if (($this->get_flag() & IMAGE_FLAG_UPLOAD)>0)
     return true;
   else
     return false;
@@ -242,7 +280,7 @@ function set_gacl($gacl)
 /** Returns the group ACL */
 function get_gacl()
 {
-  return $this->_get_data('gacl');
+  return $this->_get_data('gacl', 0);
 }
 
 function set_macl($macl)
@@ -256,21 +294,21 @@ function set_macl($macl)
 /** Returns the ACL for other phtagr users*/
 function get_macl()
 {
-  return $this->_get_data('macl');
+  return $this->_get_data('macl', 0);
 }
 
-function set_aacl($aacl)
+function set_pacl($pacl)
 {
-  if (!is_numeric($aacl) || $aacl<0)
+  if (!is_numeric($pacl) || $pacl<0)
     return;
 
-  $this->_set_data('aacl', $aacl);
+  $this->_set_data('pacl', $pacl);
 }
 
 /** Returns the ACL for anyone */
-function get_aacl()
+function get_pacl()
 {
-  return $this->_get_data('aacl');
+  return $this->_get_data('pacl', 0);
 }
 
 /** Returns the bytes of the image */
@@ -496,7 +534,7 @@ function _check_acl($user, $flag, $mask)
   // If acls are calculated within if statement, I got wrong evaluation.
   $gacl=$this->get_gacl() & $mask;
   $macl=$this->get_macl() & $mask;
-  $aacl=$this->get_aacl() & $mask;
+  $pacl=$this->get_pacl() & $mask;
   
   if ($user->is_in_group($this->get_groupid()) && $gacl >= $flag)
     return true;
@@ -504,45 +542,46 @@ function _check_acl($user, $flag, $mask)
   if ($user->is_member() && $macl >= $flag)
     return true;
 
-  if ($aacl >= $flag)
+  if ($pacl >= $flag)
     return true;
   
   return false;
 }
 
-/** Return true if user can edit the image 
+/** Return true if user can edit the tags
   @param user User object. Default is null.*/
-function can_edit($user=null)
+function can_write_tag($user=null)
 {
-  return $this->_check_acl(&$user, ACL_EDIT, ACL_WRITE_MASK);
+  return $this->_check_acl(&$user, ACL_WRITE_TAG, ACL_WRITE_MASK);
 }
 
-function can_metadata($user=null)
+function can_write_meta($user=null)
 {
-  return $this->_check_acl(&$user, ACL_METADATA, ACL_WRITE_MASK);
+  return $this->_check_acl(&$user, ACL_WRITE_META, ACL_WRITE_MASK);
+}
+
+function can_write_caption($user=null)
+{
+  return $this->_check_acl(&$user, ACL_WRITE_CAPTION, ACL_WRITE_MASK);
 }
 
 /** Return true if user can preview the image 
   @param user User object. Default is null.*/
-function can_preview($user=null)
+function can_read_preview($user=null)
 {
-  return $this->_check_acl(&$user, ACL_PREVIEW, ACL_READ_MASK);
+  return $this->_check_acl(&$user, ACL_READ_PREVIEW, ACL_READ_MASK);
 }
 
-function can_highsolution($user=null)
+function can_read_highsolution($user=null)
 {
-  return $this->_check_acl(&$user, ACL_HIGHSOLUTION, ACL_READ_MASK);
+  return $this->_check_acl(&$user, ACL_READ_HIGHSOLUTION, ACL_READ_MASK);
 }
 
-function can_fullsize($user=null)
+function can_read_original($user=null)
 {
-  return $this->_check_acl(&$user, ACL_FULLSIZE, ACL_READ_MASK);
+  return $this->_check_acl(&$user, ACL_READ_ORIGINAL, ACL_READ_MASK);
 }
 
-function can_download($user=null)
-{
-  return $this->_check_acl(&$user, ACL_DOWNLOAD, ACL_READ_MASK);
-}
 
 /** @param user Current user
   @return True if tue user is allowed to comment this image. 
@@ -550,7 +589,7 @@ function can_download($user=null)
 comment */
 function can_comment($user)
 {
-  return $this->_check_acl(&$user, ACL_PREVIEW, ACL_READ_MASK);
+  return $this->_check_acl(&$user, ACL_READ_PREVIEW, ACL_READ_MASK);
 }
 
 /** Returns the size of an thumbnail in an array. This function keeps the

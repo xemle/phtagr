@@ -85,7 +85,7 @@ switch ($type)
   case 'preview':
   case 'vpreview':
   case 'high':
-  case 'full':
+  case 'original':
     break;
   default:
     bad_request();
@@ -127,37 +127,37 @@ $fn='';
 switch ($type)
 {
   case 'mini':
-    if ($img->can_preview(&$user))
+    if ($img->can_read_preview(&$user))
       $fn=$previewer->get_filename_mini();
     else
       unauthorized();
     break;
   case 'thumb':
-    if ($img->can_preview(&$user))
+    if ($img->can_read_preview(&$user))
       $fn=$previewer->get_filename_thumb();
     else
       unauthorized();
     break;
   case 'preview':
-    if ($img->can_preview(&$user))
+    if ($img->can_read_preview(&$user))
       $fn=$previewer->get_filename_preview();
     else
       unauthorized();
     break;
   case 'vpreview':
-    if ($img->can_preview(&$user))
+    if ($img->can_read_preview(&$user))
       $fn=$previewer->get_filename_preview_movie();
     else
       unauthorized();
     break;
   case 'high':
-    if ($img->can_preview(&$user))
+    if ($img->can_read_highsolution(&$user))
       $fn=$previewer->get_filename_high();
     else
       unauthorized();
     break;
-  case 'full':
-    if ($img->can_fullsize(&$user))
+  case 'original':
+    if ($img->can_read_original(&$user))
       $fn=$previewer->get_filename();
     else
       unauthorized();
@@ -224,7 +224,7 @@ switch ($type)
   case 'high':
     $previewer->create_high();
     break;
-  case 'full':
+  case 'original':
     break;
   default:
     bad_request();
@@ -237,6 +237,7 @@ $log->disable();
 
 if (!file_exists($fn))
 {
+  $log->debug("File not found: '$fn'");
   not_found();        
 } else {
   if ($type!="vpreview")

@@ -353,9 +353,9 @@ function _get_acl_level(id, flag, mask)
 {
   var gacl=images[id]['gacl'];
   var macl=images[id]['macl'];
-  var aacl=images[id]['aacl'];
+  var pacl=images[id]['pacl'];
 
-  if ((aacl & mask) >= flag) return 3;
+  if ((pacl & mask) >= flag) return 3;
   if ((macl & mask) >= flag) return 2;
   if ((gacl & mask) >= flag) return 1;
   return 0;
@@ -488,6 +488,53 @@ function edit_caption(id)
   textarea.appendChild(document.createTextNode(caption));
 
   li.appendChild(textarea);
+
+  form.appendChild(fs);
+  form.appendChild(_get_div_buttons(nodeId));
+
+  while (e.hasChildNodes())
+    e.removeChild(e.lastChild);
+  e.appendChild(form);
+  document.getElementById(focusId).focus();
+}
+
+/** @param id Image ID
+  @retrun Input for Meta information */
+function edit_tag(id)
+{
+  var e=document.getElementById('info-'+id);
+  if (!e)
+    return;
+
+  if (!images[id])
+    return;
+
+  var nodeId="info-"+id;
+  var focusId="focus-"+id;
+  // Does a form already exists?
+  // On mozilla, the form will be omitted, check also for the next input node
+  if (Data[nodeId]!=null)
+  {
+    resetNode(nodeId);
+    return;
+  }
+
+  // Remember old content
+  Data[nodeId]=e.cloneNode(true);
+
+  var form=_init_form(id);
+  form.appendChild(_input('hidden', 'edit', 'js_tag'));
+
+  var fs=document.createElement("fieldset");
+  fs.setAttribute('class', 'jsfieldset');
+  var legend=document.createElement("legend");
+  legend.appendChild(document.createTextNode('Image tags'));
+  fs.appendChild(legend);
+
+  var ol=document.createElement('ol');
+  fs.appendChild(ol);
+
+  ol.appendChild(_get_li_tags(id));
 
   form.appendChild(fs);
   form.appendChild(_get_div_buttons(nodeId));
@@ -635,9 +682,9 @@ function _get_acl_groups(gid)
 function _get_acl_edit(id)
 {
   var li=document.createElement('li');
-  li.appendChild(_label('Who can edit this image?'));
-  var level=_get_acl_level(id, 0x01, 0x07);
-  li.appendChild(_new_acl_select('js_acl_edit', level));
+  li.appendChild(_label('Who can edit the meta data?'));
+  var level=_get_acl_level(id, 0x02, 0x07);
+  li.appendChild(_new_acl_select('js_acl_meta', level));
   return li;
 }
 

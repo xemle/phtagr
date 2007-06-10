@@ -545,7 +545,7 @@ function _read_seg_com($jpg)
   fseek($fp, $com['pos']+HDR_SIZE_JPG, SEEK_SET);
   if ($com['size']<2)
   {
-    $log->error("JPEG comment segment size is negative: ".$jpg['filename'], -1, $user->get_id());
+    $log->err("JPEG comment segment size is negative: ".$jpg['filename'], -1, $user->get_id());
     return false;
   }
   $buf=fread($fp, $com['size']-2);

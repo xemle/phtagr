@@ -508,7 +508,7 @@ function exec_debug()
     $this->info(_("This operation may take some time"));
     $sync=new ImageSync();
     list($count, $updated, $deleted)=$sync->sync_files();
-    if ($count>0) {
+    if ($count>=0) {
       $this->success(sprintf(_("All %d files where synchronized. %d were updated, %d were deleted"), $count, $updated, $deleted));
     } else {
       $this->error(sprintf(_("Synchronization of files failed. Error %d returned"), $count));

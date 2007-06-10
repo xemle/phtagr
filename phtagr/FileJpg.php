@@ -58,6 +58,8 @@ function get_image_filename()
 
 function _import_from_imagefile($image)
 {
+  global $log;
+
   $filename=$this->get_image_filename();
 
   $size=getimagesize($filename);
@@ -66,12 +68,19 @@ function _import_from_imagefile($image)
     $image->set_width($size[0]);
     $image->set_height($size[1]);
   }
+  else
+  {
+    $log->warn("Image size returned null by getimagesize($filename)");
+  }
 
   $image->set_name(basename($filename));
   $this->_iptc=new Iptc($filename);
   $iptc=$this->_iptc;
   if ($iptc==null)
+  {
+    $log->debug("No IPTC found in '$filename'");
     return;
+  }
 
   $image->set_caption($iptc->get_record('2:120'));
   $image->add_tags($iptc->get_records('2:025'));
@@ -91,9 +100,14 @@ function _import_from_imagefile($image)
 
 function _export_to_imagefile($image)
 {
+  global $log;
+
   $filename=$this->get_image_filename();
   if (!is_writeable($filename) || !is_writeable(dirname($filename)))
+  {
+    $log->warn("Could not export '$filename'. File or directory is not writeable");
     return false;
+  }
 
   if (!$this->_iptc)
     $this->_iptc=new Iptc($filename);

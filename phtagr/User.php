@@ -183,6 +183,11 @@ function get_name()
   return $this->_get_data('name', 'anonymous');
 }
 
+function get_password()
+{
+  return $this->_get_data('password', null);
+}
+
 /** Match a password against the own password
   @param passwd Password to check
   @return True, if password matches the current */
@@ -191,7 +196,7 @@ function match_passwd($passwd)
   if (strlen($passwd)==0)
     return false;
 
-  $cur_passwd=$this->_get_data('password');
+  $cur_passwd=$this->_get_password();
   if ($passwd!=$cur_passwd)
     return false;
   return true;
@@ -564,21 +569,21 @@ function _init_data()
 function get_gacl()
 {
   global $conf;
-  return $conf->get('image.gacl', ACL_PREVIEW | ACL_EDIT);
+  return $conf->get('image.gacl', ACL_READ_PREVIEW | ACL_WRITE_META);
 }
 
 /** @return the default ACL for phtagr members */
 function get_macl()
 {
   global $conf;
-  return $conf->get('image.macl', ACL_PREVIEW);
+  return $conf->get('image.macl', ACL_READ_PREVIEW);
 }
 
 /** @return the default ACL for all */
-function get_aacl()
+function get_pacl()
 {
   global $conf;
-  return $conf->get('image.aacl', ACL_PREVIEW);
+  return $conf->get('image.pacl', ACL_READ_PREVIEW);
 }
 
 /** Evaluates, if a given user is member of a given group
@@ -607,7 +612,8 @@ function is_admin()
   return false;
 }
 
-/* @return true if the given user has an phtagr account */
+/* @return true if the given user has an phtagr account. It also returns true
+ * for admins */
 function is_member()
 {
   if ($this->is_admin() ||
@@ -616,11 +622,14 @@ function is_member()
   return false;
 }
 
-/** @return True if user is a guest. If user is an admin, it returns also true */
-function is_guest()
+/** 
+  @param include_admin If true, admins are also a guest. Default is false
+  @return True if user is a guest. */
+function is_guest($include_admin=false)
 {
-  if ($this->is_admin() ||
-    $this->get_type()==USER_GUEST)
+  if ($include_admin && $this->is_admin())
+    return true;
+  if ($this->get_type()==USER_GUEST)
     return true;
   return false;
 }
@@ -628,9 +637,9 @@ function is_guest()
 /* Return true if the given user is anonymous */
 function is_anonymous()
 {
-  if ($this->get_id()==-1)
-    return true;
-  return false;
+  if ($this->get_id()>0)
+    return false;
+  return true;
 }
 
 /** 
@@ -719,7 +728,7 @@ function get_image_count($only_uploads=false, $since=-1)
        " FROM $db->images".
        " WHERE userid=$id";
   if ($only_uploads)
-    $sql.=" AND is_upload=1";
+    $sql.=" AND flag && ".IMAGE_FLAG_UPLOADED;
   if ($since>0)
     $sql.=" AND created>FROM_UNIXTIME($since)";
 
@@ -747,7 +756,7 @@ function get_image_bytes($only_uploads=false, $since=-1)
        " FROM $db->images".
        " WHERE userid=$id";
   if ($only_uploads)
-    $sql.=" AND is_upload=1";
+    $sql.=" AND flag && ".IMAGE_FLAG_UPLOADED;
   if ($since>0)
     $sql.=" AND created>FROM_UNIXTIME($since)";
 

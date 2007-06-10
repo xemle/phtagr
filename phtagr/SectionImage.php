@@ -215,11 +215,11 @@ function caption($docut=true, $return=false)
   $id=$img->get_id();
   $caption=$img->get_caption();
   
-  $can_edit=$img->can_edit($user);
+  $can_write_caption=$img->can_write_caption($user);
   
   $output="<div class=\"caption\" id=\"caption-$id\">";
   // the user can not edit the image
-  if (!$can_edit)
+  if (!$can_write_caption)
   {
     if ($caption!="")
       $output.=$this->_cut_caption($id, &$caption);
@@ -350,20 +350,35 @@ function voting($return=false)
 
 function filename($return=false)
 {
+  global $user;
   $img=$this->get_image();
   if (!$img)
     return;
 
-  $output=$this->escape_html($img->get_filename());
+  $filename=$img->get_filename();
+  $path=$user->get_upload_dir();
+
+  $pos=strpos($filename, $path);
+  if ($pos===false || $pos>0)
+    $output=$this->escape_html($filename);
+  else
+    $output=$this->escape_html(substr($filename, strlen($path)));
   return $this->output($output, $return);
 }
 
 function _acl_to_text($acl)
 {
   $t='';
-  if (($acl & ACL_WRITE_MASK) == ACL_EDIT) $t.='e';
-  if (($acl & ACL_READ_MASK) == ACL_PREVIEW) $t.='v';
-  if (($acl & ACL_READ_MASK) == ACL_HIGHSOLUTION) $t.='f';
+  // Write access
+  if (($acl & ACL_WRITE_MASK) == ACL_WRITE_CAPTION) $t.='c';
+  elseif (($acl & ACL_WRITE_MASK) == ACL_WRITE_META) $t.='m';
+  elseif (($acl & ACL_WRITE_MASK) == ACL_WRITE_TAG) $t.='t';
+
+  // Read access
+  if (($acl & ACL_READ_MASK) == ACL_READ_ORIGINAL) $t.='o';
+  elseif (($acl & ACL_READ_MASK) == ACL_READ_HIGHSOLUTION) $t.='h';
+  elseif (($acl & ACL_READ_MASK) == ACL_READ_PREVIEW) $t.='v';
+
   if ($t=='') $t='-';
   return $t;
 }
@@ -387,7 +402,7 @@ function acl($return=false)
   }
   $output.=$this->_acl_to_text($img->get_gacl()).',';
   $output.=$this->_acl_to_text($img->get_macl()).',';
-  $output.=$this->_acl_to_text($img->get_aacl());
+  $output.=$this->_acl_to_text($img->get_pacl());
 
   return $this->output($output, $return);
 }
@@ -664,7 +679,8 @@ function imginfo($is_thumb, $return=false)
       $this->clicks(true)."</td></tr>\n";
   }
 
-  if ($img->can_edit(&$user))
+  if ($img->can_write_meta(&$user) || 
+    $img->can_write_tag(&$user))
   {
     $output.="  <tr>
     <th>"._("Select:")."</th>
@@ -672,7 +688,10 @@ function imginfo($is_thumb, $return=false)
     if ($is_thumb && $img->can_select($user))    
       $output.="<input type=\"checkbox\" name=\"images[]\" value=\"$id\" onclick=\"uncheck('selectall')\" /> ";
 
-    $output.=" <a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"edit_meta($id)\">"._("Edit Metadata")."</a>";
+    if ($img->can_write_meta(&$user))
+      $output.=" <a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"edit_meta($id)\">"._("Edit Metadata")."</a>";
+    elseif ($img->can_write_tag(&$user))
+      $output.=" <a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"edit_tag($id)\">"._("Edit Tags")."</a>";
     if ($img->is_owner(&$user))
       $output.="<a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"edit_acl($id)\">".("Edit ACL")."</a>";
     $output.="</td>
@@ -714,19 +733,23 @@ function print_js()
     echo "  images[$id]['gid']=".$img->get_groupid().";\n";
     echo "  images[$id]['gacl']=".$img->get_gacl().";\n";
     echo "  images[$id]['macl']=".$img->get_macl().";\n";
-    echo "  images[$id]['aacl']=".$img->get_aacl().";\n";
+    echo "  images[$id]['pacl']=".$img->get_pacl().";\n";
   }
   $caption=$img->get_caption();
   echo "  images[$id]['caption']='".$this->_escape_js($caption)."';\n";
-  if ($img->can_edit(&$user))
+
+  $sep=$conf->get('meta.separator', ';');
+  $sep.=($sep!=' ')?' ':'';
+  if ($img->can_write_tag(&$user))
+  {
+    $tags=$img->get_tags();
+    $tag_list=$this->_escape_js(implode($sep, $tags));
+    echo "  images[$id]['tags']='$tag_list';\n";
+  }
+  if ($img->can_write_meta(&$user))
   {
     $date=$img->get_date();
     echo "  images[$id]['date']='".$this->_escape_js($date)."';\n";
-
-    $tags=$img->get_tags();
-    $sep=$conf->get('meta.separator', ';')." ";
-    $tag_list=$this->_escape_js(implode($sep, $tags));
-    echo "  images[$id]['tags']='$tag_list';\n";
 
     $sets=$img->get_sets();
     $set_list=$this->_escape_js(implode($sep, $sets));
@@ -772,7 +795,7 @@ function print_preview()
   $id=$img->get_id();
   $name=$img->get_name();
 
-  if ($id<0 || !$img->can_preview($user))
+  if ($id<0 || !$img->can_read_preview($user))
     return;
   
   echo "<div class=\"thumbcell\"><a name=\"img-$id\"/>\n";
@@ -812,7 +835,7 @@ function print_content()
   {
     $this->warning(_("Sorry, the requested image is not available."));
     return;
-  } elseif (!$img->can_preview($user)) {
+  } elseif (!$img->can_read_preview($user)) {
     $this->warning(_("Sorry, you are not allowed to access this file."));
     return;
   }

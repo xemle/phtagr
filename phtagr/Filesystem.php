@@ -99,6 +99,39 @@ function _init_roots_by_conf()
   }
 }
 
+/** Add slash at the end of the path if it does not exists
+  @param path Current path
+  @return path with tailing slash */
+function _slashify($path)
+{
+  if ($path[strlen($path)-1]!='/')
+    return $path.'/';
+  return $path;
+}
+
+/** Removes slashes at the end 
+  @param path Path
+  @return Path without tailing slash */
+function _unslashify($path)
+{
+  $len=strlen($path);
+  if ($path[$len-1]=='/')
+    return substr($path, 0, $len-1);
+  return $path;
+}
+
+/** Merges to paths together
+  @param parent Parent part of path
+  @param child Child part of path
+  @return Merged path */
+function _merge_paths($parent, $child)
+{
+  if ($child[0]=='/')
+    return $this->_unslashify($parent).$child;
+  else
+    return $this->_slashify($parent).$child;
+}
+
 /** @return True if you running this under Windows */
 function is_windows()
 {
@@ -114,6 +147,8 @@ function is_windows()
   @return True on success. False otherwise */
 function add_root($root, $alias)
 {
+  $root=$this->_slashify($root);
+
   if ($alias=='')
     $alias=basename($root);
 
@@ -123,12 +158,9 @@ function add_root($root, $alias)
   if (!@is_dir($root))
     return false;
 
+  // Check alias syntax
   if (!preg_match('/^[A-Za-z][A-Za-z0-9\-_\.\:]+$/', $alias))
     return false;
-
-  // Add directory separator at the end
-  if ($root{strlen($root)-1}!=DIRECTORY_SEPARATOR)
-    $root.=DIRECTORY_SEPARATOR;
 
   $this->_roots[$alias]=$root;
   return true;
@@ -173,25 +205,25 @@ function get_roots()
  * "user/bob". If only one root is used, the alias can be ommited and the file
  * must start with the directory separator. If "image" is the only root alias,
  * the return of "/user/bob" is also "image" and "user/bob".
-  @param file Current file
+  @param path Current path
   @return Array of root alias and filename. Otherwise return array of (false,
   false) */
-function _split_alias($file) 
+function _split_alias($path) 
 {
-  $pos=strpos($file, DIRECTORY_SEPARATOR);
+  $pos=strpos($path, '/');
 
   if ($pos>0)
   {
-    $alias=substr($file, 0, $pos);
-    $tail=substr($file, $pos+1);
+    $alias=substr($path, 0, $pos);
+    $tail=substr($path, $pos+1);
   // Note: $pos===0 checks for zero. Otherwise return value false is converted
   // to zero as well.
   } else if ($pos===0 && count($this->_roots)==1) {
     list($alias)=array_keys($this->_roots);
-    $tail=substr($file, 1);
+    $tail=substr($path, 1);
   } else {
     $tail='';
-    $alias=$file;
+    $alias=$path;
   }
 
   if (isset($this->_roots[$alias]))
@@ -200,10 +232,12 @@ function _split_alias($file)
   return array(false, false);
 }
 
-/** Returns the real name of a file or directory */
-function get_realname($file)
+/** 
+  @param path Current path
+  @return Returns the real name of a file or directory */
+function get_realname($path)
 {
-  list($alias, $tail)=$this->_split_alias($file);
+  list($alias, $tail)=$this->_split_alias($path);
   if (!$alias)
     return false;
 
@@ -236,7 +270,7 @@ function basename($file)
 {
   // Split alias and tail and operate only on the tail.
   list($alias, $tail)=$this->_split_alias($file);
-  $pos=strrpos($tail, DIRECTORY_SEPARATOR);
+  $pos=strrpos($tail, '/');
   
   if ($pos===false)
     return $file;
@@ -244,7 +278,7 @@ function basename($file)
   else if ($pos==0)
     return $alias;
   else
-    return $alias.DIRECTORY_SEPARATOR.substr($tail, 0, $pos);
+    return $alias.'/'.substr($tail, 0, $pos);
 }
 
 /** Change the current directory.
@@ -298,7 +332,7 @@ function read_dir($dir)
   while (false != ($file = readdir($handle))) {
     if (!is_readable($file) || $file=='.' || $file=='..') continue;
 
-    if ($this->is_dir($dir.DIRECTORY_SEPARATOR.$file)) {
+    if ($this->is_dir($dir.'/'.$file)) {
       array_push($subdirs, $file);
     } else {
       array_push($files, $file);
@@ -330,41 +364,41 @@ function get_files($dir)
 
 /** Find files by regular expression. It searches the subdirectories first,
  * before inspecting the current directory.
-  @param dir Given directory to search
+  @param path Given directory to search
   @param regex Regular expression, which must match the file
   @param maxdepth Maximum depth of search. Default is 255. Use 0 if you want to
   search in the current directory only
   @param _depth Current Depth. Default is 0. This is used for internal
   recursion.
   @result List of matched files */
-function find($dir, $regex, $maxdepth=255, $_depth=0)
+function find($path, $regex, $maxdepth=255, $_depth=0)
 {
   if ($_depth>$maxdepth)
     return array();
 
-  //$dir=$this->_remove_dir_tail($dir);
+  //$path=$this->_remove_dir_tail($path);
   $matches=array();
-  list($subdirs, $files)=$this->read_dir($dir);
-  if ($subdirs!=null && $_detph>$maxdepth+1)
+  list($subpaths, $files)=$this->read_dir($path);
+  if ($subpaths!=null && $_detph>$maxdepth+1)
   {
-    foreach ($subdirs as $subdir)
+    foreach ($subpaths as $subpath)
     {
-      if ($dir!=DIRECTORY_SEPARATOR)
-        $subdir=$dir.DIRECTORY_SEPARATOR.$subdir;
+      if ($path!='/')
+        $subpath=$this->_merge_paths($path, $subpath);
       else 
-        $subdir=DIRECTORY_SEPARATOR.$subdir;
+        $subpath='/'.$subpath;
       $matches=array_merge($matches, 
-        $this->find($subdir, $regex, $maxdepth, $_depth+1));
+        $this->find($subpath, $regex, $maxdepth, $_depth+1));
     }
   }
   if ($files!=null)
   {
     foreach ($files as $file)
     {
-      if ($dir!=DIRECTORY_SEPARATOR)
-        $file=$dir.DIRECTORY_SEPARATOR.$file;
+      if ($path!='/')
+        $file=$path.'/'.$file;
       else 
-        $file=DIRECTORY_SEPARATOR.$file;
+        $file='/'.$file;
       if (preg_match($regex, $file))
         array_push($matches, $file);
     }
@@ -375,37 +409,37 @@ function find($dir, $regex, $maxdepth=255, $_depth=0)
 
 /** Search images recursively of a directory. 
  The function search only for jpg or JPG files. 
- @param dir Search images in directories
+ @param path Search images in directories
  @param recursive If true, search recursive, otherwise just in the given
  directory. Default is true.
  @return Array of images files */
-function find_images($dir, $recursive=true)
+function find_images($path, $recursive=true)
 {
   if ($recursive)
     $maxdepth=255;
   else
     $maxdetph=0;
-  $files=$this->find($dir, "/\.(jpe?g|avi|mov|mpe?g)$/i", $maxdepth);
+  $files=$this->find($path, "/\.(jpe?g|avi|mov|mpe?g)$/i", $maxdepth);
   return $files;
 }
 
 /** Creates a directory.
-  @param dir Directory to create
+  @param path Directory to create
   @param withparent Create also parent directories if they not exist. 
   Default is false
   @return True on success, false otherwise */
-function mkdir($dir, $withparent=false)
+function mkdir($path, $withparent=false)
 {
-  if ($this->file_exists($dir))
+  if ($this->file_exists($path))
   {
-    if (!$this->is_dir($dir))
+    if (!$this->is_dir($path))
       return false;
     else
       return true;
   }
   
-  $real_dir=$this->get_realname($dir);
-  return @mkdir($real_dir, 0755, $withparent);
+  $fspath=$this->get_realname($path);
+  return @mkdir($fspath, 0755, $withparent);
 }
 
 /** Deletes a file
@@ -422,26 +456,26 @@ function unlink($file)
   @param dir Directory to be removed
   @param recursive True if directory is deleted recursivly. Default is true
   @return True on success, false otherwise */
-function rmdir($dir, $recursive=true)
+function rmdir($path, $recursive=true)
 {
-  if (!$this->is_dir($dir))
+  if (!$this->is_dir($path))
     return false;
 
-  list($subdirs, $files)=$this->read_dir($dir); 
+  list($subpaths, $files)=$this->read_dir($path); 
 
   // Subdirs found
-  if (count($subdirs)>0)
+  if (count($subpaths)>0)
   {
     if (!$recursive)
       return false;
 
     // recursive remove of all subdirs
-    foreach ($subdirs as $subdir)
+    foreach ($subpaths as $subpath)
     {
-      $result=$this->rmdir($subdir, $recursive);
+      $result=$this->rmdir($subpath, $recursive);
       if (!$result)
         return false;
-      if (!@rmdir($this->get_realname($subdir)))
+      if (!@rmdir($this->get_realname($subpath)))
         return false;
     }
   }

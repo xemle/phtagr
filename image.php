@@ -21,8 +21,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-if (file_exists ('config.php'))
-  include 'config.php';
+if (file_exists ('./config.php'))
+  include './config.php';
 
 if (!isset($phtagr_prefix))
   $phtagr_prefix='.';

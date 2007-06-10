@@ -32,12 +32,12 @@ class Acl extends Base
 /** Old version */
 var $_acl;
 
-function Acl($gacl, $macl, $aacl)
+function Acl($gacl, $macl, $pacl)
 {
   $this->_acl=array();
   $this->_acl[ACL_LEVEL_GROUP]=$gacl;
   $this->_acl[ACL_LEVEL_MEMBER]=$macl;
-  $this->_acl[ACL_LEVEL_ANY]=$aacl;
+  $this->_acl[ACL_LEVEL_PUBLIC]=$pacl;
 }
 
 /** Returns an array of ACL values of (group, member, any) */
@@ -46,7 +46,7 @@ function get_values()
   return array(
     $this->_acl[ACL_LEVEL_GROUP] & 0xff, 
     $this->_acl[ACL_LEVEL_MEMBER] & 0xff, 
-    $this->_acl[ACL_LEVEL_ANY] & 0xff);
+    $this->_acl[ACL_LEVEL_PUBLIC] & 0xff);
 }
 
 function get_gacl()
@@ -59,9 +59,9 @@ function get_macl()
   return $this->_acl[ACL_LEVEL_MEMBER] & 0xff;
 }
 
-function get_aacl()
+function get_pacl()
 {
-  return $this->_acl[ACL_LEVEL_ANY] & 0xff;
+  return $this->_acl[ACL_LEVEL_PUBLIC] & 0xff;
 }
 
 /** Converts an ACL string to ACL level integer value
@@ -75,20 +75,20 @@ function _str_to_level($value)
     case 'private': return ACL_LEVEL_PRIVATE;
     case 'group': return ACL_LEVEL_GROUP;
     case 'member': return ACL_LEVEL_MEMBER;
-    case 'any': return ACL_LEVEL_ANY;
+    case 'any': return ACL_LEVEL_PUBLIC;
     default: return ACL_UNKNOWN;
   }
 }
 
 /** Increase the ACL level. It checks the current flag and increases the ACL
  * level of lower ACL levels (first level is ACL_LEVEL_GROUP, second level is
- * ACL_LEVEL_MEMBER and the third level is ACL_LEVEL_ANY).
+ * ACL_LEVEL_MEMBER and the third level is ACL_LEVEL_PUBLIC).
   @param level Highes ACL level which should be increased
   @param flag Threshold flag which indicates the upper inclusive bound
   @param mask Bit mask of flag */
 function _increase_acl($level, $flag, $mask)
 {
-  if ($level>ACL_LEVEL_ANY)
+  if ($level>ACL_LEVEL_PUBLIC)
     return;
 
   for ($l=ACL_LEVEL_GROUP ; $l<=$level; $l++)
@@ -100,7 +100,7 @@ function _increase_acl($level, $flag, $mask)
 
 /** Decrease the ACL level. Decreases the ACL level of higher ACL levels
  * according to the current flag (first level is ACL_LEVEL_GROUP, second level
- * is ACL_LEVEL_MEMBER and the third level is ACL_LEVEL_ANY). The decreased ACL
+ * is ACL_LEVEL_MEMBER and the third level is ACL_LEVEL_PUBLIC). The decreased ACL
  * value is the ACL value of the higher levels which is less than the current
  * threshold or it is zero if no lower ACL value is available. 
   @param level Lower ACL level which should be downgraded
@@ -111,10 +111,10 @@ function _decrease_acl($level, $flag, $mask)
   if ($level<ACL_LEVEL_GROUP)
     return;
 
-  for ($l=ACL_LEVEL_ANY ; $l>=$level; $l--)
+  for ($l=ACL_LEVEL_PUBLIC ; $l>=$level; $l--)
   {
     // Evaluate the available ACL value which is lower than the threshold
-    $lower=($l==ACL_LEVEL_ANY)?0:($this->_acl[$l+1]&($mask));
+    $lower=($l==ACL_LEVEL_PUBLIC)?0:($this->_acl[$l+1]&($mask));
     $lower=($lower<$flag)?$lower:0;
     if (($this->_acl[$l]&($mask))>=$flag)
       $this->_acl[$l]=($this->_acl[$l]&(~$mask))|$lower;
@@ -128,7 +128,7 @@ function _decrease_acl($level, $flag, $mask)
   @return True if the ACL could be set */
 function _set_acl_levels($level, $flag, $mask)
 {
-  if ($level<ACL_LEVEL_KEEP || $level>ACL_LEVEL_ANY)
+  if ($level<ACL_LEVEL_KEEP || $level>ACL_LEVEL_PUBLIC)
     return false;
 
   if ($level==ACL_LEVEL_KEEP)
@@ -137,7 +137,7 @@ function _set_acl_levels($level, $flag, $mask)
   if ($level>=ACL_LEVEL_GROUP)
     $this->_increase_acl($level, $flag, $mask);
 
-  if ($level<ACL_LEVEL_ANY)
+  if ($level<ACL_LEVEL_PUBLIC)
     $this->_decrease_acl($level+1, $flag, $mask);
 
   return true;
@@ -146,23 +146,27 @@ function _set_acl_levels($level, $flag, $mask)
 function handle_request($prefix='')
 {
   // read level
+  if (isset($_REQUEST[$prefix.'acl_original']))
+  {
+    $level=$this->_str_to_level($_REQUEST[$prefix.'acl_original']);
+    $this->_set_acl_levels($level, ACL_READ_ORIGINAL, ACL_READ_MASK);
+  }  
   if (isset($_REQUEST[$prefix.'acl_preview']))
   {
     $level=$this->_str_to_level($_REQUEST[$prefix.'acl_preview']);
-    $this->_set_acl_levels($level, ACL_PREVIEW, ACL_READ_MASK);
+    $this->_set_acl_levels($level, ACL_READ_PREVIEW, ACL_READ_MASK);
   }  
 
   // write level
-  if (isset($_REQUEST[$prefix.'acl_edit']))
-  {
-    $level=$this->_str_to_level($_REQUEST[$prefix.'acl_edit']);
-    $this->_set_acl_levels($level, ACL_EDIT, ACL_WRITE_MASK);
-  }  
-
   if (isset($_REQUEST[$prefix.'acl_meta']))
   {
     $level=$this->_str_to_level($_REQUEST[$prefix.'acl_meta']);
-    $this->_set_acl_levels($level, ACL_META, ACL_WRITE_MASK);
+    $this->_set_acl_levels($level, ACL_WRITE_META, ACL_WRITE_MASK);
+  }  
+  if (isset($_REQUEST[$prefix.'acl_tag']))
+  {
+    $level=$this->_str_to_level($_REQUEST[$prefix.'acl_tag']);
+    $this->_set_acl_levels($level, ACL_WRITE_TAG, ACL_WRITE_MASK);
   }  
 }
 

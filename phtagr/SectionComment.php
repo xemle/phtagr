@@ -257,7 +257,7 @@ function print_content()
   {
     $this->warning(_("Sorry, the requested image is not available."));
     return;
-  } elseif (!$img->can_preview($user)) {
+  } elseif (!$img->can_read_preview($user)) {
     $this->warning(_("Sorry, you are not allowed to access this file."));
     return;
   }

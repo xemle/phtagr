@@ -39,73 +39,140 @@ function ImageSync($id=-1)
 /** Import an image by a filename to the database. If an image with the same
  * filename exists, the function update() is called.
   @param filename Filename of the image
-  @param is_upload 1 if the image is uploaded. 0 if the image is local. Default
-  is 0.
+  @param is_upload True if the image was uploaded. False if the image is local. Default
+  is false.
   @return Returns 0 on success, -1 for failure. On update the return value is
   1. If the file already exists and has no changes, the return value is 2.
   @see update() */
-function import($filename, $is_upload=0)
+function import($filename, $is_upload=false)
 {
-  global $db;
-  global $user;
+  global $db, $log, $user;
   
+  $log->trace("Import file: $filename (upload: $is_upload)");
   if (!file_exists($filename))
     return ERR_FS_NOT_EXISTS;
 
   // If no file handler exists, return with an error
-  $file=$this->get_file_handler($filename);
-  if ($file==null)
+  $handler=$this->get_file_handler($filename);
+  if ($handler==null)
     return -1;
 
-  $sfilename=mysql_escape_string($filename);
-  $sql="SELECT *".
-       " FROM $db->images".
-       " WHERE filename='$sfilename'";
-  $result=$db->query($sql);
-  if (!$result)
-    return ERR_DB_SELECT;
+  // slashify path
+  $path=dirname($filename);
+  $path.=($path[strlen($path)]!='/')?'/':'';
+  $file=basename($filename);
 
-  // image found in the database. Update it
-  if (mysql_num_rows($result)!=0)
+  $spath=mysql_escape_string($path);
+  $sfile=mysql_escape_string($file);
+
+  $sql="SELECT id,userid,flag".
+       " FROM $db->images".
+       " WHERE path='$spath' AND file='$sfile'";
+  $row=$db->query_row($sql);
+
+  // image not found in the database. Import it
+  if (empty($row['id']))
   {
-    $this->init_by_query($sql);
-    $this->_import();
-    $this->commit();
-    return 1;
+    $userid=$user->get_id();
+    $groupid=$user->get_groupid();
+
+    $gacl=$user->get_gacl();
+    $macl=$user->get_macl();
+    $pacl=$user->get_pacl();
+    
+    $flag=IMAGE_FLAG_IMPORTED;
+    $flag|=($is_upload ? IMAGE_FLAG_UPLOADED : 0);
+    // insert basics
+    $sql="INSERT INTO $db->images (".
+         "   userid, groupid, created,".
+         "   path, file, flag,".
+         "   gacl, macl, pacl,".
+         "   clicks, lastview, ranking".
+         " ) VALUES (".
+         "   $userid, $groupid, NOW(),".
+         "   '$spath', '$sfile', $flag,".
+         "   $gacl, $macl, $pacl,".
+         "   0, NOW(), 0.0".
+         " )";
+    $new_id=$db->query_insert($sql);
+    if ($new_id<=0)
+    {
+      $log->err("Import failed of file '$filename': $sql");
+      return -1;
+    }
+
+    $this->init_by_id($new_id);
+
+    $handler->import($this);
+    $this->set_modified($handler->get_filetime(), true);
+    $log->trace("data: ".print_r($this->_data, true));
+    $log->trace("Changes: ".print_r($this->_changes, true));
+    if (!$this->commit())
+    {
+      $log->err("Could not commit database changes");
+      return -1;
+    }
+    $log->debug("Successful import of '$filename' (ID $new_id)", $new_id);
+    return 0;
+  }
+  else
+  {
+    // Another user owns this file already
+    if ($row['userid']!=$user->get_id())
+    {
+      $log->warn("Import failed of '$filename'. File owned by ".$row['userid'], $row['id']);
+      return -1;
+    }
+
+    $flag=$row['flag'];
+    if (($flag & IMAGE_FLAG_MASK)==IMAGE_FLAG_UPLOADED)
+    {
+      $flag|=IMAGE_FLAG_IMPORTED;
+      // image was uploaded, but not insert
+      // update basics
+      $sql="UPDATE $db->images ".
+           " SET".
+           "  flag=$flag".
+           ", groupid=".$user->get_groupid().
+           ", gacl=".$user->get_gacl().
+           ", macl=".$user->get_macl().
+           ", pacl=".$user->get_pacl().
+           ", clicks=0, lastview=NOW(), ranking=0.0".
+           " WHERE id=".$row['id'];  
+      $log->trace("sql=$sql");
+      if (!$db->query_update($sql))
+      {
+        $log->err("Update failed of '$filename': $sql", $row['id']);
+        return -1;
+      }
+
+      $this->init_by_id($row['id']);
+
+      $handler->import($this);
+      $this->set_modified($handler->get_filetime(), true);
+      if (!$this->commit())
+      {
+        $log->err("Could not commit database changes");
+        return -1;
+      }
+      $log->debug("Successful import of '$filename' (uploaded)", $row['id']);
+      return 0;
+    }
+    elseif (($flag & IMAGE_FLAG_IMPORTED)==IMAGE_FLAG_IMPORTED)
+    {
+      // Re-import file
+      $this->init_by_id($row['id']);
+      if (!$this->_import())
+        return 2;
+      $this->commit();
+      $log->debug("Successful update of '$filename'", $row['id']);
+      return 1;
+    }
   }
   
-  $userid=$user->get_id();
-  $groupid=$user->get_groupid();
-
-  $gacl=$user->get_gacl();
-  $macl=$user->get_macl();
-  $aacl=$user->get_aacl();
-  
-  $sql="INSERT INTO $db->images (".
-       "   userid,groupid,created,".
-       "   filename,is_upload,".
-       "   gacl,macl,aacl,".
-       "   clicks,lastview,ranking".
-       " ) VALUES (".
-       "   $userid,$groupid,NOW(),".
-       "   '$sfilename',$is_upload,".
-       "   $gacl,$macl,$aacl,".
-       "   0,NOW(),0.0".
-       " )";
-  $result=$db->query($sql);
-  if (!$result)
-    return ERR_DB_INSERT;
-
-  $sql="SELECT *".
-       " FROM $db->images".
-       " WHERE filename='$sfilename'";
-  $this->init_by_query($sql);
-
-  $file->import($this);
-  $this->set_modified($file->get_filetime(), true);
-  $this->commit();
-  
-  return 0; 
+  // Should never reach this
+  $log->fatal("Generic error importing '$filename'");
+  return -1;
 }
 
 /** Import the image data if the file modification time is after the
@@ -201,7 +268,7 @@ function sync_files($userid=-1)
 
   $result=$db->query($sql);
   if (!$result)
-    return 0;
+    return array(-1, 0, 0);
     
   @clearstatcache();
   $count=0;
@@ -276,7 +343,7 @@ function delete_from_user($userid, $id)
   $userid=$user->get_id();
   $sql="SELECT filename".
        " FROM $db->images".
-       " WHERE userid=$userid AND is_upload=1";
+       " WHERE userid=$userid AND flag && ".IMAGE_FLAG_UPLOADED;
   $result=$db->query($sql);
   if ($result) {
     while ($row=mysql_fetch_row($result)) {
@@ -456,7 +523,7 @@ function _handle_request_location($prefix='', $merge)
 
 function handle_request()
 {
-  global $conf;
+  global $conf, $user;
   $this->_import(false);
 
   if (!isset($_REQUEST['edit']))
@@ -466,20 +533,33 @@ function handle_request()
   if ($edit=='multi')
   {
     $prefix='edit_';
-    $this->_handle_request_caption($prefix, true);
-    $this->_handle_request_date($prefix, true);
-    $this->_handle_request_tags($prefix, true);
-    $this->_handle_request_sets($prefix, true);
-    $this->_handle_request_location($prefix, true);
+    if ($this->can_write_tag(&$user))
+      $this->_handle_request_tags($prefix, true);
+    if ($this->can_write_meta(&$user))
+    {
+      $this->_handle_request_date($prefix, true);
+      $this->_handle_request_sets($prefix, true);
+      $this->_handle_request_location($prefix, true);
+    }
+    if ($this->can_write_caption(&$user))
+      $this->_handle_request_caption($prefix, true);
+  } else if ($edit=='js_tag') {
+    $prefix='js_';
+    if ($this->can_write_tag(&$user))
+      $this->_handle_request_tags($prefix, false);
   } else if ($edit=='js_meta') {
     $prefix='js_';
-    $this->_handle_request_date($prefix, false);
-    $this->_handle_request_tags($prefix, false);
-    $this->_handle_request_sets($prefix, false);
-    $this->_handle_request_location($prefix, false);
+    if ($this->can_write_meta(&$user))
+    {
+      $this->_handle_request_date($prefix, false);
+      $this->_handle_request_tags($prefix, false);
+      $this->_handle_request_sets($prefix, false);
+      $this->_handle_request_location($prefix, false);
+    }
   } else if ($edit=='js_caption') {
     $prefix='js_';
-    $this->_handle_request_caption($prefix, false);
+    if ($this->can_write_caption(&$user))
+      $this->_handle_request_caption($prefix, false);
   }
 
   // Commit changes to update the values

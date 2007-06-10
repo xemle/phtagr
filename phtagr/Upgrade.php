@@ -77,6 +77,8 @@ function do_upgrade()
       break;    
     case 2:
       $cur_version=$this->_upgrade_to_3(); break;
+    case 3:
+      $cur_version=$this->_upgrade_to_4(); break;
     default: break;
     }
   }
@@ -162,6 +164,67 @@ function _upgrade_to_3()
 
   $conf->set_default('db.version', '3');
   return 3;
+}
+
+/** Split filename to path and file */
+function _upgrade_to_4()
+{
+  global $db, $conf;
+
+  // Table changes
+  $sql="ALTER TABLE $db->images ".
+       "CHANGE synced modified DATETIME, ".
+       "CHANGE is_upload flag TINYINT UNSIGNED DEFAULT 0, ".
+       "CHANGE aacl pacl TINYINT UNSIGNED DEFAULT 0, ".
+       "ADD file VARCHAR(128) NOT NULL";
+  $db->query($sql);
+
+  // Set defaults
+  $sql="ALTER TABLE $db->images ".
+       "CHANGE gacl gacl TINYINT UNSIGNED DEFAULT 0, ".
+       "CHANGE macl macl TINYINT UNSIGNED DEFAULT 0, ".
+       "CHANGE filename path TEXT NOT NULL, ".
+       "CHANGE width width INT UNSIGNED DEFAULT 0, ".
+       "CHANGE height height INT UNSIGNED DEFAULT 0, ".
+       "CHANGE orientation orientation TINYINT UNSIGNED DEFAULT 1, ".
+       "CHANGE caption caption TEXT DEFAULT NULL, ".
+       "CHANGE longitude longitude FLOAT DEFAULT NULL, ".
+       "CHANGE latitude latitude FLOAT DEFAULT NULL, ".
+       "CHANGE hue hue FLOAT DEFAULT NULL, ".
+       "CHANGE saturation saturation FLOAT DEFAULT NULL, ".
+       "CHANGE luminosity luminosity FLOAT DEFAULT NULL";
+  $db->query($sql);
+
+  // Imported files
+  $sql="UPDATE $db->images ".
+       "SET flag=128 ".
+       "WHERE flag=0";
+  $db->query_update($sql);
+  
+  // Uploaded and imported files
+  $sql="UPDATE $db->images ".
+       "SET flag=192 ".
+       "WHERE flag=1";
+  $db->query_update($sql);
+
+  // Copy file part (basename)
+  $sql="UPDATE $db->images ".
+       " SET file=SUBSTRING_INDEX(path, '/', -1)";
+  $db->query_update($sql);
+
+  // Skip file part (only slashed path)
+  $sql="UPDATE $db->images ".
+       " SET path=LEFT(path, LENGTH(path)-LENGTH(SUBSTRING_INDEX(path, '/', -1)))";
+  $db->query_update($sql);
+
+  // Change index aacl to pacl
+  $sql="ALTER TABLE $db->images ".
+       "ADD INDEX(pacl), ".
+       "DROP INDEX aacl ";
+  $db->query($sql);
+
+  $conf->set_default('db.version', '4');
+  return 4;
 }
 
 }

@@ -94,11 +94,11 @@ function print_general ()
 
   echo "<fieldset><legend>"._("Default Access Rights")."</legend>\n";
   echo "<ol>\n";
-  $gacl=$conf->get('image.gacl', (ACL_EDIT | ACL_PREVIEW));
-  $macl=$conf->get('image.macl', ACL_PREVIEW);
-  $aacl=$conf->get('image.aacl', ACL_PREVIEW);
+  $gacl=$conf->get('image.gacl', (ACL_WRITE_META | ACL_READ_PREVIEW));
+  $macl=$conf->get('image.macl', ACL_READ_PREVIEW);
+  $pacl=$conf->get('image.pacl', ACL_READ_PREVIEW);
 
-  $acl=new SectionAcl($gacl, $macl, $aacl);
+  $acl=new SectionAcl($gacl, $macl, $pacl);
   $acl->print_table(false);
   echo "</li>\n";
   echo "</ol>"; 
@@ -184,13 +184,13 @@ function exec_general ()
     $user->commit();
 
     $acl=new Acl(
-      $conf->get('image.gacl', (ACL_EDIT|ACL_PREVIEW)),
-      $conf->get('image.macl', (ACL_PREVIEW)),
-      $conf->get('image.aacl', (ACL_PREVIEW)));
+      $conf->get('image.gacl', (ACL_WRITE_META | ACL_READ_PREVIEW)),
+      $conf->get('image.macl', (ACL_READ_PREVIEW)),
+      $conf->get('image.pacl', (ACL_READ_PREVIEW)));
     $acl->handle_request();
     $conf->set('image.gacl', $acl->get_gacl());
     $conf->set('image.macl', $acl->get_macl());
-    $conf->set('image.aacl', $acl->get_aacl());
+    $conf->set('image.pacl', $acl->get_pacl());
 
     $sep=$_REQUEST['meta_separator'];
     if ($sep==' ' || $sep=='.' || $sep==';' || $sep==',')
