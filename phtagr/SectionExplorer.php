@@ -210,15 +210,12 @@ function print_content()
   $row=mysql_fetch_row($result);
   $count=$row[0];
   
-  if (count($search->tags)>0)
+  if (count($search->get_tags())>0)
   {
-    echo "<h2>Explore Tag: ";
-    foreach ($search->tags as $tag)
-      echo "$tag ";
-    echo "</h2>\n";
+		$this->h2(_("Explore Tags")." ".implode(', ', $search->get_tags()));
   }
   else
-    echo "<h2>"._("Explore Tags")."</h2>\n";
+		$this->h2(_("Explore Tags"));
 
   if ($count==0)
   {

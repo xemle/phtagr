@@ -144,6 +144,12 @@ function del_tag($tag)
   return false;
 }
 
+/** @return Returns the tags of the current search */
+function get_tags()
+{
+	return $this->_tags;
+}
+
 /** Sets the operator of tags
   @param tagop Must be between 0 and 2 */
 function set_tagop($tagop)
@@ -192,6 +198,12 @@ function del_set($set)
     }
   }
   return false;
+}
+
+/** @return Returns the sets of the current search */
+function get_sets()
+{
+	return $this->_sets;
 }
 
 /** Sets the operator of sets
@@ -245,6 +257,12 @@ function del_location($location)
     }
   }
   return false;
+}
+
+/** @return Returns the locations of the current search */
+function get_locations()
+{
+	return $this->_locs;
 }
 
 /** Sets the operator of locations
@@ -741,7 +759,7 @@ function _add_sql_where_meta_exclusion($tags, $sets, $locs)
         ." ON ( i.id=il.imageid )";
   }
 
-  $sql.=" WHERE 1";
+  $sql.=" WHERE 0";
   
   if ($num_tags)
   {

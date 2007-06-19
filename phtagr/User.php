@@ -48,11 +48,14 @@ members or guest to his groups.
 class User extends SqlObject
 {
 
-function User($id=-1)
+/** @param id User id
+  @param sessionless Do not initiate a PHP session */
+function User($id=-1, $sessionless=false)
 {
   global $db;
   $this->SqlObject($db->users, $id);
-  $this->init_session();
+  if (!$sessionless)
+    $this->init_session();
 }
 
 /** 

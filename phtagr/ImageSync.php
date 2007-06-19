@@ -251,10 +251,9 @@ function _export($force=false)
   first array value is the global error code */
 function sync_files($userid=-1)
 {
-  global $db;
-  global $user;
+  global $db, $user, $log;
 
-  $sql="SELECT id,userid,filename".
+  $sql="SELECT id".
        " FROM $db->images";
   if ($userid>0)
   {
@@ -268,40 +267,40 @@ function sync_files($userid=-1)
 
   $result=$db->query($sql);
   if (!$result)
+  {
+    $log->err("Could not query: $sql");
     return array(-1, 0, 0);
+  }
     
   @clearstatcache();
   $count=0;
   $updated=0;
   $deleted=0;
+
   while ($row=mysql_fetch_row($result))
   {
-    $id=$row[0];
-    $img_userid=$row[1];
-    $filename=$row[2];
     $count++;
     
-    if (!file_exists($filename))
+		$img=new ImageSync($row[0]);
+    if (!file_exists($img->get_filename()))
     {
-      $image=new ImageSync($id);
-      $image->delete();
+      $img->delete();
       $deleted++;
     }
     else 
     {
-      $image=new ImageSync($id);
-      if ($image->_import())
+      if ($img->_import())
       {
-        $image->commit();
+        $img->commit();
         $updated++;
       }
-      if ($image->_export())
+      if ($img->_export())
       {
-        $image->commit();
+        $img->commit();
         $updated++;
       }
-      unset($image);
     }
+		unset($img);
   }
   return array($count, $updated, $deleted);
 }
@@ -341,13 +340,13 @@ function delete_from_user($userid, $id)
   $previewer->delete_from_user($userid, $id);
 
   $userid=$user->get_id();
-  $sql="SELECT filename".
+  $sql="SELECT path,file".
        " FROM $db->images".
        " WHERE userid=$userid AND flag && ".IMAGE_FLAG_UPLOADED;
   $result=$db->query($sql);
   if ($result) {
     while ($row=mysql_fetch_row($result)) {
-      @unlink($row[0]);
+      @unlink($row[0].$row[1]);
     }
   }
   return parent::delete_from_user($userid, $id);
@@ -523,7 +522,8 @@ function _handle_request_location($prefix='', $merge)
 
 function handle_request()
 {
-  global $conf, $user;
+  global $conf, $user, $log;
+  $log->trace("Handle image request for changes", $this->get_id());
   $this->_import(false);
 
   if (!isset($_REQUEST['edit']))
@@ -569,6 +569,11 @@ function handle_request()
     return;
   }
 
+  if ($this->is_modified())
+    $log->debug("Data changed", $this->get_id());
+  if ($this->is_meta_modified())
+    $log->debug("Metadata changed", $this->get_id());
+
   // Dont export on lazy sync but update modified
   if ($conf->query($this->get_userid(), 'image.lazysync', 0)==1)
   {
@@ -580,7 +585,6 @@ function handle_request()
     $this->_export(false);
     $this->commit();
   }
-
   $previewer=$this->get_preview_handler();
   if ($previewer!=null)
     $previewer->touch_previews();

@@ -69,8 +69,11 @@ function init_by_query($sql)
 {
   global $db;
   $row=$db->query_row($sql);
-  if (count($row))
-    $this->_data=$row;
+  if (!count($row))
+		return;
+
+  $this->_data=$row;
+	$this->_changes=array();	
 }
 
 /** @return Returns the unique id of the sql object */
