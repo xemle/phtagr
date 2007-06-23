@@ -150,6 +150,13 @@ function print_content()
     echo "</select>\n";
     echo "</li>";
   }
+	if ($user->is_member() || $user->is_guest())
+	{
+    echo "<li>";
+    $this->label(_("Image name:"));
+    $this->input_text("image_name");
+    echo "</li>";
+	}
 
   echo "<li>";
   $this->label(_("Sort by:"));

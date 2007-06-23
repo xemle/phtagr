@@ -514,11 +514,8 @@ function date_mysql_to_unix($date)
   @return mysql time string */
 function date_unix_to_mysql($sec)
 {
-  if (!is_numeric($sec))  
-    $sec=0;
-  if ($sec<0)
-    $sec=0;
-  return strftime("%Y-%m-%d %H:%M:%S", $sec);
+  $unix=abs(intval($sec));
+  return strftime("%Y-%m-%d %H:%M:%S", $unix);
 }
 
 /** Creates the phTagr tables

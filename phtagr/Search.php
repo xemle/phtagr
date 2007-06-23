@@ -105,6 +105,16 @@ function set_filetype($type)
   }
 }
 
+function set_name_mask($mask)
+{
+  $this->add_param('image_name', $mask);
+}
+
+function get_name_mask()
+{
+  return $this->get_param('image_name', '');
+}
+
 function add_tag($tag)
 {
   $tag=trim($tag);
@@ -147,7 +157,7 @@ function del_tag($tag)
 /** @return Returns the tags of the current search */
 function get_tags()
 {
-	return $this->_tags;
+  return $this->_tags;
 }
 
 /** Sets the operator of tags
@@ -203,7 +213,7 @@ function del_set($set)
 /** @return Returns the sets of the current search */
 function get_sets()
 {
-	return $this->_sets;
+  return $this->_sets;
 }
 
 /** Sets the operator of sets
@@ -262,7 +272,7 @@ function del_location($location)
 /** @return Returns the locations of the current search */
 function get_locations()
 {
-	return $this->_locs;
+  return $this->_locs;
 }
 
 /** Sets the operator of locations
@@ -393,7 +403,7 @@ function del_orderby()
 /** Creates a search object from a URL */
 function from_url()
 {
-  global $conf;
+  global $conf, $user;
   parent::from_url();
 
   $this->add_riparam('id', null, 1);
@@ -445,10 +455,19 @@ function from_url()
     
   if (isset($_REQUEST['user']))
     $this->set_userid($_REQUEST['user']);
-  if (isset($_REQUEST['group']))
-    $this->set_groupid($_REQUEST['group']);
-  if (isset($_REQUEST['visibility'])) 
-    $this->set_visibility($_REQUEST['visibility']);
+  
+  if ($user->is_member())
+  {
+    if (isset($_REQUEST['group']))
+      $this->set_groupid($_REQUEST['group']);
+    if (isset($_REQUEST['visibility'])) 
+      $this->set_visibility($_REQUEST['visibility']);
+  }
+  if ($user->is_member() || $user->is_guest())
+  {
+    if (isset($_REQUEST['image_name'])) 
+      $this->set_name_mask($_REQUEST['image_name']);
+  }
 
   if (isset($_REQUEST['start']))
     $this->set_date_start($_REQUEST['start']);
@@ -977,13 +996,13 @@ function _add_sql_where()
   $userid=$this->get_param('user', 0);
   $groupid=$this->get_param('group', -1);
 
-  if ($imageid>0)  $sql .= " AND i.id=".$imageid;
-  if ($userid>0)   $sql .= " AND i.userid=".$userid;
-  if ($groupid>=0) $sql .= " AND i.groupid=".$groupid;
+  if ($imageid>0)  $sql .= "AND i.id=".$imageid;
+  if ($userid>0)   $sql .= "AND i.userid=".$userid;
+  if ($groupid>=0) $sql .= "AND i.groupid=".$groupid;
   
   // handle the acl and visibility level
-  $sql .= $this->_add_sql_where_acl();
-  $sql .= $this->_add_sql_where_visibility();
+  $sql.=$this->_add_sql_where_acl();
+  $sql.=$this->_add_sql_where_visibility();
 
   // handle date
   $start=$this->get_param('start', 0);
@@ -999,6 +1018,12 @@ function _add_sql_where()
   if ($type=='video')
     $sql.=" AND i.duration>=0";
 
+  $name_mask=$this->get_name_mask();
+  if (strlen($name_mask))
+  {
+    $sname_mask=mysql_escape_string($name_mask);
+    $sql.=" AND i.name LIKE '%$sname_mask%'";
+  }
   return $sql;
 }
 
@@ -1081,7 +1106,23 @@ function get_num_query()
   return $sql;
 }
 
-function get_popular_tags()
+/** @return Returns the number of readable image */
+function get_num_images()
+{
+  global $db;
+  $sql="SELECT COUNT(id)".
+       " FROM $db->images".
+       " WHERE 1".
+       $this->_add_sql_where_acl();
+  return $db->query_cell($sql);
+}
+
+/** 
+  @param num Number of the returned tags. 
+  @return Returns an table with 2 columns. The first column is the set name,
+the second column is the number of hits. The table is ordered by descending
+hits */
+function get_popular_tags($num=50)
 {
   global $db;
 
@@ -1091,12 +1132,23 @@ function get_popular_tags()
        "   AND i.flag && ".IMAGE_FLAG_IMPORTED.
        $this->_add_sql_where_acl().
        " GROUP BY t.name ".
-       " ORDER BY hits DESC LIMIT 0,50";
+       " ORDER BY hits DESC LIMIT 0,".intval($num);
  
-  return $db->query($sql);
+  $table=$db->query_table($sql);
+  if (!$table)
+    return null;
+  $cloud=array();
+  foreach($table as $row)
+    $cloud[$row['name']]=$row['hits'];
+  return $cloud;
 }
 
-function get_popular_sets()
+/** 
+  @param num Number of the returned tags. 
+  @return Returns an table with 2 columns. The first column is the tag name,
+the second column is the number of hits. The table is ordered by descending
+hits */
+function get_popular_sets($num=50)
 {
   global $db;
 
@@ -1106,9 +1158,15 @@ function get_popular_sets()
        "   AND i.flag && ".IMAGE_FLAG_IMPORTED.
        $this->_add_sql_where_acl().
        " GROUP BY s.name". 
-       " ORDER BY hits DESC LIMIT 0,50";
+       " ORDER BY hits DESC LIMIT 0,".intval($num);
   
-  return $db->query($sql);
+  $table=$db->query_table($sql);
+  if (!$table)
+    return null;
+  $cloud=array();
+  foreach($table as $row)
+    $cloud[$row['name']]=$row['hits'];
+  return $cloud;
 }
 
 }

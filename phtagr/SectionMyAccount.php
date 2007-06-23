@@ -125,8 +125,10 @@ function print_general ()
   $this->label(_("Lazy Sync:"));
   echo "<p>";
   $this->input_checkbox("lazysync", 1, ($conf->get('image.lazysync', '0')==1));
-  $url->add_param("action", "imagesync");
-  echo "<a href=\"".$url->get_url()."\">"._("Syncronize images now")."</a>\n";
+  $url->add_param("action", "sync_new");
+  echo "<a href=\"".$url->get_url()."\" class=\"jsbutton\">"._("Sync new")."</a>\n";
+  $url->add_param("action", "sync_all");
+  echo "<a href=\"".$url->get_url()."\" class=\"jsbutton\">"._("Sync all")."</a>\n";
   echo "</p>";
   echo "</li>\n";
 
@@ -200,13 +202,18 @@ function exec_general ()
     $conf->set('image.autorotate', $_REQUEST['autorotate']==1?1:0);
     return;
   }
-  elseif ($action=="imagesync")
+  elseif ($action=="sync_new" || $action=="sync_all")
   {
     if ($user->get_id()<=0 || !$user->is_member())
       return;
 
     $sync=new ImageSync();
-    list($count, $updated, $deleted)=$sync->sync_files($user->get_id());
+		if ($action=="sync_new")
+			$since=$conf->get('image.lasysync.last', -1);
+		else
+			$since=-1;
+    list($count, $updated, $deleted)=$sync->sync_files($user->get_id(), $since);
+		$conf->set('image.lasysync.last', time());
     $this->success(sprintf(_("Files are now synchronized (%d in total, %d updated, %d deleted)"), $count, $updated, $deleted));
   }
 }

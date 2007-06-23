@@ -246,23 +246,38 @@ function _export($force=false)
  * exists delete its data. If a file is newer since the last update, update its
  * data. 
   @param userid Userid which must match current user. If userid -1 and user is
-  admin, all files are synchronized. 
+  admin, all files are synchronized.
+  @param since Starting timestamp of image modification in UNIX format. If this
+value is set, only files are considered, which modified after this timestamp excluding this time. Default is -1 (disabled).
   @return Array of count files, updated files, and deleted files. On error, the
   first array value is the global error code */
-function sync_files($userid=-1)
+function sync_files($userid=-1, $since=-1)
 {
   global $db, $user, $log;
 
   $sql="SELECT id".
-       " FROM $db->images";
+       " FROM $db->images".
+       " WHERE 1";
   if ($userid>0)
   {
     if ($userid!=$user->get_id() && !$user->is_member())
-      return array(ERR_NOT_PERMITTED, 0, 0);
-    $sql.=" WHERE userid=$userid";
+    {
+      $log->err("User is not authorized to sync files");
+      return array(-1, 0, 0);
+    }
+    $sql.=" AND userid=$userid";
   } else {
     if (!$user->is_admin())
-      return array(ERR_NOT_PERMITTED, 0, 0);
+    {
+      $log->err("User is not authorized to sync files of all users");
+      return array(-1, 0, 0);
+    }
+  }
+
+  if (intval($since)>0)
+  {
+    $time=$db->date_unix_to_mysql($since);
+    $sql.=" AND modified>'$time'";
   }
 
   $result=$db->query($sql);
@@ -281,7 +296,7 @@ function sync_files($userid=-1)
   {
     $count++;
     
-		$img=new ImageSync($row[0]);
+    $img=new ImageSync($row[0]);
     if (!file_exists($img->get_filename()))
     {
       $img->delete();
@@ -300,7 +315,7 @@ function sync_files($userid=-1)
         $updated++;
       }
     }
-		unset($img);
+    unset($img);
   }
   return array($count, $updated, $deleted);
 }
