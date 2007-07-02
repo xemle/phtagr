@@ -59,7 +59,7 @@ function import($filename, $is_upload=false)
 
   // slashify path
   $path=dirname($filename);
-  $path.=($path[strlen($path)]!='/')?'/':'';
+  $path.=($path[strlen($path)-1]!='/')?'/':'';
   $file=basename($filename);
 
   $spath=mysql_escape_string($path);
@@ -173,6 +173,70 @@ function import($filename, $is_upload=false)
   // Should never reach this
   $log->fatal("Generic error importing '$filename'");
   return -1;
+}
+
+/** Add an file by a filename to the database but don't import it.  
+  @param filename Filename of the image
+  @param is_upload True if the image was uploaded. False if the image is local. Default
+  is false.
+  @return Returns the new image id on success, -1 for failure. */
+function add_file($filename, $is_upload=false)
+{
+  global $db, $log, $user;
+  
+  $log->trace("Add file: $filename (upload: $is_upload)");
+  if (!file_exists($filename))
+  {
+    $log->err("Could not add file. File '$filename' does not exists");
+    return -1;
+  }
+
+  // slashify path
+  $path=dirname($filename);
+  $path.=($path[strlen($path)]!='/')?'/':'';
+  $file=basename($filename);
+
+  @clearstatcache();
+  $size=filesize($filename);
+
+  $spath=mysql_escape_string($path);
+  $sfile=mysql_escape_string($file);
+
+  $sql="SELECT id, bytes".
+       " FROM $db->images".
+       " WHERE path='$spath' AND file='$sfile'";
+  $row=$db->query_row($sql);
+
+  if (empty($row['id']))
+  {
+    $flag=($is_upload)?IMAGE_FLAG_UPLOADED:0;
+    // new entry
+    $sql="INSERT INTO $db->images".
+         " (userid, path, file, bytes, created, flag)".
+         " VALUES (".$user->get_id().", '$spath', '$sfile', $size, NOW(), $flag)";
+    $id=$db->query_insert($sql);
+    if ($id<0)
+    {
+      $log->err("Could not insert file '$filename' to database: $sql");
+      return -1;
+    }
+    $log->debug("Add file '$filename' to database");
+    return $id;
+  }
+  elseif ($row['bytes']!=$size && $row['id']>0)
+  {
+    // update size
+    $sql="UPDATE $db->images".
+         " SET bytes=$size".
+         " WHERE id=".$row['id'];
+    if ($db->query_update($sql)!=1)
+    {
+      $log->err("Update failed of filesize of '$filename': $sql");
+      return -1;
+    }
+    $log->debug("Update filesize of '$filename' from ".$row['bytes']." to $size");
+  }
+  return $row['id'];
 }
 
 /** Import the image data if the file modification time is after the
@@ -328,14 +392,15 @@ function delete()
   if ($user->get_id()!=$this->get_userid() && !$user->is_admin())
     return;
 
-  $log->info("Deleting '".$this->get_filename()."' from database", $this->get_id(), $user->get_id());
-
   $previewer=$this->get_preview_handler();
   if ($previewer!=null)
     $previewer->delete_previews();
 
   if ($this->is_upload())
+  {
+    $log->info("Delete file '".$this->get_filename()."' from the filesystem", $this->get_id());
     @unlink($this->get_filename());
+  }
 
   parent::delete();
 }
@@ -357,14 +422,154 @@ function delete_from_user($userid, $id)
   $userid=$user->get_id();
   $sql="SELECT path,file".
        " FROM $db->images".
-       " WHERE userid=$userid AND flag && ".IMAGE_FLAG_UPLOADED;
+       " WHERE userid=$userid AND flag & ".IMAGE_FLAG_UPLOADED;
   $result=$db->query($sql);
-  if ($result) {
-    while ($row=mysql_fetch_row($result)) {
-      @unlink($row[0].$row[1]);
-    }
+
+  if (!$result) {
+    $log->err('Could not run sql query '.$sql);
+    return;
+  }
+
+  while ($row=mysql_fetch_row($result)) {
+    @unlink($row[0].$row[1]);
   }
   return parent::delete_from_user($userid, $id);
+}
+
+/** Deletes a file or directory. This function calls delete().
+  @param file Filename or directory to delete
+  @see delete
+  @note Access rights are not checked */
+function delete_file($file)
+{
+  global $db, $log, $user;
+
+  if (!file_exists($file))
+  {
+    $log->err("Could not delete file. File '$file' does not exists");
+    return false;
+  }
+
+  $sql="SELECT id".
+       " FROM $db->images".
+       " WHERE 1";
+  // user permissions
+  if (!$user->is_member())
+  {
+    $log->err("Deletion of '$file' denied");
+    return false;
+  }
+  if (!$user->is_admin())
+    $sql.=" AND userid=".$user->get_id();
+
+  if (is_dir($file))
+  {
+    // slashify path
+    $path=$file;
+    $path.=($path[strlen($path)-1]!='/')?'/':'';
+    $spath=mysql_escape_string($path); 
+
+    $sql.=" AND path like '$spath%' AND file='$sfile'"; 
+  }
+  else
+  {
+    // slashify path
+    $path=dirname($file);
+    $path.=($path[strlen($path)-1]!='/')?'/':'';
+    $f=basename($file);
+   
+    $spath=mysql_escape_string($path); 
+    $sf=mysql_escape_string($f); 
+
+    $sql.=" AND path='$spath' AND file='$sf'"; 
+  }
+
+  $col=$db->query_column($sql);
+  if ($col==null)
+  {
+    $log->trace("Could not find file for deletion: $sql");
+    $log->err("Could not delete file. File '$filename' is not handled by phtagr");
+    return false;
+  }
+
+  foreach ($col as $id)
+  {
+    $image=new ImageSync($id);
+    $image->delete();
+  }
+  return true;
+}
+
+function move_file($src, $dst)
+{
+  global $db, $log, $user;
+
+  if ($src==$dst)
+    return true;
+
+  if (!$user->is_member())
+  {
+    $log->err("Move of '$src' to '$dst' denied");
+    return false;
+  }
+  if (!$user->is_admin())
+    $sql_where=" AND userid=".$user->get_id();  
+
+  if (!rename($src, $dst))
+  {
+    $log->err("Could not rename '$src' to '$dst'");
+    return false;
+  }
+
+  $sql_set=array();
+  
+  if (is_dir($src))
+  {
+    $src_path=$src;
+    $src_path.=($src_path[strlen($src_path)-1]!='/')?'/':'';
+    $ssrc_path=mysql_escape_string($src_path);
+
+    $dst_path=$dst;
+    $dst_path.=($dst_path[strlen($dst_path)-1]!='/')?'/':'';
+    $sdst_path=mysql_escape_string($dst_path);
+    
+    array_push($sql_set, "path=REPLACE(path, '$ssrc_path', '$sdst_path')");
+    $sql_where.=" AND path LIKE '$ssrc_path%'";
+  }
+  else
+  {
+    $src_path=dirname($src);
+    $src_path.=($src_path[strlen($src_path)-1]!='/')?'/':'';
+    $ssrc_path=mysql_escape_string($src_path);
+    $ssrc_file=mysql_escape_string(basename($src));
+
+    $dst_path=dirname($dst);
+    $dst_path.=($dst_path[strlen($dst_path)-1]!='/')?'/':'';
+    $sdst_path=mysql_escape_string($dst_path);
+    $sdst_file=mysql_escape_string(basename($dst));
+    
+    if ($ssrc_path!=$sdst_path)
+      array_push($sql_set, "path=REPLACE(path, '$ssrc_path', '$sdst_path')");
+    if ($ssrc_file!=$sdst_file)
+      array_push($sql_set, "file=REPLACE(file, '$ssrc_file', '$sdst_file')");
+
+    $sql_where.=" AND path='$ssrc_path' AND file='$ssrc_file'";
+  }
+
+  $sql="UPDATE $db->images";
+  $sql.=" SET ".implode(", ", $sql_set);
+  $sql.=" WHERE 1".$sql_where;
+
+  $num=$db->query_update($sql);
+  if ($num<0)
+  {
+    $log->err("Could not run update query: ".$sql);
+    return false;
+  }
+  else
+    $log->debug("Moved $num file(s) from '$src' to '$dst'");
+
+  return true;
 }
 
 /** Handle the caption input 

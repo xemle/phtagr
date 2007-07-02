@@ -228,8 +228,8 @@ function print_upload ()
   $qinterval=$user->get_qinterval();
   $quota=$user->get_quota();
   $used=$user->get_image_bytes(true);
-  $upload_max=$user->get_upload_max();
-  printf(_("You have %.3f MB already uploaded. Your total limit is %.3f MB. Currently you are allowed to upload %.3f MB."), $used/(1024*1024), $quota/(1024*1024), $upload_max/(1024*1024));
+  $upload_free=$user->get_upload_free();
+  printf(_("You have %.3f MB already uploaded. Your total limit is %.3f MB. Currently you are allowed to upload %.3f MB."), $used/(1024*1024), $quota/(1024*1024), $upload_free/(1024*1024));
 
   $url=new Url();
   $url->add_param('section', 'myaccount');

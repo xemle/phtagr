@@ -79,7 +79,7 @@ function print_content()
   echo "<p>";
   $this->input_text("locations", "", 30);
   echo _("Type:")."<select name=\"location_type\" size=\"1\">\n";
-  $this->option(_("Any"), LOCATION_UNDEFINED);
+  $this->option(_("Any"), LOCATION_ANY);
   $this->option(_("City"), LOCATION_CITY);
   $this->option(_("Subloction"), LOCATION_SUBLOCATION);
   $this->option(_("State"), LOCATION_STATE);

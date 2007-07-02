@@ -731,7 +731,7 @@ function get_image_count($only_uploads=false, $since=-1)
        " FROM $db->images".
        " WHERE userid=$id";
   if ($only_uploads)
-    $sql.=" AND flag && ".IMAGE_FLAG_UPLOADED;
+    $sql.=" AND flag & ".IMAGE_FLAG_UPLOADED;
   if ($since>0)
     $sql.=" AND created>FROM_UNIXTIME($since)";
 
@@ -759,7 +759,7 @@ function get_image_bytes($only_uploads=false, $since=-1)
        " FROM $db->images".
        " WHERE userid=$id";
   if ($only_uploads)
-    $sql.=" AND flag && ".IMAGE_FLAG_UPLOADED;
+    $sql.=" AND flag & ".IMAGE_FLAG_UPLOADED;
   if ($since>0)
     $sql.=" AND created>FROM_UNIXTIME($since)";
 
@@ -833,7 +833,7 @@ function get_quota_used()
 }
 
 /** @return Returns the maxium bytes, which can be uploaded */
-function get_upload_max()
+function get_upload_free()
 {
   if ($this->get_id()<0)
     return 0;
@@ -863,10 +863,10 @@ function get_upload_max()
   @return False if the upload is promitted. False otherwise */
 function can_upload_size($size=0)
 {
-  if ($size<10)
+  if ($size<0)
   return false;
   
-  $max=$this->get_upload_max();
+  $max=$this->get_upload_free();
   if ($size<=$max)
     return true;
 

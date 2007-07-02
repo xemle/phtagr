@@ -22,7 +22,7 @@
  */
 
 include_once("$phtagr_lib/Search.php");
-include_once("$phtagr_lib/Base.php");
+include_once("$phtagr_lib/SqlObject.php");
 include_once("$phtagr_lib/Constants.php");
 
 include_once("$phtagr_lib/FileJpg.php");
@@ -263,10 +263,8 @@ function get_flag()
 /** @return True if the image was uploaded. Fals otherwise */
 function is_upload()
 {
-  if (($this->get_flag() & IMAGE_FLAG_UPLOAD)>0)
-    return true;
-  else
-    return false;
+  $flag=$this->get_flag() & IMAGE_FLAG_UPLOADED;
+  return $flag>0?true:false;
 }
 
 function set_gacl($gacl)
@@ -699,6 +697,35 @@ function get_tags()
   return $this->_tags;
 }
 
+/** Searches the array of a given value and returns the corresponding key if
+ * successfull. The search is case insensitive and trims the needle.
+  @param needle Needle to search
+  @param haysack Haysack
+  @return Returns the key of the needle or null on if the needle was not found.
+*/
+function _array_isearch($needle, $haysack)
+{
+  if ($haysack===null || !is_array($haysack))
+    return null;
+  $needle=trim(strtolower($needle));
+  foreach ($haysack as $k => $h)
+  {
+    if ($needle==strtolower($h))
+      return $k;
+  }
+  return null;
+}
+
+/** Case insensitive search for a given tag
+  @param tag Search for the tag.
+  @return True if given tag already exists */
+function has_tag($tag)
+{
+  if ($this->_array_isearch($tag, $this->_tags)!==null)
+    return true;
+  return false;
+}
+
 /** @return Returns true if the image has tags */
 function has_tags()
 {
@@ -717,21 +744,18 @@ function add_tags($tags)
   $id=$this->get_id();
   foreach ($tags as $tag)
   {
-    if ($tag=='')
+    if ($tag=='' || $this->has_tag($tag))
       continue;
 
-    if (!in_array($tag, $this->_tags))
-    {
-      $tagid=$db->tag2id($tag, true);
-      if ($tagid<0)
-        continue; 
-      $sql="INSERT INTO $db->imagetag".
-           " (imageid, tagid)".
-           " VALUES ($id, $tagid)";
-      $db->query($sql);
-      array_push($this->_tags, $tag);
-      $this->set_meta_modified('tags');
-    }
+    $tagid=$db->tag2id($tag, true);
+    if ($tagid<0)
+      continue; 
+    $sql="INSERT INTO $db->imagetag".
+         " (imageid, tagid)".
+         " VALUES ($id, $tagid)";
+    $db->query($sql);
+    array_push($this->_tags, $tag);
+    $this->set_meta_modified('tags');
   }
 }
 
@@ -787,6 +811,16 @@ function get_sets()
   return $this->_sets;
 }
 
+/** Case insensitive search for a given set
+  @param set Search for the set.
+  @return True if given set already exists */
+function has_set($set)
+{
+  if ($this->_array_isearch($set, $this->_sets)!==null)
+    return true;
+  return false;
+}
+
 /** @return Returns true if the image has tags */
 function has_sets()
 {
@@ -805,21 +839,18 @@ function add_sets($sets)
   $id=$this->get_id();
   foreach ($sets as $set)
   {
-    if ($set=='')
+    if ($set=='' || $this->has_set($set))
       continue;
 
-    if (!in_array($set, $this->_sets))
-    {
-      $setid=$db->set2id($set, true);
-      if ($setid<0)
-        continue; 
-      $sql="INSERT INTO $db->imageset".
-           " (imageid, setid)".
-           " VALUES ($id, $setid)";
-      $db->query($sql);
-      array_push($this->_sets, $set);
-      $this->set_meta_modified('sets');
-    }
+    $setid=$db->set2id($set, true);
+    if ($setid<0)
+      continue; 
+    $sql="INSERT INTO $db->imageset".
+         " (imageid, setid)".
+         " VALUES ($id, $setid)";
+    $db->query($sql);
+    array_push($this->_sets, $set);
+    $this->set_meta_modified('sets');
   }
 }
 
@@ -857,7 +888,7 @@ function del_sets($sets=null)
 function get_location($type)
 {
   $this->get_locations();
-  if ($type<LOCATION_UNDEFINED || $type > LOCATION_COUNTRY)
+  if ($type<LOCATION_ANY || $type > LOCATION_COUNTRY)
     return false;
 
   return $this->_locations[$type];
@@ -886,6 +917,23 @@ function get_locations()
   return $this->_locations;
 }
 
+/** Case insensitive search for a given location
+  @param location Search for the location.
+  @param type Type of location. Default is LOCATION_ANY and search for
+any location type
+  @return True if given location already exists */
+function has_location($location, $type=LOCATION_ANY)
+{
+  $key=$this->_array_isearch($location, $this->_locations);
+  if ($key===null)
+    return false;
+  if ($type==LOCATION_ANY)
+    return true;
+  if ($key==$type)
+    return true;
+  return false;
+}
+
 /** @return Returns true if the image has tags */
 function has_locations()
 {
@@ -902,7 +950,7 @@ function set_location($value, $type)
   global $db;
   if ($value==null || $value=='')
     return false;
-  if ($type<LOCATION_UNDEFINED || $type > LOCATION_COUNTRY)
+  if ($type<LOCATION_ANY || $type > LOCATION_COUNTRY)
     return false;
 
   $this->get_locations();
@@ -939,7 +987,7 @@ function del_location($value, $type)
 {
   global $db;
   $id=$this->get_id();
-  if ($type<LOCATION_UNDEFINED || $type>LOCATION_COUNTRY)
+  if ($type<LOCATION_ANY || $type>LOCATION_COUNTRY)
     return false;
 
   $this->get_locations();
@@ -999,11 +1047,17 @@ function delete()
 {
   global $db;
   global $user;
+  global $log;
 
   if ($user->get_id()!=$this->get_userid() && !$user->is_admin())
     return false;
 
   $id=$this->get_id();
+  if ($id<=0)
+    return false;
+
+  $log->info("Delete file '".$this->get_filename()."' from the database", $id);
+
   $sql="DELETE FROM $db->imagetag".
        " WHERE imageid=$id";
   $db->query($sql);
@@ -1013,6 +1067,10 @@ function delete()
   $db->query($sql);
   
   $sql="DELETE FROM $db->imagelocation".
+       " WHERE imageid=$id";
+  $db->query($sql);
+
+  $sql="DELETE FROM $db->comments".
        " WHERE imageid=$id";
   $db->query($sql);
 
@@ -1026,50 +1084,61 @@ function delete()
 
 /** Deletes one or all images from a specific user
   @param userid ID of user
-  @param id Image ID, optional. If this parameter is set, only a single image 
-  @return 0 on success. Global error code otherwise */
-function delete_from_user($userid, $id=0)
+  @param imageid Image ID, optional. If this parameter is set, delete only a single image 
+  @return The number of deleted images. -1 otherwise */
+function delete_from_user($userid, $imageid=0)
 {
   global $db;
   global $user;
+  global $log;
 
   if (!is_numeric($userid) || $userid<1)
-    return ERR_PARAM;
+    return -1;
   if ($userid!=$user->get_id() && !$user->is_admin())
-    return ERR_NOT_PERMITTED;
+  {
+    $log->err("User is not permitted to delete all image of user (userid=$userid)");
+    return -1;
+  }
+
+  $msg="Delete images of user (userid=$userid)";
+  if ($imageid>0)
+    $msg.=" and image (imageid=$imageid)";
+  $log->info($msg);
 
   // delete tags
-  $sql="DELETE".
-       " FROM it".
+  $sql="DELETE FROM it".
        " USING $db->imagetag AS it, $db->images AS i".
        " WHERE i.userid=$userid AND i.id=it.imageid";
-  if ($id>0) $sql.=" AND i.id=$id";
+  if ($imageid>0) $sql.=" AND i.id=$imageid";
   $db->query($sql);
 
   // delete sets
-  $sql="DELETE".
-       " FROM iset".
+  $sql="DELETE FROM iset".
        " USING $db->imageset AS iset, $db->images AS i".
        " WHERE i.userid=$userid AND i.id=iset.imageid";
-  if ($id>0) $sql.=" AND i.id=$id";
+  if ($imageid>0) $sql.=" AND i.id=$imageid";
   $db->query($sql);
 
   // delete locations
-  $sql="DELETE".
-       " FROM il".
+  $sql="DELETE FROM il".
        " USING $db->imagelocation AS il, $db->images AS i".
        " WHERE i.userid=$userid AND i.id=il.imageid";
-  if ($id>0) $sql.=" AND i.id=$id";
+  if ($imageid>0) $sql.=" AND i.id=$imageid";
   $db->query($sql);
 
+  // delete comments
+  $sql="DELETE FROM c".
+       " USING $db->comments AS c, $db->images AS i".
+       " WHERE i.userid=$userid AND i.id=c.imageid";
+  if ($imageid>0) $sql.=" AND i.id=$imageid";
+  $db->query($sql);
+ 
   // Delete image data
   $sql="DELETE".
        " FROM $db->images".
        " WHERE userid=$userid";
-  if ($id>0) $sql.=" AND id=$id";
-  $db->query($sql);
-
-  return 0;
+  if ($imageid>0) $sql.=" AND id=$imageid";
+  return $db->query_delete($sql);
 }
 
 }

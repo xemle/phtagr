@@ -314,7 +314,7 @@ function query_insert($sql, $quiet=true)
 
 /** Delete sql statement and return the count of affected rows
   @param sql Delete sql statement
-  @return count of affected rows
+  @return count of affected rows. -1 on error
   @see mysql_affected_rows */
 function query_delete($sql, $quiet=true)
 {
@@ -436,7 +436,7 @@ function id2tag($id)
 function location2id($location, $type, $create=false)
 {
   $slocation=mysql_escape_string($location);
-  if ($type==LOCATION_UNDEFINED && $create==false)
+  if ($type==LOCATION_ANY && $create==false)
     $sql="SELECT id FROM $this->locations WHERE name='$slocation'";
   else
     $sql="SELECT id FROM $this->locations WHERE name='$slocation' AND type=$type";

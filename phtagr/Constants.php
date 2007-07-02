@@ -46,7 +46,7 @@ define("ACL_LEVEL_GROUP",   2);
 define("ACL_LEVEL_MEMBER",  4);
 define("ACL_LEVEL_PUBLIC",  5);
 
-define("LOCATION_UNDEFINED", 0x00);
+define("LOCATION_ANY", 0x00);
 define("LOCATION_CITY", 0x01);
 define("LOCATION_SUBLOCATION", 0x02);
 define("LOCATION_STATE", 0x03);

@@ -290,7 +290,7 @@ function clear_locations()
 
 function set_location_type($location_type)
 {
-  $this->add_iparam('location_type', $location_type, LOCATION_UNDEFINED, LOCATION_UNDEFINED, LOCATION_COUNTRY);
+  $this->add_iparam('location_type', $location_type, LOCATION_ANY, LOCATION_ANY, LOCATION_COUNTRY);
 }
 
 /** Convert input string to unix time. Currently only the format of YYYY-MM-DD
@@ -996,9 +996,9 @@ function _add_sql_where()
   $userid=$this->get_param('user', 0);
   $groupid=$this->get_param('group', -1);
 
-  if ($imageid>0)  $sql .= "AND i.id=".$imageid;
-  if ($userid>0)   $sql .= "AND i.userid=".$userid;
-  if ($groupid>=0) $sql .= "AND i.groupid=".$groupid;
+  if ($imageid>0)  $sql .= " AND i.id=".$imageid;
+  if ($userid>0)   $sql .= " AND i.userid=".$userid;
+  if ($groupid>=0) $sql .= " AND i.groupid=".$groupid;
   
   // handle the acl and visibility level
   $sql.=$this->_add_sql_where_acl();
@@ -1083,7 +1083,7 @@ function get_query($limit=1, $order=true)
   $sql.=" FROM $db->images AS i";
   $sql.=$this->_add_sql_join_meta_inclusion($pos_tags, $pos_sets, $pos_locs);
   // Consider only imported files
-  $sql.=" WHERE i.flag && ".IMAGE_FLAG_IMPORTED;
+  $sql.=" WHERE i.flag & ".IMAGE_FLAG_IMPORTED;
   $sql.=$this->_add_sql_where_meta_exclusion($neg_tags, $neg_sets, $neg_locs);
   $sql.=$this->_add_sql_where();
   $sql.=" GROUP BY i.id";
@@ -1129,7 +1129,7 @@ function get_popular_tags($num=50)
   $sql="SELECT t.name,COUNT(t.name) AS hits".
        " FROM $db->tags AS t, $db->imagetag AS it, $db->images as i".
        " WHERE t.id=it.tagid AND it.imageid=i.id".
-       "   AND i.flag && ".IMAGE_FLAG_IMPORTED.
+       "   AND i.flag & ".IMAGE_FLAG_IMPORTED.
        $this->_add_sql_where_acl().
        " GROUP BY t.name ".
        " ORDER BY hits DESC LIMIT 0,".intval($num);
@@ -1155,7 +1155,7 @@ function get_popular_sets($num=50)
   $sql="SELECT s.name,COUNT(s.name) AS hits". 
        " FROM $db->sets AS s, $db->imageset AS iset, $db->images as i".
        " WHERE s.id=iset.setid and iset.imageid=i.id".
-       "   AND i.flag && ".IMAGE_FLAG_IMPORTED.
+       "   AND i.flag & ".IMAGE_FLAG_IMPORTED.
        $this->_add_sql_where_acl().
        " GROUP BY s.name". 
        " ORDER BY hits DESC LIMIT 0,".intval($num);
