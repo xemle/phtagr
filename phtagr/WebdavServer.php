@@ -27,7 +27,7 @@ var $_base="";
 
 var $_realm="phtagr.org";
 
-var $_put_tmp="";
+var $_put_fspath="";
 
 function WebdavServer()
 {
@@ -44,6 +44,14 @@ function set_base($base)
     return false;
   $this->_base=$this->_unslashify($base);
   return true;
+}
+
+/** Returns the filesystem path to the corresponding request path
+  @param path Request path
+  @return filesystem path */
+function get_fspath($path)
+{
+  return $this->_base.$path;
 }
 
 /** Sets a new realm
@@ -130,6 +138,8 @@ function get_auth_header()
   @return array of authorization parameters. False on missing parameters */
 function _http_digest_parse($auth_hdr)
 {
+  global $log;
+
   // protect against missing data
   $needed_parts=array('nonce'=>1, 'nc'=>1, 'cnonce'=>1, 'qop'=>1, 'username'=>1, 'uri'=>1, 'response'=>1, 'opaque'=>1);
   $data=array();
@@ -140,6 +150,10 @@ function _http_digest_parse($auth_hdr)
     $data[$m[1]]=$m[3];
     unset($needed_parts[$m[1]]);
   }
+
+  if ($needed_parts)
+    $log->debug("Missing authorization part(s): ".implode(", ", array_keys($needed_parts)));
+
   return $needed_parts ? false : $data;
 }
 
@@ -160,8 +174,12 @@ function _check_session($sid, $nc)
     header('HTTP/1.1 401 Unauthorized: Unknown or died session');
     $this->_add_auth_header();
     echo "<h1>Invalid Authorization: Unknwon or died session</h1>";
+    session_write_close();
     die();
   }
+
+  if ($_SESSION['nc']==$nc)
+    $log->warn("Same request counter $nc is used!");
 
   // Check request counter
   if ($_SESSION['nc']>=$nc)
@@ -170,6 +188,7 @@ function _check_session($sid, $nc)
     header('HTTP/1.1 401 Unauthorized: Reused request counter');
     $this->_add_auth_header();
     echo "<h1>Invalid Authorization: Reused request counter</h1>";
+    session_write_close();
     die();
   }
   $_SESSION['nc']=$nc;
@@ -185,7 +204,6 @@ function _add_auth_header()
 
   // Missuse opaque value as session id
   $opaque=session_id();
-
   $_SESSION['login.counter']=$_SESSION['login.counter']+1;
   if ($_SESSION['login.counter']>3)
   {
@@ -208,7 +226,7 @@ function _add_auth_header()
  */
 function check_auth($type, $auser, $apass) 
 {
-  global $user, $log;
+  global $user, $log, $conf;
   $log->trace("check_auth: type=$type, auser=$auser, pass=$apass");
 
   $auth_hdr=$this->get_auth_header();
@@ -222,21 +240,26 @@ function check_auth($type, $auser, $apass)
     header('HTTP/1.1 401 Unauthorized');
     $this->_add_auth_header();
     $log->trace("Authorization required");
+    session_write_close();
     die('401 Unauthorized');
   }
 
   // analyze the authorization credentials
   $data=$this->_http_digest_parse($auth_hdr);
   if (empty($data['username'])) {
-    $log->trace("Authorization failed: Empty username");
+    @session_id(md5(uniqid(rand(), true)));
+    @session_start();
+    $_SESSION['nc']=0;
+    $log->trace("Authorization failed: Authorization values are missing");
     header('HTTP/1.1 401 Unauthorized');
     $this->_add_auth_header();
-    echo "<h1>Invalid Authorization: Username is missing</h1>";
+    echo "<h1>Invalid Authorization: Authorization is missing</h1>";
+    session_write_close();
     die();
   }
-  
+ 
   $this->_check_session($data['opaque'], intval($data['nc'])); 
-    
+
   // Windows client syntax "<domain>\<username>"
   if (preg_match("/^(.*)\\\\(.*)$/", $data['username'], $matches))
   {
@@ -412,7 +435,7 @@ function PROPFIND(&$options, &$files)
   //$log->trace("PROFIND: files=".print_r($files, true));
 
   // get absolute fs path to requested resource
-  $fspath=$this->_slashify($this->_base.$options["path"]);
+  $fspath=$this->get_fspath($options["path"]);
     
   // sanity check
   if (!file_exists($fspath)) {
@@ -470,7 +493,7 @@ function fileinfo($path)
   $log->trace("fileinfo: path=".$path);
 
   // map URI path to filesystem path
-  $fspath=$this->_base.$path;
+  $fspath=$this->get_fspath($path);
   $log->trace("fileinfo: fspath=".$fspath);
 
   // create result array
@@ -642,7 +665,7 @@ function GET(&$options)
   $log->trace("GET: ".$options["path"]);
 
   // get absolute fs path to requested resource
-  $fspath=$this->_base.$options["path"];
+  $fspath=$this->get_fspath($options["path"]);
 
   // sanity check
   if (!file_exists($fspath)) return false;
@@ -765,20 +788,20 @@ function http_PUT()
 {
   global $db, $user, $log;
 
-  $log->trace("http_PUT() before");
-  // this will call PUT()
+  // http_PUT() calls PUT()
   parent::http_PUT();
-  $log->trace("http_PUT() after");
 
   // Update filename on success upload
   $status=substr($this->_http_status, 0, 3);
-  if ($status < 200 || $status>=300)
+  if ($status < 200 || $status>=300) {
+    $log->debug("HTTP status is $status. Return false");
     return false;
+  }
 
-  $fspath=$this->_put_tmp;
+  $fspath=$this->_put_fspath;
   if (!file_exists($fspath))
   {
-    $log->trace("http_PUT could not determine fspath=$fspath");
+    $log->trace("Could not determine fspath=$fspath");
     return false;
   }
  
@@ -805,9 +828,10 @@ function PUT(&$options)
     $log->trace("PUT denyied for guests");
     return "409 Conflict";
   }
-  $fspath=$this->_base.$options["path"];
+  $fspath=$this->get_fspath($options["path"]);
 
   if (!@is_dir(dirname($fspath))) {
+    $log->warn("dir of '$fspath' does not exists");
     return "409 Conflict";
   }
 
@@ -818,7 +842,7 @@ function PUT(&$options)
     return "409 Conflict";
   }
 
-  if (file_exists($fspath))
+  if (file_exists($fspath) && filesize($fspath)>0)
   {
     // @todo Overwriting not supported yet
     $log->err("Overwriting not supported yet");
@@ -830,8 +854,10 @@ function PUT(&$options)
   }
 
   $size=$options['content_length'];
-  if ($size<0)
+  if ($size<0) {
+    $log->warn("Size is negative");
     return "409 Conflict";
+  }
 
   $log->trace("file size=$size");
 
@@ -843,8 +869,10 @@ function PUT(&$options)
   }
 
   // save path
-  $this->_put_tmp=$fspath;
+  $this->_put_fspath=$fspath;
   $fp=fopen($fspath, "w");
+  if ($fp===false)
+    $log->trace("fopen('$fspath', 'w')===false");
 
   return $fp;
 }
@@ -861,7 +889,7 @@ function MKCOL($options)
   global $log;
   $log->trace("MKCOL: ".$options["path"]);
 
-  $fspath=$this->_base.$options["path"];
+  $fspath=$this->get_fspath($options["path"]);
   $parent=dirname($fspath);
   $name=basename($fspath);
 
@@ -936,7 +964,7 @@ function DELETE($options)
     return "409 Conflict";
   }
 
-  $fspath=$this->_base.$options["path"];
+  $fspath=$this->get_fspath($options["path"]);
 
   if (!file_exists($fspath)) {
     $log->debug("DELETE on non existing file '$fspath'");
@@ -1148,7 +1176,7 @@ function LOCK(&$options)
   $spath=mysql_escape_string($options['path']);
 
   // get absolute fs path to requested resource
-  $fspath=$this->_base.$options["path"];
+  $fspath=$this->get_fspath($options["path"]);
 
   // TODO recursive locks on directories not supported yet
   if (is_dir($fspath) && !empty($options["depth"])) {

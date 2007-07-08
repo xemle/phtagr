@@ -50,7 +50,8 @@ $server=new WebdavServer();
 ob_start();
 #$path=$_SERVER['REQUEST_URI'];
 $path=$_SERVER["DOCUMENT_ROOT"] . ereg_replace("webdav.php",".",$_SERVER['SCRIPT_NAME']);
-$log->info("path=$path");
+
+$log->warn($_SERVER['REQUEST_METHOD']." ".$_SERVER['REQUEST_URI']);
 $server->ServeRequest($path);
 while (@ob_end_flush());
 ?>

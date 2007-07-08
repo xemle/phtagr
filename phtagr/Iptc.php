@@ -274,6 +274,15 @@ function get_filename()
   return $this->_jpg['filename'];
 }
 
+/** @return Returns an array of JPEG segments */
+function get_jpeg_segments()
+{
+  if (empty($this->_jpg['_segs']))
+    return null;
+
+  return $this->_jpg['_segs'];
+}
+
 /** Read all segments of an JPEG image until the data segment. Each JPEG
  * segment starts with a marker of an 0xff byte followed by the segemnt type
  * (also one byte). The segment type 0xda indicates the data segment, the real
@@ -308,6 +317,7 @@ function _read_seg_jpg($jpg)
     $size=$this->_byte2short(substr($hdr, 2, 2));
     if ($pos+$size+2>$jpg['size'])
     {
+      $this->_errno=-1;
       $this->_errmsg="Invalid segment size of $size";
       return false;
     }

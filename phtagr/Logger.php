@@ -251,7 +251,7 @@ function _log($level, $msg, $imageid, $userid)
     $sql="INSERT INTO $db->logs".
          " (time, level, imageid, userid, file, line, message)".
          " VALUES (NOW(), $level, $imageid, $userid, '$sfile', $line, '$smsg')";
-    $db->query($sql);
+    $db->query_insert($sql);
   }
 }
 
