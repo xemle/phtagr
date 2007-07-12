@@ -70,12 +70,44 @@ function _check_iptc_error($iptc)
   return false;
 }
 
+/** Executes command for the single image like deleting, cache deleting and
+ * synchronization
+  @param img Current image object
+  @param cmd Command */
+function _exec_command($img, $cmd)
+{
+  global $log;
+  if ($img==null)
+    return;
+  $id=$img->get_id();
+  switch ($cmd)
+  {
+    case 'delete':
+      $log->warn("Delete image", $id);
+      $img->delete();
+      unset($img);
+      break;
+    case 'delete_cache':
+      $handler = $img->get_preview_handler();
+      if ($handler != null) {
+        $log->debug("Delete image previews", $id);
+        $handler->delete_previews();
+      }
+      break;
+    case 'sync':
+      $log->debug("Synchronize image", $id);
+      $img->synchronize();
+      break;
+    default:
+      $log->info("Unknown command '$cmd'", $id);
+      break;
+  }
+}
 
 /** Executes the edits. This function also checks the rights to execute the operation */
 function execute()
 {
-  global $db;
-  global $user;
+  global $db, $user, $log;
 
   if (!isset($_REQUEST['images']) && !isset($_REQUEST['image']))
     return;
@@ -96,22 +128,17 @@ function execute()
     $img=new ImageSync($id);
     if ($img->get_id()!=$id)
     {
+      $log->debug("Could not find image with id $id");
       unset($img);
       continue;
     }
       
-    if (isset($_REQUEST['command']))
+    $cmd=$_REQUEST['command'];
+    if ($cmd!='' && $img->is_owner(&$user)) 
     {
-      $cmd=$_REQUEST['command'];
-      if ($cmd=='remove')
-      {
-        if ($img->is_owner(&$user))
-        {
-          $img->delete();
-          unset($img);
-          continue;
-        }
-      }
+      $this->_exec_command($img, $cmd);
+      if ($cmd=='delete')
+        continue;
     }
 
     /* Accept only votes of unvoted images for this session. The votes needs
@@ -212,8 +239,11 @@ function print_bar()
   echo "</select></li>
   <li>"._("Action:")." <select size=\"1\" name=\"command\">\n";
     $this->option(_("Nothing"), "none");
-    if ($user->is_member())
-      $this->option(_("Delete"), "remove");
+    if ($user->is_member()) {
+      $this->option(_("Synchronize"), "sync");
+      $this->option(_("Delete Cache"), "delete_cache");
+      $this->option(_("Delete"), "delete");
+    }
   echo "  </select></li>
   <li><input type=\"checkbox\" id=\"selectall\" onclick=\"checkbox('selectall', 'images[]')\"/>"._("Select all images")."</li>
 </ul>

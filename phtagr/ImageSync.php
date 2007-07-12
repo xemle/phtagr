@@ -306,6 +306,13 @@ function _export($force=false)
   return true;
 }
 
+/** Synchronize the single image and call import and export */
+function synchronize()
+{
+  $this->_import();
+  $this->_export();
+}
+
 /** Synchronize files between the database and the filesystem. If a file not
  * exists delete its data. If a file is newer since the last update, update its
  * data. 

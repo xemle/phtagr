@@ -245,7 +245,7 @@ if (isset($_REQUEST['section']))
       }
       $cnt->add_section(&$browser);
     } else {
-      $login = new SectionLogin();
+      $login = new SectionAccount();
       $login->section=$section;
       $login->message=_("You are not loged in!");
       $cnt->add_section(&$login);

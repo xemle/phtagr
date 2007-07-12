@@ -111,6 +111,11 @@ ul {
   margin: 0px 0px 0px 14px;
 }
 
+dir {
+  margin: 5px 0px 10px 5px;
+  list-style: none;
+}
+
 input, select, submit, reset, textarea {
   text-decoration: none;
   font-size: 8pt;

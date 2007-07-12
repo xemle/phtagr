@@ -47,42 +47,30 @@ function reset_roots()
   $this->_fs->reset_roots();
 }
 
-function print_paths($dir)
+function print_paths($path)
 {
   $fs=$this->_fs;
   $url=new Url();
   $url->add_param('section', 'browser');
+  $url->add_param('cd', '/');
 
   echo "<div class=\"path\">"._("Current path:")."&nbsp;".
     "<a href=\"".$url->get_url()."\">"._("Root")."</a>";
 
-  $path='';
-  if ($dir!='')
+  while ($path[0] == '/')
+    $path = substr($path, 1);
+
+  if ($path != "") 
   {
-    if (DIRECTORY_SEPARATOR!='\\')
+    $paths=explode('/', trim($path));
+    $cur = array();
+    foreach ($paths as $path)
     {
-      $parts=split(DIRECTORY_SEPARATOR, $dir);
-    } else {
-      $dir=str_replace(DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR, $dir);
-      $parts=split(DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR, $dir);
-    }
-    foreach ($parts as $part)
-    {
-      if ($part=='' || $path=='/') continue;
-  
-      if ($path!='')
-        $path.=DIRECTORY_SEPARATOR.$part;
-      else 
-      {
-        if ($fs->get_num_roots()<2)
-          $path=DIRECTORY_SEPARATOR.$part;
-        else
-          $path=$part;
-      }
+      array_push($cur, $path);
       echo "&nbsp;/&nbsp;";
       
-      $url->add_param('cd', $path);
-      echo "<a href=\"".$url->get_url()."\">".$this->escape_html($part)."</a>\n";
+      $url->add_param('cd', '/'.implode('/', $cur));
+      echo "<a href=\"".$url->get_url()."\">".$this->escape_html($path)."</a>\n";
     }
   }
   echo "&nbsp;/&nbsp;</div>";
@@ -90,53 +78,62 @@ function print_paths($dir)
 }
 
 /** Prints the subdirctories as list with checkboxes */
-function print_browser($dir)
+function print_browser($path)
 {
+  global $log;
+  $log->trace("Current path: ".$path);
+
   $fs=$this->_fs;
+
+  $this->print_paths($path);
+
   $url=new Url();
-  $url->add_param('section', 'browser');
-
-  $this->print_paths($dir);
-
-  echo "<form action=\"./index.php\" method=\"post\">\n<p>\n";
-  echo $url->get_form();
-
-  $cur=$dir;
+  $url->add_param("section", "browser");
+  echo "<form action=\"".$url->get_url()."\" method=\"post\">\n<p>\n";
+  $cur=$path;
   if ($cur=='')
-    $cur=DIRECTORY_SEPARATOR;
-  echo "<input type=\"checkbox\" name=\"add[]\" value=\"".$this->escape_html($cur)."\" />&nbsp;. (this dir)<br />\n";
+    $cur='/';
 
-  $alias=$dir; // alias changes, if only one root is set
-  if ($fs->is_dir($dir))
-  {
-    $subdirs=$fs->get_subdirs($dir);
-  } else {
+  $this->input_hidden("cd", $cur);
+
+  echo "<dir>\n";
+  echo "<li>";
+  $this->input_checkbox("add[]", $cur);
+  echo "&nbsp;"._("Current directory");
+  echo "</li>\n";
+
+  if (strlen($path) > 0 && $path != '/')
+    $subdirs=$fs->get_subdirs($path);
+  else
     $subdirs=$fs->get_roots();
-    // OK, just one root is set. Hide alias name
-    if (count($subdirs)==1) 
+
+  if (count($subdirs) == 0)
+  {
+    $log->info("No sub directories found for $path");
+  }
+  else
+  {
+    $path = $fs->slashify($path);
+    foreach($subdirs as $sub) 
     {
-      $dir=$subdirs[0];
-      $subdirs=$fs->get_subdirs($dir);
-      $alias='';
+      $cd=$path.$sub;
+
+      $url->add_param('cd', $cd);
+      $href=$url->get_url();
+      echo "<li>";
+      $this->input_checkbox("add[]", $cd);
+      echo "&nbsp;<a href=\"$href\">$sub</a>";
+      echo "</li>\n";
     }
   }
-
-  foreach($subdirs as $sub) 
-  {
-    if ($dir!='')
-      $cd=$alias.DIRECTORY_SEPARATOR.$sub;
-    else 
-      $cd=$sub;
-
-    $url->add_param('cd', $cd);
-    $href=$url->get_url();
-    echo "<input type=\"checkbox\" name=\"add[]\" value=\"".$this->escape_html($cd)."\" />&nbsp;<a href=\"$href\">$sub</a><br />\n";
-  }
   echo "<br/>\n";
-  echo "<input type=\"checkbox\" name=\"create_all_previews\"/>&nbsp;"._("Create all previews.")."<br />\n";
-  echo "<input type=\"checkbox\" name=\"insert_recursive\" checked=\"checked\" />&nbsp;"._("Insert images also from subdirectories.")."<br />\n";
-  echo "<input type=\"submit\" class=\"submit\" value=\""._("Add images")."\" />&nbsp;";
-  echo "<input type=\"reset\" class=\"reset\" value=\""._("Clear")."\" />";
+  $this->input_checkbox("create_all_previews", 1);
+  echo "&nbsp;"._("Create all previews.")."<br />\n";
+  $this->input_checkbox("insert_recursive", 1, true);
+  echo "&nbsp;"._("Insert images also from subdirectories.")."<br />\n";
+
+  $this->input_submit(_("Add images"));
+  $this->input_reset(_("Clear"));
   
   echo "\n</p>\n</form>\n";
 }
@@ -153,46 +150,43 @@ function print_content()
     if (isset($_REQUEST['insert_recursive']))
       $recursive=true;
 
-    foreach ($_REQUEST['add'] as $d)
-    {
-      if ($fs->is_windows())
-        $d=str_replace(DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR, $d);
-      $images=array_merge($images, $fs->find_images($d, $recursive));
-    }
+    foreach ($_REQUEST['add'] as $path)
+      $images=array_merge($images, $fs->find_images($path, $recursive));
 
     if (count($images))
       asort($images);
 
-    printf (_("Found %d images")."<br/>\n", count($images));
+    $this->info(sprintf(_("Found %d images"), count($images)));
     foreach ($images as $img)
     {
       $image=new ImageSync();
-      $result=$image->import($fs->get_realname($img), 0);
+      $result=$image->import($fs->get_fspath($img), 0);
 
       switch ($result)
       {
-      case 0:
-        printf(_("Image '%s' was successfully inserted.")."<br/>\n", $img);
-        break;
-      case 1:
-        printf(_("Image '%s' was updated.")."<br/>\n", $img);
-        break;
-      case 2:
-        printf(_("Image '%s' is already the database.")."<br/>\n", $img);
-        break;
-      default:
-        printf(_("A error occured with file '%s'.")."<br/>\n", $img);
+        case 0:
+          printf(_("Image '%s' was successfully inserted.")."<br/>\n", $img);
+          break;
+        case 1:
+          printf(_("Image '%s' was updated.")."<br/>\n", $img);
+          break;
+        case 2:
+          printf(_("Image '%s' is already the database.")."<br/>\n", $img);
+          break;
+        default:
+          printf(_("A error occured with file '%s'.")."<br/>\n", $img);
       }
 
       unset($image);
     }
+
     if ($_REQUEST['create_all_previews'])
     {
-      echo _("Now creating the previews. This can take a while...")."<br/>";
+      $this->info(_("Now creating the previews. This can take a while..."));
       foreach ($images as $img)
       {
         $image=new Image();
-        $image->init_by_filename($fs->get_realname($img));
+        $image->init_by_filename($fs->get_fspath($img));
         $previewer=$image->get_preview_handler();
         if ($previewer)
         {
@@ -212,7 +206,7 @@ function print_content()
   {
     $this->print_browser($_REQUEST['cd']);
   } else {
-    $this->print_browser('');
+    $this->print_browser('/');
   }
 }
 
