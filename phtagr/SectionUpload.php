@@ -259,7 +259,7 @@ function upload_process()
   # At first we must ensure, that the directories exist:
   if (!file_exists($path))
   {
-    if (!mkdir ($path))
+    if (!mkdir ($path, 0775, true))
     {
       $this->warning("Couldn't create directory $path!");
       return false;
@@ -284,7 +284,7 @@ function upload_process()
 
       if (preg_match("/\.zip$/i", $upload_name))
       {
-        mkdir ($upload_name);
+        mkdir ($upload_name, 0775, true);
         if (!move_uploaded_file($tmp_name, $upload_name ."/images.zip"))
           continue;
         $this->zipfile_process($path, $upload_name);

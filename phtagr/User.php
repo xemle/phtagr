@@ -240,7 +240,7 @@ function passwd($oldpasswd, $passwd)
   if (!$result)
     return ERR_DB_UPDATE;
 
-  $log->info("Changing password by '".$user->get_name()."' (".$user->get_id().")", -1, $this->get_id());
+  $log->info("Changing password by '".$user->get_name()."' (".$user->get_id().")");
   return 0;
 }
 
@@ -524,7 +524,7 @@ function create($name, $pwd, $type=USER_MEMBER)
   if ($err<0)
     return $err;
 
-  $log->info("Create user '$name' ($id)", -1, $user->get_id());
+  $log->info("Create user '$name' ($id)");
   return $id;
 }
 
@@ -544,7 +544,7 @@ function create_guest($name, $pwd)
   $guest->commit();
   unset($guest);
 
-  $log->info("Create guest '$name' ($id)", -1, $user->get_id());
+  $log->info("Create guest '$name' ($id)");
   return $id;
 }
 
@@ -558,14 +558,6 @@ function _init_data()
   $id=$this->get_id();
   if ($id<=0)
     return ERR_GERNERAL;
-
-  $upload=$this->get_upload_dir();
-  if (!$upload)
-  {
-    $fs=new Filesystem();
-    if (!$fs->mkdir($upload))
-    return ERR_FS_GENERAL;
-  }
 }
 
 /** @return the default ACL for the group */
@@ -901,7 +893,7 @@ function init_session()
   // initiating the session
   if (!isset($_SESSION['created']))
   {
-    $log->warn("Create new session", -1, $this->get_id());
+    $log->warn("Create new session");
     $_SESSION['created']=time();
     $_SESSION['img_viewed']=array();
     $_SESSION['img_voted']=array();
@@ -993,7 +985,7 @@ function _delete_session()
   foreach ($_SESSION as $key => $value)
     unset($_SESSION[$key]);
 
-  $log->warn("Delete session", -1, $this->get_id());
+  $log->warn("Delete session");
   $this->init_session();
 }
 
@@ -1129,7 +1121,7 @@ function delete()
 {
   global $user, $log;
 
-  $log->info("Delete user '".$this->get_name()."' by '".$user->get_name()."' (".$user->get_id().")", -1, $this->get_id());
+  $log->info("Delete user '".$this->get_name()."' by '".$user->get_name()."' (".$user->get_id().")");
 
   $permit=false;
 

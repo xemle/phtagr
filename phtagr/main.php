@@ -53,6 +53,7 @@ include_once("$phtagr_lib/SectionUpload.php");
 include_once("$phtagr_lib/SectionInstall.php");
 include_once("$phtagr_lib/SectionAdmin.php");
 include_once("$phtagr_lib/SectionMyAccount.php");
+include_once("$phtagr_lib/SectionUnconfigured.php");
 
 $db = new Database();
 
@@ -119,6 +120,7 @@ if ($section=="install")
 {
   $log->set_type(LOG_FILE, getcwd().DIRECTORY_SEPARATOR.'phtagr.log');
   $log->set_level(LOG_DEBUG);
+  $log->enable();
   $install = new SectionInstall();
   $cnt->add_section(&$install);
   $page->layout();
@@ -129,17 +131,9 @@ if ($section=="install")
 // Error
 if (!$db->is_connected() && $section!="install")
 {
-  $msg = new SectionBase();
-  $cnt->add_section(&$msg);
+  $sec = new SectionUnconfigured();
+  $cnt->add_section(&$sec);
     
-  $conf=new Config(0);
-  $msg->h(_("No Installation found"));
-  $link=sprintf("<a href=\"./index.php?section=install\">%s</a>",
-    _("this link"));
-  $text=sprintf(_("It looks as if phtagr is not completely configured. ".
-    "Please follow %s to install phtagr."), $link);
-  $msg->p($text);
-  
   $page->layout();
   $log->disable();
   return;

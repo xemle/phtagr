@@ -205,7 +205,7 @@ function _log($level, $msg, $imageid, $userid)
   $depth=1;
 
   $file=$bt[$depth]['file'];
-  $file=substr($file, strrpos($file, '/')+1);
+  $file=substr($file, strrpos($file, DIRECTORY_SEPARATOR)+1);
   if (isset($bt[$depth+1]['class']))
     $file.="@".$bt[$depth+1]['class'];
   if (isset($bt[$depth+1]['function']))

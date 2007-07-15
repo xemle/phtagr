@@ -98,11 +98,9 @@ function connect($config='')
     $config=getcwd().DIRECTORY_SEPARATOR."config.php";
 
   if (!file_exists($config) || !is_readable($config))
-  {
-    $this->error(_("Could not find the configuration file config.php. Please install phTagr properly"));
     return false;
-  }
  
+  $db_prefix="";
   include "$config";
 
   if (!function_exists('mysql_connect'))
@@ -121,6 +119,8 @@ function connect($config='')
   if (!mysql_select_db($db_database, $this->_link))
     return false;
 
+  $this->set_table_prefix($db_prefix);
+  
   $this->query("SET NAMES 'utf8'");
   $this->query("SET CHARACTER SET 'utf8'");
   return true;
@@ -737,8 +737,8 @@ function create_tables()
 function init_tables()
 {
   $sql="INSERT INTO $this->configs (userid, name, value)".
-       " VALUES ('0', 'db.version', '".DB_VERSION."')";
-  $this->query($sql);
+       " VALUES (0, 'db.version', '".DB_VERSION."')";
+  $this->query_insert($sql);
 }
 
 /** Deletes all tabels used by the phtagr instance */

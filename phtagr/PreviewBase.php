@@ -55,8 +55,7 @@ function get_cache_path()
   $path.=sprintf("%04d", $page).DIRECTORY_SEPARATOR;
 
   if (!file_exists($path) || !is_dir($path)) {
-    $fs=new Filesystem();
-    $fs->mkdir($path, true);
+    mkdir($path, 0775, true);
   }
   return $path;
 }
