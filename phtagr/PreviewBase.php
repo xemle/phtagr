@@ -407,7 +407,7 @@ function create_all_previews($userid=-1)
 
 /** Delete all user data 
   @param userid ID of the specific user
-  @param id Image ID, if only one image should be delted. 
+  @param id Image ID, if only one image should be deleted. 
   @return 0 on success, global error code otherwise 
   @note This function does not check the user's authorization */
 function delete_from_user($userid, $id=0)

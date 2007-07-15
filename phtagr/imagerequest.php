@@ -32,7 +32,7 @@ include_once("$phtagr_lib/User.php");
 include_once("$phtagr_lib/Database.php");
 include_once("$phtagr_lib/Config.php");
 include_once("$phtagr_lib/Logger.php");
-include_once("$phtagr_lib/Image.php");
+include_once("$phtagr_lib/ImageSync.php");
 
 
 function unauthorized()
@@ -111,7 +111,7 @@ if ($conf->get('log.enabled', 0)==1)
 $user=new User();
 $user->check_session(false);
 
-$img=new Image($_REQUEST['id']);
+$img=new ImageSync($id);
 if (!$img)
 {
   internal_error();
@@ -158,7 +158,10 @@ switch ($type)
     break;
   case 'original':
     if ($img->can_read_original(&$user))
+    {
+      $img->synchronize();
       $fn=$previewer->get_filename();
+    }
     else
       unauthorized();
     break;

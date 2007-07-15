@@ -220,15 +220,17 @@ function tables_exist()
 }
 
 /** Sql query an return the result. 
- @result On failure print an error and return NULL
+  @param sql Sql statement
+  @param log_error If true, log the sql query as error. Default is false
+  @result On failure print an error and return NULL
  * */
-function query($sql, $quiet=true)
+function query($sql, $log_error=false)
 {
   global $log;
   if (!$this->_link) return null;
   
   $result=@mysql_query($sql, $this->_link);
-  if (!$result && !$quiet)
+  if (!$result && !$log_error)
   {
     $log->err("Could not run Query: '$sql'");
     return NULL;
@@ -239,10 +241,11 @@ function query($sql, $quiet=true)
 
 /** Query a single value or cell 
   @param sql SQL query
+  @param log_error If true, log the sql query as error. Default is false
   @return Single value. Null if the query could not proceed */
-function query_cell($sql, $quiet=true)
+function query_cell($sql, $log_error=false)
 {
-  $result=$this->query($sql, $quiet);
+  $result=$this->query($sql, $log_error);
   if ($result===false)
     return null;
 
@@ -251,12 +254,13 @@ function query_cell($sql, $quiet=true)
   return $row[0];
 }
 
-/** 
+/** Queries a row and returns it as associative array
   @param sql SQL statement
-  @return Returns an row of associative array */
-function query_row($sql, $quiet=true)
+  @param log_error If true, log the sql query as error. Default is false
+  @return Returns an row of associative array. */
+function query_row($sql, $log_error=false)
 {
-  $result=$this->query($sql, $quiet);
+  $result=$this->query($sql, $log_error);
   if ($result===false)
     return array();
 
@@ -265,29 +269,31 @@ function query_row($sql, $quiet=true)
   return $row;
 }
 
-/** 
+/** Queries a column and returns it as array
   @param sql SQL statement
+  @param log_error If true, log the sql query as error. Default is false
   @return Returns a column of the query */
-function query_column($sql, $quiet=true)
+function query_column($sql, $log_error=false)
 {
-  $result=$this->query($sql, $quiet);
+  $result=$this->query($sql, $log_error);
   if ($result===false)
     return array();
 
-  $col=array();
+  $column=array();
   while ($row=mysql_fetch_array($result))
-    array_push($col, $row[0]);
+    array_push($column, $row[0]);
 
   mysql_free_result($result);
-  return $col;
+  return $column;
 }
 
-/** 
+/** Queries a table and returns an list of associative rows
   @param sql SQL statement
+  @param log_error If true, log the sql query as error. Default is false
   @return Returns a array of associative row arrays */
-function query_table($sql, $quiet=true)
+function query_table($sql, $log_error=false)
 {
-  $result=$this->query($sql, $quiet);
+  $result=$this->query($sql, $log_error);
   if ($result===false)
     return array();
 
@@ -297,16 +303,16 @@ function query_table($sql, $quiet=true)
 
   mysql_free_result($result);
   return $table;
-
 }
 
 /** Insert sql statement and return the auto generated id
   @param sql Insert sql statement
+  @param log_error If true, log the sql query as error. Default is false
   @return last autoincrement id
   @see mysql_insert_id */
-function query_insert($sql, $quiet=true)
+function query_insert($sql, $log_error=false)
 {
-  $result=$this->query($sql, $quiet);
+  $result=$this->query($sql, $log_error);
   if ($result===false)
     return -1;
   return mysql_insert_id($this->_link);
@@ -314,11 +320,12 @@ function query_insert($sql, $quiet=true)
 
 /** Delete sql statement and return the count of affected rows
   @param sql Delete sql statement
+  @param log_error If true, log the sql query as error. Default is false
   @return count of affected rows. -1 on error
   @see mysql_affected_rows */
-function query_delete($sql, $quiet=true)
+function query_delete($sql, $log_error=false)
 {
-  $result=$this->query($sql, $quiet);
+  $result=$this->query($sql, $log_error);
   if ($result===false)
     return -1;
   return mysql_affected_rows($this->_link);
@@ -326,11 +333,12 @@ function query_delete($sql, $quiet=true)
 
 /** Update sql statement and return the count of affected rows
   @param sql Delete sql statement
+  @param log_error If true, log the sql query as error. Default is false
   @return count of affected rows
   @see mysql_affected_rows */
-function query_update($sql, $quiet=true)
+function query_update($sql, $log_error=false)
 {
-  return $this->query_delete($sql, $quiet);
+  return $this->query_delete($sql, $log_error);
 }
 
 

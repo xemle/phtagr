@@ -43,6 +43,7 @@ function SectionAdmin()
   @param u User object */
 function print_user_details($u=null) 
 {
+  global $log;
   if ($u==null)
     return;
   $c=new Config($u->get_id());
@@ -79,9 +80,9 @@ function print_user_details($u=null)
 
   $this->h3(_("Quota"));
 
-  echo "<p>"._("You can set the quoata limit for uploads of the user. Quota is
+  $this->p(_("You can set the quoata limit for uploads of the user. Quota is
 the absolut limit. Quota Slice is the size which can be uploaded by the user
-within the time of Quota Interval")."</p>\n";
+within the time of Quota Interval"));
 
   echo "<fieldset><ol>";
 
@@ -103,10 +104,23 @@ within the time of Quota Interval")."</p>\n";
   echo "</ol></fieldset>\n";
 
   
+  $this->h3(_("Webdav"));
+  $this->p(_("Allow the webdav access to the user"));
+  echo "<fieldset><ol>";
+
+  echo "<li>";
+  $this->label(_("Enable Webdav:"));
+  $log->info($c->get('webdav.enabled'));
+  $this->input_checkbox('enable_webdav', 1, ($c->get('webdav.enabled', 0)==1));
+  echo "</li>\n";
+
+  echo "</ol></fieldset>\n";
+
   $this->h3(_("Filesystem"));
 
-  echo "<p>"._("Here you can specify the browsable paths for a user. The user
-can import files from these direcories.")."</p>\n";
+  $this->p(_("Here you can specify system directories for a user which are
+browsable for this user. The user can import files from these system
+direcories."));
 
   echo "<table>\n";
   $roots=$c->get('path.fsroot[]', null);
@@ -140,7 +154,7 @@ can import files from these direcories.")."</p>\n";
 
 function exec_users()
 {
-  global $user;
+  global $user, $log;
 
   if (!isset($_REQUEST['action']) ||!isset($_REQUEST['id']))
     return false;
@@ -158,9 +172,9 @@ function exec_users()
       $this->error(_("User does not exists"));
       return;
     }
-    if ($id==1)
+    if ($user->get_num_users(false)==1)
     {
-      $this->error(_("The deletion of the admin is not allowed"));
+      $this->error(_("The deletion of the last user is not allowed"));
       return;
     }
     if ($user->get_id()!=$id)
@@ -169,13 +183,21 @@ function exec_users()
       $u=$user;
     $name=$u->get_name();
     $err=$u->delete();
-    if ($err==0)
-      $this->success(sprintf(_("The user '%s' was successfully deleted"), $name));
-    else
-      $this->error(sprintf(_("The user '%s' could not deleted. An error occured (%d)"), $name, $err));
+    switch ($err)
+    {
+      case 0:
+        $this->success(sprintf(_("The user '%s' was successfully deleted"), $name));
+        break;
+      case ERR_NOT_PERMITTED:
+        $this->warning("You are not allowed to delete an user!");
+        break;
+      default:
+        $this->error(sprintf(_("The user '%s' could not deleted. An error occured (%d)"), $name, $err));
+    }
   }
   else if ($action=="edit")
   {
+    $log->info("Edit user $id");
     $u=new User($id);
     $c=new Config($id);
 
@@ -196,6 +218,14 @@ function exec_users()
     if (isset($_REQUEST['qinterval']))
       $u->set_qinterval($_REQUEST['qinterval']*86400);
 
+    // Webdav
+    if (isset($_REQUEST['enable_webdav']))
+    {
+      if ($_REQUEST['enable_webdav']==1)
+        $c->set('webdav.enabled', 1);
+      else
+        $c->set('webdav.enabled', 0);
+    }
     // Filesystem roots
     if (isset($_REQUEST['add_root'])&& $_REQUEST['add_root']!='')
     {
@@ -298,13 +328,37 @@ function exec_create_user()
       return;
     }
     $err=$user->create($name, $password, USER_MEMBER);
-    if ($err<0)
+    if ($err>0)
     {
-      $this->error(sprintf(_("User '%s' could not be created. Error %d occur"), $name, $err));
-    } else {
       $this->success(sprintf(_("User '%s' created"), $name));
     }
-
+    else
+    {
+      switch($err)
+      {
+        case ERR_NOT_PERMITTED:
+          $this->warning(_("You are not permitted to create an user"));
+          break;
+        case ERR_USER_NAME_LEN:
+          $this->error(_("The username must have at least 4 character and maximum of 32 character"));
+          break;
+        case ERR_USER_NAME_INVALID:
+          $this->error(_("The username has invalid character"));
+          break;
+        case ERR_USER_ALREADY_EXISTS:
+          $this->error(_("The username already exists"));
+          break;
+        case ERR_USER_PWD_LEN:
+          $this->error(_("The password is to short or to long"));
+          break;
+        case ERR_USER_PWD_INVALID:
+          $this->error(_("The password is invalid"));
+          break;
+        default:
+          $this->error(sprintf(_("User '%s' could not be created. Error %d occur"), $name, $err));
+      }
+    }
+  
     return;
   } 
 }

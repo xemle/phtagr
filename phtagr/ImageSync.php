@@ -412,8 +412,10 @@ function delete()
   parent::delete();
 }
 
-/** Delets all uploaded files */
-function delete_from_user($userid, $id)
+/** Delets all uploaded files 
+  @param userid User id
+  @param id Optional image id */
+function delete_from_user($userid, $id=0)
 {
   global $user;
   global $db;
@@ -430,6 +432,8 @@ function delete_from_user($userid, $id)
   $sql="SELECT path,file".
        " FROM $db->images".
        " WHERE userid=$userid AND flag & ".IMAGE_FLAG_UPLOADED;
+  if ($id>0) $sql.=" AND id=$id";
+
   $result=$db->query($sql);
 
   if (!$result) {

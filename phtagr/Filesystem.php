@@ -44,8 +44,6 @@ function Filesystem()
   {
     $this->_is_windows=true;
   }
-
-  $this->_init_roots();
 }
 
 /** Returns the count of the filesystem paths */
@@ -106,16 +104,16 @@ function remove_root($alias)
 }
 
 /** Delte all root aliases */
-function reset_roots()
+function clear_roots()
 {
   $this->_roots=array();
 }
 
-/** Initiate the root aliases. On Unix like systems it adds the system rooot.
- * On Windows system, it adds the drives as aliases. */
-function _init_roots()
+/** Add the root aliases for the filesystem. On Unix like systems it adds the
+ * system rooot.  On Windows system, it adds the drives as aliases. */
+function add_system_roots()
 {
-  $this->reset_roots();
+  $this->clear_roots();
   if ($this->_is_windows)
   {
     $drives=$this->_get_windows_drives();
@@ -123,19 +121,6 @@ function _init_roots()
       $this->add_root($drive, $drive);
   } else {
     $this->add_root('/', _("Filesystem"));
-  }
-}
-
-/** Initialize the roots from user's configuration */
-function _init_roots_by_conf()
-{
-  global $conf;
-  $this->reset_roots();
-  $roots=$conf->get('path.fsroot[]');
-  if (!$roots)
-  {
-    foreach ($roots as $root)
-      $this->add_root($root);
   }
 }
 
@@ -159,12 +144,12 @@ function _get_windows_drives()
   return $drives;
 }
 
-function _path_to_unix($win_path)
+static function path_to_unix($win_path)
 {
   return implode('/', explode('\\', $win_path));
 }
 
-function _path_to_windows($unix_path)
+static function path_to_windows($unix_path)
 {
   return implode('\\', explode('/', $unix_path));
 }

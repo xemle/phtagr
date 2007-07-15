@@ -35,16 +35,29 @@ function SectionBrowser()
 {
   $this->SectionBase("browser");
   $this->_fs=new Filesystem();
+  $this->_init_roots();
 }
 
-function add_root($root, $alias)
+function _init_roots()
 {
-  $this->_fs->add_root($root, $alias);
-}
+  global $user, $conf;
 
-function reset_roots()
-{
-  $this->_fs->reset_roots();
+  $fs=$this->_fs;
+  if ($fs->clear_roots());
+
+  if ($conf->get('webdav.enabled', 0)==1)
+  {
+    $upload_dir=$user->get_upload_dir();
+    $fs->add_root($user->get_upload_dir(), _("upload"));
+  }
+
+  // Set roots of users filesystem
+  $roots=$conf->get('path.fsroot[]');
+  if (count($roots)>0)
+  {
+    foreach ($roots as $root)
+      $fs->add_root($root, '');
+  }
 }
 
 function print_paths($path)
@@ -142,7 +155,9 @@ function print_content()
 {
   global $user; 
   $fs=$this->_fs;
-  echo "<h2>"._("Browser")."</h2>\n";
+
+  $this->h2(_("Browser"));
+
   if (isset($_REQUEST['add'])) {
     $images=array();
 

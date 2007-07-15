@@ -228,15 +228,6 @@ if (isset($_REQUEST['section']))
   {
     if ($user->can_browse()) {
       $browser = new SectionBrowser();
-      // Set roots of users filesystem
-      $roots=$conf->get('path.fsroot[]');
-      if (!$user->is_admin())
-        $browser->reset_roots();
-      if (count($roots)>0)
-      {
-        foreach ($roots as $root)
-          $browser->add_root($root, '');
-      }
       $cnt->add_section(&$browser);
     } else {
       $login = new SectionAccount();

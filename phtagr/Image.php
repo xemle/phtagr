@@ -79,11 +79,8 @@ function _split_filename($filename)
   return array($this->_slashify(dirname($filename)), basename($filename));
 }
 
-/** Initialize the values from the database into the object 
-  @param filename Filename from a specific image
-  @return True on success. False on failure
-*/
-function init_by_filename($filename)
+/** @return The id by the filename or false */
+function get_id_by_filename($filename)
 {
   global $db;
   
@@ -95,15 +92,29 @@ function init_by_filename($filename)
   $spath=mysql_escape_string($path);
   $sfile=mysql_escape_string($file);
 
-  $sql="SELECT *". 
+  $sql="SELECT id". 
        " FROM $db->images".
        " WHERE path='$spath' AND file='$sfile'";
-  $result=$db->query($sql);
-  if (!$result || mysql_num_rows($result)==0)
+  $id=$db->query_cell($sql);
+  if ($id===null)
     return false;
-    
-  unset($this->_data);
-  $this->_data=mysql_fetch_array($result, MYSQL_ASSOC);
+  return $id;
+}
+
+/** Initialize the values from the database into the object 
+  @param filename Filename from a specific image
+  @return True on success. False on failure
+*/
+function init_by_filename($filename)
+{
+  global $db;
+  
+  $id=$this->get_id_by_filename($filename);
+  
+  if ($id===false)
+    return false;
+
+  $this->init_by_id($id); 
   return true;
 }
 

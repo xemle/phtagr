@@ -199,7 +199,7 @@ function match_passwd($passwd)
   if (strlen($passwd)==0)
     return false;
 
-  $cur_passwd=$this->_get_password();
+  $cur_passwd=$this->get_password();
   if ($passwd!=$cur_passwd)
     return false;
   return true;
@@ -414,22 +414,6 @@ function _check_password($pwd)
 {
   if (strlen($pwd)<6 || strlen($pwd)>32)
     return ERR_USER_PWD_LEN;
-    
-  $upper=0; $lower=0; $num=0; $special=0;
-  for ($i=0; $i<strlen($pwd); $i++)
-  {
-    $c=$pwd{$i};
-    if ($c>='A' and $c<='Z')
-      $upper++;
-    else if ($c>='a' and $c<='z')
-      $lower++;
-    else if ($c>='0' and $c<='9')
-      $num++;
-    else
-      $special++;
-  }
-  if ($upper<2 || $lower+$num<3 || $special<1)
-    return ERR_USER_PWD_INVALID;
 
   return 0;
 }
@@ -558,6 +542,15 @@ function _init_data()
   $id=$this->get_id();
   if ($id<=0)
     return ERR_GERNERAL;
+  
+  if ($this->is_member())
+  {
+    $upload_dir=$this->get_upload_dir();
+    if (!file_exists($upload_dir))
+    {
+      @mkdir($upload_dir, 0775, true);
+    }
+  }
 }
 
 /** @return the default ACL for the group */
@@ -788,8 +781,10 @@ function can_browse()
     return true;
   
   $roots=$conf->get('path.fsroot[]', null);
-  if ($roots!=null && count($roots)>0)
+  $webdav=$conf->get('webdav.enabled', 0);
+  if (count($roots) || $webdav==1)
     return true;
+
   return false;
 }
 

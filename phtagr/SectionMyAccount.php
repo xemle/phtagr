@@ -622,16 +622,44 @@ function exec_guests()
       return;
 
     $guests=$user->get_guests();
-    if (count($guests)>GUEST_MAX)
-      return;
-
-    $result=$user->create_guest($name, $pwd);
-    if ($result<0)
-    {
-      $this->error(sprintf(_("The guest '%s' could not created. Error %d"), $name, $result));
+    if (count($guests)>GUEST_MAX) {
+      $this->warning(_("You have the maximum of guest accounts"));
       return;
     }
-    $log->info("Create new guest $name (ID: $result)", -1, $user->get_id());
+
+    $err=$user->create_guest($name, $pwd);
+    if ($err>0)
+    {
+      $this->success(sprintf(_("Guest was '%s' created"), $name));
+      $log->info("Create new guest $name (ID: $err)", -1, $user->get_id());
+    }
+    else
+    {
+      switch($err)
+      {
+        case ERR_NOT_PERMITTED:
+          $this->warning(_("You are not permitted to create an guest account"));
+          break;
+        case ERR_USER_NAME_LEN:
+          $this->error(_("The username must have at least 4 character and maximum of 32 character"));
+          break;
+        case ERR_USER_NAME_INVALID:
+          $this->error(_("The username has invalid character"));
+          break;
+        case ERR_USER_ALREADY_EXISTS:
+          $this->error(_("The username already exists"));
+          break;
+        case ERR_USER_PWD_LEN:
+          $this->error(_("The password is to short or to long"));
+          break;
+        case ERR_USER_PWD_INVALID:
+          $this->error(_("The password is invalid"));
+          break;
+        default:
+          $this->error(sprintf(_("User '%s' could not be created. Error %d occur"), $name, $err));
+      }
+    }
+    return;
   }
   elseif ($_REQUEST['action']=='remove' &&
     isset($_REQUEST['guestid']))
@@ -677,16 +705,23 @@ function exec_guests()
       } else {
         $name=$guest->get_name();
         $result=$guest->passwd($oldpassword, $password);
-        if ($result==0)
-          $this->success(sprintf(_("The password of guest '%s' was successfully changed"), $name));
-        elseif ($result==ERR_PASSWD_MISMATCH)
-          $this->error(_("The password does not match."));
-        elseif ($result==ERR_USER_PWD_INVALID)
-          $this->error(_("The new password is invalid."));
-        elseif ($result==ERR_NOT_PERMITTED)
-          $this->error(_("You are not permitted to change the password."));
-        else
-          $this->error(sprintf(_("An unknown error occured (Error number %d)"), $result));
+        switch($result)
+        {
+          case 0:
+            $this->success(sprintf(_("The password of guest '%s' was successfully changed"), $name));
+            break;
+          case ERR_PASSWD_MISMATCH:
+            $this->error(_("The old password does not match."));
+            break;
+          case ERR_USER_PWD_INVALID:
+            $this->error(_("The new password is invalid."));
+            break;
+          case ERR_NOT_PERMITTED:
+            $this->error(_("You are not permitted to change the password."));
+            break;
+          default:
+            $this->error(sprintf(_("An unknown error occured (Error number %d)"), $result));
+        }
       }
     }
 

@@ -306,7 +306,7 @@ function check_auth($type, $auser, $apass)
   $user->init_by_id($id);
   $conf->load($id);
 
-  if ($conf->get('webdav.enable', 0)!=1)
+  if ($conf->get('webdav.enabled', 0)!=1)
   {
     $log->debug("Authorization failed: Service unavailable for $username");
     header('HTTP/1.1 503 Unauthorized: Service unavailable');
@@ -696,6 +696,16 @@ function GET(&$options)
     return $this->GetDir($fspath, $options);
   }
     
+  // Synchronize image
+  $img=new Image();
+  $id=$img->get_id_by_filename($fspath);
+  if ($id>0)
+  {
+    $sync=new ImageSync($id);
+    $sync->synchronize();
+    @clearstatcache();
+  }
+
   // detect resource type
   $options['mimetype']=$this->_mimetype($fspath); 
       
