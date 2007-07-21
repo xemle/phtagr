@@ -694,6 +694,13 @@ function imginfo($is_thumb, $return=false)
       $output.=" <a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"edit_tag($id)\">"._("Edit Tags")."</a>";
     if ($img->is_owner(&$user))
       $output.="<a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"edit_acl($id)\">".("Edit ACL")."</a>";
+    if ($img->can_read_original(&$user))
+    {
+      $url=new Url('image.php');
+      $url->add_param('id', $img->get_id());
+      $url->add_param('type', 'original');
+      $output.="<a href=\"".$url->get_url()."\" class=\"jsbutton\">"._("Download")."</a>";
+    }
     $output.="</td>
   </tr>\n";
   }

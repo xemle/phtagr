@@ -160,7 +160,7 @@ switch ($type)
     if ($img->can_read_original(&$user))
     {
       $img->synchronize();
-      $fn=$previewer->get_filename();
+      $fn=$img->get_filename();
     }
     else
       unauthorized();
@@ -245,7 +245,12 @@ if (!file_exists($fn))
 } else {
   if ($type!="vpreview")
   {
+    $name=$img->get_name();
+    $name=substr($name, 0, strrpos($name, ".")+1)."jpg";
     header('Content-Type: image/jpg');
+    header("Content-Disposition: ".
+      (!strpos($HTTP_USER_AGENT,"MSIE 5.5")?"attachment; ":"").
+      "filename=$name");
   }
   else
   {

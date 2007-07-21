@@ -51,23 +51,21 @@ function _print_cloud($cloud, $param)
   $max=intval($hits[0]);
   $min=intval($hits[count($hits)-1]);
 
-  $search=new Search();
-  $search->add_param('section', 'explorer');
+  $url=new Url();
+  $url->add_param('section', 'explorer');
 
   ksort($cloud);
   $grad=($max==$min)?20:(20/($max-$min));
-  //$log->info("min=$min, max=$max, grad=$grad, cloud=".print_r($cloud, true));
 
   echo "<div class=\"$param\">\n";
   foreach ($cloud as $name => $hit)
   {
     $size=intval(8+($hit-$min)*$grad);
-    $search->add_param($param, $name);
-    $url=$search->get_url();
-    echo "<span style=\"font-size:${size}pt;\"><a href=\"$url\">".$this->escape_html($name)."</a></span>&nbsp;\n";
+    $url->add_param($param, $name);
+    echo "<span style=\"font-size:${size}pt;\"><a href=\"".$url->get_url()."\">".$this->escape_html($name)."</a></span>&nbsp;\n";
   }
   echo "</div>\n</p>\n";
-  unset($search);
+  unset($url);
 }
 
 /** Prints a cloud of sets

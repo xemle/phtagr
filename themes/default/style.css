@@ -52,7 +52,7 @@ body {
 .content {
   float: right;
   width: 620px;
-  margin: 0px 15px 0px 0px;
+  margin: 0px 15px 15px 0px;
   padding: 10px 0 0 0px;
   text-align: left;
 }
