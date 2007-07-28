@@ -175,7 +175,7 @@ function exec_general ()
       if ($password!==$confirm)
         $this->error(_("Passwords do not match together"));
       else {
-        $result=$user->password($oldpassword, $password);
+        $result=$user->passwd($oldpassword, $password);
         if ($result<0)
           $this->error(sprintf(_("Could not set the password. Error %d"), $result));
         else

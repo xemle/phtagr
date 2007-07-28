@@ -152,6 +152,7 @@ if ($user->is_member() && $user->get_num_users()>1)
   $submenu->add_item($user->get_id(), _("My images"));
   $menu->add_submenu('explorer', $submenu);
 }
+
 $menu->add_item('search', _("Search"));
 
 if ($user->can_browse())

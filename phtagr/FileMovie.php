@@ -91,8 +91,12 @@ function get_thumb_filename()
   if ($thumb!==null)
     return $thumb;
 
-  // No video theme file found, return a default filename
-  return $base."thm";
+  if (is_writeable(dirname($filename)))
+  {
+    // No video theme file found, return a default filename
+    return $base."thm";
+  }
+  return false;
 }
 
 /** Creates an thumbnail of the movie and return true on success */
@@ -102,11 +106,20 @@ function create_thumb()
   $filename=$this->get_filename();
   $thumb=$this->get_thumb_filename();
 
+  if ($thumb==false)
+  {
+    $log->err('Could not get the video thumb file');
+    return false;
+  }
+
   @clearstatcache();
   if (file_exists($thumb))
     return true;
   if (!is_writeable(dirname($thumb)))
+  {
+    $log->err("Could not create thumb '$thumb'. Directory ist not writable");
     return false;
+  }
 
   $cmd=$conf->get('bin.ffmpeg', 'ffmpeg')." -i \"$filename\" -t 0.001 -f mjpeg -y \"$thumb\"";
   $lines=array();

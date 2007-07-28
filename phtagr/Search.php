@@ -837,7 +837,10 @@ function _add_sql_where_acl()
           " WHERE userid=".$user->get_id().
           " AND i.gacl>=".ACL_READ_PREVIEW." )";
     if ($user->is_member())
+    {
       $acl.=" OR i.macl>=".ACL_READ_PREVIEW;
+      $acl.=" OR i.userid=".$user->get_id();
+    }  
     else
       $acl.=" OR i.pacl>=".ACL_READ_PREVIEW;
     $acl.=" )";
