@@ -583,7 +583,7 @@ function edit_meta(id)
 
   ol.appendChild(_get_li_date(id));
   ol.appendChild(_get_li_tags(id));
-  ol.appendChild(_get_li_sets(id));
+  ol.appendChild(_get_li_categories(id));
   _add_locations(ol, id);
 
   form.appendChild(fs);
@@ -741,14 +741,14 @@ function _get_li_tags(id)
 
 /** Row for sets
   @param id ID of the image */
-function _get_li_sets(id)
+function _get_li_categories(id)
 {
   if (!images || !images[id])
     return null;
 
   var li=document.createElement("li");
-  li.appendChild(_label('Sets:'));
-  li.appendChild(_input('text', 'js_sets', images[id]['sets']));
+  li.appendChild(_label('Categories:'));
+  li.appendChild(_input('text', 'js_categories', images[id]['categories']));
   return li;
 }
 

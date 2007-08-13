@@ -81,16 +81,16 @@ function get_tags()
 /** @return Returns an hash of sets from the displayed images of the current 
  * page.  The hash key is the set itself and the hash value is the number of 
  * occurences of the set */
-function get_sets()
+function get_categories()
 {
   $img=$this->get_image();
   if (!$img)
     return null;
 
-  $sets=$img->get_sets();
+  $cats=$img->get_categories();
   $hits=array();
-  foreach ($sets as $set)
-    $hits[$set]=1;
+  foreach ($cats as $cat)
+    $hits[$cat]=1;
   return $hits;
 }
 
@@ -521,7 +521,7 @@ function tags($return=false)
 }
 
 /** Prints the list of sets inclusive html links */
-function sets($return=false)
+function categories($return=false)
 {
   global $user;
   global $conf;
@@ -530,22 +530,22 @@ function sets($return=false)
     return;
 
   $id=$img->get_id();
-  $sets=$img->get_sets();
-  $num_sets=count($sets);
+  $cats=$img->get_categories();
+  $num_cats=count($cats);
   
-  if ($num_sets==0)
+  if ($num_cats==0)
     return;
 
   $output="";
 
-  $set_url=new Search();
-  for ($i=0; $i<$num_sets; $i++)
+  $cat_url=new Search();
+  for ($i=0; $i<$num_cats; $i++)
   {
-    $set_url->add_set($sets[$i]);
-    $url=$set_url->get_url();
-    $output.="<a href=\"$url\">".$this->escape_html($sets[$i])."</a>";
-    $set_url->del_set($sets[$i]);
-    if ($i<$num_sets-1)
+    $cat_url->add_category($cats[$i]);
+    $url=$cat_url->get_url();
+    $output.="<a href=\"$url\">".$this->escape_html($cats[$i])."</a>";
+    $cat_url->del_category($cats[$i]);
+    if ($i<$num_cats-1)
       $output.=$conf->get('meta.separator', ';')." ";
   }
   unset($set_url);
@@ -645,7 +645,7 @@ function imginfo($is_thumb, $return=false)
   {
     if (!$img->is_upload())
     {
-      $output.="<tr><th>"._("Filename:")."</th><td>".
+      $output.="<tr><th>"._("File:")."</th><td>".
         $this->filename(true)."</td></tr>\n";
     }
     $output.="<tr><th>"._("Rights:")."</th><td>".
@@ -661,15 +661,15 @@ function imginfo($is_thumb, $return=false)
       $this->tags(true)."</td></tr>\n";
   }
 
-  if ($img->has_sets())
+  if ($img->has_categories())
   {
-    $output.="<tr><th>"._("Sets:")."</th><td>".
-      $this->sets(true)."</td></tr>\n";
+    $output.="<tr><th>"._("Cat.:")."</th><td>".
+      $this->categories(true)."</td></tr>\n";
   }
 
   if ($img->has_locations())
   {
-    $output.="<tr><th>"._("Locations:")."</th><td>".
+    $output.="<tr><th>"._("Loc.:")."</th><td>".
       $this->locations(true)."</td></tr>\n";
   }
   
@@ -758,9 +758,9 @@ function print_js()
     $date=$img->get_date();
     echo "  images[$id]['date']='".$this->_escape_js($date)."';\n";
 
-    $sets=$img->get_sets();
-    $set_list=$this->_escape_js(implode($sep, $sets));
-    echo "  images[$id]['sets']='$set_list';\n";
+    $cats=$img->get_categories();
+    $cat_list=$this->_escape_js(implode($sep, $cats));
+    echo "  images[$id]['categories']='$cat_list';\n";
 
     $locs=$img->get_locations();
     echo "  images[$id]['city']='".
@@ -885,7 +885,7 @@ function print_content()
 
   global $bulb;
   if (isset($bulb))
-    $bulb->set_data($this->get_tags(), $this->get_sets(), $this->get_locations());
+    $bulb->set_data($this->get_tags(), $this->get_categories(), $this->get_locations());
 }
 
 }

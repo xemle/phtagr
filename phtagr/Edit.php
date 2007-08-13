@@ -303,8 +303,8 @@ function print_edit_inputs()
   echo "</li>\n";
 
   echo "<li>";
-  $this->label(_("Sets:"));
-  $this->input_text("edit_sets", "", 40, 150);
+  $this->label(_("Categories:"));
+  $this->input_text("edit_categories", "", 40, 150);
   echo "</li>\n";
 
   echo "<li>";

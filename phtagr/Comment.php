@@ -48,12 +48,12 @@ function get_id()
 
 function get_imageid()
 {
-  return $this->_get_data('imageid');
+  return $this->_get_data('image_id');
 }
 
 function set_imageid($imageid)
 {
-  $this->_set_data('imageid', $imageid);
+  $this->_set_data('image_id', $imageid);
 }
 
 function get_userid()
@@ -177,7 +177,7 @@ function create($imageid, $name, $email, $text)
   $stext=mysql_escape_string($text);
 
   $sql="INSERT INTO $db->comments".
-       " (imageid, userid, date, name, email, comment)".
+       " (image_id, user_id, date, name, email, comment)".
        " VALUES ($imageid, $userid, NOW(), '$sname', '$semail', '$stext')";
   $id=$db->query_insert($sql);
   if ($id>0)
@@ -220,7 +220,7 @@ function get_comment_ids($imageid)
 
   $sql="SELECT id".
        " FROM $db->comments".
-       " WHERE imageid=$imageid";
+       " WHERE image_id=$imageid";
   $result=$db->query($sql);
   if (!$result || mysql_num_rows($result)==0)
     return array();

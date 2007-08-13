@@ -371,23 +371,21 @@ function _add_sql_where_acl()
 {
   global $db, $log, $user;
 
-  $log->trace("_add_sql_where_acl");
-  
   $acl='';
 
   if ($user->is_admin())    
     return $acl;
 
   if ($user->is_guest())
-    $acl.=" AND i.userid=".$user->get_creator();
+    $acl.=" AND i.user_id=".$user->get_creator();
 
   // if requested user id is not the own user id
   if ($user->is_member() || $user->is_guest())
   {
-    $acl.=" AND ( i.groupid IN (".
-          " SELECT groupid".
+    $acl.=" AND ( i.group_id IN (".
+          " SELECT group_id".
           " FROM $db->usergroup".
-          " WHERE userid=".$user->get_id().
+          " WHERE user_id=".$user->get_id().
           " AND i.gacl>=".ACL_READ_ORIGINAL." )";
     if ($user->is_member())
       $acl.=" OR i.macl>=".ACL_READ_ORIGINAL;

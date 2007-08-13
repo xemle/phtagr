@@ -66,7 +66,7 @@ function load($userid=0)
 
   $sql="SELECT name, value".
        " FROM $db->configs".
-       " WHERE userid=$userid";
+       " WHERE user_id=$userid";
   $result=$db->query($sql);
   if (!$result)
     return false;
@@ -125,8 +125,8 @@ function query($userid, $name, $default)
   $sname=mysql_escape_string($name);
   $sql="SELECT value".
        " FROM $db->configs".
-       " WHERE (userid=0 OR userid=$userid) AND name='$sname'".
-       " ORDER BY userid DESC".
+       " WHERE (user_id=0 OR user_id=$userid) AND name='$sname'".
+       " ORDER BY user_id DESC".
        " LIMIT 0,1";
   $result=$db->query($sql);
   if (!$result || mysql_num_rows($result)==0)
@@ -158,13 +158,13 @@ function _set($userid, $name, $value)
   $svalue=mysql_escape_string($value);
   $sql="SELECT value".
        " FROM $db->configs".
-       " WHERE userid=$userid AND name=\"$sname\"";
+       " WHERE user_id=$userid AND name=\"$sname\"";
   $result=$db->query($sql);
 
   // Insert new value
   if (mysql_num_rows($result)==0)
     $sql="INSERT INTO $db->configs".
-         " (userid, name, value) VALUES".
+         " (user_id, name, value) VALUES".
          " ($userid,'$sname','$svalue')";    
   // Update single parameter 
   elseif (substr($name, -2)!='[]')
@@ -176,7 +176,7 @@ function _set($userid, $name, $value)
 
     $sql="UPDATE $db->configs".
          " SET value='$svalue'". 
-         " WHERE userid=$userid AND name='$sname'";
+         " WHERE user_id=$userid AND name='$sname'";
   }
   // Update array
   else
@@ -188,7 +188,7 @@ function _set($userid, $name, $value)
         return true;
     }
     $sql="INSERT INTO $db->configs".
-         " (userid, name, value) VALUES".
+         " (user_id, name, value) VALUES".
          " ($userid,'$sname','$svalue')";    
   }
 
@@ -243,7 +243,7 @@ function _del($userid, $name, $value=null)
   global $db;
   $sname=mysql_escape_string($name);
   $sql="DELETE FROM $db->configs".
-       " WHERE userid=$userid AND name='$sname'";
+       " WHERE user_id=$userid AND name='$sname'";
   if ($value!=null)
   {
     $svalue=mysql_escape_string($value);
@@ -292,7 +292,7 @@ function delete_from_user($userid)
 
   // Delete all preferences
   $sql="DELETE FROM $db->configs
-        WHERE userid=$userid";
+        WHERE user_id=$userid";
   $db->query($sql);
 
   // If I delete myself, delete also my configuration

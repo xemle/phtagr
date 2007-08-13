@@ -243,9 +243,29 @@ if (!file_exists($fn))
   $log->debug("File not found: '$fn'");
   not_found();        
 } else {
-  if ($type!="vpreview")
+  if ($type=='original')
   {
-    $name=$img->get_name();
+    $name=basename($img->get_filename());
+    $ext=strtolower(substr($name, strrpos($name, ".")+1));
+    switch ($ext)
+    {
+      case 'jpg':
+        header('Content-Type: image/'.$ext);
+        break;
+      case 'avi':
+      case 'mov':
+      case 'mpeg':
+      case 'mpg':
+        header('Content-Type: video/'.$ext);
+        break;
+      default:
+    }    
+    header("Content-Disposition: ".
+      (!strpos($HTTP_USER_AGENT,"MSIE 5.5")?"attachment; ":"").
+      "filename=$name");
+  }
+  elseif ($type!="vpreview")
+  {
     $name=substr($name, 0, strrpos($name, ".")+1)."jpg";
     header('Content-Type: image/jpg');
     header("Content-Disposition: ".

@@ -62,12 +62,12 @@ function print_content()
   echo "</li>";
 
   echo "<li>";
-  $this->label(_("Sets:"));
-  $this->input_text("sets", "", 30);
+  $this->label(_("Category:"));
+  $this->input_text("categories", "", 30);
   echo "</li>";
   echo "<li>";
-  $this->label(_("Set Operation:"));
-  echo "<select name=\"setop\" size=\"1\">\n";
+  $this->label(_("Category Operation:"));
+  echo "<select name=\"catop\" size=\"1\">\n";
   $this->option(_("AND"), 0);
   $this->option(_("OR"), 1);
   $this->option(_("FUZZY"), 2);

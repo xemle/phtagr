@@ -32,7 +32,7 @@ class Search extends Url
 {
 
 var $_tags;
-var $_sets;
+var $_cats;
 var $_locs;
 
 function Search($baseurl='')
@@ -40,7 +40,7 @@ function Search($baseurl='')
   global $search;
   $this->Url($baseurl);
   $this->_tags=array();
-  $this->_sets=array();
+  $this->_cats=array();
   $this->_locs=array();
 
   $this->add_param('section', 'explorer');
@@ -173,37 +173,37 @@ function clear_tags()
   $this->_tags=array();
 }
 
-function add_set($set)
+function add_category($cat)
 {
-  $set=trim($set);
-  if ($set=='') return false;
-  if ($this->has_set($set))
+  $cat=trim($cat);
+  if ($cat=='') return false;
+  if ($this->has_category($cat))
     return true;
-  array_push($this->_sets, $set);
+  array_push($this->_cats, $cat);
   return true;
 }
 
-/** @param set Set name
+/** @param cat Name of category
   @return True of the search has already that given set */
-function has_set($set)
+function has_category($cat)
 {
-  for ($i=0; $i<count($this->_sets); $i++)
-    if ($this->_sets[$i]==$set)
+  for ($i=0; $i<count($this->_cats); $i++)
+    if ($this->_cats[$i]==$cat)
       return true;
   return false;
 }
 
-/** @param set Set to delete
+/** @param cat Category to delete
   @return True if the set could be deleted. Otherwise false (e.g. if the set
   could not be found) */
-function del_set($set)
+function del_category($cat)
 {
-  for ($i=0; $i<count($this->_sets); $i++)
+  for ($i=0; $i<count($this->_cats); $i++)
   {
-    if ($this->_sets[$i]==$set)
+    if ($this->_cats[$i]==$cat)
     {
-      unset($this->_sets[$i]);
-      $this->_sets=array_merge($this->_sets);
+      unset($this->_cats[$i]);
+      $this->_cats=array_merge($this->_cats);
       return true;
     }
   }
@@ -211,22 +211,22 @@ function del_set($set)
 }
 
 /** @return Returns the sets of the current search */
-function get_sets()
+function get_categories()
 {
-  return $this->_sets;
+  return $this->_cats;
 }
 
 /** Sets the operator of sets
-  @param setop Must be between 0 and 2 */
-function set_setop($setop)
+  @param catop Must be between 0 and 2 */
+function set_catop($catop)
 {
-  $this->add_iparam('setop', $setop, null, 1, 2);
+  $this->add_iparam('catop', $catop, null, 1, 2);
 }
 
-function clear_sets()
+function clear_categories()
 {
-  unset($this->_sets);
-  $this->_sets=array();
+  unset($this->_cats);
+  $this->_cats=array();
 }
 
 function add_location($location)
@@ -276,7 +276,7 @@ function get_locations()
 }
 
 /** Sets the operator of locations
-  @param setop Must be between 0 and 2 */
+  @param catop Must be between 0 and 2 */
 function set_locop($locop)
 {
   $this->add_iparam('locop', $locop, null, 1, 2);
@@ -423,19 +423,19 @@ function from_url()
   if (isset($_REQUEST['tagop']))
     $this->set_tagop($_REQUEST['tagop']);
   
-  if (isset($_REQUEST['sets']))
+  if (isset($_REQUEST['categories']))
   {
     $sep=$conf->get('meta.separator', ';');
     $sep=($sep==" ")?"+\s":$sep;
-    $sets=preg_split("/[$sep]+/", $_REQUEST['sets']);
-    foreach ($sets as $set)
+    $cats=preg_split("/[$sep]+/", $_REQUEST['categories']);
+    foreach ($cats as $cat)
     {
-      $set=preg_replace('/[+]/', " ", $set);
-      $this->add_set($set);
+      $cat=preg_replace('/[+]/', " ", $cat);
+      $this->add_category($cat);
     }
   }
-  if (isset($_REQUEST['setop']))
-    $this->set_setop($_REQUEST['setop']);
+  if (isset($_REQUEST['catop']))
+    $this->set_catop($_REQUEST['catop']);
 
   if (isset($_REQUEST['locations']))
   {
@@ -510,23 +510,23 @@ function _to_params()
   else 
     $this->del_param('tags');
   
-  $num_sets=count($this->_sets);
-  if ($num_sets>0)
+  $num_cats=count($this->_cats);
+  if ($num_cats>0)
   {
     $v='';
-    for ($i=0; $i<$num_sets; $i++)
+    for ($i=0; $i<$num_cats; $i++)
     {
-      $v.=$this->_sets[$i];
-      if ($i<$num_sets-1)
+      $v.=$this->_cats[$i];
+      if ($i<$num_cats-1)
       {
         $v.=($sep!=" ")?$sep:"";
         $v.='+';
       }
     }
-    $this->add_param('sets', $v);
+    $this->add_param('categories', $v);
   }
   else
-    $this->del_param('sets');
+    $this->del_param('categories');
 
   $num_locs=count($this->_locs);
   if ($num_locs>0)
@@ -575,19 +575,19 @@ function _add_sql_join_tags($tags, $count=0, $op=1)
   if (!count($tags))
     return "";
 
-  $sql=" JOIN ( SELECT imageid, COUNT(imageid) AS thits".
+  $sql=" JOIN ( SELECT image_id, COUNT(image_id) AS thits".
        " FROM $db->imagetag";
   $sql.=" WHERE";
 
   $ids=array();
   foreach ($tags as $tag)
-    array_push($ids, "tagid=".$db->tag2id($tag));
+    array_push($ids, "tag_id=".$db->tag2id($tag));
   $sql.=" ".implode(" OR ", $ids);
 
-  $sql.=" GROUP BY imageid";
+  $sql.=" GROUP BY image_id";
   if ($count>0) 
   {
-    $sql.=" HAVING COUNT(imageid)";
+    $sql.=" HAVING COUNT(image_id)";
     switch ($op) 
     {
       case -2: $sql.="!="; break;
@@ -597,7 +597,7 @@ function _add_sql_join_tags($tags, $count=0, $op=1)
     }
     $sql.="$count";
   }
-  $sql.=" ) AS it ON ( i.id=it.imageid )";
+  $sql.=" ) AS it ON ( i.id=it.image_id )";
   return $sql;
 }
 
@@ -608,25 +608,25 @@ function _add_sql_join_tags($tags, $count=0, $op=1)
   be counted. Default is 0.
   @param op Count operant. -2 for not equal, -1 for less or equal, 0 for equal,
   1 for greater or equal. Default is 1 (greater) */
-function _add_sql_join_sets($sets, $count=0, $op=1)
+function _add_sql_join_categories($cats, $count=0, $op=1)
 {
   global $db;
-  if (!count($sets))
+  if (!count($cats))
     return "";
 
-  $sql=" JOIN ( SELECT imageid, COUNT(imageid) AS shits".
-       " FROM $db->imageset";
+  $sql=" JOIN ( SELECT image_id, COUNT(image_id) AS chits".
+       " FROM $db->imagecategory";
   $sql.=" WHERE";
 
   $ids=array();
-  foreach ($sets as $set)
-    array_push($ids, "setid=".$db->set2id($set));
+  foreach ($cats as $cat)
+    array_push($ids, "category_id=".$db->category2id($cat));
   $sql.=" ".implode(" OR ", $ids);
 
-  $sql.=" GROUP BY imageid";
+  $sql.=" GROUP BY image_id";
   if ($count>0) 
   {
-    $sql.=" HAVING COUNT(imageid)";
+    $sql.=" HAVING COUNT(image_id)";
     switch ($op) 
     {
       case -2: $sql.="!="; break;
@@ -636,7 +636,7 @@ function _add_sql_join_sets($sets, $count=0, $op=1)
     }
     $sql.="$count";
   }
-  $sql.=" ) AS iset ON ( i.id=iset.imageid )";
+  $sql.=" ) AS c ON ( i.id=c.image_id )";
   return $sql;
 }
 
@@ -653,7 +653,7 @@ function _add_sql_join_locations($locs, $count=0, $op=1)
   if (!count($locs))
     return "";
 
-  $sql=" JOIN ( SELECT imageid, COUNT(imageid) AS lhits".
+  $sql=" JOIN ( SELECT image_id, COUNT(image_id) AS lhits".
        " FROM $db->imagelocation";
   $sql.=" WHERE";
 
@@ -662,14 +662,14 @@ function _add_sql_join_locations($locs, $count=0, $op=1)
   {
     $locids=$db->location2ids($loc);
     foreach ($locids as $locid)
-      array_push($ids, "locationid=".$locid);
+      array_push($ids, "location_id=".$locid);
   }
   $sql.=" ".implode(" OR ", $ids);
 
-  $sql.=" GROUP BY imageid";
+  $sql.=" GROUP BY image_id";
   if ($count>0) 
   {
-    $sql.=" HAVING COUNT(imageid)";
+    $sql.=" HAVING COUNT(image_id)";
     switch ($op) 
     {
       case -2: $sql.="!="; break;
@@ -679,7 +679,7 @@ function _add_sql_join_locations($locs, $count=0, $op=1)
     }
     $sql.="$count";
   }
-  $sql.=" ) AS l ON ( i.id=l.imageid )";
+  $sql.=" ) AS l ON ( i.id=l.image_id )";
   return $sql;
 }
 
@@ -691,13 +691,13 @@ function _add_sql_join_locations($locs, $count=0, $op=1)
   @param locs Array of locations, could be NULL
   @return Returns the sql join statements for meta data inclusion. May be an
   empty string, if no meta data is given. 
-  @see _add_sql_join_tags _add_sql_join_sets _add_sql_join_locations */
-function _add_sql_join_meta_inclusion($tags, $sets, $locs)
+  @see _add_sql_join_tags _add_sql_join_categories _add_sql_join_locations */
+function _add_sql_join_meta_inclusion($tags, $cats, $locs)
 {
   global $db, $user, $log;
 
   $num_tags=count($tags);
-  $num_sets=count($sets);
+  $num_cats=count($cats);
   $num_locs=count($locs);
 
   if ($num_tags) 
@@ -712,16 +712,16 @@ function _add_sql_join_meta_inclusion($tags, $sets, $locs)
     $sql.=$this->_add_sql_join_tags($tags, $count, 1);
   }
 
-  if ($num_sets) 
+  if ($num_cats) 
   {
-    $setop=$this->get_param('setop', 0);
-    switch ($setop)
+    $catop=$this->get_param('catop', 0);
+    switch ($catop)
     {
       case 1: $count=0; break; /* OR */
-      case 2: $count=intval($num_sets*0.75); break; /* FUZZY */
-      default: $count=$num_sets; break; /* AND */
+      case 2: $count=intval($num_cats*0.75); break; /* FUZZY */
+      default: $count=$num_cats; break; /* AND */
     }
-    $sql.=$this->_add_sql_join_sets($sets, $count, 1);
+    $sql.=$this->_add_sql_join_categories($cats, $count, 1);
   }
 
   if ($num_locs) 
@@ -745,15 +745,15 @@ function _add_sql_join_meta_inclusion($tags, $sets, $locs)
   @param locs Array of exclued locations, could be NULL
   @return Returns the sql where statements for meta data exclusion. May be an
   empty string is not meta data exclusion is given */
-function _add_sql_where_meta_exclusion($tags, $sets, $locs)
+function _add_sql_where_meta_exclusion($tags, $cats, $locs)
 {
   global $db;
 
   $num_tags=count($tags);
-  $num_sets=count($sets);
+  $num_cats=count($cats);
   $num_locs=count($locs);
 
-  if ($num_tags+$num_sets+$num_locs==0)
+  if ($num_tags+$num_cats+$num_locs==0)
     return "";
 
   $sql.=" AND i.id NOT IN (";
@@ -763,19 +763,19 @@ function _add_sql_where_meta_exclusion($tags, $sets, $locs)
   if ($num_tags)
   {
     $sql.=" LEFT JOIN $db->imagetag AS it"
-        ." ON ( i.id=it.imageid )";
+        ." ON ( i.id=it.image_id )";
   }
 
-  if ($num_sets)
+  if ($num_cats)
   {
-    $sql.=" LEFT JOIN $db->imageset AS iset"
-        ." ON ( i.id=iset.imageid )";
+    $sql.=" LEFT JOIN $db->imagecategory AS ic"
+        ." ON ( i.id=ic.image_id )";
   }
 
   if ($num_locs)
   {
     $sql.=" LEFT JOIN $db->imagelocation AS il"
-        ." ON ( i.id=il.imageid )";
+        ." ON ( i.id=il.image_id )";
   }
 
   $sql.=" WHERE 0";
@@ -787,18 +787,18 @@ function _add_sql_where_meta_exclusion($tags, $sets, $locs)
       $tid=$db->tag2id($tag);
       if ($tid<0)
         continue;
-      $sql.=" OR it.tagid=$tid";
+      $sql.=" OR it.tag_id=$tid";
     }
   }
   
-  if ($num_sets)
+  if ($num_cats)
   {
-    foreach ($sets as $set)
+    foreach ($cats as $cat)
     {
-      $sid=$db->set2id($set);
-      if ($sid<0)
+      $cid=$db->category2id($cat);
+      if ($cid<0)
         continue;
-      $sql.=" OR iset.setid=$sid";
+      $sql.=" OR ic.category_id=$cid";
     }
   }
   
@@ -808,7 +808,7 @@ function _add_sql_where_meta_exclusion($tags, $sets, $locs)
     {
       $lids=$db->location2ids($loc);
       foreach ($lids as $lid)
-        $sql.=" OR il.locationid=$lid";
+        $sql.=" OR il.location_id=$lid";
     }
   }
   $sql.=$this->_add_sql_where_acl();
@@ -831,15 +831,15 @@ function _add_sql_where_acl()
   // if requested user id is not the own user id
   else if ($user->is_member() || $user->is_guest())
   {
-    $acl.=" AND ( i.groupid IN (".
-          " SELECT groupid".
+    $acl.=" AND ( i.group_id IN (".
+          " SELECT group_id".
           " FROM $db->usergroup".
-          " WHERE userid=".$user->get_id().
+          " WHERE user_id=".$user->get_id().
           " AND i.gacl>=".ACL_READ_PREVIEW." )";
     if ($user->is_member())
     {
       $acl.=" OR i.macl>=".ACL_READ_PREVIEW;
-      $acl.=" OR i.userid=".$user->get_id();
+      $acl.=" OR i.user_id=".$user->get_id();
     }  
     else
       $acl.=" OR i.pacl>=".ACL_READ_PREVIEW;
@@ -879,7 +879,7 @@ function _add_sql_where_visibility()
 /** 
   @return Returns the column order for the selected column. This is needed for
   passing the order from subqueries to upper queries.*/
-function _add_sql_column_order($num_tags, $num_sets, $num_locs)
+function _add_sql_column_order($num_tags, $num_cats, $num_locs)
 {
   $order='';
   $orderby=$this->get_param('orderby', 'date');
@@ -912,7 +912,7 @@ function _add_sql_column_order($num_tags, $num_sets, $num_locs)
 
   $hits=array();
   if ($num_tags) array_push($hits, "thits");
-  if ($num_sets) array_push($hits, "shits");
+  if ($num_cats) array_push($hits, "chits");
   if ($num_locs) array_push($hits, "lhits");
 
   if (count($hits))
@@ -929,20 +929,20 @@ function _add_sql_column_order($num_tags, $num_sets, $num_locs)
 
 /** Adds a SQL sort statement 
   @return Retruns an SQL order by statement string */
-function _add_sql_orderby($num_tags, $num_sets)
+function _add_sql_orderby($num_tags, $num_cats)
 {
   $order=array();
 
-  if ($num_tags>0 && $num_sets>0)
+  if ($num_tags>0 && $num_cats>0)
     array_push($order, "hits DESC");
 
   $tagop=$this->get_param('tagop', 0);
   if ($num_tags>0 && ($tagop==1 || $tagop==2))
     array_push($order, "thits DESC");
 
-  $setop=$this->get_param('setop', 0);
-  if ($num_sets>0 && ($setop==1 || $setop==2))
-    array_push($order, "shits DESC");
+  $catop=$this->get_param('catop', 0);
+  if ($num_cats>0 && ($catop==1 || $catop==2))
+    array_push($order, "chits DESC");
 
   $orderby=$this->get_param('orderby', 'date');
   $values=array('date' => "date DESC", 
@@ -1000,8 +1000,8 @@ function _add_sql_where()
   $groupid=$this->get_param('group', -1);
 
   if ($imageid>0)  $sql .= " AND i.id=".$imageid;
-  if ($userid>0)   $sql .= " AND i.userid=".$userid;
-  if ($groupid>=0) $sql .= " AND i.groupid=".$groupid;
+  if ($userid>0)   $sql .= " AND i.user_id=".$userid;
+  if ($groupid>=0) $sql .= " AND i.group_id=".$groupid;
   
   // handle the acl and visibility level
   $sql.=$this->_add_sql_where_acl();
@@ -1055,17 +1055,17 @@ function get_query($limit=1, $order=true)
   $num_pos_tags=count($pos_tags);
   $num_neg_tags=count($neg_tags);
   
-  $pos_sets=array();
-  $neg_sets=array();
-  foreach ($this->_sets as $set)
+  $pos_cats=array();
+  $neg_cats=array();
+  foreach ($this->_cats as $cat)
   {
-    if ($set{0}=='-')
-      array_push($neg_sets, substr($set, 1));
+    if ($cat{0}=='-')
+      array_push($neg_cats, substr($cat, 1));
     else
-      array_push($pos_sets, $set);
+      array_push($pos_cats, $cat);
   }
-  $num_pos_sets=count($pos_sets);
-  $num_neg_sets=count($neg_sets);
+  $num_pos_cats=count($pos_cats);
+  $num_neg_cats=count($neg_cats);
  
   $pos_locs=array();
   $neg_locs=array();
@@ -1081,18 +1081,18 @@ function get_query($limit=1, $order=true)
   
   $sql="SELECT i.id";
   if ($order)
-    $sql.=$this->_add_sql_column_order($num_pos_tags, $num_pos_sets, $num_pos_locs);
+    $sql.=$this->_add_sql_column_order($num_pos_tags, $num_pos_cats, $num_pos_locs);
 
   $sql.=" FROM $db->images AS i";
-  $sql.=$this->_add_sql_join_meta_inclusion($pos_tags, $pos_sets, $pos_locs);
+  $sql.=$this->_add_sql_join_meta_inclusion($pos_tags, $pos_cats, $pos_locs);
   // Consider only imported files
   $sql.=" WHERE i.flag & ".IMAGE_FLAG_IMPORTED;
-  $sql.=$this->_add_sql_where_meta_exclusion($neg_tags, $neg_sets, $neg_locs);
+  $sql.=$this->_add_sql_where_meta_exclusion($neg_tags, $neg_cats, $neg_locs);
   $sql.=$this->_add_sql_where();
   $sql.=" GROUP BY i.id";
 
   if ($order)
-    $sql.=$this->_add_sql_orderby($num_pos_tags, $num_pos_sets);
+    $sql.=$this->_add_sql_orderby($num_pos_tags, $num_pos_cats);
   $sql.=$this->_add_sql_limit($limit);
 
   return $sql; 
@@ -1130,8 +1130,8 @@ function get_popular_tags($num=50)
   global $db;
 
   $sql="SELECT t.name,COUNT(t.name) AS hits".
-       " FROM $db->tags AS t, $db->imagetag AS it, $db->images as i".
-       " WHERE t.id=it.tagid AND it.imageid=i.id".
+       " FROM $db->tags AS t, $db->imagetag AS it, $db->images AS i".
+       " WHERE t.id=it.tag_id AND it.image_id=i.id".
        "   AND i.flag & ".IMAGE_FLAG_IMPORTED.
        $this->_add_sql_where_acl().
        " GROUP BY t.name ".
@@ -1147,25 +1147,28 @@ function get_popular_tags($num=50)
 }
 
 /** 
-  @param num Number of the returned tags. 
+  @param num Number of the returned categories. 
   @return Returns an table with 2 columns. The first column is the tag name,
 the second column is the number of hits. The table is ordered by descending
 hits */
-function get_popular_sets($num=50)
+function get_popular_categories($num=50)
 {
-  global $db;
+  global $db, $log;
 
-  $sql="SELECT s.name,COUNT(s.name) AS hits". 
-       " FROM $db->sets AS s, $db->imageset AS iset, $db->images as i".
-       " WHERE s.id=iset.setid and iset.imageid=i.id".
+  $sql="SELECT c.name,COUNT(c.name) AS hits". 
+       " FROM $db->categories AS c, $db->imagecategory AS ic, $db->images AS i".
+       " WHERE c.id=ic.category_id and ic.image_id=i.id".
        "   AND i.flag & ".IMAGE_FLAG_IMPORTED.
        $this->_add_sql_where_acl().
-       " GROUP BY s.name". 
+       " GROUP BY c.name". 
        " ORDER BY hits DESC LIMIT 0,".intval($num);
   
   $table=$db->query_table($sql);
   if (!$table)
+  {
+    $log->trace($sql);
     return null;
+  }
   $cloud=array();
   foreach($table as $row)
     $cloud[$row['name']]=$row['hits'];

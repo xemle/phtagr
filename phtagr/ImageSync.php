@@ -65,7 +65,7 @@ function import($filename, $is_upload=false)
   $spath=mysql_escape_string($path);
   $sfile=mysql_escape_string($file);
 
-  $sql="SELECT id,userid,flag".
+  $sql="SELECT id,user_id,flag".
        " FROM $db->images".
        " WHERE path='$spath' AND file='$sfile'";
   $row=$db->query_row($sql);
@@ -84,7 +84,7 @@ function import($filename, $is_upload=false)
     $flag|=($is_upload ? IMAGE_FLAG_UPLOADED : 0);
     // insert basics
     $sql="INSERT INTO $db->images (".
-         "   userid, groupid, created,".
+         "   user_id, group_id, created,".
          "   path, file, flag,".
          "   gacl, macl, pacl,".
          "   clicks, lastview, ranking".
@@ -118,9 +118,9 @@ function import($filename, $is_upload=false)
   else
   {
     // Another user owns this file already
-    if ($row['userid']!=$user->get_id())
+    if ($row['user_id']!=$user->get_id())
     {
-      $log->warn("Import failed of '$filename'. File owned by ".$row['userid'], $row['id']);
+      $log->warn("Import failed of '$filename'. File owned by ".$row['user_id'], $row['id']);
       return -1;
     }
 
@@ -212,7 +212,7 @@ function add_file($filename, $is_upload=false)
     $flag=($is_upload)?IMAGE_FLAG_UPLOADED:0;
     // new entry
     $sql="INSERT INTO $db->images".
-         " (userid, path, file, bytes, created, flag)".
+         " (user_id, path, file, bytes, created, flag)".
          " VALUES (".$user->get_id().", '$spath', '$sfile', $size, NOW(), $flag)";
     $id=$db->query_insert($sql);
     if ($id<0)
@@ -336,7 +336,7 @@ function sync_files($userid=-1, $since=-1)
       $log->err("User is not authorized to sync files");
       return array(-1, 0, 0);
     }
-    $sql.=" AND userid=$userid";
+    $sql.=" AND user_id=$userid";
   } else {
     if (!$user->is_admin())
     {
@@ -696,39 +696,39 @@ function _handle_request_tags($prefix='', $merge)
   @param prefix Prefix of forumlar input names
   @param merge True if data should merge. False if data will overwrite the
   current data */
-function _handle_request_sets($prefix='', $merge)
+function _handle_request_categories($prefix='', $merge)
 {
   global $conf;
   $sep=$conf->get('meta.separator', ';');
   $sep=($sep==" ")?"\s":$sep;
-  $sets=preg_split("/[$sep]+/", $_REQUEST[$prefix.'sets']);
-  if (count($sets)==0)
+  $cats=preg_split("/[$sep]+/", $_REQUEST[$prefix.'categories']);
+  if (count($cats)==0)
     return false;
 
   // distinguish between add and remove operation.
-  $add_sets=array();
-  $del_sets=array();
-  foreach ($sets as $set)
+  $add_cats=array();
+  $del_cats=array();
+  foreach ($cats as $cat)
   {
-    $set=trim($set);
-    if ($set=='-' || $set=='')
+    $cat=trim($cat);
+    if ($cat=='-' || $cat=='')
       continue;
 
-    if ($set{0}=='-')
-      array_push($del_sets, substr($set, 1));
+    if ($cat{0}=='-')
+      array_push($del_cats, substr($cat, 1));
     else
-      array_push($add_sets, $set);
+      array_push($add_cats, $cat);
   }
-  if (count($del_sets))
-    $this->del_sets($del_sets);
+  if (count($del_cats))
+    $this->del_categories($del_cats);
   if (!$merge)
   {
-    $db_sets=$this->get_sets();
-    $del_sets=array_diff($db_sets, $add_sets);
-    if (count($del_sets))
-      $this->del_sets($del_sets);
+    $db_sets=$this->get_categories();
+    $del_cats=array_diff($db_sets, $add_cats);
+    if (count($del_cats))
+      $this->del_categories($del_cats);
   }
-  $this->add_sets($add_sets);
+  $this->add_categories($add_cats);
 }
 
 /** Handle the location input 
@@ -769,7 +769,7 @@ function handle_request()
     if ($this->can_write_meta(&$user))
     {
       $this->_handle_request_date($prefix, true);
-      $this->_handle_request_sets($prefix, true);
+      $this->_handle_request_categories($prefix, true);
       $this->_handle_request_location($prefix, true);
     }
     if ($this->can_write_caption(&$user))
@@ -784,7 +784,7 @@ function handle_request()
     {
       $this->_handle_request_date($prefix, false);
       $this->_handle_request_tags($prefix, false);
-      $this->_handle_request_sets($prefix, false);
+      $this->_handle_request_categories($prefix, false);
       $this->_handle_request_location($prefix, false);
     }
   } else if ($edit=='js_caption') {

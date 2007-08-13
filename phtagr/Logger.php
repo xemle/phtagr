@@ -236,7 +236,7 @@ function _log($level, $msg, $imageid, $userid)
   elseif ($this->_type==LOG_BUF || $this->_type==LOG_SESSION)
   {
     $log=array('time' => $now, 'level' => $slevel,
-               'imageid' => $imageid, 'userid' => $userid,
+               'image_id' => $imageid, 'user_id' => $userid,
                'file' => $file, 'line' => $line,
                'msg' => $msg);
     if ($this->_type==LOG_BUF)
@@ -249,7 +249,7 @@ function _log($level, $msg, $imageid, $userid)
     $sfile=mysql_escape_string($file);
     $smsg=mysql_escape_string($msg);
     $sql="INSERT INTO $db->logs".
-         " (time, level, imageid, userid, file, line, message)".
+         " (time, level, image_id, user_id, file, line, message)".
          " VALUES (NOW(), $level, $imageid, $userid, '$sfile', $line, '$smsg')";
     $db->query_insert($sql);
   }

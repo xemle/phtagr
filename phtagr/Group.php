@@ -49,7 +49,7 @@ function init_by_id($id)
   if ($id<=0)
     return false;
 
-  $sql="SELECT name,owner
+  $sql="SELECT name,user_id
         FROM $db->groups 
         WHERE id=$id";
   $result=$db->query($sql);
@@ -57,14 +57,14 @@ function init_by_id($id)
     return false;
   $row=mysql_fetch_assoc($result);
   $this->_name=$row['name'];
-  $this->_owner=$row['owner'];
+  $this->_owner=$row['user_id'];
   $this->_members=array();
   $this->_id=$id;
 
   // Fetch all members
   $sql="SELECT u.id,u.name
         FROM $db->users AS u, $db->usergroup AS ug
-        WHERE u.id=ug.userid AND ug.groupid=$id
+        WHERE u.id=ug.user_id AND ug.group_id=$id
         ORDER BY u.name";
   $result=$db->query($sql);
   if (!$result || mysql_num_rows($result)<1)
@@ -83,7 +83,7 @@ function get_id_by_name($name)
   $sname=mysql_escape_string($name);
   $sql="SELECT id
         FROM $db->groups
-        WHERE owner=".$user->get_id()."
+        WHERE user_id=".$user->get_id()."
           AND name='$sname'";
   $result=$db->query($sql);
   if (!$result || mysql_num_rows($result)<1)
@@ -119,7 +119,7 @@ function create($name)
 
   $sname=mysql_escape_string($name);
   $sql="INSERT INTO $db->groups".
-       " (owner, name) VALUES (".$user->get_id().",'$sname')";
+       " (user_id, name) VALUES (".$user->get_id().",'$sname')";
   $id=$db->query_insert($sql);
   if ($id<0)
     return -1;
@@ -195,7 +195,7 @@ function add_member($name_or_id)
 
   // Add user
   $sql="INSERT INTO $db->usergroup".
-       " (userid, groupid) VALUES ($uid, ".$this->get_id().")";
+       " (user_id, group_id) VALUES ($uid, ".$this->get_id().")";
   $result=$db->query($sql);
   if (!$result)
     return false;
@@ -226,7 +226,7 @@ function del_member($name_or_id)
 
   // Delete user
   $sql="DELETE FROM $db->usergroup".
-       " WHERE userid=$id AND groupid=".$this->get_id();
+       " WHERE user_id=$id AND group_id=".$this->get_id();
   $result=$db->query($sql);
   if (!$result)
     return false;
@@ -249,15 +249,15 @@ function delete()
     $new_id=0;
 
   $sql="DELETE FROM $db->usergroup".
-       " WHERE groupid=$id";
+       " WHERE group_id=$id";
   $result=$db->query($sql);
   $sql="DELETE FROM $db->groups".
        " WHERE id=$id";
   $result=$db->query($sql);
   // reset images which are affected with this group
   $sql="UPDATE $db->images".
-       " SET groupid=$new_gid".
-       " WHERE groupid=$id";
+       " SET group_id=$new_gid".
+       " WHERE group_id=$id";
   $result=$db->query($sql);
   // reset group object
   $this->_id=-1;
@@ -275,12 +275,12 @@ function delete_from_user($id)
 
   // Delete user memberships 
   $sql="DELETE FROM $db->usergroup".
-       " WHERE userid=$id";
+       " WHERE user_id=$id";
   $db->query($sql);
 
   // Delete all groups from user
   $sql="DELETE FROM $db->usergroup".
-       " WHERE groupid IN (".
+       " WHERE group_id IN (".
        "   SELECT id".
        "   FROM $db->groups".
        "   WHERE owner=$id".

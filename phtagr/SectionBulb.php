@@ -34,14 +34,14 @@ function SectionBulb()
 {
   $this->SectionBase("bulb");
   $this->_tags=array();
-  $this->_sets=array();
+  $this->_cats=array();
   $this->_locs=array();
 }
 
-function set_data($tags, $sets, $locations)
+function set_data($tags, $categories, $locations)
 {
   $this->_tags=$tags;
-  $this->_sets=$sets;
+  $this->_cats=$categories;
   $this->_locs=$locations;
 }
 
@@ -99,14 +99,14 @@ function print_content()
     echo "</ul>\n";
   }
 
-  if (count($this->_sets)>0)
+  if (count($this->_cats)>0)
   {
-    echo "\n<h3>"._("Sets:")."</h3>\n<ul>";
-    arsort($this->_sets);
-    foreach ($this->_sets as $set => $nums) 
+    echo "\n<h3>"._("Categories:")."</h3>\n<ul>";
+    arsort($this->_cats);
+    foreach ($this->_cats as $cat => $nums) 
     {
       echo "<li>";
-      $url->add_set($set);
+      $url->add_category($cat);
       // Add global search
       if ($userid>0) 
       {
@@ -114,22 +114,22 @@ function print_content()
         echo "<a href=\"".$url->get_url()."\">$img</a> ";
         $url->set_userid($userid);
       }
-      if (!$add_url->has_set($set))
+      if (!$add_url->has_category($cat))
       {
-        $add_url->add_set($set);
+        $add_url->add_category($cat);
         echo "<a href=\"".$add_url->get_url()."\">+</a>/";
-        $add_url->del_set($set);
-        $add_url->add_set("-".$set);
+        $add_url->del_category($cat);
+        $add_url->add_category("-".$cat);
         echo "<a href=\"".$add_url->get_url()."\">-</a> ";
-        $add_url->del_set("-".$set);
+        $add_url->del_category("-".$cat);
       } else {
         echo "+/- ";
       }
-      echo "<a href=\"".$url->get_url()."\">".$this->escape_html($set)."</a>";
+      echo "<a href=\"".$url->get_url()."\">".$this->escape_html($cat)."</a>";
       if ($nums>1)
         echo " <span class=\"hits\">($nums)</span>";
       echo "</li>\n";
-      $url->del_set($set);
+      $url->del_category($cat);
     }
     echo "</ul>\n";
   }

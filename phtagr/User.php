@@ -77,7 +77,7 @@ function exists($idorname)
     $sname=mysql_escape_string($name);
     $sql="SELECT COUNT(*)".
          " FROM $db->users".
-         " WHERE name='$name'";
+         " WHERE username='$name'";
   }
   $result=$db->query($sql);
   if (!$result)
@@ -115,7 +115,7 @@ function get_id_by_name($name)
   $sname=mysql_escape_string($name);
   $sql="SELECT id".
        " FROM $db->users".
-       " WHERE name='$sname'";
+       " WHERE username='$sname'";
   $result=$db->query($sql);
   if (!$result || mysql_num_rows($result)<1)
     return -1;
@@ -132,7 +132,7 @@ function get_name_by_id($id)
   if ($id<=0)
     return '';
 
-  $sql="SELECT name".
+  $sql="SELECT username".
        " FROM $db->users".
        " WHERE id=$id";
   $result=$db->query($sql);
@@ -146,7 +146,7 @@ function get_name_by_id($id)
   @return Type of user */
 function get_type()
 {
-  return $this->_get_data('type');
+  return $this->_get_data('role');
 }
 
 /** Sets the user type. Only admin user are permitted to change the types
@@ -162,7 +162,7 @@ function set_type($type)
   if ($type==USER_ADMIN && !$user->is_admin())
     return false;
 
-  $this->_set_data('type', $type);
+  $this->_set_data('role', $type);
 }
 
 /** Returns the creator id. The creator id can be used to identify the guest
@@ -183,7 +183,7 @@ function set_creator($creator)
 /** @return Returns the name of the user */
 function get_name()
 {
-  return $this->_get_data('name', 'anonymous');
+  return $this->_get_data('username', 'anonymous');
 }
 
 function get_password()
@@ -456,7 +456,7 @@ function _check_login($name, $pwd)
   $spwd=mysql_escape_string($pwd);
   $sql="SELECT id".
        " FROM $db->users".
-       " WHERE name='$sname' AND password='$spwd'";
+       " WHERE username='$sname' AND password='$spwd'";
   $result=$db->query($sql);
   if (!$result || mysql_num_rows($result)!=1)
     return false;
@@ -497,7 +497,7 @@ function create($name, $pwd, $type=USER_MEMBER)
   $sname=mysql_escape_string($name);
   $spwd=mysql_escape_string($pwd);
   $sql="INSERT INTO $db->users".
-       " (name, password, type)".
+       " (username, password, type)".
        " VALUES ('$sname', '$spwd', $type)";
   $id=$db->query_insert($sql);
   if ($id<0)
@@ -581,10 +581,10 @@ function is_in_group($groupid=-1)
 {
   global $db;
 
-  $sql="SELECT userid ".
+  $sql="SELECT user_id ".
        " FROM $db->usergroup".
-       " WHERE userid=".$this->get_id().
-       " AND groupid=$groupid";
+       " WHERE user_id=".$this->get_id().
+       " AND group_id=$groupid";
   $result=$db->query($sql);
   if (mysql_num_rows($result)>0)
     return true;
@@ -652,7 +652,7 @@ function get_guests()
   global $db;
   $guests=array();
 
-  $sql="SELECT id,name".
+  $sql="SELECT id,username".
        " FROM $db->users".
        " WHERE type=".USER_GUEST." AND creator=".$this->get_id();
   $result=$db->query($sql);
@@ -671,7 +671,7 @@ function get_groups()
   $groups=array();
   $sql="SELECT id,name". 
        " FROM $db->groups".
-       " WHERE owner=".$this->get_id();
+       " WHERE user_id=".$this->get_id();
   $result=$db->query($sql);
   if (!$result || mysql_num_rows($result)<0)
     return $groups;
@@ -688,7 +688,7 @@ function get_memberlist($onlyguests=true)
   $members=array();
   $sql="SELECT g.id,g.name".
        " FROM $db->usergroup AS ug, $db->groups AS g".
-       " WHERE ug.groupid=g.id AND ug.userid=".$this->get_id();
+       " WHERE ug.group_id=g.id AND ug.user_id=".$this->get_id();
   if ($onlyguest)
     $sql.=" AND g.creator=".$this->get_creator();
   $result=$db->query($sql);
@@ -714,7 +714,7 @@ function get_image_count($only_uploads=false, $since=-1)
   $id=$this->get_id();
   $sql="SELECT COUNT(*)".
        " FROM $db->images".
-       " WHERE userid=$id";
+       " WHERE user_id=$id";
   if ($only_uploads)
     $sql.=" AND flag & ".IMAGE_FLAG_UPLOADED;
   if ($since>0)
@@ -742,7 +742,7 @@ function get_image_bytes($only_uploads=false, $since=-1)
   $id=$this->get_id();
   $sql="SELECT SUM(bytes)".
        " FROM $db->images".
-       " WHERE userid=$id";
+       " WHERE user_id=$id";
   if ($only_uploads)
     $sql.=" AND flag & ".IMAGE_FLAG_UPLOADED;
   if ($since>0)

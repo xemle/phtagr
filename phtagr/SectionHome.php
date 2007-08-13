@@ -89,19 +89,19 @@ function print_cloud_tag($size=50)
 /** Prints a cloud of sets
   @param size Cloud size. Default is 50
   @see _print_cloud */
-function print_cloud_set($size=50) 
+function print_cloud_category($size=50) 
 {
   global $log;
-  echo "<h3>"._("Popular sets:")."</h3>\n\n<p>";
+  echo "<h3>"._("Popular categories:")."</h3>\n\n<p>";
 
   $search=new Search();
-  $cloud=$search->get_popular_sets($size);
+  $cloud=$search->get_popular_categories($size);
   if (!count($cloud))
   {
-    $this->warning(_("No popular sets found"));
+    $this->warning(_("No popular categories found"));
     return;
   }
-  $this->_print_cloud($cloud, 'sets');  
+  $this->_print_cloud($cloud, 'categories');  
 }
 
 /** Get an randomized subset of images from a specifc order
@@ -195,7 +195,7 @@ function print_content()
 {
   echo "<h2>"._("Home")."</h2>\n";
   $this->print_cloud_tag();
-  $this->print_cloud_set();
+  $this->print_cloud_category();
   $this->print_images_popular();
   $this->print_images_newest();
   $this->print_images_random();

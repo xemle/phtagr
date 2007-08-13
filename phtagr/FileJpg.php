@@ -84,7 +84,7 @@ function _import_from_imagefile($image)
 
   $image->set_caption($iptc->get_record('2:120'));
   $image->add_tags($iptc->get_records('2:025'));
-  $image->add_sets($iptc->get_records('2:020'));
+  $image->add_categories($iptc->get_records('2:020'));
   $image->set_location($iptc->get_record('2:090'), LOCATION_CITY);
   $image->set_location($iptc->get_record('2:092'), LOCATION_SUBLOCATION);
   $image->set_location($iptc->get_record('2:095'), LOCATION_STATE);
@@ -117,7 +117,7 @@ function _export_to_imagefile($image)
 
   $iptc->add_record('2:120', $image->get_caption());
   $iptc->add_records('2:025', $image->get_tags());
-  $iptc->add_records('2:020', $image->get_sets());
+  $iptc->add_records('2:020', $image->get_categories());
   $iptc->add_record('2:090', $image->get_location(LOCATION_CITY));
   $iptc->add_record('2:092', $image->get_location(LOCATION_SUBLOCATION));
   $iptc->add_record('2:095', $image->get_location(LOCATION_STATE));

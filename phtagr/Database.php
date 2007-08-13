@@ -42,12 +42,11 @@ var $images;
 /** Tablename of tags */
 var $tags;
 var $imagetag;
-var $sets;
-var $imageset;
+var $categories;
+var $imagecategory;
 var $locations;
 var $imagelocation;
 var $comments;
-var $messages;
 var $logs;
 
 function Database()
@@ -62,17 +61,16 @@ function set_table_prefix($prefix)
 {
   $this->_prefix=$prefix;
   $this->users=$prefix."users";
-  $this->usergroup=$prefix."usergroup";
+  $this->usergroup=$prefix."groups_users";
   $this->groups=$prefix."groups";
   $this->images=$prefix."images";
   $this->tags=$prefix."tags";
-  $this->imagetag=$prefix."imagetag";
-  $this->sets=$prefix."sets";
-  $this->imageset=$prefix."imageset";
+  $this->imagetag=$prefix."images_tags";
+  $this->categories=$prefix."categories";
+  $this->imagecategory=$prefix."categories_images";
   $this->locations=$prefix."locations";
-  $this->imagelocation=$prefix."imagelocation";
+  $this->imagelocation=$prefix."images_locations";
   $this->comments=$prefix."comments";
-  $this->messages=$prefix."messages";
   $this->configs=$prefix."configs";
   $this->logs=$prefix."logs";
 }
@@ -185,11 +183,10 @@ function _get_table_names()
     $this->images,
     $this->tags,
     $this->imagetag,
-    $this->sets,
-    $this->imageset,
+    $this->categories,
+    $this->imagecategory,
     $this->locations,
     $this->imagelocation,
-    $this->messages,
     $this->comments,
     $this->logs);
 }
@@ -222,7 +219,7 @@ function tables_exist()
 /** Sql query an return the result. 
   @param sql Sql statement
   @param log_error If true, log the sql query as error. Default is false
-  @result On failure print an error and return NULL
+  @result On failure print an error and return false
  * */
 function query($sql, $log_error=false)
 {
@@ -230,10 +227,10 @@ function query($sql, $log_error=false)
   if (!$this->_link) return null;
   
   $result=@mysql_query($sql, $this->_link);
-  if (!$result && !$log_error)
+  if (!$result && !$log_error && $log)
   {
     $log->err("Could not run Query: '$sql'");
-    return NULL;
+    return false;
   }
   $_SESSION['nqueries']++;
   return $result;
@@ -384,12 +381,12 @@ function tag2id($tag, $create=false)
   @param create If the set name does not exists and this flag is true, the set
   name will be created 
   @return -1 if the setnam was not found, id otherwise */
-function set2id($set, $create=false)
+function category2id($category, $create=false)
 {
-  $sset=mysql_escape_string($set);
+  $scat=mysql_escape_string($category);
   $sql="SELECT id". 
-       " FROM $this->sets".
-       " WHERE name='$sset'";
+       " FROM $this->categories".
+       " WHERE name='$scat'";
   $result=$this->query($sql);
   if (!$result)
   {
@@ -399,10 +396,10 @@ function set2id($set, $create=false)
   {
     if ($create)
     {
-      $sql="INSERT INTO $this->sets (name) VALUES('$sset')";
+      $sql="INSERT INTO $this->categories (name) VALUES('$scat')";
       $result=$this->query($sql);
       if ($result)
-        return $this->set2id($set);
+        return $this->category2id($category);
       else 
         return -1;
     }
@@ -539,7 +536,7 @@ function create_tables()
         creator       INT DEFAULT 0,
         updated       TIMESTAMP,
         expire        DATETIME DEFAULT NULL,
-        type          TINYINT UNSIGNED,
+        role          TINYINT UNSIGNED,
 
         firstname     VARCHAR(32),
         lastname      VARCHAR(32) NOT NULL,
@@ -561,17 +558,17 @@ function create_tables()
   if (!$this->query($sql)) { return false; }
 
   $sql="CREATE TABLE $this->configs (
-        userid        INT NOT NULL,
+        user_id       INT NOT NULL,
         name          VARCHAR(64),
         value         VARCHAR(192),
         
-        INDEX(userid),
+        INDEX(user_id),
         INDEX(name))";
   if (!$this->query($sql)) { return false; }
   
   $sql="CREATE TABLE $this->groups (
         id            INT NOT NULL AUTO_INCREMENT,
-        owner         INT NOT NULL,       /* User ID of the owner */
+        user_id       INT NOT NULL,       /* User ID of the owner */
         name          VARCHAR(32) NOT NULL,
         
         INDEX(id),
@@ -579,18 +576,18 @@ function create_tables()
   if (!$this->query($sql)) { return false; }
    
   $sql="CREATE TABLE $this->usergroup (
-        userid        INT NOT NULL,
-        groupid       INT NOT NULL,
+        user_id       INT NOT NULL,
+        group_id      INT NOT NULL,
         
-        INDEX(userid),
-        INDEX(groupid),
-        PRIMARY KEY(userid,groupid))";
+        INDEX(user_id),
+        INDEX(group_id),
+        PRIMARY KEY(user_id,group_id))";
   if (!$this->query($sql)) { return false; }
   
   $sql="CREATE TABLE $this->images (
         id            INT NOT NULL AUTO_INCREMENT,
-        userid        INT NOT NULL,
-        groupid       INT DEFAULT 0,
+        user_id       INT NOT NULL,
+        group_id      INT DEFAULT 0,
         modified      DATETIME,           /* Syncing time between image and the
                                              database */
         created       DATETIME,           /* Insert time of the image */
@@ -645,15 +642,14 @@ function create_tables()
   if (!$this->query($sql)) { return false; }
 
   $sql="CREATE TABLE $this->imagetag (
-        imageid       INT NOT NULL,
-        tagid         INT NOT NULL,
+        image_id      INT NOT NULL,
+        tag_id        INT NOT NULL,
 
-        INDEX(imageid),
-        PRIMARY KEY(imageid,tagid))";
+        INDEX(image_id),
+        PRIMARY KEY(image_id,tag_id))";
   if (!$this->query($sql)) { return false; }
   
-  // 'set' is a reserved word
-  $sql="CREATE TABLE $this->sets (
+  $sql="CREATE TABLE $this->categories (
         id            INT NOT NULL AUTO_INCREMENT,
         name          VARCHAR(64) NOT NULL,
         
@@ -661,12 +657,12 @@ function create_tables()
         PRIMARY KEY (id))";
   if (!$this->query($sql)) { return false; }
 
-  $sql="CREATE TABLE $this->imageset (
-        imageid       INT NOT NULL,
-        setid         INT NOT NULL,
+  $sql="CREATE TABLE $this->imagecategory (
+        image_id      INT NOT NULL,
+        category_id   INT NOT NULL,
 
-        INDEX(setid),
-        PRIMARY KEY(imageid,setid))";
+        INDEX(category_id),
+        PRIMARY KEY(image_id,category_id))";
   if (!$this->query($sql)) { return false; }
   
   $sql="CREATE TABLE $this->locations (
@@ -679,23 +675,23 @@ function create_tables()
   if (!$this->query($sql)) { return false; }
 
   $sql="CREATE TABLE $this->imagelocation (
-        imageid       INT NOT NULL,
-        locationid    INT NOT NULL,
+        image_id      INT NOT NULL,
+        location_id   INT NOT NULL,
 
-        INDEX(locationid),
-        PRIMARY KEY(imageid,locationid))";
+        INDEX(location_id),
+        PRIMARY KEY(image_id,location_id))";
   if (!$this->query($sql)) { return false; }
     
   $sql="CREATE TABLE $this->comments (
         id            INT NOT NULL AUTO_INCREMENT, 
-        imageid       INT NOT NULL,
+        image_id      INT NOT NULL,
         reply         INT DEFAULT NULL,
         auth          VARCHAR(64) DEFAULT NULL,
                                           /* Name of the commentator */
         name          VARCHAR(32) NOT NULL,
                                           /* User ID, if commentator is a
                                            * phTagr user */
-        userid        INT NOT NULL DEFAULT 0,
+        user_id       INT NOT NULL DEFAULT 0,
         email         VARCHAR(64) NOT NULL DEFAULT '',
         notify        TINYINT UNSIGNED DEFAULT 0,
         url           VARCHAR(128) NOT NULL DEFAULT '',
@@ -703,38 +699,23 @@ function create_tables()
 
         comment       TEXT NOT NULL,
         
-        INDEX (imageid),
+        INDEX (image_id),
         PRIMARY KEY (id))";
-  if (!$this->query($sql)) { return false; }
-
-  $sql="CREATE TABLE $this->messages (
-        id            INT NOT NULL AUTO_INCREMENT,
-        from_id       INT NOT NULL,
-        to_id         INT NOT NULL,
-        date          DATETIME NOT NULL,
-        expire        DATETIME DEFAULT NULL,
-        type          TINYINT UNSIGNED DEFAULT 0,
-        private       BLOB,
-        subject       VARCHAR(128),
-        body          BLOB,
-
-        INDEX (to_id),
-        PRIMARY KEY(id))";
   if (!$this->query($sql)) { return false; }
 
   $sql="CREATE TABLE $this->logs (
         time          DATETIME,
         level         TINYINT,
-        imageid       INT DEFAULT NULL,
-        userid        INT DEFAULT NULL,
+        image_id      INT DEFAULT NULL,
+        user_id       INT DEFAULT NULL,
         file          BLOB,
         line          INT,
         message       BLOB,
 
         INDEX (time),
         INDEX (level),
-        INDEX (imageid),
-        INDEX (userid))";
+        INDEX (image_id),
+        INDEX (user_id))";
   if (!$this->query($sql)) { return false; }
 
   $this->init_tables();
@@ -744,7 +725,7 @@ function create_tables()
 /** Inalizes the databases. Currently, it justs writes the table version */
 function init_tables()
 {
-  $sql="INSERT INTO $this->configs (userid, name, value)".
+  $sql="INSERT INTO $this->configs (user_id, name, value)".
        " VALUES (0, 'db.version', '".DB_VERSION."')";
   $this->query_insert($sql);
 }
@@ -773,17 +754,15 @@ function delete_images()
   if (!$this->query($sql)) { return false; }
   $sql="DELETE FROM $this->imagetag";
   if (!$this->query($sql)) { return false; }
-  $sql="DELETE FROM $this->sets";
+  $sql="DELETE FROM $this->categories";
   if (!$this->query($sql)) { return false; }
-  $sql="DELETE FROM $this->imageset";
+  $sql="DELETE FROM $this->imagecategory";
   if (!$this->query($sql)) { return false; }
   $sql="DELETE FROM $this->locations";
   if (!$this->query($sql)) { return false; }
   $sql="DELETE FROM $this->imagelocation";
   if (!$this->query($sql)) { return false; }
   $sql="DELETE FROM $this->comments";
-  if (!$this->query($sql)) { return false; }
-  $sql="DELETE FROM $this->messages";
   if (!$this->query($sql)) { return false; }
   return true;
 }
@@ -797,7 +776,7 @@ function delete_unassigned_data()
   // tags
   $sql="DELETE FROM $this->tags".
        " WHERE id NOT IN (".
-       "   SELECT tagid".
+       "   SELECT tag_id".
        "   FROM $this->imagetag".
        " )";
   $this->query($sql);
@@ -806,8 +785,8 @@ function delete_unassigned_data()
   // sets
   $sql="DELETE FROM $this->sets".
        " WHERE id NOT IN (".
-       "   SELECT setid".
-       "   FROM $this->imageset".
+       "   SELECT category_id".
+       "   FROM $this->imagecategory".
        " )";
   $this->query($sql);
   $affected+=mysql_affected_rows($this->_link);
@@ -815,7 +794,7 @@ function delete_unassigned_data()
   // locations
   $sql="DELETE FROM $this->locations".
        " WHERE id NOT IN (".
-       "   SELECT locationid".
+       "   SELECT location_id".
        "   FROM $this->imagelocation".
        " )";
   $this->query($sql);

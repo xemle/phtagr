@@ -79,6 +79,9 @@ function do_upgrade()
       $cur_version=$this->_upgrade_to_3(); break;
     case 3:
       $cur_version=$this->_upgrade_to_4(); break;
+    case 4:
+      // This should be done via external php script changedb.svn218.sh
+      break;
     default: break;
     }
   }

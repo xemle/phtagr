@@ -38,7 +38,7 @@ function SectionExplorer()
   $this->_search=new Search();
   $this->_search->from_url();
   $this->_tags=array();
-  $this->_sets=array();
+  $this->_cats=array();
   $this->_locs=array();
 }
 
@@ -58,9 +58,9 @@ function get_tags()
 /** @return Returns an hash of sets from the displayed images of the current 
  * page.  The hash key is the set itself and the hash value is the number of 
  * occurences of the set */
-function get_sets()
+function get_categories()
 {
-  return $this->_sets();
+  return $this->_cats();
 }
 
 /** @return Returns an hash of locations from the displayed images of the 
@@ -128,7 +128,7 @@ function _array_count_merge(&$counter, $add)
 }
 
 /** Collects the meta data from the image like tags, sets and locations. These 
- * can be accessed by get_tags(), get_sets() and get_locations() 
+ * can be accessed by get_tags(), get_categories() and get_locations() 
  * @param image Image object */
 function collect_meta($image)
 {
@@ -136,7 +136,7 @@ function collect_meta($image)
      return;
 
   $this->_array_count_merge(&$this->_tags, $image->get_tags());
-  $this->_array_count_merge(&$this->_sets, $image->get_sets());
+  $this->_array_count_merge(&$this->_cats, $image->get_categories());
   $this->_array_count_merge(&$this->_locs, $image->get_locations());
 }
 
@@ -277,7 +277,7 @@ function print_content()
 
   global $bulb;
   if (isset($bulb))
-    $bulb->set_data($this->_tags, $this->_sets, $this->_locs);
+    $bulb->set_data($this->_tags, $this->_cats, $this->_locs);
 }
 
 }

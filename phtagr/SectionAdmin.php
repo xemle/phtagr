@@ -442,7 +442,7 @@ function print_upload ()
 
 function exec_log()
 {
-  global $user, $conf;
+  global $user, $log, $conf;
   if (!$user->is_admin())
     return;
  
@@ -464,7 +464,7 @@ function exec_log()
       break;
     default:
       $this->warning(_("Unknown log backend"));
-      $log->warn('Unknown log backend: '.$type, -1, $user->get_userid());
+      $log->warn('Unknown log backend: '.$type, -1, $user->get_id());
       return false;
   }
 
