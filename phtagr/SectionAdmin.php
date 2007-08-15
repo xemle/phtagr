@@ -258,9 +258,9 @@ function print_users()
 
   echo "<h3>"._("Available Users")."</h3>\n";
 
-  $sql="SELECT id
-        FROM $db->users
-        WHERE type!='".USER_GUEST."'";
+  $sql="SELECT id".
+       " FROM $db->users".
+       " WHERE role!='".USER_GUEST."'";
   $result=$db->query($sql);
   if (!$result)
     return;

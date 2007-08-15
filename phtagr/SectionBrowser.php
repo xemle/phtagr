@@ -153,7 +153,7 @@ function print_browser($path)
 
 function print_content()
 {
-  global $user; 
+  global $user, $log; 
   $fs=$this->_fs;
 
   $this->h2(_("Browser"));

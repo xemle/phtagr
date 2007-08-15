@@ -643,11 +643,8 @@ function imginfo($is_thumb, $return=false)
   $output="<div class=\"imginfo\" id=\"info-$id\"><table>\n";
   if ($img->is_owner(&$user))
   {
-    if (!$img->is_upload())
-    {
-      $output.="<tr><th>"._("File:")."</th><td>".
-        $this->filename(true)."</td></tr>\n";
-    }
+    $output.="<tr><th>"._("File:")."</th><td>".
+      $this->filename(true)."</td></tr>\n";
     $output.="<tr><th>"._("Rights:")."</th><td>".
       $this->acl(true)."</td></tr>\n";
   }

@@ -273,11 +273,11 @@ function find($path, $regex, $maxdepth=255, $_depth=0)
 
   $matches=array();
   list($subpaths, $files)=$this->read_dir($path);
-  if ($subpaths!=null && $_detph>$maxdepth+1)
+  if ($subpaths!=null && $_detph<$maxdepth+1)
   {
     foreach ($subpaths as $subpath)
     {
-      $subpath=$this->merge_pathss($path, $subpath);
+      $subpath=$this->merge_paths($path, $subpath);
       $matches=array_merge($matches, 
         $this->find($subpath, $regex, $maxdepth, $_depth+1));
     }
