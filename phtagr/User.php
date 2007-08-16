@@ -98,7 +98,7 @@ function get_num_users($withguests=false)
   $sql="SELECT COUNT(*)".
        " FROM $db->users";
   if ($withguests)
-    $sql.=" WHERE type!=".USER_GUEST ;
+    $sql.=" WHERE role!=".USER_GUEST ;
   $result=$db->query($sql);
   if (!$result)
     return -1;
@@ -497,7 +497,7 @@ function create($name, $pwd, $type=USER_MEMBER)
   $sname=mysql_escape_string($name);
   $spwd=mysql_escape_string($pwd);
   $sql="INSERT INTO $db->users".
-       " (username, password, type)".
+       " (username, password, role)".
        " VALUES ('$sname', '$spwd', $type)";
   $id=$db->query_insert($sql);
   if ($id<0)
@@ -637,7 +637,7 @@ function get_num_guests()
   global $db;
   $sql="SELECT COUNT(*)".
        " FROM $db->users";
-  $sql.=" WHERE creator=".$this->get_id()." AND type=".USER_GUEST ;
+  $sql.=" WHERE creator=".$this->get_id()." AND role=".USER_GUEST ;
   $result=$db->query($sql);
   if (!$result)
     return -1;
@@ -654,7 +654,7 @@ function get_guests()
 
   $sql="SELECT id,username".
        " FROM $db->users".
-       " WHERE type=".USER_GUEST." AND creator=".$this->get_id();
+       " WHERE role=".USER_GUEST." AND creator=".$this->get_id();
   $result=$db->query($sql);
   if (!$result || mysql_num_rows($result)<1)
     return $guests;

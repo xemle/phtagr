@@ -23,12 +23,12 @@
 
 include_once("$phtagr_lib/Database.php");
 
-define("LOG_INFO", 3);
-define("LOG_WARN", 2);
-define("LOG_DEBUG", 1);
-define("LOG_TRACE", 0);
-define("LOG_ERR", -1);
-define("LOG_FATAL", -2);
+define("L_INFO", 3);
+define("L_WARN", 2);
+define("L_DEBUG", 1);
+define("L_TRACE", 0);
+define("L_ERR", -1);
+define("L_FATAL", -2);
 
 define("LOG_BUF", 1);
 define("LOG_CONSOLE", 2);
@@ -55,13 +55,13 @@ var $_enabled;
 /** Initialize the logger
   @param type Type of logging. Possible values are LOG_CONSOLE, LOG_BUF,
 LOG_FILE, LOG_HTML, or LOG_DB. Default is LOG_BUF.  @param level Log level
-threshold. Default is LOG_INFO
+threshold. Default is L_INFO
   @param filename Optional filename. Default is an empty string i
   @note By the default, the logger is disabled and has to be enabled by Logger::enable() 
   @note If LOG_DB is used, the global variable $db must be set. */
-function Logger($type=LOG_BUF, $level=LOG_INFO, $filename="")
+function Logger($type=LOG_BUF, $level=L_INFO, $filename="")
 {
-  $this->_level=LOG_INFO;
+  $this->_level=L_INFO;
   $this->_type=LOG_BUF;
   $this->_enabled=false;
   $this->_buf=array();
@@ -75,7 +75,7 @@ function Logger($type=LOG_BUF, $level=LOG_INFO, $filename="")
   @param level new log threshold */
 function set_level($level)
 {
-  if ($level >= LOG_FATAL && $level <= LOG_INFO)
+  if ($level >= L_FATAL && $level <= L_INFO)
     $this->_level=$level;
 }
 
@@ -187,15 +187,16 @@ function _log($level, $msg, $imageid, $userid)
 {
   global $db, $user;
   if (!$this->_enabled || 
-    ($this->_level > $level && $level > 0))
+    ($level < $this->_level && 0 <= $level ))
     return;
-  
-  if ($level==LOG_FATAL) $slevel="FATAL";
-  elseif ($level==LOG_ERR) $slevel="ERR";
-  elseif ($level==LOG_TRACE) $slevel="TRACE";
-  elseif ($level==LOG_DEBUG) $slevel="DEBUG";
-  elseif ($level==LOG_WARN) $slevel="WARN";
-  elseif ($level==LOG_INFO) $slevel="INFO";
+
+ 
+  if ($level==L_FATAL) $slevel="FATAL";
+  elseif ($level==L_ERR) $slevel="ERR";
+  elseif ($level==L_TRACE) $slevel="TRACE";
+  elseif ($level==L_DEBUG) $slevel="DEBUG";
+  elseif ($level==L_WARN) $slevel="WARN";
+  elseif ($level==L_INFO) $slevel="INFO";
   else return;
 
   if ($userid<0 && isset($user))
@@ -219,7 +220,7 @@ function _log($level, $msg, $imageid, $userid)
     $line=-1;
 
   $now=time();
-  $time=date("Y-d-m H:i:s", $now);
+  $time=date("Y-m-d H:i:s", $now);
   if ($this->_type==LOG_CONSOLE || $this->_type==LOG_FILE)
   {
     $line=sprintf("%s [%s] i:%d u:%d %s:%d %s\n",
@@ -320,64 +321,64 @@ function drop_db_logs($info, $warn, $debug, $trace, $error, $fatal)
     
   $now=time();
   $sql="DELETE FROM $db->logs".
-       " WHERE level=".LOG_INFO.
+       " WHERE level=".L_INFO.
        "   AND time<'".$db->date_unix_to_mysql($now-$info)."'";
   $db->query($sql);
   
   $sql="DELETE FROM $db->logs".
-       " WHERE level=".LOG_WARN.
+       " WHERE level=".L_WARN.
        "   AND time<'".$db->date_unix_to_mysql($now-$warn)."'";
   $db->query($sql);
   
   $sql="DELETE FROM $db->logs".
-       " WHERE level=".LOG_DEBUG.
+       " WHERE level=".L_DEBUG.
        "   AND time<'".$db->date_unix_to_mysql($now-$debug)."'";
   $db->query($sql);
   
   $sql="DELETE FROM $db->logs".
-       " WHERE level=".LOG_TRACE.
+       " WHERE level=".L_TRACE.
        "   AND time<'".$db->date_unix_to_mysql($now-$trace)."'";
   $db->query($sql);
   
   $sql="DELETE FROM $db->logs".
-       " WHERE level=".LOG_ERR. 
+       " WHERE level=".L_ERR. 
        "   AND time<'".$db->date_unix_to_mysql($now-$error)."'";
   $db->query($sql);
   
   $sql="DELETE FROM $db->logs". 
-       " WHERE level=".LOG_FATAL.
+       " WHERE level=".L_FATAL.
        "   AND time<'".$db->date_unix_to_mysql($now-$fatal)."'";
   $db->query($sql);
 }
 
 function fatal($msg, $imageid=-1, $userid=-1)
 {
-  $this->_log(LOG_FATAL, $msg, $imageid, $userid);
+  $this->_log(L_FATAL, $msg, $imageid, $userid);
 }
 
 function err($msg, $imageid=-1, $userid=-1)
 {
-  $this->_log(LOG_ERR, $msg, $imageid, $userid);
+  $this->_log(L_ERR, $msg, $imageid, $userid);
 }
 
 function trace($msg, $imageid=-1, $userid=-1)
 {
-  $this->_log(LOG_TRACE, $msg, $imageid, $userid);
+  $this->_log(L_TRACE, $msg, $imageid, $userid);
 }
 
 function debug($msg, $imageid=-1, $userid=-1)
 {
-  $this->_log(LOG_DEBUG, $msg, $imageid, $userid);
+  $this->_log(L_DEBUG, $msg, $imageid, $userid);
 }
 
 function warn($msg, $imageid=-1, $userid=-1)
 {
-  $this->_log(LOG_WARN, $msg, $imageid, $userid);
+  $this->_log(L_WARN, $msg, $imageid, $userid);
 }
 
 function info($msg, $imageid=-1, $userid=-1)
 {
-  $this->_log(LOG_INFO, $msg, $imageid, $userid);
+  $this->_log(L_INFO, $msg, $imageid, $userid);
 }
 
 }

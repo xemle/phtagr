@@ -113,11 +113,22 @@ function _export_to_imagefile($image)
     $this->_iptc=new Iptc($filename);
   $iptc=$this->_iptc;
 
-  $iptc->reset_iptc();
-
   $iptc->add_record('2:120', $image->get_caption());
-  $iptc->add_records('2:025', $image->get_tags());
-  $iptc->add_records('2:020', $image->get_categories());
+
+  $tags_file=$iptc->get_records('2:025');
+  $tags_db=$image->get_tags();
+  $tags_add=array_diff($tags_db, $tags_file); // tags in db but not in file
+  $tags_del=array_diff($tags_file, $tags_db); // tags in file but not in db
+  $iptc->add_records('2:025', $tags_add);
+  $iptc->del_records('2:025', $tags_del);
+
+  $cats_file=$iptc->get_records('2:020');
+  $cats_db=$image->get_categories();
+  $cats_add=array_diff($cats_db, $cats_file); // cats in db but not in file
+  $cats_del=array_diff($cats_file, $cats_db); // cats in file but not in db
+  $iptc->add_records('2:020', $cats_add);
+  $iptc->del_records('2:020', $cats_del);
+
   $iptc->add_record('2:090', $image->get_location(LOCATION_CITY));
   $iptc->add_record('2:092', $image->get_location(LOCATION_SUBLOCATION));
   $iptc->add_record('2:095', $image->get_location(LOCATION_STATE));
@@ -172,7 +183,6 @@ function _get_date_exif()
   if (!$this->_read_exif())
     return null;
 
-  if (isset($this->_exif['EXIF']) && isset($this->_exif['EXIF']['DateTimeOriginal']))
     return $this->_exif['EXIF']['DateTimeOriginal'];
   
   return null;

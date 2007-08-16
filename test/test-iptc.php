@@ -10,7 +10,7 @@ $phtagr_lib=$phtagr_prefix.DIRECTORY_SEPARATOR."phtagr";
 include_once("$phtagr_lib/Iptc.php");
 include_once("$phtagr_lib/Logger.php");
 
-$log=new Logger(LOG_CONSOLE, LOG_INFO);
+$log=new Logger(LOG_CONSOLE, L_INFO);
 $log->enable();
 
 $filename=$argv[1];

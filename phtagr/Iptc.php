@@ -430,7 +430,7 @@ function _read_seg_ps3($jpg)
     if (strlen($hdr)!=HDR_SIZE_8BIM)
     {
       $this->_errno=-1;
-      $this->_errmsg="Could not read PS segment header";
+      $this->_errmsg="Could not read PS record header";
       return -1;
     }
 
@@ -440,10 +440,18 @@ function _read_seg_ps3($jpg)
       // IPTC bug detection
       if (substr($hdr, 0, 5)=="\08BIM")
       {
+        // positive padding, shift by 1 byte
         $this->_has_iptc_bug=true;
         $log->warn("Shift 8BIM header due IPCT bug!");
         $hdr=substr($hdr, 1).fread($fp, 1);
         $seg['pos']++;
+      }
+      elseif ($substr($hdr, 0, 3)=="BIM")
+      {
+        // negative padding, rewind by 1 byte
+        fseek($fp, $seg['pos']-1, SEEK_SET);
+        $this->_has_iptc_bug=true;
+        continue;
       }
       else
       {
@@ -481,12 +489,22 @@ function _read_seg_ps3($jpg)
     }
 
     $seg_size_aligned=$seg['size']+($seg['size']&1);
-    if ($seg['pos']+$hdr_len+$seg_size_aligned>$ps3_pos_end)
+    // 8BIM block must be padded with '0's to even size. Allow incorrect
+    $seg_pos_end=$seg['pos']+$hdr_len+$seg_size_aligned;
+    if ($seg_pos_end>$ps3_pos_end)
     {
-      $this->_errno=-1;
-      $this->_errmsg=sprintf("PS3 segment $i:%s size overflow: pos:%d, hdrlen:%d, size: %d, max:%d", 
-        $seg['type'], $seg['pos'], $hdr_len, $seg_size_aligned, $ps3_pos_end);
-      return -1;
+      if ($seg_pos_end-$ps3_pos_end==1 && $seg['size']&1==1 && $seg['type']=='0404')
+      {
+        $log->warn("PS3 record (last IPTC) is not padded to aligned even size!");
+        $this->_has_iptc_bug=true;
+      }
+      else 
+      {
+        $this->_errno=-1;
+        $this->_errmsg=sprintf("PS3 record $i:%s size overflow: (pos:%d, hdrlen:%d, size: %d)=%d, max:%d", 
+          $seg['type'], $seg['pos'], $hdr_len, $seg_size_aligned, $seg_pos_end, $ps3_pos_end);
+        return -1;
+      }
     }
   
     if ($seg['type']=='0404') {
@@ -496,11 +514,9 @@ function _read_seg_ps3($jpg)
 
     array_push($app13['_segs'], $seg);
 
-    // 8BIM block must be padded with '0's to even size. Allow incorrect
-    $seg_pos_end=$seg['pos']+$hdr_len+$seg_size_aligned;
-
-    $log->warn(sprintf("seg[$i]: type: %s, pos: %d, hdrlen: %d, size: %d", $seg['type'], $seg['pos'], $hdr_len, $seg['size']));
-    $log->warn("PS3 end: $ps3_pos_end. Seg end: $seg_pos_end, Size aligned: $seg_size_aligned");
+    $log->trace(sprintf("seg[$i]: type: %s, pos: %d, hdrlen: %d, size: %d", $seg['type'], $seg['pos'], $hdr_len, $seg['size']));
+    $log->trace("PS3 end: $ps3_pos_end. Seg end: $seg_pos_end, Size aligned: $seg_size_aligned");
+    // positive shift
     if ($ps3_pos_end-$seg_pos_end==1 && $seg['type']=='0404')
     {
       $log->warn("Found IPTC bug. Adjust size");
@@ -508,12 +524,20 @@ function _read_seg_ps3($jpg)
       $seg_size_aligned++;
       $seg_pos_end++;
     }
+    //negative shift
+    if ($seg_pos_end-$ps3_pos_end==1 && $seg['type']=='0404')
+    {
+      $log->warn("Found IPTC bug. Adjust size");
+      $this->_has_iptc_bug=true;
+      $seg_size_aligned--;
+      $seg_pos_end--;
+    }
     fseek($fp, $seg_size_aligned, SEEK_CUR);
 
     $seg_free=$ps3_pos_end-$seg_pos_end;
     if ($seg_free==0)
     {
-      $log->warn("Reaching PS3 segment end. Normal break.");
+      $log->trace("Reaching PS3 segment end. Normal break.");
       break;
     }
     if ($seg_free<HDR_SIZE_8BIM)

@@ -101,7 +101,7 @@ $conf=new Config(0);
 $log=new Logger();
 if ($conf->get('log.enabled', 0)==1)
 {
-  $log->set_level($conf->get('log.level', LOG_INFO));
+  $log->set_level($conf->get('log.level', L_INFO));
   $log->set_type($conf->get('log.type', LOG_DB),
     $conf->get('log.filename', ''));
   $log->enable();

@@ -470,10 +470,10 @@ function exec_log()
 
   switch ($level)
   {
-    case LOG_INFO:
-    case LOG_WARN:
-    case LOG_DEBUG:
-    case LOG_TRACE:
+    case L_INFO:
+    case L_WARN:
+    case L_DEBUG:
+    case L_TRACE:
       break;
     default:
       $log->warn('Unknown log level: '.$level, -1, $user->get_userid());
@@ -529,11 +529,11 @@ function print_log()
   echo "<li>";
   $this->label(_("Log Level:"));
   echo "<select name=\"level\" size=\"1\">\n";
-  $level=$conf->get('log.level', LOG_INFO);
-  $this->option(_("Info"), LOG_INFO, $level==LOG_INFO);
-  $this->option(_("Warn"), LOG_WARN, $level==LOG_WARN);
-  $this->option(_("Debug"), LOG_DEBUG, $level==LOG_DEBUG);
-  $this->option(_("Trace"), LOG_TRACE, $level==LOG_TRACE);
+  $level=$conf->get('log.level', L_INFO);
+  $this->option(_("Info"), L_INFO, $level==L_INFO);
+  $this->option(_("Warn"), L_WARN, $level==L_WARN);
+  $this->option(_("Debug"), L_DEBUG, $level==L_DEBUG);
+  $this->option(_("Trace"), L_TRACE, $level==L_TRACE);
   echo "</select></li>";
 
   echo "</ol>\n";
