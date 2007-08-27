@@ -345,7 +345,7 @@ function _read_seg_jpg($jpg)
     }
     // size is excl. marker 
     // size of jpes section starting from pos: size+2
-    $size=$this->_byte2short(substr($hdr, 2, 2));
+    $size=$this->_ato16u(substr($hdr, 2, 2));
     if ($pos+$size+2>$jpg['size'])
     {
       $this->_errno=-1;
@@ -414,9 +414,9 @@ function _read_seg_ps3($jpg)
     Section header size: 12 bytes
     marker: 4 bytes='8BIM'
     type: 2 bytes
-    padding: 4 bytes=0x00000000
-    size: 2 bytes, excl. marker, type, padding, size
-    data: length of size
+    name: PString (1 byte string length, string data), padded to even size. Null name is 0x0000
+    size: 4 bytes, excl. marker, type, name, size
+    data: length of size. Padded to even size
     
     padding: 1 byes=0x00 if odd size. Not included in size! 
     See Photoshop File Formats.pdf, Section 'Image resource blocks', page 8, Table 2-1
@@ -446,7 +446,7 @@ function _read_seg_ps3($jpg)
         $hdr=substr($hdr, 1).fread($fp, 1);
         $seg['pos']++;
       }
-      elseif ($substr($hdr, 0, 3)=="BIM")
+      elseif (substr($hdr, 0, 3)=="BIM")
       {
         // negative padding, rewind by 1 byte
         fseek($fp, $seg['pos']-1, SEEK_SET);
@@ -462,31 +462,31 @@ function _read_seg_ps3($jpg)
     }
 
     // size of section starting from pos: size+12
-    $seg['size']=$this->_byte2short(substr($hdr, 10, 2));
     $seg['type']=$this->_str2hex(substr($hdr, 4, 2));
 
     // Check for path segment
-    $type=$this->_byte2short(substr($hdr, 4, 2));
-    if ($type>=2000 && $type<3000)
+    $type=$this->_ato16u(substr($hdr, 4, 2));
+
+    // Path block: 8BIM + PATH_TYPE + LEN[1] + String[len] + [optional odd padding '0'] + Size[4] + data
+    $name_len=ord($hdr[6])+1; // add byte of LEN
+    $name_len+=($name_len&0x01); // padding to even size
+
+    $hdr_len=10+$name_len; // 4 Bytes '8BIM', 2 Bytes Type, name size, 4 Bytes size
+    if ($hdr_len>HDR_SIZE_8BIM)
+      $hdr.=fread($fp, $hdr_len-HDR_SIZE_8BIM);
+    else if ($len<HDR_SIZE_8BIM)
     {
-      // Path block: 8BIM + PATH_TYPE + LEN[1] + String[len] + '0' + Size[4] + data
-      $hdr_len=ord($hdr[6]);
-      //printf("String Length: %d\n", $hdr_len);
-      $hdr_len+=12; // 4 Bytes '8BIM', 2 Bytes Type, 1 Byte len, 1 Byte leading '0', 4 Bytes size
-      if ($hdr_len>HDR_SIZE_8BIM)
-        $hdr.=fread($fp, $hdr_len-HDR_SIZE_8BIM);
-      else if ($len<HDR_SIZE_8BIM)
-      {
-        $hdr=substr($hdr,0,$hdr_len);
-        fseek($fp, $seg['pos']+$hdr_len, SEEK_SET);
-      }
-      $seg['size']=$this->_byte2short(substr($hdr, $hdr_len-2, 2));
-      //printf("New Header Length: %d\n", $hdr_len);
-      //printf("New Segement Size: %d\n", $seg['size']);
-    } else {
-      $hdr_len=HDR_SIZE_8BIM;
-      $seg['padding']=$this->_str2hex(substr($hdr, 6, 4));
+      $hdr=substr($hdr,0,$hdr_len);
+      fseek($fp, $seg['pos']+$hdr_len, SEEK_SET);
     }
+    // Maximum of JPEG size are 2 bytes at all! 
+    $seg['size']=$this->_ato32u(substr($hdr, $hdr_len-4, 4));
+    
+    $name_len=ord($hdr[6]);
+    if ($name_len>0)
+      $seg['name']=substr($hdr, 7, $name_len);
+    //printf("New Header Length: %d\n", $hdr_len);
+    //printf("New Segement Size: %d\n", $seg['size']);
 
     $seg_size_aligned=$seg['size']+($seg['size']&1);
     // 8BIM block must be padded with '0's to even size. Allow incorrect
@@ -603,7 +603,7 @@ function _read_seg_iptc($jpg)
     }
     
     // size of segment starting from pos: size+5
-    $seg['size']=$this->_byte2short(substr($hdr, 3, 2));
+    $seg['size']=$this->_ato16u(substr($hdr, 3, 2));
     if ($seg['pos']+HDR_SIZE_IPTC+$seg['size']>$iptc['pos']+HDR_SIZE_8BIM+$iptc['size'])
     {
       $this->_errno=-1;
@@ -645,9 +645,9 @@ function _read_seg_com($jpg)
   $fp=$jpg['_fp'];
   $com=&$jpg['_com'];
   fseek($fp, $com['pos']+HDR_SIZE_JPG, SEEK_SET);
-  if ($com['size']<2)
+  if ($com['size']<=2)
   {
-    $log->err("JPEG comment segment size is negative: ".$jpg['filename'], -1, $user->get_id());
+    $log->err("JPEG comment segment size is negative: ".$jpg['filename']);
     return false;
   }
   $buf=fread($fp, $com['size']-2);
@@ -713,7 +713,7 @@ function _iptc2bytes()
       $buf.=chr(0x1c);
       $buf.=chr(intval($rec));
       $buf.=chr(intval($type));
-      $buf.=$this->_short2byte(strlen($value));
+      $buf.=$this->_16utoa(strlen($value));
       $buf.=$value;
     }
   }
@@ -726,7 +726,7 @@ function _create_8bim_record($type, $buf)
   $hdr='8BIM'.$type;                          // PS header and type
   $hdr.=chr(0).chr(0).chr(0).chr(0);          // padding
   $len=strlen($buf);
-  $hdr.=$this->_short2byte($len);  // size
+  $hdr.=$this->_16utoa($len);  // size
   // padding of '0' to even size (fixed iptc bug)
   if (($len&1)==1)
   {
@@ -761,7 +761,7 @@ function _replace_seg_ps3($fin, $fout)
     // position points to the last segment
     $hdr_app13=chr(0xff).chr(0xed);
     $new_size=2+HDR_SIZE_PS3+$new_iptc_len; // jpg segment size
-    $hdr_app13.=$this->_short2byte($new_size);
+    $hdr_app13.=$this->_16utoa($new_size);
     $hdr_app13.=HDR_PS3;
 
     // segment inclusive Photoshop termination
@@ -815,7 +815,7 @@ function _replace_seg_ps3($fin, $fout)
 
     // Create JPEG segment header with adjusted size
     $hdr_app13=chr(0xff).chr(0xed);
-    $hdr_app13.=$this->_short2byte(2+strlen($new_ps_buf));
+    $hdr_app13.=$this->_16utoa(2+strlen($new_ps_buf));
 
     return fwrite($fout, $hdr_app13.$new_ps_buf);
   }
@@ -842,7 +842,7 @@ function _replace_seg_com($fout)
   // Write new comment segment
   $hdr_com=chr(0xff).chr(0xfe);
   $new_size=2+$new_comment_len; // jpg segment size
-  $hdr_app13.=$this->_short2byte($new_size);
+  $hdr_app13.=$this->_16utoa($new_size);
 
   // segment inclusive Photoshop termination
   $new_buf=$hdr_com+$new_comment;
@@ -850,16 +850,29 @@ function _replace_seg_com($fout)
   return fwrite($fout, $new_buf);
 }
 
-/** Converts a shor int value (16 bit) a byte sting */
-function _short2byte($i)
+/** Converts a short int value (16 bit) a byte sting in big endian */
+function _16utoa($i)
 {
+  $i=abs($i);
   return chr(($i>>8)&0xff) . chr(($i)&0xff);
 }
 
-/** Convert a short byte string (2 bytes) to an integer */
-function _byte2short($buf)
+/** Convert a short byte string (2 bytes) to an integer in big endian */
+function _ato16u($val)
 {
-  return ord($buf{0})<<8 | ord($buf{1});
+  if (strlen($val)<2)
+    return -1;
+  return ord($val[0])<<8 | ord($val[1]);
+}
+
+/** Converts a string to 32 unsigned integer in big endian 
+  @param val Byte string (at least 4 bytes) 
+  @return unsigned int */
+function _ato32u($val)
+{
+  if (strlen($val)<4)
+    return -1;
+  return ord($val[0])<<24 | ord($val[1])<<16 | ord($val[2])<<8 | ord($val[3]);
 }
 
 /** Convert a sting to a hex string. This is only for debugging purpose */
