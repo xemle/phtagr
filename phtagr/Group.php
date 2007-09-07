@@ -49,9 +49,9 @@ function init_by_id($id)
   if ($id<=0)
     return false;
 
-  $sql="SELECT name,user_id
-        FROM $db->groups 
-        WHERE id=$id";
+  $sql="SELECT name,user_id".
+       " FROM $db->groups".
+       " WHERE id=$id";
   $result=$db->query($sql);
   if (!$result || mysql_num_rows($result)<1)
     return false;
@@ -62,10 +62,10 @@ function init_by_id($id)
   $this->_id=$id;
 
   // Fetch all members
-  $sql="SELECT u.id,u.name
-        FROM $db->users AS u, $db->usergroup AS ug
-        WHERE u.id=ug.user_id AND ug.group_id=$id
-        ORDER BY u.name";
+  $sql="SELECT u.id,u.username".
+       " FROM $db->users AS u, $db->usergroup AS ug".
+       " WHERE u.id=ug.user_id AND ug.group_id=$id".
+       " ORDER BY u.username";
   $result=$db->query($sql);
   if (!$result || mysql_num_rows($result)<1)
     return true;
@@ -81,10 +81,10 @@ function get_id_by_name($name)
   global $db;
 
   $sname=mysql_escape_string($name);
-  $sql="SELECT id
-        FROM $db->groups
-        WHERE user_id=".$user->get_id()."
-          AND name='$sname'";
+  $sql="SELECT id".
+       " FROM $db->groups".
+       " WHERE user_id=".$user->get_id().
+       "   AND name='$sname'";
   $result=$db->query($sql);
   if (!$result || mysql_num_rows($result)<1)
     return -1;
