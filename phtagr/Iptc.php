@@ -35,6 +35,15 @@ define("HDR_SIZE_IPTC", 0x05);
 define("HDR_PS3", "Photoshop 3.0\0");
 define("HDR_8BIM_IPTC", chr(4).chr(4));
 
+define("EXIF_BYTE",       0x01);
+define("EXIF_ASCII",      0x02);
+define("EXIF_SHORT",      0x03);
+define("EXIF_LONG",       0x04);
+define("EXIF_RATIONAL",   0x05);
+define("EXIF_UNDEFINED",  0x07);
+define("EXIF_SLONG",      0x09);
+define("EXIF_SRATIONAL",  0x0a);
+
 /** @class Iptc
   Reads and write IPTC tags from a given JPEG file. */
 class Iptc extends Base 
@@ -60,6 +69,9 @@ var $_changed_com;
 
 var $_has_iptc_bug;
 
+/** True on little endian encoding of exif. False on big endian */
+var $_lendian;
+
 function Iptc($filename='')
 {
   $this->_errno=0;
@@ -70,6 +82,7 @@ function Iptc($filename='')
   $this->_changed_com=false;
   $this->_changed_iptc=false;
   $this->_has_iptc_bug=false;
+  $this->_lendian=false;
   if ($filename!='')
     $this->load_from_file($filename);
 }
@@ -152,6 +165,11 @@ function load_from_file($filename)
     $this->_jpg=null;
     fclose($fp);
     return -1;
+  }
+
+  if (isset($this->_jpg['_app1']))
+  {
+    //$this->_read_seg_app1(&$jpg);
   }
 
   if (isset($this->_jpg['_app13']))
@@ -358,6 +376,12 @@ function _read_seg_jpg($jpg)
     $seg['type']=$this->_str2hex($marker);
     array_push($jpg['_segs'], $seg);
 
+    // save exif segment
+    if ($marker[1]==chr(0xe1)) {
+      $seg['index']=$i;
+      $jpg['_app1']=$seg;
+    }
+
     // save photoshop segment
     if ($marker[1]==chr(0xed)) {
       $seg['index']=$i;
@@ -378,6 +402,208 @@ function _read_seg_jpg($jpg)
     $i++;
   }
   return true;
+}
+
+function _read_seg_app1($jpg)
+{
+  global $log; 
+  if ($jpg==null || !isset($jpg['_app1']))
+  {
+    $this->_errmsg="No PS3 header found";
+    return -1;
+  }
+
+  $app1=&$jpg['_app1'];
+  $fp=$jpg['_fp'];
+  fseek($fp, $app1['pos']+4, SEEK_SET);
+  $log->debug("Reading APP1 at ".$app1['pos']);
+
+  $exif_hdr=fread($fp, 6);
+  if (substr($exif_hdr, 0, 4)!='Exif')
+  {
+    $this->_errno=-1;
+    $this->_errmsg="Wrong Exif marker: ".substr($buf, 0, 4);
+    return;
+  }
+
+  // read whole exif information into the buffer
+  // 8 = 2 byte for jpeg semenent size, 6 byte exif header
+  $buf=fread($fp, $app1['size']-8); 
+
+  // Read TIFF header
+  $endian=substr($buf, 0, 2);
+  if ($endian=='II')
+  {
+    $app1['lendian']=true;
+    $this->_lendian=true;
+  }
+  elseif ($endian=='MM')
+  {
+    $app1['lendian']=false;
+    $this->_lendian=false;
+  }
+  else
+  { 
+    $this->_errno=-1;
+    $this->_errmsg="Wrong Exif encoding: ".$endian;
+    return;
+  }
+
+  $i42=$this->_get16u(substr($buf, 2, 2));
+  if ($i42!=0x2a)
+  {
+    $this->_errno=-1;
+    $this->_errmsg="Wrong 42 header: $i42 (should be 42)";
+    return;
+  }
+
+  $offset=$this->_get32u(substr($buf, 4, 4));
+  if ($offset!=0x08)  
+  {
+    $this->_errno=-1;
+    $this->_errmsg="Unsupported 0th IFD offset of $offset";
+    return;
+  }
+
+  $app1['interoperability']=$this->_get16u(substr($buf, 8, 2));
+  $log->trace("app1: ".print_r($app1, true));
+
+  $pos=10;
+  $len=strlen($buf);
+  while ($pos < $len)
+  {
+    $tag=array();
+    $tag['pos']=$pos; // position counting at TIFF header
+    $tag['name']=$this->_str2hex(substr($buf, $pos, 2));
+    $tag['type']=$this->_get16u(substr($buf, $pos+2, 2));
+    $tag['count']=$this->_get32u(substr($buf, $pos+4, 4));
+    $this->_getExifValue($buf, &$tag);
+    $log->trace("tag: ".print_r($tag, true));
+    // EXIF IFD, GPS IFD
+    if ($tag['name']==6987 || $tag['name']==2588) 
+    {
+      $pos=$tag['value']+2;
+    }
+    else
+    {
+      $pos+=12;
+    }
+    if ($this->_errno<0)
+    {
+      $log->err($this->_errmsg);
+      break;
+    }
+  }
+}
+
+function _get16u($val)
+{
+  if (strlen($val)<2)
+    return -1;
+  if ($this->_lendian)
+    return (ord($val[1])<<8 | ord($val[0]));
+  else
+    return (ord($val[0])<<8 | ord($val[1]));
+}
+
+function _get32u($val)
+{
+  if (strlen($val)<4)
+    return -1;
+
+  if ($this->_lendian)
+    return (ord($val[3])<<24 | ord($val[2])<<16 | ord($val[1])<<8 | ord($val[0]));
+  else
+    return (ord($val[0])<<24 | ord($val[1])<<16 | ord($val[2])<<8 | ord($val[3]));
+}
+
+function _getExifSize($type, $count)
+{
+  switch ($type)
+  {
+    case EXIF_BYTE: 
+    case EXIF_ASCII: 
+    case EXIF_UNDEFINED:
+      return $count;
+    case EXIF_SHORT:
+      return $count<<1;
+    case EXIF_LONG:
+    case EXIF_SLONG:
+      return $count<<2;
+    case EXIF_RATIONAL:
+    case EXIF_SRATIONAL:
+      return $count<<3;
+    default:
+      $this->_errno=-1;
+      $this->_errmsg="Undefinded Exif Tag Type: $type";
+      return -1;
+  }
+}
+
+function _getExifValue($buf, &$tag)
+{
+  global $log;
+  $type=$tag['type'];
+  $count=$tag['count'];
+  $pos=$tag['pos'];
+  $size=$this->_getExifSize($type, $count);
+  $tag['size']=$size;
+  if ($size<=4)
+  {
+    // offset as value
+    switch($type)
+    {
+      case EXIF_BYTE:
+        // An 8-bit unsigned integer.
+        $tag['value']=ord($buf[$pos+8]);
+        break; 
+      case EXIF_SHORT:
+        $tag['value']=$this->_get16u(substr($buf, $pos+8, 2));
+        break; 
+      case EXIF_LONG:
+        $tag['value']=$this->_get16u(substr($buf, $pos+8, 4));
+        break; 
+      case EXIF_SLONG:
+      default:
+        $tag['value']="err";
+        $this->_errno=-1;
+        $this->_errmsg="Undefinded Exif Tag Type: $type";
+        return;
+    }
+  }
+  else
+  {
+    // value buf at offset
+    $offset=$this->_get32u(substr($buf, $pos+8, 4));
+    $tag['offset']=$offset;
+    switch ($type)
+    {
+      case EXIF_UNDEFINED:
+      case EXIF_ASCII:
+        // An 8-bit byte containing one 7-bit ASCII code. The final byte is
+        // terminated with NULL
+        $tag['value']=substr($buf, $offset, $size-1);
+        return;
+      case EXIF_RATIONAL:
+        // Two LONGs. The first LONG is the numerator and the second LONG
+        // expresses the denominator.,
+        $tag['num']=$this->_get32u(substr($buf, $offset, 4));
+        $tag['den']=$this->_get32u(substr($buf, $offset+4, 4));
+        if ($tag['den']>0)
+          $tag['value']=$tag['num']/$tag['den'];
+        else
+          $tag['value']=0;
+        return;
+      case EXIF_SRATIONAL:
+        // Two SLONGs. The first SLONG is the numerator and the second SLONG is
+        // the denominator.
+      default:
+        $tag['value']="err";
+        $this->_errno=-1;
+        $this->_errmsg="Undefinded Exif Tag Type: $type";
+        return;
+    }
+  }
 }
 
 /* Read the photoshop meta headers.

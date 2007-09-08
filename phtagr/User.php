@@ -77,7 +77,7 @@ function exists($idorname)
     $sname=mysql_escape_string($name);
     $sql="SELECT COUNT(*)".
          " FROM $db->users".
-         " WHERE name='$name'";
+         " WHERE username='$name'";
   }
   $result=$db->query($sql);
   if (!$result)
@@ -115,7 +115,7 @@ function get_id_by_name($name)
   $sname=mysql_escape_string($name);
   $sql="SELECT id".
        " FROM $db->users".
-       " WHERE name='$sname'";
+       " WHERE username='$sname'";
   $result=$db->query($sql);
   if (!$result || mysql_num_rows($result)<1)
     return -1;
@@ -132,7 +132,7 @@ function get_name_by_id($id)
   if ($id<=0)
     return '';
 
-  $sql="SELECT name".
+  $sql="SELECT username".
        " FROM $db->users".
        " WHERE id=$id";
   $result=$db->query($sql);
@@ -183,7 +183,7 @@ function set_creator($creator)
 /** @return Returns the name of the user */
 function get_name()
 {
-  return $this->_get_data('name', 'anonymous');
+  return $this->_get_data('username', 'anonymous');
 }
 
 function get_password()
@@ -456,7 +456,7 @@ function _check_login($name, $pwd)
   $spwd=mysql_escape_string($pwd);
   $sql="SELECT id".
        " FROM $db->users".
-       " WHERE name='$sname' AND password='$spwd'";
+       " WHERE username='$sname' AND password='$spwd'";
   $result=$db->query($sql);
   if (!$result || mysql_num_rows($result)!=1)
     return false;
@@ -497,7 +497,7 @@ function create($name, $pwd, $type=USER_MEMBER)
   $sname=mysql_escape_string($name);
   $spwd=mysql_escape_string($pwd);
   $sql="INSERT INTO $db->users".
-       " (name, password, role)".
+       " (username, password, role)".
        " VALUES ('$sname', '$spwd', $type)";
   $id=$db->query_insert($sql);
   if ($id<0)
@@ -652,7 +652,7 @@ function get_guests()
   global $db;
   $guests=array();
 
-  $sql="SELECT id,name".
+  $sql="SELECT id,username".
        " FROM $db->users".
        " WHERE role=".USER_GUEST." AND creator=".$this->get_id();
   $result=$db->query($sql);
