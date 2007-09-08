@@ -210,12 +210,15 @@ function _handle_request_acl(&$img)
   }
   $acl->handle_request($prefix);
   
-  list($gacl, $macl, $pacl)=$acl->get_values();
-  global $log;
-  $log->trace("new acl gacl=$gacl, macl=$macl, pacl=$pacl");
-  $img->set_gacl($gacl);
-  $img->set_macl($macl);
-  $img->set_pacl($pacl);
+  if ($acl->has_changed())
+  {
+    list($gacl, $macl, $pacl)=$acl->get_values();
+    global $log;
+    $log->trace("new acl gacl=$gacl, macl=$macl, pacl=$pacl", $img->get_id());
+    $img->set_gacl($gacl);
+    $img->set_macl($macl);
+    $img->set_pacl($pacl);
+  }
   $img->commit();
 
   return true;

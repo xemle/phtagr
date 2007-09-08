@@ -529,7 +529,7 @@ function create_tables()
 { 
   $sql="CREATE TABLE $this->users (
         id            INT NOT NULL AUTO_INCREMENT,
-        name          VARCHAR(32) NOT NULL,
+        username      VARCHAR(32) NOT NULL,
         password      VARCHAR(32) NOT NULL,
         
         created       DATETIME NOT NULL DEFAULT 0,

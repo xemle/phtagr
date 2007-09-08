@@ -31,6 +31,7 @@ class Acl extends Base
 
 /** Old version */
 var $_acl;
+var $_old_acl;
 
 function Acl($gacl, $macl, $pacl)
 {
@@ -38,6 +39,21 @@ function Acl($gacl, $macl, $pacl)
   $this->_acl[ACL_LEVEL_GROUP]=$gacl;
   $this->_acl[ACL_LEVEL_MEMBER]=$macl;
   $this->_acl[ACL_LEVEL_PUBLIC]=$pacl;
+
+  $this->_old_acl=array();
+  $this->_old_acl[ACL_LEVEL_GROUP]=$gacl;
+  $this->_old_acl[ACL_LEVEL_MEMBER]=$macl;
+  $this->_old_acl[ACL_LEVEL_PUBLIC]=$pacl;
+}
+
+/** @return Returns true, if the ACL changed */
+function has_changed()
+{
+  if ($this->_acl[ACL_LEVEL_GROUP] != $this->_old_acl[ACL_LEVEL_GROUP] ||
+    $this->_acl[ACL_LEVEL_MEMBER] != $this->_old_acl[ACL_LEVEL_MEMBER] ||
+    $this->_acl[ACL_LEVEL_PUBLIC] != $this->_old_acl[ACL_LEVEL_PUBLIC])
+    return true;
+  return false;
 }
 
 /** Returns an array of ACL values of (group, member, any) */

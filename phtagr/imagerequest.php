@@ -234,8 +234,8 @@ switch ($type)
 }
 
 $gentime=sprintf("%.3f", abs(microtime()-$time_start));
-$log->warn("Image request: $type. Runs for $gentime seconds.", $img->get_id(), $user->get_id());
-$log->warn("Image request: $fn");
+$log->warn("Image request: $fn", $img->get_id());
+$log->warn("Image request: $type. Runs for $gentime seconds.", $img->get_id());
 $log->disable();
 
 if (!file_exists($fn))

@@ -54,9 +54,11 @@ function import($image)
 
 /** Save the data to the file
   @param image Image object 
+  @return True if data was written to the file
   @note This function should be overwritten by inherited classes */
 function export($image)
 {
+  return false;
 }
 
 /** @return Returns filesize. If file does not exists, returns -1 */

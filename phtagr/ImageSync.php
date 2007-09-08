@@ -275,29 +275,35 @@ function export()
   $this->_export();
 }
 
+/** @param force Force the export of the file
+  @return Returns true if data where written to the file, false otherwise */
 function _export($force=false)
 {
   global $user, $log;
 
   $file=$this->get_file_handler();
   if ($file==null)
-    return;
+    return false;
 
   @clearstatcache();
   $modified=$this->get_modified(true);
   $time_file=$file->get_filetime();
 
   $changed=$this->is_modified() || $this->is_meta_modified();
+  // Data did not changed, skip export
   if (!$force && $time_file>=$modified && !$changed)
   {
+    $log->trace("File '".$this->get_filename()."' has no changes. Skip export!", $this->get_id());
     return false;
   }
   
   $this->commit();
-  $log->warn("Exporting file ".$this->get_filename(), $this->get_id(), $user->get_id());
 
   $old_time=$file->get_filetime();
-  $file->export($this);
+  if (!$file->export($this))
+    return false;
+
+  $log->warn("Exporting file ".$this->get_filename(), $this->get_id());
   @clearstatcache();
   $new_time=$file->get_filetime();
   if ($new_time>$old_time)

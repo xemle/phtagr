@@ -98,6 +98,8 @@ function _import_from_imagefile($image)
   $image->set_orientation($this->_get_orientation_exif());
 }
 
+/** 
+  @return Returns true if data was written to the file */
 function _export_to_imagefile($image)
 {
   global $log;
@@ -105,7 +107,7 @@ function _export_to_imagefile($image)
   $filename=$this->get_image_filename();
   if (!is_writeable($filename) || !is_writeable(dirname($filename)))
   {
-    $log->warn("Could not export '$filename'. File or directory is not writeable");
+    $log->warn("Could not export '$filename'. File or directory is not writeable", $image->get_id());
     return false;
   }
 
@@ -257,6 +259,7 @@ function import($image)
   $this->_import_from_imagefile($image);
 }
 
+/** Returns true if data was written to the file */
 function export($image)
 {
   return $this->_export_to_imagefile($image);
