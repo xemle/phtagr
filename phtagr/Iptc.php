@@ -25,6 +25,7 @@
  http://www.codeproject.com/bitmap/iptc.asp
 */
 include_once("$phtagr_lib/Base.php");
+include_once dirname(__FILE__).DIRECTORY_SEPARATOR."ExifConstants.php";
 
 // Size of different headers 
 define("HDR_SIZE_JPG", 0x04);
@@ -34,15 +35,6 @@ define("HDR_SIZE_IPTC", 0x05);
 
 define("HDR_PS3", "Photoshop 3.0\0");
 define("HDR_8BIM_IPTC", chr(4).chr(4));
-
-define("EXIF_BYTE",       0x01);
-define("EXIF_ASCII",      0x02);
-define("EXIF_SHORT",      0x03);
-define("EXIF_LONG",       0x04);
-define("EXIF_RATIONAL",   0x05);
-define("EXIF_UNDEFINED",  0x07);
-define("EXIF_SLONG",      0x09);
-define("EXIF_SRATIONAL",  0x0a);
 
 /** @class Iptc
   Reads and write IPTC tags from a given JPEG file. */
@@ -358,7 +350,7 @@ function _read_seg_jpg($jpg)
     if (ord($marker[0])!=0xff)
     {
       $this->_errno=-1;
-      $this->_errmsg="Invalid jpeg segment start: ".$this->_str2hex($marker)." at $pos";
+      $this->_errmsg="Invalid jpeg segment start: ".$this->_buf2hex($marker)." at $pos";
       return false;
     }
     // size is excl. marker 
@@ -373,7 +365,7 @@ function _read_seg_jpg($jpg)
     $seg=array();
     $seg['pos']=$pos;
     $seg['size']=$size;
-    $seg['type']=$this->_str2hex($marker);
+    $seg['type']=$this->_buf2hex($marker);
     array_push($jpg['_segs'], $seg);
 
     // save exif segment
@@ -409,7 +401,7 @@ function _read_seg_app1($jpg)
   global $log; 
   if ($jpg==null || !isset($jpg['_app1']))
   {
-    $this->_errmsg="No PS3 header found";
+    $this->_errmsg="No app1 header found";
     return -1;
   }
 
@@ -465,35 +457,208 @@ function _read_seg_app1($jpg)
     return;
   }
 
-  $app1['interoperability']=$this->_get16u(substr($buf, 8, 2));
-  $log->trace("app1: ".print_r($app1, true));
-
-  $pos=10;
-  $len=strlen($buf);
-  while ($pos < $len)
+  $pos=8;
+  $ifd=$this->_read_seg_app1_ifd($buf, $pos);
+  $ifd_nice=$this->_ifd2array($ifd);
+  if (isset($ifd['exif']))
   {
-    $tag=array();
-    $tag['pos']=$pos; // position counting at TIFF header
-    $tag['name']=$this->_str2hex(substr($buf, $pos, 2));
-    $tag['type']=$this->_get16u(substr($buf, $pos+2, 2));
-    $tag['count']=$this->_get32u(substr($buf, $pos+4, 4));
-    $this->_getExifValue($buf, &$tag);
-    $log->trace("tag: ".print_r($tag, true));
-    // EXIF IFD, GPS IFD
-    if ($tag['name']==6987 || $tag['name']==2588) 
+    $ifd_nice['Exif']=$this->_ifd2array($ifd['exif']);
+    if (isset($ifd['exif']['interop']))
+      $ifd_nice['Exif']['Interop']=$this->_ifd2array($ifd['exif']['interop']);
+  }
+  $log->trace("ifd_nice=".print_r($ifd_nice, true));
+  //$log->trace("ifd=".print_r($ifd, true));
+
+  $ifd1=$this->_read_seg_app1_ifd($buf, $ifd['next_ifd']);
+  if (!empty($ifd1))
+  {
+    $ifd1_nice=$this->_ifd2array($ifd1);
+    $log->trace("ifd1_nice=".print_r($ifd1_nice, true));
+  }
+
+  
+}
+
+function _read_seg_app1_ifd($buf, $pos)
+{
+  global $log;
+  $ifd=array();
+  $len=strlen($buf);
+
+  if ($pos<=0 || $pos>=$len)
+  {
+    $this->_errno=-1;
+    $this->_errmsg="Invalid position of interoperability entries (max $len): ".$pos;
+    return null;
+  }
+
+  // get number of interoperability tags
+  $number=$this->_get16u(substr($buf, $pos, 2));
+  if ($pos+$number*12>=$len)
+  {
+    $this->_errno=-1;
+    $this->_errmsg="Invalid number of interoperability tags: ".$number;
+    return null;
+  }
+  $pos+=2;
+
+  $log->trace("IFD has $number interoperability tags");
+  $i=0;
+  while ($i++<$number)
+  {
+    $attr=array();
+    $attr['pos']=$pos; // position offset at TIFF header
+    $attr['index']=$i;
+    $attr['id']=$this->_get16u(substr($buf, $pos, 2), true);
+    $attr['name']=$this->_getExifAttributeName($attr['id']);
+    $attr['type']=$this->_get16u(substr($buf, $pos+2, 2));
+    $attr['count']=$this->_get32u(substr($buf, $pos+4, 4));
+    $this->_getExifAttributeValue($buf, &$attr);
+    if ($attr['id']==36864)
     {
-      $pos=$tag['value']+2;
+      
+      $log->info("Exif Version: ".$attr['value'].substr($buf, $attr['pos']+8, 4));
     }
-    else
-    {
-      $pos+=12;
-    }
+    //$log->trace("tag $name: ".print_r($attr, true));
+    // Check for error
     if ($this->_errno<0)
     {
       $log->err($this->_errmsg);
-      break;
+      return null;
     }
+
+    // EXIF IFD
+    if ($attr['id']==34665)
+    {
+      // JPEG segment header has 4 bytes, app1 header has 6 bytes = 10 bytes 
+      $exif_pos=$app1['pos']+10+$attr['value'];
+      $log->trace("Exif Header at ".$attr['value']." ($exif_pos 0x".dechex($exif_pos).")");
+      $exif=$this->_read_seg_app1_ifd($buf, $attr['value']);
+      if ($exif==null) 
+        return null;
+      $ifd['exif']=$exif;
+    }
+    else if ($attr['id']==40965)
+    {
+      // JPEG segment header has 4 bytes, app1 header has 6 bytes = 10 bytes 
+      $interop_pos=$app1['pos']+10+$attr['value'];
+      $log->trace("Interoperability IFD Header at ".$attr['value']." ($interop_pos 0x".dechex($interop_pos).")");
+      $interop=$this->_read_seg_app1_ifd($buf, $attr['value']);
+      if ($interop==null) 
+        return null;
+      $ifd['interop']=$interop;
+    }
+       
+    $ifd[$attr['id']]=$attr;
+    $pos+=12;
   }
+
+  // Set next ifd offset
+  $ifd['next_ifd']=$this->_get32u(substr($buf, $pos, 4));
+  $pos+=4;
+  $ifd['size']=$pos-$ifd['pos'];
+
+  return $ifd;
+}
+
+/** Returns the string prepesention of the EXIF attribute
+  @param id Id of the EXIF attribute
+  @return String represention if available, otherwise the id */
+function _getExifAttributeName($id)
+{
+  global $ExifAttributeTable;
+  if (isset($ExifAttributeTable[$id]['name']))
+    return $ExifAttributeTable[$id]['name'];
+  return $id;
+}
+
+/** Returns the id of EXIF attribute name
+  @param name Name of the attribute. If name is numeric, this number is
+  returned if it exists as ID in the attribute table
+  @return Id of the attribute or -1 if no attribute was found */
+function _getExifAttributeId($name)
+{
+  global $ExifAttributeTable;
+  if (is_numeric($name))
+  {
+    if (isset($ExifAttributeTable[$name]))
+      return $name;
+    return -1;
+  }
+
+  $name=strtolower($name);
+  foreach($ExifAttributeTable as $id => $attr)
+  {
+    if (isset($attr['name']) && strtolower($attr['name'])==$name)
+      return $id;
+  }
+  return -1;
+}
+
+/** Returns the attribute array of a given id or field name 
+  @param idOrName Attribute id or attribute name
+  @return Attribute array or false on error */
+function _getExifAttribute($idOrName)
+{
+  global $ExifAttributeTable;
+  $id=$this->_getExifAttributeId($idOrName);
+  if ($id<0)
+    return false;
+  return $ExifAttributeTable['id'];  
+}
+
+/** Checks the EXIF attribute type and returns true if the given attribute type is correct 
+  @param idOrName Attribute id or attribute name
+  @param type Attribute type
+  @return True if the given attribute has the correct type, false otherwise */
+function _checkExifAttributeType($idOrName, $type)
+{
+  $attr=$this->_getExifAttribute($idOrName);
+  if ($attr===false)
+    return false;
+
+  if ($type==$attr['type'] || 
+    (isset($attr['type2']) && $type==$attr['type2']))
+    return true;
+
+  return false;
+}
+
+/** Returns the attribute type of a given EXIF attribute 
+  @param idOrName Attribute id or attribute name
+  @param alternative if true returns the alternative if available, else the
+  primary
+  @return Primary attribute type. false on error*/
+function _getExifAttributeType($idOrName, $alternative=false)
+{
+  $attr=$this->_getExifAttribute($idOrName);
+  if ($attr===false || !isset($attr['type']))
+    return false;
+  
+  if ($alternative && isset($attr['type2']))
+    return $attr['type2'];
+
+  return $attr['type'];
+}
+
+/** Converts the ifd internal format to a nicer array with field names as array
+ * keys and field values as array value 
+  @param ifd IFD array (internal structure)
+  @return Pretty print IFD array */
+function _ifd2array($ifd)
+{
+  if (empty($ifd))
+    return array();
+
+  $result=array();
+  foreach($ifd as $id => $attr)
+  { 
+    if (is_numeric($id) && 
+      isset($attr['name']) && !is_numeric($attr['name']) && 
+      isset($attr['value']))
+      $result[$attr['name']]=$attr['value'];
+  }
+  return $result;
 }
 
 function _get16u($val)
@@ -517,7 +682,24 @@ function _get32u($val)
     return (ord($val[0])<<24 | ord($val[1])<<16 | ord($val[2])<<8 | ord($val[3]));
 }
 
-function _getExifSize($type, $count)
+/** Returns the 32 bit signed in 2's compliments notation */
+function _get32s($val)
+{
+  if (strlen($val)<4)
+    return -1;
+
+  if ($this->_lendian)
+    $result=(ord($val[3])<<24 | ord($val[2])<<16 | ord($val[1])<<8 | ord($val[0]));
+  else
+    $result=(ord($val[0])<<24 | ord($val[1])<<16 | ord($val[2])<<8 | ord($val[3]));
+  // negative
+  if ($result & 0x80000000)
+    $result=0x80000000-$result;
+  return $result;
+}
+
+
+function _getExifAttributeSize($type, $count)
 {
   switch ($type)
   {
@@ -540,14 +722,14 @@ function _getExifSize($type, $count)
   }
 }
 
-function _getExifValue($buf, &$tag)
+function _getExifAttributeValue($buf, &$attr)
 {
   global $log;
-  $type=$tag['type'];
-  $count=$tag['count'];
-  $pos=$tag['pos'];
-  $size=$this->_getExifSize($type, $count);
-  $tag['size']=$size;
+  $type=$attr['type'];
+  $count=$attr['count'];
+  $pos=$attr['pos'];
+  $size=$this->_getExifAttributeSize($type, $count);
+  $attr['size']=$size;
   if ($size<=4)
   {
     // offset as value
@@ -555,53 +737,77 @@ function _getExifValue($buf, &$tag)
     {
       case EXIF_BYTE:
         // An 8-bit unsigned integer.
-        $tag['value']=ord($buf[$pos+8]);
+        $attr['value']=ord($buf[$pos+8]);
         break; 
+      case EXIF_ASCII:
+      case EXIF_UNDEFINED:
+        $attr['value']=substr($buf, $pos+8, $size);
+        break;
       case EXIF_SHORT:
-        $tag['value']=$this->_get16u(substr($buf, $pos+8, 2));
+        $attr['value']=$this->_get16u(substr($buf, $pos+8, 2));
         break; 
       case EXIF_LONG:
-        $tag['value']=$this->_get16u(substr($buf, $pos+8, 4));
+        $attr['value']=$this->_get32u(substr($buf, $pos+8, 4));
         break; 
       case EXIF_SLONG:
+        $attr['value']=$this->_get32s(substr($buf, $pos+8, 4));
+        break;
       default:
-        $tag['value']="err";
+        $attr['value']="err";
         $this->_errno=-1;
-        $this->_errmsg="Undefinded Exif Tag Type: $type";
-        return;
+        $this->_errmsg="Undefinded Exif tag type $type at offset $pos with size $size";
+        break;
     }
   }
   else
   {
     // value buf at offset
     $offset=$this->_get32u(substr($buf, $pos+8, 4));
-    $tag['offset']=$offset;
+    $attr['offset']=$offset;
     switch ($type)
     {
-      case EXIF_UNDEFINED:
       case EXIF_ASCII:
         // An 8-bit byte containing one 7-bit ASCII code. The final byte is
         // terminated with NULL
-        $tag['value']=substr($buf, $offset, $size-1);
-        return;
+        $attr['value']=substr($buf, $offset, $size-1);
+        break;
+      case EXIF_UNDEFINED:
+        $attr['value']=substr($buf, $offset, $size);
+        break;
+      case EXIF_SHORT:
+        $attr['value']=$this->_get16u(substr($buf, $pos+8, 2));
+        break; 
+      case EXIF_LONG:
+        $attr['value']=$this->_get32u(substr($buf, $pos+8, 4));
+        break;
+      case EXIF_SLONG:
+        $attr['value']=$this->_get32s(substr($buf, $pos+8, 4));
+        break;
       case EXIF_RATIONAL:
         // Two LONGs. The first LONG is the numerator and the second LONG
         // expresses the denominator.,
-        $tag['num']=$this->_get32u(substr($buf, $offset, 4));
-        $tag['den']=$this->_get32u(substr($buf, $offset+4, 4));
-        if ($tag['den']>0)
-          $tag['value']=$tag['num']/$tag['den'];
+        $attr['num']=$this->_get32u(substr($buf, $offset, 4));
+        $attr['den']=$this->_get32u(substr($buf, $offset+4, 4));
+        if ($attr['den']>0)
+          $attr['value']=$attr['num']."/".$attr['den'];
         else
-          $tag['value']=0;
-        return;
+          $attr['value']=0;
+        break;
       case EXIF_SRATIONAL:
         // Two SLONGs. The first SLONG is the numerator and the second SLONG is
         // the denominator.
+        $attr['num']=$this->_get32s(substr($buf, $offset, 4));
+        $attr['den']=$this->_get32s(substr($buf, $offset+4, 4));
+        if ($attr['den']>0)
+          $attr['value']=$attr['num']."/".$attr['den'];
+        else
+          $attr['value']=0;
+        break;
       default:
-        $tag['value']="err";
+        $attr['value']="err";
         $this->_errno=-1;
         $this->_errmsg="Undefinded Exif Tag Type: $type";
-        return;
+        break;
     }
   }
 }
@@ -688,7 +894,7 @@ function _read_seg_ps3($jpg)
     }
 
     // size of section starting from pos: size+12
-    $seg['type']=$this->_str2hex(substr($hdr, 4, 2));
+    $seg['type']=$this->_buf2hex(substr($hdr, 4, 2));
 
     // Check for path segment
     $type=$this->_ato16u(substr($hdr, 4, 2));
@@ -1101,13 +1307,16 @@ function _ato32u($val)
   return ord($val[0])<<24 | ord($val[1])<<16 | ord($val[2])<<8 | ord($val[3]);
 }
 
-/** Convert a sting to a hex string. This is only for debugging purpose */
-function _str2hex($string) {
-  $hex = '';
-  $len = strlen($string);
+/** Convert a buffer to a hex string. This is only for debugging purpose */
+function _buf2hex($string, $reverse=false) {
+  $hex= '';
+  $len=strlen($string);
   
   for ($i = 0; $i < $len; $i++) {
-      $hex .= str_pad(dechex(ord($string[$i])), 2, 0, STR_PAD_LEFT);
+    if (!$reverse)
+      $hex.=str_pad(dechex(ord($string[$i])), 2, 0, STR_PAD_LEFT);
+    else
+      $hex=str_pad(dechex(ord($string[$i])), 2, 0, STR_PAD_LEFT).$hex;
   }
   return $hex;   
 }
