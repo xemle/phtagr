@@ -301,7 +301,11 @@ function _export($force=false)
 
   $old_time=$file->get_filetime();
   if (!$file->export($this))
+  {
+    $this->set_modified(time());
+    $this->commit();
     return false;
+  }
 
   $log->warn("Exporting file ".$this->get_filename(), $this->get_id());
   @clearstatcache();

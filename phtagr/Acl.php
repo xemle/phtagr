@@ -47,7 +47,7 @@ function Acl($gacl, $macl, $pacl)
 }
 
 /** @return Returns true, if the ACL changed */
-function has_changed()
+function has_changes()
 {
   if ($this->_acl[ACL_LEVEL_GROUP] != $this->_old_acl[ACL_LEVEL_GROUP] ||
     $this->_acl[ACL_LEVEL_MEMBER] != $this->_old_acl[ACL_LEVEL_MEMBER] ||

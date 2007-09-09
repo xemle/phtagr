@@ -28,11 +28,12 @@ include_once("$phtagr_lib/Image.php");
 include_once("$phtagr_lib/Group.php");
 include_once("$phtagr_lib/SectionAcl.php");
 
-define("MYACCOUNT_TAB_UPLOAD", "1");
+define("MYACCOUNT_TAB_UPLOAD",  "1");
 define("MYACCOUNT_TAB_GENERAL", "2");
 define("MYACCOUNT_TAB_DETAILS", "3");
-define("MYACCOUNT_TAB_GROUPS", "4");
-define("MYACCOUNT_TAB_GUESTS", "5");
+define("MYACCOUNT_TAB_GROUPS",  "4");
+define("MYACCOUNT_TAB_GUESTS",  "5");
+define("MYACCOUNT_TAB_IMAGES",  "6");
 
 class SectionMyAccount extends SectionBase
 {
@@ -92,6 +93,74 @@ function print_general ()
   echo "</ol>";
   echo "</fieldset>\n";
 
+  echo "<div class=\"buttons\">";
+  $this->input_submit(_("Apply"));
+  $this->input_reset(_("Reset"));
+  echo "</div>\n";
+
+  echo "</form>\n\n";
+}
+
+function exec_general ()
+{
+  global $user;
+  global $conf;
+
+  $action="";
+  if (isset($_REQUEST['action']))
+    $action=$_REQUEST['action'];
+
+  if($action=='edit')
+  {
+    if (isset($_REQUEST['email']))
+      $user->set_email($_REQUEST['email']);
+    if (isset($_REQUEST['firstname']))
+      $user->set_firstname($_REQUEST['firstname']);
+    if (isset($_REQUEST['lastname']))
+      $user->set_lastname($_REQUEST['lastname']);
+
+    if ($_REQUEST['password']!='' &
+      $_REQUEST['oldpassword']!='' &&
+      $_REQUEST['confirm']!='')
+    {
+      $oldpassword=$_REQUEST['oldpassword'];
+      $password=$_REQUEST['password'];
+      $confirm=$_REQUEST['confirm'];
+      if ($password!==$confirm)
+        $this->error(_("Passwords do not match together"));
+      else {
+        $result=$user->passwd($oldpassword, $password);
+        if ($result<0)
+          $this->error(sprintf(_("Could not set the password. Error %d"), $result));
+        else
+          $this->success(_("Password was changed successfully"));
+      }
+    }
+
+    if ($user->is_modified())
+    {
+      $this->success(_("User information are updated"));
+      $user->commit();
+    }
+
+    return;
+  }
+}
+
+function print_images()
+{
+  global $user;
+  global $conf;
+  $account=new SectionAccount();
+
+  echo "<h3>"._("Images")."</h3>\n";
+
+  $url=new Url();
+  $url->add_param('section', 'myaccount');
+  $url->add_param('tab', MYACCOUNT_TAB_IMAGES);
+  $url->add_param('action', 'edit');
+  echo "<form action=\"".$url->get_url()."\" method=\"post\">\n";
+
   echo "<fieldset><legend>"._("Default Access Rights")."</legend>\n";
   echo "<ol>\n";
   $gacl=$conf->get('image.gacl', (ACL_WRITE_META | ACL_READ_PREVIEW));
@@ -147,7 +216,7 @@ function print_general ()
   echo "</form>\n\n";
 }
 
-function exec_general ()
+function exec_images()
 {
   global $user;
   global $conf;
@@ -158,41 +227,17 @@ function exec_general ()
 
   if($action=='edit')
   {
-    if (isset($_REQUEST['email']))
-      $user->set_email($_REQUEST['email']);
-    if (isset($_REQUEST['firstname']))
-      $user->set_firstname($_REQUEST['firstname']);
-    if (isset($_REQUEST['lastname']))
-      $user->set_lastname($_REQUEST['lastname']);
-
-    if ($_REQUEST['password']!='' &
-      $_REQUEST['oldpassword']!='' &&
-      $_REQUEST['confirm']!='')
-    {
-      $oldpassword=$_REQUEST['oldpassword'];
-      $password=$_REQUEST['password'];
-      $confirm=$_REQUEST['confirm'];
-      if ($password!==$confirm)
-        $this->error(_("Passwords do not match together"));
-      else {
-        $result=$user->passwd($oldpassword, $password);
-        if ($result<0)
-          $this->error(sprintf(_("Could not set the password. Error %d"), $result));
-        else
-          $this->success(_("Password was changed successfully"));
-      }
-    }
-
-    $user->commit();
-
     $acl=new Acl(
       $conf->get('image.gacl', (ACL_WRITE_META | ACL_READ_PREVIEW)),
       $conf->get('image.macl', (ACL_READ_PREVIEW)),
       $conf->get('image.pacl', (ACL_READ_PREVIEW)));
     $acl->handle_request();
-    $conf->set('image.gacl', $acl->get_gacl());
-    $conf->set('image.macl', $acl->get_macl());
-    $conf->set('image.pacl', $acl->get_pacl());
+    if ($acl->has_changes())
+    {
+      $conf->set('image.gacl', $acl->get_gacl());
+      $conf->set('image.macl', $acl->get_macl());
+      $conf->set('image.pacl', $acl->get_pacl());
+    }
 
     $sep=$_REQUEST['meta_separator'];
     if ($sep==' ' || $sep=='.' || $sep==';' || $sep==',')
@@ -200,6 +245,7 @@ function exec_general ()
     
     $conf->set('image.lazysync', $_REQUEST['lazysync']==1?1:0);
     $conf->set('image.autorotate', $_REQUEST['autorotate']==1?1:0);
+    $this->success(_("Settings are saved"));
     return;
   }
   elseif ($action=="sync_new" || $action=="sync_all")
@@ -212,8 +258,9 @@ function exec_general ()
 			$since=$conf->get('image.lasysync.last', -1);
 		else
 			$since=-1;
+    $now=time();
     list($count, $updated, $deleted)=$sync->sync_files($user->get_id(), $since);
-		$conf->set('image.lasysync.last', time());
+		$conf->set('image.lasysync.last', $now);
     $this->success(sprintf(_("Files are now synchronized (%d in total, %d updated, %d deleted)"), $count, $updated, $deleted));
   }
 }
@@ -960,6 +1007,7 @@ function print_content()
   $tabs->add_item(MYACCOUNT_TAB_UPLOAD, _("Upload"));
   $tabs->add_item(MYACCOUNT_TAB_GROUPS, _("Groups"));
   $tabs->add_item(MYACCOUNT_TAB_GUESTS, _("Guests"));
+  $tabs->add_item(MYACCOUNT_TAB_IMAGES, _("Images"));
   $tabs->add_item(MYACCOUNT_TAB_GENERAL, _("General"));
   $tabs->add_item(MYACCOUNT_TAB_DETAILS, _("Details"));
   if (isset($_REQUEST['tab']))
@@ -979,6 +1027,9 @@ function print_content()
       break;
     case MYACCOUNT_TAB_GENERAL:
       $this->exec_general();
+      break;
+    case MYACCOUNT_TAB_IMAGES:
+      $this->exec_images();
       break;
     case MYACCOUNT_TAB_GROUPS:
       $this->exec_groups();
@@ -1005,6 +1056,9 @@ function print_content()
       break;
     case MYACCOUNT_TAB_GUESTS: 
       $this->print_guests(); 
+      break;
+    case MYACCOUNT_TAB_IMAGES: 
+      $this->print_images(); 
       break;
     default:
       $this->print_general(); 

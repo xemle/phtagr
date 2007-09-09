@@ -210,7 +210,7 @@ function _handle_request_acl(&$img)
   }
   $acl->handle_request($prefix);
   
-  if ($acl->has_changed())
+  if ($acl->has_changes())
   {
     list($gacl, $macl, $pacl)=$acl->get_values();
     global $log;
