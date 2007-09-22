@@ -154,4 +154,9 @@ $ExifAttributeTable=array(
   30 => array('name' => 'GPSDifferential', 'type' => EXIF_SHORT, 'count' => 1)
 );
 
+$InteropAttributeTable=array(
+  1 => array('name' => 'InteroperabilityIndex', 'type' => EXIF_ASCII, 'count' => 4),
+  2 => array('name' => 'InteroperabilityVersion', 'type' => EXIF_UNDEFINED, 'count' => 4)
+);
+
 ?>

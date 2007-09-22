@@ -133,7 +133,7 @@ function load_from_file($filename)
   $jpg['size']=$size;
   
   $fp=fopen($filename, "rb");
-  if ($fp==false) 
+  if ($fp===false) 
   {
     $this->_errmsg="Could not open file for reading";
     $this->_errno=-1;
@@ -152,7 +152,7 @@ function load_from_file($filename)
     return -1;
   }
   
-  if (!$this->_read_seg_jpg(&$jpg))
+  if (!$this->_read_seg_jpg())
   {
     $this->_jpg=null;
     fclose($fp);
@@ -161,18 +161,18 @@ function load_from_file($filename)
 
   if (isset($this->_jpg['_app1']))
   {
-    //$this->_read_seg_app1(&$jpg);
+    //$this->_read_seg_app1();
   }
 
   if (isset($this->_jpg['_app13']))
   {
-    $this->_read_seg_ps3(&$jpg);
+    $this->_read_seg_ps3();
     if (isset($this->_jpg['_iptc']))
-      $this->_read_seg_iptc(&$jpg);
+      $this->_read_seg_iptc();
   } 
 
   if (isset($this->_jpg['_com']))
-    $this->_read_seg_com(&$jpg);
+    $this->_read_seg_com();
 
   fclose($fp);
   
@@ -332,11 +332,14 @@ function has_iptc_bug()
  * is folled. The size does not include the segment marker and the segment
  * byte.
 
-  @param jpg Pointer to the JPEG array
   @return Return true if all segments have a correct size. The function will
   return false on a segment start mismatch. */
-function _read_seg_jpg($jpg)
+function _read_seg_jpg()
 {
+  if (empty($this->_jpg) && !isset($this->_jpg['_fp']))
+    return false;
+
+  $jpg=&$this->_jpg;
   $fp=$jpg['_fp'];
   $jpg['_segs']=array();
   
@@ -356,10 +359,10 @@ function _read_seg_jpg($jpg)
     // size is excl. marker 
     // size of jpes section starting from pos: size+2
     $size=$this->_ato16u(substr($hdr, 2, 2));
-    if ($pos+$size+2>$jpg['size'])
+    if ($pos+$size+2>$jpg['size'] || $size<2)
     {
       $this->_errno=-1;
-      $this->_errmsg="Invalid segment size of $size";
+      $this->_errmsg="Invalid segment size of $size at $pos (0x".dechex($pos).")";
       return false;
     }
     $seg=array();
@@ -396,17 +399,18 @@ function _read_seg_jpg($jpg)
   return true;
 }
 
-function _read_seg_app1($jpg)
+function _read_seg_app1()
 {
   global $log; 
-  if ($jpg==null || !isset($jpg['_app1']))
+  if ($this->_jpg==null || !isset($this->_jpg['_app1']))
   {
     $this->_errmsg="No app1 header found";
     return -1;
   }
 
-  $app1=&$jpg['_app1'];
-  $fp=$jpg['_fp'];
+  $jpg=&$this->_jpg;
+  $app1=$this->_jpg['_app1'];
+  $fp=$this->_jpg['_fp'];
   fseek($fp, $app1['pos']+4, SEEK_SET);
   $log->debug("Reading APP1 at ".$app1['pos']);
 
@@ -469,36 +473,66 @@ function _read_seg_app1($jpg)
   $log->trace("ifd_nice=".print_r($ifd_nice, true));
   //$log->trace("ifd=".print_r($ifd, true));
 
-  $ifd1=$this->_read_seg_app1_ifd($buf, $ifd['next_ifd']);
-  if (!empty($ifd1))
+  if ($ifd['next_ifd']>0)
   {
-    $ifd1_nice=$this->_ifd2array($ifd1);
-    $log->trace("ifd1_nice=".print_r($ifd1_nice, true));
+    $ifd1=$this->_read_seg_app1_ifd($buf, $ifd['next_ifd']);
+    if (!empty($ifd1))
+    {
+      $ifd1_nice=$this->_ifd2array($ifd1);
+      $log->trace("ifd1_nice=".print_r($ifd1_nice, true));
+    }
   }
-
   
 }
 
-function _read_seg_app1_ifd($buf, $pos)
+/** Reads an APP1 IFD segment. 
+  @param buf Buffer of EXIF
+  @param pos Current position of the IFD.
+  @param tableName Table of attribut name
+  @return Array of the IFD. False on error. Null if IFD is not available */
+function _read_seg_app1_ifd($buf, $pos, $tableName=false)
 {
   global $log;
   $ifd=array();
   $len=strlen($buf);
 
-  if ($pos<=0 || $pos>=$len)
+  if ($pos==0)
+  {
+    // IFD pointer is 0, no IFD follows
+    return null;
+  }
+
+  if ($pos<0 || $pos>=$len)
   {
     $this->_errno=-1;
     $this->_errmsg="Invalid position of interoperability entries (max $len): ".$pos;
-    return null;
+    return false;
   }
+
+  /*
+  - 2 bytes=number: Number of interoperability attributes
+  - 12 bytes*number: Per each interoperability attribute 
+  - 4 bytes: Pointer to next IFD segment
+  - Data block of the IFD
+  
+  On interoperability attribute has:
+    2 bytes: Interoperability ID of attribute
+    2 bytes: Data type of attribute
+    4 bytes: Counts of datatypes (array size)
+    4 bytes: Tag value (or offset if value requires more than 4 bytes)
+
+  Data block: If an interoperability attribute data requires more than 4
+    bytes, use the data block after all interoperability attributes. The 4
+    bytes tag value is an (absolute) offset to the data position
+  */
 
   // get number of interoperability tags
   $number=$this->_get16u(substr($buf, $pos, 2));
   if ($pos+$number*12>=$len)
   {
     $this->_errno=-1;
-    $this->_errmsg="Invalid number of interoperability tags: ".$number;
-    return null;
+    $this->_errmsg="Invalid number of interoperability tags: ".$number." at ".$pos;
+    return false;
   }
   $pos+=2;
 
@@ -510,16 +544,11 @@ function _read_seg_app1_ifd($buf, $pos)
     $attr['pos']=$pos; // position offset at TIFF header
     $attr['index']=$i;
     $attr['id']=$this->_get16u(substr($buf, $pos, 2), true);
-    $attr['name']=$this->_getExifAttributeName($attr['id']);
+    $attr['name']=$this->_getExifAttributeName($attr['id'], $tableName);
     $attr['type']=$this->_get16u(substr($buf, $pos+2, 2));
     $attr['count']=$this->_get32u(substr($buf, $pos+4, 4));
     $this->_getExifAttributeValue($buf, &$attr);
-    if ($attr['id']==36864)
-    {
-      
-      $log->info("Exif Version: ".$attr['value'].substr($buf, $attr['pos']+8, 4));
-    }
-    //$log->trace("tag $name: ".print_r($attr, true));
+    //$log->trace("Attr ".$attr['name']." (".$attr['id'].": ".print_r($attr, true));
     // Check for error
     if ($this->_errno<0)
     {
@@ -533,7 +562,7 @@ function _read_seg_app1_ifd($buf, $pos)
       // JPEG segment header has 4 bytes, app1 header has 6 bytes = 10 bytes 
       $exif_pos=$app1['pos']+10+$attr['value'];
       $log->trace("Exif Header at ".$attr['value']." ($exif_pos 0x".dechex($exif_pos).")");
-      $exif=$this->_read_seg_app1_ifd($buf, $attr['value']);
+      $exif=$this->_read_seg_app1_ifd($buf, $attr['value'], 'Exif');
       if ($exif==null) 
         return null;
       $ifd['exif']=$exif;
@@ -543,7 +572,7 @@ function _read_seg_app1_ifd($buf, $pos)
       // JPEG segment header has 4 bytes, app1 header has 6 bytes = 10 bytes 
       $interop_pos=$app1['pos']+10+$attr['value'];
       $log->trace("Interoperability IFD Header at ".$attr['value']." ($interop_pos 0x".dechex($interop_pos).")");
-      $interop=$this->_read_seg_app1_ifd($buf, $attr['value']);
+      $interop=$this->_read_seg_app1_ifd($buf, $attr['value'], 'Interoperability');
       if ($interop==null) 
         return null;
       $ifd['interop']=$interop;
@@ -564,11 +593,19 @@ function _read_seg_app1_ifd($buf, $pos)
 /** Returns the string prepesention of the EXIF attribute
   @param id Id of the EXIF attribute
   @return String represention if available, otherwise the id */
-function _getExifAttributeName($id)
+function _getExifAttributeName($id, $tableName=false)
 {
-  global $ExifAttributeTable;
-  if (isset($ExifAttributeTable[$id]['name']))
-    return $ExifAttributeTable[$id]['name'];
+  global $ExifAttributeTable, $InteropAttributeTable;
+  switch ($tableName)
+  {
+    case 'Interoperability':
+      $table=$InteropAttributeTable;
+      break;
+    default: 
+      $table=$ExifAttributeTable;
+  }
+  if (isset($table[$id]['name']))
+    return $table[$id]['name'];
   return $id;
 }
 
@@ -653,7 +690,8 @@ function _ifd2array($ifd)
   $result=array();
   foreach($ifd as $id => $attr)
   { 
-    if (is_numeric($id) && 
+    // skip MakerNote (id 37500)
+    if (is_numeric($id) && $id!=37500 &&
       isset($attr['name']) && !is_numeric($attr['name']) && 
       isset($attr['value']))
       $result[$attr['name']]=$attr['value'];
@@ -775,13 +813,13 @@ function _getExifAttributeValue($buf, &$attr)
         $attr['value']=substr($buf, $offset, $size);
         break;
       case EXIF_SHORT:
-        $attr['value']=$this->_get16u(substr($buf, $pos+8, 2));
+        $attr['value']=$this->_get16u(substr($buf, $offset, 2));
         break; 
       case EXIF_LONG:
-        $attr['value']=$this->_get32u(substr($buf, $pos+8, 4));
+        $attr['value']=$this->_get32u(substr($buf, $offset, 4));
         break;
       case EXIF_SLONG:
-        $attr['value']=$this->_get32s(substr($buf, $pos+8, 4));
+        $attr['value']=$this->_get32s(substr($buf, $offset, 4));
         break;
       case EXIF_RATIONAL:
         // Two LONGs. The first LONG is the numerator and the second LONG
@@ -813,27 +851,26 @@ function _getExifAttributeValue($buf, &$attr)
 }
 
 /* Read the photoshop meta headers.
- * @param jpg Pointer to the JPEG array
  * @return false on failure with an error string */
-function _read_seg_ps3($jpg)
+function _read_seg_ps3()
 {
   global $log; 
-  if ($jpg==null || !isset($jpg['_app13']))
+  if ($this->_jpg==null || !isset($this->_jpg['_app13']))
   {
     $this->_errmsg="No PS3 header found";
     return -1;
   }
 
-  $app13=&$jpg['_app13'];
-  $fp=$jpg['_fp'];
+  $app13=&$this->_jpg['_app13'];
+  $fp=$this->_jpg['_fp'];
   fseek($fp, $app13['pos']+4, SEEK_SET);
   
   $marker=fread($fp, 14);
   if ($marker!=HDR_PS3)
   {
-    unset($jpg['_app13']);
+    unset($this->_jpg['_app13']);
     $this->_errno=-1;
-    $this->_errmsg="Wrong photoshop marker $marker";
+    $this->_errmsg="Wrong photoshop marker $marker at ".$app13['pos']." (0x".dechex($app13['pos']).")";
     return -1;
   }
   //size of segment starting from pos: size+2
@@ -941,7 +978,7 @@ function _read_seg_ps3($jpg)
   
     if ($seg['type']=='0404') {
       $seg['index']=$i;
-      $jpg['_iptc']=$seg;
+      $this->_jpg['_iptc']=$seg;
     }
 
     array_push($app13['_segs'], $seg);
@@ -985,19 +1022,18 @@ function _read_seg_ps3($jpg)
 }
 
 /* Read the IPTC data from textual 8BIM segment (type 0x0404) 
-  @param jpg Pointer to the JPEG array
   @return false on failure with an error message */
-function _read_seg_iptc($jpg)
+function _read_seg_iptc()
 {
-  if ($jpg==null || !isset($jpg['_iptc']))
+  if ($this->_jpg==null || !isset($this->_jpg['_iptc']))
   {
     $this->_errmsg="No IPTC data found";
     $this->_errno=-1;
     return -1;
   }
 
-  $iptc=&$jpg['_iptc'];
-  $fp=$jpg['_fp'];
+  $iptc=&$this->_jpg['_iptc'];
+  $fp=$this->_jpg['_fp'];
   fseek($fp, $iptc['pos']+HDR_SIZE_8BIM, SEEK_SET);
   
   $this->_iptc=array();
@@ -1062,24 +1098,23 @@ function _read_seg_iptc($jpg)
 }
 
 /** Reads the JPEG comment segment.
-  @param jpg JPEG data array
   @return True on success, false otherwise */
-function _read_seg_com($jpg)
+function _read_seg_com()
 {
   global $user, $log;
-  if ($jpg==null || !isset($jpg['_com']))
+  if ($this->_jpg==null || !isset($this->_jpg['_com']))
   {
     $this->_errmsg="No comment section found";
     $this->_errno=-1;
     return -1;
   }
 
-  $fp=$jpg['_fp'];
-  $com=&$jpg['_com'];
+  $fp=$this->_jpg['_fp'];
+  $com=&$this->_jpg['_com'];
   fseek($fp, $com['pos']+HDR_SIZE_JPG, SEEK_SET);
   if ($com['size']<=2)
   {
-    $log->err("JPEG comment segment size is negative: ".$jpg['filename']);
+    $log->err("JPEG comment segment size is negative: ".$this->_jpg['filename']);
     return false;
   }
   $buf=fread($fp, $com['size']-2);
