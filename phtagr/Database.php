@@ -48,6 +48,7 @@ var $locations;
 var $imagelocation;
 var $comments;
 var $logs;
+var $_prefix;
 
 function Database()
 {
@@ -78,7 +79,7 @@ function set_table_prefix($prefix)
 /** @return Returns the current table prefix */
 function get_table_prefix()
 {
-  return $this->_prefix();
+  return $this->_prefix;
 }
 
 /** @return Returns the database connection resource */

@@ -34,14 +34,16 @@ class Search extends Url
 var $_tags;
 var $_cats;
 var $_locs;
+var $_tp; 
 
 function Search($baseurl='')
 {
-  global $search;
+  global $search, $db;
   $this->Url($baseurl);
   $this->_tags=array();
   $this->_cats=array();
   $this->_locs=array();
+  $this->_tp=$db->get_table_prefix();
 
   $this->add_param('section', 'explorer');
   if ($search && $search->get_userid()>0)
@@ -387,7 +389,6 @@ function set_orderby($orderby)
     $this->add_param('orderby', $orderby);
   else 
     $this->del_param('orderby');
-  
 }
 
 function get_orderby()
@@ -576,13 +577,13 @@ function _add_sql_join_tags($tags, $count=0, $op=1)
     return "";
 
   $sql=" JOIN ( SELECT image_id, COUNT(image_id) AS thits".
-       " FROM $db->imagetag";
+       " FROM {$this->_tp}images_tags";
   $sql.=" WHERE";
 
   $ids=array();
   foreach ($tags as $tag)
-    array_push($ids, "tag_id=".$db->tag2id($tag));
-  $sql.=" ".implode(" OR ", $ids);
+    array_push($ids, $db->tag2id($tag));
+  $sql.=" tag_id IN (".implode(", ", $ids).")";
 
   $sql.=" GROUP BY image_id";
   if ($count>0) 
@@ -615,13 +616,13 @@ function _add_sql_join_categories($cats, $count=0, $op=1)
     return "";
 
   $sql=" JOIN ( SELECT image_id, COUNT(image_id) AS chits".
-       " FROM $db->imagecategory";
+       " FROM {$this->_tp}categories_images";
   $sql.=" WHERE";
 
   $ids=array();
   foreach ($cats as $cat)
-    array_push($ids, "category_id=".$db->category2id($cat));
-  $sql.=" ".implode(" OR ", $ids);
+    array_push($ids, $db->category2id($cat));
+  $sql.=" category_id IN (".implode(", ", $ids).")";
 
   $sql.=" GROUP BY image_id";
   if ($count>0) 
@@ -649,12 +650,12 @@ function _add_sql_join_categories($cats, $count=0, $op=1)
   1 for greater or equal. Default is 1 (greater) */
 function _add_sql_join_locations($locs, $count=0, $op=1)
 {
-  global $db, $log;
+  global $db;
   if (!count($locs))
     return "";
 
   $sql=" JOIN ( SELECT image_id, COUNT(image_id) AS lhits".
-       " FROM $db->imagelocation";
+       " FROM {$this->_tp}images_locations";
   $sql.=" WHERE";
 
   $ids=array();
@@ -662,9 +663,9 @@ function _add_sql_join_locations($locs, $count=0, $op=1)
   {
     $locids=$db->location2ids($loc);
     foreach ($locids as $locid)
-      array_push($ids, "location_id=".$locid);
+      array_push($ids, $locid);
   }
-  $sql.=" ".implode(" OR ", $ids);
+  $sql.=" location_id IN (".implode(", ", $ids).")";
 
   $sql.=" GROUP BY image_id";
   if ($count>0) 
@@ -694,8 +695,6 @@ function _add_sql_join_locations($locs, $count=0, $op=1)
   @see _add_sql_join_tags _add_sql_join_categories _add_sql_join_locations */
 function _add_sql_join_meta_inclusion($tags, $cats, $locs)
 {
-  global $db, $user, $log;
-
   $num_tags=count($tags);
   $num_cats=count($cats);
   $num_locs=count($locs);
@@ -758,23 +757,23 @@ function _add_sql_where_meta_exclusion($tags, $cats, $locs)
 
   $sql.=" AND i.id NOT IN (";
   $sql.=" SELECT i.id".
-        " FROM $db->images AS i";
+        " FROM {$this->_tp}images AS i";
 
   if ($num_tags)
   {
-    $sql.=" LEFT JOIN $db->imagetag AS it"
+    $sql.=" LEFT JOIN {$this->_tp}images_tags AS it"
         ." ON ( i.id=it.image_id )";
   }
 
   if ($num_cats)
   {
-    $sql.=" LEFT JOIN $db->imagecategory AS ic"
+    $sql.=" LEFT JOIN {$this->_tp}categories_images AS ic"
         ." ON ( i.id=ic.image_id )";
   }
 
   if ($num_locs)
   {
-    $sql.=" LEFT JOIN $db->imagelocation AS il"
+    $sql.=" LEFT JOIN {$this->_tp}images_locations AS il"
         ." ON ( i.id=il.image_id )";
   }
 
@@ -782,34 +781,42 @@ function _add_sql_where_meta_exclusion($tags, $cats, $locs)
   
   if ($num_tags)
   {
+    $ids = array();
     foreach ($tags as $tag)
     {
       $tid=$db->tag2id($tag);
       if ($tid<0)
         continue;
-      $sql.=" OR it.tag_id=$tid";
+      array_push($ids, $tid);
     }
+    if (count($ids)>0)
+      $sql.=" OR it.tag_id IN (".implode(", ", $ids).")";
   }
   
   if ($num_cats)
   {
+    $ids = array();
     foreach ($cats as $cat)
     {
       $cid=$db->category2id($cat);
       if ($cid<0)
         continue;
-      $sql.=" OR ic.category_id=$cid";
+      array_push($ids, $cid);
     }
+    if (count($ids)>0)
+      $sql.=" OR ic.category_id IN (".implode(", ", $ids).")";
   }
   
   if ($num_locs)
   {
+    $ids = array();
     foreach ($locs as $loc)
     {
       $lids=$db->location2ids($loc);
-      foreach ($lids as $lid)
-        $sql.=" OR il.location_id=$lid";
+      $ids = array_merge($ids, $lids);
     }
+    if (count($ids)>0)
+      $sql.=" OR il.location_id IN (".implode(", ", $ids).")";
   }
   $sql.=$this->_add_sql_where_acl();
 
@@ -820,7 +827,6 @@ function _add_sql_where_meta_exclusion($tags, $cats, $locs)
 /** Returns sql statement for the where clause which checks the acl */
 function _add_sql_where_acl()
 {
-  global $db;
   global $user;
   
   $acl='';
@@ -833,7 +839,7 @@ function _add_sql_where_acl()
   {
     $acl.=" AND ( i.group_id IN (".
           " SELECT group_id".
-          " FROM $db->usergroup".
+          " FROM {$this->_tp}groups_users".
           " WHERE user_id=".$user->get_id().
           " AND i.gacl>=".ACL_READ_PREVIEW." )";
     if ($user->is_member())
@@ -1041,8 +1047,6 @@ function _add_sql_where()
   @see _add_sql_limit, _add_sql_column_order  */
 function get_query($limit=1, $order=true)
 {
-  global $db;
-
   $pos_tags=array();
   $neg_tags=array();
   foreach ($this->_tags as $tag)
@@ -1083,7 +1087,7 @@ function get_query($limit=1, $order=true)
   if ($order)
     $sql.=$this->_add_sql_column_order($num_pos_tags, $num_pos_cats, $num_pos_locs);
 
-  $sql.=" FROM $db->images AS i";
+  $sql.=" FROM {$this->_tp}images AS i";
   $sql.=$this->_add_sql_join_meta_inclusion($pos_tags, $pos_cats, $pos_locs);
   // Consider only imported files
   $sql.=" WHERE i.flag & ".IMAGE_FLAG_IMPORTED;
@@ -1102,7 +1106,6 @@ function get_query($limit=1, $order=true)
  * not order the result. */
 function get_num_query()
 {
-  global $db;
   $sql="SELECT COUNT(*) FROM ( ".
        $this->get_query(0, false).
        " ) AS num";
@@ -1114,7 +1117,7 @@ function get_num_images()
 {
   global $db;
   $sql="SELECT COUNT(id)".
-       " FROM $db->images".
+       " FROM {$this->_tp}images".
        " WHERE 1".
        $this->_add_sql_where_acl();
   return $db->query_cell($sql);
@@ -1130,7 +1133,7 @@ function get_popular_tags($num=50)
   global $db;
 
   $sql="SELECT t.name,COUNT(t.name) AS hits".
-       " FROM $db->tags AS t, $db->imagetag AS it, $db->images AS i".
+       " FROM {$this->_tp}tags AS t, {$this->_tp}images_tags AS it, {$this->_tp}images AS i".
        " WHERE t.id=it.tag_id AND it.image_id=i.id".
        "   AND i.flag & ".IMAGE_FLAG_IMPORTED.
        $this->_add_sql_where_acl().
@@ -1153,10 +1156,10 @@ the second column is the number of hits. The table is ordered by descending
 hits */
 function get_popular_categories($num=50)
 {
-  global $db, $log;
+  global $db;
 
   $sql="SELECT c.name,COUNT(c.name) AS hits". 
-       " FROM $db->categories AS c, $db->imagecategory AS ic, $db->images AS i".
+       " FROM {$this->_tp}categories AS c, {$this->_tp}categories_images AS ic, {$this->_tp}images AS i".
        " WHERE c.id=ic.category_id and ic.image_id=i.id".
        "   AND i.flag & ".IMAGE_FLAG_IMPORTED.
        $this->_add_sql_where_acl().
@@ -1165,10 +1168,7 @@ function get_popular_categories($num=50)
   
   $table=$db->query_table($sql);
   if (!$table)
-  {
-    $log->trace($sql);
     return null;
-  }
   $cloud=array();
   foreach($table as $row)
     $cloud[$row['name']]=$row['hits'];
