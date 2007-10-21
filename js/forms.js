@@ -21,8 +21,8 @@
  */
 
 /** Define global data variable to store the contents of replaced elements */
-var Data=new Array();
-var images=new Array();
+var Data=[];
+var images=[];
 
 /** Print the node information of a node. The function appends a PRE node to
  * the to node.
@@ -31,8 +31,9 @@ var images=new Array();
   @param maxDepth Maximum of depth*/
 function _debugNode(src, dst, maxDepth)
 {
-  if (src==null || dst==null)
+  if (src===null || dst===null) {
     return;
+  }
     
   var t=document.createTextNode("");
   _printNode(t, src, 0, maxDepth, "0");
@@ -54,12 +55,14 @@ function _printNode(t, e, depth, maxDepth, path)
 {
   var i, j, cn=0, an=0;
   
-  if (depth>maxDepth)
+  if (depth>maxDepth) {
     return;
+  }
 
   var text="";
-  for (i=0; i<depth; i++)
+  for (i=0; i<depth; i++) {
     text+="  ";
+  }
     
   switch (e.nodeType) {
     case 1:
@@ -76,34 +79,34 @@ function _printNode(t, e, depth, maxDepth, path)
       text+="Other";
       break;
   }
-  if (e.hasChildNodes())
-  {
+  if (e.hasChildNodes()) {
     cn=e.childNodes.length;
-    if (cn==1)
+    if (cn==1) {
       text+=" ("+cn+" child)";
-    else
+    } else {
       text+=" ("+cn+" children)";
+    }
   }
   
-  if (e.nodeValue!=null)
+  if (e.nodeValue!==null) {
     text+=": '"+e.nodeValue+"'";
+  }
   text+=" ["+path+"]";
   text+="\n"; 
   t.nodeValue+=text;
 
-  for (j=0; j<an; j++)
-  {
+  for (j=0; j<an; j++) {
     text="";
-    for (i=0; i<depth+1; i++)
+    for (i=0; i<depth+1; i++) {
       text+="  ";
+    }
     text+="@"+e.attributes[j].nodeName+"=";
     text+=e.attributes[j].nodeValue;
     text+="\n";
     t.nodeValue+=text;
   }
 
-  for (i=0; i<cn; i++)
-  {
+  for (i=0; i<cn; i++) {
     _printNode(t, e.childNodes[i], depth+1, maxDepth, path+"."+i);
   }
 }
@@ -116,8 +119,9 @@ function resetNode(nodeId)
   var from=document.getElementById(nodeId);
   var to=Data[nodeId];
   
-  if (from==null || to==null)
+  if (from===null || to===null) {
     return;
+  }
 
   var p=from.parentNode;
 
@@ -132,19 +136,22 @@ function resetNode(nodeId)
 function setStyleDisplay(id, type)
 {
   e=document.getElementById(id);
-  if (!e)
+  if (!e) {
     return;
-  if (!type || type=="")
+  }
+  if (!type || type==='') {
     type="inline";
+  }
   e.style.display=type;
   return true;
 }
 
 function setClassName(id, name)
 {
-  e=document.getElementById(id);
-  if (!e)
+  var e=document.getElementById(id);
+  if (!e) {
     return;
+  }
   e.className=name;
 }
 
@@ -171,23 +178,22 @@ function expandFormular(id)
   @note It copies all hidden input except with the name 'edit' */
 function _clone_hidden_input(src, dstForm)
 {
-  if (src==null || dstForm==null)
-  {
+  if (src===null || dstForm===null) {
     window.allert("null");
     return;
   }
     
   var i,e;
-  for (i=0; i<src.childNodes.length; i++)
-  {
+  for (i=0; i<src.childNodes.length; i++) {
     e=src.childNodes[i];
     if (e.nodeType==1 &&
       e.nodeName=="INPUT" && 
       e.getAttribute("type")=="hidden" &&
-      e.getAttribute("name")!="edit")
-      dstForm.appendChild(e.cloneNode(true))
-    else
+      e.getAttribute("name")!="edit") {
+      dstForm.appendChild(e.cloneNode(true));
+    } else {
       _clone_hidden_input(e, dstForm);
+    }
   }
 }
 
@@ -198,8 +204,9 @@ function _clone_hidden_input(src, dstForm)
 function checkbox(id, name)
 {
   var cb=document.getElementById(id);
-  if (!cb)
+  if (!cb) {
     return;
+  }
     
   for (var i=0; i<document.forms["formExplorer"].elements.length; i++) {
     var e = document.forms[1].elements[i];
@@ -214,8 +221,9 @@ function checkbox(id, name)
 function uncheck(id)
 {
   var cb=document.getElementById(id);
-  if (!cb)
+  if (!cb) {
     return;
+  }
   cb.checked=false;
 }
 
@@ -228,8 +236,9 @@ function toggle_visibility(fromId, toId)
   var from=document.getElementById(fromId);
   var to=document.getElementById(toId);
 
-  if (from==null || to==null)
+  if (from===null || to===null) {
     return;
+  }
 
   if (from.style.display=='none') {
     from.style.display='';
@@ -246,20 +255,23 @@ function toggle_visibility(fromId, toId)
   @param i Value of the vote */
 function vote_highlight(id, voting, i)
 {
+  var j;
   for (j=0; j<=5; j++)
   {
     var s="voting-"+id+"-"+j;
     var e=document.getElementById(s);
-    if (!e)
+    if (!e) {
       return;
+    }
 
     var a=e.getAttribute("src");
-    if (j<=i) 
+    if (j<=i) {
       e.setAttribute("src", a.replace(/vote-.*\.png/, "vote-select.png"));
-    else if (voting>0 && j<=voting)
+    } else if (voting>0 && j<=voting) {
       e.setAttribute("src", a.replace(/vote-.*\.png/, "vote-set.png"));
-    else
+    } else {
       e.setAttribute("src", a.replace(/vote-.*\.png/, "vote-none.png"));
+    }
   }
 }
 
@@ -268,18 +280,21 @@ function vote_highlight(id, voting, i)
   @param voting Current voting value */
 function vote_reset(id, voting)
 {
+  var j;
   for (j=0; j<=5; j++) 
   {
     var s="voting-"+id+"-"+j;
     var e=document.getElementById(s);
-    if (!e)
+    if (!e) {
       return;
+    }
 
     var a=e.getAttribute("src");
-    if (voting>0 && j<=voting)
+    if (voting>0 && j<=voting) {
       e.setAttribute("src", a.replace(/vote-.*\.png/, "vote-set.png"));
-    else
+    } else {
       e.setAttribute("src", a.replace(/vote-.*\.png/, "vote-none.png"));
+    }
   }
 }
 
@@ -293,8 +308,9 @@ function _input(type, name, value)
   var input=document.createElement("input");
   input.setAttribute("type", type);
   input.setAttribute("name", name);
-  if (value!='')
+  if (value!=='') {
     input.setAttribute("value", value);
+  }
   return input;
 }
 
@@ -305,8 +321,9 @@ function _input(type, name, value)
 function _input_checkbox(name, value, checked)
 {
   var input=_input('checkbox', name, value);
-  if (checked || checked>0)
+  if (checked || checked>0) {
     input.setAttribute("checked", "checked");
+  }
   return input;
 }
 
@@ -330,8 +347,9 @@ function _option(value, text, selected)
 {
   var option=document.createElement("option");
   option.setAttribute("value", value);
-  if (selected)
+  if (selected) {
     option.setAttribute("selected", "selected");
+  }
   option.appendChild(document.createTextNode(text));
   return option;
 }
@@ -355,9 +373,15 @@ function _get_acl_level(id, flag, mask)
   var macl=images[id]['macl'];
   var pacl=images[id]['pacl'];
 
-  if ((pacl & mask) >= flag) return 3;
-  if ((macl & mask) >= flag) return 2;
-  if ((gacl & mask) >= flag) return 1;
+  if ((pacl & mask) >= flag) {
+    return 3;
+  }
+  if ((macl & mask) >= flag) {
+    return 2;
+  }
+  if ((gacl & mask) >= flag) {
+    return 1;
+  }
   return 0;
 }
 
@@ -372,7 +396,7 @@ function _new_acl_select(name, level)
   select.setAttribute('name', name);
   select.setAttribute('size', 1);
 
-  select.appendChild(_option('private', 'Me only', (level==0?true:false)));
+  select.appendChild(_option('private', 'Me only', (level===0?true:false)));
   select.appendChild(_option('group', 'Group members', (level==1?true:false)));
   select.appendChild(_option('member', 'All members', (level==2?true:false)));
   select.appendChild(_option('any', 'Everyone', (level==3?true:false)));
@@ -391,10 +415,12 @@ function _init_form(id)
   // copy all hidden inputs from formExplorer or formImage
   // whichever exists
   var srcForm;
-  if (document.getElementById("formExplorer"))
+  if (document.getElementById("formExplorer")) {
     srcForm=document.getElementById("formExplorer");
-  else
+  }
+  else {
     srcForm=document.getElementById("formImage");
+  }
   _clone_hidden_input(srcForm, form);
  
   form.appendChild(_input('hidden', 'image', id));
@@ -407,17 +433,18 @@ function print_caption(id)
 {
   var nodeId="caption-text-"+id;
   var e=document.getElementById(nodeId);
-  if (e==null)
+  if (e===null) {
     return;
+  }
 
-  if (Data[nodeId]!=null)
-  {
+  if (Data[nodeId]!==null) {
     resetNode(nodeId);
     return;
   }
   
-  if (!images[id] || !images[id]['caption'])
+  if (!images[id] || !images[id]['caption']) {
     return;
+  }
 
   // Remember old content
   Data[nodeId]=e.cloneNode(true);
@@ -431,8 +458,9 @@ function print_caption(id)
   span.setAttribute("onclick", "resetNode('"+nodeId+"')");
   span.appendChild(document.createTextNode("[-]"));
   
-  while (e.hasChildNodes())
+  while (e.hasChildNodes()) {
     e.removeChild(e.lastChild);
+  }
   e.appendChild(text);
   e.appendChild(span);
 }
@@ -445,19 +473,20 @@ function edit_caption(id)
   var focusId=nodeId+"-focus";
 
   var e=document.getElementById(nodeId);
-  if (!e)
+  if (!e) {
     return;
+  }
 
   // Does a form already exists?
   // On mozilla, the form will be omitted, check also for the next input node
-  if (Data[nodeId]!=null)
-  {
+  if (Data[nodeId]!==null)  {
     resetNode(nodeId);
     return;
   }
 
-  if (!images[id])
+  if (!images[id]) {
     return;
+  }
 
   // Remember old content
   Data[nodeId]=e.cloneNode(true);
@@ -492,8 +521,9 @@ function edit_caption(id)
   form.appendChild(fs);
   form.appendChild(_get_div_buttons(nodeId));
 
-  while (e.hasChildNodes())
+  while (e.hasChildNodes()) {
     e.removeChild(e.lastChild);
+  }
   e.appendChild(form);
   document.getElementById(focusId).focus();
 }
@@ -503,18 +533,19 @@ function edit_caption(id)
 function edit_tag(id)
 {
   var e=document.getElementById('info-'+id);
-  if (!e)
+  if (!e) {
     return;
+  }
 
-  if (!images[id])
+  if (!images[id]) {
     return;
+  }
 
   var nodeId="info-"+id;
   var focusId="focus-"+id;
   // Does a form already exists?
   // On mozilla, the form will be omitted, check also for the next input node
-  if (Data[nodeId]!=null)
-  {
+  if (Data[nodeId]!==null) {
     resetNode(nodeId);
     return;
   }
@@ -539,8 +570,9 @@ function edit_tag(id)
   form.appendChild(fs);
   form.appendChild(_get_div_buttons(nodeId));
 
-  while (e.hasChildNodes())
+  while (e.hasChildNodes()) {
     e.removeChild(e.lastChild);
+  }
   e.appendChild(form);
   document.getElementById(focusId).focus();
 }
@@ -550,18 +582,19 @@ function edit_tag(id)
 function edit_meta(id)
 {
   var e=document.getElementById('info-'+id);
-  if (!e)
+  if (!e) {
     return;
+  }
 
-  if (!images[id])
+  if (!images[id]) {
     return;
+  }
 
   var nodeId="info-"+id;
   var focusId="focus-"+id;
   // Does a form already exists?
   // On mozilla, the form will be omitted, check also for the next input node
-  if (Data[nodeId]!=null)
-  {
+  if (Data[nodeId]!==null) {
     resetNode(nodeId);
     return;
   }
@@ -589,8 +622,9 @@ function edit_meta(id)
   form.appendChild(fs);
   form.appendChild(_get_div_buttons(nodeId));
 
-  while (e.hasChildNodes())
+  while (e.hasChildNodes()) {
     e.removeChild(e.lastChild);
+  }
   e.appendChild(form);
   document.getElementById(focusId).focus();
 }
@@ -600,18 +634,19 @@ function edit_meta(id)
 function edit_acl(id)
 {
   var e=document.getElementById('info-'+id);
-  if (!e)
+  if (!e) {
     return;
+  }
 
-  if (!images[id])
+  if (!images[id]) {
     return;
+  }
 
   var nodeId="info-"+id;
   var focusId="focus-"+id;
   // Does a form already exists?
   // On mozilla, the form will be omitted, check also for the next input node
-  if (Data[nodeId]!=null)
-  {
+  if (Data[nodeId]!==null) {
     resetNode(nodeId);
     return;
   }
@@ -632,8 +667,7 @@ function edit_acl(id)
   fs.appendChild(ol);
   
   ol.appendChild(_get_acl_groups(images[id]['gid']));
-  if (images[id]['gacl']!=null) 
-  {
+  if (images[id]['gacl']!==null) {
     ol.appendChild(_get_acl_edit(id));
     ol.appendChild(_get_acl_preview(id));
   }
@@ -641,8 +675,9 @@ function edit_acl(id)
   form.appendChild(fs);
   form.appendChild(_get_div_buttons(nodeId));
 
-  while (e.hasChildNodes())
+  while (e.hasChildNodes()) {
     e.removeChild(e.lastChild);
+  }
   e.appendChild(form);
   document.getElementById(focusId).focus();
 }
@@ -662,13 +697,12 @@ function _get_acl_groups(gid)
 
   s.appendChild(_option(0, "Keep", false));
 
-  if (typeof groups !="undefined")
-  {
-    for(var groupid in groups)
-    {
+  if (typeof groups !="undefined") {
+    for(var groupid in groups) {
       // skip current group
-      if (groupid==gid)
+      if (groupid==gid) {
         continue;
+      }
 
       s.appendChild(_option(groupid, groups[groupid], false));
     }
@@ -704,8 +738,9 @@ function _get_acl_preview(id)
   @param id ID of the image */
 function _get_li_date(id)
 {
-  if (!images || !images[id])
+  if (!images || !images[id]) {
     return null;
+  }
 
   var li=document.createElement("li");
   li.appendChild(_label('Date:'));
@@ -718,8 +753,9 @@ function _get_li_date(id)
   @param id ID of the image */
 function _get_li_tags(id)
 {
-  if (!images || !images[id])
+  if (!images || !images[id]) {
     return null;
+  }
 
   var li=document.createElement("li");
 
@@ -729,8 +765,7 @@ function _get_li_tags(id)
   te.setAttribute('name', 'js_tags');
   te.setAttribute('cols', '10');
   te.setAttribute('rows', '1');
-  if (images[id]['tags']!='')
-  {
+  if (images[id]['tags']!=='') {
     te.appendChild(document.createTextNode(images[id]['tags']));
   }
   te.setAttribute('id', 'focus-'+id);
@@ -743,8 +778,9 @@ function _get_li_tags(id)
   @param id ID of the image */
 function _get_li_categories(id)
 {
-  if (!images || !images[id])
+  if (!images || !images[id]) {
     return null;
+  }
 
   var li=document.createElement("li");
   li.appendChild(_label('Categories:'));
@@ -757,11 +793,13 @@ function _get_li_categories(id)
   @param t Table object */
 function _add_locations(e, id)
 {
-  if (!e || !id)
+  if (!e || !id) {
     return null;
+  }
 
-  if (!images || !images[id])
+  if (!images || !images[id]) {
     return null;
+  }
 
   var li=document.createElement("li");
   li.appendChild(_label('City:'));
@@ -788,8 +826,9 @@ function _add_locations(e, id)
   @param nodeId Node ID for the reset button */
 function _get_div_buttons(nodeId)
 {
-  if (nodeId=='')
+  if (nodeId==='') {
     return null;
+  }
 
   var div=document.createElement('div');
   div.setAttribute("class", "buttons");
@@ -809,8 +848,9 @@ function _get_div_buttons(nodeId)
 function remove_file_input(id)
 {
   var e=document.getElementById('upload-'+id);
-  if (e==null)
+  if (e===null) {
     return;
+  }
   var p=e.parentNode;
   p.removeChild(e);
 }
@@ -820,30 +860,32 @@ function remove_file_input(id)
   @param i Index. If index is negative, it searches backwards */
 function _getChildByName(e, name, i)
 {
-  if (e==null)
+  if (e===null) {
     return null;
+  }
   name=name.toUpperCase();
-  if (i>=0) 
-  {
-    var c=-1;
-    for (j=0; j<e.childNodes.length; j++)
-    {
-      if (e.childNodes[j].nodeName==name)
+  var c=0;
+  var j;
+  if (i>=0) {
+    c=-1;
+    for (j=0; j<e.childNodes.length; j++) {
+      if (e.childNodes[j].nodeName==name) {
         c++;
-      if (c==i)
+      }
+      if (c==i) {
         return e.chileNodes[j];
       }
-  }
-  else 
-  {
-    var c=0;
-    for (j=e.childNodes.length-1; j>=0; j--)
-    {
-      if (e.childNodes[j].nodeName==name)
+    }
+  } else {
+    c=0;
+    for (j=e.childNodes.length-1; j>=0; j--) {
+      if (e.childNodes[j].nodeName==name) {
         c--;
-      if (c==i)
+      }
+      if (c==i) {
         return e.childNodes[j];
       }
+    }
   }
 }
 
@@ -857,7 +899,7 @@ function _getLastChildByName(e, name)
 
 /** @param e current node
   @param name Node name
-  @return The first child with the given node name 
+  @return The first child with the given node name */
 function _getFistChildByName(e, name)
 {
   return _getChildByName(e, name, 0);
@@ -869,15 +911,15 @@ function _getFistChildByName(e, name)
 function add_file_input(id, text)
 {
   var row=document.getElementById('upload-'+id);
-  if (row==null)
+  if (row===null) {
     return;
+  }
 
   var new_row=row.cloneNode(true);
 
   var td=_getLastChildByName(row, 'td');
   var a=_getLastChildByName(td, 'a');
-  if (a!=null)
-  {
+  if (a!==null) {
     a.setAttribute("onclick", "remove_file_input("+id+")");
     a.firstChild.nodeValue=text;
   }
@@ -886,8 +928,7 @@ function add_file_input(id, text)
   new_row.setAttribute("id", "upload-"+id);
   td=_getLastChildByName(new_row, 'td');
   a=_getLastChildByName(td, 'a');
-  if (a!=null)
-  {
+  if (a!==null) {
     a.setAttribute("onclick", "add_file_input("+id+", '"+text+"')");
   }
 
