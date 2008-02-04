@@ -573,10 +573,19 @@ function _read_seg_app1_ifd($buf, $pos, $tableName=false)
       $interop_pos=$app1['pos']+10+$attr['value'];
       $log->trace("Interoperability IFD Header at ".$attr['value']." ($interop_pos 0x".dechex($interop_pos).")");
       $interop=$this->_read_seg_app1_ifd($buf, $attr['value'], 'Interoperability');
-      if ($interop==null) 
-        return null;
-      $ifd['interop']=$interop;
-    }
+      if ($interop!=null) 
+        $ifd['interop']=$interop;
+    } 
+    else if ($attr['name']=='MakerNote')
+    {
+      $log->trace("Maker note at ".$attr['offset']." (0x".dechex($attr['offset']).")");
+      $maker=$this->_read_seg_app1_ifd($buf, $attr['offset']);
+      if ($maker!=null) 
+      {
+        $ifd['MakerNote']=$maker;
+        $log->trace("makernote: ".print_r($maker, true));
+      }
+    } 
        
     $ifd[$attr['id']]=$attr;
     $pos+=12;
@@ -690,8 +699,7 @@ function _ifd2array($ifd)
   $result=array();
   foreach($ifd as $id => $attr)
   { 
-    // skip MakerNote (id 37500)
-    if (is_numeric($id) && $id!=37500 &&
+    if (is_numeric($id) &&
       isset($attr['name']) && !is_numeric($attr['name']) && 
       isset($attr['value']))
       $result[$attr['name']]=$attr['value'];
@@ -778,8 +786,10 @@ function _getExifAttributeValue($buf, &$attr)
         $attr['value']=ord($buf[$pos+8]);
         break; 
       case EXIF_ASCII:
-      case EXIF_UNDEFINED:
         $attr['value']=substr($buf, $pos+8, $size);
+        break;
+      case EXIF_UNDEFINED:
+        $attr['value']=$this->_buf2hex(substr($buf, $pos+8, $size));
         break;
       case EXIF_SHORT:
         $attr['value']=$this->_get16u(substr($buf, $pos+8, 2));
@@ -810,7 +820,7 @@ function _getExifAttributeValue($buf, &$attr)
         $attr['value']=substr($buf, $offset, $size-1);
         break;
       case EXIF_UNDEFINED:
-        $attr['value']=substr($buf, $offset, $size);
+        $attr['value']=$this->_buf2hex(substr($buf, $offset, $size));
         break;
       case EXIF_SHORT:
         $attr['value']=$this->_get16u(substr($buf, $offset, 2));
@@ -1112,11 +1122,17 @@ function _read_seg_com()
   $fp=$this->_jpg['_fp'];
   $com=&$this->_jpg['_com'];
   fseek($fp, $com['pos']+HDR_SIZE_JPG, SEEK_SET);
-  if ($com['size']<=2)
+  if ($com['size']<2)
   {
-    $log->err("JPEG comment segment size is negative: ".$this->_jpg['filename']);
+    $log->err("JPEG comment segment size is to low: ".$com['size']." in ".$this->_jpg['filename']);
     return false;
   }
+  else if ($com['size']==2)
+  {
+    $this->_jpg['denycom']=true;
+    return 0;
+  }
+
   $buf=fread($fp, $com['size']-2);
   if (substr($buf, 0, 5)!="<?xml") {
     $this->_xml=null;

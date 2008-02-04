@@ -686,11 +686,11 @@ function imginfo($is_thumb, $return=false)
       $output.="<input type=\"checkbox\" name=\"images[]\" value=\"$id\" onclick=\"uncheck('selectall')\" /> ";
 
     if ($img->can_write_meta(&$user))
-      $output.=" <a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"edit_meta($id)\">"._("Edit Metadata")."</a>";
+      $output.=" <a href=\"javascript:void();\" class=\"jsbutton\" onclick=\"edit_meta($id);\">"._("Edit Metadata")."</a>";
     elseif ($img->can_write_tag(&$user))
-      $output.=" <a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"edit_tag($id)\">"._("Edit Tags")."</a>";
+      $output.=" <a href=\"javascript:void();\" class=\"jsbutton\" onclick=\"edit_tag($id);\">"._("Edit Tags")."</a>";
     if ($img->is_owner(&$user))
-      $output.="<a href=\"javascript:void()\" class=\"jsbutton\" onclick=\"edit_acl($id)\">".("Edit ACL")."</a>";
+      $output.="<a href=\"javascript:void();\" class=\"jsbutton\" onclick=\"edit_acl($id);\">".("Edit ACL")."</a>";
     if ($img->can_read_original(&$user))
     {
       $url=new Url('image.php');

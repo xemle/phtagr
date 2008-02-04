@@ -205,6 +205,33 @@ function get_fspath($path)
   return false;
 }
 
+function is_external($path)
+{
+  global $user;
+  global $log;
+
+  while ($path[0] == '/')
+    $path=substr($path, 1);
+
+  $paths = explode('/', trim($path));
+  if (count($paths) == 0 || count($this->_roots) == 0)
+  {
+    return true;
+  }
+
+  foreach ($this->_roots as $alias => $fsroot) {
+    if ($alias == $paths[0]) 
+    {
+      if ($this->slashify($fsroot) == $this->slashify($user->get_upload_dir())) {
+        $log->debug("$path is internal!");
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+
 /** Returns a list of subdirectories and files of the given directory
   @param dir Directory which should be read
   @return Two dimensioned array with array of subdirectorys and an array of

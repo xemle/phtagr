@@ -82,6 +82,8 @@ function do_upgrade()
     case 4:
       // This should be done via external php script changedb.svn218.sh
       break;
+    case 5:
+      $cur_version=$this->_upgrade_to_6(); break;
     default: break;
     }
   }
@@ -228,6 +230,44 @@ function _upgrade_to_4()
 
   $conf->set_default('db.version', '4');
   return 4;
+}
+
+function _upgrade_to_6() {
+  global $db, $conf;
+
+  // Add index column to configs
+  $sql="ALTER TABLE $db->configs ".
+       "ADD id INT NOT NULL AUTO_INCREMENT,".
+       "ADD INDEX(id)";
+  $db->query($sql);
+
+  // Alter roles
+  $sql="UPDATE $db->users ".
+       "SET role=role+10";
+  $db->query_update($sql);
+  // Reset admins
+  $sql="UPDATE $db->users ".
+       "SET role=".USER_ADMIN.' '.
+       "WHERE role=11";
+  $db->query_update($sql);
+  // Reset members
+  $sql="UPDATE $db->users ".
+       "SET role=".USER_MEMBER.' '.
+       "WHERE role=12";
+  $db->query_update($sql);
+  // Reset guests
+  $sql="UPDATE $db->users ".
+       "SET role=".USER_GUEST.' '.
+       "WHERE role=13";
+  $db->query_update($sql);
+
+  // Alter image flags
+  $sql="Update $db->images ".
+       "SET flag=(flag>>7)+(((flag&64)>>5)^2)";
+  $db->query($sql);
+
+  $conf->set_default('db.version', '6');
+  return 6;
 }
 
 }

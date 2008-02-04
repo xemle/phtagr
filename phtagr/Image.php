@@ -272,9 +272,9 @@ function get_flag()
 }
 
 /** @return True if the image was uploaded. Fals otherwise */
-function is_upload()
+function is_external()
 {
-  $flag=$this->get_flag() & IMAGE_FLAG_UPLOADED;
+  $flag=$this->get_flag() & IMAGE_FLAG_IMAGE_FLAG_EXTERNAL;
   return $flag>0?true:false;
 }
 

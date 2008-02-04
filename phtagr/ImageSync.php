@@ -39,16 +39,15 @@ function ImageSync($id=-1)
 /** Import an image by a filename to the database. If an image with the same
  * filename exists, the function update() is called.
   @param filename Filename of the image
-  @param is_upload True if the image was uploaded. False if the image is local. Default
-  is false.
+  @param is_external True if the image was uploaded. False if the image is local. Default is false.
   @return Returns 0 on success, -1 for failure. On update the return value is
   1. If the file already exists and has no changes, the return value is 2.
   @see update() */
-function import($filename, $is_upload=false)
+function import($filename, $is_external=false)
 {
   global $db, $log, $user;
   
-  $log->trace("Import file: $filename (upload: $is_upload)");
+  $log->trace("Import file: $filename (external: $is_external)");
   if (!file_exists($filename))
     return ERR_FS_NOT_EXISTS;
 
@@ -80,8 +79,8 @@ function import($filename, $is_upload=false)
     $macl=$user->get_macl();
     $pacl=$user->get_pacl();
     
-    $flag=IMAGE_FLAG_IMPORTED;
-    $flag|=($is_upload ? IMAGE_FLAG_UPLOADED : 0);
+    $flag=IMAGE_FLAG_ACTIVE;
+    $flag|=($is_external ? IMAGE_FLAG_EXTERNAL : 0);
     // insert basics
     $sql="INSERT INTO $db->images (".
          "   user_id, group_id, created,".
@@ -125,9 +124,9 @@ function import($filename, $is_upload=false)
     }
 
     $flag=$row['flag'];
-    if (($flag & IMAGE_FLAG_MASK)==IMAGE_FLAG_UPLOADED)
+    if (($flag & IMAGE_FLAG_MASK)==IMAGE_FLAG_EXTERNAL)
     {
-      $flag|=IMAGE_FLAG_IMPORTED;
+      $flag|=IMAGE_FLAG_ACTIVE;
       // image was uploaded, but not insert
       // update basics
       $sql="UPDATE $db->images ".
@@ -158,7 +157,7 @@ function import($filename, $is_upload=false)
       $log->debug("Successful import of '$filename' (uploaded)", $row['id']);
       return 0;
     }
-    elseif (($flag & IMAGE_FLAG_IMPORTED)==IMAGE_FLAG_IMPORTED)
+    elseif (($flag & IMAGE_FLAG_ACTIVE)==IMAGE_FLAG_ACTIVE)
     {
       // Re-import file
       $this->init_by_id($row['id']);
@@ -177,14 +176,14 @@ function import($filename, $is_upload=false)
 
 /** Add an file by a filename to the database but don't import it.  
   @param filename Filename of the image
-  @param is_upload True if the image was uploaded. False if the image is local. Default
+  @param is_external True if the image was uploaded. False if the image is local. Default
   is false.
   @return Returns the new image id on success, -1 for failure. */
-function add_file($filename, $is_upload=false)
+function add_file($filename, $is_external=false)
 {
   global $db, $log, $user;
   
-  $log->trace("Add file: $filename (upload: $is_upload)");
+  $log->trace("Add file: $filename (upload: $is_external)");
   if (!file_exists($filename))
   {
     $log->err("Could not add file. File '$filename' does not exists");
@@ -209,7 +208,7 @@ function add_file($filename, $is_upload=false)
 
   if (empty($row['id']))
   {
-    $flag=($is_upload)?IMAGE_FLAG_UPLOADED:0;
+    $flag=($is_external)?IMAGE_FLAG_EXTERNAL:0;
     // new entry
     $sql="INSERT INTO $db->images".
          " (user_id, path, file, bytes, created, flag)".
@@ -413,7 +412,7 @@ function delete()
   if ($previewer!=null)
     $previewer->delete_previews();
 
-  if ($this->is_upload())
+  if ($this->is_external())
   {
     $log->info("Delete file '".$this->get_filename()."' from the filesystem", $this->get_id());
     @unlink($this->get_filename());
@@ -441,7 +440,7 @@ function delete_from_user($userid, $id=0)
   $userid=$user->get_id();
   $sql="SELECT path,file".
        " FROM $db->images".
-       " WHERE userid=$userid AND flag & ".IMAGE_FLAG_UPLOADED;
+       " WHERE userid=$userid AND flag & ".IMAGE_FLAG_EXTERNAL;
   if ($id>0) $sql.=" AND id=$id";
 
   $result=$db->query($sql);

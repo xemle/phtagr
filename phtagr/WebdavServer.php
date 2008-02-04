@@ -835,7 +835,7 @@ function http_PUT()
   }
  
   $sync=new ImageSync();
-  if (!$sync->add_file($fspath, true))
+  if (!$sync->add_file($fspath, false))
   {
     $log->warn("Could not add file '$fspath'");
   }

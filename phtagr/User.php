@@ -154,8 +154,8 @@ function get_type()
 function set_type($type)
 {
   global $user;
-  if ($type<USER_ADMIN || 
-      $type>USER_GUEST)
+  if ($type>USER_ADMIN || 
+      $type<USER_GUEST)
     return false;
 
   // Allow only admins to set a user to admin
@@ -485,7 +485,7 @@ function create($name, $pwd, $type=USER_MEMBER)
   if ($err<0)
     return $err;
 
-  if ($type<USER_ADMIN || $type>USER_GUEST)
+  if ($type>USER_ADMIN || $type<USER_GUEST)
     return ERR_USER_GERNERAL;
 
   if ($type==USER_AMDIN && 
@@ -716,7 +716,7 @@ function get_image_count($only_uploads=false, $since=-1)
        " FROM $db->images".
        " WHERE user_id=$id";
   if ($only_uploads)
-    $sql.=" AND flag & ".IMAGE_FLAG_UPLOADED;
+    $sql.=" AND (flag & ".IMAGE_FLAG_ACTIVE.')=0';
   if ($since>0)
     $sql.=" AND created>FROM_UNIXTIME($since)";
 
@@ -744,7 +744,7 @@ function get_image_bytes($only_uploads=false, $since=-1)
        " FROM $db->images".
        " WHERE user_id=$id";
   if ($only_uploads)
-    $sql.=" AND flag & ".IMAGE_FLAG_UPLOADED;
+    $sql.=" AND (flag & ".IMAGE_FLAG_ACTIVE.')=0';
   if ($since>0)
     $sql.=" AND created>FROM_UNIXTIME($since)";
 

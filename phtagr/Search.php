@@ -830,12 +830,14 @@ function _add_sql_where_acl()
   global $user;
   
   $acl='';
+  //if ($user->is_admin() || 
+  //  ($user->is_member() && $this->get_userid()==$user->get_id()))
   if ($user->is_admin() || 
     $this->get_userid()==$user->get_id())
     return $acl;
     
   // if requested user id is not the own user id
-  else if ($user->is_member() || $user->is_guest())
+  if ($user->is_member() || $user->is_guest())
   {
     $acl.=" AND ( i.group_id IN (".
           " SELECT group_id".
@@ -847,8 +849,11 @@ function _add_sql_where_acl()
       $acl.=" OR i.macl>=".ACL_READ_PREVIEW;
       $acl.=" OR i.user_id=".$user->get_id();
     }  
-    else
+    //elseif ($this->get_userid() != $user->get_id())
+    else 
+    {
       $acl.=" OR i.pacl>=".ACL_READ_PREVIEW;
+    }
     $acl.=" )";
   }
   else {
@@ -1090,7 +1095,7 @@ function get_query($limit=1, $order=true)
   $sql.=" FROM {$this->_tp}images AS i";
   $sql.=$this->_add_sql_join_meta_inclusion($pos_tags, $pos_cats, $pos_locs);
   // Consider only imported files
-  $sql.=" WHERE i.flag & ".IMAGE_FLAG_IMPORTED;
+  $sql.=" WHERE i.flag & ".IMAGE_FLAG_ACTIVE;
   $sql.=$this->_add_sql_where_meta_exclusion($neg_tags, $neg_cats, $neg_locs);
   $sql.=$this->_add_sql_where();
   $sql.=" GROUP BY i.id";
@@ -1135,7 +1140,7 @@ function get_popular_tags($num=50)
   $sql="SELECT t.name,COUNT(t.name) AS hits".
        " FROM {$this->_tp}tags AS t, {$this->_tp}images_tags AS it, {$this->_tp}images AS i".
        " WHERE t.id=it.tag_id AND it.image_id=i.id".
-       "   AND i.flag & ".IMAGE_FLAG_IMPORTED.
+       "   AND i.flag & ".IMAGE_FLAG_ACTIVE.
        $this->_add_sql_where_acl().
        " GROUP BY t.name ".
        " ORDER BY hits DESC LIMIT 0,".intval($num);
@@ -1161,7 +1166,7 @@ function get_popular_categories($num=50)
   $sql="SELECT c.name,COUNT(c.name) AS hits". 
        " FROM {$this->_tp}categories AS c, {$this->_tp}categories_images AS ic, {$this->_tp}images AS i".
        " WHERE c.id=ic.category_id and ic.image_id=i.id".
-       "   AND i.flag & ".IMAGE_FLAG_IMPORTED.
+       "   AND i.flag & ".IMAGE_FLAG_ACTIVE.
        $this->_add_sql_where_acl().
        " GROUP BY c.name". 
        " ORDER BY hits DESC LIMIT 0,".intval($num);

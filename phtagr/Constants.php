@@ -21,11 +21,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-define("DB_VERSION", 5);
+define("DB_VERSION", 6);
 
-define("USER_ADMIN",  0x01);
+define("USER_GUEST",  0x01);
 define("USER_MEMBER", 0x02);
-define("USER_GUEST",  0x03);
+define("USER_ADMIN",  0x03);
 
 // ACL constants
 // Reading bits are the three highest bits
@@ -54,9 +54,9 @@ define("LOCATION_COUNTRY", 0x04);
 
 define("VOTING_MAX", 0x05);
 
-define("IMAGE_FLAG_UPLOADED", 64);
-define("IMAGE_FLAG_IMPORTED", 128);
-define("IMAGE_FLAG_MASK", 192);
+define("IMAGE_FLAG_ACTIVE", 1);
+define("IMAGE_FLAG_EXTERNAL", 2);
+define("IMAGE_FLAG_MASK", 3);
 
 define("GUEST_MAX", 10);
 define("GROUP_MAX", 10);

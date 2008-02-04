@@ -175,7 +175,8 @@ function print_content()
     foreach ($images as $img)
     {
       $image=new ImageSync();
-      $result=$image->import($fs->get_fspath($img), 0);
+      $external = $fs->is_external($img);
+      $result=$image->import($fs->get_fspath($img), $external);
 
       switch ($result)
       {
