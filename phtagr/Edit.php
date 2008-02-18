@@ -288,8 +288,6 @@ function print_edit_inputs()
 
   $this->fieldset_collapsable(_("Tag Images"), 'meta', true, true);
 
-  echo "<ol>";
-
   echo "<li>";
   $this->label(_("Caption:"));
   $this->textarea("edit_caption", 40, 3);

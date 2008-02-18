@@ -266,6 +266,7 @@ function fieldset_collapsable($legend, $id=null, $collapsable=false, $collapsed=
       $output.="<a id=\"btn-expand-$id\" href=\"javascript:void()\" onclick=\"expandFormular('$id');\" style=\"display: none\">&gt;</a>";
     }
   }
+  $output.="</legend>\n";
   $output.="<ol";
   $output.=($id!=null)?" id=\"inputs-$id\">":">";
   return $this->output($output, $return);
