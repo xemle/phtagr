@@ -24,25 +24,6 @@
 var Data=[];
 var images=[];
 
-/** Print the node information of a node. The function appends a PRE node to
- * the to node.
-  @param src Source node, which has to be debugged
-  @param dst Destination node, where the debug information has to be printed 
-  @param maxDepth Maximum of depth*/
-function _debugNode(src, dst, maxDepth)
-{
-  if (src===null || dst===null) {
-    return;
-  }
-    
-  var t=document.createTextNode("");
-  _printNode(t, src, 0, maxDepth, "0");
-
-  var pre=document.createElement("pre");
-  pre.appendChild(t);
-  dst.appendChild(pre);
-}
-
 /** Prints recursivly detailed information about the node and add the text data
  * to the text node 
   @param t Textnode
@@ -111,11 +92,34 @@ function _printNode(t, e, depth, maxDepth, path)
   }
 }
 
+/** Print the node information of a node. The function appends a PRE node to
+ * the to node.
+  @param src Source node, which has to be debugged
+  @param dst Destination node, where the debug information has to be printed 
+  @param maxDepth Maximum of depth*/
+function _debugNode(src, dst, maxDepth)
+{
+  if (src===null || dst===null) {
+    return;
+  }
+    
+  var t=document.createTextNode("");
+  _printNode(t, src, 0, maxDepth, "0");
+
+  var pre=document.createElement("pre");
+  pre.appendChild(t);
+  dst.appendChild(pre);
+}
+
 /** Resets a node with the old value. The node with ID of nodeId was cloned to
  * the Data array. 
   @param nodeId Node ID of the Data array */
 function resetNode(nodeId)
 {
+  if (Data===null || !Data[nodeId]) {
+    return;
+  }
+
   var from=document.getElementById(nodeId);
   var to=Data[nodeId];
   
@@ -127,7 +131,7 @@ function resetNode(nodeId)
 
   p.replaceChild(to, from);
 
-  Data[nodeId]=null;
+  delete Data[nodeId];
 }
 
 /** Change the display style of an element
@@ -208,7 +212,7 @@ function checkbox(id, name)
     return;
   }
     
-  for (var i=0; i<document.forms["formExplorer"].elements.length; i++) {
+  for (var i=0; i<document.forms.formExplorer.elements.length; i++) {
     var e = document.forms[1].elements[i];
     if (e.name==name && e.type == 'checkbox') {
       e.checked = cb.checked;
@@ -437,7 +441,7 @@ function print_caption(id)
     return;
   }
 
-  if (Data[nodeId]!==null) {
+  if (typeof(Data[nodeId])!=='undefined') {
     resetNode(nodeId);
     return;
   }
@@ -464,6 +468,27 @@ function print_caption(id)
   e.appendChild(text);
   e.appendChild(span);
 }
+
+/** Create an Update and an Reset button
+  @param nodeId Node ID for the reset button */
+function _get_div_buttons(nodeId)
+{
+  if (nodeId==='') {
+    return null;
+  }
+
+  var div=document.createElement('div');
+  div.setAttribute("class", "buttons");
+
+  var submit=_input('submit', '', 'Apply');
+  div.appendChild(submit);
+
+  var reset=_input('reset', '', 'Cancel');
+  reset.setAttribute("onclick", "resetNode('"+nodeId+"')");
+  div.appendChild(reset);
+
+  return div;
+}
   
 /** Insert a form for caption 
   @param id Id of capation element */
@@ -479,7 +504,7 @@ function edit_caption(id)
 
   // Does a form already exists?
   // On mozilla, the form will be omitted, check also for the next input node
-  if (Data[nodeId]!==null)  {
+  if (typeof(Data[nodeId])!=='undefined') {
     resetNode(nodeId);
     return;
   }
@@ -526,212 +551,6 @@ function edit_caption(id)
   }
   e.appendChild(form);
   document.getElementById(focusId).focus();
-}
-
-/** @param id Image ID
-  @retrun Input for Meta information */
-function edit_tag(id)
-{
-  var e=document.getElementById('info-'+id);
-  if (!e) {
-    return;
-  }
-
-  if (!images[id]) {
-    return;
-  }
-
-  var nodeId="info-"+id;
-  var focusId="focus-"+id;
-  // Does a form already exists?
-  // On mozilla, the form will be omitted, check also for the next input node
-  if (Data[nodeId]!==null) {
-    resetNode(nodeId);
-    return;
-  }
-
-  // Remember old content
-  Data[nodeId]=e.cloneNode(true);
-
-  var form=_init_form(id);
-  form.appendChild(_input('hidden', 'edit', 'js_tag'));
-
-  var fs=document.createElement("fieldset");
-  fs.setAttribute('class', 'jsfieldset');
-  var legend=document.createElement("legend");
-  legend.appendChild(document.createTextNode('Image tags'));
-  fs.appendChild(legend);
-
-  var ol=document.createElement('ol');
-  fs.appendChild(ol);
-
-  ol.appendChild(_get_li_tags(id));
-
-  form.appendChild(fs);
-  form.appendChild(_get_div_buttons(nodeId));
-
-  while (e.hasChildNodes()) {
-    e.removeChild(e.lastChild);
-  }
-  e.appendChild(form);
-  document.getElementById(focusId).focus();
-}
-
-/** @param id Image ID
-  @retrun Input for Meta information */
-function edit_meta(id)
-{
-  var e=document.getElementById('info-'+id);
-  if (!e) {
-    return;
-  }
-
-  if (!images[id]) {
-    return;
-  }
-
-  var nodeId="info-"+id;
-  var focusId="focus-"+id;
-  // Does a form already exists?
-  // On mozilla, the form will be omitted, check also for the next input node
-  if (Data[nodeId]!==null) {
-    resetNode(nodeId);
-    return;
-  }
-
-  // Remember old content
-  Data[nodeId]=e.cloneNode(true);
-
-  var form=_init_form(id);
-  form.appendChild(_input('hidden', 'edit', 'js_meta'));
-
-  var fs=document.createElement("fieldset");
-  fs.setAttribute('class', 'jsfieldset');
-  var legend=document.createElement("legend");
-  legend.appendChild(document.createTextNode('Meta Data'));
-  fs.appendChild(legend);
-
-  var ol=document.createElement('ol');
-  fs.appendChild(ol);
-
-  ol.appendChild(_get_li_date(id));
-  ol.appendChild(_get_li_tags(id));
-  ol.appendChild(_get_li_categories(id));
-  _add_locations(ol, id);
-
-  form.appendChild(fs);
-  form.appendChild(_get_div_buttons(nodeId));
-
-  while (e.hasChildNodes()) {
-    e.removeChild(e.lastChild);
-  }
-  e.appendChild(form);
-  document.getElementById(focusId).focus();
-}
-
-/** @param id Image ID
-  @return Input for ACL */
-function edit_acl(id)
-{
-  var e=document.getElementById('info-'+id);
-  if (!e) {
-    return;
-  }
-
-  if (!images[id]) {
-    return;
-  }
-
-  var nodeId="info-"+id;
-  var focusId="focus-"+id;
-  // Does a form already exists?
-  // On mozilla, the form will be omitted, check also for the next input node
-  if (Data[nodeId]!==null) {
-    resetNode(nodeId);
-    return;
-  }
-
-  // Remember old content
-  Data[nodeId]=e.cloneNode(true);
-
-  var form=_init_form(id);
-  form.appendChild(_input('hidden', 'js_acl', 1));
-
-  var fs=document.createElement("fieldset");
-  fs.setAttribute('class', 'jsfieldset');
-  var legend=document.createElement("legend");
-  legend.appendChild(document.createTextNode('Access Rights'));
-  fs.appendChild(legend);
-
-  var ol=document.createElement('ol');
-  fs.appendChild(ol);
-  
-  ol.appendChild(_get_acl_groups(images[id]['gid']));
-  if (images[id]['gacl']!==null) {
-    ol.appendChild(_get_acl_edit(id));
-    ol.appendChild(_get_acl_preview(id));
-  }
-
-  form.appendChild(fs);
-  form.appendChild(_get_div_buttons(nodeId));
-
-  while (e.hasChildNodes()) {
-    e.removeChild(e.lastChild);
-  }
-  e.appendChild(form);
-  document.getElementById(focusId).focus();
-}
-
-/** Creates Group selection box 
-  @param gid Group id
-  @return Row element of ACL */
-function _get_acl_groups(gid)
-{
-  var li=document.createElement("li");
-  li.appendChild(_label("Group:"));
-
-  var s=document.createElement("select");
-  li.appendChild(s);
-  s.setAttribute("size", "1");
-  s.setAttribute("name", "js_acl_setgroup");
-
-  s.appendChild(_option(0, "Keep", false));
-
-  if (typeof groups !="undefined") {
-    for(var groupid in groups) {
-      // skip current group
-      if (groupid==gid) {
-        continue;
-      }
-
-      s.appendChild(_option(groupid, groups[groupid], false));
-    }
-  }
-  s.appendChild(_option(-1, "Delete group", false));
-
-  return li;
-}
-
-/** Returns the input for edit ACL */
-function _get_acl_edit(id)
-{
-  var li=document.createElement('li');
-  li.appendChild(_label('Who can edit the meta data?'));
-  var level=_get_acl_level(id, 0x02, 0x07);
-  li.appendChild(_new_acl_select('js_acl_meta', level));
-  return li;
-}
-
-/** Returns the input for preview ACL */
-function _get_acl_preview(id)
-{
-  var li=document.createElement('li');
-  li.appendChild(_label('Who can preview this image?'));
-  var level=_get_acl_level(id, 0x20, 0xe0);
-  var select=_new_acl_select('js_acl_preview', level);
-  select.setAttribute('id', 'focus-'+id);
-  li.appendChild(select);
-  return li;
 }
 
 /** Row for date
@@ -822,25 +641,210 @@ function _add_locations(e, id)
   e.appendChild(li);
 }
 
-/** Create an Update and an Reset button
-  @param nodeId Node ID for the reset button */
-function _get_div_buttons(nodeId)
+/** @param id Image ID
+  @retrun Input for Meta information */
+function edit_tag(id)
 {
-  if (nodeId==='') {
-    return null;
+  var e=document.getElementById('info-'+id);
+  if (!e) {
+    return;
   }
 
-  var div=document.createElement('div');
-  div.setAttribute("class", "buttons");
+  if (!images[id]) {
+    return;
+  }
 
-  var submit=_input('submit', '', 'Apply');
-  div.appendChild(submit);
+  var nodeId="info-"+id;
+  var focusId="focus-"+id;
+  // Does a form already exists?
+  // On mozilla, the form will be omitted, check also for the next input node
+  if (typeof(Data[nodeId])!=='undefined') {
+    resetNode(nodeId);
+    return;
+  }
 
-  var reset=_input('reset', '', 'Cancel');
-  reset.setAttribute("onclick", "resetNode('"+nodeId+"')");
-  div.appendChild(reset);
+  // Remember old content
+  Data[nodeId]=e.cloneNode(true);
 
-  return div;
+  var form=_init_form(id);
+  form.appendChild(_input('hidden', 'edit', 'js_tag'));
+
+  var fs=document.createElement("fieldset");
+  fs.setAttribute('class', 'jsfieldset');
+  var legend=document.createElement("legend");
+  legend.appendChild(document.createTextNode('Image tags'));
+  fs.appendChild(legend);
+
+  var ol=document.createElement('ol');
+  fs.appendChild(ol);
+
+  ol.appendChild(_get_li_tags(id));
+
+  form.appendChild(fs);
+  form.appendChild(_get_div_buttons(nodeId));
+
+  while (e.hasChildNodes()) {
+    e.removeChild(e.lastChild);
+  }
+  e.appendChild(form);
+  document.getElementById(focusId).focus();
+}
+
+/** @param id Image ID
+  @retrun Input for Meta information */
+function edit_meta(id)
+{
+  var e=document.getElementById('info-'+id);
+  if (!e) {
+    return;
+  }
+
+  if (!images[id]) {
+    return;
+  }
+
+  var nodeId="info-"+id;
+  var focusId="focus-"+id;
+  // Does a form already exists?
+  // On mozilla, the form will be omitted, check also for the next input node
+  if (typeof(Data[nodeId])!=='undefined') {
+    resetNode(nodeId);
+    return;
+  }
+
+  // Remember old content
+  Data[nodeId]=e.cloneNode(true);
+
+  var form=_init_form(id);
+  form.appendChild(_input('hidden', 'edit', 'js_meta'));
+
+  var fs=document.createElement("fieldset");
+  fs.setAttribute('class', 'jsfieldset');
+  var legend=document.createElement("legend");
+  legend.appendChild(document.createTextNode('Meta Data'));
+  fs.appendChild(legend);
+
+  var ol=document.createElement('ol');
+  fs.appendChild(ol);
+
+  ol.appendChild(_get_li_date(id));
+  ol.appendChild(_get_li_tags(id));
+  ol.appendChild(_get_li_categories(id));
+  _add_locations(ol, id);
+
+  form.appendChild(fs);
+  form.appendChild(_get_div_buttons(nodeId));
+
+  while (e.hasChildNodes()) {
+    e.removeChild(e.lastChild);
+  }
+  e.appendChild(form);
+  document.getElementById(focusId).focus();
+}
+
+/** Creates Group selection box 
+  @param gid Group id
+  @return Row element of ACL */
+function _get_acl_groups(gid)
+{
+  var li=document.createElement("li");
+  li.appendChild(_label("Group:"));
+
+  var s=document.createElement("select");
+  li.appendChild(s);
+  s.setAttribute("size", "1");
+  s.setAttribute("name", "js_acl_setgroup");
+
+  s.appendChild(_option(0, "Keep", false));
+
+  if (typeof groups !="undefined") {
+    for(var groupid in groups) {
+      // skip current group
+      if (groupid==gid) {
+        continue;
+      }
+
+      s.appendChild(_option(groupid, groups[groupid], false));
+    }
+  }
+  s.appendChild(_option(-1, "Delete group", false));
+
+  return li;
+}
+
+/** Returns the input for edit ACL */
+function _get_acl_edit(id)
+{
+  var li=document.createElement('li');
+  li.appendChild(_label('Who can edit the meta data?'));
+  var level=_get_acl_level(id, 0x02, 0x07);
+  li.appendChild(_new_acl_select('js_acl_meta', level));
+  return li;
+}
+
+/** Returns the input for preview ACL */
+function _get_acl_preview(id)
+{
+  var li=document.createElement('li');
+  li.appendChild(_label('Who can preview this image?'));
+  var level=_get_acl_level(id, 0x20, 0xe0);
+  var select=_new_acl_select('js_acl_preview', level);
+  select.setAttribute('id', 'focus-'+id);
+  li.appendChild(select);
+  return li;
+}
+
+/** @param id Image ID
+  @return Input for ACL */
+function edit_acl(id)
+{
+  var e=document.getElementById('info-'+id);
+  if (!e) {
+    return;
+  }
+
+  if (!images[id]) {
+    return;
+  }
+
+  var nodeId="info-"+id;
+  var focusId="focus-"+id;
+  // Does a form already exists?
+  // On mozilla, the form will be omitted, check also for the next input node
+  if (typeof(Data[nodeId])!=='undefined') {
+    resetNode(nodeId);
+    return;
+  }
+
+  // Remember old content
+  Data[nodeId]=e.cloneNode(true);
+
+  var form=_init_form(id);
+  form.appendChild(_input('hidden', 'js_acl', 1));
+
+  var fs=document.createElement("fieldset");
+  fs.setAttribute('class', 'jsfieldset');
+  var legend=document.createElement("legend");
+  legend.appendChild(document.createTextNode('Access Rights'));
+  fs.appendChild(legend);
+
+  var ol=document.createElement('ol');
+  fs.appendChild(ol);
+  
+  ol.appendChild(_get_acl_groups(images[id]['gid']));
+  if (typeof(images[id]['gacl'])!==undefined) {
+    ol.appendChild(_get_acl_edit(id));
+    ol.appendChild(_get_acl_preview(id));
+  }
+
+  form.appendChild(fs);
+  form.appendChild(_get_div_buttons(nodeId));
+
+  while (e.hasChildNodes()) {
+    e.removeChild(e.lastChild);
+  }
+  e.appendChild(form);
+  document.getElementById(focusId).focus();
 }
 
 /** Removes an input field for uploads
@@ -873,7 +877,7 @@ function _getChildByName(e, name, i)
         c++;
       }
       if (c==i) {
-        return e.chileNodes[j];
+        return e.childNodes[j];
       }
     }
   } else {
