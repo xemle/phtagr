@@ -532,12 +532,12 @@ function create_tables()
         id            INT NOT NULL AUTO_INCREMENT,
         username      VARCHAR(32) NOT NULL,
         password      VARCHAR(32) NOT NULL,
+        role          TINYINT UNSIGNED,
         
         created       DATETIME NOT NULL DEFAULT 0,
-        creator       INT DEFAULT 0,
-        updated       TIMESTAMP,
-        expire        DATETIME DEFAULT NULL,
-        role          TINYINT UNSIGNED,
+        creator_id    INT DEFAULT 0,
+        modified      DATETIME NOT NULL,
+        expires       DATETIME DEFAULT NULL,
 
         firstname     VARCHAR(32),
         lastname      VARCHAR(32) NOT NULL,
@@ -559,6 +559,7 @@ function create_tables()
   if (!$this->query($sql)) { return false; }
 
   $sql="CREATE TABLE $this->configs (
+        id            INT NOT NULL AUTO_INCREMENT,
         user_id       INT NOT NULL,
         name          VARCHAR(64),
         value         VARCHAR(192),

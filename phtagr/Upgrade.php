@@ -84,6 +84,8 @@ function do_upgrade()
       break;
     case 5:
       $cur_version=$this->_upgrade_to_6(); break;
+    case 6:
+      $cur_version=$this->_upgrade_to_7(); break;
     default: break;
     }
   }
@@ -268,6 +270,19 @@ function _upgrade_to_6() {
 
   $conf->set_default('db.version', '6');
   return 6;
+}
+
+function _upgrade_to_7() {
+  global $db, $conf;
+
+  // Rename creator to creator_id
+  $sql="ALTER TABLE $db->users ".
+       "CHANGE creator creator_id INT UNSIGNED DEFAULT 0, ".
+       "CHANGE expire expires DATETIME DEFAULT NULL";
+  $db->query($sql);
+
+  $conf->set_default('db.version', '7');
+  return 7;
 }
 
 }

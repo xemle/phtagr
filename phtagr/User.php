@@ -170,14 +170,14 @@ function set_type($type)
   @return The user id of the creator. */
 function get_creator()
 {
-  return $this->_get_data('creator');
+  return $this->_get_data('creator_id');
 }
 
 /** Sets the creator ID
   @param creator User ID of the creator. */
 function set_creator($creator)
 {
-  $this->_set_data('creator', $creator);
+  $this->_set_data('creator_id', $creator);
 }
 
 /** @return Returns the name of the user */
@@ -253,7 +253,7 @@ function get_groupid()
 /** @return The expired date of the account */
 function get_expire()
 {
-  return $this->_get_data('expire');
+  return $this->_get_data('expires');
 }
 
 /** Set the expire date. The date must be in the future until now
@@ -286,7 +286,7 @@ function set_expire($date)
   if ($sec<time())
     return false;
 
-  $this->_set_data('expire', date("Y-m-d", $sec));
+  $this->_set_data('expires', date("Y-m-d", $sec));
   return true;
 }
 
@@ -637,7 +637,7 @@ function get_num_guests()
   global $db;
   $sql="SELECT COUNT(*)".
        " FROM $db->users";
-  $sql.=" WHERE creator=".$this->get_id()." AND role=".USER_GUEST ;
+  $sql.=" WHERE creator_id=".$this->get_id()." AND role=".USER_GUEST ;
   $result=$db->query($sql);
   if (!$result)
     return -1;
@@ -654,7 +654,7 @@ function get_guests()
 
   $sql="SELECT id,username".
        " FROM $db->users".
-       " WHERE role=".USER_GUEST." AND creator=".$this->get_id();
+       " WHERE role=".USER_GUEST." AND creator_id=".$this->get_id();
   $result=$db->query($sql);
   if (!$result || mysql_num_rows($result)<1)
     return $guests;
@@ -690,7 +690,7 @@ function get_memberlist($onlyguests=true)
        " FROM $db->usergroup AS ug, $db->groups AS g".
        " WHERE ug.group_id=g.id AND ug.user_id=".$this->get_id();
   if ($onlyguest)
-    $sql.=" AND g.creator=".$this->get_creator();
+    $sql.=" AND g.creator_id=".$this->get_creator();
   $result=$db->query($sql);
   if (!$result || mysql_num_rows($result)<0)
     return $members;
