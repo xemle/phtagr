@@ -48,6 +48,7 @@ function print_header_html()
   echo "<head>\n";
   echo "<title>".$this->title."</title>\n";
   echo "<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\"/>\n";
+  echo "<meta name=\"robots\" content=\"noindex\">\n";
 
   $theme_dir=$user->get_theme_dir();
   $theme=$theme_dir.'/style.css';

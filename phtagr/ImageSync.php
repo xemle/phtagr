@@ -428,13 +428,14 @@ function delete_from_user($userid, $id=0)
 {
   global $user;
   global $db;
+  global $log;
 
   if (!is_numeric($userid) || $userid<1)
     return ERR_PARAM;
   if ($userid!=$user->get_id() && !$user->is_admin())
     return ERR_NOT_PERMITTED;
 
-  $previewer=new PreviewerBase();
+  $previewer=new PreviewBase();
   $previewer->delete_from_user($userid, $id);
 
   $userid=$user->get_id();

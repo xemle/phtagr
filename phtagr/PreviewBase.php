@@ -32,7 +32,7 @@ class PreviewBase extends Base
 var $_image;
 
 /** @param id Image id */
-function PreviewBase($image)
+function PreviewBase($image=null)
 {
   $this->_image=$image;
 }
