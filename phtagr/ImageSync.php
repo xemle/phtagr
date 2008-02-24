@@ -60,9 +60,11 @@ function import($filename, $is_external=false)
   $path=dirname($filename);
   $path.=($path[strlen($path)-1]!='/')?'/':'';
   $file=basename($filename);
+  $filetime=filemtime($filename);
 
   $spath=mysql_escape_string($path);
   $sfile=mysql_escape_string($file);
+  $sfiletime=date("Y-m-d H:i:s", $filetime);
 
   $sql="SELECT id,user_id,flag".
        " FROM $db->images".
@@ -84,12 +86,12 @@ function import($filename, $is_external=false)
     // insert basics
     $sql="INSERT INTO $db->images (".
          "   user_id, group_id, created,".
-         "   path, file, flag,".
+         "   path, file, filetime, flag,".
          "   gacl, macl, pacl,".
          "   clicks, lastview, ranking".
          " ) VALUES (".
          "   $userid, $groupid, NOW(),".
-         "   '$spath', '$sfile', $flag,".
+         "   '$spath', '$sfile', '$sfiletime', $flag,".
          "   $gacl, $macl, $pacl,".
          "   0, NOW(), 0.0".
          " )";
@@ -149,6 +151,7 @@ function import($filename, $is_external=false)
 
       $handler->import($this);
       $this->set_modified($handler->get_filetime(), true);
+      $this->set_filetime($handler->get_filetime(), true);
       if (!$this->commit())
       {
         $log->err("Could not commit database changes");
@@ -194,12 +197,14 @@ function add_file($filename, $is_external=false)
   $path=dirname($filename);
   $path.=($path[strlen($path)]!='/')?'/':'';
   $file=basename($filename);
+  $filetime=filemtime($filename);
 
   @clearstatcache();
   $size=filesize($filename);
 
   $spath=mysql_escape_string($path);
   $sfile=mysql_escape_string($file);
+  $sfiletime=date("Y-m-d H:i:s", $filetime);
 
   $sql="SELECT id, bytes".
        " FROM $db->images".
@@ -211,8 +216,8 @@ function add_file($filename, $is_external=false)
     $flag=($is_external)?IMAGE_FLAG_EXTERNAL:0;
     // new entry
     $sql="INSERT INTO $db->images".
-         " (user_id, path, file, bytes, created, flag)".
-         " VALUES (".$user->get_id().", '$spath', '$sfile', $size, NOW(), $flag)";
+         " (user_id, path, file, filetime, bytes, created, flag)".
+         " VALUES (".$user->get_id().", '$spath', '$sfile', '$sfiletime', $size, NOW(), $flag)";
     $id=$db->query_insert($sql);
     if ($id<0)
     {

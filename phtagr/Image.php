@@ -205,6 +205,25 @@ function get_filename()
   return $this->get_path().$this->get_file();
 }
 
+function get_filetime($in_unix=false)
+{
+  global $db;
+  $time=$this->_get_data('filetime');
+  if ($in_unix)
+    return $db->date_mysql_to_unix($time);
+  else
+    return $time;
+}
+
+function set_filetime($date, $in_unix=false)
+{
+  global $db;
+  if ($in_unix)
+    $this->_set_data('filetime', date("Y-m-d H:i:s", $date));
+  else
+    $this->_set_data('filetime', $date);
+}
+
 /** Returns the name of the image */
 function get_name()
 {

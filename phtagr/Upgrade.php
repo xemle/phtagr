@@ -86,6 +86,8 @@ function do_upgrade()
       $cur_version=$this->_upgrade_to_6(); break;
     case 6:
       $cur_version=$this->_upgrade_to_7(); break;
+    case 7:
+      $cur_version=$this->_upgrade_to_8(); break;
     default: break;
     }
   }
@@ -285,5 +287,26 @@ function _upgrade_to_7() {
   return 7;
 }
 
+function _upgrade_to_8() {
+  global $db, $conf, $log;
+
+  $sql="ALTER TABLE $db->images ".
+       "ADD filetime DATETIME NOT NULL";
+  $db->query($sql);
+  $log->warn("Alter table images!");
+
+  $sql="SELECT id,path,file FROM $db->images ORDER BY id";
+  $result = $db->query_table($sql);
+  foreach ($result as $row) {
+    $mtime = filemtime($row['path'].$row['file']);
+    $sql = "UPDATE $db->images SET filetime='".date("Y-m-d H:i:s", $mtime)."' WHERE id={$row['id']}";
+    $db->query($sql);
+  }
+  $log->warn("Set filetime for ".count($result)." images");
+
+  $log->warn("Set new DB version to 8!");
+  $conf->set_default('db.version', '8');
+  return 8;
+}
 }
 ?>
