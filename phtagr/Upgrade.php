@@ -88,6 +88,8 @@ function do_upgrade()
       $cur_version=$this->_upgrade_to_7(); break;
     case 7:
       $cur_version=$this->_upgrade_to_8(); break;
+    case 8:
+      $cur_version=$this->_upgrade_to_9(); break;
     default: break;
     }
   }
@@ -308,5 +310,47 @@ function _upgrade_to_8() {
   $conf->set_default('db.version', '8');
   return 8;
 }
+
+function _upgrade_to_9() {
+  global $db, $conf, $log, $phtagr_data;
+
+  $sql="SELECT id,username FROM $db->users";
+  $result = $db->query_table($sql);
+  foreach ($result as $row) {
+    $old = $phtagr_data.DIRECTORY_SEPARATOR.'users'.DIRECTORY_SEPARATOR.$row['username'];
+    if (!file_exists($old) || !is_dir($old))
+      continue;
+
+    $parent = $phtagr_data.DIRECTORY_SEPARATOR.'users'.DIRECTORY_SEPARATOR.$row['id'];
+    $new = $parent.DIRECTORY_SEPARATOR.'files';
+    if (!file_exists($parent) && !@mkdir($parent, 0775, true)) {
+      $log->info("Could not create parent directory '$parent'");
+      continue;
+    }
+    if (file_exists($new)) {
+      if (is_dir($new))
+        rmdir($new);
+      else
+        unlink($new);
+    }
+    if (!rename($old, $new)) {
+      $log->err("Could not rename '$old' to '$new'");
+      continue;
+    } else {
+      $log->info("Move directory from '$old' to '$new'");
+    }
+
+    $sold = mysql_escape_string($old);
+    $snew = mysql_escape_string($new);
+    $sql = "UPDATE $db->images SET path=REPLACE(path, '$sold', '$snew') WHERE user_id={$row['id']}";
+    $db->query($sql);
+    $log->info("Move database entries for user {$row['username']} ({$row['id']})");
+  }
+
+  $log->warn("Set new DB version to 9!");
+  $conf->set_default('db.version', '9');
+  return 9;
+}
+
 }
 ?>

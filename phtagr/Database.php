@@ -595,8 +595,9 @@ function create_tables()
         created       DATETIME,           /* Insert time of the image */
         path          TEXT NOT NULL,
         file          VARCHAR(128) NOT NULL,
+        filetime      DATETIME NOT NULL,
         bytes         INT NOT NULL,       /* Size of image in bytes */
-        flag          TINYINT UNSIGNED DEFAULT 0,   /* 64=upload, 128=imported, 192=upload+imported */
+        flag          TINYINT UNSIGNED DEFAULT 0,   /* 1=active, 2=external */
         gacl          TINYINT UNSIGNED DEFAULT 0,   /* Group/Friend access control list */
         macl          TINYINT UNSIGNED DEFAULT 0,   /* Member access control list */
         pacl          TINYINT UNSIGNED DEFAULT 0,   /* All access control list */

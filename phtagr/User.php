@@ -868,7 +868,7 @@ function get_upload_dir()
     return false;
 
   $name=$this->get_name();
-  $path=$phtagr_data.DIRECTORY_SEPARATOR.'users'.DIRECTORY_SEPARATOR.$name;
+  $path=$phtagr_data.DIRECTORY_SEPARATOR.'users'.DIRECTORY_SEPARATOR.$this->get_id().DIRECTORY_SEPARATOR.'files';
   return $path;
 }
 
