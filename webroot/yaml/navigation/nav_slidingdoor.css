@@ -1,0 +1,102 @@
+@charset "UTF-8";
+/**
+* "Yet Another Multicolumn Layout" - (X)HTML/CSS Framework
+*
+* (en) Horizontal list navigation based on "Sliding Door II" from von "A List Apart"
+* (de) Horizontale Navigationsliste basierend auf "Sliding Door II" von "A List Apart"
+*
+* @copyright       Copyright 2005-2007, Dirk Jesse
+* @license         CC-A 2.0 (http://creativecommons.org/licenses/by/2.0/),
+*                  YAML-C (http://www.yaml.de/en/license/license-conditions.html)
+* @link            http://www.yaml.de
+* @package         yaml
+* @version         3.0.1
+* @revision        $Revision: 92 $
+* @lastmodified    $Date: 2007-07-15 10:26:40 +0200 (So, 15 Jul 2007) $
+*/
+
+@media all
+{
+  #nav_main {
+    width:100%;
+    float:left;
+    color: #fff;
+    background-color:#1f1e2e;
+    background:#1f1e2e url("images/sliding_door/round/bg.gif") repeat-x bottom;
+  }
+
+  #nav_main ul {
+    white-space: nowrap;
+    line-height: 1em;
+    margin:0;
+    padding:0 0 0 50px;
+    list-style:none;
+  }
+
+  #nav_main li {
+    float:left;
+    background: #8f8cad url("images/sliding_door/round/left.gif") no-repeat top left;
+    padding: 0 0 0 3px;
+    margin: 0;
+    border-bottom:1px solid #000;
+  }
+
+  #nav_main a,
+  #nav_main strong {
+    display:block;
+    color:#667;
+
+    background: transparent;
+    background: url("images/sliding_door/round/right.gif") no-repeat top right;
+    padding:5px 11px 3px 8px;
+    text-transform: none;
+    text-decoration:none;
+    font-weight:normal;
+
+    /**
+    * @bugfix
+    * @affected   IE5.x, IE6
+    * @css-for    all browsers
+    * @valid      yes
+    */
+    width: auto; /* only IE 5.x */
+    width/**/:/**/ .1em; /* only IE 6.0 */
+  }
+
+  /**
+  * @bugfix
+  * @affected   IE5.x, IE6
+  * @css-for    all browsers
+  * @valid      yes
+  */
+  #nav_main > ul a,
+  #nav_main > ul strong {width:auto;}  /* for other browsers */
+
+  #nav_main ul li:focus,
+  #nav_main ul li:hover,
+  #nav_main ul li:active { background-position:0% -150px; }
+
+  #nav_main li:focus a,
+  #nav_main li:hover a,
+  #nav_main li:active a { background-position:100% -150px; }
+
+  #nav_main a:focus,
+  #nav_main a:hover,
+  #nav_main a:active { color:#223; background-color: transparent; }
+
+  #nav_main #current {
+    background-image: url("images/sliding_door/round/left_on.gif");
+    background-position:top left;
+    border-width:0
+  }
+
+  #nav_main #current a,
+  #nav_main #current strong {
+    color:#334;
+    background-image: url("images/sliding_door/round/right_on.gif");
+    background-position:top right;
+    font-weight:bold;
+    padding-bottom:4px;
+    padding-top:5px;
+  }
+}

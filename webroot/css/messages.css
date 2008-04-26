@@ -1,0 +1,40 @@
+debug, .error, .message, .warning, .success, .info, .question {
+  display:block; 
+  color: black;
+  min-height: 23px;
+  margin: 10px 0 10px 0;
+  padding: 10px 30px 10px 50px;
+}
+
+debug {
+  border: solid 2px #cc00ff;
+  background: #eeeeee url(images/debug.png) no-repeat 5px 5px;
+}
+
+.error {
+  border: solid 2px #ff0000;
+  background: #ffb09f url(images/error.png) no-repeat 5px 5px;
+}
+
+.warning {
+  border: solid 2px #ff7300;
+  background: #ffb260 url(images/warning.png) no-repeat 5px 5px;
+}
+
+.success {
+  border: solid 2px #008e47;
+  background: #7aff8c url(images/success.png) no-repeat 5px 5px;
+}
+
+.message,
+.info{
+  border: solid 2px #ffdc3f;
+  background: #ffffb8 url(images/info.png) no-repeat 5px 5px;
+}
+
+.question {
+  border: solid 2px #0000ff;
+  background: #9797ff url(images/question.png) no-repeat 5px 5px;
+}
+
+

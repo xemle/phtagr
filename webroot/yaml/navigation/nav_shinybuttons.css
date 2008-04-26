@@ -1,0 +1,99 @@
+@charset "UTF-8";
+/**
+* "Yet Another Multicolumn Layout" - (X)HTML/CSS Framework
+*
+* (en) Horizontal list navigation "Shiny Buttons"
+* (de) Horizontale Navigationsliste "Shiny Buttons"
+*
+* @copyright       Copyright 2005-2007, Dirk Jesse
+* @license         CC-A 2.0 (http://creativecommons.org/licenses/by/2.0/),
+*                  YAML-C (http://www.yaml.de/en/license/license-conditions.html)
+* @link            http://www.yaml.de
+* @package         yaml
+* @version         3.0.1
+* @revision        $Revision: 92 $
+* @lastmodified    $Date: 2007-07-15 10:26:40 +0200 (So, 15 Jul 2007) $
+*/
+
+@media all
+{
+#nav_main {
+  /* (en) containing floats in IE */
+  /* (de) Einfassen der Floats im IE */
+  width: 100%;
+  overflow:hidden;
+  /* (en) containing floats in all other browsers */
+  /* (de) Einfassen der Floats in allen anderen Browsern */
+  float:left;
+  display:inline;
+  background: #b8b8b8 url("images/shiny_buttons/background.gif") repeat-x center right;
+  border-top: 1px #333 solid;
+  border-bottom: 1px #333 solid;
+  line-height: 0px;
+}
+
+#nav_main ul {
+  float:left;
+    /* (en|de) Bugfix: IE - Doubled Float Margin Bug */
+  display:inline;
+  margin:0;
+  padding: 0;
+  /* (en) Left margin of the first button  */
+  /* (de) Abstand des ersten Buttons vom linken Rand  */
+  margin-left: 50px;
+
+  border-left: 1px #aaa solid;
+  border-right: 1px #fff solid;
+}
+
+#nav_main ul li {
+  float: left;
+    /* (en|de) Bugfix: IE - Doubled Float Margin Bug */
+  display:inline;
+  margin: 0;
+  padding: 0;
+  font-size: 1.0em;
+  line-height: 1em;
+  list-style-type: none;
+  border-left: 1px #fff solid;
+  border-right: 1px #aaa solid;
+}
+
+#nav_main ul li a,
+#nav_main ul li strong {
+  display:block;
+  width: auto;
+  font-size: 1em;
+  font-weight: bold;
+  background: transparent;
+  text-decoration: none;
+  color: #000;
+  margin: 0;
+  padding: 0.5em 0.8em 0.5em 0.8em;
+}
+
+#nav_main ul li a:focus,
+#nav_main ul li a:hover,
+#nav_main ul li a:active  {
+  background: #eee;
+  color: #333;
+  text-decoration: none;
+}
+
+#nav_main ul li#current {
+  border-left: 1px #444 solid;
+  border-right: 1px #888 solid;
+  background: transparent url("images/shiny_buttons/background_active.gif") repeat-x center right;
+}
+
+#nav_main ul li#current strong,
+#nav_main ul li#current a,
+#nav_main ul li#current a:focus,
+#nav_main ul li#current a:hover,
+#nav_main ul li#current a:active {
+  color: #fff;
+  background: transparent;
+  text-decoration: none;
+}
+
+}

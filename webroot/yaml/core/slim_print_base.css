@@ -1,0 +1,20 @@
+@charset "UTF-8";
+/* "Yet Another Multicolumn Layout" (c) by Dirk Jesse (http://www.yaml.de)
+* $Revision: 82 $ $Date: 2007-07-12 17:36:28 +0200 (Do, 12 Jul 2007) $ */
+@media print {
+#page_margins,#page{width:100%;min-width:inherit;max-width:none}
+#header{height:auto}
+#footer{display:none}
+#topnav{display:none}
+#nav{display:none}
+#search{display:none}
+body *{font-family:"Times New Roman", Times, serif}
+code,pre{font-family:"Courier New", Courier, mono}
+body{font-size:12pt}
+h1,h2,h3,h4,h5,h6{page-break-after:avoid}
+abbr[title]:after,acronym[title]:after{content:'(' attr(title) ')'}
+#page a[href^="http:"],#page a[href^="https:"]{padding-left:0;background-image:none}
+a[href]:after{content:" <URL: "attr(href)">";color:#444;background:inherit;font-style:italic}
+#col1_content:before,#col2_content:before,#col3_content:before{content:"";color:#888;background:inherit;display:block;font-weight:700;font-size:1.5em}
+.floatbox,.subcolumns,.subcolums_oldgecko{overflow:visible;display:table}
+}

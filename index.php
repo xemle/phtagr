@@ -1,51 +1,26 @@
 <?php
-/*
- * phtagr.
- * 
- * Multi-user image gallery.
- * 
- * Copyright (C) 2006,2007 Sebastian Felis, sebastian@phtagr.org
- * 
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; version 2 of the 
- * License.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+/* SVN FILE: $Id: index.php 4410 2007-02-02 13:31:21Z phpnut $ */
+/**
+ * PHP versions 4 and 5
+ *
+ * CakePHP(tm) :  Rapid Development Framework <http://www.cakephp.org/>
+ * Copyright 2005-2007, Cake Software Foundation, Inc.
+ *								1785 E. Sahara Avenue, Suite 490-204
+ *								Las Vegas, Nevada 89104
+ *
+ * Licensed under The MIT License
+ * Redistributions of files must retain the above copyright notice.
+ *
+ * @filesource
+ * @copyright		Copyright 2005-2007, Cake Software Foundation, Inc.
+ * @link				http://www.cakefoundation.org/projects/info/cakephp CakePHP(tm) Project
+ * @package			cake
+ * @subpackage		cake.app
+ * @since			CakePHP(tm) v 0.10.0.1076
+ * @version			$Revision: 4410 $
+ * @modifiedby		$LastChangedBy: phpnut $
+ * @lastmodified	$Date: 2007-02-02 14:31:21 +0100 (Fri, 02 Feb 2007) $
+ * @license			http://www.opensource.org/licenses/mit-license.php The MIT License
  */
-
-// This file includes the real content over $phtagr_prefix/main.php
-
-if (file_exists ('./config.php'))
-  include './config.php';
-
-$cwd=getcwd();
-
-if (!isset($phtagr_prefix))
-  $phtagr_prefix='.';
-
-$phtagr_lib=$phtagr_prefix.DIRECTORY_SEPARATOR.'phtagr';
-
-if (!isset($phtagr_data))
-  $phtagr_data=$cwd.DIRECTORY_SEPARATOR."data";
-
-if (!isset($phtagr_htdocs))
-{
-  $phtagr_htdocs=dirname($_SERVER['PHP_SELF']);
-  $len=strlen($phtagr_htdocs);
-  if ($phtagr_htdocs[$len-1]=='/')
-  {
-    $phtagr_htdocs=substr($phtagr_htdocs, 0, $len-1);
-  }
-}
-
-include "$phtagr_lib/main.php";
-
+require 'webroot' . DIRECTORY_SEPARATOR . 'index.php';
 ?>

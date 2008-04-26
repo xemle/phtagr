@@ -1,0 +1,113 @@
+/* Forms */
+fieldset {
+  margin: 5px 0 5px 0;
+  background-color: white;
+  border-top: 1px solid #888;
+  border-bottom: 1px solid #888;
+}
+
+fieldset legend {
+  margin: 0px 0px 0em 0em;
+  padding: 3px;
+  font-weight: bold;
+  border: 1px solid #888;
+  background-color: white;
+}
+
+fieldset fieldset {
+	margin-top: 0px;
+	margin-bottom: 20px;
+	padding: 16px 0;
+}
+
+fieldset fieldset legend {
+	font-weight: normal;
+	margin-left: 20px;
+}
+fieldset fieldset div {
+	clear: left;
+	margin: 0 20px;
+}
+form div {
+	clear: both;
+	margin-bottom: 1em;
+	padding: .5em;
+	vertical-align: text-top;
+}
+form div.input {
+	color: #444;
+}
+form div.required {
+	color: #333;
+	font-weight: bold;
+}
+form div.submit {
+	border: 0;
+	clear: both;
+	margin-top: 5px;
+}
+label {
+  float: left; 
+  display: block;
+  width: 140px; 
+  padding-right: 5px; 
+  text-align: right; 
+}
+input[type=text],
+input[type=password],
+select,
+textarea {
+  float:left;
+  background-color: #efefef;
+  border: 1px #bbb solid;
+}
+input[type=text]:hover,
+input[type=password]:hover,
+select:hover,
+textarea:hover {
+  border: 1px solid black;
+}
+input[type=text]:focus,
+input[type=password]:focus,
+select:focus,
+textarea:focus {
+  border: 1px solid black;
+  background-color: #ffffd0;
+}
+select[multiple=multiple] {
+	width: 100%;
+}
+option {
+	padding: 0 3px;
+}
+fieldset * input[type=checkbox] {
+	clear: left;
+	float: left;
+	margin: 0px 6px 7px 2px;
+	width: auto;
+}
+input[type=submit] {
+  color: black;
+  padding: 3px;
+  font-weight: bold;
+  background-color: white;
+  border: 1px solid #888;
+}
+
+input[type=submit]:hover {
+  color: white;
+  background-color: #f63;
+}
+
+input[type=reset],
+.reset {
+  color: white;
+  font-weight: bold;
+  background-color: #182e7a;
+}
+.reset {
+  border: 1px solid black;
+  padding: 4px;
+  margin: 0 3pt 0 3pt;
+}
+

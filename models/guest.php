@@ -1,0 +1,60 @@
+<?php
+/*
+ * phtagr.
+ * 
+ * Multi-user image gallery.
+ * 
+ * Copyright (C) 2006-2008 Sebastian Felis, sebastian@phtagr.org
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; version 2 of the 
+ * License.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+
+class Guest extends AppModel
+{
+  var $name = 'Guest';
+  var $useTable = 'users';
+
+  var $belongsTo = array('Creator' => array('className' => 'User'));
+
+  var $hasAndBelongsToMany = array( 
+                  'Member' => array(
+                      'className' => 'Group'
+                    )
+                  );
+
+  var $validate = array(
+    'username' => array(
+      'rule' => array('between', 3, 32),
+      'message' => 'Guestname must be between 3 and 32 characters long.'),
+    'password' => array(
+      'rule' => array('minLength', '5'),
+      'message' => 'Password is to short!')
+    );
+
+  function beforeSave() {
+    if (isset($this->data['Guest']['webdav']) && $this->data['Guest']['webdav'] > 0) {
+      $this->data['Guest']['quota'] = 1;
+    } else {
+      $this->data['Guest']['quota'] = 0;
+    }
+
+    if (empty($this->data['Guest']['expires'])) {
+      $this->data['Guest']['expires'] = null;
+    }
+    return true;
+  }
+
+}
+?>
