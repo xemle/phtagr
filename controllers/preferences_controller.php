@@ -54,7 +54,6 @@ class PreferencesController extends AppController {
       $this->Session->setFlash("Settings saved");
     }
     $tree = $this->Preference->getTree($userId);
-    $this->Logger->trace($tree);
     $this->data = $tree;
 
     $this->set('userId', $userId);

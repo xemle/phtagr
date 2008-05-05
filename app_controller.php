@@ -30,16 +30,20 @@ class AppController extends Controller
   var $_nobody = null;
   var $_user = null;
 
-  /** Calls checkUser() to check the credentials of the user 
-    @see checkUser() */
+  /** Calls _checkSession() to check the credentials of the user 
+    @see _checkSession() */
   function beforeFilter() {
-    $this->checkUser();
+    $this->_checkSession();
   }
 
   /** Checks a cookie for a valid user id. If a id found, the user is load to
    * the session 
    * @todo Check expired user */
-  function checkCookie() {
+  function _checkSession() {
+    $this->Session->activate();
+    if ($this->Session->check('User.id'))
+      return true;
+
     $this->Cookie->name = 'phTagr';
 
     // Fetch Cookie
@@ -58,30 +62,20 @@ class AppController extends Controller
     }
 
     // Valid cookie found. Loading the user to the session
-    $this->Logger->info("User '{$user['User']['username']}' (id {$user['User']['id']}) is authenticated through the cookie!");
+    //$this->Logger->debug("Start new session for '{$user['User']['username']}' (id {$user['User']['id']})");
     $this->Session->write('User.id', $user['User']['id']);
     $this->Session->write('User.role', $user['User']['role']);
     $this->Session->write('User.username', $user['User']['username']);
-    return true;
-  }
 
-  function checkSession() {
-    // If the session info hasn't been set...
-    if (!$this->Session->check('User.id') && !$this->checkCookie()) {
-      // Force the user to login
-      $this->Logger->info("Session value of User is empty!");
-      $this->redirect('/users/login');
-      exit();
-    } else {
-      $this->Logger->trace("Session of User is not empty ;-)");
-    }
+    $this->Logger->info("User '{$user['User']['username']}' (id {$user['User']['id']}) authenticated through the cookie!");
+    return true;
   }
 
   /** Checks the session for valid user. If no user is found, it checks for a
    * valid cookie
    * @return True if the correct session correspond to an user */ 
-  function checkUser() {
-    if (!$this->Session->check('User.id') && !$this->checkCookie())
+  function _checkUser() {
+    if (!$this->_checkSession())
       return false;
 
     if ($this->_user)
@@ -98,7 +92,7 @@ class AppController extends Controller
   }
  
   function getUser() {
-    if (!$this->checkUser() || !$this->_user) {
+    if (!$this->_checkUser() || !$this->_user) {
       if (!$this->_nobody)
         $this->_nobody = $this->User->getNobody();
       return $this->_nobody;

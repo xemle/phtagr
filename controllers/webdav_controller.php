@@ -25,25 +25,23 @@ App::import('vendor', "WebdavServer", true, array(), "webdav".DS."WebdavServer.p
 
 class WebdavController extends AppController
 {
-	var $components=array('DigestAuth');
+  var $components=array('DigestAuth');
 
   var $uses = array('User', 'Image');
-	// Important to set the davroot in the Webdav Server
-	var $name = 'webdav';
+  // Important to set the davroot in the Webdav Server
+  var $name = 'webdav';
 
   /** @todo Remove configuration of debug */
-	function beforeFilter() 
-	{
+  function beforeFilter() {
     // dont't call parent::beforeFilter(). Cookies (and sessions) are not
     // supported for WebDAV..
 
     Configure::write('debug', 0);
-		$this->DigestAuth->check();
-	}
+    $this->DigestAuth->check();
+  }
 
   /** @todo Set webdav root to creator's root if user is guest */
-  function index()
-  {
+  function index() {
     $this->requireRole(ROLE_GUEST);
     $this->layout = 'webdav';
 
@@ -68,7 +66,7 @@ class WebdavController extends AppController
       $this->redirect(null, 401, true);
     }
 
-		// start buffering
+    // start buffering
     ob_start();
     $webdav->ServeRequest($_SERVER['REQUEST_URI']);
     while (@ob_end_flush());

@@ -23,7 +23,8 @@ echo $search->prevImage().' '.$search->up().' '.$search->nextImage();
     },{config: {  
       autoPlay: true,
       videoFile: '<?php echo Router::url("/files/video/".$data['Image']['id']); ?>',
-      initialScale: 'orig', 
+      initialScale: 'orig',
+      loop: false,
       useNativeFullScreen: true
     }} 
   );}

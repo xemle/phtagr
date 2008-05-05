@@ -23,12 +23,12 @@
 
 class DigestAuthComponent extends Object
 {
-	var $_hdrs = null;
-	var $realm = '';
-	var $controller = null;
-	
-	function initialize(&$controller) {
-		$this->controller = $controller;
+  var $_hdrs = null;
+  var $realm = '';
+  var $controller = null;
+  
+  function initialize(&$controller) {
+    $this->controller = $controller;
   }
 
   /** Returns the authorization header. It tryies to fetch the HTTP
@@ -37,17 +37,17 @@ class DigestAuthComponent extends Object
    * header information is available, it returns false
     @return HTTP authorization header. False if no header was found */
   function __getAuthHeader() {
-		$hdr = false;
+    $hdr = false;
     if (function_exists('apache_request_headers')) {
       $arh=apache_request_headers();
-			if (isset($arh['Authorization']))
-	      $hdr=$arh['Authorization'];
+      if (isset($arh['Authorization']))
+        $hdr=$arh['Authorization'];
     } elseif (isset($_SERVER['HTTP_AUTHORIZATION'])) {
       $hdr=$_SERVER['HTTP_AUTHORIZATION'];
     } elseif (isset($_SERVER['PHP_AUTH_DIGEST'])) {
       $hdr=$_SERVER['PHP_AUTH_DIGEST'];
     }
-		if ($hdr === false)
+    if ($hdr === false)
       $this->controller->Logger->warn("Could not find any authentication header");
     return $hdr;
   }
@@ -55,13 +55,13 @@ class DigestAuthComponent extends Object
   /** Parse the http authorization header and checks for all required fields. 
     */
   function __checkAuthHeader() {
-		$authHdr = $this->__getAuthHeader();
-		if (!$authHdr) {
-			$this->controller->Logger->info("Request authentication header");
-			$this->__addAuthHeader();
-			$this->controller->redirect(null, 401, true);
-		}
-		
+    $authHdr = $this->__getAuthHeader();
+    if (!$authHdr) {
+      $this->controller->Logger->info("Request authentication header");
+      $this->__addAuthHeader();
+      $this->controller->redirect(null, 401, true);
+    }
+    
     // protect against missing data
     $requiredParts=array('nonce'=>1, 'nc'=>1, 'cnonce'=>1, 'qop'=>1, 'username'=>1, 'uri'=>1, 'response'=>1, 'opaque'=>1);
     $data=array();
@@ -76,13 +76,13 @@ class DigestAuthComponent extends Object
     if ($requiredParts) {
       $this->controller->Logger->warn("Missing authorization part(s): ".implode(", ", array_keys($requiredParts)));
       $this->controller->Logger->info("Authorization header is: ".$authHdr);
-			$this->__addAuthHeader();
-			$this->controller->redirect(null, 401, true);
-		}
+      $this->__addAuthHeader();
+      $this->controller->redirect(null, 401, true);
+    }
   
-		// convert nc from hex to decimal
-		$this->_hdrs = $data;
-		$this->opaque = $data['opaque'];
+    // convert nc from hex to decimal
+    $this->_hdrs = $data;
+    $this->opaque = $data['opaque'];
   }
   
   /** Add authentication header to the response. The session keeps a login
@@ -90,65 +90,65 @@ class DigestAuthComponent extends Object
    * the authentication header */
   function __addAuthHeader() {
     // Use opaque value as session id
-		if (!$this->controller->Session->started()) {
-			$this->controller->Session->renew();
-			$this->controller->Session->write('auth.nc', 0);
-			$this->controller->Session->write('auth.logins', 0);
-		}
+    if (!$this->controller->Session->started()) {
+      $this->controller->Session->renew();
+      $this->controller->Session->write('auth.nc', 0);
+      $this->controller->Session->write('auth.logins', 0);
+    }
     $opaque=$this->controller->Session->id();
     $counter=$this->controller->Session->read('auth.logins');
   
     if ($counter>3) {
       $this->controller->Logger->err('login countes exceeded');
-			$this->controller->redirect(null, 401, true);
+      $this->controller->redirect(null, 401, true);
     }
     $this->controller->Session->write('auth.logins', $counter+1);
     
     header('WWW-Authenticate: Digest realm="'.$this->realm.'",qop="auth",nonce="'.uniqid().'",opaque="'.$opaque.'",algorithm="MD5"');
   }
 
-	function __checkUri() {
-		if ($this->_hdrs['uri']!==$_SERVER['REQUEST_URI']) {
-			$this->controller->Logger->err("Uri missmatch: Have ".$_SERVER['REQUEST_URI']." but auth has ".$this->_hdrs['uri']);
-			$this->__addAuthHeader();
-			$this->controller->redirect(null, 401, true);
-		}
-	}
+  function __checkUri() {
+    if ($this->_hdrs['uri']!==$_SERVER['REQUEST_URI']) {
+      $this->controller->Logger->err("Uri missmatch: Have ".$_SERVER['REQUEST_URI']." but auth has ".$this->_hdrs['uri']);
+      $this->__addAuthHeader();
+      $this->controller->redirect(null, 401, true);
+    }
+  }
 
   /** Checks the session to be active and validates the request counter. If the
    * session is not alive or the request counter was already used, an
    * unauthorized response is thrown
    */
   function __checkSession() {
-		$sid = $this->_hdrs['opaque'];
-		if ($this->controller->Session->started())
-			$this->controller->Logger->warn("Session already started!");
-		$this->controller->Session->id($sid);
-		$this->controller->Session->start();
+    $sid = $this->_hdrs['opaque'];
+    if ($this->controller->Session->started())
+      $this->controller->Logger->warn("Session already started!");
+    $this->controller->Session->id($sid);
+    $this->controller->Session->start();
 
     if (!$this->controller->Session->check('auth.nc')) {
       $this->controller->Logger->err("Authorization failed: Unknown or died session ($sid)");
       $this->controller->Logger->trace($_SESSION);
       $this->controller->Session->write('auth.nc', 0);
-			$this->controller->redirect(null, 401, true);
+      $this->controller->redirect(null, 403, true);
     }
   
     $snc=$this->controller->Session->read('auth.nc');
-		$nc=hexdec($this->_hdrs['nc']);
+    $nc=hexdec($this->_hdrs['nc']);
     if ($snc==$nc)
       $this->controller->Logger->info("Same request counter $snc is used!");
   
     // Check request counter
     if ($snc>$nc) {
       $this->controller->Logger->err("Authorization failed: Reused request counter! Current is {$snc}. Request counter is $nc");
-			$this->controller->redirect(null, 401, true);
+      $this->controller->redirect(null, 403, true);
     }
-		// Update request counter to the session
+    // Update request counter to the session
     $this->controller->Session->write('auth.nc', $nc);
   }
 
-	function __checkUser() {
-	  // Windows client syntax "<domain>\<username>"
+  function __checkUser() {
+    // Windows client syntax "<domain>\<username>"
     if (preg_match('/^(.*)\\\\(.*)$/', $this->_hdrs['username'], $matches)) {
       $this->_hdrs['domain']=$matches[1];
       $this->_hdrs['winusername']=$matches[2];
@@ -156,42 +156,45 @@ class DigestAuthComponent extends Object
     } else { 
       $username=$this->_hdrs['username'];
     } 
-	
-		$user = $this->controller->User->findByUsername($username);
-		if ($user === false) {
-			$this->controller->Logger->err("Unknown username '$username'");
-			$this->controller->redirect(null, 401, true);
-		}
+  
+    $user = $this->controller->User->findByUsername($username);
+    if ($user === false) {
+      $this->controller->Logger->err("Unknown username '$username'");
+      $this->controller->redirect(null, 403, true);
+    }
 
     // Todo read A1 from database
     $A1=md5($this->_hdrs['username'].':'.$this->realm.':'.$user['User']['password']);
     $A2=md5($_SERVER['REQUEST_METHOD'].':'.$this->_hdrs['uri']);
     $validResponse=md5($A1.':'.$this->_hdrs['nonce'].':'.$this->_hdrs['nc'].':'.$this->_hdrs['cnonce'].':'.$this->_hdrs['qop'].':'.$A2);
     if ($this->_hdrs['response']!=$validResponse) {
-			$this->controller->Logger->err("Invalid response: Got ".$this->_hdrs['response']." but expected $validResponse");
-			$this->controller->redirect(null, 401, true);
-  	}
+      $this->controller->Logger->err("Invalid response: Got ".$this->_hdrs['response']." but expected $validResponse");
+      $this->controller->redirect(null, 403, true);
+    }
 
     if ($this->controller->User->isExpired($user)) {
       $this->controller->Logger->warn("User account of '{$user['User']['username']}' (id {$user['User']['id']}) is expired!");
       $this->controller->reidrect(null, 403, true);
     } else {
-  		$this->controller->Logger->info("User '$username' ({$user['User']['id']}) successfully authenticated");
-	  	$this->controller->Session->write('User.id', $user['User']['id']);
-	  	$this->controller->Session->write('User.username', $user['User']['username']);
-	  	$this->controller->Session->write('User.role', $user['User']['role']);
+      $this->controller->Logger->info("User '{$user['User']['username']}' (id {$user['User']['id']}) authenticated");
+      if (!$this->controller->Session->check('User.id') || $this->controller->Session->read('User.id') != $user['User']['id']) {
+        $this->controller->Logger->info("Start new session for '{$user['User']['username']}' (id {$user['User']['id']})");
+        $this->controller->Session->write('User.id', $user['User']['id']);
+        $this->controller->Session->write('User.username', $user['User']['username']);
+        $this->controller->Session->write('User.role', $user['User']['role']);
+      }
     }
-	}
+  }
 
-	function check() {
-		$this->__checkAuthHeader();
-		$this->__checkUri();
-		$this->__checkSession();
-		$this->__checkUser();
+  function check() {
+    $this->__checkAuthHeader();
+    $this->__checkUri();
+    $this->__checkSession();
+    $this->__checkUser();
     // @todo add check for client agent
 
-		return true;
-	}
+    return true;
+  }
 
 }
 

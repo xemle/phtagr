@@ -78,8 +78,11 @@ class User extends AppModel
             $this->Logger->err("Unknown unit {$matches[3]}");
         }
       }
-      $this->Logger->info($matches);
-      $this->Logger->info($size);
+      $size = intval($size);
+      if ($size < 0) {
+        $this->Logger->err("Size is negtive: $size");
+        return 0;
+      }
       return $size;
     } else {
       return 0;

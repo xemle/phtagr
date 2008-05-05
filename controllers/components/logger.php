@@ -300,17 +300,17 @@ class LoggerComponent extends Object {
   function write($msg, $level=L_INFO) {
     $this->_write($level, $msg);
   }
-	
-	function bt() {
-		$steps=debug_backtrace();
-		array_pop($steps);
-		$trace = array();
-		foreach ($steps as $step) {
+  
+  function bt() {
+    $steps=debug_backtrace();
+    array_pop($steps);
+    $trace = array();
+    foreach ($steps as $step) {
       $step = am(array('file' => 'null', 'line' => '0', 'function' => ''), $step);
-			$trace[] = $step['file'].':'.$step['line'].' '.$step['function'].'()';
+      $trace[] = $step['file'].':'.$step['line'].' '.$step['function'].'()';
     }
-		$this->debug($trace);
-	}
+    $this->debug($trace);
+  }
 }
 
 ?>

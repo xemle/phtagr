@@ -26,9 +26,9 @@ if (!App::import('Vendor', "phpthumb", true, array(), "phpthumb.class.php")) {
 
 class FilesController extends AppController
 {
-	var $name = 'Thumbs';
-	var $uses = array('Image');
-	var $layout = null;
+  var $name = 'Thumbs';
+  var $uses = array('Image');
+  var $layout = null;
   var $_outputMap = array(
                       OUTPUT_TYPE_MINI => array('size' => OUTPUT_SIZE_MINI, 'square' => true),
                       OUTPUT_TYPE_THUMB => array('size' => OUTPUT_SIZE_THUMB),
@@ -36,7 +36,7 @@ class FilesController extends AppController
                       OUTPUT_TYPE_VIDEO => array('size' => OUTPUT_SIZE_VIDEO, 'bitrate' => OUTPUT_BITRATE_VIDEO)
                     );
   var $components = array('VideoFilter');
-	
+  
   function _getCacheDir($data) {
     if (!isset($data['Image']['id'])) {
       $this->Logger->debug("Data does not contain id of the image");
@@ -289,23 +289,25 @@ class FilesController extends AppController
     exit; 
   }
 
-	function mini($id) {
+  function mini($id) {
     $this->_createPreview($id, OUTPUT_TYPE_MINI);
   }
 
-	function thumb($id)	{
+  function thumb($id)	{
     $this->_createPreview($id, OUTPUT_TYPE_THUMB);
   }
 
-	function preview($id) {
+  function preview($id) {
+    $this->Logger->info("Request of image $id: preview");
     $this->_createPreview($id, OUTPUT_TYPE_PREVIEW);
   }
 
   function video($id) {
+    $this->Logger->info("Request of image $id: video");
     $this->_createFlashVideo($id, OUTPUT_TYPE_VIDEO);
   }
 
-	function original($id) {
+  function original($id) {
     $id = intval($id);
     $image = $this->Image->findById($id);
     $user = $this->getUser();
@@ -313,6 +315,7 @@ class FilesController extends AppController
       $this->Logger->warn("User {$user['User']['id']} has no previleges to access image ".$image['Image']['id']);
       $this->redirect(null, 404);
     }
+    $this->Logger->info("Request of image $id: original");
     $filename = $this->Image->getFilename($image);  
 
     $size = getimagesize($filename);

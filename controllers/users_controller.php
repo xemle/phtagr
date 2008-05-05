@@ -68,15 +68,19 @@ class UsersController extends AppController
         $this->Session->setFlash("Sorry. Your account is expired!");
       } else {
         if($user['User']['password'] == $this->data['User']['password']) {
-          if ($this->Session->write('User.id', $user['User']['id'])) {
-            $this->Logger->info("Successfull login of user '{$user['User']['username']}' (id {$user['User']['id']})");
+          $this->Session->activate();
+          if (!$this->Session->check('User.id') || $this->Session->read('User.id') != $user['User']['id']) {
+            $this->Logger->info("Start new session for '{$user['User']['username']}' (id {$user['User']['id']})");
+            $this->Session->write('User.id', $user['User']['id']);
             $this->Session->write('User.role',  $user['User']['role']);
             $this->Session->write('User.username',  $user['User']['username']);
 
             // Save Cookie for 3 months
             $this->Cookie->write('user', $user['User']['id'], true, 92*24*3600);
             $this->Logger->debug("Write authentication cookie for user '{$user['User']['username']}' (id {$user['User']['id']})");
-            $this->redirect('/', null, false);
+
+            $this->Logger->info("Successfull login of user '{$user['User']['username']}' (id {$user['User']['id']})");
+            $this->redirect('/');
           } else {
             $this->Logger->err("Could not write session information of user '{$user['User']['username']}' ({$user['User']['id']})");
             $this->Session->setFlash("Sorry. Internal login procedure failed!");
@@ -91,9 +95,10 @@ class UsersController extends AppController
   }
 
   function logout() {
-    $this->Session->delete('User.id');
-    $this->Session->delete('User.role');
-    $this->Session->delete('User.username');
+    $user = $this->getUser();
+    $this->Logger->info("Delete session for user '{$user['User']['username']}' (id {$user['User']['id']})");
+
+    $this->Session->destroy();
 
     $this->Cookie->name = 'phTagr';
     $this->Cookie->destroy();
