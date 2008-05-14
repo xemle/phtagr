@@ -104,3 +104,20 @@ var thumbSelectInvert = function() {
     selectImage(id);
   }
 };
+
+var showMap = function(latitude, longitude) {
+  toggleVisibility('mapbox', 'block');
+  var e = document.getElementById("map");
+  if (e && GBrowserIsCompatible()) {
+    var map = new GMap2(e);
+    map.addControl(new GMapTypeControl());
+    map.addControl(new GSmallMapControl());
+    map.addControl(new GScaleControl());
+    map.enableScrollWheelZoom();
+
+    var center = new GLatLng(latitude, longitude);
+    map.setCenter(center, 14);
+
+    map.addOverlay(new GMarker(center));
+  }
+};

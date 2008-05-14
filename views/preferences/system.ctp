@@ -10,5 +10,11 @@
   echo $form->input('bin.flvtool2', array('label' => "Path to flvtool2")); 
 ?>
 </fieldset>
+<fieldset><legend>Google Maps</legend>
+<p>Key for <a href="http://maps.google.com">Google Maps</a></p>
+<?php
+  echo $form->input('google.map.key', array('label' => "Key")); 
+?>
+</fieldset>
 <?php echo $form->end('Save'); ?>
 <?php debug($this->data); ?>

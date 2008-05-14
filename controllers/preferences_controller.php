@@ -77,6 +77,8 @@ class PreferencesController extends AppController {
       $this->_set(0, 'bin.convert', $this->data);
       $this->_set(0, 'bin.ffmpeg', $this->data);
       $this->_set(0, 'bin.flvtool2', $this->data);
+
+      $this->_set(0, 'google.map.key', $this->data);
       // debug
       $this->set('commit', $this->data);
       $this->Session->setFlash("Settings saved");

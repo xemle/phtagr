@@ -23,6 +23,7 @@
 
 class SearchComponent extends Object
 {
+  var $component = array('Logger');
   var $_params = array('page' => 1, 'show' => 12, 'pos' => 1);
   var $_tags = array();
   var $_categories = array();
@@ -58,6 +59,37 @@ class SearchComponent extends Object
     if (isset($this->_params[$name])) {
       if ($value === null || $this->_params[$name] == $value)
         unset($this->_params[$name]);
+    }
+  }
+
+  /** Parse passed arguments for the search and check them againse the role of
+   * the user */
+  function parseArgs() {
+    $userRole = $this->controller->getUserRole();
+    foreach($this->controller->passedArgs as $name => $value) {
+      if (is_numeric($name))
+        continue;
+      switch($name) {
+        case 'page': $this->setPageNum(intval($value)); break;
+        case 'show': $this->setPageSize(intval($value)); break;
+        case 'pos': $this->setPosition(intval($value)); break;
+        case 'sort': $this->setOrder($value); break;
+
+        case 'image': $this->setImageId(intval($value)); break;
+        case 'user': $this->setUserId($value); break;
+        case 'group': if ($userRole >= ROLE_MEMBER) $this->setGroupId(intval($value)); break;
+        case 'visibility': if ($userRole >= ROLE_MEMBER) $this->setVisibility($value); break;
+
+        case 'from': $this->setDateStart($value); break;
+        case 'to': $this->setDateEnd($value); break;
+
+        case 'tags': $this->addTags(preg_split('/\s*,\s*/', $value)); break;
+        case 'categories': $this->addCategories(preg_split('/\s*,\s*/', trim($value))); break;
+        case 'locations': $this->addLocations(preg_split('/\s*,\s*/', trim($value))); break;
+
+        default:
+          $this->Logger->err("Unknown argument: $name:$value");
+      }
     }
   }
 

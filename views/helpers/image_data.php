@@ -99,18 +99,7 @@ class ImageDataHelper extends AppHelper {
     return $output;
   }
 
-  function metaTable($data) {
-    $cells= array();
-    if (!$data) 
-      return $cells;
-
-    $imageId = $data['Image']['id'];
-
-    $this->search->initialize();
-    $userId = $this->search->get('user');
-    $this->search->clear();
-    if ($userId)
-      $this->search->set('user', $userId);
+  function _metaDate($data) {
     $base = $this->search->getSearch();
 
     $this->search->set('from', $this->toUnix(&$data, -3*60*60));
@@ -142,47 +131,67 @@ class ImageDataHelper extends AppHelper {
     $output .= $this->html->link('>', $this->search->getUri());
     $output .= ']';
 
-    $cells[] = array("Date:", $output);
+    $this->search->setSearch($base);
+    return $output;
+  }
+
+  function _metaHabtm($data, $habtm) {
+    if (!count($data[$habtm])) 
+      return false;
+
+    $base = $this->search->getSearch();
+    $field = strtolower(Inflector::pluralize($habtm));
+    $links = array();
+    foreach ($data[$habtm] as $assoc) {
+      $this->search->set($field, $assoc['name']);
+      $links[] = $this->html->link($assoc['name'], $this->search->getUri());
+    }
+    $this->search->setSearch($base);
+    return implode(', ', $links);
+  }
+
+  function _metaAccess($data) {
+    $base = $this->search->getSearch();
+    $output = '';
+    if (isset($data['Group']['name'])) {
+      $this->search->clear();
+      $this->search->set('group', $data['Group']['id']);
+      $output .= $this->html->link($data['Group']['name'], $this->search->getUri()).', ';
+    }
+    $output .= $this->_acl2text($data);
+    $this->search->setSearch($base);
+
+    return $output;
+  }
+
+  function metaTable($data, $withMap = false) {
+    $cells= array();
+    if (!$data) 
+      return $cells;
+
+    $imageId = $data['Image']['id'];
+
+    $this->search->initialize();
+    $userId = $this->search->get('user');
+    $this->search->clear();
+    if ($userId)
+      $this->search->set('user', $userId);
+    $base = $this->search->getSearch();
+
+    $cells[] = array("Date:", $this->_metaDate(&$data));
 
     if (count($data['Tag'])) {
-      $links = array();
-      $this->search->setSearch($base);
-      foreach ($data['Tag'] as $tag) {
-        $this->search->set('tags', $tag['name']);
-        $links[] = $this->html->link($tag['name'], $this->search->getUri());
-      }
-      $cells[] = array('Tags:', implode(', ', $links));
+      $cells[] = array('Tags:', $this->_metaHabtm(&$data, 'Tag'));
     }
-
     if (count($data['Category'])) {
-      $links = array();
-      $this->search->setSearch($base);
-      foreach ($data['Category'] as $category) {
-        $this->search->set('categories', $category['name']);
-        $links[] = $this->html->link($category['name'], $this->search->getUri());
-      }
-      $cells[] = array('Categories:', implode(', ', $links));
+      $cells[] = array('Categories:', $this->_metaHabtm(&$data, 'Category'));
     }
-
     if (count($data['Location'])) {
-      $links = array();
-      $this->search->setSearch($base);
-      foreach ($data['Location'] as $location) {
-        $this->search->set('locations', $location['name']);
-        $links[] = $this->html->link($location['name'], $this->search->getUri());
-      }
-      $cells[] = array('Locations:', implode(', ', $links));
+      $cells[] = array('Locations:', $this->_metaHabtm(&$data, 'Location'));
     }
 
     if ($data['Image']['isOwner']) {
-      $output = '';
-      if (isset($data['Group']['name'])) {
-        $this->search->clear();
-        $this->search->set('group', $data['Group']['id']);
-        $output .= $this->html->link($data['Group']['name'], $this->search->getUri()).', ';
-      }
-      $output .= $this->_acl2text($data);
-      $cells[] = array('Access:', $output);
+      $cells[] = array('Access:', $this->_metaAccess($data));
     }
     
     // Action list 
@@ -200,6 +209,15 @@ class ImageDataHelper extends AppHelper {
       $output .= ' '.$this->html->link(
         $this->html->image('icons/disk.png', array('alt' => 'Save image', 'title' => 'Save image')), 
         '/files/original/'.$imageId, null, null, false);
+
+    if ($withMap && isset($data['Image']['latitude']) && isset($data['Image']['longitude'])) {
+      $output .= ' '.$this->html->link(
+          $this->html->image('icons/map.png',
+            array('alt' => 'Show location in a map', 'title' => 'Show location in a map')),
+          '#',
+          array('onclick' => sprintf('showMap(%f,%f);return false;', $data['Image']['latitude'],$data['Image']['longitude'])),
+          null, false);
+    }
     
     if ($data['Image']['isOwner']) {
       $output .= ' '.$this->ajax->link(
@@ -214,6 +232,7 @@ class ImageDataHelper extends AppHelper {
           '/explorer/sync/'.$imageId, 
           array('update' => 'meta-'.$imageId), null, false);
     }
+
     if ($output) {
       $output = "<div class=\"actionlist\">$output</div>\n";
       $cells[] = array("Actions:", $output);

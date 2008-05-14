@@ -79,12 +79,16 @@ class BrowserController extends AppController
     if (isset($this->_fsRoots[$alias]))
       return false;
 
-    if (!@is_dir($root))
+    if (!@is_dir($root)) {
+      $this->Logger->err("Directory of '$root' does not exists");
       return false;
+    }
 
     // Check alias syntax
-    if (!preg_match('/^[A-Za-z][A-Za-z0-9\-_\.\:]+$/', $alias))
+    if (!preg_match('/^[A-Za-z0-9][A-Za-z0-9\-_\.\:]+$/', $alias)) {
+      $this->Logger->err("Name '$alias' as alias is invalid");
       return false;
+    }
 
     $this->Logger->trace("Add new FS root '$root' (alias '$alias')");
     $this->_fsRoots[$alias]=$root;

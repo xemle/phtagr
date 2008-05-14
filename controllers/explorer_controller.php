@@ -30,7 +30,8 @@ class ExplorerController extends AppController
   function beforeFilter() {
     parent::beforeFilter();
 
-    $this->_parseArgs();
+    $this->Search->controller =& $this;
+    $this->Search->parseArgs();
   }
 
   function beforeRender() {
@@ -50,6 +51,7 @@ class ExplorerController extends AppController
     $data = $this->Search->paginateImage();
     $this->set('data', $data);
     $this->_countMeta(array($data));
+    $this->set('mapKey', $this->getPreferenceValue('google.map.key', false));
     if ($this->Image->isVideo($data))
       $this->render('video');
     else
@@ -164,37 +166,6 @@ class ExplorerController extends AppController
       $this->set('groups', $groups);
     }
     $this->render('index');
-  }
-
-  /** Parse passed arguments for the search and check them againse the role of
-   * the user */
-  function _parseArgs() {
-    $userRole = $this->getUserRole();
-    foreach($this->passedArgs as $name => $value) {
-      if (is_numeric($name))
-        continue;
-      switch($name) {
-        case 'page': $this->Search->setPageNum(intval($value)); break;
-        case 'show': $this->Search->setPageSize(intval($value)); break;
-        case 'pos': $this->Search->setPosition(intval($value)); break;
-        case 'sort': $this->Search->setOrder($value); break;
-
-        case 'image': $this->Search->setImageId(intval($value)); break;
-        case 'user': $this->Search->setUserId($value); break;
-        case 'group': if ($userRole >= ROLE_MEMBER) $this->Search->setGroupId(intval($value)); break;
-        case 'visibility': if ($userRole >= ROLE_MEMBER) $this->Search->setVisibility($value); break;
-
-        case 'from': $this->Search->setDateStart($value); break;
-        case 'to': $this->Search->setDateEnd($value); break;
-
-        case 'tags': $this->Search->addTags(preg_split('/\s*,\s*/', $value)); break;
-        case 'categories': $this->Search->addCategories(preg_split('/\s*,\s*/', trim($value))); break;
-        case 'locations': $this->Search->addLocations(preg_split('/\s*,\s*/', trim($value))); break;
-
-        default:
-          $this->Logger->err("Unknown argument: $name:$value");
-      }
-    }
   }
 
   /** Updates the ids lists of a given association. It adds and deletes items

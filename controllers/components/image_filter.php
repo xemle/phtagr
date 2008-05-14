@@ -107,6 +107,19 @@ class ImageFilterComponent extends Object {
     $v['aperture'] = $this->_extract($data, 'Aperture', NULL);
     $v['shutter'] = $this->_extract($data, 'ShutterSpeed', NULL);
 
+    // fetch GPS coordinates
+    $latitude = $this->_extract($data, 'GPSLatitude', null);
+    $latitudeRef = $this->_extract($data, 'GPSLatitudeRef', null);
+    $longitude = $this->_extract($data, 'GPSLongitude', null);
+    $longitudeRef = $this->_extract($data, 'GPSLongitudeRef', null);
+    if ($latitude && $latitudeRef && $longitude && $longitudeRef) {
+      if ($latitudeRef == 'S')
+        $latitude *= -1;
+      if ($longitudeRef == 'W')
+        $longitude *= -1;
+      $v['latitude'] = $latitude; 
+      $v['longitude'] = $longitude; 
+    }
    
     // Associations to meta data: Tags, Categories, Locations
     $keywords = $this->_extract($data, 'Keywords');

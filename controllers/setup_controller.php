@@ -32,16 +32,36 @@ class SetupController extends AppController {
   var $config = null; 
   var $db = null;
   var $Schema = null;
+  var $User = null;
+  var $Preference = null;
   var $commands = array('exiftool', 'convert', 'ffmpeg', 'flvtool2');
 
   function beforeFilter() {
     Configure::write('Cache.disable', true);
     $this->config = ROOT.DS.APP_DIR.DS.'config'.DS.'database.php';
     $this->paths = array(TMP, USER_DIR);
-    return false;
+    if (isset($this->params['admin']) && $this->params['admin'] && $this->__hasAdmin()) {
+      parent::beforeFilter();
+    } else {
+      return false;
+    }
   }
 
   function beforeRender() {
+  }
+
+  function __initDatabase() {
+    if (!$this->__hasConfig()) {
+      return false;
+    }
+
+    App::import('Core', 'CakeSchema');
+    $this->Schema =& new CakeSchema(array('connection' => 'default', 'file' => null, 'path' => null, 'name' => null));
+
+    App::import('Core', 'ConnectionManager');
+    $this->db =& ConnectionManager::getDataSource($this->Schema->connection);
+
+    return true;
   }
 
   /** Checks the current database for missing tables. If tables are missing, it
@@ -50,27 +70,25 @@ class SetupController extends AppController {
     @param Create statements or false if all required tables are in the
     database */
   function __getMissingTables($Schema) {
-    $db =& ConnectionManager::getDataSource($this->Schema->connection);
-
     // Check for required tables and create missing tables
-    $sources = $db->listSources();
+    $sources = $this->db->listSources();
     $requiredTables = array();
-    $create = array();
+    $missingTables = array();
     foreach ($Schema->tables as $table => $fields) {
-      $tableName = $db->fullTableName($table, false);
+      $tableName = $this->db->fullTableName($table, false);
       $requiredTables[] = $tableName;
       if (!in_array($tableName, $sources)) {
-        $create[$table] = $db->createSchema($Schema, $table);
+        $missingTables[$table] = $this->db->createSchema($Schema, $table);
       }
     }
     // set tables sources only to the required tables. This overwrites current
     // list and hides not required tables
-    $db->_sources = $requiredTables;
+    $this->db->_sources = $requiredTables;
 
-    if (!count($create)) {
+    if (!count($missingTables)) {
       return false;
     }
-    return $create;
+    return $missingTables;
   }
   
   /** Create tables according to create statements
@@ -78,16 +96,17 @@ class SetupController extends AppController {
     @param Array of creation statements
     @return On success it returns false. If error occurs, it returns the
     creation statements */
-  function __createTables($Schema, $create) {
-    $db =& ConnectionManager::getDataSource($this->Schema->connection);
-  
+  function __createTables($Schema, $newTables) {
+    if (!$newTables)
+      return false;
+
     $errors = array();
-    foreach ($create as $table => $sql) {
-      if (!$db->_execute($create[$table])) {
+    foreach ($newTables as $table => $sql) {
+      if (!$this->db->_execute($sql)) {
         $errors[$table] = $sql;
-        $tableName = $db->fullTableName($table, false);
+        $tableName = $this->db->fullTableName($table, false);
         $this->Logger->err("Could not create table '$tableName'");
-        $this->Logger->debug($create[$table]);
+        $this->Logger->debug($sql);
       }
     }
     if (!count($errors)) {
@@ -97,15 +116,17 @@ class SetupController extends AppController {
   }
 
   function __getAlteredColumns($Schema) {
-    $db =& ConnectionManager::getDataSource($this->Schema->connection);
-
     $Old = $this->Schema->read();
     $compare = $this->Schema->compare($Old, $Schema);
 
     // Check changes
     $columns = array();
+    $sources = $this->db->listSources();
     foreach ($compare as $table => $changes) {
-      $columns[$table] = $db->alterSchema(array($table => $changes), $table);
+      $tableName = $this->db->fullTableName($table, false);
+      if (!in_array($tableName, $sources))
+        continue;
+      $columns[$table] = $this->db->alterSchema(array($table => $changes), $table);
     }
     
     if (!count($columns)) {
@@ -115,19 +136,75 @@ class SetupController extends AppController {
   }
 
   function __alterColumns($Schema, $columns) {
-    $db =& ConnectionManager::getDataSource($Schema->connection);
+    if (!$columns) 
+      return false;
+
     $errors = array();
-    foreach ($columns as $table => $changes) {
-      if (!$db->_execute($changes)) {
-        $this->Logger->err("Could not update table $table");
-        $this->Logger->debug($changes);
-        $errors[$table] = $changes;
+    foreach ($columns as $table => $sql) {
+      if (!$this->db->_execute($sql)) {
+        $errors[$table] = $sql;
+        $tableName = $this->db->fullTableName($table, false);
+        $this->Logger->err("Could not update table '$tableName'");
+        $this->Logger->debug($sql);
       }
     }
     if (!count($errors)) {
       return false;
     }
     return $errors;
+  }
+
+  function __requireUpgrade($Schema) {
+    $missingTables = $this->__getMissingTables($Schema);
+    if ($missingTables)
+      return true;
+    $alterColumns = $this->__getAlteredColumns($Schema);
+    if ($alterColumns)
+      return true;
+    return false;
+  }
+
+  function __createMissingTables($Schema) {
+    $missingTables = $this->__getMissingTables($Schema);
+    return $this->__createTables($Schema, $missingTables);
+  }
+
+  function __upgradeTables($Schema) {
+    $alterColumns = $this->__getAlteredColumns($Schema);
+    return $this->__alterColumns($Schema, $alterColumns);
+  }
+
+  function __upgradeDatabase($Schema) {
+    $errorTables = $this->__createMissingTables($Schema);
+    $errorColumns = $this->__upgradeTables($Schema);
+    if ($errorTables || $errorColumns) {
+      return array('tables' => $errorTables, 'columns' => $errorColumns);
+    } else {
+      return false;
+    }
+  }
+
+  function __loadModel($models) {
+    if (!$this->__hasConnection()) {
+      return false;
+    }
+
+    if (!is_array($models)) {
+      $models = array($models);
+    }
+    $success = true;
+    foreach($models as $model) {
+      if (isset($this->$model))
+        continue;
+
+      if (!App::import('model', $model)) {
+        $this->Logger->err("Could not load model '$model'");
+        $success = false;
+        continue;
+      }
+      $this->$model =& new $model();
+    }
+    return $success;
   }
 
   function __hasSession() {
@@ -162,8 +239,9 @@ class SetupController extends AppController {
       return false;
     $this->Logger->debug("Check for database connection");
 
-    App::import('Core', 'ConnectionManager');
-    $this->db =& ConnectionManager::getDataSource('default');
+    if (!$this->__initDatabase())
+      return false;
+
     return $this->db->connected;
   }
 
@@ -186,9 +264,9 @@ class SetupController extends AppController {
       return false;
 
     $this->Logger->debug("Check for admin account");
-    App::import('model', 'User');
-
-    $this->User =& new User();
+    if (!$this->__loadModel('User')) {
+      return false;
+    }
 
     return $this->User->hasAdmins();
   }
@@ -201,8 +279,9 @@ class SetupController extends AppController {
       $commands = $this->commands;
     }
 
-    App::import('model', 'Preference');
-    $this->Preference =& new Preference();
+    if (!$this->__loadModel('Preference')) {
+      return false;
+    }
 
     if (!count($commands)) {
       return $this->Preference->hasAny(array('user_id' => 0, 'name' => 'LIKE bin.%'));
@@ -219,8 +298,12 @@ class SetupController extends AppController {
 
   function index() {
     if ($this->__hasAdmin()) {
-      $this->Logger->warn("Setup is disabled. phTagr is already configured!");
-      $this->redirect('/');
+      if ($this->hasRole(ROLE_ADMIN)) {
+        $this->redirect('/admin/setup/upgrade');
+      } else {
+        $this->Logger->warn("Setup is disabled. phTagr is already configured!");
+        $this->redirect('/');
+      }
     }
 
     $this->Session->write('setup', true);
@@ -319,40 +402,35 @@ class DATABASE_CONFIG
 
     $this->Logger->info("Check current database schema");
 
-    App::import('Core', 'CakeSchema');
-    $this->Schema =& new CakeSchema(array('connection' => 'default', 'file' => null, 'path' => null, 'name' => null));
-    $Schema = $this->Schema->load(array());
-
-    $create = $this->__getMissingTables($Schema);
-    if ($create) {
-      $errors = $this->__createTables($Schema, $create);
-      if ($errors) {
-        $tables = array();
-        foreach ($errors as $table => $sql) {
-          $tables[$table] = $db->fullTableName($table, false);
-        }
-        $this->Session->write('tables', $tables);
-        $this->redirect('tableerror');
-      }
-      $this->Logger->warn("All missing tables are created: ".implode(', ', array_keys($create)));
+    if (!$this->__initDatabase()) {
+      $this->Logger->err("Could not setup database connection");
+      $this->redirect('config');
     }
-    $this->Logger->warn("All tables exists");
 
-    $columns = $this->__getAlteredColumns($Schema);
-    if ($columns) {
-      $errors = $this->__alterColumns($Schema, $columns);
-      if ($errors) {
-        $this->Logger->err("Could not allter table: ".implode(', ', array_keys($errors)));
-        /*
-        $this->Session->write('errors', $errors);
-        $this->redirect('columnerror');
-        */
-      }
-      $this->Logger->info("All tables are updated: ".implode(', ', array_keys($columns)));
+    $Schema = $this->Schema = $this->Schema->load(array());
+    $errors = $this->__upgradeDatabase($Schema);
+
+    $check = false;
+    $this->Logger->trace($errors);
+    if ($errors['tables']) {
+      $check = true;
+      $this->Logger->err("Not all tables could be created: ".array_keys($errors['tables']));
+    } else {
+      $this->Logger->info("All tables exists");
     }
-    $this->Logger->info("All tables are correct");
-    $this->Session->setFlash("All required tables are created");
-    $this->redirect('user');
+    if ($errors['columns']) {
+      $check = true;
+      $this->Logger->err("Not all columngs could be altered: ".array_keys($errors['columns']));
+    } else {
+      $this->Logger->info("All tables are correct");
+    }
+
+    if (!$check) {
+      $this->Session->setFlash("All required tables are created");
+      $this->redirect('user');
+    } else {
+      $this->Session->setFlash("Could not create tables correctly. Please see logfile for details");
+    }
   }
 
   function user() {
@@ -474,6 +552,38 @@ class DATABASE_CONFIG
 
     // cleanup
     $this->Session->delete('setup');
+  }
+
+  function admin_upgrade($action = null) {
+    if (!$this->__hasAdmin()) 
+      $this->redirect('/setup');
+    $this->requireRole(ROLE_ADMIN);
+
+    $Schema = $this->Schema->load(array());
+    if (!$this->__requireUpgrade($Schema))
+      $this->redirect('/admin/setup/uptodate');
+
+    $errors = false;
+    if ($action == 'run') {
+      $errors = $this->__upgradeDatabase($Schema);
+      if ($errors == false) {
+        $this->Session->setFlash("Database was upgraded successfully");
+        $this->redirect('/admin/setup/uptodate');
+      } else {
+        $this->Session->setFlash("The database could not upgraded completely. The log file might discover the issue");
+      }
+    }
+    $this->set('errors', $errors);
+  }
+
+  function admin_uptodate() {
+    if (!$this->__hasAdmin()) 
+      $this->redirect('/setup');
+    $this->requireRole(ROLE_ADMIN);
+
+    $Schema = $this->Schema->load(array());
+    if ($this->__requireUpgrade($Schema))
+      $this->redirect('/admin/setup/upgrade');
   }
 }
 ?>
