@@ -88,15 +88,20 @@ class PreferencesController extends AppController {
     $this->data = $tree;
   }
 
-  function beforeRender() {
+  function getMenuItems() {
     $items = array();
     if ($this->hasRole(ROLE_ADMIN))
-      $items[] = array('text' => 'System', 'link' => 'system');
+      $items[] = array('text' => 'System', 'link' => '/preferences/system');
     if ($this->hasRole(ROLE_MEMBER)) {
       $items[] = array('text' => 'Guest Accounts', 'link' => '/guests');
       $items[] = array('text' => 'Groups', 'link' => '/groups');
     }
-    $items[] = array('text' => 'Access Rights', 'link' => 'acl');
+    $items[] = array('text' => 'Access Rights', 'link' => '/preferences/acl');
+    return $items;
+  }
+
+  function beforeRender() {
+    $items = $this->getMenuItems();
     $menu = array('items' => $items, 'active' => $this->here);
     $this->set('mainMenu', $menu);
   }

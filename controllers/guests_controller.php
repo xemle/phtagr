@@ -159,10 +159,22 @@ class GuestsController extends AppController {
     }
   }
 
-  function _setMenu() {
+  function _getMenuItems() {
     $items = array();
     $items[] = array('text' => 'List Guests', 'link' => 'index');
     $items[] = array('text' => 'Add Guest', 'link' => 'add');
+    return $items;
+  }
+
+  function _setMenu() {
+    $items = $this->requestAction('/preferences/getMenuItems');
+    $me = '/'.strtolower(Inflector::pluralize($this->name));
+    foreach ($items as $index => $item) {
+      if ($item['link'] == $me) {
+        $item['submenu'] = array('items' => $this->_getMenuItems());
+        $items[$index] = $item;
+      }
+    }
     $menu = array('items' => $items);
     $this->set('mainMenu', $menu);
   }
