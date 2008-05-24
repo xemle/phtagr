@@ -25,7 +25,7 @@ class ExplorerController extends AppController
 {
   var $components = array('RequestHandler', 'Search', 'ImageFilter', 'VideoFilter');
   var $uses = array('Image', 'Group', 'Tag', 'Category', 'Location');
-  var $helpers = array('form', 'formular', 'html', 'javascript', 'ajax', 'imageData', 'time', 'search', 'explorerMenu');
+  var $helpers = array('form', 'formular', 'html', 'javascript', 'ajax', 'imageData', 'time', 'search', 'explorerMenu', 'rss');
 
   function beforeFilter() {
     parent::beforeFilter();
@@ -36,6 +36,7 @@ class ExplorerController extends AppController
 
   function beforeRender() {
     $this->params['search'] = $this->Search->getParams();
+    $this->set('feeds', '/explorer/rss');
   }
 
   function index() {
@@ -540,6 +541,20 @@ class ExplorerController extends AppController
     $this->layout='bare';
     $this->render('updatemeta');
     Configure::write('debug', 0);
+  }
+
+  function rss() {
+    $this->layoutPath = 'rss';
+    $this->Search->setPageSize(30);
+    $this->Search->setOrder('newest');
+    $this->set('data', $this->Search->paginate());
+
+    Configure::write('debug', 0);
+    $this->set(
+        'channel', array('title' => "New Images",
+        'link' => "/explorer/rss",
+        'description' => "Recently Published Images" )
+      );
   }
 }
 ?>

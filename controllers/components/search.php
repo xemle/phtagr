@@ -980,7 +980,7 @@ class SearchComponent extends Object
       $sql = $this->getQuery(2);
       $results = $this->controller->Image->query($sql);
       if (isset($results[$index])) {
-        $data = $this->controller->Image->optimizedRead($results[$index]['Image']['id']);
+        $data = $this->controller->Image->optimizedRead($tmpImage);
         $this->controller->Image->setAccessFlags(&$data, $this->controller->getUser());
         if ($index > 0 && isset($results[$index-1]))
           $this->_params['prevImage'] = $results[$index-1]['Image']['id'];
