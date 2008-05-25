@@ -42,6 +42,7 @@ class PhtagrSchema extends CakeSchema {
 			'category_id' => array('type'=>'integer', 'null' => false, 'default' => '0'),
 			'indexes' => array('PRIMARY' => array('column' => array('image_id', 'category_id'), 'unique' => 1), 'setid' => array('column' => 'category_id', 'unique' => 0))
 		);
+  /*
 	var $comments = array(
 			'id' => array('type'=>'integer', 'null' => false, 'default' => NULL, 'key' => 'primary'),
 			'created' => array('type'=>'datetime', 'null' => true, 'default' => NULL),
@@ -57,6 +58,7 @@ class PhtagrSchema extends CakeSchema {
 			'notify' => array('type'=>'integer', 'null' => true, 'default' => '0', 'length' => 3),
 			'indexes' => array('PRIMARY' => array('column' => 'id', 'unique' => 1))
 		);
+  */
 	var $configs = array(
 			'id' => array('type'=>'integer', 'null' => false, 'default' => NULL, 'key' => 'primary'),
 			'user_id' => array('type'=>'integer', 'null' => true, 'default' => NULL),
@@ -133,7 +135,7 @@ class PhtagrSchema extends CakeSchema {
 			'created' => array('type'=>'datetime', 'null' => true, 'default' => NULL),
 			'modified' => array('type'=>'datetime', 'null' => true, 'default' => NULL),
 			'username' => array('type'=>'string', 'null' => true, 'default' => NULL, 'length' => 32),
-			'password' => array('type'=>'string', 'null' => false, 'length' => 32),
+			'password' => array('type'=>'string', 'null' => false, 'length' => 60),
 			'role' => array('type'=>'integer', 'null' => true, 'default' => NULL, 'length' => 3),
 			'creator_id' => array('type'=>'integer', 'null' => true, 'default' => '0', 'length' => 10),
 			'expires' => array('type'=>'datetime', 'null' => true, 'default' => NULL),
