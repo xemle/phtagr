@@ -28,8 +28,9 @@ class SetupController extends AppController {
   //var $autoRender = false;
   var $uses = null;
   var $helpers = array('form', 'html');
+  var $core = null; 
+  var $dbConfig = null; 
   var $paths = array();
-  var $config = null; 
   var $db = null;
   var $Schema = null;
   var $User = null;
@@ -38,7 +39,8 @@ class SetupController extends AppController {
 
   function beforeFilter() {
     Configure::write('Cache.disable', true);
-    $this->config = ROOT.DS.APP_DIR.DS.'config'.DS.'database.php';
+    $this->core = CONFIGS.'core.php';
+    $this->dbConfig = CONFIGS.'database.php';
     $this->paths = array(TMP, USER_DIR);
     if (isset($this->params['admin']) && $this->params['admin'] && $this->__hasAdmin()) {
       parent::beforeFilter();
@@ -207,6 +209,16 @@ class SetupController extends AppController {
     return $success;
   }
 
+  function __hasSalt() {
+    $this->Logger->debug("Check for settings in core");
+    if (Configure::read('Security.salt') == 'DYhG93b0qyJfIxfs2guVoUubWwvniR2G0FgaC9mi') {
+      $this->Logger->warn("Detecting unsecure security salt");
+      return false;
+    }
+
+    return true;
+  }
+
   function __hasSession() {
     return $this->Session->check('setup');
   }
@@ -214,6 +226,7 @@ class SetupController extends AppController {
   function __checkSession() {
     if (!$this->__hasSession()) {
       $this->Logger->warn('Setup is disabled. Setup session variable is not set.');
+      $this->Logger->bt();
       $this->redirect('/');
     }
   }
@@ -231,7 +244,7 @@ class SetupController extends AppController {
     if (!$this->__hasPaths())
       return false;
     $this->Logger->debug("Check for database configuration");
-    return is_readable($this->config);
+    return is_readable($this->dbConfig);
   }
 
   function __hasConnection() {
@@ -304,10 +317,81 @@ class SetupController extends AppController {
         $this->Logger->warn("Setup is disabled. phTagr is already configured!");
         $this->redirect('/');
       }
+    } elseif (!$this->__hasSalt()) {
+      $this->redirect('salt');
     }
 
     $this->Session->write('setup', true);
     $this->Logger->info("Start Setup of phTagr!");
+  }
+
+  function __generateSalt() {
+    $chars  = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $chars .= 'abcdefghijklmnopqrstuvwxyz';
+    $chars .= '0123456789';
+    $len = strlen($chars);
+
+    srand(getMicrotime()*1000);
+    $salt = '';
+    for($i = 0; $i < 40; $i++) {
+      $salt .= $chars[rand(0, $len-1)];
+    }
+
+    return $salt;
+  }
+
+  function salt() {
+    if ($this->__hasSalt())
+      $this->redirect('index');
+
+    if (!is_writeable(dirname($this->core))) {
+      $this->redirect('saltro');
+    }
+
+    $oldSalt = 'DYhG93b0qyJfIxfs2guVoUubWwvniR2G0FgaC9m';
+    $salt = $this->__generateSalt();
+
+    $file =& new File($this->core);
+    $content = $file->read();
+    $newContent = preg_replace("/$oldSalt/", $salt, $content);
+    if (!$file->write($newContent)) {
+      $this->Session->setFlash("Could not write configureation to '$this->core'");
+      $this->Logger->err("Could not write configuration to '$this->core'");
+    } else {
+      Configure::write('Security.salt', $salt);
+      $this->Session->destroy();
+      $this->Session->renew();
+
+      $this->Session->setFlash("Update core settings");
+      $this->Logger->info("Set new security salt to '$this->core'");
+      $this->redirect('index');
+    }
+  }
+
+  function saltro() {
+    if ($this->__hasSalt())
+      $this->redirect('index');
+
+    if (is_writeable(dirname($this->core))) {
+      $this->redirect('salt');
+    } 
+
+    $oldSalt = Configure::read('Security.salt');
+
+    $file =& new File($this->core);
+    $content = $file->read();
+    $lines = preg_split('/\n/', $content);
+    $c = count($lines);
+    for($i = 0; $i < $c; $i++) {
+      if (preg_match("/'$oldSalt'/", $lines[$i])) {
+        $this->set('line', $i+1);
+        break;
+      }
+    }
+
+    $this->set('oldSalt', $oldSalt);
+    $this->set('salt', $this->__generateSalt());
+    $this->set('file', $this->core);
   }
 
   function path() {
@@ -338,14 +422,18 @@ class SetupController extends AppController {
     if ($this->__hasConfig())
       $this->redirect('database');
 
-    if (!is_writeable(dirname($this->config)))
-      $this->redirect('configreadonly');
+    if (!is_writeable(dirname($this->dbConfig)))
+      $this->redirect('configro');
 
     $this->__checkSession();
 
     if (!empty($this->data)) {
       $output = "<?php 
-/** Automatic generated database configuration file */
+/** 
+ * Automatic generated database configuration file by phTagr
+ *
+ * Date: ".date("Y-m-d H:i:s")."
+ */
 class DATABASE_CONFIG
 {
   var \$default = array('driver' => 'mysql',
@@ -359,13 +447,13 @@ class DATABASE_CONFIG
                 'prefix' => '{$this->data['db']['prefix']}');
 }
 ?>";
-      $file =& new File($this->config, true, 644);
+      $file =& new File($this->dbConfig, true, 644);
       if ($file->write($output)) {
-        $this->Logger->info("Database configuration file '{$this->config}' was written successfully");
+        $this->Logger->info("Database configuration file '{$this->dbConfig}' was written successfully");
         $file->close();
         $this->redirect('database');
       } else {
-        $this->Logger->err("Could not write database configuration file '{$this->config}'");
+        $this->Logger->err("Could not write database configuration file '{$this->dbConfig}'");
         $this->Session->setFlash("Could not write database configuration file");
       }
       $file->close();
@@ -377,12 +465,12 @@ class DATABASE_CONFIG
     $this->Logger->info("Request database configuration");
   }
 
-  function configreadonly() {
+  function configro() {
     if ($this->__hasConfig())
       $this->redirect('database');
 
     // nothing to do
-    $this->set('config', $this->config);
+    $this->set('dbConfig', $this->dbConfig);
     $this->Logger->info("Request database configuration (readonly)");
   }
 
@@ -445,6 +533,8 @@ class DATABASE_CONFIG
     if (!empty($this->data)) {
       $this->data['User']['role'] = ROLE_ADMIN;
       $this->User->create($this->data);
+      if (empty($this->data['User']['confirm']))
+        $this->User->invalidate('confirm', 'Password confirmation is missing');
       if ($this->User->save()) {
         $userId = $this->User->getLastInsertID();
         $this->Session->write('User.id', $userId);

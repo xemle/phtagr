@@ -5,9 +5,9 @@
 The configuration file for the database connection could not be written. Please create a database configuration file by your own!
 </div>
 
-<p>Below a sample configuration file is shown. Please adapt your database credentials and click <?php echo $html->link('Retry', 'configreadonly'); ?></p>
+<p>Below a sample configuration file is shown. Please adapt your database credentials and click <?php echo $html->link('Retry', 'configro'); ?></p>
 
-<p><pre><?php echo $config; ?></pre></p>
+<p><pre><?php echo $dbConfig; ?></pre></p>
 
 <p><pre><code>&lt;?php
 
@@ -26,4 +26,4 @@ class DATABASE_CONFIG {
 }
 ?&gt;</code></pre></p>
 
-<p><?php echo $html->link('Retry', 'configreadonly'); ?> database connection.</p>
+<p><?php echo $html->link('Retry', 'configro'); ?> database connection.</p>
