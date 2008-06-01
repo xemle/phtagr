@@ -158,11 +158,13 @@ class SetupController extends AppController {
 
   function __requireUpgrade($Schema) {
     $missingTables = $this->__getMissingTables($Schema);
-    if ($missingTables)
+    if ($missingTables) {
       return true;
+    }
     $alterColumns = $this->__getAlteredColumns($Schema);
-    if ($alterColumns)
+    if ($alterColumns) {
       return true;
+    }
     return false;
   }
 

@@ -6,9 +6,16 @@
 <fieldset><legend>General</legend>
 <?php
   echo $form->input('User.username');
-  echo $form->input('User.password');
   echo $form->input('User.firstname');
   echo $form->input('User.lastname');
+  echo $form->input('User.email');
+?>
+</fieldset>
+
+<fieldset><legend>Password</legend>
+<?php
+  echo $form->input('User.password');
+  echo $form->input('User.confirm', array('type' => 'password'));
 ?>
 </fieldset>
 

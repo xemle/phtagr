@@ -191,12 +191,16 @@ class BrowserController extends AppController
     $image = $this->Image->find(array('path' => $path, 'file' => $file));
 
     if ($image) {
-      if ($image['Image']['flag'] & IMAGE_FLAG_ACTIVE > 0) {
+      if ($image['User']['id'] != $user['User']['id']) {
+        $this->Logger->err("Import failed: Existing file '$filename' belongs to another user ('{$image['User']['username']}', id {$image['User']['id']})");
+        return -1;
+      } elseif ($image['Image']['flag'] & IMAGE_FLAG_ACTIVE > 0) {
         $this->Logger->debug("File '$filename' is already in database");
         $this->Logger->warn("Import of existing files currently not supported"); 
         return 0;
         // TODO Synchronize data
       }
+      $this->Image->addDefaultAcl(&$image, &$user);
       $imageId = $image['Image']['id'];      
     } else {
       $this->Logger->debug("File '$filename' is not in the database");

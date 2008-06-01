@@ -67,7 +67,7 @@ class UsersController extends AppController
         $this->Logger->warn("User account of '{$user['User']['username']}' (id {$user['User']['id']}) is expired!");
         $this->Session->setFlash("Sorry. Your account is expired!");
       } else {
-        if($user['User']['password'] == $this->data['User']['password']) {
+        if ($user['User']['password'] == $this->data['User']['password']) {
           $this->Session->activate();
           if (!$this->Session->check('User.id') || $this->Session->read('User.id') != $user['User']['id']) {
             $this->Logger->info("Start new session for '{$user['User']['username']}' (id {$user['User']['id']})");
@@ -118,9 +118,17 @@ class UsersController extends AppController
         $this->Session->setFlash('User already exists');
       } else {
         $this->data['User']['id'] = $id;
-        // remove password information if not set
-        if (!strlen($this->data['User']['password']))
-          unset($this->data['User']['password']);
+
+        $this->User->set($this->data);
+        if (!empty($this->data['User']['password']) && empty($this->data['User']['confirm'])) {
+          $this->User->invalidate('confirm', 'Password confirmation is missing');
+        } elseif (empty($this->data['User']['password']) && empty($this->data['User']['confirm'])) {
+          unset($this->User->data['User']['password']);
+        }
+        if ($this->User->save(null, true, array('username', 'password', 'email', 'expires', 'quota', 'firstname', 'lastname')))
+          $this->Session->setFlash('User data was updated');
+        else
+          $this->Session->setFlash('Could not be updated');
 
         if (!empty($this->data['Preference']['path']['fspath'])) {
           $fsroot = $this->data['Preference']['path']['fspath'];
@@ -129,15 +137,11 @@ class UsersController extends AppController
           if (is_dir($fsroot))
             $this->Preference->addValue('path.fsroot[]', $fsroot, $id);
         }
-        if ($this->User->save($this->data))
-          $this->Session->setFlash('User data was updated');
-        else
-          $this->Session->setFlash('Could not be updated');
       }
     }
 
-    $this->data = $this->User->find('User.id='.$id);
-    $this->data['User']['password'] = '';
+    $this->data = $this->User->findById($id);
+    unset($this->data['User']['password']);
 
     $this->set('fsroots', $this->Preference->buildTree($this->data, 'path.fsroot'));
   }
@@ -150,7 +154,7 @@ class UsersController extends AppController
         $this->Session->setFlash('Username is already given, please choose another name!');
       } else {
         $this->data['User']['role'] = ROLE_MEMBER;
-        if ($this->User->save($this->data)) {
+        if ($this->User->save($this->data, true, array('username', 'password', 'role', 'email'))) {
           $this->Session->setFlash('User was created');
           $this->redirect('/admin/users/edit/'.$this->User->id);
         } else {

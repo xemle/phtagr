@@ -44,13 +44,19 @@ class PreferencesController extends AppController {
     if (isset($this->data)) {
       // TODO check valid acl
       $this->_set($userId, 'acl.group', $this->data);
-      $this->_set($userId, 'acl.write.meta', $this->data);
+
+      // check values
+      if ($this->data['acl']['write']['meta'] > $this->data['acl']['write']['tag'])
+        $this->data['acl']['write']['meta'] = $this->data['acl']['write']['tag'];
+      if ($this->data['acl']['read']['original'] > $this->data['acl']['read']['preview'])
+        $this->data['acl']['read']['original'] = $this->data['acl']['read']['preview'];
+
       $this->_set($userId, 'acl.write.tag', $this->data);
-      $this->_set($userId, 'acl.write.comment', $this->data);
+      $this->_set($userId, 'acl.write.meta', $this->data);
+
+      $this->_set($userId, 'acl.read.original', $this->data);
       $this->_set($userId, 'acl.read.preview', $this->data);
-      $this->_set($userId, 'acl.read.download', $this->data);
-      // debug
-      $this->set('commit', $this->data);
+
       $this->Session->setFlash("Settings saved");
     }
     $tree = $this->Preference->getTree($userId);
@@ -63,7 +69,7 @@ class PreferencesController extends AppController {
     } else {
       $groups = array();
     }
-    $groups[0] = '[No Group]';
+    $groups[-1] = '[No Group]';
     $this->set('groups', $groups);
   }
 

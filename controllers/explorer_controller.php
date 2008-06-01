@@ -273,6 +273,16 @@ class ExplorerController extends AppController
         if ($groupId>0 && !$this->Group->hasAny("Group.user_id=$userId AND Group.id=$groupId"))
           $groupId = -1;
       }
+    
+      $date = false;
+      if (!empty($this->data['Image']['date'])) {
+        $time = strtotime($this->data['Image']['date']);
+        if ($time !== false) {
+          $date = date("Y-m-d H:i:s", $time);
+        } else {
+          $this->Logger->warn("Could not convert time of '{$this->data['Image']['date']}'");
+        }
+      }
 
       $ids = split(',', $this->data['Image']['ids']);
       $ids = array_unique($ids);
@@ -304,6 +314,10 @@ class ExplorerController extends AppController
         // Update metadata
         $this->_handleHabtm(&$image, 'Tag', $tags);
         if ($this->Image->checkAccess(&$image, &$user, ACL_WRITE_META, ACL_WRITE_MASK, &$members)) {
+          if ($date) {
+            $image['Image']['date'] = $date;
+            $changedMeta = true;
+          }
           $this->_handleHabtm(&$image, 'Category', $categories);
           $this->_removeLocation(&$image, &$delLocations);
           $this->_handleHabtm(&$image, 'Location', $locations);

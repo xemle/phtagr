@@ -96,6 +96,7 @@ class ImageFilterComponent extends Object {
 
     // Image information
     $v['name'] = $this->_extract($data, 'FileName');
+    // TODO Read IPTC date, than EXIF date
     $v['date'] = $this->_extract($data, 'DateTimeOriginal', date('Y-m-d H:i:s', time()));
     if (!$this->controller->Image->isVideo($image)) {
       $v['width'] = $this->_extract($data, 'ImageWidth', 0);
@@ -221,6 +222,8 @@ class ImageFilterComponent extends Object {
     * @param image Image data array */
   function _createExportArguments($data, $image) {
     $args = '';
+
+    // TODO Check for date and write it as IPTC date if changed
 
     // Associations to meta data: Tags, Categories, Locations
     $keywords = $this->_extract($data, 'Keywords');

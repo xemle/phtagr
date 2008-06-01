@@ -7,6 +7,7 @@
 <?php
   echo $form->input('User.username');
   echo $form->input('User.password');
+  echo $form->input('User.email');
 ?>
 </fieldset>
 <?php echo $form->submit("Create"); ?>

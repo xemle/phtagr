@@ -521,9 +521,7 @@ class WebdavServer extends HTTP_WebDAV_Server
       $parentFsPath=dirname($fspath);
 
       unset($paths[count($paths)-1]);
-      $parentPath=implode('/', $paths);
-      if ($parentPath!='')
-        $parentPath='/'.$parentPath.'/';
+      $parentPath='/'.implode('/', $paths);
 
       $link=$this->_unslashify($baseUri.$this->pathRawurlencode($parentPath));
       printf($format, 
@@ -545,15 +543,14 @@ class WebdavServer extends HTTP_WebDAV_Server
     }
     asort($dirs);
     asort($files);
-    $userRole = $this->controller->getUserRole();
     $files=array_merge($dirs,$files);
     foreach($files as $filename) {
       $fullpath=$fspath."/".$filename;
       // check access for guest accounts
-      if ($userRole <= ROLE_GUEST && !$this->_hasReadRights($fullpath))
+      if (!$this->_hasReadRights($fullpath))
         continue;
 
-      $name  =htmlspecialchars($filename);
+      $name  =htmlspecialchars($this->_unslashify($filename));
       $link=$baseUri.$this->pathRawurlencode($path.$name);
       printf($format, 
         number_format(filesize($fullpath)),
@@ -624,7 +621,6 @@ class WebdavServer extends HTTP_WebDAV_Server
     }
 
     $fspath=$this->getFsPath($options["path"]);
-    $this->controller->Logger->debug("PUT: '$fspath' ({$options["path"]})");
 
     if (!@is_dir(dirname($fspath))) {
       $this->controller->Logger->warn("dir of '$fspath' does not exists");
@@ -649,6 +645,7 @@ class WebdavServer extends HTTP_WebDAV_Server
       return "409 Conflict";
     }
 
+    $this->controller->Logger->debug("PUT: '$fspath' ($size Bytes, {$options["path"]})");
     $options["new"]=!file_exists($fspath);
 
     // save path

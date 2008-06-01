@@ -3,10 +3,16 @@
 
 <?php echo $form->create(null, array('action' => 'edit/'.$this->data['Guest']['id']));?>
 <fieldset><legend>Guest</legend>
-
 <?php
+  echo $form->input('Guest.email');
   echo $form->input('Guest.expires', array('type' => 'text'));
   echo $form->input('Guest.webdav', array('type' => 'checkbox', 'checked' => ($this->data['Guest']['quota']>0?'checked':''), 'label' => 'Enable WebDAV access'));
+?>
+</fieldset>
+<fieldset><legend>Password</legend>
+<?php
+  echo $form->input('Guest.password');
+  echo $form->input('Guest.confirm', array('type' => 'password'));
 ?>
 </fieldset>
 <? echo $form->submit('Save'); ?>

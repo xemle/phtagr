@@ -39,9 +39,23 @@ class Guest extends AppModel
       'rule' => array('between', 3, 32),
       'message' => 'Guestname must be between 3 and 32 characters long.'),
     'password' => array(
-      'rule' => array('minLength', '5'),
-      'message' => 'Password is to short!')
+      'rule' => array('between', 6, 20),
+      'message' => 'Password must be between 6 and 20 characters long.'),
+    'email' => array(
+      'rule' => array('email'),
+      'message' => 'Email address is not valid')
     );
+
+  function beforeValidate() {
+    if (isset($this->data['Guest']['confirm'])) {
+      if (empty($this->data['Guest']['password'])) {
+        $this->invalidate('password', 'Password not given');
+      } elseif ($this->data['Guest']['password'] != $this->data['Guest']['confirm']) {
+        $this->invalidate('password', 'Password confirmation mismatch');
+      }
+    }
+  }
+
 
   function beforeSave() {
     if (isset($this->data['Guest']['webdav']) && $this->data['Guest']['webdav'] > 0) {
@@ -53,6 +67,7 @@ class Guest extends AppModel
     if (empty($this->data['Guest']['expires'])) {
       $this->data['Guest']['expires'] = null;
     }
+
     return true;
   }
 

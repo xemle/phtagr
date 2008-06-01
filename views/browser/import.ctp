@@ -2,4 +2,4 @@
 <?php $session->flash(); ?>
 
 <?=$html->link('Back', "index$path"); ?>
-<? pr($files); ?>
+<? debug($files); ?>

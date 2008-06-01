@@ -42,8 +42,11 @@ class User extends AppModel
       'rule' => array('between', 3, 32),
       'message' => 'Username must be between 3 and 32 characters long.'),
     'password' => array(
-      'rule' => array('minLength', '5'),
-      'message' => 'Password is to short!')
+      'rule' => array('between', 6, 20),
+      'message' => 'Password must be between 6 and 20 characters long.'),
+    'email' => array(
+      'rule' => array('email'),
+      'message' => 'Email address is not valid')
     );
  
   function afterFind($result, $primary = false) {
@@ -78,7 +81,6 @@ class User extends AppModel
             $this->Logger->err("Unknown unit {$matches[3]}");
         }
       }
-      $size = intval($size);
       if ($size < 0) {
         $this->Logger->err("Size is negtive: $size");
         return 0;
@@ -86,6 +88,16 @@ class User extends AppModel
       return $size;
     } else {
       return 0;
+    }
+  }
+
+  function beforeValidate() {
+    if (!empty($this->data['User']['confirm'])) {
+      if (!isset($this->data['User']['password'])) {
+        $this->invalidate('password', 'Password not given');
+      } elseif ($this->data['User']['password'] != $this->data['User']['confirm']) {
+        $this->invalidate('password', 'Password confirmation mismatch');
+      }
     }
   }
 
@@ -97,7 +109,7 @@ class User extends AppModel
     if (empty($this->data['User']['expires'])) {
       $this->data['User']['expires'] = null;
     }
-                   
+  
     return true;
   }
 
@@ -189,5 +201,6 @@ class User extends AppModel
 
     return false;
   }
+  
 }
 ?>

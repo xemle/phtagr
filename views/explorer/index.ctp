@@ -83,6 +83,9 @@ echo $search->prev().' '.$search->numbers().' '.$search->next()
 <fieldset><legend>Metadata</legend>
 <?php echo $form->hidden('Image.ids', array('id' => 'ImageIds')) ?>
 <?php 
+  if ($canWriteMeta) {
+    echo $form->input('Image.date', array('type' => 'text')); 
+  }
   echo $form->input('Tags.text', array('label' => 'Tags', 'maxlength' => 320)); 
   if ($canWriteMeta) {
     echo $form->input('Categories.text', array('label' => 'Categories', 'maxlength' => 320)); 
@@ -106,7 +109,6 @@ echo $search->prev().' '.$search->numbers().' '.$search->next()
   echo $form->input('acl.read.original', array('type' => 'select', 'options' => $aclSelect, 'selected' => ACL_LEVEL_KEEP, 'label' => "Who can download the image?"));
   echo $form->input('acl.write.tag', array('type' => 'select', 'options' => $aclSelect, 'selected' => ACL_LEVEL_KEEP, 'label' => "Who can add tags?"));
   echo $form->input('acl.write.meta', array('type' => 'select', 'options' => $aclSelect, 'selected' => ACL_LEVEL_KEEP, 'label' => "Who can edit all meta data?"));
-  echo $form->input('acl.write.comment', array('type' => 'select', 'options' => $aclSelect, 'selected' => ACL_LEVEL_KEEP, 'label' => "Who can add comments?"));
   echo $form->input('Group.id', array('type' => 'select', 'options' => $groups, 'selected' => 0, 'label' => "Default image group?"));
 ?>
 </fieldset>

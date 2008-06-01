@@ -109,7 +109,7 @@ class DigestAuthComponent extends Object
 
   function __checkUri() {
     if ($this->_hdrs['uri']!==$_SERVER['REQUEST_URI']) {
-      $this->controller->Logger->err("Uri missmatch: Have ".$_SERVER['REQUEST_URI']." but auth has ".$this->_hdrs['uri']);
+      $this->controller->Logger->err("Uri missmatch: Request is '".$_SERVER['REQUEST_URI']."' but auth header has '".$this->_hdrs['uri'])."'";
       $this->__addAuthHeader();
       $this->controller->redirect(null, 401, true);
     }
@@ -163,12 +163,11 @@ class DigestAuthComponent extends Object
       $this->controller->redirect(null, 403, true);
     }
 
-    // Todo read A1 from database
     $A1=md5($this->_hdrs['username'].':'.$this->realm.':'.$user['User']['password']);
     $A2=md5($_SERVER['REQUEST_METHOD'].':'.$this->_hdrs['uri']);
     $validResponse=md5($A1.':'.$this->_hdrs['nonce'].':'.$this->_hdrs['nc'].':'.$this->_hdrs['cnonce'].':'.$this->_hdrs['qop'].':'.$A2);
     if ($this->_hdrs['response']!=$validResponse) {
-      $this->controller->Logger->err("Invalid response: Got ".$this->_hdrs['response']." but expected $validResponse");
+      $this->controller->Logger->err("Invalid response: Got '".$this->_hdrs['response']."' but expected '$validResponse'");
       $this->controller->redirect(null, 403, true);
     }
 

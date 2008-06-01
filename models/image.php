@@ -104,6 +104,17 @@ class Image extends AppModel
     return in_array($ext, $videoExtensions);
   }
 
+  function addDefaultAcl(&$data, $user) {
+    // Access control values
+    $acl = $this->User->Preference->getDefaultAcl($user);
+    $data['Image']['user_id'] = $user['User']['id'];
+    $data['Image']['group_id'] = $acl['groupId'];
+    $data['Image']['gacl'] = $acl['gacl'];
+    $data['Image']['macl'] = $acl['macl'];
+    $data['Image']['pacl'] = $acl['pacl'];
+    return $data;
+  }
+
   /** Insert file to the database
     @param filename Filename to be inserted
     @param user User model data of the current user
@@ -124,12 +135,7 @@ class Image extends AppModel
     $v = &$data['Image'];
 
     // Access control values
-    $v['user_id'] = $user['User']['id'];
-    $acl = $this->User->Preference->getDefaultAcl($user);
-    $v['group_id'] = $acl['group_id'];
-    $v['gacl'] = $acl['gacl'];
-    $v['macl'] = $acl['macl'];
-    $v['pacl'] = $acl['pacl'];
+    $this->addDefaultAcl(&$data, $user);
 
     // File information
     $v['file'] = basename($filename);

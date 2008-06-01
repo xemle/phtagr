@@ -57,7 +57,7 @@ class GuestsController extends AppController {
       $this->data['Guest']['role'] = ROLE_GUEST;
       if ($this->Guest->hasAny(array("Guest.username" => $this->data['Guest']['username']))) {
         $this->Session->setFlash("Sorry. Username is already taken");
-      } elseif ($this->Guest->save($this->data)) {
+      } elseif ($this->Guest->save($this->data, true, array('username', 'password', 'role', 'creator_id', 'email', 'quota'))) {
         $guestId = $this->Guest->getLastInsertID();
         $guest = $this->Guest->find("Guest.id=$guestId");
         $user = $this->getUser();
@@ -74,20 +74,27 @@ class GuestsController extends AppController {
     $guestId = intval($guestId);
     $userId = $this->getUserId();
     
-    if (!$this->Guest->hasAny("id=$guestId AND creator_id=$userId")) {
-      $this->Session->setFlash("Sorry. Could not find requested guest");
+    if (!$this->Guest->hasAny(array('id' => $guestId, 'creator_id' => $userId))) {
+      $this->Session->setFlash("Sorry. Could not find requested guest '$guestId' of user '$userId'");
       $this->redirect("index");
     }
 
     if (!empty($this->data)) {
       $this->Guest->id = $guestId;
-      if ($this->Guest->save($this->data, true, array('expires', 'quota'))) {
+      $this->Guest->set($this->data);
+      if (!empty($this->data['Guest']['password']) && empty($this->data['Guest']['confirm'])) {
+        $this->Guest->invalidate('confirm', 'Password confirmation is missing');
+      } elseif (empty($this->data['Guest']['password']) && empty($this->data['Guest']['confirm'])) {
+        unset($this->Guest->data['Guest']['password']);
+      }
+      if ($this->Guest->save(null, true, array('username', 'password', 'email', 'expires', 'quota'))) {
         $this->Session->setFlash("Guest was saved");
       } else {
         $this->Session->setFlash("Guest could not be saved!");
       }
     }
     $this->data = $this->Guest->findById($guestId);
+    unset($this->data['Guest']['password']);
     $this->set('userId', $userId);
   }
 
