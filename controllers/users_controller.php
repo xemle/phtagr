@@ -23,7 +23,7 @@
 
 class UsersController extends AppController
 {
-  var $components = array('RequestHandler', 'Cookie');
+  var $components = array('RequestHandler', 'Cookie', 'Email');
   var $uses = array('Preference'); 
   var $helpers = array('form', 'formular', 'number');
   var $paginate = array('limit' => 10, 'order' => array('User.username' => 'asc')); 
@@ -187,6 +187,46 @@ class UsersController extends AppController
     $this->Preference->delValue('path.fsroot[]', $fsroot, $id);
 
     $this->redirect("edit/$id");
+  }
+
+  /** Password recovery */
+  function password() {
+    if (!empty($this->data)) {
+      $user = $this->User->find(array(
+          'username' => $this->data['User']['username'], 
+          'email' => $this->data['User']['email']));
+      if (empty($user)) {
+        $this->Session->setFlash('No user with this email was found');
+        $this->Logger->warn(sprintf("No user '%s' with email %s was found",
+            $this->data['User']['username'], $this->data['User']['email']));
+      } else {
+        $this->Email->to = sprintf("%s %s <%s>", 
+            $user['User']['firstname'],
+            $user['User']['lastname'],
+            $user['User']['email']);
+  
+        $this->Email->subject = 'Password Request';
+        $this->Email->replyTo = 'noreply@phtagr.org';
+        $this->Email->from = 'phTagr <noreply@phtagr.org>';
+
+        $this->Email->template = 'password';
+        $this->set('user', $user);
+
+        if ($this->Email->send()) {
+          $this->Logger->info(sprintf("Sent password mail of '%s' (id %d) to %s",
+            $user['User']['username'], 
+            $user['User']['id'],
+            $user['User']['email']));
+          $this->Session->setFlash('Mail was sent');
+        } else {
+          $this->Logger->err(sprintf("Could not sent password mail of '%s' (id %d) to '%s'",
+            $user['User']['username'],
+            $user['User']['id'],
+            $user['User']['email']));
+          $this->Session->setFlash('Mail could not sent');
+        }
+      }
+    }
   }
 }
 ?>

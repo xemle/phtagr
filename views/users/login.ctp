@@ -11,3 +11,4 @@
 <?php echo $form->submit('Login'); ?>
 </form>
 
+<?php echo $html->link('Forgot your password?', 'password'); ?>
