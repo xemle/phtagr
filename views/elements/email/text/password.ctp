@@ -1,8 +1,8 @@
-Dear <?php echo $user['User']['username']; ?>
+Dear <?php echo $user['User']['username']."\n"; ?>
 
 Your phTagr account password is:
 
-  <?php echo $user['User']['password']; ?>
+  <?php echo $user['User']['password']."\n"; ?>
 
 Sincerely
 
