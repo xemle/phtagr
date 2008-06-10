@@ -670,10 +670,10 @@ class SearchComponent extends Object
       $acl .= " AND Image.gacl<".ACL_READ_PREVIEW; 
       break;
     case 'group':
-      $acl .= " AND Image.gacl>=".ACL_READ_PREVIEW." AND i.macl<".ACL_READ_PREVIEW; 
+      $acl .= " AND Image.gacl>=".ACL_READ_PREVIEW." AND Image.macl<".ACL_READ_PREVIEW; 
       break;
     case 'member':
-      $acl .= " AND Image.macl>=".ACL_READ_PREVIEW." AND i.pacl<".ACL_READ_PREVIEW; 
+      $acl .= " AND Image.macl>=".ACL_READ_PREVIEW." AND Image.pacl<".ACL_READ_PREVIEW; 
       break;
     case 'public':
       $acl .= " AND Image.pacl>=".ACL_READ_PREVIEW; 

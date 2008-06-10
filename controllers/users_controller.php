@@ -42,8 +42,8 @@ class UsersController extends AppController
     $this->set('mainMenu', $menu);
   }
 
-  /** 
-   * @todo Add redirection of redirection address, if available */
+  /** Checks the login of the user. If the session variable 'loginRedirect' is
+   * set the user is forwarded to this given address on successful login. */
   function login() {
     $failedText = "Sorry. Username is unkonwn or password was wrong";
     if (!empty($this->data) && !$this->RequestHandler->isPost()) {
@@ -80,7 +80,12 @@ class UsersController extends AppController
             $this->Logger->debug("Write authentication cookie for user '{$user['User']['username']}' (id {$user['User']['id']})");
 
             $this->Logger->info("Successfull login of user '{$user['User']['username']}' (id {$user['User']['id']})");
-            $this->redirect('/');
+            if ($this->Session->check('loginRedirect')) {
+              $this->redirect($this->Session->read('loginRedirect'));
+              $this->Session->delete('loginRedirect');
+            } else {
+              $this->redirect('/');
+            }
           } else {
             $this->Logger->err("Could not write session information of user '{$user['User']['username']}' ({$user['User']['id']})");
             $this->Session->setFlash("Sorry. Internal login procedure failed!");
@@ -107,10 +112,14 @@ class UsersController extends AppController
   }
 
   function admin_index() {
+    $this->requireRole(ROLE_ADMIN, array('loginRedirect' => '/admin/users'));
+
     $this->data = $this->paginate('User', array('User.role>='.ROLE_MEMBER));
   }
 
   function admin_edit($id) {
+    $this->requireRole(ROLE_ADMIN, array('loginRedirect' => '/admin/users'));
+
     $id = intval($id);
 
     if (!empty($this->data)) {
@@ -125,10 +134,12 @@ class UsersController extends AppController
         } elseif (empty($this->data['User']['password']) && empty($this->data['User']['confirm'])) {
           unset($this->User->data['User']['password']);
         }
-        if ($this->User->save(null, true, array('username', 'password', 'email', 'expires', 'quota', 'firstname', 'lastname')))
+        if ($this->User->save(null, true, array('username', 'password', 'email', 'expires', 'quota', 'firstname', 'lastname'))) {
+          $this->Logger->debug("Data of user {$this->data['User']['username']} was updated");
           $this->Session->setFlash('User data was updated');
-        else
+        } else {
           $this->Session->setFlash('Could not be updated');
+        }
 
         if (!empty($this->data['Preference']['path']['fspath'])) {
           $fsroot = $this->data['Preference']['path']['fspath'];
@@ -147,7 +158,7 @@ class UsersController extends AppController
   }
  
   function admin_add() {
-    $this->requireRole(ROLE_ADMIN);
+    $this->requireRole(ROLE_ADMIN, array('loginRedirect' => '/admin/users'));
 
     if (!empty($this->data)) {
       if ($this->User->hasAny(array('User.username' => '= '.$this->data['User']['username']))) {
@@ -155,9 +166,11 @@ class UsersController extends AppController
       } else {
         $this->data['User']['role'] = ROLE_MEMBER;
         if ($this->User->save($this->data, true, array('username', 'password', 'role', 'email'))) {
+          $this->Logger->info("New user {$this->data['User']['username']} was created");
           $this->Session->setFlash('User was created');
           $this->redirect('/admin/users/edit/'.$this->User->id);
         } else {
+          $this->Logger->warn("Creation of user {$this->data['User']['username']} failed");
           $this->Session->setFlash('Could not create user');
         }
       }
@@ -165,9 +178,10 @@ class UsersController extends AppController
   } 
   
   function admin_del($id) {
-    $this->requireRole(ROLE_ADMIN);
+    $this->requireRole(ROLE_ADMIN, array('loginRedirect' => '/admin/users'));
 
-    $user = $this->User->find("id=$id");
+    $id = intval($id);
+    $user = $this->User->findById($id);
     if (!$user) {
       $this->Session->setFlash("Could not find user to delete");
     } else {
@@ -178,6 +192,9 @@ class UsersController extends AppController
   }
 
   function admin_delfsroot($id) {
+    $this->requireRole(ROLE_ADMIN);
+
+    $id = intval($id);
     $dirs = $this->params['pass'];
     unset($dirs[0]);
     $fsroot = implode(DS, $dirs);

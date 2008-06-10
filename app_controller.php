@@ -116,9 +116,20 @@ class AppController extends Controller
     return false;
   }
 
-  function requireRole($requiredRole=ROLE_NOBODY, $redirectTo = '/users/login') {
+  function requireRole($requiredRole=ROLE_NOBODY, $options = null) {
+    $options = am(array(
+      'redirect' => '/users/login', 
+      'loginRedirect' => false, 
+      'flash' => false), 
+      $options);
     if (!$this->hasRole($requiredRole)) {
-      $this->redirect($redirectTo);
+      if ($options['loginRedirect']) {
+        $this->Session->write('loginRedirect', $options['loginRedirect']);
+      }
+      if ($options['flash']) {
+        $this->Session->setFlash($options['flash']);
+      }
+      $this->redirect($options['redirect']);
       exit();
     }
     return true;

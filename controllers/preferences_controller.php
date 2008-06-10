@@ -29,7 +29,7 @@ class PreferencesController extends AppController {
   function beforeFilter() {
     parent::beforeFilter();
 
-    $this->requireRole(ROLE_GUEST);
+    $this->requireRole(ROLE_GUEST, array('redirect' => '/'));
   }
 
   function _set($userId, $path, $data) {

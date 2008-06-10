@@ -52,16 +52,26 @@ class SetupController extends AppController {
   function beforeRender() {
   }
 
-  function __initDatabase() {
+  /** Initialize the database schema and data source
+    @return True if the database source could be loaded */
+  function __initDataSource() {
     if (!$this->__hasConfig()) {
       return false;
     }
 
     App::import('Core', 'CakeSchema');
     $this->Schema =& new CakeSchema(array('connection' => 'default', 'file' => null, 'path' => null, 'name' => null));
+    if (!$this->Schema) {
+      $this->Logger->err("Could not create database schema");
+      return false;
+    }
 
     App::import('Core', 'ConnectionManager');
     $this->db =& ConnectionManager::getDataSource($this->Schema->connection);
+    if (!$this->db) {
+      $this->Logger->err("Could not create database source");
+      return false;
+    }
 
     return true;
   }
@@ -233,8 +243,9 @@ class SetupController extends AppController {
     }
   }
 
+  /** Checks for required writable paths */
   function __hasPaths() {
-    $this->Logger->debug("Check for paths");
+    $this->Logger->debug("Check for writable paths");
     foreach ($this->paths as $path) {
       if (!is_dir($path) || !is_writeable($path))
         return false;
@@ -242,29 +253,38 @@ class SetupController extends AppController {
     return true;
   }
 
+  /** Checks the existence of the database configuration */
   function __hasConfig() {
     if (!$this->__hasPaths())
       return false;
+
     $this->Logger->debug("Check for database configuration");
     return is_readable($this->dbConfig);
   }
 
+  /** Checks the database connection */
   function __hasConnection() {
     if (!$this->__hasConfig())
       return false;
     $this->Logger->debug("Check for database connection");
 
-    if (!$this->__initDatabase())
+    if (!$this->__initDataSource())
       return false;
 
     return $this->db->connected;
   }
 
+  /** Checks for existing tables
+    @param tables. Array of tables names. Default array('users')
+    @return True if all given tables exists */
   function __hasTables($tables = array('users')) {
     if (!$this->__hasConnection())
       return false;
 
     $this->Logger->debug("Check for initial required tables");
+    if (!is_array($tables)) {
+      $tables = array($tables);
+    }
     $sources = $this->db->listSources();
     foreach ($tables as $table) {
       $tableName = $this->db->fullTableName($table, false);
@@ -274,6 +294,7 @@ class SetupController extends AppController {
     return true;
   }
 
+  /** Check for administration account */
   function __hasAdmin() {
     if (!$this->__hasTables())
       return false;
@@ -311,13 +332,15 @@ class SetupController extends AppController {
     }
   }
 
+  /** Setup entry. Dispatches preparation, installation or upgrade */
   function index() {
     if ($this->__hasAdmin()) {
       if ($this->hasRole(ROLE_ADMIN)) {
         $this->redirect('/admin/setup/upgrade');
       } else {
         $this->Logger->warn("Setup is disabled. phTagr is already configured!");
-        $this->redirect('/');
+        $this->Session->write('loginRedirect', '/setup');
+        $this->redirect('/users/login');
       }
     } elseif (!$this->__hasSalt()) {
       $this->redirect('salt');
@@ -327,6 +350,8 @@ class SetupController extends AppController {
     $this->Logger->info("Start Setup of phTagr!");
   }
 
+  /** Generate a random salt string 
+    @return Random salt string */
   function __generateSalt() {
     $chars  = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     $chars .= 'abcdefghijklmnopqrstuvwxyz';
@@ -397,7 +422,6 @@ class SetupController extends AppController {
   }
 
   function path() {
-    // Check temporary directory for sessions, logs, etc.
     if ($this->__hasPaths()) 
       $this->redirect('config');
 
@@ -421,13 +445,15 @@ class SetupController extends AppController {
     if (!$this->__hasPaths())
       $this->redirect('path');
 
-    if ($this->__hasConfig())
+    $error = $this->Session->read('configError');
+    if ($this->__hasConfig() && !$error)
       $this->redirect('database');
 
     if (!is_writeable(dirname($this->dbConfig)))
       $this->redirect('configro');
 
     $this->__checkSession();
+    $this->Session->delete('configError');
 
     if (!empty($this->data)) {
       $output = "<?php 
@@ -468,8 +494,12 @@ class DATABASE_CONFIG
   }
 
   function configro() {
-    if ($this->__hasConfig())
+    $error = $this->Session->read('configError');
+    if ($this->__hasConfig() && !$error)
       $this->redirect('database');
+
+    $this->__checkSession();
+    $this->Session->delete('configError');
 
     // nothing to do
     $this->set('dbConfig', $this->dbConfig);
@@ -482,6 +512,7 @@ class DATABASE_CONFIG
 
     if (!$this->__hasConnection()) {
       $this->Session->setFlash('Could not connect to database. Please check your database configuration!');
+      $this->Session->write('configError', true);
       $this->redirect('config');
     }
 
@@ -490,18 +521,15 @@ class DATABASE_CONFIG
 
     $this->__checkSession();
 
-    $this->Logger->info("Check current database schema");
-
-    if (!$this->__initDatabase()) {
-      $this->Logger->err("Could not setup database connection");
-      $this->redirect('config');
+    $Schema = $this->Schema = $this->Schema->load(array());
+    if (!$Schema) {
+      $this->Logger->err("Could not load schema");
     }
 
-    $Schema = $this->Schema = $this->Schema->load(array());
+    $this->Logger->info("Check current database schema");
     $errors = $this->__upgradeDatabase($Schema);
 
     $check = false;
-    $this->Logger->trace($errors);
     if ($errors['tables']) {
       $check = true;
       $this->Logger->err("Not all tables could be created: ".array_keys($errors['tables']));
@@ -519,6 +547,7 @@ class DATABASE_CONFIG
       $this->Session->setFlash("All required tables are created");
       $this->redirect('user');
     } else {
+      $this->Logger->trace($errors);
       $this->Session->setFlash("Could not create tables correctly. Please see logfile for details");
     }
   }
