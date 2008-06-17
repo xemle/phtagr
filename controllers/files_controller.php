@@ -35,7 +35,7 @@ class FilesController extends AppController
                       OUTPUT_TYPE_PREVIEW => array('size' => OUTPUT_SIZE_PREVIEW),
                       OUTPUT_TYPE_VIDEO => array('size' => OUTPUT_SIZE_VIDEO, 'bitrate' => OUTPUT_BITRATE_VIDEO)
                     );
-  var $components = array('VideoFilter');
+  var $components = array('VideoFilter', 'FileCache');
   
   function _getCacheDir($data) {
     if (!isset($data['Image']['id'])) {
@@ -43,23 +43,13 @@ class FilesController extends AppController
       return false;
     }
 
-    $cacheDir=$this->Image->User->getCacheDir($data);
-    if ($cacheDir===false) {
-      $this->Logger->err("Could not fetch users cache directory for image {$data['Image']['id']}");
-      return false;
-    }
-    $imageId=$data['Image']['id'];
-    $dir=intval($imageId/1000);
-    $cacheDir.=sprintf("%04d", $dir).DS;
-    if (!is_dir($cacheDir) && !@mkdir($cacheDir, 0770, true)) {
-      $this->Logger->debug("Could not create cache directory: $cacheDir");
-      return false;
-    }
+    $cacheDir = $this->FileCache->getPath($data['Image']['user_id'], $data['Image']['id']);
     return $cacheDir;
   }
 
   function _getCacheFilename($id, $size, $ext='jpg') {
-    return sprintf("%07d-%d.$ext", $id, $size);
+    $prefix = $this->FileCache->getFilenamePrefix($id);
+    return $prefix.sprintf("%d.%s", $size, $ext);
   }
 
   /** Checking if the client is validating his cache and the cache file is the

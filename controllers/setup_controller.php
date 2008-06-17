@@ -82,7 +82,8 @@ class SetupController extends AppController {
     @param Create statements or false if all required tables are in the
     database */
   function __getMissingTables($Schema) {
-    // Check for required tables and create missing tables
+    // Reset sources for refetching
+    $this->db->_sources = null;
     $sources = $this->db->listSources();
     $requiredTables = array();
     $missingTables = array();
@@ -114,11 +115,13 @@ class SetupController extends AppController {
 
     $errors = array();
     foreach ($newTables as $table => $sql) {
+      $tableName = $this->db->fullTableName($table, false);
       if (!$this->db->_execute($sql)) {
         $errors[$table] = $sql;
-        $tableName = $this->db->fullTableName($table, false);
         $this->Logger->err("Could not create table '$tableName'");
         $this->Logger->debug($sql);
+      } else {
+        $this->Logger->info("Created new table '$tableName'");
       }
     }
     if (!count($errors)) {
@@ -153,11 +156,14 @@ class SetupController extends AppController {
 
     $errors = array();
     foreach ($columns as $table => $sql) {
+      $tableName = $this->db->fullTableName($table, false);
       if (!$this->db->_execute($sql)) {
         $errors[$table] = $sql;
-        $tableName = $this->db->fullTableName($table, false);
         $this->Logger->err("Could not update table '$tableName'");
         $this->Logger->debug($sql);
+      } else {
+        $this->Logger->info("Upgraded table '$tableName'");
+        $this->Logger->trace($sql);
       }
     }
     if (!count($errors)) {
@@ -675,6 +681,17 @@ class DATABASE_CONFIG
     $this->Session->delete('setup');
   }
 
+  function __deleteModelCache() {
+    $modelCacheDir = TMP.'cache'.DS.'models'.DS;
+    $folder = new Folder($modelCacheDir);
+    $modelCacheFiles = $folder->find('cake_model_.*');
+    foreach ($modelCacheFiles as $file) {
+      if (!@unlink($file)) {
+        $this->Logger->err("Could not delete model cache file '$file' in '$modelCacheDir'");
+      }
+    }
+  }
+
   function admin_upgrade($action = null) {
     if (!$this->__hasAdmin()) 
       $this->redirect('/setup');
@@ -688,6 +705,7 @@ class DATABASE_CONFIG
     if ($action == 'run') {
       $errors = $this->__upgradeDatabase($Schema);
       if ($errors == false) {
+        $this->__deleteModelCache();
         $this->Session->setFlash("Database was upgraded successfully");
         $this->redirect('/admin/setup/uptodate');
       } else {

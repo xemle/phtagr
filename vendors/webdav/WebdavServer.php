@@ -301,17 +301,19 @@ class WebdavServer extends HTTP_WebDAV_Server
     }
 
     // get additional properties from database
-    /*
-    $spath=mysql_escape_string($path);
-    $sql="SELECT ns, name, value".
-         " FROM $db->properties".
-         " WHERE path='$spath'";
-    $res=$db->query($sql);
-    while ($row=mysql_fetch_assoc($res)) {
-      $info["props"][]=$this->mkprop($row["ns"], $row["name"], $row["value"]);
+    $image=$this->controller->Image->findByFilename($fspath);
+    if ($image) {
+      foreach($image['Property'] as $property) {
+        $info['props'][]=$this->mkprop(
+          $property['ns'], 
+          $property['name'], 
+          $property['value']);
+      }
     }
-    mysql_free_result($res);
-    */
+    foreach ($info['props'] as $prop) {
+      $this->controller->Logger->trace('{'.$prop['ns']."}{$prop['name']}:{$prop['val']}");
+    }
+
     //$this->controller->Logger->trace("fileinfo: info=".print_r($info, true));
     return $info;
   }
@@ -358,7 +360,6 @@ class WebdavServer extends HTTP_WebDAV_Server
     return false;
   }
 
-    
   /**
    * try to detect the mime type of a file
    *
@@ -438,11 +439,16 @@ class WebdavServer extends HTTP_WebDAV_Server
     $this->controller->Logger->debug("GET: '$fspath' ({$options["path"]})");
 
     // sanity check
-    if (!file_exists($fspath)) return false;
+    if (!file_exists($fspath)) { 
+      $this->controller->Logger->warn("Content '$fspath' does not exists");
+      return false;
+    }
       
     if ($this->controller->getUserRole() <= ROLE_GUEST &&
-      !$this->_hasReadRights($fspath))
+      !$this->_hasReadRights($fspath)) {
+      $this->controller->Logger->warn("User is not allowed to view content of '$fspath'");
       return false;
+    }
 
     // is this a collection?
     if (is_dir($fspath)) {
@@ -583,20 +589,14 @@ class WebdavServer extends HTTP_WebDAV_Server
       return false;
     }
    
-    $id = $this->controller->Image->filenameExists($fspath);
-    if ($id) {
-      // handle overwriting and update bytes
-      $image = $this->controller->Image->findById($id);
-      if (!$image) {
-        $this->controller->Logger->err("Could not load image with id $id");
+    $image = $this->controller->Image->findByFilename($fspath);
+    if ($image) {
+      $this->controller->Image->deactivate(&$image);
+      $this->controller->Image->updateFile(&$image);
+      if ($this->controller->Image->save($image)) {
+        $this->controller->Logger->info("Update file '{$image['Image']['path']}{$image['Image']['file']}' to size {$image['Image']['bytes']} bytes");
       } else {
-        $this->controller->Image->deactivate(&$image);
-        $this->controller->Image->updateFile(&$image);
-        if ($this->controller->Image->save($image)) {
-          $this->controller->Logger->info("Update file '{$image['Image']['path']}{$image['Image']['file']}' to size {$image['Image']['bytes']} bytes");
-        } else {
-          $this->controller->Logger->err("Could not update filesize of '{$image['Image']['path']}{$image['Image']['file']}'");
-        }
+        $this->controller->Logger->err("Could not update filesize of '{$image['Image']['path']}{$image['Image']['file']}'");
       }
     } else {
       $id = $this->controller->Image->insertFile($fspath, $this->controller->getUser());
@@ -708,35 +708,44 @@ class WebdavServer extends HTTP_WebDAV_Server
       $this->controller->Logger->warn("DELETE denyied for guests");
       return "403 Forbidden";
     }
-    $fspath=$this->getFsPath($options["path"]);
-    $this->controller->Logger->debug("DELETE '$fspath' ({$options['path']})");
 
+    $fspath=$this->getFsPath($options["path"]);
     if (!file_exists($fspath)) {
       $this->controller->Logger->err("DELETE failed. file '$fspath' does not exists");
       return "404 Not found";
     }
         
+    $this->controller->Logger->debug("DELETE '$fspath' ({$options['path']})");
     if (!is_dir($fspath)) {
-      $id = $this->controller->Image->filenameExists($fspath);
-      if (!$id) {
+      $image = $this->controller->Image->findByFilename($fspath);
+      if (!$image) {
         $this->controller->Logger->warn("File '$fspath' is not in database. Delete file anyway");
       } else {
-        $this->controller->Logger->info("Delete image with id $id (filename '$fspath')");
-        // TODO delete cached files
-        $this->controller->Image->delete($id);
+        $this->controller->FileCache->delete($image['Image']['user_id'], $image['Image']['id']);
+        if (!$this->controller->Image->delete($image['Image']['id'])) {
+          $this->controller->Logger->err("Could not delete image with id {$image['Image']['id']} (filename '$fspath')");
+        } else {
+          $this->controller->Logger->info("Delete image with id {$image['Image']['id']} (filename '$fspath')");
+        }
       }
       unlink($fspath);
       $this->controller->Logger->info("file '$fspath' deleted!");
     } else {
-      // @TODO Check build of correct and escaped sql condition
-      $images = $this->controller->Image->findAll(array('path' => "LIKE {$fspath}%"), array('id', 'path', 'file'));
+      uses('sanitize');
+      $sanitize = new Sanitize();
+      $sqlFspath = $sanitize->escape($fspath);
+      $images = $this->controller->Image->findAll("Image.path LIKE '{$sqlFspath}%'", array('Image.id', 'Image.user_id', 'Image.path', 'Image.file'));
       if (!$images) {
-          $this->controller->Logger->warn("No file with directory '$fspath' is in database");
+        $this->controller->Logger->warn("No file with directory '$fspath' is in database");
       } else {
+        $this->controller->Logger->trace("Found ".count($images)." file(s) in database for directory '$fspath'");
         foreach($images as $image) {
-          $this->controller->Logger->info("Delete image with id {$image['Image']['id']} (filename '{$image['Image']['path']}{$image['Image']['file']}')");
-          // TODO delete cached files
-          $this->controller->Image->delete($image['Image']['id']);
+          $this->controller->FileCache->delete($image['Image']['user_id'], $image['Image']['id']);
+          if (!$this->controller->Image->delete($image['Image']['id'])) {
+            $this->controller->Logger->err("Could not delete image with id {$image['Image']['id']} (filename '{$image['Image']['path']}{$image['Image']['file']}')");
+          } else {
+            $this->controller->Logger->info("Delete image with id {$image['Image']['id']} (filename '{$image['Image']['path']}{$image['Image']['file']}')");
+          }
         }
       }
       $folder =& new Folder();
@@ -745,7 +754,6 @@ class WebdavServer extends HTTP_WebDAV_Server
     }
     return "204 No Content";
   }
-
 
   /**
    * MOVE method handler
@@ -826,22 +834,10 @@ class WebdavServer extends HTTP_WebDAV_Server
       }
     }
 
-    if (is_dir($source) && ($options["depth"] != "infinity")) {
+    if (is_dir($source) && ($options["depth"] == 1)) {
       // RFC 2518 Section 9.2, last paragraph
+      $this->controller->Logger->err("Bad request: Source is a directory, but depth is ".$options["depth"]);
       return "400 Bad request";
-    }
-
-    $destDir = dirname($dest);
-    if (!file_exists($destDir)) {
-      if (@mkdir($destDir)) {
-        $this->controller->Logger->err("Created parent directory '$destDir'");
-      } else {
-        $this->controller->Logger->err("Could not create parent directory '$destDir'");
-        return "412 precondition failed";
-      }
-    } elseif (!is_dir($destDir)) {
-      $this->controller->Logger->err("Parent directory '$destDir' is a file!");
-      return "412 precondition failed";
     }
 
     if ($del) {
@@ -887,6 +883,7 @@ class WebdavServer extends HTTP_WebDAV_Server
             $this->controller->Logger->err("Could not create directory '$destdir'");
             return "500 Internal server error";
           }
+          // COPY properties
         }
       } else {
         $dirs = array();
@@ -894,9 +891,6 @@ class WebdavServer extends HTTP_WebDAV_Server
         $files = array($source);
       }
 
-      if (!is_array($files) || empty($files)) {
-        return "500 Internal server error";
-      }
       $user = $this->controller->getUser();
       foreach ($files as $file) {
         $destfile=str_replace($source, $dest, $file);
@@ -905,14 +899,24 @@ class WebdavServer extends HTTP_WebDAV_Server
           $this->controller->Logger->err("Could not copy file '$file' to '$destfile'");
           return "409 Conflict";
         }
-        if ($this->controller->Image->insertFile($destfile, $user)) {
-          $this->controller->Logger->info("Insert copied file '$destfile' to database (from '$file')");
-        } else {
+        $dstImageId = $this->controller->Image->insertFile($destfile, $user);
+        if (!$dstImageId) {
           $this->controller->Logger->err("Could not insert copied file '$destfile' to database (from '$file')");
           unlink($destfile);
           return "409 Conflict";
+        } else {
+          // Copy all properties
+          $srcImage = $this->controller->Image->findByFilenam($file);
+          if (!$srcImage) {
+            $this->controller->Logger->warn("Could not found source '$file' in database");
+          } else {
+            if (!empty($srcImage['Property'])) {
+              $this->controller->Property->copy($srcImage, $dstImageId);
+              $this->controller->Logger->debug("Copy properties from '$file' to '$destfile'");
+            }
+          }
         }
-        // TODO copy properties to new file
+        $this->controller->Logger->info("Insert copied file '$destfile' to database (from '$file')");
       }
     }
 
@@ -928,39 +932,45 @@ class WebdavServer extends HTTP_WebDAV_Server
   function PROPPATCH(&$options) {
     $this->controller->Logger->debug("PROPATCH: ".$options["path"]);
 
-    $msg="";
     $path=$options["path"];
-    $spath=mysql_escape_string($path);
-    $dir=dirname($path)."/";
-    $base=basename($path);
-      
+    $fspath=$this->getFsPath($path);
+    $imageId=$this->controller->Image->filenameExists($fspath);
+    if (!$imageId) {
+      $this->controller->Logger->err("Filename '$fspath' does not exists");
+      return "";
+    }
+
     foreach ($options["props"] as $key => $prop) {
       if ($prop["ns"] == "DAV:") {
         $options["props"][$key]['status']="403 Forbidden";
       } else {
+        $property = $this->controller->Property->find(array('Property.image_id' => $imageId, 'Property.name' => $prop['name'], 'Property.ns' => $prop['ns']));
         if (isset($prop["val"])) {
-          /*
-          $sql="REPLACE INTO $db->properties".
-               " SET path='$spath',".
-               " name='$prop[name]',".
-               " ns= '$prop[ns]',".
-               " value='$prop[val]'";
-          */
-        } else {
-          /*
-          $sql="DELETE FROM $db->properties".
-               " WHERE path='$spath'". 
-               " AND name='$prop[name]'".
-               " AND ns='$prop[ns]'";
-          */
+          if (!$property) {
+            $property = array('Property' => array(
+              'image_id' => $imageId, 
+              'name' => $prop['name'], 
+              'ns' => $prop['ns'], 
+              'value' => $prop['val']));
+            $this->controller->Logger->debug("Create new property for image $imageId: {$prop['ns']}:{$prop['name']}='{$prop['val']}'");
+            $property = $this->controller->Property->create($property);
+          } else {
+            $property['Property']['value'] = $prop['val'];
+            $this->controller->Logger->debug("Set new property value for image $imageId: {$prop['ns']}:{$prop['name']}='{$prop['val']}'");
+            $this->controller->Property->id = $property['Property']['id'];
+          }
+          if (!$this->controller->Property->save($property)) {
+            $this->controller->Logger->err("Could not save property");
+          }
+        } elseif ($property) {
+          $this->controller->Logger->debug("Delete property of image $imageId: {$prop['ns']}:{$prop['name']}");
+          $this->controller->Property->delete($property['Property']['id']); 
         }     
-        //$db->query($sql);
       }
     }
             
     return "";
   }
-
 
   /**
    * LOCK method handler
@@ -971,53 +981,61 @@ class WebdavServer extends HTTP_WebDAV_Server
   function LOCK(&$options) {
     $this->controller->Logger->info("LOCK: ".$options["path"]);
 
-    $spath=mysql_escape_string($options['path']);
-
     // get absolute fs path to requested resource
     $fspath=$this->getFsPath($options["path"]);
 
     // TODO recursive locks on directories not supported yet
     if (is_dir($fspath) && !empty($options["depth"])) {
+      $this->controller->Logger->warn("recursive locks on directories not supported yet!");
       return "409 Conflict";
     }
 
     $options["timeout"]=time()+300; // 5min. hardcoded
 
+    // Delete expired locks
+    $this->controller->Lock->deleteAll(array('Lock.expires' => "< '".date('Y-m-d H:i:s', time())."'"));
+
+    $imageId = $this->controller->Image->filenameExists($fspath);
+    if (!$imageId) {
+      $this->controller->Logger->warn("Could not find file with path '$fspath'");
+      return true;
+    }
+
     if (isset($options["update"])) { // Lock Update
-      $where="WHERE path='$spath' AND token='$options[update]'";
-      $sql="SELECT owner, exclusivelock FROM $db->locks $where";
+      $lock = $this->controller->Lock->find(array('Lock.image_id' => $imageId, 'Lock.token' => $options['update']));
+      
+      if ($lock) {
+        $lock['Lock']['expires'] = date('Y-m-d H:i:s', $options['timeout']);
+        $this->controller->Lock->save($lock);
+        $this->controller->Logger->info("Updated lock for '$fspath': ".$lock['Lock']['expires']);
 
-      $res=$db->query($sql);
-      $row=mysql_fetch_assoc($res);
-      mysql_free_result($res);
-
-      if (is_array($row)) {
-        $sql="UPDATE $db->locks".
-             " SET expires='$options[timeout]', ".
-             " modified=".time()." ".$where;
-        //$db->query($sql);
-
-        $options['owner']=$row['owner'];
-        $options['scope']=$row["exclusivelock"] ? "exclusive" : "shared";
-        $options['type']=$row["exclusivelock"] ? "write"   : "read";
+        $options['owner']=$lock['Lock']['owner'];
+        $options['scope']=$lock['Lock']["exclusivelock"] ? "exclusive" : "shared";
+        $options['type']=$lock['Lock']["exclusivelock"] ? "write"   : "read";
 
         return true;
       } else {
+        $this->controller->Logger->warn("No lock found for lock update: '$fspath'");
         return false;
       }
     }
       
-    $sql="INSERT INTO $db->locks".
-         " SET token='$options[locktoken]',".
-         " path='$spath',".
-         " created=".time().",".
-         " modified=".time().",".
-         " owner='$options[owner]',".
-         " expires='$options[timeout]',".
-         " exclusivelock=".($options['scope']==="exclusive"?"1":"0");
-    //$db->query($sql);
-
-    return mysql_affected_rows() ? "200 OK" : "409 Conflict";
+    $lock = array('Lock' => array(
+      'token' => $options['locktoken'],
+      'image_id' => $imageId,
+      'owner' => $options['owner'],
+      'expires' => date('Y-m-d H:i:s', $options['timeout']),
+      'exclusivelock' => ($options['scope']==="exclusive"?"1":"0")
+      ));
+    $lock = $this->controller->Lock->create($lock);
+    if ($this->controller->Lock->save($lock)) {
+      $this->controller->Logger->info("Created lock for '$fspath': ".$lock['Lock']['expires']);
+      return "200 OK";
+    } else {
+      $this->controller->Logger->err("Could not save lock of image $imageId");
+      $this->controller->Logger->trace($lock);
+      return "409 Conflict";
+    }
   }
 
   /**
@@ -1029,16 +1047,20 @@ class WebdavServer extends HTTP_WebDAV_Server
   function UNLOCK(&$options) {
     $this->controller->Logger->info("UNLOCK: ".$options["path"]);
 
-    $spath=mysql_escape_string($options['path']);
-    $stoken=mysql_escape_string($options['token']);
-    /*
-    $sql="DELETE FROM $db->locks".
-         " WHERE path='$spath'".
-         " AND token='$stoken'";
-    */
-    //$db->query($sql);
-
-    return mysql_affected_rows() ? "204 No Content" : "409 Conflict";
+    $fspath = $this->getFsPath($options["path"]);
+    $imageId = $this->controller->Image->filenameExists($fspath);
+    if (!$imageId) {
+      $this->controller->Logger->err("Could not find file for path '$fspath'");
+      return "409 Conflict";
+    }
+    $lock = $this->controller->Lock->find(array('Lock.image_id' => $imageId, 'Lock.token' => $options['token']));
+    if (!$lock) {
+      $this->controller->Logger->err("Could not find lock for image $imageId");
+      return "409 Conflict";
+    }
+    $this->controller->Lock->del($lock['Lock']['id']);
+    $this->controller->Logger->info("Deleted lock for '$fspath'");
+    return "204 No Content";
   }
 
   /**
@@ -1048,32 +1070,32 @@ class WebdavServer extends HTTP_WebDAV_Server
    * @return bool   true on success
    */
   function checkLock($path) {
+    $this->controller->Logger->info("checkLock: ".$path);
     $result=false;
       
     $res=false;
-    /*
-    $spath=mysql_escape_string($path);
-    $sql="SELECT owner, token, created, modified, expires, exclusivelock".
-         " FROM $db->locks".
-         " WHERE path='$spath'";
-    $res=$db->query($sql);
-    */
+   
+    $fspath = $this->getFsPath($path);
+    $imageId = $this->controller->Image->filenameExists($fspath);
+    if (!$imageId) {
+      $this->controller->Logger->warn("Could not find file with path '$fspath'");
+      return false;
+    }
+    $lock = $this->controller->Lock->findByImageId($imageId);
     
-    if ($res) {
-      $row=mysql_fetch_array($res);
-      mysql_free_result($res);
-
-      if ($row) {
-        $result=array( "type"  => "write",
-                 "scope"   => $row["exclusivelock"] ? "exclusive" : "shared",
-                 "depth"   => 0,
-                 "owner"   => $row['owner'],
-                 "token"   => $row['token'],
-                 "created" => $row['created'],   
-                 "modified" => $row['modified'],   
-                 "expires" => $row['expires']
-                 );
-      }
+    if (!$lock) {
+      $this->controller->Logger->debug("No lock found for '$fspath'");
+    } else {
+      $result=array(
+        'type'  => 'write',
+        'scope' => $lock['Lock']['exclusivelock'] ? 'exclusive' : 'shared',
+        'depth' => 0,
+        'owner' => $lock['Lock']['owner'],
+        'token' => $lock['Lock']['token'],
+        'created' => strtotime($lock['Lock']['created']),
+        'modified' => strtotime($lock['Lock']['modified']),
+        'expires' => strtotime($lock['Lock']['expires'])
+      );
     }
 
     return $result;

@@ -40,22 +40,26 @@ class Image extends AppModel
                            ACL_LEVEL_MEMBER => 'macl',
                            ACL_LEVEL_PUBLIC => 'pacl');
 
+  /** Search for an image by filename 
+    @param filename Filename of the current image */
+  function findByFilename($filename) {
+    $file = basename($filename);
+    $path = Folder::slashTerm(dirname($filename));
+
+    return $this->find(array("path" => $path, "file" => $file));
+  }
+
   /** Checks if a file exists already in the database.
     @param filename Filename of image
     @return Returns the ID if filename is already in the database, otherwise it
     returns false. */
   function filenameExists($filename) {
-    $file = basename($filename);
-    $path = dirname($filename);
-    $len = strlen($path);
-    if ($len > 0 && $path[$len-1] != DS)
-      $path .= DS;
-
-    $result = $this->find(array("AND" => array("path" => $path, "file" => $file)), array("Image.id"));
-    if ($result)
-      return $result['Image']['id'];
-    else
+    $image = $this->findByFilename($filename);
+    if ($image) {
+      return $image['Image']['id'];
+    } else {
       return false;
+    }
   }
 
   function getFilename($data) {
@@ -65,7 +69,7 @@ class Image extends AppModel
     
     return $data['Image']['path'].$data['Image']['file'];
   }
-  
+
   /** Evaluates, if a given filesystem path is part of the users dir. Otherwise
    * the file is treated as an external file 
     @param data Image model data
@@ -224,6 +228,12 @@ class Image extends AppModel
     $data['Image']['bytes'] = filesize($filename);
     $data['Image']['filetime'] = date('Y-m-d H:i:s', filemtime($filename));
     return $data;
+  }
+
+  function beforeDelete($cascade = true) {
+    // prepare associations for deletion
+    $this->bindModel(array('hasMany' => array('Property' => array('dependent' => true))));
+    return true;
   }
 
   /** Returns true if current user is allowed of the current flag

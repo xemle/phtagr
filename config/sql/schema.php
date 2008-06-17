@@ -42,23 +42,6 @@ class PhtagrSchema extends CakeSchema {
 			'category_id' => array('type'=>'integer', 'null' => false, 'default' => '0'),
 			'indexes' => array('PRIMARY' => array('column' => array('image_id', 'category_id'), 'unique' => 1), 'setid' => array('column' => 'category_id', 'unique' => 0))
 		);
-  /*
-	var $comments = array(
-			'id' => array('type'=>'integer', 'null' => false, 'default' => NULL, 'key' => 'primary'),
-			'created' => array('type'=>'datetime', 'null' => true, 'default' => NULL),
-			'modified' => array('type'=>'datetime', 'null' => true, 'default' => NULL),
-			'image_id' => array('type'=>'integer', 'null' => true, 'default' => NULL),
-			'user_id' => array('type'=>'integer', 'null' => true, 'default' => NULL),
-			'name' => array('type'=>'string', 'null' => false, 'length' => 32),
-			'email' => array('type'=>'string', 'null' => false, 'length' => 64),
-			'date' => array('type'=>'datetime', 'null' => true, 'default' => NULL),
-			'comment' => array('type'=>'text', 'null' => false),
-			'reply' => array('type'=>'integer', 'null' => true, 'default' => '0'),
-			'auth' => array('type'=>'string', 'null' => true, 'default' => NULL, 'length' => 64),
-			'notify' => array('type'=>'integer', 'null' => true, 'default' => '0', 'length' => 3),
-			'indexes' => array('PRIMARY' => array('column' => 'id', 'unique' => 1))
-		);
-  */
 	var $configs = array(
 			'id' => array('type'=>'integer', 'null' => false, 'default' => NULL, 'key' => 'primary'),
 			'user_id' => array('type'=>'integer', 'null' => true, 'default' => NULL),
@@ -119,11 +102,32 @@ class PhtagrSchema extends CakeSchema {
 			'tag_id' => array('type'=>'integer', 'null' => false, 'default' => '0'),
 			'indexes' => array('PRIMARY' => array('column' => array('image_id', 'tag_id'), 'unique' => 1), 'imageid' => array('column' => 'image_id', 'unique' => 0), 'tagid' => array('column' => 'tag_id', 'unique' => 0))
 		);
+	var $locks = array(
+			'id' => array('type'=>'integer', 'null' => false, 'default' => NULL, 'key' => 'primary'),
+			'image_id' => array('type'=>'integer', 'null' => true, 'default' => NULL),
+			'token' => array('type'=>'string', 'null' => false, 'key' => 'index'),
+			'expires' => array('type'=>'datetime', 'null' => true, 'default' => NULL, 'key' => 'index'),
+			'owner' => array('type'=>'string', 'null' => true, 'default' => NULL, 'length' => 200),
+			'recursive' => array('type'=>'integer', 'null' => true, 'default' => '0'),
+			'writelock' => array('type'=>'integer', 'null' => true, 'default' => '0'),
+			'exclusivelock' => array('type'=>'integer', 'null' => false, 'default' => '0'),
+			'created' => array('type'=>'datetime', 'null' => true, 'default' => NULL),
+			'modified' => array('type'=>'datetime', 'null' => true, 'default' => NULL),
+			'indexes' => array('PRIMARY' => array('column' => 'id', 'unique' => 1), 'token' => array('column' => 'token', 'unique' => 0), 'expires' => array('column' => 'expires', 'unique' => 0))
+		);
 	var $locations = array(
 			'id' => array('type'=>'integer', 'null' => false, 'default' => NULL, 'key' => 'primary'),
 			'name' => array('type'=>'string', 'null' => false, 'length' => 64, 'key' => 'index'),
 			'type' => array('type'=>'integer', 'null' => true, 'default' => NULL, 'length' => 3),
 			'indexes' => array('PRIMARY' => array('column' => 'id', 'unique' => 1), 'name' => array('column' => 'name', 'unique' => 0))
+		);
+	var $properties = array(
+			'id' => array('type'=>'integer', 'null' => false, 'default' => NULL, 'key' => 'primary'),
+			'image_id' => array('type'=>'integer', 'null' => true, 'default' => NULL),
+			'ns' => array('type'=>'string', 'null' => false, 'default' => 'DAV:', 'length' => 120),
+			'name' => array('type'=>'string', 'null' => false, 'length' => 120),
+			'value' => array('type'=>'text', 'null' => true, 'default' => NULL),
+			'indexes' => array('PRIMARY' => array('column' => 'id', 'unique' => 1))
 		);
 	var $tags = array(
 			'id' => array('type'=>'integer', 'null' => false, 'default' => NULL, 'key' => 'primary'),

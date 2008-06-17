@@ -137,49 +137,19 @@ class User extends AppModel
     return false;
   }
 
-  function getUserDir($data) {
+  function getRootDir($data) {
     if (!isset($data['User']['id'])) {
       $this->Logger->err("Data does not contain user's id");
       return false;
     }
-    $userDir=USER_DIR.$data['User']['id'].DS;
-    if (!is_dir($userDir)) {
-      if (!@mkdir($userDir, 0770, true)) {
-        $this->Logger->err("Could not create users directory: $userDir");
-        return false;
-      }
-    }
-    return $userDir;
-  }
 
-  function getCacheDir($data) {
-    $userDir=$this->getUserDir($data);
-    if ($userDir===false)
+    $rootDir = USER_DIR.$data['User']['id'].DS.'files'.DS;
+    $folder = new Folder();
+    if (!$folder->create($rootDir)) {
+      $this->Logger->err("Could not create users root directory '$fileDir'");
       return false;
-
-    $cacheDir=$userDir.'cache'.DS;
-    if (!is_dir($cacheDir)) {
-      if (!@mkdir($cacheDir, 0770, true)) {
-        $this->Logger->err("Could not create users cache directory: $cacheDir");
-        return false;
-      }
     }
-    return $cacheDir;
-  }
-
-  function getRootDir($data) {
-    $userDir=$this->getUserDir($data);
-    if ($userDir===false)
-      return false;
-
-    $fileDir=$userDir.'files'.DS;
-    if (!is_dir($fileDir)) {
-      if (!@mkdir($fileDir, 0770, true)) {
-        $this->Logger->err("Could not create users file directory: $fileDir");
-        return false;
-      }
-    }
-    return $fileDir;
+    return $rootDir;
   }
   
   function allowWebdav($user) {
