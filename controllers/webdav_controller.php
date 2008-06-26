@@ -25,7 +25,7 @@ App::import('vendor', "WebdavServer", true, array(), "webdav".DS."WebdavServer.p
 
 class WebdavController extends AppController
 {
-  var $components=array('DigestAuth', 'FileCache');
+  var $components=array('RequestHandler', 'DigestAuth', 'FileCache');
 
   var $uses = array('User', 'Image', 'Property', 'Lock');
   // Important to set the davroot in the Webdav Server
@@ -37,7 +37,12 @@ class WebdavController extends AppController
     // supported for WebDAV..
 
     Configure::write('debug', 0);
-    $this->DigestAuth->check();
+    if ($this->RequestHandler->isSSL()) {
+      // If the connection is encrypted we can use the basic authentication
+      // schema which might cause less problems with clients.
+      $this->DigestAuth->preferedSchema = 'basic';
+    }
+    $this->DigestAuth->authenticate();
 
     // Bind Properties and Locks to images persistently (only webdav is using it)
     $this->Image->bind('Property', array('type' => 'hasMany'));

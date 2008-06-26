@@ -194,8 +194,11 @@ class WebdavServer extends HTTP_WebDAV_Server
     @return True if user is authorized to read directory. False otherwise 
     @todo This function must be implemented */
   function _hasReadRights($fspath) {
-    $allow = $this->controller->Image->canRead($fspath, $this->controller->getUser());
-    $this->controller->Logger->trace(($allow?"Permit":"Deny")." access to '$fspath'");
+    $user = $this->controller->getUser();
+    $allow = $this->controller->Image->canRead($fspath, $user);
+    if (!$allow) {
+      $this->controller->Logger->trace("Deny user {$user['User']['id']} to access '$fspath'");
+    }
     return $allow;
   }
 
@@ -308,10 +311,8 @@ class WebdavServer extends HTTP_WebDAV_Server
           $property['ns'], 
           $property['name'], 
           $property['value']);
+        $this->controller->Logger->trace("Add property: {$property['ns']}:{$property['name']}={$property['value']}");
       }
-    }
-    foreach ($info['props'] as $prop) {
-      $this->controller->Logger->trace('{'.$prop['ns']."}{$prop['name']}:{$prop['val']}");
     }
 
     //$this->controller->Logger->trace("fileinfo: info=".print_r($info, true));
@@ -1075,6 +1076,7 @@ class WebdavServer extends HTTP_WebDAV_Server
       
     $res=false;
    
+    $path = urldecode($path);
     $fspath = $this->getFsPath($path);
     $imageId = $this->controller->Image->filenameExists($fspath);
     if (!$imageId) {
