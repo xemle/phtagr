@@ -46,6 +46,8 @@ class WebdavServer extends HTTP_WebDAV_Server
 
   var $_putFsPath="";
 
+  var $_imageCache = null;
+
   var $controller = null;
 
   function WebdavServer() {
@@ -124,7 +126,7 @@ class WebdavServer extends HTTP_WebDAV_Server
     } else {
       $fspath=$this->_fsRoot;
     }
-    $this->controller->Logger->trace("getFsPath($path)=$fspath");
+    //$this->controller->Logger->trace("getFsPath($path)=$fspath");
     return $fspath;
   }
 
@@ -138,6 +140,50 @@ class WebdavServer extends HTTP_WebDAV_Server
     @param text Text of server identification */
   function setPoweredBy($text) {
     $this->dav_powered_by=$text;
+  }
+
+  /** Reads all images of a given path and build an image cache 
+    @param path System path to read */
+  function _buildImageCache($path) {
+    if (isset($this->_imageCache[$path]) || !is_dir($path)) {
+      return;
+    }
+
+    // Initialize cache array
+    if (!$this->_imageCache) {
+      $this->_imageCache = array();
+    }
+    $this->_imageCache[$path] = array();
+
+    // Bind only required models
+    $this->controller->Image->unbindAll();
+    $this->controller->Image->bindModel(array('hasMany' => array('Property' => array(), 'Lock' => array())));
+    $images = $this->controller->Image->findAll(array('path' => $path));
+
+    // Build cache array
+    foreach ($images as $image) {
+      $file = $image['Image']['file'];
+      $this->_imageCache[$path][$file] = $image;
+    }
+    $this->controller->Logger->trace("Built image cache for path '$path'");
+  }
+
+  /** Fetches a model data of an image by using the image cache. If the cache
+   * path is not available, it builds the cache first
+   @param filename Filename of image
+   @return image model data or false if image was not found */
+  function _getImage($filename) {
+    $path = Folder::slashTerm(dirname($filename));
+    $file = basename($filename);
+    if (!isset($this->_imageCache[$path])) {
+      $this->_buildImageCache($path);
+    }
+
+    if (isset($this->_imageCache[$path][$file])) {
+      return $this->_imageCache[$path][$file];
+    } else {
+      return false;
+    }
   }
 
   /** Encodes the paths of an url. E.g '/space test/' becomes '/space%20test/' 
@@ -193,9 +239,14 @@ class WebdavServer extends HTTP_WebDAV_Server
     @param path System directory or filename
     @return True if user is authorized to read directory. False otherwise 
     @todo This function must be implemented */
-  function _hasReadRights($fspath) {
+  function _canRead($fspath) {
     $user = $this->controller->getUser();
-    $allow = $this->controller->Image->canRead($fspath, $user);
+    if (is_dir($fspath)) {
+      $allow = $this->controller->Image->canRead($fspath, $user);
+    } else {
+      $image = $this->_getImage($fspath);
+      $allow = $this->controller->Image->checkAccess(&$image, &$user, ACL_READ_ORIGINAL, ACL_READ_MASK);
+    }
     if (!$allow) {
       $this->controller->Logger->trace("Deny user {$user['User']['id']} to access '$fspath'");
     }
@@ -222,7 +273,7 @@ class WebdavServer extends HTTP_WebDAV_Server
 
     $userRole = $this->controller->getUserRole();
     if ($userRole <= ROLE_GUEST &&
-      !$this->_hasReadRights($fspath)) {
+      !$this->_canRead($fspath)) {
       $this->controller->Logger->warn("User is not allowed to read '$fspath'");
       return false;
     }
@@ -250,7 +301,7 @@ class WebdavServer extends HTTP_WebDAV_Server
             continue;
           // @todo Improve the read check if user is a guest. Query files from
           // the database instead
-          if ($userRole <= ROLE_GUEST && !$this->_hasReadRights($fspath.$filename))
+          if ($userRole <= ROLE_GUEST && !$this->_canRead($fspath.$filename))
             continue; 
           $files["files"][]=$this->fileinfo($options["path"].$filename);
         }
@@ -271,7 +322,7 @@ class WebdavServer extends HTTP_WebDAV_Server
   function fileinfo($path) {
     // map URI path to filesystem path
     $fspath=$this->getFsPath($path);
-    $this->controller->Logger->debug("fileinfo: '$fspath' ($path)");
+    $this->controller->Logger->trace("fileinfo: '$fspath' ($path)");
 
     // create result array
     $info=array();
@@ -304,7 +355,7 @@ class WebdavServer extends HTTP_WebDAV_Server
     }
 
     // get additional properties from database
-    $image=$this->controller->Image->findByFilename($fspath);
+    $image = $this->_getImage($fspath);
     if ($image) {
       foreach($image['Property'] as $property) {
         $info['props'][]=$this->mkprop(
@@ -444,9 +495,9 @@ class WebdavServer extends HTTP_WebDAV_Server
       $this->controller->Logger->warn("Content '$fspath' does not exists");
       return false;
     }
-      
+
     if ($this->controller->getUserRole() <= ROLE_GUEST &&
-      !$this->_hasReadRights($fspath)) {
+      !$this->_canRead($fspath)) {
       $this->controller->Logger->warn("User is not allowed to view content of '$fspath'");
       return false;
     }
@@ -455,7 +506,7 @@ class WebdavServer extends HTTP_WebDAV_Server
     if (is_dir($fspath)) {
       return $this->GetDir($fspath, $options);
     }
-      
+ 
     // TODO synchronize file if neccessary
 
     // detect resource type
@@ -554,7 +605,7 @@ class WebdavServer extends HTTP_WebDAV_Server
     foreach($files as $filename) {
       $fullpath=$fspath."/".$filename;
       // check access for guest accounts
-      if (!$this->_hasReadRights($fullpath))
+      if (!$this->_canRead($fullpath))
         continue;
 
       $name  =htmlspecialchars($this->_unslashify($filename));
@@ -1056,7 +1107,7 @@ class WebdavServer extends HTTP_WebDAV_Server
     }
     $lock = $this->controller->Lock->find(array('Lock.image_id' => $imageId, 'Lock.token' => $options['token']));
     if (!$lock) {
-      $this->controller->Logger->err("Could not find lock for image $imageId");
+      $this->controller->Logger->err("Could not find lock token '{$options['token']}' for image $imageId");
       return "409 Conflict";
     }
     $this->controller->Lock->del($lock['Lock']['id']);
@@ -1071,33 +1122,33 @@ class WebdavServer extends HTTP_WebDAV_Server
    * @return bool   true on success
    */
   function checkLock($path) {
-    $this->controller->Logger->info("checkLock: ".$path);
+    //$this->controller->Logger->debug("checkLock: ".$path);
     $result=false;
       
     $res=false;
    
     $path = urldecode($path);
     $fspath = $this->getFsPath($path);
-    $imageId = $this->controller->Image->filenameExists($fspath);
-    if (!$imageId) {
-      $this->controller->Logger->warn("Could not find file with path '$fspath'");
-      return false;
+    $image = $this->_getImage($fspath);
+    if (!$image) {
+      $this->controller->Logger->debug("Could not find file with path '$fspath'");
+      return $result;
     }
-    $lock = $this->controller->Lock->findByImageId($imageId);
-    
-    if (!$lock) {
-      $this->controller->Logger->debug("No lock found for '$fspath'");
-    } else {
+
+    if (isset($image['Lock']) && count($image['Lock'])) {
+      $lock = $image['Lock'][0];
       $result=array(
         'type'  => 'write',
-        'scope' => $lock['Lock']['exclusivelock'] ? 'exclusive' : 'shared',
+        'scope' => $lock['exclusivelock'] ? 'exclusive' : 'shared',
         'depth' => 0,
-        'owner' => $lock['Lock']['owner'],
-        'token' => $lock['Lock']['token'],
-        'created' => strtotime($lock['Lock']['created']),
-        'modified' => strtotime($lock['Lock']['modified']),
-        'expires' => strtotime($lock['Lock']['expires'])
+        'owner' => $lock['owner'],
+        'token' => $lock['token'],
+        'created' => strtotime($lock['created']),
+        'modified' => strtotime($lock['modified']),
+        'expires' => strtotime($lock['expires'])
       );
+      $this->controller->Logger->debug("File is locked: $fspath");
+      //$this->controller->Logger->trace($result);
     }
 
     return $result;
