@@ -72,8 +72,8 @@ class PhtagrSchema extends CakeSchema {
 			'bytes' => array('type'=>'integer', 'null' => false),
 			'filetime' => array('type'=>'datetime', 'null' => false),
 			'gacl' => array('type'=>'integer', 'null' => true, 'default' => '0', 'length' => 3),
-			'macl' => array('type'=>'integer', 'null' => true, 'default' => '0', 'length' => 3),
-			'pacl' => array('type'=>'integer', 'null' => true, 'default' => '0', 'length' => 3, 'key' => 'index'),
+			'uacl' => array('type'=>'integer', 'null' => true, 'default' => '0', 'length' => 3),
+			'oacl' => array('type'=>'integer', 'null' => true, 'default' => '0', 'length' => 3, 'key' => 'index'),
 			'date' => array('type'=>'datetime', 'null' => true, 'default' => NULL, 'key' => 'index'),
 			'width' => array('type'=>'integer', 'null' => true, 'default' => NULL, 'length' => 10),
 			'height' => array('type'=>'integer', 'null' => true, 'default' => NULL, 'length' => 10),
@@ -90,7 +90,7 @@ class PhtagrSchema extends CakeSchema {
 			'ranking' => array('type'=>'float', 'null' => true, 'default' => '0', 'key' => 'index'),
 			'voting' => array('type'=>'float', 'null' => true, 'default' => '0'),
 			'votes' => array('type'=>'integer', 'null' => true, 'default' => '0'),
-			'indexes' => array('PRIMARY' => array('column' => 'id', 'unique' => 1), 'date' => array('column' => 'date', 'unique' => 0), 'ranking' => array('column' => 'ranking', 'unique' => 0), 'id' => array('column' => 'id', 'unique' => 0), 'pacl' => array('column' => 'pacl', 'unique' => 0))
+			'indexes' => array('PRIMARY' => array('column' => 'id', 'unique' => 1), 'date' => array('column' => 'date', 'unique' => 0), 'ranking' => array('column' => 'ranking', 'unique' => 0), 'id' => array('column' => 'id', 'unique' => 0), 'oacl' => array('column' => 'oacl', 'unique' => 0))
 		);
 	var $images_locations = array(
 			'image_id' => array('type'=>'integer', 'null' => false, 'default' => '0'),

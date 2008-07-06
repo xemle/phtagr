@@ -32,7 +32,7 @@ Page <?php echo $paginator->counter() ?>
   switch ($user['User']['role'])
   {
     case ROLE_ADMIN: echo 'Admin'; break;
-    case ROLE_MEMBER: echo 'Member'; break;
+    case ROLE_USER: echo 'Member'; break;
     case ROLE_GUEST: echo 'Guest'; break;
     case ROLE_NOBODY: echo 'Nobody'; break;
     default: 

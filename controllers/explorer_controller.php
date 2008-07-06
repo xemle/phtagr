@@ -158,7 +158,7 @@ class ExplorerController extends AppController
     $data = $this->Search->paginate();
     $this->_countMeta(&$data);
     $this->set('data', &$data);
-    if ($this->hasRole(ROLE_MEMBER)) {
+    if ($this->hasRole(ROLE_USER)) {
       $groups = $this->Group->findAll("Group.user_id={$this->getUserId()}", false, array('Group.name'));
       if ($groups) 
         $groups = Set::combine($groups, "{n}.Group.id", "{n}.Group.name");
@@ -225,7 +225,7 @@ class ExplorerController extends AppController
   function _editAcl(&$image, $groupId) {
     $changedAcl = false;
     // Backup old values
-    $fieldsAcl = array('gacl', 'macl', 'pacl', 'group_id');
+    $fieldsAcl = array('gacl', 'uacl', 'oacl', 'group_id');
     foreach ($fieldsAcl as $field) {
       $image['Image']['_'.$field] = $image['Image'][$field];
     }
@@ -509,7 +509,7 @@ class ExplorerController extends AppController
         $this->Image->setAcl(&$image, ACL_READ_ORIGINAL, ACL_READ_MASK, $this->data['acl']['read']['original']);
 
         $image['Image']['modified'] = null;
-        $this->Image->save($image['Image'], true, array('group_id', 'gacl', 'macl', 'pacl'));
+        $this->Image->save($image['Image'], true, array('group_id', 'gacl', 'uacl', 'oacl'));
       }
     }
     $image = $this->Image->findById($id);

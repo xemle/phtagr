@@ -28,7 +28,7 @@ class GroupsController extends AppController {
 
   function beforeFilter() {
     parent::beforeFilter();
-    $this->requireRole(ROLE_MEMBER);
+    $this->requireRole(ROLE_USER);
   }
 
   function beforeRender() {

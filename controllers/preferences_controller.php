@@ -38,7 +38,7 @@ class PreferencesController extends AppController {
   }
 
   function acl() {
-    $this->requireRole(ROLE_MEMBER);
+    $this->requireRole(ROLE_USER);
 
     $userId = $this->getUserId();
     if (isset($this->data)) {
@@ -98,7 +98,7 @@ class PreferencesController extends AppController {
     $items = array();
     if ($this->hasRole(ROLE_ADMIN))
       $items[] = array('text' => 'System', 'link' => '/preferences/system');
-    if ($this->hasRole(ROLE_MEMBER)) {
+    if ($this->hasRole(ROLE_USER)) {
       $items[] = array('text' => 'Guest Accounts', 'link' => '/guests');
       $items[] = array('text' => 'Groups', 'link' => '/groups');
     }

@@ -114,7 +114,7 @@ class UsersController extends AppController
   function admin_index() {
     $this->requireRole(ROLE_ADMIN, array('loginRedirect' => '/admin/users'));
 
-    $this->data = $this->paginate('User', array('User.role>='.ROLE_MEMBER));
+    $this->data = $this->paginate('User', array('User.role>='.ROLE_USER));
   }
 
   function admin_edit($id) {
@@ -164,7 +164,7 @@ class UsersController extends AppController
       if ($this->User->hasAny(array('User.username' => '= '.$this->data['User']['username']))) {
         $this->Session->setFlash('Username is already given, please choose another name!');
       } else {
-        $this->data['User']['role'] = ROLE_MEMBER;
+        $this->data['User']['role'] = ROLE_USER;
         if ($this->User->save($this->data, true, array('username', 'password', 'role', 'email'))) {
           $this->Logger->info("New user {$this->data['User']['username']} was created");
           $this->Session->setFlash('User was created');

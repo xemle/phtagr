@@ -28,8 +28,8 @@ class Preference extends AppModel {
   var $belongsTo = array('User' => array());
 
   var $_aclMap = array(ACL_LEVEL_GROUP => 'gacl',
-                           ACL_LEVEL_MEMBER => 'macl',
-                           ACL_LEVEL_PUBLIC => 'pacl');
+                           ACL_LEVEL_USER => 'uacl',
+                           ACL_LEVEL_OTHER => 'oacl');
 
   function addDefaults($preferences) {
     $ownPreferences = Set::extract($preferences, '{n}.name');
@@ -149,14 +149,14 @@ class Preference extends AppModel {
 
   /** Increase the ACL level. It checks the current flag and increases the ACL
    * level of lower ACL levels (first level is ACL_LEVEL_GROUP, second level is
-   * ACL_LEVEL_MEMBER and the third level is ACL_LEVEL_PUBLIC).
+   * ACL_LEVEL_USER and the third level is ACL_LEVEL_OTHER).
     @param data Array of image data
     @param flag Threshold flag which indicates the upper inclusive bound
     @param mask Bit mask of flag 
     @param level Highes ACL level which should be increased */
   function _increaseAcl(&$data, $flag, $mask, $level) {
-    //$this->Logger->debug("Increase: {$data['gacl']},{$data['macl']},{$data['pacl']}: $flag/$mask ($level)");
-    if ($level>ACL_LEVEL_PUBLIC)
+    //$this->Logger->debug("Increase: {$data['gacl']},{$data['uacl']},{$data['oacl']}: $flag/$mask ($level)");
+    if ($level>ACL_LEVEL_OTHER)
       return;
 
     for ($l=ACL_LEVEL_GROUP; $l<=$level; $l++) {
@@ -164,12 +164,12 @@ class Preference extends AppModel {
       if (($data[$name]&($mask))<$flag)
         $data[$name]=($data[$name]&(~$mask))|$flag;
     }
-    //$this->Logger->debug("Increase (result): {$data['gacl']},{$data['macl']},{$data['pacl']}: $flag/$mask ($level)");
+    //$this->Logger->debug("Increase (result): {$data['gacl']},{$data['uacl']},{$data['oacl']}: $flag/$mask ($level)");
   }
 
   /** Decrease the ACL level. Decreases the ACL level of higher ACL levels
    * according to the current flag (first level is ACL_LEVEL_GROUP, second level
-   * is ACL_LEVEL_MEMBER and the third level is ACL_LEVEL_PUBLIC). The decreased ACL
+   * is ACL_LEVEL_USER and the third level is ACL_LEVEL_OTHER). The decreased ACL
    * value is the ACL value of the higher levels which is less than the current
    * threshold or it is zero if no lower ACL value is available. 
     @param data Array of image data
@@ -177,14 +177,14 @@ class Preference extends AppModel {
     @param mask Bit mask of flag
     @param level Lower ACL level which should be downgraded */
   function _decreaseAcl(&$data, $flag, $mask, $level) {
-    //$this->Logger->debug("Decrease: {$data['gacl']},{$data['macl']},{$data['pacl']}: $flag/$mask ($level)");
+    //$this->Logger->debug("Decrease: {$data['gacl']},{$data['uacl']},{$data['oacl']}: $flag/$mask ($level)");
     if ($level<ACL_LEVEL_GROUP)
       return;
 
-    for ($l=ACL_LEVEL_PUBLIC; $l>=$level; $l--) {
+    for ($l=ACL_LEVEL_OTHER; $l>=$level; $l--) {
       $name = $this->_aclMap[$l];
       // Evaluate the available ACL value which is lower than the threshold
-      if ($l==ACL_LEVEL_PUBLIC) 
+      if ($l==ACL_LEVEL_OTHER) 
         $lower = 0;
       else {
         $next = $this->_aclMap[$l+1];
@@ -194,11 +194,11 @@ class Preference extends AppModel {
       if (($data[$name]&($mask))>=$flag)
         $data[$name]=($data[$name]&(~$mask))|$lower;
     }
-    //$this->Logger->debug("Decrease (result): {$data['gacl']},{$data['macl']},{$data['pacl']}: $flag/$mask ($level)");
+    //$this->Logger->debug("Decrease (result): {$data['gacl']},{$data['uacl']},{$data['oacl']}: $flag/$mask ($level)");
   }
 
   function setAcl(&$data, $flag, $mask, $level) {
-    if ($level<ACL_LEVEL_KEEP || $level>ACL_LEVEL_PUBLIC)
+    if ($level<ACL_LEVEL_KEEP || $level>ACL_LEVEL_OTHER)
       return false;
 
     if ($level==ACL_LEVEL_KEEP)
@@ -207,7 +207,7 @@ class Preference extends AppModel {
     if ($level>=ACL_LEVEL_GROUP)
       $this->_increaseAcl(&$data, $flag, $mask, $level);
 
-    if ($level<ACL_LEVEL_PUBLIC)
+    if ($level<ACL_LEVEL_OTHER)
       $this->_decreaseAcl(&$data, $flag, $mask, $level+1);
 
     return $data;
@@ -220,8 +220,8 @@ class Preference extends AppModel {
     $acl = array(
         'groupId' => $this->getValue($tree, 'acl.group', -1),
         'gacl' => ACL_READ_ORIGINAL | ACL_WRITE_META,
-        'macl' => ACL_READ_PREVIEW | ACL_WRITE_TAG,
-        'pacl' => ACL_READ_PREVIEW
+        'uacl' => ACL_READ_PREVIEW | ACL_WRITE_TAG,
+        'oacl' => ACL_READ_PREVIEW
       );
 
     $this->setAcl(&$acl, ACL_WRITE_TAG, ACL_WRITE_MASK, $this->getValue($tree, 'acl.write.tag', ACL_LEVEL_KEEP));

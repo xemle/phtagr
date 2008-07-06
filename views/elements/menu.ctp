@@ -24,7 +24,7 @@
         'My Images', 
         'link' => "/explorer/user/$userId", 
         'type' => ($controller == 'explorer' && $myImages?'current':''));
-    if ($role>=ROLE_MEMBER)
+    if ($role>=ROLE_USER)
       $items[] = array(
         'text' => 'My Files', 
         'link' => '/browser', 

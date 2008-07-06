@@ -77,8 +77,8 @@ class SearchComponent extends Object
 
         case 'image': $this->setImageId(intval($value)); break;
         case 'user': $this->setUserId($value); break;
-        case 'group': if ($userRole >= ROLE_MEMBER) $this->setGroupId(intval($value)); break;
-        case 'visibility': if ($userRole >= ROLE_MEMBER) $this->setVisibility($value); break;
+        case 'group': if ($userRole >= ROLE_USER) $this->setGroupId(intval($value)); break;
+        case 'visibility': if ($userRole >= ROLE_USER) $this->setVisibility($value); break;
 
         case 'from': $this->setDateStart($value); break;
         case 'to': $this->setDateEnd($value); break;
@@ -670,13 +670,13 @@ class SearchComponent extends Object
       $acl .= " AND Image.gacl<".ACL_READ_PREVIEW; 
       break;
     case 'group':
-      $acl .= " AND Image.gacl>=".ACL_READ_PREVIEW." AND Image.macl<".ACL_READ_PREVIEW; 
+      $acl .= " AND Image.gacl>=".ACL_READ_PREVIEW." AND Image.uacl<".ACL_READ_PREVIEW; 
       break;
     case 'member':
-      $acl .= " AND Image.macl>=".ACL_READ_PREVIEW." AND Image.pacl<".ACL_READ_PREVIEW; 
+      $acl .= " AND Image.uacl>=".ACL_READ_PREVIEW." AND Image.oacl<".ACL_READ_PREVIEW; 
       break;
     case 'public':
-      $acl .= " AND Image.pacl>=".ACL_READ_PREVIEW; 
+      $acl .= " AND Image.oacl>=".ACL_READ_PREVIEW; 
       break;
     default:
       break;

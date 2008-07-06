@@ -35,7 +35,7 @@ class BrowserController extends AppController
   function beforeFilter() {
     parent::beforeFilter();
 
-    $this->requireRole(ROLE_MEMBER, array('redirect' => '/'));
+    $this->requireRole(ROLE_USER, array('redirect' => '/'));
 
     $userDir = $this->User->getRootDir($this->getUser());
     $this->_addFsRoot($userDir);

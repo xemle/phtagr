@@ -94,8 +94,8 @@ class ImageDataHelper extends AppHelper {
   /** Returns an text repesentation of the acl */
   function _acl2text($data) {
     $output = $this->_acl2icon($data['Image']['gacl']).',';
-    $output .= $this->_acl2icon($data['Image']['macl']).',';
-    $output .= $this->_acl2icon($data['Image']['pacl']);
+    $output .= $this->_acl2icon($data['Image']['uacl']).',';
+    $output .= $this->_acl2icon($data['Image']['oacl']);
     return $output;
   }
 
@@ -241,11 +241,11 @@ class ImageDataHelper extends AppHelper {
   }
 
   function _getCurrentLevel($data, $flag, $mask) {
-    $data = am(array('Image' => array('pacl' => 0, 'macl' => 0, 'gacl' => 0)), $data);
-    if (($data['Image']['pacl'] & $mask) >= $flag)
-      return ACL_LEVEL_PUBLIC;
-    if (($data['Image']['macl'] & $mask) >= $flag)
-      return ACL_LEVEL_MEMBER;
+    $data = am(array('Image' => array('oacl' => 0, 'uacl' => 0, 'gacl' => 0)), $data);
+    if (($data['Image']['oacl'] & $mask) >= $flag)
+      return ACL_LEVEL_OTHER;
+    if (($data['Image']['uacl'] & $mask) >= $flag)
+      return ACL_LEVEL_USER;
     if (($data['Image']['gacl'] & $mask) >= $flag)
       return ACL_LEVEL_GROUP;
     return ACL_LEVEL_PRIVATE;
@@ -260,7 +260,7 @@ class ImageDataHelper extends AppHelper {
     @param flag Bit flag of the acl (used for image data array)
     @param mask Bit mask of the acl (used for image data array)
 
-  // 0=keep, 1=me only, 2=group, 3=member, 4=public
+  // 0=keep, 1=me only, 2=group, 3=user, 4=others
   */
   function acl2select($fieldName, $data, $flag=0, $mask=0, $options=null) {
     if (is_array($data))
@@ -271,7 +271,7 @@ class ImageDataHelper extends AppHelper {
       $level = ACL_LEVEL_PRIVATE;
 
     // level check
-    if ($level < ACL_LEVEL_KEEP|| $level > ACL_LEVEL_PUBLIC)
+    if ($level < ACL_LEVEL_KEEP|| $level > ACL_LEVEL_OTHER)
       $level = ACL_LEVEL_PRIVATE;
 
     //$this->log($data['Image']);
@@ -280,8 +280,8 @@ class ImageDataHelper extends AppHelper {
       ACL_LEVEL_KEEP => 'Keep',
       ACL_LEVEL_PRIVATE => 'Me only',
       ACL_LEVEL_GROUP => 'Group members',
-      ACL_LEVEL_MEMBER => 'All members',
-      ACL_LEVEL_PUBLIC => 'Everyone');
+      ACL_LEVEL_USER => 'Users',
+      ACL_LEVEL_OTHER => 'Everyone');
     $options = am($options, array('type' => 'select', 'options' => $acl, 'selected' => $level));
     $this->log($options);
     return $this->form->input($fieldName, $options);

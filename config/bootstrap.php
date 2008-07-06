@@ -45,7 +45,7 @@
 
 define('ROLE_NOBODY', 0);
 define('ROLE_GUEST', 1);
-define('ROLE_MEMBER', 2);
+define('ROLE_USER', 2);
 define('ROLE_ADMIN', 3);
 
 define('OUTPUT_TYPE_MINI', 1);
@@ -77,8 +77,8 @@ define("ACL_LEVEL_UNKNOWN",-1);
 define("ACL_LEVEL_KEEP",    0);
 define("ACL_LEVEL_PRIVATE", 1);
 define("ACL_LEVEL_GROUP",   2);
-define("ACL_LEVEL_MEMBER",  3);
-define("ACL_LEVEL_PUBLIC",  4);
+define("ACL_LEVEL_USER",  3);
+define("ACL_LEVEL_OTHER",  4);
 
 define("IMAGE_FLAG_ACTIVE",   1);
 define("IMAGE_FLAG_EXTERNAL", 2);

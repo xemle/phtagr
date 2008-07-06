@@ -2,8 +2,8 @@
 <?php $session->flash(); ?>
 <?php 
   $aclSelect = array(
-    ACL_LEVEL_PUBLIC => 'Everyone',
-    ACL_LEVEL_MEMBER => 'Members',
+    ACL_LEVEL_OTHER => 'Everyone',
+    ACL_LEVEL_USER => 'User',
     ACL_LEVEL_GROUP => 'Guests',
     ACL_LEVEL_PRIVATE => 'Me only');
 ?>

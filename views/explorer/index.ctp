@@ -101,9 +101,9 @@ echo $search->prev().' '.$search->numbers().' '.$search->next()
 <?php
   $aclSelect = array(
     ACL_LEVEL_KEEP => '[Keep]',
-    ACL_LEVEL_PUBLIC => 'Everyone',
-    ACL_LEVEL_MEMBER => 'Members',
-    ACL_LEVEL_GROUP => 'Guests',
+    ACL_LEVEL_OTHER => 'Everyone',
+    ACL_LEVEL_USER => 'Users',
+    ACL_LEVEL_GROUP => 'Group members',
     ACL_LEVEL_PRIVATE => 'Me only');
   echo $form->input('acl.read.preview', array('type' => 'select', 'options' => $aclSelect, 'selected' => ACL_LEVEL_KEEP, 'label' => "Who can view the image?"));
   echo $form->input('acl.read.original', array('type' => 'select', 'options' => $aclSelect, 'selected' => ACL_LEVEL_KEEP, 'label' => "Who can download the image?"));
