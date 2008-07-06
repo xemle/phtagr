@@ -92,11 +92,20 @@ class User extends AppModel
   }
 
   function beforeValidate() {
-    if (!empty($this->data['User']['confirm'])) {
-      if (!isset($this->data['User']['password'])) {
+    if (isset($this->data['User']['password']) && 
+      isset($this->data['User']['confirm'])) {
+      if (empty($this->data['User']['password']) && 
+        empty($this->data['User']['confirm'])) {
+        // both are empty - clear it
+        unset($this->data['User']['confirm']);
+        unset($this->data['User']['password']);
+      } elseif (empty($this->data['User']['password'])) {
         $this->invalidate('password', 'Password not given');
+      } elseif (empty($this->data['User']['confirm'])) {
+        $this->invalidate('confirm', 'Password confirmation is missing');
       } elseif ($this->data['User']['password'] != $this->data['User']['confirm']) {
         $this->invalidate('password', 'Password confirmation mismatch');
+        $this->invalidate('confirm', 'Password confirmation mismatch');
       }
     }
   }

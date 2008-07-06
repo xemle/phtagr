@@ -47,15 +47,23 @@ class Guest extends AppModel
     );
 
   function beforeValidate() {
-    if (isset($this->data['Guest']['confirm'])) {
-      if (empty($this->data['Guest']['password'])) {
+    if (isset($this->data['Guest']['password']) && 
+      isset($this->data['Guest']['confirm'])) {
+      if (empty($this->data['Guest']['password']) && 
+        empty($this->data['Guest']['confirm'])) {
+        // both are empty - clear it
+        unset($this->data['Guest']['confirm']);
+        unset($this->data['Guest']['password']);
+      } elseif (empty($this->data['Guest']['password'])) {
         $this->invalidate('password', 'Password not given');
+      } elseif (empty($this->data['Guest']['confirm'])) {
+        $this->invalidate('confirm', 'Password confirmation is missing');
       } elseif ($this->data['Guest']['password'] != $this->data['Guest']['confirm']) {
         $this->invalidate('password', 'Password confirmation mismatch');
+        $this->invalidate('confirm', 'Password confirmation mismatch');
       }
     }
   }
-
 
   function beforeSave() {
     if (isset($this->data['Guest']['webdav']) && $this->data['Guest']['webdav'] > 0) {

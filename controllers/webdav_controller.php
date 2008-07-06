@@ -38,9 +38,9 @@ class WebdavController extends AppController
 
     Configure::write('debug', 0);
     if ($this->RequestHandler->isSSL()) {
-      // If the connection is encrypted we can use the basic authentication
-      // schema which might cause less problems with clients.
-      $this->DigestAuth->preferedSchema = 'basic';
+      // If the connection is encrypted we can allow the basic authentication
+      // schema. E.g. Anyclient 1.4 sends requests unasked with basic schema
+      $this->DigestAuth->validSchemas = array('digest', 'basic');
     }
     $this->DigestAuth->authenticate();
 

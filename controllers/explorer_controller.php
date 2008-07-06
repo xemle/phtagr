@@ -159,7 +159,7 @@ class ExplorerController extends AppController
     $this->_countMeta(&$data);
     $this->set('data', &$data);
     if ($this->hasRole(ROLE_USER)) {
-      $groups = $this->Group->findAll("Group.user_id={$this->getUserId()}", false, array('Group.name'));
+      $groups = $this->Group->findAll(array('Group.user_id' => $this->getUserId()), false, array('Group.name'));
       if ($groups) 
         $groups = Set::combine($groups, "{n}.Group.id", "{n}.Group.name");
       $groups[0] = '[Keep]';
@@ -461,7 +461,7 @@ class ExplorerController extends AppController
     $this->set('data', $image);
     $this->layout='bare';
     if ($this->Image->checkAccess(&$image, &$user, 1, 0)) {
-      $groups = $this->Group->findAll(array('User.id' => '= '.$this->getUserId()));
+      $groups = $this->Group->findAll(array('User.id' => $this->getUserId()));
       if (!empty($groups)) {
         $groups = Set::combine($groups, '{n}.Group.id', '{n}.Group.name');
       } else {

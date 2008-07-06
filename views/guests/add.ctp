@@ -7,7 +7,9 @@
 <fieldset><legend>Create new guest account</legend>
 <?php
   echo $form->input('Guest.username');
+  echo $form->input('Guest.email');
   echo $form->input('Guest.password');
+  echo $form->input('Guest.confirm');
 ?>
 </fieldset>
 <?php echo $form->submit('Create'); ?>

@@ -129,11 +129,6 @@ class UsersController extends AppController
         $this->data['User']['id'] = $id;
 
         $this->User->set($this->data);
-        if (!empty($this->data['User']['password']) && empty($this->data['User']['confirm'])) {
-          $this->User->invalidate('confirm', 'Password confirmation is missing');
-        } elseif (empty($this->data['User']['password']) && empty($this->data['User']['confirm'])) {
-          unset($this->User->data['User']['password']);
-        }
         if ($this->User->save(null, true, array('username', 'password', 'email', 'expires', 'quota', 'firstname', 'lastname'))) {
           $this->Logger->debug("Data of user {$this->data['User']['username']} was updated");
           $this->Session->setFlash('User data was updated');

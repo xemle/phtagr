@@ -37,7 +37,7 @@ class GuestsController extends AppController {
 
   function index() {
     $userId = $this->getUserId();
-    $this->data = $this->Guest->findAll("Guest.creator_id=$userId");
+    $this->data = $this->Guest->findAll(array('Guest.creator_id' => $userId));
   }
 
   function autocomplete() {
@@ -45,7 +45,10 @@ class GuestsController extends AppController {
       $this->redirect(null, '404');
     } 
     $userId = $this->getUserId();
-    $groups = $this->Group->findAll("Group.user_id=$userId AND Group.name LIKE '%{$this->data['Group']['name']}%'");
+    uses('sanitize');
+    $sanitize = new Sanitize();
+    $escName = $sanitize->escape($this->data['Group']['name']);
+    $groups = $this->Group->findAll("Group.user_id=$userId AND Group.name LIKE '%$escName%'");
     $this->data = $groups;
     $this->layout = "bare";
   }
@@ -59,7 +62,7 @@ class GuestsController extends AppController {
         $this->Session->setFlash("Sorry. Username is already taken");
       } elseif ($this->Guest->save($this->data, true, array('username', 'password', 'role', 'creator_id', 'email', 'quota'))) {
         $guestId = $this->Guest->getLastInsertID();
-        $guest = $this->Guest->find("Guest.id=$guestId");
+        $guest = $this->Guest->findById($guestId);
         $user = $this->getUser();
         $this->Logger->info("User '{$user['User']['username']}' ({$user['User']['id']}) created a guest account '{$guest['Guest']['username']}' ({$guest['Guest']['id']})");
         $this->Session->setFlash("Guest account '{$this->data['Guest']['username']}' was successfully created");
@@ -82,11 +85,6 @@ class GuestsController extends AppController {
     if (!empty($this->data)) {
       $this->Guest->id = $guestId;
       $this->Guest->set($this->data);
-      if (!empty($this->data['Guest']['password']) && empty($this->data['Guest']['confirm'])) {
-        $this->Guest->invalidate('confirm', 'Password confirmation is missing');
-      } elseif (empty($this->data['Guest']['password']) && empty($this->data['Guest']['confirm'])) {
-        unset($this->Guest->data['Guest']['password']);
-      }
       if ($this->Guest->save(null, true, array('username', 'password', 'email', 'expires', 'quota'))) {
         $this->Session->setFlash("Guest was saved");
       } else {
@@ -102,7 +100,7 @@ class GuestsController extends AppController {
     @todo Reset all group information of image */
   function delete($guestId) {
     $userId = $this->getUserId();
-    $guest = $this->Guest->find("Guest.id=$guestId AND Creator.id=$userId");
+    $guest = $this->Guest->find(array('Guest.id' => $guestId, 'Creator.id' => $userId));
     if (!$guest) {
       $this->Session->setFlash("Could not find requested guest for deletion");
     } else {
@@ -117,8 +115,8 @@ class GuestsController extends AppController {
   function addGroup($groupId) {
     if (!empty($this->data)) {
       $userId = $this->getUserId();
-      $group = $this->Group->find("Group.name='{$this->data['Group']['name']}' AND Group.user_id=".$userId);
-      $guest = $this->Guest->find("Guest.id=$groupId AND Creator.id=$userId");
+      $group = $this->Group->find(array('Group.name' => $this->data['Group']['name'], 'Group.user_id' => $userId));
+      $guest = $this->Guest->find(array('Guest.id' => $groupId, 'Creator.id' => $userId));
 
       if (!$guest) {
         $this->Session->setFlash("The given user with id '$groupId' could not be found!");
@@ -141,8 +139,11 @@ class GuestsController extends AppController {
   }
 
   function deleteGroup($guestId, $groupId) {
+    $guestId = intval($guestId);
+    $groupId = intval($groupId);
     $userId = $this->getUserId();
-    $guest = $this->Guest->find("Guest.id=$guestId AND Creator.id=$userId");
+
+    $guest = $this->Guest->find(array('Guest.id' => $guestId, 'Creator.id' => $userId));
     if (!$guest) {
       $this->Session->setFlash("Could not find guest!");
       $this->redirect("index");
@@ -152,13 +153,13 @@ class GuestsController extends AppController {
       if ($key === false) {
         $this->Session->setFlash("Could not find group of guest '{$guest['Guest']['username']}'");
       } else {
-        $group = $this->Group->find("Group.id=$groupId");
         unset($list[$key]);
         $guest['Member']['Member'] = array_unique($list);
         if (!$this->Guest->save($guest)) {
           $this->Session->setFlash("Could not save guest");
         } else {
-          $this->Logger->info("Deleted group '{$this->data['Group']['name']}' ({$this->data['Group']['id']}) from guest '{$guest['Guest']['username']}' ({$guest['Guest']['id']})");
+          $group = $this->Group->findById($groupId);
+          $this->Logger->info("Deleted group '{$group['Group']['name']}' ({$group['Group']['id']}) from guest '{$guest['Guest']['username']}' ({$guest['Guest']['id']})");
           $this->Session->setFlash("Group '{$group['Group']['name']}' was successfully deleted from guest '{$guest['Guest']['username']}'");
         }
       }

@@ -37,7 +37,7 @@ class GroupsController extends AppController {
 
   function index() {
     $userId = $this->getUserId();
-    $this->data = $this->Group->findAll("User.id=$userId");
+    $this->data = $this->Group->findAll(array('User.id' => $userId));
   }
 
   function autocomplete() {
@@ -45,7 +45,10 @@ class GroupsController extends AppController {
       $this->redirect(null, '404');
     }
     $userId = $this->getUserId();
-    $guests = $this->User->findAll("User.creator=$userId AND User.username LIKE '%{$this->data['User']['username']}%'");
+    uses('sanitize');
+    $sanitize = new Sanitize();
+    $escUsername = $sanitize->escape($this->data['User']['username']);
+    $guests = $this->User->findAll("User.creator_id=$userId AND User.username LIKE '%$escUsername%'");
     $this->data = $guests;
     $this->layout = "bare";
   }
@@ -58,7 +61,7 @@ class GroupsController extends AppController {
         $this->Session->setFlash("Group '{$this->data['Group']['name']}' already exists");
       } elseif ($this->Group->save($this->data)) {
         $groupId = $this->Group->getLastInsertID();
-        $group = $this->Group->find("Group.id=$groupId");
+        $group = $this->Group->findById($groupId);
         $user = $this->getUser();
         $this->Logger->info("User '{$user['User']['username']}' ({$user['User']['id']}) created a group '{$group['Group']['name']}' ({$group['Group']['id']})");
         $this->Session->setFlash("Add successfully group '{$this->data['Group']['name']}'");
@@ -71,7 +74,7 @@ class GroupsController extends AppController {
 
   function edit($groupId) {
     $userId = $this->getUserId();
-    $group = $this->Group->find("Group.id=$groupId AND Group.user_id=$userId");
+    $group = $this->Group->find(array('Group.id' => $groupId, 'Group.user_id' => $userId));
     if ($group) {
       $this->data = $group;
     } else {
@@ -85,7 +88,7 @@ class GroupsController extends AppController {
     @todo Check for permission! */
   function delete($groupId) {
     $userId = $this->getUserId();
-    $group = $this->Group->find("Group.id=$groupId AND Group.user_id=$userId");
+    $group = $this->Group->find(array('Group.id' => $groupId, 'Group.user_id' => $userId));
     if ($group) {
       $this->Group->delete($groupId);
       $user = $this->getUser();
@@ -100,8 +103,9 @@ class GroupsController extends AppController {
   function addMember($groupId) {
     if (!empty($this->data)) {
       $userId = $this->getUserId();
-      $group = $this->Group->find("Group.id=$groupId AND Group.user_id=$userId");
-      $user = $this->User->find("User.username='{$this->data['User']['username']}'");
+      $group = $this->Group->find(array('Group.id' => $groupId, 'Group.user_id' => $userId));
+      // TODO Allow only users and own guests? Currently allow all guests and users
+      $user = $this->User->findByUsername($this->data['User']['username']);
 
       if (!$group) {
         $this->Session->setFlash("Could not find given group!");
@@ -126,7 +130,7 @@ class GroupsController extends AppController {
 
   function deleteMember($groupId, $memberId) {
     $userId = $this->getUserId();
-    $group = $this->Group->find("Group.id=$groupId AND Group.user_id=$userId");
+    $group = $this->Group->find(array('Group.id' => $groupId, 'Group.user_id' => $userId));
     if (!$group) {
       $this->Session->setFlash("Could not find group!");
       $this->redirect("index");
@@ -141,6 +145,7 @@ class GroupsController extends AppController {
         if (!$this->Group->save($group)) {
           $this->Session->setFlash("Could not save group");
         } else {
+          $user = $this->getUser();
           $this->Logger->info("Delete user '{$user['User']['username']}' ({$user['User']['id']}) from group '{$group['Group']['name']}' ({$group['Group']['id']})");
           $this->Session->setFlash("Member was successfully deleted from group '{$group['Group']['name']}'");
         }
