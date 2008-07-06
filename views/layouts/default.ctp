@@ -5,7 +5,7 @@
 <title><?php echo $title_for_layout?></title>
 <?php 
   echo $html->charset('UTF-8')."\n";
-  echo $html->meta('icon', $html->url('/img/favicon.ico'))."\n";
+  echo $html->meta('icon')."\n";
   echo $html->css('phtagr')."\n";
   echo $javascript->link(array('prototype', 'event-selectors', 'effects', 'controls', 'phtagr'))."\n";
   
