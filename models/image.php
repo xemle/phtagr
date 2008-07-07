@@ -473,6 +473,7 @@ class Image extends AppModel
     @return returns sql statement for the where clause which checks the access
     to the image */
   function buildWhereAcl($user, $userId = 0, $level = ACL_READ_PREVIEW) {
+    $level = intval($level);
     $acl = '';
     if ($userId > 0 && $user['User']['id'] == $userId) {
       // My Images
@@ -481,8 +482,13 @@ class Image extends AppModel
       elseif ($user['User']['role'] == ROLE_GUEST) {
         if (count($user['Member'])) {
           $groupIds = Set::extract($user, 'Member.{n}.id');
-          $acl .= " AND Image.group_id in ( ".implode(", ", $groupIds)." )";
-          $acl .= " AND Image.gacl >= ".$level;
+          if (count($groupIds) > 1) {
+            $acl .= " AND Image.group_id in ( ".implode(", ", $groupIds)." )";
+            $acl .= " AND Image.gacl >= $level";
+          } elseif (count($groupIds) == 1) {
+            $acl .= " AND Image.group_id = {$groupIds[0]}";
+            $acl .= " AND Image.gacl >= $level";
+          }
         } else {
           // no images
           $acl .= " AND 1 = 0";
@@ -496,15 +502,24 @@ class Image extends AppModel
       // General ACL
       if ($user['User']['role'] < ROLE_ADMIN) {
         $acl .= " AND (";
+        // All images of group on Guests and Users
         if ($user['User']['role'] >= ROLE_GUEST && count($user['Member'])) {
           $groupIds = Set::extract($user, 'Member.{n}.id');
-          $acl .= " ( Image.group_id in ( ".implode(", ", $groupIds)." )";
-          $acl .= " AND Image.gacl >= ".$level." ) OR";
+          if (count($groupIds) > 1) {
+            $acl .= " ( Image.group_id in ( ".implode(", ", $groupIds)." )";
+            $acl .= " AND Image.gacl >= $level ) OR";
+          } elseif (count($groupIds) == 1) {
+            $acl .= " ( Image.group_id = {$groupIds[0]}";
+            $acl .= " AND Image.gacl >= $level ) OR";
+          }
         }
+        // Own images and others users on Users
         if ($user['User']['role'] >= ROLE_USER) {
-          $acl .= " ( Image.uacl >= ".$level." ) OR";
+          $acl .= " Image.user_id = {$user['User']['id']} OR";
+          $acl .= " Image.uacl >= $level OR";
         }
-        $acl .= " Image.oacl >= ".$level." )";
+        // Public 
+        $acl .= " Image.oacl >= $level )";
       }
     }
     return $acl;
@@ -516,18 +531,20 @@ class Image extends AppModel
     @param flag Reading image flag which must match the condition 
     @return True if user can read the filename */
   function canRead($filename, $user, $flag = ACL_READ_ORIGINAL) {
-    if (!file_exists($filename))
+    if (!file_exists($filename)) {
+      $this->Logger->debug("Filename does not exists: $filename");
       return false;
+    }
 
     $db =& ConnectionManager::getDataSource($this->useDbConfig);
     $conditions = '';
     if (is_dir($filename)) {
       $path = $db->value(Folder::slashTerm($filename).'%');
-      $conditions .= "Image.path LIKE $path ";
+      $conditions .= "Image.path LIKE $path";
     } else {
       $path = $db->value(Folder::slashTerm(dirname($filename)));
       $file = $db->value(basename($filename));
-      $conditions .= "Image.path=$path AND Image.file=$file ";
+      $conditions .= "Image.path=$path AND Image.file=$file";
     }
     $conditions .= $this->buildWhereAcl($user, 0, $flag);
 
