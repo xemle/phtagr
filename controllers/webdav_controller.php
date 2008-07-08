@@ -21,11 +21,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-App::import('vendor', "WebdavServer", true, array(), "webdav".DS."WebdavServer.php");
-
 class WebdavController extends AppController
 {
-  var $components=array('RequestHandler', 'DigestAuth', 'FileCache');
+  var $components=array('RequestHandler', 'DigestAuth', 'FileCache', 'WebdavServer');
 
   var $uses = array('User', 'Image', 'Property', 'Lock');
   // Important to set the davroot in the Webdav Server
@@ -54,9 +52,6 @@ class WebdavController extends AppController
     $this->requireRole(ROLE_GUEST);
     $this->layout = 'webdav';
 
-    $webdav = new WebdavServer();
-    $webdav->setController(&$this);
-    
     $user = $this->getUser();
     if (!$this->User->allowWebdav($user)) {
       $this->Logger->err("WebDAV is not allowed to user '{$user['User']['username']}' (id {$user['User']['id']})");
@@ -70,14 +65,14 @@ class WebdavController extends AppController
     } elseif ($user['User']['role'] >= ROLE_GUEST) {
       $root = $this->User->getRootDir($user);
     }
-    if (!$root || !$webdav->setFsRoot($root)) {
+    if (!$root || !$this->WebdavServer->setFsRoot($root)) {
       $this->Logger->err("Could not set fsroot: $root");
       $this->redirect(null, 401, true);
     }
 
     // start buffering
     ob_start();
-    $webdav->ServeRequest($_SERVER['REQUEST_URI']);
+    $this->WebdavServer->ServeRequest($_SERVER['REQUEST_URI']);
     while (@ob_end_flush());
     die();
   }
