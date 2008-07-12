@@ -209,11 +209,14 @@ class DigestAuthComponent extends Object
     $requiredParts=array('nonce'=>1, 'nc'=>1, 'cnonce'=>1, 'qop'=>1, 'username'=>1, 'uri'=>1, 'response'=>1, 'opaque'=>1);
     $data=array();
   
-    preg_match_all('/(\w+)=([\'"]?)([a-zA-Z0-9=%.\/\\\\_\-~\@]+)\2/', $this->_authHdr, $matches, PREG_SET_ORDER);
+    preg_match_all('/(\w+)=(([\'"])([^"\']+)\3|(\w+))/', $this->_authHdr, $matches, PREG_SET_ORDER);
 
-    foreach ($matches as $m) {
-      $data[$m[1]]=$m[3];
-      unset($requiredParts[$m[1]]);
+    foreach ($matches as $match) {
+      $name = strtolower($match[1]);
+      $value = (isset($match[5]) ? $match[5] : $match[4]);
+      // TODO Check syntax of values
+      $data[$name]=$value;
+      unset($requiredParts[$name]);
     }
   
     if ($requiredParts) {
@@ -222,7 +225,6 @@ class DigestAuthComponent extends Object
       $this->requestAuthentication();
     }
   
-    // convert nc from hex to decimal
     $this->_authData = $data;
   }
 
