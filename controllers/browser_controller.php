@@ -27,7 +27,7 @@ class BrowserController extends AppController
 
   var $components = array('RequestHandler', 'ImageFilter', 'VideoFilter');
   var $uses = array('User', 'Image', 'Tag', 'Category', 'Location', 'Preference');
-  var $helpers = array('form', 'formular', 'html');
+  var $helpers = array('form', 'formular', 'html', 'number');
 
   /** Array of filesystem root directories. */
   var $_fsRoots = array();
@@ -55,7 +55,8 @@ class BrowserController extends AppController
   function _setMenu() {
     $items = array();
     $items[] = array('text' => 'Import Files', 'link' => 'index', 'type' => ($this->action=='index'?'active':false));
-    $items[] = array('text' => 'Synchroinze', 'link' => 'sync');
+    $items[] = array('text' => 'Synchronize', 'link' => 'sync');
+    $items[] = array('text' => 'Overview', 'link' => 'view');
     $menu = array('items' => $items);
     $this->set('mainMenu', $menu);
   }
@@ -302,7 +303,7 @@ class BrowserController extends AppController
           $filename = $this->Image->getFilename($image);
         }
         if (!$filename || !$this->ImageFilter->writeFile(&$image, $filename)) {
-          $this->Logger->err("Count not write file '".$this->Image->getFilename($image)."'");
+          $this->Logger->err("Could not write file '".$this->Image->getFilename($image)."'");
           $errors++;
         } else {
           $this->Logger->info("Synced file '".$this->Image->getFilename($image)."' ({$image['Image']['id']})");
@@ -318,8 +319,32 @@ class BrowserController extends AppController
     }
 
     $this->data['synced'] = $synced;
+    $this->data['unsynced'] = $this->data['total'] - $synced;
     $this->data['errors'] = $errors;
   }
 
+  function view() {
+    $user = $this->getUser();
+    $userId = $this->getUserId();
+    $this->data = $user;
+    $external = (IMAGE_FLAG_ACTIVE | IMAGE_FLAG_EXTERNAL);
+
+    $files['count'] = $this->Image->find('count', array('conditions' => "User.id = $userId"));
+    $bytes = $this->Image->findAll(array("User.id" => $userId, "Image.flag & ".IMAGE_FLAG_EXTERNAL." = 0"), array('SUM(Image.bytes) AS Bytes'));
+    $files['bytes'] = $bytes[0][0]['Bytes'];
+    $bytes = $this->Image->findAll(array("User.id" => $userId), array('SUM(Image.bytes) AS Bytes'));
+    $files['bytesAll'] = $bytes[0][0]['Bytes'];
+    $files['quota'] = $user['User']['quota'];
+    $files['free'] = $files['quota'] - $files['bytes'];
+    $files['active'] = $this->Image->find('count', array('conditions' => "User.id = $userId AND Image.flag & ".IMAGE_FLAG_ACTIVE." > 0"));
+    $files['video'] = $this->Image->find('count', array('conditions' => "User.id = $userId AND Image.flag & ".IMAGE_FLAG_ACTIVE." > 0 AND Image.duration > 0"));
+    $files['external'] = $this->Image->find('count', array('conditions' => "User.id = $userId AND Image.flag & $external = $external"));
+    $files['public'] = $this->Image->find('count', array('conditions' => "User.id = $userId AND Image.flag & ".IMAGE_FLAG_ACTIVE." > 0 AND Image.oacl >= ".ACL_READ_PREVIEW));
+    $files['user'] = $this->Image->find('count', array('conditions' => "User.id = $userId AND Image.flag & ".IMAGE_FLAG_ACTIVE." > 0 AND Image.oacl < ".ACL_READ_PREVIEW." AND Image.uacl >= ".ACL_READ_PREVIEW));
+    $files['group'] = $this->Image->find('count', array('conditions' => "User.id = $userId AND Image.flag & ".IMAGE_FLAG_ACTIVE." > 0 AND Image.uacl < ".ACL_READ_PREVIEW." AND Image.gacl >= ".ACL_READ_PREVIEW));
+    $files['private'] = $this->Image->find('count', array('conditions' => "User.id = $userId AND Image.flag & ".IMAGE_FLAG_ACTIVE." > 0 AND Image.gacl < ".ACL_READ_PREVIEW));
+
+    $this->set('files', $files);
+  }
 }
 ?>
