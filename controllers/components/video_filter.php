@@ -24,6 +24,7 @@
 class VideoFilterComponent extends Object {
 
   var $controller = null;
+  var $components = array('Logger');
 
   function startup(&$controller) {
     $this->controller =& $controller;
@@ -38,9 +39,9 @@ class VideoFilterComponent extends Object {
     $image = array('Image' => array('path' => $path, 'file' => $file));
     if (!$this->controller->Image->isExternal(&$image, &$user)) {
       if (!$this->controller->Image->insertFile($filename, &$user)) {
-        $this->controller->Logger->err("Could not insert file '$filename' to the database");
+        $this->Logger->err("Could not insert file '$filename' to the database");
       } else {
-        $this->controller->Logger->info("Insert file '$filename' to the database");
+        $this->Logger->info("Insert file '$filename' to the database");
       }
     }
   }
@@ -52,18 +53,18 @@ class VideoFilterComponent extends Object {
     @return Filename of the video thumbnail. False on failure */
   function createVideoPreview($videoFilename, $thumbFilename = '', $overwrite = false) {
     if (!file_exists($videoFilename) || !is_readable($videoFilename)) {
-      $this->controller->Logger->err("Video file '$videoFilename' does not exists or is readable");
+      $this->Logger->err("Video file '$videoFilename' does not exists or is readable");
       return false;
     }
     if ($thumbFilename == '') {
       $thumbFilename = substr($videoFilename, 0, strrpos($videoFilename, '.')+1).'thm';
     }
     if (!$overwrite && file_exists($thumbFilename)) {
-      $this->controller->Logger->warn("Video thumbnail file '$thumbFilename' already exists");
+      $this->Logger->warn("Video thumbnail file '$thumbFilename' already exists");
       return $thumbFilename;
     }
     if (!is_writable(dirname($thumbFilename))) {
-      $this->controller->Logger->err("Directory for video thumbnail file '$thumbFilename' is not writeable");
+      $this->Logger->err("Directory for video thumbnail file '$thumbFilename' is not writeable");
       return false;
     }
     $bin = $this->controller->getPreferenceValue('bin.ffmpeg', 'ffmpeg');
@@ -73,12 +74,12 @@ class VideoFilterComponent extends Object {
     $t1 = getMicrotime();
     exec($command, &$output, &$result);
     $t2 = getMicrotime();
-    $this->controller->Logger->debug("Command '$command' returnd $result and required ".round($t2-$t1, 4)."ms");
+    $this->Logger->debug("Command '$command' returnd $result and required ".round($t2-$t1, 4)."ms");
     if ($result != 0) {
-      $this->controller->Logger->err("Command '$command' returned unexcpected $result");
+      $this->Logger->err("Command '$command' returned unexcpected $result");
       return false;  
     } else {
-      $this->controller->Logger->info("Created video thumbnail of '$videoFilename'");
+      $this->Logger->info("Created video thumbnail of '$videoFilename'");
       $this->_insertFile($thumbFilename);
     }
     return $thumbFilename;
@@ -108,7 +109,7 @@ class VideoFilterComponent extends Object {
   function readFile(&$image) {
     $filename = $this->controller->Image->getFilename(&$image);
     if (!file_exists($filename) || !is_readable($filename)) {
-      $this->controller->Logger->warn("File: $filename does not exists nor is readable");
+      $this->Logger->warn("File: $filename does not exists nor is readable");
       return false;
     }
 
@@ -123,17 +124,17 @@ class VideoFilterComponent extends Object {
     $t1 = getMicrotime();
     exec($command, &$output, &$result);
     $t2 = getMicrotime();
-    $this->controller->Logger->debug("Command '$command' returnd $result and required ".round($t2-$t1, 4)."ms");
+    $this->Logger->debug("Command '$command' returnd $result and required ".round($t2-$t1, 4)."ms");
     
     if ($result != 1) {
-      $this->controller->Logger->err("Command '$command' returned unexcpected $result");
+      $this->Logger->err("Command '$command' returned unexcpected $result");
       return false;
     } elseif (!count($output)) {
-      $this->controller->Logger->err("Command returned no output!");
+      $this->Logger->err("Command returned no output!");
       return false;
     } else {
-      $this->controller->Logger->debug("Command '$command' returned $result");
-      $this->controller->Logger->trace($output);
+      $this->Logger->debug("Command '$command' returned $result");
+      $this->Logger->trace($output);
 
       foreach ($output as $line) {
         $words=preg_split("/[\s,]+/", trim($line));
@@ -141,12 +142,12 @@ class VideoFilterComponent extends Object {
           $times=preg_split("/:/", $words[1]);
           $time=$times[0]*3600+$times[1]*60+intval($times[2]);
           $image['Image']['duration'] = $time;
-          $this->controller->Logger->trace("Extract duration of '$filename': $time");
+          $this->Logger->trace("Extract duration of '$filename': $time");
         } elseif ($words[2]=="Video:") {
           list($width, $height)=split("x", $words[5]);
           $image['Image']['width'] = $width;
           $image['Image']['height'] = $height;
-          $this->controller->Logger->trace("Extract video size of '$filename': $width x $height");
+          $this->Logger->trace("Extract video size of '$filename': $width x $height");
         }
       }
     }

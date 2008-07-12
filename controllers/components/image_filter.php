@@ -24,6 +24,8 @@
 class ImageFilterComponent extends Object {
 
   var $controller = null;
+  var $components = array('Logger');
+
   var $locationMap = array(
                         LOCATION_CITY => 'City', 
                         LOCATION_SUBLOCATION => 'Sub-location',
@@ -42,8 +44,8 @@ class ImageFilterComponent extends Object {
     if (!$filename)
       $filename = $this->controller->Image->getFilename($image);
     if (!file_exists($filename) || !is_readable($filename)) {
-      $this->controller->Logger->warn("File: $filename does not exists nor is readable");
-      $this->controller->Logger->trace($image);
+      $this->Logger->warn("File: $filename does not exists nor is readable");
+      $this->Logger->trace($image);
       return false;
     }
 
@@ -67,13 +69,13 @@ class ImageFilterComponent extends Object {
     $t1 = getMicrotime();
     exec($command, &$output, &$result);
     $t2 = getMicrotime();
-    $this->controller->Logger->trace("$bin call needed ".round($t2-$t1, 4)."ms");
+    $this->Logger->trace("$bin call needed ".round($t2-$t1, 4)."ms");
     
     if ($result == 127) {
-      $this->controller->Logger->err("$bin could not be found!");
+      $this->Logger->err("$bin could not be found!");
       return false;
     } elseif ($result != 0) {
-      $this->controller->Logger->err("$bin returned with error: $result (command: \"$command\")");
+      $this->Logger->err("$bin returned with error: $result (command: \"$command\")");
       return false;
     }
 
@@ -176,7 +178,7 @@ class ImageFilterComponent extends Object {
       $filename = $this->controller->Image->getFilename($image);
 
     if (!file_exists($filename) || !is_writeable(dirname($filename)) || !is_writeable($filename)) {
-      $this->controller->Logger->warn("File: $filename does not exists nor is readable");
+      $this->Logger->warn("File: $filename does not exists nor is readable");
       return false;
     }
 
@@ -187,7 +189,7 @@ class ImageFilterComponent extends Object {
 
     $args = $this->_createExportArguments($data, $image);
     if ($args == '') {
-      $this->controller->Logger->debug("File '$filename' has no metadata changes");
+      $this->Logger->debug("File '$filename' has no metadata changes");
       $update = array();
       $update['id'] = $image['Image']['id'];
       $update['flag'] = ($image['Image']['flag'] ^ IMAGE_FLAG_DIRTY) & 0xff;
@@ -199,23 +201,23 @@ class ImageFilterComponent extends Object {
     $tmp = $this->_getTempFilename($filename);
     $bin = $this->controller->getPreferenceValue('bin.exiftool', 'exiftool');
     $command = "$bin $args -o ".escapeshellarg($tmp).' '.escapeshellarg($filename);
-    $this->controller->Logger->trace("Execute command: \"$command\"");
+    $this->Logger->trace("Execute command: \"$command\"");
     $output = array();
     $result = -1;
     $t1 = getMicrotime();
     exec($command, &$output, &$result);
     $t2 = getMicrotime();
-    $this->controller->Logger->trace("$bin call needed ".round($t2-$t1, 4)."ms");
+    $this->Logger->trace("$bin call needed ".round($t2-$t1, 4)."ms");
 
     if ($result != 0 || !file_exists($tmp)) {
-      $this->controller->Logger->err("$bin returns with error: $result (command: $command)");
+      $this->Logger->err("$bin returns with error: $result (command: $command)");
       if (file_exists($tmp))
         unlink($tmp);
       return false;
     } else {
       $tmp2 = $this->_getTempFilename($filename);
       if (!rename($filename, $tmp2)) {
-        $this->controller->Logger->err("Could not rename original file '$filename' to temporary file '$tmp2'");
+        $this->Logger->err("Could not rename original file '$filename' to temporary file '$tmp2'");
         unlink($tmp);
         return false;
       }
@@ -273,7 +275,7 @@ class ImageFilterComponent extends Object {
     if ($timeDb && (!$timeFile || ($timeFile != $timeDb))) {
       $arg .= ' -DateCreated='.escapeshellarg(date("Y:m:d", $timeDb));
       $arg .= ' -TimeCreated='.escapeshellarg(date("H:i:s", $timeDb));
-      //$this->controller->Logger->trace("Set new date via IPTC: $arg");
+      //$this->Logger->trace("Set new date via IPTC: $arg");
     }
     return $arg;
   }
