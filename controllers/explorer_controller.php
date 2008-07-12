@@ -331,7 +331,6 @@ class ExplorerController extends AppController
             (count($image[$habtm][$habtm]) != count($oldHabtmIds[$habtm]) ||
             count(array_diff($image[$habtm][$habtm], $oldHabtmIds[$habtm])))) {
             $changedMeta = true;
-            $image['Image']['flag'] |= IMAGE_FLAG_DIRTY;
           } elseif (isset($image[$habtm])) {
             unset($image[$habtm]);
           }
@@ -349,6 +348,9 @@ class ExplorerController extends AppController
         }
 
         if ($changedMeta || $changedAcl) { 
+          if ($changedMeta) {
+            $image['Image']['flag'] |= IMAGE_FLAG_DIRTY;
+          }
           $image['Image']['modified'] = null;
           if (!$this->Image->save($image)) {
             $this->Logger->warn('Could not save new metadata/acl to image '.$id);

@@ -9,7 +9,7 @@
   echo $form->input('Guest.username');
   echo $form->input('Guest.email');
   echo $form->input('Guest.password');
-  echo $form->input('Guest.confirm');
+  echo $form->input('Guest.confirm', array('type' => 'password'));
 ?>
 </fieldset>
 <?php echo $form->submit('Create'); ?>

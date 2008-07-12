@@ -200,7 +200,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
   }
 
   function ServeRequest($base=false) {
-    $this->Logger->debug("ServeRequest: $base");
+    $this->Logger->info("ServeRequest: {$this->_SERVER["REQUEST_METHOD"]} $base");
 
     // special treatment for litmus compliance test
     // reply on its identifier header
@@ -523,6 +523,9 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
     // detect resource size
     $options['size']=filesize($fspath);
       
+    // Clean the open obstack which was open in the controller
+    @ob_end_clean();
+
     // no need to check result here, it is handled by the base class
     $options['stream']=fopen($fspath, "r");
     
@@ -1047,7 +1050,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
     $options["timeout"]=time()+300; // 5min. hardcoded
 
     // Delete expired locks
-    $this->controller->Lock->deleteAll(array('Lock.expires' => "< '".date('Y-m-d H:i:s', time())."'"));
+    $this->controller->Lock->deleteAll("Lock.expires < '".date('Y-m-d H:i:s', time())."'");
 
     $imageId = $this->controller->Image->filenameExists($fspath);
     if (!$imageId) {

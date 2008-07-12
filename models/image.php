@@ -513,9 +513,12 @@ class Image extends AppModel
             $acl .= " AND Image.gacl >= $level ) OR";
           }
         }
-        // Own images and others users on Users
         if ($user['User']['role'] >= ROLE_USER) {
-          $acl .= " Image.user_id = {$user['User']['id']} OR";
+          // Own image
+          if ($userId == 0) {
+            $acl .= " Image.user_id = {$user['User']['id']} OR";
+          }
+          // Other users
           $acl .= " Image.uacl >= $level OR";
         }
         // Public 
