@@ -243,7 +243,8 @@ class ImageFilterComponent extends Object {
    * file differs from the database entry
     @param data Meta data of the file
     @param image Model data of the current image
-    @return export arguments or an empty string */
+    @return export arguments or an empty string 
+    @note IPTC dates are set in the default timezone */
   function _createExportDate($data, $image) {
     // Remove IPTC data and time if database date is not set
     if (!$image['Image']['date']) {
@@ -261,7 +262,8 @@ class ImageFilterComponent extends Object {
       if ($time) {
         $dateIptc .= ' '.$time;
       } else {
-        $dateIptc .= ' 00:00:00';
+        //Midnight with timezone
+        $dateIptc .= ' 00:00:00'.date('O');
       }
       $timeFile = strtotime($dateIptc);
     } else {
@@ -274,7 +276,7 @@ class ImageFilterComponent extends Object {
     $arg = '';
     if ($timeDb && (!$timeFile || ($timeFile != $timeDb))) {
       $arg .= ' -DateCreated='.escapeshellarg(date("Y:m:d", $timeDb));
-      $arg .= ' -TimeCreated='.escapeshellarg(date("H:i:s", $timeDb));
+      $arg .= ' -TimeCreated='.escapeshellarg(date("H:i:sO", $timeDb));
       //$this->Logger->trace("Set new date via IPTC: $arg");
     }
     return $arg;
