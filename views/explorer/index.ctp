@@ -2,12 +2,12 @@
 <?php $session->flash(); ?>
 <div class="navigator">
 <?php 
-echo $search->prev().' '.$search->numbers().' '.$search->next();
+echo $query->prev().' '.$query->numbers().' '.$query->next();
 ?>
 </div>
 
 <?php 
-$search->initialize();
+$query->initialize();
 ?>
 <div class="thumbs">
 <script type="text/javascript">
@@ -18,7 +18,7 @@ $cell=0;
 $canWriteTag=false;
 $canWriteMeta=false;
 $canWriteAcl=false;
-$pos = ($search->get('page', 1)-1) * $search->get('show', 12) + 1;
+$pos = ($query->get('page', 1)-1) * $query->get('show', 12) + 1;
 foreach($data as $image): ?>
 <div class="thumb" id="image-<?php echo $image['Image']['id'];?>" >
 <script type="text/javascript">
@@ -29,8 +29,8 @@ foreach($data as $image): ?>
 <div class="image">
 <?php 
   $size = $imageData->getimagesize($image, OUTPUT_SIZE_THUMB);
-  $search->set('pos', $pos++);
-  echo "<a href=\"".Router::url("/explorer/image/".$image['Image']['id'].'/'.$search->getParams())."\">";
+  $query->set('pos', $pos++);
+  echo "<a href=\"".Router::url("/explorer/image/".$image['Image']['id'].'/'.$query->getParams())."\">";
   echo "<img src=\"".Router::url("/files/thumb/".$image['Image']['id'])."\" $size[3] alt=\"".$image['Image']['name']."\"/>"; 
   echo "</a>";
 
@@ -73,13 +73,13 @@ foreach($data as $image): ?>
 
 <div class="navigator">
 <?php 
-echo $search->prev().' '.$search->numbers().' '.$search->next()
+echo $query->prev().' '.$query->numbers().' '.$query->next()
 ?>
 </div>
 
 <div class="edit">
 <?php if ($canWriteTag): ?>
-<? echo $form->create(null, array('id' => 'explorer', 'action' => 'edit/'.$search->getParams())); ?>
+<? echo $form->create(null, array('id' => 'explorer', 'action' => 'edit/'.$query->getParams())); ?>
 <fieldset><legend>Metadata</legend>
 <?php echo $form->hidden('Image.ids', array('id' => 'ImageIds')) ?>
 <?php 

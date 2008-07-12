@@ -23,19 +23,19 @@
 
 class ExplorerController extends AppController
 {
-  var $components = array('RequestHandler', 'Search', 'ImageFilter', 'VideoFilter');
+  var $components = array('RequestHandler', 'Query', 'ImageFilter', 'VideoFilter');
   var $uses = array('Image', 'Group', 'Tag', 'Category', 'Location');
-  var $helpers = array('form', 'formular', 'html', 'javascript', 'ajax', 'imageData', 'time', 'search', 'explorerMenu', 'rss');
+  var $helpers = array('form', 'formular', 'html', 'javascript', 'ajax', 'imageData', 'time', 'query', 'explorerMenu', 'rss');
 
   function beforeFilter() {
     parent::beforeFilter();
 
-    $this->Search->controller =& $this;
-    $this->Search->parseArgs();
+    $this->Query->controller =& $this;
+    $this->Query->parseArgs();
   }
 
   function beforeRender() {
-    $this->params['search'] = $this->Search->getParams();
+    $this->params['query'] = $this->Query->getParams();
     $this->set('feeds', '/explorer/rss');
   }
 
@@ -43,13 +43,13 @@ class ExplorerController extends AppController
     $this->_setDataAndRender();
   }
 
-  function search() {
+  function query() {
     $this->_setDataAndRender();
   }
 
   function image($id) {
-    $this->Search->setImageId($id);
-    $data = $this->Search->paginateImage();
+    $this->Query->setImageId($id);
+    $data = $this->Query->paginateImage();
     $this->set('data', $data);
     $this->_countMeta(array($data));
     $this->set('mapKey', $this->getPreferenceValue('google.map.key', false));
@@ -60,12 +60,12 @@ class ExplorerController extends AppController
   }
 
   function user($idOrName) {
-    $this->Search->setUserId($idOrName);
+    $this->Query->setUserId($idOrName);
     $this->_setDataAndRender();
   }
 
   function group($id) {
-    $this->Search->setGroupId($id);
+    $this->Query->setGroupId($id);
     $this->_setDataAndRender();
   }
 
@@ -90,25 +90,25 @@ class ExplorerController extends AppController
       }
       $from = mktime(0, 0, 0, $month, $day, $year);
       $to = mktime(0, 0, 0, $m, $d, $y);
-      $this->Search->setDateStart($from);
-      $this->Search->setDateEnd($to-1);
-      $this->Search->setOrder('-date');
+      $this->Query->setDateStart($from);
+      $this->Query->setDateEnd($to-1);
+      $this->Query->setOrder('-date');
     }
     $this->_setDataAndRender();
   }
 
   function tag($tags) {
-    $this->Search->addTags(preg_split('/\s*,\s*/', trim($tags)));
+    $this->Query->addTags(preg_split('/\s*,\s*/', trim($tags)));
     $this->_setDataAndRender();
   }
 
   function category($categories) {
-    $this->Search->addCategories(preg_split('/\s*,\s*/', trim($categories)));
+    $this->Query->addCategories(preg_split('/\s*,\s*/', trim($categories)));
     $this->_setDataAndRender();
   }
 
   function location($locations) {
-    $this->Search->addLocations(preg_split('/\s*,\s*/', trim($locations)));
+    $this->Query->addLocations(preg_split('/\s*,\s*/', trim($locations)));
     $this->_setDataAndRender();
   }
 
@@ -155,7 +155,7 @@ class ExplorerController extends AppController
   }
 
   function _setDataAndRender() {
-    $data = $this->Search->paginate();
+    $data = $this->Query->paginate();
     $this->_countMeta(&$data);
     $this->set('data', &$data);
     if ($this->hasRole(ROLE_USER)) {
@@ -561,9 +561,9 @@ class ExplorerController extends AppController
 
   function rss() {
     $this->layoutPath = 'rss';
-    $this->Search->setPageSize(30);
-    $this->Search->setOrder('newest');
-    $this->set('data', $this->Search->paginate());
+    $this->Query->setPageSize(30);
+    $this->Query->setOrder('newest');
+    $this->set('data', $this->Query->paginate());
 
     Configure::write('debug', 0);
     $this->set(

@@ -25,15 +25,15 @@ class HomeController extends AppController
 	// Important to set the davroot in the Webdav Server
 	var $name = 'home';
 
-  var $components = array('Search');
+  var $components = array('Query');
   var $helpers = array('html');
   var $uses = array('Image', 'Tag', 'Category');
 
   function index() {
-    $cloud = $this->Search->getCloud(50);
+    $cloud = $this->Query->getCloud(50);
     $this->set('cloudTags', $cloud);
 
-    $cloud = $this->Search->getCloud(50, 'Category');
+    $cloud = $this->Query->getCloud(50, 'Category');
     $this->set('cloudCategories', $cloud);
   }
 }

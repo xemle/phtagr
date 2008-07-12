@@ -6,7 +6,7 @@
 
 <div class="navigator">
 <?php
-echo $search->prevImage().' '.$search->up().' '.$search->nextImage();
+echo $query->prevImage().' '.$query->up().' '.$query->nextImage();
 ?>
 </div>
 

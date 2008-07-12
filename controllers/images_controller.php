@@ -25,7 +25,7 @@ class ImagesController extends AppController
 {
   var $scaffold;
   var $uses = array('Image', 'Tag');
-  var $components = array('Search');
+  var $components = array('Query');
   var $helpers = array('imageData');
 
   function view($id)

@@ -22,7 +22,7 @@
  */
 class ExplorerMenuHelper extends AppHelper
 {
-  var $helpers = array('Html', 'Search', 'Menu');
+  var $helpers = array('html', 'query', 'menu');
 
   var $_id;
 
@@ -31,13 +31,13 @@ class ExplorerMenuHelper extends AppHelper
     if (!isset($data[$fields]) || !count($data[$fields]))
       return false;
 
-    $tmp = $this->Search->getSearch();
-    $userId = $this->Search->get('user');
+    $tmp = $this->query->getQuery();
+    $userId = $this->query->get('user');
 
     $subMenu = array();
 
     foreach($data[$fields] as $name => $count) {
-      $this->Search->set('page', 1);
+      $this->query->set('page', 1);
 
       $id = "item-".$this->_id++;
 
@@ -45,34 +45,34 @@ class ExplorerMenuHelper extends AppHelper
       $link = "/explorer/$field/$name";
       if ($userId)
         $link .= "/user:$userId";
-      $text = ' '.$this->Html->link($name, $link);
+      $text = ' '.$this->html->link($name, $link);
       $text .= " ($count)";
 
       $text .= " <div class=\"actionlist\" id=\"$id\">";
 
       // include field
-      $this->Search->add($fields, $name);
-      $text .= $this->Html->link(
-        $this->Html->image('icons/add.png', array('alt' => '+', 'title' => "Include $field $name")),
-        $this->Search->getUri(), null, false, false);
-      $this->Search->remove($fields, $name);
+      $this->query->add($fields, $name);
+      $text .= $this->html->link(
+        $this->html->image('icons/add.png', array('alt' => '+', 'title' => "Include $field $name")),
+        $this->query->getUri(), null, false, false);
+      $this->query->remove($fields, $name);
 
       // exclude field
-      $this->Search->add($fields, '-'.$name);
-      $text .= $this->Html->link(
-        $this->Html->image('icons/delete.png', array('alt' => '-', 'title' => "Exclude $field $name")),
-        $this->Search->getUri(), null, false, false);
-      $this->Search->remove($fields, '-'.$name);
+      $this->query->add($fields, '-'.$name);
+      $text .= $this->html->link(
+        $this->html->image('icons/delete.png', array('alt' => '-', 'title' => "Exclude $field $name")),
+        $this->query->getUri(), null, false, false);
+      $this->query->remove($fields, '-'.$name);
 
       // global link
       if ($userId) {
-        $tmp2 = $this->Search->getSearch();
-        $this->Search->clear();
-        $this->Search->add($fields, $name);
-        $text .= $this->Html->link(
-          $this->Html->image('icons/world.png', array('alt' => 'global', 'title' => "Explore global $field $name")),
+        $tmp2 = $this->query->getQuery();
+        $this->query->clear();
+        $this->query->add($fields, $name);
+        $text .= $this->html->link(
+          $this->html->image('icons/world.png', array('alt' => 'global', 'title' => "Explore global $field $name")),
           "$field/$name", null, false, false);
-        $this->Search->setSearch($tmp2);
+        $this->query->setQuery($tmp2);
       }
       $text .= "</div>";
 
@@ -83,13 +83,13 @@ class ExplorerMenuHelper extends AppHelper
         'onmouseout' => "toggleVisibility('$id', 'inline');");
 
       // reset changed search parameters
-      $this->Search->setSearch($tmp);
+      $this->query->setQuery($tmp);
     }
     return $subMenu;
   }
 
-  function _getSearchOrderMenu() {
-    $tmp = $this->Search->getSearch();
+  function _getQueryOrderMenu() {
+    $tmp = $this->query->getQuery();
     $subMenu = array();
     
     $orders = array(
@@ -99,18 +99,18 @@ class ExplorerMenuHelper extends AppHelper
         'random' => 'Random'
       );
     foreach ($orders as $order => $name) {
-      $this->Search->set('sort', $order);
+      $this->query->set('sort', $order);
       $subMenu[] = array(
-          'text' => $this->Html->link($name, $this->Search->getUri()),
+          'text' => $this->html->link($name, $this->query->getUri()),
           'type' => 'multi'
         );
     }
-    $this->Search->setSearch($tmp);
+    $this->query->setQuery($tmp);
     return $subMenu;
   }
 
   function getMainMenu($data) {
-    $this->Search->initialize();
+    $this->query->initialize();
     $items = array();
     $this->_id = 0;
 
@@ -126,10 +126,10 @@ class ExplorerMenuHelper extends AppHelper
     if ($subMenu !== false)
       $items[] = array('text' => 'Locations', 'type' => 'text', 'submenu' => array('items' => $subMenu));
 
-    $items[] = array('text' => 'Order By', 'type' => 'text', 'submenu' => array('items' => $this->_getSearchOrderMenu()));
+    $items[] = array('text' => 'Order By', 'type' => 'text', 'submenu' => array('items' => $this->_getQueryOrderMenu()));
 
     $menu = array('items' => $items);
-    return $this->Menu->getMainMenu($menu);
+    return $this->menu->getMainMenu($menu);
   }
 }
 ?>

@@ -21,7 +21,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-class SearchComponent extends Object
+class QueryComponent extends Object
 {
   var $component = array('Logger');
   var $_params = array('page' => 1, 'show' => 12, 'pos' => 1);
@@ -62,7 +62,7 @@ class SearchComponent extends Object
     }
   }
 
-  /** Parse passed arguments for the search and check them againse the role of
+  /** Parse passed arguments for the query and check them againse the role of
    * the user */
   function parseArgs() {
     $userRole = $this->controller->getUserRole();
@@ -175,7 +175,7 @@ class SearchComponent extends Object
   }
 
   /** @param tag Tag name
-    @return True of the search has already that given tag */
+    @return True of the query has already that given tag */
   function hasTag($tag) {
     return in_array($tag, $this->_tags);
   }
@@ -192,7 +192,7 @@ class SearchComponent extends Object
     return false;
   }
 
-  /** @return Returns the tags of the current search */
+  /** @return Returns the tags of the current query */
   function getTags() {
     return $this->_tags;
   }
@@ -228,7 +228,7 @@ class SearchComponent extends Object
   }
 
   /** @param cat Name of category
-    @return True of the search has already that given set */
+    @return True of the query has already that given set */
   function hasCategory($category) {
     return in_array($category, $this->_categories);
   }
@@ -245,7 +245,7 @@ class SearchComponent extends Object
     return false;
   }
 
-  /** @return Returns the sets of the current search */
+  /** @return Returns the sets of the current query */
   function getCategories() {
     return $this->_categories;
   }
@@ -283,7 +283,7 @@ class SearchComponent extends Object
   }
 
   /** @param set Set name
-    @return True of the search has already that given set */
+    @return True of the query has already that given set */
   function hasLocation($location) {
     return in_array($location, $this->_locations);
   }
@@ -300,7 +300,7 @@ class SearchComponent extends Object
     return false;
   }
 
-  /** @return Returns the locations of the current search */
+  /** @return Returns the locations of the current query */
   function getLocations() {
     return $this->_locations;
   }

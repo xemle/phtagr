@@ -21,10 +21,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-class SearchHelper extends AppHelper {
+class QueryHelper extends AppHelper {
   var $helpers = array('html'); 
 
-  /** Skip specific search parameters */
+  /** Skip specific query parameters */
   var $_excludePage = array('prevPage' => true, 
                     'nextPage' => true,
                     'prevImage' => true, 
@@ -49,29 +49,29 @@ class SearchHelper extends AppHelper {
                     'videw' => true
                     );
 
-  var $_search = array(); 
+  var $_query = array(); 
 
-  /** Initialize search parameters from the global parameter array, which is
-   * set by the search component */
+  /** Initialize query parameters from the global parameter array, which is
+   * set by the query component */
   function initialize() {
-    if (!isset($this->params['search']))
+    if (!isset($this->params['query']))
       return;
-    $this->_search = $this->params['search'];
+    $this->_query = $this->params['query'];
   }
 
   /** 
-    @param search Optional search array
-    @return Array of current search options with the syntax of
+    @param query Optional query array
+    @return Array of current query options with the syntax of
     name:value[,value...]
    */
-  function _buildParams($search = null, $exclude = null) {
-    if ($search == null)
-      $search = &$this->_search;
+  function _buildParams($query = null, $exclude = null) {
+    if ($query == null)
+      $query = &$this->_query;
     if ($exclude == null)
       $exclude = &$this->_excludePage;
 
     $params = array();
-    foreach ($search as $name => $value) {
+    foreach ($query as $name => $value) {
       if (isset($exclude[$name]) && 
         ($exclude[$name] === true || $exclude[$name] == $value))
         continue;
@@ -87,18 +87,18 @@ class SearchHelper extends AppHelper {
     return $params;
   }
 
-  /** Returns all parameters of the current search */
-  function getSearch() {
-    return $this->_search;
+  /** Returns all parameters of the current query */
+  function getQuery() {
+    return $this->_query;
   }
 
-  function setSearch($search) {
-    $this->_search = $search;
+  function setQuery($query) {
+    $this->_query = $query;
   }
 
-  /** Clear all parameter values of the search */
+  /** Clear all parameter values of the query */
   function clear() {
-    $this->_search = array();
+    $this->_query = array();
   }
 
   /** Set the current parameter with the given value. This function will
@@ -106,7 +106,7 @@ class SearchHelper extends AppHelper {
    * @param name Parameter name 
    * @param value Parameter value */
   function set($name, $value) {
-    $this->_search[$name] = $value;    
+    $this->_query[$name] = $value;    
   }
 
   /** Returns a specific parameter by name
@@ -114,8 +114,8 @@ class SearchHelper extends AppHelper {
     @param default Default value, if parameter is not set. Default is null
     @return Parameter value */
   function get($name, $default = null) {
-    if (isset($this->_search[$name]))
-      return $this->_search[$name];
+    if (isset($this->_query[$name]))
+      return $this->_query[$name];
     else
       return $default;
   }
@@ -125,16 +125,16 @@ class SearchHelper extends AppHelper {
    * @param name Parameter name 
    * @param value Parameter value */
   function add($name, $value) {
-    if (!isset($this->_search[$name]))
-      $this->_search[$name] = array();
+    if (!isset($this->_query[$name]))
+      $this->_query[$name] = array();
     
-    if (!is_array($this->_search[$name])) {
-      $value = $this->_search[$name];
-      $this->_search[$name] = array($value);
+    if (!is_array($this->_query[$name])) {
+      $value = $this->_query[$name];
+      $this->_query[$name] = array($value);
     }
        
-    if (!in_array($value, $this->_search[$name]))
-      array_push($this->_search[$name], $value);
+    if (!in_array($value, $this->_query[$name]))
+      array_push($this->_query[$name], $value);
   }
 
   /** Removes a parameter value of the parameter name. If more than one value
@@ -142,53 +142,53 @@ class SearchHelper extends AppHelper {
    * @param name Parameter name 
    * @param value Parameter value */
   function remove($name, $value = null) {
-    if (!isset($this->_search[$name]))
+    if (!isset($this->_query[$name]))
       return;
 
-    if (!is_array($this->_search[$name])) {
-      unset($this->_search[$name]);
+    if (!is_array($this->_query[$name])) {
+      unset($this->_query[$name]);
     } elseif ($value !== null) {
-      $key = array_search($value, $this->_search[$name]);
+      $key = array_search($value, $this->_query[$name]);
       if ($key !== false)
-        unset($this->_search[$name][$key]);
+        unset($this->_query[$name][$key]);
 
       // Removes parameter if no value exists
-      if (!count($this->_search[$name]))
-        unset($this->_search[$name]);
+      if (!count($this->_query[$name]))
+        unset($this->_query[$name]);
     }
   }
 
-  function getParams($search = null, $exclude = null) {
-    return implode('/', $this->_buildParams($search, $exclude));
+  function getParams($query = null, $exclude = null) {
+    return implode('/', $this->_buildParams($query, $exclude));
   }
 
-  /** @param search Optional search array
-    @return uri of current search */
-  function getUri($search = null, $exclude = null) {
-    $params = $this->_buildParams($search, $exclude);
-    return '/'.$this->params['controller'].'/search/'.implode('/', $params);
+  /** @param query Optional query array
+    @return uri of current query */
+  function getUri($query = null, $exclude = null) {
+    $params = $this->_buildParams($query, $exclude);
+    return '/'.$this->params['controller'].'/query/'.implode('/', $params);
   }
 
   function prev() {
-    if (!isset($this->params['search']))
+    if (!isset($this->params['query']))
       return;
-    $search = $this->params['search'];
+    $query = $this->params['query'];
     $exclude = am($this->_excludePage, array('pos' => true));
-    if ($search['prevPage']) {
-      $search['page']--;
-      return $this->html->link('prev', $this->getUri($search, $exclude));
+    if ($query['prevPage']) {
+      $query['page']--;
+      return $this->html->link('prev', $this->getUri($query, $exclude));
     }
   }
   
   function numbers() {
-    if (!isset($this->params['search']))
+    if (!isset($this->params['query']))
       return;
     $output = '';
-    $search = $this->params['search'];
+    $query = $this->params['query'];
     $exclude = am($this->_excludePage, array('pos' => true));
-    if ($search['pages'] > 1) {
-      $count = $search['pages'];
-      $current = $search['page'];
+    if ($query['pages'] > 1) {
+      $count = $query['pages'];
+      $current = $query['page'];
       for ($i = 1; $i <= $count; $i++) {
         if ($i == $current) {
           $output .= " <span class=\"current\">$i</span> ";
@@ -196,8 +196,8 @@ class SearchHelper extends AppHelper {
         else if ($count <= 12 ||
             ($i < 3 || $i > $count-2 ||
             ($i-$current < 4 && $current-$i<4))) {
-          $search['page']=$i;
-          $output .= ' '.$this->html->link($i, $this->getUri($search, $exclude));
+          $query['page']=$i;
+          $output .= ' '.$this->html->link($i, $this->getUri($query, $exclude));
         }
         else if ($i == $count-2 || $i == 3) {
           $output .= " ... ";
@@ -208,44 +208,44 @@ class SearchHelper extends AppHelper {
   }
 
   function next() {
-    if (!isset($this->params['search']))
+    if (!isset($this->params['query']))
       return;
-    $search = $this->params['search'];
+    $query = $this->params['query'];
     $exclude = am($this->_excludePage, array('pos' => true));
-    if ($search['nextPage']) {
-      $search['page']++;
-      return $this->html->link('next', $this->getUri($search, $exclude));
+    if ($query['nextPage']) {
+      $query['page']++;
+      return $this->html->link('next', $this->getUri($query, $exclude));
     }
   }
 
   function prevImage() {
-    if (!isset($this->params['search']))
+    if (!isset($this->params['query']))
       return;
-    $search = $this->params['search'];
-    if (isset($search['prevImage'])) {
-      $search['pos']--;
-      $search['page'] = ceil($search['pos'] / $search['show']);
-      return $this->html->link('prev', '/explorer/image/'.$search['prevImage'].'/'.$this->getParams($search, $this->_excludeImage));
+    $query = $this->params['query'];
+    if (isset($query['prevImage'])) {
+      $query['pos']--;
+      $query['page'] = ceil($query['pos'] / $query['show']);
+      return $this->html->link('prev', '/explorer/image/'.$query['prevImage'].'/'.$this->getParams($query, $this->_excludeImage));
     }
   }
 
   function up() {
-    if (!isset($this->params['search']))
+    if (!isset($this->params['query']))
       return;
-    $search = $this->params['search'];
-    $search['page'] = ceil($search['pos'] / $search['show']);
+    $query = $this->params['query'];
+    $query['page'] = ceil($query['pos'] / $query['show']);
     $exclude = am($this->_excludeImage, array('image' => true, 'pos' => true));
-    return $this->html->link('up', $this->getUri($search, $exclude).'#image-'.$search['image']);
+    return $this->html->link('up', $this->getUri($query, $exclude).'#image-'.$query['image']);
   }
 
   function nextImage() {
-    if (!isset($this->params['search']))
+    if (!isset($this->params['query']))
       return;
-    $search = $this->params['search'];
-    if (isset($search['nextImage'])) {
-      $search['pos']++;
-      $search['page'] = ceil($search['pos'] / $search['show']);
-      return $this->html->link('next', '/explorer/image/'.$search['nextImage'].'/'.$this->getParams($search, $this->_excludeImage));
+    $query = $this->params['query'];
+    if (isset($query['nextImage'])) {
+      $query['pos']++;
+      $query['page'] = ceil($query['pos'] / $query['show']);
+      return $this->html->link('next', '/explorer/image/'.$query['nextImage'].'/'.$this->getParams($query, $this->_excludeImage));
     }
   }
 }

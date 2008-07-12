@@ -22,7 +22,7 @@
  */
 
 class ImageDataHelper extends AppHelper {
-  var $helpers = array('time', 'ajax', 'html', 'form', 'search');
+  var $helpers = array('time', 'ajax', 'html', 'form', 'query');
 
   function getimagesize($data, $size, $square=false) {
     if (!isset($data['Image']['width']) ||
@@ -100,38 +100,38 @@ class ImageDataHelper extends AppHelper {
   }
 
   function _metaDate($data) {
-    $base = $this->search->getSearch();
+    $base = $this->query->getQuery();
 
-    $this->search->set('from', $this->toUnix(&$data, -3*60*60));
-    $this->search->set('to', $this->toUnix(&$data, 3*60*60));
-    $output = $this->html->link($data['Image']['date'], $this->search->getUri());
+    $this->query->set('from', $this->toUnix(&$data, -3*60*60));
+    $this->query->set('to', $this->toUnix(&$data, 3*60*60));
+    $output = $this->html->link($data['Image']['date'], $this->query->getUri());
     $output .= ' [';
 
-    $this->search->setSearch($base);
-    $this->search->set('to', $this->toUnix(&$data));
-    $this->search->set('sort', 'date');
-    $output .= $this->html->link('<', $this->search->getUri());
+    $this->query->setQuery($base);
+    $this->query->set('to', $this->toUnix(&$data));
+    $this->query->set('sort', 'date');
+    $output .= $this->html->link('<', $this->query->getUri());
 
-    $this->search->setSearch($base);
-    $this->search->set('from', $this->toUnix(&$data, -12*60*60));
-    $this->search->set('to', $this->toUnix(&$data, 12*60*60));
-    $output .= $this->html->link('d', $this->search->getUri());
+    $this->query->setQuery($base);
+    $this->query->set('from', $this->toUnix(&$data, -12*60*60));
+    $this->query->set('to', $this->toUnix(&$data, 12*60*60));
+    $output .= $this->html->link('d', $this->query->getUri());
 
-    $this->search->set('from', $this->toUnix(&$data, -3.5*24*60*60));
-    $this->search->set('to', $this->toUnix(&$data, 3.5*24*60*60));
-    $output .= $this->html->link('w', $this->search->getUri());
+    $this->query->set('from', $this->toUnix(&$data, -3.5*24*60*60));
+    $this->query->set('to', $this->toUnix(&$data, 3.5*24*60*60));
+    $output .= $this->html->link('w', $this->query->getUri());
 
-    $this->search->set('from', $this->toUnix(&$data, -15*24*60*60));
-    $this->search->set('to', $this->toUnix(&$data, 15*24*60*60));
-    $output .= $this->html->link('m', $this->search->getUri());
+    $this->query->set('from', $this->toUnix(&$data, -15*24*60*60));
+    $this->query->set('to', $this->toUnix(&$data, 15*24*60*60));
+    $output .= $this->html->link('m', $this->query->getUri());
 
-    $this->search->setSearch($base);
-    $this->search->set('from', $this->toUnix(&$data));
-    $this->search->set('sort', '-date');
-    $output .= $this->html->link('>', $this->search->getUri());
+    $this->query->setQuery($base);
+    $this->query->set('from', $this->toUnix(&$data));
+    $this->query->set('sort', '-date');
+    $output .= $this->html->link('>', $this->query->getUri());
     $output .= ']';
 
-    $this->search->setSearch($base);
+    $this->query->setQuery($base);
     return $output;
   }
 
@@ -139,27 +139,27 @@ class ImageDataHelper extends AppHelper {
     if (!count($data[$habtm])) 
       return false;
 
-    $base = $this->search->getSearch();
+    $base = $this->query->getQuery();
     $field = strtolower(Inflector::pluralize($habtm));
     $links = array();
     foreach ($data[$habtm] as $assoc) {
-      $this->search->set($field, $assoc['name']);
-      $links[] = $this->html->link($assoc['name'], $this->search->getUri());
+      $this->query->set($field, $assoc['name']);
+      $links[] = $this->html->link($assoc['name'], $this->query->getUri());
     }
-    $this->search->setSearch($base);
+    $this->query->setQuery($base);
     return implode(', ', $links);
   }
 
   function _metaAccess($data) {
-    $base = $this->search->getSearch();
+    $base = $this->query->getQuery();
     $output = '';
     if (isset($data['Group']['name'])) {
-      $this->search->clear();
-      $this->search->set('group', $data['Group']['id']);
-      $output .= $this->html->link($data['Group']['name'], $this->search->getUri()).', ';
+      $this->query->clear();
+      $this->query->set('group', $data['Group']['id']);
+      $output .= $this->html->link($data['Group']['name'], $this->query->getUri()).', ';
     }
     $output .= $this->_acl2text($data);
-    $this->search->setSearch($base);
+    $this->query->setQuery($base);
 
     return $output;
   }
@@ -171,12 +171,12 @@ class ImageDataHelper extends AppHelper {
 
     $imageId = $data['Image']['id'];
 
-    $this->search->initialize();
-    $userId = $this->search->get('user');
-    $this->search->clear();
+    $this->query->initialize();
+    $userId = $this->query->get('user');
+    $this->query->clear();
     if ($userId)
-      $this->search->set('user', $userId);
-    $base = $this->search->getSearch();
+      $this->query->set('user', $userId);
+    $base = $this->query->getQuery();
 
     $cells[] = array("Date:", $this->_metaDate(&$data));
 
