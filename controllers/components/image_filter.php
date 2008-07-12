@@ -85,6 +85,26 @@ class ImageFilterComponent extends Object {
     return $data;
   }
 
+  /** Extracts the date of the file. It extracts the date of IPTC and EXIF.
+   * IPTC has the priority. 
+    @param data Meta data 
+    @return Date of the meta data or now if not data information was found */
+  function _extractImageDate($data) {
+    // IPTC date
+    $dateIptc = $this->_extract($data, 'DateCreated', null);
+    if ($dateIptc) {
+      $time = $this->_extract($data, 'TimeCreated', null);
+      if ($time) {
+        $dateIptc .= ' '.$time;
+      } else {
+        $dateIptc .= ' 00:00:00';
+      }
+      return $dateIptc;
+    }
+    // No IPTC date: Extract Exif date or now
+    return $this->_extract($data, 'DateTimeOriginal', date('Y-m-d H:i:s', time()));
+  }
+
   /** Extract the image data from the exif tool array and save it as image 
    * @param data Data array from exif tool array 
    * @return Array of the the image data array as image model data 
@@ -97,7 +117,7 @@ class ImageFilterComponent extends Object {
     // Image information
     $v['name'] = $this->_extract($data, 'FileName');
     // TODO Read IPTC date, than EXIF date
-    $v['date'] = $this->_extract($data, 'DateTimeOriginal', date('Y-m-d H:i:s', time()));
+    $v['date'] = $this->_extractImageDate($data);
     if (!$this->controller->Image->isVideo($image)) {
       $v['width'] = $this->_extract($data, 'ImageWidth', 0);
       $v['height'] = $this->_extract($data, 'ImageHeight', 0);
@@ -217,13 +237,54 @@ class ImageFilterComponent extends Object {
     return true;
   }
 
+  /** Creates the export arguments for date for IPTC if date information of the
+   * file differs from the database entry
+    @param data Meta data of the file
+    @param image Model data of the current image
+    @return export arguments or an empty string */
+  function _createExportDate($data, $image) {
+    // Remove IPTC data and time if database date is not set
+    if (!$image['Image']['date']) {
+      $arg .= ' -DateCreated-= -TimeCreated-=';
+      return '';
+    }
+
+    $timeDb = strtotime($image['Image']['date']);
+    $timeFile = false;
+
+    // Date priorities: IPTC, EXIF
+    $dateIptc = $this->_extract($data, 'DateCreated');
+    if ($dateIptc) {
+      $time = $this->_extract($data, 'TimeCreated');
+      if ($time) {
+        $dateIptc .= ' '.$time;
+      } else {
+        $dateIptc .= ' 00:00:00';
+      }
+      $timeFile = strtotime($dateIptc);
+    } else {
+      $dateExif = $this->_extract($data, 'DateTimeOriginal');
+      if ($dateExif) {
+        $timeFile = strtotime($dateExif);
+      }
+    }
+
+    $arg = '';
+    if ($timeDb && (!$timeFile || ($timeFile != $timeDb))) {
+      $arg .= ' -DateCreated='.escapeshellarg(date("Y:m:d", $timeDb));
+      $arg .= ' -TimeCreated='.escapeshellarg(date("H:i:s", $timeDb));
+      //$this->controller->Logger->trace("Set new date via IPTC: $arg");
+    }
+    return $arg;
+  }
+
   /** Create arguments to export the metadata from the database to the file.
     * @param data metadata from the file (Exiftool information)
     * @param image Image data array */
   function _createExportArguments($data, $image) {
     $args = '';
 
-    // TODO Check for date and write it as IPTC date if changed
+    $args .= $this->_createExportDate($data, $image);
 
     // Associations to meta data: Tags, Categories, Locations
     $keywords = $this->_extract($data, 'Keywords');
