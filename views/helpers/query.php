@@ -138,10 +138,10 @@ class QueryHelper extends AppHelper {
   }
 
   /** Removes a parameter value of the parameter name. If more than one value
-   * is stacked to the parameter value, is removes only the given value.
+   * is stacked to the parameter value, is delets only the given value.
    * @param name Parameter name 
    * @param value Parameter value */
-  function remove($name, $value = null) {
+  function del($name, $value = null) {
     if (!isset($this->_query[$name]))
       return;
 
@@ -156,6 +156,10 @@ class QueryHelper extends AppHelper {
       if (!count($this->_query[$name]))
         unset($this->_query[$name]);
     }
+  }
+
+  function delete($name, $value = null) {
+    $this->del($name, $value);
   }
 
   function getParams($query = null, $exclude = null) {

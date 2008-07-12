@@ -283,7 +283,7 @@ class ImageDataHelper extends AppHelper {
       ACL_LEVEL_USER => 'Users',
       ACL_LEVEL_OTHER => 'Everyone');
     $options = am($options, array('type' => 'select', 'options' => $acl, 'selected' => $level));
-    $this->log($options);
+    //$this->log($options);
     return $this->form->input($fieldName, $options);
   }  
 

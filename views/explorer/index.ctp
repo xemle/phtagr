@@ -42,7 +42,11 @@ foreach($data as $image): ?>
     $canWriteAcl=true;
 ?>
 </div>
-
+<div class="user">
+<?php
+  echo $html->link($image['User']['username'], "/explorer/user/".$image['User']['id']);
+?>
+</div>
 <div class="meta">
 <div id="<?php echo 'meta-'.$image['Image']['id']; ?>">
 <table>

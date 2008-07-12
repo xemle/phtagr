@@ -55,14 +55,14 @@ class ExplorerMenuHelper extends AppHelper
       $text .= $this->html->link(
         $this->html->image('icons/add.png', array('alt' => '+', 'title' => "Include $field $name")),
         $this->query->getUri(), null, false, false);
-      $this->query->remove($fields, $name);
+      $this->query->del($fields, $name);
 
       // exclude field
       $this->query->add($fields, '-'.$name);
       $text .= $this->html->link(
         $this->html->image('icons/delete.png', array('alt' => '-', 'title' => "Exclude $field $name")),
         $this->query->getUri(), null, false, false);
-      $this->query->remove($fields, '-'.$name);
+      $this->query->del($fields, '-'.$name);
 
       // global link
       if ($userId) {
@@ -114,6 +114,7 @@ class ExplorerMenuHelper extends AppHelper
     $items = array();
     $this->_id = 0;
 
+    $items[] = array('text' => $this->html->link('Advance Search', 'search'));
     $subMenu = $this->_getSubMenu($data, 'tag');
     if ($subMenu !== false)
       $items[] = array('text' => 'Tags', 'type' => 'text', 'submenu' => array('items' => $subMenu));
@@ -126,7 +127,9 @@ class ExplorerMenuHelper extends AppHelper
     if ($subMenu !== false)
       $items[] = array('text' => 'Locations', 'type' => 'text', 'submenu' => array('items' => $subMenu));
 
-    $items[] = array('text' => 'Order By', 'type' => 'text', 'submenu' => array('items' => $this->_getQueryOrderMenu()));
+    if ($this->params['action'] != 'search') {
+      $items[] = array('text' => 'Order By', 'type' => 'text', 'submenu' => array('items' => $this->_getQueryOrderMenu()));
+    }
 
     $menu = array('items' => $items);
     return $this->menu->getMainMenu($menu);

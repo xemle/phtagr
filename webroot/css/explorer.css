@@ -46,6 +46,10 @@
   border: 1px solid black;
 }
 
+.user {
+  text-align: center;
+}
+
 .meta {
   margin: 0; 
   padding: 0;

@@ -67,7 +67,7 @@ class QueryComponent extends Object
   function parseArgs() {
     $userRole = $this->controller->getUserRole();
     foreach($this->controller->passedArgs as $name => $value) {
-      if (is_numeric($name))
+      if (is_numeric($name) || empty($value))
         continue;
       switch($name) {
         case 'page': $this->setPageNum(intval($value)); break;
@@ -76,39 +76,57 @@ class QueryComponent extends Object
         case 'sort': $this->setOrder($value); break;
 
         case 'image': $this->setImageId(intval($value)); break;
-        case 'user': $this->setUserId($value); break;
+        case 'user': $this->setUser($value); break;
         case 'group': if ($userRole >= ROLE_USER) $this->setGroupId(intval($value)); break;
         case 'visibility': if ($userRole >= ROLE_USER) $this->setVisibility($value); break;
+
+        case 'filename': if ($userRole >= ROLE_GUEST) $this->setFilename($value); break;
+        case 'filetype': if ($userRole >= ROLE_GUEST) $this->setFiletype($value); break;
 
         case 'from': $this->setDateStart($value); break;
         case 'to': $this->setDateEnd($value); break;
 
-        case 'tags': $this->addTags(preg_split('/\s*,\s*/', $value)); break;
-        case 'categories': $this->addCategories(preg_split('/\s*,\s*/', trim($value))); break;
-        case 'locations': $this->addLocations(preg_split('/\s*,\s*/', trim($value))); break;
+        case 'tags': $this->addTags($value); break;
+        case 'tagop': $this->setTagOp(intval($value)); break;
+        case 'categories': $this->addCategories($value); break;
+        case 'categoryop': $this->setCategoryOp(intval($value)); break;
+        case 'locations': $this->addLocations($value); break;
 
         default:
-          $this->Logger->err("Unknown argument: $name:$value");
+          //$this->Logger->err("Unknown argument: $name:$value");
       }
     }
   }
 
   function setImageId($imageId) {
-    $imageId = intval($imageId);
-    $this->setParam('image', $imageId);
+    if (empty($imageId)) {
+      return;
+    }
+
+    $this->setParam('image', intval($imageId));
   }
 
   /** Set the user id
     @param userid If the userid is not numeric, it converts the name to the id */
-  function setUserId($idOrName) {
-    if (!is_numeric($idOrName)) {
-      $user = $this->controller->User->findByUsername($idOrName);
-      if ($user !== false)
-        $userid=$user['User']['id'];
-      else
-        $userid=-1;
+  function setUser($idOrName) {
+    if (empty($idOrName)) {
+      return;
     }
-    $this->setParam('user', $idOrName);
+
+    if (is_numeric($idOrName)) {
+      $user = $this->controller->User->findById($idOrName);
+    } else {
+      $user = $this->controller->User->findByUsername($idOrName);
+    }
+    if ($user == false || $user['User']['role'] < ROLE_USER) {
+      return;
+    }
+
+    $this->setParam('user', $user['User']['id']);
+  }
+
+  function setUserId($id) {
+    $this->setUser($id);
   }
 
   function getUserId() {
@@ -116,20 +134,27 @@ class QueryComponent extends Object
   }
 
   function setGroupId($groupId) {
-    $groupId = intval($groupId);
-    $this->setParam('group', $groupId);
+    if (empty($groupId)) {
+      return;
+    }
+
+    $this->setParam('group', intval($groupId));
   }
 
   function setVisibility($visibility) {
+    if (empty($visibility)) {
+      return;
+    }
+
     switch ($visibility) {
-    case 'private': 
-    case 'group': 
-    case 'member':
-    case 'public':
-      $this->setParam('visibility', $visibility);
-      break;
-    default:
-      break;
+      case 'private': 
+      case 'group': 
+      case 'user':
+      case 'public':
+        $this->setParam('visibility', $visibility);
+        break;
+      default:
+        break;
     }
   }
 
@@ -137,39 +162,52 @@ class QueryComponent extends Object
     @param type Valid values are 'any', 'image', and 'video'
   */
   function setFiletype($type) {
+    if (empty($type)) {
+      return;
+    }
+
     switch ($type) {
-    case 'any':
-      $this->delParam('filetype');
-      break;
-    case 'image': 
-    case 'video':
-      $this->setParam('filetype', $type);
-      break;
-    default:
-      break;
+      case 'any':
+        $this->delParam('filetype');
+        break;
+      case 'image': 
+      case 'video':
+        $this->setParam('filetype', $type);
+        break;
+      default:
+        break;
     }
   }
 
-  function setNameMask($mask) {
-    $this->setParam('image_name', $mask);
+  function setFilename($mask) {
+    if (empty($mask)) {
+      return;
+    }
+
+    $this->setParam('filename', $mask);
   }
 
-  function getNameMask() {
-    return $this->getParam('image_name', '');
+  function getFilename() {
+    return $this->getParam('filename', '');
   }
 
   function addTag($tag) {
     $tag=trim($tag);
-    if (!strlen($tag)) 
+    if (!$tag) 
       return false;
     if ($this->hasTag($tag))
       return true;
 
-    array_push($this->_tags, $tag);
+    $this->_tags[] = $tag;
     return true;
   }
 
   function addTags($tags) {
+    if (empty($tags)) {
+      return;
+    } elseif (!is_array($tags)) {
+      $tags = preg_split('/\s*,\s*/', trim($tags));
+    }
     foreach ($tags as $tag)
       $this->addTag($tag);
   }
@@ -200,6 +238,10 @@ class QueryComponent extends Object
   /** Sets the operator of tags
     @param tagop Must be between 0 and 2 */
   function setTagOp($tagop) {
+    if (empty($tagop)) {
+      return;
+    }
+
     $tagop = intval($tagop);
     if ($tagop < 0 || $tagop > 2)
       $tagop = 0; 
@@ -207,22 +249,26 @@ class QueryComponent extends Object
     $this->setParam('tagop', $tagop);
   }
 
-  function clearTags()
-  {
+  function clearTags() {
     unset($this->_tags);
     $this->_tags=array();
   }
 
   function addCategory($cat) {
     $cat=trim($cat);
-    if ($cat=='') return false;
+    if (!$cat) return false;
     if ($this->hasCategory($cat))
       return true;
-    array_push($this->_categories, $cat);
+    $this->_categories[] = $cat;
     return true;
   }
 
   function addCategories($categories) {
+    if (empty($categories)) {
+      return;
+    } elseif (!is_array($categories)) {
+      $categories = preg_split('/\s*,\s*/', trim($categories));
+    }
     foreach($categories as $category)
       $this->addCategory($category);
   }
@@ -253,6 +299,10 @@ class QueryComponent extends Object
   /** Sets the operator of sets
     @param catop Must be between 0 and 2 */
   function setCategoryOp($catop) {
+    if (empty($catop)) {
+      return;
+    }
+    
     $catop = intval($catop);
     if ($catop < 0 || $catop > 2)
       $catop = 0; 
@@ -273,11 +323,17 @@ class QueryComponent extends Object
     if ($this->hasLocation($location)) 
       return true;
 
-    array_push($this->_locations, $location);
+    $this->_locations[] = $location;
     return true;
   }
 
   function addLocations($locations) {
+    if (empty($locations)) {
+      return;
+    } elseif (!is_array($locations)) {
+      $locations = preg_split('/\s*,\s*/', trim($locations));
+    }
+
     foreach($locations as $location)
       $this->addLocation($location);
   }
@@ -308,6 +364,10 @@ class QueryComponent extends Object
   /** Sets the operator of locations
     @param catop Must be between 0 and 2 */
   function setLocationOp($locop) {
+    if (empty($locop)) {
+      return;
+    }
+
     $locop = intval($locop);
     if ($locop < 0 || $locop > 2)
       $locop = 0; 
@@ -337,21 +397,28 @@ class QueryComponent extends Object
       return $date;
 
     // YYYY-MM-DD
-    if (strlen($date)==10 && strpos($date, '-')>0) {
-      $s=strtr($date, '-', ' ');
-      $a=split(' ', $s);
+    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+      $a=split('-', $s);
       $sec=mktime(0, 0, 0, $a[1], $a[2], $a[0]);
       return $sec;
     }
     return false;
   }
 
-  function setDateStart($start) {
+  function setDateFrom($start) {
+    if (empty($start)) {
+      return;
+    }
+
     $start=$this->_convertDate($start);
     $this->setParam('from', $start);
   }
 
-  function setDateEnd($end) {
+  function setDateTo($end) {
+    if (empty($end)) {
+      return;
+    }
+
     $end=$this->_convertDate($end);
     $this->setParam('to', $end);
   }
@@ -359,6 +426,10 @@ class QueryComponent extends Object
   /**
     @param pos If is less than 0 set it to 1. If 0, delete it */
   function setPosition($pos) {
+    if (empty($pos)) {
+      return;
+    }
+
     $pos = intval($pos);
     if ($pos == 0) {
       $this->delParam('pos');
@@ -376,6 +447,10 @@ class QueryComponent extends Object
   }
 
   function setPageNum($page) {
+    if (empty($page)) {
+      return;
+    }
+
     $page = intval($page);
     if ($page < 1)
       $page = 1;
@@ -661,7 +736,7 @@ class QueryComponent extends Object
   }
 
   /** Sets the visiblity of an image. It selects images which are only visible
-   * for the group, only for members or visible for the public */
+   * for the group, only for user or visible for the public */
   function _addSqlWhereVisibility() {
     $acl='';
     $visible=$this->getParam('visibility', '');
@@ -672,7 +747,7 @@ class QueryComponent extends Object
     case 'group':
       $acl .= " AND Image.gacl>=".ACL_READ_PREVIEW." AND Image.uacl<".ACL_READ_PREVIEW; 
       break;
-    case 'member':
+    case 'user':
       $acl .= " AND Image.uacl>=".ACL_READ_PREVIEW." AND Image.oacl<".ACL_READ_PREVIEW; 
       break;
     case 'public':
@@ -826,10 +901,11 @@ class QueryComponent extends Object
     if ($type=='video')
       $sql.=" AND Image.duration>=0";
 
-    $nameMask=$this->getNameMask();
-    if (strlen($nameMask)) {
-      $snameMask=mysql_escape_string($nameMask);
-      $sql.=" AND Image.name LIKE '%$snameMask%'";
+    $file=$this->getFilename();
+    if (strlen($file)) {
+      uses('sanitize');
+      $sanitize = new Sanitize();
+      $sql.=" AND Image.file LIKE '%".$sanitize->escape($file)."%'";
     }
     return $sql;
   }

@@ -44,7 +44,43 @@ class ExplorerController extends AppController
   }
 
   function query() {
+    if (!empty($this->data)) {
+      $this->Query->addTags($this->data['Image']['tags']);
+      $this->Query->setTagOp($this->data['Image']['tag_op']);
+      $this->Query->addCategories($this->data['Image']['categories']);
+      $this->Query->setCategoryOp($this->data['Image']['category_op']);
+      $this->Query->addLocations($this->data['Image']['locations']);
+
+      $this->Query->setDateFrom($this->data['Image']['date_from']);
+      $this->Query->setDateTo($this->data['Image']['date_to']);
+
+      $this->Query->setPageSize($this->data['Query']['show']);
+
+      if ($this->hasRole(ROLE_GUEST)) {
+        $this->Query->setFilename($this->data['Image']['filename']);
+        $this->Query->setFiletype($this->data['Image']['file_type']);
+      }
+
+      if ($this->hasRole(ROLE_USER)) {
+        $this->Query->setVisibility($this->data['Image']['visibility']);
+
+        $this->Query->setUser($this->data['User']['username']);
+        $this->Query->setGroupId($this->data['Group']['id']);
+      } 
+    } 
     $this->_setDataAndRender();
+  }
+
+  function search() {
+    if ($this->hasRole(ROLE_USER)) {
+      $groups = $this->Group->findAll(array('Group.user_id' => $this->getUserId()), false, array('Group.name'));
+      if ($groups) 
+        $groups = Set::combine($groups, "{n}.Group.id", "{n}.Group.name");
+      $groups[-1] = '';
+      $this->set('groups', $groups);
+    }
+    $this->set('userRole', $this->getUserRole());
+    $this->set('mainMenuExplorer', array());
   }
 
   function image($id) {
@@ -60,7 +96,7 @@ class ExplorerController extends AppController
   }
 
   function user($idOrName) {
-    $this->Query->setUserId($idOrName);
+    $this->Query->setUser($idOrName);
     $this->_setDataAndRender();
   }
 

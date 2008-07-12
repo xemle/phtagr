@@ -10,9 +10,9 @@
     $userId = $session->read('User.id');
     $role = $session->read('User.role');
     $myImages = false;
-    if (isset($search)) {
-      $search->initialize();
-      $myImages = ($userId == $search->get('user', null)?true:false);
+    if (isset($query)) {
+      $query->initialize();
+      $myImages = ($userId == $query->get('user', null)?true:false);
     }
     $items[] = array(
       'text' => 'Explorer', 
