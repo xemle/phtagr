@@ -42,11 +42,17 @@ foreach($data as $image): ?>
     $canWriteAcl=true;
 ?>
 </div>
+
+<?php 
+  $query->initialize();
+  if (!$query->get('myimage')): ?>
 <div class="user">
 <?php
   echo $html->link($image['User']['username'], "/explorer/user/".$image['User']['id']);
 ?>
 </div>
+<?php endif; ?>
+
 <div class="meta">
 <div id="<?php echo 'meta-'.$image['Image']['id']; ?>">
 <table>
@@ -83,7 +89,10 @@ echo $query->prev().' '.$query->numbers().' '.$query->next()
 
 <div class="edit">
 <?php if ($canWriteTag): ?>
-<? echo $form->create(null, array('id' => 'explorer', 'action' => 'edit/'.$query->getParams())); ?>
+<?php 
+  $query->initialize();
+  echo $form->create(null, array('id' => 'explorer', 'action' => 'edit/'.$query->getParams())); 
+?>
 <fieldset><legend>Metadata</legend>
 <?php echo $form->hidden('Image.ids', array('id' => 'ImageIds')) ?>
 <?php 
