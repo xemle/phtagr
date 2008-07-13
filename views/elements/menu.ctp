@@ -12,7 +12,7 @@
     $myImages = false;
     if (isset($query)) {
       $query->initialize();
-      $myImages = ($userId == $query->get('user', null)?true:false);
+      $myImages = $query->get('myimage');
     }
     $items[] = array(
       'text' => 'Explorer', 

@@ -28,13 +28,18 @@
 <?php if ($userRole >= ROLE_GUEST): ?>
 <fieldset><legend>General</legend>
 <?php 
+  if ($userId) {
+    echo $form->hidden('User.username', array('value' => $userId));
+  }
   if ($userRole >= ROLE_GUEST) {
     echo $form->input('Image.filename');
     $type = array('any' => 'Any Type', 'image' => 'Image', 'video' => 'Video');
     echo $form->input('Image.file_type', array('type' => 'select', 'options' => $type, 'selected' => 'any', 'label' => 'File Type'));
   }
   if ($userRole >= ROLE_USER) {
-    echo $form->input('User.username');
+    if (!$userId) {
+      echo $form->input('User.username');
+    }
     echo $form->input('Group.id', array('type' => 'select', 'options' => $groups, 'selected' => -1, 'label' => 'Group'));
 
     $visibility = array('any' => 'Any', 'private' => 'Private', 'group' => 'Group members', 'user' => 'User', 'public' => 'Public');

@@ -35,7 +35,8 @@ class QueryHelper extends AppHelper {
                     'show' => 12,
                     'pos' => 1, 
                     'image' => true,
-                    'video' => true
+                    'video' => true,
+                    'myimage' => true
                     );
 
   var $_excludeImage = array('prevImage' => true,
@@ -46,7 +47,8 @@ class QueryHelper extends AppHelper {
                     'show' => 12,
                     'pos' => 1,
                     'image' => true,
-                    'videw' => true
+                    'videw' => true,
+                    'myimage' => true
                     );
 
   var $_query = array(); 

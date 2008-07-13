@@ -118,7 +118,7 @@ class QueryComponent extends Object
     } else {
       $user = $this->controller->User->findByUsername($idOrName);
     }
-    if ($user == false || $user['User']['role'] < ROLE_USER) {
+    if ($user == false) {
       return;
     }
 
@@ -136,9 +136,12 @@ class QueryComponent extends Object
   function setGroupId($groupId) {
     if (empty($groupId)) {
       return;
-    }
+    } 
 
-    $this->setParam('group', intval($groupId));
+    $groupId = intval($groupId);
+    if ($groupId > 0) {
+      $this->setParam('group', intval($groupId));
+    }
   }
 
   function setVisibility($visibility) {
@@ -1019,6 +1022,12 @@ class QueryComponent extends Object
     $this->_params['pages'] = ceil($this->_params['count'] / $this->_params['show']);;
     $this->_params['prevPage'] = $this->_params['page']>1?1:0;
     $this->_params['nextPage'] = $this->_params['page']<$this->_params['pages']?1:0;
+    $userId = $this->getUserId();
+    if ($userId > 0 && $userId == $this->controller->getUserId()) {
+      $this->_params['myimage'] = true;
+    } else {
+      $this->_params['myimage'] = false;
+    }
     return $data;
   }
 
@@ -1074,6 +1083,12 @@ class QueryComponent extends Object
     $this->_params['pos'] = $tmpPos;
     $this->_params['image'] = $tmpImage;
     $this->_params['pages'] = ceil($this->_params['count'] / $this->_params['show']);
+    $userId = $this->getUserId();
+    if ($userId > 0 && $userId == $this->controller->getUserId()) {
+      $this->_params['myimage'] = true;
+    } else {
+      $this->_params['myimage'] = false;
+    }
     return $data;
   }
 

@@ -59,6 +59,10 @@ class ExplorerController extends AppController
       if ($this->hasRole(ROLE_GUEST)) {
         $this->Query->setFilename($this->data['Image']['filename']);
         $this->Query->setFiletype($this->data['Image']['file_type']);
+        // Allow to search for my images
+        if ($this->data['User']['username'] == $this->getUserId()) {
+          $this->Query->setUser($this->data['User']['username']);
+        }
       }
 
       if ($this->hasRole(ROLE_USER)) {
@@ -79,6 +83,7 @@ class ExplorerController extends AppController
       $groups[-1] = '';
       $this->set('groups', $groups);
     }
+    $this->set('userId', $this->Query->getUserId() == $this->getUserId() ? $this->getUserId() : false);
     $this->set('userRole', $this->getUserRole());
     $this->set('mainMenuExplorer', array());
   }
