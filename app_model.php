@@ -92,12 +92,18 @@ class AppModel extends Model
     @return Array of items, which can be created by the model */
   function createItems($text, $name='name', $sep=',') {
     $items = explode($sep, $text);
+    foreach ($items as $key => $item) {
+      $item = trim($item);
+      if (strlen($item) == 0 || $item == '-') {
+        unset($items[$key]);
+        continue;
+      }
+      $items[$key] = $item;
+    }
+    $items = array_unique($items);
+
     $list = array();
     foreach ($items as $item) {
-      $item = trim($item);
-      if (strlen($item) == 0 || $item == '-')
-        continue;
-
       $list[] = array($name => $item);
     }
     return $list;

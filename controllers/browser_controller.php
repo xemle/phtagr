@@ -337,6 +337,7 @@ class BrowserController extends AppController
     $files['quota'] = $user['User']['quota'];
     $files['free'] = $files['quota'] - $files['bytes'];
     $files['active'] = $this->Image->find('count', array('conditions' => "User.id = $userId AND Image.flag & ".IMAGE_FLAG_ACTIVE." > 0"));
+    $files['dirty'] = $this->Image->find('count', array('conditions' => "User.id = $userId AND Image.flag & ".IMAGE_FLAG_DIRTY." > 0"));
     $files['video'] = $this->Image->find('count', array('conditions' => "User.id = $userId AND Image.flag & ".IMAGE_FLAG_ACTIVE." > 0 AND Image.duration > 0"));
     $files['external'] = $this->Image->find('count', array('conditions' => "User.id = $userId AND Image.flag & $external = $external"));
     $files['public'] = $this->Image->find('count', array('conditions' => "User.id = $userId AND Image.flag & ".IMAGE_FLAG_ACTIVE." > 0 AND Image.oacl >= ".ACL_READ_PREVIEW));

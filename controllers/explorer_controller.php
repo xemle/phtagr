@@ -131,8 +131,8 @@ class ExplorerController extends AppController
       }
       $from = mktime(0, 0, 0, $month, $day, $year);
       $to = mktime(0, 0, 0, $m, $d, $y);
-      $this->Query->setDateStart($from);
-      $this->Query->setDateEnd($to-1);
+      $this->Query->setDateFrom($from);
+      $this->Query->setDateTo($to-1);
       $this->Query->setOrder('-date');
     }
     $this->_setDataAndRender();

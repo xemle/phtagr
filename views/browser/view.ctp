@@ -20,6 +20,7 @@
   $cells[] = array('Visible for users', $files['user']);
   $cells[] = array('Visible for group members', $files['group']);
   $cells[] = array('Private files', $files['private']);
+  $cells[] = array('Unsynced files', $files['dirty']);
   echo $html->tableCells($cells);
 ?>
 </tbody>

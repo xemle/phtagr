@@ -1,4 +1,4 @@
-<h1>File Synchronirzation</h1>
+<h1>File Synchronization</h1>
 
 <?php if ($this->data['errors']): ?>
 <div class="error">Some files could not be updated with new metadata. Mainly this happens if the files are write protected. Please have a look to the log files for details.</div>

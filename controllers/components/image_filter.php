@@ -293,7 +293,7 @@ class ImageFilterComponent extends Object {
     // Associations to meta data: Tags, Categories, Locations
     $keywords = $this->_extract($data, 'Keywords');
     if ($keywords)
-      $fileTags = preg_split('/\s*,\s*/', trim($keywords));
+      $fileTags = array_unique(preg_split('/\s*,\s*/', trim($keywords)));
     else
       $fileTags = array();
 
@@ -309,7 +309,7 @@ class ImageFilterComponent extends Object {
 
     $categories = $this->_extract($data, 'SupplementalCategories');
     if ($categories)
-      $fileCategories = preg_split('/\s*,\s*/', trim($categories));
+      $fileCategories = array_unique(preg_split('/\s*,\s*/', trim($categories)));
     else
       $fileCategories = array();
 
