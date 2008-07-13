@@ -83,8 +83,8 @@ class QueryComponent extends Object
         case 'filename': if ($userRole >= ROLE_GUEST) $this->setFilename($value); break;
         case 'filetype': if ($userRole >= ROLE_GUEST) $this->setFiletype($value); break;
 
-        case 'from': $this->setDateStart($value); break;
-        case 'to': $this->setDateEnd($value); break;
+        case 'from': $this->setDateFrom($value); break;
+        case 'to': $this->setDateTo($value); break;
 
         case 'tags': $this->addTags($value); break;
         case 'tagop': $this->setTagOp(intval($value)); break;
