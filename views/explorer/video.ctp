@@ -4,11 +4,11 @@
 <h1><?php echo $data['Image']['name'] ?></h1>
 <?php $session->flash(); ?>
 
-<div class="navigator">
+<div class="paginator"><div class="subpaginator">
 <?php
 echo $query->prevImage().' '.$query->up().' '.$query->nextImage();
 ?>
-</div>
+</div></div>
 
 <?php 
   $size = $imageData->getimagesize($data, OUTPUT_SIZE_VIDEO);

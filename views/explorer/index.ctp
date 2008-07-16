@@ -1,30 +1,29 @@
 <h1>Explorer</h1>
 <?php $session->flash(); ?>
-<div class="navigator">
+<div class="paginator"><div class="subpaginator">
 <?php 
 echo $query->prev().' '.$query->numbers().' '.$query->next();
 ?>
-</div>
+</div></div>
 
-<?php 
-$query->initialize();
-?>
 <div class="thumbs">
 <script type="text/javascript">
   var imageData = [];
 </script>
 <?php
+$query->initialize();
 $cell=0;
 $canWriteTag=false;
 $canWriteMeta=false;
 $canWriteAcl=false;
 $pos = ($query->get('page', 1)-1) * $query->get('show', 12) + 1;
 foreach($data as $image): ?>
-<div class="thumb" id="image-<?php echo $image['Image']['id'];?>" >
+<?php $side = $cell % 2 ? 'r' : 'l'; ?>
+<?php if (!($cell % 2)): ?><div class="subcolumns"><?php endif; ?>
+<div class="c50<?=$side; ?>"><div class="subc<?=$side; ?> unselected thumb" id="image-<?= $image['Image']['id'];?>" >
 <script type="text/javascript">
   imageData[<?php echo $image['Image']['id']; ?>] = [];
 </script>
-<div class="unselected" id="thumb-<?php echo $image['Image']['id']; ?>">
 <h2><?php echo $image['Image']['file']; ?></h2>
 <div class="image">
 <?php 
@@ -44,7 +43,6 @@ foreach($data as $image): ?>
 </div>
 
 <?php 
-  $query->initialize();
   if (!$query->get('myimage')): ?>
 <div class="user">
 <?php
@@ -61,31 +59,24 @@ foreach($data as $image): ?>
 </div>
 </div><!-- meta -->
 
-</div></div><!-- thumb -->
-<?php 
-  $cell++;
-  if ($cell%2==0)
-    echo "<div class=\"row2\" ></div>\n";
-  if ($cell%3==0)
-    echo "<div class=\"row3\" ></div>\n";
-  if ($cell%4==0)
-    echo "<div class=\"row4\" ></div>\n";
-?>
-<?php endforeach; ?>
+</div><!-- c50 --></div><!-- subc -->
+<?php if ($side == 'r'): ?></div><!-- subcolumns --><?php endif; ?>
+<?php $cell++; endforeach; ?>
+<?php /* fix for odd number */ if ($cell % 2): ?></div><!-- subcolumns --><?php endif; ?>
 </div>
 
 <?php if ($canWriteTag): ?>
-<div class="navigator">
+<div class="paginator"><div class="subpaginator">
 <a href="javascript:void(0);" onclick="thumbSelectAll();">Select All</a>
 <a href="javascript:void(0);" onclick="thumbSelectInvert();">Invert Selection</a>
-</div>
+</div></div>
 <?php endif; ?>
 
-<div class="navigator">
+<div class="paginator"><div class="subpaginator">
 <?php 
 echo $query->prev().' '.$query->numbers().' '.$query->next()
 ?>
-</div>
+</div></div>
 
 <div class="edit">
 <?php if ($canWriteTag): ?>

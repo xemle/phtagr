@@ -154,7 +154,6 @@ class ImageDataHelper extends AppHelper {
     $base = $this->query->getQuery();
     $output = '';
     if (isset($data['Group']['name'])) {
-      $this->query->clear();
       $this->query->set('group', $data['Group']['id']);
       $output .= $this->html->link($data['Group']['name'], $this->query->getUri()).', ';
     }
@@ -172,6 +171,8 @@ class ImageDataHelper extends AppHelper {
     $imageId = $data['Image']['id'];
 
     $this->query->initialize();
+    $tmpQuery = $this->query->getQuery();
+
     $userId = $this->query->get('user');
     $this->query->clear();
     if ($userId)
@@ -237,6 +238,8 @@ class ImageDataHelper extends AppHelper {
       $output = "<div class=\"actionlist\">$output</div>\n";
       $cells[] = array("Actions:", $output);
     }
+
+    $this->query->setQuery($tmpQuery);
     return $cells;
   }
 

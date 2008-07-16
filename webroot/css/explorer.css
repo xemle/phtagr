@@ -1,17 +1,13 @@
-.thumbs, .thumb {
+.thumbs  {
   float: left;
   padding: 0;
   margin: 0;
-}
-
-.thumbs {
   width: 100%;
 }
 
 .thumb {
-  width: 50%;
+  width: 95%;
 }
-
 .unselected {
   margin: 2px;
   padding: 3px;
@@ -25,14 +21,6 @@
 
 .thumb h2 {
   font-size: 110%;
-}
-
-.row2 {
-  float: left;
-  width: 100%;
-  content: ".";
-  height: 0;
-  visibility: hidden;
 }
 
 .image {
@@ -75,31 +63,44 @@
   margin: 0;
 }
 
-.navigator {
-  width: 100%;
+.paginator {
+  width: 95%;
+  display: block;
   color: #8C8C8C;
-  margin: 10px 0 10px 0;
+  margin: 10px 0;
   text-align: center;
 }
 
-.navigator a {
-  font-size: 80%;
+.subpaginator {
+  font-size: 85%;
+  margin: 2px auto;
+  padding: 3px;
+}
+
+.subpaginator a {
   text-decoration: none;
-  padding: 3px 5px 3px 5px;
-  margin: 3px 0px 3px 0px;
+  padding: 2px 6px;
+  margin: 3px 0;
   background-color: #ffffff;
   border: 1px solid #b3b3b3;
 }
 
-.navigator a:hover {
+.subpaginator a:hover {
   border: 1px solid #000;
   background-color: #f63;
   color: #ffffff;
 }
 
-.navigator .current {
-  padding: 2px 5px 2px 5px;
-  margin: 0 1px 0 1px;
+.subpaginator a.prev,
+.subpaginator a.next {
+  margin: 3px 8px;
+}
+
+.subpaginator .current {
+  font-weight: bold;
+  font-size: 100%;
+  padding: 4px 8px;
+  margin: 0 1px;
   color: white;
   background-color: #182e7a;
   border: 1px solid #000;

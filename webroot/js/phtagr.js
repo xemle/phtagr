@@ -49,14 +49,14 @@ var selectImage = function(id) {
   var e = document.getElementById('select-'+id);
   if (!e)
     return false;
-  var thumb = document.getElementById('thumb-'+id);
+  var thumb = document.getElementById('image-'+id);
 
   var add = false;
   if (e.checked) {
-    thumb.className='selected';
+    thumb.className=thumb.className.replace(' unselected', ' selected');
     add = true;
   } else {
-    thumb.className='unselected';
+    thumb.className=thumb.className.replace(' selected', ' unselected');
   }
 
   // adapt the id list for the hidden input

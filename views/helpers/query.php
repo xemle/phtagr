@@ -24,7 +24,7 @@
 class QueryHelper extends AppHelper {
   var $helpers = array('html'); 
 
-  /** Skip specific query parameters */
+  /** Skip specific query parameters for multiple query */
   var $_excludePage = array('prevPage' => true, 
                     'nextPage' => true,
                     'prevImage' => true, 
@@ -39,6 +39,7 @@ class QueryHelper extends AppHelper {
                     'myimage' => true
                     );
 
+  /** Skip specific query parameters for single query */
   var $_excludeImage = array('prevImage' => true,
                     'nextImage' => true,
                     'count' => true,
@@ -182,7 +183,7 @@ class QueryHelper extends AppHelper {
     $exclude = am($this->_excludePage, array('pos' => true));
     if ($query['prevPage']) {
       $query['page']--;
-      return $this->html->link('prev', $this->getUri($query, $exclude));
+      return $this->html->link('prev', $this->getUri($query, $exclude), array('class' => 'prev'));
     }
   }
   
@@ -220,7 +221,7 @@ class QueryHelper extends AppHelper {
     $exclude = am($this->_excludePage, array('pos' => true));
     if ($query['nextPage']) {
       $query['page']++;
-      return $this->html->link('next', $this->getUri($query, $exclude));
+      return $this->html->link('next', $this->getUri($query, $exclude), array('class' => 'next'));
     }
   }
 
@@ -231,7 +232,7 @@ class QueryHelper extends AppHelper {
     if (isset($query['prevImage'])) {
       $query['pos']--;
       $query['page'] = ceil($query['pos'] / $query['show']);
-      return $this->html->link('prev', '/explorer/image/'.$query['prevImage'].'/'.$this->getParams($query, $this->_excludeImage));
+      return $this->html->link('prev', '/explorer/image/'.$query['prevImage'].'/'.$this->getParams($query, $this->_excludeImage), array('class' => 'prev'));
     }
   }
 
@@ -241,7 +242,7 @@ class QueryHelper extends AppHelper {
     $query = $this->params['query'];
     $query['page'] = ceil($query['pos'] / $query['show']);
     $exclude = am($this->_excludeImage, array('image' => true, 'pos' => true));
-    return $this->html->link('up', $this->getUri($query, $exclude).'#image-'.$query['image']);
+    return $this->html->link('up', $this->getUri($query, $exclude).'#image-'.$query['image'], array('class' => 'up'));
   }
 
   function nextImage() {
@@ -251,7 +252,7 @@ class QueryHelper extends AppHelper {
     if (isset($query['nextImage'])) {
       $query['pos']++;
       $query['page'] = ceil($query['pos'] / $query['show']);
-      return $this->html->link('next', '/explorer/image/'.$query['nextImage'].'/'.$this->getParams($query, $this->_excludeImage));
+      return $this->html->link('next', '/explorer/image/'.$query['nextImage'].'/'.$this->getParams($query, $this->_excludeImage), array('class' => 'next'));
     }
   }
 }
