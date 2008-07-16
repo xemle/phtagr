@@ -96,6 +96,23 @@ class BrowserController extends AppController
     return true;
   }
 
+  /** @return Returns the path of the current request */
+  function getPath() {
+    if (count($this->params['pass'])) {
+      $path = implode('/', $this->params['pass']);
+    } else {
+      $path = '/';
+    }
+  
+    if (strlen($path) && $path[strlen($path)-1] != '/') {
+      $path .= '/';
+    }
+    if ($path[0] != '/') {
+      $path = '/'.$path;
+    }
+    return $path;
+  }
+
   /** Returns the canonicalized path 
     @param path
     @return canonicalized path */
@@ -124,36 +141,30 @@ class BrowserController extends AppController
   function _getFsPath($path) {
     $path = $this->_canonicalPath($path);
     $dirs = explode('/', $path);
+    $fspath = false;
     if (count($this->_fsRoots) > 1) {
-      // we hav multiple FS root, extract FS root by alias
-      if (count($dirs) > 0) {
-        $alias = $dirs[0];
-        if (isset($this->_fsRoots[$alias])) {
-          unset($dirs[0]);
-          return $this->_fsRoots[$alias].implode(DS, $dirs);
-        }
-      } 
+      // multiple FS roots, extract FS root by alias
+      if (count($dirs) < 1 || !isset($this->_fsRoots[$dirs[0]])) {
+        return false;
+      }
+      $alias = $dirs[0];
+      unset($dirs[0]);
+      $fspath = $this->_fsRoots[$alias].implode(DS, $dirs);
     } elseif (count($this->_fsRoots) == 1) {
       // only one FS root
       list($alias) = array_keys($this->_fsRoots);
-      return $this->_fsRoots[$alias].implode(DS, $dirs);
+      $fspath = $this->_fsRoots[$alias].implode(DS, $dirs);
     }
-    return false;
+
+    if (!is_dir($fspath)) {
+      return false;
+    }
+    return $fspath;
   }
 
   function index() {
-    if (count($this->params['pass']))
-      $path = implode('/', $this->params['pass']);
-    else 
-      $path = '/';
-  
-    if (strlen($path) && $path[strlen($path)-1] != '/')
-      $path .= '/';
-    if ($path[0] != '/')
-      $path = '/'.$path;
-
+    $path = $this->getPath();
     $fsPath = $this->_getFsPath($path);
-
     if ($fsPath) {
       $folder =& new Folder();
       $folder->cd($fsPath);
@@ -174,6 +185,10 @@ class BrowserController extends AppController
       }
       $files = $list;
     } else {
+      if (strlen($path) > 1) {
+        $this->Logger->debug("Invalid path: '$path'. Redirect to index");
+        $this->redirect('index');
+      }
       // filesystem path could not be resolved. Take all aliases of filesystem
       // roots
       $dirs = array_keys($this->_fsRoots);

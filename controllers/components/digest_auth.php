@@ -261,10 +261,12 @@ class DigestAuthComponent extends Object
     $this->Session->start();
 
     if (!$this->Session->check('auth.nc')) {
-      $this->Logger->err("Unknown or died session ($sid)");
-      $this->Logger->trace($_SESSION);
+      $this->Session->renew();
+      $this->Session->write('auth.logins', 0);
       $this->Session->write('auth.nc', 0);
-      $this->decline();
+      $this->Logger->warn("Unknown or died session ($sid).");
+      //$this->Logger->trace($_SESSION);
+      $this->requestAuthentication();
     }
   
     $snc=$this->Session->read('auth.nc');
