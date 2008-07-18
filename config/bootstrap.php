@@ -51,13 +51,15 @@ define('ROLE_ADMIN', 3);
 define('OUTPUT_TYPE_MINI', 1);
 define('OUTPUT_TYPE_THUMB', 2);
 define('OUTPUT_TYPE_PREVIEW', 3);
-define('OUTPUT_TYPE_VIDEO', 4);
+define('OUTPUT_TYPE_HIGH', 4);
+define('OUTPUT_TYPE_VIDEO', 5);
 /** Quality between 0 (worsest) and 100 (best) */
 define('OUTPUT_QUALITY', 75);
 /** Dimension size of output */
 define('OUTPUT_SIZE_MINI', 75);
 define('OUTPUT_SIZE_THUMB', 220);
 define('OUTPUT_SIZE_PREVIEW', 600);
+define('OUTPUT_SIZE_HIGH', 1280);
 define('OUTPUT_SIZE_VIDEO', 480);
 define('OUTPUT_BITRATE_VIDEO', 350);
 
@@ -65,7 +67,7 @@ define('OUTPUT_BITRATE_VIDEO', 350);
 // Reading bits are the three highest bits
 define("ACL_READ_MASK", 0xe0);
 define("ACL_READ_ORIGINAL", 0x60);
-define("ACL_READ_HIGHSOLUTION", 0x40);
+define("ACL_READ_HIGH", 0x40);
 define("ACL_READ_PREVIEW", 0x20);
 
 define("ACL_WRITE_MASK", 0x07);

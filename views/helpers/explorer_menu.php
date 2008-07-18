@@ -119,6 +119,8 @@ class ExplorerMenuHelper extends AppHelper
       $search .= '/user:'.$this->query->get('user');
     }
     $items[] = array('text' => $this->html->link('Advance Search', $search));
+    $items[] = array('text' => $this->html->link('Start Slideshow', 'javascript:startSlideshow();'));
+
     $subMenu = $this->_getSubMenu($data, 'tag');
     if ($subMenu !== false)
       $items[] = array('text' => 'Tags', 'type' => 'text', 'submenu' => array('items' => $subMenu));

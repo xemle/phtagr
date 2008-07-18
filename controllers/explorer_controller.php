@@ -36,7 +36,18 @@ class ExplorerController extends AppController
 
   function beforeRender() {
     $this->params['query'] = $this->Query->getParams();
-    $this->set('feeds', '/explorer/rss');
+    $this->set('feeds', array(
+      $this->_getMediaRss() => array('title' => 'Media RSS', 'id' => 'gallery'), 
+      '/explorer/rss' => array('title' => 'Normal RSS')));
+  }
+
+  function _getMediaRss() {
+    $args = array();
+    foreach ($this->passedArgs as $name => $value) {
+      $args[] = $name.':'.$value;
+    }
+    $args[] =  "media.rss";
+    return '/explorer/media/'.implode('/', $args);
   }
 
   function index() {
@@ -153,6 +164,7 @@ class ExplorerController extends AppController
       $groups[-1] = '[No Group]';
       $this->set('groups', $groups);
     }
+    $this->set('mediaRss', $this->_getMediaRss());
     $this->render('index');
   }
 
@@ -558,6 +570,13 @@ class ExplorerController extends AppController
         'link' => "/explorer/rss",
         'description' => "Recently Published Images" )
       );
+  }
+
+  function media() {
+    $this->data = $this->Query->paginate();
+    $this->set('mainMenuExplorer', $this->Query->getMenu(&$this->data));
+    $this->layout = 'xml';
+    Configure::write('debug', 0);
   }
 }
 ?>

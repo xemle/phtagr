@@ -84,7 +84,7 @@ class ImageDataHelper extends AppHelper {
 
     // Read access
     if (($acl & ACL_READ_MASK) == ACL_READ_ORIGINAL) $t.='o';
-    elseif (($acl & ACL_READ_MASK) == ACL_READ_HIGHSOLUTION) $t.='h';
+    elseif (($acl & ACL_READ_MASK) == ACL_READ_HIGH) $t.='h';
     elseif (($acl & ACL_READ_MASK) == ACL_READ_PREVIEW) $t.='v';
 
     if ($t=='') $t='-';

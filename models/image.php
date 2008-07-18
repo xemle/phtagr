@@ -298,7 +298,7 @@ class Image extends AppModel
     $data['Image']['canWriteCaption'] = $this->checkAccess(&$data, &$user, ACL_WRITE_CAPTION, ACL_WRITE_MASK, &$groups);    
 
     $data['Image']['canReadPreview'] = $this->checkAccess(&$data, &$user, ACL_READ_PREVIEW, ACL_READ_MASK, &$groups);    
-    $data['Image']['canReadHighsolution'] = $this->checkAccess(&$data, &$user, ACL_READ_HIGHSOLUTION, ACL_READ_MASK, &$groups);    
+    $data['Image']['canReadHigh'] = $this->checkAccess(&$data, &$user, ACL_READ_HIGH, ACL_READ_MASK, &$groups);    
     $data['Image']['canReadOriginal'] = $this->checkAccess(&$data, &$user, ACL_READ_ORIGINAL, ACL_READ_MASK, &$groups);    
 
     $data['Image']['isOwner'] = ife($data['Image']['user_id'] == $user['User']['id'], true, false);

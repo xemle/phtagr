@@ -1,6 +1,16 @@
 <h1>Explorer</h1>
 <?php $session->flash(); ?>
 
+<?php if (isset($mediaRss)): ?>
+<script type="text/javascript" src="<?php echo Router::url('/piclenslite/piclens_optimized.js'); ?>" ></script>
+<script type="text/javascript">
+function startSlideshow() {
+  PicLensLite.setLiteURLs({swf:'<?php echo Router::url("/piclenslite/PicLensLite.swf"); ?>'});
+  PicLensLite.start({feedUrl:'<?php echo Router::url($mediaRss, true); ?>'});
+}
+</script>
+<?php endif; ?>
+
 <?php if ($query->hasPages()): ?>
 <div class="paginator"><div class="subpaginator">
 <?php echo $query->prev().' '.$query->numbers().' '.$query->next(); ?>

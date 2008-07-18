@@ -9,11 +9,21 @@
   echo $html->css('phtagr')."\n";
   echo $javascript->link(array('prototype', 'event-selectors', 'effects', 'controls', 'phtagr'))."\n";
   
+  /** allow 'feed_url', array('feed1_url', 'feed2_url'), or array('feed1_url' => array(attributes...)) */
   if (!empty($feeds)) {
+    // only text as single url
     if (!is_array($feeds))
       $feeds = array($feeds);
-    foreach ($feeds as $feed) {
-      echo $html->meta('rss', $feed);
+    // single feed url
+    if (count($feeds) && in_array('title', $feeds)) {
+      $feeds = array($feeds);
+    }
+    foreach ($feeds as $feed => $attr) {
+      if (is_numeric($feed)) {
+        $feed = $attr;
+        $attr = array();
+      }
+      echo $html->meta('rss', $feed, $attr);
     }
   }
  

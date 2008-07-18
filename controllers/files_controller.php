@@ -33,6 +33,7 @@ class FilesController extends AppController
                       OUTPUT_TYPE_MINI => array('size' => OUTPUT_SIZE_MINI, 'square' => true),
                       OUTPUT_TYPE_THUMB => array('size' => OUTPUT_SIZE_THUMB),
                       OUTPUT_TYPE_PREVIEW => array('size' => OUTPUT_SIZE_PREVIEW),
+                      OUTPUT_TYPE_HIGH => array('size' => OUTPUT_SIZE_HIGH, 'quality' => 90),
                       OUTPUT_TYPE_VIDEO => array('size' => OUTPUT_SIZE_VIDEO, 'bitrate' => OUTPUT_BITRATE_VIDEO)
                     );
   var $components = array('VideoFilter', 'FileCache');
@@ -81,7 +82,13 @@ class FilesController extends AppController
     @todo Implement access check for file! */
   function _checkAccess($image, $outputType) {
     $user = $this->getUser();
-    if (!$this->Image->checkAccess(&$image, $user, ACL_READ_PREVIEW, ACL_READ_MASK)) {
+    switch ($outputType) {
+      case OUTPUT_TYPE_HIGH:
+        $flag = ACL_READ_HIGH; break;
+      default:
+        $flag = ACL_READ_PREVIEW; break;
+    }
+    if (!$this->Image->checkAccess(&$image, $user, $flag, ACL_READ_MASK)) {
       $this->Logger->warn("User {$user['User']['id']} has no previleges to access image ".$image['Image']['id']);
       $this->redirect(null, 404);
     }
@@ -290,6 +297,11 @@ class FilesController extends AppController
   function preview($id) {
     $this->Logger->info("Request of image $id: preview");
     $this->_createPreview($id, OUTPUT_TYPE_PREVIEW);
+  }
+
+  function high($id) {
+    $this->Logger->info("Request of image $id: high");
+    $this->_createPreview($id, OUTPUT_TYPE_HIGH);
   }
 
   function video($id) {
