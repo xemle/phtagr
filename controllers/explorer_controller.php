@@ -44,6 +44,12 @@ class ExplorerController extends AppController
   function _getMediaRss() {
     $args = array();
     foreach ($this->passedArgs as $name => $value) {
+      if (is_numeric($name)) {
+        $name = $this->action;
+        if (in_array($name, array('tag', 'category', 'location'))) {
+          $name = Inflector::pluralize($name);
+        }
+      }
       $args[] = $name.':'.$value;
     }
     $args[] =  "media.rss";
