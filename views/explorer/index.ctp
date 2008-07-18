@@ -1,10 +1,11 @@
 <h1>Explorer</h1>
 <?php $session->flash(); ?>
+
+<?php if ($query->hasPages()): ?>
 <div class="paginator"><div class="subpaginator">
-<?php 
-echo $query->prev().' '.$query->numbers().' '.$query->next();
-?>
+<?php echo $query->prev().' '.$query->numbers().' '.$query->next(); ?>
 </div></div>
+<?php endif; ?>
 
 <div class="thumbs">
 <script type="text/javascript">
@@ -29,7 +30,7 @@ foreach($data as $image): ?>
 <?php 
   $size = $imageData->getimagesize($image, OUTPUT_SIZE_THUMB);
   $query->set('pos', $pos++);
-  echo "<a href=\"".Router::url("/explorer/image/".$image['Image']['id'].'/'.$query->getParams())."\">";
+  echo "<a href=\"".Router::url("/images/view/".$image['Image']['id'].'/'.$query->getParams())."\">";
   echo "<img src=\"".Router::url("/files/thumb/".$image['Image']['id'])."\" $size[3] alt=\"".$image['Image']['name']."\"/>"; 
   echo "</a>";
 
@@ -72,11 +73,11 @@ foreach($data as $image): ?>
 </div></div>
 <?php endif; ?>
 
+<?php if ($query->hasPages()): ?>
 <div class="paginator"><div class="subpaginator">
-<?php 
-echo $query->prev().' '.$query->numbers().' '.$query->next()
-?>
+<?php echo $query->prev().' '.$query->numbers().' '.$query->next(); ?>
 </div></div>
+<?php endif; ?>
 
 <div class="edit">
 <?php if ($canWriteTag): ?>

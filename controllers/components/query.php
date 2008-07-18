@@ -32,7 +32,7 @@ class QueryComponent extends Object
 
   var $controller = null;
 
-  function startup(&$controller) {
+  function initialize(&$controller) {
     $this->controller = &$controller;
     $this->_tp=$this->controller->Image->tablePrefix;
   }
@@ -50,6 +50,33 @@ class QueryComponent extends Object
     $data['locations'] = $this->_locations;
     return $data;
   }
+
+  /** 
+    @param query Optional query array
+    @return Array of current query options with the syntax of
+    name:value[,value...]
+   */
+  function getUrl($exclude = null) {
+    if ($exclude == null)
+      $exclude = array();
+
+    $params = array();
+    foreach ($this->_params as $name => $value) {
+      if (isset($exclude[$name]) && 
+        ($exclude[$name] === true || $exclude[$name] == $value))
+        continue;
+      if (is_array($value)) {
+        // arrays like tags, categories, locations
+        if (count($value)) {
+          $params[] = $name.':'.implode(',', $value);
+        }
+      } else {
+        $params[] = $name.':'.$value;
+      }
+    }
+    return implode('/', $params);
+  }
+
 
   function setParam($name, $value) {
     $this->_params[$name] = $value;    
@@ -1117,6 +1144,52 @@ class QueryComponent extends Object
     $cloud['_min'] = $min;
     $cloud['_max'] = $max;
     return $cloud;
+  }
+
+  /** Counts values of a specific array key
+    @param counter Pointer to the merged array
+    @param data Hash array to count
+    @param key Key of the hash entry. Default is 'name' */
+  function _arrayCountMerge(&$counter, $data, $key = 'name')
+  {
+    if (!count($data))
+      return;
+    foreach ($data as $item) {
+      $name = $item[$key];
+      if (!isset($counter[$name]))
+        $counter[$name] = 1;
+      else
+        $counter[$name]++;
+    }
+  }
+
+  function getMenu($data) {
+    $tags = array();
+    $categories = array();
+    $locations = array();
+    if (isset($data['Image'])) {
+      // Single image
+      $this->_arrayCountMerge(&$tags, &$data['Tag']);
+      $this->_arrayCountMerge(&$categories, &$data['Category']);
+      $this->_arrayCountMerge(&$locations, &$data['Location']);
+    } else {
+      // Multiple image
+      foreach ($data as $image) {
+        $this->_arrayCountMerge(&$tags, &$image['Tag']);
+        $this->_arrayCountMerge(&$categories, &$image['Category']);
+        $this->_arrayCountMerge(&$locations, &$image['Location']);
+      }
+    }
+    arsort($tags);
+    arsort($categories);
+    arsort($locations);
+    
+    $menu = array();
+    $menu['tags'] = $tags;
+    $menu['categories'] = $categories;
+    $menu['locations'] = $locations;
+    
+    return $menu; 
   }
 
 }

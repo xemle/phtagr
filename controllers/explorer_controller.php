@@ -88,18 +88,6 @@ class ExplorerController extends AppController
     $this->set('mainMenuExplorer', array());
   }
 
-  function image($id) {
-    $this->Query->setImageId($id);
-    $data = $this->Query->paginateImage();
-    $this->set('data', $data);
-    $this->_countMeta(array($data));
-    $this->set('mapKey', $this->getPreferenceValue('google.map.key', false));
-    if ($this->Image->isVideo($data))
-      $this->render('video');
-    else
-      $this->render('image');
-  }
-
   function user($idOrName) {
     $this->Query->setUser($idOrName);
     $this->_setDataAndRender();
@@ -153,51 +141,9 @@ class ExplorerController extends AppController
     $this->_setDataAndRender();
   }
 
-  /** Counts values of a specific array key
-    @param counter Pointer to the merged array
-    @param data Hash array to count
-    @param key Key of the hash entry. Default is 'name' */
-  function _arrayCountMerge(&$counter, $data, $key = 'name')
-  {
-    if (!count($data))
-      return;
-    foreach ($data as $item) {
-      $name = $item[$key];
-      if (!isset($counter[$name]))
-        $counter[$name] = 1;
-      else
-        $counter[$name]++;
-    }
-  }
-
-  function _countMeta($data) {
-    $tags = array();
-    $categories = array();
-    $locations = array();
-    foreach ($data as $image) {
-      $this->_arrayCountMerge(&$tags, &$image['Tag']);
-      $this->_arrayCountMerge(&$categories, &$image['Category']);
-      $this->_arrayCountMerge(&$locations, &$image['Location']);
-    }
-    arsort($tags);
-    arsort($categories);
-    arsort($locations);
-    
-    $this->set('tags', $tags);
-    $this->set('categories', $categories);
-    $this->set('locations', $locations);
-    
-    $menu = array();
-    $menu['tags'] = $tags;
-    $menu['categories'] = $categories;
-    $menu['locations'] = $locations;
-    
-    $this->set('mainMenuExplorer', &$menu);
-  }
-
   function _setDataAndRender() {
     $data = $this->Query->paginate();
-    $this->_countMeta(&$data);
+    $this->set('mainMenuExplorer', $this->Query->getMenu(&$data));
     $this->set('data', &$data);
     if ($this->hasRole(ROLE_USER)) {
       $groups = $this->Group->findAll(array('Group.user_id' => $this->getUserId()), false, array('Group.name'));

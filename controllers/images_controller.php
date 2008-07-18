@@ -23,18 +23,30 @@
 
 class ImagesController extends AppController
 {
-  var $scaffold;
-  var $uses = array('Image', 'Tag');
-  var $components = array('Query');
-  var $helpers = array('imageData');
+  var $components = array('RequestHandler', 'Query', 'ImageFilter', 'VideoFilter');
+  var $uses = array('Image', 'Group', 'Tag', 'Category', 'Location');
+  var $helpers = array('form', 'formular', 'html', 'javascript', 'ajax', 'imageData', 'time', 'query', 'explorerMenu', 'rss');
 
-  function view($id)
-  {
-    $this->set('data', $this->Image->read(null, $id));
+  function beforeFilter() {
+    parent::beforeFilter();
+
+    $this->Query->parseArgs();
   }
 
-  function editmeta($id) {
-    $this->set('data', $this->Image->read(null, $id));
+  function beforeRender() {
+    $this->params['query'] = $this->Query->getParams();
+    $this->set('feeds', '/explorer/rss');
+  }
+
+  function view($id) {
+    $this->Query->setImageId($id);
+    $data = $this->Query->paginateImage();
+    $this->set('mainMenuExplorer', $this->Query->getMenu(&$data));
+    $this->set('data', $data);
+    $this->set('mapKey', $this->getPreferenceValue('google.map.key', false));
+    if ($this->Image->isVideo($data)) {
+      $this->render('video');
+    }
   }
 }
 ?>

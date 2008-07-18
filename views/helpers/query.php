@@ -171,22 +171,43 @@ class QueryHelper extends AppHelper {
 
   /** @param query Optional query array
     @return uri of current query */
-  function getUri($query = null, $exclude = null) {
+  function getUri($query = null, $exclude = null, $base = null) {
     $params = $this->_buildParams($query, $exclude);
-    return '/'.$this->params['controller'].'/query/'.implode('/', $params);
+    if (!$base) {
+      $base = '/explorer/query/';
+    }
+    return $base.implode('/', $params);
+  }
+
+  function hasPages() {
+    if (isset($this->params['query']['pages']) &&
+      $this->params['query']['pages'] > 1)
+      return true;
+    return false;
+  }
+
+  function hasPrev() {
+    return (isset($this->params['query']['prevPage']) &&
+      $this->params['query']['prevPage']);
+  }
+
+  function getPrevUrl($base = null) {
+    if (!$this->hasPrev()) {
+      return false;
+    }
+    $params = $this->params['query'];
+    $params['page']--;
+    return $this->getUri($params, $this->_excludePage, $base);
   }
 
   function prev() {
-    if (!isset($this->params['query']))
-      return;
-    $query = $this->params['query'];
-    $exclude = am($this->_excludePage, array('pos' => true));
-    if ($query['prevPage']) {
-      $query['page']--;
-      return $this->html->link('prev', $this->getUri($query, $exclude), array('class' => 'prev'));
+    $prevUrl = $this->getPrevUrl();
+    if (!$prevUrl) {
+      return false;
     }
+    return $this->html->link('prev', $prevUrl, array('class' => 'prev'));
   }
-  
+
   function numbers() {
     if (!isset($this->params['query']))
       return;
@@ -214,15 +235,26 @@ class QueryHelper extends AppHelper {
     return $output;
   }
 
-  function next() {
-    if (!isset($this->params['query']))
-      return;
-    $query = $this->params['query'];
-    $exclude = am($this->_excludePage, array('pos' => true));
-    if ($query['nextPage']) {
-      $query['page']++;
-      return $this->html->link('next', $this->getUri($query, $exclude), array('class' => 'next'));
+  function hasNext() {
+    return (isset($this->params['query']['nextPage']) &&
+      $this->params['query']['nextPage']);
+  }
+
+  function getNextUrl($base = null) {
+    if (!$this->hasNext()) {
+      return false;
     }
+    $params = $this->params['query'];
+    $params['page']++;
+    return $this->getUri($params, $this->_excludePage, $base);
+  }
+
+  function next() {
+    $nextUrl = $this->getNextUrl();
+    if (!$nextUrl) {
+      return false;
+    }
+    return $this->html->link('next', $nextUrl, array('class' => 'next'));
   }
 
   function prevImage() {
@@ -232,7 +264,7 @@ class QueryHelper extends AppHelper {
     if (isset($query['prevImage'])) {
       $query['pos']--;
       $query['page'] = ceil($query['pos'] / $query['show']);
-      return $this->html->link('prev', '/explorer/image/'.$query['prevImage'].'/'.$this->getParams($query, $this->_excludeImage), array('class' => 'prev'));
+      return $this->html->link('prev', '/images/view/'.$query['prevImage'].'/'.$this->getParams($query, $this->_excludeImage), array('class' => 'prev'));
     }
   }
 
@@ -252,7 +284,7 @@ class QueryHelper extends AppHelper {
     if (isset($query['nextImage'])) {
       $query['pos']++;
       $query['page'] = ceil($query['pos'] / $query['show']);
-      return $this->html->link('next', '/explorer/image/'.$query['nextImage'].'/'.$this->getParams($query, $this->_excludeImage), array('class' => 'next'));
+      return $this->html->link('next', '/images/view/'.$query['nextImage'].'/'.$this->getParams($query, $this->_excludeImage), array('class' => 'next'));
     }
   }
 }
