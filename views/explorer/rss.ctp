@@ -1,10 +1,13 @@
 <?php
+
+/** Callback frunction for rss items */
 function getItem($data) {
   return array('title' => $data['Image']['name'],
-    'link' => "/explorer/image/" . $data['Image']['id'],
-    'guid' => "/explorer/image/" . $data['Image']['id'],
+    'link' => '/images/view/'.$data['Image']['id'],
+    'guid' => $data['Image']['id'],
     'description' => $data['Image']['caption'],
     'pubDate' => $data['Image']['created']);
 }
 
 echo $rss->items($data, 'getItem');
+?>
