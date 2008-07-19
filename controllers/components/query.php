@@ -23,7 +23,7 @@
 
 class QueryComponent extends Object
 {
-  var $component = array('Logger');
+  var $components = array('Session', 'Logger');
   var $_params = array('page' => 1, 'show' => 12, 'pos' => 1);
   var $_tags = array();
   var $_categories = array();
@@ -1043,7 +1043,7 @@ class QueryComponent extends Object
         $data[] = $image;
       }
     } else {
-      $this->controller->Session->setFlash("Sorry. No image or files found!");
+      $this->Session->setFlash("Sorry. No image or files found!");
     }
     // pagination values
     $this->_params['pages'] = ceil($this->_params['count'] / $this->_params['show']);;
@@ -1092,16 +1092,16 @@ class QueryComponent extends Object
       $sql = $this->getQuery(2);
       $results = $this->controller->Image->query($sql);
       if (!isset($results[$index])) {
-        $this->controller->Logger->err("Unexpected results of query: $sql");
-        $this->controller->Session->setFlash("Sorry. No image or files found!");
+        $this->Logger->err("Unexpected results of query: $sql");
+        $this->Session->setFlash("Sorry. No image or files found!");
       } elseif ($results[$index]['Image']['id'] != $tmpImage) {
         // The image was not found via search. Query it directly
         $this->_params['image'] = $tmpImage;
         $sql = $this->getQuery(2);
         $results = $this->controller->Image->query($sql);
         if (!$results) {
-          $this->controller->Logger->warn("Image with id $tmpImage could not be found");
-          $this->controller->Session->setFlash("Sorry. No image or files found!");
+          $this->Logger->warn("Image with id $tmpImage could not be found");
+          $this->Session->setFlash("Sorry. No image or files found!");
         } else {
           $data = $this->controller->Image->optimizedRead($tmpImage);
           $this->controller->Image->setAccessFlags(&$data, $this->controller->getUser());
@@ -1117,7 +1117,7 @@ class QueryComponent extends Object
         }
       }
     } else {
-      $this->controller->Session->setFlash("Sorry. No image or files found!");
+      $this->Session->setFlash("Sorry. No image or files found!");
     }
     // pagination values
     $this->_params['show'] = $tmpShow;
