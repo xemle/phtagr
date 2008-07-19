@@ -71,14 +71,17 @@ class BrowserController extends AppController
   function _addFsRoot($root, $alias = null) {
     $root = Folder::slashTerm($root);
 
-    if ($alias == null)
+    if ($alias == null) {
       $alias=basename($root);
+    }
     // on root path basename returns an empty string
-    if ($alias == '')
+    if ($alias == '') {
       $alias = 'root';
+    }
 
-    if (isset($this->_fsRoots[$alias]))
+    if (isset($this->_fsRoots[$alias])) {
       return false;
+    }
 
     if (!@is_dir($root)) {
       $this->Logger->err("Directory of '$root' does not exists");
@@ -116,13 +119,13 @@ class BrowserController extends AppController
   /** Returns the canonicalized path 
     @param path
     @return canonicalized path */
-  function _canonicalPath($path)
-  {
+  function _canonicalPath($path) {
     $paths=explode('/', $path);
     $canonical=array();
     foreach ($paths as $p) { 
-      if ($p ==='' || $p == '.')
+      if ($p ==='' || $p == '.') {
         continue;
+      }
       if ($p =='..') { 
         array_pop($canonical);
         continue;
@@ -136,7 +139,9 @@ class BrowserController extends AppController
    * roots are available, the highest directory is handled as alias of the
    * filesystem root.
     @param path Relative path
-    @return Filesystem path or false, if filesystem root could not be resolved
+    @return Filesystem path of filename. If filesystem root could not be
+    resolved it returns false 
+    @note At lease one filesystem root must be defined
     */
   function _getFsPath($path) {
     $path = $this->_canonicalPath($path);
@@ -156,7 +161,7 @@ class BrowserController extends AppController
       $fspath = $this->_fsRoots[$alias].implode(DS, $dirs);
     }
 
-    if (!is_dir($fspath)) {
+    if (!file_exists($fspath)) {
       return false;
     }
     return $fspath;
@@ -176,12 +181,13 @@ class BrowserController extends AppController
       $list = array();
       foreach ($files as $file) {
         $ext = strtolower(substr($file, strrpos($file, '.')+1));
-        if (in_array($ext, $images))
+        if (in_array($ext, $images)) {
           $list[$file] = 'image';
-        elseif (in_array($ext, $videos))
+        } elseif (in_array($ext, $videos)) {
           $list[$file] = 'video';
-        else
+        } else {
           $list[$file] = 'unknown';
+        }
       }
       $files = $list;
     } else {
@@ -258,13 +264,15 @@ class BrowserController extends AppController
     $dirs = array();
     $files = array();
     foreach ($data['import'] as $file) {
-      if (!$file)
+      if (!$file) {
         continue;
+      }
       $fsPath = $this->_getFsPath($file);
-      if (is_dir($fsPath))
+      if (is_dir($fsPath)) {
         $dirs[] = Folder::slashTerm($fsPath);
-      elseif (file_exists($fsPath) && is_readable($fsPath))
+      } elseif (file_exists($fsPath) && is_readable($fsPath)) {
         $files[] = $fsPath;
+      }
     }
     
     // search for files
@@ -283,10 +291,12 @@ class BrowserController extends AppController
     $numErrors = 0;
     foreach ($files as $file) {
       $result = $this->_importFile($file);
-      if ($result>0)
+      if ($result>0) {
         $numImports++;
-      if ($result<0)
+      }
+      if ($result<0) {
         $numErrors++;
+      }
     }
     $this->Session->setFlash("Imported $numImports files ($numErrors errors)");
 
@@ -309,6 +319,7 @@ class BrowserController extends AppController
       $this->data['total'] = 0;
     } else {
       $ids = Set::extract($result, '{n}.Image.id');
+      $executionTime = ini_get('max_execution_time');
       $start = getMicrotime();
       foreach ($ids as $id) {
         $image = $this->Image->findById($id);
@@ -325,10 +336,11 @@ class BrowserController extends AppController
           $synced++;
         }
 
-        // Ensure only 25 sec maximum of execution
+        // Consume only maximum of execution time
         $time = getMicrotime()-$start;
-        if ($time > 25)
+        if ($time > $executionTime - 5) {
           break;
+        }
       }
       $this->data['total'] = count($ids);
     }

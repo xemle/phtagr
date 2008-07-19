@@ -1091,16 +1091,30 @@ class QueryComponent extends Object
       // get the final query
       $sql = $this->getQuery(2);
       $results = $this->controller->Image->query($sql);
-      if (isset($results[$index])) {
-        $data = $this->controller->Image->optimizedRead($tmpImage);
-        $this->controller->Image->setAccessFlags(&$data, $this->controller->getUser());
-        if ($index > 0 && isset($results[$index-1]))
-          $this->_params['prevImage'] = $results[$index-1]['Image']['id'];
-        if (isset($results[$index+1]))
-          $this->_params['nextImage'] = $results[$index+1]['Image']['id'];
-      } else {
+      if (!isset($results[$index])) {
         $this->controller->Logger->err("Unexpected results of query: $sql");
         $this->controller->Session->setFlash("Sorry. No image or files found!");
+      } elseif ($results[$index]['Image']['id'] != $tmpImage) {
+        // The image was not found via search. Query it directly
+        $this->_params['image'] = $tmpImage;
+        $sql = $this->getQuery(2);
+        $results = $this->controller->Image->query($sql);
+        if (!$results) {
+          $this->controller->Logger->warn("Image with id $tmpImage could not be found");
+          $this->controller->Session->setFlash("Sorry. No image or files found!");
+        } else {
+          $data = $this->controller->Image->optimizedRead($tmpImage);
+          $this->controller->Image->setAccessFlags(&$data, $this->controller->getUser());
+        }
+      } else {
+        $data = $this->controller->Image->optimizedRead($tmpImage);
+        $this->controller->Image->setAccessFlags(&$data, $this->controller->getUser());
+        if ($index > 0 && isset($results[$index-1])) {
+          $this->_params['prevImage'] = $results[$index-1]['Image']['id'];
+        }
+        if (isset($results[$index+1])) {
+          $this->_params['nextImage'] = $results[$index+1]['Image']['id'];
+        }
       }
     } else {
       $this->controller->Session->setFlash("Sorry. No image or files found!");
@@ -1150,16 +1164,16 @@ class QueryComponent extends Object
     @param counter Pointer to the merged array
     @param data Hash array to count
     @param key Key of the hash entry. Default is 'name' */
-  function _arrayCountMerge(&$counter, $data, $key = 'name')
-  {
+  function _arrayCountMerge(&$counter, $data, $key = 'name') {
     if (!count($data))
       return;
     foreach ($data as $item) {
       $name = $item[$key];
-      if (!isset($counter[$name]))
+      if (!isset($counter[$name])) {
         $counter[$name] = 1;
-      else
+      } else {
         $counter[$name]++;
+      }
     }
   }
 
@@ -1172,7 +1186,7 @@ class QueryComponent extends Object
       $this->_arrayCountMerge(&$tags, &$data['Tag']);
       $this->_arrayCountMerge(&$categories, &$data['Category']);
       $this->_arrayCountMerge(&$locations, &$data['Location']);
-    } else {
+    } elseif (count($data)) {
       // Multiple image
       foreach ($data as $image) {
         $this->_arrayCountMerge(&$tags, &$image['Tag']);
