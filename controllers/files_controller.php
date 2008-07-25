@@ -36,7 +36,16 @@ class FilesController extends AppController
                       OUTPUT_TYPE_HIGH => array('size' => OUTPUT_SIZE_HIGH, 'quality' => 90),
                       OUTPUT_TYPE_VIDEO => array('size' => OUTPUT_SIZE_VIDEO, 'bitrate' => OUTPUT_BITRATE_VIDEO)
                     );
-  var $components = array('VideoFilter', 'FileCache');
+  var $components = array('ImageFilter', 'VideoFilter', 'FileCache');
+
+  function beforeFilter() {
+    // Reduce security level for this controller if required. Security level
+    // 'high' allows only 10 concurrent requests
+    if (Configure::read('Security.level') === 'high') {
+      Configure::write('Security.level', 'medium');
+    }
+    parent::beforeFilter();
+  }
   
   function _getCacheDir($data) {
     if (!isset($data['Image']['id'])) {
@@ -78,9 +87,16 @@ class FilesController extends AppController
     //header('Cache-Control: max-age=0');
   }
 
-  /** 
-    @todo Implement access check for file! */
-  function _checkAccess($image, $outputType) {
+  /** Fetch image from database and checks access 
+    @param id Image id
+    @param outputType 
+    @return Image data array. If no image is found or access is denied it responses 404 */
+  function _getImage($id, $outputType) {
+    if (!$this->Image->hasAny("Image.id = $id")) {
+      $this->Logger->debug("No Image with id $id exists");
+      $this->redirect(null, 404);
+    }
+
     $user = $this->getUser();
     switch ($outputType) {
       case OUTPUT_TYPE_HIGH:
@@ -88,11 +104,31 @@ class FilesController extends AppController
       default:
         $flag = ACL_READ_PREVIEW; break;
     }
-    if (!$this->Image->checkAccess(&$image, $user, $flag, ACL_READ_MASK)) {
-      $this->Logger->warn("User {$user['User']['id']} has no previleges to access image ".$image['Image']['id']);
-      $this->redirect(null, 404);
+    $condition = "Image.id = $id AND Image.flag & ".IMAGE_FLAG_ACTIVE.$this->Image->buildWhereAcl($user, 0, $flag);
+    $image = $this->Image->find($condition);
+    if (!$image) {
+      $this->Logger->debug("Deny access to image $id");
+      $this->redirect(null, 403);
     }
-    return true;
+    
+    return $image;
+  }
+
+  /** Fetches the source filename and checks it for read permission. If
+   * filename is not readable it responses with 404
+    @param image Image data
+    @return filename of image */
+  function _getSourceFile($image) {
+    if ($this->Image->isVideo($image)) {
+      $sourceFilename = $this->VideoFilter->getVideoPreviewFilename($image);
+    } else {
+      $sourceFilename = $this->Image->getFilename($image);
+    }
+    if(!is_readable($sourceFilename)) {
+      $this->Logger->debug("Image file (id {$image['Image']['id']}) is not readable: $sourceFilename");
+      $this->redirect(null, 500); 
+    }
+    return $sourceFilename;
   }
 
   /**  */
@@ -102,24 +138,11 @@ class FilesController extends AppController
       $this->Logger->err("Unknown ouput type $outputType");
       die("Internal error");
     }
+    
+    $image = $this->_getImage($id, $outputType);
+    $sourceFilename = $this->_getSourceFile($image);
+
     $options = am(array('size' => 220, 'square' => false, 'quality' => OUTPUT_QUALITY), $this->_outputMap[$outputType]);
-
-    $image = $this->Image->findById($id);
-    if (!$image) {
-      $this->Logger->debug("Could not fetch image with id $id");
-      die("No such file");
-    }
-
-    $this->_checkAccess(&$image, $outputType);
-
-    if ($this->Image->isVideo($image))
-      $sourceFilename = $this->VideoFilter->getVideoPreviewFilename($image);
-    else 
-      $sourceFilename = $this->Image->getFilename($image);
-    if(!is_readable($sourceFilename)) {
-      $this->Logger->debug("Image file (id {$image['Image']['id']}) is not readable: $sourceFilename");
-      die("Couldn't read source image");
-    }
 
     $phpThumb = new phpThumb();
 
@@ -128,8 +151,7 @@ class FilesController extends AppController
     $phpThumb->h = $options['size'];
     $phpThumb->q = $options['quality'];
 
-    switch ($image['Image']['orientation']) 
-    {
+    switch ($image['Image']['orientation']) {
       case 1:
         break;
       case 3:
@@ -183,9 +205,13 @@ class FilesController extends AppController
     //Thanks to Kim Biesbjerg for his fix about cached thumbnails being regenerated
     if(!is_file($phpThumb->cache_filename)) { 
       // Check if image is already cached.
-      if ($phpThumb->GenerateThumbnail()) {
-        $this->Logger->debug("Render new {$options['size']}x{$options['size']} thumbnail of image id {$image['Image']['id']} to '{$phpThumb->cache_filename}'");
+      $t1 = getMicrotime();
+      $result = $phpThumb->GenerateThumbnail();
+      $t2 = getMicrotime();
+      if ($result) {
+        $this->Logger->debug("Render {$options['size']}x{$options['size']} image (id {$image['Image']['id']}) in ".round($t2-$t1, 4)."ms to '{$phpThumb->cache_filename}'");
         $phpThumb->RenderToFile($phpThumb->cache_filename);
+        $this->ImageFilter->clearMetaData($phpThumb->cache_filename);
       } else {
         $this->Logger->err("Could not generate thumbnail: ".$phpThumb->error);
         $this->Logger->err($phpThumb->debugmessages);

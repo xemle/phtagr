@@ -57,6 +57,30 @@ class ImageFilterComponent extends Object {
     return $this->_extractImageData(&$image, $meta);
   }
 
+  /** Clear image metadata from a file
+    @param filename Filename to file to clean */
+  function clearMetaData($filename) {
+    if (!file_exists($filename)) {
+      $this->Logger->err("Filename '$filename' does not exists");
+      return;
+    }
+    if (!is_writeable($filename)) {
+      $this->Logger->err("Filename '$filename' is not writeable");
+      return;
+    }
+
+    $bin = $this->controller->getPreferenceValue('bin.exiftool', 'exiftool');
+    $command = $bin.' -all= '.escapeshellarg($filename);
+    $output = array();
+    $result = -1;
+    $t1 = getMicrotime();
+    exec($command, &$output, &$result);
+    $t2 = getMicrotime();
+    $this->Logger->trace("$bin call needed ".round($t2-$t1, 4)."ms");
+
+    $this->Logger->debug("Cleaned meta data of '$filename'");
+  }
+
   /** Read the meta data viea exiftool from a file
     * @param filename Filename to read 
     * @result Array of metadata or false on error */
