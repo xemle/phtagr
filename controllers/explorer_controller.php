@@ -580,7 +580,6 @@ class ExplorerController extends AppController
 
   function media() {
     $this->data = $this->Query->paginate();
-    $this->set('mainMenuExplorer', $this->Query->getMenu(&$this->data));
     $this->layout = 'xml';
     Configure::write('debug', 0);
   }
