@@ -40,7 +40,7 @@
  * In production mode, flash messages redirect after a time interval.
  * In development mode, you need to click the flash message to continue.
  */
-	Configure::write('debug', 2);
+	Configure::write('debug', 0);
 /**
  * Application wide charset encoding
  */
@@ -228,7 +228,7 @@
 	Cache::config('default', array('engine' => 'File'));
 
   Configure::write('Logger.enable', true);
-  Configure::write('Logger.level', 0);
+  Configure::write('Logger.level', 1);
   Configure::write('Logger.file', TMP.'logs'.DS.'logger.log');
 
   if (!defined('USER_DIR')) {
