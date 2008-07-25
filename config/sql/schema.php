@@ -68,7 +68,7 @@ class PhtagrSchema extends CakeSchema {
 			'group_id' => array('type'=>'integer', 'null' => true, 'default' => NULL),
 			'flag' => array('type'=>'integer', 'null' => true, 'default' => '0', 'length' => 3),
 			'path' => array('type'=>'text', 'null' => false),
-			'file' => array('type'=>'string', 'null' => false, 'length' => 255),
+			'file' => array('type'=>'string', 'null' => false, 'length' => 254), /* should be 255. Bug: Schema::read() removes default lengths, while Schema::compare() doesn't which causes unnecessary changes */
 			'bytes' => array('type'=>'integer', 'null' => false),
 			'filetime' => array('type'=>'datetime', 'null' => false),
 			'gacl' => array('type'=>'integer', 'null' => true, 'default' => '0', 'length' => 3),
