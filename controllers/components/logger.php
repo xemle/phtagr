@@ -21,19 +21,20 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-define("L_INFO", 3);
-define("L_WARN", 2);
-define("L_DEBUG", 1);
-define("L_TRACE", 0);
-define("L_ERR", -1);
-define("L_FATAL", -2);
+define("L_FATAL",  -3);
+define("L_ERR",    -2);
+define("L_WARN",   -1);
+define("L_NOTICE",  0);
+define("L_INFO",    1);
+define("L_VERBOSE", 2);
+define("L_DEBUG",   3);
+define("L_TRACE",   4);
 
-define("LOG_BUF", 1);
-define("LOG_CONSOLE", 2);
-define("LOG_FILE", 3);
-define("LOG_HTML", 4);
-define("LOG_DB", 5);
-define("LOG_SESSION", 6);
+define("LOG_BUF",     0);
+define("LOG_SESSION", 1);
+define("LOG_HTML",    2);
+define("LOG_CONSOLE", 3);
+define("LOG_FILE",    4);
 
 /** @class Logger
   Class to log messages with different backends. Available backends are
@@ -78,8 +79,9 @@ class LoggerComponent extends Object {
   /** Sets the new log threshold 
     @param level new log threshold */
   function setLevel($level) {
-    if ($level >= L_FATAL && $level <= L_INFO)
+    if ($level >= L_FATAL && $level <= L_TRACE) {
       $this->_level=$level;
+    }
   }
 
   /** @return Returns the current log threshold */
@@ -91,16 +93,17 @@ class LoggerComponent extends Object {
     @return True, if the logger could be enabled  */
   function enable() {
     //global $db;
-    if ($this->_enabled)
+    if ($this->_enabled) {
       return true;
+    }
 
-    if ($this->_type==LOG_FILE && !$this->_openFile())
+    if ($this->_type == LOG_FILE && !$this->_openFile()) {
       return false;
-    //if ($this->_type==LOG_DB && !$db->is_connected())
-    //  return false;
+    }
     if ($this->_type==LOG_SESSION) { 
-      if (!isset($_SESSION))
+      if (!isset($_SESSION)) {
         return false;
+      }
       $_SESSION['log_buf']=array();
     }
 
@@ -110,12 +113,14 @@ class LoggerComponent extends Object {
 
   /** Disables the logger */
   function disable() {
-    if (!$this->_enabled)
+    if (!$this->_enabled) {
       return;
+    }
 
-    $this->_enabled=false;
-    if ($this->_type==LOG_FILE)
+    $this->_enabled = false;
+    if ($this->_type == LOG_FILE) {
       $this->_closeFile();
+    }
   }
 
   /** @return returns true if the logger is enables */
@@ -128,27 +133,30 @@ class LoggerComponent extends Object {
     @param filename Filename if backend type is LOG_FILE 
     @note If the logger is enabled, it will be disabled and enabled again to
   invoke backend finalizations and initialisations */
-  function setType($type, $filename="") {
-    if ($type<LOG_CONSOLE || $type>LOG_SESSION)
+  function setType($type, $filename = false) {
+    if ($type < LOG_BUF || $type > LOG_FILE) {
       return;
+    }
 
     // parameter checks
-    if ($type==LOG_FILE)
-    {
-      if ($filename=='')
+    if ($type == LOG_FILE) {
+      if (!$filename || !is_writeable(dirname($filename))) {
         return;
-      $this->_filename=$filename;
+      }
+      $this->_filename = $filename;
     }
 
     // restarting
-    $isRunning=$this->_enabled;
-    if ($isRunning)
+    $isRunning = $this->_enabled;
+    if ($isRunning) {
       $this->disable();
+    }
 
-    $this->_type=$type;
+    $this->_type = $type;
 
-    if ($isRunning)
+    if ($isRunning) {
       $this->enable();
+    }
   }
 
   /** @return Returns current backend type */
@@ -158,78 +166,90 @@ class LoggerComponent extends Object {
 
   /** @return Returns the internal log buffer, if LOG_BUF is used */
   function getBuffer() {
-    if ($this->_type==LOG_BUF)
+    if ($this->_type == LOG_BUF)
       return $this->_buf;
-    if ($this->_type==LOG_SESSION && isset($_SESSION['log_buf']))
+    if ($this->_type == LOG_SESSION && isset($_SESSION['log_buf']))
       return $_SESSION['log_buf'];
-    return null;
+    return false;
   }
 
   /** @return Returns the lines if LOG_HTML is used */
   function getLines() {
-    if ($this->_type==LOG_HTML)
+    if ($this->_type == LOG_HTML) {
       return $this->_lines;
+    } 
+    return false;
   }
 
   /** Generates the log message and dispatch the logs to the backends.
     @param level Log level. If the level lower than the current threshold (but no
-  error or fatal error), the function returns immediately 
-    @param msg Log message
-    @param image Image ID if any
-    @param user User ID if any */
+    error or fatal error), the function returns immediately 
+    @param msg Log message */
   function _write($level, $msg) {
     if (!$this->_enabled || 
-      ($level < $this->_level && 0 <= $level))
+      ($level < $this->_level && $level >= 0))
       return;
 
-    if ($level==L_FATAL) $slevel="FATAL";
-    elseif ($level==L_ERR) $slevel="ERR";
-    elseif ($level==L_TRACE) $slevel="TRACE";
-    elseif ($level==L_DEBUG) $slevel="DEBUG";
-    elseif ($level==L_WARN) $slevel="WARN";
-    elseif ($level==L_INFO) $slevel="INFO";
-    else return;
+    switch ($level) {
+      case L_FATAL:   $slevel = 'FATAL';    break;
+      case L_ERR:     $slevel = 'ERR';      break;
+      case L_WARN:    $slevel = 'WARN';     break;
+      case L_NOTICE:  $slevel = 'NOTICE';   break;
+      case L_INFO:    $slevel = 'INFO';     break;
+      case L_VERBOSE: $slevel = 'VERBOSE';  break;
+      case L_DEBUG:   $slevel = 'DEBUG';    break;
+      case L_TRACE:   $slevel = 'TRACE';    break;
+      default: $slevel = 'UNDEF';
+    }
 
-    $bt=@debug_backtrace();
-    $depth=2;
+    $bt = @debug_backtrace();
+    $depth = 2;
 
-    $file=$bt[$depth]['file'];
-    $file=substr($file, strrpos($file, DS)+1);
-    if (isset($bt[$depth+1]['class']))
-      $file.="@".$bt[$depth+1]['class'];
-    if (isset($bt[$depth+1]['function']))
-      $file.="::".$bt[$depth+1]['function']."()";
+    $file = $bt[$depth]['file'];
+    $file = substr($file, strrpos($file, DS)+1);
+    if (isset($bt[$depth+1]['class'])) {
+      $file .= "@".$bt[$depth+1]['class'];
+    }
+    if (isset($bt[$depth+1]['function'])) {
+      $file .= "::".$bt[$depth+1]['function']."()";
+    }
 
-    $line=$bt[$depth]['line'];
+    $line = $bt[$depth]['line'];
 
-    if (!isset($file))
+    if (!isset($file)) {
       $file="(no file)";
-    if (!isset($line))
-      $line=-1;
+    }
+    if (!isset($line)) {
+      $line = 0;
+    }
 
-    if (!is_string($msg))
+    if (is_array($msg) || is_object($msg)) {
       $msg = print_r($msg, true);
+    }
 
-    $now=time();
-    $time=date("Y-m-d H:i:s", $now);
-    if ($this->_type==LOG_CONSOLE || $this->_type==LOG_FILE) {
-      $space = str_repeat(' ', max(0, 5-strlen($slevel)));
+    $now = time();
+    $time = date("Y-m-d H:i:s", $now);
+    if ($this->_type == LOG_CONSOLE || $this->_type == LOG_FILE) {
+      $space = str_repeat(' ', max(0, 7-strlen($slevel)));
       $line=sprintf("%s [%s]%s %s:%d %s\n",
         $time, $slevel, $space, $file, $line, $msg);
-      if ($this->_type==LOG_CONSOLE)
+      if ($this->_type == LOG_CONSOLE) {
         echo $line;
-      else
+      } else {
         $this->_logFile($line);
-    } elseif ($this->_type==LOG_HTML) {
+      }
+    } elseif ($this->_type == LOG_HTML) {
       $this->_logHtml($time, $slevel, $imageid, $userid, $file, $line, $msg);
-    } elseif ($this->_type==LOG_BUF || $this->_type==LOG_SESSION) {
+    } elseif ($this->_type == LOG_BUF || $this->_type == LOG_SESSION) {
       $log=array('time' => $now, 'level' => $slevel,
                  'file' => $file, 'line' => $line,
                  'msg' => $msg);
-      if ($this->_type==LOG_BUF)
-        array_push($this->_buf, $log);
-      if ($this->_type==LOG_SESSION && isset($_SESSION['log_buf']))
-        array_push($_SESSION['log_buf'], $log);
+      if ($this->_type == LOG_BUF) {
+        $this->_buf[] = $log;
+      }
+      if ($this->_type == LOG_SESSION && isset($_SESSION['log_buf'])) {
+        $_SESSION['log_buf'][] = $log;
+      }
     }
   }
 
@@ -242,14 +262,15 @@ class LoggerComponent extends Object {
 
     $msg=htmlentities($msg, ENT_QUOTES, "UTF-8");
     $line.="<span class=\"msg\">$msg</span><br />";
-    array_push($this->_lines, $line); 
+    $this->_lines[] = $line;
   }
 
   function _openFile() {
-    if ($this->_filename=='')
+    if ($this->_filename=='') {
       return false;
+    }
 
-    $this->_file=fopen($this->_filename, 'a');
+    $this->_file = fopen($this->_filename, 'a');
     if (!$this->_file) {
       return false;
       $this->_file=null;
@@ -258,13 +279,15 @@ class LoggerComponent extends Object {
   }
 
   function _closeFile() {
-    if ($this->_file!=null)
+    if ($this->_file != null) {
       fclose($this->_file);
+    }
   }
 
   function _logFile($line) {
-    if ($this->_file!=null)
+    if ($this->_file!=null) {
       fwrite($this->_file, $line);
+    }
   }
 
   function fatal($msg) {
@@ -277,19 +300,14 @@ class LoggerComponent extends Object {
     $logger->write($msg, L_ERR);
   }
 
-  function trace($msg) {
-    $logger = self::getInstance();
-    $logger->write($msg, L_TRACE);
-  }
-
-  function debug($msg) {
-    $logger = self::getInstance();
-    $logger->write($msg, L_DEBUG);
-  }
-
   function warn($msg) {
     $logger = self::getInstance();
     $logger->write($msg, L_WARN);
+  }
+
+  function notice($msg) {
+    $logger = self::getInstance();
+    $logger->write($msg, L_NOTICE);
   }
 
   function info($msg) {
@@ -297,12 +315,27 @@ class LoggerComponent extends Object {
     $logger->write($msg, L_INFO);
   }
 
+  function verbose($msg) {
+    $logger = self::getInstance();
+    $logger->write($msg, L_VERBOSE);
+  }
+
+  function debug($msg) {
+    $logger = self::getInstance();
+    $logger->write($msg, L_DEBUG);
+  }
+
+  function trace($msg) {
+    $logger = self::getInstance();
+    $logger->write($msg, L_TRACE);
+  }
+
   function write($msg, $level=L_INFO) {
     $this->_write($level, $msg);
   }
   
   function bt() {
-    $steps=debug_backtrace();
+    $steps = @debug_backtrace();
     array_pop($steps);
     $trace = array();
     foreach ($steps as $step) {
