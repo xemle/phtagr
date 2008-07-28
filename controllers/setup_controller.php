@@ -686,7 +686,7 @@ class DATABASE_CONFIG
     $folder = new Folder($modelCacheDir);
     $modelCacheFiles = $folder->find('cake_model_.*');
     foreach ($modelCacheFiles as $file) {
-      if (!@unlink($file)) {
+      if (!@unlink($folder->addPathElement($modelCacheDir, $file))) {
         $this->Logger->err("Could not delete model cache file '$file' in '$modelCacheDir'");
       }
     }

@@ -87,7 +87,7 @@ class FileCacheComponent extends Object {
       $this->Logger->debug("Delete cached files of image $imageId");
       foreach($files as $file) {
         $this->Logger->trace("Delete cache file '$file'");
-        unlink($file);
+        unlink($folder->addPathElement($cacheDir, $file));
       }
     } else {
       $this->Logger->trace("No cached files found for image $imageId");
