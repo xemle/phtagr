@@ -99,6 +99,7 @@ class FilesController extends AppController
 
     $user = $this->getUser();
     switch ($outputType) {
+      case OUTPUT_TYPE_VIDEO:
       case OUTPUT_TYPE_HIGH:
         $flag = ACL_READ_HIGH; break;
       default:
@@ -253,24 +254,21 @@ class FilesController extends AppController
       $this->Logger->err("Unknown ouput type $outputType");
       die("Internal error");
     }
-    $options = am(array('size' => 220, 'bitrate' => 250), $this->_outputMap[$outputType]);
 
-    $image = $this->Image->findById($id);
-    if (!$image) {
-      $this->Logger->debug("Could not fetch image with id $id");
-      die("No such file");
-    }
-
-    $this->_checkAccess(&$image, $outputType);
-
-    if (!$this->Image->isVideo($image))
+    $image = $this->_getImage($id, $outputType);
+    if (!$this->Image->isVideo($image)) {
+      $this->err("Requested resource is no video");
       $this->redirect(null, 404);
+    }
 
     $sourceFilename = $this->Image->getFilename($image);
     $cacheDir = $this->_getCacheDir($image);
     if (!$cacheDir) {
+      $this->fatal("Precondition of cache directory failed: $cacheDir");
       die("Precondition of cache directory failed");
     }
+
+    $options = $this->_outputMap[$outputType];
     $flashFilename = $cacheDir.$this->_getCacheFilename($id, $options['size'], 'flv');
 
     if (!file_exists($flashFilename)) {
