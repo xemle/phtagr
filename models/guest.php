@@ -26,6 +26,8 @@ class Guest extends AppModel
   var $name = 'Guest';
   var $useTable = 'users';
 
+  var $actsAs = array('Cipher' => array());
+
   var $belongsTo = array('Creator' => array('className' => 'User'));
 
   var $hasAndBelongsToMany = array( 

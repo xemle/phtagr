@@ -25,6 +25,8 @@ class User extends AppModel
 {
   var $name = 'User';
 
+  var $actsAs = array('Cipher' => array());
+
   var $hasMany = array(
                   'Group' => array(),
                   'Preference' => array(),

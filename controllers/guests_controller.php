@@ -88,10 +88,13 @@ class GuestsController extends AppController {
       if ($this->Guest->save(null, true, array('username', 'password', 'email', 'expires', 'quota'))) {
         $this->Session->setFlash("Guest was saved");
       } else {
+        $this->Logger->err("Could not save guest");
+        $this->Logger->trace($this->Guest->validationErrors);
         $this->Session->setFlash("Guest could not be saved!");
       }
     }
     $this->data = $this->Guest->findById($guestId);
+    $this->Logger->trace($this->data);
     unset($this->data['Guest']['password']);
     $this->set('userId', $userId);
   }
@@ -127,7 +130,10 @@ class GuestsController extends AppController {
         $list = Set::extract($guest, "Member.{n}.id");
         $list[] = $group['Group']['id'];
         $guest['Member']['Member'] = array_unique($list);
-        if ($this->Guest->save($guest)) {
+        unset($guest['Guest']['password']);
+        $this->Guest->id = $guestId;
+        $this->Guest->set($guest);
+        if ($this->Guest->save()) {
           $this->Logger->info("Added group '{$group['Group']['name']}' ({$group['Group']['id']}) to guest '{$guest['Guest']['username']}' ({$guest['Guest']['id']})");
           $this->Session->setFlash("The group '{$this->data['Group']['name']}' was added to your guest '{$guest['Guest']['username']}'");
         } else {
@@ -155,7 +161,12 @@ class GuestsController extends AppController {
       } else {
         unset($list[$key]);
         $guest['Member']['Member'] = array_unique($list);
-        if (!$this->Guest->save($guest)) {
+        unset($guest['Guest']['password']);
+        $this->Guest->id = $guestId;
+        $this->Guest->set($guest);
+        if (!$this->Guest->save()) {
+          $this->Logger->err("Could not save guest");
+          $this->Logger->trace($this->Guest->validationErrors);
           $this->Session->setFlash("Could not save guest");
         } else {
           $group = $this->Group->findById($groupId);

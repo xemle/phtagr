@@ -67,7 +67,10 @@ class UsersController extends AppController
         $this->Logger->warn("User account of '{$user['User']['username']}' (id {$user['User']['id']}) is expired!");
         $this->Session->setFlash("Sorry. Your account is expired!");
       } else {
+        $user = $this->User->decrypt(&$user);
+        $this->Logger->trace($user);
         if ($user['User']['password'] == $this->data['User']['password']) {
+          $this->Session->renew();
           $this->Session->activate();
           if (!$this->Session->check('User.id') || $this->Session->read('User.id') != $user['User']['id']) {
             $this->Logger->info("Start new session for '{$user['User']['username']}' (id {$user['User']['id']})");

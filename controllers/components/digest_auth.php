@@ -194,6 +194,7 @@ class DigestAuthComponent extends Object
     }
 
     // check credentials
+    $user = $this->controller->User->decrypt(&$user);
     if ($user['User']['password'] != $this->_authData['password']) {
       $this->Logger->err("Password missmatch");
       $this->requestAuthentication();
@@ -292,6 +293,7 @@ class DigestAuthComponent extends Object
       $this->requestAuthentication();
     }
 
+    $user = $this->controller->User->decrypt(&$user);
     $A1=md5($this->_authData['username'].':'.$this->realm.':'.$user['User']['password']);
     $A2=md5($_SERVER['REQUEST_METHOD'].':'.$this->_authData['uri']);
     $validResponse=md5($A1.':'.$this->_authData['nonce'].':'.$this->_authData['nc'].':'.$this->_authData['cnonce'].':'.$this->_authData['qop'].':'.$A2);
