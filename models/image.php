@@ -592,5 +592,54 @@ class Image extends AppModel
     $result = $this->query($sql);
     return $result[0][0]['total'];
   }
+
+  /** Deletes all HABTM association from images of a given user like Tag, Categories 
+    @param userId User ID */
+  function _deleteHasAndBelongsToManyFromUser($userId) {
+    $db =& ConnectionManager::getDataSource($this->useDbConfig);
+
+    $table = $db->fullTableName($this->table, false);
+    $alias = $this->alias;
+    $key = $this->primaryKey;
+
+    $this->Logger->info("Delete HasAndBelongsToMany Image association of user '$userId'");
+    foreach ($this->hasAndBelongsToMany as $model => $data) {
+      $joinTable = $db->fullTableName($data['joinTable'], false);
+      $joinAlias = $data['with'];
+      $foreignKey = $data['foreignKey'];
+      $sql = "DELETE FROM `$joinAlias`".
+             " USING `$joinTable` AS `$joinAlias`, `$table` AS `$alias`".
+             " WHERE `$alias`.`user_id` = $userId AND `$alias`.`$key` = `$joinAlias`.`$foreignKey`";
+      $this->Logger->debug("Delete $model associations");
+      $this->Logger->trace($sql);
+      $this->query($sql);
+    }
+  }
+
+  function _deleteHasManyFromUser($userId) {
+    $db =& ConnectionManager::getDataSource($this->useDbConfig);
+
+    $table = $db->fullTableName($this->table, false);
+    $alias = $this->alias;
+    $key = $this->primaryKey;
+
+    $this->Logger->info("Delete HasMany Image assosciation of user '$userId'");
+    foreach ($this->hasMany as $model => $data) {
+      $manyTable = $db->fullTableName($this->{$model}->table, false);
+      $foreignKey = $data['foreignKey'];
+      $sql = "DELETE FROM `$model`".
+             " USING `$manyTable` AS `$model`, `$table` AS `$alias`".
+             " WHERE `$alias`.`user_id` = $userId AND `$alias`.`$key` = `$model`.`$foreignKey`";
+      $this->Logger->debug("Delete $model associations");
+      $this->Logger->trace($sql);
+      $this->query($sql);
+    }
+  }
+
+  function deleteFromUser($userId) {
+    $this->_deleteHasAndBelongsToManyFromUser($userId);
+    $this->_deleteHasManyFromUser($userId);
+    $this->deleteAll("Image.user_id = $userId");
+  }
 }
 ?>

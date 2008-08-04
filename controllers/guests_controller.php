@@ -94,7 +94,6 @@ class GuestsController extends AppController {
       }
     }
     $this->data = $this->Guest->findById($guestId);
-    $this->Logger->trace($this->data);
     unset($this->data['Guest']['password']);
     $this->set('userId', $userId);
   }
@@ -131,7 +130,6 @@ class GuestsController extends AppController {
         $list[] = $group['Group']['id'];
         $guest['Member']['Member'] = array_unique($list);
         unset($guest['Guest']['password']);
-        $this->Guest->id = $guestId;
         $this->Guest->set($guest);
         if ($this->Guest->save()) {
           $this->Logger->info("Added group '{$group['Group']['name']}' ({$group['Group']['id']}) to guest '{$guest['Guest']['username']}' ({$guest['Guest']['id']})");

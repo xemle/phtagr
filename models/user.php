@@ -28,9 +28,9 @@ class User extends AppModel
   var $actsAs = array('Cipher' => array());
 
   var $hasMany = array(
-                  'Group' => array(),
-                  'Preference' => array(),
-                  'Guest' => array('foreignKey' => 'creator_id')
+                  'Group' => array('dependent' => true),
+                  'Preference' => array('dependent' => true),
+                  'Guest' => array('foreignKey' => 'creator_id', 'dependent' => true)
                   );
 
   var $hasAndBelongsToMany = array(
@@ -121,6 +121,22 @@ class User extends AppModel
       $this->data['User']['expires'] = null;
     }
   
+    return true;
+  }
+
+  function beforeDelete($cascade) {
+    App::import('Model', 'Image');
+  
+    $id = $this->id;
+    $this->Image =& new Image();
+    $this->Logger->info("Delete all image database entries of user $id");
+    $this->Image->deleteFromUser($id);
+
+    $dir = USER_DIR.$id;
+    $this->Logger->info("Delete user directory of user $id: $dir");
+    $folder = new Folder($dir);
+    $folder->delete();
+
     return true;
   }
 

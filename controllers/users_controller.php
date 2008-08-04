@@ -68,7 +68,6 @@ class UsersController extends AppController
         $this->Session->setFlash("Sorry. Your account is expired!");
       } else {
         $user = $this->User->decrypt(&$user);
-        $this->Logger->trace($user);
         if ($user['User']['password'] == $this->data['User']['password']) {
           $this->Session->renew();
           $this->Session->activate();
@@ -126,26 +125,24 @@ class UsersController extends AppController
     $id = intval($id);
 
     if (!empty($this->data)) {
-      if (!$this->User->isUnique('username')) {
-        $this->Session->setFlash('User already exists');
+      $this->data['User']['id'] = $id;
+
+      $this->User->set($this->data);
+      if ($this->User->save(null, true, array('username', 'password', 'email', 'expires', 'quota', 'firstname', 'lastname'))) {
+        $this->Logger->debug("Data of user {$this->data['User']['username']} was updated");
+        $this->Session->setFlash('User data was updated');
       } else {
-        $this->data['User']['id'] = $id;
+        $this->Logger->err("Could not save user data");
+        $this->Logger->debug($this->User->validationErrors);
+        $this->Session->setFlash('Could not be updated');
+      }
 
-        $this->User->set($this->data);
-        if ($this->User->save(null, true, array('username', 'password', 'email', 'expires', 'quota', 'firstname', 'lastname'))) {
-          $this->Logger->debug("Data of user {$this->data['User']['username']} was updated");
-          $this->Session->setFlash('User data was updated');
-        } else {
-          $this->Session->setFlash('Could not be updated');
-        }
+      if (!empty($this->data['Preference']['path']['fspath'])) {
+        $fsroot = $this->data['Preference']['path']['fspath'];
+        $fsroot = Folder::slashTerm($fsroot);
 
-        if (!empty($this->data['Preference']['path']['fspath'])) {
-          $fsroot = $this->data['Preference']['path']['fspath'];
-          $fsroot = Folder::slashTerm($fsroot);
-
-          if (is_dir($fsroot))
-            $this->Preference->addValue('path.fsroot[]', $fsroot, $id);
-        }
+        if (is_dir($fsroot))
+          $this->Preference->addValue('path.fsroot[]', $fsroot, $id);
       }
     }
 
@@ -182,8 +179,10 @@ class UsersController extends AppController
     $user = $this->User->findById($id);
     if (!$user) {
       $this->Session->setFlash("Could not find user to delete");
+      $this->redirect('/admin/users/');
     } else {
       $this->User->del($id);
+      $this->Logger->notice("All data of user '{$user['User']['username']}' ($id) deleted");
       $this->Session->setFlash("User '{$user['User']['username']}' was deleted");
       $this->redirect('/admin/users/');
     }
