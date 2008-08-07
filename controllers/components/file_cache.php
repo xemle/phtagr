@@ -100,8 +100,8 @@ class FileCacheComponent extends Object {
     $userId = intval($userId);
     $cacheDir = USER_DIR.$userId.DS.'cache'.DS;
     if (is_dir($cacheDir)) {
-      $folder = new Folder($cacheDir);
-      $folder->delete();
+      $folder = new Folder();
+      $folder->delete($cacheDir);
       $this->Logger->info("Deleted cache dir '$cacheDir'");
     } else {
       $this->Logger->debug("User $userId has no cached files");

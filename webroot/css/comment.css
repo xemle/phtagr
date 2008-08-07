@@ -1,0 +1,37 @@
+.comments {
+  margin: 2em 0;
+}
+.comment .meta {
+  border: none;
+  background: none;
+}
+
+.comment {
+  margin: 1em 0;
+}
+
+.comments .even {
+  background-color: #eee;
+}
+
+.comment .meta {
+  padding: .5em;
+  font-size: 105%;
+}
+
+.comment .meta .from {
+  font-weight: bold;
+}
+
+.comment .meta .date {
+  font-style: italic;
+}
+
+.comment .text {
+  padding: .5em 2em; 
+}
+
+.comments form textarea {
+  width: 66%;
+  font-size: 120%;
+}

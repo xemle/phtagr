@@ -216,10 +216,34 @@ class Image extends AppModel
     return $data;
   }
 
+  function setDirty($data, $dirty = true) {
+    if (!isset($data['Image']['id']) || !isset($data['Image']['flag'])) {
+      $this->Logger->err("Precondition failed");
+      return false;
+    }
+    $flag = $data['Image']['flag'];
+    $current = ($flag & IMAGE_FLAG_DIRTY);
+    if (($dirty ^ $current)) {
+      return true;
+    }
+    if ($dirty) {
+      $data['Image']['flag'] |= IMAGE_FLAG_DIRTY;
+    } else {
+      $data['Image']['flag'] ^= IMAGE_FLAG_DIRTY;
+    }
+    if (!$this->save($data, array('flag'))) {
+      $this->Logger->err("Could not update flag");
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   /** Updates file with file size and file time 
     @param data Image data
     @return Return updated image data */
   function updateFile(&$data) {
+    clearstatcache();
     $filename = $data['Image']['path'].$data['Image']['file'];
     if (!file_exists($filename)) {
       $this->Logger->err("File '$filename' does not exists");
@@ -232,7 +256,11 @@ class Image extends AppModel
 
   function beforeDelete($cascade = true) {
     // prepare associations for deletion
-    $this->bindModel(array('hasMany' => array('Property' => array('dependent' => true))));
+    $this->bindModel(array(
+      'hasMany' => array(
+        'Property' => array('dependent' => true), 
+        'Comment' => array('dependent' => true)
+      )));
     return true;
   }
 
@@ -610,8 +638,7 @@ class Image extends AppModel
       $sql = "DELETE FROM `$joinAlias`".
              " USING `$joinTable` AS `$joinAlias`, `$table` AS `$alias`".
              " WHERE `$alias`.`user_id` = $userId AND `$alias`.`$key` = `$joinAlias`.`$foreignKey`";
-      $this->Logger->debug("Delete $model associations");
-      $this->Logger->trace($sql);
+      $this->Logger->debug("Delete $model HABTM associations");
       $this->query($sql);
     }
   }
@@ -625,18 +652,25 @@ class Image extends AppModel
 
     $this->Logger->info("Delete HasMany Image assosciation of user '$userId'");
     foreach ($this->hasMany as $model => $data) {
+      if (!isset($data['dependent']) || !$data['dependent']) {
+        continue;
+      }
       $manyTable = $db->fullTableName($this->{$model}->table, false);
       $foreignKey = $data['foreignKey'];
       $sql = "DELETE FROM `$model`".
              " USING `$manyTable` AS `$model`, `$table` AS `$alias`".
              " WHERE `$alias`.`user_id` = $userId AND `$alias`.`$key` = `$model`.`$foreignKey`";
-      $this->Logger->debug("Delete $model associations");
-      $this->Logger->trace($sql);
+      $this->Logger->debug("Delete $model HasMany associations");
       $this->query($sql);
     }
   }
 
   function deleteFromUser($userId) {
+    $this->bindModel(array(
+      'hasMany' => array(
+        'Property' => array('dependent' => true), 
+        'Comment' => array('dependent' => true)
+      )));
     $this->_deleteHasAndBelongsToManyFromUser($userId);
     $this->_deleteHasManyFromUser($userId);
     $this->deleteAll("Image.user_id = $userId");

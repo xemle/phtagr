@@ -1,6 +1,3 @@
-<?php if (!isset($data)): ?>
-<div class="info">No Image could be found</div>
-<?php else: ?>
 <h1><?php echo $data['Image']['name'] ?></h1>
 <?php $session->flash(); ?>
 
@@ -36,6 +33,6 @@ echo $query->prevImage().' '.$query->up().' '.$query->nextImage();
 <div id="map"></div>
 <a href="#" onclick="toggleVisibility('mapbox')">Close Map</a>
 </div>
-<?php endif; ?>
+<?php endif; /* withMap */ ?>
 
-<?php endif; ?>
+<?php echo View::element('comment'); ?>

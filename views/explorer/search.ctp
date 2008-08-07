@@ -3,7 +3,7 @@
 <?php echo $form->create(null, array('action' => 'query')); ?>
 <fieldset><legend>Metadata</legend>
 <?php 
-  echo $form->input('Image.tags');
+  echo $form->input('Image.tags', array('after' => '<span class="hint">E.g. includeTag, -excludeTag</span>'));
   $op = array('0' => 'AND', '1' => 'OR', '2' => 'FUZZY');
   echo $form->input('Image.tag_op', array('type' => 'select', 'options' => $op, 'selected' => 0, 'label' => 'Tag operand'));
 
@@ -12,7 +12,7 @@
 
   echo $form->input('Image.locations');
 
-  echo $form->input('Image.date_from');
+  echo $form->input('Image.date_from', array('after' => '<span class="hint">E.g. 2008-08-07</span>'));
   echo $form->input('Image.date_to');
 ?>
 </fieldset>

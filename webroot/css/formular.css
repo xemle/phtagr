@@ -15,36 +15,36 @@ fieldset legend {
 }
 
 fieldset fieldset {
-	margin-top: 0px;
-	margin-bottom: 20px;
-	padding: 16px 0;
+  margin-top: 0px;
+  margin-bottom: 20px;
+  padding: 16px 0;
 }
 
 fieldset fieldset legend {
-	font-weight: normal;
-	margin-left: 20px;
+  font-weight: normal;
+  margin-left: 20px;
 }
 fieldset fieldset div {
-	clear: left;
-	margin: 0 20px;
+  clear: left;
+  margin: 0 20px;
 }
 form div {
-	clear: both;
-	margin-bottom: 1em;
-	padding: .5em;
-	vertical-align: text-top;
+  clear: both;
+  margin-bottom: 1em;
+  padding: .5em;
+  vertical-align: text-top;
 }
 form div.input {
-	color: #444;
+  color: #444;
 }
 form div.required {
-	color: #333;
-	font-weight: bold;
+  color: #333;
+  font-weight: bold;
 }
 form div.submit {
-	border: 0;
-	clear: both;
-	margin-top: 5px;
+  border: 0;
+  clear: both;
+  margin-top: 5px;
 }
 label {
   float: left; 
@@ -53,6 +53,16 @@ label {
   padding-right: 5px; 
   text-align: right; 
 }
+form div .hint {
+  float: left;
+  font-style: italic;
+  padding: 0 1em;
+  color: #888;
+}
+form div img {
+  float: left;
+}
+
 input[type=text],
 input[type=password],
 select,
@@ -75,16 +85,16 @@ textarea:focus {
   background-color: #ffffd0;
 }
 select[multiple=multiple] {
-	width: 100%;
+  width: 100%;
 }
 option {
-	padding: 0 3px;
+  padding: 0 3px;
 }
 fieldset * input[type=checkbox] {
-	clear: left;
-	float: left;
-	margin: 0px 6px 7px 2px;
-	width: auto;
+  clear: left;
+  float: left;
+  margin: 0px 6px 7px 2px;
+  width: auto;
 }
 input[type=submit] {
   color: black;

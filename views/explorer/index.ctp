@@ -99,9 +99,9 @@ foreach($data as $image): ?>
 <?php echo $form->hidden('Image.ids', array('id' => 'ImageIds')) ?>
 <?php 
   if ($canWriteMeta) {
-    echo $form->input('Image.date', array('type' => 'text')); 
+    echo $form->input('Image.date', array('type' => 'text', 'after' => '<span class="hint">E.g. 2008-08-07 15:30</span>')); 
   }
-  echo $form->input('Tags.text', array('label' => 'Tags', 'maxlength' => 320)); 
+  echo $form->input('Tags.text', array('label' => 'Tags', 'maxlength' => 320, 'after' => '<span class="hint">E.g. newtag, -oldtag</span>')); 
   if ($canWriteMeta) {
     echo $form->input('Categories.text', array('label' => 'Categories', 'maxlength' => 320)); 
     echo $form->input('Locations.city', array('maxlength' => 32));
