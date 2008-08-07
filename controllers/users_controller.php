@@ -128,8 +128,8 @@ class UsersController extends AppController
       $this->data['User']['id'] = $id;
 
       $this->User->set($this->data);
-      if ($this->User->save(null, true, array('username', 'password', 'email', 'expires', 'quota', 'firstname', 'lastname'))) {
-        $this->Logger->debug("Data of user {$this->data['User']['username']} was updated");
+      if ($this->User->save(null, true, array('password', 'email', 'expires', 'quota', 'firstname', 'lastname'))) {
+        $this->Logger->debug("Data of user {$this->data['User']['id']} was updated");
         $this->Session->setFlash('User data was updated');
       } else {
         $this->Logger->err("Could not save user data");
@@ -156,7 +156,7 @@ class UsersController extends AppController
     $this->requireRole(ROLE_ADMIN, array('loginRedirect' => '/admin/users'));
 
     if (!empty($this->data)) {
-      if ($this->User->hasAny(array('User.username' => '= '.$this->data['User']['username']))) {
+      if ($this->User->hasAny(array('User.username' => $this->data['User']['username']))) {
         $this->Session->setFlash('Username is already given, please choose another name!');
       } else {
         $this->data['User']['role'] = ROLE_USER;
@@ -224,6 +224,7 @@ class UsersController extends AppController
         $this->Email->from = 'phTagr <noreply@phtagr.org>';
 
         $this->Email->template = 'password';
+        $user = $this->User->decrypt(&$user);
         $this->set('user', $user);
 
         if ($this->Email->send()) {

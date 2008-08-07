@@ -131,16 +131,32 @@ class SetupController extends AppController {
   }
 
   function __getAlteredColumns($Schema) {
+    // Reset sources for refetching
+    $this->db->_sources = null;
     $Old = $this->Schema->read();
     $compare = $this->Schema->compare($Old, $Schema);
+    $models = Configure::listObjects('model');
 
     // Check changes
     $columns = array();
     $sources = $this->db->listSources();
     foreach ($compare as $table => $changes) {
+      // Check for existing table
       $tableName = $this->db->fullTableName($table, false);
-      if (!in_array($tableName, $sources))
+      if (!in_array($tableName, $sources)) {
+        $this->Logger->warn("Skip table changes of not existing table '$tableName'");
         continue;
+      }
+      // Check for existing model
+      $modelName = Inflector::classify($table);
+      $this->Logger->info($modelName);
+      if (!in_array($modelName, $models)) {
+        $this->Logger->err("Model '$modelName' does not exists");
+        $columns[$table] = "Model '$modelName' does not exists";
+        trigger_error(sprintf(__("Model '$modelName' does not exists", true)), E_USER_WARNING);
+        continue;
+      }
+
       $columns[$table] = $this->db->alterSchema(array($table => $changes), $table);
     }
     
@@ -175,10 +191,12 @@ class SetupController extends AppController {
   function __requireUpgrade($Schema) {
     $missingTables = $this->__getMissingTables($Schema);
     if ($missingTables) {
+      $this->Logger->info("Missing table(s): ".implode(", ", array_keys($missingTables)));
       return true;
     }
     $alterColumns = $this->__getAlteredColumns($Schema);
     if ($alterColumns) {
+      $this->Logger->info("Table change(s): ".implode(", ", array_keys($alterColumns)));
       return true;
     }
     return false;

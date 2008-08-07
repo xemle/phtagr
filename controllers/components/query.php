@@ -1073,7 +1073,9 @@ class QueryComponent extends Object
     $this->_params['pos'] = max(0, min($this->_params['pos'], $this->_params['count']));
 
     $data = null;
-    if ($this->_params['count']>0) {
+    if ($this->_params['count']<=0) {
+      return false;
+    } else {
       // parameter adjustment 
       $tmpShow = $this->_params['show'];
       $tmpPos = $this->_params['pos'];
@@ -1093,7 +1095,7 @@ class QueryComponent extends Object
       $results = $this->controller->Image->query($sql);
       if (!isset($results[$index])) {
         $this->Logger->err("Unexpected results of query: $sql");
-        $this->Session->setFlash("Sorry. No image or files found!");
+        return false;
       } elseif ($results[$index]['Image']['id'] != $tmpImage) {
         // The image was not found via search. Query it directly
         $this->_params['image'] = $tmpImage;
@@ -1101,13 +1103,15 @@ class QueryComponent extends Object
         $results = $this->controller->Image->query($sql);
         if (!$results) {
           $this->Logger->warn("Image with id $tmpImage could not be found");
-          $this->Session->setFlash("Sorry. No image or files found!");
+          return false;
         } else {
-          $data = $this->controller->Image->optimizedRead($tmpImage);
+          $this->controller->Image->bindModel(array('hasMany' => array('Comment' => array('dependent' => true))));
+          $data = $this->controller->Image->findById($tmpImage);
           $this->controller->Image->setAccessFlags(&$data, $this->controller->getUser());
         }
       } else {
-        $data = $this->controller->Image->optimizedRead($tmpImage);
+        $this->controller->Image->bindModel(array('hasMany' => array('Comment' => array('dependent' => true))));
+        $data = $this->controller->Image->findById($tmpImage);
         $this->controller->Image->setAccessFlags(&$data, $this->controller->getUser());
         if ($index > 0 && isset($results[$index-1])) {
           $this->_params['prevImage'] = $results[$index-1]['Image']['id'];
@@ -1116,8 +1120,6 @@ class QueryComponent extends Object
           $this->_params['nextImage'] = $results[$index+1]['Image']['id'];
         }
       }
-    } else {
-      $this->Session->setFlash("Sorry. No image or files found!");
     }
     // pagination values
     $this->_params['show'] = $tmpShow;

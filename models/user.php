@@ -134,8 +134,8 @@ class User extends AppModel
 
     $dir = USER_DIR.$id;
     $this->Logger->info("Delete user directory of user $id: $dir");
-    $folder = new Folder($dir);
-    $folder->delete();
+    $folder = new Folder();
+    $folder->delete($dir);
 
     return true;
   }

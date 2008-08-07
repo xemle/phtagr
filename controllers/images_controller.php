@@ -41,11 +41,17 @@ class ImagesController extends AppController
   function view($id) {
     $this->Query->setImageId($id);
     $data = $this->Query->paginateImage();
-    $this->set('mainMenuExplorer', $this->Query->getMenu(&$data));
-    $this->set('data', $data);
-    $this->set('mapKey', $this->getPreferenceValue('google.map.key', false));
-    if ($this->Image->isVideo($data)) {
-      $this->render('video');
+    if (!$data) {
+      $this->render('notfound');
+    } else {
+      $this->set('mainMenuExplorer', $this->Query->getMenu(&$data));
+      $this->set('data', $data);
+      $this->set('userRole', $this->getUserRole());
+      $this->set('userId', $this->getUserId());
+      $this->set('mapKey', $this->getPreferenceValue('google.map.key', false));
+      if ($this->Image->isVideo($data)) {
+        $this->render('video');
+      }
     }
   }
 }

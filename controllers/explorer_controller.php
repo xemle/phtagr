@@ -570,7 +570,9 @@ class ExplorerController extends AppController
     $this->Query->setOrder('newest');
     $this->set('data', $this->Query->paginate());
 
-    Configure::write('debug', 0);
+    if (Configure::read('debug') > 1) {
+      Configure::write('debug', 1);
+    }
     $this->set(
         'channel', array('title' => "New Images",
         'link' => "/explorer/rss",

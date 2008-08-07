@@ -6,8 +6,9 @@
 <fieldset><legend>Create new user</legend>
 <?php
   echo $form->input('User.username');
-  echo $form->input('User.password');
   echo $form->input('User.email');
+  echo $form->input('User.password');
+  echo $form->input('User.confirm', array('type' => 'password'));
 ?>
 </fieldset>
 <?php echo $form->submit("Create"); ?>
