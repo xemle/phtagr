@@ -27,6 +27,7 @@
 
 <h3>Add new Comment</h3>
 <?php echo $form->create('Comment', array('action' => 'add/'.$params)); ?>
+<fieldset>
 <?php
   echo $form->hidden('Image.id', array('value' => $data['Image']['id']));
 ?>
@@ -34,13 +35,15 @@
   if ($userRole == ROLE_NOBODY) {
     echo $form->input('Comment.name');
     echo $form->input('Comment.email');
-    echo '<div class="input text"><label>&nbsp;</label><img src="'.$html->url('/comments/captcha').'" /></div>';
+    echo '<div class="input text"><label>&nbsp;</label><img src="'.$html->url('/comments/captcha/verify.jpg').'" /></div>';
     echo $form->input('Captcha.verification');
   }
 ?>
 <?php
   echo $form->input('Comment.text', array('label' => 'Comment'));
+  echo $form->input('Comment.notify', array('type' => 'checkbox', 'label' => 'Notify me on new comments', 'checked' => 'checked'));
 ?>
+</fieldset>
 <?php echo $form->submit('Add Comment'); ?>
 <?php echo $form->end(); ?>
 </div><!-- comments -->

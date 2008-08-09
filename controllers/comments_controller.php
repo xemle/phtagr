@@ -52,8 +52,10 @@ class CommentsController extends AppController
       if ($userId <= 0 && (!$this->Session->check('captcha') || $this->data['Captcha']['verification'] != $this->Session->read('captcha'))) {
         $this->Session->setFlash("Verification failed");
         $this->Logger->warn("Captcha verification failed: ".$this->data['Captcha']['verification']." != ".$this->Session->read('captcha'));
+        $this->Session->delete('captcha');
         $this->redirect("/images/view/$imageId/$url");        
       }
+      $this->Session->delete('captcha');
 
       $image = $this->Image->findById($imageId);
       if (!$image) {
@@ -85,6 +87,7 @@ class CommentsController extends AppController
           $commentId = $this->Comment->getLastInsertID();
           $this->_sendEmail($commentId);
         }
+        $this->_sendNotifies($imageId, $commentId);
       } else {
         $this->Session->setFlash(__('The Comment could not be saved. Please, try again.', true));
         $this->Logger->err("Could not save comment to image $imageId");
@@ -125,6 +128,61 @@ class CommentsController extends AppController
       $this->Logger->warn("Could not send notification mail for new comment");
     } else {
       $this->Logger->info("Notification mail for new comment send to {$user['User']['email']}");
+    }
+  }
+
+  /** Send email notifications to previous commentator which enables the mail
+   * notification. It collects all emails of previous commentators who accepted
+   * a notification mail
+    @param imageId Current image id
+    @param commentId Id of the new comment */
+  function _sendNotifies($imageId, $commentId) {
+    $this->Image->bindModel(array('hasMany' => array('Comment')));
+    $image = $this->Image->findById($imageId);
+    if (!$image) {
+      $this->Logger->err("Could not find image $imageId");
+      return;
+    }
+    $comment = $this->Comment->findById($commentId); 
+    if (!$comment || $comment['Comment']['image_id'] != $imageId) {
+      $this->Logger->err("Could not find comment $commentId");
+      return;
+    } elseif ($comment['Comment']['image_id'] != $imageId) {
+      $this->Logger->err("Comment $commentId does not corrolate with image $imageId");
+      return;
+    }
+
+    $emails = array();
+    foreach($image['Comment'] as $c) {
+      // not image owner, disabled notify, current comment
+      if ($c['user_id'] == $image['Image']['user_id'] || 
+        !$c['notify'] ||
+        $c['id'] == $commentId) {
+        continue;
+      }
+      $emails[] = $c['email'];
+    }
+    if (!count($emails)) {
+      $this->Logger->debug("No user for comment update notifications found");
+      return;
+    }
+
+    $emails = array_unique($emails);
+    $to = array_pop($emails);
+    $this->Email->to = $to;
+    $this->Email->bcc = $emails;
+
+    $this->Email->subject = 'Comment notification of Image '.$image['Image']['name'];
+    $this->Email->replyTo = 'noreply@phtagr.org';
+    $this->Email->from = 'phTagr <noreply@phtagr.org>';
+
+    $this->Email->template = 'commentnotify';
+    $this->set('data', $comment);
+    $this->Logger->debug($comment);
+    if (!$this->Email->send()) {
+      $this->Logger->warn("Could not send comment update notification mail for new comment");
+    } else {
+      $this->Logger->info("Send comment update notification to: $to, bbc to: ".implode(', ', $emails));
     }
   }
 

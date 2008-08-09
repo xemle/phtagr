@@ -93,9 +93,16 @@ option {
 fieldset * input[type=checkbox] {
   clear: left;
   float: left;
-  margin: 0px 6px 7px 2px;
+  margin: 0px 6px 0px 145px;
+  padding: 5px;
   width: auto;
 }
+.checkbox label {
+  float: left;
+  text-align: left;
+  width: auto;
+}
+
 input[type=submit] {
   color: black;
   padding: 3px;
