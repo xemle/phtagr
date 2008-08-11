@@ -30,7 +30,7 @@ class FilesController extends AppController
   var $uses = array('Image');
   var $layout = null;
   var $_outputMap = array(
-                      OUTPUT_TYPE_MINI => array('size' => OUTPUT_SIZE_MINI, 'square' => true),
+                      OUTPUT_TYPE_MINI => array('size' => OUTPUT_SIZE_MINI, 'square' => false),
                       OUTPUT_TYPE_THUMB => array('size' => OUTPUT_SIZE_THUMB),
                       OUTPUT_TYPE_PREVIEW => array('size' => OUTPUT_SIZE_PREVIEW),
                       OUTPUT_TYPE_HIGH => array('size' => OUTPUT_SIZE_HIGH, 'quality' => 90),

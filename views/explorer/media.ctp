@@ -13,7 +13,12 @@
 <?php foreach ($this->data as $image): ?>
   <item>
     <title><?php echo $image['Image']['name']; ?></title>
-    <link><?php echo Router::url('/images/view/'.$image['Image']['id'].'/'.$query->getParams(), true); ?></link>
+    <link><?php 
+      $url = '/images/view/'.$image['Image']['id'].'/';
+      if ($query->getParams()) {
+        $url .= $query->getParams().'/';
+      }
+      echo Router::url($url, true); ?></link>
     <?php 
       $thumbSize = $imageData->getimagesize($image, OUTPUT_SIZE_THUMB);
       $previewSize = $imageData->getimagesize($image, OUTPUT_SIZE_PREVIEW);

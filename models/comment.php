@@ -20,8 +20,13 @@ class Comment extends AppModel {
   );
 
   var $validate = array(
-    'name' => array('rule' => 'alphaNumeric', 'message' => 'Name must only contain letters and numbers.'),
-    'email' => array('rule' => 'email', 'message' => 'Email is invalid'));
+    'name' => array('rule' => 'notEmpty', 'message' => 'Name is missing'),
+    'email' => array('rule' => 'email', 'message' => 'Email is invalid'),
+    'text' => array(
+      'empty' => array('rule' => 'notEmpty', 'message' => 'Comment text is empty'),
+      'max' => array('rule' => array('maxLength', 2048), 'message' => 'Comment is to long')
+      )
+    );
 
 }
 ?>

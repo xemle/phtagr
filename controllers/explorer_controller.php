@@ -37,8 +37,8 @@ class ExplorerController extends AppController
   function beforeRender() {
     $this->params['query'] = $this->Query->getParams();
     $this->set('feeds', array(
-      $this->_getMediaRss() => array('title' => 'Media RSS', 'id' => 'gallery'), 
-      '/explorer/rss' => array('title' => 'Normal RSS')));
+      $this->_getMediaRss() => array('title' => 'Media RSS of current search', 'id' => 'gallery') 
+      ));
   }
 
   function _getMediaRss() {

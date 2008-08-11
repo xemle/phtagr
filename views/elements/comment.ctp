@@ -34,7 +34,7 @@
 <?php 
   if ($userRole == ROLE_NOBODY) {
     echo $form->input('Comment.name');
-    echo $form->input('Comment.email');
+    echo $form->input('Comment.email', array('after' => '<span class="hint">Will not be published</span>'));
     echo '<div class="input text"><label>&nbsp;</label><img src="'.$html->url('/comments/captcha/verify.jpg').'" /></div>';
     echo $form->input('Captcha.verification');
   }

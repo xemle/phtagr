@@ -7,7 +7,9 @@
 }
 
 .comment {
-  margin: 1em 0;
+  clear: left;
+  margin: 1em auto;
+  overflow: hidden;
 }
 
 .comments .even {
@@ -29,6 +31,11 @@
 
 .comment .text {
   padding: .5em 2em; 
+}
+
+.comment .image {
+  float: left;
+  margin: 0 .5em .5em 0;
 }
 
 .comments form textarea {

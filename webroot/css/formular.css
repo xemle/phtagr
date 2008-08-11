@@ -55,6 +55,7 @@ label {
 }
 form div .hint {
   float: left;
+  font-weight: normal;
   font-style: italic;
   padding: 0 1em;
   color: #888;

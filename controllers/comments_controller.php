@@ -80,17 +80,18 @@ class CommentsController extends AppController
         $this->data['Comment']['email'] = $user['User']['email'];
       }
       if ($this->Comment->save($this->data)) {
+        $commentId = $this->Comment->getLastInsertID();
         $this->Session->setFlash(__('The Comment has been saved', true));
         $this->Logger->info("New comment of image $imageId");
         // Send email notification of other image owners
         if ($image['Image']['user_id'] != $userId) {
-          $commentId = $this->Comment->getLastInsertID();
           $this->_sendEmail($commentId);
         }
         $this->_sendNotifies($imageId, $commentId);
       } else {
         $this->Session->setFlash(__('The Comment could not be saved. Please, try again.', true));
         $this->Logger->err("Could not save comment to image $imageId");
+        $this->Logger->trace($this->Comment->validationErrors);
       }
       $this->redirect("/images/view/$imageId/$url");
     } else {
@@ -220,7 +221,7 @@ class CommentsController extends AppController
   function rss() {
     $this->layoutPath = 'rss';
     $where = '1 = 1'.$this->Image->buildWhereAcl($this->getUser());
-    $comments = $this->Comment->findAll($where, null, 'Comment.date', 20);
+    $comments = $this->Comment->findAll($where, null, 'Comment.date DESC', 20);
     $this->set('data', $comments);
 
     if (Configure::read('debug') > 1) {

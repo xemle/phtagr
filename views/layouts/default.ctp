@@ -26,6 +26,8 @@
       echo $html->meta('rss', $feed, $attr);
     }
   }
+  echo $html->meta('rss', '/explorer/rss', array('title' => 'Recent images'));
+  echo $html->meta('rss', '/comments/rss', array('title' => 'Recent comments'));
  
 ?>
 
