@@ -22,8 +22,16 @@ require_once('../phpthumb.class.php');
 // create phpThumb object
 $phpThumb = new phpThumb();
 
+$thumbnail_width = 100;
+
 // set data source -- do this first, any settings must be made AFTER this call
-$phpThumb->setSourceFilename($_FILES['userfile']['tmp_name']);
+if (is_uploaded_file(@$_FILES['userfile']['tmp_name'])) {
+	$phpThumb->setSourceFilename($_FILES['userfile']['tmp_name']);
+	$output_filename = './thumbnails/'.basename($_FILES['userfile']['name']).'_'.$thumbnail_width.'.'.$phpThumb->config_output_format;
+} else {
+	$phpThumb->setSourceData(file_get_contents('..\images\disk.jpg'));
+	$output_filename = './thumbnails/disk_small.jpg';
+}
 
 // PLEASE NOTE:
 // You must set any relevant config settings here. The phpThumb
@@ -37,7 +45,6 @@ $phpThumb->setParameter('w', $thumbnail_width);
 //$phpThumb->setParameter('fltr', 'wmi|../watermark.jpg|C|75|20|20');
 
 // generate & output thumbnail
-$output_filename = './thumbnails/'.basename($_FILES['userfile']['name']).'_'.$thumbnail_width.'.'.$phpThumb->config_output_format;
 if ($phpThumb->GenerateThumbnail()) { // this line is VERY important, do not remove it!
 	if ($phpThumb->RenderToFile($output_filename)) {
 		// do something on success

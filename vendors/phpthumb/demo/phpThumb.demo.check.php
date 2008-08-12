@@ -291,7 +291,7 @@ echo '</th><td>EXIF extension required for auto-rotate images. Also required to 
 
 echo '<tr><th>php_sapi_name()</th><th colspan="2" bgcolor="';
 $php_sapi_name = strtolower(function_exists('php_sapi_name') ? php_sapi_name() : '');
-if (!$php_sapi_name) {
+if (!$php_sapi_name || (eregi('~', dirname($_SERVER['PHP_SELF'])) && ($php_sapi_name != 'apache'))) {
 	echo 'red';
 } elseif ($php_sapi_name == 'cgi-fcgi') {
 	echo 'orange';
@@ -378,7 +378,7 @@ echo '<tr bgcolor="#EEEEEE"><th>Setting</th><th>Master Value</th><th>Local Value
 $SettingFeatures = array(
 	'magic_quotes_runtime' => array('red',    'lime',   'This setting is evil. Turn it off.'),
 	'magic_quotes_gpc'     => array('yellow', 'lime',   'This setting is bad. Turn it off, if possible. phpThumb will attempt to work around it if it is enabled.'),
-	'safe_mode'            => array('orange', 'lime',   'Best if off. Calls to ImageMagick will be disabled if on (limiting max image resolution, no animated GIF resize). Temp files may be disabled. Features will be limited. If disabled in Master but enabled in Local, edit httpd.conf and set (php_admin_value safe_mode "Off") between <VirtualHost> tags'),
+	'safe_mode'            => array('orange', 'lime',   'Best if off. Calls to ImageMagick will be disabled if safe_mode is set to prevent writing temp files (limiting max image resolution, no animated GIF resize). Raw image data sources (e.g. from MySQL database) may not work. Temp files may be disabled. Features will be limited. If disabled in Master but enabled in Local, edit httpd.conf and set (php_admin_value safe_mode "Off") between <VirtualHost> tags'),
 	'allow_url_fopen'      => array('lime',   'yellow', 'Best if on. HTTP source images will be unavailable if disabled and CURL is unavailable.'),
 );
 
