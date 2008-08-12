@@ -174,14 +174,15 @@ class FilesController extends AppController
       $height=$image['Image']['height'];
       if ($width<$height) {
         $ratio = ($width/$height);
+        $size = $options['size']/$ratio;
         $phpThumb->sx=0;
-        $phpThumb->sy=intval($options['size']/($ratio*4));
+        $phpThumb->sy=intval(($size-$options['size'])/2);
       } else {
         $ratio = ($height/$width);
-        $phpThumb->sx=intval($options['size']/($ratio*4));
+        $size = $options['size']/$ratio;
+        $phpThumb->sx=intval(($size-$options['size'])/2);
         $phpThumb->sy=0;
       }
-      $size = $options['size']/$ratio;
 
       if ($phpThumb->ra == 90 || $phpThumb->ra == 270) {
         $tmp = $phpThumb->sx;
