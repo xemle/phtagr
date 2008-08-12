@@ -32,13 +32,15 @@ class CipherBehavior extends ModelBehavior
     @saltLen Length of salt as prefix and suffix. The salt ensures differend
     outputs for the same input. Default is 4. 
     @padding Padding of ciphered value. Default is 4.
-    @autoDecrypt Decrypt ciphered value automatically. Default is false. */
+    @autoDecrypt Decrypt ciphered value automatically. Default is false. 
+    @noEncypt Disables encryption if true. Usefull for revert the encryption. */
   var $default = array(
                     'cipher' => 'password', 
                     'prefix' => '$E$', 
                     'saltLen' => 4, 
                     'padding' => 4, 
-                    'autoDecrypt' => false
+                    'autoDecrypt' => false,
+                    'noEncypt' => false
                   );
   var $config = array();
 
@@ -64,12 +66,15 @@ class CipherBehavior extends ModelBehavior
 
     if (isset($config['autoDecrypt']))
       $this->config[$model->name]['autoDecrypt'] = $config['autoDecrypt'];
+
+    if (isset($config['noEncrypt']))
+      $this->config[$model->name]['noEncrypt'] = $config['noEncrypt'];
   }
 
   /** Model hook to encrypt model data 
     @param model Current model */
   function beforeSave(&$model) {
-    if (isset($this->config[$model->name])) {
+    if (isset($this->config[$model->name]) && !$this->config[$mode->name]['noEncypt']) {
       if (!is_array($this->config[$model->name]['cipher'])) {
         $cipher = array($this->config[$model->name]['cipher']);
       } else {
