@@ -1428,7 +1428,7 @@ class phpthumb {
 							// this is broken for aoe=1, but unsure how to fix. Send advice to info@silisoftware.com
 							if ($this->w || $this->h) {
 								if ($this->ImageMagickSwitchAvailable('repage')) {
-									$commandline .= ' -repage';
+									$commandline .= ' +repage';
 								} else {
 									$this->DebugMessage('Skipping "-repage" because ImageMagick (v'.$this->ImageMagickVersion().') does not support it', __FILE__, __LINE__);
 								}
