@@ -62,9 +62,10 @@ class AppModel extends Model
       if ($item['name'][0]=='-') {
         $item['name'] = substr($item['name'], 1);
       }
-      $data = $this->find(array('and' => $item), array('id'), '', false);
+      $data = $this->findAll(array('and' => $item), array('id'), '', false);
       if ($data !== false) {
-        array_push($ids, $data[$this->name]['id']);
+        $newIds = Set::extract($data, '{n}.'.$this->name.'.id');
+        $ids = array_merge($ids, $newIds);
       } else {
         if ($create==true) {
           // no item was found, but create a new one
