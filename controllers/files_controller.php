@@ -30,7 +30,7 @@ class FilesController extends AppController
   var $uses = array('Image');
   var $layout = null;
   var $_outputMap = array(
-                      OUTPUT_TYPE_MINI => array('size' => OUTPUT_SIZE_MINI, 'square' => false),
+                      OUTPUT_TYPE_MINI => array('size' => OUTPUT_SIZE_MINI, 'square' => true),
                       OUTPUT_TYPE_THUMB => array('size' => OUTPUT_SIZE_THUMB),
                       OUTPUT_TYPE_PREVIEW => array('size' => OUTPUT_SIZE_PREVIEW),
                       OUTPUT_TYPE_HIGH => array('size' => OUTPUT_SIZE_HIGH, 'quality' => 90),
@@ -173,20 +173,35 @@ class FilesController extends AppController
       $width=$image['Image']['width'];
       $height=$image['Image']['height'];
       if ($width<$height) {
-        $phpThumb->sy=($height-$width)/2;
-        $phpThumb->sw=$width;
-        $phpThumb->sh=$width;
+        $ratio = ($width/$height);
+        $phpThumb->sx=0;
+        $phpThumb->sy=intval($options['size']/($ratio*4));
       } else {
-        $phpThumb->sx=($width-$height)/2;
-        $phpThumb->sw=$height;
-        $phpThumb->sh=$height;
+        $ratio = ($height/$width);
+        $phpThumb->sx=intval($options['size']/($ratio*4));
+        $phpThumb->sy=0;
       }
+      $size = $options['size']/$ratio;
+
+      if ($phpThumb->ra == 90 || $phpThumb->ra == 270) {
+        $tmp = $phpThumb->sx;
+        $phpThumb->sx = $phpThumb->sy;
+        $phpThumb->sy = $tmp;
+      }
+
+      $phpThumb->sw=$options['size'];
+      $phpThumb->sh=$options['size'];
+
+      $phpThumb->w = $size;
+      $phpThumb->h = $size;
+
       //$this->Logger->debug(sprintf("square: %dx%d %dx%d", 
       //  $phpThumb->sx, $phpThumb->sy, 
       //  $phpThumb->sw, $phpThumb->sh), LOG_DEBUG);
     }
     $phpThumb->config_imagemagick_path = $this->getPreferenceValue('bin.convert', 'convert');
     $phpThumb->config_prefer_imagemagick = true;
+    $phpThumb->config_imagemagick_use_thumbnail = false;
     $phpThumb->config_output_format = 'jpg';
     $phpThumb->config_error_die_on_error = true;
     $phpThumb->config_document_root = '';
