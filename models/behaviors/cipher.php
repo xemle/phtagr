@@ -47,34 +47,41 @@ class CipherBehavior extends ModelBehavior
   function setup(&$model, $config = array()) {
     $this->config[$model->name] = $this->default;
 
-    if (isset($config['key']))
+    if (isset($config['key'])) {
       $this->config[$model->name]['key'] = $config['key'];
-    else
+    } else {
       $this->config[$model->name]['key'] = Configure::read('Security.salt');
+    }
 
-    if (isset($config['cipher']))
+    if (isset($config['cipher'])) {
       $this->config[$model->name]['cipher'] = $config['cipher'];
+    }
 
-    if (isset($config['prefix']))
+    if (isset($config['prefix'])) {
       $this->config[$model->name]['prefix'] = $config['prefix'];
+    }
 
-    if (isset($config['saltLen']))
+    if (isset($config['saltLen']) && $config['saltLen'] >= 2) {
       $this->config[$model->name]['saltLen'] = $config['saltLen'];
+    }
 
-    if (isset($config['padding']) && $config['padding'] <= 32)
+    if (isset($config['padding']) && $config['padding'] <= 32) {
       $this->config[$model->name]['padding'] = $config['padding'];
+    }
 
-    if (isset($config['autoDecrypt']))
+    if (isset($config['autoDecrypt'])) {
       $this->config[$model->name]['autoDecrypt'] = $config['autoDecrypt'];
+    }
 
-    if (isset($config['noEncrypt']))
+    if (isset($config['noEncrypt'])) {
       $this->config[$model->name]['noEncrypt'] = $config['noEncrypt'];
+    }
   }
 
   /** Model hook to encrypt model data 
     @param model Current model */
   function beforeSave(&$model) {
-    if (isset($this->config[$model->name]) && !$this->config[$mode->name]['noEncypt']) {
+    if (isset($this->config[$model->name]) && !$this->config[$model->name]['noEncypt']) {
       if (!is_array($this->config[$model->name]['cipher'])) {
         $cipher = array($this->config[$model->name]['cipher']);
       } else {
@@ -124,6 +131,7 @@ class CipherBehavior extends ModelBehavior
     @param data Current model data. If null, the Model::data is used 
     @return Deciphered model data */
   function decrypt(&$model, &$data = null) {
+    $this->log(print_r($data, true));
     if ($data === null)
       $data =& $model->data;
     if (isset($this->config[$model->name])) {
@@ -184,7 +192,7 @@ class CipherBehavior extends ModelBehavior
     @param padding Alignment size. Default is 4
     @return Envelope with salt 
     @see _unpackValue() */
-  function _packValue($value, $salt, $padding) {
+  function _packValue($value, $salt, $padding = 4) {
     $l = strlen($value) + 2 * strlen($salt);
     $lp = $l % $padding;
     $pad = '';
@@ -210,8 +218,9 @@ class CipherBehavior extends ModelBehavior
       return false;
     }
     $pad = ord(substr($envelope, $l - $saltLen -1, 1));
-    if ($pad > 32) 
+    if ($pad > 32) {
       $pad = 0;
+    }
     $value = substr($envelope, $saltLen, $l - (2 * $saltLen) - $pad);
     return $value;
   }
