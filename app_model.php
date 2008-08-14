@@ -62,8 +62,8 @@ class AppModel extends Model
       if ($item['name'][0]=='-') {
         $item['name'] = substr($item['name'], 1);
       }
-      $data = $this->findAll(array('and' => $item), array('id'), '', false);
-      if ($data !== false) {
+      $data = $this->findAll(array('and' => $item), array('id'));
+      if (!empty($data)) {
         $newIds = Set::extract($data, '{n}.'.$this->name.'.id');
         $ids = array_merge($ids, $newIds);
       } else {
@@ -72,18 +72,19 @@ class AppModel extends Model
           //$this->Logger->trace('Create item of '.$this->name);
           $new = $this->create($item);
           if ($new && $this->save($new)) {
-            array_push($ids, $this->getInsertID());
+            $ids[] = $this->getInsertID();
           } else {
             $this->Logger->err($this->name.": Could not create new item ".$item['name']);
           }
         } else {
           // add dummy empty entry
           if (!in_array(-1, $ids))
-            array_push($ids, -1); 
+            $ids[] = -1;
         }
       }
     }
-    return $ids;
+
+    return array_unique($ids);
   }
 
   /** Create model simple items from a text by splitting the text by the separator ','
