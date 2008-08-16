@@ -25,6 +25,7 @@ class GuestsController extends AppController {
   var $uses = array('Group', 'User', 'Guest');
   var $components = array('RequestHandler');
   var $helpers = array('form', 'ajax');
+  var $menuItems = array();
 
   function beforeFilter() {
     parent::beforeFilter();
@@ -96,6 +97,18 @@ class GuestsController extends AppController {
     $this->data = $this->Guest->findById($guestId);
     unset($this->data['Guest']['password']);
     $this->set('userId', $userId);
+    $this->menuItems[] = array(
+      'text' => 'Guest '.$this->data['Guest']['username'], 
+      'type' => 'text', 
+      'submenu' => array(
+        'items' => array(
+          array(
+            'text' => 'Edit', 
+            'link' => 'edit/'.$guestId
+            )
+          )
+        )
+      );
   }
 
   /**
@@ -180,6 +193,7 @@ class GuestsController extends AppController {
     $items = array();
     $items[] = array('text' => 'List Guests', 'link' => 'index');
     $items[] = array('text' => 'Add Guest', 'link' => 'add');
+    $items = am($items, $this->menuItems);
     return $items;
   }
 

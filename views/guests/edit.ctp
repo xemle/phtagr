@@ -59,6 +59,3 @@ Please add groups to grant access to your personal images.</div>
 <?php echo $form->submit('Add Group'); ?>
 </form>
 
-<?php 
-echo $html->link('List all guests', '/guest/index');
-?>

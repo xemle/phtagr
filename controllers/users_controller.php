@@ -27,19 +27,33 @@ class UsersController extends AppController
   var $uses = array('Preference'); 
   var $helpers = array('form', 'formular', 'number');
   var $paginate = array('limit' => 10, 'order' => array('User.username' => 'asc')); 
+  var $menuItems = array();
 
   function beforeRender() {
     $this->_setMenu();
   }
 
-  function _setMenu() {
+  function _getMenuItems() {
     $items = array();
+    $items[] = array('text' => 'List users', 'link' => 'index');
+    $items[] = array('text' => 'Add user', 'link' => 'add');
+    $items = am($items, $this->menuItems);
+    return $items;
+  }
+
+  function _setMenu() {
     if ($this->hasRole(ROLE_ADMIN)) {
-      $items[] = array('text' => 'List users', 'link' => 'index');
-      $items[] = array('text' => 'Add user', 'link' => 'add');
+      $items = $this->requestAction('/system/getMenuItems');
+      $me = '/admin/'.strtolower(Inflector::pluralize($this->name));
+      foreach ($items as $index => $item) {
+        if ($item['link'] == $me) {
+          $item['submenu'] = array('items' => $this->_getMenuItems());
+          $items[$index] = $item;
+        }
+      }
+      $menu = array('items' => $items);
+      $this->set('mainMenu', $menu);
     }
-    $menu = array('items' => $items);
-    $this->set('mainMenu', $menu);
   }
 
   /** Checks the login of the user. If the session variable 'loginRedirect' is
@@ -150,6 +164,18 @@ class UsersController extends AppController
     unset($this->data['User']['password']);
 
     $this->set('fsroots', $this->Preference->buildTree($this->data, 'path.fsroot'));
+    $this->menuItems[] = array(
+      'text' => 'User '.$this->data['User']['username'], 
+      'type' => 'text', 
+      'submenu' => array(
+        'items' => array(
+          array(
+            'text' => 'Edit', 
+            'link' => 'edit/'.$id
+            )
+          )
+        )
+      );
   }
  
   function admin_add() {

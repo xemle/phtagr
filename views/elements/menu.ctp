@@ -29,11 +29,6 @@
         'text' => 'My Files', 
         'link' => '/browser', 
         'type' => ($controller == 'browser'?'current':''));
-    if ($role>=ROLE_ADMIN)
-      $items[] = array(
-        'text' => 'Users', 
-        'link' => '/admin/users', 
-        'type' => ($controller == 'users'?'current':''));
   } else {
     $items[] = array(
       'text' => 'Explorer', 

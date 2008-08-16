@@ -32,11 +32,6 @@ class PreferencesController extends AppController {
     $this->requireRole(ROLE_GUEST, array('redirect' => '/'));
   }
 
-  function _set($userId, $path, $data) {
-    $value = Set::extract($data, $path);
-    $this->Preference->setValue($path, $value, $userId);
-  }
-
   function acl() {
     $this->requireRole(ROLE_USER);
 
@@ -77,7 +72,7 @@ class PreferencesController extends AppController {
     $this->requireRole(ROLE_ADMIN);
 
     $userId = $this->getUserId();
-    if (isset($this->data)) {
+    if (!empty($this->data)) {
       // TODO check valid acl
       $this->_set(0, 'bin.exiftool', $this->data);
       $this->_set(0, 'bin.convert', $this->data);
@@ -94,11 +89,29 @@ class PreferencesController extends AppController {
     $this->data = $tree;
   }
 
+  function profile() {
+    $this->requireRole(ROLE_USER);
+
+    $userId = $this->getUserId();
+    if (!empty($this->data)) {
+      $this->User->id = $userId;
+      $this->Logger->debug($this->data);
+      if (!$this->User->save($this->data, true, array('firstname', 'lastname', 'password', 'email'))) {
+        $this->Logger->err("Could not update user profile");
+        $this->Session->setFlash("Could not save profile!");
+      } else {
+        $this->Logger->info("User $userId profile updated");
+        $this->Session->setFlash("Profile saved");
+      }
+    }
+    $this->data = $this->User->findById($userId);
+    unset($this->data['User']['password']);
+  }
+
   function getMenuItems() {
     $items = array();
-    if ($this->hasRole(ROLE_ADMIN))
-      $items[] = array('text' => 'System', 'link' => '/preferences/system');
     if ($this->hasRole(ROLE_USER)) {
+      $items[] = array('text' => 'Profile', 'link' => '/preferences/profile');
       $items[] = array('text' => 'Guest Accounts', 'link' => '/guests');
       $items[] = array('text' => 'Groups', 'link' => '/groups');
     }

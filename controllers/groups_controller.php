@@ -25,6 +25,7 @@ class GroupsController extends AppController {
   var $uses = array('Group', 'User');
   var $components = array('RequestHandler');
   var $helpers = array('form', 'ajax');
+  var $menuItems = array();
 
   function beforeFilter() {
     parent::beforeFilter();
@@ -75,12 +76,24 @@ class GroupsController extends AppController {
   function edit($groupId) {
     $userId = $this->getUserId();
     $group = $this->Group->find(array('Group.id' => $groupId, 'Group.user_id' => $userId));
-    if ($group) {
-      $this->data = $group;
-    } else {
+    if (!$group) {
       $this->Session->setFlash("Could not find group.");
       $this->redirect("index");
     }
+    $this->data = $group;
+
+    $this->menuItems[] = array(
+      'text' => 'Group '.$this->data['Group']['name'], 
+      'type' => 'text', 
+      'submenu' => array(
+        'items' => array(
+          array(
+            'text' => 'Edit', 
+            'link' => 'edit/'.$groupId
+            )
+          )
+        )
+      );
   }
 
   /**
@@ -158,6 +171,7 @@ class GroupsController extends AppController {
     $items = array();
     $items[] = array('text' => 'List groups', 'link' => 'index');
     $items[] = array('text' => 'Add group', 'link' => 'add');
+    $items = am($items, $this->menuItems);
     return $items;
   }
 
