@@ -8,6 +8,11 @@
   echo $form->input('User.firstname');
   echo $form->input('User.lastname');
   echo $form->input('User.email');
+  $roles = array(ROLE_USER => 'User', ROLE_SYSOP => 'System Operator');
+  if ($allowAdminRole) {
+    $roles[ROLE_ADMIN] = 'Admin';
+  }
+  echo $form->input('User.role', array('type' => 'select', 'options' => $roles, 'selected' => $this->data['User']['role']));
 ?>
 </fieldset>
 

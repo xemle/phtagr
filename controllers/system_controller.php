@@ -29,7 +29,7 @@ class SystemController extends AppController {
   function beforeFilter() {
     parent::beforeFilter();
 
-    $this->requireRole(ROLE_ADMIN, array('redirect' => '/'));
+    $this->requireRole(ROLE_SYSOP, array('redirect' => '/'));
   }
 
   function _set($userId, $path, $data) {

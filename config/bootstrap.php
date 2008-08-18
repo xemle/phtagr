@@ -46,7 +46,8 @@
 define('ROLE_NOBODY', 0);
 define('ROLE_GUEST', 1);
 define('ROLE_USER', 2);
-define('ROLE_ADMIN', 3);
+define('ROLE_SYSOP', 3);
+define('ROLE_ADMIN', 4);
 
 define('OUTPUT_TYPE_MINI', 1);
 define('OUTPUT_TYPE_THUMB', 2);

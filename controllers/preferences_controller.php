@@ -68,27 +68,6 @@ class PreferencesController extends AppController {
     $this->set('groups', $groups);
   }
 
-  function system() {
-    $this->requireRole(ROLE_ADMIN);
-
-    $userId = $this->getUserId();
-    if (!empty($this->data)) {
-      // TODO check valid acl
-      $this->_set(0, 'bin.exiftool', $this->data);
-      $this->_set(0, 'bin.convert', $this->data);
-      $this->_set(0, 'bin.ffmpeg', $this->data);
-      $this->_set(0, 'bin.flvtool2', $this->data);
-
-      $this->_set(0, 'google.map.key', $this->data);
-      // debug
-      $this->set('commit', $this->data);
-      $this->Session->setFlash("Settings saved");
-    }
-    $tree = $this->Preference->getTree($userId);
-    $this->Logger->trace($tree);
-    $this->data = $tree;
-  }
-
   function profile() {
     $this->requireRole(ROLE_USER);
 

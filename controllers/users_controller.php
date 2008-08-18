@@ -42,7 +42,7 @@ class UsersController extends AppController
   }
 
   function _setMenu() {
-    if ($this->hasRole(ROLE_ADMIN)) {
+    if ($this->hasRole(ROLE_SYSOP)) {
       $items = $this->requestAction('/system/getMenuItems');
       $me = '/admin/'.strtolower(Inflector::pluralize($this->name));
       foreach ($items as $index => $item) {
@@ -128,21 +128,37 @@ class UsersController extends AppController
   }
 
   function admin_index() {
-    $this->requireRole(ROLE_ADMIN, array('loginRedirect' => '/admin/users'));
+    $this->requireRole(ROLE_SYSOP, array('loginRedirect' => '/admin/users'));
 
     $this->data = $this->paginate('User', array('User.role>='.ROLE_USER));
   }
 
+  /** Ensure at least one admin exists
+    @param id Current user
+    @return True if at least one system operator exists */
+  function _lastAdminCheck($id) {
+    $userId = $this->getUserId();
+    $userRole = $this->getUserRole();
+    if ($userId == $id && $userRole == ROLE_ADMIN && $this->data['User']['role'] < ROLE_ADMIN) {
+      $count = $this->User->find('count', array('conditions' => array('User.role >= '.ROLE_ADMIN)));
+      if ($count == 1) {
+        $this->Logger->warn('Can not degrade last admin');
+        $this->Session->setFlash('Can not degrade last admin');
+        return false;
+      }
+    }
+    return true;
+  }
+
   function admin_edit($id) {
-    $this->requireRole(ROLE_ADMIN, array('loginRedirect' => '/admin/users'));
+    $this->requireRole(ROLE_SYSOP, array('loginRedirect' => '/admin/users'));
 
     $id = intval($id);
-
-    if (!empty($this->data)) {
+    if (!empty($this->data) && $this->_lastAdminCheck($id)) {
       $this->data['User']['id'] = $id;
 
       $this->User->set($this->data);
-      if ($this->User->save(null, true, array('password', 'email', 'expires', 'quota', 'firstname', 'lastname'))) {
+      if ($this->User->save(null, true, array('password', 'email', 'expires', 'quota', 'firstname', 'lastname', 'role'))) {
         $this->Logger->debug("Data of user {$this->data['User']['id']} was updated");
         $this->Session->setFlash('User data was updated');
       } else {
@@ -164,6 +180,7 @@ class UsersController extends AppController
     unset($this->data['User']['password']);
 
     $this->set('fsroots', $this->Preference->buildTree($this->data, 'path.fsroot'));
+    $this->set('allowAdminRole', ($this->getUserRole() == ROLE_ADMIN) ? true : false);
     $this->menuItems[] = array(
       'text' => 'User '.$this->data['User']['username'], 
       'type' => 'text', 
@@ -179,7 +196,7 @@ class UsersController extends AppController
   }
  
   function admin_add() {
-    $this->requireRole(ROLE_ADMIN, array('loginRedirect' => '/admin/users'));
+    $this->requireRole(ROLE_SYSOP, array('loginRedirect' => '/admin/users'));
 
     if (!empty($this->data)) {
       if ($this->User->hasAny(array('User.username' => $this->data['User']['username']))) {
@@ -199,7 +216,7 @@ class UsersController extends AppController
   } 
   
   function admin_del($id) {
-    $this->requireRole(ROLE_ADMIN, array('loginRedirect' => '/admin/users'));
+    $this->requireRole(ROLE_SYSOP, array('loginRedirect' => '/admin/users'));
 
     $id = intval($id);
     $user = $this->User->findById($id);
@@ -215,7 +232,7 @@ class UsersController extends AppController
   }
 
   function admin_delfsroot($id) {
-    $this->requireRole(ROLE_ADMIN);
+    $this->requireRole(ROLE_SYSOP);
 
     $id = intval($id);
     $dirs = $this->params['pass'];

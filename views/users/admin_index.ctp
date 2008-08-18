@@ -29,9 +29,9 @@ Page <?php echo $paginator->counter() ?>
   <td><?=$user['User']['lastname'];?></td>
   <td><?=count($user['Guest']); ?></td>
   <td><?php 
-  switch ($user['User']['role'])
-  {
+  switch ($user['User']['role']) {
     case ROLE_ADMIN: echo 'Admin'; break;
+    case ROLE_SYSOP: echo 'SysOp'; break;
     case ROLE_USER: echo 'Member'; break;
     case ROLE_GUEST: echo 'Guest'; break;
     case ROLE_NOBODY: echo 'Nobody'; break;

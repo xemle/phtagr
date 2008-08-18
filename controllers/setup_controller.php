@@ -42,7 +42,7 @@ class SetupController extends AppController {
     $this->core = CONFIGS.'core.php';
     $this->dbConfig = CONFIGS.'database.php';
     $this->paths = array(TMP, USER_DIR);
-    if (isset($this->params['admin']) && $this->params['admin'] && $this->__hasAdmin()) {
+    if (isset($this->params['admin']) && $this->params['admin'] && $this->__hasSysOp()) {
       parent::beforeFilter();
     } else {
       return false;
@@ -319,7 +319,7 @@ class SetupController extends AppController {
   }
 
   /** Check for administration account */
-  function __hasAdmin() {
+  function __hasSysOp() {
     if (!$this->__hasTables())
       return false;
 
@@ -328,11 +328,11 @@ class SetupController extends AppController {
       return false;
     }
 
-    return $this->User->hasAdmins();
+    return $this->User->hasAnyWithRole(ROLE_SYSOP);
   }
 
   function __hasCommands($commands = null) {
-    if (!$this->__hasAdmin())
+    if (!$this->__hasSysOp())
       return false;
 
     if ($commands === null) {
@@ -358,8 +358,8 @@ class SetupController extends AppController {
 
   /** Setup entry. Dispatches preparation, installation or upgrade */
   function index() {
-    if ($this->__hasAdmin()) {
-      if ($this->hasRole(ROLE_ADMIN)) {
+    if ($this->__hasSysOp()) {
+      if ($this->hasRole(ROLE_SYSOP)) {
         $this->redirect('/admin/setup/upgrade');
       } else {
         $this->Logger->warn("Setup is disabled. phTagr is already configured!");
@@ -540,7 +540,7 @@ class DATABASE_CONFIG
       $this->redirect('config');
     }
 
-    if ($this->__hasAdmin())
+    if ($this->__hasSysOp())
       $this->redirect('system');
 
     $this->__checkSession();
@@ -580,7 +580,7 @@ class DATABASE_CONFIG
     if (!$this->__hasTables()) 
       $this->redirect('database');
 
-    if ($this->__hasAdmin())
+    if ($this->__hasSysOp())
       $this->redirect('system');
 
     $this->__checkSession();
@@ -642,10 +642,10 @@ class DATABASE_CONFIG
   }
 
   function system() {
-    if (!$this->__hasAdmin())
+    if (!$this->__hasSysOp())
       $this->redirect('user');
 
-    $this->requireRole(ROLE_ADMIN);
+    $this->requireRole(ROLE_SYSOP);
 
     $this->__checkSession();
 
@@ -689,7 +689,7 @@ class DATABASE_CONFIG
       $this->redirect('system');
     }
 
-    $this->requireRole(ROLE_ADMIN);
+    $this->requireRole(ROLE_SYSOP);
 
     $this->__checkSession();
 
@@ -711,9 +711,9 @@ class DATABASE_CONFIG
   }
 
   function admin_upgrade($action = null) {
-    if (!$this->__hasAdmin()) 
+    if (!$this->__hasSysOp()) 
       $this->redirect('/setup');
-    $this->requireRole(ROLE_ADMIN);
+    $this->requireRole(ROLE_SYSOP);
 
     $Schema = $this->Schema->load(array());
     if (!$this->__requireUpgrade($Schema))
@@ -734,9 +734,9 @@ class DATABASE_CONFIG
   }
 
   function admin_uptodate() {
-    if (!$this->__hasAdmin()) 
+    if (!$this->__hasSysOp()) 
       $this->redirect('/setup');
-    $this->requireRole(ROLE_ADMIN);
+    $this->requireRole(ROLE_SYSOP);
 
     $Schema = $this->Schema->load(array());
     if ($this->__requireUpgrade($Schema))

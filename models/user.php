@@ -140,8 +140,9 @@ class User extends AppModel
     return true;
   }
 
-  function hasAdmins() {
-    return $this->hasAny(array('role' => ROLE_ADMIN));
+  function hasAnyWithRole($role = ROLE_ADMIN) {
+    $role = min(max(intval($role), ROLE_NOBODY), ROLE_ADMIN);
+    return $this->hasAny("role >= $role");
   }
 
   function getNobody() {
