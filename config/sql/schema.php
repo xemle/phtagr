@@ -158,6 +158,7 @@ class PhtagrSchema extends CakeSchema {
 			'role' => array('type'=>'integer', 'null' => true, 'default' => NULL, 'length' => 3),
 			'creator_id' => array('type'=>'integer', 'null' => true, 'default' => '0', 'length' => 10),
 			'expires' => array('type'=>'datetime', 'null' => true, 'default' => NULL),
+			'key' => array('type'=>'string', 'null' => true, 'default' => NULL, 'length' => 64),
 			'quota' => array('type'=>'float', 'null' => true, 'default' => 0.0),
 			'firstname' => array('type'=>'string', 'null' => true, 'default' => NULL, 'length' => 32),
 			'lastname' => array('type'=>'string', 'null' => false, 'length' => 32),

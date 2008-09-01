@@ -81,5 +81,17 @@ class Guest extends AppModel
     return true;
   }
 
+  function generateKey($data) {
+    srand(getMicrotime()*1000);
+    $h = '';
+    for ($i = 0; $i < 128; $i++) {
+      $h .= chr(rand(0, 255));
+    }
+    $h .= time();
+    $data['Guest']['key'] = md5($h);
+    return $data;
+  }
+
+
 }
 ?>

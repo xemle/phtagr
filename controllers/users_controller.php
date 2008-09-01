@@ -87,9 +87,7 @@ class UsersController extends AppController
           $this->Session->activate();
           if (!$this->Session->check('User.id') || $this->Session->read('User.id') != $user['User']['id']) {
             $this->Logger->info("Start new session for '{$user['User']['username']}' (id {$user['User']['id']})");
-            $this->Session->write('User.id', $user['User']['id']);
-            $this->Session->write('User.role',  $user['User']['role']);
-            $this->Session->write('User.username',  $user['User']['username']);
+            $this->User->writeSession($user, &$this->Session);
 
             // Save Cookie for 3 months
             $this->Cookie->write('user', $user['User']['id'], true, 92*24*3600);
@@ -117,7 +115,7 @@ class UsersController extends AppController
 
   function logout() {
     $user = $this->getUser();
-    $this->Logger->info("Delete session for user '{$user['User']['username']}' (id {$user['User']['id']})");
+    $this->Logger->info("Delete session for user id {$user['User']['id']}");
 
     $this->Session->destroy();
 

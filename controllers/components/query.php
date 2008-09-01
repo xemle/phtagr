@@ -171,6 +171,18 @@ class QueryComponent extends Object
     }
   }
 
+  function setKey($key) {
+    if ($key !== null) {
+      $this->setParam('key', $key);
+    } else {
+      $this->delParam('key');
+    }
+  }
+
+  function getKey() {
+    return $this->getParam('key', null);
+  }
+
   function setVisibility($visibility) {
     if (empty($visibility)) {
       return;

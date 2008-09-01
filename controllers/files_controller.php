@@ -211,6 +211,7 @@ class FilesController extends AppController
 
     $cacheDir = $this->_getCacheDir($image);
     if (!$cacheDir) {
+      $this->Logger->fatal("Cache directory for image failed");
       die("Precondition of cache directory failed");
     }
     $phpThumb->config_cache_directory = $cacheDir;

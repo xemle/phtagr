@@ -74,6 +74,25 @@ class GuestsController extends AppController {
     }
   }
 
+  function _addGuestMenu($guest) {
+    $this->menuItems[] = array(
+      'text' => 'Guest '.$guest['Guest']['username'], 
+      'type' => 'text', 
+      'submenu' => array(
+        'items' => array(
+          array(
+            'text' => 'Edit', 
+            'link' => 'edit/'.$guest['Guest']['id']
+            ),
+          array(
+            'text' => 'Links', 
+            'link' => 'links/'.$guest['Guest']['id']
+            )
+          )
+        )
+      );
+  }
+
   function edit($guestId) {
     $guestId = intval($guestId);
     $userId = $this->getUserId();
@@ -97,18 +116,7 @@ class GuestsController extends AppController {
     $this->data = $this->Guest->findById($guestId);
     unset($this->data['Guest']['password']);
     $this->set('userId', $userId);
-    $this->menuItems[] = array(
-      'text' => 'Guest '.$this->data['Guest']['username'], 
-      'type' => 'text', 
-      'submenu' => array(
-        'items' => array(
-          array(
-            'text' => 'Edit', 
-            'link' => 'edit/'.$guestId
-            )
-          )
-        )
-      );
+    $this->_addGuestMenu($this->data);
   }
 
   /**
@@ -187,6 +195,29 @@ class GuestsController extends AppController {
       }
       $this->redirect("edit/$guestId");
     }
+  }
+
+  function links($guestId, $action = null) {
+    $this->requireRole(ROLE_USER);
+
+    $userId = $this->getUserId();
+    $guest = $this->Guest->find(array('Guest.id' => $guestId, 'Creator.id' => $userId));
+    if (!$guest) {
+      $this->Session->setFlash("Could not find guest!");
+      $this->Logger->err("Could not find guest $guestId for user $userId");
+      $this->redirect("index");
+    }
+
+    if ($action == 'renew' || empty($guest['Guest']['key'])) {
+      $this->Guest->generateKey(&$guest);
+      $this->Guest->id = $guestId;
+      if (!$this->Guest->save($guest, false, array('key'))) {
+        $this->Logger->err("Could not save user data");
+        $this->Logger->debug($this->Guest->validationErrors);
+      }
+    }
+    $this->data = $this->Guest->findById($guestId);
+    $this->_addGuestMenu($this->data);
   }
 
   function _getMenuItems() {

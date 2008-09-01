@@ -87,6 +87,22 @@ class PreferencesController extends AppController {
     unset($this->data['User']['password']);
   }
 
+  function rss($action = null) {
+    $this->requireRole(ROLE_USER);
+
+    $userId = $this->getUserId();
+    $user = $this->User->findById($userId);
+    if ($action == 'renew' || empty($user['User']['key'])) {
+      $this->User->generateKey(&$user);
+      $this->User->id = $userId;
+      if (!$this->User->save($user, false, array('key'))) {
+        $this->Logger->err("Could not save user data");
+        $this->Logger->debug($this->User->validationErrors);
+      }
+    }
+    $this->set('data', $this->User->findById($userId));
+  }
+
   function getMenuItems() {
     $items = array();
     if ($this->hasRole(ROLE_USER)) {
@@ -95,6 +111,7 @@ class PreferencesController extends AppController {
       $items[] = array('text' => 'Groups', 'link' => '/groups');
     }
     $items[] = array('text' => 'Access Rights', 'link' => '/preferences/acl');
+    $items[] = array('text' => 'RSS', 'link' => '/preferences/rss');
     return $items;
   }
 

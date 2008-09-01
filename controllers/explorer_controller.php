@@ -583,7 +583,9 @@ class ExplorerController extends AppController
   function media() {
     $this->data = $this->Query->paginate();
     $this->layout = 'xml';
-    Configure::write('debug', 0);
+    if (Configure::read('debug') > 1) {
+      Configure::write('debug', 1);
+    }
   }
 }
 ?>

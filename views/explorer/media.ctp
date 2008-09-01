@@ -9,12 +9,19 @@
 <?php if ($query->hasNext()): ?>
   <atom:link rel="next" href="<?php echo Router::url($query->getNextUrl('/explorer/media/').'/media.rss', true); ?>" />
 <?php endif; ?>
-<?php $query->initialize(); ?>
+<?php
+  $query->initialize(); 
+  if ($session->check('Authentication.key')) {
+    $optParams = 'key:'.$session->read('Authentication.key').'/';
+  } else {
+    $optParams = '';
+  }
+?>
 <?php foreach ($this->data as $image): ?>
   <item>
     <title><?php echo $image['Image']['name']; ?></title>
     <link><?php 
-      $url = '/images/view/'.$image['Image']['id'].'/';
+      $url = '/images/view/'.$image['Image']['id'].'/'.$optParams;
       if ($query->getParams()) {
         $url .= $query->getParams().'/';
       }
@@ -22,16 +29,16 @@
     <?php 
       $thumbSize = $imageData->getimagesize($image, OUTPUT_SIZE_THUMB);
       $previewSize = $imageData->getimagesize($image, OUTPUT_SIZE_PREVIEW);
-      $thumbUrl = '/files/thumb/'.$image['Image']['id'].'/'.$image['Image']['file'];
+      $thumbUrl = '/files/thumb/'.$image['Image']['id'].'/'.$optParams.$image['Image']['file'];
       if ($image['Image']['canReadOriginal']) {
-        $contentUrl = '/files/high/'.$image['Image']['id'].'/'.$image['Image']['file'];
+        $contentUrl = '/files/high/'.$image['Image']['id'].'/'.$optParams.$image['Image']['file'];
       } else {
-        $contentUrl = '/files/preview/'.$image['Image']['id'].'/'.$image['Image']['file'];
+        $contentUrl = '/files/preview/'.$image['Image']['id'].'/'.$optParams.$image['Image']['file'];
       }
     ?>
     <media:thumbnail url="<?php echo Router::url($thumbUrl, true); ?>" <?php echo $thumbSize[3]; ?> />
     <media:content url="<?php echo Router::url($contentUrl, true); ?>" <?php echo $previewSize[3]; ?> />
-    <guid><?php echo Router::url('/images/view/'.$image['Image']['id'], true); ?></guid>
+    <guid><?php echo Router::url($url, true); ?></guid>
     <description type="html" />
   </item>
 <?php endforeach; ?>

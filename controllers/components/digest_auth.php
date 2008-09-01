@@ -58,9 +58,7 @@ class DigestAuthComponent extends Object
     $this->Logger->info("User '{$user['User']['username']}' (id {$user['User']['id']}) authenticated");
     if (!$this->Session->check('User.id') || $this->Session->read('User.id') != $user['User']['id']) {
       $this->Logger->info("Start new session for '{$user['User']['username']}' (id {$user['User']['id']})");
-      $this->Session->write('User.id', $user['User']['id']);
-      $this->Session->write('User.username', $user['User']['username']);
-      $this->Session->write('User.role', $user['User']['role']);
+      $this->controller->User->writeSession($user, $this->Session);
     }
   }
 

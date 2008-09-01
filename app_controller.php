@@ -36,38 +36,62 @@ class AppController extends Controller
     $this->_checkSession();
   }
 
+  function _checkCookie() {
+    $this->Cookie->name = 'phTagr';
+    return $this->Cookie->read('user');
+  }
+
+  function _checkKey() {
+    if (!isset($this->params['named']['key'])) {
+      return false;
+    }
+
+    // fetch and delete key from passed parameters
+    $key = $this->params['named']['key'];
+    unset($this->params['named']['key']);
+
+    $data = $this->User->findByKey($key, array('User.id'));
+    if ($data) {
+      $this->Session->write('Authentication.key', $key);
+      return $data['User']['id'];
+    }
+    return false;
+  }
+
   /** Checks a cookie for a valid user id. If a id found, the user is load to
    * the session 
    * @todo Check expired user */
   function _checkSession() {
     $this->Session->activate();
-    if ($this->Session->check('User.id'))
+    if ($this->Session->check('User.id')) {
       return true;
+    }
 
-    $this->Cookie->name = 'phTagr';
+    $authType = 'Cookie';
+    $id = $this->_checkCookie();
+    if (!$id) {
+      $id = $this->_checkKey();
+      $authType = 'Key';
+    }
 
-    // Fetch Cookie
-    $id = $this->Cookie->read('user');
-    if ($id == null) 
+    if (!$id) {
       return false;
+    }
 
-    // Read user
+    // Fetch User
     $user = $this->User->findById($id);
-    if (!$user)
+    if (!$user) {
       return false;
+    }
 
     if ($this->User->isExpired($user)) {
       $this->Logger->warn("User account of '{$user['User']['username']}' (id {$user['User']['id']}) is expired!");
       return false;
     }
 
-    // Valid cookie found. Loading the user to the session
-    //$this->Logger->debug("Start new session for '{$user['User']['username']}' (id {$user['User']['id']})");
-    $this->Session->write('User.id', $user['User']['id']);
-    $this->Session->write('User.role', $user['User']['role']);
-    $this->Session->write('User.username', $user['User']['username']);
+    $this->User->writeSession($user, &$this->Session);
+    $this->Logger->info("User '{$user['User']['username']}' (id {$user['User']['id']}) authenticated via $authType!");
 
-    $this->Logger->info("User '{$user['User']['username']}' (id {$user['User']['id']}) authenticated through the cookie!");
     return true;
   }
 
