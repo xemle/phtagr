@@ -48,15 +48,29 @@ class CommentsController extends AppController
       $url = $this->Query->getUrl();
       $user = $this->getUser();
       $userId = $this->getUserId();
+      $role = $this->getUserRole();
 
-      if ($userId <= 0 && (!$this->Session->check('captcha') || $this->data['Captcha']['verification'] != $this->Session->read('captcha'))) {
+      // Fetch required authentication method
+      if ($role < ROLE_GUEST) {
+        $auth = (COMMENT_AUTH_NAME | COMMENT_AUTH_CAPTCHA);
+      } elseif ($role <= ROLE_GUEST) {
+        $auth = $this->getPreferenceValue('comment.auth', COMMENT_AUTH_NONE);
+      } else {
+        $auth = COMMENT_AUTH_NONE;
+      }
+
+      // Check capatcha if required
+      if (($auth & COMMENT_AUTH_CAPTCHA) > 0 && (!$this->Session->check('captcha') || $this->data['Captcha']['verification'] != $this->Session->read('captcha'))) {
         $this->Session->setFlash("Verification failed");
         $this->Logger->warn("Captcha verification failed: ".$this->data['Captcha']['verification']." != ".$this->Session->read('captcha'));
         $this->Session->delete('captcha');
-        $this->redirect("/images/view/$imageId/$url");        
+        $this->Session->write('Comment.data', $this->data);
+        $this->Session->write('Comment.validationErrors', $this->Comment->validationErrors);
+        $this->redirect("/images/view/$imageId/$url"); 
       }
       $this->Session->delete('captcha');
 
+      // Get image and check permissons
       $image = $this->Image->findById($imageId);
       if (!$image) {
         $this->Session->setFlash("Image not found");
@@ -74,7 +88,7 @@ class CommentsController extends AppController
       $this->data['Comment']['date'] = date("Y-m-d H:i:s", time());
       uses('Sanitize');
       $this->data['Comment']['text'] = Sanitize::html($this->data['Comment']['text']);
-      if ($userId > 0) {
+      if (($auth & COMMENT_AUTH_NAME) == 0) {
         $this->data['Comment']['user_id'] = $user['User']['id'];
         $this->data['Comment']['name'] = $user['User']['username'];
         $this->data['Comment']['email'] = $user['User']['email'];
@@ -92,6 +106,8 @@ class CommentsController extends AppController
         $this->Session->setFlash(__('The Comment could not be saved. Please, try again.', true));
         $this->Logger->err("Could not save comment to image $imageId");
         $this->Logger->trace($this->Comment->validationErrors);
+        $this->Session->write('Comment.data', $this->data);
+        $this->Session->write('Comment.validationErrors', $this->Comment->validationErrors);
       }
       $this->redirect("/images/view/$imageId/$url");
     } else {

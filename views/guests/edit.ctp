@@ -15,6 +15,20 @@
   echo $form->input('Guest.confirm', array('type' => 'password'));
 ?>
 </fieldset>
+<fieldset><legend>Comments</legend>
+<?php
+  $options = array(
+    0 => 'None',
+    1 => 'Name',
+    3 => 'Name and captcha' 
+    );
+  $select = $this->data['Comment']['auth'];
+  echo '<div class="input select">';
+  echo $form->label(null, 'Authentication');
+  echo $form->select('Comment.auth', $options, $select, null, false);
+  echo '</div>';
+?>
+</fieldset>
 <? echo $form->submit('Save'); ?>
 </form>
 

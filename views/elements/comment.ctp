@@ -3,16 +3,22 @@
   $params = $query->getParams();
 ?>
 <div class="comments">
-<?php if (count($data['Comment'])): ?>
+<?php if (count($this->data['Comment'])): ?>
 <h3>Comments</h3>
 <?php $count = 0; ?>
-<?php foreach ($data['Comment'] as $comment): ?>
+<?php foreach ($this->data['Comment'] as $key => $comment): ?>
+<?php if (!is_numeric($key)) continue; ?>
 <div class="comment <?php echo ($count++%2)?'even':'odd'; ?>">
 <div class="meta">
-<span class="from"><?php echo $comment['name'] ?></span> said 
+<span class="from"><?php 
+  if (!empty($comment['url'])) {
+    echo $html->link($comment['name'], $comment['url']);
+  } else {
+    echo $comment['name'];
+  } ?></span> said 
 <span class="date"><?php echo $time->relativeTime($comment['date']); ?></span>
 <?php 
-  if ($data['Image']['isOwner'] || $comment['user_id'] == $userId) {
+  if ($this->data['Image']['isOwner'] || $comment['user_id'] == $userId) {
     echo $html->link('(delete)', '/comments/delete/'.$comment['id'].'/'.$params);
   }
 ?>:
@@ -29,12 +35,15 @@
 <?php echo $form->create('Comment', array('action' => 'add/'.$params)); ?>
 <fieldset>
 <?php
-  echo $form->hidden('Image.id', array('value' => $data['Image']['id']));
+  echo $form->hidden('Image.id', array('value' => $this->data['Image']['id']));
 ?>
 <?php 
-  if ($userRole == ROLE_NOBODY) {
+  if (($commentAuth & COMMENT_AUTH_NAME) > 0) {
     echo $form->input('Comment.name');
     echo $form->input('Comment.email', array('after' => '<span class="hint">Will not be published</span>'));
+    echo $form->input('Comment.url', array('after' => '<span class="hint">Optional</span>', 'required' => false));
+  }
+  if (($commentAuth & COMMENT_AUTH_CAPTCHA) > 0) {
     echo '<div class="input text"><label>&nbsp;</label><img src="'.$html->url('/comments/captcha/verify.jpg').'" /></div>';
     echo $form->input('Captcha.verification');
   }

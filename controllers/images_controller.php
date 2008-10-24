@@ -40,16 +40,32 @@ class ImagesController extends AppController
 
   function view($id) {
     $this->Query->setImageId($id);
-    $data = $this->Query->paginateImage();
-    if (!$data) {
+    $this->data = $this->Query->paginateImage();
+    if (!$this->data) {
       $this->render('notfound');
     } else {
-      $this->set('mainMenuExplorer', $this->Query->getMenu(&$data));
-      $this->set('data', $data);
+      $this->set('mainMenuExplorer', $this->Query->getMenu(&$this->data));
+      $role = $this->getUserRole();
+      if ($role >= ROLE_USER) {
+        $commentAuth = COMMENT_AUTH_NONE;
+      } elseif ($role >= ROLE_GUEST) {
+        $commentAuth = $this->getPreferenceValue('comment.auth', COMMENT_AUTH_NONE);
+      } else {
+        $commentAuth = (COMMENT_AUTH_NAME | COMMENT_AUTH_CAPTCHA);
+      }
       $this->set('userRole', $this->getUserRole());
       $this->set('userId', $this->getUserId());
+      $this->set('commentAuth', $commentAuth);
       $this->set('mapKey', $this->getPreferenceValue('google.map.key', false));
-      if ($this->Image->isVideo($data)) {
+
+      if ($this->Session->check('Comment.data')) {
+        $comment = $this->Session->read('Comment.data');
+        $this->Comment->validationErrors = $this->Session->read('Comment.validationErrors');
+        $this->data['Comment'] = am($comment['Comment'], $this->data['Comment']);
+        //$this->data = am($this->Session->read('Comment.data'), $this->data);
+        $this->Session->del('Comment.data');
+      }
+      if ($this->Image->isVideo($this->data)) {
         $this->render('video');
       }
     }

@@ -25,7 +25,7 @@ class AppController extends Controller
 {
   var $helpers = array('html', 'session', 'javascript', 'menu');
   var $components = array('Cookie', 'Logger');
-  var $uses = array('User');
+  var $uses = array('User', 'Preference');
   
   var $_nobody = null;
   var $_user = null;
@@ -161,26 +161,7 @@ class AppController extends Controller
   
   function getPreferenceValue($name, $default=null) {
     $user = $this->getUser();
-    if (!isset($user['Preference']))
-      return $default;
-
-    $isArray = false;
-    $values = array();
-    if (strlen($name) > 2 && substr($name, -2) == '[]')
-      $isArray = true;
-      
-    foreach ($user['Preference'] as $pref) {
-      if ($pref['name'] === $name) {
-        if ($isArray)
-          $values[] = $pref['value'];
-        else
-          return $pref['value'];
-      }
-    }
-    if ($isArray && count($values))
-      return $values;
-
-    return $default;
+    return $this->Preference->getValue($user, $name, $default);
   }
  
 }

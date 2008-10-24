@@ -50,6 +50,7 @@ class PhtagrSchema extends CakeSchema {
 			'user_id' => array('type'=>'integer', 'null' => true, 'default' => NULL),
 			'name' => array('type'=>'string', 'null' => false, 'length' => 32),
 			'email' => array('type'=>'string', 'null' => false, 'length' => 64),
+			'url' => array('type'=>'string', 'null' => true, 'length' => 254),
 			'date' => array('type'=>'datetime', 'null' => true, 'default' => NULL),
 			'text' => array('type'=>'text', 'null' => false),
 			'reply' => array('type'=>'integer', 'null' => true, 'default' => '0'),

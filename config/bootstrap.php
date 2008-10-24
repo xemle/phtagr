@@ -83,6 +83,10 @@ define("ACL_LEVEL_GROUP",   2);
 define("ACL_LEVEL_USER",  3);
 define("ACL_LEVEL_OTHER",  4);
 
+define("COMMENT_AUTH_NONE",     0);
+define("COMMENT_AUTH_NAME",     1);
+define("COMMENT_AUTH_CAPTCHA",  2);
+
 define("IMAGE_FLAG_ACTIVE",   1);
 define("IMAGE_FLAG_EXTERNAL", 2);
 define("IMAGE_FLAG_DIRTY",    4);

@@ -30,6 +30,10 @@ class Guest extends AppModel
 
   var $belongsTo = array('Creator' => array('className' => 'User'));
 
+  var $hasMany = array(
+                  'Preference' => array('dependent' => true),
+                  );
+
   var $hasAndBelongsToMany = array( 
                   'Member' => array(
                       'className' => 'Group'
@@ -47,6 +51,13 @@ class Guest extends AppModel
       'rule' => array('email'),
       'message' => 'Email address is not valid')
     );
+
+  function afterFind($result, $primary = false) {
+    if ($primary && isset($result[0]['Preference'])) {
+      $result[0]['Preference'] = $this->Preference->addDefaults($result[0]['Preference']);
+    }
+    return $result;
+  }
 
   function beforeValidate() {
     if (isset($this->data['Guest']['password']) && 

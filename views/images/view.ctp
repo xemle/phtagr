@@ -1,5 +1,6 @@
-<h1><?php echo $data['Image']['name'] ?></h1>
+<h1><?php echo $this->data['Image']['name'] ?></h1>
 <?php $session->flash(); ?>
+
 
 <div class="paginator"><div class="subpaginator">
 <?php
@@ -9,7 +10,7 @@ echo $query->prevImage().' '.$query->up().' '.$query->nextImage();
 
 <?php
   $withMap = false;
-  if (isset($data['Image']['longitude']) && isset($data['Image']['latitude']) &&
+  if (isset($this->data['Image']['longitude']) && isset($this->data['Image']['latitude']) &&
     isset($mapKey)) {
     $withMap = true;
     echo '<script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key='.htmlentities($mapKey).'" type="text/javascript"></script>'."\n";
@@ -17,13 +18,13 @@ echo $query->prevImage().' '.$query->up().' '.$query->nextImage();
 ?>
 
 <?php 
-  $size = $imageData->getimagesize($data, OUTPUT_SIZE_PREVIEW);
-  echo "<img src=\"".Router::url("/files/preview/".$data['Image']['id'])."\" $size[3] alt=\"{$data['Image']['name']}\"/>"; ?>
+  $size = $imageData->getimagesize($this->data, OUTPUT_SIZE_PREVIEW);
+  echo "<img src=\"".Router::url("/files/preview/".$this->data['Image']['id'])."\" $size[3] alt=\"{$this->data['Image']['name']}\"/>"; ?>
 
 <div class="meta">
-<div id="<?php echo 'meta-'.$data['Image']['id']; ?>">
+<div id="<?php echo 'meta-'.$this->data['Image']['id']; ?>">
 <table> 
-  <?php echo $html->tableCells($imageData->metaTable(&$data, $withMap)); ?>
+  <?php echo $html->tableCells($imageData->metaTable(&$this->data, $withMap)); ?>
 </table>
 </div>
 </div><!-- meta -->

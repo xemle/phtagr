@@ -95,11 +95,53 @@ class Preference extends AppModel {
     return $tree;
   }
  
-  function getValue($data, $name, $default = null) {
-    $value = Set::extract($data, $name);
-    if ($value == null)
+  /** Returns the value of a preference model data
+    @param data Model data
+    @param name Name of preference
+    @param default Default value, if value is not found 
+    @return Value of the preference */
+  function _getModelValue($data, $name, $default = null) {
+    if (!isset($data['Preference'])) {
       return $default;
-    return $value;
+    }
+
+    $isArray = false;
+    $values = array();
+    if (strlen($name) > 2 && substr($name, -2) == '[]') {
+      $isArray = true;
+    }
+
+    foreach ($data['Preference'] as $pref) {
+      if ($pref['name'] === $name) {
+        if (!$isArray) {
+          return $pref['value'];
+        } else {
+          $values[] = $pref['value'];
+        }
+      }
+    }
+    if ($isArray && count($values)) {
+      return $values;
+    }
+
+    return $default;
+  }
+
+  /** Returns the value of a given path from the data
+    @param data Preference tree data or model data
+    @param path Path of the data to extract
+    @param default Default value, if the path does not exists
+    @return Extracted preference (or default value)
+    @see _getModelValue */
+  function getValue($data, $path, $default = null) {
+    if (isset($data['Preference'])) {
+      return $this->_getModelValue($data, $path, $default);
+    }
+    $value = Set::extract($name, $data);
+    if (!empty($value)) {
+      return $value;
+    }
+    return $default;
   }
  
   function setValue($name, $value, $userId = null) {
