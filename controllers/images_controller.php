@@ -49,14 +49,14 @@ class ImagesController extends AppController
       if ($role >= ROLE_USER) {
         $commentAuth = COMMENT_AUTH_NONE;
       } elseif ($role >= ROLE_GUEST) {
-        $commentAuth = $this->getPreferenceValue('comment.auth', COMMENT_AUTH_NONE);
+        $commentAuth = $this->getOption('comment.auth', COMMENT_AUTH_NONE);
       } else {
         $commentAuth = (COMMENT_AUTH_NAME | COMMENT_AUTH_CAPTCHA);
       }
       $this->set('userRole', $this->getUserRole());
       $this->set('userId', $this->getUserId());
       $this->set('commentAuth', $commentAuth);
-      $this->set('mapKey', $this->getPreferenceValue('google.map.key', false));
+      $this->set('mapKey', $this->getOption('google.map.key', false));
 
       if ($this->Session->check('Comment.data')) {
         $comment = $this->Session->read('Comment.data');

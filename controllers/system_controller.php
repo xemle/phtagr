@@ -24,7 +24,7 @@ class SystemController extends AppController {
 
   var $name = 'System';
   var $helpers = array('formular', 'form');
-  var $uses = array('Preference');
+  var $uses = array('Option');
 
   function beforeFilter() {
     parent::beforeFilter();
@@ -34,7 +34,7 @@ class SystemController extends AppController {
 
   function _set($userId, $path, $data) {
     $value = Set::extract($data, $path);
-    $this->Preference->setValue($path, $value, $userId);
+    $this->Option->setValue($path, $value, $userId);
   }
 
   function index() {
@@ -50,7 +50,7 @@ class SystemController extends AppController {
       $this->set('commit', $this->data);
       $this->Session->setFlash("Settings saved");
     }
-    $tree = $this->Preference->getTree(0);
+    $tree = $this->Option->getTree(0);
     $this->Logger->trace($tree);
     $this->data = $tree;
   }

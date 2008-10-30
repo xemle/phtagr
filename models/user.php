@@ -29,7 +29,7 @@ class User extends AppModel
 
   var $hasMany = array(
                   'Group' => array('dependent' => true),
-                  'Preference' => array('dependent' => true),
+                  'Option' => array('dependent' => true),
                   'Guest' => array('foreignKey' => 'creator_id', 'dependent' => true)
                   );
 
@@ -52,8 +52,8 @@ class User extends AppModel
     );
  
   function afterFind($result, $primary = false) {
-    if ($primary && isset($result[0]['Preference'])) {
-      $result[0]['Preference'] = $this->Preference->addDefaults($result[0]['Preference']);
+    if ($primary && isset($result[0]['Option'])) {
+      $result[0]['Option'] = $this->Option->addDefaults($result[0]['Option']);
     }
     return $result;
   }
@@ -160,7 +160,7 @@ class User extends AppModel
             'id' => -1, 
             'role' => ROLE_NOBODY), 
         'Member' => array(),
-        'Preference' => $this->Preference->addDefaults(array()));
+        'Option' => $this->Option->addDefaults(array()));
     return $nobody;
   }
 

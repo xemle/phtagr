@@ -108,7 +108,7 @@ class GuestsController extends AppController {
       if ($this->Guest->save(null, true, array('username', 'password', 'email', 'expires', 'quota'))) {
         $this->Session->setFlash("Guest was saved");
         $auth = max(0, min(3, $this->data['Comment']['auth']));
-        $this->Preference->setValue('comment.auth', $auth, $guestId);
+        $this->Option->setValue('comment.auth', $auth, $guestId);
       } else {
         $this->Logger->err("Could not save guest");
         $this->Logger->trace($this->Guest->validationErrors);
@@ -117,7 +117,7 @@ class GuestsController extends AppController {
     }
     $this->data = $this->Guest->findById($guestId);
     unset($this->data['Guest']['password']);
-    $this->data['Comment']['auth'] = $this->Preference->getValue($this->data, 'comment.auth', COMMENT_AUTH_NONE);
+    $this->data['Comment']['auth'] = $this->Option->getValue($this->data, 'comment.auth', COMMENT_AUTH_NONE);
     $this->set('userId', $userId);
     $this->_addGuestMenu($this->data);
   }
@@ -232,7 +232,7 @@ class GuestsController extends AppController {
   }
 
   function _setMenu() {
-    $items = $this->requestAction('/preferences/getMenuItems');
+    $items = $this->requestAction('/options/getMenuItems');
     $me = '/'.strtolower(Inflector::pluralize($this->name));
     foreach ($items as $index => $item) {
       if ($item['link'] == $me) {

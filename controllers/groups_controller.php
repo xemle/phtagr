@@ -176,7 +176,7 @@ class GroupsController extends AppController {
   }
 
   function _setMenu() {
-    $items = $this->requestAction('/preferences/getMenuItems');
+    $items = $this->requestAction('/options/getMenuItems');
     $me = '/'.strtolower(Inflector::pluralize($this->name));
     foreach ($items as $index => $item) {
       if ($item['link'] == $me) {

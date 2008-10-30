@@ -25,7 +25,7 @@ class AppController extends Controller
 {
   var $helpers = array('html', 'session', 'javascript', 'menu');
   var $components = array('Cookie', 'Logger');
-  var $uses = array('User', 'Preference');
+  var $uses = array('User', 'Option');
   
   var $_nobody = null;
   var $_user = null;
@@ -159,9 +159,9 @@ class AppController extends Controller
     return true;
   }
   
-  function getPreferenceValue($name, $default=null) {
+  function getOption($name, $default=null) {
     $user = $this->getUser();
-    return $this->Preference->getValue($user, $name, $default);
+    return $this->Option->getValue($user, $name, $default);
   }
  
 }

@@ -24,7 +24,7 @@
 class UsersController extends AppController
 {
   var $components = array('RequestHandler', 'Cookie', 'Email');
-  var $uses = array('Preference'); 
+  var $uses = array('Option'); 
   var $helpers = array('form', 'formular', 'number');
   var $paginate = array('limit' => 10, 'order' => array('User.username' => 'asc')); 
   var $menuItems = array();
@@ -165,19 +165,19 @@ class UsersController extends AppController
         $this->Session->setFlash('Could not be updated');
       }
 
-      if (!empty($this->data['Preference']['path']['fspath'])) {
-        $fsroot = $this->data['Preference']['path']['fspath'];
+      if (!empty($this->data['Option']['path']['fspath'])) {
+        $fsroot = $this->data['Option']['path']['fspath'];
         $fsroot = Folder::slashTerm($fsroot);
 
         if (is_dir($fsroot))
-          $this->Preference->addValue('path.fsroot[]', $fsroot, $id);
+          $this->Option->addValue('path.fsroot[]', $fsroot, $id);
       }
     }
 
     $this->data = $this->User->findById($id);
     unset($this->data['User']['password']);
 
-    $this->set('fsroots', $this->Preference->buildTree($this->data, 'path.fsroot'));
+    $this->set('fsroots', $this->Option->buildTree($this->data, 'path.fsroot'));
     $this->set('allowAdminRole', ($this->getUserRole() == ROLE_ADMIN) ? true : false);
     $this->menuItems[] = array(
       'text' => 'User '.$this->data['User']['username'], 
@@ -239,7 +239,7 @@ class UsersController extends AppController
     if (DS == '/')
       $fsroot = '/'.$fsroot;
     $fsroot = Folder::slashTerm($fsroot);
-    $this->Preference->delValue('path.fsroot[]', $fsroot, $id);
+    $this->Option->delValue('path.fsroot[]', $fsroot, $id);
 
     $this->redirect("edit/$id");
   }

@@ -110,7 +110,7 @@ class Image extends AppModel
 
   function addDefaultAcl(&$data, $user) {
     // Access control values
-    $acl = $this->User->Preference->getDefaultAcl($user);
+    $acl = $this->User->Option->getDefaultAcl($user);
     $data['Image']['user_id'] = $user['User']['id'];
     $data['Image']['group_id'] = $acl['groupId'];
     $data['Image']['gacl'] = $acl['gacl'];

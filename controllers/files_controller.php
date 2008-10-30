@@ -26,7 +26,7 @@ if (!App::import('Vendor', "phpthumb", true, array(), "phpthumb.class.php")) {
 
 class FilesController extends AppController
 {
-  var $name = 'Thumbs';
+  var $name = 'Files';
   var $uses = array('Image');
   var $layout = null;
   var $_outputMap = array(
@@ -200,7 +200,7 @@ class FilesController extends AppController
       //  $phpThumb->sx, $phpThumb->sy, 
       //  $phpThumb->sw, $phpThumb->sh), LOG_DEBUG);
     }
-    $phpThumb->config_imagemagick_path = $this->getPreferenceValue('bin.convert', 'convert');
+    $phpThumb->config_imagemagick_path = $this->getOption('bin.convert', 'convert');
     $phpThumb->config_prefer_imagemagick = true;
     $phpThumb->config_imagemagick_use_thumbnail = false;
     $phpThumb->config_output_format = 'jpg';
@@ -289,7 +289,7 @@ class FilesController extends AppController
     $flashFilename = $cacheDir.$this->_getCacheFilename($id, $options['size'], 'flv');
 
     if (!file_exists($flashFilename)) {
-      $bin = $this->getPreferenceValue('bin.ffmpeg', 'ffmpeg');
+      $bin = $this->getOption('bin.ffmpeg', 'ffmpeg');
       list($width, $height) = $this->_scaleSize($image, $options['size']);
       $command = "$bin -i ".escapeshellarg($sourceFilename)." -s {$width}x{$height} -r 15 -b {$options['bitrate']} -ar 22050 -ab 48 -y ".escapeshellarg($flashFilename);
       $output = array();
@@ -305,7 +305,7 @@ class FilesController extends AppController
         $this->Logger->info("Created flash video '$flashFilename' of '$sourceFilename'");
       }
       
-      $bin = $this->getPreferenceValue('bin.flvtool2', 'flvtool2');
+      $bin = $this->getOption('bin.flvtool2', 'flvtool2');
       $command = "$bin -U ".escapeshellarg($flashFilename);
       $output = array();
       $result = -1;

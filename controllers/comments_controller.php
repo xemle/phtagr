@@ -54,7 +54,7 @@ class CommentsController extends AppController
       if ($role < ROLE_GUEST) {
         $auth = (COMMENT_AUTH_NAME | COMMENT_AUTH_CAPTCHA);
       } elseif ($role <= ROLE_GUEST) {
-        $auth = $this->getPreferenceValue('comment.auth', COMMENT_AUTH_NONE);
+        $auth = $this->getOption('comment.auth', COMMENT_AUTH_NONE);
       } else {
         $auth = COMMENT_AUTH_NONE;
       }

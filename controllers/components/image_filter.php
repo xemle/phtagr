@@ -69,7 +69,7 @@ class ImageFilterComponent extends Object {
       return;
     }
 
-    $bin = $this->controller->getPreferenceValue('bin.exiftool', 'exiftool');
+    $bin = $this->controller->getOption('bin.exiftool', 'exiftool');
     $command = $bin.' -all= '.escapeshellarg($filename);
     $output = array();
     $result = -1;
@@ -86,7 +86,7 @@ class ImageFilterComponent extends Object {
     * @result Array of metadata or false on error */
   function _readMetaData($filename) {
     // read meta data
-    $bin = $this->controller->getPreferenceValue('bin.exiftool', 'exiftool');
+    $bin = $this->controller->getOption('bin.exiftool', 'exiftool');
     $command = "$bin -S -n ".escapeshellarg($filename);
     $output = array();
     $result = -1;
@@ -223,7 +223,7 @@ class ImageFilterComponent extends Object {
     }
 
     $tmp = $this->_getTempFilename($filename);
-    $bin = $this->controller->getPreferenceValue('bin.exiftool', 'exiftool');
+    $bin = $this->controller->getOption('bin.exiftool', 'exiftool');
     $command = "$bin $args -o ".escapeshellarg($tmp).' '.escapeshellarg($filename);
     $this->Logger->trace("Execute command: \"$command\"");
     $output = array();

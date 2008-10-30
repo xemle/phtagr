@@ -20,10 +20,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-class Preference extends AppModel {
+class Option extends AppModel {
 
-  var $name = 'Preference';
-  var $useTable = 'configs';
+  var $name = 'Option';
 
   var $belongsTo = array('User' => array());
 
@@ -31,22 +30,22 @@ class Preference extends AppModel {
                            ACL_LEVEL_USER => 'uacl',
                            ACL_LEVEL_OTHER => 'oacl');
 
-  function addDefaults($preferences) {
-    $ownPreferences = Set::extract($preferences, '{n}.name');
+  function addDefaults($options) {
+    $ownOptions = Set::extract($options, '{n}.name');
     $this->unbindModel(array('belongsTo' => array('User')));
-    $defaultPreferences = $this->findAllByUserId(0);
-    foreach ($defaultPreferences as $default) {
+    $defaultOptions = $this->findAllByUserId(0);
+    foreach ($defaultOptions as $default) {
       $name = $default[$this->name]['name'];
       if (strlen($name)>2 && substr($name, -2) == '[]') {
-        $preferences[] = $default[$this->name];
+        $options[] = $default[$this->name];
       } else {
-        $exists = in_array($name, $ownPreferences);
+        $exists = in_array($name, $ownOptions);
         if (!$exists) {
-          $preferences[] = $default[$this->name];
+          $options[] = $default[$this->name];
         }
       }
     }
-    return $preferences;
+    return $options;
   }
 
   function getTree($userId) {
@@ -57,25 +56,25 @@ class Preference extends AppModel {
 
   function buildTree($data, $subPath = null, $strip = false) {
     $tree = array();
-    // Preference is set as root
-    if (isset($data['Preference']))
-      $data = &$data['Preference'];
+    // Option is set as root
+    if (isset($data['Option']))
+      $data = &$data['Option'];
 
     foreach ($data as $item) {
-      // Preference is set as item
-      if (isset($item['Preference']))
-        $preference = &$item['Preference'];
+      // Option is set as item
+      if (isset($item['Option']))
+        $option = &$item['Option'];
       else
-        $preference = &$item;
+        $option = &$item;
 
       // Skip if subpath does not match
-      if (isset($subPath) && strpos($preference['name'], $subPath) !== 0) {
+      if (isset($subPath) && strpos($option['name'], $subPath) !== 0) {
         continue;
       } elseif ($strip && strpos($subPath, '.') > 0) {
-        $preference['name'] = substr($preference['name'], strrpos($subPath, '.')+1);
+        $option['name'] = substr($option['name'], strrpos($subPath, '.')+1);
       }
       $node = &$tree;
-      $paths = explode('.', $preference['name']);
+      $paths = explode('.', $option['name']);
       for($i=0; $i<count($paths); $i++) {
         $path=$paths[$i];
           
@@ -88,20 +87,20 @@ class Preference extends AppModel {
         $node = &$node[$path];
       }
       if ($isArray)
-        $node[] = $preference['value'];
+        $node[] = $option['value'];
       else
-        $node = $preference['value'];
+        $node = $option['value'];
     }
     return $tree;
   }
  
-  /** Returns the value of a preference model data
+  /** Returns the value of a option model data
     @param data Model data
-    @param name Name of preference
+    @param name Name of option
     @param default Default value, if value is not found 
-    @return Value of the preference */
+    @return Value of the option */
   function _getModelValue($data, $name, $default = null) {
-    if (!isset($data['Preference'])) {
+    if (!isset($data['Option'])) {
       return $default;
     }
 
@@ -111,12 +110,12 @@ class Preference extends AppModel {
       $isArray = true;
     }
 
-    foreach ($data['Preference'] as $pref) {
-      if ($pref['name'] === $name) {
+    foreach ($data['Option'] as $option) {
+      if ($option['name'] === $name) {
         if (!$isArray) {
-          return $pref['value'];
+          return $option['value'];
         } else {
-          $values[] = $pref['value'];
+          $values[] = $option['value'];
         }
       }
     }
@@ -128,13 +127,13 @@ class Preference extends AppModel {
   }
 
   /** Returns the value of a given path from the data
-    @param data Preference tree data or model data
+    @param data Option tree data or model data
     @param path Path of the data to extract
     @param default Default value, if the path does not exists
-    @return Extracted preference (or default value)
+    @return Extracted option (or default value)
     @see _getModelValue */
   function getValue($data, $path, $default = null) {
-    if (isset($data['Preference'])) {
+    if (isset($data['Option'])) {
       return $this->_getModelValue($data, $path, $default);
     }
     $value = Set::extract($name, $data);
@@ -155,10 +154,10 @@ class Preference extends AppModel {
     }
     $data = $this->find(array('AND' => array('user_id' => $userId, 'name' => $name)));
     if ($data) {
-      $data['Preference']['value'] = $value;
+      $data['Option']['value'] = $value;
       $this->save($data);
     } else {
-      $this->create(array('Preference' => array('name' => $name, 'value' => $value, 'user_id' => $userId)));
+      $this->create(array('Option' => array('name' => $name, 'value' => $value, 'user_id' => $userId)));
       $this->save();
     }
   }
@@ -172,7 +171,7 @@ class Preference extends AppModel {
     } else {
       $userId = $this->data['User']['id'];
     }
-    $this->create(array('Preference' => array('name' => $name, 'value' => $value, 'user_id' => $userId)));
+    $this->create(array('Option' => array('name' => $name, 'value' => $value, 'user_id' => $userId)));
     $this->save();
   }
 

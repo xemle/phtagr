@@ -34,7 +34,7 @@ class SetupController extends AppController {
   var $db = null;
   var $Schema = null;
   var $User = null;
-  var $Preference = null;
+  var $Option = null;
   var $commands = array('exiftool', 'convert', 'ffmpeg', 'flvtool2');
 
   function beforeFilter() {
@@ -339,15 +339,15 @@ class SetupController extends AppController {
       $commands = $this->commands;
     }
 
-    if (!$this->__loadModel('Preference')) {
+    if (!$this->__loadModel('Option')) {
       return false;
     }
 
     if (!count($commands)) {
-      return $this->Preference->hasAny(array('user_id' => 0, 'name' => 'LIKE bin.%'));
+      return $this->Option->hasAny(array('user_id' => 0, 'name' => 'LIKE bin.%'));
     } else {
       foreach ($commands as $command) {
-        if (!$this->Preference->hasAny(array('user_id' => 0, 'name' => 'bin.'.$command))) {
+        if (!$this->Option->hasAny(array('user_id' => 0, 'name' => 'bin.'.$command))) {
           $this->Logger->trace("Command '$command' is missing");
           return false;
         }
@@ -660,7 +660,7 @@ class DATABASE_CONFIG
         $bin = Set::extract($this->data, 'bin.'.$command);
         $file = new File($bin);
         if ($file->executable()) {
-          $this->Preference->setValue('bin.'.$command, $bin, 0);
+          $this->Option->setValue('bin.'.$command, $bin, 0);
           $this->Logger->debug("Write 'bin.$command'='$bin'");
         } else {
           $missing[] = $command;    

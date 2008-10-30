@@ -31,7 +31,7 @@ class Guest extends AppModel
   var $belongsTo = array('Creator' => array('className' => 'User'));
 
   var $hasMany = array(
-                  'Preference' => array('dependent' => true),
+                  'Option' => array('dependent' => true),
                   );
 
   var $hasAndBelongsToMany = array( 
@@ -53,8 +53,8 @@ class Guest extends AppModel
     );
 
   function afterFind($result, $primary = false) {
-    if ($primary && isset($result[0]['Preference'])) {
-      $result[0]['Preference'] = $this->Preference->addDefaults($result[0]['Preference']);
+    if ($primary && isset($result[0]['Option'])) {
+      $result[0]['Option'] = $this->Option->addDefaults($result[0]['Option']);
     }
     return $result;
   }

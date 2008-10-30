@@ -61,7 +61,7 @@ To add external files from the system, you can add file system paths to the
 user</p>
 </div>
 <?php endif; ?>
-<? echo $form->input('Preference.path.fspath', array('label' => 'System Path')); ?>
+<? echo $form->input('Option.path.fspath', array('label' => 'System Path')); ?>
 </fieldset>
 <?php echo $form->submit('Save'); ?>
 </form>

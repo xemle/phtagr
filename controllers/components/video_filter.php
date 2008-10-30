@@ -67,7 +67,7 @@ class VideoFilterComponent extends Object {
       $this->Logger->err("Directory for video thumbnail file '$thumbFilename' is not writeable");
       return false;
     }
-    $bin = $this->controller->getPreferenceValue('bin.ffmpeg', 'ffmpeg');
+    $bin = $this->controller->getOption('bin.ffmpeg', 'ffmpeg');
     $command = "$bin -i ".escapeshellarg($videoFilename)." -t 0.001 -f mjpeg -y ".escapeshellarg($thumbFilename);
     $output = array();
     $result = -1;
@@ -117,7 +117,7 @@ class VideoFilterComponent extends Object {
     $image['Image']['width'] = 0;
     $image['Image']['height'] = 0;
 
-    $bin = $this->controller->getPreferenceValue('bin.ffmpeg', 'ffmpeg');
+    $bin = $this->controller->getOption('bin.ffmpeg', 'ffmpeg');
     $command = "$bin -i ".escapeshellarg($filename)." -t 0.0 2>&1";
     $output=array();
     $result=-1;

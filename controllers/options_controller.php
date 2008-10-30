@@ -20,11 +20,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-class PreferencesController extends AppController {
+class OptionsController extends AppController {
 
-  var $name = 'Preferences';
+  var $name = 'Options';
   var $helpers = array('formular', 'form');
-  var $uses = array('Preference', 'Group');
+  var $uses = array('Option', 'Group');
 
   function beforeFilter() {
     parent::beforeFilter();
@@ -54,7 +54,7 @@ class PreferencesController extends AppController {
 
       $this->Session->setFlash("Settings saved");
     }
-    $tree = $this->Preference->getTree($userId);
+    $tree = $this->Option->getTree($userId);
     $this->data = $tree;
 
     $this->set('userId', $userId);
@@ -106,12 +106,12 @@ class PreferencesController extends AppController {
   function getMenuItems() {
     $items = array();
     if ($this->hasRole(ROLE_USER)) {
-      $items[] = array('text' => 'Profile', 'link' => '/preferences/profile');
+      $items[] = array('text' => 'Profile', 'link' => '/options/profile');
       $items[] = array('text' => 'Guest Accounts', 'link' => '/guests');
       $items[] = array('text' => 'Groups', 'link' => '/groups');
     }
-    $items[] = array('text' => 'Access Rights', 'link' => '/preferences/acl');
-    $items[] = array('text' => 'RSS', 'link' => '/preferences/rss');
+    $items[] = array('text' => 'Access Rights', 'link' => '/options/acl');
+    $items[] = array('text' => 'RSS', 'link' => '/options/rss');
     return $items;
   }
 

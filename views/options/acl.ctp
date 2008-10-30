@@ -1,4 +1,4 @@
-<h1>Preferences</h1>
+<h1>Access Rights</h1>
 <?php $session->flash(); ?>
 <?php 
   $aclSelect = array(
@@ -8,7 +8,7 @@
     ACL_LEVEL_PRIVATE => 'Me only');
 ?>
 <?php echo $form->create(null, array('action' => 'acl')); ?>
-<fieldset><legend>Default Image Access Rights</legend>
+<fieldset><legend>Default Access Rights</legend>
 <p>The following access rights are applied to new images.</p>
 <?php
   echo $form->input('acl.read.preview', array('type' => 'select', 'options' => $aclSelect, 'label' => "Who can view the image?")); 

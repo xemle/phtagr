@@ -57,13 +57,6 @@ class PhtagrSchema extends CakeSchema {
 			'notify' => array('type'=>'integer', 'null' => true, 'default' => '0', 'length' => 3),
 			'indexes' => array('PRIMARY' => array('column' => 'id', 'unique' => 1))
 		);
-	var $configs = array(
-			'id' => array('type'=>'integer', 'null' => false, 'default' => NULL, 'key' => 'primary'),
-			'user_id' => array('type'=>'integer', 'null' => true, 'default' => NULL),
-			'name' => array('type'=>'string', 'null' => true, 'default' => NULL, 'length' => 64),
-			'value' => array('type'=>'string', 'null' => true, 'default' => NULL, 'length' => 192),
-			'indexes' => array('PRIMARY' => array('column' => 'id', 'unique' => 1), 'user_id' => array('column' => 'user_id', 'unique' => 0))
-		);
 	var $groups = array(
 			'id' => array('type'=>'integer', 'null' => false, 'default' => NULL, 'key' => 'primary'),
 			'user_id' => array('type'=>'integer', 'null' => true, 'default' => NULL),
@@ -136,6 +129,13 @@ class PhtagrSchema extends CakeSchema {
 			'name' => array('type'=>'string', 'null' => false, 'length' => 64, 'key' => 'index'),
 			'type' => array('type'=>'integer', 'null' => true, 'default' => NULL, 'length' => 3),
 			'indexes' => array('PRIMARY' => array('column' => 'id', 'unique' => 1), 'name' => array('column' => 'name', 'unique' => 0))
+		);
+	var $options = array(
+			'id' => array('type'=>'integer', 'null' => false, 'default' => NULL, 'key' => 'primary'),
+			'user_id' => array('type'=>'integer', 'null' => true, 'default' => NULL),
+			'name' => array('type'=>'string', 'null' => true, 'default' => NULL, 'length' => 64),
+			'value' => array('type'=>'string', 'null' => true, 'default' => NULL, 'length' => 192),
+			'indexes' => array('PRIMARY' => array('column' => 'id', 'unique' => 1), 'user_id' => array('column' => 'user_id', 'unique' => 0))
 		);
 	var $properties = array(
 			'id' => array('type'=>'integer', 'null' => false, 'default' => NULL, 'key' => 'primary'),

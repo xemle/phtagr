@@ -26,7 +26,7 @@ class BrowserController extends AppController
   var $name = "Browser";
 
   var $components = array('RequestHandler', 'ImageFilter', 'VideoFilter');
-  var $uses = array('User', 'Image', 'Tag', 'Category', 'Location', 'Preference');
+  var $uses = array('User', 'Image', 'Tag', 'Category', 'Location', 'Option');
   var $helpers = array('form', 'formular', 'html', 'number');
 
   /** Array of filesystem root directories. */
@@ -40,7 +40,7 @@ class BrowserController extends AppController
     $userDir = $this->User->getRootDir($this->getUser());
     $this->_addFsRoot($userDir);
 
-    $fsroots = $this->Preference->buildTree($this->getUser(), 'path.fsroot', true);
+    $fsroots = $this->Option->buildTree($this->getUser(), 'path.fsroot', true);
     if (count($fsroots)) {
       foreach ($fsroots['fsroot'] as $id => $root) {
         $this->_addFsRoot($root);
