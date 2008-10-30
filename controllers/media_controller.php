@@ -24,9 +24,9 @@ if (!App::import('Vendor', "phpthumb", true, array(), "phpthumb.class.php")) {
   debug("Please install phpthumb properly");
 }
 
-class FilesController extends AppController
+class MediaController extends AppController
 {
-  var $name = 'Files';
+  var $name = 'Media';
   var $uses = array('Image');
   var $layout = null;
   var $_outputMap = array(
@@ -165,7 +165,7 @@ class FilesController extends AppController
         $phpThumb->ra=270; 
         break;
       default: 
-        $this->Logger->warn("Unsupported ratation flag: ".$image['Image']['orientation']);
+        $this->Logger->warn("Unsupported rotation flag: ".$image['Image']['orientation']);
         break;
     }
 

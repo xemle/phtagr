@@ -209,7 +209,7 @@ class ImageDataHelper extends AppHelper {
     if ($data['Image']['canReadOriginal'])
       $output .= ' '.$this->html->link(
         $this->html->image('icons/disk.png', array('alt' => 'Save image', 'title' => 'Save image')), 
-        '/files/original/'.$imageId.'/'.$data['Image']['file'], null, null, false);
+        '/media/original/'.$imageId.'/'.$data['Image']['file'], null, null, false);
 
     if ($withMap && isset($data['Image']['latitude']) && isset($data['Image']['longitude'])) {
       $output .= ' '.$this->html->link(

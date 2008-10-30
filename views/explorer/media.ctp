@@ -29,11 +29,11 @@
     <?php 
       $thumbSize = $imageData->getimagesize($image, OUTPUT_SIZE_THUMB);
       $previewSize = $imageData->getimagesize($image, OUTPUT_SIZE_PREVIEW);
-      $thumbUrl = '/files/thumb/'.$image['Image']['id'].'/'.$optParams.$image['Image']['file'];
+      $thumbUrl = '/media/thumb/'.$image['Image']['id'].'/'.$optParams.$image['Image']['file'];
       if ($image['Image']['canReadOriginal']) {
-        $contentUrl = '/files/high/'.$image['Image']['id'].'/'.$optParams.$image['Image']['file'];
+        $contentUrl = '/media/high/'.$image['Image']['id'].'/'.$optParams.$image['Image']['file'];
       } else {
-        $contentUrl = '/files/preview/'.$image['Image']['id'].'/'.$optParams.$image['Image']['file'];
+        $contentUrl = '/media/preview/'.$image['Image']['id'].'/'.$optParams.$image['Image']['file'];
       }
     ?>
     <media:thumbnail url="<?php echo Router::url($thumbUrl, true); ?>" <?php echo $thumbSize[3]; ?> />

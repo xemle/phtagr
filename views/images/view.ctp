@@ -19,7 +19,7 @@ echo $query->prevImage().' '.$query->up().' '.$query->nextImage();
 
 <?php 
   $size = $imageData->getimagesize($this->data, OUTPUT_SIZE_PREVIEW);
-  echo "<img src=\"".Router::url("/files/preview/".$this->data['Image']['id'])."\" $size[3] alt=\"{$this->data['Image']['name']}\"/>"; ?>
+  echo "<img src=\"".Router::url("/media/preview/".$this->data['Image']['id'])."\" $size[3] alt=\"{$this->data['Image']['name']}\"/>"; ?>
 
 <div class="meta">
 <div id="<?php echo 'meta-'.$this->data['Image']['id']; ?>">

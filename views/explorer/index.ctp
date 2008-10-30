@@ -41,7 +41,7 @@ foreach($data as $image): ?>
   $size = $imageData->getimagesize($image, OUTPUT_SIZE_THUMB);
   $query->set('pos', $pos++);
   echo "<a href=\"".Router::url("/images/view/".$image['Image']['id'].'/'.$query->getParams())."\">";
-  echo "<img src=\"".Router::url("/files/thumb/".$image['Image']['id'])."\" $size[3] alt=\"".$image['Image']['name']."\"/>"; 
+  echo "<img src=\"".Router::url("/media/thumb/".$image['Image']['id'])."\" $size[3] alt=\"".$image['Image']['name']."\"/>"; 
   echo "</a>";
 
   if ($image['Image']['canWriteTag'])
