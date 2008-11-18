@@ -68,7 +68,7 @@ Please add groups to grant access to your personal images.</div>
 <?php echo $form->create(null, array('action' => 'addGroup/'.$this->data['Guest']['id']));?>
 <fieldset><legend>Group Assignements</legend>
 <div class="input"><label>Group</label>
-<?php echo $ajax->autocomplete('Group/name', '/guests/autocomplete'); ?></div>
+<?php echo $ajax->autocomplete('Group.name', '/guests/autocomplete'); ?></div>
 </fieldset>
 <?php echo $form->submit('Add Group'); ?>
 </form>

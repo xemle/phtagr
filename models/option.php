@@ -136,7 +136,7 @@ class Option extends AppModel {
     if (isset($data['Option'])) {
       return $this->_getModelValue($data, $path, $default);
     }
-    $value = Set::extract($name, $data);
+    $value = Set::extract($data, $path);
     if (!empty($value)) {
       return $value;
     }

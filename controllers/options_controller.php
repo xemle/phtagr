@@ -32,6 +32,11 @@ class OptionsController extends AppController {
     $this->requireRole(ROLE_GUEST, array('redirect' => '/'));
   }
 
+  function _set($userId, $path, $data) {
+    $value = Set::extract($data, $path);
+    $this->Option->setValue($path, $value, $userId);
+  }
+
   function acl() {
     $this->requireRole(ROLE_USER);
 

@@ -37,7 +37,7 @@
 
 <fieldset><legend>Add member</legend>
 <div class="input"><label>Group</label>
-<?php echo $ajax->autocomplete('User/username', '/groups/autocomplete'); ?></div>
+<?php echo $ajax->autocomplete('User.username', '/groups/autocomplete'); ?></div>
 </fieldset>
 <?php echo $form->submit('Add'); ?>
 </form>
