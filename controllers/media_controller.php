@@ -44,6 +44,10 @@ class MediaController extends AppController
     if (Configure::read('Security.level') === 'high') {
       Configure::write('Security.level', 'medium');
     }
+    // Disable sql output
+    if (Configure::read('debug') === 2) {
+      Configure::write('debug', 1);
+    }
     parent::beforeFilter();
   }
   
@@ -85,6 +89,24 @@ class MediaController extends AppController
 
     // following line will disallow caching
     //header('Cache-Control: max-age=0');
+  }
+
+  /** Get options for Media View of a file
+    @param filename Filename of the media
+    @return Array of Media Option for the view. */
+  function _getMediaOptions($filename) {
+    $path = substr($filename, 0, strrpos($filename, DS) + 1);
+    $file = substr($filename, strrpos($filename, DS) + 1);
+    $ext = strtolower(substr($file, strrpos($file, '.') + 1));
+    $name = substr($file, 0, strrpos($file, '.'));
+
+    $options = array(
+      'id' => $file,
+      'name' => $name,
+      'extension' => $ext,
+      'path' => $path);
+
+    return $options;
   }
 
   /** Fetch image from database and checks access 
@@ -239,17 +261,16 @@ class MediaController extends AppController
 
     //$this->Logger->debug($phpThumb->debugmessages);
     
-    if (is_file($phpThumb->cache_filename)) { 
-      $this->_handleClientCache($phpThumb->cache_filename);
+    if (!is_file($phpThumb->cache_filename)) { 
+      $this->Logger->err("Could not create preview file {$phpThumb->cache_filename}");
+      $this->Logger->err($phpThumb->debugmessages);
+      $this->redirect(null, 500);
+    }
+    $this->_handleClientCache($phpThumb->cache_filename);
 
-      // If thumb was already generated we want to use cached version
-      $cachedImage = getimagesize($phpThumb->cache_filename);
-      header('Content-Type: '.$cachedImage['mime']);
-      readfile($phpThumb->cache_filename);
-      exit;
-    } 
-    $this->Logger->err("Unexpected end of script! is_file($phpThumb->cache_filename)==false!");
-    $this->Logger->err($phpThumb->debugmessages);
+    $mediaOptions = $this->_getMediaOptions($phpThumb->cache_filename);
+    $this->view = 'Media';
+    $this->set($mediaOptions);
   }
 
   function _scaleSize($image, $size) {
@@ -320,11 +341,12 @@ class MediaController extends AppController
         $this->Logger->info("Updated flash video '$flashFilename' with meta tags");
       }
     }
+    if (!is_file($flashFilename)) { 
+      $this->Logger->err("Could not create preview file {$flashFilename}");
+      $this->redirect(null, 500);
+    }
  
-    $this->_handleClientCache($flashFilename);
-    header('Content-Type: video/x-flv');
-    readfile($flashFilename);
-    exit; 
+    return $flashFilename;
   }
 
   function mini($id) {
@@ -347,7 +369,12 @@ class MediaController extends AppController
 
   function video($id) {
     $this->Logger->info("Request of image $id: video");
-    $this->_createFlashVideo($id, OUTPUT_TYPE_VIDEO);
+    $filename = $this->_createFlashVideo($id, OUTPUT_TYPE_VIDEO);
+
+    $mediaOptions = $this->_getMediaOptions($filename);
+    $mediaOptions['download'] = true;
+    $this->view = 'Media';
+    $this->set($mediaOptions);
   }
 
   function original($id) {
@@ -361,11 +388,10 @@ class MediaController extends AppController
     $this->Logger->info("Request of image $id: original");
     $filename = $this->Image->getFilename($image);  
 
-    $size = getimagesize($filename);
-    header('Content-Type: '.$size['mime']);
-
-    readfile($filename);
-    exit; 
+    $mediaOptions = $this->_getMediaOptions($filename);
+    $mediaOptions['download'] = true;
+    $this->view = 'Media';
+    $this->set($mediaOptions);
   }
 }
 ?>
