@@ -29,10 +29,11 @@
 <?php foreach($files as $file => $type): ?>
   <li><?php
     if ($type != 'unknown') {
-      if ($type == 'video')
-        $icon = 'film';
-      else
-        $icon = 'picture';
+      switch ($type) {
+        case 'video': $icon = 'film'; break;
+        case 'maps': $icon = 'map'; break;
+        default: $icon = 'picture';
+      }
       echo $html->image("icons/$icon.png").' '.
         $form->checkbox('import][', array("value" => "$path$file", 'id' => 'id'.rand())).' '.$file;
     } else {

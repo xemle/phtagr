@@ -25,7 +25,7 @@ class BrowserController extends AppController
 {
   var $name = "Browser";
 
-  var $components = array('RequestHandler', 'ImageFilter', 'VideoFilter');
+  var $components = array('RequestHandler', 'ImageFilter', 'VideoFilter', 'GpsFilter');
   var $uses = array('User', 'Image', 'Tag', 'Category', 'Location', 'Option');
   var $helpers = array('form', 'formular', 'html', 'number');
 
@@ -178,6 +178,7 @@ class BrowserController extends AppController
       // TODO get supported extensions from file filter
       $videos = array('avi', 'mov', 'mpg', 'mpeg');
       $images = array('jpeg', 'jpg');
+      $maps = array('log');
       $list = array();
       foreach ($files as $file) {
         $ext = strtolower(substr($file, strrpos($file, '.')+1));
@@ -185,6 +186,8 @@ class BrowserController extends AppController
           $list[$file] = 'image';
         } elseif (in_array($ext, $videos)) {
           $list[$file] = 'video';
+        } elseif (in_array($ext, $maps)) {
+          $list[$file] = 'maps';
         } else {
           $list[$file] = 'unknown';
         }
@@ -280,7 +283,7 @@ class BrowserController extends AppController
     foreach ($dirs as $dir) {
       $cd = $folder->cd($dir);
       // Get extensions from file filter
-      $found = $folder->find('.*(jpe?g|avi|mov|mpe?g)');
+      $found = $folder->find('.*(jpe?g|avi|mov|mpe?g|log)');
       foreach ($found as $file) {
         $files[] = $dir.$file;
       }
@@ -290,6 +293,10 @@ class BrowserController extends AppController
     $numImports = 0;
     $numErrors = 0;
     foreach ($files as $file) {
+      if (preg_match('/.*\.log$/', $file)) {
+        $this->GpsFilter->readFile($file, array('offset' => 120*60, 'overwrite' => false));
+        continue;
+      }
       $result = $this->_importFile($file);
       if ($result>0) {
         $numImports++;

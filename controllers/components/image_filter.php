@@ -306,6 +306,56 @@ class ImageFilterComponent extends Object {
     return $arg;
   }
 
+  function _createExportGps(&$data, &$image) {
+    $args = '';
+
+    $latitude = $this->_extract($data, 'GPSLatitude', null);
+    $latitudeRef = $this->_extract($data, 'GPSLatitudeRef', null);
+    $longitude = $this->_extract($data, 'GPSLongitude', null);
+    $longitudeRef = $this->_extract($data, 'GPSLongitudeRef', null);
+    if ($latitude && $latitudeRef && $longitude && $longitudeRef) {
+      if ($latitudeRef == 'S')
+        $latitude *= -1;
+      if ($longitudeRef == 'W')
+        $longitude *= -1;
+    } else {
+      $latitude = null;
+      $longitude = null;
+    }
+    $latitudeDb = $image['Image']['latitude'];
+    if (!$latitude || $latitude != $latitudeDb) {
+      if (!$latitudeDb) {
+        $latitudeRef = '';
+        $latitudeDb = '';
+      } elseif ($latitudeDb < 0) {
+        $latitudeRef = 'S';
+        $latitudeDb *= -1;
+      } else  {
+        $latitudeRef = 'N';
+      }
+      $args .= ' -GPSLatitude='.escapeshellarg($latitudeDb);
+      $args .= ' -GPSLatitudeRef='.escapeshellarg($latitudeRef);
+    }
+    $longitude = $this->_extract($data, 'GPSLongitude', null);
+    $longitudeRef = $this->_extract($data, 'GPSLongitudeRef', null);
+    $longitudeDb = $image['Image']['longitude'];
+    if (!$longitude || $longitude != $longitudeDb) {
+      if (!$longitudeDb) {
+        $longitudeRef = '';
+        $longitudeDb = '';
+      } elseif ($longitudeDb < 0) {
+        $longitudeRef = 'W';
+        $longitudeDb *= -1;
+      } else  {
+        $longitudeRef = 'E';
+      }
+      $args .= ' -GPSLongitude='.escapeshellarg($longitudeDb);
+      $args .= ' -GPSLongitudeRef='.escapeshellarg($longitudeRef);
+    }
+    return $args;
+  }
+
+
   /** Create arguments to export the metadata from the database to the file.
     * @param data metadata from the file (Exiftool information)
     * @param image Image data array */
@@ -313,6 +363,7 @@ class ImageFilterComponent extends Object {
     $args = '';
 
     $args .= $this->_createExportDate($data, $image);
+    $args .= $this->_createExportGps($data, $image);
 
     // Associations to meta data: Tags, Categories, Locations
     $keywords = $this->_extract($data, 'Keywords');
