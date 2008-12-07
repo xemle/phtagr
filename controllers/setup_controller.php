@@ -545,9 +545,11 @@ class DATABASE_CONFIG
 
     $this->__checkSession();
 
-    $Schema = $this->Schema = $this->Schema->load(array());
+    $this->Schema->path = CONFIGS.'sql'.DS;
+    $this->Schema->name = 'Phtagr';
+    $Schema = $this->Schema->load(array());
     if (!$Schema) {
-      $this->Logger->err("Could not load schema");
+      $this->Logger->err("Could not load schema!");
     }
 
     $this->Logger->info("Check current database schema");
