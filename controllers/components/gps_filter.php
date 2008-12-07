@@ -85,7 +85,8 @@ class GpsFilterComponent extends Object {
 
       $image['Image']['latitude'] = $position['latitude'];
       $image['Image']['longitude'] = $position['longitude'];
-      if ($this->controller->Image->save($image, true, array('latitude', 'longitude'))) {
+      $image['Image']['flag'] |= IMAGE_FLAG_DIRTY;
+      if ($this->controller->Image->save($image, true, array('latitude', 'longitude', 'flag'))) {
         $this->Logger->debug("Update GPS position of image {$image['Image']['id']} to {$position['latitude']}/{$position['longitude']}");
       } else {
         $this->Logger->warn("Could not update GPS position of image {$image['Image']['id']}");
