@@ -24,7 +24,7 @@
 class VideoFilterComponent extends Object {
 
   var $controller = null;
-  var $components = array('Logger');
+  var $components = array('Logger', 'FileCache');
 
   function startup(&$controller) {
     $this->controller =& $controller;
@@ -47,25 +47,23 @@ class VideoFilterComponent extends Object {
   }
 
   /** Creates a video preview image using ffmpeg 
-    @param videoFilename Filename of the video file
+    @param image Image model data
     @param thumbFilename Optional filename of the thumbnail image file
-    @param overwrite If true, overwrite existing thumbnail file
     @return Filename of the video thumbnail. False on failure */
-  function createVideoPreview($videoFilename, $thumbFilename = '', $overwrite = false) {
+  function createVideoPreview($image, $thumbFilename = '', $overwrite = false) {
+    $videoFilename = $this->controller->Image->getFilename(&$image);
+    $isNew = false;
     if (!file_exists($videoFilename) || !is_readable($videoFilename)) {
       $this->Logger->err("Video file '$videoFilename' does not exists or is readable");
       return false;
     }
     if ($thumbFilename == '') {
       $thumbFilename = substr($videoFilename, 0, strrpos($videoFilename, '.')+1).'thm';
+      $isNew = true;
     }
     if (!$overwrite && file_exists($thumbFilename)) {
       $this->Logger->warn("Video thumbnail file '$thumbFilename' already exists");
       return $thumbFilename;
-    }
-    if (!is_writable(dirname($thumbFilename))) {
-      $this->Logger->err("Directory for video thumbnail file '$thumbFilename' is not writeable");
-      return false;
     }
     $bin = $this->controller->getOption('bin.ffmpeg', 'ffmpeg');
     $command = "$bin -i ".escapeshellarg($videoFilename)." -t 0.001 -f mjpeg -y ".escapeshellarg($thumbFilename);
@@ -80,15 +78,30 @@ class VideoFilterComponent extends Object {
       return false;  
     } else {
       $this->Logger->info("Created video thumbnail of '$videoFilename'");
-      $this->_insertFile($thumbFilename);
+      if ($isNew) {
+        $this->_insertFile($thumbFilename);
+      }
     }
+    return $thumbFilename;
+  }
+
+  /** Returns the preview filename of the internal cache
+    @param image Image model data
+    @return Cached preview filename */
+  function getVideoPreviewFilenameCache($image) {
+    $path = $this->FileCache->getPath($image['Image']['user_id'], $image['Image']['id']);
+    $file = $this->FileCache->getFilenamePrefix($image['Image']['id']);
+    $thumbFilename = $path.$file.'preview.thm';
     return $thumbFilename;
   }
 
   /** Gets the thumbnail filename of the a video. If it not exists, build it 
     @param image Image model data
-    @param create If true, create missing video preview image */
-  function getVideoPreviewFilename($image, $create = true) {
+    @param options Array of options. Set 'create' to false to disable automaitc
+    thumbnail creations. Default is true. Set 'noCache' to true to disable
+    thumbnail creation in the cache directory. Default is false. */
+  function getVideoPreviewFilename($image, $options = array()) {
+    $options = am($options, array('create' => true, 'noCache' => false));
     $folder = new Folder($image['Image']['path']);
     $file = $image['Image']['file'];
     $base = substr($file, 0, strrpos($file, '.')+1);
@@ -96,9 +109,20 @@ class VideoFilterComponent extends Object {
     if (count($found)) {
       return Folder::slashTerm($folder->path).$found[0];
     }
+    if (!$options['noCache']) {
+      $cache = $this->getVideoPreviewFilenameCache($image);
+      if (file_exists($cache)) {
+        return $cache;
+      }
+    }
     $thumbFilename = false;
-    if ($create) {
-      $thumbFilename = $this->createVideoPreview($this->controller->Image->getFilename($image));
+    if ($options['create']) {
+      if (is_writeable($folder->path)) {
+        $thumbFilename = $this->createVideoPreview($image);
+      } elseif (!$options['noCache']) {
+        $this->Logger->info("Origination directory of video is not writable. Use cache directory ($cache)");
+        $thumbFilename = $this->createVideoPreview($image, $cache);
+      }
     }
     return $thumbFilename;
   }

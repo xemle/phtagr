@@ -244,7 +244,7 @@ class BrowserController extends AppController
     $thumbFilename = false;
     if ($this->Image->isVideo($image)) {
       $this->VideoFilter->readFile(&$image);
-      $thumbFilename = $this->VideoFilter->getVideoPreviewFilename(&$image);
+      $thumbFilename = $this->VideoFilter->getVideoPreviewFilename(&$image, array('noCache' => true));
     }
     $this->ImageFilter->readFile(&$image, $thumbFilename);
     if ($image !== false && $this->Image->save($image)) {
@@ -331,7 +331,7 @@ class BrowserController extends AppController
       foreach ($ids as $id) {
         $image = $this->Image->findById($id);
         if ($this->Image->isVideo($image)) {
-          $filename = $this->VideoFilter->getVideoPreviewFilename(&$image);
+          $filename = $this->VideoFilter->getVideoPreviewFilename(&$image, array('noCache' => true));
         } else {
           $filename = $this->Image->getFilename($image);
         }
