@@ -82,6 +82,15 @@ class QueryComponent extends Object
     $this->_params[$name] = $value;    
   }
 
+  function setParams($params) {
+    if (!is_array($params)) {
+      return;
+    }
+    foreach ($params as $name => $value) {
+      $this->setParam($name, $value);
+    }
+  }
+
   function delParam($name, $value = null) {
     if (isset($this->_params[$name])) {
       if ($value === null || $this->_params[$name] == $value)
@@ -89,6 +98,19 @@ class QueryComponent extends Object
     }
   }
 
+  function delParams($params) {
+    if (!is_array($params)) {
+      $this->delParam($params);
+      return;
+    }
+    foreach ($params as $name => $value) {
+      if (is_numeric($name)) {
+        $this->delParam($value);
+      } else {
+        $this->delParam($name, $value);
+      }
+    }
+  }
   /** Parse passed arguments for the query and check them againse the role of
    * the user */
   function parseArgs() {
@@ -118,6 +140,11 @@ class QueryComponent extends Object
         case 'categories': $this->addCategories($value); break;
         case 'categoryop': $this->setCategoryOp(intval($value)); break;
         case 'locations': $this->addLocations($value); break;
+
+        case 'north': $this->setParam('north', floatval($value)); break;
+        case 'south': $this->setParam('south', floatval($value)); break;
+        case 'west': $this->setParam('west', floatval($value)); break;
+        case 'east': $this->setParam('east', floatval($value)); break;
 
         default:
           //$this->Logger->err("Unknown argument: $name:$value");
@@ -709,6 +736,26 @@ class QueryComponent extends Object
     return $sql;
   }
 
+  function _addSqlWhereGPS() {
+    $sql = '';
+    if ($this->getParam('north')) {
+      $sql .= ' AND Image.latitude < '.$this->getParam('north');
+    }
+
+    if ($this->getParam('south')) {
+      $sql .= ' AND Image.latitude >= '.$this->getParam('south');
+    }
+
+    if ($this->getParam('east')) {
+      $sql .= ' AND Image.longitude < '.$this->getParam('east');
+    }
+
+    if ($this->getParam('west')) {
+      $sql .= ' AND Image.longitude >= '.$this->getParam('west');
+    }
+
+    return $sql;
+  }
   /** The meta data exclusion is solved by a disjunction of the meta data set and
    * is in a negated sql where statement (NOT IN).
     @param tags Array of exclued tags, could be NULL
@@ -949,6 +996,7 @@ class QueryComponent extends Object
       $sanitize = new Sanitize();
       $sql.=" AND Image.file LIKE '%".$sanitize->escape($file)."%'";
     }
+    $sql.=$this->_addSqlWhereGPS();
     return $sql;
   }
 
@@ -1054,8 +1102,6 @@ class QueryComponent extends Object
         $this->controller->Image->setAccessFlags(&$image, &$user);
         $data[] = $image;
       }
-    } else {
-      $this->Session->setFlash("Sorry. No image or files found!");
     }
     // pagination values
     $this->_params['pages'] = ceil($this->_params['count'] / $this->_params['show']);;

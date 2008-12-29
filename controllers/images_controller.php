@@ -25,7 +25,7 @@ class ImagesController extends AppController
 {
   var $components = array('RequestHandler', 'Query', 'ImageFilter', 'VideoFilter');
   var $uses = array('Image', 'Group', 'Tag', 'Category', 'Location');
-  var $helpers = array('form', 'formular', 'html', 'javascript', 'ajax', 'imageData', 'time', 'query', 'explorerMenu', 'rss');
+  var $helpers = array('form', 'formular', 'html', 'javascript', 'ajax', 'imageData', 'time', 'query', 'explorerMenu', 'rss', 'map');
 
   function beforeFilter() {
     parent::beforeFilter();

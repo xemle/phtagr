@@ -160,6 +160,9 @@ class ExplorerController extends AppController
 
   function _setDataAndRender() {
     $data = $this->Query->paginate();
+    if (count($data) == 0) {
+      $this->Session->setFlash("Sorry. No image or files found!");
+    }
     $this->set('mainMenuExplorer', $this->Query->getMenu(&$data));
     $this->set('data', &$data);
     if ($this->hasRole(ROLE_USER)) {
@@ -587,5 +590,39 @@ class ExplorerController extends AppController
       Configure::write('debug', 1);
     }
   }
+
+  function points($north, $south, $west, $east) {
+    $this->Query->setParam('order', 'random');
+
+    $north = floatval($north);
+    $south = floatval($south);
+    $west = floatval($west);
+    $east = floatval($east);
+
+    $stepLat = ($north - $south) / 3;
+    $stepLng = ($east - $west) / 3;
+    $lat = $south;
+    while ($lat < $north) {
+      $lng = $west;
+      while ($lng < $east) {
+        $this->Query->setParams(array(
+          'north' => $lat+$stepLat, 'south' => $lat, 
+          'west' => $lng, 'east' => $lng+$stepLng));
+        $points = $this->Query->paginate();
+        //$this->Logger->trace("Found ".count($points)." points");
+        $this->data = am($this->Query->paginate(), $this->data);
+        $lng += $stepLng;
+      }
+      $lat += $stepLat;
+    }
+
+    $this->layout = 'xml';
+    $this->Logger->trace("Query points of N:$north, S:$south, W:$west, E:$east: Found ".count($this->data)." points");
+    $this->Query->delParams(array('north', 'south', 'west', 'east'));
+    if (Configure::read('debug') > 1) {
+      Configure::write('debug', 1);
+    }
+  }
+
 }
 ?>

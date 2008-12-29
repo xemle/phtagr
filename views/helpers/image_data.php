@@ -216,7 +216,7 @@ class ImageDataHelper extends AppHelper {
           $this->html->image('icons/map.png',
             array('alt' => 'Show location in a map', 'title' => 'Show location in a map')),
           '#',
-          array('onclick' => sprintf('showMap(%f,%f);return false;', $data['Image']['latitude'],$data['Image']['longitude'])),
+          array('onclick' => sprintf('showMap(%d, %f,%f);return false;', $data['Image']['id'], $data['Image']['latitude'],$data['Image']['longitude'])),
           null, false);
     }
     

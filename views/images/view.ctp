@@ -13,7 +13,8 @@ echo $query->prevImage().' '.$query->up().' '.$query->nextImage();
   if (isset($this->data['Image']['longitude']) && isset($this->data['Image']['latitude']) &&
     isset($mapKey)) {
     $withMap = true;
-    echo '<script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key='.htmlentities($mapKey).'" type="text/javascript"></script>'."\n";
+    echo $map->loadScripts($mapKey);
+    echo $map->script();
   }
 ?>
 
@@ -29,11 +30,9 @@ echo $query->prevImage().' '.$query->up().' '.$query->nextImage();
 </div>
 </div><!-- meta -->
 
-<?php if ($withMap): ?>
-<div id="mapbox" style="display: none;">
-<div id="map"></div>
-<a href="#" onclick="toggleVisibility('mapbox')">Close Map</a>
-</div>
-<?php endif; /* withMap */ ?>
+<?php if ($withMap) {
+  echo $map->container();
+}
+?>
 
 <?php echo View::element('comment'); ?>
