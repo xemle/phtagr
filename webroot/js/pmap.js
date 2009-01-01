@@ -3,7 +3,7 @@
  *
  * Multi-user image gallery.
  *
- * Copyright (C) 2006-2008 Sebastian Felis, sebastian@phtagr.org
+ * Copyright (C) 2006-2009 Sebastian Felis, sebastian@phtagr.org
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
