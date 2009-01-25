@@ -242,10 +242,12 @@ class ExplorerController extends AppController
     if ($groupId!=0)
       $image['Image']['group_id'] = $groupId;
 
-    $this->Image->setAcl(&$image, ACL_WRITE_TAG, ACL_WRITE_MASK, $this->data['acl']['write']['tag']);
+    // Higher grants first
     $this->Image->setAcl(&$image, ACL_WRITE_META, ACL_WRITE_MASK, $this->data['acl']['write']['meta']);
-    $this->Image->setAcl(&$image, ACL_READ_PREVIEW, ACL_READ_MASK, $this->data['acl']['read']['preview']);
+    $this->Image->setAcl(&$image, ACL_WRITE_TAG, ACL_WRITE_MASK, $this->data['acl']['write']['tag']);
+
     $this->Image->setAcl(&$image, ACL_READ_ORIGINAL, ACL_READ_MASK, $this->data['acl']['read']['original']);
+    $this->Image->setAcl(&$image, ACL_READ_PREVIEW, ACL_READ_MASK, $this->data['acl']['read']['preview']);
 
     // Evaluate changes
     foreach ($fieldsAcl as $field) {
