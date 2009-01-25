@@ -122,13 +122,14 @@ class MediaController extends AppController
     $user = $this->getUser();
     switch ($outputType) {
       case OUTPUT_TYPE_VIDEO:
+        $flag = ACL_READ_PREVIEW; break;
       case OUTPUT_TYPE_HIGH:
         $flag = ACL_READ_HIGH; break;
       default:
         $flag = ACL_READ_PREVIEW; break;
     }
-    $condition = "Image.id = $id AND Image.flag & ".IMAGE_FLAG_ACTIVE.$this->Image->buildWhereAcl($user, 0, $flag);
-    $image = $this->Image->find($condition);
+    $conditions = "Image.id = $id AND Image.flag & ".IMAGE_FLAG_ACTIVE.$this->Image->buildWhereAcl($user, 0, $flag);
+    $image = $this->Image->find($conditions);
     if (!$image) {
       $this->Logger->debug("Deny access to image $id");
       $this->redirect(null, 403);
