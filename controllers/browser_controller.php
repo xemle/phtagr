@@ -25,7 +25,7 @@ class BrowserController extends AppController
 {
   var $name = "Browser";
 
-  var $components = array('RequestHandler', 'ImageFilter', 'VideoFilter', 'GpsFilter');
+  var $components = array('RequestHandler', 'ImageFilter', 'VideoFilter', 'GpsFilter', 'Upload', 'Zip');
   var $uses = array('User', 'Image', 'Tag', 'Category', 'Location', 'Option');
   var $helpers = array('form', 'formular', 'html', 'number');
 
@@ -55,6 +55,11 @@ class BrowserController extends AppController
   function _setMenu() {
     $items = array();
     $items[] = array('text' => 'Import Files', 'link' => 'index', 'type' => ($this->action=='index'?'active':false));
+    if (count($this->_fsRoots > 1)) {
+      $items[] = array('text' => 'Upload', 'link' => 'upload/files');
+    } else {
+      $items[] = array('text' => 'Upload', 'link' => 'upload');
+    }
     $items[] = array('text' => 'Synchronize', 'link' => 'sync');
     $items[] = array('text' => 'Overview', 'link' => 'view');
     $menu = array('items' => $items);
@@ -170,6 +175,7 @@ class BrowserController extends AppController
   function index() {
     $path = $this->getPath();
     $fsPath = $this->_getFsPath($path);
+
     if ($fsPath) {
       $folder =& new Folder();
       $folder->cd($fsPath);
@@ -207,6 +213,15 @@ class BrowserController extends AppController
     $this->set('path', $path);
     $this->set('dirs', $dirs);
     $this->set('files', $files);
+
+    // Check for internal path
+    $userRoot = $this->User->getRootDir($this->getUser());
+    if ($fsPath && strpos($fsPath, $userRoot) === 0) {
+      $isInternal = true;
+    } else {
+      $isInternal = false;
+    }
+    $this->set('isInternal', $isInternal);
   }
 
   function _importFile($filename) {
@@ -381,5 +396,101 @@ class BrowserController extends AppController
 
     $this->set('files', $files);
   }
+
+  function folder() {
+    $path = $this->getPath();
+    $fsPath = $this->_getFsPath($path);
+    // Check for internal path
+    $userRoot = $this->User->getRootDir($this->getUser());
+    if (!$fsPath) {
+      $this->Logger->warn("Invalid path to create folder");
+      $this->Session->setFlash("Invalid path to create folder");
+      $this->redirect("index");
+    }
+    if (strpos($fsPath, $userRoot) !== 0) {
+      $this->Session->setFlash("Could not create folder here: $path");
+      $this->Logger->warn("Could not create folder in external path: $fsPath");
+      $this->redirect("index/".$path);
+    }
+
+    if (!empty($this->data['Folder']['name'])) {
+      $folder = new Folder($fsPath);
+      $name = $this->data['Folder']['name'];
+
+      $newFolder = Folder::slashTerm($fsPath).$name;
+      if ($folder->mkdir($newFolder)) {
+        $this->Logger->verbose("Create folder $newFolder");
+        $this->Session->setFlash("Folder $name created");
+        $this->redirect("index/".$path.$name);
+      } else {
+        $this->Logger->err("Could not create folder $name in $fsPath");
+        $this->Session->setFlash("Could not create folder");
+        $this->redirect('folder/'.$path);
+      }
+    }
+    
+    $this->set('path', $path);
+  }
+
+  function upload() {
+    $path = $this->getPath();
+    $fsPath = $this->_getFsPath($path);
+    if (!$fsPath) {
+      $this->Logger->warn("Invalid path for upload");
+      $this->Session->setFlash("Invalid path for upload");
+      $this->redirect("index");
+    }
+    // Check for internal path
+    $userRoot = $this->User->getRootDir($this->getUser());
+    if (strpos($fsPath, $userRoot) !== 0) {
+      $this->Session->setFlash("Could not upload here: $path");
+      $this->Logger->warn("Could not upload in external path: $fsPath");
+      $this->redirect("index/".$path);
+    }
+    if ($this->Upload->isUpload()) {
+      $file = $this->Upload->upload(array('root' => $fsPath, 'overwrite' => false));
+      if ($file) {
+        $this->Logger->info("File '$file' uploaded successfully");
+        if (substr(strtolower($file), -4) == '.zip' && $this->data['File']['extract']) {
+          $files = $this->Zip->unzip($file);
+          $this->Session->setFlash("File uploaded successfully and ".count($files)." files were extracted");
+          $image = $this->Image->findByFilename($file);
+          if ($image) {
+            $this->Image->delete($image['Image']['id']);
+          } else {
+            $this->Logger->warn("Could not find model for $file to delete");
+          }
+          @unlink($file);
+          $this->Logger->info("Delete archive $file");
+        } else {
+          $this->Session->setFlash("File uploaded successfully");
+        }
+      } else {
+        $this->Session->setFlash("Could not upload file");
+      }
+    }
+
+    // Fetch quota and free bytes
+    $user = $this->getUser();
+    $userId = $this->getUserId();
+    $bytes = $this->Image->findAll(array("User.id" => $userId, "Image.flag & ".IMAGE_FLAG_EXTERNAL." = 0"), array('SUM(Image.bytes) AS Bytes'));
+    $bytes = $bytes[0][0]['Bytes'];
+    $quota = $user['User']['quota'];
+    $free = $quota - $bytes;
+    $this->set('quota', $quota);
+    $this->set('free', $free);
+    $max = strtoupper(ini_get('upload_max_filesize'));
+    if (preg_match('/^([0-9]+)([TGMK])B?$/', $max, $matches)) {
+      $max = $matches[1];
+      switch ($matches[2]) {
+        case 'T': $max *= 1024; 
+        case 'G': $max *= 1024; 
+        case 'M': $max *= 1024; 
+        case 'B': $max *= 1024; 
+      }
+    }
+    $this->set('max', $max);
+    $this->set('path', $path);
+  } 
 }
 ?>

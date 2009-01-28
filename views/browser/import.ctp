@@ -1,5 +1,4 @@
 <h1>Browser</h1>
 <?php $session->flash(); ?>
 
-<?=$html->link('Back', "index$path"); ?>
-<? debug($files); ?>
+View folder <?php echo $html->link($path, "index/$path"); ?>

@@ -1,4 +1,5 @@
 <h1>Broswer</h1>
+<?php $session->flash(); ?>
 
 <?php echo $form->create('Browser', array('action' => 'import')); ?>
 <p>
@@ -44,6 +45,8 @@
 </ul>
 <?=$form->submit('Import');?>
 </form>
-<? debug($path); ?>
-<? debug($dirs); ?>
-<? debug($files); ?>
+
+<?php if ($isInternal): ?>
+<?php echo $html->link("Upload files", 'upload/'.$path); ?> or
+<?php echo $html->link("create folder", 'folder/'.$path); ?>. 
+<?php endif; ?>
