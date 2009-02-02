@@ -19,7 +19,7 @@ echo $query->prevImage().' '.$query->up().' '.$query->nextImage();
       height: <?php echo ($size[1]+28); ?>
     },{config: {  
       autoPlay: true,
-      videoFile: '<?php echo Router::url("/media/video/".$this->data['Image']['id']); ?>',
+      videoFile: '<?php echo Router::url("/media/video/".$this->data['Image']['id'], true); ?>',
       initialScale: 'orig',
       loop: false,
       useNativeFullScreen: true
