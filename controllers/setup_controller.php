@@ -530,6 +530,15 @@ class DATABASE_CONFIG
     $this->Logger->info("Request database configuration (readonly)");
   }
 
+  function loadSchema($options = array()) {
+    $options = am(array('path' => CONFIGS.'sql'.DS, 'name' => 'Phtagr'), $options);
+    $Schema = $this->Schema->load($options);
+    if (!$Schema) {
+      $this->Logger->err("Could not load schema!");
+    }
+    return $Schema;
+  }
+
   function database() {
     if (!$this->__hasConfig())
       $this->redirect('config');
@@ -545,13 +554,7 @@ class DATABASE_CONFIG
 
     $this->__checkSession();
 
-    $this->Schema->path = CONFIGS.'sql'.DS;
-    $this->Schema->name = 'Phtagr';
-    $Schema = $this->Schema->load(array());
-    if (!$Schema) {
-      $this->Logger->err("Could not load schema!");
-    }
-
+    $Schema = $this->loadSchema();
     $this->Logger->info("Check current database schema");
     $errors = $this->__upgradeDatabase($Schema);
 
@@ -717,9 +720,10 @@ class DATABASE_CONFIG
       $this->redirect('/setup');
     $this->requireRole(ROLE_SYSOP);
 
-    $Schema = $this->Schema->load(array());
-    if (!$this->__requireUpgrade($Schema))
+    $Schema = $this->loadSchema();
+    if (!$this->__requireUpgrade($Schema)) {
       $this->redirect('/admin/setup/uptodate');
+    }
 
     $errors = false;
     if ($action == 'run') {
@@ -740,7 +744,7 @@ class DATABASE_CONFIG
       $this->redirect('/setup');
     $this->requireRole(ROLE_SYSOP);
 
-    $Schema = $this->Schema->load(array());
+    $Schema = $this->loadSchema();
     if ($this->__requireUpgrade($Schema))
       $this->redirect('/admin/setup/upgrade');
   }
