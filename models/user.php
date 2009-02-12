@@ -125,12 +125,12 @@ class User extends AppModel
   }
 
   function beforeDelete($cascade) {
-    App::import('Model', 'Image');
+    App::import('Model', 'Medium');
   
     $id = $this->id;
-    $this->Image =& new Image();
+    $this->Medium =& new Medium();
     $this->Logger->info("Delete all image database entries of user $id");
-    $this->Image->deleteFromUser($id);
+    $this->Medium->deleteFromUser($id);
 
     $dir = USER_DIR.$id;
     $this->Logger->info("Delete user directory of user $id: $dir");
@@ -207,12 +207,12 @@ class User extends AppModel
   }
 
   function canUpload($user, $size) {
-    $this->bind('Image', array('type' => 'hasMany'));
+    $this->bind('Medium', array('type' => 'hasMany'));
     $userId = intval($user['User']['id']);
     if ($userId < 1)
       return false;
 
-    $current = $this->Image->countBytes($userId, false);
+    $current = $this->Medium->countBytes($userId, false);
     $quota = $user['User']['quota'];
     if ($current + $size <= $quota) 
       return true;

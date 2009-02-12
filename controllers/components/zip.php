@@ -25,7 +25,7 @@ class ZipComponent extends Object {
   
   var $name = 'ZipComponent';
   var $controller = null;
-  var $components = array('Logger');
+  var $components = array('Logger', 'FileManager');
   var $zip = null;
   var $_stats = null;
 
@@ -73,7 +73,7 @@ class ZipComponent extends Object {
       $bytes += $stat['size'];
       $this->_stats[] = $stat;
     }
-    if (!$this->controller->User->canUpload($this->controller->getUser(), $bytes)) {
+    if (!$this->FileManager->canWrite($bytes)) {
       $this->Logger->warn("Extracted data exceeds user's quota");
       return array();
     }
@@ -89,6 +89,10 @@ class ZipComponent extends Object {
     return $newFiles;
   }
 
+  /** Exract file from zip file 
+    @param file Array of file stat
+    @param dst Destination of filei
+    @result filename on success */
   function _extract($file, $dst) {
     $fp = $this->zip->getStream($file['name']);
     if (!$fp) {
@@ -134,7 +138,7 @@ class ZipComponent extends Object {
       unlink($newFile);
       return false;
     }
-    if (!$this->controller->Image->insertFile($newFile, $this->controller->getUser())) {
+    if (!$this->FileManager->add($newFile)) {
       unlink($newFile);
       $this->Logger->err("Could not insert $newFile to database");
       return false;

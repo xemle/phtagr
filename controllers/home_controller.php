@@ -27,7 +27,7 @@ class HomeController extends AppController
 
   var $components = array('Query');
   var $helpers = array('html', 'time', 'text');
-  var $uses = array('Image', 'Tag', 'Category', 'Comment');
+  var $uses = array('Medium', 'Tag', 'Category', 'Comment');
 
   function index() {
     $cloud = $this->Query->getCloud(50);
@@ -36,7 +36,7 @@ class HomeController extends AppController
     $cloud = $this->Query->getCloud(50, 'Category');
     $this->set('cloudCategories', $cloud);
 
-    $acl = "1 = 1".$this->Image->buildWhereAcl($this->getUser());
+    $acl = "1 = 1".$this->Medium->buildWhereAcl($this->getUser());
     $comments = $this->Comment->findAll($acl, null, 'Comment.date DESC', 4);
     $this->set('comments', $comments);
   }

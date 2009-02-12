@@ -46,11 +46,11 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
 
   var $_putFsPath="";
 
-  var $_imageCache = null;
+  var $_fileCache = null;
 
   var $controller = null;
 
-  var $components = array('Logger');
+  var $components = array('Logger', 'FileManager');
 
   function WebdavServer() {
     $this->HTTP_WebDAV_Server();
@@ -144,45 +144,48 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
     $this->dav_powered_by=$text;
   }
 
-  /** Reads all images of a given path and build an image cache 
+  /** Reads all files of a given path and build an file cache 
     @param path System path to read */
-  function _buildImageCache($path) {
-    if (isset($this->_imageCache[$path]) || !is_dir($path)) {
+  function _buildFileCache($path) {
+    if (isset($this->_fileCache[$path]) || !is_dir($path)) {
       return;
     }
 
     // Initialize cache array
-    if (!$this->_imageCache) {
-      $this->_imageCache = array();
+    if (!$this->_fileCache) {
+      $this->_fileCache = array();
     }
-    $this->_imageCache[$path] = array();
+    $this->_fileCache[$path] = array();
 
     // Bind only required models
-    $this->controller->Image->unbindAll();
-    $this->controller->Image->bindModel(array('hasMany' => array('Property' => array(), 'Lock' => array())));
-    $images = $this->controller->Image->findAll(array('path' => $path));
+    $this->controller->MyFile->unbindAll();
+    $this->controller->MyFile->bindModel(array('hasMany' => array(
+      'Property' => array('foreignKey' => 'file_id'), 
+      'Lock' => array('foreignKey' => 'file_id')
+      )));
+    $files = $this->controller->MyFile->findAll(array('path' => $path));
 
     // Build cache array
-    foreach ($images as $image) {
-      $file = $image['Image']['file'];
-      $this->_imageCache[$path][$file] = $image;
+    foreach ($files as $file) {
+      $name = $file['File']['file'];
+      $this->_fileCache[$path][$name] = $file;
     }
-    $this->Logger->trace("Built image cache for path '$path'");
+    $this->Logger->trace("Built file cache for path '$path' with ".count($files)." files");
   }
 
-  /** Fetches a model data of an image by using the image cache. If the cache
+  /** Fetches a model data of an file by using the file cache. If the cache
    * path is not available, it builds the cache first
-   @param filename Filename of image
-   @return image model data or false if image was not found */
-  function _getImage($filename) {
+   @param filename Filename of file
+   @return file model data or false if file was not found */
+  function _getFile($filename) {
     $path = Folder::slashTerm(dirname($filename));
     $file = basename($filename);
-    if (!isset($this->_imageCache[$path])) {
-      $this->_buildImageCache($path);
+    if (!isset($this->_fileCache[$path])) {
+      $this->_buildFileCache($path);
     }
 
-    if (isset($this->_imageCache[$path][$file])) {
-      return $this->_imageCache[$path][$file];
+    if (isset($this->_fileCache[$path][$file])) {
+      return $this->_fileCache[$path][$file];
     } else {
       return false;
     }
@@ -244,10 +247,11 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
   function _canRead($fspath) {
     $user = $this->controller->getUser();
     if (is_dir($fspath)) {
-      $allow = $this->controller->Image->canRead($fspath, $user);
+      $allow = $this->controller->MyFile->canRead($fspath, $user);
     } else {
-      $image = $this->_getImage($fspath);
-      $allow = $this->controller->Image->checkAccess(&$image, &$user, ACL_READ_ORIGINAL, ACL_READ_MASK);
+      $file = $this->_getFile($fspath);
+      $this->Logger->debug($file);
+      $allow = $this->controller->MyFile->checkAccess(&$file, &$user, ACL_READ_ORIGINAL, ACL_READ_MASK);
     }
     if (!$allow) {
       $this->Logger->trace("Deny user {$user['User']['id']} to access '$fspath'");
@@ -357,9 +361,9 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
     }
 
     // get additional properties from database
-    $image = $this->_getImage($fspath);
-    if ($image) {
-      foreach($image['Property'] as $property) {
+    $file = $this->_getFile($fspath);
+    if ($file) {
+      foreach($file['Property'] as $property) {
         $info['props'][]=$this->mkprop(
           $property['ns'], 
           $property['name'], 
@@ -646,17 +650,16 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
       return false;
     }
    
-    $image = $this->controller->Image->findByFilename($fspath);
-    if ($image) {
-      $this->controller->Image->deactivate(&$image);
-      $this->controller->Image->updateFile(&$image);
-      if ($this->controller->Image->save($image)) {
-        $this->Logger->info("Update file '{$image['Image']['path']}{$image['Image']['file']}' to size {$image['Image']['bytes']} bytes");
+    $file = $this->controller->MyFile->findByFilename($fspath);
+    if ($file) {
+      $this->controller->MyFile->update(&$file);
+      if ($this->controller->MyFile->save($file)) {
+        $this->Logger->info("Update file '{$file['File']['path']}{$file['File']['file']}' to size {$file['File']['size']} bytes");
       } else {
-        $this->Logger->err("Could not update filesize of '{$image['Image']['path']}{$image['Image']['file']}'");
+        $this->Logger->err("Could not update filesize of '{$file['File']['path']}{$file['File']['file']}'");
       }
     } else {
-      $id = $this->controller->Image->insertFile($fspath, $this->controller->getUser());
+      $id = $this->FileManager->add($fspath, $this->controller->getUser());
       if ($id) {
         $this->Logger->info("Add file '$fspath' to database with id $id");
       } else {
@@ -766,48 +769,17 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
       return "403 Forbidden";
     }
 
-    $fspath=$this->getFsPath($options["path"]);
+    $fspath = $this->getFsPath($options["path"]);
     if (!file_exists($fspath)) {
       $this->Logger->err("DELETE failed. file '$fspath' does not exists");
       return "404 Not found";
     }
         
-    $this->Logger->debug("DELETE '$fspath' ({$options['path']})");
-    if (!is_dir($fspath)) {
-      $image = $this->controller->Image->findByFilename($fspath);
-      if (!$image) {
-        $this->Logger->warn("File '$fspath' is not in database. Delete file anyway");
-      } else {
-        $this->controller->FileCache->delete($image['Image']['user_id'], $image['Image']['id']);
-        if (!$this->controller->Image->delete($image['Image']['id'])) {
-          $this->Logger->err("Could not delete image with id {$image['Image']['id']} (filename '$fspath')");
-        } else {
-          $this->Logger->info("Delete image with id {$image['Image']['id']} (filename '$fspath')");
-        }
-      }
-      unlink($fspath);
-      $this->Logger->info("file '$fspath' deleted!");
+    $this->Logger->info("blub");
+    if ($this->FileManager->delete($fspath)) {
+      $this->Logger->info("Delete '$fspath' ({$options['path']})");
     } else {
-      uses('sanitize');
-      $sanitize = new Sanitize();
-      $sqlFspath = $sanitize->escape($fspath);
-      $images = $this->controller->Image->findAll("Image.path LIKE '{$sqlFspath}%'", array('Image.id', 'Image.user_id', 'Image.path', 'Image.file'));
-      if (!$images) {
-        $this->Logger->warn("No file with directory '$fspath' is in database");
-      } else {
-        $this->Logger->trace("Found ".count($images)." file(s) in database for directory '$fspath'");
-        foreach($images as $image) {
-          $this->controller->FileCache->delete($image['Image']['user_id'], $image['Image']['id']);
-          if (!$this->controller->Image->delete($image['Image']['id'])) {
-            $this->Logger->err("Could not delete image with id {$image['Image']['id']} (filename '{$image['Image']['path']}{$image['Image']['file']}')");
-          } else {
-            $this->Logger->info("Delete image with id {$image['Image']['id']} (filename '{$image['Image']['path']}{$image['Image']['file']}')");
-          }
-        }
-      }
-      $folder =& new Folder();
-      $folder->delete($fspath);
-      $this->Logger->info("Directory '$fspath' deleted!");
+      $this->Logger->err("Could not delete '$fspath' ({$options['path']})");
     }
     return "204 No Content";
   }
@@ -900,24 +872,14 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
     if ($del) {
       // move file(s)
       if (!is_dir($source)) { 
-        if (!rename($source, $dest)) {
-          $this->Logger->err("Could not rename file from '$source' to '$dest'");
-          return "500 Internal server error";
-        }
-        if (!$this->controller->Image->move($source, $dest)) {
+        if (!$this->FileManager->move($source, $dest)) {
           $this->Logger->warn("Could not update file in database from file '$source' to '$dest'");
-          rename($dest, $source);
           return "500 Internal server error";
         } 
         $this->Logger->info("Renamed file from '$source' to '$dest'");
       } elseif (is_dir($dest) || !file_exists($dest)) {
-        if (!rename($source, $dest)) {
-          $this->Logger->err("Could not rename directory from '$source' to '$dest'");
-          return "500 Internal server error";
-        }
-        if (!$this->controller->Image->moveAll($source, $dest)) {
+        if (!$this->FileManager->move($source, $dest)) {
           $this->Logger->err("Could not update file in database from directory '$source' to directory '$dest'");
-          rename($dest, $source);
           return "500 Internal server error";
         } 
         $this->Logger->info("Renamed directory from '$source' to '$dest'");
@@ -926,6 +888,10 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
         return "412 precondition failed";
       }
     } else {
+      if (!$this->FileManager->copy($source, $dest)) {
+        return "500 Internal server error";
+      }
+      /* 
       if (is_dir($source)) {
         $folder =& new Folder($source);
         list($dirs, $files) = $folder->tree($source);
@@ -956,25 +922,26 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
           $this->Logger->err("Could not copy file '$file' to '$destfile'");
           return "409 Conflict";
         }
-        $dstImageId = $this->controller->Image->insertFile($destfile, $user);
-        if (!$dstImageId) {
+        $dstFileId = $this->FileManager->add($destfile, $user);
+        if (!$dstFileId) {
           $this->Logger->err("Could not insert copied file '$destfile' to database (from '$file')");
           unlink($destfile);
           return "409 Conflict";
         } else {
           // Copy all properties
-          $srcImage = $this->controller->Image->findByFilenam($file);
-          if (!$srcImage) {
+          $srcFile = $this->controller->MyFile->findByFilename($file);
+          if (!$srcFile) {
             $this->Logger->warn("Could not found source '$file' in database");
           } else {
-            if (!empty($srcImage['Property'])) {
-              $this->controller->Property->copy($srcImage, $dstImageId);
+            if (!empty($srcFile['Property'])) {
+              $this->controller->Property->copy($srcFile, $dstFileId);
               $this->Logger->debug("Copy properties from '$file' to '$destfile'");
             }
           }
         }
         $this->Logger->info("Insert copied file '$destfile' to database (from '$file')");
       }
+        */
     }
 
     return ($new && !$existingCol) ? "201 Created" : "204 No Content";     
@@ -991,8 +958,8 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
 
     $path=$options["path"];
     $fspath=$this->getFsPath($path);
-    $imageId=$this->controller->Image->filenameExists($fspath);
-    if (!$imageId) {
+    $fileId=$this->controller->MyFile->fileExists($fspath);
+    if (!$fileId) {
       $this->Logger->err("Filename '$fspath' does not exists");
       return "";
     }
@@ -1001,26 +968,26 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
       if ($prop["ns"] == "DAV:") {
         $options["props"][$key]['status']="403 Forbidden";
       } else {
-        $property = $this->controller->Property->find(array('Property.image_id' => $imageId, 'Property.name' => $prop['name'], 'Property.ns' => $prop['ns']));
+        $property = $this->controller->Property->find(array('Property.file_id' => $fileId, 'Property.name' => $prop['name'], 'Property.ns' => $prop['ns']));
         if (isset($prop["val"])) {
           if (!$property) {
             $property = array('Property' => array(
-              'image_id' => $imageId, 
+              'file_id' => $fileId, 
               'name' => $prop['name'], 
               'ns' => $prop['ns'], 
               'value' => $prop['val']));
-            $this->Logger->debug("Create new property for image $imageId: {$prop['ns']}:{$prop['name']}='{$prop['val']}'");
+            $this->Logger->debug("Create new property for file $fileId: {$prop['ns']}:{$prop['name']}='{$prop['val']}'");
             $property = $this->controller->Property->create($property);
           } else {
             $property['Property']['value'] = $prop['val'];
-            $this->Logger->debug("Set new property value for image $imageId: {$prop['ns']}:{$prop['name']}='{$prop['val']}'");
+            $this->Logger->debug("Set new property value for file $fileId: {$prop['ns']}:{$prop['name']}='{$prop['val']}'");
             $this->controller->Property->id = $property['Property']['id'];
           }
           if (!$this->controller->Property->save($property)) {
             $this->Logger->err("Could not save property");
           }
         } elseif ($property) {
-          $this->Logger->debug("Delete property of image $imageId: {$prop['ns']}:{$prop['name']}");
+          $this->Logger->debug("Delete property of file $fileId: {$prop['ns']}:{$prop['name']}");
           $this->controller->Property->delete($property['Property']['id']); 
         }     
       }
@@ -1052,14 +1019,14 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
     // Delete expired locks
     $this->controller->Lock->deleteAll("Lock.expires < '".date('Y-m-d H:i:s', time())."'");
 
-    $imageId = $this->controller->Image->filenameExists($fspath);
-    if (!$imageId) {
+    $fileId = $this->controller->MyFile->fileExists($fspath);
+    if (!$fileId) {
       $this->Logger->warn("Could not find file with path '$fspath'");
       return true;
     }
 
     if (isset($options["update"])) { // Lock Update
-      $lock = $this->controller->Lock->find(array('Lock.image_id' => $imageId, 'Lock.token' => $options['update']));
+      $lock = $this->controller->Lock->find(array('Lock.file_id' => $fileId, 'Lock.token' => $options['update']));
       
       if ($lock) {
         $lock['Lock']['expires'] = date('Y-m-d H:i:s', $options['timeout']);
@@ -1079,7 +1046,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
       
     $lock = array('Lock' => array(
       'token' => $options['locktoken'],
-      'image_id' => $imageId,
+      'file_id' => $fileId,
       'owner' => $options['owner'],
       'expires' => date('Y-m-d H:i:s', $options['timeout']),
       'exclusivelock' => ($options['scope']==="exclusive"?"1":"0")
@@ -1089,7 +1056,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
       $this->Logger->info("Created lock for '$fspath': ".$lock['Lock']['expires']);
       return "200 OK";
     } else {
-      $this->Logger->err("Could not save lock of image $imageId");
+      $this->Logger->err("Could not save lock of file $fileId");
       $this->Logger->trace($lock);
       return "409 Conflict";
     }
@@ -1105,14 +1072,14 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
     $this->Logger->info("UNLOCK: ".$options["path"]);
 
     $fspath = $this->getFsPath($options["path"]);
-    $imageId = $this->controller->Image->filenameExists($fspath);
-    if (!$imageId) {
+    $fileId = $this->controller->MyFile->fileExists($fspath);
+    if (!$fileId) {
       $this->Logger->err("Could not find file for path '$fspath'");
       return "409 Conflict";
     }
-    $lock = $this->controller->Lock->find(array('Lock.image_id' => $imageId, 'Lock.token' => $options['token']));
+    $lock = $this->controller->Lock->find(array('Lock.file_id' => $fileId, 'Lock.token' => $options['token']));
     if (!$lock) {
-      $this->Logger->err("Could not find lock token '{$options['token']}' for image $imageId");
+      $this->Logger->err("Could not find lock token '{$options['token']}' for file $fileId");
       return "409 Conflict";
     }
     $this->controller->Lock->del($lock['Lock']['id']);
@@ -1134,14 +1101,14 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
    
     $path = urldecode($path);
     $fspath = $this->getFsPath($path);
-    $image = $this->_getImage($fspath);
-    if (!$image) {
+    $file = $this->_getFile($fspath);
+    if (!$file) {
       $this->Logger->debug("Could not find file with path '$fspath'");
       return $result;
     }
 
-    if (isset($image['Lock']) && count($image['Lock'])) {
-      $lock = $image['Lock'][0];
+    if (isset($file['Lock']) && count($file['Lock'])) {
+      $lock = $file['Lock'][0];
       $result=array(
         'type'  => 'write',
         'scope' => $lock['exclusivelock'] ? 'exclusive' : 'shared',

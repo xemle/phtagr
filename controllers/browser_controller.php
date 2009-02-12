@@ -25,8 +25,8 @@ class BrowserController extends AppController
 {
   var $name = "Browser";
 
-  var $components = array('RequestHandler', 'ImageFilter', 'VideoFilter', 'GpsFilter', 'Upload', 'Zip');
-  var $uses = array('User', 'Image', 'Tag', 'Category', 'Location', 'Option');
+  var $components = array('FileManager', 'RequestHandler', 'ImageFilter', 'VideoFilter', 'GpsFilter', 'Upload', 'Zip');
+  var $uses = array('User', 'MyFile', 'Tag', 'Category', 'Location', 'Option');
   var $helpers = array('form', 'formular', 'html', 'number');
 
   /** Array of filesystem root directories. */
@@ -37,7 +37,7 @@ class BrowserController extends AppController
 
     $this->requireRole(ROLE_USER, array('redirect' => '/'));
 
-    $userDir = $this->User->getRootDir($this->getUser());
+    $userDir = $this->FileManager->getUserDir();
     $this->_addFsRoot($userDir);
 
     $fsroots = $this->Option->buildTree($this->getUser(), 'path.fsroot', true);
@@ -55,7 +55,7 @@ class BrowserController extends AppController
   function _setMenu() {
     $items = array();
     $items[] = array('text' => 'Import Files', 'link' => 'index', 'type' => ($this->action=='index'?'active':false));
-    if (count($this->_fsRoots > 1)) {
+    if (count($this->_fsRoots) > 1) {
       $items[] = array('text' => 'Upload', 'link' => 'upload/files');
     } else {
       $items[] = array('text' => 'Upload', 'link' => 'upload');
@@ -401,13 +401,12 @@ class BrowserController extends AppController
     $path = $this->getPath();
     $fsPath = $this->_getFsPath($path);
     // Check for internal path
-    $userRoot = $this->User->getRootDir($this->getUser());
     if (!$fsPath) {
       $this->Logger->warn("Invalid path to create folder");
       $this->Session->setFlash("Invalid path to create folder");
       $this->redirect("index");
     }
-    if (strpos($fsPath, $userRoot) !== 0) {
+    if ($this->FileManager->isExternam($fspath)) {
       $this->Session->setFlash("Could not create folder here: $path");
       $this->Logger->warn("Could not create folder in external path: $fsPath");
       $this->redirect("index/".$path);
@@ -441,27 +440,21 @@ class BrowserController extends AppController
       $this->redirect("index");
     }
     // Check for internal path
-    $userRoot = $this->User->getRootDir($this->getUser());
-    if (strpos($fsPath, $userRoot) !== 0) {
+    if ($this->FileManager->isExternal($fsPath)) {
       $this->Session->setFlash("Could not upload here: $path");
       $this->Logger->warn("Could not upload in external path: $fsPath");
       $this->redirect("index/".$path);
     }
     if ($this->Upload->isUpload()) {
-      $file = $this->Upload->upload(array('root' => $fsPath, 'overwrite' => false));
-      if ($file) {
-        $this->Logger->info("File '$file' uploaded successfully");
-        if (substr(strtolower($file), -4) == '.zip' && $this->data['File']['extract']) {
-          $files = $this->Zip->unzip($file);
+      $filename = $this->Upload->upload(array('root' => $fsPath, 'overwrite' => false));
+      if ($filename) {
+        $this->Logger->info("File '$filename' uploaded successfully");
+        if (substr(strtolower($filename), -4) == '.zip' && $this->data['File']['extract']) {
+          $files = $this->Zip->unzip($filename);
           $this->Session->setFlash("File uploaded successfully and ".count($files)." files were extracted");
-          $image = $this->Image->findByFilename($file);
-          if ($image) {
-            $this->Image->delete($image['Image']['id']);
-          } else {
-            $this->Logger->warn("Could not find model for $file to delete");
+          if ($this->FileManager->delete($filename)) {
+            $this->Logger->info("Delete archive $filename");
           }
-          @unlink($file);
-          $this->Logger->info("Delete archive $file");
         } else {
           $this->Session->setFlash("File uploaded successfully");
         }
@@ -473,8 +466,7 @@ class BrowserController extends AppController
     // Fetch quota and free bytes
     $user = $this->getUser();
     $userId = $this->getUserId();
-    $bytes = $this->Image->findAll(array("User.id" => $userId, "Image.flag & ".IMAGE_FLAG_EXTERNAL." = 0"), array('SUM(Image.bytes) AS Bytes'));
-    $bytes = $bytes[0][0]['Bytes'];
+    $bytes = $this->MyFile->countBytes($userId);
     $quota = $user['User']['quota'];
     $free = $quota - $bytes;
     $this->set('quota', $quota);
