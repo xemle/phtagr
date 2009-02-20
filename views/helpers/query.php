@@ -27,8 +27,8 @@ class QueryHelper extends AppHelper {
   /** Skip specific query parameters for multiple query */
   var $_excludePage = array('prevPage' => true, 
                     'nextPage' => true,
-                    'prevImage' => true, 
-                    'nextImage' => true, 
+                    'prevMedium' => true, 
+                    'nextMedium' => true, 
                     'count' => true, 
                     'pages' => true, 
                     'page' => 1, 
@@ -36,12 +36,12 @@ class QueryHelper extends AppHelper {
                     'pos' => 1, 
                     'image' => true,
                     'video' => true,
-                    'myimage' => true
+                    'mymedium' => true
                     );
 
   /** Skip specific query parameters for single query */
-  var $_excludeImage = array('prevImage' => true,
-                    'nextImage' => true,
+  var $_excludeMedium = array('prevMedium' => true,
+                    'nextMedium' => true,
                     'count' => true,
                     'pages' => true,
                     'page' => 1,
@@ -49,7 +49,7 @@ class QueryHelper extends AppHelper {
                     'pos' => 1,
                     'image' => true,
                     'videw' => true,
-                    'myimage' => true
+                    'mymedium' => true
                     );
 
   var $_query = array(); 
@@ -257,14 +257,14 @@ class QueryHelper extends AppHelper {
     return $this->html->link('next', $nextUrl, array('class' => 'next'));
   }
 
-  function prevImage() {
+  function prevMedium() {
     if (!isset($this->params['query']))
       return;
     $query = $this->params['query'];
-    if (isset($query['prevImage'])) {
+    if (isset($query['prevMedium'])) {
       $query['pos']--;
       $query['page'] = ceil($query['pos'] / $query['show']);
-      return $this->html->link('prev', '/images/view/'.$query['prevImage'].'/'.$this->getParams($query, $this->_excludeImage), array('class' => 'prev'));
+      return $this->html->link('prev', '/images/view/'.$query['prevMedium'].'/'.$this->getParams($query, $this->_excludeMedium), array('class' => 'prev'));
     }
   }
 
@@ -273,18 +273,18 @@ class QueryHelper extends AppHelper {
       return;
     $query = $this->params['query'];
     $query['page'] = ceil($query['pos'] / $query['show']);
-    $exclude = am($this->_excludeImage, array('image' => true, 'pos' => true));
-    return $this->html->link('up', $this->getUri($query, $exclude).'#image-'.$query['image'], array('class' => 'up'));
+    $exclude = am($this->_excludeMedium, array('image' => true, 'pos' => true));
+    return $this->html->link('up', $this->getUri($query, $exclude).'#medium-'.$query['medium'], array('class' => 'up'));
   }
 
-  function nextImage() {
+  function nextMedium() {
     if (!isset($this->params['query']))
       return;
     $query = $this->params['query'];
-    if (isset($query['nextImage'])) {
+    if (isset($query['nextMedium'])) {
       $query['pos']++;
       $query['page'] = ceil($query['pos'] / $query['show']);
-      return $this->html->link('next', '/images/view/'.$query['nextImage'].'/'.$this->getParams($query, $this->_excludeImage), array('class' => 'next'));
+      return $this->html->link('next', '/images/view/'.$query['nextMedium'].'/'.$this->getParams($query, $this->_excludeMedium), array('class' => 'next'));
     }
   }
 }

@@ -27,7 +27,7 @@ if (!App::import('Vendor', "phpthumb", true, array(), "phpthumb.class.php")) {
 class MediaController extends AppController
 {
   var $name = 'Media';
-  var $uses = array('Image');
+  var $uses = array('Medium');
   var $layout = null;
   var $_outputMap = array(
                       OUTPUT_TYPE_MINI => array('size' => OUTPUT_SIZE_MINI, 'square' => true),
@@ -36,7 +36,7 @@ class MediaController extends AppController
                       OUTPUT_TYPE_HIGH => array('size' => OUTPUT_SIZE_HIGH, 'quality' => 90),
                       OUTPUT_TYPE_VIDEO => array('size' => OUTPUT_SIZE_VIDEO, 'bitrate' => OUTPUT_BITRATE_VIDEO)
                     );
-  var $components = array('ImageFilter', 'VideoFilter', 'FileCache');
+  var $components = array('ImageResizer', 'FileCache');
 
   function beforeFilter() {
     // Reduce security level for this controller if required. Security level
@@ -52,12 +52,12 @@ class MediaController extends AppController
   }
   
   function _getCacheDir($data) {
-    if (!isset($data['Image']['id'])) {
+    if (!isset($data['Medium']['id'])) {
       $this->Logger->debug("Data does not contain id of the image");
       return false;
     }
 
-    $cacheDir = $this->FileCache->getPath($data['Image']['user_id'], $data['Image']['id']);
+    $cacheDir = $this->FileCache->getPath($data['Medium']['user_id'], $data['Medium']['id']);
     return $cacheDir;
   }
 
@@ -110,12 +110,12 @@ class MediaController extends AppController
   }
 
   /** Fetch image from database and checks access 
-    @param id Image id
+    @param id Medium id
     @param outputType 
-    @return Image data array. If no image is found or access is denied it responses 404 */
-  function _getImage($id, $outputType) {
-    if (!$this->Image->hasAny("Image.id = $id")) {
-      $this->Logger->debug("No Image with id $id exists");
+    @return Medium data array. If no image is found or access is denied it responses 404 */
+  function _getMedium($id, $outputType) {
+    if (!$this->Medium->hasAny("Medium.id = $id")) {
+      $this->Logger->debug("No Medium with id $id exists");
       $this->redirect(null, 404);
     }
 
@@ -128,28 +128,29 @@ class MediaController extends AppController
       default:
         $flag = ACL_READ_PREVIEW; break;
     }
-    $conditions = "Image.id = $id AND Image.flag & ".IMAGE_FLAG_ACTIVE.$this->Image->buildWhereAcl($user, 0, $flag);
-    $image = $this->Image->find($conditions);
-    if (!$image) {
+    //$conditions = "Medium.id = $id AND Medium.flag & ".MEDIUM_FLAG_ACTIVE.$this->Medium->buildWhereAcl($user, 0, $flag);
+    $conditions = "Medium.id = $id".$this->Medium->buildWhereAcl($user, 0, $flag);
+    $medium = $this->Medium->find($conditions);
+    if (!$medium) {
       $this->Logger->debug("Deny access to image $id");
       $this->redirect(null, 403);
     }
     
-    return $image;
+    return $medium;
   }
 
   /** Fetches the source filename and checks it for read permission. If
    * filename is not readable it responses with 404
-    @param image Image data
+    @param image Medium data
     @return filename of image */
-  function _getSourceFile($image) {
-    if ($this->Image->isVideo($image)) {
-      $sourceFilename = $this->VideoFilter->getVideoPreviewFilename($image);
+  function _getSourceFile($medium) {
+    if ($this->Medium->isType($medium, MEDIUM_TYPE_VIDEO)) {
+      $sourceFilename = $this->VideoFilter->getVideoPreviewFilename($medium);
     } else {
-      $sourceFilename = $this->Image->getFilename($image);
+      $sourceFilename = $this->Medium->File->getFilename($medium['File'][0]);
     }
     if(!is_readable($sourceFilename)) {
-      $this->Logger->debug("Image file (id {$image['Image']['id']}) is not readable: $sourceFilename");
+      $this->Logger->debug("Medium file (id {$medium['Medium']['id']}) is not readable: $sourceFilename");
       $this->redirect(null, 500); 
     }
     return $sourceFilename;
@@ -163,120 +164,41 @@ class MediaController extends AppController
       die("Internal error");
     }
     
-    $image = $this->_getImage($id, $outputType);
-    $sourceFilename = $this->_getSourceFile($image);
-
+    $medium = $this->_getMedium($id, $outputType);
     $options = am(array('size' => 220, 'square' => false, 'quality' => OUTPUT_QUALITY), $this->_outputMap[$outputType]);
+    $dst = $this->_getCacheDir($medium).$this->_getCacheFilename($id, $options['size']);
 
-    $phpThumb = new phpThumb();
+    if (!file_exists($dst)) {
+      $src = $this->_getSourceFile($medium);
+      $options['width'] = $medium['Medium']['width'];
+      $options['height'] = $medium['Medium']['height'];
 
-    $phpThumb->src = $sourceFilename;
-    $phpThumb->w = $options['size'];
-    $phpThumb->h = $options['size'];
-    $phpThumb->q = $options['quality'];
-
-    switch ($image['Image']['orientation']) {
-      case 1:
-        break;
-      case 3:
-        $phpThumb->ra=180; 
-        break;
-      case 6: 
-        $phpThumb->ra=90; 
-        break;
-      case 8: 
-        $phpThumb->ra=270; 
-        break;
-      default: 
-        $this->Logger->warn("Unsupported rotation flag: ".$image['Image']['orientation']);
-        break;
-    }
-
-    if ($options['square'] && $image['Image']['height']>0) {
-      $width=$image['Image']['width'];
-      $height=$image['Image']['height'];
-      if ($width<$height) {
-        $ratio = ($width/$height);
-        $size = $options['size']/$ratio;
-        $phpThumb->sx=0;
-        $phpThumb->sy=intval(($size-$options['size'])/2);
-      } else {
-        $ratio = ($height/$width);
-        $size = $options['size']/$ratio;
-        $phpThumb->sx=intval(($size-$options['size'])/2);
-        $phpThumb->sy=0;
+      switch ($medium['Medium']['orientation']) {
+        case 1: break;
+        case 3: $options['rotation'] = 180; break;
+        case 6: $options['rotation'] = 90; break;
+        case 8: $options['rotation'] = 270; break;
+        default: 
+          $this->Logger->warn("Unsupported rotation flag: ".$medium['Medium']['orientation']);
+          break;
       }
 
-      if ($phpThumb->ra == 90 || $phpThumb->ra == 270) {
-        $tmp = $phpThumb->sx;
-        $phpThumb->sx = $phpThumb->sy;
-        $phpThumb->sy = $tmp;
+      if (!$this->ImageResizer->resize($src, $dst, $options)) {
+        $this->Logger->err("Could not create image preview");
+        $this->redirect(null, 500);
       }
-
-      $phpThumb->sw=$options['size'];
-      $phpThumb->sh=$options['size'];
-
-      $phpThumb->w = $size;
-      $phpThumb->h = $size;
-
-      //$this->Logger->debug(sprintf("square: %dx%d %dx%d", 
-      //  $phpThumb->sx, $phpThumb->sy, 
-      //  $phpThumb->sw, $phpThumb->sh), LOG_DEBUG);
     }
-    $phpThumb->config_imagemagick_path = $this->getOption('bin.convert', 'convert');
-    $phpThumb->config_prefer_imagemagick = true;
-    $phpThumb->config_imagemagick_use_thumbnail = false;
-    $phpThumb->config_output_format = 'jpg';
-    $phpThumb->config_error_die_on_error = true;
-    $phpThumb->config_document_root = '';
-    $phpThumb->config_temp_directory = APP . 'tmp';
-    $phpThumb->config_allow_src_above_docroot = true;
 
-    $cacheDir = $this->_getCacheDir($image);
-    if (!$cacheDir) {
-      $this->Logger->fatal("Cache directory for image failed");
-      die("Precondition of cache directory failed");
-    }
-    $phpThumb->config_cache_directory = $cacheDir;
-    $phpThumb->config_cache_disable_warning = false;
+    $this->_handleClientCache($dst);
 
-    $cacheFilename = $this->_getCacheFilename($id, $options['size']);
-    $phpThumb->cache_filename = $phpThumb->config_cache_directory.$cacheFilename;
-    
-    //Thanks to Kim Biesbjerg for his fix about cached thumbnails being regenerated
-    if(!is_file($phpThumb->cache_filename)) { 
-      // Check if image is already cached.
-      $t1 = getMicrotime();
-      $result = $phpThumb->GenerateThumbnail();
-      $t2 = getMicrotime();
-      if ($result) {
-        $this->Logger->debug("Render {$options['size']}x{$options['size']} image (id {$image['Image']['id']}) in ".round($t2-$t1, 4)."ms to '{$phpThumb->cache_filename}'");
-        $phpThumb->RenderToFile($phpThumb->cache_filename);
-        $this->ImageFilter->clearMetaData($phpThumb->cache_filename);
-      } else {
-        $this->Logger->err("Could not generate thumbnail: ".$phpThumb->error);
-        $this->Logger->err($phpThumb->debugmessages);
-        die('Failed: '.$phpThumb->error);
-      }
-    } 
-
-    //$this->Logger->debug($phpThumb->debugmessages);
-    
-    if (!is_file($phpThumb->cache_filename)) { 
-      $this->Logger->err("Could not create preview file {$phpThumb->cache_filename}");
-      $this->Logger->err($phpThumb->debugmessages);
-      $this->redirect(null, 500);
-    }
-    $this->_handleClientCache($phpThumb->cache_filename);
-
-    $mediaOptions = $this->_getMediaOptions($phpThumb->cache_filename);
+    $mediaOptions = $this->_getMediaOptions($dst);
     $this->view = 'Media';
     $this->set($mediaOptions);
   }
 
-  function _scaleSize($image, $size) {
-    $width = $image['Image']['width'];
-    $height = $image['Image']['height'];
+  function _scaleSize($medium, $size) {
+    $width = $medium['Medium']['width'];
+    $height = $medium['Medium']['height'];
     if ($width > $size && $width > $height) {
       $height = intval($size * $height / $width);
       $width = $size;
@@ -294,14 +216,14 @@ class MediaController extends AppController
       die("Internal error");
     }
 
-    $image = $this->_getImage($id, $outputType);
-    if (!$this->Image->isVideo($image)) {
+    $medium = $this->_getMedium($id, $outputType);
+    if (!$this->Medium->isVideo($medium)) {
       $this->err("Requested resource is no video");
       $this->redirect(null, 404);
     }
 
-    $sourceFilename = $this->Image->getFilename($image);
-    $cacheDir = $this->_getCacheDir($image);
+    $src = $this->Medium->getFilename($medium);
+    $cacheDir = $this->_getCacheDir($medium);
     if (!$cacheDir) {
       $this->fatal("Precondition of cache directory failed: $cacheDir");
       die("Precondition of cache directory failed");
@@ -312,8 +234,8 @@ class MediaController extends AppController
 
     if (!file_exists($flashFilename)) {
       $bin = $this->getOption('bin.ffmpeg', 'ffmpeg');
-      list($width, $height) = $this->_scaleSize($image, $options['size']);
-      $command = "$bin -i ".escapeshellarg($sourceFilename)." -s {$width}x{$height} -r 15 -b {$options['bitrate']} -ar 22050 -ab 48 -y ".escapeshellarg($flashFilename);
+      list($width, $height) = $this->_scaleSize($medium, $options['size']);
+      $command = "$bin -i ".escapeshellarg($src)." -s {$width}x{$height} -r 15 -b {$options['bitrate']} -ar 22050 -ab 48 -y ".escapeshellarg($flashFilename);
       $output = array();
       $result = -1;
       $t1 = getMicrotime();
@@ -324,7 +246,7 @@ class MediaController extends AppController
         $this->Logger->err("Command '$command' returned unexcpected $result");
         $this->redirect(null, 500);
       } else {
-        $this->Logger->info("Created flash video '$flashFilename' of '$sourceFilename'");
+        $this->Logger->info("Created flash video '$flashFilename' of '$src'");
       }
       
       $bin = $this->getOption('bin.flvtool2', 'flvtool2');
@@ -380,14 +302,14 @@ class MediaController extends AppController
 
   function original($id) {
     $id = intval($id);
-    $image = $this->Image->findById($id);
+    $medium = $this->Medium->findById($id);
     $user = $this->getUser();
-    if (!$this->Image->checkAccess(&$image, $user, ACL_READ_ORIGINAL, ACL_READ_MASK)) {
-      $this->Logger->warn("User {$user['User']['id']} has no previleges to access image ".$image['Image']['id']);
+    if (!$this->Medium->checkAccess(&$medium, $user, ACL_READ_ORIGINAL, ACL_READ_MASK)) {
+      $this->Logger->warn("User {$user['User']['id']} has no previleges to access image ".$medium['Medium']['id']);
       $this->redirect(null, 404);
     }
     $this->Logger->info("Request of image $id: original");
-    $filename = $this->Image->getFilename($image);  
+    $filename = $this->Medium->getFilename($medium);  
 
     $mediaOptions = $this->_getMediaOptions($filename);
     $mediaOptions['download'] = true;

@@ -24,58 +24,40 @@
 class Medium extends AppModel
 {
   var $name = 'Medium';
-  var $validate = array();
 
   var $belongsTo = array(
-                    'User' => array(),
-                    'Group' => array(),
-                    );
-  var $hasAndBelongsToMany = array(
-                              'Tag' => array(),
-                              'Location' => array('order' => 'Location.type'),
-                              'Category' => array()
-                              );
+    'User' => array(),
+    'Group' => array());
   
-  var $_aclMap = array(ACL_LEVEL_GROUP => 'gacl',
-                           ACL_LEVEL_USER => 'uacl',
-                           ACL_LEVEL_OTHER => 'oacl');
+  var $hasMany = array(
+    'Comment' => array('dependent' => true, 'foreignKey' => 'medium_id'),
+    'File' => array('className' => 'MyFile', 'foreignKey' => 'medium_id'));
 
-  /** Evaluates, if a given filesystem path is part of the users dir. Otherwise
-   * the file is treated as an external file 
-    @param data Medium model data
-    @param user Optional user model data
-    @return True, if file is not within the users directory */
-  function isExternal($data, $user = null) {
-    if (!isset($data['Medium']['path'])) {
-      $this->Logger->err("Medium path not set");
+  var $hasAndBelongsToMany = array(
+    'Tag' => array('foreignKey' => 'medium_id'),
+    'Category' => array('foreignKey' => 'medium_id'),
+    'Location' => array('foreignKey' => 'medium_id', 'order' => 'Location.type'));
+  
+  var $_aclMap = array(
+    ACL_LEVEL_GROUP => 'gacl',
+    ACL_LEVEL_USER => 'uacl',
+    ACL_LEVEL_OTHER => 'oacl');
+
+  function isType($data, $type) {
+    if (!$data) {
+      $data = $this->data;
+    }
+
+    if (!isset($data['Medium']['id']) || !isset($data['Medium']['type'])) {
+      $this->Logger->err("Precondition failed");
       return false;
     }
-    if (!$user) {
-      if (!isset($data['User']['id'])) {
-        $this->Logger->err("User is not set");
-        return false;
-      }
-      $user = $this->User->findById($data['Medium']['user_id']);
+
+    if ($data['Medium']['type'] == $type) {
+      return true;
+    } else {
+      return false;
     }
-    $userDir = $this->User->getRootDir($user);
-    if (strpos($data['Medium']['path'], $userDir) === 0)
-      return false;
-    return true;
-  }
-
-  /** Evaluates, if a filename is a video file 
-    @param data Medium model data
-    @return True, if filename is a video. False otherwise */
-  function isVideo($data) {
-    if (!isset($data['Medium']['file']))
-      return false;
-    $file = $data['Medium']['file'];
-
-    $videoExtensions = array('avi', 'mpeg', 'mpg', 'mov');
-    $ext = strtolower(substr($file, strrpos($file, '.')+1));
-    if (!$ext)
-      return false;
-    return in_array($ext, $videoExtensions);
   }
 
   function addDefaultAcl(&$data, $user) {
@@ -89,149 +71,69 @@ class Medium extends AppModel
     return $data;
   }
 
-  /** Insert file to the database
-    @param filename Filename to be inserted
-    @param user User model data of the current user
-    @return Medium id on success. False on error */
-  function insertFile($filename, $user) {
-    if (!file_exists($filename) || !is_readable($filename)) {
-      $this->Logger->err("Cannot insert file '$filename'. File is does not exists or is not readable");
+  function setFlag($data, $flag) {
+    if (!$data) {
+      $data = $this->data;
+    }
+    if (isset($data['Medium'])) {
+      $data =& $data['Medium'];
+    }
+
+    if (!isset($data['id']) || !isset($data['flag'])) {
+      $this->Logger->err("Precondition failed");
       return false;
     }
-      
-    $id = $this->filenameExists($filename);
-    if ($id) {
-      $this->Logger->debug("File '$filename' already in the database");
-      return $id;
+
+    if ($data['flag'] & $flag) {
+      return true;
     }
+    $data['flag'] |= $flag;
+    if (!$this->save($data, true, array('flag'))) {
+      $this->Logger->err("Could not update flag");
+      return false;
+    }
+    return true;
+  }
 
-    $data = array('Medium' => array());
-    $v = &$data['Medium'];
-
-    // Access control values
-    $this->addDefaultAcl(&$data, $user);
-
-    // File information
-    $v['file'] = basename($filename);
-    $v['path'] = Folder::slashTerm(dirname($filename));
-    $v['filetime'] = date('Y-m-d H:i:s', filemtime($filename));
-    $v['bytes'] = filesize($filename);
-
-    // generic information
-    $v['flag'] = 0;
-    if ($this->isExternal($data, $user)) {
-      $v['flag'] |= IMAGE_FLAG_EXTERNAL;
+  function deleteFlag($data, $flag) {
+    if (!$data) {
+      $data = $this->data;
     }
     
-    if (!$this->create($data) || !$this->save()) {
-      $this->Logger->err("Could not create and save data");
+    if (isset($data['Medium'])) {
+      $data =& $data['Medium'];
+    }
+    if (!isset($data['id']) || !isset($data['flag'])) {
+      $this->Logger->err("Precondition failed");
       return false;
     }
-    return $this->getLastInsertID();
-  }
 
-  function move($src, $dst) {
-    $id = $this->filenameExists($src);
-    if (!$id) {
-      $this->Logger->err("Source '$src' was not found in the database!");
-      return false;
+    if ($data['flag'] & $flag == 0) {
+      return true;
     }
-    if (!file_exists($dst)) {
-      $this->Logger->err("Destination '$dst' does not exists!");
-      return false;
-    }
-    $image = $this->findById($id);
-    if (is_dir($dst)) {
-      $image['Medium']['path'] = Folder::slashTerm(dirname($dst));
-    } else {
-      $image['Medium']['path'] = Folder::slashTerm(dirname($dst));
-      $image['Medium']['file'] = basename($dst);
-    }
-    if (!$this->save($image, true, array('path', 'file'))) {
-      $this->Logger->err("Could not updated new filename '$dst' (id=$id)");
+    $data['flag'] ^= $flag;
+    if (!$this->save($data, true, array('flag'))) {
+      $this->Logger->err("Could not update flag");
       return false;
     }
     return true;
   }
-  
-  function moveAll($src, $dst) {
-    if (!is_dir($dst)) {
-      $this->Logger->err("Destination '$dst' is not a directory");
-      return false;
-    }
-    $src = Folder::slashTerm($src);
-    $dst = Folder::slashTerm($dst);
 
-    $db =& ConnectionManager::getDataSource($this->useDbConfig);
-    $sql = "UPDATE ".$this->tablePrefix.$this->table." AS Medium ".
-           "SET path=REPLACE(path,".$db->value($src).",".$db->value($dst).") ".
-           "WHERE path LIKE ".$db->value($src."%");
-    $this->Logger->debug($sql);
-    $this->query($sql);
-    return true;
-  }
-
-  /** Inactivates an image and removes all habtm associations 
-    @param data Medium data
-    @return Return updated image data */
-  function deactivate(&$data) {
-    if (!isset($data['Medium']['flag'])) {
-      $this->Logger->err("Invalid data");
-      return false;
+  function hasFlag($data, $flag) {
+    if (!$data) {
+      $data = $this->data;
     }
-    $data['Medium']['flag'] = ($data['Medium']['flag'] & ~IMAGE_FLAG_ACTIVE) & 0xff;
-    foreach ($this->hasAndBelongsToMany as $assoc => $v) {
-      $data[$assoc][$assoc] = array();
-    }
-    return $data;
-  }
-
-  function setDirty($data, $dirty = true) {
+    
     if (!isset($data['Medium']['id']) || !isset($data['Medium']['flag'])) {
       $this->Logger->err("Precondition failed");
       return false;
     }
-    $flag = $data['Medium']['flag'];
-    $current = ($flag & IMAGE_FLAG_DIRTY);
-    if (($dirty ^ $current)) {
-      return true;
-    }
-    if ($dirty) {
-      $data['Medium']['flag'] |= IMAGE_FLAG_DIRTY;
-    } else {
-      $data['Medium']['flag'] ^= IMAGE_FLAG_DIRTY;
-    }
-    if (!$this->save($data, array('flag'))) {
-      $this->Logger->err("Could not update flag");
-      return false;
-    } else {
-      return true;
-    }
-  }
 
-  /** Updates file with file size and file time 
-    @param data Medium data
-    @return Return updated image data */
-  function updateFile(&$data) {
-    clearstatcache();
-    $filename = $data['Medium']['path'].$data['Medium']['file'];
-    if (!file_exists($filename)) {
-      $this->Logger->err("File '$filename' does not exists");
+    if ($data['Medium']['flag'] & $flag) {
+      return true;
+    } else {
       return false;
     }
-    $data['Medium']['bytes'] = filesize($filename);
-    $data['Medium']['filetime'] = date('Y-m-d H:i:s', filemtime($filename));
-    return $data;
-  }
-
-  function beforeDelete($cascade = true) {
-    // prepare associations for deletion
-    $this->bindModel(array(
-      'hasMany' => array(
-        'Property' => array('dependent' => true), 
-        'Comment' => array('dependent' => true)
-      )));
-    return true;
   }
 
   /** Returns true if current user is allowed of the current flag
@@ -301,7 +203,7 @@ class Medium extends AppModel
 
     $data['Medium']['isOwner'] = ife($data['Medium']['user_id'] == $user['User']['id'], true, false);
     $data['Medium']['canWriteAcl'] = $this->checkAccess(&$data, &$user, 1, 0, &$groups);    
-    $data['Medium']['isDirty'] = ife(($data['Medium']['flag'] & IMAGE_FLAG_DIRTY) > 0, true, false);
+    $data['Medium']['isDirty'] = ife(($data['Medium']['flag'] & MEDIUM_FLAG_DIRTY) > 0, true, false);
 
     return $data;
   }
@@ -561,6 +463,7 @@ class Medium extends AppModel
     $alias = $this->{$model}->alias;
     $key = $this->{$model}->primaryKey;
 
+    $this->Logger->debug($this->hasAndBelongsToMany[$model]);
     $joinTable = $this->hasAndBelongsToMany[$model]['joinTable'];
     $joinTable = $db->fullTableName($joinTable, false);
     $joinAlias = $this->hasAndBelongsToMany[$model]['with'];
@@ -573,7 +476,7 @@ class Medium extends AppModel
          "  `$myTable` AS `{$this->alias}`".
          " WHERE `$alias`.`$key` = `$joinAlias`.`$associationForeignKey`".
          "   AND `$joinAlias`.`$foreignKey` = `{$this->alias}`.`{$this->primaryKey}`".
-         "   AND Medium.flag & ".IMAGE_FLAG_ACTIVE.
+         "   AND Medium.flag & ".MEDIUM_FLAG_ACTIVE.
          $this->buildWhereAcl($user).
          " GROUP BY `$alias`.`name` ".
          " ORDER BY hits DESC LIMIT 0,".intval($num);

@@ -36,6 +36,7 @@ class SetupController extends AppController {
   var $User = null;
   var $Option = null;
   var $commands = array('exiftool', 'convert', 'ffmpeg', 'flvtool2');
+  var $modelMapping = array('files' => 'MyFile', 'media' => 'Medium');
 
   function beforeFilter() {
     Configure::write('Cache.disable', true);
@@ -148,7 +149,11 @@ class SetupController extends AppController {
         continue;
       }
       // Check for existing model
-      $modelName = Inflector::classify($table);
+      if (!isset($this->modelMapping[$table])) {
+        $modelName = Inflector::classify($table);
+      } else {
+        $modelName = $this->modelMapping[$table];
+      }
       $this->Logger->info($modelName);
       if (!in_array($modelName, $models)) {
         $this->Logger->err("Model '$modelName' does not exists");

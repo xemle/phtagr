@@ -17,23 +17,23 @@
     $optParams = '';
   }
 ?>
-<?php foreach ($this->data as $image): ?>
+<?php foreach ($this->data as $medium): ?>
   <item>
-    <title><?php echo $image['Image']['name']; ?></title>
+    <title><?php echo $medium['Medium']['name']; ?></title>
     <link><?php 
-      $url = '/images/view/'.$image['Image']['id'].'/'.$optParams;
+      $url = '/images/view/'.$medium['Medium']['id'].'/'.$optParams;
       if ($query->getParams()) {
         $url .= $query->getParams().'/';
       }
       echo Router::url($url, true); ?></link>
     <?php 
-      $thumbSize = $imageData->getimagesize($image, OUTPUT_SIZE_THUMB);
-      $previewSize = $imageData->getimagesize($image, OUTPUT_SIZE_PREVIEW);
-      $thumbUrl = '/media/thumb/'.$image['Image']['id'].'/'.$optParams.$image['Image']['file'];
-      if ($image['Image']['canReadOriginal']) {
-        $contentUrl = '/media/high/'.$image['Image']['id'].'/'.$optParams.$image['Image']['file'];
+      $thumbSize = $imageData->getimagesize($medium, OUTPUT_SIZE_THUMB);
+      $previewSize = $imageData->getimagesize($medium, OUTPUT_SIZE_PREVIEW);
+      $thumbUrl = '/media/thumb/'.$medium['Medium']['id'].'/'.$optParams.$medium['Medium']['file'];
+      if ($medium['Medium']['canReadOriginal']) {
+        $contentUrl = '/media/high/'.$medium['Medium']['id'].'/'.$optParams.$medium['Medium']['file'];
       } else {
-        $contentUrl = '/media/preview/'.$image['Image']['id'].'/'.$optParams.$image['Image']['file'];
+        $contentUrl = '/media/preview/'.$medium['Medium']['id'].'/'.$optParams.$medium['Medium']['file'];
       }
     ?>
     <media:thumbnail url="<?php echo Router::url($thumbUrl, true); ?>" <?php echo $thumbSize[3]; ?> />

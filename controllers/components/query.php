@@ -34,7 +34,7 @@ class QueryComponent extends Object
 
   function initialize(&$controller) {
     $this->controller = &$controller;
-    $this->_tp=$this->controller->Image->tablePrefix;
+    $this->_tp=$this->controller->Medium->tablePrefix;
   }
 
   function getParam($name, $default = null) {
@@ -124,7 +124,7 @@ class QueryComponent extends Object
         case 'pos': $this->setPosition(intval($value)); break;
         case 'sort': $this->setOrder($value); break;
 
-        case 'image': $this->setImageId(intval($value)); break;
+        case 'medium': $this->setMediumId(intval($value)); break;
         case 'user': $this->setUser($value); break;
         case 'group': if ($userRole >= ROLE_USER) $this->setGroupId(intval($value)); break;
         case 'visibility': if ($userRole >= ROLE_USER) $this->setVisibility($value); break;
@@ -152,12 +152,12 @@ class QueryComponent extends Object
     }
   }
 
-  function setImageId($imageId) {
-    if (empty($imageId)) {
+  function setMediumId($mediumId) {
+    if (empty($mediumId)) {
       return;
     }
 
-    $this->setParam('image', intval($imageId));
+    $this->setParam('medium', intval($mediumId));
   }
 
   /** Set the user id
@@ -228,7 +228,7 @@ class QueryComponent extends Object
   }
 
   /** Set the file type. 
-    @param type Valid values are 'any', 'image', and 'video'
+    @param type Valid values are 'any', 'media', and 'video'
   */
   function setFiletype($type) {
     if (empty($type)) {
@@ -588,13 +588,13 @@ class QueryComponent extends Object
     if (!count($ids))
       return "";
 
-    $sql=" JOIN ( SELECT image_id, COUNT(image_id) AS thits".
-         " FROM {$this->_tp}images_tags AS ImageTag";
+    $sql=" JOIN ( SELECT medium_id, COUNT(medium_id) AS thits".
+         " FROM {$this->_tp}media_tags AS MediumTag";
     $sql.=" WHERE";
     $sql.=" tag_id IN (".implode(", ", $ids).")";
-    $sql.=" GROUP BY image_id";
+    $sql.=" GROUP BY medium_id";
     if ($count>0) {
-      $sql.=" HAVING COUNT(image_id)";
+      $sql.=" HAVING COUNT(medium_id)";
       switch ($op) {
         case -2: $sql.="!="; break;
         case -1: $sql.="<="; break;
@@ -603,7 +603,7 @@ class QueryComponent extends Object
       }
       $sql.="$count";
     }
-    $sql.=" ) AS ImageTag ON ( Image.id = ImageTag.image_id )";
+    $sql.=" ) AS MediumTag ON ( Medium.id = MediumTag.medium_id )";
     return $sql;
   }
 
@@ -626,14 +626,14 @@ class QueryComponent extends Object
     if (!count($ids))
       return "";
 
-    $sql=" JOIN ( SELECT image_id, COUNT(image_id) AS chits".
-         " FROM {$this->_tp}categories_images AS CategoryImage";
+    $sql=" JOIN ( SELECT medium_id, COUNT(medium_id) AS chits".
+         " FROM {$this->_tp}categories_media AS CategoryMedium";
     $sql.=" WHERE";
     $sql.=" category_id IN (".implode(", ", $ids).")";
 
-    $sql.=" GROUP BY image_id";
+    $sql.=" GROUP BY medium_id";
     if ($count>0) {
-      $sql.=" HAVING COUNT(image_id)";
+      $sql.=" HAVING COUNT(medium_id)";
       switch ($op) {
         case -2: $sql.="!="; break;
         case -1: $sql.="<="; break;
@@ -642,7 +642,7 @@ class QueryComponent extends Object
       }
       $sql.="$count";
     }
-    $sql.=" ) AS CategoryImage ON ( Image.id = CategoryImage.image_id )";
+    $sql.=" ) AS CategoryMedium ON ( Medium.id = CategoryMedium.medium_id )";
     return $sql;
   }
 
@@ -665,14 +665,14 @@ class QueryComponent extends Object
     if (!count($ids))
       return "";
 
-    $sql=" JOIN ( SELECT image_id, COUNT(image_id) AS lhits".
-         " FROM {$this->_tp}images_locations AS ImageLocation";
+    $sql=" JOIN ( SELECT medium_id, COUNT(medium_id) AS lhits".
+         " FROM {$this->_tp}locations_media AS LocationMedia";
     $sql.=" WHERE";
     $sql.=" location_id IN (".implode(", ", $ids).")";
 
-    $sql.=" GROUP BY image_id";
+    $sql.=" GROUP BY medium_id";
     if ($count>0) {
-      $sql.=" HAVING COUNT(image_id)";
+      $sql.=" HAVING COUNT(medium_id)";
       switch ($op) {
         case -2: $sql.="!="; break;
         case -1: $sql.="<="; break;
@@ -681,7 +681,7 @@ class QueryComponent extends Object
       }
       $sql.="$count";
     }
-    $sql.=" ) AS ImageLocation ON ( Image.id = ImageLocation.image_id )";
+    $sql.=" ) AS LocationMedia ON ( Medium.id = LocationMedia.medium_id )";
     return $sql;
   }
 
@@ -739,19 +739,19 @@ class QueryComponent extends Object
   function _addSqlWhereGPS() {
     $sql = '';
     if ($this->getParam('north')) {
-      $sql .= ' AND Image.latitude < '.$this->getParam('north');
+      $sql .= ' AND Medium.latitude < '.$this->getParam('north');
     }
 
     if ($this->getParam('south')) {
-      $sql .= ' AND Image.latitude >= '.$this->getParam('south');
+      $sql .= ' AND Medium.latitude >= '.$this->getParam('south');
     }
 
     if ($this->getParam('east')) {
-      $sql .= ' AND Image.longitude < '.$this->getParam('east');
+      $sql .= ' AND Medium.longitude < '.$this->getParam('east');
     }
 
     if ($this->getParam('west')) {
-      $sql .= ' AND Image.longitude >= '.$this->getParam('west');
+      $sql .= ' AND Medium.longitude >= '.$this->getParam('west');
     }
 
     return $sql;
@@ -771,23 +771,23 @@ class QueryComponent extends Object
     if ($numTags+$numCats+$numLocs==0)
       return "";
 
-    $sql =" AND Image.id NOT IN (";
-    $sql.=" SELECT Image.id".
-          " FROM {$this->_tp}images AS Image";
+    $sql =" AND Medium.id NOT IN (";
+    $sql.=" SELECT Medium.id".
+          " FROM {$this->_tp}media AS Medium";
 
     if ($numTags) {
-      $sql.=" LEFT JOIN {$this->_tp}images_tags AS ImageTag"
-          ." ON ( Image.id = ImageTag.image_id )";
+      $sql.=" LEFT JOIN {$this->_tp}media_tags AS MediumTag"
+          ." ON ( Medium.id = MediumTag.medium_id )";
     }
 
     if ($numCats) {
-      $sql.=" LEFT JOIN {$this->_tp}categories_images AS CategoryImage"
-          ." ON ( Image.id = CategoryImage.image_id )";
+      $sql.=" LEFT JOIN {$this->_tp}categories_media AS CategoryMedium"
+          ." ON ( Medium.id = CategoryMedium.medium_id )";
     }
 
     if ($numLocs) {
-      $sql.=" LEFT JOIN {$this->_tp}images_locations AS ImageLocation"
-          ." ON ( Image.id = ImageLocation.image_id )";
+      $sql.=" LEFT JOIN {$this->_tp}locations_media AS LocationMedia"
+          ." ON ( Medium.id = LocationMedia.medium_id )";
     }
 
     $sql.=" WHERE 0";
@@ -798,7 +798,7 @@ class QueryComponent extends Object
         $data[] = array('name' => $tag); 
       $ids=$this->controller->Tag->createIdList($data);
       if (count($ids)>0)
-        $sql.=" OR ImageTag.tag_id IN (".implode(", ", $ids).")";
+        $sql.=" OR MediumTag.tag_id IN (".implode(", ", $ids).")";
     }
     
     if ($numCats) {
@@ -807,7 +807,7 @@ class QueryComponent extends Object
         $data[] = array('name' => $cat); 
       $ids=$this->controller->Category->createIdList($data);
       if (count($ids)>0)
-        $sql.=" OR CategoryImage.category_id IN (".implode(", ", $ids).")";
+        $sql.=" OR CategoryMedium.category_id IN (".implode(", ", $ids).")";
     }
     
     if ($numLocs) {
@@ -816,31 +816,31 @@ class QueryComponent extends Object
         $data[] = array('name' => $loc); 
       $ids=$this->controller->Location->createIdList($data);
       if (count($ids)>0)
-        $sql.=" OR ImageLocation.location_id IN (".implode(", ", $ids).")";
+        $sql.=" OR LocationMedia.location_id IN (".implode(", ", $ids).")";
     }
-    $sql.=$this->controller->Image->buildWhereAcl($this->controller->getUser()).
+    $sql.=$this->controller->Medium->buildWhereAcl($this->controller->getUser()).
 
     $sql.=" )";
     return $sql;
   }
 
-  /** Sets the visiblity of an image. It selects images which are only visible
+  /** Sets the visiblity of an medium. It selects media which are only visible
    * for the group, only for user or visible for the public */
   function _addSqlWhereVisibility() {
     $acl='';
     $visible=$this->getParam('visibility', '');
     switch ($visible) {
     case 'private':
-      $acl .= " AND Image.gacl<".ACL_READ_PREVIEW; 
+      $acl .= " AND Medium.gacl<".ACL_READ_PREVIEW; 
       break;
     case 'group':
-      $acl .= " AND Image.gacl>=".ACL_READ_PREVIEW." AND Image.uacl<".ACL_READ_PREVIEW; 
+      $acl .= " AND Medium.gacl>=".ACL_READ_PREVIEW." AND Medium.uacl<".ACL_READ_PREVIEW; 
       break;
     case 'user':
-      $acl .= " AND Image.uacl>=".ACL_READ_PREVIEW." AND Image.oacl<".ACL_READ_PREVIEW; 
+      $acl .= " AND Medium.uacl>=".ACL_READ_PREVIEW." AND Medium.oacl<".ACL_READ_PREVIEW; 
       break;
     case 'public':
-      $acl .= " AND Image.oacl>=".ACL_READ_PREVIEW; 
+      $acl .= " AND Medium.oacl>=".ACL_READ_PREVIEW; 
       break;
     default:
       break;
@@ -857,23 +857,23 @@ class QueryComponent extends Object
     switch ($orderBy) {
     case 'date':
     case '-date':
-      $order.=",Image.date";
+      $order.=",Medium.date";
       break;
     case 'popularity':
     case '-popularity':
-      $order.=",Image.ranking";
+      $order.=",Medium.ranking";
       break;
     case 'voting':
     case '-voting':
-      $order.=",Image.voting,Image.votes";
+      $order.=",Medium.voting,Medium.votes";
       break;
     case 'newest':
     case '-newest':
-      $order.=",Image.created";
+      $order.=",Medium.created";
       break;
     case 'changes':
     case '-changes':
-      $order.=",Image.modified";
+      $order.=",Medium.modified";
       break;
     case 'random':
       break;
@@ -916,24 +916,24 @@ class QueryComponent extends Object
     if ($numCats>0 && ($catop==1 || $catop==2))
       $order[] = "chits DESC";
 
-    $orderMap=array('date' => "Image.date DESC", 
-           '-date' => "Image.date ASC", 
-           'popularity' => "Image.ranking DESC",
-           '-popularity' => "Image.ranking ASC",
-           'voting' => "Image.voting DESC, Image.votes DESC",
-           '-voting' => "Image.voting ASC, Image.votes ASC",
-           'newest' => "Image.created DESC",
-           '-newest' => "Image.created ASC",
-           'changes' => "Image.modified DESC",
-           '-changes' => "Image.modified ASC",
+    $orderMap=array('date' => "Medium.date DESC", 
+           '-date' => "Medium.date ASC", 
+           'popularity' => "Medium.ranking DESC",
+           '-popularity' => "Medium.ranking ASC",
+           'voting' => "Medium.voting DESC, Medium.votes DESC",
+           '-voting' => "Medium.voting ASC, Medium.votes ASC",
+           'newest' => "Medium.created DESC",
+           '-newest' => "Medium.created ASC",
+           'changes' => "Medium.modified DESC",
+           '-changes' => "Medium.modified ASC",
            'random' => "RAND()",
            '-random' => "RAND()");
     $tmpOrder = $this->getOrder();
     if (isset($orderMap[$tmpOrder]))
       $order[] = $orderMap[$tmpOrder];
 
-    // At least order by Image ID if order is not deterministic
-    $order[] = "Image.id DESC";
+    // At least order by Medium ID if order is not deterministic
+    $order[] = "Medium.id DESC";
     $sql = " ORDER BY ".implode(", ", $order);
       
     return $sql;
@@ -963,38 +963,38 @@ class QueryComponent extends Object
   function _addSqlWhere() {
     $sql="";
 
-    // handle IDs of image
-    $imageId=$this->getParam('image', 0);
+    // handle IDs of medium
+    $mediumId=$this->getParam('medium', 0);
     $userId=$this->getParam('user', 0);
     $groupId=$this->getParam('group', -1);
 
-    if ($imageId>0)  $sql .= " AND Image.id=".$imageId;
+    if ($mediumId>0)  $sql .= " AND Medium.id=".$mediumId;
     // userId is handled by acl
-    if ($groupId>=0) $sql .= " AND Image.group_id=".$groupId;
+    if ($groupId>=0) $sql .= " AND Medium.group_id=".$groupId;
     
     // handle the acl and visibility level
-    $sql.=$this->controller->Image->buildWhereAcl($this->controller->getUser(), $userId);
+    $sql.=$this->controller->Medium->buildWhereAcl($this->controller->getUser(), $userId);
     $sql.=$this->_addSqlWhereVisibility();
 
     // handle date
     $start=$this->getParam('from', 0);
     $end=$this->getParam('to', 0);
     if ($start>0)
-      $sql .= " AND Image.date>=FROM_UNIXTIME($start)";
+      $sql .= " AND Medium.date>=FROM_UNIXTIME($start)";
     if ($end>0)
-      $sql .= " AND Image.date<=FROM_UNIXTIME($end)";
+      $sql .= " AND Medium.date<=FROM_UNIXTIME($end)";
 
     $type=$this->getParam('filetype');
     if ($type=='image')
-      $sql.=" AND Image.duration=-1";
+      $sql.=" AND Medium.duration=-1";
     if ($type=='video')
-      $sql.=" AND Image.duration>=0";
+      $sql.=" AND Medium.duration>=0";
 
     $file=$this->getFilename();
     if (strlen($file)) {
       uses('sanitize');
       $sanitize = new Sanitize();
-      $sql.=" AND Image.file LIKE '%".$sanitize->escape($file)."%'";
+      $sql.=" AND Medium.file LIKE '%".$sanitize->escape($file)."%'";
     }
     $sql.=$this->_addSqlWhereGPS();
     return $sql;
@@ -1043,17 +1043,18 @@ class QueryComponent extends Object
     $numPosLocs=count($posLocs);
     $num_negLocs=count($negLocs);
     
-    $sql="SELECT Image.id";
+    $sql="SELECT Medium.id";
     if ($order)
       $sql.=$this->_addSqlColumnOrder($numPosTags, $numPosCats, $numPosLocs);
 
-    $sql.=" FROM {$this->_tp}images AS Image";
+    $sql.=" FROM {$this->_tp}media AS Medium";
     $sql.=$this->_addSqlJoinMetaInclusion($posTags, $posCats, $posLocs);
     // Consider only active files
-    $sql.=" WHERE Image.flag & ".IMAGE_FLAG_ACTIVE;
+    //$sql.=" WHERE Medium.flag & ".MEDIUM_FLAG_ACTIVE;
+    $sql.=" WHERE 1 = 1";
     $sql.=$this->_addSqlWhereMetaExclusion($negTags, $negCats, $negLocs);
     $sql.=$this->_addSqlWhere();
-    $sql.=" GROUP BY Image.id";
+    $sql.=" GROUP BY Medium.id";
 
     if ($order)
       $sql.=$this->_addSqlOrderBy($numPosTags, $numPosCats);
@@ -1071,19 +1072,19 @@ class QueryComponent extends Object
     return $sql;
   }
 
-  /** @return Returns the number of readable image */
-  function getNumImages() {
+  /** @return Returns the number of readable medium */
+  function getNumMedium() {
     $sql="SELECT COUNT(id)".
-         " FROM {$this->_tp}images AS Image".
+         " FROM {$this->_tp}media AS Medium".
          " WHERE 1".
-         $this->controller->Image->buildWhereAcl($this->controller->getUser());
-    return $this->controller->Image->query($sql);
+         $this->controller->Medium->buildWhereAcl($this->controller->getUser());
+    return $this->controller->Medium->query($sql);
   }
 
   function paginate() {
-    // get total number of images
+    // get total number of media
     $sql = $this->getNumQuery();
-    $result = $this->controller->Image->query($sql);
+    $result = $this->controller->Medium->query($sql);
     $this->_params['count'] = $result[0][0]['num'];
 
     // adjust page count if required
@@ -1095,12 +1096,12 @@ class QueryComponent extends Object
     if ($this->_params['count']>0) {
       // get the final query
       $sql = $this->getQuery();
-      $results = $this->controller->Image->query($sql);
+      $results = $this->controller->Medium->query($sql);
       $user = $this->controller->getUser();
       foreach ($results as $result) {
-        $image = $this->controller->Image->optimizedRead($result['Image']['id']);
-        $this->controller->Image->setAccessFlags(&$image, &$user);
-        $data[] = $image;
+        $medium = $this->controller->Medium->optimizedRead($result['Medium']['id']);
+        $this->controller->Medium->setAccessFlags(&$medium, &$user);
+        $data[] = $medium;
       }
     }
     // pagination values
@@ -1109,20 +1110,20 @@ class QueryComponent extends Object
     $this->_params['nextPage'] = $this->_params['page']<$this->_params['pages']?1:0;
     $userId = $this->getUserId();
     if ($userId > 0 && $userId == $this->controller->getUserId()) {
-      $this->_params['myimage'] = true;
+      $this->_params['mymedium'] = true;
     } else {
-      $this->_params['myimage'] = false;
+      $this->_params['mymedium'] = false;
     }
     return $data;
   }
 
-  function paginateImage() {
-    $tmpImage = $this->getParam('image');
-    $this->delParam('image');
+  function paginateMedium() {
+    $tmpMedium = $this->getParam('medium');
+    $this->delParam('medium');
     
-    // get total number of images
+    // get total number of media
     $sql = $this->getNumQuery();
-    $result = $this->controller->Image->query($sql);
+    $result = $this->controller->Medium->query($sql);
     $this->_params['count'] = $result[0][0]['num'];
 
     // adjust page count and pos if required
@@ -1150,45 +1151,45 @@ class QueryComponent extends Object
 
       // get the final query
       $sql = $this->getQuery(2);
-      $results = $this->controller->Image->query($sql);
+      $results = $this->controller->Medium->query($sql);
       if (!isset($results[$index])) {
         $this->Logger->err("Unexpected results of query: $sql");
         return false;
-      } elseif ($results[$index]['Image']['id'] != $tmpImage) {
-        // The image was not found via search. Query it directly
-        $this->_params['image'] = $tmpImage;
+      } elseif ($results[$index]['Medium']['id'] != $tmpMedium) {
+        // The medium was not found via search. Query it directly
+        $this->_params['medium'] = $tmpMedium;
         $sql = $this->getQuery(2);
-        $results = $this->controller->Image->query($sql);
+        $results = $this->controller->Medium->query($sql);
         if (!$results) {
-          $this->Logger->warn("Image with id $tmpImage could not be found");
+          $this->Logger->warn("Medium with id $tmpMedium could not be found");
           return false;
         } else {
-          $this->controller->Image->bindModel(array('hasMany' => array('Comment' => array('dependent' => true))));
-          $data = $this->controller->Image->findById($tmpImage);
-          $this->controller->Image->setAccessFlags(&$data, $this->controller->getUser());
+          $this->controller->Medium->bindModel(array('hasMany' => array('Comment' => array('dependent' => true))));
+          $data = $this->controller->Medium->findById($tmpMedium);
+          $this->controller->Medium->setAccessFlags(&$data, $this->controller->getUser());
         }
       } else {
-        $this->controller->Image->bindModel(array('hasMany' => array('Comment' => array('dependent' => true))));
-        $data = $this->controller->Image->findById($tmpImage);
-        $this->controller->Image->setAccessFlags(&$data, $this->controller->getUser());
+        $this->controller->Medium->bindModel(array('hasMany' => array('Comment' => array('dependent' => true))));
+        $data = $this->controller->Medium->findById($tmpMedium);
+        $this->controller->Medium->setAccessFlags(&$data, $this->controller->getUser());
         if ($index > 0 && isset($results[$index-1])) {
-          $this->_params['prevImage'] = $results[$index-1]['Image']['id'];
+          $this->_params['prevMedium'] = $results[$index-1]['Medium']['id'];
         }
         if (isset($results[$index+1])) {
-          $this->_params['nextImage'] = $results[$index+1]['Image']['id'];
+          $this->_params['nextMedium'] = $results[$index+1]['Medium']['id'];
         }
       }
     }
     // pagination values
     $this->_params['show'] = $tmpShow;
     $this->_params['pos'] = $tmpPos;
-    $this->_params['image'] = $tmpImage;
+    $this->_params['medium'] = $tmpMedium;
     $this->_params['pages'] = ceil($this->_params['count'] / $this->_params['show']);
     $userId = $this->getUserId();
     if ($userId > 0 && $userId == $this->controller->getUserId()) {
-      $this->_params['myimage'] = true;
+      $this->_params['mymedium'] = true;
     } else {
-      $this->_params['myimage'] = false;
+      $this->_params['mymedium'] = false;
     }
     return $data;
   }
@@ -1199,7 +1200,7 @@ class QueryComponent extends Object
   the second column is the number of hits. The table is ordered by descending
   hits */
   function getCloud($num=50, $model='Tag') {
-    $results = $this->controller->Image->queryCloud($this->controller->getUser(), $model, $num);
+    $results = $this->controller->Medium->queryCloud($this->controller->getUser(), $model, $num);
     // Remap and sort could by name
     if (!$results)
       return false;
@@ -1241,17 +1242,17 @@ class QueryComponent extends Object
     $tags = array();
     $categories = array();
     $locations = array();
-    if (isset($data['Image'])) {
-      // Single image
+    if (isset($data['Medium'])) {
+      // Single medium
       $this->_arrayCountMerge(&$tags, &$data['Tag']);
       $this->_arrayCountMerge(&$categories, &$data['Category']);
       $this->_arrayCountMerge(&$locations, &$data['Location']);
     } elseif (count($data)) {
-      // Multiple image
-      foreach ($data as $image) {
-        $this->_arrayCountMerge(&$tags, &$image['Tag']);
-        $this->_arrayCountMerge(&$categories, &$image['Category']);
-        $this->_arrayCountMerge(&$locations, &$image['Location']);
+      // Multiple medium
+      foreach ($data as $medium) {
+        $this->_arrayCountMerge(&$tags, &$medium['Tag']);
+        $this->_arrayCountMerge(&$categories, &$medium['Category']);
+        $this->_arrayCountMerge(&$locations, &$medium['Location']);
       }
     }
     arsort($tags);

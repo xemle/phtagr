@@ -90,10 +90,19 @@ define("COMMENT_AUTH_CAPTCHA",  2);
 define("MEDIUM_FLAG_ACTIVE",   1);
 define("MEDIUM_FLAG_DIRTY",    4);
 
+define("MEDIUM_TYPE_IMAGE", 1);
+define("MEDIUM_TYPE_VIDEO", 2);
+define("MEDIUM_TYPE_IMAGE_WITH_SOUND", 3);
+
 define("FILE_FLAG_DIRECTORY", 1);
 define("FILE_FLAG_EXTERNAL",  2);
 define("FILE_FLAG_DEPENDENT", 4);
 define("FILE_FLAG_READ",      8);
+
+define("FILE_TYPE_IMAGE", 1);
+define("FILE_TYPE_VIDEO", 2);
+define("FILE_TYPE_SOUND", 3);
+define("FILE_TYPE_GPS", 4);
 
 define("LOCATION_ANY", 0x00);
 define("LOCATION_CITY", 0x01);

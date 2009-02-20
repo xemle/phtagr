@@ -5,18 +5,8 @@ class Comment extends AppModel {
 
   //The Associations below have been created with all possible keys, those that are not needed can be removed
   var $belongsTo = array(
-      'Medium' => array('className' => 'Medium',
-                'foreignKey' => 'image_id',
-                'conditions' => '',
-                'fields' => '',
-                'order' => ''
-      ),
-      'User' => array('className' => 'User',
-                'foreignKey' => 'user_id',
-                'conditions' => '',
-                'fields' => '',
-                'order' => ''
-      )
+      'Medium' => array('foreignKey' => 'medium_id'),
+      'User' => array()
   );
 
   var $validate = array(

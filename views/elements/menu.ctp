@@ -12,7 +12,7 @@
     $myImages = false;
     if (isset($query)) {
       $query->initialize();
-      $myImages = $query->get('myimage');
+      $myImages = $query->get('mymedium');
     }
     $items[] = array(
       'text' => 'Explorer', 

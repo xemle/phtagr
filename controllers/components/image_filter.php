@@ -21,9 +21,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-class ImageFilterComponent extends Object {
+class ImageFilterComponent extends BaseFilterComponent {
 
-  var $controller = null;
   var $components = array('Logger');
 
   var $locationMap = array(
@@ -36,25 +35,63 @@ class ImageFilterComponent extends Object {
     $this->controller =& $controller;
   }
 
-  /** Read the meta data from the file 
-   * @param image Image data model
-   * @param filename Optional filename for import meta data
-   * @return The image data array or False on error */
-  function readFile($image, $filename = false) {
-    if (!$filename)
-      $filename = $this->controller->Image->getFilename($image);
-    if (!file_exists($filename) || !is_readable($filename)) {
-      $this->Logger->warn("File: $filename does not exists nor is readable");
-      $this->Logger->trace($image);
-      return false;
-    }
+  function getName() {
+    return "Image";
+  }
 
+  function getExtensions() {
+    return array('jpeg', 'jpg');
+  }
+
+  /** Read the meta data from the file 
+   * @param file File model data
+   * @param medium Reference of Medium model data
+   * @param options Options
+   *  - noSave if set dont save model data
+   * @return The image data array or False on error */
+  function read($file, &$medium, $options = array()) {
+    $options = am(array('noSave' => false), $options);
+    $filename = $this->MyFile->getFilename($file);
     $meta = $this->_readMetaData($filename);
     if ($meta === false) {
       return false;
     }
 
-    return $this->_extractImageData(&$image, $meta);
+    $isNew = false;
+    if (!$medium) {
+      $medium = $this->Medium->create(array(
+        'user_id' => $file['File']['user_id'],
+        'type' => MEDIUM_TYPE_IMAGE
+        ), true);
+      $this->Logger->debug($medium);
+      $isNew = true;
+    };
+
+    $this->_extractImageData(&$medium, $meta);
+    if ($options['noSave']) {
+      return 1;
+    } elseif (!$this->Medium->save($medium)) {
+      $this->Logger->err("Could not save Medium");
+      $this->Logger->trace($medium);
+      return -1;
+    } elseif ($isNew) {
+      $mediumId = $this->Medium->getLastInsertID();
+      $file['File']['medium_id'] = $mediumId;
+      if (!$this->MyFile->save($file['File'], true, array('medium_id'))) {
+        $this->$this->Logger->err("Could not link file {$file['File']['id']} to medium $mediumId");
+        $this->Medium->delete($mediumId);
+        return -1;
+      } else {
+        $this->Logger->info("Created new Medium (id $mediumId)");
+      }
+    } else {
+      $this->Logger->verbose("Updated medium (id ".$medium['Medium']['id'].")");
+    }
+    $file['File']['readed'] = date("Y-m-d H:i:s", time());
+    if (!$this->MyFile->save($file['File'], true, array('readed'))) {
+      $this->$this->Logger->warn("Could not update file {$file['File']['id']}");
+    }
+    return 1;
   }
 
   /** Clear image metadata from a file
@@ -115,7 +152,7 @@ class ImageFilterComponent extends Object {
    * IPTC has the priority. 
     @param data Meta data 
     @return Date of the meta data or now if not data information was found */
-  function _extractImageDate($data) {
+  function _extractMediumDate($data) {
     // IPTC date
     $dateIptc = $this->_extract($data, 'DateCreated', null);
     if ($dateIptc) {
@@ -131,20 +168,20 @@ class ImageFilterComponent extends Object {
     return $this->_extract($data, 'DateTimeOriginal', date('Y-m-d H:i:s', time()));
   }
 
-  /** Extract the image data from the exif tool array and save it as image 
+  /** Extract the image data from the exif tool array and save it as Medium
    * @param data Data array from exif tool array 
    * @return Array of the the image data array as image model data 
    */
-  function _extractImageData($image, $data) {
+  function _extractImageData($medium, $data) {
     $user = $this->controller->getUser();
 
-    $v = &$image['Image'];
+    $v = &$medium['Medium'];
 
-    // Image information
+    // Medium information
     $v['name'] = $this->_extract($data, 'FileName');
     // TODO Read IPTC date, than EXIF date
-    $v['date'] = $this->_extractImageDate($data);
-    if (!$this->controller->Image->isVideo($image)) {
+    $v['date'] = $this->_extractMediumDate($data);
+    if ($v['type'] == MEDIUM_TYPE_IMAGE) {
       $v['width'] = $this->_extract($data, 'ImageWidth', 0);
       $v['height'] = $this->_extract($data, 'ImageHeight', 0);
       $v['duration'] = -1;
@@ -172,12 +209,12 @@ class ImageFilterComponent extends Object {
     $keywords = $this->_extract($data, 'Keywords');
     $ids = $this->controller->Tag->createIdListFromText($keywords, 'name', true);
     if (count($ids) > 0)
-      $image['Tag']['Tag'] = am($ids, set::extract($image, 'Tag.{n}.id'));
+      $medium['Tag']['Tag'] = am($ids, set::extract($medium, 'Tag.{n}.id'));
     
     $categories = $this->_extract($data, 'SupplementalCategories');
     $ids = $this->controller->Category->createIdListFromText($categories, 'name', true);
     if (count($ids) > 0)
-      $image['Category']['Category'] = am($ids, set::extract($image, 'Category.{n}.id'));
+      $medium['Category']['Category'] = am($ids, set::extract($medium, 'Category.{n}.id'));
   
     // City, Sub-location, Province-State, Country-PrimaryLocationName
     $items = array();
@@ -188,19 +225,22 @@ class ImageFilterComponent extends Object {
     }
     $ids = $this->controller->Location->createIdList($items, true);
     if (count($ids) > 0)
-      $image['Location']['Location'] = am($ids,  set::extract($image, 'Location.{n}.id'));
+      $medium['Location']['Location'] = am($ids,  set::extract($medium, 'Location.{n}.id'));
 
-    return $image;
+    return $medium;
   }
 
   /** Write the meta data to an image file 
-   * @param data Image data
-   * @param filename Optional filename for export meta data
+   * @param file File model data
+   * @param medium Medium model data
+   * @param options Array of options
    * @return False on error */
-  function writeFile($image, $filename = false) {
-    if (!$filename)
-      $filename = $this->controller->Image->getFilename($image);
-
+  function write($file, $medium = null, $options = array()) {
+    if (!$file || !$medium) {
+      $this->Logger->err("File or medium is empty");
+      return false;
+    }
+    $filename = $this->MyFile->getFilename($file);
     if (!file_exists($filename) || !is_writeable(dirname($filename)) || !is_writeable($filename)) {
       $this->Logger->warn("File: $filename does not exists nor is readable");
       return false;
@@ -208,17 +248,16 @@ class ImageFilterComponent extends Object {
 
     $data = $this->_readMetaData($filename);
     if ($data === false) {
+      $this->Logger->warn("File has no metadata!");
       return false;
     }
 
-    $args = $this->_createExportArguments($data, $image);
+    $args = $this->_createExportArguments($data, $medium);
     if ($args == '') {
       $this->Logger->debug("File '$filename' has no metadata changes");
-      $update = array();
-      $update['id'] = $image['Image']['id'];
-      $update['flag'] = ($image['Image']['flag'] ^ IMAGE_FLAG_DIRTY) & 0xff;
-      if (!$this->controller->Image->save(array("Image" => $update), true, array_keys($update)))
-        $this->controller->warn("Could not update image data of image {$image['Image']['id']}");
+      if (!$this->Medium->deleteFlag($medium, MEDIUM_FLAG_DIRTY)) {
+        $this->controller->warn("Could not update image data of medium {$medium['Medium']['id']}");
+      }
       return true;
     }
 
@@ -249,18 +288,10 @@ class ImageFilterComponent extends Object {
       unlink($tmp2);
     }
     
-    // update new filesize and filetime
-    @clearstatcache();
-    $update = array();
-    $update['id'] = $image['Image']['id'];
-    if (!$this->controller->Image->isVideo($filename)) {
-      $update['bytes'] = filesize($filename);
-      $update['filetime'] = date("Y-m-d H:i:s", filemtime($filename));
+    $this->MyFile->update($file);
+    if (!$this->Medium->deleteFlag($medium, MEDIUM_FLAG_DIRTY)) {
+      $this->controller->warn("Could not update image data of medium {$medium['Medium']['id']}");
     }
-    $update['flag'] = ($image['Image']['flag'] ^ IMAGE_FLAG_DIRTY) & 0xff;
-    if (!$this->controller->Image->save(array("Image" => $update), true, array_keys($update)))
-      $this->controller->warn("Could not update image data of image {$image['Image']['id']}");
-    return true;
   }
 
   /** Creates the export arguments for date for IPTC if date information of the
@@ -269,14 +300,14 @@ class ImageFilterComponent extends Object {
     @param image Model data of the current image
     @return export arguments or an empty string 
     @note IPTC dates are set in the default timezone */
-  function _createExportDate($data, $image) {
+  function _createExportDate($data, $medium) {
     // Remove IPTC data and time if database date is not set
-    if (!$image['Image']['date']) {
+    if (!$medium['Medium']['date']) {
       $arg .= ' -DateCreated-= -TimeCreated-=';
       return '';
     }
 
-    $timeDb = strtotime($image['Image']['date']);
+    $timeDb = strtotime($medium['Medium']['date']);
     $timeFile = false;
 
     // Date priorities: IPTC, EXIF
@@ -306,7 +337,7 @@ class ImageFilterComponent extends Object {
     return $arg;
   }
 
-  function _createExportGps(&$data, &$image) {
+  function _createExportGps(&$data, &$medium) {
     $args = '';
 
     $latitude = $this->_extract($data, 'GPSLatitude', null);
@@ -314,16 +345,19 @@ class ImageFilterComponent extends Object {
     $longitude = $this->_extract($data, 'GPSLongitude', null);
     $longitudeRef = $this->_extract($data, 'GPSLongitudeRef', null);
     if ($latitude && $latitudeRef && $longitude && $longitudeRef) {
-      if ($latitudeRef == 'S')
+      if ($latitudeRef == 'S') {
         $latitude *= -1;
-      if ($longitudeRef == 'W')
+      }
+      if ($longitudeRef == 'W') {
         $longitude *= -1;
+      }
     } else {
       $latitude = null;
       $longitude = null;
     }
-    $latitudeDb = $image['Image']['latitude'];
-    if (!$latitude || $latitude != $latitudeDb) {
+    $latitudeDb = $medium['Medium']['latitude'];
+    $this->Logger->debug("$latitude || $latitude != $latitudeDb");
+    if ($latitude != $latitudeDb) {
       if (!$latitudeDb) {
         $latitudeRef = '';
         $latitudeDb = '';
@@ -338,8 +372,8 @@ class ImageFilterComponent extends Object {
     }
     $longitude = $this->_extract($data, 'GPSLongitude', null);
     $longitudeRef = $this->_extract($data, 'GPSLongitudeRef', null);
-    $longitudeDb = $image['Image']['longitude'];
-    if (!$longitude || $longitude != $longitudeDb) {
+    $longitudeDb = $medium['Medium']['longitude'];
+    if ($longitude != $longitudeDb) {
       if (!$longitudeDb) {
         $longitudeRef = '';
         $longitudeDb = '';
@@ -358,12 +392,12 @@ class ImageFilterComponent extends Object {
 
   /** Create arguments to export the metadata from the database to the file.
     * @param data metadata from the file (Exiftool information)
-    * @param image Image data array */
-  function _createExportArguments($data, $image) {
+    * @param image Medium data array */
+  function _createExportArguments($data, $medium) {
     $args = '';
 
-    $args .= $this->_createExportDate($data, $image);
-    $args .= $this->_createExportGps($data, $image);
+    $args .= $this->_createExportDate($data, $medium);
+    $args .= $this->_createExportGps($data, $medium);
 
     // Associations to meta data: Tags, Categories, Locations
     $keywords = $this->_extract($data, 'Keywords');
@@ -372,8 +406,8 @@ class ImageFilterComponent extends Object {
     else
       $fileTags = array();
 
-    if (count($image['Tag']))
-      $dbTags = Set::extract($image, "Tag.{n}.name");
+    if (count($medium['Tag']))
+      $dbTags = Set::extract($medium, "Tag.{n}.name");
     else
       $dbTags = array();
 
@@ -388,8 +422,8 @@ class ImageFilterComponent extends Object {
     else
       $fileCategories = array();
 
-    if (count($image['Category']))
-      $dbCategories = Set::extract($image, "Category.{n}.name");
+    if (count($medium['Category']))
+      $dbCategories = Set::extract($medium, "Category.{n}.name");
     else
       $dbCategories = array();
 
@@ -399,8 +433,8 @@ class ImageFilterComponent extends Object {
       $args .= " -SupplementalCategories+=".escapeshellarg($add);
 
     // Locations
-    if (count($image['Location']))
-      $dbLocations = Set::combine($image, "Location.{n}.type", "Location.{n}.name");
+    if (count($medium['Location']))
+      $dbLocations = Set::combine($medium, "Location.{n}.type", "Location.{n}.name");
     else
       $dbLocations = array();
 

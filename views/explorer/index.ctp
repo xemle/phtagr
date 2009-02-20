@@ -19,7 +19,7 @@ function startSlideshow() {
 
 <div class="thumbs">
 <script type="text/javascript">
-  var imageData = [];
+  var mediaData = [];
 </script>
 <?php
 $query->initialize();
@@ -28,44 +28,44 @@ $canWriteTag=false;
 $canWriteMeta=false;
 $canWriteAcl=false;
 $pos = ($query->get('page', 1)-1) * $query->get('show', 12) + 1;
-foreach($data as $image): ?>
+foreach($data as $medium): ?>
 <?php $side = $cell % 2 ? 'r' : 'l'; ?>
 <?php if (!($cell % 2)): ?><div class="subcolumns"><?php endif; ?>
-<div class="c50<?=$side; ?>"><div class="subc<?=$side; ?> unselected thumb" id="image-<?= $image['Image']['id'];?>" >
+<div class="c50<?=$side; ?>"><div class="subc<?=$side; ?> unselected thumb" id="medium-<?= $medium['Medium']['id'];?>" >
 <script type="text/javascript">
-  imageData[<?php echo $image['Image']['id']; ?>] = [];
+  mediaData[<?php echo $medium['Medium']['id']; ?>] = [];
 </script>
-<h2><?php echo $image['Image']['file']; ?></h2>
+<h2><?php echo $medium['Medium']['name']; ?></h2>
 <div class="image">
 <?php 
-  $size = $imageData->getimagesize($image, OUTPUT_SIZE_THUMB);
+  $size = $imageData->getimagesize($medium, OUTPUT_SIZE_THUMB);
   $query->set('pos', $pos++);
-  echo "<a href=\"".Router::url("/images/view/".$image['Image']['id'].'/'.$query->getParams())."\">";
-  echo "<img src=\"".Router::url("/media/thumb/".$image['Image']['id'])."\" $size[3] alt=\"".$image['Image']['name']."\"/>"; 
+  echo "<a href=\"".Router::url("/images/view/".$medium['Medium']['id'].'/'.$query->getParams())."\">";
+  echo "<img src=\"".Router::url("/media/thumb/".$medium['Medium']['id'])."\" $size[3] alt=\"".$medium['Medium']['name']."\"/>"; 
   echo "</a>";
 
-  if ($image['Image']['canWriteTag'])
+  if ($medium['Medium']['canWriteTag'])
     $canWriteTag=true;
-  if ($image['Image']['canWriteMeta'])
+  if ($medium['Medium']['canWriteMeta'])
     $canWriteMeta=true;
-  if ($image['Image']['canWriteAcl'])
+  if ($medium['Medium']['canWriteAcl'])
     $canWriteAcl=true;
 ?>
 </div>
 
 <?php 
-  if (!$query->get('myimage')): ?>
+  if (!$query->get('mymedium')): ?>
 <div class="user">
 <?php
-  echo $html->link($image['User']['username'], "/explorer/user/".$image['User']['id']);
+  echo $html->link($medium['User']['username'], "/explorer/user/".$medium['User']['id']);
 ?>
 </div>
 <?php endif; ?>
 
 <div class="meta">
-<div id="<?php echo 'meta-'.$image['Image']['id']; ?>">
+<div id="<?php echo 'meta-'.$medium['Medium']['id']; ?>">
 <table>
-  <?php echo $html->tableCells($imageData->metaTable(&$image)); ?>
+  <?php echo $html->tableCells($imageData->metaTable(&$medium)); ?>
 </table>
 </div>
 </div><!-- meta -->
@@ -96,10 +96,10 @@ foreach($data as $image): ?>
   echo $form->create(null, array('id' => 'explorer', 'action' => 'edit/'.$query->getParams())); 
 ?>
 <fieldset><legend>Metadata</legend>
-<?php echo $form->hidden('Image.ids', array('id' => 'ImageIds')) ?>
+<?php echo $form->hidden('Medium.ids', array('id' => 'MediumIds')) ?>
 <?php 
   if ($canWriteMeta) {
-    echo $form->input('Image.date', array('type' => 'text', 'after' => '<span class="hint">E.g. 2008-08-07 15:30</span>')); 
+    echo $form->input('Medium.date', array('type' => 'text', 'after' => '<span class="hint">E.g. 2008-08-07 15:30</span>')); 
   }
   echo $form->input('Tags.text', array('label' => 'Tags', 'maxlength' => 320, 'after' => '<span class="hint">E.g. newtag, -oldtag</span>')); 
   if ($canWriteMeta) {

@@ -45,11 +45,11 @@ var toggleVisibility = function(id, type) {
   }
 }.defaults(-1, 'block');
 
-var selectImage = function(id) {
+var selectMedium = function(id) {
   var e = document.getElementById('select-'+id);
   if (!e)
     return false;
-  var thumb = document.getElementById('image-'+id);
+  var thumb = document.getElementById('medium-'+id);
 
   var add = false;
   if (e.checked) {
@@ -60,7 +60,7 @@ var selectImage = function(id) {
   }
 
   // adapt the id list for the hidden input
-  var list = document.getElementById('ImageIds');
+  var list = document.getElementById('MediumIds');
   var ids;
   if (list.value.length > 0)
     ids = list.value.split(',');
@@ -85,23 +85,23 @@ var selectImage = function(id) {
 
 var thumbSelectAll = function() {
   var e = null;
-  for(var id in imageData) {
+  for(var id in mediaData) {
     e = document.getElementById('select-'+id);
     if (!e)
       continue;
     e.checked = true;
-    selectImage(id);
+    selectMedium(id);
   }
 };
 
 var thumbSelectInvert = function() {
   var e = null;
-  for(var id in imageData) {
+  for(var id in mediaData) {
     e = document.getElementById('select-'+id);
     if (!e)
       continue;
     e.checked = !e.checked;
-    selectImage(id);
+    selectMedium(id);
   }
 };
 

@@ -1,6 +1,6 @@
 <?php 
-  $imageId = $data['Image']['id'];
-  echo $ajax->form('savemeta/'.$imageId, 'post', array('url' => '/explorer/savemeta/'.$imageId, 'update' => 'meta-'.$imageId, 'id' => 'form-meta-'.$imageId)); 
+  $mediumId = $data['Medium']['id'];
+  echo $ajax->form('savemeta/'.$mediumId, 'post', array('url' => '/explorer/savemeta/'.$mediumId, 'update' => 'meta-'.$mediumId, 'id' => 'form-meta-'.$mediumId)); 
 ?>
 <fieldset>
 <?php
@@ -11,6 +11,6 @@
 </fieldset>
 <?php
   echo $form->submit('Save', array('div' => false)); 
-  echo $ajax->link('Cancel', '/explorer/updatemeta/'.$imageId, array('update' => 'meta-'.$imageId, 'class' => 'reset'));
+  echo $ajax->link('Cancel', '/explorer/updatemeta/'.$mediumId, array('update' => 'meta-'.$mediumId, 'class' => 'reset'));
 ?>
 </form>

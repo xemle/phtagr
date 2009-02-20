@@ -113,12 +113,27 @@ class MyFile extends AppModel
       $data = $this->data;
     }
 
-    if (!isset($data['File']['path']) || 
-      !isset($data['File']['file'])) {
+    if (isset($data['File'])) {
+      $data =& $data['File'];
+    }
+    if (!isset($data['path']) || 
+      !isset($data['file'])) {
       return false;
     }
     
-    return $data['File']['path'].$data['File']['file'];
+    return $data['path'].$data['file'];
+  }
+
+  function hasMedium($data = null) {
+    if (!$data) {
+      $data = $this->data;
+    }
+
+    if (isset($data['File']['medium_id']) && $data['File']['medium_id'] > 0) {
+      return true;
+    }
+    
+    return false;
   }
 
   /** Checks if a user can read the original file 

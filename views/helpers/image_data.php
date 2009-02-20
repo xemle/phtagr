@@ -25,9 +25,9 @@ class ImageDataHelper extends AppHelper {
   var $helpers = array('time', 'ajax', 'html', 'form', 'query');
 
   function getimagesize($data, $size, $square=false) {
-    if (!isset($data['Image']['width']) ||
-      !isset($data['Image']['height']) ||
-      !isset($data['Image']['orientation'])) {
+    if (!isset($data['Medium']['width']) ||
+      !isset($data['Medium']['height']) ||
+      !isset($data['Medium']['orientation'])) {
       $result = array();
       $result[0] = 0;
       $result[1] = 0;
@@ -38,8 +38,8 @@ class ImageDataHelper extends AppHelper {
       $width=$size;
       $height=$size;
     } else {
-      $width=$data['Image']['width'];
-      $height=$data['Image']['height'];
+      $width=$data['Medium']['width'];
+      $height=$data['Medium']['height'];
       if ($width > $size && $width>=$height) {
         $height=intval($size*($height/$width));
         $width=$size;
@@ -51,7 +51,7 @@ class ImageDataHelper extends AppHelper {
     $result = array();
 
     // Rotate the image according to the orientation
-    $orientation = $data['Image']['orientation'];
+    $orientation = $data['Medium']['orientation'];
     if ($orientation >= 5 && $orientation <= 8) {
       $result[0] = $height;
       $result[1] = $width;
@@ -66,10 +66,10 @@ class ImageDataHelper extends AppHelper {
   }
   
   function toUnix($data, $offset=0) {
-    if (!isset($data['Image']['date']))
+    if (!isset($data['Medium']['date']))
       return -1;
 
-    $sec=$this->time->toUnix($data['Image']['date']);
+    $sec=$this->time->toUnix($data['Medium']['date']);
     return $sec+$offset;
   }
 
@@ -93,9 +93,9 @@ class ImageDataHelper extends AppHelper {
 
   /** Returns an text repesentation of the acl */
   function _acl2text($data) {
-    $output = $this->_acl2icon($data['Image']['gacl']).',';
-    $output .= $this->_acl2icon($data['Image']['uacl']).',';
-    $output .= $this->_acl2icon($data['Image']['oacl']);
+    $output = $this->_acl2icon($data['Medium']['gacl']).',';
+    $output .= $this->_acl2icon($data['Medium']['uacl']).',';
+    $output .= $this->_acl2icon($data['Medium']['oacl']);
     return $output;
   }
 
@@ -104,7 +104,7 @@ class ImageDataHelper extends AppHelper {
 
     $this->query->set('from', $this->toUnix(&$data, -3*60*60));
     $this->query->set('to', $this->toUnix(&$data, 3*60*60));
-    $output = $this->html->link($data['Image']['date'], $this->query->getUri());
+    $output = $this->html->link($data['Medium']['date'], $this->query->getUri());
     $output .= ' [';
 
     $this->query->setQuery($base);
@@ -168,7 +168,7 @@ class ImageDataHelper extends AppHelper {
     if (!$data) 
       return $cells;
 
-    $imageId = $data['Image']['id'];
+    $imageId = $data['Medium']['id'];
 
     $this->query->initialize();
     $tmpQuery = $this->query->getQuery();
@@ -191,42 +191,42 @@ class ImageDataHelper extends AppHelper {
       $cells[] = array('Locations:', $this->_metaHabtm(&$data, 'Location'));
     }
 
-    if ($data['Image']['isOwner']) {
+    if ($data['Medium']['isOwner']) {
       $cells[] = array('Access:', $this->_metaAccess($data));
     }
     
     // Action list 
     $output = '';
-    if ($data['Image']['canWriteTag']) {
-      $output = $this->form->checkbox('selected][', array('value' => $imageId, 'id' => 'select-'.$imageId, 'onclick' => "selectImage($imageId);"));
+    if ($data['Medium']['canWriteTag']) {
+      $output = $this->form->checkbox('selected][', array('value' => $imageId, 'id' => 'select-'.$imageId, 'onclick' => "selectMedium($imageId);"));
     }
 
-    if ($data['Image']['canWriteTag'])
+    if ($data['Medium']['canWriteTag'])
       $output .= ' '.$this->ajax->link(
         $this->html->image('icons/tag_blue_edit.png', array('alt' => 'Edit tags', 'title' => 'Edit tags')), 
         '/explorer/editmeta/'.$imageId, 
         array('update' => 'meta-'.$imageId), null, false);
-    if ($data['Image']['canReadOriginal'])
+    if ($data['Medium']['canReadOriginal'])
       $output .= ' '.$this->html->link(
         $this->html->image('icons/disk.png', array('alt' => 'Save image', 'title' => 'Save image')), 
-        '/media/original/'.$imageId.'/'.$data['Image']['file'], null, null, false);
+        '/media/original/'.$imageId.'/'.$data['Medium']['name'], null, null, false);
 
-    if ($withMap && isset($data['Image']['latitude']) && isset($data['Image']['longitude'])) {
+    if ($withMap && isset($data['Medium']['latitude']) && isset($data['Medium']['longitude'])) {
       $output .= ' '.$this->html->link(
           $this->html->image('icons/map.png',
             array('alt' => 'Show location in a map', 'title' => 'Show location in a map')),
           '#',
-          array('onclick' => sprintf('showMap(%d, %f,%f);return false;', $data['Image']['id'], $data['Image']['latitude'],$data['Image']['longitude'])),
+          array('onclick' => sprintf('showMap(%d, %f,%f);return false;', $data['Medium']['id'], $data['Medium']['latitude'],$data['Medium']['longitude'])),
           null, false);
     }
     
-    if ($data['Image']['isOwner']) {
+    if ($data['Medium']['isOwner']) {
       $output .= ' '.$this->ajax->link(
         $this->html->image('icons/key.png', 
           array('alt' => 'Edit ACL', 'title' => 'Edit access rights')), 
         '/explorer/editacl/'.$imageId, 
         array('update' => 'meta-'.$imageId), null, false);
-      if ($data['Image']['isDirty'])
+      if ($data['Medium']['isDirty'])
         $output .= ' '.$this->ajax->link(
           $this->html->image('icons/database_refresh.png', 
             array('alt' => 'Synchronize db with image', 'title' => 'Synchronize meta data with the image')), 
@@ -244,12 +244,12 @@ class ImageDataHelper extends AppHelper {
   }
 
   function _getCurrentLevel($data, $flag, $mask) {
-    $data = am(array('Image' => array('oacl' => 0, 'uacl' => 0, 'gacl' => 0)), $data);
-    if (($data['Image']['oacl'] & $mask) >= $flag)
+    $data = am(array('Medium' => array('oacl' => 0, 'uacl' => 0, 'gacl' => 0)), $data);
+    if (($data['Medium']['oacl'] & $mask) >= $flag)
       return ACL_LEVEL_OTHER;
-    if (($data['Image']['uacl'] & $mask) >= $flag)
+    if (($data['Medium']['uacl'] & $mask) >= $flag)
       return ACL_LEVEL_USER;
-    if (($data['Image']['gacl'] & $mask) >= $flag)
+    if (($data['Medium']['gacl'] & $mask) >= $flag)
       return ACL_LEVEL_GROUP;
     return ACL_LEVEL_PRIVATE;
   }
@@ -277,7 +277,7 @@ class ImageDataHelper extends AppHelper {
     if ($level < ACL_LEVEL_KEEP|| $level > ACL_LEVEL_OTHER)
       $level = ACL_LEVEL_PRIVATE;
 
-    //$this->log($data['Image']);
+    //$this->log($data['Medium']);
     //$this->log("level=$level, flag=$flag, mask=$mask");
     $acl = array(
       ACL_LEVEL_KEEP => 'Keep',

@@ -69,6 +69,7 @@ class PhtagrSchema extends CakeSchema {
 			'file' => array('type'=>'string', 'null' => false, 'length' => 254), /* should be 255. Bug: Schema::read() removes default lengths, while Schema::compare() doesn't which causes unnecessary changes */
 			'size' => array('type'=>'integer', 'null' => false),
 			'time' => array('type'=>'datetime', 'null' => false),
+			'readed' => array('type'=>'datetime', 'null' => true, 'default' => NULL),
 			'indexes' => array('PRIMARY' => array('column' => 'id', 'unique' => 1), 'id' => array('column' => 'id', 'unique' => 0), 'user_id' => array('column' => 'user_id', 'unique' => 0), 'medium_id' => array('column' => 'medium_id', 'unique' => 0))
 		);
 	var $groups = array(
@@ -113,6 +114,7 @@ class PhtagrSchema extends CakeSchema {
 			'user_id' => array('type'=>'integer', 'null' => true, 'default' => NULL),
 			'group_id' => array('type'=>'integer', 'null' => true, 'default' => NULL),
 			'flag' => array('type'=>'integer', 'null' => true, 'default' => '0', 'length' => 3),
+			'type' => array('type'=>'integer', 'null' => true, 'default' => '0', 'length' => 3),
 			'gacl' => array('type'=>'integer', 'null' => true, 'default' => '0', 'length' => 3),
 			'uacl' => array('type'=>'integer', 'null' => true, 'default' => '0', 'length' => 3),
 			'oacl' => array('type'=>'integer', 'null' => true, 'default' => '0', 'length' => 3, 'key' => 'index'),

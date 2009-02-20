@@ -1,16 +1,16 @@
-<h1><?php echo $this->data['Image']['name'] ?></h1>
+<h1><?php echo $this->data['Medium']['name'] ?></h1>
 <?php $session->flash(); ?>
 
 
 <div class="paginator"><div class="subpaginator">
 <?php
-echo $query->prevImage().' '.$query->up().' '.$query->nextImage();
+echo $query->prevMedium().' '.$query->up().' '.$query->nextMedium();
 ?>
 </div></div>
 
 <?php
   $withMap = false;
-  if (isset($this->data['Image']['longitude']) && isset($this->data['Image']['latitude']) &&
+  if (isset($this->data['Medium']['longitude']) && isset($this->data['Medium']['latitude']) &&
     isset($mapKey)) {
     $withMap = true;
     echo $map->loadScripts($mapKey);
@@ -20,10 +20,10 @@ echo $query->prevImage().' '.$query->up().' '.$query->nextImage();
 
 <?php 
   $size = $imageData->getimagesize($this->data, OUTPUT_SIZE_PREVIEW);
-  echo "<img src=\"".Router::url("/media/preview/".$this->data['Image']['id'])."\" $size[3] alt=\"{$this->data['Image']['name']}\"/>"; ?>
+  echo "<img src=\"".Router::url("/media/preview/".$this->data['Medium']['id'])."\" $size[3] alt=\"{$this->data['Medium']['name']}\"/>"; ?>
 
 <div class="meta">
-<div id="<?php echo 'meta-'.$this->data['Image']['id']; ?>">
+<div id="<?php echo 'meta-'.$this->data['Medium']['id']; ?>">
 <table> 
   <?php echo $html->tableCells($imageData->metaTable(&$this->data, $withMap)); ?>
 </table>
