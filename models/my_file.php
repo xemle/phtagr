@@ -28,6 +28,17 @@ class MyFile extends AppModel
 
   var $belongsTo = array('Medium', 'User');
 
+  var $types = array(
+    FILE_TYPE_IMAGE => array('jpg', 'jpeg', 'png', 'gif'),
+    FILE_TYPE_SOUND => array('wav', 'mp3'),
+    FILE_TYPE_VIDEO => array('avi', 'mpg', 'mpeg', 'mov'),
+    FILE_TYPE_VIDEOTHUMB => array('thm'),
+    FILE_TYPE_TEXT => array('txt'),
+    FILE_TYPE_GPS => array('log')
+    );
+
+  var $actsAs = array('Type', 'Flag');
+
   /** Creates a model data for a file
     @param filename Filename
     @param userId user Id (required)
@@ -39,10 +50,12 @@ class MyFile extends AppModel
       $path = Folder::slashTerm($filename);
       $file = null;
       $size = 0;
+      $type = FILE_TYPE_DIRECTORY;
     } else {
       $path = Folder::slashTerm(dirname($filename));
       $file = basename($filename);
       $size = filesize($filename);
+      $type = $this->_getTypeFromFilename($filename);
     }
 
     $new = array();
@@ -51,10 +64,25 @@ class MyFile extends AppModel
     $new['File']['size'] = $size;
     $new['File']['time'] = date("Y-m-d H:i:s", filemtime($filename));
     $new['File']['flag'] = $flag;
+    $new['File']['type'] = $type;
     $new['File']['user_id'] = $userId;
     $new = parent::create($new, true);
 
     return $new;
+  }
+
+  /** Returns the file type of a filename
+    @param filename Filename of the file
+    @return Type of the file. If the type is not known it returns
+    FILE_TYPE_UNKNOWN */
+  function _getTypeFromFilename($filename) {
+    $ext = strtolower(substr($filename, strrpos($filename, '.') + 1));
+    foreach ($this->types as $type => $extensions) {
+      if (in_array($ext, $extensions)) {
+        return $type;
+      }
+    }
+    return FILE_TYPE_UNKNOWN;
   }
 
   /** Deletes the linked file (if the file is not external) and also deletes
@@ -69,8 +97,9 @@ class MyFile extends AppModel
         $this->Logger->verbose("Delete file $filename");
       }
       if ($this->hasFlag(null, FILE_FLAG_DEPENDENT) && 
-        isset($this->data['Medium']['id'])) {
-        $this->Media->delete($this->data['Medium']['id']);
+        $this->hasMedium()) {
+        $this->Logger->verbose("Delete medium {$this->data['Medium']['id']} from dependent file {$this->data['File']['id']}");
+        $this->Medium->delete($this->data['Medium']['id']);
       }
     }
     // prepare associations for deletion
@@ -124,16 +153,54 @@ class MyFile extends AppModel
     return $data['path'].$data['file'];
   }
 
+  function getExtension($data) {
+    if (!$data) {
+      $data = $this->data;
+    }
+    if (isset($data['File'])) {
+      $data = $data['File'];
+    }
+    if (!isset($data['file'])) {
+      $this->Logger->err("Precondition failed");
+      return false;
+    }
+    return strtolower(substr($data['file'], strrpos($data['file'], '.') + 1));
+  }
+
   function hasMedium($data = null) {
     if (!$data) {
       $data = $this->data;
     }
 
-    if (isset($data['File']['medium_id']) && $data['File']['medium_id'] > 0) {
+    if (isset($data['File'])) {
+      $data = $data['File'];
+    }
+    if (isset($data['medium_id']) && $data['medium_id'] > 0) {
       return true;
     }
     
     return false;
+  }
+
+  function setMedium($data = null, $mediumId) {
+    if (!$data) {
+      $data = $this->data;
+    }
+
+    if (isset($data['File'])) {
+      $data = $data['File'];
+    }
+
+    if (!isset($data['id']) || !intval($mediumId)) {
+      $this->Logger->err("Precondition failed");
+      return false;
+    }
+    $data['medium_id'] = $mediumId;
+    if (!$this->save($data, true, array('medium_id'))) {
+      $this->Logger->err("Could not bind medium $mediumId to file {$data['id']}");
+      return false;
+    }
+    return true;
   }
 
   /** Checks if a user can read the original file 
@@ -176,6 +243,7 @@ class MyFile extends AppModel
     }
     return false;
   }
+
   /** Count used bytes of a user
     @param userId User id
     @param includeExternal Set true to include also external files. Default is
@@ -188,29 +256,6 @@ class MyFile extends AppModel
     }
     $result = $this->findAll($conditions, array('SUM(File.size) AS bytes'));
     return intval($result[0][0]['bytes']);
-  }
-
-  /** Evaluates a flag of the model data 
-    @param data Model data. If null, use current data
-    @param flag to evaluate
-    @return True if the flag is set, false otherwise. On error it returns null
-    */
-  function hasFlag($data, $flag) {
-    if (!$data) {
-      $data = $this->data;
-    }
-
-    if (!isset($data['File']['flag'])) {
-      $this->Logger->err("Invalid data");
-      $this->Logger->debug($data);
-      return null;
-    }
-
-    if ($data['File']['flag'] & $flag > 0) {
-      return true;
-    } else {
-      return false;
-    }
   }
 
   /** Updates the file size and time to the model data 
@@ -231,6 +276,25 @@ class MyFile extends AppModel
         $this->Logger->debug("Update file type and size of $filename");
       }
     }
+  }
+
+  function updateReaded($data = null) {
+    if (!$data) {
+      $data = $this->data;
+    }
+    if (isset($data['File'])) {
+      $data = $data['File'];
+    }
+    if (!isset($data['id'])) {
+      $this->Logger->err("Precondition failed");
+      return false;
+    }
+    $data['readed'] = date("Y-m-d H:i:s", time());
+    if (!$this->save($data, true, array('readed'))) {
+      $this->Logger->err("could not save data");
+      return false;
+    }
+    return true;
   }
 
   function move($src, $dst) {

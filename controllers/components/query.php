@@ -466,9 +466,8 @@ class QueryComponent extends Object
       return $date;
 
     // YYYY-MM-DD
-    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
-      $a=split('-', $s);
-      $sec=mktime(0, 0, 0, $a[1], $a[2], $a[0]);
+    if (preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $date, $a)) {
+      $sec = mktime(0, 0, 0, $a[2], $a[3], $a[1]);
       return $sec;
     }
     return false;

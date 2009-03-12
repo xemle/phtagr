@@ -32,21 +32,22 @@ class FileCacheComponent extends Object {
 
   /** Returns the cache path of the user
     @param userId Id of the current user
-    @param imageId Id of the current image/file
+    @param mediumId Id of the current image/file
     @param create Creates the directory if true. If false and the directory
     does not exists, it returns false. Default is true.
     @return Path for the cache file. False on error */
-  function getPath($userId, $imageId, $create = true) {
+  function getPath($userId, $mediumId, $create = true) {
     $userId = intval($userId);
-    $imageId = intval($imageId);
+    $mediumId = intval($mediumId);
 
     $cacheDir = USER_DIR.$userId.DS.'cache'.DS;
-    $dir = intval($imageId/1000);
+    $dir = intval($mediumId/1000);
     $cacheDir .= sprintf("%04d", $dir).DS;
 
     if (!is_dir($cacheDir)) {
-      if (!$create)
+      if (!$create) {
         return false;
+      }
 
       $folder =& new Folder($cacheDir);
       if (!$folder->create($cacheDir)) {
@@ -60,37 +61,55 @@ class FileCacheComponent extends Object {
   }
 
   /** Returns the filename prefix of the cache file
-    @param imageId Id of the current image/file
+    @param mediumId Id of the current image/file
     @return filename prefix */
-  function getFilenamePrefix($imageId) {
-    $imageId = intval($imageId);
+  function getFilenamePrefix($mediumId) {
+    $mediumId = intval($mediumId);
 
-    $prefix = sprintf("%07d-", $imageId);
+    $prefix = sprintf("%07d-", $mediumId);
     return $prefix;
+  }
+
+  /** Returns the full cache filename prefix of a medium
+    @param medium Medium model data
+    @param cache filename prefix */
+  function getFilename($medium) {
+    if (!isset($medium['Medium']['id']) || !isset($medium['Medium']['user_id'])) {
+      $this->Logger->err("Precondition failed");
+      return false;
+    }
+    $userId = $medium['Medium']['user_id'];
+    $mediumId = $medium['Medium']['id'];
+
+    $path = $this->getPath($userId, $mediumId);
+    if (!$path) {
+      return false;
+    }
+    return $path.$this->getFilenamePrefix($mediumId);
   }
 
   /** Deletes all cached files of a specific image/file.
     @param userId Id of the current user
-    @param imageId Id of the current image/file */
-  function delete($userId, $imageId) {
-    $imageId = intval($imageId);
-    $cacheDir = $this->getPath($userId, $imageId, false);
+    @param mediumId Id of the current image/file */
+  function delete($userId, $mediumId) {
+    $mediumId = intval($mediumId);
+    $cacheDir = $this->getPath($userId, $mediumId, false);
     if (!$cacheDir) {
-      $this->Logger->trace("No cache dir found for image $imageId");
+      $this->Logger->trace("No cache dir found for image $mediumId");
       return true;
     }
 
     $folder =& new Folder($cacheDir);
-    $pattern = $this->getFilenamePrefix($imageId).'.*';
+    $pattern = $this->getFilenamePrefix($mediumId).'.*';
     $files = $folder->find($pattern);
     if ($files) {
-      $this->Logger->debug("Delete cached files of image $imageId");
+      $this->Logger->debug("Delete cached files of image $mediumId");
       foreach($files as $file) {
         $this->Logger->trace("Delete cache file '$file'");
         unlink($folder->addPathElement($cacheDir, $file));
       }
     } else {
-      $this->Logger->trace("No cached files found for image $imageId");
+      $this->Logger->trace("No cached files found for image $mediumId");
     }
   }
 

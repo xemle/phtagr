@@ -27,7 +27,7 @@ if (!App::import('Vendor', "phpthumb", true, array(), "phpthumb.class.php")) {
 class MediaController extends AppController
 {
   var $name = 'Media';
-  var $uses = array('Medium');
+  var $uses = array('Medium', 'MyFile');
   var $layout = null;
   var $_outputMap = array(
                       OUTPUT_TYPE_MINI => array('size' => OUTPUT_SIZE_MINI, 'square' => true),
@@ -36,7 +36,7 @@ class MediaController extends AppController
                       OUTPUT_TYPE_HIGH => array('size' => OUTPUT_SIZE_HIGH, 'quality' => 90),
                       OUTPUT_TYPE_VIDEO => array('size' => OUTPUT_SIZE_VIDEO, 'bitrate' => OUTPUT_BITRATE_VIDEO)
                     );
-  var $components = array('ImageResizer', 'FileCache');
+  var $components = array('ImageResizer', 'VideoPreview', 'FlashVideo', 'FileCache');
 
   function beforeFilter() {
     // Reduce security level for this controller if required. Security level
@@ -145,7 +145,7 @@ class MediaController extends AppController
     @return filename of image */
   function _getSourceFile($medium) {
     if ($this->Medium->isType($medium, MEDIUM_TYPE_VIDEO)) {
-      $sourceFilename = $this->VideoFilter->getVideoPreviewFilename($medium);
+      $sourceFilename = $this->VideoPreview->getPreviewFilename($medium);
     } else {
       $sourceFilename = $this->Medium->File->getFilename($medium['File'][0]);
     }
@@ -196,19 +196,6 @@ class MediaController extends AppController
     $this->set($mediaOptions);
   }
 
-  function _scaleSize($medium, $size) {
-    $width = $medium['Medium']['width'];
-    $height = $medium['Medium']['height'];
-    if ($width > $size && $width > $height) {
-      $height = intval($size * $height / $width);
-      $width = $size;
-    } elseif ($height > $size) {
-      $width = intval($size * $width / $height);
-      $height = $size;
-    }
-    return array($width, $height);
-  }
-
   function _createFlashVideo($id, $outputType) {
     $id = intval($id);
     if (!isset($this->_outputMap[$outputType])) {
@@ -217,53 +204,8 @@ class MediaController extends AppController
     }
 
     $medium = $this->_getMedium($id, $outputType);
-    if (!$this->Medium->isVideo($medium)) {
-      $this->err("Requested resource is no video");
-      $this->redirect(null, 404);
-    }
+    $flashFilename = $this->FlashVideo->create($medium, $this->_outputMap[$outputType]);
 
-    $src = $this->Medium->getFilename($medium);
-    $cacheDir = $this->_getCacheDir($medium);
-    if (!$cacheDir) {
-      $this->fatal("Precondition of cache directory failed: $cacheDir");
-      die("Precondition of cache directory failed");
-    }
-
-    $options = $this->_outputMap[$outputType];
-    $flashFilename = $cacheDir.$this->_getCacheFilename($id, $options['size'], 'flv');
-
-    if (!file_exists($flashFilename)) {
-      $bin = $this->getOption('bin.ffmpeg', 'ffmpeg');
-      list($width, $height) = $this->_scaleSize($medium, $options['size']);
-      $command = "$bin -i ".escapeshellarg($src)." -s {$width}x{$height} -r 15 -b {$options['bitrate']} -ar 22050 -ab 48 -y ".escapeshellarg($flashFilename);
-      $output = array();
-      $result = -1;
-      $t1 = getMicrotime();
-      exec($command, &$output, &$result);
-      $t2 = getMicrotime();
-      $this->Logger->debug("Command '$command' returnd $result and required ".round($t2-$t1, 4)."ms");
-      if ($result != 0) {
-        $this->Logger->err("Command '$command' returned unexcpected $result");
-        $this->redirect(null, 500);
-      } else {
-        $this->Logger->info("Created flash video '$flashFilename' of '$src'");
-      }
-      
-      $bin = $this->getOption('bin.flvtool2', 'flvtool2');
-      $command = "$bin -U ".escapeshellarg($flashFilename);
-      $output = array();
-      $result = -1;
-      $t1 = getMicrotime();
-      exec($command, &$output, &$result);
-      $t2 = getMicrotime();
-      $this->Logger->debug("Command '$command' returnd $result and required ".round($t2-$t1, 4)."ms");
-      if ($result != 0) {
-        $this->Logger->err("Command '$command' returned unexcpected $result");
-        $this->redirect(null, 500);
-      } else {
-        $this->Logger->info("Updated flash video '$flashFilename' with meta tags");
-      }
-    }
     if (!is_file($flashFilename)) { 
       $this->Logger->err("Could not create preview file {$flashFilename}");
       $this->redirect(null, 500);

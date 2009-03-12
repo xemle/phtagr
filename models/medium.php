@@ -43,21 +43,14 @@ class Medium extends AppModel
     ACL_LEVEL_USER => 'uacl',
     ACL_LEVEL_OTHER => 'oacl');
 
-  function isType($data, $type) {
-    if (!$data) {
-      $data = $this->data;
-    }
+  var $actsAs = array('Type', 'Flag', 'Cache');
 
-    if (!isset($data['Medium']['id']) || !isset($data['Medium']['type'])) {
-      $this->Logger->err("Precondition failed");
-      return false;
-    }
-
-    if ($data['Medium']['type'] == $type) {
-      return true;
-    } else {
-      return false;
-    }
+  function beforeDelete($cascade = true) {
+    // Delete media cache files
+    $this->unbindAll();
+    $this->set($this->findById($this->id));
+    $this->deleteCache();
+    return true;
   }
 
   function addDefaultAcl(&$data, $user) {
@@ -71,69 +64,33 @@ class Medium extends AppModel
     return $data;
   }
 
-  function setFlag($data, $flag) {
+  /** Returns the file model by its type
+    @param data Media model data
+    @param fileType Required file type. Default is FILE_TYPE_IMAGE
+    @param fullModel If true returns the full associated file model. If false
+    returns only the file model of the medium without associations 
+    @return Fals on error, null if file was not found */
+  function getFile($data, $fileType = FILE_TYPE_IMAGE, $fullModel = true) {
     if (!$data) {
       $data = $this->data;
     }
-    if (isset($data['Medium'])) {
-      $data =& $data['Medium'];
-    }
 
-    if (!isset($data['id']) || !isset($data['flag'])) {
+    if (!isset($data['File'])) {
       $this->Logger->err("Precondition failed");
       return false;
     }
 
-    if ($data['flag'] & $flag) {
-      return true;
-    }
-    $data['flag'] |= $flag;
-    if (!$this->save($data, true, array('flag'))) {
-      $this->Logger->err("Could not update flag");
-      return false;
-    }
-    return true;
-  }
-
-  function deleteFlag($data, $flag) {
-    if (!$data) {
-      $data = $this->data;
-    }
-    
-    if (isset($data['Medium'])) {
-      $data =& $data['Medium'];
-    }
-    if (!isset($data['id']) || !isset($data['flag'])) {
-      $this->Logger->err("Precondition failed");
-      return false;
+    foreach ($data['File'] as $file) {
+      if ($file['type'] == $fileType) {
+        if ($fullModel) {
+          return $this->File->findById($file['id']);
+        } else {
+          return array('File' => $file);
+        }
+      }
     }
 
-    if ($data['flag'] & $flag == 0) {
-      return true;
-    }
-    $data['flag'] ^= $flag;
-    if (!$this->save($data, true, array('flag'))) {
-      $this->Logger->err("Could not update flag");
-      return false;
-    }
-    return true;
-  }
-
-  function hasFlag($data, $flag) {
-    if (!$data) {
-      $data = $this->data;
-    }
-    
-    if (!isset($data['Medium']['id']) || !isset($data['Medium']['flag'])) {
-      $this->Logger->err("Precondition failed");
-      return false;
-    }
-
-    if ($data['Medium']['flag'] & $flag) {
-      return true;
-    } else {
-      return false;
-    }
+    return null;
   }
 
   /** Returns true if current user is allowed of the current flag
@@ -476,7 +433,7 @@ class Medium extends AppModel
          "  `$myTable` AS `{$this->alias}`".
          " WHERE `$alias`.`$key` = `$joinAlias`.`$associationForeignKey`".
          "   AND `$joinAlias`.`$foreignKey` = `{$this->alias}`.`{$this->primaryKey}`".
-         "   AND Medium.flag & ".MEDIUM_FLAG_ACTIVE.
+    //     "   AND Medium.flag & ".MEDIUM_FLAG_ACTIVE.
          $this->buildWhereAcl($user).
          " GROUP BY `$alias`.`name` ".
          " ORDER BY hits DESC LIMIT 0,".intval($num);

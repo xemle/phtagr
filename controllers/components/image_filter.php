@@ -61,7 +61,7 @@ class ImageFilterComponent extends BaseFilterComponent {
     if (!$medium) {
       $medium = $this->Medium->create(array(
         'user_id' => $file['File']['user_id'],
-        'type' => MEDIUM_TYPE_IMAGE
+        'type' => MEDIUM_TYPE_IMAGE,
         ), true);
       $this->Logger->debug($medium);
       $isNew = true;
@@ -76,9 +76,7 @@ class ImageFilterComponent extends BaseFilterComponent {
       return -1;
     } elseif ($isNew) {
       $mediumId = $this->Medium->getLastInsertID();
-      $file['File']['medium_id'] = $mediumId;
-      if (!$this->MyFile->save($file['File'], true, array('medium_id'))) {
-        $this->$this->Logger->err("Could not link file {$file['File']['id']} to medium $mediumId");
+      if (!$this->MyFile->setMedium($file, $mediumId)) {
         $this->Medium->delete($mediumId);
         return -1;
       } else {
@@ -87,10 +85,8 @@ class ImageFilterComponent extends BaseFilterComponent {
     } else {
       $this->Logger->verbose("Updated medium (id ".$medium['Medium']['id'].")");
     }
-    $file['File']['readed'] = date("Y-m-d H:i:s", time());
-    if (!$this->MyFile->save($file['File'], true, array('readed'))) {
-      $this->$this->Logger->warn("Could not update file {$file['File']['id']}");
-    }
+    $this->MyFile->updateReaded($file);
+    $this->MyFile->setFlag($file, FILE_FLAG_DEPENDENT);
     return 1;
   }
 
@@ -181,11 +177,9 @@ class ImageFilterComponent extends BaseFilterComponent {
     $v['name'] = $this->_extract($data, 'FileName');
     // TODO Read IPTC date, than EXIF date
     $v['date'] = $this->_extractMediumDate($data);
-    if ($v['type'] == MEDIUM_TYPE_IMAGE) {
-      $v['width'] = $this->_extract($data, 'ImageWidth', 0);
-      $v['height'] = $this->_extract($data, 'ImageHeight', 0);
-      $v['duration'] = -1;
-    }
+    $v['width'] = $this->_extract($data, 'ImageWidth', 0);
+    $v['height'] = $this->_extract($data, 'ImageHeight', 0);
+    $v['duration'] = -1;
     $v['orientation'] = $this->_extract($data, 'Orientation', 1);
 
     $v['aperture'] = $this->_extract($data, 'Aperture', NULL);

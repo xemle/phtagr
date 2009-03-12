@@ -73,37 +73,6 @@ class ImageResizerComponent extends Object {
     $phpThumb->q = $options['quality'];
     $phpThumb->ra = $options['rotation']; 
 
-    if ($options['square'] && $options['height'] > 0) {
-      $width = $options['width'];
-      $height = $options['height'];
-      if ($width < $height) {
-        $ratio = ($width / $height);
-        $size = $options['size'] / $ratio;
-        $phpThumb->sx = 0;
-        $phpThumb->sy = intval(($size - $options['size']) / 2);
-      } else {
-        $ratio = ($height / $width);
-        $size = $options['size'] / $ratio;
-        $phpThumb->sx = intval(($size - $options['size']) / 2);
-        $phpThumb->sy = 0;
-      }
-
-      if ($phpThumb->ra == 90 || $phpThumb->ra == 270) {
-        $tmp = $phpThumb->sx;
-        $phpThumb->sx = $phpThumb->sy;
-        $phpThumb->sy = $tmp;
-      }
-
-      $phpThumb->sw = $options['width'];
-      $phpThumb->sh = $options['height'];
-
-      $phpThumb->w = $size;
-      $phpThumb->h = $size;
-
-      //$this->Logger->debug(sprintf("square: %dx%d %dx%d", 
-      //  $phpThumb->sx, $phpThumb->sy, 
-      //  $phpThumb->sw, $phpThumb->sh), LOG_DEBUG);
-    }
     $phpThumb->config_imagemagick_path = $this->controller->getOption('bin.convert', 'convert');
     $phpThumb->config_prefer_imagemagick = true;
     $phpThumb->config_imagemagick_use_thumbnail = false;
@@ -117,27 +86,61 @@ class ImageResizerComponent extends Object {
     $phpThumb->config_cache_disable_warning = false;
     $phpThumb->cache_filename = $dst;
     
-    //Thanks to Kim Biesbjerg for his fix about cached thumbnails being regenerated
-    if(!is_file($phpThumb->cache_filename)) { 
-      // Check if image is already cached.
-      $t1 = getMicrotime();
-      $result = $phpThumb->GenerateThumbnail();
-      $t2 = getMicrotime();
-      if ($result) {
-        $this->Logger->debug("Render {$options['size']}x{$options['size']} image in ".round($t2-$t1, 4)."ms to '{$phpThumb->cache_filename}'");
-        $phpThumb->RenderToFile($phpThumb->cache_filename);
-      } else {
-        $this->Logger->err("Could not generate thumbnail: ".$phpThumb->error);
-        $this->Logger->err($phpThumb->debugmessages);
-        die('Failed: '.$phpThumb->error);
-      }
-    } 
-    //$this->Logger->debug($phpThumb->debugmessages);
+    if ($options['square'] && $options['height'] > 0) {
+      $this->_getSquareOption(&$phpThumb, &$options);
+    }
+
+    $t1 = getMicrotime();
+    $result = $phpThumb->GenerateThumbnail();
+    $t2 = getMicrotime();
+    if ($result) {
+      $this->Logger->debug("Render {$options['size']}x{$options['size']} image in ".round($t2-$t1, 4)."ms to '{$phpThumb->cache_filename}'");
+      $phpThumb->RenderToFile($phpThumb->cache_filename);
+    } else {
+      $this->Logger->err("Could not generate thumbnail: ".$phpThumb->error);
+      $this->Logger->err($phpThumb->debugmessages);
+      die('Failed: '.$phpThumb->error);
+    }
     
     if ($options['clearMetaData']) {
       $this->clearMetaData($dst);
     }
     return true;
+  }
+
+  /* Set phpThumb options for square image
+    @param phpThumb phpThumb object (reference)
+    @param options Array of options */
+  function _getSquareOption($phpThumb, $options) {
+    $width = $options['width'];
+    $height = $options['height'];
+    if ($width < $height) {
+      $ratio = ($width / $height);
+      $size = $options['size'] / $ratio;
+      $phpThumb->sx = 0;
+      $phpThumb->sy = intval(($size - $options['size']) / 2);
+    } else {
+      $ratio = ($height / $width);
+      $size = $options['size'] / $ratio;
+      $phpThumb->sx = intval(($size - $options['size']) / 2);
+      $phpThumb->sy = 0;
+    }
+
+    if ($phpThumb->ra == 90 || $phpThumb->ra == 270) {
+      $tmp = $phpThumb->sx;
+      $phpThumb->sx = $phpThumb->sy;
+      $phpThumb->sy = $tmp;
+    }
+
+    $phpThumb->sw = $options['size'];
+    $phpThumb->sh = $options['size'];
+
+    $phpThumb->w = $size;
+    $phpThumb->h = $size;
+
+    //$this->Logger->debug(sprintf("square: %dx%d %dx%d", 
+    //  $phpThumb->sx, $phpThumb->sy, 
+    //  $phpThumb->sw, $phpThumb->sh));
   }
 
   /** Clear image metadata from a file

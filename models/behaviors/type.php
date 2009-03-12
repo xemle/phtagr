@@ -21,42 +21,24 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-class BaseFilterComponent extends Object {
+class TypeBehavior extends ModelBehavior 
+{
+  var $config = array();
 
-  var $components = array('Logger');
-  var $controller = null;
-
-  var $Manager = null;
-  var $Medium = null;
-  var $MyFile = null;
-
-  function startup(&$controller) {
-    $this->controller =& $controller;
+  function setup(&$model, $config = array()) {
+    $this->config[$model->name] = $config;
   }
 
-  function init(&$manager) {
-    if ($manager->controller) {
-      $this->controller =& $manager->controller;
+  function isType(&$model, &$data, $type) {
+    if (!$data) {
+      $data =& $model->data;
     }
-    $this->Manager =& $manager;
-    return true;
-  }
+    if (!isset($data[$model->alias]['type'])) {
+      $model->Logger->err("Precondition failed");
+      return null;
+    }
 
-  function getName() {
-    return false;
-  }
-
-  function getExtensions() {
-    return false;
-  }
-  
-  function read($file, $medium = false, $options = array()) {
-    return false;
-  }
-
-  function write($file, $medium = false, $options = array()) {
-    return false;
+    return $data[$model->alias]['type'] == $type ? true : false;
   }
 }
-
 ?>

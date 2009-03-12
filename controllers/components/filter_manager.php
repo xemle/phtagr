@@ -43,7 +43,7 @@ class FilterManagerComponent extends Object {
     }
     $this->MyFile =& $controller->MyFile;
     $this->Medium =& $controller->Medium;
-    $this->loadFilter('ImageFilter');
+    $this->loadFilter(array('ImageFilter', 'VideoFilter'));
   }
 
   /** Reads a component and checks required functions 
@@ -69,11 +69,19 @@ class FilterManagerComponent extends Object {
     if ($this->_validateFilter($filter, $name)) {
       $filterName = $filter->getName();
       if (isset($this->filters[$filterName])) {
+        $this->Logger->verbose("Filter $filterName already loaded");
         return true;
       }
       $filter->MyFile =& $this->MyFile;
       $filter->Medium =& $this->Medium;
       $this->controller->Component->_loadComponents(&$filter);
+      // init components to setup the controller
+      foreach ($filter->components as $name) {
+        $component =& $filter->$name;
+        if (method_exists($component, 'startup')) {
+          $component->startup(&$this->controller);
+        }
+      }
       $filter->init(&$this);
 
       $extensions = $filter->getExtensions();
@@ -93,15 +101,19 @@ class FilterManagerComponent extends Object {
       if (count($new)) {
         $this->Logger->trace("Loaded filter $name with extension(s): ".implode(', ', $new));
       }
+      $this->filters[$filterName] =& $filter;
     }
   }
 
   function getFilter($name) {
+    $filter = null;
     if (isset($this->filters[$name])) {
-      return $this->filters[$name];
+      $filter =& $this->filters[$name];
     } else {
-      $this->Logger->debug("Could not find filter '$name'");
+      $this->Logger->warn("Could not find filter '$name'");
+      $this->Logger->debug(array_keys($this->filters));
     }
+    return $filter;
   }
 
   /** checks the filter for required functions
@@ -122,7 +134,7 @@ class FilterManagerComponent extends Object {
   }
 
   function isSupported($filename) {
-    $ext = substr($filename, strrpos($filename, '.') + 1);
+    $ext = strtolower(substr($filename, strrpos($filename, '.') + 1));
     if (isset($this->extensions[$ext])) {
       return true;
     } else {
@@ -131,7 +143,7 @@ class FilterManagerComponent extends Object {
   }
 
   function getFilterByExtension($filename) {
-    $ext = substr($filename, strrpos($filename, '.') + 1);
+    $ext = strtolower(substr($filename, strrpos($filename, '.') + 1));
     if (isset($this->extensions[$ext])) {
       return $this->extensions[$ext];
     } else {
