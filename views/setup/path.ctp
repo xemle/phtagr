@@ -1,7 +1,7 @@
 <?php $session->flash(); ?>
 <h1>Paths</h1>
 
-<?php if (!count($missing)): ?>
+<?php if (count($missing)): ?>
 <div class="error">
 Following paths are missing. Please create these paths!
 </div>
@@ -14,7 +14,7 @@ foreach($missing as $path)
 </pre>
 <?php endif; ?>
 
-<?php if (!count($readonly)): ?>
+<?php if (count($readonly)): ?>
 <div class="error">
 Following paths are not writeable. Please change the permissions!
 </div>

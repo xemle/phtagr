@@ -28,6 +28,11 @@ class ExplorerController extends AppController
   var $helpers = array('form', 'formular', 'html', 'javascript', 'ajax', 'imageData', 'time', 'query', 'explorerMenu', 'rss');
 
   function beforeFilter() {
+    if ($this->action == 'points' && 
+      Configure::read('Security.level') === 'high') {
+      Configure::write('Security.level', 'medium');
+    }
+
     parent::beforeFilter();
 
     $this->Query->controller =& $this;
