@@ -182,7 +182,7 @@ class BrowserController extends AppController
       list($dirs, $files) = $folder->read();
 
       // TODO get supported extensions from file filter
-      $videos = array('avi', 'mov', 'mpg', 'mpeg');
+      $videos = array('avi', 'mov', 'mpg', 'mpeg', 'thm');
       $images = array('jpeg', 'jpg');
       $maps = array('log');
       $list = array();

@@ -21,7 +21,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-class GpsFilterComponent extends Object {
+class GpsFilterComponent extends BaseFilterComponent {
 
   var $controller = null;
   var $components = array('Logger', 'Nmea');
@@ -30,18 +30,31 @@ class GpsFilterComponent extends Object {
     $this->controller =& $controller;
   }
 
+  function getName() {
+    return "Gps";
+  }
+
+  function getExtensions() {
+    return array('log');
+  }
+
   /** Read the meta data from the file 
-   * @param image Image data model
-   * @param filename Optional filename for import meta data
+   * @param file File data model
+   * @param medium Medium data model
+   * @param options 
+   *  - offset Time offset in seconds
+   *  - overwrite Overwrite GPS 
+   *  - minInterval Threshold in seconds which media get a GPS point
    * @return The image data array or False on error */
-  function readFile($filename, $options) {
+  function read($file, &$medium, $options = array()) {
     $options = am(array(
-          'offset' => 0, 
+          'offset' => 120*60, 
           'overwrite' => false,
           'minInterval' => 600),
           $options);
     //$this->Logger->trace($options);
 
+    $filename = $this->MyFile->getFilename($file);
     if (!$this->Nmea->readFile($filename)) {
       $this->Logger->warn('Could not read file $filename');
       return false;
@@ -58,42 +71,46 @@ class GpsFilterComponent extends Object {
     //$this->Logger->trace("start: ".date("'Y-m-d H:i:s'", $start)." end: ".date("'Y-m-d H:i:s'", $end));
 
     $conditions = array(
-      'Image.user_id' => $userId,
-      'Image.date >= '.date("'Y-m-d H:i:s'", $start+$options['offset']).' AND '.
-      'Image.date <= '.date("'Y-m-d H:i:s'", $end+$options['offset']));
+      'Medium.user_id' => $userId,
+      'Medium.date >= '.date("'Y-m-d H:i:s'", $start+$options['offset']).' AND '.
+      'Medium.date <= '.date("'Y-m-d H:i:s'", $end+$options['offset']));
     if (!$options['overwrite']) {
-      $conditions['Image.latitude'] = null;
-      $conditions['Image.longitude'] = null;
+      $conditions['Medium.latitude'] = null;
+      $conditions['Medium.longitude'] = null;
     }
-    //$this->Logger->trace($conditions);
-    $this->controller->Image->unbindAll();
-    $images = $this->controller->Image->findAll($conditions);
-    if (!count($images)) {
+    $this->Logger->trace($conditions);
+    $this->Medium->unbindAll();
+    $media = $this->Medium->findAll($conditions);
+    if (!count($media)) {
       $this->Logger->info("No images found for GPS interval");
       return false;
     }
     // fetch images of same user, no gps, range
-    foreach ($images as $image) {
+    foreach ($media as $medium) {
       // Adjust time according offset and fetch position
-      $date = strtotime($image['Image']['date'])-$options['offset'];
+      $date = strtotime($medium['Medium']['date'])-$options['offset'];
       $position = $this->Nmea->getPosition($date);
       // write position
       if (!$position) {
-        $this->Logger->debug("No GPS position found for image {$image['Image']['id']}");
+        $this->Logger->debug("No GPS position found for image {$medium['Medium']['id']}");
         continue;
       }
 
-      $image['Image']['latitude'] = $position['latitude'];
-      $image['Image']['longitude'] = $position['longitude'];
-      $image['Image']['flag'] |= IMAGE_FLAG_DIRTY;
-      if ($this->controller->Image->save($image, true, array('latitude', 'longitude', 'flag'))) {
-        $this->Logger->debug("Update GPS position of image {$image['Image']['id']} to {$position['latitude']}/{$position['longitude']}");
+      $medium['Medium']['latitude'] = $position['latitude'];
+      $medium['Medium']['longitude'] = $position['longitude'];
+      $medium['Medium']['flag'] |= MEDIUM_FLAG_DIRTY;
+      if ($this->Medium->save($medium['Medium'], true, array('latitude', 'longitude', 'flag'))) {
+        $this->Logger->debug("Update GPS position of image {$medium['Medium']['id']} to {$position['latitude']}/{$position['longitude']}");
       } else {
-        $this->Logger->warn("Could not update GPS position of image {$image['Image']['id']}");
+        $this->Logger->warn("Could not update GPS position of image {$medium['Medium']['id']}");
       }
     }
+    return 1;
   }
 
+  function write($file, $medium = null, $options = array()) {
+    return 0;
+  }
 }
 
 ?>

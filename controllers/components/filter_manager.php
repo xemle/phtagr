@@ -43,7 +43,7 @@ class FilterManagerComponent extends Object {
     }
     $this->MyFile =& $controller->MyFile;
     $this->Medium =& $controller->Medium;
-    $this->loadFilter(array('ImageFilter', 'VideoFilter'));
+    $this->loadFilter(array('ImageFilter', 'VideoFilter', 'GpsFilter'));
   }
 
   /** Reads a component and checks required functions 
