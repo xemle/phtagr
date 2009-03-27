@@ -1,4 +1,4 @@
-<h1>Broswer</h1>
+<h1>File Browser</h1>
 <?php $session->flash(); ?>
 
 <?php echo $form->create('Browser', array('action' => 'import')); ?>

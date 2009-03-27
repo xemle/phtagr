@@ -511,19 +511,23 @@ class ExplorerController extends AppController
       } else {
         // check for existing group of user
         $groupId = $this->data['Group']['id'];
-        if ($groupId>0) 
+        if ($groupId > 0) {
           $group = $this->Group->find(array('and' => array('User.id' => $userId, 'Group.id' => $groupId)));
-        else
+        } else {
           $group = null;
-        if ($group)
+        }
+        if ($group) {
           $image['Image']['group_id'] = $groupId;
-        else
+        } else {
           $image['Image']['group_id'] = -1;
+        }
 
-        $this->Image->setAcl(&$image, ACL_WRITE_TAG, ACL_WRITE_MASK, $this->data['acl']['write']['tag']);
+        // higher grants first
         $this->Image->setAcl(&$image, ACL_WRITE_META, ACL_WRITE_MASK, $this->data['acl']['write']['meta']);
-        $this->Image->setAcl(&$image, ACL_READ_PREVIEW, ACL_READ_MASK, $this->data['acl']['read']['preview']);
+        $this->Image->setAcl(&$image, ACL_WRITE_TAG, ACL_WRITE_MASK, $this->data['acl']['write']['tag']);
+
         $this->Image->setAcl(&$image, ACL_READ_ORIGINAL, ACL_READ_MASK, $this->data['acl']['read']['original']);
+        $this->Image->setAcl(&$image, ACL_READ_PREVIEW, ACL_READ_MASK, $this->data['acl']['read']['preview']);
 
         $image['Image']['modified'] = null;
         $this->Image->save($image['Image'], true, array('group_id', 'gacl', 'uacl', 'oacl'));
@@ -546,8 +550,9 @@ class ExplorerController extends AppController
 
     $image = $this->Image->findById($id);
     $user = $this->getUser();
-    if ($image)
+    if ($image) {
       $this->Image->setAccessFlags(&$image, $user);
+    }
     if (!$image) {
       $this->Logger->err("User '{$user['User']['username']}' ({$user['User']['id']}) requested non existing image id '$id'");
     } elseif (!$image['Image']['isOwner']) {
