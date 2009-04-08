@@ -66,26 +66,42 @@ class MediaController extends AppController
     return $prefix.sprintf("%d.%s", $size, $ext);
   }
 
+  /** Fetch the request headers. Getting headers sent by the client. Convert
+   * header to lower case since it is case insensitive.
+    @return Array of request header */
+  function _getRequestHeaders() {
+    $headers = array();
+    if (function_exists('apache_request_headers')) {
+      $headers = apache_request_headers();
+      foreach($headers as $h => $v) {
+        $headers[strtolower($h)] = $v;
+      }
+    } else {
+      $headers = array();
+      foreach($_SERVER as $h => $v) {
+        if(ereg('HTTP_(.+)', $h, $hp)) {
+          $headers[strtolower($hp[1])] = $v;
+        }
+      }
+    }
+    return $headers;
+  }
+
   /** Checking if the client is validating his cache and the cache file is the
     * concurrent one. If clients file is OK, it will respond '304 Not Modified'
     * @param filename filename of cache file
     */
   function _handleClientCache($filename) {
-    $cacheTime = filectime($filename);
+    $cacheTime = filemtime($filename);
+    $headers = $this->_getRequestHeaders();
     if (isset($headers['if-modified-since']) &&
-        (strtotime($headers['if-modified-since']) == $cacheTime))
-    {
+        (strtotime($headers['if-modified-since']) == $cacheTime)) {
       header('Last-Modified: '.
         gmdate('D, d M Y H:i:s', $cacheTime).' GMT', true, 304);
       // Allow further caching for 30 days
       header('Cache-Control: max-age=2592000, must-revalidate');
       exit;
     }
-
-    // Allow caching
-    header('Last-Modified: '.gmdate('D, d M Y H:i:s',
-      $cacheTime).' GMT', true, 200);
-    header('Cache-Control: max-age=2592000');
 
     // following line will disallow caching
     //header('Cache-Control: max-age=0');
@@ -99,12 +115,14 @@ class MediaController extends AppController
     $file = substr($filename, strrpos($filename, DS) + 1);
     $ext = strtolower(substr($file, strrpos($file, '.') + 1));
     $name = substr($file, 0, strrpos($file, '.'));
+    $modified = date("Y-m-d H:i:s", filemtime($filename));
 
     $options = array(
       'id' => $file,
       'name' => $name,
       'extension' => $ext,
-      'path' => $path);
+      'path' => $path,
+      'modified' => $modified);
 
     return $options;
   }
