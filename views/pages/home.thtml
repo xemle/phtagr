@@ -1,0 +1,1 @@
+<h1><?php echo _("Welcome to phTagr")?></h1>

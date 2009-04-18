@@ -1,0 +1,24 @@
+table.default {
+  border: 1px solid #888;
+}
+
+table.default thead tr {
+  font-weight: bold;
+  background-color: #336;
+  color: #fff;
+}
+
+table.default thead * a {
+  color: #fff;
+}
+
+table.default tbody tr.even {
+  background-color: #eee;
+}
+
+table.default tbody tr:hover,
+table.default tbody tr:hover a {
+  color: #fff;
+  background-color: #f63;
+}
+

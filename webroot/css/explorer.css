@@ -1,0 +1,125 @@
+.thumbs, .thumb {
+  float: left;
+  padding: 0;
+  margin: 0;
+}
+
+.thumbs {
+  width: 100%;
+}
+
+.thumb {
+  width: 50%;
+}
+
+.unselected {
+  margin: 2px;
+  padding: 3px;
+}
+
+.selected {
+  margin: 2px;
+  padding: 3px;
+  background-color: #bdf;
+}
+
+.thumb h2 {
+  font-size: 110%;
+}
+
+.row2 {
+  float: left;
+  width: 100%;
+  content: ".";
+  height: 0;
+  visibility: hidden;
+}
+
+.image {
+  margin: 0px;
+  padding: 2px 2px; 
+  text-align: center;
+}
+
+.image * img {
+  vertical-align: middle; 
+  border: 1px solid black;
+}
+
+.meta {
+  margin: 0; 
+  padding: 0;
+  border: 1px solid #ddd;
+  background-color: #f0f0f0;
+}
+
+.meta * td {
+  margin: 0px;
+  padding: 0px;
+}
+
+.meta * a {
+  text-decoration: none;
+}
+
+.meta * a:hover {
+  color: white;
+  background-color: #f63;
+}
+
+.meta * fieldset {
+  margin: 0;
+}
+
+.navigator {
+  width: 100%;
+  color: #8C8C8C;
+  margin: 10px 0 10px 0;
+  text-align: center;
+}
+
+.navigator a {
+  font-size: 80%;
+  text-decoration: none;
+  padding: 3px 5px 3px 5px;
+  margin: 3px 0px 3px 0px;
+  background-color: #ffffff;
+  border: 1px solid #b3b3b3;
+}
+
+.navigator a:hover {
+  border: 1px solid #000;
+  background-color: #f63;
+  color: #ffffff;
+}
+
+.navigator .current {
+  padding: 2px 5px 2px 5px;
+  margin: 0 1px 0 1px;
+  color: white;
+  background-color: #182e7a;
+  border: 1px solid #000;
+}
+
+.edit {
+  clear: both;
+}
+
+/** Patches for the menu list */
+#submenu li.multi {
+  margin: 0;
+  padding: 3px 0 3px 10%;
+  border-bottom: 1px #eee solid;
+}
+
+#submenu li.multi a {
+  display: inline;
+  padding: 3px 0px 3px 0px;
+  border-style: none;
+}
+
+#submenu li.multi .actionlist {
+  display: none;
+}
+
+
