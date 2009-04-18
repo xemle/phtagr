@@ -27,7 +27,7 @@ class BaseFilterComponent extends Object {
   var $controller = null;
 
   var $Manager = null;
-  var $Medium = null;
+  var $Media = null;
   var $MyFile = null;
 
   function startup(&$controller) {
@@ -50,11 +50,11 @@ class BaseFilterComponent extends Object {
     return false;
   }
   
-  function read($file, $medium = false, $options = array()) {
+  function read($file, $media = false, $options = array()) {
     return false;
   }
 
-  function write($file, $medium = false, $options = array()) {
+  function write($file, $media = false, $options = array()) {
     return false;
   }
 }

@@ -30,6 +30,33 @@ class VideoPreviewComponent extends Object {
     $this->controller =& $controller;
   }
 
+  /** Finds the video thumb of a video 
+    @param video File model data of the video
+    @param insertIfMissing If true, adds the thumb file to the database. Default is true
+    @return Filename of the thumb file. False if no thumb file was found */
+  function _findThumb($video, $insertIfMissing = true) {
+    $videoFilename = $this->controller->MyFile->getFilename($video);
+    $path = dirname($videoFilename);
+    $folder =& new Folder($path);
+    $pattern = basename($videoFilename);
+    $pattern = substr($pattern, 0, strrpos($pattern, '.')+1).'[Tt][Hh][Mm]';
+    $found = $folder->find($pattern);
+    if (count($found) && is_readable(Folder::addPathElement($path, $found[0]))) {
+      $thumbFilename = Folder::addPathElement($path, $found[0]);
+      if ($insertIfMissing) {
+        $thumb = $this->FileManager>add($thumbFilename, $video['File']['user_id']);
+        $thumb['File']['media_id'] = $video['File']['media_id'];
+        if (!$this->controller->MyFile->save($thumb)) {
+          $this->Logger->err("Could not add thumb to database of video {$video['File']['id']}");
+        } else {
+          $this->Logger->verbose("Add missing video thumb $thumbFilename to database (".$this->controller->MyFile->getLastInsertId().")"); 
+        }
+      }
+      return $thumbFilename;
+    } 
+    return false;
+  }
+
   /** Creates a video preview image using ffmpeg 
     @param video File model data of a video
     @param thumbFilename Optional filename of the thumbnail image file
@@ -42,15 +69,18 @@ class VideoPreviewComponent extends Object {
       return false;
     }
     if ($thumbFilename == '') {
-      $thumbFilename = substr($videoFilename, 0, strrpos($videoFilename, '.')+1).'thm';
-      $isNew = true;
+      $thumbFilename = $this->_findThumb($videoFilename);
+      if (!$thumbFilename) {
+        $thumbFilename = substr($videoFilename, 0, strrpos($videoFilename, '.')+1).'thm';
+        $isNew = true;
+      }
     }
     if (!$overwrite && file_exists($thumbFilename)) {
       $this->Logger->warn("Video thumbnail file '$thumbFilename' already exists");
       return $thumbFilename;
     }
-    if (!is_writeable(dirname($videoFilename))) {
-      $this->Logger->err("Could not write video thumb. Dir is not writable");
+    if (!is_writeable(dirname($thumbFilename))) {
+      $this->Logger->err("Could not write video thumb. Path '".dirname($thumbFilename)."' is not writable");
       return false;
     }
     $bin = $this->controller->getOption('bin.ffmpeg', 'ffmpeg');
@@ -74,46 +104,47 @@ class VideoPreviewComponent extends Object {
   }
 
   /** Returns the preview filename of the internal cache
-    @param image Medium model data
+    @param image Media model data
     @return Cached preview filename */
-  function getPreviewFilenameCache($medium) {
-    $path = $this->FileCache->getPath($medium['Medium']['user_id'], $medium['Medium']['id']);
-    $file = $this->FileCache->getFilenamePrefix($medium['Medium']['id']);
+  function getPreviewFilenameCache($media) {
+    $path = $this->FileCache->getPath($media['Media']['user_id'], $media['Media']['id']);
+    $file = $this->FileCache->getFilenamePrefix($media['Media']['id']);
     $thumbFilename = $path.$file.'preview.thm';
     return $thumbFilename;
   }
 
   /** Gets the thumbnail filename of the a video. If it not exists, build it 
-    @param image Medium model data
+    @param image Media model data
     @param options Array of options. Set 'create' to false to disable automaitc
     thumbnail creations. Default is true. Set 'noCache' to true to disable
     thumbnail creation in the cache directory. Default is false. */
-  function getPreviewFilename($medium, $options = array()) {
+  function getPreviewFilename($media, $options = array()) {
     $options = am($options, array('create' => true, 'noCache' => false));
 
-    $thumb = $this->controller->Medium->getFile($medium, FILE_TYPE_VIDEOTHUMB, false);
+    $thumb = $this->controller->Media->getFile($media, FILE_TYPE_VIDEOTHUMB, false);
     if ($thumb) {
       return $this->controller->MyFile->getFilename($thumb);
     }
   
     if (!$options['noCache']) {
-      $cache = $this->getPreviewFilenameCache($medium);
+      $cache = $this->getPreviewFilenameCache($media);
       if (file_exists($cache)) {
         return $cache;
       }
     }
     $thumbFilename = false;
     if ($options['create']) {
-      $video = $this->controller->Medium->getFile($medium, FILE_TYPE_VIDEO, false);
+      $video = $this->controller->Media->getFile($media, FILE_TYPE_VIDEO, false);
       if (!$video) {
-        $this->Logger->err("No video file found for medium {$medium['Medium']['id']}");
+        $this->Logger->err("No video file found for media {$media['Media']['id']}");
         return false;
       }
       $videoFile = $this->controller->MyFile->getFilename($video);
-      if (is_writeable(dirname($videoFile))) {
+      $thumbFilename = $this->_findThumb($video);
+      if (!$thumbFilename && is_writeable(dirname($videoFile))) {
         $thumbFilename = $this->create($video);
       } elseif (!$options['noCache']) {
-        $this->Logger->info("Origination directory of video is not writable. Use cache directory ($cache)");
+        $this->Logger->info("Origination directory of video is not writable. Use cache file ($cache)");
         $thumbFilename = $this->create($video, $cache);
       }
     }

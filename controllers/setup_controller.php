@@ -38,7 +38,7 @@ class SetupController extends AppController {
 
   function beforeFilter() {
     Configure::write('Cache.disable', true);
-    $this->UpgradeSchema->modelMapping = array('files' => 'MyFile', 'media' => 'Medium');
+    $this->UpgradeSchema->modelMapping = array('files' => 'MyFile');
     $this->core = CONFIGS.'core.php';
     $this->dbConfig = CONFIGS.'database.php';
     $this->paths = array(TMP, USER_DIR);
@@ -576,7 +576,7 @@ class DATABASE_CONFIG
 
     $errors = false;
     if ($action == 'run') {
-      $errors = $this->UpgradeSchema->upgradeDatabase($Schema);
+      $errors = $this->UpgradeSchema->upgrade();
       if ($errors == false) {
         $this->UpgradeSchema->deleteModelCache();
         $this->Session->setFlash("Database was upgraded successfully");

@@ -24,7 +24,7 @@
 class ImagesController extends AppController
 {
   var $components = array('RequestHandler', 'Query');
-  var $uses = array('Medium', 'Group', 'Tag', 'Category', 'Location');
+  var $uses = array('Media', 'Group', 'Tag', 'Category', 'Location');
   var $helpers = array('form', 'formular', 'html', 'javascript', 'ajax', 'imageData', 'time', 'query', 'explorerMenu', 'rss', 'map');
 
   function beforeFilter() {
@@ -39,8 +39,8 @@ class ImagesController extends AppController
   }
 
   function view($id) {
-    $this->Query->setMediumId($id);
-    $this->data = $this->Query->paginateMedium();
+    $this->Query->setMediaId($id);
+    $this->data = $this->Query->paginateMedia();
     if (!$this->data) {
       $this->render('notfound');
     } else {
@@ -65,7 +65,7 @@ class ImagesController extends AppController
         //$this->data = am($this->Session->read('Comment.data'), $this->data);
         $this->Session->del('Comment.data');
       }
-      if ($this->Medium->isType($this->data, MEDIUM_TYPE_VIDEO)) {
+      if ($this->Media->isType($this->data, MEDIUM_TYPE_VIDEO)) {
         $this->render('video');
       }
     }

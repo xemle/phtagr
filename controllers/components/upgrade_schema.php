@@ -31,7 +31,7 @@ class UpgradeSchemaComponent extends Object{
   var $db = null;
   var $cakeSchema = null;
   var $schema = null;
-  var $modelMapping = array('files' => 'MyFile', 'media' => 'Medium');
+  var $modelMapping = array('files' => 'MyFile', 'media' => 'Media');
 
   function startup(&$controller) {
     $this->controller = $controller;
@@ -58,7 +58,7 @@ class UpgradeSchemaComponent extends Object{
       $this->Logger->err("Could not create database source");
       return false;
     }
-
+    $this->db->cacheSources = false;
     return true;
   }
 
@@ -111,7 +111,6 @@ class UpgradeSchemaComponent extends Object{
     database */
   function _getMissingTables() {
     // Reset sources for refetching
-    $this->db->_sources = null;
     $sources = $this->db->listSources();
     $requiredTables = array();
     $missingTables = array();
@@ -159,12 +158,21 @@ class UpgradeSchemaComponent extends Object{
     return $errors;
   }
 
-  function _getAlteredColumns() {
+  function _getAlteredColumns($noDrop = false) {
     // Reset sources for refetching
     $this->db->_sources = null;
     $Old = $this->cakeSchema->read();
     $compare = $this->cakeSchema->compare($Old, $this->schema);
     $models = Configure::listObjects('model');
+
+    // remove column drops if required
+    if ($noDrop) {
+      foreach ($compare as $table => $changes) {
+        if (isset($compare[$table]['drop'])) {
+          unset($compare[$table]['drop']);
+        }
+      }
+    }
 
     // Check changes
     $columns = array();
@@ -235,19 +243,20 @@ class UpgradeSchemaComponent extends Object{
     return false;
   }
 
+  /** @todo Drop not required tables */
   function _createMissingTables() {
     $missingTables = $this->_getMissingTables();
     return $this->_createTables($missingTables);
   }
 
-  function _upgradeTables() {
-    $alterColumns = $this->_getAlteredColumns();
+  function _upgradeTables($noDrop = false) {
+    $alterColumns = $this->_getAlteredColumns($noDrop);
     return $this->_alterColumns($alterColumns);
   }
 
-  function upgrade() {
+  function upgrade($noDrop = false) {
     $errorTables = $this->_createMissingTables();
-    $errorColumns = $this->_upgradeTables();
+    $errorColumns = $this->_upgradeTables($noDrop);
     if ($errorTables || $errorColumns) {
       return array('tables' => $errorTables, 'columns' => $errorColumns);
     } else {

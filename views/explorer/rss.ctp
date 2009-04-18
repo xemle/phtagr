@@ -2,11 +2,11 @@
 
 /** Callback frunction for rss items */
 function getItem($data) {
-  return array('title' => $data['Medium']['name'],
-    'link' => '/images/view/'.$data['Medium']['id'].'/'.$data['Medium']['file'],
-    'guid' => $data['Medium']['id'],
-    'description' => $data['Medium']['caption'],
-    'pubDate' => $data['Medium']['created']);
+  return array('title' => $data['Media']['name'],
+    'link' => '/images/view/'.$data['Media']['id'].'/'.$data['Media']['file'],
+    'guid' => $data['Media']['id'],
+    'description' => $data['Media']['caption'],
+    'pubDate' => $data['Media']['created']);
 }
 
 echo $rss->items($data, 'getItem');

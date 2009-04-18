@@ -1,6 +1,6 @@
 <?php 
-  $mediumId = $data['Medium']['id'];
-  echo $ajax->form('savemeta/'.$mediumId, 'post', array('url' => '/explorer/savemeta/'.$mediumId, 'update' => 'meta-'.$mediumId, 'id' => 'form-meta-'.$mediumId)); 
+  $mediaId = $data['Media']['id'];
+  echo $ajax->form('savemeta/'.$mediaId, 'post', array('url' => '/explorer/savemeta/'.$mediaId, 'update' => 'meta-'.$mediaId, 'id' => 'form-meta-'.$mediaId)); 
 ?>
 <fieldset>
 <?php
@@ -12,7 +12,7 @@
   foreach ($data['Location'] as $location)
     $locations[$location['type']] = $location['name'];
 
-  echo $form->input('Medium.date', array('type' => 'text', 'value' => $data['Medium']['date']));
+  echo $form->input('Media.date', array('type' => 'text', 'value' => $data['Media']['date']));
   echo $form->input('Tags.text', array('value' => $tagText, 'label' => 'Tags'));
   echo $form->input('Categories.text', array('value' => $categoryText, 'label' => 'Cagegories'));
   echo $form->input('Locations.city', array('value' => $locations[LOCATION_CITY]));
@@ -23,6 +23,6 @@
 </fieldset>
 <?php
   echo $form->submit('Save', array('div' => false)); 
-  echo $ajax->link('Cancel', '/explorer/updatemeta/'.$mediumId, array('update' => 'meta-'.$mediumId, 'class' => 'reset'));
+  echo $ajax->link('Cancel', '/explorer/updatemeta/'.$mediaId, array('update' => 'meta-'.$mediaId, 'class' => 'reset'));
 ?>
 </form>

@@ -30,9 +30,9 @@ class FlashVideoComponent extends Object {
     $this->controller =& $controller;
   }
 
-  function _scaleSize($medium, $size) {
-    $width = $medium['Medium']['width'];
-    $height = $medium['Medium']['height'];
+  function _scaleSize($media, $size) {
+    $width = $media['Media']['width'];
+    $height = $media['Media']['height'];
     if ($width > $size && $width > $height) {
       $height = intval($size * $height / $width);
       $width = $size;
@@ -47,21 +47,21 @@ class FlashVideoComponent extends Object {
   }
 
 
-  function create($medium, $options = array()) {
+  function create($media, $options = array()) {
     $options = am(array('size' => OUTPUT_SIZE_VIDEO, 'bitrate' => OUTPUT_BITRATE_VIDEO), $options);
-    if (!$this->controller->Medium->isType($medium, MEDIUM_TYPE_VIDEO)) {
-      $this->Logger->err("Medium {$medium['Medium']['id']} is not a video");
+    if (!$this->controller->Media->isType($media, MEDIUM_TYPE_VIDEO)) {
+      $this->Logger->err("Media {$media['Media']['id']} is not a video");
       return false;
     }
-    $video = $this->controller->Medium->getFile($medium, FILE_TYPE_VIDEO);
+    $video = $this->controller->Media->getFile($media, FILE_TYPE_VIDEO);
     if (!$video) {
-      $this->Logger->err("Could not find video for medium {$medium['Medium']['id']}");
+      $this->Logger->err("Could not find video for media {$media['Media']['id']}");
       return false;
     }
 
     $src = $this->controller->MyFile->getFilename($video);
     $this->Logger->debug($src);
-    $cache = $this->FileCache->getFilename($medium);
+    $cache = $this->FileCache->getFilename($media);
 
     if (!$cache) {
       $this->Logger->fatal("Precondition of cache directory failed: $cacheDir");
@@ -72,7 +72,7 @@ class FlashVideoComponent extends Object {
 
     if (!file_exists($flashFilename)) {
       $bin = $this->controller->getOption('bin.ffmpeg', 'ffmpeg');
-      list($width, $height) = $this->_scaleSize($medium, $options['size']);
+      list($width, $height) = $this->_scaleSize($media, $options['size']);
       $command = "$bin -i ".escapeshellarg($src)." -s {$width}x{$height} -r 15 -b {$options['bitrate']} -ar 22050 -ab 48 -y ".escapeshellarg($flashFilename);
       $output = array();
       $result = -1;

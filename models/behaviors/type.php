@@ -40,5 +40,24 @@ class TypeBehavior extends ModelBehavior
 
     return $data[$model->alias]['type'] == $type ? true : false;
   }
+
+  function setType(&$model, &$data, $type) {
+    if (!$data) {
+      $data =& $model->data;
+    }
+    if (isset($data[$model->alias])) {
+      $data =& $data[$model->alias];
+    }
+
+    if (!isset($data['id'])) {
+      $model->Logger->err("Precondition failed");
+      return null;
+    }
+
+    $data['type'] = $type;
+    if (!$model->save($data, true, array('type'))) {
+      $model->Logger->err("Could not update type of model {$model->alias} {$data['id']} to type {$type}");
+    }
+  }
 }
 ?>

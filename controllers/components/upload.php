@@ -95,9 +95,9 @@ class UploadComponent extends Object {
     if (!$data) {
       $this->Logger->warn("Could not find file '$file' in database");
     } else {
-      // @TODO delete only medium if medium requires file
-      $this->FileCache->delete($data['File']['user_id'], $data['Medium']['id']);
-      $this->controller->Medium->delete($data['Medium']['id']);
+      // @TODO delete only media if media requires file
+      $this->FileCache->delete($data['File']['user_id'], $data['Media']['id']);
+      $this->controller->Media->delete($data['Media']['id']);
       $this->Logger->info("Delete existsing file '$file' data for overwrite");
     }
   }

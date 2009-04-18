@@ -38,15 +38,15 @@ class PhtagrSchema extends CakeSchema {
 			'indexes' => array('PRIMARY' => array('column' => 'id', 'unique' => 1), 'name' => array('column' => 'name', 'unique' => 0))
 		);
 	var $categories_media = array(
-			'medium_id' => array('type'=>'integer', 'null' => false, 'default' => '0'),
+			'media_id' => array('type'=>'integer', 'null' => false, 'default' => '0'),
 			'category_id' => array('type'=>'integer', 'null' => false, 'default' => '0'),
-			'indexes' => array('PRIMARY' => array('column' => array('medium_id', 'category_id'), 'unique' => 1), 'setid' => array('column' => 'category_id', 'unique' => 0))
+			'indexes' => array('PRIMARY' => array('column' => array('media_id', 'category_id'), 'unique' => 1), 'setid' => array('column' => 'category_id', 'unique' => 0))
 		);
 	var $comments = array(
 			'id' => array('type'=>'integer', 'null' => false, 'default' => NULL, 'key' => 'primary'),
 			'created' => array('type'=>'datetime', 'null' => true, 'default' => NULL),
 			'modified' => array('type'=>'datetime', 'null' => true, 'default' => NULL),
-			'medium_id' => array('type'=>'integer', 'null' => true, 'default' => NULL),
+			'media_id' => array('type'=>'integer', 'null' => true, 'default' => NULL),
 			'user_id' => array('type'=>'integer', 'null' => true, 'default' => NULL),
 			'name' => array('type'=>'string', 'null' => false, 'length' => 32),
 			'email' => array('type'=>'string', 'null' => false, 'length' => 64),
@@ -62,7 +62,7 @@ class PhtagrSchema extends CakeSchema {
 			'created' => array('type'=>'datetime', 'null' => true, 'default' => NULL),
 			'modified' => array('type'=>'datetime', 'null' => true, 'default' => NULL),
 			'user_id' => array('type'=>'integer', 'null' => true, 'default' => NULL),
-			'medium_id' => array('type'=>'integer', 'null' => true, 'default' => NULL),
+			'media_id' => array('type'=>'integer', 'null' => true, 'default' => NULL),
 			'flag' => array('type'=>'integer', 'null' => true, 'default' => '0', 'length' => 3),
 			'type' => array('type'=>'integer', 'null' => true, 'default' => '0', 'length' => 3),
 			'path' => array('type'=>'text', 'null' => false),
@@ -70,7 +70,7 @@ class PhtagrSchema extends CakeSchema {
 			'size' => array('type'=>'integer', 'null' => false),
 			'time' => array('type'=>'datetime', 'null' => false),
 			'readed' => array('type'=>'datetime', 'null' => true, 'default' => NULL),
-			'indexes' => array('PRIMARY' => array('column' => 'id', 'unique' => 1), 'id' => array('column' => 'id', 'unique' => 0), 'user_id' => array('column' => 'user_id', 'unique' => 0), 'medium_id' => array('column' => 'medium_id', 'unique' => 0))
+			'indexes' => array('PRIMARY' => array('column' => 'id', 'unique' => 1), 'id' => array('column' => 'id', 'unique' => 0), 'user_id' => array('column' => 'user_id', 'unique' => 0), 'media_id' => array('column' => 'media_id', 'unique' => 0))
 		);
 	var $groups = array(
 			'id' => array('type'=>'integer', 'null' => false, 'default' => NULL, 'key' => 'primary'),
@@ -104,8 +104,8 @@ class PhtagrSchema extends CakeSchema {
 		);
 	var $locations_media = array(
 			'location_id' => array('type'=>'integer', 'null' => false, 'default' => '0'),
-			'medium_id' => array('type'=>'integer', 'null' => false, 'default' => '0'),
-			'indexes' => array('PRIMARY' => array('column' => array('medium_id', 'location_id'), 'unique' => 1), 'locationid' => array('column' => 'location_id', 'unique' => 0))
+			'media_id' => array('type'=>'integer', 'null' => false, 'default' => '0'),
+			'indexes' => array('PRIMARY' => array('column' => array('media_id', 'location_id'), 'unique' => 1), 'locationid' => array('column' => 'location_id', 'unique' => 0))
 		);
 	var $media = array(
 			'id' => array('type'=>'integer', 'null' => false, 'default' => NULL, 'key' => 'primary'),
@@ -138,9 +138,9 @@ class PhtagrSchema extends CakeSchema {
 			'indexes' => array('PRIMARY' => array('column' => 'id', 'unique' => 1), 'date' => array('column' => 'date', 'unique' => 0), 'ranking' => array('column' => 'ranking', 'unique' => 0), 'id' => array('column' => 'id', 'unique' => 0), 'oacl' => array('column' => 'oacl', 'unique' => 0))
 		);
 	var $media_tags = array(
-			'medium_id' => array('type'=>'integer', 'null' => false, 'default' => '0'),
+			'media_id' => array('type'=>'integer', 'null' => false, 'default' => '0'),
 			'tag_id' => array('type'=>'integer', 'null' => false, 'default' => '0'),
-			'indexes' => array('PRIMARY' => array('column' => array('medium_id', 'tag_id'), 'unique' => 1), 'imageid' => array('column' => 'medium_id', 'unique' => 0), 'tagid' => array('column' => 'tag_id', 'unique' => 0))
+			'indexes' => array('PRIMARY' => array('column' => array('media_id', 'tag_id'), 'unique' => 1), 'imageid' => array('column' => 'media_id', 'unique' => 0), 'tagid' => array('column' => 'tag_id', 'unique' => 0))
 		);
 	var $options = array(
 			'id' => array('type'=>'integer', 'null' => false, 'default' => NULL, 'key' => 'primary'),

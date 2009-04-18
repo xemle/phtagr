@@ -27,7 +27,7 @@ if (!App::import('Vendor', "phpthumb", true, array(), "phpthumb.class.php")) {
 class MediaController extends AppController
 {
   var $name = 'Media';
-  var $uses = array('Medium', 'MyFile');
+  var $uses = array('Media', 'MyFile');
   var $layout = null;
   var $_outputMap = array(
                       OUTPUT_TYPE_MINI => array('size' => OUTPUT_SIZE_MINI, 'square' => true),
@@ -42,7 +42,7 @@ class MediaController extends AppController
     // Reduce security level for this controller if required. Security level
     // 'high' allows only 10 concurrent requests
     if (Configure::read('Security.level') === 'high') {
-      Configure::write('Security.level', 'medium');
+      Configure::write('Security.level', 'media');
     }
     // Disable sql output
     if (Configure::read('debug') === 2) {
@@ -52,12 +52,12 @@ class MediaController extends AppController
   }
   
   function _getCacheDir($data) {
-    if (!isset($data['Medium']['id'])) {
+    if (!isset($data['Media']['id'])) {
       $this->Logger->debug("Data does not contain id of the image");
       return false;
     }
 
-    $cacheDir = $this->FileCache->getPath($data['Medium']['user_id'], $data['Medium']['id']);
+    $cacheDir = $this->FileCache->getPath($data['Media']['user_id'], $data['Media']['id']);
     return $cacheDir;
   }
 
@@ -110,12 +110,12 @@ class MediaController extends AppController
   }
 
   /** Fetch image from database and checks access 
-    @param id Medium id
+    @param id Media id
     @param outputType 
-    @return Medium data array. If no image is found or access is denied it responses 404 */
-  function _getMedium($id, $outputType) {
-    if (!$this->Medium->hasAny("Medium.id = $id")) {
-      $this->Logger->debug("No Medium with id $id exists");
+    @return Media data array. If no image is found or access is denied it responses 404 */
+  function _getMedia($id, $outputType) {
+    if (!$this->Media->hasAny("Media.id = $id")) {
+      $this->Logger->debug("No Media with id $id exists");
       $this->redirect(null, 404);
     }
 
@@ -128,29 +128,29 @@ class MediaController extends AppController
       default:
         $flag = ACL_READ_PREVIEW; break;
     }
-    //$conditions = "Medium.id = $id AND Medium.flag & ".MEDIUM_FLAG_ACTIVE.$this->Medium->buildWhereAcl($user, 0, $flag);
-    $conditions = "Medium.id = $id".$this->Medium->buildWhereAcl($user, 0, $flag);
-    $medium = $this->Medium->find($conditions);
-    if (!$medium) {
+    //$conditions = "Media.id = $id AND Media.flag & ".MEDIUM_FLAG_ACTIVE.$this->Media->buildWhereAcl($user, 0, $flag);
+    $conditions = "Media.id = $id".$this->Media->buildWhereAcl($user, 0, $flag);
+    $media = $this->Media->find($conditions);
+    if (!$media) {
       $this->Logger->debug("Deny access to image $id");
       $this->redirect(null, 403);
     }
     
-    return $medium;
+    return $media;
   }
 
   /** Fetches the source filename and checks it for read permission. If
    * filename is not readable it responses with 404
-    @param image Medium data
+    @param image Media data
     @return filename of image */
-  function _getSourceFile($medium) {
-    if ($this->Medium->isType($medium, MEDIUM_TYPE_VIDEO)) {
-      $sourceFilename = $this->VideoPreview->getPreviewFilename($medium);
+  function _getSourceFile($media) {
+    if ($this->Media->isType($media, MEDIUM_TYPE_VIDEO)) {
+      $sourceFilename = $this->VideoPreview->getPreviewFilename($media);
     } else {
-      $sourceFilename = $this->Medium->File->getFilename($medium['File'][0]);
+      $sourceFilename = $this->Media->File->getFilename($media['File'][0]);
     }
     if(!is_readable($sourceFilename)) {
-      $this->Logger->debug("Medium file (id {$medium['Medium']['id']}) is not readable: $sourceFilename");
+      $this->Logger->debug("Media file (id {$media['Media']['id']}) is not readable: $sourceFilename");
       $this->redirect(null, 500); 
     }
     return $sourceFilename;
@@ -164,22 +164,22 @@ class MediaController extends AppController
       die("Internal error");
     }
     
-    $medium = $this->_getMedium($id, $outputType);
+    $media = $this->_getMedia($id, $outputType);
     $options = am(array('size' => 220, 'square' => false, 'quality' => OUTPUT_QUALITY), $this->_outputMap[$outputType]);
-    $dst = $this->_getCacheDir($medium).$this->_getCacheFilename($id, $options['size']);
+    $dst = $this->_getCacheDir($media).$this->_getCacheFilename($id, $options['size']);
 
     if (!file_exists($dst)) {
-      $src = $this->_getSourceFile($medium);
-      $options['width'] = $medium['Medium']['width'];
-      $options['height'] = $medium['Medium']['height'];
+      $src = $this->_getSourceFile($media);
+      $options['width'] = $media['Media']['width'];
+      $options['height'] = $media['Media']['height'];
 
-      switch ($medium['Medium']['orientation']) {
+      switch ($media['Media']['orientation']) {
         case 1: break;
         case 3: $options['rotation'] = 180; break;
         case 6: $options['rotation'] = 90; break;
         case 8: $options['rotation'] = 270; break;
         default: 
-          $this->Logger->warn("Unsupported rotation flag: ".$medium['Medium']['orientation']);
+          $this->Logger->warn("Unsupported rotation flag: ".$media['Media']['orientation']);
           break;
       }
 
@@ -203,8 +203,8 @@ class MediaController extends AppController
       die("Internal error");
     }
 
-    $medium = $this->_getMedium($id, $outputType);
-    $flashFilename = $this->FlashVideo->create($medium, $this->_outputMap[$outputType]);
+    $media = $this->_getMedia($id, $outputType);
+    $flashFilename = $this->FlashVideo->create($media, $this->_outputMap[$outputType]);
 
     if (!is_file($flashFilename)) { 
       $this->Logger->err("Could not create preview file {$flashFilename}");
@@ -244,14 +244,14 @@ class MediaController extends AppController
 
   function original($id) {
     $id = intval($id);
-    $medium = $this->Medium->findById($id);
+    $media = $this->Media->findById($id);
     $user = $this->getUser();
-    if (!$this->Medium->checkAccess(&$medium, $user, ACL_READ_ORIGINAL, ACL_READ_MASK)) {
-      $this->Logger->warn("User {$user['User']['id']} has no previleges to access image ".$medium['Medium']['id']);
+    if (!$this->Media->checkAccess(&$media, $user, ACL_READ_ORIGINAL, ACL_READ_MASK)) {
+      $this->Logger->warn("User {$user['User']['id']} has no previleges to access image ".$media['Media']['id']);
       $this->redirect(null, 404);
     }
     $this->Logger->info("Request of image $id: original");
-    $filename = $this->Medium->getFilename($medium);  
+    $filename = $this->Media->getFilename($media);  
 
     $mediaOptions = $this->_getMediaOptions($filename);
     $mediaOptions['download'] = true;

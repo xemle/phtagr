@@ -28,44 +28,44 @@ $canWriteTag=false;
 $canWriteMeta=false;
 $canWriteAcl=false;
 $pos = ($query->get('page', 1)-1) * $query->get('show', 12) + 1;
-foreach($data as $medium): ?>
+foreach($data as $media): ?>
 <?php $side = $cell % 2 ? 'r' : 'l'; ?>
 <?php if (!($cell % 2)): ?><div class="subcolumns"><?php endif; ?>
-<div class="c50<?=$side; ?>"><div class="subc<?=$side; ?> unselected thumb" id="medium-<?= $medium['Medium']['id'];?>" >
+<div class="c50<?=$side; ?>"><div class="subc<?=$side; ?> unselected thumb" id="media-<?= $media['Media']['id'];?>" >
 <script type="text/javascript">
-  mediaData[<?php echo $medium['Medium']['id']; ?>] = [];
+  mediaData[<?php echo $media['Media']['id']; ?>] = [];
 </script>
-<h2><?php echo $medium['Medium']['name']; ?></h2>
+<h2><?php echo $media['Media']['name']; ?></h2>
 <div class="image">
 <?php 
-  $size = $imageData->getimagesize($medium, OUTPUT_SIZE_THUMB);
+  $size = $imageData->getimagesize($media, OUTPUT_SIZE_THUMB);
   $query->set('pos', $pos++);
-  echo "<a href=\"".Router::url("/images/view/".$medium['Medium']['id'].'/'.$query->getParams())."\">";
-  echo "<img src=\"".Router::url("/media/thumb/".$medium['Medium']['id'])."\" $size[3] alt=\"".$medium['Medium']['name']."\"/>"; 
+  echo "<a href=\"".Router::url("/images/view/".$media['Media']['id'].'/'.$query->getParams())."\">";
+  echo "<img src=\"".Router::url("/media/thumb/".$media['Media']['id'])."\" $size[3] alt=\"".$media['Media']['name']."\"/>"; 
   echo "</a>";
 
-  if ($medium['Medium']['canWriteTag'])
+  if ($media['Media']['canWriteTag'])
     $canWriteTag=true;
-  if ($medium['Medium']['canWriteMeta'])
+  if ($media['Media']['canWriteMeta'])
     $canWriteMeta=true;
-  if ($medium['Medium']['canWriteAcl'])
+  if ($media['Media']['canWriteAcl'])
     $canWriteAcl=true;
 ?>
 </div>
 
 <?php 
-  if (!$query->get('mymedium')): ?>
+  if (!$query->get('mymedia')): ?>
 <div class="user">
 <?php
-  echo $html->link($medium['User']['username'], "/explorer/user/".$medium['User']['id']);
+  echo $html->link($media['User']['username'], "/explorer/user/".$media['User']['id']);
 ?>
 </div>
 <?php endif; ?>
 
 <div class="meta">
-<div id="<?php echo 'meta-'.$medium['Medium']['id']; ?>">
+<div id="<?php echo 'meta-'.$media['Media']['id']; ?>">
 <table>
-  <?php echo $html->tableCells($imageData->metaTable(&$medium)); ?>
+  <?php echo $html->tableCells($imageData->metaTable(&$media)); ?>
 </table>
 </div>
 </div><!-- meta -->
@@ -96,10 +96,10 @@ foreach($data as $medium): ?>
   echo $form->create(null, array('id' => 'explorer', 'action' => 'edit/'.$query->getParams())); 
 ?>
 <fieldset><legend>Metadata</legend>
-<?php echo $form->hidden('Medium.ids', array('id' => 'MediumIds')) ?>
+<?php echo $form->hidden('Media.ids', array('id' => 'MediaIds')) ?>
 <?php 
   if ($canWriteMeta) {
-    echo $form->input('Medium.date', array('type' => 'text', 'after' => '<span class="hint">E.g. 2008-08-07 15:30</span>')); 
+    echo $form->input('Media.date', array('type' => 'text', 'after' => '<span class="hint">E.g. 2008-08-07 15:30</span>')); 
   }
   echo $form->input('Tags.text', array('label' => 'Tags', 'maxlength' => 320, 'after' => '<span class="hint">E.g. newtag, -oldtag</span>')); 
   if ($canWriteMeta) {

@@ -31,7 +31,7 @@ class CacheBehavior extends ModelBehavior
     $this->config[$model->name] = $config;
   }
 
-  /** Deletes all cache files of a given medium
+  /** Deletes all cache files of a given media
     @param model Reference of model
     @param data Model data 
     @return True on success */
@@ -58,7 +58,7 @@ class CacheBehavior extends ModelBehavior
     $folder =& new Folder($cacheDir);
     $files = $folder->find($pattern);
     if (!$files) {
-      $model->Logger->trace("No cache files found for medium {$data['id']}");
+      $model->Logger->trace("No cache files found for media {$data['id']}");
     } else {
       foreach ($files as $file) {
         if (!@unlink($folder->addPathElement($cacheDir, $file))) {
@@ -67,7 +67,7 @@ class CacheBehavior extends ModelBehavior
           $model->Logger->trace("Deleted cache file '$file'");
         }
       }
-      $model->Logger->debug("Deleted cache files of medium {$data['id']}");
+      $model->Logger->debug("Deleted cache files of media {$data['id']}");
     }
     return true;
   }

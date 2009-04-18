@@ -21,22 +21,22 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-class Medium extends AppModel
+class Media extends AppModel
 {
-  var $name = 'Medium';
+  var $name = 'Media';
 
   var $belongsTo = array(
     'User' => array(),
     'Group' => array());
   
   var $hasMany = array(
-    'Comment' => array('dependent' => true, 'foreignKey' => 'medium_id'),
-    'File' => array('className' => 'MyFile', 'foreignKey' => 'medium_id'));
+    'Comment' => array('dependent' => true),
+    'File' => array('className' => 'MyFile'));
 
   var $hasAndBelongsToMany = array(
-    'Tag' => array('foreignKey' => 'medium_id'),
-    'Category' => array('foreignKey' => 'medium_id'),
-    'Location' => array('foreignKey' => 'medium_id', 'order' => 'Location.type'));
+    'Tag' => array(),
+    'Category' => array(),
+    'Location' => array('order' => 'Location.type'));
   
   var $_aclMap = array(
     ACL_LEVEL_GROUP => 'gacl',
@@ -56,11 +56,11 @@ class Medium extends AppModel
   function addDefaultAcl(&$data, $user) {
     // Access control values
     $acl = $this->User->Option->getDefaultAcl($user);
-    $data['Medium']['user_id'] = $user['User']['id'];
-    $data['Medium']['group_id'] = $acl['groupId'];
-    $data['Medium']['gacl'] = $acl['gacl'];
-    $data['Medium']['uacl'] = $acl['uacl'];
-    $data['Medium']['oacl'] = $acl['oacl'];
+    $data['Media']['user_id'] = $user['User']['id'];
+    $data['Media']['group_id'] = $acl['groupId'];
+    $data['Media']['gacl'] = $acl['gacl'];
+    $data['Media']['uacl'] = $acl['uacl'];
+    $data['Media']['oacl'] = $acl['oacl'];
     return $data;
   }
 
@@ -68,7 +68,7 @@ class Medium extends AppModel
     @param data Media model data
     @param fileType Required file type. Default is FILE_TYPE_IMAGE
     @param fullModel If true returns the full associated file model. If false
-    returns only the file model of the medium without associations 
+    returns only the file model of the media without associations 
     @return Fals on error, null if file was not found */
   function getFile($data, $fileType = FILE_TYPE_IMAGE, $fullModel = true) {
     if (!$data) {
@@ -94,7 +94,7 @@ class Medium extends AppModel
   }
 
   /** Returns true if current user is allowed of the current flag
-    @param data Current Medium array
+    @param data Current Media array
     @param user Current User array
     @param flag Flag bit which should be checkt
     @param mask Bitmask for the flag which should be checkt
@@ -102,30 +102,30 @@ class Medium extends AppModel
     by the user's data.
     @return True is user is allowed, False otherwise */
   function checkAccess(&$data, &$user, $flag, $mask, &$groups=null) {
-    if (!$data || !$user || !isset($data['Medium']) || !isset($user['User'])) {
+    if (!$data || !$user || !isset($data['Media']) || !isset($user['User'])) {
       $this->Logger->err("precondition failed");
       return false;
     }
 
     // check for public access
-    if (($data['Medium']['oacl'] & $mask) >= $flag)
+    if (($data['Media']['oacl'] & $mask) >= $flag)
       return true;
 
     // check for members
     if ($user['User']['role'] >= ROLE_USER && 
-      ($data['Medium']['uacl'] & $mask) >= $flag)
+      ($data['Media']['uacl'] & $mask) >= $flag)
       return true;
 
     // check for group members
     if ($groups === null)
       $groups = Set::extract($user, 'Member.{n}.id');
     if ($user['User']['role'] >= ROLE_GUEST &&
-      ($data['Medium']['gacl'] & $mask) >= $flag &&
-      in_array($data['Medium']['group_id'], $groups))
+      ($data['Media']['gacl'] & $mask) >= $flag &&
+      in_array($data['Media']['group_id'], $groups))
       return true;
 
-    // Medium owner and admin check
-    if ($user['User']['id'] == $data['Medium']['user_id'] ||
+    // Media owner and admin check
+    if ($user['User']['id'] == $data['Media']['user_id'] ||
       $user['User']['role'] == ROLE_ADMIN)
       return true;
 
@@ -133,9 +133,9 @@ class Medium extends AppModel
   }
 
   /** Set the access flags of write and read options according to the current user
-    @param data Reference of the Medium array 
+    @param data Reference of the Media array 
     @param user User array
-    @return $data of Medium data with the access flags */
+    @return $data of Media data with the access flags */
   function setAccessFlags(&$data, $user) {
     if (!isset($data)) 
       return $data;
@@ -144,23 +144,23 @@ class Medium extends AppModel
     $user = am(array('User' => array('id' => -1, 'role' => ROLE_NOBODY), 'Member' => array()), $user);
     //$this->Logger->debug($user);
 
-    $oacl = $data['Medium']['oacl'];
-    $uacl = $data['Medium']['uacl'];
-    $gacl = $data['Medium']['gacl'];
+    $oacl = $data['Media']['oacl'];
+    $uacl = $data['Media']['uacl'];
+    $gacl = $data['Media']['gacl'];
     
     $groups = Set::extract($user, 'Member.{n}.id');
 
-    $data['Medium']['canWriteTag'] = $this->checkAccess(&$data, &$user, ACL_WRITE_TAG, ACL_WRITE_MASK, &$groups);    
-    $data['Medium']['canWriteMeta'] = $this->checkAccess(&$data, &$user, ACL_WRITE_META, ACL_WRITE_MASK, &$groups);    
-    $data['Medium']['canWriteCaption'] = $this->checkAccess(&$data, &$user, ACL_WRITE_CAPTION, ACL_WRITE_MASK, &$groups);    
+    $data['Media']['canWriteTag'] = $this->checkAccess(&$data, &$user, ACL_WRITE_TAG, ACL_WRITE_MASK, &$groups);    
+    $data['Media']['canWriteMeta'] = $this->checkAccess(&$data, &$user, ACL_WRITE_META, ACL_WRITE_MASK, &$groups);    
+    $data['Media']['canWriteCaption'] = $this->checkAccess(&$data, &$user, ACL_WRITE_CAPTION, ACL_WRITE_MASK, &$groups);    
 
-    $data['Medium']['canReadPreview'] = $this->checkAccess(&$data, &$user, ACL_READ_PREVIEW, ACL_READ_MASK, &$groups);    
-    $data['Medium']['canReadHigh'] = $this->checkAccess(&$data, &$user, ACL_READ_HIGH, ACL_READ_MASK, &$groups);    
-    $data['Medium']['canReadOriginal'] = $this->checkAccess(&$data, &$user, ACL_READ_ORIGINAL, ACL_READ_MASK, &$groups);    
+    $data['Media']['canReadPreview'] = $this->checkAccess(&$data, &$user, ACL_READ_PREVIEW, ACL_READ_MASK, &$groups);    
+    $data['Media']['canReadHigh'] = $this->checkAccess(&$data, &$user, ACL_READ_HIGH, ACL_READ_MASK, &$groups);    
+    $data['Media']['canReadOriginal'] = $this->checkAccess(&$data, &$user, ACL_READ_ORIGINAL, ACL_READ_MASK, &$groups);    
 
-    $data['Medium']['isOwner'] = ife($data['Medium']['user_id'] == $user['User']['id'], true, false);
-    $data['Medium']['canWriteAcl'] = $this->checkAccess(&$data, &$user, 1, 0, &$groups);    
-    $data['Medium']['isDirty'] = ife(($data['Medium']['flag'] & MEDIUM_FLAG_DIRTY) > 0, true, false);
+    $data['Media']['isOwner'] = ife($data['Media']['user_id'] == $user['User']['id'], true, false);
+    $data['Media']['canWriteAcl'] = $this->checkAccess(&$data, &$user, 1, 0, &$groups);    
+    $data['Media']['isDirty'] = ife(($data['Media']['flag'] & MEDIUM_FLAG_DIRTY) > 0, true, false);
 
     return $data;
   }
@@ -173,16 +173,16 @@ class Medium extends AppModel
     @param mask Bit mask of flag 
     @param level Highes ACL level which should be increased */
   function _increaseAcl(&$data, $flag, $mask, $level) {
-    //$this->Logger->debug("Increase: {$data['Medium']['gacl']},{$data['Medium']['uacl']},{$data['Medium']['oacl']}: $flag/$mask ($level)");
+    //$this->Logger->debug("Increase: {$data['Media']['gacl']},{$data['Media']['uacl']},{$data['Media']['oacl']}: $flag/$mask ($level)");
     if ($level>ACL_LEVEL_OTHER)
       return;
 
     for ($l=ACL_LEVEL_GROUP; $l<=$level; $l++) {
       $name = $this->_aclMap[$l];
-      if (($data['Medium'][$name]&($mask))<$flag)
-        $data['Medium'][$name]=($data['Medium'][$name]&(~$mask))|$flag;
+      if (($data['Media'][$name]&($mask))<$flag)
+        $data['Media'][$name]=($data['Media'][$name]&(~$mask))|$flag;
     }
-    //$this->Logger->debug("Increase (result): {$data['Medium']['gacl']},{$data['Medium']['uacl']},{$data['Medium']['oacl']}: $flag/$mask ($level)");
+    //$this->Logger->debug("Increase (result): {$data['Media']['gacl']},{$data['Media']['uacl']},{$data['Media']['oacl']}: $flag/$mask ($level)");
   }
 
   /** Decrease the ACL level. Decreases the ACL level of higher ACL levels
@@ -195,7 +195,7 @@ class Medium extends AppModel
     @param mask Bit mask of flag
     @param level Lower ACL level which should be downgraded */
   function _decreaseAcl(&$data, $flag, $mask, $level) {
-    //$this->Logger->debug("Decrease: {$data['Medium']['gacl']},{$data['Medium']['uacl']},{$data['Medium']['oacl']}: $flag/$mask ($level)");
+    //$this->Logger->debug("Decrease: {$data['Media']['gacl']},{$data['Media']['uacl']},{$data['Media']['oacl']}: $flag/$mask ($level)");
     if ($level<ACL_LEVEL_GROUP)
       return;
 
@@ -206,13 +206,13 @@ class Medium extends AppModel
         $lower = 0;
       else {
         $next = $this->_aclMap[$l+1];
-        $lower = $data['Medium'][$next]&($mask);
+        $lower = $data['Media'][$next]&($mask);
       }
       $lower=($lower<$flag)?$lower:0;
-      if (($data['Medium'][$name]&($mask))>=$flag)
-        $data['Medium'][$name]=($data['Medium'][$name]&(~$mask))|$lower;
+      if (($data['Media'][$name]&($mask))>=$flag)
+        $data['Media'][$name]=($data['Media'][$name]&(~$mask))|$lower;
     }
-    //$this->Logger->debug("Decrease (result): {$data['Medium']['gacl']},{$data['Medium']['uacl']},{$data['Medium']['oacl']}: $flag/$mask ($level)");
+    //$this->Logger->debug("Decrease (result): {$data['Media']['gacl']},{$data['Media']['uacl']},{$data['Media']['oacl']}: $flag/$mask ($level)");
   }
 
   function setAcl(&$data, $flag, $mask, $level) {
@@ -298,12 +298,12 @@ class Medium extends AppModel
 
   /** The function Model::find slows down the hole search. This function builds
    * the query manually for speed optimazation 
-    @param id Medium id
+    @param id Media id
     @return Return the image Array as find */
   function optimizedRead($id) {
     $db =& ConnectionManager::getDataSource($this->useDbConfig);
     $myTable = $db->fullTableName($this->table, false);
-    $sql = "SELECT Medium.* FROM `$myTable` AS Medium WHERE Medium.id = $id";
+    $sql = "SELECT Media.* FROM `$myTable` AS Media WHERE Media.id = $id";
     $result = $this->query($sql);
     if (!$result)
       return array();
@@ -312,7 +312,7 @@ class Medium extends AppModel
 
     foreach ($this->belongsTo as $model => $config) {
       $name = Inflector::underscore($model);
-      $image[$model] = $this->_optimizedBelongsTo($image['Medium'][$name.'_id'], $model);
+      $image[$model] = $this->_optimizedBelongsTo($image['Media'][$name.'_id'], $model);
     }
 
     foreach ($this->hasAndBelongsToMany as $model => $config) {
@@ -324,7 +324,7 @@ class Medium extends AppModel
   /** 
     @param user Current user
     @param userId User id of own user or foreign user. If user id is equal with
-    the id of the current user, the user is treated as 'My Mediums'. Otherwise
+    the id of the current user, the user is treated as 'My Medias'. Otherwise
     the default acl will apply 
     @param level Level of ACL which image must be have. Default is ACL_READ_PREVIEW.
     @return returns sql statement for the where clause which checks the access
@@ -333,18 +333,18 @@ class Medium extends AppModel
     $level = intval($level);
     $acl = '';
     if ($userId > 0 && $user['User']['id'] == $userId) {
-      // My Mediums
+      // My Medias
       if ($user['User']['role'] >= ROLE_USER)
-        $acl .= " AND Medium.user_id = $userId";
+        $acl .= " AND Media.user_id = $userId";
       elseif ($user['User']['role'] == ROLE_GUEST) {
         if (count($user['Member'])) {
           $groupIds = Set::extract($user, 'Member.{n}.id');
           if (count($groupIds) > 1) {
-            $acl .= " AND Medium.group_id in ( ".implode(", ", $groupIds)." )";
-            $acl .= " AND Medium.gacl >= $level";
+            $acl .= " AND Media.group_id in ( ".implode(", ", $groupIds)." )";
+            $acl .= " AND Media.gacl >= $level";
           } elseif (count($groupIds) == 1) {
-            $acl .= " AND Medium.group_id = {$groupIds[0]}";
-            $acl .= " AND Medium.gacl >= $level";
+            $acl .= " AND Media.group_id = {$groupIds[0]}";
+            $acl .= " AND Media.gacl >= $level";
           }
         } else {
           // no images
@@ -354,7 +354,7 @@ class Medium extends AppModel
     } else {
       // Another user, if set
       if ($userId > 0)
-        $acl .= " AND Medium.user_id = $userId";
+        $acl .= " AND Media.user_id = $userId";
 
       // General ACL
       if ($user['User']['role'] < ROLE_ADMIN) {
@@ -363,23 +363,23 @@ class Medium extends AppModel
         if ($user['User']['role'] >= ROLE_GUEST && count($user['Member'])) {
           $groupIds = Set::extract($user, 'Member.{n}.id');
           if (count($groupIds) > 1) {
-            $acl .= " ( Medium.group_id in ( ".implode(", ", $groupIds)." )";
-            $acl .= " AND Medium.gacl >= $level ) OR";
+            $acl .= " ( Media.group_id in ( ".implode(", ", $groupIds)." )";
+            $acl .= " AND Media.gacl >= $level ) OR";
           } elseif (count($groupIds) == 1) {
-            $acl .= " ( Medium.group_id = {$groupIds[0]}";
-            $acl .= " AND Medium.gacl >= $level ) OR";
+            $acl .= " ( Media.group_id = {$groupIds[0]}";
+            $acl .= " AND Media.gacl >= $level ) OR";
           }
         }
         if ($user['User']['role'] >= ROLE_USER) {
           // Own image
           if ($userId == 0) {
-            $acl .= " Medium.user_id = {$user['User']['id']} OR";
+            $acl .= " Media.user_id = {$user['User']['id']} OR";
           }
           // Other users
-          $acl .= " Medium.uacl >= $level OR";
+          $acl .= " Media.uacl >= $level OR";
         }
         // Public 
-        $acl .= " Medium.oacl >= $level )";
+        $acl .= " Media.oacl >= $level )";
       }
     }
     return $acl;
@@ -400,11 +400,11 @@ class Medium extends AppModel
     $conditions = '';
     if (is_dir($filename)) {
       $path = $db->value(Folder::slashTerm($filename).'%');
-      $conditions .= "Medium.path LIKE $path";
+      $conditions .= "Media.path LIKE $path";
     } else {
       $path = $db->value(Folder::slashTerm(dirname($filename)));
       $file = $db->value(basename($filename));
-      $conditions .= "Medium.path=$path AND Medium.file=$file";
+      $conditions .= "Media.path=$path AND Media.file=$file";
     }
     $conditions .= $this->buildWhereAcl($user, 0, $flag);
 
@@ -433,7 +433,7 @@ class Medium extends AppModel
          "  `$myTable` AS `{$this->alias}`".
          " WHERE `$alias`.`$key` = `$joinAlias`.`$associationForeignKey`".
          "   AND `$joinAlias`.`$foreignKey` = `{$this->alias}`.`{$this->primaryKey}`".
-    //     "   AND Medium.flag & ".MEDIUM_FLAG_ACTIVE.
+    //     "   AND Media.flag & ".MEDIUM_FLAG_ACTIVE.
          $this->buildWhereAcl($user).
          " GROUP BY `$alias`.`name` ".
          " ORDER BY hits DESC LIMIT 0,".intval($num);
@@ -450,7 +450,7 @@ class Medium extends AppModel
     $alias = $this->alias;
     $key = $this->primaryKey;
 
-    $this->Logger->info("Delete HasAndBelongsToMany Medium association of user '$userId'");
+    $this->Logger->info("Delete HasAndBelongsToMany Media association of user '$userId'");
     foreach ($this->hasAndBelongsToMany as $model => $data) {
       $joinTable = $db->fullTableName($data['joinTable'], false);
       $joinAlias = $data['with'];
@@ -470,7 +470,7 @@ class Medium extends AppModel
     $alias = $this->alias;
     $key = $this->primaryKey;
 
-    $this->Logger->info("Delete HasMany Medium assosciation of user '$userId'");
+    $this->Logger->info("Delete HasMany Media assosciation of user '$userId'");
     foreach ($this->hasMany as $model => $data) {
       if (!isset($data['dependent']) || !$data['dependent']) {
         continue;
@@ -493,7 +493,7 @@ class Medium extends AppModel
       )));
     $this->_deleteHasAndBelongsToManyFromUser($userId);
     $this->_deleteHasManyFromUser($userId);
-    $this->deleteAll("Medium.user_id = $userId");
+    $this->deleteAll("Media.user_id = $userId");
   }
 }
 ?>

@@ -26,7 +26,7 @@ class BrowserController extends AppController
   var $name = "Browser";
 
   var $components = array('FileManager', 'RequestHandler', 'FilterManager', 'Upload', 'Zip');
-  var $uses = array('User', 'MyFile', 'Medium', 'Tag', 'Category', 'Location', 'Option');
+  var $uses = array('User', 'MyFile', 'Media', 'Tag', 'Category', 'Location', 'Option');
   var $helpers = array('form', 'formular', 'html', 'number');
 
   /** Array of filesystem root directories. */
@@ -224,53 +224,6 @@ class BrowserController extends AppController
     $this->set('isInternal', $isInternal);
   }
 
-  function _importFile($filename) {
-    $user =& $this->getUser();
-    $path = Folder::slashTerm(dirname($filename));
-    $file = basename($filename);
-    $image = $this->Medium->find(array('path' => $path, 'file' => $file));
-
-    if ($image) {
-      if ($image['User']['id'] != $user['User']['id']) {
-        $this->Logger->err("Import failed: Existing file '$filename' belongs to another user ('{$image['User']['username']}', id {$image['User']['id']})");
-        return -1;
-      } elseif ($image['Medium']['flag'] & MEDIUM_FLAG_ACTIVE > 0) {
-        $this->Logger->debug("File '$filename' is already in database");
-        $this->Logger->warn("Import of existing files currently not supported"); 
-        return 0;
-        // TODO Synchronize data
-      }
-      $this->Medium->addDefaultAcl(&$image, &$user);
-      $imageId = $image['Medium']['id'];      
-    } else {
-      $this->Logger->debug("File '$filename' is not in the database");
-      $imageId = $this->Medium->insertFile($filename, $user);
-      if (!$imageId) {
-        $this->Logger->err("Could not insert '$filename' to the database");
-        return -1;
-      }
-      $image = $this->Medium->findById($imageId);
-      if (!$image) {
-        $this->Logger->err("Could not read image with id $imageId");
-        return -1;
-      }
-    }
-    $image['Medium']['flag'] |= MEDIUM_FLAG_ACTIVE;
-    $thumbFilename = false;
-    if ($this->Medium->isVideo($image)) {
-      $this->VideoFilter->readFile(&$image);
-      $thumbFilename = $this->VideoFilter->getVideoPreviewFilename(&$image, array('noCache' => true));
-    }
-    $this->ImageFilter->readFile(&$image, $thumbFilename);
-    if ($image !== false && $this->Medium->save($image)) {
-      $this->Logger->info("Imported file '$filename' with id $imageId");
-      return 1;
-    } else {
-      $this->Logger->err("Could not save imported data of file '$filename'");
-      return -1;
-    }
-  }
-
   function import() {
     $user = $this->getUser();
     // parameter preparation
@@ -281,6 +234,7 @@ class BrowserController extends AppController
     // Get dir and imports
     $dirs = array();
     $files = array();
+    $toRead = array();
     foreach ($data['import'] as $file) {
       if (!$file) {
         continue;
@@ -288,37 +242,17 @@ class BrowserController extends AppController
       $fsPath = $this->_getFsPath($file);
       if (is_dir($fsPath)) {
         $dirs[] = Folder::slashTerm($fsPath);
+        $toRead[] = $fsPath;
       } elseif (file_exists($fsPath) && is_readable($fsPath)) {
         $files[] = $fsPath;
+        $toRead[] = $fsPath;
       }
     }
     
-    // search for files
-    $folder =& new Folder();
-    foreach ($dirs as $dir) {
-      $cd = $folder->cd($dir);
-      // Get extensions from file filter
-      $extensions = $this->FilterManager->getExtension();
-      $found = $folder->find('.*('.implode('|', $extensions).')');
-      foreach ($found as $file) {
-        $files[] = $dir.$file;
-      }
-    }
-
-    // import files
-    $numImports = 0;
-    $numErrors = 0;
-    foreach ($files as $filename) {
-      $result = $this->FilterManager->read($filename);
-      //$result = $this->_importFile($file);
-      if ($result>0) {
-        $numImports++;
-      }
-      if ($result<0) {
-        $numErrors++;
-      }
-    }
-    $this->Session->setFlash("Imported $numImports files ($numErrors errors)");
+    //$this->Logger->debug($toRead);
+    $readed = $this->FilterManager->readFiles($toRead);
+    $errors = $this->FilterManager->errors;
+    $this->Session->setFlash("Imported $readed files ($errors errors)");
 
     // Set data for view
     $this->set('path', $path);
@@ -332,22 +266,22 @@ class BrowserController extends AppController
     $errors = 0;
 
     @clearstatcache();
-    $this->Medium->unbindAll();
-    $result = $this->Medium->findAll("Medium.user_id = $userId AND Medium.flag & ".MEDIUM_FLAG_DIRTY." > 0", array("Medium.id"));
+    $this->Media->unbindAll();
+    $result = $this->Media->findAll("Media.user_id = $userId AND Media.flag & ".MEDIUM_FLAG_DIRTY." > 0", array("Media.id"));
     if (!$result) {
       $this->Logger->info("No images found for synchronization");
       $this->data['total'] = 0;
     } else {
-      $ids = Set::extract($result, '{n}.Medium.id');
+      $ids = Set::extract($result, '{n}.Media.id');
       $executionTime = ini_get('max_execution_time');
       $start = getMicrotime();
       foreach ($ids as $id) {
-        $medium = $this->Medium->findById($id);
-        if (!$this->FilterManager->write($medium)) {
-          $this->Logger->err("Could not export medium $id");
+        $media = $this->Media->findById($id);
+        if (!$this->FilterManager->write($media)) {
+          $this->Logger->err("Could not export media $id");
           $errors++;
         } else {
-          $this->Logger->verbose("Synced medium $id");
+          $this->Logger->verbose("Synced media $id");
           $synced++;
         }
 

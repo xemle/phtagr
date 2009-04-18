@@ -26,7 +26,7 @@ class MyFile extends AppModel
   var $alias = 'File';
   var $useTable = 'files';
 
-  var $belongsTo = array('Medium', 'User');
+  var $belongsTo = array('Media', 'User');
 
   var $types = array(
     FILE_TYPE_IMAGE => array('jpg', 'jpeg', 'png', 'gif'),
@@ -86,7 +86,7 @@ class MyFile extends AppModel
   }
 
   /** Deletes the linked file (if the file is not external) and also deletes
-   * the medium if the file is required by the medium */
+   * the media if the file is required by the media */
   function beforeDelete($cascade = true) {
     $this->set($this->findById($this->id));
     if (!$this->hasFlag(null, FILE_FLAG_EXTERNAL)) {
@@ -97,9 +97,9 @@ class MyFile extends AppModel
         $this->Logger->verbose("Delete file $filename");
       }
       if ($this->hasFlag(null, FILE_FLAG_DEPENDENT) && 
-        $this->hasMedium()) {
-        $this->Logger->verbose("Delete medium {$this->data['Medium']['id']} from dependent file {$this->data['File']['id']}");
-        $this->Medium->delete($this->data['Medium']['id']);
+        $this->hasMedia()) {
+        $this->Logger->verbose("Delete media {$this->data['Media']['id']} from dependent file {$this->data['File']['id']}");
+        $this->Media->delete($this->data['Media']['id']);
       }
     }
     // prepare associations for deletion
@@ -167,7 +167,7 @@ class MyFile extends AppModel
     return strtolower(substr($data['file'], strrpos($data['file'], '.') + 1));
   }
 
-  function hasMedium($data = null) {
+  function hasMedia($data = null) {
     if (!$data) {
       $data = $this->data;
     }
@@ -175,14 +175,14 @@ class MyFile extends AppModel
     if (isset($data['File'])) {
       $data = $data['File'];
     }
-    if (isset($data['medium_id']) && $data['medium_id'] > 0) {
+    if (isset($data['media_id']) && $data['media_id'] > 0) {
       return true;
     }
     
     return false;
   }
 
-  function setMedium($data = null, $mediumId) {
+  function setMedia($data = null, $mediaId) {
     if (!$data) {
       $data = $this->data;
     }
@@ -191,13 +191,13 @@ class MyFile extends AppModel
       $data = $data['File'];
     }
 
-    if (!isset($data['id']) || !intval($mediumId)) {
+    if (!isset($data['id']) || !intval($mediaId)) {
       $this->Logger->err("Precondition failed");
       return false;
     }
-    $data['medium_id'] = $mediumId;
-    if (!$this->save($data, true, array('medium_id'))) {
-      $this->Logger->err("Could not bind medium $mediumId to file {$data['id']}");
+    $data['media_id'] = $mediaId;
+    if (!$this->save($data, true, array('media_id'))) {
+      $this->Logger->err("Could not bind media $mediaId to file {$data['id']}");
       return false;
     }
     return true;
@@ -234,8 +234,8 @@ class MyFile extends AppModel
   }
 
   function checkAccess($data, $user, $flag, $mask) {
-    if (!empty($data['Medium']['id'])) {
-      return $this->Medium->checkAccess($data, $user, $flag, $mask);
+    if (!empty($data['Media']['id'])) {
+      return $this->Media->checkAccess($data, $user, $flag, $mask);
     } elseif (isset($data['File']['user_id']) &&
       isset($user['User']['id']) &&
       $data['File']['user_id'] == $user['User']['id']) {

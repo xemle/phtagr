@@ -36,22 +36,33 @@ class FileManagerComponent extends Object {
 
   /** Add a file to the database 
     @param filename Filename to add
-    @param user Optional user 
+    @param user Optional user. User model data or user Id.
     @return File id or false on error */
   function add($filename, $user = false) {
     if (!$user) {
-      $user = $this->controller->getUser();
+      $userId = $this->controller->getUserId();
+    } elseif (is_numeric($user)) {
+      $userId = intval($user);
+    } else {
+      if (!isset($user['User']['id'])) {
+        $this->Logger->err('Unexcpected user data array. Use current user.');
+        $this->Logger->debug($user); 
+        $userId = $this->controller->getUserId();
+      } else {
+        $userId = $user['User']['id'];
+      } 
     }
+
     $id = $this->MyFile->fileExists($filename);
     if ($id) {
-      $this->Logger->verbose("File $filename already exists");
+      $this->Logger->verbose("File $filename already exists (id $id)");
       return $id;
     }
     $flag = 0;
     if ($this->isExternal($filename)) {
       $flag |= FILE_FLAG_EXTERNAL;
     }
-    $file = $this->MyFile->create($filename, $user['User']['id'], $flag);
+    $file = $this->MyFile->create($filename, $userId, $flag);
 
     if ($this->MyFile->save($file)) {
       $id = $this->MyFile->getLastInsertID();

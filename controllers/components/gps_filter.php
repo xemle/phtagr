@@ -35,18 +35,18 @@ class GpsFilterComponent extends BaseFilterComponent {
   }
 
   function getExtensions() {
-    return array('log');
+    return array('log' => array('priority' => 2));
   }
 
   /** Read the meta data from the file 
    * @param file File data model
-   * @param medium Medium data model
+   * @param media Media data model
    * @param options 
    *  - offset Time offset in seconds
    *  - overwrite Overwrite GPS 
    *  - minInterval Threshold in seconds which media get a GPS point
    * @return The image data array or False on error */
-  function read($file, &$medium, $options = array()) {
+  function read($file, &$media, $options = array()) {
     $options = am(array(
           'offset' => 120*60, 
           'overwrite' => false,
@@ -71,44 +71,44 @@ class GpsFilterComponent extends BaseFilterComponent {
     //$this->Logger->trace("start: ".date("'Y-m-d H:i:s'", $start)." end: ".date("'Y-m-d H:i:s'", $end));
 
     $conditions = array(
-      'Medium.user_id' => $userId,
-      'Medium.date >= '.date("'Y-m-d H:i:s'", $start+$options['offset']).' AND '.
-      'Medium.date <= '.date("'Y-m-d H:i:s'", $end+$options['offset']));
+      'Media.user_id' => $userId,
+      'Media.date >= '.date("'Y-m-d H:i:s'", $start+$options['offset']).' AND '.
+      'Media.date <= '.date("'Y-m-d H:i:s'", $end+$options['offset']));
     if (!$options['overwrite']) {
-      $conditions['Medium.latitude'] = null;
-      $conditions['Medium.longitude'] = null;
+      $conditions['Media.latitude'] = null;
+      $conditions['Media.longitude'] = null;
     }
     $this->Logger->trace($conditions);
-    $this->Medium->unbindAll();
-    $media = $this->Medium->findAll($conditions);
-    if (!count($media)) {
+    $this->Media->unbindAll();
+    $mediaSet = $this->Media->findAll($conditions);
+    if (!count($mediaSet)) {
       $this->Logger->info("No images found for GPS interval");
       return false;
     }
     // fetch images of same user, no gps, range
-    foreach ($media as $medium) {
+    foreach ($mediaSet as $media) {
       // Adjust time according offset and fetch position
-      $date = strtotime($medium['Medium']['date'])-$options['offset'];
+      $date = strtotime($media['Media']['date'])-$options['offset'];
       $position = $this->Nmea->getPosition($date);
       // write position
       if (!$position) {
-        $this->Logger->debug("No GPS position found for image {$medium['Medium']['id']}");
+        $this->Logger->debug("No GPS position found for image {$media['Media']['id']}");
         continue;
       }
 
-      $medium['Medium']['latitude'] = $position['latitude'];
-      $medium['Medium']['longitude'] = $position['longitude'];
-      $medium['Medium']['flag'] |= MEDIUM_FLAG_DIRTY;
-      if ($this->Medium->save($medium['Medium'], true, array('latitude', 'longitude', 'flag'))) {
-        $this->Logger->debug("Update GPS position of image {$medium['Medium']['id']} to {$position['latitude']}/{$position['longitude']}");
+      $media['Media']['latitude'] = $position['latitude'];
+      $media['Media']['longitude'] = $position['longitude'];
+      $media['Media']['flag'] |= MEDIUM_FLAG_DIRTY;
+      if ($this->Media->save($media['Media'], true, array('latitude', 'longitude', 'flag'))) {
+        $this->Logger->debug("Update GPS position of image {$media['Media']['id']} to {$position['latitude']}/{$position['longitude']}");
       } else {
-        $this->Logger->warn("Could not update GPS position of image {$medium['Medium']['id']}");
+        $this->Logger->warn("Could not update GPS position of image {$media['Media']['id']}");
       }
     }
     return 1;
   }
 
-  function write($file, $medium = null, $options = array()) {
+  function write($file, $media = null, $options = array()) {
     return 0;
   }
 }

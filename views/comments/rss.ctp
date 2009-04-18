@@ -2,9 +2,9 @@
 
 /** Callback frunction for rss items */
 function getItem($data) {
-  return array('title' => $data['Comment']['name'].' comment on '.$data['Image']['name'],
-    'link' => '/images/view/'.$data['Image']['id'].'/'.$data['Image']['file'],
-    'guid' => Router::url($data['Image']['id'].'-'.$data['Comment']['id'], true),
+  return array('title' => $data['Comment']['name'].' comment on '.$data['Media']['name'],
+    'link' => '/images/view/'.$data['Media']['id'].'/'.$data['Media']['file'],
+    'guid' => Router::url($data['Media']['id'].'-'.$data['Comment']['id'], true),
     'description' => $data['Comment']['text'],
     'pubDate' => $data['Comment']['created']);
 }
