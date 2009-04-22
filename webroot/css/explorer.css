@@ -23,6 +23,10 @@
   font-size: 110%;
 }
 
+.thumb h2 img {
+  vertical-align: middle;
+}
+
 .image {
   margin: 0px;
   padding: 2px 2px; 
@@ -136,5 +140,4 @@
 #submenu li.multi .actionlist {
   display: none;
 }
-
 

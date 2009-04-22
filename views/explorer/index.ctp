@@ -31,11 +31,30 @@ $pos = ($query->get('page', 1)-1) * $query->get('show', 12) + 1;
 foreach($data as $media): ?>
 <?php $side = $cell % 2 ? 'r' : 'l'; ?>
 <?php if (!($cell % 2)): ?><div class="subcolumns"><?php endif; ?>
+<?php 
+  $icon = false;
+  if ($media['Media']['isOwner']) {
+    switch ($media['Media']['visibility']) {
+      case ACL_LEVEL_OTHER: 
+        $icon = $html->image('icons/world.png', array('title' => 'This media is public visible'));;
+        break;
+      case ACL_LEVEL_USER: 
+        $icon = $html->image('icons/group.png', array('title' => 'This media is visible for users'));;
+        break;
+      case ACL_LEVEL_GROUP: 
+        $icon = $html->image('icons/user.png', array('title' => 'This media is visible for group members'));;
+        break;
+      default: 
+        $icon = $html->image('icons/stop.png', array('title' => 'This media is private'));;
+        break;
+    }
+  }
+?>
 <div class="c50<?=$side; ?>"><div class="subc<?=$side; ?> unselected thumb" id="media-<?= $media['Media']['id'];?>" >
 <script type="text/javascript">
   mediaData[<?php echo $media['Media']['id']; ?>] = [];
 </script>
-<h2><?php echo $media['Media']['name']; ?></h2>
+<h2><?php if ($icon) { echo $icon.' '; } ?><?php echo $media['Media']['name']; ?></h2>
 <div class="image">
 <?php 
   $size = $imageData->getimagesize($media, OUTPUT_SIZE_THUMB);
@@ -44,12 +63,15 @@ foreach($data as $media): ?>
   echo "<img src=\"".Router::url("/media/thumb/".$media['Media']['id'])."\" $size[3] alt=\"".$media['Media']['name']."\"/>"; 
   echo "</a>";
 
-  if ($media['Media']['canWriteTag'])
+  if ($media['Media']['canWriteTag']) {
     $canWriteTag=true;
-  if ($media['Media']['canWriteMeta'])
+  }
+  if ($media['Media']['canWriteMeta']) {
     $canWriteMeta=true;
-  if ($media['Media']['canWriteAcl'])
+  }
+  if ($media['Media']['canWriteAcl']) {
     $canWriteAcl=true;
+  }
 ?>
 </div>
 

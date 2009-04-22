@@ -74,62 +74,92 @@ class ImageDataHelper extends AppHelper {
   }
 
   /** Returns an single icon of a acl */
-  function _acl2icon($acl)
-  {
+  function _acl2icon($acl, $titlePrefix = '') {
     $t='';
     // Write access
-    if (($acl & ACL_WRITE_MASK) == ACL_WRITE_CAPTION) $t.='c';
-    elseif (($acl & ACL_WRITE_MASK) == ACL_WRITE_META) $t.='m';
-    elseif (($acl & ACL_WRITE_MASK) == ACL_WRITE_TAG) $t.='t';
+    if (($acl & ACL_WRITE_MASK) == ACL_WRITE_META) {
+      $t .= $this->html->image('icons/tag.png', array('alt' => 'm', 'title' => $titlePrefix.'edit the meta data'));
+    } elseif (($acl & ACL_WRITE_MASK) == ACL_WRITE_TAG) {
+      $t .= $this->html->image('icons/tag_blue.png', array('alt' => 't', 'title' => $titlePrefix.'edit the tags'));
+    }
 
     // Read access
-    if (($acl & ACL_READ_MASK) == ACL_READ_ORIGINAL) $t.='o';
-    elseif (($acl & ACL_READ_MASK) == ACL_READ_HIGH) $t.='h';
-    elseif (($acl & ACL_READ_MASK) == ACL_READ_PREVIEW) $t.='v';
-
-    if ($t=='') $t='-';
+    if (($acl & ACL_READ_MASK) == ACL_READ_ORIGINAL) {
+      $t .= $this->html->image('icons/disk.png', array('alt' => 'o', 'title' => $titlePrefix.'download this media'));
+    } elseif (($acl & ACL_READ_MASK) == ACL_READ_PREVIEW) {
+      $t .= $this->html->image('icons/picture.png', array('alt' => 'v', 'title' => $titlePrefix.'view this media'));
+    }
+    if ($t == '') {
+      $t='-';
+    }
     return $t;
   }
 
   /** Returns an text repesentation of the acl */
   function _acl2text($data) {
-    $output = $this->_acl2icon($data['Media']['gacl']).',';
-    $output .= $this->_acl2icon($data['Media']['uacl']).',';
-    $output .= $this->_acl2icon($data['Media']['oacl']);
+    //$output = $this->html->image('icons/user.png', array('alt' => 'groups', 'title' => "Access for group members")).': ';
+    $output = '<span title="Access for group members">group</span>';
+    if (isset($data['Group']['name'])) {
+      $base = $this->query->getQuery();
+      $name = $data['Group']['name'];
+      $this->query->set('group', $data['Group']['id']);
+      $output .= ' ('.$this->html->link($name, $this->query->getUri(), array('title' => "This media belongs to the group '$name'")).')';
+      $this->query->setQuery($base);
+    }
+    $output .= ': ';
+    $output .= $this->_acl2icon($data['Media']['gacl'], 'Group members can ').' ';
+
+    //$output .= $this->html->image('icons/group.png', array('alt' => 'users', 'title' => "Access for users")).': ';
+    $output .= '<span title="Access for users">users: </span> ';
+    $output .= $this->_acl2icon($data['Media']['uacl'], 'Users can ').' ';
+
+    //$output .= $this->html->image('icons/world.png', array('alt' => 'public', 'title' => "Public access")).': ';
+    $output .= '<span title="Public access">public: </span> ';
+    $output .= $this->_acl2icon($data['Media']['oacl'], 'The public can ');
     return $output;
   }
 
   function _metaDate($data) {
     $base = $this->query->getQuery();
 
+    $id = "date-".$data['Media']['id'];
+    $output = '<span onmouseover="toggleVisibility(\''.$id.'\', \'inline\');"';
+    $output .= ' onmouseout="toggleVisibility(\''.$id.'\', \'inline\');">';
+
     $this->query->set('from', $this->toUnix(&$data, -3*60*60));
     $this->query->set('to', $this->toUnix(&$data, 3*60*60));
-    $output = $this->html->link($data['Media']['date'], $this->query->getUri());
-    $output .= ' [';
+    $output .= $this->html->link($data['Media']['date'], $this->query->getUri());
+    $output .= ' ';
 
+    $output .= '<div style="display: none;" class="actionlist" id="'.$id.'">';
     $this->query->setQuery($base);
     $this->query->set('to', $this->toUnix(&$data));
     $this->query->set('sort', 'date');
-    $output .= $this->html->link('<', $this->query->getUri());
+    $icon = $this->html->image('icons/date_previous.png', array('alt' => '<', 'title' => "View media of previous dates"));
+    $output .= $this->html->link($icon, $this->query->getUri(), array('escape' => false));
 
     $this->query->setQuery($base);
     $this->query->set('from', $this->toUnix(&$data, -12*60*60));
     $this->query->set('to', $this->toUnix(&$data, 12*60*60));
-    $output .= $this->html->link('d', $this->query->getUri());
+    $icon = $this->html->image('icons/calendar_view_day.png', array('alt' => 'd', 'title' => "View media of this day"));
+    $output .= $this->html->link($icon, $this->query->getUri(), array('escape' => false));
 
     $this->query->set('from', $this->toUnix(&$data, -3.5*24*60*60));
     $this->query->set('to', $this->toUnix(&$data, 3.5*24*60*60));
-    $output .= $this->html->link('w', $this->query->getUri());
+    $icon = $this->html->image('icons/calendar_view_week.png', array('alt' => 'w', 'title' => "View media of this week"));
+    $output .= $this->html->link($icon, $this->query->getUri(), array('escape' => false));
 
     $this->query->set('from', $this->toUnix(&$data, -15*24*60*60));
     $this->query->set('to', $this->toUnix(&$data, 15*24*60*60));
-    $output .= $this->html->link('m', $this->query->getUri());
+    $icon = $this->html->image('icons/calendar_view_month.png', array('alt' => 'm', 'title' => "View media of this month"));
+    $output .= $this->html->link($icon, $this->query->getUri(), array('escape' => false));
 
     $this->query->setQuery($base);
     $this->query->set('from', $this->toUnix(&$data));
     $this->query->set('sort', '-date');
-    $output .= $this->html->link('>', $this->query->getUri());
-    $output .= ']';
+    $icon = $this->html->image('icons/date_next.png', array('alt' => '>', 'title' => "View media of next dates"));
+    $output .= $this->html->link($icon, $this->query->getUri(), array('escape' => false));
+    $output .= '</div></span>';
 
     $this->query->setQuery($base);
     return $output;
@@ -151,14 +181,11 @@ class ImageDataHelper extends AppHelper {
   }
 
   function _metaAccess($data) {
-    $base = $this->query->getQuery();
-    $output = '';
-    if (isset($data['Group']['name'])) {
-      $this->query->set('group', $data['Group']['id']);
-      $output .= $this->html->link($data['Group']['name'], $this->query->getUri()).', ';
-    }
+    $id = $data['Media']['id'];
+    $output = '<div class="actionlist">';
     $output .= $this->_acl2text($data);
-    $this->query->setQuery($base);
+
+    $output .= '</div>';
 
     return $output;
   }
@@ -168,7 +195,7 @@ class ImageDataHelper extends AppHelper {
     if (!$data) 
       return $cells;
 
-    $imageId = $data['Media']['id'];
+    $mediaId = $data['Media']['id'];
 
     $this->query->initialize();
     $tmpQuery = $this->query->getQuery();
@@ -198,18 +225,18 @@ class ImageDataHelper extends AppHelper {
     // Action list 
     $output = '';
     if ($data['Media']['canWriteTag']) {
-      $output = $this->form->checkbox('selected][', array('value' => $imageId, 'id' => 'select-'.$imageId, 'onclick' => "selectMedia($imageId);"));
+      $output = $this->form->checkbox('selected][', array('value' => $mediaId, 'id' => 'select-'.$mediaId, 'onclick' => "selectMedia($mediaId);"));
     }
 
     if ($data['Media']['canWriteTag'])
       $output .= ' '.$this->ajax->link(
         $this->html->image('icons/tag_blue_edit.png', array('alt' => 'Edit tags', 'title' => 'Edit tags')), 
-        '/explorer/editmeta/'.$imageId, 
-        array('update' => 'meta-'.$imageId), null, false);
+        '/explorer/editmeta/'.$mediaId, 
+        array('update' => 'meta-'.$mediaId), null, false);
     if ($data['Media']['canReadOriginal'])
       $output .= ' '.$this->html->link(
         $this->html->image('icons/disk.png', array('alt' => 'Save image', 'title' => 'Save image')), 
-        '/media/original/'.$imageId.'/'.$data['Media']['name'], null, null, false);
+        '/media/original/'.$mediaId.'/'.$data['Media']['name'], null, null, false);
 
     if ($withMap && isset($data['Media']['latitude']) && isset($data['Media']['longitude'])) {
       $output .= ' '.$this->html->link(
@@ -224,14 +251,14 @@ class ImageDataHelper extends AppHelper {
       $output .= ' '.$this->ajax->link(
         $this->html->image('icons/key.png', 
           array('alt' => 'Edit ACL', 'title' => 'Edit access rights')), 
-        '/explorer/editacl/'.$imageId, 
-        array('update' => 'meta-'.$imageId), null, false);
+        '/explorer/editacl/'.$mediaId, 
+        array('update' => 'meta-'.$mediaId), null, false);
       if ($data['Media']['isDirty'])
         $output .= ' '.$this->ajax->link(
           $this->html->image('icons/database_refresh.png', 
             array('alt' => 'Synchronize db with image', 'title' => 'Synchronize meta data with the image')), 
-          '/explorer/sync/'.$imageId, 
-          array('update' => 'meta-'.$imageId), null, false);
+          '/explorer/sync/'.$mediaId, 
+          array('update' => 'meta-'.$mediaId), null, false);
     }
 
     if ($output) {

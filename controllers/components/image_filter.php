@@ -60,10 +60,15 @@ class ImageFilterComponent extends BaseFilterComponent {
     $isNew = false;
     if (!$media) {
       $media = $this->Media->create(array(
-        'user_id' => $file['File']['user_id'],
         'type' => MEDIUM_TYPE_IMAGE,
         ), true);
-      //$this->Logger->debug($media);
+      if ($this->controller->getUserId() != $file['File']['user_id']) {
+        $user = $this->Media->User->findById($file['File']['user_id']);
+      } else {
+        $user = $this->controller->getUser();
+      }
+      $this->Media->addDefaultAcl(&$media, &$user);
+      
       $isNew = true;
     };
 

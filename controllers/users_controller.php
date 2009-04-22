@@ -187,6 +187,57 @@ class UsersController extends AppController
           array(
             'text' => 'Edit', 
             'link' => 'edit/'.$id
+            ),
+          array(
+            'text' => 'External Paths', 
+            'link' => 'path/'.$id
+            )
+          )
+        )
+      );
+  }
+
+  function admin_path($id) {
+    $this->requireRole(ROLE_SYSOP, array('loginRedirect' => '/admin/users'));
+
+    $id = intval($id);
+    if (!empty($this->data)) {
+      $this->data['User']['id'] = $id;
+
+      $this->User->set($this->data);
+
+      if (!empty($this->data['Option']['path']['fspath'])) {
+        $fsroot = $this->data['Option']['path']['fspath'];
+        $fsroot = Folder::slashTerm($fsroot);
+
+        if (is_dir($fsroot) && is_readable($fsroot)) {
+          $this->Option->addValue('path.fsroot[]', $fsroot, $id);
+          $this->Session->setFlash("Directory '$fsroot' was added");
+          $this->Logger->info("Add external directory '$fsroot' to user $id");
+        } else {
+          $this->Session->setFlash("Directory '$fsroot' could not be read");
+          $this->Logger->err("Directory '$fsroot' could not be read");
+        }
+      }
+    }
+
+    $this->data = $this->User->findById($id);
+    unset($this->data['User']['password']);
+
+    $this->set('fsroots', $this->Option->buildTree($this->data, 'path.fsroot'));
+
+    $this->menuItems[] = array(
+      'text' => 'User '.$this->data['User']['username'], 
+      'type' => 'text', 
+      'submenu' => array(
+        'items' => array(
+          array(
+            'text' => 'Edit', 
+            'link' => 'edit/'.$id
+            ),
+          array(
+            'text' => 'External Paths', 
+            'link' => 'path/'.$id
             )
           )
         )
@@ -229,19 +280,22 @@ class UsersController extends AppController
     }
   }
 
-  function admin_delfsroot($id) {
+  function admin_delpath($id) {
     $this->requireRole(ROLE_SYSOP);
 
     $id = intval($id);
     $dirs = $this->params['pass'];
     unset($dirs[0]);
     $fsroot = implode(DS, $dirs);
-    if (DS == '/')
+    if (DS == '/') {
       $fsroot = '/'.$fsroot;
+    }
     $fsroot = Folder::slashTerm($fsroot);
+    
     $this->Option->delValue('path.fsroot[]', $fsroot, $id);
-
-    $this->redirect("edit/$id");
+    $this->Logger->info("Deleted external directory '$fsroot' from user $id");
+    $this->Session->setFlash("Deleted external directory '$fsroot'");
+    $this->redirect("path/$id");
   }
 
   /** Password recovery */

@@ -89,10 +89,11 @@ class UpgradeSchemaComponent extends Object{
       return false;
     }
 
-    $this->Logger->debug("Check for initial required tables");
     if (!is_array($tables)) {
       $tables = array($tables);
     }
+    $this->Logger->debug("Check for required tables: ".implode($tables, ', '));
+
     $sources = $this->db->listSources();
     foreach ($tables as $table) {
       $tableName = $this->db->fullTableName($table, false);

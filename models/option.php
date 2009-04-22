@@ -254,6 +254,25 @@ class Option extends AppModel {
     return $data;
   }
 
+  function addDefaultAclTree($tree) {
+    if (!isset($tree['acl']['write']['tag'])) {
+      $tree['acl']['write']['tag'] = ACL_LEVEL_USER;
+    }
+    if (!isset($tree['acl']['write']['meta'])) {
+      $tree['acl']['write']['meta'] = ACL_LEVEL_GROUP;
+    }
+    if (!isset($tree['acl']['read']['preview'])) {
+      $tree['acl']['read']['preview'] = ACL_LEVEL_OTHER;
+    }
+    if (!isset($tree['acl']['read']['original'])) {
+      $tree['acl']['read']['original'] = ACL_LEVEL_GROUP;
+    }
+    if (!isset($tree['acl']['group'])) {
+      $tree['acl']['group'] = -1;
+    }
+    return $tree;
+  }
+
   function getDefaultAcl($data) {
     $tree = $this->buildTree($data);
     

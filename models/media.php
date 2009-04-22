@@ -54,6 +54,10 @@ class Media extends AppModel
   }
 
   function addDefaultAcl(&$data, $user) {
+    if (!$data) {
+      $data =& $this->data;
+    }
+    
     // Access control values
     $acl = $this->User->Option->getDefaultAcl($user);
     $data['Media']['user_id'] = $user['User']['id'];
@@ -157,6 +161,15 @@ class Media extends AppModel
     $data['Media']['canReadPreview'] = $this->checkAccess(&$data, &$user, ACL_READ_PREVIEW, ACL_READ_MASK, &$groups);    
     $data['Media']['canReadHigh'] = $this->checkAccess(&$data, &$user, ACL_READ_HIGH, ACL_READ_MASK, &$groups);    
     $data['Media']['canReadOriginal'] = $this->checkAccess(&$data, &$user, ACL_READ_ORIGINAL, ACL_READ_MASK, &$groups);    
+    if (($data['Media']['oacl'] & ACL_READ_PREVIEW) > 0) {
+      $data['Media']['visibility'] = ACL_LEVEL_OTHER;
+    } elseif (($data['Media']['uacl'] & ACL_READ_PREVIEW) > 0) {
+      $data['Media']['visibility'] = ACL_LEVEL_USER;
+    } elseif (($data['Media']['gacl'] & ACL_READ_PREVIEW) > 0) {
+      $data['Media']['visibility'] = ACL_LEVEL_GROUP;
+    } else {
+      $data['Media']['visibility'] = ACL_LEVEL_PRIVATE;
+    }
 
     $data['Media']['isOwner'] = ife($data['Media']['user_id'] == $user['User']['id'], true, false);
     $data['Media']['canWriteAcl'] = $this->checkAccess(&$data, &$user, 1, 0, &$groups);    
@@ -420,7 +433,6 @@ class Media extends AppModel
     $alias = $this->{$model}->alias;
     $key = $this->{$model}->primaryKey;
 
-    $this->Logger->debug($this->hasAndBelongsToMany[$model]);
     $joinTable = $this->hasAndBelongsToMany[$model]['joinTable'];
     $joinTable = $db->fullTableName($joinTable, false);
     $joinAlias = $this->hasAndBelongsToMany[$model]['with'];
