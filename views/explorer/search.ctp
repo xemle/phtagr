@@ -3,17 +3,17 @@
 <?php echo $form->create(null, array('action' => 'query')); ?>
 <fieldset><legend>Metadata</legend>
 <?php 
-  echo $form->input('Image.tags', array('after' => '<span class="hint">E.g. includeTag, -excludeTag</span>'));
+  echo $form->input('Media.tags', array('after' => '<span class="hint">E.g. includeTag, -excludeTag</span>'));
   $op = array('0' => 'AND', '1' => 'OR', '2' => 'FUZZY');
-  echo $form->input('Image.tag_op', array('type' => 'select', 'options' => $op, 'selected' => 0, 'label' => 'Tag operand'));
+  echo $form->input('Media.tag_op', array('type' => 'select', 'options' => $op, 'selected' => 0, 'label' => 'Tag operand'));
 
-  echo $form->input('Image.categories');
-  echo $form->input('Image.category_op', array('type' => 'select', 'options' => $op, 'selected' => 0, 'label' => 'Category operand'));
+  echo $form->input('Media.categories');
+  echo $form->input('Media.category_op', array('type' => 'select', 'options' => $op, 'selected' => 0, 'label' => 'Category operand'));
 
-  echo $form->input('Image.locations');
+  echo $form->input('Media.locations');
 
-  echo $form->input('Image.date_from', array('after' => '<span class="hint">E.g. 2008-08-07</span>'));
-  echo $form->input('Image.date_to');
+  echo $form->input('Media.date_from', array('after' => '<span class="hint">E.g. 2008-08-07</span>'));
+  echo $form->input('Media.date_to');
 ?>
 </fieldset>
 <fieldset><legend>Output</legend>
@@ -32,9 +32,9 @@
     echo $form->hidden('User.username', array('value' => $userId));
   }
   if ($userRole >= ROLE_GUEST) {
-    echo $form->input('Image.filename');
+    echo $form->input('Media.filename');
     $type = array('any' => 'Any Type', 'image' => 'Image', 'video' => 'Video');
-    echo $form->input('Image.file_type', array('type' => 'select', 'options' => $type, 'selected' => 'any', 'label' => 'File Type'));
+    echo $form->input('Media.file_type', array('type' => 'select', 'options' => $type, 'selected' => 'any', 'label' => 'File Type'));
   }
   if ($userRole >= ROLE_USER) {
     if (!$userId) {
@@ -43,7 +43,7 @@
     echo $form->input('Group.id', array('type' => 'select', 'options' => $groups, 'selected' => -1, 'label' => 'Group'));
 
     $visibility = array('any' => 'Any', 'private' => 'Private', 'group' => 'Group members', 'user' => 'User', 'public' => 'Public');
-    echo $form->input('Image.visibility', array('type' => 'select', 'options' => $visibility, 'label' => 'Image visibility'));
+    echo $form->input('Media.visibility', array('type' => 'select', 'options' => $visibility, 'label' => 'Media visibility'));
   }
 ?>
 </fieldset>

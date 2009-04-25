@@ -21,251 +21,84 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-class Image extends AppModel
+class Media extends AppModel
 {
-  var $name = 'Image';
-  var $validate = array();
+  var $name = 'Media';
 
   var $belongsTo = array(
-                    'User' => array(),
-                    'Group' => array(),
-                    );
-  var $hasAndBelongsToMany = array(
-                              'Tag' => array(),
-                              'Location' => array('order' => 'Location.type'),
-                              'Category' => array()
-                              );
+    'User' => array(),
+    'Group' => array());
   
-  var $_aclMap = array(ACL_LEVEL_GROUP => 'gacl',
-                           ACL_LEVEL_USER => 'uacl',
-                           ACL_LEVEL_OTHER => 'oacl');
+  var $hasMany = array(
+    'Comment' => array('dependent' => true),
+    'File' => array('className' => 'MyFile'));
 
-  /** Search for an image by filename 
-    @param filename Filename of the current image */
-  function findByFilename($filename) {
-    $file = basename($filename);
-    $path = Folder::slashTerm(dirname($filename));
+  var $hasAndBelongsToMany = array(
+    'Tag' => array(),
+    'Category' => array(),
+    'Location' => array('order' => 'Location.type'));
+  
+  var $_aclMap = array(
+    ACL_LEVEL_GROUP => 'gacl',
+    ACL_LEVEL_USER => 'uacl',
+    ACL_LEVEL_OTHER => 'oacl');
 
-    return $this->find(array("path" => $path, "file" => $file));
-  }
+  var $actsAs = array('Type', 'Flag', 'Cache');
 
-  /** Checks if a file exists already in the database.
-    @param filename Filename of image
-    @return Returns the ID if filename is already in the database, otherwise it
-    returns false. */
-  function filenameExists($filename) {
-    $image = $this->findByFilename($filename);
-    if ($image) {
-      return $image['Image']['id'];
-    } else {
-      return false;
-    }
-  }
-
-  function getFilename($data) {
-    if (!isset($data['Image']['path']) || 
-      !isset($data['Image']['file']))
-      return false;
-    
-    return $data['Image']['path'].$data['Image']['file'];
-  }
-
-  /** Evaluates, if a given filesystem path is part of the users dir. Otherwise
-   * the file is treated as an external file 
-    @param data Image model data
-    @param user Optional user model data
-    @return True, if file is not within the users directory */
-  function isExternal($data, $user = null) {
-    if (!isset($data['Image']['path'])) {
-      $this->Logger->err("Image path not set");
-      return false;
-    }
-    if (!$user) {
-      if (!isset($data['User']['id'])) {
-        $this->Logger->err("User is not set");
-        return false;
-      }
-      $user = $this->User->findById($data['Image']['user_id']);
-    }
-    $userDir = $this->User->getRootDir($user);
-    if (strpos($data['Image']['path'], $userDir) === 0)
-      return false;
+  function beforeDelete($cascade = true) {
+    // Delete media cache files
+    $this->unbindAll();
+    $this->set($this->findById($this->id));
+    $this->deleteCache();
     return true;
-  }
-
-  /** Evaluates, if a filename is a video file 
-    @param data Image model data
-    @return True, if filename is a video. False otherwise */
-  function isVideo($data) {
-    if (!isset($data['Image']['file']))
-      return false;
-    $file = $data['Image']['file'];
-
-    $videoExtensions = array('avi', 'mpeg', 'mpg', 'mov');
-    $ext = strtolower(substr($file, strrpos($file, '.')+1));
-    if (!$ext)
-      return false;
-    return in_array($ext, $videoExtensions);
   }
 
   function addDefaultAcl(&$data, $user) {
-    // Access control values
-    $acl = $this->User->Option->getDefaultAcl($user);
-    $data['Image']['user_id'] = $user['User']['id'];
-    $data['Image']['group_id'] = $acl['groupId'];
-    $data['Image']['gacl'] = $acl['gacl'];
-    $data['Image']['uacl'] = $acl['uacl'];
-    $data['Image']['oacl'] = $acl['oacl'];
-    return $data;
-  }
-
-  /** Insert file to the database
-    @param filename Filename to be inserted
-    @param user User model data of the current user
-    @return Image id on success. False on error */
-  function insertFile($filename, $user) {
-    if (!file_exists($filename) || !is_readable($filename)) {
-      $this->Logger->err("Cannot insert file '$filename'. File is does not exists or is not readable");
-      return false;
-    }
-      
-    $id = $this->filenameExists($filename);
-    if ($id) {
-      $this->Logger->debug("File '$filename' already in the database");
-      return $id;
-    }
-
-    $data = array('Image' => array());
-    $v = &$data['Image'];
-
-    // Access control values
-    $this->addDefaultAcl(&$data, $user);
-
-    // File information
-    $v['file'] = basename($filename);
-    $v['path'] = Folder::slashTerm(dirname($filename));
-    $v['filetime'] = date('Y-m-d H:i:s', filemtime($filename));
-    $v['bytes'] = filesize($filename);
-
-    // generic information
-    $v['flag'] = 0;
-    if ($this->isExternal($data, $user)) {
-      $v['flag'] |= IMAGE_FLAG_EXTERNAL;
+    if (!$data) {
+      $data =& $this->data;
     }
     
-    if (!$this->create($data) || !$this->save()) {
-      $this->Logger->err("Could not create and save data");
-      return false;
-    }
-    return $this->getLastInsertID();
-  }
-
-  function move($src, $dst) {
-    $id = $this->filenameExists($src);
-    if (!$id) {
-      $this->Logger->err("Source '$src' was not found in the database!");
-      return false;
-    }
-    if (!file_exists($dst)) {
-      $this->Logger->err("Destination '$dst' does not exists!");
-      return false;
-    }
-    $image = $this->findById($id);
-    if (is_dir($dst)) {
-      $image['Image']['path'] = Folder::slashTerm(dirname($dst));
-    } else {
-      $image['Image']['path'] = Folder::slashTerm(dirname($dst));
-      $image['Image']['file'] = basename($dst);
-    }
-    if (!$this->save($image, true, array('path', 'file'))) {
-      $this->Logger->err("Could not updated new filename '$dst' (id=$id)");
-      return false;
-    }
-    return true;
-  }
-  
-  function moveAll($src, $dst) {
-    if (!is_dir($dst)) {
-      $this->Logger->err("Destination '$dst' is not a directory");
-      return false;
-    }
-    $src = Folder::slashTerm($src);
-    $dst = Folder::slashTerm($dst);
-
-    $db =& ConnectionManager::getDataSource($this->useDbConfig);
-    $sql = "UPDATE ".$this->tablePrefix.$this->table." AS Image ".
-           "SET path=REPLACE(path,".$db->value($src).",".$db->value($dst).") ".
-           "WHERE path LIKE ".$db->value($src."%");
-    $this->Logger->debug($sql);
-    $this->query($sql);
-    return true;
-  }
-
-  /** Inactivates an image and removes all habtm associations 
-    @param data Image data
-    @return Return updated image data */
-  function deactivate(&$data) {
-    if (!isset($data['Image']['flag'])) {
-      $this->Logger->err("Invalid data");
-      return false;
-    }
-    $data['Image']['flag'] = ($data['Image']['flag'] & ~IMAGE_FLAG_ACTIVE) & 0xff;
-    foreach ($this->hasAndBelongsToMany as $assoc => $v) {
-      $data[$assoc][$assoc] = array();
-    }
+    // Access control values
+    $acl = $this->User->Option->getDefaultAcl($user);
+    $data['Media']['user_id'] = $user['User']['id'];
+    $data['Media']['group_id'] = $acl['groupId'];
+    $data['Media']['gacl'] = $acl['gacl'];
+    $data['Media']['uacl'] = $acl['uacl'];
+    $data['Media']['oacl'] = $acl['oacl'];
     return $data;
   }
 
-  function setDirty($data, $dirty = true) {
-    if (!isset($data['Image']['id']) || !isset($data['Image']['flag'])) {
+  /** Returns the file model by its type
+    @param data Media model data
+    @param fileType Required file type. Default is FILE_TYPE_IMAGE
+    @param fullModel If true returns the full associated file model. If false
+    returns only the file model of the media without associations 
+    @return Fals on error, null if file was not found */
+  function getFile($data, $fileType = FILE_TYPE_IMAGE, $fullModel = true) {
+    if (!$data) {
+      $data = $this->data;
+    }
+
+    if (!isset($data['File'])) {
       $this->Logger->err("Precondition failed");
       return false;
     }
-    $flag = $data['Image']['flag'];
-    $current = ($flag & IMAGE_FLAG_DIRTY);
-    if (($dirty ^ $current)) {
-      return true;
-    }
-    if ($dirty) {
-      $data['Image']['flag'] |= IMAGE_FLAG_DIRTY;
-    } else {
-      $data['Image']['flag'] ^= IMAGE_FLAG_DIRTY;
-    }
-    if (!$this->save($data, array('flag'))) {
-      $this->Logger->err("Could not update flag");
-      return false;
-    } else {
-      return true;
-    }
-  }
 
-  /** Updates file with file size and file time 
-    @param data Image data
-    @return Return updated image data */
-  function updateFile(&$data) {
-    clearstatcache();
-    $filename = $data['Image']['path'].$data['Image']['file'];
-    if (!file_exists($filename)) {
-      $this->Logger->err("File '$filename' does not exists");
-      return false;
+    foreach ($data['File'] as $file) {
+      if ($file['type'] == $fileType) {
+        if ($fullModel) {
+          return $this->File->findById($file['id']);
+        } else {
+          return array('File' => $file);
+        }
+      }
     }
-    $data['Image']['bytes'] = filesize($filename);
-    $data['Image']['filetime'] = date('Y-m-d H:i:s', filemtime($filename));
-    return $data;
-  }
 
-  function beforeDelete($cascade = true) {
-    // prepare associations for deletion
-    $this->bindModel(array(
-      'hasMany' => array(
-        'Property' => array('dependent' => true), 
-        'Comment' => array('dependent' => true)
-      )));
-    return true;
+    return null;
   }
 
   /** Returns true if current user is allowed of the current flag
-    @param data Current Image array
+    @param data Current Media array
     @param user Current User array
     @param flag Flag bit which should be checkt
     @param mask Bitmask for the flag which should be checkt
@@ -273,30 +106,30 @@ class Image extends AppModel
     by the user's data.
     @return True is user is allowed, False otherwise */
   function checkAccess(&$data, &$user, $flag, $mask, &$groups=null) {
-    if (!$data || !$user || !isset($data['Image']) || !isset($user['User'])) {
+    if (!$data || !$user || !isset($data['Media']) || !isset($user['User'])) {
       $this->Logger->err("precondition failed");
       return false;
     }
 
     // check for public access
-    if (($data['Image']['oacl'] & $mask) >= $flag)
+    if (($data['Media']['oacl'] & $mask) >= $flag)
       return true;
 
     // check for members
     if ($user['User']['role'] >= ROLE_USER && 
-      ($data['Image']['uacl'] & $mask) >= $flag)
+      ($data['Media']['uacl'] & $mask) >= $flag)
       return true;
 
     // check for group members
     if ($groups === null)
       $groups = Set::extract($user, 'Member.{n}.id');
     if ($user['User']['role'] >= ROLE_GUEST &&
-      ($data['Image']['gacl'] & $mask) >= $flag &&
-      in_array($data['Image']['group_id'], $groups))
+      ($data['Media']['gacl'] & $mask) >= $flag &&
+      in_array($data['Media']['group_id'], $groups))
       return true;
 
-    // Image owner and admin check
-    if ($user['User']['id'] == $data['Image']['user_id'] ||
+    // Media owner and admin check
+    if ($user['User']['id'] == $data['Media']['user_id'] ||
       $user['User']['role'] == ROLE_ADMIN)
       return true;
 
@@ -304,9 +137,9 @@ class Image extends AppModel
   }
 
   /** Set the access flags of write and read options according to the current user
-    @param data Reference of the Image array 
+    @param data Reference of the Media array 
     @param user User array
-    @return $data of Image data with the access flags */
+    @return $data of Media data with the access flags */
   function setAccessFlags(&$data, $user) {
     if (!isset($data)) 
       return $data;
@@ -315,23 +148,32 @@ class Image extends AppModel
     $user = am(array('User' => array('id' => -1, 'role' => ROLE_NOBODY), 'Member' => array()), $user);
     //$this->Logger->debug($user);
 
-    $oacl = $data['Image']['oacl'];
-    $uacl = $data['Image']['uacl'];
-    $gacl = $data['Image']['gacl'];
+    $oacl = $data['Media']['oacl'];
+    $uacl = $data['Media']['uacl'];
+    $gacl = $data['Media']['gacl'];
     
     $groups = Set::extract($user, 'Member.{n}.id');
 
-    $data['Image']['canWriteTag'] = $this->checkAccess(&$data, &$user, ACL_WRITE_TAG, ACL_WRITE_MASK, &$groups);    
-    $data['Image']['canWriteMeta'] = $this->checkAccess(&$data, &$user, ACL_WRITE_META, ACL_WRITE_MASK, &$groups);    
-    $data['Image']['canWriteCaption'] = $this->checkAccess(&$data, &$user, ACL_WRITE_CAPTION, ACL_WRITE_MASK, &$groups);    
+    $data['Media']['canWriteTag'] = $this->checkAccess(&$data, &$user, ACL_WRITE_TAG, ACL_WRITE_MASK, &$groups);    
+    $data['Media']['canWriteMeta'] = $this->checkAccess(&$data, &$user, ACL_WRITE_META, ACL_WRITE_MASK, &$groups);    
+    $data['Media']['canWriteCaption'] = $this->checkAccess(&$data, &$user, ACL_WRITE_CAPTION, ACL_WRITE_MASK, &$groups);    
 
-    $data['Image']['canReadPreview'] = $this->checkAccess(&$data, &$user, ACL_READ_PREVIEW, ACL_READ_MASK, &$groups);    
-    $data['Image']['canReadHigh'] = $this->checkAccess(&$data, &$user, ACL_READ_HIGH, ACL_READ_MASK, &$groups);    
-    $data['Image']['canReadOriginal'] = $this->checkAccess(&$data, &$user, ACL_READ_ORIGINAL, ACL_READ_MASK, &$groups);    
+    $data['Media']['canReadPreview'] = $this->checkAccess(&$data, &$user, ACL_READ_PREVIEW, ACL_READ_MASK, &$groups);    
+    $data['Media']['canReadHigh'] = $this->checkAccess(&$data, &$user, ACL_READ_HIGH, ACL_READ_MASK, &$groups);    
+    $data['Media']['canReadOriginal'] = $this->checkAccess(&$data, &$user, ACL_READ_ORIGINAL, ACL_READ_MASK, &$groups);    
+    if (($data['Media']['oacl'] & ACL_READ_PREVIEW) > 0) {
+      $data['Media']['visibility'] = ACL_LEVEL_OTHER;
+    } elseif (($data['Media']['uacl'] & ACL_READ_PREVIEW) > 0) {
+      $data['Media']['visibility'] = ACL_LEVEL_USER;
+    } elseif (($data['Media']['gacl'] & ACL_READ_PREVIEW) > 0) {
+      $data['Media']['visibility'] = ACL_LEVEL_GROUP;
+    } else {
+      $data['Media']['visibility'] = ACL_LEVEL_PRIVATE;
+    }
 
-    $data['Image']['isOwner'] = ife($data['Image']['user_id'] == $user['User']['id'], true, false);
-    $data['Image']['canWriteAcl'] = $this->checkAccess(&$data, &$user, 1, 0, &$groups);    
-    $data['Image']['isDirty'] = ife(($data['Image']['flag'] & IMAGE_FLAG_DIRTY) > 0, true, false);
+    $data['Media']['isOwner'] = ife($data['Media']['user_id'] == $user['User']['id'], true, false);
+    $data['Media']['canWriteAcl'] = $this->checkAccess(&$data, &$user, 1, 0, &$groups);    
+    $data['Media']['isDirty'] = ife(($data['Media']['flag'] & MEDIUM_FLAG_DIRTY) > 0, true, false);
 
     return $data;
   }
@@ -344,16 +186,16 @@ class Image extends AppModel
     @param mask Bit mask of flag 
     @param level Highes ACL level which should be increased */
   function _increaseAcl(&$data, $flag, $mask, $level) {
-    //$this->Logger->debug("Increase: {$data['Image']['gacl']},{$data['Image']['uacl']},{$data['Image']['oacl']}: $flag/$mask ($level)");
+    //$this->Logger->debug("Increase: {$data['Media']['gacl']},{$data['Media']['uacl']},{$data['Media']['oacl']}: $flag/$mask ($level)");
     if ($level>ACL_LEVEL_OTHER)
       return;
 
     for ($l=ACL_LEVEL_GROUP; $l<=$level; $l++) {
       $name = $this->_aclMap[$l];
-      if (($data['Image'][$name]&($mask))<$flag)
-        $data['Image'][$name]=($data['Image'][$name]&(~$mask))|$flag;
+      if (($data['Media'][$name]&($mask))<$flag)
+        $data['Media'][$name]=($data['Media'][$name]&(~$mask))|$flag;
     }
-    //$this->Logger->debug("Increase (result): {$data['Image']['gacl']},{$data['Image']['uacl']},{$data['Image']['oacl']}: $flag/$mask ($level)");
+    //$this->Logger->debug("Increase (result): {$data['Media']['gacl']},{$data['Media']['uacl']},{$data['Media']['oacl']}: $flag/$mask ($level)");
   }
 
   /** Decrease the ACL level. Decreases the ACL level of higher ACL levels
@@ -366,7 +208,7 @@ class Image extends AppModel
     @param mask Bit mask of flag
     @param level Lower ACL level which should be downgraded */
   function _decreaseAcl(&$data, $flag, $mask, $level) {
-    //$this->Logger->debug("Decrease: {$data['Image']['gacl']},{$data['Image']['uacl']},{$data['Image']['oacl']}: $flag/$mask ($level)");
+    //$this->Logger->debug("Decrease: {$data['Media']['gacl']},{$data['Media']['uacl']},{$data['Media']['oacl']}: $flag/$mask ($level)");
     if ($level<ACL_LEVEL_GROUP)
       return;
 
@@ -377,13 +219,13 @@ class Image extends AppModel
         $lower = 0;
       else {
         $next = $this->_aclMap[$l+1];
-        $lower = $data['Image'][$next]&($mask);
+        $lower = $data['Media'][$next]&($mask);
       }
       $lower=($lower<$flag)?$lower:0;
-      if (($data['Image'][$name]&($mask))>=$flag)
-        $data['Image'][$name]=($data['Image'][$name]&(~$mask))|$lower;
+      if (($data['Media'][$name]&($mask))>=$flag)
+        $data['Media'][$name]=($data['Media'][$name]&(~$mask))|$lower;
     }
-    //$this->Logger->debug("Decrease (result): {$data['Image']['gacl']},{$data['Image']['uacl']},{$data['Image']['oacl']}: $flag/$mask ($level)");
+    //$this->Logger->debug("Decrease (result): {$data['Media']['gacl']},{$data['Media']['uacl']},{$data['Media']['oacl']}: $flag/$mask ($level)");
   }
 
   function setAcl(&$data, $flag, $mask, $level) {
@@ -469,12 +311,12 @@ class Image extends AppModel
 
   /** The function Model::find slows down the hole search. This function builds
    * the query manually for speed optimazation 
-    @param id Image id
+    @param id Media id
     @return Return the image Array as find */
   function optimizedRead($id) {
     $db =& ConnectionManager::getDataSource($this->useDbConfig);
     $myTable = $db->fullTableName($this->table, false);
-    $sql = "SELECT Image.* FROM `$myTable` AS Image WHERE Image.id = $id";
+    $sql = "SELECT Media.* FROM `$myTable` AS Media WHERE Media.id = $id";
     $result = $this->query($sql);
     if (!$result)
       return array();
@@ -483,7 +325,7 @@ class Image extends AppModel
 
     foreach ($this->belongsTo as $model => $config) {
       $name = Inflector::underscore($model);
-      $image[$model] = $this->_optimizedBelongsTo($image['Image'][$name.'_id'], $model);
+      $image[$model] = $this->_optimizedBelongsTo($image['Media'][$name.'_id'], $model);
     }
 
     foreach ($this->hasAndBelongsToMany as $model => $config) {
@@ -495,7 +337,7 @@ class Image extends AppModel
   /** 
     @param user Current user
     @param userId User id of own user or foreign user. If user id is equal with
-    the id of the current user, the user is treated as 'My Images'. Otherwise
+    the id of the current user, the user is treated as 'My Medias'. Otherwise
     the default acl will apply 
     @param level Level of ACL which image must be have. Default is ACL_READ_PREVIEW.
     @return returns sql statement for the where clause which checks the access
@@ -504,18 +346,18 @@ class Image extends AppModel
     $level = intval($level);
     $acl = '';
     if ($userId > 0 && $user['User']['id'] == $userId) {
-      // My Images
+      // My Medias
       if ($user['User']['role'] >= ROLE_USER)
-        $acl .= " AND Image.user_id = $userId";
+        $acl .= " AND Media.user_id = $userId";
       elseif ($user['User']['role'] == ROLE_GUEST) {
         if (count($user['Member'])) {
           $groupIds = Set::extract($user, 'Member.{n}.id');
           if (count($groupIds) > 1) {
-            $acl .= " AND Image.group_id in ( ".implode(", ", $groupIds)." )";
-            $acl .= " AND Image.gacl >= $level";
+            $acl .= " AND Media.group_id in ( ".implode(", ", $groupIds)." )";
+            $acl .= " AND Media.gacl >= $level";
           } elseif (count($groupIds) == 1) {
-            $acl .= " AND Image.group_id = {$groupIds[0]}";
-            $acl .= " AND Image.gacl >= $level";
+            $acl .= " AND Media.group_id = {$groupIds[0]}";
+            $acl .= " AND Media.gacl >= $level";
           }
         } else {
           // no images
@@ -525,7 +367,7 @@ class Image extends AppModel
     } else {
       // Another user, if set
       if ($userId > 0)
-        $acl .= " AND Image.user_id = $userId";
+        $acl .= " AND Media.user_id = $userId";
 
       // General ACL
       if ($user['User']['role'] < ROLE_ADMIN) {
@@ -534,23 +376,23 @@ class Image extends AppModel
         if ($user['User']['role'] >= ROLE_GUEST && count($user['Member'])) {
           $groupIds = Set::extract($user, 'Member.{n}.id');
           if (count($groupIds) > 1) {
-            $acl .= " ( Image.group_id in ( ".implode(", ", $groupIds)." )";
-            $acl .= " AND Image.gacl >= $level ) OR";
+            $acl .= " ( Media.group_id in ( ".implode(", ", $groupIds)." )";
+            $acl .= " AND Media.gacl >= $level ) OR";
           } elseif (count($groupIds) == 1) {
-            $acl .= " ( Image.group_id = {$groupIds[0]}";
-            $acl .= " AND Image.gacl >= $level ) OR";
+            $acl .= " ( Media.group_id = {$groupIds[0]}";
+            $acl .= " AND Media.gacl >= $level ) OR";
           }
         }
         if ($user['User']['role'] >= ROLE_USER) {
           // Own image
           if ($userId == 0) {
-            $acl .= " Image.user_id = {$user['User']['id']} OR";
+            $acl .= " Media.user_id = {$user['User']['id']} OR";
           }
           // Other users
-          $acl .= " Image.uacl >= $level OR";
+          $acl .= " Media.uacl >= $level OR";
         }
         // Public 
-        $acl .= " Image.oacl >= $level )";
+        $acl .= " Media.oacl >= $level )";
       }
     }
     return $acl;
@@ -571,11 +413,11 @@ class Image extends AppModel
     $conditions = '';
     if (is_dir($filename)) {
       $path = $db->value(Folder::slashTerm($filename).'%');
-      $conditions .= "Image.path LIKE $path";
+      $conditions .= "Media.path LIKE $path";
     } else {
       $path = $db->value(Folder::slashTerm(dirname($filename)));
       $file = $db->value(basename($filename));
-      $conditions .= "Image.path=$path AND Image.file=$file";
+      $conditions .= "Media.path=$path AND Media.file=$file";
     }
     $conditions .= $this->buildWhereAcl($user, 0, $flag);
 
@@ -603,22 +445,12 @@ class Image extends AppModel
          "  `$myTable` AS `{$this->alias}`".
          " WHERE `$alias`.`$key` = `$joinAlias`.`$associationForeignKey`".
          "   AND `$joinAlias`.`$foreignKey` = `{$this->alias}`.`{$this->primaryKey}`".
-         "   AND Image.flag & ".IMAGE_FLAG_ACTIVE.
+    //     "   AND Media.flag & ".MEDIUM_FLAG_ACTIVE.
          $this->buildWhereAcl($user).
          " GROUP BY `$alias`.`name` ".
          " ORDER BY hits DESC LIMIT 0,".intval($num);
 
     return $this->query($sql);
-  }
-
-  function countBytes($userId, $includeExternal = false) {
-    $userId = intval($userId);
-    $sql = "SELECT SUM(bytes) AS total FROM ".$this->tablePrefix.$this->table." WHERE user_id=$userId";
-    if (!$includeExternal) {
-      $sql .= " AND flag & ".IMAGE_FLAG_EXTERNAL." = 0";
-    }
-    $result = $this->query($sql);
-    return $result[0][0]['total'];
   }
 
   /** Deletes all HABTM association from images of a given user like Tag, Categories 
@@ -630,7 +462,7 @@ class Image extends AppModel
     $alias = $this->alias;
     $key = $this->primaryKey;
 
-    $this->Logger->info("Delete HasAndBelongsToMany Image association of user '$userId'");
+    $this->Logger->info("Delete HasAndBelongsToMany Media association of user '$userId'");
     foreach ($this->hasAndBelongsToMany as $model => $data) {
       $joinTable = $db->fullTableName($data['joinTable'], false);
       $joinAlias = $data['with'];
@@ -650,7 +482,7 @@ class Image extends AppModel
     $alias = $this->alias;
     $key = $this->primaryKey;
 
-    $this->Logger->info("Delete HasMany Image assosciation of user '$userId'");
+    $this->Logger->info("Delete HasMany Media assosciation of user '$userId'");
     foreach ($this->hasMany as $model => $data) {
       if (!isset($data['dependent']) || !$data['dependent']) {
         continue;
@@ -673,7 +505,7 @@ class Image extends AppModel
       )));
     $this->_deleteHasAndBelongsToManyFromUser($userId);
     $this->_deleteHasManyFromUser($userId);
-    $this->deleteAll("Image.user_id = $userId");
+    $this->deleteAll("Media.user_id = $userId");
   }
 }
 ?>

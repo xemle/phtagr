@@ -25,7 +25,7 @@ class WebdavController extends AppController
 {
   var $components=array('RequestHandler', 'DigestAuth', 'FileCache', 'WebdavServer');
 
-  var $uses = array('User', 'Image', 'Property', 'Lock');
+  var $uses = array('User', 'MyFile', 'Media', 'Property', 'Lock');
   // Important to set the davroot in the Webdav Server
   var $name = 'webdav';
 
@@ -43,8 +43,8 @@ class WebdavController extends AppController
     $this->DigestAuth->authenticate();
 
     // Bind Properties and Locks to images persistently (only webdav is using it)
-    $this->Image->bind('Property', array('type' => 'hasMany'));
-    $this->Image->bind('Lock', array('type' => 'hasMany'));
+    $this->MyFile->bind('Property', array('type' => 'hasMany', 'foreignKey' => 'file_id'));
+    $this->MyFile->bind('Lock', array('type' => 'hasMany', 'foreignKey' => 'file_id'));
   }
 
   /** @todo Set webdav root to creator's root if user is guest */

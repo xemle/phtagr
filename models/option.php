@@ -254,6 +254,25 @@ class Option extends AppModel {
     return $data;
   }
 
+  function addDefaultAclTree($tree) {
+    if (!isset($tree['acl']['write']['tag'])) {
+      $tree['acl']['write']['tag'] = ACL_LEVEL_USER;
+    }
+    if (!isset($tree['acl']['write']['meta'])) {
+      $tree['acl']['write']['meta'] = ACL_LEVEL_GROUP;
+    }
+    if (!isset($tree['acl']['read']['preview'])) {
+      $tree['acl']['read']['preview'] = ACL_LEVEL_OTHER;
+    }
+    if (!isset($tree['acl']['read']['original'])) {
+      $tree['acl']['read']['original'] = ACL_LEVEL_GROUP;
+    }
+    if (!isset($tree['acl']['group'])) {
+      $tree['acl']['group'] = -1;
+    }
+    return $tree;
+  }
+
   function getDefaultAcl($data) {
     $tree = $this->buildTree($data);
     
@@ -265,11 +284,13 @@ class Option extends AppModel {
         'oacl' => ACL_READ_PREVIEW
       );
 
-    $this->setAcl(&$acl, ACL_WRITE_TAG, ACL_WRITE_MASK, $this->getValue($tree, 'acl.write.tag', ACL_LEVEL_KEEP));
-    $this->setAcl(&$acl, ACL_WRITE_META, ACL_WRITE_MASK, $this->getValue($tree, 'acl.write.meta', ACL_LEVEL_KEEP));
+    $this->Logger->debug($acl);
+    $this->setAcl(&$acl, ACL_WRITE_TAG, ACL_WRITE_MASK, $this->getValue($tree, 'acl.write.tag', ACL_LEVEL_OTHER));
+    $this->setAcl(&$acl, ACL_WRITE_META, ACL_WRITE_MASK, $this->getValue($tree, 'acl.write.meta', ACL_LEVEL_USER));
 
-    $this->setAcl(&$acl, ACL_READ_PREVIEW, ACL_READ_MASK, $this->getValue($tree, 'acl.read.preview', ACL_LEVEL_KEEP));
-    $this->setAcl(&$acl, ACL_READ_ORIGINAL, ACL_READ_MASK, $this->getValue($tree, 'acl.read.original', ACL_LEVEL_KEEP));
+    $this->setAcl(&$acl, ACL_READ_PREVIEW, ACL_READ_MASK, $this->getValue($tree, 'acl.read.preview', ACL_LEVEL_OTHER));
+    $this->setAcl(&$acl, ACL_READ_ORIGINAL, ACL_READ_MASK, $this->getValue($tree, 'acl.read.original', ACL_LEVEL_GROUP));
+    $this->Logger->debug($acl);
 
     return $acl;
   }  

@@ -24,7 +24,7 @@
 class CommentsController extends AppController 
 {
   var $name = 'Comments';
-  var $uses = array('Comment', 'Image');
+  var $uses = array('Comment', 'Media');
   var $helpers = array('Html', 'Form', 'Rss');
   var $components = array('Query', 'Captcha', 'Email');
 
@@ -43,8 +43,8 @@ class CommentsController extends AppController
   }
 
   function add() {
-    if (!empty($this->data) && isset($this->data['Image']['id'])) {
-      $imageId = intval($this->data['Image']['id']);
+    if (!empty($this->data) && isset($this->data['Media']['id'])) {
+      $mediaId = intval($this->data['Media']['id']);
       $url = $this->Query->getUrl();
       $user = $this->getUser();
       $userId = $this->getUserId();
@@ -66,25 +66,25 @@ class CommentsController extends AppController
         $this->Session->delete('captcha');
         $this->Session->write('Comment.data', $this->data);
         $this->Session->write('Comment.validationErrors', $this->Comment->validationErrors);
-        $this->redirect("/images/view/$imageId/$url"); 
+        $this->redirect("/images/view/$mediaId/$url"); 
       }
       $this->Session->delete('captcha');
 
-      // Get image and check permissons
-      $image = $this->Image->findById($imageId);
-      if (!$image) {
-        $this->Session->setFlash("Image not found");
-        $this->Logger->info("Image $imageId not found");
+      // Get media and check permissons
+      $media = $this->Media->findById($mediaId);
+      if (!$media) {
+        $this->Session->setFlash("Media not found");
+        $this->Logger->info("Media $mediaId not found");
         $this->redirect("/explorer");
       }
-      if (!$this->Image->checkAccess($image, $user, ACL_READ_PREVIEW, ACL_READ_MASK)) {
-        $this->Session->setFlash("Image not found");
-        $this->Logger->info("Comments denied to image $imageId");
+      if (!$this->Media->checkAccess($media, $user, ACL_READ_PREVIEW, ACL_READ_MASK)) {
+        $this->Session->setFlash("Media not found");
+        $this->Logger->info("Comments denied to media $mediaId");
         $this->redirect("/explorer");
       }
 
       $this->Comment->create();
-      $this->data['Comment']['image_id'] = $imageId;
+      $this->data['Comment']['media_id'] = $mediaId;
       $this->data['Comment']['date'] = date("Y-m-d H:i:s", time());
       uses('Sanitize');
       $this->data['Comment']['text'] = Sanitize::html($this->data['Comment']['text']);
@@ -96,20 +96,20 @@ class CommentsController extends AppController
       if ($this->Comment->save($this->data)) {
         $commentId = $this->Comment->getLastInsertID();
         $this->Session->setFlash(__('The Comment has been saved', true));
-        $this->Logger->info("New comment of image $imageId");
-        // Send email notification of other image owners
-        if ($image['Image']['user_id'] != $userId) {
+        $this->Logger->info("New comment of media $mediaId");
+        // Send email notification of other media owners
+        if ($media['Media']['user_id'] != $userId) {
           $this->_sendEmail($commentId);
         }
-        $this->_sendNotifies($imageId, $commentId);
+        $this->_sendNotifies($mediaId, $commentId);
       } else {
         $this->Session->setFlash(__('The Comment could not be saved. Please, try again.', true));
-        $this->Logger->err("Could not save comment to image $imageId");
+        $this->Logger->err("Could not save comment to media $mediaId");
         $this->Logger->trace($this->Comment->validationErrors);
         $this->Session->write('Comment.data', $this->data);
         $this->Session->write('Comment.validationErrors', $this->Comment->validationErrors);
       }
-      $this->redirect("/images/view/$imageId/$url");
+      $this->redirect("/images/view/$mediaId/$url");
     } else {
       $this->redirect("/explorer");
     }
@@ -121,9 +121,9 @@ class CommentsController extends AppController
       $this->Logger->err("Could not find comment $commentId");
       return;
     }
-    $user = $this->User->findById($comment['Image']['user_id']);
+    $user = $this->User->findById($comment['Media']['user_id']);
     if (!$user) {
-      $this->Logger->err("Could not find user '{$comment['Image']['user_id']}'");
+      $this->Logger->err("Could not find user '{$comment['Media']['user_id']}'");
       return;
     }
     $email = $user['User']['email'];
@@ -133,7 +133,7 @@ class CommentsController extends AppController
       $user['User']['lastname'],
       $user['User']['email']);
 
-    $this->Email->subject = 'New Comment of Image '.$comment['Image']['name'];
+    $this->Email->subject = 'New Comment of Media '.$comment['Media']['name'];
     $this->Email->replyTo = 'noreply@phtagr.org';
     $this->Email->from = 'phTagr <noreply@phtagr.org>';
 
@@ -151,28 +151,28 @@ class CommentsController extends AppController
   /** Send email notifications to previous commentator which enables the mail
    * notification. It collects all emails of previous commentators who accepted
    * a notification mail
-    @param imageId Current image id
+    @param mediaId Current media id
     @param commentId Id of the new comment */
-  function _sendNotifies($imageId, $commentId) {
-    $this->Image->bindModel(array('hasMany' => array('Comment')));
-    $image = $this->Image->findById($imageId);
-    if (!$image) {
-      $this->Logger->err("Could not find image $imageId");
+  function _sendNotifies($mediaId, $commentId) {
+    $this->Media->bindModel(array('hasMany' => array('Comment')));
+    $media = $this->Media->findById($mediaId);
+    if (!$media) {
+      $this->Logger->err("Could not find media $mediaId");
       return;
     }
     $comment = $this->Comment->findById($commentId); 
-    if (!$comment || $comment['Comment']['image_id'] != $imageId) {
+    if (!$comment || $comment['Comment']['media_id'] != $mediaId) {
       $this->Logger->err("Could not find comment $commentId");
       return;
-    } elseif ($comment['Comment']['image_id'] != $imageId) {
-      $this->Logger->err("Comment $commentId does not corrolate with image $imageId");
+    } elseif ($comment['Comment']['media_id'] != $mediaId) {
+      $this->Logger->err("Comment $commentId does not corrolate with media $mediaId");
       return;
     }
 
     $emails = array();
-    foreach($image['Comment'] as $c) {
-      // not image owner, disabled notify, current comment
-      if ($c['user_id'] == $image['Image']['user_id'] || 
+    foreach($media['Comment'] as $c) {
+      // not media owner, disabled notify, current comment
+      if ($c['user_id'] == $media['Media']['user_id'] || 
         !$c['notify'] ||
         $c['id'] == $commentId) {
         continue;
@@ -189,7 +189,7 @@ class CommentsController extends AppController
     $this->Email->to = $to;
     $this->Email->bcc = $emails;
 
-    $this->Email->subject = 'Comment notification of Image '.$image['Image']['name'];
+    $this->Email->subject = 'Comment notification of Media '.$media['Media']['name'];
     $this->Email->replyTo = 'noreply@phtagr.org';
     $this->Email->from = 'phTagr <noreply@phtagr.org>';
 
@@ -216,18 +216,18 @@ class CommentsController extends AppController
     }
     $userId = $this->getUserId();
 
-    // Allow only comment owner, image owner or admins
-    if ((isset($comment['User']['id']) && $comment['User']['id'] == $userId) || ($comment['Image']['user_id'] == $userId) || ($this->getUserRole() == ROLE_ADMIN)) {
+    // Allow only comment owner, media owner or admins
+    if ((isset($comment['User']['id']) && $comment['User']['id'] == $userId) || ($comment['Media']['user_id'] == $userId) || ($this->getUserRole() == ROLE_ADMIN)) {
       if ($this->Comment->del($id)) {
         $this->Session->setFlash(__('Comment deleted', true));
-        $this->Logger->info("Delete comment {$comment['Comment']['id']} of image {$comment['Image']['id']}");
+        $this->Logger->info("Delete comment {$comment['Comment']['id']} of media {$comment['Media']['id']}");
       }
     } else {
       $this->Session->setFlash("Deny deletion of comment");
       $this->Logger->warn("Deny deletion of comment");
     }
     $url = $this->Query->getUrl();
-    $this->redirect("/images/view/".$comment['Image']['id']."/$url");
+    $this->redirect("/images/view/".$comment['Media']['id']."/$url");
   }
 
   function captcha() {
@@ -236,7 +236,7 @@ class CommentsController extends AppController
 
   function rss() {
     $this->layoutPath = 'rss';
-    $where = '1 = 1'.$this->Image->buildWhereAcl($this->getUser());
+    $where = '1 = 1'.$this->Media->buildWhereAcl($this->getUser());
     $comments = $this->Comment->findAll($where, null, 'Comment.date DESC', 20);
     $this->set('data', $comments);
 

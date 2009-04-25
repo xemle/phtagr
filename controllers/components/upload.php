@@ -25,7 +25,7 @@ class UploadComponent extends Object {
   
   var $name = 'UploadComponent';
   var $controller = null;
-  var $components = array('Logger', 'FileCache');
+  var $components = array('Logger', 'FileCache', 'FileManager');
   
   function startup(&$controller) {
     $this->controller = $controller;
@@ -76,29 +76,28 @@ class UploadComponent extends Object {
       return false;
     }
     // Check users quota
-    if (!$this->controller->User->canUpload($this->controller->getUser(), $uploadData['size'])) {
+    if (!$this->FileManager->canWrite($uploadData['size'])) {
       $this->Logger->warn("Quota exceed. Deny upload of {$uploadData['size']} Bytes");
       return false;
     }
 
-    if (!$this->controller->Image->insertFile($path.$filename, $this->controller->getUser())) {
+    if (!$this->FileManager->add($path.$filename)) {
       unlink($path.$filename);
-      $this->Logger->err("Could not insert $path.$filename to database");
+      $this->Logger->err("Could not insert $path$filename to database");
       return false;
-    } else{
-      $this->Logger->info("Insert file $path.$filename to database");
     }
 
     return $path.$filename;
   }
   
   function _deleteOldFile($file) {
-    $data = $this->controller->Image->findByFilename($file);
+    $data = $this->controller->MyFile->findByFilename($file);
     if (!$data) {
       $this->Logger->warn("Could not find file '$file' in database");
     } else {
-      $this->FileCache->delete($data['Image']['user_id'], $data['Image']['id']);
-      $this->controller->Image->delete($data['Image']['id']);
+      // @TODO delete only media if media requires file
+      $this->FileCache->delete($data['File']['user_id'], $data['Media']['id']);
+      $this->controller->Media->delete($data['Media']['id']);
       $this->Logger->info("Delete existsing file '$file' data for overwrite");
     }
   }

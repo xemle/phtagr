@@ -62,7 +62,8 @@ define('OUTPUT_SIZE_THUMB', 220);
 define('OUTPUT_SIZE_PREVIEW', 600);
 define('OUTPUT_SIZE_HIGH', 1280);
 define('OUTPUT_SIZE_VIDEO', 480);
-define('OUTPUT_BITRATE_VIDEO', 350);
+// ffmpeg option fo '-b'. Size could be suffixed by k or m
+define('OUTPUT_BITRATE_VIDEO', '786k');
 
 // ACL constants
 // Reading bits are the three highest bits
@@ -87,9 +88,26 @@ define("COMMENT_AUTH_NONE",     0);
 define("COMMENT_AUTH_NAME",     1);
 define("COMMENT_AUTH_CAPTCHA",  2);
 
-define("IMAGE_FLAG_ACTIVE",   1);
-define("IMAGE_FLAG_EXTERNAL", 2);
-define("IMAGE_FLAG_DIRTY",    4);
+define("MEDIUM_FLAG_ACTIVE",   1);
+define("MEDIUM_FLAG_DIRTY",    4);
+
+define("MEDIUM_TYPE_IMAGE", 1);
+define("MEDIUM_TYPE_VIDEO", 2);
+define("MEDIUM_TYPE_IMAGE_WITH_SOUND", 3);
+
+define("FILE_FLAG_DIRECTORY", 1);
+define("FILE_FLAG_EXTERNAL",  2);
+define("FILE_FLAG_DEPENDENT", 4);
+define("FILE_FLAG_READ",      8);
+
+define("FILE_TYPE_UNKNOWN",     0);
+define("FILE_TYPE_DIRECTORY",   1);
+define("FILE_TYPE_TEXT",        2);
+define("FILE_TYPE_IMAGE",       3);
+define("FILE_TYPE_SOUND",       4);
+define("FILE_TYPE_VIDEO",       5);
+define("FILE_TYPE_VIDEOTHUMB",  6);
+define("FILE_TYPE_GPS",         7);
 
 define("LOCATION_ANY", 0x00);
 define("LOCATION_CITY", 0x01);

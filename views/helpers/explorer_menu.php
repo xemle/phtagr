@@ -115,7 +115,7 @@ class ExplorerMenuHelper extends AppHelper
     $this->_id = 0;
 
     $search = '/explorer/search';
-    if ($this->query->get('myimage')) {
+    if ($this->query->get('mymedia')) {
       $search .= '/user:'.$this->query->get('user');
     }
     $items[] = array('text' => $this->html->link('Advance Search', $search));

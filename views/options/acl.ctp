@@ -19,5 +19,3 @@
 ?>
 </fieldset>
 <?php echo $form->end('Save'); ?>
-<?php debug($this->data); ?>
-<?php debug($groups); ?>

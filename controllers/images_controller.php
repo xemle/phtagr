@@ -23,8 +23,8 @@
 
 class ImagesController extends AppController
 {
-  var $components = array('RequestHandler', 'Query', 'ImageFilter', 'VideoFilter');
-  var $uses = array('Image', 'Group', 'Tag', 'Category', 'Location');
+  var $components = array('RequestHandler', 'Query');
+  var $uses = array('Media', 'Group', 'Tag', 'Category', 'Location');
   var $helpers = array('form', 'formular', 'html', 'javascript', 'ajax', 'imageData', 'time', 'query', 'explorerMenu', 'rss', 'map');
 
   function beforeFilter() {
@@ -39,8 +39,8 @@ class ImagesController extends AppController
   }
 
   function view($id) {
-    $this->Query->setImageId($id);
-    $this->data = $this->Query->paginateImage();
+    $this->Query->setMediaId($id);
+    $this->data = $this->Query->paginateMedia();
     if (!$this->data) {
       $this->render('notfound');
     } else {
@@ -65,7 +65,7 @@ class ImagesController extends AppController
         //$this->data = am($this->Session->read('Comment.data'), $this->data);
         $this->Session->del('Comment.data');
       }
-      if ($this->Image->isVideo($this->data)) {
+      if ($this->Media->isType($this->data, MEDIUM_TYPE_VIDEO)) {
         $this->render('video');
       }
     }

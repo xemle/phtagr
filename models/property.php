@@ -27,8 +27,8 @@ class Property extends AppModel {
 
   //The Associations below have been created with all possible keys, those that are not needed can be removed
   var $belongsTo = array(
-      'Image' => array('className' => 'Image',
-                'foreignKey' => 'image_id',
+      'File' => array('className' => 'MyFile',
+                'foreignKey' => 'file_id',
                 'conditions' => '',
                 'fields' => '',
                 'order' => ''

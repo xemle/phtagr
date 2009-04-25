@@ -23,8 +23,8 @@
 
 class ExplorerController extends AppController
 {
-  var $components = array('RequestHandler', 'Query', 'ImageFilter', 'VideoFilter');
-  var $uses = array('Image', 'Group', 'Tag', 'Category', 'Location');
+  var $components = array('RequestHandler', 'Query', 'FilterManager');
+  var $uses = array('Media', 'MyFile', 'Group', 'Tag', 'Category', 'Location');
   var $helpers = array('form', 'formular', 'html', 'javascript', 'ajax', 'imageData', 'time', 'query', 'explorerMenu', 'rss');
 
   function beforeFilter() {
@@ -67,20 +67,20 @@ class ExplorerController extends AppController
 
   function query() {
     if (!empty($this->data)) {
-      $this->Query->addTags($this->data['Image']['tags']);
-      $this->Query->setTagOp($this->data['Image']['tag_op']);
-      $this->Query->addCategories($this->data['Image']['categories']);
-      $this->Query->setCategoryOp($this->data['Image']['category_op']);
-      $this->Query->addLocations($this->data['Image']['locations']);
+      $this->Query->addTags($this->data['Media']['tags']);
+      $this->Query->setTagOp($this->data['Media']['tag_op']);
+      $this->Query->addCategories($this->data['Media']['categories']);
+      $this->Query->setCategoryOp($this->data['Media']['category_op']);
+      $this->Query->addLocations($this->data['Media']['locations']);
 
-      $this->Query->setDateFrom($this->data['Image']['date_from']);
-      $this->Query->setDateTo($this->data['Image']['date_to']);
+      $this->Query->setDateFrom($this->data['Media']['date_from']);
+      $this->Query->setDateTo($this->data['Media']['date_to']);
 
       $this->Query->setPageSize($this->data['Query']['show']);
 
       if ($this->hasRole(ROLE_GUEST)) {
-        $this->Query->setFilename($this->data['Image']['filename']);
-        $this->Query->setFiletype($this->data['Image']['file_type']);
+        $this->Query->setFilename($this->data['Media']['filename']);
+        $this->Query->setFiletype($this->data['Media']['file_type']);
         // Allow to search for my images
         if ($this->data['User']['username'] == $this->getUserId()) {
           $this->Query->setUser($this->data['User']['username']);
@@ -88,7 +88,7 @@ class ExplorerController extends AppController
       }
 
       if ($this->hasRole(ROLE_USER)) {
-        $this->Query->setVisibility($this->data['Image']['visibility']);
+        $this->Query->setVisibility($this->data['Media']['visibility']);
 
         $this->Query->setUser($this->data['User']['username']);
         $this->Query->setGroupId($this->data['Group']['id']);
@@ -235,28 +235,28 @@ class ExplorerController extends AppController
     }
   }
 
-  function _editAcl(&$image, $groupId) {
+  function _editAcl(&$media, $groupId) {
     $changedAcl = false;
     // Backup old values
     $fieldsAcl = array('gacl', 'uacl', 'oacl', 'group_id');
     foreach ($fieldsAcl as $field) {
-      $image['Image']['_'.$field] = $image['Image'][$field];
+      $media['Media']['_'.$field] = $media['Media'][$field];
     }
 
     // Change access properties 
     if ($groupId!=0)
-      $image['Image']['group_id'] = $groupId;
+      $media['Media']['group_id'] = $groupId;
 
     // Higher grants first
-    $this->Image->setAcl(&$image, ACL_WRITE_META, ACL_WRITE_MASK, $this->data['acl']['write']['meta']);
-    $this->Image->setAcl(&$image, ACL_WRITE_TAG, ACL_WRITE_MASK, $this->data['acl']['write']['tag']);
+    $this->Media->setAcl(&$media, ACL_WRITE_META, ACL_WRITE_MASK, $this->data['acl']['write']['meta']);
+    $this->Media->setAcl(&$media, ACL_WRITE_TAG, ACL_WRITE_MASK, $this->data['acl']['write']['tag']);
 
-    $this->Image->setAcl(&$image, ACL_READ_ORIGINAL, ACL_READ_MASK, $this->data['acl']['read']['original']);
-    $this->Image->setAcl(&$image, ACL_READ_PREVIEW, ACL_READ_MASK, $this->data['acl']['read']['preview']);
+    $this->Media->setAcl(&$media, ACL_READ_ORIGINAL, ACL_READ_MASK, $this->data['acl']['read']['original']);
+    $this->Media->setAcl(&$media, ACL_READ_PREVIEW, ACL_READ_MASK, $this->data['acl']['read']['preview']);
 
     // Evaluate changes
     foreach ($fieldsAcl as $field) {
-      if ($image['Image']['_'.$field] != $image['Image'][$field]) {
+      if ($media['Media']['_'.$field] != $media['Media'][$field]) {
         $changedAcl = true;
         break;
       }
@@ -290,29 +290,29 @@ class ExplorerController extends AppController
       }
     
       $date = false;
-      if (!empty($this->data['Image']['date'])) {
-        $time = strtotime($this->data['Image']['date']);
+      if (!empty($this->data['Media']['date'])) {
+        $time = strtotime($this->data['Media']['date']);
         if ($time !== false) {
           $date = date("Y-m-d H:i:s", $time);
         } else {
-          $this->Logger->warn("Could not convert time of '{$this->data['Image']['date']}'");
+          $this->Logger->warn("Could not convert time of '{$this->data['Media']['date']}'");
         }
       }
 
-      $ids = split(',', $this->data['Image']['ids']);
+      $ids = split(',', $this->data['Media']['ids']);
       $ids = array_unique($ids);
       foreach ($ids as $id) {
         $id = intval($id);
         if ($id == 0)
           continue;
 
-        $image = $this->Image->findById($id);
-        if (!$image) {
-          $this->Logger->debug("Could not find Image with id $id");
+        $media = $this->Media->findById($id);
+        if (!$media) {
+          $this->Logger->debug("Could not find Media with id $id");
           continue;
         }
         // primary access check
-        if (!$this->Image->checkAccess(&$image, &$user, ACL_WRITE_TAG, ACL_WRITE_MASK, &$members)) {
+        if (!$this->Media->checkAccess(&$media, &$user, ACL_WRITE_TAG, ACL_WRITE_MASK, &$members)) {
           $this->Logger->warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change any metadata of image ".$id);
           continue;
         }
@@ -320,43 +320,43 @@ class ExplorerController extends AppController
         $changedMeta = false;
 
         // Backup old associations
-        $habtms = array_keys($this->Image->hasAndBelongsToMany);
+        $habtms = array_keys($this->Media->hasAndBelongsToMany);
         $oldHabtmIds = array();
         foreach ($habtms as $habtm) {
-          $oldHabtmIds[$habtm] = Set::extract($image, "$habtm.{n}.id");
+          $oldHabtmIds[$habtm] = Set::extract($media, "$habtm.{n}.id");
         }
 
         // Update metadata
-        $this->_handleHabtm(&$image, 'Tag', $tags);
-        if ($this->Image->checkAccess(&$image, &$user, ACL_WRITE_META, ACL_WRITE_MASK, &$members)) {
+        $this->_handleHabtm(&$media, 'Tag', $tags);
+        if ($this->Media->checkAccess(&$media, &$user, ACL_WRITE_META, ACL_WRITE_MASK, &$members)) {
           if ($date) {
-            $image['Image']['date'] = $date;
+            $media['Media']['date'] = $date;
             $changedMeta = true;
           }
-          $this->_handleHabtm(&$image, 'Category', $categories);
-          $this->_removeLocation(&$image, &$delLocations);
-          $this->_handleHabtm(&$image, 'Location', $locations);
+          $this->_handleHabtm(&$media, 'Category', $categories);
+          $this->_removeLocation(&$media, &$delLocations);
+          $this->_handleHabtm(&$media, 'Location', $locations);
         } else {
-          $this->Logger->warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change metadata of image ".$image['Image']['id']);
+          $this->Logger->warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change metadata of image ".$media['Media']['id']);
         }
       
         // Evaluate, if data changed and cleanup of unchanged HABTMs
         foreach ($habtms as $habtm) {
-          if (isset($image[$habtm][$habtm]) && 
-            (count($image[$habtm][$habtm]) != count($oldHabtmIds[$habtm]) ||
-            count(array_diff($image[$habtm][$habtm], $oldHabtmIds[$habtm])))) {
+          if (isset($media[$habtm][$habtm]) && 
+            (count($media[$habtm][$habtm]) != count($oldHabtmIds[$habtm]) ||
+            count(array_diff($media[$habtm][$habtm], $oldHabtmIds[$habtm])))) {
             $changedMeta = true;
-          } elseif (isset($image[$habtm])) {
-            unset($image[$habtm]);
+          } elseif (isset($media[$habtm])) {
+            unset($media[$habtm]);
           }
         }
 
         $changedAcl = false;
         if (!empty($this->data['acl'])) {
-          $this->Image->setAccessFlags(&$image, $user);
+          $this->Media->setAccessFlags(&$media, $user);
 
-          if ($this->Image->checkAccess(&$image, &$user, 1, 0)) {
-            $changedAcl = $this->_editAcl(&$image, $groupId);
+          if ($this->Media->checkAccess(&$media, &$user, 1, 0)) {
+            $changedAcl = $this->_editAcl(&$media, $groupId);
           } else {
             $this->Logger->warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change access rights of image ".$id);
           }
@@ -364,10 +364,10 @@ class ExplorerController extends AppController
 
         if ($changedMeta || $changedAcl) { 
           if ($changedMeta) {
-            $image['Image']['flag'] |= IMAGE_FLAG_DIRTY;
+            $media['Media']['flag'] |= MEDIUM_FLAG_DIRTY;
           }
-          $image['Image']['modified'] = null;
-          if (!$this->Image->save($image)) {
+          $media['Media']['modified'] = null;
+          if (!$this->Media->save($media)) {
             $this->Logger->warn('Could not save new metadata/acl to image '.$id);
           } else {
             $this->Logger->info('Updated metadata or acl of '.$id);
@@ -390,12 +390,12 @@ class ExplorerController extends AppController
     }
     $id = intval($id);
     $user = $this->getUser();
-    $image = $this->Image->findById($id);
-    $this->Image->setAccessFlags(&$image, $user);
-    $this->set('data', $image);
+    $media = $this->Media->findById($id);
+    $this->Media->setAccessFlags(&$media, $user);
+    $this->set('data', $media);
     $this->layout='bare';
-    if (!$this->Image->checkAccess(&$image, &$user, ACL_WRITE_META, ACL_WRITE_MASK)) {
-      if ($this->Image->checkAccess(&$image, &$user, ACL_WRITE_TAG, ACL_WRITE_MASK)) {
+    if (!$this->Media->checkAccess(&$media, &$user, ACL_WRITE_META, ACL_WRITE_MASK)) {
+      if ($this->Media->checkAccess(&$media, &$user, ACL_WRITE_TAG, ACL_WRITE_MASK)) {
         $this->render('edittag');
       } else {
         $this->Logger->warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change ACL of image ".$id);
@@ -417,34 +417,34 @@ class ExplorerController extends AppController
     $this->layout='bare';
     $user = $this->getUser();
     if (isset($this->data)) {
-      $image = $this->Image->findById($id);
+      $media = $this->Media->findById($id);
 
-      if (!$this->Image->checkAccess(&$image, &$user, ACL_WRITE_TAG, ACL_WRITE_MASK)) {
+      if (!$this->Media->checkAccess(&$media, &$user, ACL_WRITE_TAG, ACL_WRITE_MASK)) {
         $this->Logger->warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change tags of image ".$id);
       } else {
         $ids = $this->Tag->createIdListFromText($this->data['Tags']['text'], 'name', true);
-        $image['Tag']['Tag'] = $ids;
+        $media['Tag']['Tag'] = $ids;
 
-        if ($this->Image->checkAccess(&$image, &$user, ACL_WRITE_META, ACL_WRITE_MASK)) {
-          $image['Image']['date'] = $this->data['Image']['date'];
+        if ($this->Media->checkAccess(&$media, &$user, ACL_WRITE_META, ACL_WRITE_MASK)) {
+          $media['Media']['date'] = $this->data['Media']['date'];
           $ids = $this->Category->createIdListFromText($this->data['Categories']['text'], 'name', true);
-          $image['Category']['Category'] = $ids;
+          $media['Category']['Category'] = $ids;
 
           $locations = $this->Location->createLocationItems($this->data['Locations']);
           $locations = $this->Location->filterItems($locations);
           $ids = $this->Location->CreateIdList($locations, true);
-          $image['Location']['Location'] = $ids;      
+          $media['Location']['Location'] = $ids;      
         } else {
           $this->Logger->warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change meta data of image ".$id);
         }
-        $image['Image']['modified'] = null;
-        $image['Image']['flag'] |= IMAGE_FLAG_DIRTY;
-        $this->Image->save($image);
+        $media['Media']['modified'] = null;
+        $media['Media']['flag'] |= MEDIUM_FLAG_DIRTY;
+        $this->Media->save($media);
       }
     }
-    $image = $this->Image->findById($id);
-    $this->Image->setAccessFlags(&$image, $user);
-    $this->set('data', $image);
+    $media = $this->Media->findById($id);
+    $this->Media->setAccessFlags(&$media, $user);
+    $this->set('data', $media);
     Configure::write('debug', 0);
     $this->render('updatemeta');
   }
@@ -459,9 +459,9 @@ class ExplorerController extends AppController
       $this->redirect(null, '404');
     }
     $id = intval($id);
-    $image = $this->Image->findById($id);
-    $this->Image->setAccessFlags(&$image, $this->getUser());
-    $this->set('data', $image);
+    $media = $this->Media->findById($id);
+    $this->Media->setAccessFlags(&$media, $this->getUser());
+    $this->set('data', $media);
     $this->layout='bare';
     Configure::write('debug', 0);
   }
@@ -473,11 +473,11 @@ class ExplorerController extends AppController
     }
     $id = intval($id);
     $user = $this->getUser();
-    $image = $this->Image->findById($id);
-    $this->Image->setAccessFlags(&$image, $user);
-    $this->set('data', $image);
+    $media = $this->Media->findById($id);
+    $this->Media->setAccessFlags(&$media, $user);
+    $this->set('data', $media);
     $this->layout='bare';
-    if ($this->Image->checkAccess(&$image, &$user, 1, 0)) {
+    if ($this->Media->checkAccess(&$media, &$user, 1, 0)) {
       $groups = $this->Group->findAll(array('User.id' => $this->getUserId()));
       if (!empty($groups)) {
         $groups = Set::combine($groups, '{n}.Group.id', '{n}.Group.name');
@@ -503,10 +503,10 @@ class ExplorerController extends AppController
     if (isset($this->data)) {
       // Call find() instead of read(). read() populates resultes to the model,
       // which causes problems at save()
-      $image = $this->Image->findById($id);
+      $media = $this->Media->findById($id);
       $user = $this->getUser();
       $userId = $user['User']['id'];
-      if (!$this->Image->checkAccess(&$image, &$user, 1, 0)) {
+      if (!$this->Media->checkAccess(&$media, &$user, 1, 0)) {
         $this->Logger->warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change ACL of image ".$id);
       } else {
         // check for existing group of user
@@ -517,25 +517,24 @@ class ExplorerController extends AppController
           $group = null;
         }
         if ($group) {
-          $image['Image']['group_id'] = $groupId;
+          $media['Media']['group_id'] = $groupId;
         } else {
-          $image['Image']['group_id'] = -1;
+          $media['Media']['group_id'] = -1;
         }
 
         // higher grants first
-        $this->Image->setAcl(&$image, ACL_WRITE_META, ACL_WRITE_MASK, $this->data['acl']['write']['meta']);
-        $this->Image->setAcl(&$image, ACL_WRITE_TAG, ACL_WRITE_MASK, $this->data['acl']['write']['tag']);
+        $this->Media->setAcl(&$media, ACL_WRITE_TAG, ACL_WRITE_MASK, $this->data['acl']['write']['tag']);
+        $this->Media->setAcl(&$media, ACL_WRITE_META, ACL_WRITE_MASK, $this->data['acl']['write']['meta']);
+        $this->Media->setAcl(&$media, ACL_READ_PREVIEW, ACL_READ_MASK, $this->data['acl']['read']['preview']);
+        $this->Media->setAcl(&$media, ACL_READ_ORIGINAL, ACL_READ_MASK, $this->data['acl']['read']['original']);
 
-        $this->Image->setAcl(&$image, ACL_READ_ORIGINAL, ACL_READ_MASK, $this->data['acl']['read']['original']);
-        $this->Image->setAcl(&$image, ACL_READ_PREVIEW, ACL_READ_MASK, $this->data['acl']['read']['preview']);
-
-        $image['Image']['modified'] = null;
-        $this->Image->save($image['Image'], true, array('group_id', 'gacl', 'uacl', 'oacl'));
+        $media['Media']['modified'] = null;
+        $this->Media->save($media['Media'], true, array('group_id', 'gacl', 'uacl', 'oacl'));
       }
     }
-    $image = $this->Image->findById($id);
-    $this->Image->setAccessFlags(&$image, $this->getUser());
-    $this->set('data', $image);
+    $media = $this->Media->findById($id);
+    $this->Media->setAccessFlags(&$media, $this->getUser());
+    $this->set('data', $media);
     $this->layout='bare';
     $this->render('updatemeta');
     Configure::write('debug', 0);
@@ -548,32 +547,21 @@ class ExplorerController extends AppController
     }
     $id = intval($id);
 
-    $image = $this->Image->findById($id);
     $user = $this->getUser();
-    if ($image) {
-      $this->Image->setAccessFlags(&$image, $user);
-    }
-    if (!$image) {
+    $media = $this->Media->findById($id);
+    if (!$media) {
       $this->Logger->err("User '{$user['User']['username']}' ({$user['User']['id']}) requested non existing image id '$id'");
-    } elseif (!$image['Image']['isOwner']) {
+      $this->redirect(null, 401);
+    }
+    $this->Media->setAccessFlags(&$media, $user);
+    if (!$media['Media']['isOwner']) {
       $this->Logger->warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to sync image '$id'");
     } else {
-      @clearstatcache();
-      if ($this->Image->isVideo($image)) {
-        $thumbFilename = $this->VideoFilter->getVideoPreviewFilename(&$image);
-      } else {
-        $thumbFilename = $this->Image->getFilename(&$image);
-      }
-      if (!$thumbFilename || !$this->ImageFilter->writeFile(&$image, $thumbFilename)) {
-        $this->Logger->err("Count not write file '".$this->Image->getFilename($image)."'");
-      } else {
-        $this->Logger->info("Synced file '".$this->Image->getFilename($image)."' ({$image['Image']['id']})");
-        // reread image
-        $image = $this->Image->findById($id);
-        $this->Image->setAccessFlags(&$image, $user);
-      }
+      $this->FilterManager->write($media);
+      $media =  $this->Media->findById($id);
+      $this->Media->setAccessFlags(&$media, $user);
     }
-    $this->set('data', $image);
+    $this->set('data', $media);
     $this->layout='bare';
     $this->render('updatemeta');
     Configure::write('debug', 0);

@@ -18,7 +18,7 @@
   } ?></span> said 
 <span class="date"><?php echo $time->relativeTime($comment['date']); ?></span>
 <?php 
-  if ($this->data['Image']['isOwner'] || $comment['user_id'] == $userId) {
+  if ($this->data['Media']['isOwner'] || $comment['user_id'] == $userId) {
     echo $html->link('(delete)', '/comments/delete/'.$comment['id'].'/'.$params);
   }
 ?>:
@@ -35,7 +35,7 @@
 <?php echo $form->create('Comment', array('action' => 'add/'.$params)); ?>
 <fieldset>
 <?php
-  echo $form->hidden('Image.id', array('value' => $this->data['Image']['id']));
+  echo $form->hidden('Media.id', array('value' => $this->data['Media']['id']));
 ?>
 <?php 
   if (($commentAuth & COMMENT_AUTH_NAME) > 0) {

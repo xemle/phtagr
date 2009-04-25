@@ -60,6 +60,7 @@ class OptionsController extends AppController {
       $this->Session->setFlash("Settings saved");
     }
     $tree = $this->Option->getTree($userId);
+    $this->Option->addDefaultAclTree(&$tree);
     $this->data = $tree;
 
     $this->set('userId', $userId);

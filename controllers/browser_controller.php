@@ -25,8 +25,8 @@ class BrowserController extends AppController
 {
   var $name = "Browser";
 
-  var $components = array('RequestHandler', 'ImageFilter', 'VideoFilter', 'GpsFilter', 'Upload', 'Zip');
-  var $uses = array('User', 'Image', 'Tag', 'Category', 'Location', 'Option');
+  var $components = array('FileManager', 'RequestHandler', 'FilterManager', 'Upload', 'Zip');
+  var $uses = array('User', 'MyFile', 'Media', 'Tag', 'Category', 'Location', 'Option');
   var $helpers = array('form', 'formular', 'html', 'number');
 
   /** Array of filesystem root directories. */
@@ -37,7 +37,7 @@ class BrowserController extends AppController
 
     $this->requireRole(ROLE_USER, array('redirect' => '/'));
 
-    $userDir = $this->User->getRootDir($this->getUser());
+    $userDir = $this->FileManager->getUserDir();
     $this->_addFsRoot($userDir);
 
     $fsroots = $this->Option->buildTree($this->getUser(), 'path.fsroot', true);
@@ -55,7 +55,7 @@ class BrowserController extends AppController
   function _setMenu() {
     $items = array();
     $items[] = array('text' => 'Import Files', 'link' => 'index', 'type' => ($this->action=='index'?'active':false));
-    if (count($this->_fsRoots > 1)) {
+    if (count($this->_fsRoots) > 1) {
       $items[] = array('text' => 'Upload', 'link' => 'upload/files');
     } else {
       $items[] = array('text' => 'Upload', 'link' => 'upload');
@@ -182,7 +182,7 @@ class BrowserController extends AppController
       list($dirs, $files) = $folder->read();
 
       // TODO get supported extensions from file filter
-      $videos = array('avi', 'mov', 'mpg', 'mpeg');
+      $videos = array('avi', 'mov', 'mpg', 'mpeg', 'thm');
       $images = array('jpeg', 'jpg');
       $maps = array('log');
       $list = array();
@@ -224,53 +224,6 @@ class BrowserController extends AppController
     $this->set('isInternal', $isInternal);
   }
 
-  function _importFile($filename) {
-    $user =& $this->getUser();
-    $path = Folder::slashTerm(dirname($filename));
-    $file = basename($filename);
-    $image = $this->Image->find(array('path' => $path, 'file' => $file));
-
-    if ($image) {
-      if ($image['User']['id'] != $user['User']['id']) {
-        $this->Logger->err("Import failed: Existing file '$filename' belongs to another user ('{$image['User']['username']}', id {$image['User']['id']})");
-        return -1;
-      } elseif ($image['Image']['flag'] & IMAGE_FLAG_ACTIVE > 0) {
-        $this->Logger->debug("File '$filename' is already in database");
-        $this->Logger->warn("Import of existing files currently not supported"); 
-        return 0;
-        // TODO Synchronize data
-      }
-      $this->Image->addDefaultAcl(&$image, &$user);
-      $imageId = $image['Image']['id'];      
-    } else {
-      $this->Logger->debug("File '$filename' is not in the database");
-      $imageId = $this->Image->insertFile($filename, $user);
-      if (!$imageId) {
-        $this->Logger->err("Could not insert '$filename' to the database");
-        return -1;
-      }
-      $image = $this->Image->findById($imageId);
-      if (!$image) {
-        $this->Logger->err("Could not read image with id $imageId");
-        return -1;
-      }
-    }
-    $image['Image']['flag'] |= IMAGE_FLAG_ACTIVE;
-    $thumbFilename = false;
-    if ($this->Image->isVideo($image)) {
-      $this->VideoFilter->readFile(&$image);
-      $thumbFilename = $this->VideoFilter->getVideoPreviewFilename(&$image, array('noCache' => true));
-    }
-    $this->ImageFilter->readFile(&$image, $thumbFilename);
-    if ($image !== false && $this->Image->save($image)) {
-      $this->Logger->info("Imported file '$filename' with id $imageId");
-      return 1;
-    } else {
-      $this->Logger->err("Could not save imported data of file '$filename'");
-      return -1;
-    }
-  }
-
   function import() {
     $user = $this->getUser();
     // parameter preparation
@@ -281,6 +234,7 @@ class BrowserController extends AppController
     // Get dir and imports
     $dirs = array();
     $files = array();
+    $toRead = array();
     foreach ($data['import'] as $file) {
       if (!$file) {
         continue;
@@ -288,39 +242,17 @@ class BrowserController extends AppController
       $fsPath = $this->_getFsPath($file);
       if (is_dir($fsPath)) {
         $dirs[] = Folder::slashTerm($fsPath);
+        $toRead[] = $fsPath;
       } elseif (file_exists($fsPath) && is_readable($fsPath)) {
         $files[] = $fsPath;
+        $toRead[] = $fsPath;
       }
     }
     
-    // search for files
-    $folder =& new Folder();
-    foreach ($dirs as $dir) {
-      $cd = $folder->cd($dir);
-      // Get extensions from file filter
-      $found = $folder->find('.*(jpe?g|avi|mov|mpe?g|log)');
-      foreach ($found as $file) {
-        $files[] = $dir.$file;
-      }
-    }
-
-    // import files
-    $numImports = 0;
-    $numErrors = 0;
-    foreach ($files as $file) {
-      if (preg_match('/.*\.log$/', $file)) {
-        $this->GpsFilter->readFile($file, array('offset' => 120*60, 'overwrite' => false));
-        continue;
-      }
-      $result = $this->_importFile($file);
-      if ($result>0) {
-        $numImports++;
-      }
-      if ($result<0) {
-        $numErrors++;
-      }
-    }
-    $this->Session->setFlash("Imported $numImports files ($numErrors errors)");
+    //$this->Logger->debug($toRead);
+    $readed = $this->FilterManager->readFiles($toRead);
+    $errors = $this->FilterManager->errors;
+    $this->Session->setFlash("Imported $readed files ($errors errors)");
 
     // Set data for view
     $this->set('path', $path);
@@ -334,27 +266,22 @@ class BrowserController extends AppController
     $errors = 0;
 
     @clearstatcache();
-    $this->Image->unbindModel(array('hasAndBelongsToMany' => array('Tag', 'Category', 'Location')));
-    $result = $this->Image->findAll("Image.user_id=$userId AND Image.flag & ".IMAGE_FLAG_DIRTY." > 0", array("Image.id"));
+    $this->Media->unbindAll();
+    $result = $this->Media->findAll("Media.user_id = $userId AND Media.flag & ".MEDIUM_FLAG_DIRTY." > 0", array("Media.id"));
     if (!$result) {
       $this->Logger->info("No images found for synchronization");
       $this->data['total'] = 0;
     } else {
-      $ids = Set::extract($result, '{n}.Image.id');
+      $ids = Set::extract($result, '{n}.Media.id');
       $executionTime = ini_get('max_execution_time');
       $start = getMicrotime();
       foreach ($ids as $id) {
-        $image = $this->Image->findById($id);
-        if ($this->Image->isVideo($image)) {
-          $filename = $this->VideoFilter->getVideoPreviewFilename(&$image, array('noCache' => true));
-        } else {
-          $filename = $this->Image->getFilename($image);
-        }
-        if (!$filename || !$this->ImageFilter->writeFile(&$image, $filename)) {
-          $this->Logger->err("Could not write file '".$this->Image->getFilename($image)."'");
+        $media = $this->Media->findById($id);
+        if (!$this->FilterManager->write($media)) {
+          $this->Logger->err("Could not export media $id");
           $errors++;
         } else {
-          $this->Logger->info("Synced file '".$this->Image->getFilename($image)."' ({$image['Image']['id']})");
+          $this->Logger->verbose("Synced media $id");
           $synced++;
         }
 
@@ -376,23 +303,23 @@ class BrowserController extends AppController
     $user = $this->getUser();
     $userId = $this->getUserId();
     $this->data = $user;
-    $external = (IMAGE_FLAG_ACTIVE | IMAGE_FLAG_EXTERNAL);
+    $external = (MEDIUM_FLAG_ACTIVE | MEDIUM_FLAG_EXTERNAL);
 
     $files['count'] = $this->Image->find('count', array('conditions' => "User.id = $userId"));
-    $bytes = $this->Image->findAll(array("User.id" => $userId, "Image.flag & ".IMAGE_FLAG_EXTERNAL." = 0"), array('SUM(Image.bytes) AS Bytes'));
+    $bytes = $this->Image->findAll(array("User.id" => $userId, "Image.flag & ".MEDIUM_FLAG_EXTERNAL." = 0"), array('SUM(Image.bytes) AS Bytes'));
     $files['bytes'] = $bytes[0][0]['Bytes'];
     $bytes = $this->Image->findAll(array("User.id" => $userId), array('SUM(Image.bytes) AS Bytes'));
     $files['bytesAll'] = $bytes[0][0]['Bytes'];
     $files['quota'] = $user['User']['quota'];
     $files['free'] = $files['quota'] - $files['bytes'];
-    $files['active'] = $this->Image->find('count', array('conditions' => "User.id = $userId AND Image.flag & ".IMAGE_FLAG_ACTIVE." > 0"));
-    $files['dirty'] = $this->Image->find('count', array('conditions' => "User.id = $userId AND Image.flag & ".IMAGE_FLAG_DIRTY." > 0"));
-    $files['video'] = $this->Image->find('count', array('conditions' => "User.id = $userId AND Image.flag & ".IMAGE_FLAG_ACTIVE." > 0 AND Image.duration > 0"));
+    $files['active'] = $this->Image->find('count', array('conditions' => "User.id = $userId AND Image.flag & ".MEDIUM_FLAG_ACTIVE." > 0"));
+    $files['dirty'] = $this->Image->find('count', array('conditions' => "User.id = $userId AND Image.flag & ".MEDIUM_FLAG_DIRTY." > 0"));
+    $files['video'] = $this->Image->find('count', array('conditions' => "User.id = $userId AND Image.flag & ".MEDIUM_FLAG_ACTIVE." > 0 AND Image.duration > 0"));
     $files['external'] = $this->Image->find('count', array('conditions' => "User.id = $userId AND Image.flag & $external = $external"));
-    $files['public'] = $this->Image->find('count', array('conditions' => "User.id = $userId AND Image.flag & ".IMAGE_FLAG_ACTIVE." > 0 AND Image.oacl >= ".ACL_READ_PREVIEW));
-    $files['user'] = $this->Image->find('count', array('conditions' => "User.id = $userId AND Image.flag & ".IMAGE_FLAG_ACTIVE." > 0 AND Image.oacl < ".ACL_READ_PREVIEW." AND Image.uacl >= ".ACL_READ_PREVIEW));
-    $files['group'] = $this->Image->find('count', array('conditions' => "User.id = $userId AND Image.flag & ".IMAGE_FLAG_ACTIVE." > 0 AND Image.uacl < ".ACL_READ_PREVIEW." AND Image.gacl >= ".ACL_READ_PREVIEW));
-    $files['private'] = $this->Image->find('count', array('conditions' => "User.id = $userId AND Image.flag & ".IMAGE_FLAG_ACTIVE." > 0 AND Image.gacl < ".ACL_READ_PREVIEW));
+    $files['public'] = $this->Image->find('count', array('conditions' => "User.id = $userId AND Image.flag & ".MEDIUM_FLAG_ACTIVE." > 0 AND Image.oacl >= ".ACL_READ_PREVIEW));
+    $files['user'] = $this->Image->find('count', array('conditions' => "User.id = $userId AND Image.flag & ".MEDIUM_FLAG_ACTIVE." > 0 AND Image.oacl < ".ACL_READ_PREVIEW." AND Image.uacl >= ".ACL_READ_PREVIEW));
+    $files['group'] = $this->Image->find('count', array('conditions' => "User.id = $userId AND Image.flag & ".MEDIUM_FLAG_ACTIVE." > 0 AND Image.uacl < ".ACL_READ_PREVIEW." AND Image.gacl >= ".ACL_READ_PREVIEW));
+    $files['private'] = $this->Image->find('count', array('conditions' => "User.id = $userId AND Image.flag & ".MEDIUM_FLAG_ACTIVE." > 0 AND Image.gacl < ".ACL_READ_PREVIEW));
 
     $this->set('files', $files);
   }
@@ -401,13 +328,12 @@ class BrowserController extends AppController
     $path = $this->getPath();
     $fsPath = $this->_getFsPath($path);
     // Check for internal path
-    $userRoot = $this->User->getRootDir($this->getUser());
     if (!$fsPath) {
       $this->Logger->warn("Invalid path to create folder");
       $this->Session->setFlash("Invalid path to create folder");
       $this->redirect("index");
     }
-    if (strpos($fsPath, $userRoot) !== 0) {
+    if ($this->FileManager->isExternam($fspath)) {
       $this->Session->setFlash("Could not create folder here: $path");
       $this->Logger->warn("Could not create folder in external path: $fsPath");
       $this->redirect("index/".$path);
@@ -441,27 +367,21 @@ class BrowserController extends AppController
       $this->redirect("index");
     }
     // Check for internal path
-    $userRoot = $this->User->getRootDir($this->getUser());
-    if (strpos($fsPath, $userRoot) !== 0) {
+    if ($this->FileManager->isExternal($fsPath)) {
       $this->Session->setFlash("Could not upload here: $path");
       $this->Logger->warn("Could not upload in external path: $fsPath");
       $this->redirect("index/".$path);
     }
     if ($this->Upload->isUpload()) {
-      $file = $this->Upload->upload(array('root' => $fsPath, 'overwrite' => false));
-      if ($file) {
-        $this->Logger->info("File '$file' uploaded successfully");
-        if (substr(strtolower($file), -4) == '.zip' && $this->data['File']['extract']) {
-          $files = $this->Zip->unzip($file);
+      $filename = $this->Upload->upload(array('root' => $fsPath, 'overwrite' => false));
+      if ($filename) {
+        $this->Logger->info("File '$filename' uploaded successfully");
+        if (substr(strtolower($filename), -4) == '.zip' && $this->data['File']['extract']) {
+          $files = $this->Zip->unzip($filename);
           $this->Session->setFlash("File uploaded successfully and ".count($files)." files were extracted");
-          $image = $this->Image->findByFilename($file);
-          if ($image) {
-            $this->Image->delete($image['Image']['id']);
-          } else {
-            $this->Logger->warn("Could not find model for $file to delete");
+          if ($this->FileManager->delete($filename)) {
+            $this->Logger->info("Delete archive $filename");
           }
-          @unlink($file);
-          $this->Logger->info("Delete archive $file");
         } else {
           $this->Session->setFlash("File uploaded successfully");
         }
@@ -473,8 +393,7 @@ class BrowserController extends AppController
     // Fetch quota and free bytes
     $user = $this->getUser();
     $userId = $this->getUserId();
-    $bytes = $this->Image->findAll(array("User.id" => $userId, "Image.flag & ".IMAGE_FLAG_EXTERNAL." = 0"), array('SUM(Image.bytes) AS Bytes'));
-    $bytes = $bytes[0][0]['Bytes'];
+    $bytes = $this->MyFile->countBytes($userId);
     $quota = $user['User']['quota'];
     $free = $quota - $bytes;
     $this->set('quota', $quota);

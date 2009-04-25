@@ -1,12 +1,12 @@
 <markers>
-<?php foreach ($this->data as $image): ?>
-  <marker id="<?php echo $image['Image']['id']; ?>" lat="<?php echo $image['Image']['latitude']; ?>" lng="<?php echo $image['Image']['longitude']; ?>" >
-    <name><?php echo $image['Image']['name']; ?></name>
-    <icon><?php echo Router::url('/media/mini/'.$image['Image']['id'].'/'.$image['Image']['file'], true); ?></icon>
+<?php foreach ($this->data as $media): ?>
+  <marker id="<?php echo $media['Media']['id']; ?>" lat="<?php echo $media['Media']['latitude']; ?>" lng="<?php echo $media['Media']['longitude']; ?>" >
+    <name><?php echo $media['Media']['name']; ?></name>
+    <icon><?php echo Router::url('/media/mini/'.$media['Media']['id'].'/'.$media['Media']['file'], true); ?></icon>
     <description><![CDATA[<h3><?php 
-      echo $image['Image']['name']; 
+      echo $media['Media']['name']; 
     ?></h3>
-    <a href="<?php echo Router::url('/images/view/'.$image['Image']['id']); ?>"><img src="<?php echo Router::url('/media/mini/'.$image['Image']['id'].'/'.$image['Image']['file'], true); ?>" width="75" height="75" /> view</a>]]></description>
+    <a href="<?php echo Router::url('/images/view/'.$media['Media']['id']); ?>"><img src="<?php echo Router::url('/media/mini/'.$media['Media']['id'].'/'.$media['Media']['file'], true); ?>" width="75" height="75" /> view</a>]]></description>
   </marker>
 <?php endforeach; /* data loop */ ?>
 </markers>
