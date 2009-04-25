@@ -60,7 +60,7 @@ class ImageFilterComponent extends BaseFilterComponent {
     $isNew = false;
     if (!$media) {
       $media = $this->Media->create(array(
-        'type' => MEDIUM_TYPE_IMAGE,
+        'type' => MEDIA_TYPE_IMAGE,
         ), true);
       if ($this->controller->getUserId() != $file['File']['user_id']) {
         $user = $this->Media->User->findById($file['File']['user_id']);
@@ -254,7 +254,7 @@ class ImageFilterComponent extends BaseFilterComponent {
     $args = $this->_createExportArguments($data, $media);
     if ($args == '') {
       $this->Logger->debug("File '$filename' has no metadata changes");
-      if (!$this->Media->deleteFlag($media, MEDIUM_FLAG_DIRTY)) {
+      if (!$this->Media->deleteFlag($media, MEDIA_FLAG_DIRTY)) {
         $this->controller->warn("Could not update image data of media {$media['Media']['id']}");
       }
       return true;
@@ -288,7 +288,7 @@ class ImageFilterComponent extends BaseFilterComponent {
     }
     
     $this->MyFile->update($file);
-    if (!$this->Media->deleteFlag($media, MEDIUM_FLAG_DIRTY)) {
+    if (!$this->Media->deleteFlag($media, MEDIA_FLAG_DIRTY)) {
       $this->controller->warn("Could not update image data of media {$media['Media']['id']}");
     }
   }

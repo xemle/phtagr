@@ -146,7 +146,7 @@ class MediaController extends AppController
       default:
         $flag = ACL_READ_PREVIEW; break;
     }
-    //$conditions = "Media.id = $id AND Media.flag & ".MEDIUM_FLAG_ACTIVE.$this->Media->buildWhereAcl($user, 0, $flag);
+    //$conditions = "Media.id = $id AND Media.flag & ".MEDIA_FLAG_ACTIVE.$this->Media->buildWhereAcl($user, 0, $flag);
     $conditions = "Media.id = $id".$this->Media->buildWhereAcl($user, 0, $flag);
     $media = $this->Media->find($conditions);
     if (!$media) {
@@ -162,7 +162,7 @@ class MediaController extends AppController
     @param image Media data
     @return filename of image */
   function _getSourceFile($media) {
-    if ($this->Media->isType($media, MEDIUM_TYPE_VIDEO)) {
+    if ($this->Media->isType($media, MEDIA_TYPE_VIDEO)) {
       $sourceFilename = $this->VideoPreview->getPreviewFilename($media);
     } else {
       $sourceFilename = $this->Media->File->getFilename($media['File'][0]);

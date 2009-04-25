@@ -49,7 +49,7 @@ class FlashVideoComponent extends Object {
 
   function create($media, $options = array()) {
     $options = am(array('size' => OUTPUT_SIZE_VIDEO, 'bitrate' => OUTPUT_BITRATE_VIDEO), $options);
-    if (!$this->controller->Media->isType($media, MEDIUM_TYPE_VIDEO)) {
+    if (!$this->controller->Media->isType($media, MEDIA_TYPE_VIDEO)) {
       $this->Logger->err("Media {$media['Media']['id']} is not a video");
       return false;
     }

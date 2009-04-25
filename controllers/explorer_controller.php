@@ -364,7 +364,7 @@ class ExplorerController extends AppController
 
         if ($changedMeta || $changedAcl) { 
           if ($changedMeta) {
-            $media['Media']['flag'] |= MEDIUM_FLAG_DIRTY;
+            $media['Media']['flag'] |= MEDIA_FLAG_DIRTY;
           }
           $media['Media']['modified'] = null;
           if (!$this->Media->save($media)) {
@@ -438,7 +438,7 @@ class ExplorerController extends AppController
           $this->Logger->warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change meta data of image ".$id);
         }
         $media['Media']['modified'] = null;
-        $media['Media']['flag'] |= MEDIUM_FLAG_DIRTY;
+        $media['Media']['flag'] |= MEDIA_FLAG_DIRTY;
         $this->Media->save($media);
       }
     }

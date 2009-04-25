@@ -1049,7 +1049,7 @@ class QueryComponent extends Object
     $sql.=" FROM {$this->_tp}media AS Media";
     $sql.=$this->_addSqlJoinMetaInclusion($posTags, $posCats, $posLocs);
     // Consider only active files
-    //$sql.=" WHERE Media.flag & ".MEDIUM_FLAG_ACTIVE;
+    //$sql.=" WHERE Media.flag & ".MEDIA_FLAG_ACTIVE;
     $sql.=" WHERE 1 = 1";
     $sql.=$this->_addSqlWhereMetaExclusion($negTags, $negCats, $negLocs);
     $sql.=$this->_addSqlWhere();

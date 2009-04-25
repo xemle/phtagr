@@ -173,7 +173,7 @@ class Media extends AppModel
 
     $data['Media']['isOwner'] = ife($data['Media']['user_id'] == $user['User']['id'], true, false);
     $data['Media']['canWriteAcl'] = $this->checkAccess(&$data, &$user, 1, 0, &$groups);    
-    $data['Media']['isDirty'] = ife(($data['Media']['flag'] & MEDIUM_FLAG_DIRTY) > 0, true, false);
+    $data['Media']['isDirty'] = ife(($data['Media']['flag'] & MEDIA_FLAG_DIRTY) > 0, true, false);
 
     return $data;
   }
@@ -445,7 +445,7 @@ class Media extends AppModel
          "  `$myTable` AS `{$this->alias}`".
          " WHERE `$alias`.`$key` = `$joinAlias`.`$associationForeignKey`".
          "   AND `$joinAlias`.`$foreignKey` = `{$this->alias}`.`{$this->primaryKey}`".
-    //     "   AND Media.flag & ".MEDIUM_FLAG_ACTIVE.
+    //     "   AND Media.flag & ".MEDIA_FLAG_ACTIVE.
          $this->buildWhereAcl($user).
          " GROUP BY `$alias`.`name` ".
          " ORDER BY hits DESC LIMIT 0,".intval($num);

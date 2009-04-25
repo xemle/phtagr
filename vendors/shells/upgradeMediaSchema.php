@@ -154,11 +154,11 @@ class UpgradeMediaSchemaShell extends Shell {
     $type = $file['File']['type'];
     switch ($type) {
       case FILE_TYPE_IMAGE:
-        $this->Media->setType($media, MEDIUM_TYPE_IMAGE);
+        $this->Media->setType($media, MEDIA_TYPE_IMAGE);
         break;
       case FILE_TYPE_VIDEO:
         // if video search for thumb and add it
-        $this->Media->setType($media, MEDIUM_TYPE_VIDEO);
+        $this->Media->setType($media, MEDIA_TYPE_VIDEO);
         $this->_addVideoThumb($media, $file);
         break;
       default:

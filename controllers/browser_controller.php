@@ -267,7 +267,7 @@ class BrowserController extends AppController
 
     @clearstatcache();
     $this->Media->unbindAll();
-    $result = $this->Media->findAll("Media.user_id = $userId AND Media.flag & ".MEDIUM_FLAG_DIRTY." > 0", array("Media.id"));
+    $result = $this->Media->findAll("Media.user_id = $userId AND Media.flag & ".MEDIA_FLAG_DIRTY." > 0", array("Media.id"));
     if (!$result) {
       $this->Logger->info("No images found for synchronization");
       $this->data['total'] = 0;
@@ -303,23 +303,23 @@ class BrowserController extends AppController
     $user = $this->getUser();
     $userId = $this->getUserId();
     $this->data = $user;
-    $external = (MEDIUM_FLAG_ACTIVE | MEDIUM_FLAG_EXTERNAL);
+    $external = (FILE_FLAG_EXTERNAL);
 
-    $files['count'] = $this->Image->find('count', array('conditions' => "User.id = $userId"));
-    $bytes = $this->Image->findAll(array("User.id" => $userId, "Image.flag & ".MEDIUM_FLAG_EXTERNAL." = 0"), array('SUM(Image.bytes) AS Bytes'));
-    $files['bytes'] = $bytes[0][0]['Bytes'];
-    $bytes = $this->Image->findAll(array("User.id" => $userId), array('SUM(Image.bytes) AS Bytes'));
+    $files['count'] = $this->MyFile->find('count', array('conditions' => "User.id = $userId"));
+    $bytes = $this->MyFile->findAll(array("User.id" => $userId, "File.flag & ".FILE_FLAG_EXTERNAL." = 0"), array('SUM(File.size) AS Bytes'));
+    $files['bytes'] = floatval($bytes[0][0]['Bytes']);
+    $bytes = $this->MyFile->findAll(array("User.id" => $userId), array('SUM(File.size) AS Bytes'));
     $files['bytesAll'] = $bytes[0][0]['Bytes'];
     $files['quota'] = $user['User']['quota'];
     $files['free'] = $files['quota'] - $files['bytes'];
-    $files['active'] = $this->Image->find('count', array('conditions' => "User.id = $userId AND Image.flag & ".MEDIUM_FLAG_ACTIVE." > 0"));
-    $files['dirty'] = $this->Image->find('count', array('conditions' => "User.id = $userId AND Image.flag & ".MEDIUM_FLAG_DIRTY." > 0"));
-    $files['video'] = $this->Image->find('count', array('conditions' => "User.id = $userId AND Image.flag & ".MEDIUM_FLAG_ACTIVE." > 0 AND Image.duration > 0"));
-    $files['external'] = $this->Image->find('count', array('conditions' => "User.id = $userId AND Image.flag & $external = $external"));
-    $files['public'] = $this->Image->find('count', array('conditions' => "User.id = $userId AND Image.flag & ".MEDIUM_FLAG_ACTIVE." > 0 AND Image.oacl >= ".ACL_READ_PREVIEW));
-    $files['user'] = $this->Image->find('count', array('conditions' => "User.id = $userId AND Image.flag & ".MEDIUM_FLAG_ACTIVE." > 0 AND Image.oacl < ".ACL_READ_PREVIEW." AND Image.uacl >= ".ACL_READ_PREVIEW));
-    $files['group'] = $this->Image->find('count', array('conditions' => "User.id = $userId AND Image.flag & ".MEDIUM_FLAG_ACTIVE." > 0 AND Image.uacl < ".ACL_READ_PREVIEW." AND Image.gacl >= ".ACL_READ_PREVIEW));
-    $files['private'] = $this->Image->find('count', array('conditions' => "User.id = $userId AND Image.flag & ".MEDIUM_FLAG_ACTIVE." > 0 AND Image.gacl < ".ACL_READ_PREVIEW));
+    $files['active'] = $this->Media->find('count', array('conditions' => "User.id = $userId"));
+    $files['dirty'] = $this->Media->find('count', array('conditions' => "User.id = $userId"));
+    $files['video'] = $this->Media->find('count', array('conditions' => "User.id = $userId AND Media.duration > 0"));
+    $files['external'] = $this->MyFile->find('count', array('conditions' => "User.id = $userId AND File.flag & $external = $external"));
+    $files['public'] = $this->Media->find('count', array('conditions' => "User.id = $userId AND Media.oacl >= ".ACL_READ_PREVIEW));
+    $files['user'] = $this->Media->find('count', array('conditions' => "User.id = $userId AND Media.oacl < ".ACL_READ_PREVIEW." AND Media.uacl >= ".ACL_READ_PREVIEW));
+    $files['group'] = $this->Media->find('count', array('conditions' => "User.id = $userId AND Media.uacl < ".ACL_READ_PREVIEW." AND Media.gacl >= ".ACL_READ_PREVIEW));
+    $files['private'] = $this->Media->find('count', array('conditions' => "User.id = $userId AND Media.gacl < ".ACL_READ_PREVIEW));
 
     $this->set('files', $files);
   }

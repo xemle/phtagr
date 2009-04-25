@@ -98,7 +98,7 @@ class GpsFilterComponent extends BaseFilterComponent {
 
       $media['Media']['latitude'] = $position['latitude'];
       $media['Media']['longitude'] = $position['longitude'];
-      $media['Media']['flag'] |= MEDIUM_FLAG_DIRTY;
+      $media['Media']['flag'] |= MEDIA_FLAG_DIRTY;
       if ($this->Media->save($media['Media'], true, array('latitude', 'longitude', 'flag'))) {
         $this->Logger->debug("Update GPS position of image {$media['Media']['id']} to {$position['latitude']}/{$position['longitude']}");
       } else {

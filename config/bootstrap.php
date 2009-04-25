@@ -88,12 +88,12 @@ define("COMMENT_AUTH_NONE",     0);
 define("COMMENT_AUTH_NAME",     1);
 define("COMMENT_AUTH_CAPTCHA",  2);
 
-define("MEDIUM_FLAG_ACTIVE",   1);
-define("MEDIUM_FLAG_DIRTY",    4);
+define("MEDIA_FLAG_ACTIVE",   1);
+define("MEDIA_FLAG_DIRTY",    4);
 
-define("MEDIUM_TYPE_IMAGE", 1);
-define("MEDIUM_TYPE_VIDEO", 2);
-define("MEDIUM_TYPE_IMAGE_WITH_SOUND", 3);
+define("MEDIA_TYPE_IMAGE", 1);
+define("MEDIA_TYPE_VIDEO", 2);
+define("MEDIA_TYPE_IMAGE_WITH_SOUND", 3);
 
 define("FILE_FLAG_DIRECTORY", 1);
 define("FILE_FLAG_EXTERNAL",  2);

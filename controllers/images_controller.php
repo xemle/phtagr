@@ -65,7 +65,7 @@ class ImagesController extends AppController
         //$this->data = am($this->Session->read('Comment.data'), $this->data);
         $this->Session->del('Comment.data');
       }
-      if ($this->Media->isType($this->data, MEDIUM_TYPE_VIDEO)) {
+      if ($this->Media->isType($this->data, MEDIA_TYPE_VIDEO)) {
         $this->render('video');
       }
     }

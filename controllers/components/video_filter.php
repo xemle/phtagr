@@ -116,7 +116,7 @@ class VideoFilterComponent extends BaseFilterComponent {
     $isNew = false;
     if (!$media) {
       $media = $this->Media->create(array(
-            'type' => MEDIUM_TYPE_VIDEO,
+            'type' => MEDIA_TYPE_VIDEO,
             'date' => date('Y-m-d H:i:s', time()),
             'name' => basename($filename),
             'orientation' => 1
