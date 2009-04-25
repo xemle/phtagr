@@ -45,11 +45,11 @@ var toggleVisibility = function(id, type) {
   }
 }.defaults(-1, 'block');
 
-var selectMedium = function(id) {
+var selectMedia = function(id) {
   var e = document.getElementById('select-'+id);
   if (!e)
     return false;
-  var thumb = document.getElementById('medium-'+id);
+  var thumb = document.getElementById('media-'+id);
 
   var add = false;
   if (e.checked) {
@@ -60,7 +60,7 @@ var selectMedium = function(id) {
   }
 
   // adapt the id list for the hidden input
-  var list = document.getElementById('MediumIds');
+  var list = document.getElementById('MediaIds');
   var ids;
   if (list.value.length > 0)
     ids = list.value.split(',');
@@ -90,7 +90,7 @@ var thumbSelectAll = function() {
     if (!e)
       continue;
     e.checked = true;
-    selectMedium(id);
+    selectMedia(id);
   }
 };
 
@@ -101,7 +101,7 @@ var thumbSelectInvert = function() {
     if (!e)
       continue;
     e.checked = !e.checked;
-    selectMedium(id);
+    selectMedia(id);
   }
 };
 
