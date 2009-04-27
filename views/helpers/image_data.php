@@ -233,10 +233,14 @@ class ImageDataHelper extends AppHelper {
         $this->html->image('icons/tag_blue_edit.png', array('alt' => 'Edit tags', 'title' => 'Edit tags')), 
         '/explorer/editmeta/'.$mediaId, 
         array('update' => 'meta-'.$mediaId), null, false);
-    if ($data['Media']['canReadOriginal'])
-      $output .= ' '.$this->html->link(
-        $this->html->image('icons/disk.png', array('alt' => 'Save image', 'title' => 'Save image')), 
-        '/media/original/'.$mediaId.'/'.$data['Media']['name'], null, null, false);
+    if ($data['Media']['canReadOriginal']) {
+      foreach ($data['File'] as $file) {
+        $output .= ' '.$this->html->link(
+          $this->html->image('icons/disk.png', 
+            array('alt' => $file['file'], 'title' => 'Save file '.$file['file'])), 
+          '/media/file/'.$file['id'].'/'.$file['file'], null, null, false);
+      }
+    }
 
     if ($withMap && isset($data['Media']['latitude']) && isset($data['Media']['longitude'])) {
       $output .= ' '.$this->html->link(

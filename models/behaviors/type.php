@@ -29,19 +29,23 @@ class TypeBehavior extends ModelBehavior
     $this->config[$model->name] = $config;
   }
 
-  function isType(&$model, &$data, $type) {
+  function isType(&$model, $data, $type) {
     if (!$data) {
       $data =& $model->data;
     }
-    if (!isset($data[$model->alias]['type'])) {
+    if ($data[$model->alias]) {
+      $data = $data[$model->alias];
+    }
+    if (!isset($data['type'])) {
       $model->Logger->err("Precondition failed");
+      $model->Logger->debug($data);
       return null;
     }
 
-    return $data[$model->alias]['type'] == $type ? true : false;
+    return $data['type'] == $type ? true : false;
   }
 
-  function setType(&$model, &$data, $type) {
+  function setType(&$model, $data, $type) {
     if (!$data) {
       $data =& $model->data;
     }

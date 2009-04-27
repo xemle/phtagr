@@ -309,6 +309,42 @@ class Media extends AppModel
       return array();
   }
 
+  /** Generates a has one relation query for the image
+    @param modelId Id of the related model
+    @param model Model name
+    @return Array of the relation model */
+  function _optimizedHasMany($modelId, $model) {
+    if (!$modelId) {
+      return array();
+    }
+
+    $db =& ConnectionManager::getDataSource($this->useDbConfig);
+
+    if (!isset($this->hasMany[$model]['cacheQuery'])) {
+      $config = $this->hasMany[$model];
+      $table = $db->fullTableName($this->{$model}->table, false);
+      $alias = $this->{$model}->alias;
+      $key = $config['foreignKey'];
+      $tp = $this->tablePrefix;
+
+      $sql = "SELECT `$alias`.* FROM `$table` AS `$alias` WHERE `$alias`.`$key`=%d";
+      $this->hasMany[$model]['cacheQuery'] = $sql;
+    }
+
+    $sql = sprintf($this->hasMany[$model]['cacheQuery'], $modelId);
+    //$this->Logger->debug($sql);
+    $result = $this->query($sql);
+    if (count($result)) {
+      $tmp = array();
+      foreach ($result as $data) {
+        $tmp[] = $data[$model];
+      }
+      return $tmp;
+    } else {
+      return array();
+    }
+  }
+
   /** The function Model::find slows down the hole search. This function builds
    * the query manually for speed optimazation 
     @param id Media id
@@ -324,8 +360,13 @@ class Media extends AppModel
     $image = &$result[0];
 
     foreach ($this->belongsTo as $model => $config) {
-      $name = Inflector::underscore($model);
+      $name = Inflector::underscore(Inflector::singularize($model));
       $image[$model] = $this->_optimizedBelongsTo($image['Media'][$name.'_id'], $model);
+    }
+
+    foreach ($this->hasMany as $model => $config) {
+      $name = Inflector::underscore(Inflector::singularize($model));
+      $image[$model] = $this->_optimizedHasMany($image['Media']['id'], $model);
     }
 
     foreach ($this->hasAndBelongsToMany as $model => $config) {

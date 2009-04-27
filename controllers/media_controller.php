@@ -122,7 +122,8 @@ class MediaController extends AppController
       'name' => $name,
       'extension' => $ext,
       'path' => $path,
-      'modified' => $modified);
+      'modified' => $modified,
+      'mimeType' => array('thm' => 'image/jpeg'));
 
     return $options;
   }
@@ -260,16 +261,20 @@ class MediaController extends AppController
     $this->set($mediaOptions);
   }
 
-  function original($id) {
+  function file($id) {
     $id = intval($id);
-    $media = $this->Media->findById($id);
+    $file = $this->MyFile->findById($id);
     $user = $this->getUser();
-    if (!$this->Media->checkAccess(&$media, $user, ACL_READ_ORIGINAL, ACL_READ_MASK)) {
-      $this->Logger->warn("User {$user['User']['id']} has no previleges to access image ".$media['Media']['id']);
+    if (!$this->MyFile->hasMedia($file)) {
+      $this->Logger->warn("User {$user['User']['id']} requested file {$file['File']['id']} without media");
       $this->redirect(null, 404);
     }
-    $this->Logger->info("Request of image $id: original");
-    $filename = $this->Media->getFilename($media);  
+    if (!$this->Media->checkAccess(&$file, $user, ACL_READ_ORIGINAL, ACL_READ_MASK)) {
+      $this->Logger->warn("User {$user['User']['id']} has no previleges to access image ".$file['Media']['id']);
+      $this->redirect(null, 404);
+    }
+    $this->Logger->info("Request of media {$file['Media']['id']}: file $id '{$file['File']['file']}'");
+    $filename = $this->MyFile->getFilename($file);  
 
     $mediaOptions = $this->_getMediaOptions($filename);
     $mediaOptions['download'] = true;
