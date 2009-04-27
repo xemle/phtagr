@@ -150,19 +150,27 @@ class UpgradeMediaSchemaShell extends Shell {
     $sql = "UPDATE ".$this->_getTable('locks')." SET file_id = $fileId WHERE image_id = {$media['Media']['id']}";
     $this->_execute($sql);
 
-    // set media type
-    $type = $file['File']['type'];
-    switch ($type) {
-      case FILE_TYPE_IMAGE:
-        $this->Media->setType($media, MEDIA_TYPE_IMAGE);
-        break;
-      case FILE_TYPE_VIDEO:
-        // if video search for thumb and add it
-        $this->Media->setType($media, MEDIA_TYPE_VIDEO);
-        $this->_addVideoThumb($media, $file);
-        break;
-      default:
-        $this->Logger->warn("Unhandled file type $type");
+    if (($media['Media']['flag']) & 1 > 0) {
+      // set media type
+      $type = $file['File']['type'];
+      switch ($type) {
+        case FILE_TYPE_IMAGE:
+          $this->Media->setType($media, MEDIA_TYPE_IMAGE);
+          break;
+        case FILE_TYPE_VIDEO:
+          // if video search for thumb and add it
+          $this->Media->setType($media, MEDIA_TYPE_VIDEO);
+          $this->_addVideoThumb($media, $file);
+          break;
+        default:
+          $this->Logger->warn("Unhandled file type $type");
+      }
+      // Delete old flag IMAGE_FLAG_ACTIVE
+      $this->Media->deleteFlag($media, 1);
+    } else {
+      // Inactive media will be deleted, data is stored in files
+      $this->Media->delete($media['Media']['id']);
+      $this->Logger->debug("Deleted inactive media {$media['Media']['id']}");
     }
     return true;
   }
