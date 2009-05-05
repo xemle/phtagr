@@ -104,7 +104,7 @@ class VideoFilterComponent extends BaseFilterComponent {
    * @param image Media model data
    * @return True, false on error */
   function read(&$file, &$media, $options = array()) {
-    $filename = $this->MyFile->getFilename(&$file);
+    $filename = $this->MyFile->getFilename($file);
 
     if ($this->MyFile->isType($file, FILE_TYPE_VIDEOTHUMB)) {
       return $this->_readThumb($file, &$media);

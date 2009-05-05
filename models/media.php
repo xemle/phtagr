@@ -57,6 +57,10 @@ class Media extends AppModel
     if (!$data) {
       $data =& $this->data;
     }
+    if (!isset($user) || !isset($user['User']['id'])) {
+      $this->Logger->err("User data is not correct! Media ACL will be wrong!");
+      $this->Logger->trace($user);
+    }
     
     // Access control values
     $acl = $this->User->Option->getDefaultAcl($user);

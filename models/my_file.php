@@ -143,7 +143,7 @@ class MyFile extends AppModel
     }
 
     if (isset($data['File'])) {
-      $data =& $data['File'];
+      $data = $data['File'];
     }
     if (!isset($data['path']) || 
       !isset($data['file'])) {

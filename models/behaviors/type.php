@@ -33,7 +33,7 @@ class TypeBehavior extends ModelBehavior
     if (!$data) {
       $data =& $model->data;
     }
-    if ($data[$model->alias]) {
+    if (isset($data[$model->alias])) {
       $data = $data[$model->alias];
     }
     if (!isset($data['type'])) {

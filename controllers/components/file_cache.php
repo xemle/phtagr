@@ -76,6 +76,7 @@ class FileCacheComponent extends Object {
   function getFilename($media) {
     if (!isset($media['Media']['id']) || !isset($media['Media']['user_id'])) {
       $this->Logger->err("Precondition failed");
+      $this->Logger->debug($media);
       return false;
     }
     $userId = $media['Media']['user_id'];

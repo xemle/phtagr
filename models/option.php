@@ -284,13 +284,11 @@ class Option extends AppModel {
         'oacl' => ACL_READ_PREVIEW
       );
 
-    $this->Logger->debug($acl);
     $this->setAcl(&$acl, ACL_WRITE_TAG, ACL_WRITE_MASK, $this->getValue($tree, 'acl.write.tag', ACL_LEVEL_OTHER));
     $this->setAcl(&$acl, ACL_WRITE_META, ACL_WRITE_MASK, $this->getValue($tree, 'acl.write.meta', ACL_LEVEL_USER));
 
     $this->setAcl(&$acl, ACL_READ_PREVIEW, ACL_READ_MASK, $this->getValue($tree, 'acl.read.preview', ACL_LEVEL_OTHER));
     $this->setAcl(&$acl, ACL_READ_ORIGINAL, ACL_READ_MASK, $this->getValue($tree, 'acl.read.original', ACL_LEVEL_GROUP));
-    $this->Logger->debug($acl);
 
     return $acl;
   }  

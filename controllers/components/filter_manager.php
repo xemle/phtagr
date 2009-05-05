@@ -295,7 +295,7 @@ class FilterManagerComponent extends Object {
 
     $filter = $this->getFilterByExtension($filename);
     $this->Logger->debug("Read file $filename with filter ".$filter->getName());
-    $result = $filter->read($file, &$media);
+    $result = $filter->read(&$file, &$media);
     if ($result < 0) {
       $this->errors++;
     }

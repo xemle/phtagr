@@ -81,6 +81,7 @@ class FlagBehavior extends ModelBehavior
   function delFlag(&$model, $data, $flag) {
     return $this->deleteFlag($model, $data, $flag);
   }
+
   function hasFlag(&$model, &$data, $flag) {
     if (!$data) {
       $data = $model->data;
