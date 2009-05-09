@@ -65,4 +65,7 @@ foreach($cloudCategories as $key => $tag) {
 </div><!-- comment -->
 <?php endforeach; /* comments */ ?>
 </div><!-- comments -->
+<div>
+  <?php echo $html->link ("older comments...", "/comments", NULL, false, false);?>
+</div>
 <?php endif; ?>

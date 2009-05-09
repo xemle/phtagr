@@ -24,15 +24,29 @@
 class CommentsController extends AppController 
 {
   var $name = 'Comments';
-  var $uses = array('Comment', 'Media');
-  var $helpers = array('Html', 'Form', 'Rss');
+  var $uses = array('Comment', 'Media', 'Tag');
+  var $helpers = array('html', 'time', 'text', 'Form', 'Rss', 'paginator');
   var $components = array('Query', 'Captcha', 'Email');
+
+	var $paginate = array (
+		'fields' => array ('Comment.id', 'Comment.name', 'Comment.date', 'Media.id', 'Comment.text' ),
+		'limit' => 10,
+		'order' => array (
+			'Comment.date' => 'desc'
+		)
+	);
 
   function beforeFilter() {
     parent::beforeFilter();
 
     $this->Query->parseArgs();
   }
+
+	function index() {
+		$acl = "1 = 1".$this->Media->buildWhereAcl($this->getUser());
+		$data = $this->paginate ('Comment', $acl);
+		$this->set('comments', $data);
+	}
 
   function view($id = null) {
     if (!$id) {
