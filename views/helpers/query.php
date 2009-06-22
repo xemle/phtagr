@@ -34,7 +34,7 @@ class QueryHelper extends AppHelper {
                     'page' => 1, 
                     'show' => 12,
                     'pos' => 1, 
-                    'image' => true,
+                    'media' => true,
                     'video' => true,
                     'mymedia' => true
                     );
@@ -47,8 +47,8 @@ class QueryHelper extends AppHelper {
                     'page' => 1,
                     'show' => 12,
                     'pos' => 1,
-                    'image' => true,
-                    'videw' => true,
+                    'media' => true,
+                    'video' => true,
                     'mymedia' => true
                     );
 

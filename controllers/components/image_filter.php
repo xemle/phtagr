@@ -67,7 +67,7 @@ class ImageFilterComponent extends BaseFilterComponent {
       } else {
         $user = $this->controller->getUser();
       }
-      $this->Media->addDefaultAcl(&$media, &$user);
+      $media = $this->Media->addDefaultAcl(&$media, &$user);
       
       $isNew = true;
     };

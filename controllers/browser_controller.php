@@ -333,7 +333,7 @@ class BrowserController extends AppController
       $this->Session->setFlash("Invalid path to create folder");
       $this->redirect("index");
     }
-    if ($this->FileManager->isExternam($fspath)) {
+    if ($this->FileManager->isExternal($fsPath)) {
       $this->Session->setFlash("Could not create folder here: $path");
       $this->Logger->warn("Could not create folder in external path: $fsPath");
       $this->redirect("index/".$path);
