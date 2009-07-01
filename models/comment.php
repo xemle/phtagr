@@ -21,7 +21,7 @@ class Comment extends AppModel {
 
   function beforeSave() {
     // Add http:// prefix if no protocol is found
-    if (!empty($this->data['Comment']['url']) && strpos('://', $this->data['Comment']['url']) < 7) {
+    if (!empty($this->data['Comment']['url']) && !preg_match('/^https?:\/\//i', $this->data['Comment']['url'])) {
       $this->data['Comment']['url'] = 'http://'.$this->data['Comment']['url'];
     }
     return true;

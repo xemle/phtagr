@@ -28,13 +28,13 @@ class CommentsController extends AppController
   var $helpers = array('html', 'time', 'text', 'Form', 'Rss', 'paginator');
   var $components = array('Query', 'Captcha', 'Email');
 
-	var $paginate = array (
-		'fields' => array ('Comment.id', 'Comment.name', 'Comment.date', 'Media.id', 'Comment.text' ),
-		'limit' => 10,
-		'order' => array (
-			'Comment.date' => 'desc'
-		)
-	);
+  var $paginate = array (
+    'fields' => array ('Comment.id', 'Comment.name', 'Comment.date', 'Comment.text', 'Media.id', 'Media.name' ),
+    'limit' => 10,
+    'order' => array (
+      'Comment.date' => 'desc'
+    )
+  );
 
   function beforeFilter() {
     parent::beforeFilter();
@@ -42,11 +42,11 @@ class CommentsController extends AppController
     $this->Query->parseArgs();
   }
 
-	function index() {
-		$acl = "1 = 1".$this->Media->buildWhereAcl($this->getUser());
-		$data = $this->paginate ('Comment', $acl);
-		$this->set('comments', $data);
-	}
+  function index() {
+    $acl = "1 = 1".$this->Media->buildWhereAcl($this->getUser());
+    $data = $this->paginate ('Comment', $acl);
+    $this->set('comments', $data);
+  }
 
   function view($id = null) {
     if (!$id) {
@@ -147,9 +147,9 @@ class CommentsController extends AppController
       $user['User']['lastname'],
       $user['User']['email']);
 
-    $this->Email->subject = 'New Comment of Media '.$comment['Media']['name'];
-    $this->Email->replyTo = 'noreply@phtagr.org';
-    $this->Email->from = 'phTagr <noreply@phtagr.org>';
+    $this->Email->subject = '[phtagr] Comment: '.$comment['Media']['name'];
+    $this->Email->replyTo = $comment['Comment']['name'].' <'.$comment['Comment']['email'].'>';
+    $this->Email->from = $comment['Comment']['name']." <noreply@phtagr.org>";
 
     $this->Email->template = 'comment';
     $this->set('user', $user);
@@ -203,9 +203,9 @@ class CommentsController extends AppController
     $this->Email->to = $to;
     $this->Email->bcc = $emails;
 
-    $this->Email->subject = 'Comment notification of Media '.$media['Media']['name'];
+    $this->Email->subject = '[phtagr] Comment notification: '.$media['Media']['name'];
     $this->Email->replyTo = 'noreply@phtagr.org';
-    $this->Email->from = 'phTagr <noreply@phtagr.org>';
+    $this->Email->from = $comment['Comment']['name'].' <noreply@phtagr.org>';
 
     $this->Email->template = 'commentnotify';
     $this->set('data', $comment);
