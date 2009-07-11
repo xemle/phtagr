@@ -23,8 +23,6 @@
 
 class ImageFilterComponent extends BaseFilterComponent {
 
-  var $components = array('Logger');
-
   var $locationMap = array(
                         LOCATION_CITY => 'City', 
                         LOCATION_SUBLOCATION => 'Sub-location',
@@ -76,8 +74,8 @@ class ImageFilterComponent extends BaseFilterComponent {
     if ($options['noSave']) {
       return 1;
     } elseif (!$this->Media->save($media)) {
-      $this->Logger->err("Could not save Media");
-      $this->Logger->trace($media);
+      Logger::err("Could not save Media");
+      Logger::trace($media);
       return -1;
     } elseif ($isNew) {
       $mediaId = $this->Media->getLastInsertID();
@@ -85,10 +83,10 @@ class ImageFilterComponent extends BaseFilterComponent {
         $this->Media->delete($mediaId);
         return -1;
       } else {
-        $this->Logger->info("Created new Media (id $mediaId)");
+        Logger::info("Created new Media (id $mediaId)");
       }
     } else {
-      $this->Logger->verbose("Updated media (id ".$media['Media']['id'].")");
+      Logger::verbose("Updated media (id ".$media['Media']['id'].")");
     }
     $this->MyFile->updateReaded($file);
     $this->MyFile->setFlag($file, FILE_FLAG_DEPENDENT);
@@ -99,11 +97,11 @@ class ImageFilterComponent extends BaseFilterComponent {
     @param filename Filename to file to clean */
   function clearMetaData($filename) {
     if (!file_exists($filename)) {
-      $this->Logger->err("Filename '$filename' does not exists");
+      Logger::err("Filename '$filename' does not exists");
       return;
     }
     if (!is_writeable($filename)) {
-      $this->Logger->err("Filename '$filename' is not writeable");
+      Logger::err("Filename '$filename' is not writeable");
       return;
     }
 
@@ -114,9 +112,9 @@ class ImageFilterComponent extends BaseFilterComponent {
     $t1 = getMicrotime();
     exec($command, &$output, &$result);
     $t2 = getMicrotime();
-    $this->Logger->trace("$bin call needed ".round($t2-$t1, 4)."ms");
+    Logger::trace("$bin call needed ".round($t2-$t1, 4)."ms");
 
-    $this->Logger->debug("Cleaned meta data of '$filename'");
+    Logger::debug("Cleaned meta data of '$filename'");
   }
 
   /** Read the meta data viea exiftool from a file
@@ -131,13 +129,13 @@ class ImageFilterComponent extends BaseFilterComponent {
     $t1 = getMicrotime();
     exec($command, &$output, &$result);
     $t2 = getMicrotime();
-    $this->Logger->trace("$bin call needed ".round($t2-$t1, 4)."ms");
+    Logger::trace("$bin call needed ".round($t2-$t1, 4)."ms");
     
     if ($result == 127) {
-      $this->Logger->err("$bin could not be found!");
+      Logger::err("$bin could not be found!");
       return false;
     } elseif ($result != 0) {
-      $this->Logger->err("$bin returned with error: $result (command: \"$command\")");
+      Logger::err("$bin returned with error: $result (command: \"$command\")");
       return false;
     }
 
@@ -236,24 +234,24 @@ class ImageFilterComponent extends BaseFilterComponent {
    * @return False on error */
   function write($file, $media = null, $options = array()) {
     if (!$file || !$media) {
-      $this->Logger->err("File or media is empty");
+      Logger::err("File or media is empty");
       return false;
     }
     $filename = $this->MyFile->getFilename($file);
     if (!file_exists($filename) || !is_writeable(dirname($filename)) || !is_writeable($filename)) {
-      $this->Logger->warn("File: $filename does not exists nor is readable");
+      Logger::warn("File: $filename does not exists nor is readable");
       return false;
     }
 
     $data = $this->_readMetaData($filename);
     if ($data === false) {
-      $this->Logger->warn("File has no metadata!");
+      Logger::warn("File has no metadata!");
       return false;
     }
 
     $args = $this->_createExportArguments($data, $media);
     if ($args == '') {
-      $this->Logger->debug("File '$filename' has no metadata changes");
+      Logger::debug("File '$filename' has no metadata changes");
       if (!$this->Media->deleteFlag($media, MEDIA_FLAG_DIRTY)) {
         $this->controller->warn("Could not update image data of media {$media['Media']['id']}");
       }
@@ -263,23 +261,23 @@ class ImageFilterComponent extends BaseFilterComponent {
     $tmp = $this->_getTempFilename($filename);
     $bin = $this->controller->getOption('bin.exiftool', 'exiftool');
     $command = "$bin $args -o ".escapeshellarg($tmp).' '.escapeshellarg($filename);
-    $this->Logger->trace("Execute command: \"$command\"");
+    Logger::trace("Execute command: \"$command\"");
     $output = array();
     $result = -1;
     $t1 = getMicrotime();
     exec($command, &$output, &$result);
     $t2 = getMicrotime();
-    $this->Logger->trace("$bin call needed ".round($t2-$t1, 4)."ms");
+    Logger::trace("$bin call needed ".round($t2-$t1, 4)."ms");
 
     if ($result != 0 || !file_exists($tmp)) {
-      $this->Logger->err("$bin returns with error: $result (command: $command)");
+      Logger::err("$bin returns with error: $result (command: $command)");
       if (file_exists($tmp))
         unlink($tmp);
       return false;
     } else {
       $tmp2 = $this->_getTempFilename($filename);
       if (!rename($filename, $tmp2)) {
-        $this->Logger->err("Could not rename original file '$filename' to temporary file '$tmp2'");
+        Logger::err("Could not rename original file '$filename' to temporary file '$tmp2'");
         unlink($tmp);
         return false;
       }
@@ -331,7 +329,7 @@ class ImageFilterComponent extends BaseFilterComponent {
     if ($timeDb && (!$timeFile || ($timeFile != $timeDb))) {
       $arg .= ' -DateCreated='.escapeshellarg(date("Y:m:d", $timeDb));
       $arg .= ' -TimeCreated='.escapeshellarg(date("H:i:sO", $timeDb));
-      //$this->Logger->trace("Set new date via IPTC: $arg");
+      //Logger::trace("Set new date via IPTC: $arg");
     }
     return $arg;
   }
@@ -355,7 +353,7 @@ class ImageFilterComponent extends BaseFilterComponent {
       $longitude = null;
     }
     $latitudeDb = $media['Media']['latitude'];
-    $this->Logger->debug("$latitude || $latitude != $latitudeDb");
+    Logger::debug("$latitude || $latitude != $latitudeDb");
     if ($latitude != $latitudeDb) {
       if (!$latitudeDb) {
         $latitudeRef = '';

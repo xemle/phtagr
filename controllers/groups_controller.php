@@ -64,7 +64,7 @@ class GroupsController extends AppController {
         $groupId = $this->Group->getLastInsertID();
         $group = $this->Group->findById($groupId);
         $user = $this->getUser();
-        $this->Logger->info("User '{$user['User']['username']}' ({$user['User']['id']}) created a group '{$group['Group']['name']}' ({$group['Group']['id']})");
+        Logger::info("User '{$user['User']['username']}' ({$user['User']['id']}) created a group '{$group['Group']['name']}' ({$group['Group']['id']})");
         $this->Session->setFlash("Add successfully group '{$this->data['Group']['name']}'");
         $this->redirect("edit/$groupId");
       } else {
@@ -105,7 +105,7 @@ class GroupsController extends AppController {
     if ($group) {
       $this->Group->delete($groupId);
       $user = $this->getUser();
-      $this->Logger->info("User '{$user['User']['username']}' ({$user['User']['id']}) deleted group '{$group['Group']['name']}' ({$group['Group']['id']})");
+      Logger::info("User '{$user['User']['username']}' ({$user['User']['id']}) deleted group '{$group['Group']['name']}' ({$group['Group']['id']})");
       $this->Session->setFlash("Successfully deleted group '{$group['Group']['name']}'");
     } else {
       $this->Session->setFlash("Could not find group for deletion.");
@@ -131,7 +131,7 @@ class GroupsController extends AppController {
         $list[] = $user['User']['id'];
         $group['Member']['Member'] = array_unique($list);
         if ($this->Group->save($group)) {
-          $this->Logger->info("Add user '{$user['User']['username']}' ({$user['User']['id']}) to group '{$group['Group']['name']}' ({$group['Group']['id']})");
+          Logger::info("Add user '{$user['User']['username']}' ({$user['User']['id']}) to group '{$group['Group']['name']}' ({$group['Group']['id']})");
           $this->Session->setFlash("Add user '{$user['User']['username']}' to group '{$group['Group']['name']}'");
         } else {
           $this->Session->setFlash("Could not add user '{$this->data['User']['username']}' to group '{$this->data['Group']['name']}'!");
@@ -159,7 +159,7 @@ class GroupsController extends AppController {
           $this->Session->setFlash("Could not save group");
         } else {
           $user = $this->getUser();
-          $this->Logger->info("Delete user '{$user['User']['username']}' ({$user['User']['id']}) from group '{$group['Group']['name']}' ({$group['Group']['id']})");
+          Logger::info("Delete user '{$user['User']['username']}' ({$user['User']['id']}) from group '{$group['Group']['name']}' ({$group['Group']['id']})");
           $this->Session->setFlash("Member was successfully deleted from group '{$group['Group']['name']}'");
         }
       }

@@ -80,11 +80,11 @@ class User extends AppModel
             $size = $size * 1024 * 1024 * 1024;
             break;
           default:
-            $this->Logger->err("Unknown unit {$matches[3]}");
+            Logger::err("Unknown unit {$matches[3]}");
         }
       }
       if ($size < 0) {
-        $this->Logger->err("Size is negtive: $size");
+        Logger::err("Size is negtive: $size");
         return 0;
       }
       return $size;
@@ -129,11 +129,11 @@ class User extends AppModel
   
     $id = $this->id;
     $this->Media =& new Media();
-    $this->Logger->info("Delete all image database entries of user $id");
+    Logger::info("Delete all image database entries of user $id");
     $this->Media->deleteFromUser($id);
 
     $dir = USER_DIR.$id;
-    $this->Logger->info("Delete user directory of user $id: $dir");
+    Logger::info("Delete user directory of user $id: $dir");
     $folder = new Folder();
     $folder->delete($dir);
 
@@ -187,14 +187,14 @@ class User extends AppModel
 
   function getRootDir($data) {
     if (!isset($data['User']['id'])) {
-      $this->Logger->err("Data does not contain user's id");
+      Logger::err("Data does not contain user's id");
       return false;
     }
 
     $rootDir = USER_DIR.$data['User']['id'].DS.'files'.DS;
     $folder = new Folder();
     if (!$folder->create($rootDir)) {
-      $this->Logger->err("Could not create users root directory '$fileDir'");
+      Logger::err("Could not create users root directory '$fileDir'");
       return false;
     }
     return $rootDir;

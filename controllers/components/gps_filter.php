@@ -24,7 +24,7 @@
 class GpsFilterComponent extends BaseFilterComponent {
 
   var $controller = null;
-  var $components = array('Logger', 'Nmea');
+  var $components = array('Nmea');
 
   function startup(&$controller) {
     $this->controller =& $controller;
@@ -52,15 +52,15 @@ class GpsFilterComponent extends BaseFilterComponent {
           'overwrite' => false,
           'minInterval' => 600),
           $options);
-    //$this->Logger->trace($options);
+    //Logger::trace($options);
 
     $filename = $this->MyFile->getFilename($file);
     if (!$this->Nmea->readFile($filename)) {
-      $this->Logger->warn('Could not read file $filename');
+      Logger::warn('Could not read file $filename');
       return false;
     }
     if ($this->Nmea->getPointCount() == 0) {
-      $this->Logger->warn("NMEA file has no points");
+      Logger::warn("NMEA file has no points");
       return false;
     }
     $this->Enma->minInterval = $options['minInterval'];
@@ -68,7 +68,7 @@ class GpsFilterComponent extends BaseFilterComponent {
     // fetch [first, last] positions
     $userId = $this->controller->getUserId();
     list($start, $end) = $this->Nmea->getTimeInterval();
-    //$this->Logger->trace("start: ".date("'Y-m-d H:i:s'", $start)." end: ".date("'Y-m-d H:i:s'", $end));
+    //Logger::trace("start: ".date("'Y-m-d H:i:s'", $start)." end: ".date("'Y-m-d H:i:s'", $end));
 
     $conditions = array(
       'Media.user_id' => $userId,
@@ -78,11 +78,11 @@ class GpsFilterComponent extends BaseFilterComponent {
       $conditions['Media.latitude'] = null;
       $conditions['Media.longitude'] = null;
     }
-    $this->Logger->trace($conditions);
+    Logger::trace($conditions);
     $this->Media->unbindAll();
     $mediaSet = $this->Media->findAll($conditions);
     if (!count($mediaSet)) {
-      $this->Logger->info("No images found for GPS interval");
+      Logger::info("No images found for GPS interval");
       return false;
     }
     // fetch images of same user, no gps, range
@@ -92,7 +92,7 @@ class GpsFilterComponent extends BaseFilterComponent {
       $position = $this->Nmea->getPosition($date);
       // write position
       if (!$position) {
-        $this->Logger->debug("No GPS position found for image {$media['Media']['id']}");
+        Logger::debug("No GPS position found for image {$media['Media']['id']}");
         continue;
       }
 
@@ -100,9 +100,9 @@ class GpsFilterComponent extends BaseFilterComponent {
       $media['Media']['longitude'] = $position['longitude'];
       $media['Media']['flag'] |= MEDIA_FLAG_DIRTY;
       if ($this->Media->save($media['Media'], true, array('latitude', 'longitude', 'flag'))) {
-        $this->Logger->debug("Update GPS position of image {$media['Media']['id']} to {$position['latitude']}/{$position['longitude']}");
+        Logger::debug("Update GPS position of image {$media['Media']['id']} to {$position['latitude']}/{$position['longitude']}");
       } else {
-        $this->Logger->warn("Could not update GPS position of image {$media['Media']['id']}");
+        Logger::warn("Could not update GPS position of image {$media['Media']['id']}");
       }
     }
     return 1;

@@ -23,14 +23,6 @@
 
 class AppModel extends Model
 {
-  var $Logger = null;
-
-  function __construct($id = false, $table = null, $ds = null) {
-    parent::__construct($id, $table, $ds);
-    App::import('Component', 'Logger');
-    $this->Logger = LoggerComponent::getInstance();
-  }
-
   /** Create an id list of specifc items
    @param items Array of items with partial row information like the following. 
 
@@ -69,12 +61,12 @@ class AppModel extends Model
       } else {
         if ($create==true) {
           // no item was found, but create a new one
-          //$this->Logger->trace('Create item of '.$this->name);
+          //Logger::trace('Create item of '.$this->name);
           $new = $this->create($item);
           if ($new && $this->save($new)) {
             $ids[] = $this->getInsertID();
           } else {
-            $this->Logger->err($this->name.": Could not create new item ".$item['name']);
+            Logger::err($this->name.": Could not create new item ".$item['name']);
           }
         } else {
           // add dummy empty entry

@@ -21,18 +21,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 App::import('model', array('Media', 'MyFile'));
-App::import('component', array('Logger', 'UpgradeSchema'));
+App::import('component', array('UpgradeSchema'));
+App::import('File', 'Search', array('file' => APP.'logger.php'));
 
 class UpgradeMediaSchemaShell extends Shell {
 
   var $uses = array('Media', 'MyFile');
   var $db = null;
-  var $Logger = null;
 
   function initialize() {
-    $this->Logger =& new LoggerComponent();
     $this->UpgradeSchema =& new UpgradeSchemaComponent();
-    $this->UpgradeSchema->Logger =& $this->Logger;
 
     $this->out("Schema Upgrade Shell Script for Media Schema");
     $this->hr();
@@ -46,7 +44,7 @@ class UpgradeMediaSchemaShell extends Shell {
   }
 
   function _execute($sql) {
-    $this->Logger->debug($sql);
+    Logger::debug($sql);
     $this->UpgradeSchema->db->execute($sql);
   }
 
@@ -121,9 +119,9 @@ class UpgradeMediaSchemaShell extends Shell {
     $thumb['File']['media_id'] = $media['Media']['id'];
     $thumb['File']['readed'] = date("Y-m-d H:i:s", filemtime($filename));
     if (!$this->MyFile->save($thumb)) {
-      $this->Logger->warn("Could not add thumbnail to database");
+      Logger::warn("Could not add thumbnail to database");
     } else {
-      $this->Logger->verbose("Add thumb file of media {$media['Media']['id']}");
+      Logger::verbose("Add thumb file of media {$media['Media']['id']}");
     }
   }
 
@@ -137,8 +135,8 @@ class UpgradeMediaSchemaShell extends Shell {
     $file['File']['media_id'] = $media['Media']['id'];
     $file['File']['readed'] = date("Y-m-d H:i:s", filemtime($filename));
     if (!$this->MyFile->save($file)) {
-      $this->Logger->debug("Cannot migrate data from media {$media['Media']['id']}");
-      $this->Logger->warn($file);
+      Logger::debug("Cannot migrate data from media {$media['Media']['id']}");
+      Logger::warn($file);
       return false;
     } 
 
@@ -163,14 +161,14 @@ class UpgradeMediaSchemaShell extends Shell {
           $this->_addVideoThumb($media, $file);
           break;
         default:
-          $this->Logger->warn("Unhandled file type $type");
+          Logger::warn("Unhandled file type $type");
       }
       // Delete old flag IMAGE_FLAG_ACTIVE
       $this->Media->deleteFlag($media, 1);
     } else {
       // Inactive media will be deleted, data is stored in files
       $this->Media->delete($media['Media']['id']);
-      $this->Logger->debug("Deleted inactive media {$media['Media']['id']}");
+      Logger::debug("Deleted inactive media {$media['Media']['id']}");
     }
     return true;
   }
@@ -186,7 +184,7 @@ class UpgradeMediaSchemaShell extends Shell {
     $this->Media->unbindAll();
     $media = $this->Media->findAll("1 = 1", array('Media.id', 'Media.path', 'Media.file', 'Media.user_id', 'Media.flag'));
     $this->out("Migrate ".count($media)." media...");
-    $this->Logger->verbose("Found ".count($media)." media to migrade ...");
+    Logger::verbose("Found ".count($media)." media to migrade ...");
 
     $errors = 0;
     foreach ($media as $m) {
@@ -196,10 +194,10 @@ class UpgradeMediaSchemaShell extends Shell {
     }
     if ($errors) {
       $this->out("Upgrade ".count($media)." media with $errors errors");
-      $this->Logger->err("Upgrade ".count($media)." media with $errors errors");
+      Logger::err("Upgrade ".count($media)." media with $errors errors");
       return true;
     } else {
-      $this->Logger->info("Upgrade ".count($media)." media successfully");
+      Logger::info("Upgrade ".count($media)." media successfully");
       return false;
     }
   }

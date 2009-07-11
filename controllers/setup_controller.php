@@ -64,7 +64,7 @@ class SetupController extends AppController {
 
   function __loadModel($models) {
     if (!$this->UpgradeSchema->isConnected()) {
-      $this->Logger->warn("Not connected");
+      Logger::warn("Not connected");
       return false;
     }
 
@@ -78,7 +78,7 @@ class SetupController extends AppController {
       }
 
       if (!App::import('model', $model)) {
-        $this->Logger->err("Could not load model '$model'");
+        Logger::err("Could not load model '$model'");
         $success = false;
         continue;
       }
@@ -88,9 +88,9 @@ class SetupController extends AppController {
   }
 
   function __hasSalt() {
-    $this->Logger->debug("Check for settings in core");
+    Logger::debug("Check for settings in core");
     if (Configure::read('Security.salt') == 'DYhG93b0qyJfIxfs2guVoUubWwvniR2G0FgaC9mi') {
-      $this->Logger->warn("Detecting unsecure security salt");
+      Logger::warn("Detecting unsecure security salt");
       return false;
     }
 
@@ -103,15 +103,15 @@ class SetupController extends AppController {
 
   function __checkSession() {
     if (!$this->__hasSession()) {
-      $this->Logger->warn('Setup is disabled. Setup session variable is not set.');
-      $this->Logger->bt();
+      Logger::warn('Setup is disabled. Setup session variable is not set.');
+      Logger::bt();
       $this->redirect('/');
     }
   }
 
   /** Checks for required writable paths */
   function __hasPaths() {
-    $this->Logger->debug("Check for writable paths");
+    Logger::debug("Check for writable paths");
     foreach ($this->paths as $path) {
       if (!is_dir($path) || !is_writeable($path))
         return false;
@@ -124,7 +124,7 @@ class SetupController extends AppController {
     if (!$this->__hasPaths())
       return false;
 
-    $this->Logger->debug("Check for database configuration");
+    Logger::debug("Check for database configuration");
     return is_readable($this->dbConfig);
   }
 
@@ -133,7 +133,7 @@ class SetupController extends AppController {
     if (!$this->__hasConfig()) {
       return false;
     }
-    $this->Logger->debug("Check for database connection");
+    Logger::debug("Check for database connection");
 
     if (!$this->UpgradeSchema->initDataSource()) {
       return false;
@@ -150,9 +150,9 @@ class SetupController extends AppController {
       return false;
     }
 
-    $this->Logger->debug("Check for initial required tables");
+    Logger::debug("Check for initial required tables");
     if (!$this->UpgradeSchema->hasTables($tables)) {
-      $this->Logger->debug("require tables");
+      Logger::debug("require tables");
       return false;
     } else {
       return true;
@@ -165,7 +165,7 @@ class SetupController extends AppController {
       return false;
     }
 
-    $this->Logger->debug("Check for admin account");
+    Logger::debug("Check for admin account");
     if (!$this->__loadModel('User')) {
       return false;
     }
@@ -191,7 +191,7 @@ class SetupController extends AppController {
     } else {
       foreach ($commands as $command) {
         if (!$this->Option->hasAny(array('user_id' => 0, 'name' => 'bin.'.$command))) {
-          $this->Logger->trace("Command '$command' is missing");
+          Logger::trace("Command '$command' is missing");
           return false;
         }
       }
@@ -203,10 +203,10 @@ class SetupController extends AppController {
   function index() {
     if ($this->__hasSysOp()) {
       if ($this->hasRole(ROLE_SYSOP)) {
-        $this->Logger->verbose("Redirect to upgrade");
+        Logger::verbose("Redirect to upgrade");
         $this->redirect('/admin/setup/upgrade');
       } else {
-        $this->Logger->warn("Setup is disabled. phTagr is already configured!");
+        Logger::warn("Setup is disabled. phTagr is already configured!");
         $this->Session->write('loginRedirect', '/setup');
         $this->redirect('/users/login');
       }
@@ -215,7 +215,7 @@ class SetupController extends AppController {
     }
 
     $this->Session->write('setup', true);
-    $this->Logger->info("Start Setup of phTagr!");
+    Logger::info("Start Setup of phTagr!");
   }
 
   /** Generate a random salt string 
@@ -251,14 +251,14 @@ class SetupController extends AppController {
     $newContent = preg_replace("/$oldSalt/", $salt, $content);
     if (!$file->write($newContent)) {
       $this->Session->setFlash("Could not write configureation to '$this->core'");
-      $this->Logger->err("Could not write configuration to '$this->core'");
+      Logger::err("Could not write configuration to '$this->core'");
     } else {
       Configure::write('Security.salt', $salt);
       $this->Session->destroy();
       $this->Session->renew();
 
       $this->Session->setFlash("Update core settings");
-      $this->Logger->info("Set new security salt to '$this->core'");
+      Logger::info("Set new security salt to '$this->core'");
       $this->redirect('index');
     }
   }
@@ -304,7 +304,7 @@ class SetupController extends AppController {
         $readonly[] = $path;
     }
 
-    $this->Logger->info("Missing directories: ".implode(', ', $missing).", readonly Directories: ".implode(', ', $readonly));
+    Logger::info("Missing directories: ".implode(', ', $missing).", readonly Directories: ".implode(', ', $readonly));
     $this->set('missing', $missing);
     $this->set('readonly', $readonly);
   }
@@ -348,11 +348,11 @@ class DATABASE_CONFIG
 ?>";
       $file =& new File($this->dbConfig, true, 644);
       if ($file->write($output)) {
-        $this->Logger->info("Database configuration file '{$this->dbConfig}' was written successfully");
+        Logger::info("Database configuration file '{$this->dbConfig}' was written successfully");
         $file->close();
         $this->redirect('database');
       } else {
-        $this->Logger->err("Could not write database configuration file '{$this->dbConfig}'");
+        Logger::err("Could not write database configuration file '{$this->dbConfig}'");
         $this->Session->setFlash("Could not write database configuration file");
       }
       $file->close();
@@ -361,7 +361,7 @@ class DATABASE_CONFIG
       $this->data['db']['database'] = 'phtagr';
       $this->data['db']['login'] = 'phtagr';
     }
-    $this->Logger->info("Request database configuration");
+    Logger::info("Request database configuration");
   }
 
   function configro() {
@@ -375,7 +375,7 @@ class DATABASE_CONFIG
 
     // nothing to do
     $this->set('dbConfig', $this->dbConfig);
-    $this->Logger->info("Request database configuration (readonly)");
+    Logger::info("Request database configuration (readonly)");
   }
 
   function database() {
@@ -396,28 +396,28 @@ class DATABASE_CONFIG
     $this->__checkSession();
 
     $Schema = $this->UpgradeSchema->loadSchema();
-    $this->Logger->info("Check current database schema");
+    Logger::info("Check current database schema");
     $errors = $this->UpgradeSchema->upgrade();
 
     $check = false;
     if ($errors['tables']) {
       $check = true;
-      $this->Logger->err("Not all tables could be created: ".array_keys($errors['tables']));
+      Logger::err("Not all tables could be created: ".array_keys($errors['tables']));
     } else {
-      $this->Logger->info("All tables exists");
+      Logger::info("All tables exists");
     }
     if ($errors['columns']) {
       $check = true;
-      $this->Logger->err("Not all columngs could be altered: ".array_keys($errors['columns']));
+      Logger::err("Not all columngs could be altered: ".array_keys($errors['columns']));
     } else {
-      $this->Logger->info("All tables are correct");
+      Logger::info("All tables are correct");
     }
 
     if (!$check) {
       $this->Session->setFlash("All required tables are created");
       $this->redirect('user');
     } else {
-      $this->Logger->trace($errors);
+      Logger::trace($errors);
       $this->Session->setFlash("Could not create tables correctly. Please see logfile for details");
     }
   }
@@ -444,17 +444,17 @@ class DATABASE_CONFIG
         $this->Session->write('User.id', $userId);
         $this->Session->write('User.role', ROLE_ADMIN);
         $this->Session->write('User.username', $this->data['User']['username']);
-        $this->Logger->info("Admin account '{$this->data['User']['username']}' was created");
+        Logger::info("Admin account '{$this->data['User']['username']}' was created");
         $this->Session->setFlash("Admin account was successfully created");
         $this->redirect('system');
       } else {
-        $this->Logger->err("Admin account '{$this->data['User']['username']}' could not be created");
+        Logger::err("Admin account '{$this->data['User']['username']}' could not be created");
         $this->Session->setFlash("Could not create admin account. Please retry");
       }
     } elseif (!isset($this->data['User']['username'])) {
       $this->data['User']['username'] = 'admin';
     }
-    $this->Logger->info("Request account data for the admin");
+    Logger::info("Request account data for the admin");
   }
   
   function __findCommand($command) {
@@ -504,7 +504,7 @@ class DATABASE_CONFIG
       $this->redirect('/');
     }
 
-    $this->Logger->info("Check for required external programs");
+    Logger::info("Check for required external programs");
     $missing = array();
     if (!empty($this->data)) {
       foreach ($this->commands as $command) {
@@ -512,10 +512,10 @@ class DATABASE_CONFIG
         $file = new File($bin);
         if ($file->executable()) {
           $this->Option->setValue('bin.'.$command, $bin, 0);
-          $this->Logger->debug("Write 'bin.$command'='$bin'");
+          Logger::debug("Write 'bin.$command'='$bin'");
         } else {
           $missing[] = $command;    
-          $this->Logger->err("Command for '$command': '$bin' is missing or not executeable!");
+          Logger::err("Command for '$command': '$bin' is missing or not executeable!");
         }
       }
       if (!count($missing)) {
@@ -545,7 +545,7 @@ class DATABASE_CONFIG
 
     $this->__checkSession();
 
-    $this->Logger->info("Setup complete");
+    Logger::info("Setup complete");
 
     // cleanup
     $this->Session->delete('setup');
@@ -557,7 +557,7 @@ class DATABASE_CONFIG
     $modelCacheFiles = $folder->find('cake_model_.*');
     foreach ($modelCacheFiles as $file) {
       if (!@unlink($folder->addPathElement($modelCacheDir, $file))) {
-        $this->Logger->err("Could not delete model cache file '$file' in '$modelCacheDir'");
+        Logger::err("Could not delete model cache file '$file' in '$modelCacheDir'");
       }
     }
   }
@@ -568,7 +568,7 @@ class DATABASE_CONFIG
     $this->requireRole(ROLE_SYSOP);
 
     if (!$this->UpgradeSchema->loadSchema()) {
-      $this->Logger->err("Could not load schema");
+      Logger::err("Could not load schema");
     }
     if (!$this->UpgradeSchema->requireUpgrade()) {
       $this->redirect('/admin/setup/uptodate');

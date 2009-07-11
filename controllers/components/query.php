@@ -23,7 +23,7 @@
 
 class QueryComponent extends Object
 {
-  var $components = array('Session', 'Logger');
+  var $components = array('Session');
   var $_params = array('page' => 1, 'show' => 12, 'pos' => 1);
   var $_tags = array();
   var $_categories = array();
@@ -147,7 +147,7 @@ class QueryComponent extends Object
         case 'east': $this->setParam('east', floatval($value)); break;
 
         default:
-          //$this->Logger->err("Unknown argument: $name:$value");
+          //Logger::err("Unknown argument: $name:$value");
       }
     }
   }
@@ -1152,7 +1152,7 @@ class QueryComponent extends Object
       $sql = $this->getQuery(2);
       $results = $this->controller->Media->query($sql);
       if (!isset($results[$index])) {
-        $this->Logger->err("Unexpected results of query: $sql");
+        Logger::err("Unexpected results of query: $sql");
         return false;
       } elseif ($results[$index]['Media']['id'] != $tmpMedia) {
         // The media was not found via search. Query it directly
@@ -1160,7 +1160,7 @@ class QueryComponent extends Object
         $sql = $this->getQuery(2);
         $results = $this->controller->Media->query($sql);
         if (!$results) {
-          $this->Logger->warn("Media with id $tmpMedia could not be found");
+          Logger::warn("Media with id $tmpMedia could not be found");
           return false;
         } else {
           $this->controller->Media->bindModel(array('hasMany' => array('Comment' => array('dependent' => true))));

@@ -53,7 +53,7 @@ class MediaController extends AppController
   
   function _getCacheDir($data) {
     if (!isset($data['Media']['id'])) {
-      $this->Logger->debug("Data does not contain id of the image");
+      Logger::debug("Data does not contain id of the image");
       return false;
     }
 
@@ -134,7 +134,7 @@ class MediaController extends AppController
     @return Media data array. If no image is found or access is denied it responses 404 */
   function _getMedia($id, $outputType) {
     if (!$this->Media->hasAny("Media.id = $id")) {
-      $this->Logger->debug("No Media with id $id exists");
+      Logger::debug("No Media with id $id exists");
       $this->redirect(null, 404);
     }
 
@@ -151,7 +151,7 @@ class MediaController extends AppController
     $conditions = "Media.id = $id".$this->Media->buildWhereAcl($user, 0, $flag);
     $media = $this->Media->find($conditions);
     if (!$media) {
-      $this->Logger->debug("Deny access to image $id");
+      Logger::debug("Deny access to image $id");
       $this->redirect(null, 403);
     }
     
@@ -169,7 +169,7 @@ class MediaController extends AppController
       $sourceFilename = $this->Media->File->getFilename($media['File'][0]);
     }
     if(!is_readable($sourceFilename)) {
-      $this->Logger->debug("Media file (id {$media['Media']['id']}) is not readable: $sourceFilename");
+      Logger::debug("Media file (id {$media['Media']['id']}) is not readable: $sourceFilename");
       $this->redirect(null, 500); 
     }
     return $sourceFilename;
@@ -179,7 +179,7 @@ class MediaController extends AppController
   function _createPreview($id, $outputType) {
     $id = intval($id);
     if (!isset($this->_outputMap[$outputType])) {
-      $this->Logger->err("Unknown ouput type $outputType");
+      Logger::err("Unknown ouput type $outputType");
       die("Internal error");
     }
     
@@ -198,12 +198,12 @@ class MediaController extends AppController
         case 6: $options['rotation'] = 90; break;
         case 8: $options['rotation'] = 270; break;
         default: 
-          $this->Logger->warn("Unsupported rotation flag: ".$media['Media']['orientation']);
+          Logger::warn("Unsupported rotation flag: ".$media['Media']['orientation']);
           break;
       }
 
       if (!$this->ImageResizer->resize($src, $dst, $options)) {
-        $this->Logger->err("Could not create image preview");
+        Logger::err("Could not create image preview");
         $this->redirect(null, 500);
       }
     }
@@ -218,7 +218,7 @@ class MediaController extends AppController
   function _createFlashVideo($id, $outputType) {
     $id = intval($id);
     if (!isset($this->_outputMap[$outputType])) {
-      $this->Logger->err("Unknown ouput type $outputType");
+      Logger::err("Unknown ouput type $outputType");
       die("Internal error");
     }
 
@@ -226,7 +226,7 @@ class MediaController extends AppController
     $flashFilename = $this->FlashVideo->create($media, $this->_outputMap[$outputType]);
 
     if (!is_file($flashFilename)) { 
-      $this->Logger->err("Could not create preview file {$flashFilename}");
+      Logger::err("Could not create preview file {$flashFilename}");
       $this->redirect(null, 500);
     }
  
@@ -242,17 +242,17 @@ class MediaController extends AppController
   }
 
   function preview($id) {
-    $this->Logger->info("Request of image $id: preview");
+    Logger::info("Request of image $id: preview");
     $this->_createPreview($id, OUTPUT_TYPE_PREVIEW);
   }
 
   function high($id) {
-    $this->Logger->info("Request of image $id: high");
+    Logger::info("Request of image $id: high");
     $this->_createPreview($id, OUTPUT_TYPE_HIGH);
   }
 
   function video($id) {
-    $this->Logger->info("Request of image $id: video");
+    Logger::info("Request of image $id: video");
     $filename = $this->_createFlashVideo($id, OUTPUT_TYPE_VIDEO);
 
     $mediaOptions = $this->_getMediaOptions($filename);
@@ -266,14 +266,14 @@ class MediaController extends AppController
     $file = $this->MyFile->findById($id);
     $user = $this->getUser();
     if (!$this->MyFile->hasMedia($file)) {
-      $this->Logger->warn("User {$user['User']['id']} requested file {$file['File']['id']} without media");
+      Logger::warn("User {$user['User']['id']} requested file {$file['File']['id']} without media");
       $this->redirect(null, 404);
     }
     if (!$this->Media->checkAccess(&$file, $user, ACL_READ_ORIGINAL, ACL_READ_MASK)) {
-      $this->Logger->warn("User {$user['User']['id']} has no previleges to access image ".$file['Media']['id']);
+      Logger::warn("User {$user['User']['id']} has no previleges to access image ".$file['Media']['id']);
       $this->redirect(null, 404);
     }
-    $this->Logger->info("Request of media {$file['Media']['id']}: file $id '{$file['File']['file']}'");
+    Logger::info("Request of media {$file['Media']['id']}: file $id '{$file['File']['file']}'");
     $filename = $this->MyFile->getFilename($file);  
 
     $mediaOptions = $this->_getMediaOptions($filename);

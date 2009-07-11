@@ -24,7 +24,6 @@
 class FileManagerComponent extends Object {
 
   var $controller = null;
-  var $components = array('Logger');
   var $MyFile = null;
   var $User = null;
 
@@ -45,8 +44,8 @@ class FileManagerComponent extends Object {
       $userId = intval($user);
     } else {
       if (!isset($user['User']['id'])) {
-        $this->Logger->err('Unexcpected user data array. Use current user.');
-        $this->Logger->debug($user); 
+        Logger::err('Unexcpected user data array. Use current user.');
+        Logger::debug($user); 
         $userId = $this->controller->getUserId();
       } else {
         $userId = $user['User']['id'];
@@ -55,7 +54,7 @@ class FileManagerComponent extends Object {
 
     $id = $this->MyFile->fileExists($filename);
     if ($id) {
-      $this->Logger->verbose("File $filename already exists (id $id)");
+      Logger::verbose("File $filename already exists (id $id)");
       return $id;
     }
     $flag = 0;
@@ -66,10 +65,10 @@ class FileManagerComponent extends Object {
 
     if ($this->MyFile->save($file)) {
       $id = $this->MyFile->getLastInsertID();
-      $this->Logger->verbose("Insert file $filename to database (id $id)");
+      Logger::verbose("Insert file $filename to database (id $id)");
       return $id;
     } else {
-      $this->Logger->err("Could not save file $filename to database");
+      Logger::err("Could not save file $filename to database");
       return false;
     }
 
@@ -86,7 +85,7 @@ class FileManagerComponent extends Object {
       }
       $id = $this->MyFile->fileExists($file);
       if (!$id) {
-        $this->Logger->warn("Could not find file $file");
+        Logger::warn("Could not find file $file");
         return false;
       }
     } elseif (is_int($file)) {
@@ -94,7 +93,7 @@ class FileManagerComponent extends Object {
     } elseif (is_array($file) && !empty($file['File']['id'])) {
       $id = $file['File']['id'];
     } else {
-      $this->Logger->warn("Could not determine file from $file");
+      Logger::warn("Could not determine file from $file");
       return false;
     }
     return $this->MyFile->delete($id);
@@ -115,7 +114,7 @@ class FileManagerComponent extends Object {
     $userDir = USER_DIR.$user['User']['id'].DS.'files'.DS;
     $folder = new Folder();
     if (!$folder->create($userDir)) {
-      $this->Logger->err("Could not create users root directory '$userDir'");
+      Logger::err("Could not create users root directory '$userDir'");
       return false;
     }
     return $userDir;
@@ -174,9 +173,9 @@ class FileManagerComponent extends Object {
       // Create required directories
       foreach ($dirs as $dir) {
         $dstDir = str_replace($src, $dst, $dir);
-        $this->Logger->info($dstDir);
+        Logger::info($dstDir);
         if (!file_exists($dstDir) && !@mkdir($dstDir)) {
-          $this->Logger->err("Could not create directory '$dstDir'");
+          Logger::err("Could not create directory '$dstDir'");
           return false;
         }
         // COPY properties
@@ -192,13 +191,13 @@ class FileManagerComponent extends Object {
       $dstFile = str_replace($src, $dst, $file);
         
       if (!@copy($file, $dstFile)) {
-        $this->Logger->err("Could not copy file '$file' to '$dstFile'");
+        Logger::err("Could not copy file '$file' to '$dstFile'");
         //return "409 Conflict";
         return false;
       }
       $dstFileId = $this->add($dstFile, $user);
       if (!$dstFileId) {
-        $this->Logger->err("Could not insert copied file '$dstFile' to database (from '$file')");
+        Logger::err("Could not insert copied file '$dstFile' to database (from '$file')");
         unlink($dstFile);
         // return "409 Conflict";
         return false;
@@ -206,30 +205,30 @@ class FileManagerComponent extends Object {
         // Copy all properties
         $srcFile = $this->MyFile->findByFilename($file);
         if (!$srcFile) {
-          $this->Logger->warn("Could not found source '$file' in database");
+          Logger::warn("Could not found source '$file' in database");
         } else {
           if (!empty($srcFile['Property'])) {
             $this->controller->Property->copy($srcFile, $dstFileId);
-            $this->Logger->debug("Copy properties from '$file' to '$dstFile'");
+            Logger::debug("Copy properties from '$file' to '$dstFile'");
           }
         }
       }
-      $this->Logger->info("Insert copied file '$dstFile' to database (from '$file')");
+      Logger::info("Insert copied file '$dstFile' to database (from '$file')");
     }
     return true;
   }
 
   function move($src, $dst) {
     if (!file_exists($src)) {
-      $this->Logger->err("Invalid source: $src. File does not exists");
+      Logger::err("Invalid source: $src. File does not exists");
       return false;
     }
     if ((!file_exists($dst) && !is_writeable(dirname($dst))) ||
       (is_dir($dst) && !is_writeable($dst))) {
-      $this->Logger->err("Invalid destination $dst. Destination is not writeable");
+      Logger::err("Invalid destination $dst. Destination is not writeable");
       return false;
     } elseif (file_exists($dst) && !is_dir($dst)) {
-      $this->Logger->err("Invalid destination: $dst. Destination is a file");
+      Logger::err("Invalid destination: $dst. Destination is a file");
       return false;
     }
     return $this->MyFile->move($src, $dst);

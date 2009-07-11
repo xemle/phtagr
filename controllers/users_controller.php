@@ -61,12 +61,12 @@ class UsersController extends AppController
   function login() {
     $failedText = "Sorry. Username is unkonwn or password was wrong";
     if (!empty($this->data) && !$this->RequestHandler->isPost()) {
-      $this->Logger->warn("Authentication failed: Request was not HTTP POST");
+      Logger::warn("Authentication failed: Request was not HTTP POST");
       $this->Session->setFlash($failedText);
       $this->data = null;
     }
     if (empty($this->data['User']['username']) xor empty($this->data['User']['password'])) {
-      $this->Logger->warn("Authentication failed: Username or password are not set");
+      Logger::warn("Authentication failed: Username or password are not set");
       $this->Session->setFlash("Please enter username and password!");
       $this->data = null; 
     }
@@ -75,10 +75,10 @@ class UsersController extends AppController
       $user = $this->User->findByUsername($this->data['User']['username']);
 
       if (!$user) {
-        $this->Logger->warn("Authentication failed: Unknown username '{$this->data['User']['username']}'!");
+        Logger::warn("Authentication failed: Unknown username '{$this->data['User']['username']}'!");
         $this->Session->setFlash($failedText);
       } elseif ($this->User->isExpired($user)) {
-        $this->Logger->warn("User account of '{$user['User']['username']}' (id {$user['User']['id']}) is expired!");
+        Logger::warn("User account of '{$user['User']['username']}' (id {$user['User']['id']}) is expired!");
         $this->Session->setFlash("Sorry. Your account is expired!");
       } else {
         $user = $this->User->decrypt(&$user);
@@ -86,14 +86,14 @@ class UsersController extends AppController
           $this->Session->renew();
           $this->Session->activate();
           if (!$this->Session->check('User.id') || $this->Session->read('User.id') != $user['User']['id']) {
-            $this->Logger->info("Start new session for '{$user['User']['username']}' (id {$user['User']['id']})");
+            Logger::info("Start new session for '{$user['User']['username']}' (id {$user['User']['id']})");
             $this->User->writeSession($user, &$this->Session);
 
             // Save Cookie for 3 months
             $this->Cookie->write('user', $user['User']['id'], true, 92*24*3600);
-            $this->Logger->debug("Write authentication cookie for user '{$user['User']['username']}' (id {$user['User']['id']})");
+            Logger::debug("Write authentication cookie for user '{$user['User']['username']}' (id {$user['User']['id']})");
 
-            $this->Logger->info("Successfull login of user '{$user['User']['username']}' (id {$user['User']['id']})");
+            Logger::info("Successfull login of user '{$user['User']['username']}' (id {$user['User']['id']})");
             if ($this->Session->check('loginRedirect')) {
               $this->redirect($this->Session->read('loginRedirect'));
               $this->Session->delete('loginRedirect');
@@ -101,11 +101,11 @@ class UsersController extends AppController
               $this->redirect('/');
             }
           } else {
-            $this->Logger->err("Could not write session information of user '{$user['User']['username']}' ({$user['User']['id']})");
+            Logger::err("Could not write session information of user '{$user['User']['username']}' ({$user['User']['id']})");
             $this->Session->setFlash("Sorry. Internal login procedure failed!");
           }
         } else {
-          $this->Logger->warn("Authentication failed: Incorrect password of username '{$this->data['User']['username']}'!");
+          Logger::warn("Authentication failed: Incorrect password of username '{$this->data['User']['username']}'!");
           $this->Session->setFlash($failedText);
         }
       }
@@ -115,7 +115,7 @@ class UsersController extends AppController
 
   function logout() {
     $user = $this->getUser();
-    $this->Logger->info("Delete session for user id {$user['User']['id']}");
+    Logger::info("Delete session for user id {$user['User']['id']}");
 
     $this->Session->destroy();
 
@@ -140,7 +140,7 @@ class UsersController extends AppController
     if ($userId == $id && $userRole == ROLE_ADMIN && $this->data['User']['role'] < ROLE_ADMIN) {
       $count = $this->User->find('count', array('conditions' => array('User.role >= '.ROLE_ADMIN)));
       if ($count == 1) {
-        $this->Logger->warn('Can not degrade last admin');
+        Logger::warn('Can not degrade last admin');
         $this->Session->setFlash('Can not degrade last admin');
         return false;
       }
@@ -157,11 +157,11 @@ class UsersController extends AppController
 
       $this->User->set($this->data);
       if ($this->User->save(null, true, array('password', 'email', 'expires', 'quota', 'firstname', 'lastname', 'role'))) {
-        $this->Logger->debug("Data of user {$this->data['User']['id']} was updated");
+        Logger::debug("Data of user {$this->data['User']['id']} was updated");
         $this->Session->setFlash('User data was updated');
       } else {
-        $this->Logger->err("Could not save user data");
-        $this->Logger->debug($this->User->validationErrors);
+        Logger::err("Could not save user data");
+        Logger::debug($this->User->validationErrors);
         $this->Session->setFlash('Could not be updated');
       }
 
@@ -213,10 +213,10 @@ class UsersController extends AppController
         if (is_dir($fsroot) && is_readable($fsroot)) {
           $this->Option->addValue('path.fsroot[]', $fsroot, $id);
           $this->Session->setFlash("Directory '$fsroot' was added");
-          $this->Logger->info("Add external directory '$fsroot' to user $id");
+          Logger::info("Add external directory '$fsroot' to user $id");
         } else {
           $this->Session->setFlash("Directory '$fsroot' could not be read");
-          $this->Logger->err("Directory '$fsroot' could not be read");
+          Logger::err("Directory '$fsroot' could not be read");
         }
       }
     }
@@ -253,11 +253,11 @@ class UsersController extends AppController
       } else {
         $this->data['User']['role'] = ROLE_USER;
         if ($this->User->save($this->data, true, array('username', 'password', 'role', 'email'))) {
-          $this->Logger->info("New user {$this->data['User']['username']} was created");
+          Logger::info("New user {$this->data['User']['username']} was created");
           $this->Session->setFlash('User was created');
           $this->redirect('/admin/users/edit/'.$this->User->id);
         } else {
-          $this->Logger->warn("Creation of user {$this->data['User']['username']} failed");
+          Logger::warn("Creation of user {$this->data['User']['username']} failed");
           $this->Session->setFlash('Could not create user');
         }
       }
@@ -274,7 +274,7 @@ class UsersController extends AppController
       $this->redirect('/admin/users/');
     } else {
       $this->User->del($id);
-      $this->Logger->notice("All data of user '{$user['User']['username']}' ($id) deleted");
+      Logger::notice("All data of user '{$user['User']['username']}' ($id) deleted");
       $this->Session->setFlash("User '{$user['User']['username']}' was deleted");
       $this->redirect('/admin/users/');
     }
@@ -293,7 +293,7 @@ class UsersController extends AppController
     $fsroot = Folder::slashTerm($fsroot);
     
     $this->Option->delValue('path.fsroot[]', $fsroot, $id);
-    $this->Logger->info("Deleted external directory '$fsroot' from user $id");
+    Logger::info("Deleted external directory '$fsroot' from user $id");
     $this->Session->setFlash("Deleted external directory '$fsroot'");
     $this->redirect("path/$id");
   }
@@ -306,7 +306,7 @@ class UsersController extends AppController
           'email' => $this->data['User']['email']));
       if (empty($user)) {
         $this->Session->setFlash('No user with this email was found');
-        $this->Logger->warn(sprintf("No user '%s' with email %s was found",
+        Logger::warn(sprintf("No user '%s' with email %s was found",
             $this->data['User']['username'], $this->data['User']['email']));
       } else {
         $this->Email->to = sprintf("%s %s <%s>", 
@@ -323,13 +323,13 @@ class UsersController extends AppController
         $this->set('user', $user);
 
         if ($this->Email->send()) {
-          $this->Logger->info(sprintf("Sent password mail of '%s' (id %d) to %s",
+          Logger::info(sprintf("Sent password mail of '%s' (id %d) to %s",
             $user['User']['username'], 
             $user['User']['id'],
             $user['User']['email']));
           $this->Session->setFlash('Mail was sent');
         } else {
-          $this->Logger->err(sprintf("Could not sent password mail of '%s' (id %d) to '%s'",
+          Logger::err(sprintf("Could not sent password mail of '%s' (id %d) to '%s'",
             $user['User']['username'],
             $user['User']['id'],
             $user['User']['email']));

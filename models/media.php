@@ -58,8 +58,8 @@ class Media extends AppModel
       $data =& $this->data;
     }
     if (!isset($user) || !isset($user['User']['id'])) {
-      $this->Logger->err("User data is not correct! Media ACL will be wrong!");
-      $this->Logger->trace($user);
+      Logger::err("User data is not correct! Media ACL will be wrong!");
+      Logger::trace($user);
     }
     
     // Access control values
@@ -84,7 +84,7 @@ class Media extends AppModel
     }
 
     if (!isset($data['File'])) {
-      $this->Logger->err("Precondition failed");
+      Logger::err("Precondition failed");
       return false;
     }
 
@@ -111,7 +111,7 @@ class Media extends AppModel
     @return True is user is allowed, False otherwise */
   function checkAccess(&$data, &$user, $flag, $mask, &$groups=null) {
     if (!$data || !$user || !isset($data['Media']) || !isset($user['User'])) {
-      $this->Logger->err("precondition failed");
+      Logger::err("precondition failed");
       return false;
     }
 
@@ -150,7 +150,7 @@ class Media extends AppModel
 
     // at least dummy user
     $user = am(array('User' => array('id' => -1, 'role' => ROLE_NOBODY), 'Member' => array()), $user);
-    //$this->Logger->debug($user);
+    //Logger::debug($user);
 
     $oacl = $data['Media']['oacl'];
     $uacl = $data['Media']['uacl'];
@@ -190,7 +190,7 @@ class Media extends AppModel
     @param mask Bit mask of flag 
     @param level Highes ACL level which should be increased */
   function _increaseAcl(&$data, $flag, $mask, $level) {
-    //$this->Logger->debug("Increase: {$data['Media']['gacl']},{$data['Media']['uacl']},{$data['Media']['oacl']}: $flag/$mask ($level)");
+    //Logger::debug("Increase: {$data['Media']['gacl']},{$data['Media']['uacl']},{$data['Media']['oacl']}: $flag/$mask ($level)");
     if ($level>ACL_LEVEL_OTHER)
       return;
 
@@ -199,7 +199,7 @@ class Media extends AppModel
       if (($data['Media'][$name]&($mask))<$flag)
         $data['Media'][$name]=($data['Media'][$name]&(~$mask))|$flag;
     }
-    //$this->Logger->debug("Increase (result): {$data['Media']['gacl']},{$data['Media']['uacl']},{$data['Media']['oacl']}: $flag/$mask ($level)");
+    //Logger::debug("Increase (result): {$data['Media']['gacl']},{$data['Media']['uacl']},{$data['Media']['oacl']}: $flag/$mask ($level)");
   }
 
   /** Decrease the ACL level. Decreases the ACL level of higher ACL levels
@@ -212,7 +212,7 @@ class Media extends AppModel
     @param mask Bit mask of flag
     @param level Lower ACL level which should be downgraded */
   function _decreaseAcl(&$data, $flag, $mask, $level) {
-    //$this->Logger->debug("Decrease: {$data['Media']['gacl']},{$data['Media']['uacl']},{$data['Media']['oacl']}: $flag/$mask ($level)");
+    //Logger::debug("Decrease: {$data['Media']['gacl']},{$data['Media']['uacl']},{$data['Media']['oacl']}: $flag/$mask ($level)");
     if ($level<ACL_LEVEL_GROUP)
       return;
 
@@ -229,7 +229,7 @@ class Media extends AppModel
       if (($data['Media'][$name]&($mask))>=$flag)
         $data['Media'][$name]=($data['Media'][$name]&(~$mask))|$lower;
     }
-    //$this->Logger->debug("Decrease (result): {$data['Media']['gacl']},{$data['Media']['uacl']},{$data['Media']['oacl']}: $flag/$mask ($level)");
+    //Logger::debug("Decrease (result): {$data['Media']['gacl']},{$data['Media']['uacl']},{$data['Media']['oacl']}: $flag/$mask ($level)");
   }
 
   function setAcl(&$data, $flag, $mask, $level) {
@@ -336,7 +336,7 @@ class Media extends AppModel
     }
 
     $sql = sprintf($this->hasMany[$model]['cacheQuery'], $modelId);
-    //$this->Logger->debug($sql);
+    //Logger::debug($sql);
     $result = $this->query($sql);
     if (count($result)) {
       $tmp = array();
@@ -450,7 +450,7 @@ class Media extends AppModel
     @return True if user can read the filename */
   function canRead($filename, $user, $flag = ACL_READ_ORIGINAL) {
     if (!file_exists($filename)) {
-      $this->Logger->debug("Filename does not exists: $filename");
+      Logger::debug("Filename does not exists: $filename");
       return false;
     }
 
@@ -507,7 +507,7 @@ class Media extends AppModel
     $alias = $this->alias;
     $key = $this->primaryKey;
 
-    $this->Logger->info("Delete HasAndBelongsToMany Media association of user '$userId'");
+    Logger::info("Delete HasAndBelongsToMany Media association of user '$userId'");
     foreach ($this->hasAndBelongsToMany as $model => $data) {
       $joinTable = $db->fullTableName($data['joinTable'], false);
       $joinAlias = $data['with'];
@@ -515,7 +515,7 @@ class Media extends AppModel
       $sql = "DELETE FROM `$joinAlias`".
              " USING `$joinTable` AS `$joinAlias`, `$table` AS `$alias`".
              " WHERE `$alias`.`user_id` = $userId AND `$alias`.`$key` = `$joinAlias`.`$foreignKey`";
-      $this->Logger->debug("Delete $model HABTM associations");
+      Logger::debug("Delete $model HABTM associations");
       $this->query($sql);
     }
   }
@@ -527,7 +527,7 @@ class Media extends AppModel
     $alias = $this->alias;
     $key = $this->primaryKey;
 
-    $this->Logger->info("Delete HasMany Media assosciation of user '$userId'");
+    Logger::info("Delete HasMany Media assosciation of user '$userId'");
     foreach ($this->hasMany as $model => $data) {
       if (!isset($data['dependent']) || !$data['dependent']) {
         continue;
@@ -537,7 +537,7 @@ class Media extends AppModel
       $sql = "DELETE FROM `$model`".
              " USING `$manyTable` AS `$model`, `$table` AS `$alias`".
              " WHERE `$alias`.`user_id` = $userId AND `$alias`.`$key` = `$model`.`$foreignKey`";
-      $this->Logger->debug("Delete $model HasMany associations");
+      Logger::debug("Delete $model HasMany associations");
       $this->query($sql);
     }
   }

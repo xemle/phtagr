@@ -25,8 +25,6 @@ class NmeaComponent extends Object {
 
   var $controller;
 
-  var $components = array('Logger');
-
   var $minInterval = 600; // 10 minutes
 
   var $points = array();
@@ -55,7 +53,7 @@ class NmeaComponent extends Object {
     $check = strtolower(substr($line, $i+1, 2));
     
     if ($sum != $check) {
-      $this->Logger->warn("Wrong checksum! $sum!=$check (line: $line");
+      Logger::warn("Wrong checksum! $sum!=$check (line: $line");
       return false;
     }
 
@@ -108,12 +106,12 @@ class NmeaComponent extends Object {
     @return False on error */
   function readFile($filename, $timeOffset = 0, $append = false) {
     if (!is_readable($filename)) {
-      $this->Logger->warn("File '$file' is not readable");
+      Logger::warn("File '$file' is not readable");
       return false;
     }
     $h = fopen($filename, 'r');
     if (!$h) {
-      $this->Logger->warn("Could not open file '$file'");
+      Logger::warn("Could not open file '$file'");
       return false;
     }
 
@@ -198,9 +196,9 @@ class NmeaComponent extends Object {
       $last = $this->times[$num-1];
       $startTime = date("Y-m-d H:i:s", $first);
       $seconds = $last - $first;
-      $this->Logger->debug("Read '$filename' with ".count($this->times)." entries. Start $startTime for $seconds seconds.");
+      Logger::debug("Read '$filename' with ".count($this->times)." entries. Start $startTime for $seconds seconds.");
     } else {
-      $this->Logger->verbose("File '$filename' does not contain any points");
+      Logger::verbose("File '$filename' does not contain any points");
     }
     return true;
   }

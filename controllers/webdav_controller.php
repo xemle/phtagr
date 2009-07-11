@@ -54,7 +54,7 @@ class WebdavController extends AppController
 
     $user = $this->getUser();
     if (!$this->User->allowWebdav($user)) {
-      $this->Logger->err("WebDAV is not allowed to user '{$user['User']['username']}' (id {$user['User']['id']})");
+      Logger::err("WebDAV is not allowed to user '{$user['User']['username']}' (id {$user['User']['id']})");
       $this->redirect(null, 403);
     }
 
@@ -66,7 +66,7 @@ class WebdavController extends AppController
       $root = $this->User->getRootDir($user);
     }
     if (!$root || !$this->WebdavServer->setFsRoot($root)) {
-      $this->Logger->err("Could not set fsroot: $root");
+      Logger::err("Could not set fsroot: $root");
       $this->redirect(null, 401, true);
     }
 

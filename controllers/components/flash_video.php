@@ -24,7 +24,7 @@
 class FlashVideoComponent extends Object {
 
   var $controller = null;
-  var $components = array('Logger', 'FileCache');
+  var $components = array('FileCache');
 
   function startup(&$controller) {
     $this->controller =& $controller;
@@ -50,21 +50,21 @@ class FlashVideoComponent extends Object {
   function create($media, $options = array()) {
     $options = am(array('size' => OUTPUT_SIZE_VIDEO, 'bitrate' => OUTPUT_BITRATE_VIDEO), $options);
     if (!$this->controller->Media->isType($media, MEDIA_TYPE_VIDEO)) {
-      $this->Logger->err("Media {$media['Media']['id']} is not a video");
+      Logger::err("Media {$media['Media']['id']} is not a video");
       return false;
     }
     $video = $this->controller->Media->getFile($media, FILE_TYPE_VIDEO);
     if (!$video) {
-      $this->Logger->err("Could not find video for media {$media['Media']['id']}");
+      Logger::err("Could not find video for media {$media['Media']['id']}");
       return false;
     }
 
     $src = $this->controller->MyFile->getFilename($video);
-    $this->Logger->debug($src);
+    Logger::debug($src);
     $cache = $this->FileCache->getFilename($media);
 
     if (!$cache) {
-      $this->Logger->fatal("Precondition of cache directory failed: $cacheDir");
+      Logger::fatal("Precondition of cache directory failed: $cacheDir");
       die("Precondition of cache directory failed");
     }
 
@@ -79,13 +79,13 @@ class FlashVideoComponent extends Object {
       $t1 = getMicrotime();
       exec($command, &$output, &$result);
       $t2 = getMicrotime();
-      $this->Logger->debug("Command '$command' returnd $result and required ".round($t2-$t1, 4)."ms");
+      Logger::debug("Command '$command' returnd $result and required ".round($t2-$t1, 4)."ms");
       if ($result != 0) {
-        $this->Logger->err("Command '$command' returned unexcpected $result");
+        Logger::err("Command '$command' returned unexcpected $result");
         @unlink($flashFilename);
         $this->controller->redirect(null, 500);
       } else {
-        $this->Logger->info("Created flash video '$flashFilename' of '$src'");
+        Logger::info("Created flash video '$flashFilename' of '$src'");
       }
       
       $bin = $this->controller->getOption('bin.flvtool2', 'flvtool2');
@@ -95,16 +95,16 @@ class FlashVideoComponent extends Object {
       $t1 = getMicrotime();
       exec($command, &$output, &$result);
       $t2 = getMicrotime();
-      $this->Logger->debug("Command '$command' returnd $result and required ".round($t2-$t1, 4)."ms");
+      Logger::debug("Command '$command' returnd $result and required ".round($t2-$t1, 4)."ms");
       if ($result != 0) {
-        $this->Logger->err("Command '$command' returned unexcpected $result");
+        Logger::err("Command '$command' returned unexcpected $result");
         $this->redirect(null, 500);
       } else {
-        $this->Logger->info("Updated flash video '$flashFilename' with meta tags");
+        Logger::info("Updated flash video '$flashFilename' with meta tags");
       }
     }
     if (!is_file($flashFilename)) { 
-      $this->Logger->err("Could not create preview file {$flashFilename}");
+      Logger::err("Could not create preview file {$flashFilename}");
       $this->redirect(null, 500);
     }
  

@@ -24,7 +24,6 @@
 class FileCacheComponent extends Object {
 
   var $controller = null;
-  var $components = array('Logger');
 
   function initialize(&$controller) {
     $this->controller = $controller;
@@ -51,10 +50,10 @@ class FileCacheComponent extends Object {
 
       $folder =& new Folder($cacheDir);
       if (!$folder->create($cacheDir)) {
-        $this->Logger->err("Could not create cache dir '$cacheDir'");
+        Logger::err("Could not create cache dir '$cacheDir'");
         return false;
       } else {
-        $this->Logger->debug("Create cache dir '$cacheDir'");
+        Logger::debug("Create cache dir '$cacheDir'");
       }
     }
     return $cacheDir;
@@ -75,8 +74,8 @@ class FileCacheComponent extends Object {
     @param cache filename prefix */
   function getFilename($media) {
     if (!isset($media['Media']['id']) || !isset($media['Media']['user_id'])) {
-      $this->Logger->err("Precondition failed");
-      $this->Logger->debug($media);
+      Logger::err("Precondition failed");
+      Logger::debug($media);
       return false;
     }
     $userId = $media['Media']['user_id'];
@@ -96,7 +95,7 @@ class FileCacheComponent extends Object {
     $mediaId = intval($mediaId);
     $cacheDir = $this->getPath($userId, $mediaId, false);
     if (!$cacheDir) {
-      $this->Logger->trace("No cache dir found for image $mediaId");
+      Logger::trace("No cache dir found for image $mediaId");
       return true;
     }
 
@@ -104,13 +103,13 @@ class FileCacheComponent extends Object {
     $pattern = $this->getFilenamePrefix($mediaId).'.*';
     $files = $folder->find($pattern);
     if ($files) {
-      $this->Logger->debug("Delete cached files of image $mediaId");
+      Logger::debug("Delete cached files of image $mediaId");
       foreach($files as $file) {
-        $this->Logger->trace("Delete cache file '$file'");
+        Logger::trace("Delete cache file '$file'");
         unlink($folder->addPathElement($cacheDir, $file));
       }
     } else {
-      $this->Logger->trace("No cached files found for image $mediaId");
+      Logger::trace("No cached files found for image $mediaId");
     }
   }
 
@@ -122,9 +121,9 @@ class FileCacheComponent extends Object {
     if (is_dir($cacheDir)) {
       $folder = new Folder();
       $folder->delete($cacheDir);
-      $this->Logger->info("Deleted cache dir '$cacheDir'");
+      Logger::info("Deleted cache dir '$cacheDir'");
     } else {
-      $this->Logger->debug("User $userId has no cached files");
+      Logger::debug("User $userId has no cached files");
     }
   }
 }

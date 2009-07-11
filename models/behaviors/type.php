@@ -37,8 +37,8 @@ class TypeBehavior extends ModelBehavior
       $data = $data[$model->alias];
     }
     if (!isset($data['type'])) {
-      $model->Logger->err("Precondition failed");
-      $model->Logger->debug($data);
+      Logger::err("Precondition failed");
+      Logger::debug($data);
       return null;
     }
 
@@ -54,13 +54,13 @@ class TypeBehavior extends ModelBehavior
     }
 
     if (!isset($data['id'])) {
-      $model->Logger->err("Precondition failed");
+      Logger::err("Precondition failed");
       return null;
     }
 
     $data['type'] = $type;
     if (!$model->save($data, true, array('type'))) {
-      $model->Logger->err("Could not update type of model {$model->alias} {$data['id']} to type {$type}");
+      Logger::err("Could not update type of model {$model->alias} {$data['id']} to type {$type}");
     }
   }
 }

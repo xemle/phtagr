@@ -27,7 +27,6 @@ if (!App::import('Vendor', "phpthumb", true, array(), "phpthumb.class.php")) {
 class ImageResizerComponent extends Object {
 
   var $controller = null;
-  var $components = array('Logger');
 
   function startup(&$controller) {
     $this->controller =& $controller;
@@ -52,11 +51,11 @@ class ImageResizerComponent extends Object {
       ), $options);
 
     if (!is_readable($src)) {
-      $this->Logger->err("Could not read source $src");
+      Logger::err("Could not read source $src");
       return false;
     }
     if (!is_writeable(dirname($dst))) {
-      $this->Logger->err("Could not write to path ".dirname($dst));
+      Logger::err("Could not write to path ".dirname($dst));
       return false;
     }
     if (!isset($options['width']) || !isset($options['height'])) {
@@ -94,11 +93,11 @@ class ImageResizerComponent extends Object {
     $result = $phpThumb->GenerateThumbnail();
     $t2 = getMicrotime();
     if ($result) {
-      $this->Logger->debug("Render {$options['size']}x{$options['size']} image in ".round($t2-$t1, 4)."ms to '{$phpThumb->cache_filename}'");
+      Logger::debug("Render {$options['size']}x{$options['size']} image in ".round($t2-$t1, 4)."ms to '{$phpThumb->cache_filename}'");
       $phpThumb->RenderToFile($phpThumb->cache_filename);
     } else {
-      $this->Logger->err("Could not generate thumbnail: ".$phpThumb->error);
-      $this->Logger->err($phpThumb->debugmessages);
+      Logger::err("Could not generate thumbnail: ".$phpThumb->error);
+      Logger::err($phpThumb->debugmessages);
       die('Failed: '.$phpThumb->error);
     }
     
@@ -138,7 +137,7 @@ class ImageResizerComponent extends Object {
     $phpThumb->w = $size;
     $phpThumb->h = $size;
 
-    //$this->Logger->debug(sprintf("square: %dx%d %dx%d", 
+    //Logger::debug(sprintf("square: %dx%d %dx%d", 
     //  $phpThumb->sx, $phpThumb->sy, 
     //  $phpThumb->sw, $phpThumb->sh));
   }
@@ -147,11 +146,11 @@ class ImageResizerComponent extends Object {
     @param filename Filename to file to clean */
   function clearMetaData($filename) {
     if (!file_exists($filename)) {
-      $this->Logger->err("Filename '$filename' does not exists");
+      Logger::err("Filename '$filename' does not exists");
       return;
     }
     if (!is_writeable($filename)) {
-      $this->Logger->err("Filename '$filename' is not writeable");
+      Logger::err("Filename '$filename' is not writeable");
       return;
     }
 
@@ -162,9 +161,9 @@ class ImageResizerComponent extends Object {
     $t1 = getMicrotime();
     exec($command, &$output, &$result);
     $t2 = getMicrotime();
-    $this->Logger->trace("$bin call needed ".round($t2-$t1, 4)."ms");
+    Logger::trace("$bin call needed ".round($t2-$t1, 4)."ms");
 
-    $this->Logger->debug("Cleaned meta data of '$filename'");
+    Logger::debug("Cleaned meta data of '$filename'");
   }
 
 }

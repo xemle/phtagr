@@ -24,7 +24,7 @@
 class VideoFilterComponent extends BaseFilterComponent {
 
   var $controller = null;
-  var $components = array('Logger', 'VideoPreview', 'FileManager');
+  var $components = array('VideoPreview', 'FileManager');
 
   function startup(&$controller) {
     $this->controller =& $controller;
@@ -67,17 +67,17 @@ class VideoFilterComponent extends BaseFilterComponent {
     if (!$media) {
       $video = $this->_findVideo($file);
       if (!$video) {
-        $this->Logger->err("Could not find video for video thumb $filename");
+        Logger::err("Could not find video for video thumb $filename");
         return -1;
       }
       $media = $this->Media->findById($video['File']['media_id']);
       if (!$media) {
-        $this->Logger->err("Could not find media for video file. Maybe import it first");
+        Logger::err("Could not find media for video file. Maybe import it first");
         return -1;
       }
     }
     $ImageFilter = $this->Manager->getFilter('Image');
-    $this->Logger->debug("Read video thumbnail by ImageFilter: $filename");
+    Logger::debug("Read video thumbnail by ImageFilter: $filename");
     foreach (array('name', 'width', 'height', 'flag', 'duration') as $column) {
       if (isset($media['Media'][$column])) {
         $tmp[$column] = $media['Media'][$column];
@@ -91,12 +91,12 @@ class VideoFilterComponent extends BaseFilterComponent {
     // restore overwritten values
     $media['Media'] = am($media['Media'], $tmp);
     if (!$this->Media->save($media)) {
-      $this->Logger->err("Could not save media");
+      Logger::err("Could not save media");
       return -1;
     } 
     $this->MyFile->setMedia($file, $media['Media']['id']);
     $this->MyFile->updateReaded($file);
-    $this->Logger->verbose("Updated media from thumb file");
+    Logger::verbose("Updated media from thumb file");
     return 1;
   }
 
@@ -109,7 +109,7 @@ class VideoFilterComponent extends BaseFilterComponent {
     if ($this->MyFile->isType($file, FILE_TYPE_VIDEOTHUMB)) {
       return $this->_readThumb($file, &$media);
     } elseif (!$this->MyFile->isType($file, FILE_TYPE_VIDEO)) {
-      $this->Logger->err("File type is not supported: ".$this->MyFile->getFilename($file));
+      Logger::err("File type is not supported: ".$this->MyFile->getFilename($file));
       return -1;
     }
 
@@ -140,17 +140,17 @@ class VideoFilterComponent extends BaseFilterComponent {
     $t1 = getMicrotime();
     exec($command, &$output, &$result);
     $t2 = getMicrotime();
-    $this->Logger->debug("Command '$command' returnd $result and required ".round($t2-$t1, 4)."ms");
+    Logger::debug("Command '$command' returnd $result and required ".round($t2-$t1, 4)."ms");
     
     if ($result != 1) {
-      $this->Logger->err("Command '$command' returned unexcpected $result");
+      Logger::err("Command '$command' returned unexcpected $result");
       return -1;
     } elseif (!count($output)) {
-      $this->Logger->err("Command returned no output!");
+      Logger::err("Command returned no output!");
       return -1;
     } else {
-      $this->Logger->debug("Command '$command' returned $result");
-      $this->Logger->trace($output);
+      Logger::debug("Command '$command' returned $result");
+      Logger::trace($output);
 
       foreach ($output as $line) {
         $words=preg_split("/[\s,]+/", trim($line));
@@ -158,17 +158,17 @@ class VideoFilterComponent extends BaseFilterComponent {
           $times=preg_split("/:/", $words[1]);
           $time=$times[0]*3600+$times[1]*60+intval($times[2]);
           $data['duration'] = $time;
-          $this->Logger->trace("Extract duration of '$filename': $time");
+          Logger::trace("Extract duration of '$filename': $time");
         } elseif ($words[2]=="Video:") {
           list($width, $height)=split("x", $words[5]);
           $data['width'] = $width;
           $data['height'] = $height;
-          $this->Logger->trace("Extract video size of '$filename': $width x $height");
+          Logger::trace("Extract video size of '$filename': $width x $height");
         }
       }
     }
     if (!$this->Media->save($media)) {
-      $this->Logger->err("Could not save media");
+      Logger::err("Could not save media");
       return -1;
     } elseif ($isNew || !$this->MyFile->hasMedia($file)) {
       $mediaId = $isNew ? $this->Media->getLastInsertID() : $data['id'];
@@ -197,14 +197,14 @@ class VideoFilterComponent extends BaseFilterComponent {
   function _createThumb($media) {
     $video = $this->Media->getFile($media, FILE_TYPE_VIDEO);
     if (!$video) {
-      $this->Logger->err("Media {$media['Media']['id']} has no video");
+      Logger::err("Media {$media['Media']['id']} has no video");
       return false;
     }
     if (!is_writable(dirname($this->MyFile->getFilename($video)))) {
-      $this->Logger->warn("Cannot create video thumb. Directory of video is not writeable");
+      Logger::warn("Cannot create video thumb. Directory of video is not writeable");
     }
     //$this->VideoPreview->controller =& $this->controller;
-    //$this->Logger->debug($this->VideoPreview->controller->MyFile->alias);
+    //Logger::debug($this->VideoPreview->controller->MyFile->alias);
     $thumb = $this->VideoPreview->create($video);
     if (!$thumb) {
       return false;
@@ -225,11 +225,11 @@ class VideoFilterComponent extends BaseFilterComponent {
     if ($this->MyFile->isType($file, FILE_TYPE_VIDEOTHUMB)) {
       $imageFilter = $this->Manager->getFilter('Image');
       if (!$imageFilter) {
-        $this->Logger->err("Could not get filter Image");
+        Logger::err("Could not get filter Image");
         return false;
       }
       $filename = $this->MyFile->getFilename($file);
-      $this->Logger->debug("Write video thumbnail by ImageFilter: $filename");
+      Logger::debug("Write video thumbnail by ImageFilter: $filename");
       return $imageFilter->write(&$file, &$media);
     }
     return true;

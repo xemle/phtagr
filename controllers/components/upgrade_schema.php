@@ -25,7 +25,6 @@ uses('file', 'model' . DS . 'schema');
 
 class UpgradeSchemaComponent extends Object{
 
-  var $components = array('Logger');
   var $controller = null;
   var $dbConfig = null; 
   var $db = null;
@@ -48,14 +47,14 @@ class UpgradeSchemaComponent extends Object{
     $options = am(array('path' => CONFIGS.'sql'.DS, 'name' => 'Phtagr'), $options);
     $this->cakeSchema =& new CakeSchema($options);
     if (!$this->cakeSchema) {
-      $this->Logger->err("Could not create database schema");
+      Logger::err("Could not create database schema");
       return false;
     }
 
     App::import('Core', 'ConnectionManager');
     $this->db =& ConnectionManager::getDataSource($this->cakeSchema->connection);
     if (!$this->db) {
-      $this->Logger->err("Could not create database source");
+      Logger::err("Could not create database source");
       return false;
     }
     $this->db->cacheSources = false;
@@ -66,7 +65,7 @@ class UpgradeSchemaComponent extends Object{
     $options = am(array('path' => CONFIGS.'sql'.DS, 'name' => 'Phtagr'), $options);
     $schema = $this->cakeSchema->load($options);
     if (!$schema) {
-      $this->Logger->err("Could not load schema!");
+      Logger::err("Could not load schema!");
     }
     $this->schema = $schema;
     return $schema;
@@ -92,13 +91,13 @@ class UpgradeSchemaComponent extends Object{
     if (!is_array($tables)) {
       $tables = array($tables);
     }
-    $this->Logger->debug("Check for required tables: ".implode($tables, ', '));
+    Logger::debug("Check for required tables: ".implode($tables, ', '));
 
     $sources = $this->db->listSources();
     foreach ($tables as $table) {
       $tableName = $this->db->fullTableName($table, false);
       if (!in_array($tableName, $sources)) {
-        $this->Logger->warn("Missing table $tableName (from $table)");
+        Logger::warn("Missing table $tableName (from $table)");
         return false;
       }
     }
@@ -147,10 +146,10 @@ class UpgradeSchemaComponent extends Object{
       $tableName = $this->db->fullTableName($table, false);
       if (!$this->db->_execute($sql)) {
         $errors[$table] = $sql;
-        $this->Logger->err("Could not create table '$tableName'");
-        $this->Logger->debug($sql);
+        Logger::err("Could not create table '$tableName'");
+        Logger::debug($sql);
       } else {
-        $this->Logger->info("Created new table '$tableName'");
+        Logger::info("Created new table '$tableName'");
       }
     }
     if (!count($errors)) {
@@ -182,7 +181,7 @@ class UpgradeSchemaComponent extends Object{
       // Check for existing table
       $tableName = $this->db->fullTableName($table, false);
       if (!in_array($tableName, $sources)) {
-        $this->Logger->warn("Skip table changes of not existing table '$tableName'");
+        Logger::warn("Skip table changes of not existing table '$tableName'");
         continue;
       }
       // Check for existing model
@@ -192,7 +191,7 @@ class UpgradeSchemaComponent extends Object{
         $modelName = $this->modelMapping[$table];
       }
       if (!in_array($modelName, $models)) {
-        $this->Logger->err("Model '$modelName' does not exists");
+        Logger::err("Model '$modelName' does not exists");
         $columns[$table] = "Model '$modelName' does not exists";
         trigger_error(sprintf(__("Model '$modelName' does not exists", true)), E_USER_WARNING);
         continue;
@@ -217,11 +216,11 @@ class UpgradeSchemaComponent extends Object{
       $tableName = $this->db->fullTableName($table, false);
       if (!$this->db->_execute($sql)) {
         $errors[$table] = $sql;
-        $this->Logger->err("Could not update table '$tableName'");
-        $this->Logger->debug($sql);
+        Logger::err("Could not update table '$tableName'");
+        Logger::debug($sql);
       } else {
-        $this->Logger->info("Upgraded table '$tableName'");
-        $this->Logger->trace($sql);
+        Logger::info("Upgraded table '$tableName'");
+        Logger::trace($sql);
       }
     }
     if (!count($errors)) {
@@ -233,12 +232,12 @@ class UpgradeSchemaComponent extends Object{
   function requireUpgrade() {
     $missingTables = $this->_getMissingTables($this->schema);
     if ($missingTables) {
-      $this->Logger->info("Missing table(s): ".implode(", ", array_keys($missingTables)));
+      Logger::info("Missing table(s): ".implode(", ", array_keys($missingTables)));
       return true;
     }
     $alterColumns = $this->_getAlteredColumns($this->schema);
     if ($alterColumns) {
-      $this->Logger->info("Table change(s): ".implode(", ", array_keys($alterColumns)));
+      Logger::info("Table change(s): ".implode(", ", array_keys($alterColumns)));
       return true;
     }
     return false;
@@ -271,7 +270,7 @@ class UpgradeSchemaComponent extends Object{
     $modelCacheFiles = $folder->find('cake_model_.*');
     foreach ($modelCacheFiles as $file) {
       if (!@unlink($folder->addPathElement($modelCacheDir, $file))) {
-        $this->Logger->err("Could not delete model cache file '$file' in '$modelCacheDir'");
+        Logger::err("Could not delete model cache file '$file' in '$modelCacheDir'");
       }
     }
   }

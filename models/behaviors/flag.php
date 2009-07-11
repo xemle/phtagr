@@ -38,7 +38,7 @@ class FlagBehavior extends ModelBehavior
     }
 
     if (!isset($data['id']) || !isset($data['flag'])) {
-      $model->Logger->err("Precondition failed");
+      Logger::err("Precondition failed");
       return false;
     }
 
@@ -47,7 +47,7 @@ class FlagBehavior extends ModelBehavior
     }
     $data['flag'] |= $flag;
     if (!$model->save($data, true, array('flag'))) {
-      $model->Logger->err("Could not update flag");
+      Logger::err("Could not update flag");
       return false;
     }
     return true;
@@ -62,7 +62,7 @@ class FlagBehavior extends ModelBehavior
       $data =& $data[$model->alias];
     }
     if (!isset($data['id']) || !isset($data['flag'])) {
-      $model->Logger->err("Precondition failed");
+      Logger::err("Precondition failed");
       return false;
     }
 
@@ -71,7 +71,7 @@ class FlagBehavior extends ModelBehavior
     }
     $data['flag'] ^= $flag;
     if (!$model->save($data, true, array('flag'))) {
-      $model->Logger->err("Could not update flag");
+      Logger::err("Could not update flag");
       return false;
     }
     return true;
@@ -91,7 +91,7 @@ class FlagBehavior extends ModelBehavior
       $data = $data[$model->alias];
     }
     if (!isset($data['flag'])) {
-      $model->Logger->err("Precondition failed");
+      Logger::err("Precondition failed");
       return false;
     }
 

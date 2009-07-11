@@ -21,10 +21,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+App::import('File', 'Search', array('file' => APP.'logger.php'));
+
 class AppController extends Controller
 {
   var $helpers = array('html', 'session', 'javascript', 'menu');
-  var $components = array('Cookie', 'Logger');
+  var $components = array('Cookie');
   var $uses = array('User', 'Option');
   
   var $_nobody = null;
@@ -85,12 +87,12 @@ class AppController extends Controller
     }
 
     if ($this->User->isExpired($user)) {
-      $this->Logger->warn("User account of '{$user['User']['username']}' (id {$user['User']['id']}) is expired!");
+      Logger::warn("User account of '{$user['User']['username']}' (id {$user['User']['id']}) is expired!");
       return false;
     }
 
     $this->User->writeSession($user, &$this->Session);
-    $this->Logger->info("User '{$user['User']['username']}' (id {$user['User']['id']}) authenticated via $authType!");
+    Logger::info("User '{$user['User']['username']}' (id {$user['User']['id']}) authenticated via $authType!");
 
     return true;
   }

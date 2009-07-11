@@ -89,17 +89,17 @@ class BrowserController extends AppController
     }
 
     if (!@is_dir($root)) {
-      $this->Logger->err("Directory of '$root' does not exists");
+      Logger::err("Directory of '$root' does not exists");
       return false;
     }
 
     // Check alias syntax
     if (!preg_match('/^[A-Za-z0-9][A-Za-z0-9\-_\.\:]+$/', $alias)) {
-      $this->Logger->err("Name '$alias' as alias is invalid");
+      Logger::err("Name '$alias' as alias is invalid");
       return false;
     }
 
-    $this->Logger->trace("Add new FS root '$root' (alias '$alias')");
+    Logger::trace("Add new FS root '$root' (alias '$alias')");
     $this->_fsRoots[$alias]=$root;
     return true;
   }
@@ -201,7 +201,7 @@ class BrowserController extends AppController
       $files = $list;
     } else {
       if (strlen($path) > 1) {
-        $this->Logger->debug("Invalid path: '$path'. Redirect to index");
+        Logger::debug("Invalid path: '$path'. Redirect to index");
         $this->redirect('index');
       }
       // filesystem path could not be resolved. Take all aliases of filesystem
@@ -249,7 +249,7 @@ class BrowserController extends AppController
       }
     }
     
-    //$this->Logger->debug($toRead);
+    //Logger::debug($toRead);
     $readed = $this->FilterManager->readFiles($toRead);
     $errors = $this->FilterManager->errors;
     $this->Session->setFlash("Imported $readed files ($errors errors)");
@@ -269,7 +269,7 @@ class BrowserController extends AppController
     $this->Media->unbindAll();
     $result = $this->Media->findAll("Media.user_id = $userId AND Media.flag & ".MEDIA_FLAG_DIRTY." > 0", array("Media.id"));
     if (!$result) {
-      $this->Logger->info("No images found for synchronization");
+      Logger::info("No images found for synchronization");
       $this->data['total'] = 0;
     } else {
       $ids = Set::extract($result, '{n}.Media.id');
@@ -278,10 +278,10 @@ class BrowserController extends AppController
       foreach ($ids as $id) {
         $media = $this->Media->findById($id);
         if (!$this->FilterManager->write($media)) {
-          $this->Logger->err("Could not export media $id");
+          Logger::err("Could not export media $id");
           $errors++;
         } else {
-          $this->Logger->verbose("Synced media $id");
+          Logger::verbose("Synced media $id");
           $synced++;
         }
 
@@ -329,13 +329,13 @@ class BrowserController extends AppController
     $fsPath = $this->_getFsPath($path);
     // Check for internal path
     if (!$fsPath) {
-      $this->Logger->warn("Invalid path to create folder");
+      Logger::warn("Invalid path to create folder");
       $this->Session->setFlash("Invalid path to create folder");
       $this->redirect("index");
     }
     if ($this->FileManager->isExternal($fsPath)) {
       $this->Session->setFlash("Could not create folder here: $path");
-      $this->Logger->warn("Could not create folder in external path: $fsPath");
+      Logger::warn("Could not create folder in external path: $fsPath");
       $this->redirect("index/".$path);
     }
 
@@ -345,11 +345,11 @@ class BrowserController extends AppController
 
       $newFolder = Folder::slashTerm($fsPath).$name;
       if ($folder->mkdir($newFolder)) {
-        $this->Logger->verbose("Create folder $newFolder");
+        Logger::verbose("Create folder $newFolder");
         $this->Session->setFlash("Folder $name created");
         $this->redirect("index/".$path.$name);
       } else {
-        $this->Logger->err("Could not create folder $name in $fsPath");
+        Logger::err("Could not create folder $name in $fsPath");
         $this->Session->setFlash("Could not create folder");
         $this->redirect('folder/'.$path);
       }
@@ -362,25 +362,25 @@ class BrowserController extends AppController
     $path = $this->getPath();
     $fsPath = $this->_getFsPath($path);
     if (!$fsPath) {
-      $this->Logger->warn("Invalid path for upload");
+      Logger::warn("Invalid path for upload");
       $this->Session->setFlash("Invalid path for upload");
       $this->redirect("index");
     }
     // Check for internal path
     if ($this->FileManager->isExternal($fsPath)) {
       $this->Session->setFlash("Could not upload here: $path");
-      $this->Logger->warn("Could not upload in external path: $fsPath");
+      Logger::warn("Could not upload in external path: $fsPath");
       $this->redirect("index/".$path);
     }
     if ($this->Upload->isUpload()) {
       $filename = $this->Upload->upload(array('root' => $fsPath, 'overwrite' => false));
       if ($filename) {
-        $this->Logger->info("File '$filename' uploaded successfully");
+        Logger::info("File '$filename' uploaded successfully");
         if (substr(strtolower($filename), -4) == '.zip' && $this->data['File']['extract']) {
           $files = $this->Zip->unzip($filename);
           $this->Session->setFlash("File uploaded successfully and ".count($files)." files were extracted");
           if ($this->FileManager->delete($filename)) {
-            $this->Logger->info("Delete archive $filename");
+            Logger::info("Delete archive $filename");
           }
         } else {
           $this->Session->setFlash("File uploaded successfully");

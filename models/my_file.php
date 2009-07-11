@@ -92,13 +92,13 @@ class MyFile extends AppModel
     if (!$this->hasFlag(null, FILE_FLAG_EXTERNAL)) {
       $filename = $this->getFilename();
       if (!@unlink($filename)) {
-        $this->Logger->err("Could not delete file $filename");
+        Logger::err("Could not delete file $filename");
       } else {
-        $this->Logger->verbose("Delete file $filename");
+        Logger::verbose("Delete file $filename");
       }
       if ($this->hasFlag(null, FILE_FLAG_DEPENDENT) && 
         $this->hasMedia()) {
-        $this->Logger->verbose("Delete media {$this->data['Media']['id']} from dependent file {$this->data['File']['id']}");
+        Logger::verbose("Delete media {$this->data['Media']['id']} from dependent file {$this->data['File']['id']}");
         $this->Media->delete($this->data['Media']['id']);
       }
     }
@@ -161,7 +161,7 @@ class MyFile extends AppModel
       $data = $data['File'];
     }
     if (!isset($data['file'])) {
-      $this->Logger->err("Precondition failed");
+      Logger::err("Precondition failed");
       return false;
     }
     return strtolower(substr($data['file'], strrpos($data['file'], '.') + 1));
@@ -192,12 +192,12 @@ class MyFile extends AppModel
     }
 
     if (!isset($data['id']) || !intval($mediaId)) {
-      $this->Logger->err("Precondition failed");
+      Logger::err("Precondition failed");
       return false;
     }
     $data['media_id'] = $mediaId;
     if (!$this->save($data, true, array('media_id'))) {
-      $this->Logger->err("Could not bind media $mediaId to file {$data['id']}");
+      Logger::err("Could not bind media $mediaId to file {$data['id']}");
       return false;
     }
     return true;
@@ -210,7 +210,7 @@ class MyFile extends AppModel
     @return True if user can read the filename */
   function canRead($filename, $user, $flag = ACL_READ_ORIGINAL) {
     if (!file_exists($filename)) {
-      $this->Logger->debug("Filename does not exists: $filename");
+      Logger::debug("Filename does not exists: $filename");
       return false;
     }
 
@@ -228,7 +228,7 @@ class MyFile extends AppModel
     }
     // @TODO Fix ACL
     //$conditions .= $this->buildWhereAcl($user, 0, $flag);
-    $this->Logger->debug($conditions);
+    Logger::debug($conditions);
 
     return $this->hasAny($conditions);
   }
@@ -271,9 +271,9 @@ class MyFile extends AppModel
       $this->data['File']['size'] = filesize($filename);
       $this->data['File']['time'] = date("Y-m-d H:i:s", filemtime($filename));
       if (!$this->save(null, true, array('size', 'time'))) {
-        $this->Logger->warn("Could not update file data of $filename");
+        Logger::warn("Could not update file data of $filename");
       } else {
-        $this->Logger->debug("Update file type and size of $filename");
+        Logger::debug("Update file type and size of $filename");
       }
     }
   }
@@ -286,12 +286,12 @@ class MyFile extends AppModel
       $data = $data['File'];
     }
     if (!isset($data['id'])) {
-      $this->Logger->err("Precondition failed");
+      Logger::err("Precondition failed");
       return false;
     }
     $data['readed'] = date("Y-m-d H:i:s", time());
     if (!$this->save($data, true, array('readed'))) {
-      $this->Logger->err("could not save data");
+      Logger::err("could not save data");
       return false;
     }
     return true;
@@ -302,17 +302,17 @@ class MyFile extends AppModel
       return $this->moveDir($src, $dst);
     }
     if (file_exists($dst)) {
-      $this->Logger->err("Destination '$dst' exists and cannot overwritten!");
+      Logger::err("Destination '$dst' exists and cannot overwritten!");
       return false;
     }
     $data = $this->findByFilename($src);
     if (!$data) {
-      $this->Logger->err("Source '$src' was not found in the database!");
+      Logger::err("Source '$src' was not found in the database!");
       return false;
     }
 
     if (!@rename($src, $dst)) {
-      $this->Logger->err("Could not move '$src'to '$dst'");
+      Logger::err("Could not move '$src'to '$dst'");
       return false;
     }
     if (is_dir($dst)) {
@@ -322,7 +322,7 @@ class MyFile extends AppModel
       $data['File']['file'] = basename($dst);
     }
     if (!$this->save($data, true, array('path', 'file'))) {
-      $this->Logger->err("Could not updated new filename '$dst' (id=$id)");
+      Logger::err("Could not updated new filename '$dst' (id=$id)");
       return false;
     }
     return true;
@@ -333,18 +333,18 @@ class MyFile extends AppModel
     @param dst Destination directory or empty filename*/
   function moveDir($src, $dst) {
     if (!is_dir($src)) {
-      $this->Logger->err("Source '$src' is not a directory");
+      Logger::err("Source '$src' is not a directory");
       return false;
     }
     // Allow dir and writeable parent dir
     if ((file_exists($dst) && !is_dir($dst)) || 
       (!file_exists($dst) && !is_writeable(dirname($dst)))) {
-      $this->Logger->err("Invalid destination '$dst'");
+      Logger::err("Invalid destination '$dst'");
       return false;
     }
 
     if (!@rename($src, $dst)) {
-      $this->Logger->err("Could not rename directory");
+      Logger::err("Could not rename directory");
       return false;
     }
 
@@ -359,14 +359,14 @@ class MyFile extends AppModel
     $sql = "UPDATE ".$this->tablePrefix.$this->table." AS File ".
            "SET path=REPLACE(path,'$sqlSrc','$sqlDst') ".
            "WHERE path LIKE '$sqlSrc%'";
-    $this->Logger->debug($sql);
+    Logger::debug($sql);
     $this->query($sql);
     return true;
   }
 
   function deletePath($path, $deleteFolder = false) {
     if (!file_exists($path)) {
-      $this->Logger->err("Path $path does not exists");
+      Logger::err("Path $path does not exists");
       return false;
     }
     if (!is_dir($path)) {
@@ -378,7 +378,7 @@ class MyFile extends AppModel
     $files = $this->deleteAll("File.path LIKE '$sqlPath%'", true, true);
     if ($deleteFolder) {
       $folder = new Folder();
-      $this->Logger->info("Delete folder $path");
+      Logger::info("Delete folder $path");
       $folder->delete($path);
     }
     return true;

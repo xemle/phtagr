@@ -31,7 +31,7 @@ class DigestAuthComponent extends Object
   var $preferedSchema = 'digest';
   var $realm = 'phtagr/webdav';
   var $controller = null;
-  var $components = array('Logger', 'Session');
+  var $components = array('Session');
   
   function initialize(&$controller) {
     $this->controller = $controller;
@@ -39,7 +39,7 @@ class DigestAuthComponent extends Object
 
   function __fixWindowsUsername() {
     if (!isset($this->_authData['username'])) {
-      $this->Logger->err("Username is not set");
+      Logger::err("Username is not set");
       return false;
     }
 
@@ -55,15 +55,15 @@ class DigestAuthComponent extends Object
   }
 
   function __writeUserData($user) {
-    $this->Logger->info("User '{$user['User']['username']}' (id {$user['User']['id']}) authenticated");
+    Logger::info("User '{$user['User']['username']}' (id {$user['User']['id']}) authenticated");
     if (!$this->Session->check('User.id') || $this->Session->read('User.id') != $user['User']['id']) {
-      $this->Logger->info("Start new session for '{$user['User']['username']}' (id {$user['User']['id']})");
+      Logger::info("Start new session for '{$user['User']['username']}' (id {$user['User']['id']})");
       $this->controller->User->writeSession($user, $this->Session);
     }
   }
 
   function __addBasicRequestHeader() {
-    $this->Logger->trace("Add basic authentications header");
+    Logger::trace("Add basic authentications header");
     header('WWW-Authenticate: Basic realm="'.$this->realm.'"');
   }
   
@@ -81,12 +81,12 @@ class DigestAuthComponent extends Object
     $counter = $this->Session->read('auth.logins');
   
     if ($counter>3) {
-      $this->Logger->err('login countes exceeded');
+      Logger::err('login countes exceeded');
       $this->decline();
     }
     $this->Session->write('auth.logins', $counter+1);
     
-    $this->Logger->trace("Add authentications header");
+    Logger::trace("Add authentications header");
     header('WWW-Authenticate: Digest realm="'.$this->realm.'",qop="auth",nonce="'.uniqid().'",opaque="'.$opaque.'",algorithm="MD5"');
   }
 
@@ -117,16 +117,16 @@ class DigestAuthComponent extends Object
       $arh=apache_request_headers();
       if (isset($arh['Authorization']))
         $hdr=$arh['Authorization'];
-      //$this->Logger->trace($arh);
+      //Logger::trace($arh);
     } elseif (isset($_SERVER['HTTP_AUTHORIZATION'])) {
       $hdr=$_SERVER['HTTP_AUTHORIZATION'];
     } elseif (isset($_SERVER['PHP_AUTH_DIGEST'])) {
       $hdr=$_SERVER['PHP_AUTH_DIGEST'];
     }
     if ($hdr === false) {
-      $this->Logger->info("Could not find any authentication header");
+      Logger::info("Could not find any authentication header");
     }
-    //$this->Logger->trace($hdr);
+    //Logger::trace($hdr);
     $this->_authHdr = $hdr;
     return $hdr;
   }
@@ -134,18 +134,18 @@ class DigestAuthComponent extends Object
   function __getAuthSchema() {
     $words = preg_split("/[\s]+/", $this->_authHdr);
     if (!$words) {
-      $this->Logger->warn("Could not split authentication header");
+      Logger::warn("Could not split authentication header");
       $this->requestAuthentication();
     }
 
     if (count($words) < 2) {
-      $this->Logger->warn("Authentication header a to less parameter");
+      Logger::warn("Authentication header a to less parameter");
       $this->requestAuthentication();
     }
 
     $schema = strtolower($words[0]);
     if ($schema != 'digest' && $schema != 'basic') {
-      $this->Logger->err("Unsupported authentication schema: $schema");
+      Logger::err("Unsupported authentication schema: $schema");
       $this->requestAuthentication();
     }
 
@@ -155,16 +155,16 @@ class DigestAuthComponent extends Object
   function __checkBasicHeader() {
     $words = preg_split("/[\s]+/", $this->_authHdr);
     if (count($words) != 2 || strtolower($words[0]) != 'basic') {
-      $this->Logger->err("Wrong basic authentication header");
-      $this->Logger->trace($this->authHdr);
+      Logger::err("Wrong basic authentication header");
+      Logger::trace($this->authHdr);
       $this->requestAuthentication();
     }
 
     $decode = base64_decode($words[1]);
     $data = preg_split('/:/', $decode, 2);
     if (count($data) != 2) {
-      $this->Logger->err("Authentication data is invalid");
-      $this->Logger->trace("Basic authentication string is: {$word[1]} (decoded: $decode)");
+      Logger::err("Authentication data is invalid");
+      Logger::trace("Basic authentication string is: {$word[1]} (decoded: $decode)");
       $this->requestAuthentication();
     }
 
@@ -175,7 +175,7 @@ class DigestAuthComponent extends Object
 
   function __checkBasicUser() {
     if (!$this->_authData) {
-      $this->Logger->err("Aauthentication data is not set");
+      Logger::err("Aauthentication data is not set");
       $this->requestAuthentication();
     }
 
@@ -183,18 +183,18 @@ class DigestAuthComponent extends Object
     $username = $this->__fixWindowsUsername();
     $user = $this->controller->User->findByUsername($username);
     if (!$user) {
-      $this->Logger->err("User '$username' not found");
+      Logger::err("User '$username' not found");
       $this->requestAuthentication();
     }
     if ($this->controller->User->isExpired($user)) {
-      $this->Logger->warn("User account of '{$user['User']['username']}' (id {$user['User']['id']}) is expired!");
+      Logger::warn("User account of '{$user['User']['username']}' (id {$user['User']['id']}) is expired!");
       $this->decline();
     }
 
     // check credentials
     $user = $this->controller->User->decrypt(&$user);
     if ($user['User']['password'] != $this->_authData['password']) {
-      $this->Logger->err("Password missmatch");
+      Logger::err("Password missmatch");
       $this->requestAuthentication();
     }
 
@@ -219,8 +219,8 @@ class DigestAuthComponent extends Object
     }
   
     if ($requiredParts) {
-      $this->Logger->warn("Missing authorization part(s): ".implode(", ", array_keys($requiredParts)));
-      $this->Logger->info("Authorization header is: ".$this->_authHdr);
+      Logger::warn("Missing authorization part(s): ".implode(", ", array_keys($requiredParts)));
+      Logger::info("Authorization header is: ".$this->_authHdr);
       $this->requestAuthentication();
     }
   
@@ -242,7 +242,7 @@ class DigestAuthComponent extends Object
     }
 
     if ($uri !== $requestUri) {
-      $this->Logger->err("Uri missmatch: Request is '$requestUri' but auth header has '$uri'");
+      Logger::err("Uri missmatch: Request is '$requestUri' but auth header has '$uri'");
       $this->requestAuthentication();
     }
   }
@@ -254,7 +254,7 @@ class DigestAuthComponent extends Object
   function __checkSession() {
     $sid = $this->_authData['opaque'];
     if ($this->Session->started()) {
-      $this->Logger->warn("Session already started!");
+      Logger::warn("Session already started!");
     }
     $this->Session->id($sid);
     $this->Session->start();
@@ -263,19 +263,19 @@ class DigestAuthComponent extends Object
       $this->Session->renew();
       $this->Session->write('auth.logins', 0);
       $this->Session->write('auth.nc', 0);
-      $this->Logger->warn("Unknown or died session ($sid).");
-      //$this->Logger->trace($_SESSION);
+      Logger::warn("Unknown or died session ($sid).");
+      //Logger::trace($_SESSION);
       $this->requestAuthentication();
     }
   
     $snc=$this->Session->read('auth.nc');
     $nc=hexdec($this->_authData['nc']);
     if ($snc==$nc)
-      $this->Logger->warn("Same request counter $snc is used!");
+      Logger::warn("Same request counter $snc is used!");
   
     // Check request counter
     if ($snc>$nc) {
-      $this->Logger->err("Reused request counter. Current count is {$snc}. Request counter is $nc");
+      Logger::err("Reused request counter. Current count is {$snc}. Request counter is $nc");
       $this->decline();
     }
 
@@ -287,7 +287,7 @@ class DigestAuthComponent extends Object
     $username = $this->__fixWindowsUsername();  
     $user = $this->controller->User->findByUsername($username);
     if ($user === false) {
-      $this->Logger->err("Unknown username '$username'");
+      Logger::err("Unknown username '$username'");
       $this->requestAuthentication();
     }
 
@@ -296,12 +296,12 @@ class DigestAuthComponent extends Object
     $A2=md5($_SERVER['REQUEST_METHOD'].':'.$this->_authData['uri']);
     $validResponse=md5($A1.':'.$this->_authData['nonce'].':'.$this->_authData['nc'].':'.$this->_authData['cnonce'].':'.$this->_authData['qop'].':'.$A2);
     if ($this->_authData['response']!=$validResponse) {
-      $this->Logger->err("Invalid authentication response: Got '".$this->_authData['response']."' but expected '$validResponse'");
+      Logger::err("Invalid authentication response: Got '".$this->_authData['response']."' but expected '$validResponse'");
       $this->decline();
     }
 
     if ($this->controller->User->isExpired($user)) {
-      $this->Logger->warn("User account of '{$user['User']['username']}' (id {$user['User']['id']}) is expired!");
+      Logger::warn("User account of '{$user['User']['username']}' (id {$user['User']['id']}) is expired!");
       $this->decline();
     } else {
       $this->__writeUserData($user);
@@ -327,12 +327,12 @@ class DigestAuthComponent extends Object
 
     $schema = $this->__getAuthSchema();
     if (!$schema) {
-      $this->Logger->err("Drop request without valid authentication");
+      Logger::err("Drop request without valid authentication");
       $this->requestAuthentication();
     }
 
     if (!in_array($schema, $this->validSchemas) && $schema != $this->preferedSchema) {
-      $this->Logger->err("Schema '$schema' is not allowed");
+      Logger::err("Schema '$schema' is not allowed");
       $this->requestAuthentication();
     }
 
@@ -349,7 +349,7 @@ class DigestAuthComponent extends Object
         $this->__checkBasicUser();
         break;
       default: 
-        $this->Logger->err("Authentication schema '$schema' NIY");
+        Logger::err("Authentication schema '$schema' NIY");
         $this->decline();
         break;
     }

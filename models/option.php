@@ -196,7 +196,7 @@ class Option extends AppModel {
     @param mask Bit mask of flag 
     @param level Highes ACL level which should be increased */
   function _increaseAcl(&$data, $flag, $mask, $level) {
-    //$this->Logger->debug("Increase: {$data['gacl']},{$data['uacl']},{$data['oacl']}: $flag/$mask ($level)");
+    //Logger::debug("Increase: {$data['gacl']},{$data['uacl']},{$data['oacl']}: $flag/$mask ($level)");
     if ($level>ACL_LEVEL_OTHER)
       return;
 
@@ -205,7 +205,7 @@ class Option extends AppModel {
       if (($data[$name]&($mask))<$flag)
         $data[$name]=($data[$name]&(~$mask))|$flag;
     }
-    //$this->Logger->debug("Increase (result): {$data['gacl']},{$data['uacl']},{$data['oacl']}: $flag/$mask ($level)");
+    //Logger::debug("Increase (result): {$data['gacl']},{$data['uacl']},{$data['oacl']}: $flag/$mask ($level)");
   }
 
   /** Decrease the ACL level. Decreases the ACL level of higher ACL levels
@@ -218,7 +218,7 @@ class Option extends AppModel {
     @param mask Bit mask of flag
     @param level Lower ACL level which should be downgraded */
   function _decreaseAcl(&$data, $flag, $mask, $level) {
-    //$this->Logger->debug("Decrease: {$data['gacl']},{$data['uacl']},{$data['oacl']}: $flag/$mask ($level)");
+    //Logger::debug("Decrease: {$data['gacl']},{$data['uacl']},{$data['oacl']}: $flag/$mask ($level)");
     if ($level<ACL_LEVEL_GROUP)
       return;
 
@@ -235,7 +235,7 @@ class Option extends AppModel {
       if (($data[$name]&($mask))>=$flag)
         $data[$name]=($data[$name]&(~$mask))|$lower;
     }
-    //$this->Logger->debug("Decrease (result): {$data['gacl']},{$data['uacl']},{$data['oacl']}: $flag/$mask ($level)");
+    //Logger::debug("Decrease (result): {$data['gacl']},{$data['uacl']},{$data['oacl']}: $flag/$mask ($level)");
   }
 
   function setAcl(&$data, $flag, $mask, $level) {

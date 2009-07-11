@@ -43,7 +43,7 @@ class CacheBehavior extends ModelBehavior
       $data = $data[$model->alias];
     }
     if (!isset($data['user_id']) || !isset($data['id'])) {
-      $model->Logger->err("Precondition failed");
+      Logger::err("Precondition failed");
       return false;
     }
     
@@ -58,16 +58,16 @@ class CacheBehavior extends ModelBehavior
     $folder =& new Folder($cacheDir);
     $files = $folder->find($pattern);
     if (!$files) {
-      $model->Logger->trace("No cache files found for media {$data['id']}");
+      Logger::trace("No cache files found for media {$data['id']}");
     } else {
       foreach ($files as $file) {
         if (!@unlink($folder->addPathElement($cacheDir, $file))) {
-          $model->Logger->err("Could not delete cache file ".$folder->addPathElement($cacheDir, $file));
+          Logger::err("Could not delete cache file ".$folder->addPathElement($cacheDir, $file));
         } else {
-          $model->Logger->trace("Deleted cache file '$file'");
+          Logger::trace("Deleted cache file '$file'");
         }
       }
-      $model->Logger->debug("Deleted cache files of media {$data['id']}");
+      Logger::debug("Deleted cache files of media {$data['id']}");
     }
     return true;
   }

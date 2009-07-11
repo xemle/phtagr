@@ -51,7 +51,7 @@ class SystemController extends AppController {
       $this->Session->setFlash("Settings saved");
     }
     $tree = $this->Option->getTree(0);
-    $this->Logger->trace($tree);
+    Logger::trace($tree);
     $this->data = $tree;
   }
 

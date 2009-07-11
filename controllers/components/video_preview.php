@@ -24,7 +24,7 @@
 class VideoPreviewComponent extends Object {
 
   var $controller = null;
-  var $components = array('Logger', 'FileCache', 'FileManager');
+  var $components = array('FileCache', 'FileManager');
 
   function startup(&$controller) {
     $this->controller =& $controller;
@@ -47,9 +47,9 @@ class VideoPreviewComponent extends Object {
         $thumb = $this->FileManager>add($thumbFilename, $video['File']['user_id']);
         $thumb['File']['media_id'] = $video['File']['media_id'];
         if (!$this->controller->MyFile->save($thumb)) {
-          $this->Logger->err("Could not add thumb to database of video {$video['File']['id']}");
+          Logger::err("Could not add thumb to database of video {$video['File']['id']}");
         } else {
-          $this->Logger->verbose("Add missing video thumb $thumbFilename to database (".$this->controller->MyFile->getLastInsertId().")"); 
+          Logger::verbose("Add missing video thumb $thumbFilename to database (".$this->controller->MyFile->getLastInsertId().")"); 
         }
       }
       return $thumbFilename;
@@ -65,7 +65,7 @@ class VideoPreviewComponent extends Object {
     $videoFilename = $this->controller->MyFile->getFilename(&$video);
     $isNew = false;
     if (!file_exists($videoFilename) || !is_readable($videoFilename)) {
-      $this->Logger->err("Video file '$videoFilename' does not exists or is readable");
+      Logger::err("Video file '$videoFilename' does not exists or is readable");
       return false;
     }
     if ($thumbFilename == '') {
@@ -76,11 +76,11 @@ class VideoPreviewComponent extends Object {
       }
     }
     if (!$overwrite && file_exists($thumbFilename)) {
-      $this->Logger->warn("Video thumbnail file '$thumbFilename' already exists");
+      Logger::warn("Video thumbnail file '$thumbFilename' already exists");
       return $thumbFilename;
     }
     if (!is_writeable(dirname($thumbFilename))) {
-      $this->Logger->err("Could not write video thumb. Path '".dirname($thumbFilename)."' is not writable");
+      Logger::err("Could not write video thumb. Path '".dirname($thumbFilename)."' is not writable");
       return false;
     }
     $bin = $this->controller->getOption('bin.ffmpeg', 'ffmpeg');
@@ -90,12 +90,12 @@ class VideoPreviewComponent extends Object {
     $t1 = getMicrotime();
     exec($command, &$output, &$result);
     $t2 = getMicrotime();
-    $this->Logger->debug("Command '$command' returnd $result and required ".round($t2-$t1, 4)."ms");
+    Logger::debug("Command '$command' returnd $result and required ".round($t2-$t1, 4)."ms");
     if ($result != 0) {
-      $this->Logger->err("Command '$command' returned unexcpected $result");
+      Logger::err("Command '$command' returned unexcpected $result");
       return false;  
     } else {
-      $this->Logger->info("Created video thumbnail of '$videoFilename'");
+      Logger::info("Created video thumbnail of '$videoFilename'");
       if ($isNew) {
         $this->FileManager->add($thumbFilename);
       }
@@ -136,7 +136,7 @@ class VideoPreviewComponent extends Object {
     if ($options['create']) {
       $video = $this->controller->Media->getFile($media, FILE_TYPE_VIDEO, false);
       if (!$video) {
-        $this->Logger->err("No video file found for media {$media['Media']['id']}");
+        Logger::err("No video file found for media {$media['Media']['id']}");
         return false;
       }
       $videoFile = $this->controller->MyFile->getFilename($video);
@@ -144,7 +144,7 @@ class VideoPreviewComponent extends Object {
       if (!$thumbFilename && is_writeable(dirname($videoFile))) {
         $thumbFilename = $this->create($video);
       } elseif (!$options['noCache']) {
-        $this->Logger->info("Origination directory of video is not writable. Use cache file ($cache)");
+        Logger::info("Origination directory of video is not writable. Use cache file ($cache)");
         $thumbFilename = $this->create($video, $cache);
       }
     }

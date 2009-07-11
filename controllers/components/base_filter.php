@@ -23,7 +23,7 @@
 
 class BaseFilterComponent extends Object {
 
-  var $components = array('Logger');
+  var $components = array();
   var $controller = null;
 
   var $Manager = null;

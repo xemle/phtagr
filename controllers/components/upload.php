@@ -25,7 +25,7 @@ class UploadComponent extends Object {
   
   var $name = 'UploadComponent';
   var $controller = null;
-  var $components = array('Logger', 'FileCache', 'FileManager');
+  var $components = array('FileCache', 'FileManager');
   
   function startup(&$controller) {
     $this->controller = $controller;
@@ -45,7 +45,7 @@ class UploadComponent extends Object {
   function upload($options = array()) {
     $options = am(array('root' => false, 'path' => '', 'overwrite' => true), $options);
     if (!isset($options['root'])) {
-      $this->Logger->err("Option for root directory is missing");
+      Logger::err("Option for root directory is missing");
       return false;
     } 
     if (!$this->validate()) {
@@ -55,7 +55,7 @@ class UploadComponent extends Object {
     $path = Folder::slashTerm($options['root']).$options['path'];
     $path = Folder::slashTerm($path);
     if (!is_dir($path) || !is_writeable($path)) {
-      $this->Logger->err("Upload path '$path' does not exists or is not writeable");
+      Logger::err("Upload path '$path' does not exists or is not writeable");
       return false;
     }
     $folder = new Folder($path);
@@ -72,18 +72,18 @@ class UploadComponent extends Object {
 
     $tmpFile = $uploadData['tmp_name'];
     if (!move_uploaded_file($tmpFile, $path.$filename)) {
-      $this->Logger->err("Could not write uploaded file");
+      Logger::err("Could not write uploaded file");
       return false;
     }
     // Check users quota
     if (!$this->FileManager->canWrite($uploadData['size'])) {
-      $this->Logger->warn("Quota exceed. Deny upload of {$uploadData['size']} Bytes");
+      Logger::warn("Quota exceed. Deny upload of {$uploadData['size']} Bytes");
       return false;
     }
 
     if (!$this->FileManager->add($path.$filename)) {
       unlink($path.$filename);
-      $this->Logger->err("Could not insert $path$filename to database");
+      Logger::err("Could not insert $path$filename to database");
       return false;
     }
 
@@ -93,12 +93,12 @@ class UploadComponent extends Object {
   function _deleteOldFile($file) {
     $data = $this->controller->MyFile->findByFilename($file);
     if (!$data) {
-      $this->Logger->warn("Could not find file '$file' in database");
+      Logger::warn("Could not find file '$file' in database");
     } else {
       // @TODO delete only media if media requires file
       $this->FileCache->delete($data['File']['user_id'], $data['Media']['id']);
       $this->controller->Media->delete($data['Media']['id']);
-      $this->Logger->info("Delete existsing file '$file' data for overwrite");
+      Logger::info("Delete existsing file '$file' data for overwrite");
     }
   }
 
@@ -122,8 +122,8 @@ class UploadComponent extends Object {
     if (!$data ||
       $data['error'] ||
       !is_uploaded_file($data['tmp_name'])) {
-      $this->Logger->warn('Upload data is invalid');
-      $this->Logger->trace($data);
+      Logger::warn('Upload data is invalid');
+      Logger::trace($data);
       return false;
     }
     return true;

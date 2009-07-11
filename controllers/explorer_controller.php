@@ -295,7 +295,7 @@ class ExplorerController extends AppController
         if ($time !== false) {
           $date = date("Y-m-d H:i:s", $time);
         } else {
-          $this->Logger->warn("Could not convert time of '{$this->data['Media']['date']}'");
+          Logger::warn("Could not convert time of '{$this->data['Media']['date']}'");
         }
       }
 
@@ -308,12 +308,12 @@ class ExplorerController extends AppController
 
         $media = $this->Media->findById($id);
         if (!$media) {
-          $this->Logger->debug("Could not find Media with id $id");
+          Logger::debug("Could not find Media with id $id");
           continue;
         }
         // primary access check
         if (!$this->Media->checkAccess(&$media, &$user, ACL_WRITE_TAG, ACL_WRITE_MASK, &$members)) {
-          $this->Logger->warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change any metadata of image ".$id);
+          Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change any metadata of image ".$id);
           continue;
         }
 
@@ -337,7 +337,7 @@ class ExplorerController extends AppController
           $this->_removeLocation(&$media, &$delLocations);
           $this->_handleHabtm(&$media, 'Location', $locations);
         } else {
-          $this->Logger->warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change metadata of image ".$media['Media']['id']);
+          Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change metadata of image ".$media['Media']['id']);
         }
       
         // Evaluate, if data changed and cleanup of unchanged HABTMs
@@ -358,7 +358,7 @@ class ExplorerController extends AppController
           if ($this->Media->checkAccess(&$media, &$user, 1, 0)) {
             $changedAcl = $this->_editAcl(&$media, $groupId);
           } else {
-            $this->Logger->warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change access rights of image ".$id);
+            Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change access rights of image ".$id);
           }
         }
 
@@ -368,9 +368,9 @@ class ExplorerController extends AppController
           }
           $media['Media']['modified'] = null;
           if (!$this->Media->save($media)) {
-            $this->Logger->warn('Could not save new metadata/acl to image '.$id);
+            Logger::warn('Could not save new metadata/acl to image '.$id);
           } else {
-            $this->Logger->info('Updated metadata or acl of '.$id);
+            Logger::info('Updated metadata or acl of '.$id);
           }
         }
       }
@@ -385,7 +385,7 @@ class ExplorerController extends AppController
     */
   function editmeta($id) {
     if (!$this->RequestHandler->isAjax() || !$this->RequestHandler->isPost()) {
-      $this->Logger->warn("Decline wrong ajax request");
+      Logger::warn("Decline wrong ajax request");
       $this->redirect(null, '404');
     }
     $id = intval($id);
@@ -398,7 +398,7 @@ class ExplorerController extends AppController
       if ($this->Media->checkAccess(&$media, &$user, ACL_WRITE_TAG, ACL_WRITE_MASK)) {
         $this->render('edittag');
       } else {
-        $this->Logger->warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change ACL of image ".$id);
+        Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change ACL of image ".$id);
         $this->render('updatemeta');
       }
     }
@@ -410,7 +410,7 @@ class ExplorerController extends AppController
    */
   function savemeta($id) {
     if (!$this->RequestHandler->isAjax() || !$this->RequestHandler->isPost()) {
-      $this->Logger->warn("Decline wrong ajax request");
+      Logger::warn("Decline wrong ajax request");
       $this->redirect(null, '404');
     }
     $id = intval($id);
@@ -420,7 +420,7 @@ class ExplorerController extends AppController
       $media = $this->Media->findById($id);
 
       if (!$this->Media->checkAccess(&$media, &$user, ACL_WRITE_TAG, ACL_WRITE_MASK)) {
-        $this->Logger->warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change tags of image ".$id);
+        Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change tags of image ".$id);
       } else {
         $ids = $this->Tag->createIdListFromText($this->data['Tags']['text'], 'name', true);
         $media['Tag']['Tag'] = $ids;
@@ -435,7 +435,7 @@ class ExplorerController extends AppController
           $ids = $this->Location->CreateIdList($locations, true);
           $media['Location']['Location'] = $ids;      
         } else {
-          $this->Logger->warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change meta data of image ".$id);
+          Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change meta data of image ".$id);
         }
         $media['Media']['modified'] = null;
         $media['Media']['flag'] |= MEDIA_FLAG_DIRTY;
@@ -455,7 +455,7 @@ class ExplorerController extends AppController
    */
   function updatemeta($id) {
     if (!$this->RequestHandler->isAjax() || !$this->RequestHandler->isPost()) {
-      $this->Logger->warn("Decline wrong ajax request");
+      Logger::warn("Decline wrong ajax request");
       $this->redirect(null, '404');
     }
     $id = intval($id);
@@ -468,7 +468,7 @@ class ExplorerController extends AppController
 
   function editacl($id) {
     if (!$this->RequestHandler->isAjax() || !$this->RequestHandler->isPost()) {
-      $this->Logger->warn("Decline wrong ajax request");
+      Logger::warn("Decline wrong ajax request");
       $this->redirect(null, '404');
     }
     $id = intval($id);
@@ -487,7 +487,7 @@ class ExplorerController extends AppController
       $groups[-1] = '[No Group]';
       $this->set('groups', $groups);
     } else {
-      $this->Logger->warn("User {$user['User']['username']} ({$user['User']['id']}) has no previleges to change ACL of image ".$id);
+      Logger::warn("User {$user['User']['username']} ({$user['User']['id']}) has no previleges to change ACL of image ".$id);
       $this->render('updatemeta');
     }
     //Configure::write('debug', 0);
@@ -495,7 +495,7 @@ class ExplorerController extends AppController
 
   function saveacl($id) {
     if (!$this->RequestHandler->isAjax() || !$this->RequestHandler->isPost()) {
-      $this->Logger->warn("Decline wrong ajax request");
+      Logger::warn("Decline wrong ajax request");
       $this->redirect(null, '404');
     }
     $id = intval($id);
@@ -507,7 +507,7 @@ class ExplorerController extends AppController
       $user = $this->getUser();
       $userId = $user['User']['id'];
       if (!$this->Media->checkAccess(&$media, &$user, 1, 0)) {
-        $this->Logger->warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change ACL of image ".$id);
+        Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change ACL of image ".$id);
       } else {
         // check for existing group of user
         $groupId = $this->data['Group']['id'];
@@ -542,7 +542,7 @@ class ExplorerController extends AppController
 
   function sync($id) {
     if (!$this->RequestHandler->isAjax() || !$this->RequestHandler->isPost()) {
-      $this->Logger->warn("Decline wrong ajax request");
+      Logger::warn("Decline wrong ajax request");
       $this->redirect(null, '404');
     }
     $id = intval($id);
@@ -550,12 +550,12 @@ class ExplorerController extends AppController
     $user = $this->getUser();
     $media = $this->Media->findById($id);
     if (!$media) {
-      $this->Logger->err("User '{$user['User']['username']}' ({$user['User']['id']}) requested non existing image id '$id'");
+      Logger::err("User '{$user['User']['username']}' ({$user['User']['id']}) requested non existing image id '$id'");
       $this->redirect(null, 401);
     }
     $this->Media->setAccessFlags(&$media, $user);
     if (!$media['Media']['isOwner']) {
-      $this->Logger->warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to sync image '$id'");
+      Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to sync image '$id'");
     } else {
       $this->FilterManager->write($media);
       $media =  $this->Media->findById($id);
@@ -609,7 +609,7 @@ class ExplorerController extends AppController
           'north' => $lat+$stepLat, 'south' => $lat, 
           'west' => $lng, 'east' => $lng+$stepLng));
         $points = $this->Query->paginate();
-        //$this->Logger->trace("Found ".count($points)." points");
+        //Logger::trace("Found ".count($points)." points");
         $this->data = am($this->Query->paginate(), $this->data);
         $lng += $stepLng;
       }
@@ -617,7 +617,7 @@ class ExplorerController extends AppController
     }
 
     $this->layout = 'xml';
-    $this->Logger->trace("Query points of N:$north, S:$south, W:$west, E:$east: Found ".count($this->data)." points");
+    Logger::trace("Query points of N:$north, S:$south, W:$west, E:$east: Found ".count($this->data)." points");
     $this->Query->delParams(array('north', 'south', 'west', 'east'));
     if (Configure::read('debug') > 1) {
       Configure::write('debug', 1);

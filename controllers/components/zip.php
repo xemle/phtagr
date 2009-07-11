@@ -25,7 +25,7 @@ class ZipComponent extends Object {
   
   var $name = 'ZipComponent';
   var $controller = null;
-  var $components = array('Logger', 'FileManager');
+  var $components = array('FileManager');
   var $zip = null;
   var $_stats = null;
 
@@ -38,32 +38,32 @@ class ZipComponent extends Object {
 
   function unzip($file, $dst = false) {
     if (!$this->zip) {
-      $this->Logger->err("Missing plugin for class ZipArchive");
+      Logger::err("Missing plugin for class ZipArchive");
       return false;
     }
     if (!is_readable($file)) {
-      $this->Logger->err("File $file is not readable");
+      Logger::err("File $file is not readable");
       return false;
     }
 
     if (!$dst) {
       $dst = dirname($file);
     } elseif (!is_dir($dst)) {
-      $this->Logger->err("Destination $dst is not a directory");
+      Logger::err("Destination $dst is not a directory");
       return false;
     }
     $dst = Folder::slashTerm($dst);
 
     if (!is_writeable($dst)) {
-      $this->Logger->err("Destiantion $dst is not writeable");
+      Logger::err("Destiantion $dst is not writeable");
       return false;
     }
 
     if ($this->zip->open($file) !== true) {
-      $this->Logger->err("Could not open file $file");
+      Logger::err("Could not open file $file");
       return false;
     } else {
-      $this->Logger->info("Open $file with {$this->zip->numFiles} file(s)");
+      Logger::info("Open $file with {$this->zip->numFiles} file(s)");
     }
 
     $this->_stats = array();
@@ -74,7 +74,7 @@ class ZipComponent extends Object {
       $this->_stats[] = $stat;
     }
     if (!$this->FileManager->canWrite($bytes)) {
-      $this->Logger->warn("Extracted data exceeds user's quota");
+      Logger::warn("Extracted data exceeds user's quota");
       return array();
     }
 
@@ -96,7 +96,7 @@ class ZipComponent extends Object {
   function _extract($file, $dst) {
     $fp = $this->zip->getStream($file['name']);
     if (!$fp) {
-      $this->Logger->err("Could not extract {$file['name']}");
+      Logger::err("Could not extract {$file['name']}");
       return false;
     }
     if (dirname($file['name']) != '') {
@@ -104,17 +104,17 @@ class ZipComponent extends Object {
       $fileDir = $dst.dirname($file['name']);
       if (!is_dir($fileDir)) {
         if (!$folder->mkdir($fileDir)) {
-          $this->Logger->err("Could not create directory $fileDir");
+          Logger::err("Could not create directory $fileDir");
           return false;
         } else {
-          $this->Logger->verbose("Create directory $fileDir");
+          Logger::verbose("Create directory $fileDir");
         }
       }
     }
 
     // skip directories, which have zero size
     if ($file['size'] === 0) {
-      $this->Logger->debug("Skip directory {$file['name']}");
+      Logger::debug("Skip directory {$file['name']}");
       return false;
     }
 
@@ -122,7 +122,7 @@ class ZipComponent extends Object {
     $tp = fopen($newFile, 'w');
     if (!$tp) {
       fclose($fp);
-      $this->Logger->err("Could not open file $newFile");
+      Logger::err("Could not open file $newFile");
       return false;
     }
 
@@ -134,16 +134,16 @@ class ZipComponent extends Object {
     fclose($fp);
     fclose($tp);
     if ($written != $file['size']) {
-      $this->Logger->warn("Extraction error: File has {$file['size']} Bytes but $written Bytes were written");
+      Logger::warn("Extraction error: File has {$file['size']} Bytes but $written Bytes were written");
       unlink($newFile);
       return false;
     }
     if (!$this->FileManager->add($newFile)) {
       unlink($newFile);
-      $this->Logger->err("Could not insert $newFile to database");
+      Logger::err("Could not insert $newFile to database");
       return false;
     }
-    $this->Logger->verbose("Extracted {$file['name']} ($written Bytes)");
+    Logger::verbose("Extracted {$file['name']} ($written Bytes)");
     return $newFile;
   }
 }

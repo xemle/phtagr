@@ -42,7 +42,7 @@ LOG_CONSOLE which prints message directly to the console. LOG_BUF which saves
 the log mesages in a internal buffer. LOG_FILE which dumps the log message to a
 file, LOG_HTML which logs formats the log message for HTML output. And finally
 LOG_DB which writes the logmessage to the database */
-class LoggerComponent extends Object {
+class Logger extends Object {
 
   var $_level = L_INFO;
   var $_type = LOG_BUF;
@@ -52,16 +52,10 @@ class LoggerComponent extends Object {
   var $_lines = array();
   var $_enabled = false;
 
-  var $controller = true;
-
-  function startup(&$controller) {
-    $this->controller=$controller;
-  }
-
   function &getInstance() {
     static $instance = null;
     if (!$instance) {
-      $instance =& new LoggerComponent();
+      $instance =& new Logger();
       $instance->__loadBootstrap();
     }
     return $instance;

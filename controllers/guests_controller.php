@@ -65,7 +65,7 @@ class GuestsController extends AppController {
         $guestId = $this->Guest->getLastInsertID();
         $guest = $this->Guest->findById($guestId);
         $user = $this->getUser();
-        $this->Logger->info("User '{$user['User']['username']}' ({$user['User']['id']}) created a guest account '{$guest['Guest']['username']}' ({$guest['Guest']['id']})");
+        Logger::info("User '{$user['User']['username']}' ({$user['User']['id']}) created a guest account '{$guest['Guest']['username']}' ({$guest['Guest']['id']})");
         $this->Session->setFlash("Guest account '{$this->data['Guest']['username']}' was successfully created");
         $this->redirect("edit/$guestId");
       } else {
@@ -110,8 +110,8 @@ class GuestsController extends AppController {
         $auth = max(0, min(3, $this->data['Comment']['auth']));
         $this->Option->setValue('comment.auth', $auth, $guestId);
       } else {
-        $this->Logger->err("Could not save guest");
-        $this->Logger->trace($this->Guest->validationErrors);
+        Logger::err("Could not save guest");
+        Logger::trace($this->Guest->validationErrors);
         $this->Session->setFlash("Guest could not be saved!");
       }
     }
@@ -131,7 +131,7 @@ class GuestsController extends AppController {
       $this->Session->setFlash("Could not find requested guest for deletion");
     } else {
       $user = $this->getUser();
-      $this->Logger->info("User '{$user['User']['username']}' ({$user['User']['id']}) deleted guest account '{$guest['Guest']['username']}' ({$guest['Guest']['id']})");
+      Logger::info("User '{$user['User']['username']}' ({$user['User']['id']}) deleted guest account '{$guest['Guest']['username']}' ({$guest['Guest']['id']})");
       $this->Session->setFlash("Guest account '{$guest['Guest']['username']}' deleted!");
       $this->Guest->delete($guestId);
     }
@@ -156,7 +156,7 @@ class GuestsController extends AppController {
         unset($guest['Guest']['password']);
         $this->Guest->set($guest);
         if ($this->Guest->save()) {
-          $this->Logger->info("Added group '{$group['Group']['name']}' ({$group['Group']['id']}) to guest '{$guest['Guest']['username']}' ({$guest['Guest']['id']})");
+          Logger::info("Added group '{$group['Group']['name']}' ({$group['Group']['id']}) to guest '{$guest['Guest']['username']}' ({$guest['Guest']['id']})");
           $this->Session->setFlash("The group '{$this->data['Group']['name']}' was added to your guest '{$guest['Guest']['username']}'");
         } else {
           $this->Session->setFlash("The group '{$this->data['Group']['name']}' could not be added to your guest '{$guest['Guest']['username']}'");
@@ -187,12 +187,12 @@ class GuestsController extends AppController {
         $this->Guest->id = $guestId;
         $this->Guest->set($guest);
         if (!$this->Guest->save()) {
-          $this->Logger->err("Could not save guest");
-          $this->Logger->trace($this->Guest->validationErrors);
+          Logger::err("Could not save guest");
+          Logger::trace($this->Guest->validationErrors);
           $this->Session->setFlash("Could not save guest");
         } else {
           $group = $this->Group->findById($groupId);
-          $this->Logger->info("Deleted group '{$group['Group']['name']}' ({$group['Group']['id']}) from guest '{$guest['Guest']['username']}' ({$guest['Guest']['id']})");
+          Logger::info("Deleted group '{$group['Group']['name']}' ({$group['Group']['id']}) from guest '{$guest['Guest']['username']}' ({$guest['Guest']['id']})");
           $this->Session->setFlash("Group '{$group['Group']['name']}' was successfully deleted from guest '{$guest['Guest']['username']}'");
         }
       }
@@ -207,7 +207,7 @@ class GuestsController extends AppController {
     $guest = $this->Guest->find(array('Guest.id' => $guestId, 'Creator.id' => $userId));
     if (!$guest) {
       $this->Session->setFlash("Could not find guest!");
-      $this->Logger->err("Could not find guest $guestId for user $userId");
+      Logger::err("Could not find guest $guestId for user $userId");
       $this->redirect("index");
     }
 
@@ -215,8 +215,8 @@ class GuestsController extends AppController {
       $this->Guest->generateKey(&$guest);
       $this->Guest->id = $guestId;
       if (!$this->Guest->save($guest, false, array('key'))) {
-        $this->Logger->err("Could not save user data");
-        $this->Logger->debug($this->Guest->validationErrors);
+        Logger::err("Could not save user data");
+        Logger::debug($this->Guest->validationErrors);
       }
     }
     $this->data = $this->Guest->findById($guestId);

@@ -37,7 +37,7 @@ Page <?php echo $paginator->counter() ?>
     case ROLE_NOBODY: echo 'Nobody'; break;
     default: 
       echo 'Unknown'; 
-      $this->Logger->error("Unkown role of user: ".$user['User']['role']);
+      Logger::error("Unkown role of user: ".$user['User']['role']);
       break;
   };?></td>
   <td><?php
