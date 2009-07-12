@@ -469,6 +469,27 @@ class Media extends AppModel
     return $this->hasAny($conditions);
   }
 
+  function updateRanking($data) {
+    if (!isset($data['Media']['id'])) {
+      Logger::warn("Precondition failed");
+      return false;
+    }
+
+    $timediff = time() - strtotime($data['Media']['lastview']);
+    $ranking = (0.9 * $data['Media']['ranking']) + (0.1 / ($timediff + 1));
+
+    $data['Media']['ranking'] = $ranking;
+    $data['Media']['lastview'] = date("Y-m-d H:i:s", time());
+    $data['Media']['clicks']++;
+    if (!$this->save($data['Media'], true, array('clicks', 'ranking', 'lastview'))) {
+      Logger::err("Could not save new ranking data");
+      return false;
+    } else {
+      Logger::trace("Update ranking of media {$data['Media']['id']} to $ranking with {$data['Media']['clicks']} click(s)");
+      return true;
+    }
+  }
+
   function queryCloud($user, $model='Tag', $num=50) {
     $db =& ConnectionManager::getDataSource($this->useDbConfig);
 

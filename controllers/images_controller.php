@@ -38,6 +38,46 @@ class ImagesController extends AppController
     $this->set('feeds', '/explorer/rss');
   }
 
+  /** Simple crawler detection
+    @todo Verifiy and improve crawler detection */
+  function _isCrawler() {
+    return (preg_match('/(agent|bot|crawl|search|spider|walker)/i', env('HTTP_USER_AGENT')) == 1);
+  }
+
+  /** Update the rating and clicks of a media. The rated media will be stored
+   * in the session to avoid multiple rating per session. */
+  function _updateRating() {
+    if (!$this->data || !isset($this->data['Media']['id'])) {
+      Logger::warn("Precondition failed");
+      return;
+    }
+    if (!$this->Session->check('Session.requestCount') || 
+      $this->Session->read('Session.requestCount') <= 1) {
+      Logger::verbose("No session found or request counter to low");
+      return;
+    } elseif ($this->_isCrawler()) {
+      Logger::verbose("Deny ranking for crawler: ".env('HTTP_USER_AGENT'));
+      return;
+    }
+
+    // Check for media rating
+    $id = $this->data['Media']['id'];
+    $ranked = array();
+    if ($this->Session->check('Media.ranked')) {
+      $ranked = $this->Session->read('Media.ranked');
+    }
+    if (in_array($id, $ranked)) {
+      Logger::trace("Skip ranking for already rated media $id");
+      return;
+    }
+
+    $this->Media->updateRanking($this->data);
+
+    // update rated media ids
+    $ranked[] = $id;
+    $this->Session->write('Media.ranked', $ranked);
+  }
+
   function view($id) {
     $this->Query->setMediaId($id);
     $this->data = $this->Query->paginateMedia();
@@ -53,6 +93,7 @@ class ImagesController extends AppController
       } else {
         $commentAuth = (COMMENT_AUTH_NAME | COMMENT_AUTH_CAPTCHA);
       }
+      $this->_updateRating();
       $this->set('userRole', $this->getUserRole());
       $this->set('userId', $this->getUserId());
       $this->set('commentAuth', $commentAuth);

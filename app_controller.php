@@ -65,6 +65,14 @@ class AppController extends Controller
    * @todo Check expired user */
   function _checkSession() {
     $this->Session->activate();
+    if (!$this->Session->check('Session.requestCount')) {
+      $this->Session->write('Session.requestCount', 1);
+      $this->Session->write('Session.start', time());
+    } else {
+      $count = $this->Session->read('Session.requestCount');
+      $this->Session->write('Session.requestCount', $count + 1);
+    }
+
     if ($this->Session->check('User.id')) {
       return true;
     }
@@ -101,11 +109,13 @@ class AppController extends Controller
    * valid cookie
    * @return True if the correct session correspond to an user */ 
   function _checkUser() {
-    if (!$this->_checkSession())
+    if (!$this->_checkSession()) {
       return false;
+    }
 
-    if ($this->_user)
+    if ($this->_user) {
       return true;
+    }
 
     $userId = $this->Session->read('User.id');
     $user = $this->User->findById($userId);
@@ -119,8 +129,9 @@ class AppController extends Controller
  
   function getUser() {
     if (!$this->_checkUser() || !$this->_user) {
-      if (!$this->_nobody)
+      if (!$this->_nobody) {
         $this->_nobody = $this->User->getNobody();
+      }
       return $this->_nobody;
     }
     return $this->_user;
@@ -136,9 +147,10 @@ class AppController extends Controller
     return $user['User']['id'];
   }
 
-  function hasRole($requiredRole=ROLE_NOBODY) {
-    if ($requiredRole <= $this->getUserRole())
+  function hasRole($requiredRole = ROLE_NOBODY) {
+    if ($requiredRole <= $this->getUserRole()) {
       return true;
+    }
     return false;
   }
 

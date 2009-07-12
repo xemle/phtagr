@@ -96,6 +96,7 @@ class ExplorerMenuHelper extends AppHelper
         'date' => 'Date', 
         'newest' => 'Newest', 
         'changes' => 'Changes', 
+        'popularity' => 'Popularity', 
         'random' => 'Random'
       );
     foreach ($orders as $order => $name) {

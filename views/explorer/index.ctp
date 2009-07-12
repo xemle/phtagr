@@ -79,7 +79,17 @@ foreach($data as $media): ?>
   if (!$query->get('mymedia')): ?>
 <div class="user">
 <?php
-  echo $html->link($media['User']['username'], "/explorer/user/".$media['User']['id']);
+  echo "by ".$html->link($media['User']['username'], "/explorer/user/".$media['User']['id']);
+  $extra = array();
+  if ($media['Media']['clicks'] > 0) {
+    $extra[] = $media['Media']['clicks'].' '.$html->image('icons/eye.png', array('alt' => 'clicks', 'title' => "{$media['Media']['clicks']} clicks"));;
+  }
+  if (count($media['Comment'])) {
+    $extra[] = count($media['Comment']).' '.$html->image('icons/comments.png', array('alt' => 'comments', 'title' => count($media['Comment'])." comments"));
+  }
+  if ($extra) {
+    echo " (".implode(', ', $extra).")";
+  }
 ?>
 </div>
 <?php endif; ?>
