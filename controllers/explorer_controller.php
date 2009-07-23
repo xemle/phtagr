@@ -23,9 +23,9 @@
 
 class ExplorerController extends AppController
 {
-  var $components = array('RequestHandler', 'Query', 'FilterManager');
+  var $components = array('RequestHandler', 'FilterManager', 'Search', 'QueryBuilder');
   var $uses = array('Media', 'MyFile', 'Group', 'Tag', 'Category', 'Location');
-  var $helpers = array('form', 'formular', 'html', 'javascript', 'ajax', 'imageData', 'time', 'query', 'explorerMenu', 'rss');
+  var $helpers = array('form', 'formular', 'html', 'javascript', 'ajax', 'imageData', 'time', 'explorerMenu', 'rss', 'search', 'navigator', 'paginator');
 
   function beforeFilter() {
     if ($this->action == 'points' && 
@@ -34,13 +34,51 @@ class ExplorerController extends AppController
     }
 
     parent::beforeFilter();
-
-    $this->Query->controller =& $this;
-    $this->Query->parseArgs();
+    
+    // disable search parameter after role
+    $role = $this->getUserRole();
+    $disabled = array();
+    switch ($role) {
+      case ROLE_NOBODY:
+        $disabled[] = 'group';
+        $disabled[] = 'file';
+      case ROLE_GUEST:
+        $disabled[] = 'visibility';
+      case ROLE_USER:
+      case ROLE_SYSOP:
+      case ROLE_ADMIN:
+        break;
+      default:
+        Logger::warn("Unhandled role $role");
+    }
+    $this->Search->disabled = $disabled;
+    $this->Search->parseArgs();
   }
 
   function beforeRender() {
-    $this->params['query'] = $this->Query->getParams();
+    $data = $this->Search->paginate();
+    // Set access rights
+    if ($data) {
+      $user = $this->getUser();
+      // @note References in foreach loops does not work with PHP4
+      foreach ($data as &$media) {
+        $this->Media->setAccessFlags($media, $user);
+      }
+    }
+    //Logger::debug($data);
+    $this->set('data', $data);
+    //$this->data = $data;
+
+    //$this->set('mainMenuExplorer', $this->Search->getMenu(&$data));
+    if ($this->hasRole(ROLE_USER)) {
+      $groups = $this->Group->findAll(array('Group.user_id' => $this->getUserId()), false, array('Group.name'));
+      if ($groups) 
+        $groups = Set::combine($groups, "{n}.Group.id", "{n}.Group.name");
+      $groups[0] = '[Keep]';
+      $groups[-1] = '[No Group]';
+      $this->set('groups', $groups);
+    }
+
     $this->set('feeds', array(
       $this->_getMediaRss() => array('title' => 'Media RSS of current search', 'id' => 'gallery') 
       ));
@@ -62,39 +100,40 @@ class ExplorerController extends AppController
   }
 
   function index() {
-    $this->_setDataAndRender();
   }
 
   function query() {
     if (!empty($this->data)) {
-      $this->Query->addTags($this->data['Media']['tags']);
-      $this->Query->setTagOp($this->data['Media']['tag_op']);
-      $this->Query->addCategories($this->data['Media']['categories']);
-      $this->Query->setCategoryOp($this->data['Media']['category_op']);
-      $this->Query->addLocations($this->data['Media']['locations']);
+      /*
+      $this->Search->addTags($this->data['Media']['tags']);
+      $this->Search->setTagOp($this->data['Media']['tag_op']);
+      $this->Search->addCategories($this->data['Media']['categories']);
+      $this->Search->setCategoryOp($this->data['Media']['category_op']);
+      $this->Search->addLocations($this->data['Media']['locations']);
 
-      $this->Query->setDateFrom($this->data['Media']['date_from']);
-      $this->Query->setDateTo($this->data['Media']['date_to']);
+      $this->Search->setDateFrom($this->data['Media']['date_from']);
+      $this->Search->setDateTo($this->data['Media']['date_to']);
 
-      $this->Query->setPageSize($this->data['Query']['show']);
+      $this->Search->setPageSize($this->data['Search']['show']);
 
       if ($this->hasRole(ROLE_GUEST)) {
-        $this->Query->setFilename($this->data['Media']['filename']);
-        $this->Query->setFiletype($this->data['Media']['file_type']);
+        $this->Search->setFilename($this->data['Media']['filename']);
+        $this->Search->setFiletype($this->data['Media']['file_type']);
         // Allow to search for my images
         if ($this->data['User']['username'] == $this->getUserId()) {
-          $this->Query->setUser($this->data['User']['username']);
+          $this->Search->setUser($this->data['User']['username']);
         }
       }
 
       if ($this->hasRole(ROLE_USER)) {
-        $this->Query->setVisibility($this->data['Media']['visibility']);
+        $this->Search->setVisibility($this->data['Media']['visibility']);
 
-        $this->Query->setUser($this->data['User']['username']);
-        $this->Query->setGroupId($this->data['Group']['id']);
+        $this->Search->setUser($this->data['User']['username']);
+        $this->Search->setGroupId($this->data['Group']['id']);
       } 
+      */
     } 
-    $this->_setDataAndRender();
+    $this->render('index');
   }
 
   function search() {
@@ -105,19 +144,19 @@ class ExplorerController extends AppController
       $groups[-1] = '';
       $this->set('groups', $groups);
     }
-    $this->set('userId', $this->Query->getUserId() == $this->getUserId() ? $this->getUserId() : false);
+    $this->set('userId', $this->Search->getUserId() == $this->getUserId() ? $this->getUserId() : false);
     $this->set('userRole', $this->getUserRole());
     $this->set('mainMenuExplorer', array());
   }
 
   function user($idOrName) {
-    $this->Query->setUser($idOrName);
-    $this->_setDataAndRender();
+    $this->Search->setUser($idOrName);
+    $this->render('index');
   }
 
   function group($id) {
-    $this->Query->setGroupId($id);
-    $this->_setDataAndRender();
+    $this->Search->setGroupId($id);
+    $this->render('index');
   }
 
   function date($year = null, $month = null, $day = null) {
@@ -141,44 +180,25 @@ class ExplorerController extends AppController
       }
       $from = mktime(0, 0, 0, $month, $day, $year);
       $to = mktime(0, 0, 0, $m, $d, $y);
-      $this->Query->setDateFrom($from);
-      $this->Query->setDateTo($to-1);
-      $this->Query->setOrder('-date');
+      $this->Search->setDateFrom($from);
+      $this->Search->setDateTo($to-1);
+      $this->Search->setOrder('-date');
     }
-    $this->_setDataAndRender();
+    $this->render('index');
   }
 
   function tag($tags) {
-    $this->Query->addTags(preg_split('/\s*,\s*/', trim($tags)));
-    $this->_setDataAndRender();
+    $this->Search->addTags(preg_split('/\s*,\s*/', trim($tags)));
+    $this->render('index');
   }
 
   function category($categories) {
-    $this->Query->addCategories(preg_split('/\s*,\s*/', trim($categories)));
-    $this->_setDataAndRender();
+    $this->Search->addCategories(preg_split('/\s*,\s*/', trim($categories)));
+    $this->render('index');
   }
 
   function location($locations) {
-    $this->Query->addLocations(preg_split('/\s*,\s*/', trim($locations)));
-    $this->_setDataAndRender();
-  }
-
-  function _setDataAndRender() {
-    $data = $this->Query->paginate();
-    if (count($data) == 0) {
-      $this->Session->setFlash("Sorry. No image or files found!");
-    }
-    $this->set('mainMenuExplorer', $this->Query->getMenu(&$data));
-    $this->set('data', &$data);
-    if ($this->hasRole(ROLE_USER)) {
-      $groups = $this->Group->findAll(array('Group.user_id' => $this->getUserId()), false, array('Group.name'));
-      if ($groups) 
-        $groups = Set::combine($groups, "{n}.Group.id", "{n}.Group.name");
-      $groups[0] = '[Keep]';
-      $groups[-1] = '[No Group]';
-      $this->set('groups', $groups);
-    }
-    $this->set('mediaRss', $this->_getMediaRss());
+    $this->Search->addLocations(preg_split('/\s*,\s*/', trim($locations)));
     $this->render('index');
   }
 
@@ -376,7 +396,7 @@ class ExplorerController extends AppController
       }
       $this->data = array();
     }
-    $this->_setDataAndRender();
+    $this->render('index');
   }
 
   /** 
@@ -569,9 +589,9 @@ class ExplorerController extends AppController
 
   function rss() {
     $this->layoutPath = 'rss';
-    $this->Query->setPageSize(30);
-    $this->Query->setOrder('newest');
-    $this->set('data', $this->Query->paginate());
+    $this->Search->setPageSize(30);
+    $this->Search->setOrder('newest');
+    $this->set('data', $this->Search->paginate());
 
     if (Configure::read('debug') > 1) {
       Configure::write('debug', 1);
@@ -584,7 +604,7 @@ class ExplorerController extends AppController
   }
 
   function media() {
-    $this->data = $this->Query->paginate();
+    $this->data = $this->Search->paginate();
     $this->layout = 'xml';
     if (Configure::read('debug') > 1) {
       Configure::write('debug', 1);
@@ -592,7 +612,7 @@ class ExplorerController extends AppController
   }
 
   function points($north, $south, $west, $east) {
-    $this->Query->setParam('order', 'random');
+    $this->Search->setParam('order', 'random');
 
     $north = floatval($north);
     $south = floatval($south);
@@ -605,24 +625,28 @@ class ExplorerController extends AppController
     while ($lat < $north) {
       $lng = $west;
       while ($lng < $east) {
-        $this->Query->setParams(array(
+        $this->Search->setParams(array(
           'north' => $lat+$stepLat, 'south' => $lat, 
           'west' => $lng, 'east' => $lng+$stepLng));
-        $points = $this->Query->paginate();
+        $points = $this->Search->paginate();
         //Logger::trace("Found ".count($points)." points");
-        $this->data = am($this->Query->paginate(), $this->data);
+        $this->data = am($this->Search->paginate(), $this->data);
         $lng += $stepLng;
       }
       $lat += $stepLat;
     }
 
     $this->layout = 'xml';
-    Logger::trace("Query points of N:$north, S:$south, W:$west, E:$east: Found ".count($this->data)." points");
-    $this->Query->delParams(array('north', 'south', 'west', 'east'));
+    Logger::trace("Search points of N:$north, S:$south, W:$west, E:$east: Found ".count($this->data)." points");
+    $this->Search->del(array('north', 'south', 'west', 'east'));
     if (Configure::read('debug') > 1) {
       Configure::write('debug', 1);
     }
   }
 
+  function test() {
+    
+    $this->render('index');
+  }
 }
 ?>

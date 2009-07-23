@@ -11,9 +11,12 @@ function startSlideshow() {
 </script>
 <?php endif; ?>
 
-<?php if ($query->hasPages()): ?>
+<?php 
+  $search->initialize();
+?>
+<?php if ($navigator->hasPages()): ?>
 <div class="paginator"><div class="subpaginator">
-<?php echo $query->prev().' '.$query->numbers().' '.$query->next(); ?>
+<?php echo $navigator->prev().' '.$navigator->numbers().' '.$navigator->next(); ?>
 </div></div>
 <?php endif; ?>
 
@@ -22,13 +25,12 @@ function startSlideshow() {
   var mediaData = [];
 </script>
 <?php
-$query->initialize();
 $cell=0;
 $canWriteTag=false;
 $canWriteMeta=false;
 $canWriteAcl=false;
 $pos = ($query->get('page', 1)-1) * $query->get('show', 12) + 1;
-foreach($data as $media): ?>
+foreach ($data as $media): ?>
 <?php $side = $cell % 2 ? 'r' : 'l'; ?>
 <?php if (!($cell % 2)): ?><div class="subcolumns"><?php endif; ?>
 <?php 
@@ -59,7 +61,7 @@ foreach($data as $media): ?>
 <?php 
   $size = $imageData->getimagesize($media, OUTPUT_SIZE_THUMB);
   $query->set('pos', $pos++);
-  echo "<a href=\"".Router::url("/images/view/".$media['Media']['id'].'/'.$query->getParams())."\">";
+  echo "<a href=\"".Router::url("/images/view/".$media['Media']['id'].'/'.$search->serialize())."\">";
   echo "<img src=\"".Router::url("/media/thumb/".$media['Media']['id'])."\" $size[3] alt=\"".$media['Media']['name']."\"/>"; 
   echo "</a>";
 
@@ -76,7 +78,7 @@ foreach($data as $media): ?>
 </div>
 
 <?php 
-  if (!$query->get('mymedia')): ?>
+  if (!$search->getMymedia()): ?>
 <div class="user">
 <?php
   echo "by ".$html->link($media['User']['username'], "/explorer/user/".$media['User']['id']);
@@ -115,17 +117,16 @@ foreach($data as $media): ?>
 </div></div>
 <?php endif; ?>
 
-<?php if ($query->hasPages()): ?>
+<?php if ($navigator->hasPages()): ?>
 <div class="paginator"><div class="subpaginator">
-<?php echo $query->prev().' '.$query->numbers().' '.$query->next(); ?>
+<?php echo $navigator->prev().' '.$navigator->numbers().' '.$navigator->next(); ?>
 </div></div>
 <?php endif; ?>
 
 <div class="edit">
 <?php if ($canWriteTag): ?>
 <?php 
-  $query->initialize();
-  echo $form->create(null, array('id' => 'explorer', 'action' => 'edit/'.$query->getParams())); 
+  echo $form->create(null, array('id' => 'explorer', 'action' => 'edit/'.$search->serialize())); 
 ?>
 <fieldset><legend>Metadata</legend>
 <?php echo $form->hidden('Media.ids', array('id' => 'MediaIds')) ?>

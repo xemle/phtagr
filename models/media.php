@@ -43,7 +43,7 @@ class Media extends AppModel
     ACL_LEVEL_USER => 'uacl',
     ACL_LEVEL_OTHER => 'oacl');
 
-  var $actsAs = array('Type', 'Flag', 'Cache');
+  var $actsAs = array('Type', 'Flag', 'Cache', 'Exclude');
 
   function beforeDelete($cascade = true) {
     // Delete media cache files
