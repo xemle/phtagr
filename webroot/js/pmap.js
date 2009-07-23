@@ -36,6 +36,8 @@ function PMap(latitude, longitude, options) {
   this.currentId = null; /**< Current image marker's id */
   this.url = null;    /**< base URL for background queries */
   this.isLoaded = false;
+  this._updatingMarkers = false;
+  this._continueUpdateMarkers = false;
 
   options = options || {};
   var domId = 'map';
@@ -102,6 +104,13 @@ PMap.prototype.updateMarkers = function() {
     return false;
   }
 
+  /** Wait until the current update if finished */
+  if (this._updatingMarkers == true) {
+    this._continueUpdateMarkers = true;
+    return true;
+  }
+  this._updatingMarkers = true;
+
   var bounds = this.gmap.getBounds();
   var sw = bounds.getSouthWest();
   var ne = bounds.getNorthEast();
@@ -114,6 +123,7 @@ PMap.prototype.updateMarkers = function() {
     method: 'get',
     onSuccess: this.readMarkers.bind(this)
   });
+
 }
 
 /** Read markers from xml document 
@@ -123,6 +133,13 @@ PMap.prototype.readMarkers = function(data) {
   var markers = xml.getElementsByTagName("marker");
   for (var i = 0; i < markers.length; i++) {
     this.readMarker(markers[i]);
+  }
+
+  this._updatingMarkers = false;
+  /** trigger next update */
+  if (this._continueUpdateMarkers == true) {
+    this._continueUpdateMarkers = false;
+    this.updateMarkers();
   }
 }
 
