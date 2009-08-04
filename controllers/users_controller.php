@@ -23,7 +23,7 @@
 
 class UsersController extends AppController
 {
-  var $components = array('RequestHandler', 'Cookie', 'Email');
+  var $components = array('RequestHandler', 'Cookie', 'Email', 'Captcha');
   var $uses = array('Option'); 
   var $helpers = array('form', 'formular', 'number');
   var $paginate = array('limit' => 10, 'order' => array('User.username' => 'asc')); 
@@ -37,6 +37,7 @@ class UsersController extends AppController
     $items = array();
     $items[] = array('text' => 'List users', 'link' => 'index');
     $items[] = array('text' => 'Add user', 'link' => 'add');
+    $items[] = array('text' => 'Registration', 'link' => 'register');
     $items = am($items, $this->menuItems);
     return $items;
   }
@@ -55,6 +56,47 @@ class UsersController extends AppController
       $this->set('mainMenu', $menu);
     }
   }
+
+  function __fromReadableSize($readable) {
+    if (is_float($readable) || is_numeric($readable)) {
+      return $readable;
+    } elseif (preg_match_all('/^\s*(0|[1-9][0-9]*)(\.[0-9]+)?\s*([KkMmGg][Bb]?)?\s*$/', $readable, $matches, PREG_SET_ORDER)) {
+      $matches = $matches[0];
+      $size = (float)$matches[1];
+      if (is_numeric($matches[2])) {
+        $size += $matches[2];
+      }
+      if (is_string($matches[3])) {
+        switch ($matches[3][0]) {
+          case 'k':
+          case 'K':
+            $size = $size * 1024;
+            break;
+          case 'm':
+          case 'M':
+            $size = $size * 1024 * 1024;
+            break;
+          case 'g':
+          case 'G':
+            $size = $size * 1024 * 1024 * 1024;
+            break;
+          case 'T':
+            $size = $size * 1024 * 1024 * 1024 * 1024;
+            break;
+          default:
+            Logger::err("Unknown unit {$matches[3]}");
+        }
+      }
+      if ($size < 0) {
+        Logger::err("Size is negtive: $size");
+        return 0;
+      }
+      return $size;
+    } else {
+      return 0;
+    }
+  }
+
 
   /** Checks the login of the user. If the session variable 'loginRedirect' is
    * set the user is forwarded to this given address on successful login. */
@@ -111,6 +153,7 @@ class UsersController extends AppController
       }
       unset($this->data['User']['password']);
     }
+    $this->set('register', $this->Option->getValue($this->getUser(), 'user.register.enable', 0));
   }
 
   function logout() {
@@ -298,6 +341,31 @@ class UsersController extends AppController
     $this->redirect("path/$id");
   }
 
+  function admin_register() {
+    $this->requireRole(ROLE_SYSOP, array('loginRedirect' => '/admin/users'));
+
+    if (!empty($this->data)) {
+      if ($this->data['user']['register']['enable']) {
+        $this->Option->setValue('user.register.enable', 1, 0);
+      } else {
+        $this->Option->setValue('user.register.enable', 0, 0);
+      }
+      $quota = $this->__fromReadableSize($this->data['user']['register']['quota']);
+      $this->Option->setValue('user.register.quota', $quota, 0); 
+      $this->Session->setFlash("Options are saved");
+    }
+    $this->data = $this->Option->getTree($this->getUserId());
+
+    // add default values
+    if (!isset($this->data['user']['register']['enable'])) {
+      $this->data['user']['register']['enable'] = 0;
+    }
+    if (!isset($this->data['user']['register']['quota'])) {
+      $this->data['user']['register']['quota'] = (float)100*1024*1024;
+    }
+    
+  } 
+ 
   /** Password recovery */
   function password() {
     if (!empty($this->data)) {
@@ -315,8 +383,8 @@ class UsersController extends AppController
             $user['User']['email']);
   
         $this->Email->subject = 'Password Request';
-        $this->Email->replyTo = 'noreply@phtagr.org';
-        $this->Email->from = 'phTagr <noreply@phtagr.org>';
+        $this->Email->replyTo = "noreply@{$_SERVER['SERVER_NAME']}";
+        $this->Email->from = "phTagr <noreply@{$_SERVER['SERVER_NAME']}>";
 
         $this->Email->template = 'password';
         $user = $this->User->decrypt(&$user);
@@ -338,5 +406,212 @@ class UsersController extends AppController
       }
     }
   }
+
+  function register() {
+    if ($this->getUserRole() != ROLE_NOBODY) {
+      $this->redirect('/');
+    } elseif (!$this->getOption('user.register.enable', 0)) {
+      Logger::verbose("User registration is disabled");
+      $this->redirect('login');
+    }
+
+    if (!empty($this->data)) {
+      if ($this->data['Captcha']['verification'] != $this->Session->read('user.register.captcha')) {
+        $this->Session->setFlash('Captcha verification failed');
+        Logger::verbose("Captcha verification failed");
+      } elseif ($this->User->hasAny(array('User.username' => $this->data['User']['username']))) {
+        $this->Session->setFlash('Username is already taken, please choose another name!');
+        Logger::info("Username already exists: {$this->data['User']['username']}");
+      } else {
+        $user = $this->User->create($this->data);
+        if ($this->User->save($user['User'], true, array('id', 'username', 'password', 'email'))) {
+          Logger::info("New user {$this->data['User']['username']} was created");
+          $this->_initRegisteredUser($this->User->getLastInsertID());
+        } else {
+          Logger::err("Creation of user {$this->data['User']['username']} failed");
+          $this->Session->setFlash('Could not create user');
+        }
+      }
+    }
+    unset($this->data['User']['password']);
+    unset($this->data['User']['confirm']);
+    unset($this->data['Captcha']['verification']);
+  }
+
+  function captcha() {
+    if (!$this->getOption('user.register.enable', 0)) {
+      $this->redirect(null, 404);
+    }
+
+    $this->Captcha->render('user.register.captcha');
+  }
+
+  function _initRegisteredUser($newUserId) {
+    $user = $this->User->findById($newUserId);
+    if (!$user) {
+      Logger::err("Could not find user with ID $newUserId");
+      return false;
+    }
+    $options = $this->Option->getTree(0);
+    $user['User']['role'] = ROLE_USER;
+    $user['User']['expires'] = date("Y-m-d H:i:s", time() - 3600);
+    $user['User']['quota'] = $this->Option->getValue($options, 'user.register.quota', 0);
+    if (!$this->User->save($user['User'], true, array('role', 'expires', 'quota'))) {
+      Logger::err("Could not init user $newUserId");
+      return false;
+    }
+    // set confirmation key
+    $key = md5($newUserId.':'.$user['User']['username'].':'.$user['User']['password'].':'.$user['User']['expires']);
+    $this->Option->setValue('user.register.key', $key, $newUserId);
+    // send confimation email
+    if (!$this->_sendConfirmationEmail($user, $key)) {
+      $this->Session->setFlash("Could not send your confirmation email. Please contact the admin");
+      return false;
+    }
+    $this->Session->setFlash("A confirmation email was sent to your email address");
+    $this->redirect("/users/confirm");
+  }
+
+  function confirm($key = false) {
+    if ($this->getUserRole() != ROLE_NOBODY) {
+      $this->redirect('/');
+    } elseif (!$this->getOption('user.register.enable', 0)) {
+      Logger::verbose("User registration is disabled");
+      $this->redirect(null, 404);
+    }
+
+    if (!$key && !empty($this->data)) {
+      // check user input
+      if (empty($this->data['User']['key'])) {
+        $this->Session->setFlash("Please enter the confirmation key");
+      } else { 
+        $key = $this->data['User']['key']; 
+      }
+    }
+
+    if ($key) {
+      $this->_checkConfirmation($key);
+    }
+  }
+
+  /** Verifies the confirmation key and activates the new user account 
+    @param key Account confirmation key */
+  function _checkConfirmation($key) {
+    // check key. Option [belongsTo] User: The user is bound to option
+    $user = $this->Option->find(array("Option.value" => $key));
+    if (!$user) {
+      Logger::trace("Could not find confirmation key");
+      $this->Session->setFlash("Could not find confirmation key");
+      return false;
+    } 
+
+    if (!isset($user['User']['id'])) {
+      Logger::err("Could not find the user for register confirmation");
+      $this->Session->setFlash("Internal error occured");
+      return false;
+    }
+    
+    // check expiration (14 days+1h). After this time, the account will be
+    // deleted
+    $now = time();
+    $expires = strtotime($user['User']['expires']);
+    if ($now - $expires > (14 * 24 * 3600 + 3600)) {
+      $this->Session->setFlash("Could not find confirmation key");
+      Logger::err("Registration confirmation is expired.");
+      $this->User->delete($user['User']['id']);
+      Logger::info("Deleted user from expired registration");
+      return false;
+    }
+
+    // activate user account (disabling the expire date)
+    $user['User']['expires'] = null;
+    if (!$this->User->save($user['User'], true, array('expires'))) {
+      Logger::err("Could not update expires of user {$user['User']['id']}");
+      return false;
+    }
+    // send email to user and notify the sysops
+    $this->_sendNewAccountEmail($user);
+    $this->_sendNewAccountNotifiactionEmail($user);
+
+    // delete confirmation key
+    $this->Option->delete($user['Option']['id']);
+
+    // login the user automatically 
+    $this->User->writeSession($user, &$this->Session);
+    $this->redirect('/options/profile');
+  }
+
+  /** Send the confirmation email to the new user
+    @param user User model data
+    @param key Confirmation key to activate the account */
+  function _sendConfirmationEmail($user, $key) {
+    $this->Email->to = $user['User']['email'];
+
+    $this->Email->subject = '[phtagr] Account confirmation: '.$user['User']['username'];
+    $this->Email->replyTo = "noreply@{$_SERVER['SERVER_NAME']}";
+    $this->Email->from = "{$_SERVER['SERVER_NAME']} <noreply@{$_SERVER['SERVER_NAME']}>";
+
+    $this->Email->template = 'new_account_confirmation';
+    $this->set('user', $user);
+    $this->set('key', $key);
+
+    if (!$this->Email->send()) {
+      Logger::err("Could not send account confirmation mail to {$user['User']['email']} for new user {$user['User']['username']}");
+      return false;
+    } else {
+      Logger::info("Account confirmation mail send to {$user['User']['email']} for new user {$user['User']['username']}");
+      return true;
+    }
+  }
+
+  /** Send an email for the new account to the new user 
+    @param user User model data */
+  function _sendNewAccountEmail($user) {
+    $this->Email->to = $user['User']['email'];
+
+    $this->Email->subject = '[phtagr] Welcome '.$user['User']['username'];
+    $this->Email->replyTo = "noreply@{$_SERVER['SERVER_NAME']}";
+    $this->Email->from = "{$_SERVER['SERVER_NAME']} <noreply@{$_SERVER['SERVER_NAME']}>";
+
+    $this->Email->template = 'new_account';
+    $this->set('user', $user);
+
+    if (!$this->Email->send()) {
+      Logger::err("Could not send new account mail to {$user['User']['email']} for new user {$user['User']['username']}");
+      return false;
+    }
+    Logger::info("New account mail send to {$user['User']['email']} for new user {$user['User']['username']}");
+    return true;
+  }
+
+  /** Send a notification email to all system operators (and admins) of the new
+   * account
+    @param user User model data (of the new user) */
+  function _sendNewAccountNotifiactionEmail($user) {
+    $sysOps = $this->User->findAll("User.role >= ".ROLE_SYSOP);
+    if (!$sysOps) {
+      Logger::err("Could not find system operators");
+      return false;
+    }
+    $emails = Set::combine($sysOps, '{n}.User.id', array('{0} <{1}>', '{n}.User.username', '{n}.User.email'));
+
+    $this->Email->to = array_pop($emails);
+    $this->Email->bcc = $emails;
+
+    $this->Email->subject = '[phtagr] New account notification: '.$user['User']['username'];
+    $this->Email->replyTo = "noreply@{$_SERVER['SERVER_NAME']}";
+    $this->Email->from = "{$_SERVER['SERVER_NAME']} <noreply@{$_SERVER['SERVER_NAME']}>";
+
+    $this->Email->template = 'new_account_notification';
+    $this->set('user', $user);
+
+    if (!$this->Email->send()) {
+      Logger::err("Could not send new account notification email to system operators ".implode(', ', Set::combine($sysOps, '{n}.User.id', '{n}.User.username')));
+      return false;
+    } 
+    Logger::info("New account notification email send to system operators ".implode(', ', Set::combine($sysOps, '{n}.User.id', '{n}.User.username')));
+    return true;
+  }
+
 }
 ?>

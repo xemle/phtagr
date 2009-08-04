@@ -11,4 +11,7 @@
 <?php echo $form->submit('Login'); ?>
 </form>
 
-<?php echo $html->link('Forgot your password?', 'password'); ?>
+<?php echo $html->link('Forgot your password', 'password'); ?>
+<?php if ($register): ?>
+ or create <?php echo $html->link('your account', 'register'); ?>
+<?php endif; ?>

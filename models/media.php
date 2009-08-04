@@ -566,7 +566,6 @@ class Media extends AppModel
   function deleteFromUser($userId) {
     $this->bindModel(array(
       'hasMany' => array(
-        'Property' => array('dependent' => true), 
         'Comment' => array('dependent' => true)
       )));
     $this->_deleteHasAndBelongsToManyFromUser($userId);

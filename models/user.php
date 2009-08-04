@@ -29,13 +29,14 @@ class User extends AppModel
 
   var $hasMany = array(
                   'Group' => array('dependent' => true),
-                  'Option' => array('dependent' => true),
+                  'Option' => array('dependent' => true, 'dependent' => true),
                   'Guest' => array('foreignKey' => 'creator_id', 'dependent' => true)
                   );
 
   var $hasAndBelongsToMany = array(
                   'Member' => array(
-                      'className' => 'Group'
+                      'className' => 'Group', 
+                      'dependent' => true
                     )
                   );
 
@@ -46,6 +47,9 @@ class User extends AppModel
     'password' => array(
       'rule' => array('between', 6, 20),
       'message' => 'Password must be between 6 and 20 characters long.'),
+    'role' => array(
+      'rule' => array('between', ROLE_GUEST, ROLE_ADMIN),
+      'message' => 'Invalid role'),
     'email' => array(
       'rule' => array('email'),
       'message' => 'Email address is not valid')
@@ -59,7 +63,9 @@ class User extends AppModel
   }
 
   function __fromReadableSize($readable) {
-    if (preg_match_all('/^\s*(0|[1-9][0-9]*)(\.[0-9]+)?\s*([KkMmGg][Bb]?)\s*$/', $readable, $matches, PREG_SET_ORDER)) {
+    if (is_float($readable) || is_numeric($readable)) {
+      return $readable;
+    } elseif (preg_match_all('/^\s*(0|[1-9][0-9]*)(\.[0-9]+)?\s*([KkMmGg][Bb]?)?\s*$/', $readable, $matches, PREG_SET_ORDER)) {
       $matches = $matches[0];
       $size = (float)$matches[1];
       if (is_numeric($matches[2])) {
@@ -131,6 +137,9 @@ class User extends AppModel
     $this->Media =& new Media();
     Logger::info("Delete all image database entries of user $id");
     $this->Media->deleteFromUser($id);
+
+    $this->MyFile =& new MyFile();
+    $this->MyFile->deleteAll("File.user_id = $id");
 
     $dir = USER_DIR.$id;
     Logger::info("Delete user directory of user $id: $dir");

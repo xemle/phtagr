@@ -6,9 +6,9 @@ class CaptchaComponent extends Object
     $this->controller = $controller;
   }
 
-  function render() {
+  function render($name = 'captcha') {
     $kcaptcha = new KCAPTCHA();
-    $this->controller->Session->write('captcha', $kcaptcha->getKeyString());
+    $this->controller->Session->write($name, $kcaptcha->getKeyString());
   }
 }
 ?>
