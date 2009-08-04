@@ -1,4 +1,4 @@
-<h1>Advance Search</h1>
+<h1>Advanced Search</h1>
 
 <?php echo $form->create(null, array('action' => 'query')); ?>
 <fieldset><legend>Metadata</legend>
