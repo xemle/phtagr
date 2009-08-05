@@ -205,7 +205,7 @@ class CommentsController extends AppController
 
     $this->Email->subject = '[phtagr] Comment notification: '.$media['Media']['name'];
     $this->Email->replyTo = "noreply@{$_SERVER['SERVER_NAME']}";
-    $this->Email->from = $comment['Comment']['name'].' <noreply@{$_SERVER['SERVER_NAME']}>';
+    $this->Email->from = $comment['Comment']['name']." <noreply@{$_SERVER['SERVER_NAME']}>";
 
     $this->Email->template = 'commentnotify';
     $this->set('data', $comment);
