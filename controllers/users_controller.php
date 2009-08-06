@@ -101,7 +101,7 @@ class UsersController extends AppController
   /** Checks the login of the user. If the session variable 'loginRedirect' is
    * set the user is forwarded to this given address on successful login. */
   function login() {
-    $failedText = "Sorry. Username is unkonwn or password was wrong";
+    $failedText = "Sorry. Wrong password or unknown username!";
     if (!empty($this->data) && !$this->RequestHandler->isPost()) {
       Logger::warn("Authentication failed: Request was not HTTP POST");
       $this->Session->setFlash($failedText);
@@ -292,7 +292,7 @@ class UsersController extends AppController
 
     if (!empty($this->data)) {
       if ($this->User->hasAny(array('User.username' => $this->data['User']['username']))) {
-        $this->Session->setFlash('Username is already given, please choose another name!');
+        $this->Session->setFlash('Username already exists, please choose a different name!');
       } else {
         $this->data['User']['role'] = ROLE_USER;
         if ($this->User->save($this->data, true, array('username', 'password', 'role', 'email'))) {
@@ -301,7 +301,7 @@ class UsersController extends AppController
           $this->redirect('/admin/users/edit/'.$this->User->id);
         } else {
           Logger::warn("Creation of user {$this->data['User']['username']} failed");
-          $this->Session->setFlash('Could not create user');
+          $this->Session->setFlash('Could not create user!');
         }
       }
     }
@@ -313,7 +313,7 @@ class UsersController extends AppController
     $id = intval($id);
     $user = $this->User->findById($id);
     if (!$user) {
-      $this->Session->setFlash("Could not find user to delete");
+      $this->Session->setFlash("Could not delete user: user not found!");
       $this->redirect('/admin/users/');
     } else {
       $this->User->del($id);
@@ -352,7 +352,7 @@ class UsersController extends AppController
       }
       $quota = $this->__fromReadableSize($this->data['user']['register']['quota']);
       $this->Option->setValue('user.register.quota', $quota, 0); 
-      $this->Session->setFlash("Options are saved");
+      $this->Session->setFlash("Options saved!");
     }
     $this->data = $this->Option->getTree($this->getUserId());
 
@@ -391,17 +391,17 @@ class UsersController extends AppController
         $this->set('user', $user);
 
         if ($this->Email->send()) {
-          Logger::info(sprintf("Sent password mail of '%s' (id %d) to %s",
+          Logger::info(sprintf("Sent password mail to user '%s' (id %d) with address %s",
             $user['User']['username'], 
             $user['User']['id'],
             $user['User']['email']));
-          $this->Session->setFlash('Mail was sent');
+          $this->Session->setFlash('Mail was sent!');
         } else {
-          Logger::err(sprintf("Could not sent password mail of '%s' (id %d) to '%s'",
+          Logger::err(sprintf("Could not send password mail to user '%s' (id %d) with address '%s'",
             $user['User']['username'],
             $user['User']['id'],
             $user['User']['email']));
-          $this->Session->setFlash('Mail could not sent');
+          $this->Session->setFlash('Mail could not be sent: unknown error!');
         }
       }
     }
@@ -420,7 +420,7 @@ class UsersController extends AppController
         $this->Session->setFlash('Captcha verification failed');
         Logger::verbose("Captcha verification failed");
       } elseif ($this->User->hasAny(array('User.username' => $this->data['User']['username']))) {
-        $this->Session->setFlash('Username is already taken, please choose another name!');
+        $this->Session->setFlash('Username already exists, please choose different name!');
         Logger::info("Username already exists: {$this->data['User']['username']}");
       } else {
         $user = $this->User->create($this->data);
@@ -465,7 +465,7 @@ class UsersController extends AppController
     $this->Option->setValue('user.register.key', $key, $newUserId);
     // send confimation email
     if (!$this->_sendConfirmationEmail($user, $key)) {
-      $this->Session->setFlash("Could not send your confirmation email. Please contact the admin");
+      $this->Session->setFlash("Could not send the confirmation email. Please contact the admin.");
       return false;
     }
     $this->Session->setFlash("A confirmation email was sent to your email address");
