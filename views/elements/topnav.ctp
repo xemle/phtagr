@@ -13,4 +13,9 @@
   } else {
     echo $html->link(_("Login"), "/users/login");
   }
+
+  echo $form->create(null, array('url' => array('controller' => 'explorer', 'action' => 'quicksearch'))); 
+  echo $form->input('Media.quicksearch', array ('label' => false));
+  echo $form->end('Search');
 ?>
+

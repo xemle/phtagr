@@ -65,6 +65,47 @@ class ExplorerController extends AppController
     $this->_setDataAndRender();
   }
 
+  function quicksearch($quicksearch = false) {
+    if (!empty($this->data) && isset($this->data['Media']['quicksearch'])) {
+      $quicksearch = $this->data['Media']['quicksearch'];
+    } 
+
+    if ($quicksearch) {
+      // Perform queries for each Tags, Categories and Locations
+      // seperately:
+
+			// Split the query so that we have a list of tags/categories/locations.
+			// For now we split at whitespaces, improvements could be made to not
+			// split multiple tags/categories/locations enclosed in quotation marks
+			$quicksearch = preg_split('/\s+/', trim($quicksearch));
+
+      // Reduce results to 6 
+      $this->Query->setPageSize(6);
+
+      // Add tag to the query
+      $this->Query->addTags($quicksearch);
+      // Set variable dataTags for view
+      $this->Query->setTagOp(1);
+      $this->set('dataTags', $this->Query->paginate());
+      // Reset query
+			$this->Query->clearTags ();
+      $this->Query->setTagOp(0);
+
+      $this->Query->addCategories($quicksearch);
+      $this->Query->setCategoryOp(1);
+      $this->set('dataCategories', $this->Query->paginate());
+			$this->Query->clearCategories();
+      $this->Query->setCategoryOp(0);
+
+      $this->Query->addLocations($quicksearch);
+      $this->Query->setLocationOp(1);
+      $this->set('dataLocations', $this->Query->paginate());
+      $this->Query->clearLocations();
+      $this->Query->setLocationOp(0);
+    }
+    $this->set('quicksearch', $quicksearch);
+  }
+
   function query() {
     if (!empty($this->data)) {
       $this->Query->addTags($this->data['Media']['tags']);
@@ -77,7 +118,6 @@ class ExplorerController extends AppController
       $this->Query->setDateTo($this->data['Media']['date_to']);
 
       $this->Query->setPageSize($this->data['Query']['show']);
-
       if ($this->hasRole(ROLE_GUEST)) {
         $this->Query->setFilename($this->data['Media']['filename']);
         $this->Query->setFiletype($this->data['Media']['file_type']);
@@ -169,6 +209,7 @@ class ExplorerController extends AppController
       $this->Session->setFlash("Sorry. No image or files found!");
     }
     $this->set('mainMenuExplorer', $this->Query->getMenu(&$data));
+
     $this->set('data', &$data);
     if ($this->hasRole(ROLE_USER)) {
       $groups = $this->Group->findAll(array('Group.user_id' => $this->getUserId()), false, array('Group.name'));

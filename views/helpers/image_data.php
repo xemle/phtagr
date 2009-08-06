@@ -321,4 +321,28 @@ class ImageDataHelper extends AppHelper {
     return $this->form->input($fieldName, $options);
   }  
 
+  /** Returns the visibility icon for the own media 
+    @params media Media model data 
+    @return Html output for the icon or false */
+  function getVisibilityIcon(&$media) {
+    $icon = false;
+    if (isset($media['Media']['isOwner']) && $media['Media']['isOwner']) {
+      switch ($media['Media']['visibility']) {
+        case ACL_LEVEL_OTHER: 
+          $icon = $this->html->image('icons/world.png', array('title' => 'This media is public visible'));;
+          break;
+        case ACL_LEVEL_USER: 
+          $icon = $this->html->image('icons/group.png', array('title' => 'This media is visible for users'));;
+          break;
+        case ACL_LEVEL_GROUP: 
+          $icon = $this->html->image('icons/user.png', array('title' => 'This media is visible for group members'));;
+          break;
+        default: 
+          $icon = $this->html->image('icons/stop.png', array('title' => 'This media is private'));;
+          break;
+      }
+    }
+    return $icon;
+  }
+
 }
