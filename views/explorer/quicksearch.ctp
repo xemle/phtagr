@@ -25,9 +25,9 @@ if (count($dataTags) > 0) : ?>
 <?php foreach($dataTags as $media): ?>
 
 <?php  
-	$size = $imageData->getimagesize($media, OUTPUT_SIZE_MINI); 
+	$size = $imageData->getimagesize($media, OUTPUT_SIZE_MINI, true); 
   $query->set('pos', $pos++); 
-  echo "<a href=\"".Router::url("/images/view/".$media['Media']['id'].'/'.$query->getParams())."\">"; 
+  echo "<a href=\"".Router::url("/images/view/".$media['Media']['id'])."\">"; 
   echo "<img src=\"".Router::url("/media/mini/".$media['Media']['id'])."\" $size[3] alt=\"".$media['Media']['name']."\"/>";  
   echo "</a>"; 
 ?> 
@@ -50,9 +50,9 @@ if (count($dataCategories) > 0) : ?>
 <?php foreach($dataCategories as $media): ?>
 
 <?php  
-	$size = $imageData->getimagesize($media, OUTPUT_SIZE_MINI); 
+	$size = $imageData->getimagesize($media, OUTPUT_SIZE_MINI, true); 
   $query->set('pos', $pos++); 
-  echo "<a href=\"".Router::url("/images/view/".$media['Media']['id'].'/'.$query->getParams())."\">"; 
+  echo "<a href=\"".Router::url("/images/view/".$media['Media']['id'])."\">"; 
   echo "<img src=\"".Router::url("/media/mini/".$media['Media']['id'])."\" $size[3] alt=\"".$media['Media']['name']."\"/>";  
   echo "</a>"; 
 ?> 
@@ -75,9 +75,9 @@ if (count($dataLocations) > 0) : ?>
 <?php foreach($dataLocations as $media): ?>
 
 <?php  
-	$size = $imageData->getimagesize($media, OUTPUT_SIZE_MINI); 
+	$size = $imageData->getimagesize($media, OUTPUT_SIZE_MINI, true); 
   $query->set('pos', $pos++); 
-  echo "<a href=\"".Router::url("/images/view/".$media['Media']['id'].'/'.$query->getParams())."\">"; 
+  echo "<a href=\"".Router::url("/images/view/".$media['Media']['id'])."\">"; 
   echo "<img src=\"".Router::url("/media/mini/".$media['Media']['id'])."\" $size[3] alt=\"".$media['Media']['name']."\"/>";  
   echo "</a>"; 
 ?> 
