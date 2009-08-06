@@ -150,7 +150,7 @@ class CipherBehavior extends ModelBehavior
           if ($decrypt) {
             $data[$model->name][$column] = $decrypt;
           } else {
-            $this->log(__METHOD__." Could not decrpyt {$model->name}::$column: '{$data[$model->name][$column]}'");
+            $this->log(__METHOD__." Could not decrypt {$model->name}::$column: '{$data[$model->name][$column]}'");
           }
         }
       }
