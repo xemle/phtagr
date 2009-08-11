@@ -24,7 +24,13 @@
 class ImageDataHelper extends AppHelper {
   var $helpers = array('time', 'ajax', 'html', 'form', 'query');
 
-  function getimagesize($data, $size, $square=false) {
+  /** Returns the image size of the given media. This function considers the
+    orientaion of the media.
+    @param media Media model data
+    @param resize New size. If false than it returns the media size
+    @param square Returns the squared size of resize value 
+    @return array of sizes. array(height, width, html size) */
+  function getimagesize($data, $resize = false, $square=false) {
     if (!isset($data['Media']['width']) ||
       !isset($data['Media']['height']) ||
       !isset($data['Media']['orientation'])) {
@@ -34,18 +40,20 @@ class ImageDataHelper extends AppHelper {
       $result[3] = "";
       return $result;
     }
-    if ($square) {
-      $width=$size;
-      $height=$size;
-    } else {
-      $width=$data['Media']['width'];
-      $height=$data['Media']['height'];
-      if ($width > $size && $width>=$height) {
-        $height=intval($size*($height/$width));
-        $width=$size;
-      } elseif ($height > $size && $height > $width) {
-        $width=intval($size*($width/$height));
-        $height=$size;
+    $width=$data['Media']['width'];
+    $height=$data['Media']['height'];
+    if ($resize) {
+      if ($square) {
+        $width=$resize;
+        $height=$resize;
+      } else {
+        if ($width > $resize && $width>=$height) {
+          $height=intval($resize*($height/$width));
+          $width=$resize;
+        } elseif ($height > $resize && $height > $width) {
+          $width=intval($resize*($width/$height));
+          $height=$resize;
+        }
       }
     }
     $result = array();
