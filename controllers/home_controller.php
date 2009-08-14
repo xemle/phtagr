@@ -26,14 +26,37 @@ class HomeController extends AppController
 	var $name = 'home';
 
   var $components = array('Query');
-  var $helpers = array('html', 'time', 'text');
+  var $helpers = array('html', 'time', 'text', 'imageData');
   var $uses = array('Media', 'Tag', 'Category', 'Comment');
 
+  /** @todo improve the randomized newest media */
   function index() {
-    $cloud = $this->Query->getCloud(50);
+    $this->Query->setOrder('newest');
+    $max = 50;
+    $this->Query->setPageSize($max);
+    $data = $this->Query->paginate();
+    // generate tossed index to variy the media 
+    srand(time());
+    $toss = array();
+    for ($i = 0; $i < count($data); $i++) {
+      $toss[] = rand(0, 100);
+    }
+    asort($toss);
+    // reassign index
+    $tossData = array();
+    foreach ($toss as $index => $r) {
+      $tossData[] =& $data[$index];
+    }
+    $this->set('newMedia', $tossData);
+
+    $this->Query->setOrder('random');
+    $this->Query->setPageSize(1);
+    $this->set('randomMedia', $this->Query->paginate());
+
+    $cloud = $this->Query->getCloud(35);
     $this->set('cloudTags', $cloud);
 
-    $cloud = $this->Query->getCloud(50, 'Category');
+    $cloud = $this->Query->getCloud(25, 'Category');
     $this->set('cloudCategories', $cloud);
 
     $acl = "1 = 1".$this->Media->buildWhereAcl($this->getUser());

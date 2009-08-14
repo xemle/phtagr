@@ -22,3 +22,14 @@ table.default tbody tr:hover a {
   background-color: #f63;
 }
 
+
+table.bare {
+  border: 0;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+table.bare tbody tr,
+table.bare tbody tr td {
+  margin: 0;
+  padding: 0;
+}

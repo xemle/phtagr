@@ -27,39 +27,62 @@ class ImageDataHelper extends AppHelper {
   /** Returns the image size of the given media. This function considers the
     orientaion of the media.
     @param media Media model data
-    @param resize New size. If false than it returns the media size
+    @param size New size. Numeric value of maximum width or height. Possible
+    text values: 'mini', 'thumb', 'preview', 'original'. If false than it
+    returns the media size
     @param square Returns the squared size of resize value 
     @return array of sizes. array(height, width, html size) */
-  function getimagesize($data, $resize = false, $square=false) {
-    if (!isset($data['Media']['width']) ||
-      !isset($data['Media']['height']) ||
-      !isset($data['Media']['orientation'])) {
-      $result = array();
-      $result[0] = 0;
-      $result[1] = 0;
-      $result[3] = "";
-      return $result;
+  function getimagesize($media, $size = false, $square=false) {
+    if (!isset($media['Media']['width']) ||
+      !isset($media['Media']['height']) ||
+      !isset($media['Media']['orientation'])) {
+      return array(0 => 0, 1 => 0, 3 => '');
     }
-    $width=$data['Media']['width'];
-    $height=$data['Media']['height'];
+
+    if ($size && !is_numeric($size) && !in_array($size, array('mini', 'thumb', 'preview', 'original'))) {
+      Logger::err("Wrong media size $resize");
+    }
+
+    switch ($size) {
+      case 'mini':
+        $resize = OUTPUT_SIZE_MINI;
+        $square = true;
+        break;
+      case 'thumb':
+        $resize = OUTPUT_SIZE_THUMB;
+        break;
+      case 'preview':
+        $resize = OUTPUT_SIZE_PREVIEW;
+        break;
+      case 'original':
+        $resize = false;
+        break;
+      default:
+        if ($size && is_numeric($size)) {
+          $resize = $size;
+        }
+    }
+
+    $width = $media['Media']['width'];
+    $height = $media['Media']['height'];
     if ($resize) {
       if ($square) {
-        $width=$resize;
-        $height=$resize;
+        $width = $resize;
+        $height = $resize;
       } else {
-        if ($width > $resize && $width>=$height) {
-          $height=intval($resize*($height/$width));
-          $width=$resize;
+        if ($width > $resize && $width >= $height) {
+          $height = intval($resize * ($height / $width));
+          $width = $resize;
         } elseif ($height > $resize && $height > $width) {
-          $width=intval($resize*($width/$height));
-          $height=$resize;
+          $width = intval($resize * ($width / $height));
+          $height = $resize;
         }
       }
     }
     $result = array();
 
     // Rotate the image according to the orientation
-    $orientation = $data['Media']['orientation'];
+    $orientation = $media['Media']['orientation'];
     if ($orientation >= 5 && $orientation <= 8) {
       $result[0] = $height;
       $result[1] = $width;
@@ -73,6 +96,50 @@ class ImageDataHelper extends AppHelper {
     return $result;
   }
   
+  /** Creates an media image with the link
+    @param media Media model data
+    @param options Media size or option array. Options are
+      type - Type of the media. String values: 'mini', 'thumb', 'preview', 'original'
+      size - Size of the media - optional.
+      param - Extra url parameter 
+      div - Wrapped div arround the link with the class given in the div options
+    @return HTML link with media image */
+  function mediaLink($media, $options = array()) {
+    if (!isset($media['Media']['id'])) {
+      Logger::err("Media id is not set");
+      return false;
+    }
+    if (!is_array($options)) {
+      $options = array('type' => $options);
+    }
+    $options = am(array('type' => 'thumb', 'params' => false, 'size' => false, 'div' => false), $options);
+
+    if (!in_array($options['type'], array('mini', 'thumb', 'preview', 'original'))) {
+      Logger::err("Wrong media type {$options['type']}");
+      return false;
+    }
+    if (!$options['size']) {
+      $options['size'] = $options['type'];
+    }
+
+    $imgSrc = Router::url("/media/{$options['type']}/{$media['Media']['id']}");
+    $size = $this->getimagesize($media, $options['size']);
+    App::import('Core', 'Sanitize');
+    $Sanitize =& new Sanitize();
+    $alt = $Sanitize->html($media['Media']['name'], true);
+    $img = "<img src=\"$imgSrc\" {$size[3]} alt=\"$alt\" title=\"$alt\" />";
+    $link = "/images/view/{$media['Media']['id']}";
+    if ($options['params']) {
+      $link .= $options['params'];
+    }
+
+    $out = $this->html->link($img, $link, false, false, false);
+    if ($options['div']) {
+      $out = '<div class="'.$options['div'].'">'.$out.'</div>';
+    }
+    return $out;
+  }
+
   function toUnix($data, $offset=0) {
     if (!isset($data['Media']['date']))
       return -1;
