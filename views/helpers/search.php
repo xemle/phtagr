@@ -20,6 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+
 App::import('File', 'Search', array('file' => APP.'search.php'));
 
 class SearchHelper extends Search {
@@ -28,13 +29,18 @@ class SearchHelper extends Search {
 
   var $config = array();
 
+  var $isMyMedia = false;
+
   /** Initialize query parameters from the global parameter array, which is
    * set by the query component */
   function initialize($config = array()) {
     if (isset($this->params['search'])) {
       $this->_data = $this->params['search']['data'];
-      $this->config['base'] = $this->params['search']['base'];
+      $this->config['uriBase'] = $this->params['search']['uriBase'];
       $this->config['defaults'] = $this->params['search']['defaults'];
+      if (isset($this->params['search']['myMedia'])) {
+        $this->isMyMedia = true;
+      }
     }
     $this->config = am($config, $this->config);
   }
@@ -57,40 +63,53 @@ class SearchHelper extends Search {
       $data = $this->_data;
     }
 
+    $add = (array)$add;
+    $del = (array)$del;
+    
     // add parameters
-    if (is_array($add)) {
-      foreach ($add as $name => $values) {
-        if (Inflector::pluralize($name) == $name || is_array($values)) {
-          $name = Inflector::pluralize($name);
-          foreach ((array)$values as $value) {
-            if (!isset($data[$name]) || !in_array($value, $data)) {
-              $data[$name][] = $value;
-            }
-          }
-        } else {
-          $data[$name] = $values;
+    foreach ($add as $name => $values) {
+      if (Inflector::pluralize($name) == $name || is_array($values)) {
+        $name = Inflector::pluralize($name);
+        if (!isset($data[$name])) {
+          $data[$name] = array();
         }
+        if (isset($data[$name]) && !is_array($data[$name])) {
+          // fix array
+          $data[$name] = array($data[$name]);
+        }
+        foreach ((array)$values as $value) {
+          if (!in_array($value, $data[$name])) {
+            $data[$name][] = $value;
+          }
+        }
+      } else {
+        $data[$name] = $values;
       }
     }
+
     // delete parameters
-    if (is_array($del)) {
-      foreach ($del as $name => $values) {
-        if (Inflector::pluralize($name) == $name || is_array($values)) {
-          $name = Inflector::pluralize($name);
-          foreach ((array)$values as $value) {
-            if (isset($data[$name]) && in_array($value, $data[$name])) {
-              $key = array_search($value, $data[$name]);
-              unset($data[$name][$key]);
-            }
+    foreach ($del as $name => $values) {
+      if (Inflector::pluralize($name) == $name || is_array($values)) {
+        $name = Inflector::pluralize($name);
+        if (!isset($data[$name])) {
+          continue;
+        }
+        foreach ((array)$values as $value) {
+          if (is_array($data[$name]) && in_array($value, $data[$name])) {
+            $key = array_search($value, $data[$name]);
+            unset($data[$name][$key]);
           }
-        } else {
+        }
+        if (count($data[$name]) == 0) {
           unset($data[$name]);
         }
+      } else {
+        unset($data[$name]);
       }
     }
 
     ksort($data);
-    
+
     foreach ($data as $name => $values) {
       // get default value - if any
       if (isset($config['defaults'][$name])) {
@@ -128,13 +147,17 @@ class SearchHelper extends Search {
     @param add Array of parameters to add
     @param del Array of parameters to delete 
     @return uri of current query */
-  function getUri($data = false, $add = false, $del = false, $options = null) {
+  function getUri($data = false, $add = false, $del = false, $options = array()) {
     $serial = $this->serialize($data, $add, $del, $options);
     $config = am($this->config, $options);
-    return $config['base'].$serial;
+    if ($serial) {
+      return $config['uriBase'].'/'.$serial;
+    } else {
+      return $config['uriBase'];
+    }
   }
 
-  function link($data = false, $add = false, $del = false, $options = null) {
+  function link($data = false, $add = false, $del = false, $options = array()) {
     $out = $this->Html->link($this->getUri($data, $add, $del, $options));
     return $this->out($out);
   }

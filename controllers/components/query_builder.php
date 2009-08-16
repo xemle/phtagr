@@ -25,20 +25,23 @@ App::import('Core', array('Sanitize'));
 
 class QueryBuilderComponent extends Object
 {
-  var $components = array('Logger');
+  var $components = array();
 
   var $controller = null;
 
+  /**
+    'name' => 'Model.field' // map condition to 'Model.field = value'
+    'name' => array('rule' => 'special rule name') 
+    'name' => array('field' => 'Model.field', 'operand' => 'condition operand')
+  */
   var $rules = array(
     'to' => array('field' => 'Media.date', 'operand' => '<='),
     'from' => array('field' => 'Media.date', 'operand' => '>='),
-    'categories' => 'Category.name',
-    'locations' => 'Location.name',
+    'categories' => array('custom' => 'buildHabtm'),
+    'locations' => array('custom' => 'buildHabtm'),
     'media' => 'Media.id',
-    'page' => array('rule' => 'offset'),
-    'show' => array('rule' => 'limit'),
-    'tags' => 'Tag.name',
-    'tagOp' => array('rule' => array('custom', 'buildHabtmOperand'))
+    'user' => 'User.username',
+    'tags' => array('custom' => 'buildHabtm'),
     );
 
   function initialize(&$controller) {
@@ -46,6 +49,22 @@ class QueryBuilderComponent extends Object
     $this->Sanitize =& new Sanitize();
   }
 
+  /** Get array value if exist or default value
+    @param data Data array
+    @param name Key of data
+    @param default Default value
+    @return data value or default */
+  function _getParam(&$data, $name, $default = null) {
+    if (!isset($data[$name])) {
+      return $default;
+    } else {
+      return $data[$name];
+    }
+  }
+
+  /** Sanitize the data
+    @param Data as single value or array
+    @return Sanitized data */
   function _sanitizeData($data) {
     if (!is_array($data)) {
       if (is_numeric($data)) {
@@ -62,6 +81,12 @@ class QueryBuilderComponent extends Object
     }
   }
 
+  /** Build a single condition by field, value, and the operand and sanitze the
+    value(s)
+    @param field Field name
+    @param value Value as single value or array
+    @param operand Optional operand. Default is '='
+    @return Sanitized condition */
   function _buildCondition($field, $value, $operand = '=') {
     $condition = $field;
     if (!is_array($value)) {
@@ -75,18 +100,19 @@ class QueryBuilderComponent extends Object
     return $condition; 
   }
 
-  /** Extract exclusions 
+  /** Extract exclusion parameters. A exclustion is a value which starts with a
+    minus sign ('-')
     @param data Parameter data
-    @param allow Parameter list which are not evaluated
+    @param skip Parameter list which are not evaluated and skiped
     @return exclusions parameter */
-  function _extractExclusions(&$data, $allow = array('sort')) {
+  function _extractExclusions(&$data, $skip = array('sort')) {
     $exclusions = array();
     if (!count($data)) {
       return $exclusions;
     }
 
     foreach ($data as $name => $values) {
-      if (in_array($name, $allow)) {
+      if (in_array($name, $skip)) {
         continue;
       }
 
@@ -110,7 +136,7 @@ class QueryBuilderComponent extends Object
         }
       }
     }
-    Logger::info($exclusions);
+    //Logger::info($exclusions);
     return $exclusions;
   }
 
@@ -119,55 +145,50 @@ class QueryBuilderComponent extends Object
     if (!count($data)) {
       return $query;
     }
-    foreach ($data as $name => $value) {
+    foreach ($this->rules as $name => $rule) {
+      if (!isset($data[$name])) {
+        continue;
+      } else {
+        $value = $data[$name];
+      }
       $method = 'build'.Inflector::camelize($name);
-      //Logger::info("Looking for method $method");
       if (method_exists($this, $method)) {
         call_user_method($method, &$this, &$data, &$query, $value);
         continue;
       }
-      if (!isset($this->rules[$name])) {
-        Logger::warn("No rule definition for '$name'!");
-        continue;
-      }
       
-      $rule = $this->rules[$name];
       if (!is_array($rule)) {
         $query['conditions'][] = $this->_buildCondition($rule, $value);
       } else {
-        $rule = am(array('rule' => 'default', 'operand' => '='), $rule);
-        if (is_array($rule['rule'])) {
-          $type = $rule['rule'][0];
+        $rule = am(array('custom' => false, 'operand' => '='), $rule);
+        if ($rule['custom']) {
+          if (!method_exists($this, $rule['custom'])) {
+            Logger::err("Custom method {$rule['custom']} does not exists or is missing");
+            continue;
+          }
+          Logger::debug("Call custom rule {$rule['custom']}");
+          call_user_method($rule['custom'], &$this, &$data, &$query, $name, $value);
+        } elseif (!isset($rule['field'])) {
+           Logger::err("Field in rule is missing");
+           Logger::debug($rule);
+           continue;
         } else {
-          $type = $rule['rule'];
-        }
-        switch ($type) {
-          case 'limit':
-            $query['limit'] = $this->_sanitizeData($value);
-            break;
-          case 'offset':
-            $query['offset'] = $this->_sanitizeData($value);
-            break;
-          case 'custom':
-            if (!isset($rule['rule'][1]) ||
-              !method_exists($this, $rule['rule'][1])) {
-              Logger::err("Method does not exists or is missing");
-              continue;
-            }
-            call_user_method($rule['rule'][1], &$this, &$data, &$query, $name, $value);
-            break;
-          default:
-            if (!isset($rule['field'])) {
-              Logger::err("Field in rule is missing");
-              Logger::debug($rule);
-              break;
-            }
-            $query['conditions'][] = $this->_buildCondition($rule['field'], $value, $rule['operand']);
+           $query['conditions'][] = $this->_buildCondition($rule['field'], $value, $rule['operand']);
         }
       }
     }
-    if (isset($query['offset']) && isset($query['limit'])) {
-      $query['offset'] = $query['offset'] * $query['limit'];
+
+    // paging, offsets and limit
+    if (isset($data['pos'])) { 
+      $query['offset'] = $data['pos'];
+    } elseif (isset($data['offset']) && isset($data['limit'])) {
+      $query['offset'] = $data['offset'] * $data['limit'];
+    }
+    if (isset($data['limit'])) {
+      $query['limit'] = $data['limit'];
+    }
+    if (isset($data['sort'])) {
+      $this->_buildOrder(&$data, &$query);
     }
     return $query;
   }
@@ -175,37 +196,88 @@ class QueryBuilderComponent extends Object
   function build($data) {
     $exclude = $this->_extractExclusions(&$data);
     $query = $this->buildConditions(&$data);
-    Logger::debug($query);
     if (count($exclude)) {
       $query['conditions']['exclude'] = $this->buildConditions($exclude);
     }
+    Logger::debug($query);
     return $query;
   }
 
-  //function buildHabtmOperand(&$data, &$query, $value) {
-  function buildHabtmOperand(&$data, &$query, $name, $value) {
-    //Logger::info($query);
-    //Logger::info($value);
-    if ($name == 'tagOp') {
-      $field = 'tags';
-      $fieldCount = 'TagCount';
-    } 
-    if (!isset($data[$field]) || count($data[$field]) < 1) {
+  function _buildOrder(&$data, &$query) {
+    if ($data['sort'] == 'default') {
+      if (isset($query['_counts']) && count($query['_counts']) > 0) {
+        Logger::debug($data);
+        if ($this->_getParam(&$data, 'operand') == 'OR') {
+          Logger::debug("------------ harhar");
+          // global OR operand
+          $counts = array();
+          $conditions = array();
+          foreach ($query['_counts'] as $count) {
+            $counts[] = "( $count + 1 )";
+            $conditions[] = "IFNULL($count,0)";
+          }
+          $query['conditions'][] = '( '.implode(' + ', $conditions).' ) > 0';
+          $query['order'][] = implode(" * ", $counts).' DESC';
+        } else {
+          // OR operand on habtm
+          foreach (array('tag', 'category', 'location') as $habtm) {
+            $fieldCount = Inflector::camelize($habtm)."Count";
+            if (in_array($fieldCount, $query['_counts']) &&
+              $this->_getParam(&$data, $habtm."Op") == 'OR') {
+              $query['order'][] = $fieldCount.' DESC';
+            }
+          }
+        }
+      }
+      $query['order'][] = 'Media.date';
+    } else {
+      switch ($data['sort']) {
+        case 'date':
+          $query['order'][] = 'Media.date DESC'; 
+          break;
+        case '-date':
+          $query['order'][] = 'Media.date ASC'; 
+          break;
+        default:
+          Logger::err("Unknown sort value: {$data['sort']}");
+      }
+    }
+    $query['order'][] = 'Media.id';
+  }
+
+  function buildHabtm(&$data, &$query, $name, $value) {
+    if (count($data[$name]) == 0) {
       return;
     }
 
-    switch ($value) {
+    $habtm = Inflector::singularize($name);
+
+    $field = Inflector::camelize($habtm).'.name';
+    $query['conditions'][] = $this->_buildCondition($field, $value);
+
+    $fieldCount = Inflector::camelize($habtm).'Count';
+    $query['_counts'][] = $fieldCount;
+
+    $operand = $this->_getParam(&$data, 'operand');
+    if ($operand == 'OR') {
+      // handled by sort
+      return;
+    } elseif ($operand == null) {
+      // habtm operand
+      $operand = $this->_getParam(&$data, $habtm."Op", 'AND');
+    }
+
+    switch ($operand) {
       case 'AND':
-        $query['conditions'][] = $fieldCount.' = '.count($data[$field]);
+        $query['conditions'][] = $fieldCount.' = '.count($data[$name]);
         break;
       case 'OR':
         $query['conditions'][] = $fieldCount.' > 0';
-        $query['order'][] = $fieldCount.' DESC';
         break;
       default:
-        Logger::err("Unknown $field operand '$value'");
-    } 
-    Logger::debug($query);
+        Logger::err("Unknown $field operand '$operand'");
+    }
   }
+
 }
 ?>

@@ -76,6 +76,7 @@ class Search extends Object
   }
 
   function addParam($name, $value) {
+    $name = Inflector::pluralize($name);
     if (is_array($value)) {
       foreach ($value as $v) {
         $this->addParam($name, $v);
@@ -83,7 +84,6 @@ class Search extends Object
       return;
     }
     
-    Logger::debug("$name:$value");
     if ((!isset($this->_data[$name]) || !in_array($value, $this->_data[$name])) &&
       $this->validate($name, $value)) {
       $this->_data[$name][] = $value;

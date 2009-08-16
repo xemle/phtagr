@@ -22,7 +22,12 @@
  */
 
 class ImageDataHelper extends AppHelper {
+
   var $helpers = array('Time', 'Ajax', 'Html', 'Form', 'Search');
+
+  function beforeRender() {
+    $this->Search->initialize();
+  }
 
   function getimagesize($data, $size, $square=false) {
     if (!isset($data['Media']['width']) ||
@@ -122,8 +127,8 @@ class ImageDataHelper extends AppHelper {
     $output = '<span onmouseover="toggleVisibility(\''.$id.'\', \'inline\');"';
     $output .= ' onmouseout="toggleVisibility(\''.$id.'\', \'inline\');">';
 
-    LoggerComponent::verbose($this->Search->_data);
-    LoggerComponent::verbose("SUPER");
+    //Logger::verbose($this->Search->_data);
+    //Logger::verbose("SUPER");
     $output .= $this->Html->link($data['Media']['date'], $this->Search->getUri(false, array('from' => $this->toUnix(&$data, -3*60*60), 'to' => $this->toUnix(&$data, 3*60*60))));
     $output .= ' ';
 
@@ -148,14 +153,19 @@ class ImageDataHelper extends AppHelper {
   }
 
   function _metaHabtm($data, $habtm) {
-    if (!count($data[$habtm])) 
+    if (!count($data[$habtm])) {
       return false;
+    }
 
-    $field = strtolower(Inflector::pluralize($habtm));
+    $base = "/explorer";
+    if ($this->action == 'user') {
+      $base .= "/user/".$this->params['pass'][0];
+    }
+    $base .= "/".strtolower($habtm);
+
     $links = array();
     foreach ($data[$habtm] as $assoc) {
-      $this->Search->setParam($field, $assoc['name']);
-      $links[] = $this->Html->link($assoc['name'], $this->Search->getUri(array(), array($field => $assoc['name'])));
+      $links[] = $this->Html->link($assoc['name'], "$base/{$assoc['name']}");
     }
     return implode(', ', $links);
   }
@@ -177,8 +187,8 @@ class ImageDataHelper extends AppHelper {
 
     $mediaId = $data['Media']['id'];
 
-    LoggerComponent::debug($this->Search->_data); 
-    LoggerComponent::debug("HUHU");
+    //Logger::debug($this->Search->_data); 
+    //Logger::debug("HUHU");
     $userId = $this->Search->getUser();
     if ($userId) {
       $this->Search->setUser($userId);
@@ -296,5 +306,4 @@ class ImageDataHelper extends AppHelper {
     //$this->log($options);
     return $this->Form->input($fieldName, $options);
   }  
-
 }

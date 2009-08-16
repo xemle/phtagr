@@ -2,14 +2,14 @@
 
 App::import('Core', array('Helper', 'AppHelper', 'Controller', 'View'));
 App::import('Helper', array('Search'));
-App::import('Component', array('Logger'));
-
+App::import('File', 'Logger', array('file' => APP.'logger.php'));
+ 
 class SearchHelperTest extends CakeTestCase {
 
   function setUp() {
     $this->Search = new SearchHelper();
     $this->Search->params['search']['data'] = array();
-    $this->Search->params['search']['base'] = '/explorer/query/';
+    $this->Search->params['search']['uriBase'] = '/explorer/query';
     $this->Search->params['search']['defaults'] = array(
       'show' => 12,
       'page' => 1,
@@ -25,7 +25,7 @@ class SearchHelperTest extends CakeTestCase {
   function testConfig() {
     $result = $this->Search->config;
     $this->assertEqual($result, array(
-      'base' => '/explorer/query/',
+      'uriBase' => '/explorer/query',
       'defaults' => array(
         'show' => 12,
         'page' => 1,
@@ -79,6 +79,17 @@ class SearchHelperTest extends CakeTestCase {
     $result = $this->Search->serialize();
     $this->assertEqual($result, 'tags:tag1,tag2/user:admin');
     $this->Search->setParams($params);
+
+    $result = $this->Search->serialize(array('tags' => 'tag1'), array('tags' => 'tag1'));
+    $this->assertEqual($result, 'tags:tag1');
+
+    $result = $this->Search->serialize(array('tags' => array('tag1')), false, array('tags' => 'tag1'));
+    $this->assertEqual($result, '');
+
+    $this->Search->delTags();
+    $this->Search->addTag('tag1');
+    $result = $this->Search->serialize(false, array('tags' => 'tag1'));
+    $this->assertEqual($result, 'tags:tag1');
   }
 
   function testSerializeDefaults() {
@@ -105,6 +116,20 @@ class SearchHelperTest extends CakeTestCase {
     // disabled array default
     $result = $this->Search->serialize(false, false, false, array('defaults' => array('tags' => false)));
     $this->assertEqual($result, '');
+  }
+
+  function testGetUri() {
+    $result = $this->Search->getUri();
+    $this->assertEqual($result, '/explorer/query');
+
+    $result = $this->Search->getUri(false, false, false, array('uriBase' => '/image/view/1'));
+    $this->assertEqual($result, '/image/view/1');
+  
+    $result = $this->Search->getUri(array('tags' => array('tag1', 'tag2')));
+    $this->assertEqual($result, '/explorer/query/tags:tag1,tag2');    
+  
+    $result = $this->Search->getUri(array('tags' => array('tag1', 'tag2')), false, false, array('uriBase' => '/image/view/1'));
+    $this->assertEqual($result, '/image/view/1/tags:tag1,tag2');
   }
 }
 ?>

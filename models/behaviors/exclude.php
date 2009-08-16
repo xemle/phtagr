@@ -52,7 +52,7 @@ class ExcludeBehavior extends ModelBehavior {
     @param joinConditions Join conditions for HABTM bindings
     @param joinType Type of SQL join (INNER, LEFT, RIGHT) */
   function _buildHasAndBelongsToManyJoins(&$Model, &$query, $joinConditions, $options = array()) {
-    $options = am($options, array('type' => '', 'count' => true));
+    $options = am(array('type' => false, 'count' => true), $options);
 
     $options['type'] = strtoupper($options['type']);
     if (!in_array($options['type'], array('', 'RIGHT', 'LEFT'))) {
@@ -61,7 +61,7 @@ class ExcludeBehavior extends ModelBehavior {
     }
     foreach ($joinConditions as $name => $queryConditions) {
       $config = $Model->hasAndBelongsToMany[$name];
-      //$Model->Logger->trace($config);
+      //Logger::trace($config);
       extract($config);
 
       $alias = $Model->{$name}->alias;
@@ -71,6 +71,10 @@ class ExcludeBehavior extends ModelBehavior {
       if ($options['count']) {
         $count = Inflector::camelize($name).'Count';
         $join .= ", COUNT($with.$foreignKey) AS $count";
+        if (!isset($query['_counts'])) {
+          $query['_counts'] = array();
+        }
+        $query['_counts'][] = $count;
       }
       $join .= " FROM $joinTable AS $with, $table AS $alias";
       $join .= " WHERE $with.$associationForeignKey = $alias.id";
@@ -79,7 +83,7 @@ class ExcludeBehavior extends ModelBehavior {
       $join .= ") AS $with ON {$Model->alias}.id = $with.$foreignKey";
       $query['joins'][] = $join;
     }
-    //$Model->Logger->debug($query);
+    //Logger::debug($query);
   }
 
   /** Build SQL joins for hasMany relations
@@ -89,13 +93,13 @@ class ExcludeBehavior extends ModelBehavior {
     @param options Options */
   function _buildHasManyJoins(&$Model, &$query, &$joinConditions, $options = array()) {
     $options['type'] = strtoupper($options['type']);
-    if (!in_array($options['type'], array('', 'RIGHT', 'LEFT'))) {
+    if (!in_array($options['type'], array(false, 'RIGHT', 'LEFT'))) {
       Logger::warn("Invalid join type: ".$options['type']);
       $options['type'] = '';
     }
     foreach ($joinConditions as $name => $queryConditions) {
       $config = $Model->hasMany[$name];
-      //$Model->Logger->trace($config);
+      //Logger::trace($config);
 
       $alias = $Model->{$name}->alias;
       $table = $Model->{$name}->table;
@@ -105,6 +109,10 @@ class ExcludeBehavior extends ModelBehavior {
       if ($options['count']) {
         $count = Inflector::camelize($name).'Count';
         $join .= ", COUNT($alias.id) AS $count";
+        if (!isset($query['_counts'])) {
+          $query['_counts'] = array();
+        }
+        $query['_counts'][] = $count;
       }
       $join .= " FROM $table AS $alias";
       $join .= " WHERE ".implode(" OR ", $queryConditions);
@@ -112,7 +120,7 @@ class ExcludeBehavior extends ModelBehavior {
       $join .= ") AS $alias ON {$Model->alias}.id = $alias.$foreignKey";
       $query['joins'][] = $join;
     }
-    //$Model->Logger->debug($query);
+    //Logger::debug($query);
   }
 
   /**
@@ -120,7 +128,7 @@ class ExcludeBehavior extends ModelBehavior {
     joins for these relations.
     @param Model current model object
     @param query query array
-    @param options Options */
+    @param options Join options*/
   function _buildJoins(&$Model, &$query, $options = array()) {
     $joinConditions = array();
     if (empty($query['conditions'])) {
@@ -131,7 +139,7 @@ class ExcludeBehavior extends ModelBehavior {
     } else {
       $conditions =& $query['conditions'];
     }
-    //$Model->Logger->debug($conditions);
+    //Logger::debug($conditions);
     foreach ($conditions as $key => $condition) {
       // Match 'Model.field'
       if (!preg_match('/^(.*)\./', $condition, $matches)) {
@@ -151,7 +159,7 @@ class ExcludeBehavior extends ModelBehavior {
       }
       $joinConditions[$type][$name][] = $condition;
     }
-    //$Model->Logger->debug($joinConditions);
+    //Logger::debug($joinConditions);
     if (isset($joinConditions['hasAndBelongsToMany'])) {
       $this->_buildHasAndBelongsToManyJoins($Model, &$query, $joinConditions['hasAndBelongsToMany'], $options);
     }
@@ -167,16 +175,22 @@ class ExcludeBehavior extends ModelBehavior {
     @return SQL exclusion condition */
   function _buildExclusion(&$Model, $query) {
     $query = am(array('joins' => array()), $query);
-    //$Model->Logger->debug($query);
-    $this->_buildJoins($Model, &$query, array('count' => false));
-    //$Model->Logger->debug($query);
-
+    //Logger::debug($query);
+    $this->_buildJoins($Model, &$query, array('count' => true, 'type' => 'LEFT'));
+    //Logger::debug($query);
     $exclusion = " {$Model->alias}.id NOT IN (";
     $exclusion .= " SELECT {$Model->alias}.id";
-    $exclusion .= " FROM {$Model->table} AS {$Model->alias}";
-    $exclusion .= implode(' ', $query['joins']);
-    if (count($query['conditions']) == 0) {
-      $query['conditions'][] = ' 1 = 1';
+    $exclusion .= " FROM {$Model->table} AS {$Model->alias} ";
+    $exclusion .= implode(' ', $query['joins']); 
+
+    // build condition for outer join
+    if (count($query['_counts'])) {
+      $counts = array();
+      foreach ($query['_counts'] as $count) {
+        $counts[] = $count." > 0";
+      }
+      $condition = '( '.join(' OR ', $counts).' )';
+      $query['conditions'][] = $condition;
     }
     $exclusion .= " WHERE ".implode(' AND ', $query['conditions']);
 
@@ -193,12 +207,12 @@ class ExcludeBehavior extends ModelBehavior {
     } elseif (isset($query['exclude'])) {
       $exclude = $query['exclude'];
     }
-    //$Model->Logger->debug($query);
+    //Logger::debug($query);
     $this->_buildJoins($Model, &$query, array('type' => 'LEFT'));
     if ($exclude) {
       $query['conditions'][] = $this->_buildExclusion($Model, $exclude);
     }
-    //$Model->Logger->debug($query);
+    //Logger::debug($query);
     return $query;
   }
 

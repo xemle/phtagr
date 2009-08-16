@@ -25,7 +25,7 @@ class ExplorerController extends AppController
 {
   var $components = array('RequestHandler', 'FilterManager', 'Search', 'QueryBuilder');
   var $uses = array('Media', 'MyFile', 'Group', 'Tag', 'Category', 'Location');
-  var $helpers = array('form', 'formular', 'html', 'javascript', 'ajax', 'imageData', 'time', 'explorerMenu', 'rss', 'search', 'navigator', 'paginator');
+  var $helpers = array('form', 'formular', 'html', 'javascript', 'ajax', 'imageData', 'time', 'explorerMenu', 'rss', 'search', 'navigator');
 
   function beforeFilter() {
     if ($this->action == 'points' && 
@@ -66,8 +66,7 @@ class ExplorerController extends AppController
       }
     }
     //Logger::debug($data);
-    $this->set('data', $data);
-    //$this->data = $data;
+    $this->data = $data;
 
     //$this->set('mainMenuExplorer', $this->Search->getMenu(&$data));
     if ($this->hasRole(ROLE_USER)) {
@@ -149,8 +148,13 @@ class ExplorerController extends AppController
     $this->set('mainMenuExplorer', array());
   }
 
-  function user($idOrName) {
-    $this->Search->setUser($idOrName);
+  function user($username, $param = false, $value = false) {
+    $this->Search->setUser($username);
+    if ($param && $value && in_array($param, array('tag', 'category', 'location'))) {
+      Logger::debug("Add $param ($value)");
+      $this->Search->addParam($param, explode(',', $value));
+      Logger::debug($this->Search->getParams());
+    }
     $this->render('index');
   }
 

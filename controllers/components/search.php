@@ -28,6 +28,8 @@ class SearchComponent extends Search
 {
   var $components = array('QueryBuilder');
 
+  var $controller = null;
+
   var $Validation = null;
 
   /** Parameter validation array
@@ -44,6 +46,7 @@ class SearchComponent extends Search
     'north' => 'decimal',
     'locations' => array('rule' => array('custom', '/^[-]?[\w\d]+$/')),
     'locationOp' => array('rule' => array('inList', array('AND', 'OR'))),
+    'operand' => array('rule' => array('inList', array('AND', 'OR'))),
     'page' => array('numericRule' => 'numeric', 'minRule' => array('rule' => array('range', 0))),
     'pos' => array('numericRule' => 'numeric', 'minRule' => array('rule' => array('range', 0))),
     'show' => array('rule' => array('inList', array(6, 12, 24, 60, 120, 240))),
@@ -61,7 +64,7 @@ class SearchComponent extends Search
   var $disabled = array();
 
   /** Base URL for search helper */
-  var $base = '/explorer/query/';
+  var $uriBase = '/explorer/query';
 
   /** Default values */
   var $defaults = array(
@@ -69,14 +72,9 @@ class SearchComponent extends Search
     'locationOp' => 'AND',
     'page' => '1',
     'show' => '12',
-    'sort' => 'date',
+    'sort' => 'default',
     'tagOp' => 'AND'
     );
-
-  /** Parameter data */
-  var $data = array();
-
-  var $controller = null;
 
   function initialize(&$controller) {
     $this->controller = &$controller;
@@ -85,7 +83,7 @@ class SearchComponent extends Search
   }
 
   function clear() {
-    $this->data = $this->defaults;
+    $this->_data = $this->defaults;
   }
 
   /** Validates the parameter value
@@ -197,11 +195,18 @@ class SearchComponent extends Search
       $this->setPage($paging['pageCount']);
     }
 
+    if ($this->getUser(false) != false) {
+      $username = $this->getUser();
+      $this->uriBase = '/explorer/user/'.$username;
+      $this->defaults['user'] = $username;
+    }
+
     // Set data for search helper
     $params = $this->controller->params['paging']['Media'];
-    $params['base'] = $this->base;
+    $params['uriBase'] = $this->uriBase;
     $params['defaults'] = $this->defaults;
     $params['data'] = $this->getParams();
+
     $this->controller->params['search'] = $params;
 
     return $data;

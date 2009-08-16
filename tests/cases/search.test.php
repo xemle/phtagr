@@ -12,6 +12,50 @@ class SearchTest extends CakeTestCase {
     $this->Search->clear();
   }
 
+  function testParam() {
+    $this->_init();
+    
+    // get not existing values
+    $result = $this->Search->getParam('notExists'); 
+    $this->assertEqual($result, null);
+    
+    // get default value of not existing value 
+    $result = $this->Search->getParam('notExists', 'default'); 
+    $this->assertEqual($result, 'default');
+
+    // set and get
+    $this->Search->setParam('page', 2);
+    $result = $this->Search->getParam('page'); 
+    $this->assertEqual($result, 2);
+
+    // delete
+    $this->Search->delParam('page');
+    $result = $this->Search->getParam('page'); 
+    $this->assertEqual($result, null);
+    
+    // add single value
+    $this->Search->addParam('tag', 'tag1');
+    $result = $this->Search->getParam('tag'); 
+    $this->assertEqual($result, null);
+    $result = $this->Search->getParam('tags'); 
+    $this->assertEqual($result, array('tag1'));
+
+    // add array
+    $this->Search->addParam('tag', array('tag2', 'tag3'));
+    $result = $this->Search->getParam('tags'); 
+    $this->assertEqual($result, array('tag1', 'tag2', 'tag3'));
+
+    // delete singel value from array
+    $this->Search->delParam('tags', 'tag2');
+    $result = $this->Search->getParam('tags'); 
+    $this->assertEqual($result, array('tag1', 2 => 'tag3'));
+
+    // delete array
+    $this->Search->delParam('tags');
+    $result = $this->Search->getParam('tags'); 
+    $this->assertEqual($result, null);
+  }
+
   function testSingle() {
     $this->_init();
 

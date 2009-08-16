@@ -29,8 +29,8 @@ $cell=0;
 $canWriteTag=false;
 $canWriteMeta=false;
 $canWriteAcl=false;
-$pos = ($query->get('page', 1)-1) * $query->get('show', 12) + 1;
-foreach ($data as $media): ?>
+$pos = ($search->getPage(1)-1) * $search->getShow(12) + 1;
+foreach ($this->data as $media): ?>
 <?php $side = $cell % 2 ? 'r' : 'l'; ?>
 <?php if (!($cell % 2)): ?><div class="subcolumns"><?php endif; ?>
 <?php 
@@ -60,7 +60,7 @@ foreach ($data as $media): ?>
 <div class="image">
 <?php 
   $size = $imageData->getimagesize($media, OUTPUT_SIZE_THUMB);
-  $query->set('pos', $pos++);
+  $search->setPos($pos++);
   echo "<a href=\"".Router::url("/images/view/".$media['Media']['id'].'/'.$search->serialize())."\">";
   echo "<img src=\"".Router::url("/media/thumb/".$media['Media']['id'])."\" $size[3] alt=\"".$media['Media']['name']."\"/>"; 
   echo "</a>";
@@ -77,11 +77,12 @@ foreach ($data as $media): ?>
 ?>
 </div>
 
-<?php 
-  if (!$search->getMymedia()): ?>
 <div class="user">
 <?php
-  echo "by ".$html->link($media['User']['username'], "/explorer/user/".$media['User']['id']);
+  if ($this->action != 'user' ||
+    $this->params['pass'][0] != $session->read('User.username')) {
+    echo "by ".$html->link($media['User']['username'], "/explorer/user/".$media['User']['username']);
+  }
   $extra = array();
   if ($media['Media']['clicks'] > 0) {
     $extra[] = $media['Media']['clicks'].' '.$html->image('icons/eye.png', array('alt' => 'clicks', 'title' => "{$media['Media']['clicks']} clicks"));;
@@ -94,7 +95,6 @@ foreach ($data as $media): ?>
   }
 ?>
 </div>
-<?php endif; ?>
 
 <div class="meta">
 <div id="<?php echo 'meta-'.$media['Media']['id']; ?>">
