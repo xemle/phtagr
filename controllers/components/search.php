@@ -47,10 +47,10 @@ class SearchComponent extends Search
     'locations' => array('rule' => array('custom', '/^[-]?[\w\d]+$/')),
     'locationOp' => array('rule' => array('inList', array('AND', 'OR'))),
     'operand' => array('rule' => array('inList', array('AND', 'OR'))),
-    'page' => array('numericRule' => 'numeric', 'minRule' => array('rule' => array('range', 0))),
-    'pos' => array('numericRule' => 'numeric', 'minRule' => array('rule' => array('range', 0))),
+    'page' => array('numericRule' => 'numeric', 'minRule' => array('rule' => array('range', 1))),
+    'pos' => array('numericRule' => 'numeric', 'minRule' => array('rule' => array('range', 1))),
     'show' => array('rule' => array('inList', array(6, 12, 24, 60, 120, 240))),
-    'sort' => array('rule' => array('inList', array('date', '-date', 'newest', '-newest', 'random'))),
+    'sort' => array('rule' => array('inList', array('date', '-date', 'newest', 'changes', 'viewed', 'popularity', 'random'))),
     'tags' => array('rule' => array('custom', '/^[-]?[\w\d]+$/')),
     'tagOp' => array('rule' => array('inList', array('AND', 'OR'))),
     'south' => 'decimal',
@@ -58,22 +58,20 @@ class SearchComponent extends Search
     'user' => 'alphaNumeric',
     'users' => array('rule' => array('custom', '/^[-]?[\w\d]+$/')),
     'west' => 'decimal',
+    'visibility' => array('rule' => array('inList', array('private', 'group', 'user', 'public'))),
     );
 
   /** Array of disabled parameter names */
   var $disabled = array();
 
   /** Base URL for search helper */
-  var $uriBase = '/explorer/query';
+  var $baseUri = '/explorer/query';
 
   /** Default values */
   var $defaults = array(
-    'categoryOp' => 'AND',
-    'locationOp' => 'AND',
     'page' => '1',
     'show' => '12',
     'sort' => 'default',
-    'tagOp' => 'AND'
     );
 
   function initialize(&$controller) {
@@ -164,13 +162,36 @@ class SearchComponent extends Search
     return $result;
   }
 
+  /** Set the disabled search fields according to the user role */
+  function _setDisabledFields() {
+    // disable search parameter after role
+    $role = $this->controller->getUserRole();
+    $disabled = array();
+    switch ($role) {
+      case ROLE_NOBODY:
+        $disabled[] = 'group';
+        $disabled[] = 'file';
+      case ROLE_GUEST:
+        $disabled[] = 'visibility';
+      case ROLE_USER:
+      case ROLE_SYSOP:
+      case ROLE_ADMIN:
+        break;
+      default:
+        Logger::err("Unhandled role $role");
+    }
+    $this->disabled = $disabled;
+  }
+
   /** parse all parameters given in the URL and adds them to the search */
   function parseArgs() {
+    $this->_setDisabledFields();
     foreach($this->controller->passedArgs as $name => $value) {
       if (is_numeric($name) || empty($value)) {
         continue;
       }
-      if ($name == Inflector::pluralize($name)) {
+      $singles = array('pos'); // quick fix
+      if (!in_array($name, $singles) && $name == Inflector::pluralize($name)) {
         $values = explode(',', $value);
         $this->addParam($name, $values);
       } else {
@@ -180,35 +201,138 @@ class SearchComponent extends Search
   }
 
   function paginate() {
-    $params = $this->getParams();
-    $this->controller->paginate = $this->QueryBuilder->build($params); 
-    $data = $this->controller->paginate('Media');
+    $query = $this->QueryBuilder->build($this->getParams()); 
+    $tmp = $query;
+    unset($query['limit']);
+    unset($query['page']);
+    $count = $this->controller->Media->find('count', $query);
+    $query = $tmp;
 
-    // repage to last page if page exceeds the page count 
-    if (!$data and $this->controller->params['paging']['Media']['count'] > 0) {
-      $paging = $this->controller->params['paging']['Media'];
-      $offset = ($paging['pageCount'] - 1) * $this->controller->paginate['limit'];
-      $this->controller->paginate['offset'] = $offset;
-      $data = $this->controller->paginate('Media');
+    $params = array(
+      'pageCount' => 0, 
+      'current' => 0, 
+      'nextPage' => false, 
+      'prevPage' => false,
+      'baseUri' => $this->baseUri,
+      'defaults' => $this->defaults,
+      'data' => $this->getParams()
+      );
 
-      // update search parameter
-      $this->setPage($paging['pageCount']);
+    if ($count == 0) {
+      $this->params['search'] = $params;
+      return array();
     }
+    $params['pageCount'] = ceil($count / $this->getShow(12));
+    if ($this->getPage() > $params['pageCount']) {
+      $this->setPage($params['pageCount']);
+      $params['data'] = $this->getParams();
+      $query['page'] = $params['pageCount'];
+    }
+    if ($this->getPage() > 2) {
+      $params['prevPage'] = true;
+    }
+    if ($this->getPage() < $params['pageCount']) {
+      $params['nextPage'] = true;
+    }
+    $params['page'] = $this->getPage();
 
+    // get all media and set access flags
+    $data = $this->controller->Media->find('all', $query);
+    $user = $this->controller->getUser();
+    for ($i = 0; $i < count($data); $i++) {
+      $this->controller->Media->setAccessFlags(&$data[$i], $user);
+    }
+    
     if ($this->getUser(false) != false) {
       $username = $this->getUser();
-      $this->uriBase = '/explorer/user/'.$username;
-      $this->defaults['user'] = $username;
+      $params['baseUri'] = '/explorer/user/'.$username;
+      $params['defaults']['user'] = $username;
     }
 
     // Set data for search helper
-    $params = $this->controller->params['paging']['Media'];
-    $params['uriBase'] = $this->uriBase;
-    $params['defaults'] = $this->defaults;
-    $params['data'] = $this->getParams();
-
     $this->controller->params['search'] = $params;
 
+    return $data;
+  }
+
+  function paginateMedia($id) {
+    $query = $this->QueryBuilder->build($this->getParams()); 
+    unset($query['limit']);
+    unset($query['offset']);
+    $count = $this->controller->Media->find('count', $query);
+
+    $params = array(
+      'pos' => 0, 
+      'current' => false,
+      'prevMedia' => false,
+      'nextMedia' => false, 
+      'baseUri' => $this->baseUri,
+      'defaults' => $this->defaults,
+      'data' => $this->getParams()
+      );
+
+    $data = $this->controller->Media->findById($id);
+    if ($count == 0 || !$data) {
+      $this->params['search'] = $params;
+      return array();
+    }
+    $this->controller->Media->setAccessFlags(&$data, $this->controller->getUser());
+
+    $pos = $this->getPos();
+    $mediaOffset = 1; // offset from previews media
+    $show = 3; // show size
+    if ($count > 2) {
+      if ($count <= $pos) {
+        // last media [current, next]
+        $this->setPos($count);
+        $params['data'] = $this->getParams();
+        $pos = $count - 1;
+        $show = 2;
+      } elseif ($pos == 1) {
+        // first media [prev, current]
+        $show = 2;
+        $mediaOffset = 0;
+      } else {
+        // [prev, current, next]
+        $pos--;
+      }
+    } elseif ($count == 2) {
+      $show = 2;
+      if ($pos == 1) {
+        // [current, next]
+        $mediaOffset = 0;
+      } // else [prev, current]
+    } else {
+      // [current]
+      $show = 1;
+      $mediaOffset = 0;
+    }
+
+    // get neigbors
+    $query['fields'] = 'Media.id';
+    $query['offset'] = $pos - 1;
+    $query['limit'] = $show;
+    if ($show > 1) {
+      $result = $this->controller->Media->find('all', $query);
+      $ids = Set::extract('/Media/id', $result);
+      if ($mediaOffset == 1) {
+        $params['prevMedia'] = $ids[0];
+      } 
+      if (isset($ids[$mediaOffset + 1])) {
+        $params['nextMedia'] = $ids[$mediaOffset + 1];
+      } 
+    }
+
+    $params['current'] = $id;
+    if ($this->getUser(false) != false) {
+      $username = $this->getUser();
+      $params['baseUri'] = '/explorer/user/'.$username;
+      $params['defaults']['user'] = $username;
+    }
+
+    // Set data for search helper
+    $this->controller->params['search'] = $params;
+ 
     return $data;
   }
 }

@@ -141,6 +141,10 @@ class ExcludeBehavior extends ModelBehavior {
     }
     //Logger::debug($conditions);
     foreach ($conditions as $key => $condition) {
+      // we expect only full conditions
+      if (!is_string($condition)) {
+        return false;
+      }
       // Match 'Model.field'
       if (!preg_match('/^(.*)\./', $condition, $matches)) {
         continue;

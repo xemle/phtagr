@@ -307,3 +307,5 @@ class ImageDataHelper extends AppHelper {
     return $this->Form->input($fieldName, $options);
   }  
 }
+
+?>

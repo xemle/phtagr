@@ -9,7 +9,7 @@ class SearchHelperTest extends CakeTestCase {
   function setUp() {
     $this->Search = new SearchHelper();
     $this->Search->params['search']['data'] = array();
-    $this->Search->params['search']['uriBase'] = '/explorer/query';
+    $this->Search->params['search']['baseUri'] = '/explorer/query';
     $this->Search->params['search']['defaults'] = array(
       'show' => 12,
       'page' => 1,
@@ -25,7 +25,7 @@ class SearchHelperTest extends CakeTestCase {
   function testConfig() {
     $result = $this->Search->config;
     $this->assertEqual($result, array(
-      'uriBase' => '/explorer/query',
+      'baseUri' => '/explorer/query',
       'defaults' => array(
         'show' => 12,
         'page' => 1,
@@ -122,13 +122,13 @@ class SearchHelperTest extends CakeTestCase {
     $result = $this->Search->getUri();
     $this->assertEqual($result, '/explorer/query');
 
-    $result = $this->Search->getUri(false, false, false, array('uriBase' => '/image/view/1'));
+    $result = $this->Search->getUri(false, false, false, array('baseUri' => '/image/view/1'));
     $this->assertEqual($result, '/image/view/1');
   
     $result = $this->Search->getUri(array('tags' => array('tag1', 'tag2')));
     $this->assertEqual($result, '/explorer/query/tags:tag1,tag2');    
   
-    $result = $this->Search->getUri(array('tags' => array('tag1', 'tag2')), false, false, array('uriBase' => '/image/view/1'));
+    $result = $this->Search->getUri(array('tags' => array('tag1', 'tag2')), false, false, array('baseUri' => '/image/view/1'));
     $this->assertEqual($result, '/image/view/1/tags:tag1,tag2');
   }
 }

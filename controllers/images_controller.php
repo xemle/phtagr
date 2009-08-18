@@ -23,18 +23,17 @@
 
 class ImagesController extends AppController
 {
-  var $components = array('RequestHandler', 'Query');
+  var $components = array('RequestHandler', 'Search');
   var $uses = array('Media', 'Group', 'Tag', 'Category', 'Location');
-  var $helpers = array('form', 'formular', 'html', 'javascript', 'ajax', 'imageData', 'time', 'query', 'explorerMenu', 'rss', 'map');
+  var $helpers = array('form', 'formular', 'html', 'javascript', 'ajax', 'imageData', 'time', 'search', 'explorerMenu', 'rss', 'map', 'navigator');
 
   function beforeFilter() {
     parent::beforeFilter();
 
-    $this->Query->parseArgs();
+    $this->Search->parseArgs();
   }
 
   function beforeRender() {
-    $this->params['query'] = $this->Query->getParams();
     $this->set('feeds', '/explorer/rss');
   }
 
@@ -79,12 +78,10 @@ class ImagesController extends AppController
   }
 
   function view($id) {
-    $this->Query->setMediaId($id);
-    $this->data = $this->Query->paginateMedia();
+    $this->data = $this->Search->paginateMedia($id);
     if (!$this->data) {
       $this->render('notfound');
     } else {
-      $this->set('mainMenuExplorer', $this->Query->getMenu(&$this->data));
       $role = $this->getUserRole();
       if ($role >= ROLE_USER) {
         $commentAuth = COMMENT_AUTH_NONE;

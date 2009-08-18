@@ -137,7 +137,6 @@ class Search extends Object
         break;
       case 'add':
         if (count($args) == 1) {
-          $name = Inflector::pluralize($name);
           return $this->addParam($name, $args[0]);
         }
         break;

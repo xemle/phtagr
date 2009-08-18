@@ -36,7 +36,7 @@ class SearchHelper extends Search {
   function initialize($config = array()) {
     if (isset($this->params['search'])) {
       $this->_data = $this->params['search']['data'];
-      $this->config['uriBase'] = $this->params['search']['uriBase'];
+      $this->config['baseUri'] = $this->params['search']['baseUri'];
       $this->config['defaults'] = $this->params['search']['defaults'];
       if (isset($this->params['search']['myMedia'])) {
         $this->isMyMedia = true;
@@ -65,10 +65,11 @@ class SearchHelper extends Search {
 
     $add = (array)$add;
     $del = (array)$del;
+    $singulars = array('pos');
     
     // add parameters
     foreach ($add as $name => $values) {
-      if (Inflector::pluralize($name) == $name || is_array($values)) {
+      if (!in_array($name, $singulars) && Inflector::pluralize($name) == $name || is_array($values)) {
         $name = Inflector::pluralize($name);
         if (!isset($data[$name])) {
           $data[$name] = array();
@@ -89,7 +90,7 @@ class SearchHelper extends Search {
 
     // delete parameters
     foreach ($del as $name => $values) {
-      if (Inflector::pluralize($name) == $name || is_array($values)) {
+      if (!in_array($name, $singulars) && Inflector::pluralize($name) == $name || is_array($values)) {
         $name = Inflector::pluralize($name);
         if (!isset($data[$name])) {
           continue;
@@ -151,9 +152,9 @@ class SearchHelper extends Search {
     $serial = $this->serialize($data, $add, $del, $options);
     $config = am($this->config, $options);
     if ($serial) {
-      return $config['uriBase'].'/'.$serial;
+      return $config['baseUri'].'/'.$serial;
     } else {
-      return $config['uriBase'];
+      return $config['baseUri'];
     }
   }
 
@@ -163,3 +164,4 @@ class SearchHelper extends Search {
   }
 
 }
+?>

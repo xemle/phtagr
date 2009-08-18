@@ -49,7 +49,7 @@ class ExplorerController extends AppController
       case ROLE_ADMIN:
         break;
       default:
-        Logger::warn("Unhandled role $role");
+        Logger::err("Unhandled role $role");
     }
     $this->Search->disabled = $disabled;
     $this->Search->parseArgs();

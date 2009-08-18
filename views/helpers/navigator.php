@@ -24,36 +24,29 @@
 class NavigatorHelper extends AppHelper {
   var $helpers = array('Html', 'Search'); 
 
+  function beforeRender() {
+    $this->Search->initialize();
+  }
+
   function hasPages() {
-    return (isset($this->params['search']['pageCount']) &&
-      $this->params['search']['pageCount'] > 1);
-  }
-
-  function hasPrev() {
-    return (isset($this->params['search']['prevPage']) &&
-      $this->params['search']['prevPage']);
-  }
-
-  function getPrevUrl() {
-    if (!$this->hasPrev()) {
-      return false;
-    }
-    
-    return $this->Search->getUri(false, array('page' => $this->params['search']['current'] - 1));
+    return (isset($this->params['search']) && $this->params['search']['pageCount'] > 1);
   }
 
   function prev() {
-    $prevUrl = $this->getPrevUrl();
-    if (!$prevUrl) {
+    if (!isset($this->params['search']) || 
+      !$this->params['search']['prevPage']) {
       return false;
     }
-    return $this->Html->link('prev', $prevUrl, array('class' => 'prev'));
+    $current = $this->params['search']['page'];
+    $link = $this->Search->getUri(false, array('page' => $current - 1));
+    return $this->Html->link('prev', $link, array('class' => 'prev'));
   }
 
   function numbers() {
     if (!isset($this->params['search'])) {
       return;
     }
+
     $params = $this->params['search'];
     $output = '';
     
@@ -67,64 +60,63 @@ class NavigatorHelper extends AppHelper {
         else if ($count <= 12 ||
             ($i < 3 || $i > $count-2 ||
             ($i-$current < 4 && $current-$i<4))) {
-          $output .= ' '.$this->Html->link($i, $this->Search->getUri(false, array('page' => $i)));
+          $link = $this->Search->getUri(false, array('page' => $i));
+          $output .= ' '.$this->Html->link($i, $link);
         }
         else if ($i == $count-2 || $i == 3) {
           $output .= " ... ";
         }
       }
     }
+
     return $output;
   }
 
-  function hasNext() {
-    return (isset($this->params['search']['nextPage']) &&
-      $this->params['search']['nextPage']);
-  }
-
-  function getNextUrl($base = null) {
-    if (!$this->hasNext()) {
-      return false;
-    }
-    return $this->Search->getUri(false, array($this->params['search']['count'] + 1));
-  }
-
   function next() {
-    $nextUrl = $this->getNextUrl();
-    if (!$nextUrl) {
+    if (!isset($this->params['search']) || 
+      !$this->params['search']['nextPage']) {
       return false;
     }
-    return $this->Html->link('next', $nextUrl, array('class' => 'next'));
+    $current = $this->params['search']['page'];
+    $link = $this->Search->getUri(false, array('page' => $current + 1));
+    return $this->Html->link('next', $link, array('class' => 'next'));
   }
 
   function prevMedia() {
-    if (!isset($this->params['search']))
+    if (!isset($this->params['search']) ||
+      !$this->params['search']['prevMedia']) {
       return;
-    $query = $this->params['search'];
-    if (isset($query['prevMedia'])) {
-      $query['pos']--;
-      $query['page'] = ceil($query['pos'] / $query['show']);
-      return $this->Html->link('prev', '/images/view/'.$query['prevMedia'].'/'.$this->getParams($query, $this->_excludeMedia), array('class' => 'prev'));
     }
+    $params = $this->params['search'];
+    $pos = $this->Search->getPos() - 1;
+    $page = ceil($pos / $this->Search->getShow());
+    $baseUri = '/images/view/'.$params['prevMedia'];
+    $link = $this->Search->getUri(false, array('pos' => $pos, 'page' => $page), false, array('baseUri' => $baseUri));
+    return $this->Html->link('prev', $link, array('class' => 'prev'));
   }
 
   function up() {
-    if (!isset($this->params['search']))
+    if (!isset($this->params['search'])) {
       return;
-    $query = $this->params['search'];
-    $query['page'] = ceil($query['pos'] / $query['show']);
-    $exclude = am($this->_excludeMedia, array('image' => true, 'pos' => true));
-    return $this->Html->link('up', $this->Search->getUri($query, $exclude).'#media-'.$query['media'], array('class' => 'up'));
+    }
+    $params = $this->params['search'];
+    $pos = $this->Search->getPos();
+    $link = $this->Search->getUri(false, false, array('pos' => $pos)).'#media-'.$params['current'];
+    return $this->Html->link('up', $link, array('class' => 'up'));
   }
 
   function nextMedia() {
-    if (!isset($this->params['search']))
+    if (!isset($this->params['search']) || 
+      !$this->params['search']['nextMedia']) {
       return;
-    $query = $this->params['search'];
-    if (isset($query['nextMedia'])) {
-      $query['pos']++;
-      $query['page'] = ceil($query['pos'] / $query['show']);
-      return $this->Html->link('next', '/images/view/'.$query['nextMedia'].'/'.$this->getParams($query, $this->_excludeMedia), array('class' => 'next'));
     }
+    $params = $this->params['search'];
+    Logger::debug($params);
+    $pos = $this->Search->getPos() + 1;
+    $page = ceil($pos / $this->Search->getShow());
+    $baseUri = '/images/view/'.$params['nextMedia'];
+    $link = $this->Search->getUri(false, array('pos' => $pos, 'page' => $page), false, array('baseUri' => $baseUri));
+    return $this->Html->link('next', $link, array('class' => 'next'));
   }
 }
+?>

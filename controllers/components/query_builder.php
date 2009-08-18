@@ -35,13 +35,17 @@ class QueryBuilderComponent extends Object
     'name' => array('field' => 'Model.field', 'operand' => 'condition operand')
   */
   var $rules = array(
-    'to' => array('field' => 'Media.date', 'operand' => '<='),
-    'from' => array('field' => 'Media.date', 'operand' => '>='),
     'categories' => array('custom' => 'buildHabtm'),
+    'east' => array('field' => 'Media.longitude', 'operand' => '<='),
+    'from' => array('field' => 'Media.date', 'operand' => '>='),
     'locations' => array('custom' => 'buildHabtm'),
     'media' => 'Media.id',
+    'north' => array('field' => 'Media.latitude', 'operand' => '<='),
     'user' => 'User.username',
+    'south' => array('field' => 'Media.latitude', 'operand' => '>='),
+    'to' => array('field' => 'Media.date', 'operand' => '<='),
     'tags' => array('custom' => 'buildHabtm'),
+    'west' => array('field' => 'Media.longitude', 'operand' => '>='),
     );
 
   function initialize(&$controller) {
@@ -62,7 +66,7 @@ class QueryBuilderComponent extends Object
     }
   }
 
-  /** Sanitize the data
+  /** Sanitize the data by escaping the value
     @param Data as single value or array
     @return Sanitized data */
   function _sanitizeData($data) {
@@ -166,7 +170,7 @@ class QueryBuilderComponent extends Object
             Logger::err("Custom method {$rule['custom']} does not exists or is missing");
             continue;
           }
-          Logger::debug("Call custom rule {$rule['custom']}");
+          //Logger::debug("Call custom rule {$rule['custom']}");
           call_user_method($rule['custom'], &$this, &$data, &$query, $name, $value);
         } elseif (!isset($rule['field'])) {
            Logger::err("Field in rule is missing");
@@ -177,16 +181,20 @@ class QueryBuilderComponent extends Object
         }
       }
     }
+    if (!isset($data['visibility'])) {
+      $this->_buildAccessConditions(&$data, &$query);
+    }
 
     // paging, offsets and limit
     if (isset($data['pos'])) { 
       $query['offset'] = $data['pos'];
-    } elseif (isset($data['offset']) && isset($data['limit'])) {
-      $query['offset'] = $data['offset'] * $data['limit'];
+    } elseif (isset($data['show']) && isset($data['page'])) {
+      $query['page'] = $data['page'];
     }
-    if (isset($data['limit'])) {
-      $query['limit'] = $data['limit'];
+    if (isset($data['show'])) {
+      $query['limit'] = $data['show'];
     }
+
     if (isset($data['sort'])) {
       $this->_buildOrder(&$data, &$query);
     }
@@ -199,22 +207,19 @@ class QueryBuilderComponent extends Object
     if (count($exclude)) {
       $query['conditions']['exclude'] = $this->buildConditions($exclude);
     }
-    Logger::debug($query);
     return $query;
   }
 
   function _buildOrder(&$data, &$query) {
     if ($data['sort'] == 'default') {
       if (isset($query['_counts']) && count($query['_counts']) > 0) {
-        Logger::debug($data);
         if ($this->_getParam(&$data, 'operand') == 'OR') {
-          Logger::debug("------------ harhar");
           // global OR operand
           $counts = array();
           $conditions = array();
           foreach ($query['_counts'] as $count) {
             $counts[] = "( $count + 1 )";
-            $conditions[] = "IFNULL($count,0)";
+            $conditions[] = "COALESCE($count, 0)";
           }
           $query['conditions'][] = '( '.implode(' + ', $conditions).' ) > 0';
           $query['order'][] = implode(" * ", $counts).' DESC';
@@ -224,12 +229,12 @@ class QueryBuilderComponent extends Object
             $fieldCount = Inflector::camelize($habtm)."Count";
             if (in_array($fieldCount, $query['_counts']) &&
               $this->_getParam(&$data, $habtm."Op") == 'OR') {
-              $query['order'][] = $fieldCount.' DESC';
+              $query['order'][] = "COALESCE($fieldCount, 0) DESC";
             }
           }
         }
       }
-      $query['order'][] = 'Media.date';
+      $query['order'][] = 'Media.date DESC';
     } else {
       switch ($data['sort']) {
         case 'date':
@@ -238,13 +243,32 @@ class QueryBuilderComponent extends Object
         case '-date':
           $query['order'][] = 'Media.date ASC'; 
           break;
+        case 'newest':
+          $query['order'][] = 'Media.created DESC'; 
+          break;
+        case 'changes':
+          $query['order'][] = 'Media.modified DESC'; 
+          break;
+        case 'viewed':
+          $query['order'][] = 'Media.lastview DESC'; 
+          break;
+        case 'popularity':
+          $query['order'][] = 'Media.ranking DESC'; 
+          break;
+        case 'random':
+          $query['order'][] = 'RAND()'; 
+          break;
         default:
           Logger::err("Unknown sort value: {$data['sort']}");
       }
     }
-    $query['order'][] = 'Media.id';
   }
 
+  /**
+    @param data Search parameters array
+    @param SQL array
+    @param name Parameter name
+    @param value Parameter value */
   function buildHabtm(&$data, &$query, $name, $value) {
     if (count($data[$name]) == 0) {
       return;
@@ -258,9 +282,10 @@ class QueryBuilderComponent extends Object
     $fieldCount = Inflector::camelize($habtm).'Count';
     $query['_counts'][] = $fieldCount;
 
+    // handle operand conditions (AND and OR)
     $operand = $this->_getParam(&$data, 'operand');
     if ($operand == 'OR') {
-      // handled by sort
+      // handled by _buildOrder()
       return;
     } elseif ($operand == null) {
       // habtm operand
@@ -279,5 +304,45 @@ class QueryBuilderComponent extends Object
     }
   }
 
+  function _buildAccessConditions(&$data, &$query) {
+    $user = $this->controller->getUser();
+    $userId = 0;
+    if (isset($data['user'])) {
+      // get users id for backwards compatibility
+      $u = $this->controller->User->findByUsername($data['user']);
+      if ($u) {
+        $userId = $u['User']['id'];
+      } else {
+        $userId = -1;
+      }
+    }
+    $sql = $this->controller->Media->buildWhereAcl($user, $userId);
+    if (preg_match('/^\s*AND\s+(.*)$/', $sql, $matches)) {
+      $sql = $matches[1];
+    }
+    $query['conditions'][] = $sql;
+  }
+
+  function buildVisibility(&$data, &$query, $value) {
+    $query['conditions'][] = $this->_buildCondition("User.id", $this->controller->getUserId());
+    switch ($value) {
+      case 'private':
+        $query['conditions'][] = $this->_buildCondition("Media.gacl", ACL_READ_PREVIEW, '<');
+        break;
+      case 'group':
+        $query['conditions'][] = $this->_buildCondition("Media.gacl", ACL_READ_PREVIEW, '>=');
+        $query['conditions'][] = $this->_buildCondition("Media.uacl", ACL_READ_PREVIEW, '<');
+        break;
+      case 'user':
+        $query['conditions'][] = $this->_buildCondition("Media.uacl", ACL_READ_PREVIEW, '>=');
+        $query['conditions'][] = $this->_buildCondition("Media.oacl", ACL_READ_PREVIEW, '<');
+        break;
+      case 'public':
+        $query['conditions'][] = $this->_buildCondition("Media.oacl", ACL_READ_PREVIEW, '>=');
+        break;
+      default:
+        Logger::err("Unknown visibility value $value");
+    }
+  }
 }
 ?>

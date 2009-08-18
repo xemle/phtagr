@@ -46,7 +46,7 @@ class ExplorerMenuHelper extends AppHelper
     return $data;
   }
 
-  function _getExtra($association, $value, $id) {
+  function _getAssociationExtra($association, $value, $id) {
     $out = " <div class=\"actionlist\" id=\"$id\">";
 
     $plural = Inflector::pluralize($association);
@@ -68,7 +68,7 @@ class ExplorerMenuHelper extends AppHelper
     return $out;
   }
 
-  function _getSubMenu2($association) {
+  function _getSubMenu($association) {
     $counts = $this->_countAssociation(Inflector::camelize($association));
     $subMenu = array();
     $base = '/explorer';
@@ -78,7 +78,7 @@ class ExplorerMenuHelper extends AppHelper
     foreach($counts as $name => $count) {
       $id = "item-".$this->_id++;
       $link = $this->html->link($name, "$base/$association/$name");
-      $extra = $this->_getExtra($association, $name, $id);
+      $extra = $this->_getAssociationExtra($association, $name, $id);
       $subMenu[] = array(
         'text' => "$link ($count) $extra",
         'type' => 'multi',
@@ -89,75 +89,7 @@ class ExplorerMenuHelper extends AppHelper
     return $subMenu;
   }
 
-  /*
-  function _getSubMenu($data, $field) {
-    return $this->_getSubMenu2($field);
-    $fields = Inflector::pluralize($field);
-    if (!isset($data[$fields]) || !count($data[$fields])) {
-      return false;
-    }
-
-    $tmp = $this->query->getQuery();
-    $userId = $this->query->get('user');
-
-    $subMenu = array();
-
-    foreach($data[$fields] as $name => $count) {
-      $this->query->set('page', 1);
-
-      $id = "item-".$this->_id++;
-
-      // field
-      $link = "/explorer/$field/$name";
-      if ($userId)
-        $link .= "/user:$userId";
-      $text = ' '.$this->html->link($name, $link);
-      $text .= " ($count)";
-
-      $text .= " <div class=\"actionlist\" id=\"$id\">";
-
-      // include field
-      $this->query->add($fields, $name);
-      $text .= $this->html->link(
-        $this->html->image('icons/add.png', array('alt' => '+', 'title' => "Include $field $name")),
-        $this->query->getUri(), null, false, false);
-      $this->query->del($fields, $name);
-
-      // exclude field
-      $this->query->add($fields, '-'.$name);
-      $text .= $this->html->link(
-        $this->html->image('icons/delete.png', array('alt' => '-', 'title' => "Exclude $field $name")),
-        $this->query->getUri(), null, false, false);
-      $this->query->del($fields, '-'.$name);
-
-      // global link
-      if ($userId) {
-        $tmp2 = $this->query->getQuery();
-        $this->query->clear();
-        $this->query->add($fields, $name);
-        $text .= $this->html->link(
-          $this->html->image('icons/world.png', array('alt' => 'global', 'title' => "Explore global $field $name")),
-          "$field/$name", null, false, false);
-        $this->query->setQuery($tmp2);
-      }
-      $text .= "</div>";
-
-      $subMenu[] = array(
-        'text' => $text, 
-        'type' => 'multi', 
-        'onmouseover' => "toggleVisibility('$id', 'inline');",
-        'onmouseout' => "toggleVisibility('$id', 'inline');");
-
-      // reset changed search parameters
-      $this->query->setQuery($tmp);
-    }
-    return $subMenu;
-  }
-  */
-
   function _getQueryOrderMenu() {
-    /*
-    $tmp = $this->query->getQuery();
     $subMenu = array();
     
     $orders = array(
@@ -168,15 +100,13 @@ class ExplorerMenuHelper extends AppHelper
         'random' => 'Random'
       );
     foreach ($orders as $order => $name) {
-      $this->query->set('sort', $order);
+      $link = $this->search->getUri(false, array('sort' => $order));
       $subMenu[] = array(
-          'text' => $this->html->link($name, $this->query->getUri()),
+          'text' => $this->html->link($name, $link),
           'type' => 'multi'
         );
     }
-    $this->query->setQuery($tmp);
     return $subMenu;
-    */
   }
 
   function getMainMenu() {
@@ -194,15 +124,15 @@ class ExplorerMenuHelper extends AppHelper
     $items[] = array('text' => $this->html->link('Advance Search', $search));
     $items[] = array('text' => $this->html->link('Start Slideshow', 'javascript:startSlideshow();'));
 
-    $subMenu = $this->_getSubMenu2('tag');
+    $subMenu = $this->_getSubMenu('tag');
     if ($subMenu !== false)
       $items[] = array('text' => 'Tags', 'type' => 'text', 'submenu' => array('items' => $subMenu));
     
-    $subMenu = $this->_getSubMenu2('category');
+    $subMenu = $this->_getSubMenu('category');
     if ($subMenu !== false)
       $items[] = array('text' => 'Categories', 'type' => 'text', 'submenu' => array('items' => $subMenu));
 
-    $subMenu = $this->_getSubMenu2('location');
+    $subMenu = $this->_getSubMenu('location');
     if ($subMenu !== false)
       $items[] = array('text' => 'Locations', 'type' => 'text', 'submenu' => array('items' => $subMenu));
 

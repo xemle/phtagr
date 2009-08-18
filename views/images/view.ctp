@@ -4,7 +4,7 @@
 
 <div class="paginator"><div class="subpaginator">
 <?php
-echo $query->prevMedia().' '.$query->up().' '.$query->nextMedia();
+echo $navigator->prevMedia().' '.$navigator->up().' '.$navigator->nextMedia();
 ?>
 </div></div>
 
