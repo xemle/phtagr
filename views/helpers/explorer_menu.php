@@ -94,23 +94,71 @@ class ExplorerMenuHelper extends AppHelper
     return $subMenu;
   }
 
-  function _getQueryOrderMenu() {
-    $subMenu = array();
+  function _getOrderItem() {
+    $link = $this->search->getUri(false, array('sort' => 'date'), 'page');
+    $out = $this->html->link("Order", $link);
+
+    $id = 'order-item';
+    $out .= " <div class=\"actionlist\" id=\"$id\">";
     
-    $orders = array(
-        'date' => 'Date', 
-        'newest' => 'Newest', 
-        'changes' => 'Changes', 
-        'popularity' => 'Popularity', 
-        'random' => 'Random'
+    $icon = $this->html->image('icons/date_previous.png', array('alt' => 'date asc', 'title' => "Show oldest first"));
+    $link = $this->search->getUri(false, array('sort' => '-date'), 'page');
+    $out .= $this->html->link($icon, $link, false, false, array('escape' => false));
+    
+    $icon = $this->html->image('icons/add.png', array('alt' => 'newest', 'title' => "Show newest first"));
+    $link = $this->search->getUri(false, array('sort' => 'newest'), 'page');
+    $out .= $this->html->link($icon, $link, false, false, array('escape' => false));
+    
+    $icon = $this->html->image('icons/heart.png', array('alt' => 'pouplarity', 'title' => "Show popular first"));
+    $link = $this->search->getUri(false, array('sort' => 'popularity'), 'page');
+    $out .= $this->html->link($icon, $link, false, false, array('escape' => false));
+    
+    $icon = $this->html->image('icons/images.png', array('alt' => 'random', 'title' => "Show random order"));
+    $link = $this->search->getUri(false, array('sort' => 'random'), 'page');
+    $out .= $this->html->link($icon, $link, false, false, array('escape' => false));
+    
+    $icon = $this->html->image('icons/pencil.png', array('alt' => 'changes', 'title' => "Show changes first"));
+    $link = $this->search->getUri(false, array('sort' => 'changes'), 'page');
+    $out .= $this->html->link($icon, $link, false, false, array('escape' => false));
+    
+    $icon = $this->html->image('icons/eye.png', array('alt' => 'views', 'title' => "Show last views first"));
+    $link = $this->search->getUri(false, array('sort' => 'viewed'), 'page');
+    $out .= $this->html->link($icon, $link, false, false, array('escape' => false));
+
+    $out .= "</div>";
+
+    $subMenu = array(
+      'text' => $out,
+      'type' => 'multi',
+      'onmouseover' => "toggleVisibility('$id', 'inline');",
+      'onmouseout' => "toggleVisibility('$id', 'inline');"
       );
-    foreach ($orders as $order => $name) {
-      $link = $this->search->getUri(false, array('sort' => $order));
-      $subMenu[] = array(
-          'text' => $this->html->link($name, $link),
-          'type' => 'multi'
-        );
+    return $subMenu;
+  }
+
+  function _getPageItem() {
+    
+    $link = $this->search->getUri(false, array('show' => '12'), 'page');
+    $out = $this->html->link("Pagesize", $link);
+
+    $sizes = array(6, 12, 24, 60, 120, 250);
+    $links = array();
+    foreach ($sizes as $size) {
+      $link = $this->search->getUri(false, array('show' => $size), 'page');
+      $links[] = $this->html->link($size, $link, false, false, array('escape' => false));
     }
+
+    $id = 'page-item';
+    $out .= " <div class=\"actionlist\" id=\"$id\">";
+    $out .= implode(", ", $links);
+    $out .= "</div>";
+
+    $subMenu = array(
+      'text' => $out,
+      'type' => 'multi',
+      'onmouseover' => "toggleVisibility('$id', 'inline');",
+      'onmouseout' => "toggleVisibility('$id', 'inline');"
+      );
     return $subMenu;
   }
 
@@ -136,9 +184,10 @@ class ExplorerMenuHelper extends AppHelper
     if ($subMenu !== false)
       $items[] = array('text' => 'Locations', 'type' => 'text', 'submenu' => array('items' => $subMenu));
 
-    if ($this->params['action'] != 'search') {
-      $items[] = array('text' => 'Order By', 'type' => 'text', 'submenu' => array('items' => $this->_getQueryOrderMenu()));
-    }
+    $subItems = array();
+    $subItems[] = $this->_getOrderItem();
+    $subItems[] = $this->_getPageItem();
+    $items[] = array('text' => 'Options', 'type' => 'text', 'submenu' => array('items' => $subItems));
 
     $menu = array('items' => $items);
     return $this->menu->getMainMenu($menu);

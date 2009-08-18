@@ -35,67 +35,29 @@ class ExplorerController extends AppController
 
     parent::beforeFilter();
     
-    // disable search parameter after role
-    $role = $this->getUserRole();
-    $disabled = array();
-    switch ($role) {
-      case ROLE_NOBODY:
-        $disabled[] = 'group';
-        $disabled[] = 'file';
-      case ROLE_GUEST:
-        $disabled[] = 'visibility';
-      case ROLE_USER:
-      case ROLE_SYSOP:
-      case ROLE_ADMIN:
-        break;
-      default:
-        Logger::err("Unhandled role $role");
-    }
-    $this->Search->disabled = $disabled;
     $this->Search->parseArgs();
   }
 
   function beforeRender() {
-    $data = $this->Search->paginate();
-    // Set access rights
-    if ($data) {
-      $user = $this->getUser();
-      // @note References in foreach loops does not work with PHP4
-      foreach ($data as &$media) {
-        $this->Media->setAccessFlags($media, $user);
-      }
-    }
-    //Logger::debug($data);
-    $this->data = $data;
+    if ($this->layout != 'xml' && !$this->RequestHandler->isAjax()) {
+      $this->data = $this->Search->paginate();
 
-    //$this->set('mainMenuExplorer', $this->Search->getMenu(&$data));
-    if ($this->hasRole(ROLE_USER)) {
-      $groups = $this->Group->findAll(array('Group.user_id' => $this->getUserId()), false, array('Group.name'));
-      if ($groups) 
-        $groups = Set::combine($groups, "{n}.Group.id", "{n}.Group.name");
-      $groups[0] = '[Keep]';
-      $groups[-1] = '[No Group]';
-      $this->set('groups', $groups);
-    }
-
-    $this->set('feeds', array(
-      $this->_getMediaRss() => array('title' => 'Media RSS of current search', 'id' => 'gallery') 
-      ));
-  }
-
-  function _getMediaRss() {
-    $args = array();
-    foreach ($this->passedArgs as $name => $value) {
-      if (is_numeric($name)) {
-        $name = $this->action;
-        if (in_array($name, array('tag', 'category', 'location'))) {
-          $name = Inflector::pluralize($name);
+      //$this->set('mainMenuExplorer', $this->Search->getMenu(&$data));
+      if ($this->hasRole(ROLE_USER)) {
+        $groups = $this->Group->findAll(array('Group.user_id' => $this->getUserId()), false, array('Group.name'));
+        if ($groups) {
+          $groups = Set::combine($groups, "{n}.Group.id", "{n}.Group.name");
         }
+        $groups[0] = '[Keep]';
+        $groups[-1] = '[No Group]';
+        $this->set('groups', $groups);
       }
-      $args[] = $name.':'.$value;
+
+      $mediaRss = '/explorer/media/'.$this->Search->getUri();
+      $this->set('feeds', array(
+        $mediaRss => array('title' => 'Media RSS of current search', 'id' => 'gallery') 
+        ));
     }
-    $args[] =  "media.rss";
-    return '/explorer/media/'.implode('/', $args);
   }
 
   function index() {
@@ -145,21 +107,18 @@ class ExplorerController extends AppController
     }
     $this->set('userId', $this->Search->getUserId() == $this->getUserId() ? $this->getUserId() : false);
     $this->set('userRole', $this->getUserRole());
-    $this->set('mainMenuExplorer', array());
   }
 
   function user($username, $param = false, $value = false) {
     $this->Search->setUser($username);
     if ($param && $value && in_array($param, array('tag', 'category', 'location'))) {
-      Logger::debug("Add $param ($value)");
       $this->Search->addParam($param, explode(',', $value));
-      Logger::debug($this->Search->getParams());
     }
     $this->render('index');
   }
 
-  function group($id) {
-    $this->Search->setGroupId($id);
+  function group($name) {
+    $this->Search->addGroup($name);
     $this->render('index');
   }
 
@@ -184,9 +143,22 @@ class ExplorerController extends AppController
       }
       $from = mktime(0, 0, 0, $month, $day, $year);
       $to = mktime(0, 0, 0, $m, $d, $y);
-      $this->Search->setDateFrom($from);
-      $this->Search->setDateTo($to-1);
+      $this->Search->setFrom($from);
+      $this->Search->setTo($to-1);
       $this->Search->setOrder('-date');
+    } elseif ($year) {
+      $from = strtotime($year);
+      if ($from) {
+        $this->Search->setFrom($from);
+        $this->Search->setOrder('-date');
+      }
+      if ($month) {
+        $to = strtotime($month);
+        if ($to) {
+          $this->Search->setTo($to);
+          $this->Search->setOrder('date');
+        }
+      }
     }
     $this->render('index');
   }
@@ -593,9 +565,8 @@ class ExplorerController extends AppController
 
   function rss() {
     $this->layoutPath = 'rss';
-    $this->Search->setPageSize(30);
+    $this->Search->setShow(30);
     $this->Search->setOrder('newest');
-    $this->set('data', $this->Search->paginate());
 
     if (Configure::read('debug') > 1) {
       Configure::write('debug', 1);
@@ -608,15 +579,15 @@ class ExplorerController extends AppController
   }
 
   function media() {
-    $this->data = $this->Search->paginate();
     $this->layout = 'xml';
     if (Configure::read('debug') > 1) {
       Configure::write('debug', 1);
     }
+    $this->data = $this->Search->paginate();
   }
 
   function points($north, $south, $west, $east) {
-    $this->Search->setParam('order', 'random');
+    $this->Search->setSort('random');
 
     $north = floatval($north);
     $south = floatval($south);
@@ -629,12 +600,13 @@ class ExplorerController extends AppController
     while ($lat < $north) {
       $lng = $west;
       while ($lng < $east) {
-        $this->Search->setParams(array(
-          'north' => $lat+$stepLat, 'south' => $lat, 
-          'west' => $lng, 'east' => $lng+$stepLng));
+        $this->Search->setNorth($lat + $stepLat);
+        $this->Search->setSouth($lat);
+        $this->Search->setWest($lng);
+        $this->Search->setEast($lng + $stepLng);
         $points = $this->Search->paginate();
         //Logger::trace("Found ".count($points)." points");
-        $this->data = am($this->Search->paginate(), $this->data);
+        $this->data = am($points, $this->data);
         $lng += $stepLng;
       }
       $lat += $stepLat;
@@ -642,15 +614,10 @@ class ExplorerController extends AppController
 
     $this->layout = 'xml';
     Logger::trace("Search points of N:$north, S:$south, W:$west, E:$east: Found ".count($this->data)." points");
-    $this->Search->del(array('north', 'south', 'west', 'east'));
     if (Configure::read('debug') > 1) {
       Configure::write('debug', 1);
     }
   }
 
-  function test() {
-    
-    $this->render('index');
-  }
 }
 ?>

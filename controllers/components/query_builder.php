@@ -38,10 +38,10 @@ class QueryBuilderComponent extends Object
     'categories' => array('custom' => 'buildHabtm'),
     'east' => array('field' => 'Media.longitude', 'operand' => '<='),
     'from' => array('field' => 'Media.date', 'operand' => '>='),
+    'groups' => 'Group.name',
     'locations' => array('custom' => 'buildHabtm'),
     'media' => 'Media.id',
     'north' => array('field' => 'Media.latitude', 'operand' => '<='),
-    'user' => 'User.username',
     'south' => array('field' => 'Media.latitude', 'operand' => '>='),
     'to' => array('field' => 'Media.date', 'operand' => '<='),
     'tags' => array('custom' => 'buildHabtm'),
@@ -181,9 +181,7 @@ class QueryBuilderComponent extends Object
         }
       }
     }
-    if (!isset($data['visibility'])) {
-      $this->_buildAccessConditions(&$data, &$query);
-    }
+    $this->_buildAccessConditions(&$data, &$query);
 
     // paging, offsets and limit
     if (isset($data['pos'])) { 
@@ -205,6 +203,7 @@ class QueryBuilderComponent extends Object
     $exclude = $this->_extractExclusions(&$data);
     $query = $this->buildConditions(&$data);
     if (count($exclude)) {
+      $exclude['operand'] = 'OR';
       $query['conditions']['exclude'] = $this->buildConditions($exclude);
     }
     return $query;
@@ -305,15 +304,21 @@ class QueryBuilderComponent extends Object
   }
 
   function _buildAccessConditions(&$data, &$query) {
+    if (isset($data['visibility'])) {
+      return true;
+    }
     $user = $this->controller->getUser();
     $userId = 0;
     if (isset($data['user'])) {
       // get users id for backwards compatibility
       $u = $this->controller->User->findByUsername($data['user']);
-      if ($u) {
+      if ($u && ($u['User']['role'] >= ROLE_USER ||
+          $u['role'] == ROLE_GUEST && $u['User']['id'] == $user['User']['id'])) {
         $userId = $u['User']['id'];
       } else {
-        $userId = -1;
+        // user not found or wrong invalid guest name
+        Logger::warn("Invalid user. Disable search");
+        $query['conditions'][] = '1 = 0';
       }
     }
     $sql = $this->controller->Media->buildWhereAcl($user, $userId);

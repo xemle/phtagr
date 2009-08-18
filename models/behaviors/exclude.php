@@ -74,7 +74,9 @@ class ExcludeBehavior extends ModelBehavior {
         if (!isset($query['_counts'])) {
           $query['_counts'] = array();
         }
-        $query['_counts'][] = $count;
+        if (!in_array($count, $query['_counts'])) {
+          $query['_counts'][] = $count;
+        }
       }
       $join .= " FROM {$Model->tablePrefix}$joinTable AS $with, $table AS $alias";
       $join .= " WHERE $with.$associationForeignKey = $alias.id";
@@ -112,7 +114,9 @@ class ExcludeBehavior extends ModelBehavior {
         if (!isset($query['_counts'])) {
           $query['_counts'] = array();
         }
-        $query['_counts'][] = $count;
+        if (!in_array($count, $query['_counts'])) {
+          $query['_counts'][] = $count;
+        }
       }
       $join .= " FROM $table AS $alias";
       $join .= " WHERE ".implode(" OR ", $queryConditions);
@@ -191,10 +195,13 @@ class ExcludeBehavior extends ModelBehavior {
     if (count($query['_counts'])) {
       $counts = array();
       foreach ($query['_counts'] as $count) {
-        $counts[] = $count." > 0";
+        $counts[] = "COALESCE($count, 0) > 0";
       }
       $condition = '( '.join(' OR ', $counts).' )';
       $query['conditions'][] = $condition;
+    }
+    if (count($query['conditions']) == 0) {
+      $query['conditions'][] = '1 = 1';
     }
     $exclusion .= " WHERE ".implode(' AND ', $query['conditions']);
 

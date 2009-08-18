@@ -35,28 +35,27 @@ class SearchComponent extends Search
   /** Parameter validation array
     @see http://book.cakephp.org/view/125/Data-Validation */
   var $validate = array(
-    'categories' => array('rule' => array('custom', '/^[-]?[\w\d]+$/')),
+    'categories' => array('rule' => array('maxLength', 30)),
     'categoryOp' => array('rule' => array('inList', array('AND', 'OR'))),
     'east' => 'decimal',
     'file' => 'alphaNumeric',
-    'from' => 'date',
-    'group' => 'alphaNumeric',
-    'groups' => array('rule' => array('custom', '/^[-]?[\w\d]+$/')),
+    'from' => array('rule' => array('custom', '/^\d{4}-\d{2}-\d{2}([ T]\d{2}:\d{2}\d{2})?$/')),
+    'groups' => 'alphaNumeric',
     'media' => 'numeric',
     'north' => 'decimal',
-    'locations' => array('rule' => array('custom', '/^[-]?[\w\d]+$/')),
+    'locations' => array('rule' => array('maxLength', 30)),
     'locationOp' => array('rule' => array('inList', array('AND', 'OR'))),
     'operand' => array('rule' => array('inList', array('AND', 'OR'))),
     'page' => array('numericRule' => 'numeric', 'minRule' => array('rule' => array('range', 1))),
     'pos' => array('numericRule' => 'numeric', 'minRule' => array('rule' => array('range', 1))),
-    'show' => array('rule' => array('inList', array(6, 12, 24, 60, 120, 240))),
+    'show' => array('rule' => array('range', 6, 240)),
     'sort' => array('rule' => array('inList', array('date', '-date', 'newest', 'changes', 'viewed', 'popularity', 'random'))),
-    'tags' => array('rule' => array('custom', '/^[-]?[\w\d]+$/')),
+    'tags' => array('rule' => array('maxLength', 30)),
     'tagOp' => array('rule' => array('inList', array('AND', 'OR'))),
     'south' => 'decimal',
-    'to' => 'date',
+    'to' => array('rule' => array('custom', '/^\d{4}-\d{2}-\d{2}([ T]\d{2}:\d{2}\d{2})?$/')),
     'user' => 'alphaNumeric',
-    'users' => array('rule' => array('custom', '/^[-]?[\w\d]+$/')),
+    'users' => array('rule' => array('custom', '/^-?[\w\d]+$/')),
     'west' => 'decimal',
     'visibility' => array('rule' => array('inList', array('private', 'group', 'user', 'public'))),
     );
@@ -169,9 +168,9 @@ class SearchComponent extends Search
     $disabled = array();
     switch ($role) {
       case ROLE_NOBODY:
-        $disabled[] = 'group';
         $disabled[] = 'file';
       case ROLE_GUEST:
+        $disabled[] = 'groups';
         $disabled[] = 'visibility';
       case ROLE_USER:
       case ROLE_SYSOP:

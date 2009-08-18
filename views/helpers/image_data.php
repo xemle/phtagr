@@ -79,6 +79,43 @@ class ImageDataHelper extends AppHelper {
     return $sec + $offset;
   }
 
+  /** Returns a link of the media date with different options
+    @param media Media model data
+    @param option
+      - from: All media after given media
+      - to: All media before given media
+      - offset: given in hours (3h), days (3.5d) or months (6m) 
+    @return Link of the date search */
+  function getDateLink(&$media, $option = false) {
+    $date = $media['Media']['date'];
+    if ($option == 'from') {
+      return $this->Search->getUri(array('from' => $date, 'sort' => '-date'));
+    } elseif ($option == 'to') {
+      return $this->Search->getUri(array('to' => $date, 'sort' => 'date'));
+    } elseif (preg_match('/^(\d+(.\d+)?)([hdm])$/', $option, $matches)) {
+      $offset = $matches[1].$matches[2];
+      switch ($matches[3]) {
+        case 'h':
+          $offset *= 60*60;
+          break;
+        case 'd':
+          $offset *= 24*60*60;
+          break;
+        case 'm':
+          $offset *= 30*24*60*60;
+          break;
+        default:
+          Logger::err("Unknown date offset {$matches[3]}");
+      }
+    } else {
+      $offset = (integer)$option;
+    }
+
+    $from = date('Y-m-d H:i:s', strtotime($date) - $offset);
+    $to = date('Y-m-d H:i:s', strtotime($date) + $offset);
+    return $this->Search->getUri(array('from' => $from, 'to' => $to));
+  }
+
   /** Returns an single icon of a acl */
   function _acl2icon($acl, $titlePrefix = '') {
     $t='';
@@ -127,26 +164,24 @@ class ImageDataHelper extends AppHelper {
     $output = '<span onmouseover="toggleVisibility(\''.$id.'\', \'inline\');"';
     $output .= ' onmouseout="toggleVisibility(\''.$id.'\', \'inline\');">';
 
-    //Logger::verbose($this->Search->_data);
-    //Logger::verbose("SUPER");
-    $output .= $this->Html->link($data['Media']['date'], $this->Search->getUri(false, array('from' => $this->toUnix(&$data, -3*60*60), 'to' => $this->toUnix(&$data, 3*60*60))));
+    $output .= $this->Html->link($data['Media']['date'], $this->getDateLink(&$data, '3h'));
     $output .= ' ';
 
     $output .= '<div style="display: none;" class="actionlist" id="'.$id.'">';
     $icon = $this->Html->image('icons/date_previous.png', array('alt' => '<', 'title' => "View media of previous dates"));
-    $output .= $this->Html->link($icon, $this->Search->getUri(false, array('to' => $this->toUnix(&$data), 'sort' => 'date')), array('escape' => false));
+    $output .= $this->Html->link($icon, $this->getDateLink(&$data, 'to'), array('escape' => false));
 
     $icon = $this->Html->image('icons/calendar_view_day.png', array('alt' => 'd', 'title' => "View media of this day"));
-    $output .= $this->Html->link($icon, $this->Search->getUri(false, array('from' => $this->toUnix(&$data, -12*60*60), 'to' => $this->toUnix(&$data, 12*60*60))), array('escape' => false));
+    $output .= $this->Html->link($icon, $this->getDateLink(&$data, '12h'), array('escape' => false));
 
     $icon = $this->Html->image('icons/calendar_view_week.png', array('alt' => 'w', 'title' => "View media of this week"));
-    $output .= $this->Html->link($icon, $this->Search->getUri(false, array('from' => $this->toUnix(&$data, -3.5*24*60*60), 'to' => $this->toUnix(&$data, 3.5*24*60*60))), array('escape' => false));
+    $output .= $this->Html->link($icon, $this->getDateLink(&$data, '3.5d'), array('escape' => false));
 
     $icon = $this->Html->image('icons/calendar_view_month.png', array('alt' => 'm', 'title' => "View media of this month"));
-    $output .= $this->Html->link($icon, $this->Search->getUri(false, array('from' => $this->toUnix(&$data, -15*24*60*60), 'to' => $this->toUnix(&$data, 15*24*60*60))), array('escape' => false));
+    $output .= $this->Html->link($icon, $this->getDateLink(&$data, '15d'), array('escape' => false));
 
     $icon = $this->Html->image('icons/date_next.png', array('alt' => '>', 'title' => "View media of next dates"));
-    $output .= $this->Html->link($icon, $this->Search->getUri(false, array('from' => $this->toUnix(&$data), 'sort' => '-date')), array('escape' => false));
+    $output .= $this->Html->link($icon, $this->getDateLink(&$data, 'from'), array('escape' => false));
     $output .= '</div></span>';
 
     return $output;

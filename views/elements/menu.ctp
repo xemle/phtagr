@@ -10,21 +10,23 @@
     $userId = $session->read('User.id');
     $role = $session->read('User.role');
     $myImages = false;
-    if (isset($query)) {
-      $query->initialize();
-      $myImages = $query->get('mymedia');
+    if ($controller == 'explorer' && 
+      $action == 'user' &&
+      $this->params['pass'][0] == $session->read('User.username')) {
+      $myImages = true;
     }
     $items[] = array(
       'text' => 'Explorer', 
       'link' => '/explorer', 
       'type' => ($controller == 'explorer' && !$myImages?'current':''));
 
-    if ($role>=ROLE_GUEST)
+    if ($role >= ROLE_GUEST) {
       $items[] = array('text' => 
         'My Images', 
-        'link' => "/explorer/user/$userId", 
+        'link' => "/explorer/user/".$session->read('User.username'), 
         'type' => ($controller == 'explorer' && $myImages?'current':''));
-    if ($role>=ROLE_USER)
+    }
+    if ($role >= ROLE_USER)
       $items[] = array(
         'text' => 'My Files', 
         'link' => '/browser', 
