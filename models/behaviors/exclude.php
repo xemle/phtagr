@@ -65,7 +65,7 @@ class ExcludeBehavior extends ModelBehavior {
       extract($config);
 
       $alias = $Model->{$name}->alias;
-      $table = $Model->{$name}->table;
+      $table = $Model->{$name}->tablePrefix.$Model->{$name}->table;
 
       $join = "{$options['type']} JOIN ( SELECT $with.$foreignKey";
       if ($options['count']) {
@@ -102,7 +102,7 @@ class ExcludeBehavior extends ModelBehavior {
       //Logger::trace($config);
 
       $alias = $Model->{$name}->alias;
-      $table = $Model->{$name}->table;
+      $table = $Model->{$name}->tablePrefix.$Model->{$name}->table;
       $foreignKey = $config['foreignKey'];
 
       $join = "{$options['type']} JOIN ( SELECT $alias.$foreignKey";
@@ -184,7 +184,7 @@ class ExcludeBehavior extends ModelBehavior {
     //Logger::debug($query);
     $exclusion = " {$Model->alias}.id NOT IN (";
     $exclusion .= " SELECT {$Model->alias}.id";
-    $exclusion .= " FROM {$Model->table} AS {$Model->alias} ";
+    $exclusion .= " FROM {$Model->tablePrefix}{$Model->table} AS {$Model->alias} ";
     $exclusion .= implode(' ', $query['joins']); 
 
     // build condition for outer join

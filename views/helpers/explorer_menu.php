@@ -31,19 +31,24 @@ class ExplorerMenuHelper extends AppHelper
     @param association name
     @return Array of accociation name as key and their count as value */
   function _countAssociation($association) {
-    $data = array();
-    foreach ($this->data as $media) {
+    $result = array();
+    if (isset($this->data['Media'])) {
+      $data = array($this->data);
+    } else {
+      $data =& $this->data;
+    }
+    foreach ($data as $media) {
       $values = Set::extract("/$association/name", $media);
       foreach ($values as $value) {
-        if (!isset($data[$value])) {
-          $data[$value] = 1;
+        if (!isset($result[$value])) {
+          $result[$value] = 1;
         } else {
-          $data[$value]++;
+          $result[$value]++;
         }
       }
     }
-    arsort($data);
-    return $data;
+    arsort($result);
+    return $result;
   }
 
   function _getAssociationExtra($association, $value, $id) {
@@ -116,11 +121,6 @@ class ExplorerMenuHelper extends AppHelper
     $this->_id = 0;
 
     $search = '/explorer/search';
-    /*
-    if ($this->query->get('mymedia')) {
-      $search .= '/user:'.$this->query->get('user');
-    }
-    */
     $items[] = array('text' => $this->html->link('Advance Search', $search));
     $items[] = array('text' => $this->html->link('Start Slideshow', 'javascript:startSlideshow();'));
 

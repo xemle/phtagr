@@ -219,7 +219,7 @@ class SearchComponent extends Search
       );
 
     if ($count == 0) {
-      $this->params['search'] = $params;
+      $this->controller->params['search'] = $params;
       return array();
     }
     $params['pageCount'] = ceil($count / $this->getShow(12));
@@ -273,7 +273,7 @@ class SearchComponent extends Search
 
     $data = $this->controller->Media->findById($id);
     if ($count == 0 || !$data) {
-      $this->params['search'] = $params;
+      $this->controller->params['search'] = $params;
       return array();
     }
     $this->controller->Media->setAccessFlags(&$data, $this->controller->getUser());
