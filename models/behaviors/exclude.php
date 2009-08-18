@@ -76,7 +76,7 @@ class ExcludeBehavior extends ModelBehavior {
         }
         $query['_counts'][] = $count;
       }
-      $join .= " FROM $joinTable AS $with, $table AS $alias";
+      $join .= " FROM {$Model->tablePrefix}$joinTable AS $with, $table AS $alias";
       $join .= " WHERE $with.$associationForeignKey = $alias.id";
       $join .=   " AND ( ".implode(" OR ", $queryConditions)." )";
       $join .= " GROUP BY $with.$foreignKey ";
