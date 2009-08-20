@@ -183,7 +183,7 @@ class ExplorerMenuHelper extends AppHelper
     }
 
     $subMenu = $this->_getAssociationSubMenu('category');
-    if ($subMenu !== false)a {
+    if ($subMenu !== false) {
       $items[] = array('text' => 'Categories', 'type' => 'text', 'submenu' => array('items' => $subMenu));
     }
 
