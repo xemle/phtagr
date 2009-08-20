@@ -88,7 +88,7 @@ class NavigatorHelper extends AppHelper {
       return;
     }
     $params = $this->params['search'];
-    $pos = $this->Search->getPos() - 1;
+    $pos = $this->Search->getPos(1) - 1;
     $page = ceil($pos / $this->Search->getShow());
     $baseUri = '/images/view/'.$params['prevMedia'];
     $link = $this->Search->getUri(false, array('pos' => $pos, 'page' => $page), false, array('baseUri' => $baseUri, 'defaults' => array('pos' => 1)));
@@ -100,8 +100,7 @@ class NavigatorHelper extends AppHelper {
       return;
     }
     $params = $this->params['search'];
-    $pos = $this->Search->getPos();
-    $link = $this->Search->getUri(false, false, array('pos' => $pos)).'#media-'.$params['current'];
+    $link = $this->Search->getUri(false, false, 'pos').'#media-'.$params['current'];
     return $this->Html->link('up', $link, array('class' => 'up'));
   }
 
@@ -111,7 +110,7 @@ class NavigatorHelper extends AppHelper {
       return;
     }
     $params = $this->params['search'];
-    $pos = $this->Search->getPos() + 1;
+    $pos = $this->Search->getPos(1) + 1;
     $page = ceil($pos / $this->Search->getShow());
     $baseUri = '/images/view/'.$params['nextMedia'];
     $link = $this->Search->getUri(false, array('pos' => $pos, 'page' => $page), false, array('baseUri' => $baseUri, 'defaults' => array('pos' => 1)));

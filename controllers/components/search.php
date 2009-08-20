@@ -278,7 +278,7 @@ class SearchComponent extends Search
     }
     $this->controller->Media->setAccessFlags(&$data, $this->controller->getUser());
 
-    $pos = $this->getPos();
+    $pos = $this->getPos(1);
     $mediaOffset = 1; // offset from previews media
     $show = 3; // show size
     if ($count > 2) {
@@ -324,6 +324,7 @@ class SearchComponent extends Search
     }
 
     $params['current'] = $id;
+    $params['pos'] = $this->getPos(1);
     if ($this->getUser(false) != false) {
       $username = $this->getUser();
       $params['baseUri'] = '/explorer/user/'.$username;

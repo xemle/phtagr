@@ -60,7 +60,6 @@ foreach ($this->data as $media): ?>
 <div class="image">
 <?php 
   $size = $imageData->getimagesize($media, OUTPUT_SIZE_THUMB);
-  $pos++;
   echo "<a href=\"".Router::url("/images/view/".$media['Media']['id'].'/'.$search->serialize(false, array('pos' => $pos++), false, array('defaults' => array('pos' => 1))))."\">";
   echo "<img src=\"".Router::url("/media/thumb/".$media['Media']['id'])."\" $size[3] alt=\"".$media['Media']['name']."\"/>"; 
   echo "</a>";
