@@ -227,7 +227,7 @@ class MyFile extends AppModel
       $conditions .= "File.path = '$sqlPath' AND File.file = '$sqlFile'";
     }
     // @TODO Fix ACL
-    //$conditions .= $this->buildWhereAcl($user, 0, $flag);
+    //$conditions[] = $this->Media->buildAclConditions($user, 0, $flag);
     Logger::debug($conditions);
 
     return $this->hasAny($conditions);

@@ -321,11 +321,7 @@ class QueryBuilderComponent extends Object
         $query['conditions'][] = '1 = 0';
       }
     }
-    $sql = $this->controller->Media->buildWhereAcl($user, $userId);
-    if (preg_match('/^\s*AND\s+(.*)$/', $sql, $matches)) {
-      $sql = $matches[1];
-    }
-    $query['conditions'][] = $sql;
+    $query['conditions'][] = $this->controller->Media->buildAclConditions($user, $userId);
   }
 
   function buildVisibility(&$data, &$query, $value) {

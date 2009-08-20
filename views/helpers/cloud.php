@@ -20,22 +20,32 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-class HomeController extends AppController
+class CloudHelper extends AppHelper
 {
-  var $name = 'home';
+  var $helpers = array('Html');
 
-  var $helpers = array('html', 'time', 'text', 'cloud');
-  var $uses = array('Media', 'Tag', 'Category', 'Comment');
+  /** Prints a tag cloud 
+    @param data Cloud data
+    @param urlPrefix Prefix of URL
+    @return Cloud html */
+  function cloud($data, $urlPrefix = false) {
+    if (count($data) == 0) {
+      return;
+    }
+    $max = max($data);
+    $min = min($data);
+    $steps = 300 / ($max - $min + 1);
 
-  function index() {
-    $user = $this->getUser();
-    $this->set('cloudTags', $this->Media->cloud($user, 'Tag', 50));
+    $out = '';
+    ksort($data);
+    foreach($data as $name => $hits) {
+      $size = 100 + floor(($hits - $min) * $steps);
+      $out .= "<span style=\"font-size: {$size}%\">";
+      $out .= $this->Html->link($name, $urlPrefix.$name);
+      $out .= "</span> ";                      
+    }
 
-    $this->set('cloudCategories', $this->Media->cloud($user, 'Category', 50));
-
-    $conditions[] = $this->Media->buildAclConditions($this->getUser());
-    $comments = $this->Comment->findAll($conditions, null, 'Comment.date DESC', 4);
-    $this->set('comments', $comments);
+    return $out;
   }
 }
 ?>
