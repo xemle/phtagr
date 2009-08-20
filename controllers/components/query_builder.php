@@ -184,7 +184,7 @@ class QueryBuilderComponent extends Object
     $this->_buildAccessConditions(&$data, &$query);
 
     // paging, offsets and limit
-    if (isset($data['pos'])) { 
+    if (!empty($data['pos'])) { 
       $query['offset'] = $data['pos'];
     } elseif (isset($data['show']) && isset($data['page'])) {
       $query['page'] = $data['page'];
