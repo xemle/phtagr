@@ -218,7 +218,6 @@ class ExcludeBehavior extends ModelBehavior {
     } elseif (isset($query['exclude'])) {
       $exclude = $query['exclude'];
     }
-    //Logger::debug($query);
     $this->_buildJoins($Model, &$query, array('type' => 'LEFT'));
     if ($exclude) {
       $query['conditions'][] = $this->_buildExclusion($Model, $exclude);

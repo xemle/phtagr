@@ -465,7 +465,8 @@ class Media extends AppModel
       $file = $db->value(basename($filename));
       $conditions[] = "Media.path=$path AND Media.file=$file";
     }
-    $conditions[] = $this->buildAclConditions($user, 0, $flag);
+    $acl = $this->buildAclConditions($user, 0, $flag);
+    $conditions = am($conditions, $acl);
 
     return $this->hasAny($conditions);
   }

@@ -321,7 +321,8 @@ class QueryBuilderComponent extends Object
         $query['conditions'][] = '1 = 0';
       }
     }
-    $query['conditions'][] = $this->controller->Media->buildAclConditions($user, $userId);
+    $acl = $this->controller->Media->buildAclConditions($user, $userId);
+    $query['conditions'] = am($query['conditions'], $acl);
   }
 
   function buildVisibility(&$data, &$query, $value) {
