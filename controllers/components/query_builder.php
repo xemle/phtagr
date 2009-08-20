@@ -145,7 +145,7 @@ class QueryBuilderComponent extends Object
   }
 
   function buildConditions($data) {
-    $query = array();
+    $query = array('conditions' => array());
     if (!count($data)) {
       return $query;
     }
