@@ -13,6 +13,7 @@ class SearchHelperTest extends CakeTestCase {
     $this->Search->params['search']['defaults'] = array(
       'show' => 12,
       'page' => 1,
+      'pos' => false,
       'tagOp' => 'AND'
       );
     $this->Search->initialize();
@@ -29,6 +30,7 @@ class SearchHelperTest extends CakeTestCase {
       'defaults' => array(
         'show' => 12,
         'page' => 1,
+        'pos' => false,
         'tagOp' => 'AND'
         )
       ));
@@ -100,20 +102,36 @@ class SearchHelperTest extends CakeTestCase {
       );
 
     // disabled default
-    $result = $this->Search->serialize(false, array('pos' => 2), false, array('defaults' => array('pos' => false)));
+    $result = $this->Search->serialize(false, array('pos' => 2));
     $this->assertEqual($result, 'tags:tag1,tag2');
  
-    $result = $this->Search->serialize(array('pos' => 2), false, false, array('defaults' => array('pos' => false)));
+    $result = $this->Search->serialize(array('pos' => 2));
     $this->assertEqual($result, '');
     
+    // enable disable default value
+    $result = $this->Search->serialize(false, array('pos' => 2), false, array('defaults' => array('pos' => true)));
+    $this->assertEqual($result, 'pos:2/tags:tag1,tag2');
+ 
+    $result = $this->Search->serialize(false, array('show' => 12), false, array('defaults' => array('show' => true)));
+    $this->assertEqual($result, 'show:12/tags:tag1,tag2');
+ 
     // array default
     $result = $this->Search->serialize(false, false, false, array('defaults' => array('tags' => 'tag1')));
     $this->assertEqual($result, 'tags:tag2');
+
+    $data = array('tags' => array('tag2'), 'page' => 12, 'pos' => 1);
+    $result = $this->Search->serialize($data, false, false, array('defaults' => array('page' => '12', 'pos' => 1)));
+    $this->assertEqual($result, 'tags:tag2');
     
-    $result = $this->Search->serialize(array('tagOp' => 'AND', 'tags' => array('tag1', 'tag2')), false, false, array('defaults' => array('tagOp' => 'OR')));
+    $data = array('tagOp' => 'AND', 'tags' => array('tag1', 'tag2'));
+    $result = $this->Search->serialize($data, false, false, array('defaults' => array('tagOp' => 'OR')));
     $this->assertEqual($result, 'tagOp:AND/tags:tag1,tag2');
     
     // disabled array default
+    $data = array('tags' => array('tag1', 'tag2'));
+    $result = $this->Search->serialize($data, false, false, array('defaults' => array('tags' => false)));
+    $this->assertEqual($result, '');
+
     $result = $this->Search->serialize(false, false, false, array('defaults' => array('tags' => false)));
     $this->assertEqual($result, '');
   }
@@ -125,11 +143,34 @@ class SearchHelperTest extends CakeTestCase {
     $result = $this->Search->getUri(false, false, false, array('baseUri' => '/image/view/1'));
     $this->assertEqual($result, '/image/view/1');
   
+    $result = $this->Search->getUri(false, array('pos' => 2), false, array('baseUri' => '/image/view/1', 'defaults' => array('pos' => true)));
+    $this->assertEqual($result, '/image/view/1/pos:2');
+  
     $result = $this->Search->getUri(array('tags' => array('tag1', 'tag2')));
     $this->assertEqual($result, '/explorer/query/tags:tag1,tag2');    
   
     $result = $this->Search->getUri(array('tags' => array('tag1', 'tag2')), false, false, array('baseUri' => '/image/view/1'));
     $this->assertEqual($result, '/image/view/1/tags:tag1,tag2');
+
+    $this->Search->setPos(13);
+    $this->Search->setPage(2);
+    $this->Search->config['defaults']['pos'] = true;
+    // pos as singular test, overwrite
+    $result = $this->Search->getUri(false, array('pos' => 14));
+    $this->assertEqual($result, '/explorer/query/page:2/pos:14');
+
+    // delete
+    $result = $this->Search->getUri(false, false, 'pos');
+    $this->assertEqual($result, '/explorer/query/page:2');
+
+    // delete has higher priority as add
+    $result = $this->Search->getUri(false, array('show' => 24), array('show'));
+    $this->assertEqual($result, '/explorer/query/page:2/pos:13');
+    
+    // reset search
+    $this->Search->delPos();
+    $this->Search->delPage();
+    $this->Search->config['defaults']['pos'] = false;
   }
 }
 ?>

@@ -91,7 +91,7 @@ class NavigatorHelper extends AppHelper {
     $pos = $this->Search->getPos() - 1;
     $page = ceil($pos / $this->Search->getShow());
     $baseUri = '/images/view/'.$params['prevMedia'];
-    $link = $this->Search->getUri(false, array('pos' => $pos, 'page' => $page), false, array('baseUri' => $baseUri));
+    $link = $this->Search->getUri(false, array('pos' => $pos, 'page' => $page), false, array('baseUri' => $baseUri, 'defaults' => array('pos' => 1)));
     return $this->Html->link('prev', $link, array('class' => 'prev'));
   }
 
@@ -111,11 +111,10 @@ class NavigatorHelper extends AppHelper {
       return;
     }
     $params = $this->params['search'];
-    Logger::debug($params);
     $pos = $this->Search->getPos() + 1;
     $page = ceil($pos / $this->Search->getShow());
     $baseUri = '/images/view/'.$params['nextMedia'];
-    $link = $this->Search->getUri(false, array('pos' => $pos, 'page' => $page), false, array('baseUri' => $baseUri));
+    $link = $this->Search->getUri(false, array('pos' => $pos, 'page' => $page), false, array('baseUri' => $baseUri, 'defaults' => array('pos' => 1)));
     return $this->Html->link('next', $link, array('class' => 'next'));
   }
 }

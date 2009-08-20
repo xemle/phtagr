@@ -31,18 +31,89 @@ class SearchHelper extends Search {
 
   var $isMyMedia = false;
 
+  /** Singular exception where the inflector does not match */
+  var $singulars = array('pos');
+
   /** Initialize query parameters from the global parameter array, which is
    * set by the query component */
   function initialize($config = array()) {
     if (isset($this->params['search'])) {
-      $this->_data = $this->params['search']['data'];
-      $this->config['baseUri'] = $this->params['search']['baseUri'];
-      $this->config['defaults'] = $this->params['search']['defaults'];
-      if (isset($this->params['search']['myMedia'])) {
+      $params = $this->params['search'];
+      $this->_data = $params['data'];
+      $this->config['baseUri'] = $params['baseUri'];
+      $this->config['defaults'] = $params['defaults'];
+      if (isset($params['myMedia'])) {
         $this->isMyMedia = true;
       }
     }
     $this->config = am($config, $this->config);
+  }
+
+  /** Add parameter to the data array
+    @param data Reference of data array
+    @param add Add values */
+  function _addParams(&$data, $add = false) {
+    if (!$add) {
+      return $data;
+    }
+    $add = (array)$add;
+
+    foreach ($add as $name => $values) {
+      if (!in_array($name, $this->singulars) && Inflector::pluralize($name) == $name || is_array($values)) {
+        $name = Inflector::pluralize($name);
+        if (!isset($data[$name])) {
+          $data[$name] = array();
+        }
+        if (isset($data[$name]) && !is_array($data[$name])) {
+          // fix array
+          $data[$name] = array($data[$name]);
+        }
+        foreach ((array)$values as $value) {
+          if (!in_array($value, $data[$name])) {
+            $data[$name][] = $value;
+          }
+        }
+      } else {
+        $data[$name] = $values;
+      }
+    }
+
+    return $data;
+  }
+
+  /** Removes parameter from the data array
+    @param Reference of data array
+    @param del Array of paramers which have to be removed */
+  function _delParams(&$data, $del = false) {
+    if (!$del) {
+      return $data;
+    }
+
+    $del = (array)$del;
+
+    foreach ($del as $name => $values) {
+      if (is_numeric($name) && is_string($values)) {
+        $name = $values;
+      }
+      if (!in_array($name, $this->singulars) && Inflector::pluralize($name) == $name || is_array($values)) {
+        $name = Inflector::pluralize($name);
+        if (!isset($data[$name])) {
+          continue;
+        }
+        foreach ((array)$values as $value) {
+          if (is_array($data[$name]) && in_array($value, $data[$name])) {
+            $key = array_search($value, $data[$name]);
+            unset($data[$name][$key]);
+          }
+        }
+        if (count($data[$name]) == 0) {
+          unset($data[$name]);
+        }
+      } else {
+        unset($data[$name]);
+      }
+    }
+    return $data;
   }
 
   /** Serialize the search
@@ -63,52 +134,8 @@ class SearchHelper extends Search {
       $data = $this->_data;
     }
 
-    $add = (array)$add;
-    $del = (array)$del;
-    $singulars = array('pos');
-    
-    // add parameters
-    foreach ($add as $name => $values) {
-      if (!in_array($name, $singulars) && Inflector::pluralize($name) == $name || is_array($values)) {
-        $name = Inflector::pluralize($name);
-        if (!isset($data[$name])) {
-          $data[$name] = array();
-        }
-        if (isset($data[$name]) && !is_array($data[$name])) {
-          // fix array
-          $data[$name] = array($data[$name]);
-        }
-        foreach ((array)$values as $value) {
-          if (!in_array($value, $data[$name])) {
-            $data[$name][] = $value;
-          }
-        }
-      } else {
-        $data[$name] = $values;
-      }
-    }
-
-    // delete parameters
-    foreach ($del as $name => $values) {
-      if (!in_array($name, $singulars) && Inflector::pluralize($name) == $name || is_array($values)) {
-        $name = Inflector::pluralize($name);
-        if (!isset($data[$name])) {
-          continue;
-        }
-        foreach ((array)$values as $value) {
-          if (is_array($data[$name]) && in_array($value, $data[$name])) {
-            $key = array_search($value, $data[$name]);
-            unset($data[$name][$key]);
-          }
-        }
-        if (count($data[$name]) == 0) {
-          unset($data[$name]);
-        }
-      } else {
-        unset($data[$name]);
-      }
-    }
-
+    $this->_addParams(&$data, $add);
+    $this->_delParams(&$data, $del);
     ksort($data);
 
     foreach ($data as $name => $values) {
@@ -134,7 +161,7 @@ class SearchHelper extends Search {
         if (is_array($values)) {
           $values = array_shift($values);
         }
-        if ($default != $values) {
+        if ($default === true || $default != $values) {
           // no default or disabled value
           $params[] = $name.':'.$values;
         }

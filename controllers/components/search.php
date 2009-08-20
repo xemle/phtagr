@@ -46,9 +46,9 @@ class SearchComponent extends Search
     'locations' => array('rule' => array('maxLength', 30)),
     'locationOp' => array('rule' => array('inList', array('AND', 'OR'))),
     'operand' => array('rule' => array('inList', array('AND', 'OR'))),
-    'page' => array('numericRule' => 'numeric', 'minRule' => array('rule' => array('range', 1))),
-    'pos' => array('numericRule' => 'numeric', 'minRule' => array('rule' => array('range', 1))),
-    'show' => array('rule' => array('range', 6, 240)),
+    'page' => array('numericRule' => 'numeric', 'minRule' => array('rule' => array('comparison', '>=', 1))),
+    'pos' => array('numericRule' => 'numeric', 'minRule' => array('rule' => array('comparison', '>=', 1))),
+    'show' => array('numericRule' => 'numeric', 'minRule' => array('rule' => array('comparison', '>=', 4)), 'maxRule' => array('rule' => array('comparison', '<=', 240))),
     'sort' => array('rule' => array('inList', array('date', '-date', 'newest', 'changes', 'viewed', 'popularity', 'random'))),
     'tags' => array('rule' => array('maxLength', 30)),
     'tagOp' => array('rule' => array('inList', array('AND', 'OR'))),
@@ -69,6 +69,7 @@ class SearchComponent extends Search
   /** Default values */
   var $defaults = array(
     'page' => '1',
+    'pos' => false,
     'show' => '12',
     'sort' => 'default',
     );
@@ -227,7 +228,7 @@ class SearchComponent extends Search
       $params['data'] = $this->getParams();
       $query['page'] = $params['pageCount'];
     }
-    if ($this->getPage() > 2) {
+    if ($this->getPage() > 1) {
       $params['prevPage'] = true;
     }
     if ($this->getPage() < $params['pageCount']) {

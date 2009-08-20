@@ -73,8 +73,12 @@ class ExplorerMenuHelper extends AppHelper
     return $out;
   }
 
-  function _getSubMenu($association) {
+  function _getAssociationSubMenu($association) {
     $counts = $this->_countAssociation(Inflector::camelize($association));
+    if (count($counts) == 0) {
+      return false;
+    }
+
     $subMenu = array();
     $base = '/explorer';
     if ($this->action == 'user') {
@@ -137,14 +141,15 @@ class ExplorerMenuHelper extends AppHelper
   }
 
   function _getPageItem() {
-    
     $link = $this->search->getUri(false, array('show' => '12'), 'page');
     $out = $this->html->link("Pagesize", $link);
 
-    $sizes = array(6, 12, 24, 60, 120, 250);
+    $pos = $this->search->getPage(1) * $this->search->getShow(1);
+    $sizes = array(6, 12, 24, 60, 120, 240);
     $links = array();
     foreach ($sizes as $size) {
-      $link = $this->search->getUri(false, array('show' => $size), 'page');
+      $page = ceil($pos / $size);
+      $link = $this->search->getUri(false, array('show' => $size, 'page' => $page));
       $links[] = $this->html->link($size, $link, false, false, array('escape' => false));
     }
 
@@ -172,17 +177,20 @@ class ExplorerMenuHelper extends AppHelper
     $items[] = array('text' => $this->html->link('Advance Search', $search));
     $items[] = array('text' => $this->html->link('Start Slideshow', 'javascript:startSlideshow();'));
 
-    $subMenu = $this->_getSubMenu('tag');
-    if ($subMenu !== false)
+    $subMenu = $this->_getAssociationSubMenu('tag');
+    if ($subMenu !== false) {
       $items[] = array('text' => 'Tags', 'type' => 'text', 'submenu' => array('items' => $subMenu));
-    
-    $subMenu = $this->_getSubMenu('category');
-    if ($subMenu !== false)
-      $items[] = array('text' => 'Categories', 'type' => 'text', 'submenu' => array('items' => $subMenu));
+    }
 
-    $subMenu = $this->_getSubMenu('location');
-    if ($subMenu !== false)
+    $subMenu = $this->_getAssociationSubMenu('category');
+    if ($subMenu !== false)a {
+      $items[] = array('text' => 'Categories', 'type' => 'text', 'submenu' => array('items' => $subMenu));
+    }
+
+    $subMenu = $this->_getAssociationSubMenu('location');
+    if ($subMenu !== false) {
       $items[] = array('text' => 'Locations', 'type' => 'text', 'submenu' => array('items' => $subMenu));
+    }
 
     $subItems = array();
     $subItems[] = $this->_getOrderItem();
