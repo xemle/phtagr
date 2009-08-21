@@ -58,7 +58,7 @@ class CommentsController extends AppController
   function add() {
     if (!empty($this->data) && isset($this->data['Media']['id'])) {
       $mediaId = intval($this->data['Media']['id']);
-      $url = $this->Search->getUri(false, false, false, array('baseUri' => '/images/view/'.$this->data['Media']['id'], 'defaults' => array('pos' => 1));
+      $url = $this->Search->getUri(false, false, false, array('baseUri' => '/images/view/'.$this->data['Media']['id'], 'defaults' => array('pos' => 1)));
       $user = $this->getUser();
       $userId = $this->getUserId();
       $role = $this->getUserRole();
@@ -239,7 +239,7 @@ class CommentsController extends AppController
       $this->Session->setFlash("Deny deletion of comment");
       Logger::warn("Deny deletion of comment");
     }
-    $url = $this->Search->getUri(false, false, false, array('baseUri' => '/images/view/'.$this->data['Media']['id'], 'defaults' => array('pos' => 1));
+    $url = $this->Search->getUri(false, false, false, array('baseUri' => '/images/view/'.$this->data['Media']['id'], 'defaults' => array('pos' => 1)));
     $this->redirect("/images/view/".$comment['Media']['id']."/$url");
   }
 
