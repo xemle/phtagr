@@ -36,7 +36,7 @@ class HomeController extends AppController
     // generate tossed index to variy the media 
     srand(time());
     while (count($data) > 12) {
-      $rnd = $rand(0, 50);
+      $rnd = rand(0, 50);
       if (isset($data[$rnd])) {
         unset($data[$rnd]);
       }

@@ -29,7 +29,9 @@
               continue;
             }
     
-            $params = '/'.$search->serialize(array('sort' => 'newest', 'pos' => $i + 1), false, false, array('defaults' => array('pos' => 1)));
+            $pos = $keys[$i] + 1;
+            $page = ceil($pos / $search->getShow(12));
+            $params = '/'.$search->serialize(array('sort' => 'newest', 'page' => $page, 'pos' => $pos), false, false, array('defaults' => array('pos' => 1)));
             $row[] = $imageData->mediaLink($newMedia[$keys[$i++]], array('type' => 'mini', 'div' => 'image', 'params' => $params));
           }
           $cells[] = $row;

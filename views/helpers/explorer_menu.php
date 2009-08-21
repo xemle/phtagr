@@ -58,11 +58,11 @@ class ExplorerMenuHelper extends AppHelper
     $out = " <div class=\"actionlist\" id=\"$id\">";
 
     $plural = Inflector::pluralize($association);
-    $addLink = $this->search->getUri(false, array($plural => $value), array($plural => '-'.$value));
+    $addLink = $this->search->getUri(false, array($plural => $value), array($plural => '-'.$value, 'page'));
     $addIcon = $this->html->image('icons/add.png', array('alt' => '+', 'title' => "Include $association $value"));
     $out .= $this->html->link($addIcon, $addLink, false, false, false);
 
-    $delLink = $this->search->getUri(false, array($plural => '-'.$value), array($plural => $value));
+    $delLink = $this->search->getUri(false, array($plural => '-'.$value), array($plural => $value, 'page'));
     $delIcon = $this->html->image('icons/delete.png', array('alt' => '-', 'title' => "Exclude $association $value"));
     $out .= $this->html->link($delIcon, $delLink, false, false, false);
 
