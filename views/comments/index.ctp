@@ -25,4 +25,9 @@
 </div><!-- comment -->
 <?php endforeach; /* comments */ ?>
 </div><!-- comments -->
+
+<div class="paginator"><div class="subpaginator">
+<?php echo $paginator->prev().' '.$paginator->numbers().' '.$paginator->next(); ?>
+</div></div>
+
 <?php endif; ?>
