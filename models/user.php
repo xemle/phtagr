@@ -167,6 +167,7 @@ class User extends AppModel
     $nobody = array(
         'User' => array(
             'id' => -1, 
+            'username' => '', 
             'role' => ROLE_NOBODY), 
         'Member' => array(),
         'Option' => $this->Option->addDefaults(array()));

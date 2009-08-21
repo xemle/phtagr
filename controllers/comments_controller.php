@@ -26,7 +26,7 @@ class CommentsController extends AppController
   var $name = 'Comments';
   var $uses = array('Comment', 'Media', 'Tag');
   var $helpers = array('html', 'time', 'text', 'Form', 'Rss', 'paginator');
-  var $components = array('Query', 'Captcha', 'Email');
+  var $components = array('Search', 'Captcha', 'Email');
 
   var $paginate = array (
     'fields' => array ('Comment.id', 'Comment.name', 'Comment.date', 'Comment.text', 'Media.id', 'Media.name' ),
@@ -39,12 +39,11 @@ class CommentsController extends AppController
   function beforeFilter() {
     parent::beforeFilter();
 
-    $this->Query->parseArgs();
+    $this->Search->parseArgs();
   }
 
   function index() {
-    $acl = "1 = 1".$this->Media->buildWhereAcl($this->getUser());
-    $data = $this->paginate ('Comment', $acl);
+    $data = $this->paginate('Comment', $this->Media->buildAclConditions($this->getUser()));
     $this->set('comments', $data);
   }
 
@@ -59,7 +58,7 @@ class CommentsController extends AppController
   function add() {
     if (!empty($this->data) && isset($this->data['Media']['id'])) {
       $mediaId = intval($this->data['Media']['id']);
-      $url = $this->Query->getUrl();
+      $url = $this->Search->getUri(false, false, false, array('baseUri' => '/images/view/'.$this->data['Media']['id'], 'defaults' => array('pos' => 1));
       $user = $this->getUser();
       $userId = $this->getUserId();
       $role = $this->getUserRole();
@@ -240,7 +239,7 @@ class CommentsController extends AppController
       $this->Session->setFlash("Deny deletion of comment");
       Logger::warn("Deny deletion of comment");
     }
-    $url = $this->Query->getUrl();
+    $url = $this->Search->getUri(false, false, false, array('baseUri' => '/images/view/'.$this->data['Media']['id'], 'defaults' => array('pos' => 1));
     $this->redirect("/images/view/".$comment['Media']['id']."/$url");
   }
 
@@ -250,19 +249,18 @@ class CommentsController extends AppController
 
   function rss() {
     $this->layoutPath = 'rss';
-    $where = '1 = 1'.$this->Media->buildWhereAcl($this->getUser());
-    $comments = $this->Comment->findAll($where, null, 'Comment.date DESC', 20);
-    $this->set('data', $comments);
+    $conditions = $this->Media->buildAclConditions($this->getUser());
+    $this->data = $this->Comment->findAll($conditions, null, 'Comment.date DESC', 20);
 
     if (Configure::read('debug') > 1) {
       Configure::write('debug', 1);
     }
     $this->set(
-        'channel', array(
-          'title' => "New Comments",
-          'link' => "/comments/rss",
-          'description' => "Recently Published Comments" )
-        );
+      'channel', array(
+        'title' => "New Comments",
+        'link' => "/comments/rss",
+        'description' => "Recently Published Comments" )
+      );
   }
 }
 ?>

@@ -1,6 +1,6 @@
 <?php 
-  $query->initialize();
-  $params = $query->getParams();
+  $search->initialize();
+  $params = $search->getParams();
 ?>
 <div class="comments">
 <?php if (count($this->data['Comment'])): ?>

@@ -7,9 +7,8 @@
 </script>
 
 <?php
-$query->initialize();
+$search->initialize();
 $cell=0;
-$pos = ($query->get('page', 1)-1) * $query->get('show', 12) + 1;
 
 if (count($dataTags) + count($dataCategories) + count($dataLocations) == 0): ?>
 <div class="info">
@@ -21,24 +20,20 @@ Sorry, nothing was found for <?php echo $quicksearch; ?>
 if (count($dataTags) > 0) : ?>
 <h2>Results for Tags:</h2>
 <div align="left"> 
-
-<?php foreach($dataTags as $media): ?>
-
-<?php  
-	$size = $imageData->getimagesize($media, OUTPUT_SIZE_MINI, true); 
-  $query->set('pos', $pos++); 
-  echo "<a href=\"".Router::url("/images/view/".$media['Media']['id'])."\">"; 
-  echo "<img src=\"".Router::url("/media/mini/".$media['Media']['id'])."\" $size[3] alt=\"".$media['Media']['name']."\"/>";  
-  echo "</a>"; 
-?> 
-<?php $cell++; endforeach; ?>
+<?php 
+  foreach($dataTags as $media) {
+    echo $imageData->mediaLink($media, 'mini').' ';
+  }
+?>
 </div>
 
 <?php
-	echo 'See more results with tag ';
-	foreach ($quicksearch as $s) {
-		echo $html->link($s,'/explorer/tag/'.$s).' ';
-}
+  echo 'See more results with tag ';
+  $names = Set::extract('/Tag/name', $dataTags);
+  $names = array_unique($names);
+  foreach ($names as $name) {
+    echo $html->link($name, '/explorer/tag/'.$name).' ';
+  }
 ?>
 <?php endif; /* if (count($dataTags) > 0) */ ?>  
 
@@ -46,24 +41,20 @@ if (count($dataTags) > 0) : ?>
 if (count($dataCategories) > 0) : ?>
 <h2>Results for Categories:</h2>
 <div align="left"> 
-
-<?php foreach($dataCategories as $media): ?>
-
-<?php  
-	$size = $imageData->getimagesize($media, OUTPUT_SIZE_MINI, true); 
-  $query->set('pos', $pos++); 
-  echo "<a href=\"".Router::url("/images/view/".$media['Media']['id'])."\">"; 
-  echo "<img src=\"".Router::url("/media/mini/".$media['Media']['id'])."\" $size[3] alt=\"".$media['Media']['name']."\"/>";  
-  echo "</a>"; 
-?> 
-<?php $cell++; endforeach; ?>
+<?php 
+  foreach($dataCategories as $media) {
+    echo $imageData->mediaLink($media, 'mini').' ';
+  }
+?>
 </div>
 
 <?php
-	echo 'See more results with Category ';
-	foreach ($quicksearch as $s) {
-		echo $html->link($s,'/explorer/category/'.$s).' ';
-}
+  echo 'See more results with Category ';
+  $names = Set::extract('/Category/name', $dataTags);
+  $names = array_unique($names);
+  foreach ($names as $name) {
+    echo $html->link($name, '/explorer/category/'.$name).' ';
+  }
 ?>
 <?php endif; /* if (count($dataCategories) > 0) */ ?>  
 
@@ -71,24 +62,20 @@ if (count($dataCategories) > 0) : ?>
 if (count($dataLocations) > 0) : ?>
 <h2>Results for Locations:</h2>
 <div align="left"> 
-
-<?php foreach($dataLocations as $media): ?>
-
-<?php  
-	$size = $imageData->getimagesize($media, OUTPUT_SIZE_MINI, true); 
-  $query->set('pos', $pos++); 
-  echo "<a href=\"".Router::url("/images/view/".$media['Media']['id'])."\">"; 
-  echo "<img src=\"".Router::url("/media/mini/".$media['Media']['id'])."\" $size[3] alt=\"".$media['Media']['name']."\"/>";  
-  echo "</a>"; 
-?> 
-<?php $cell++; endforeach; ?>
+<?php 
+  foreach($dataLocations as $media) {
+    echo $imageData->mediaLink($media, 'mini').' ';
+  }
+?>
 </div>
 
 <?php
-	echo 'See more results with Location ';
-	foreach ($quicksearch as $s) {
-		echo $html->link($s,'/explorer/location/'.$s).' ';
-}
+  echo 'See more results with Location ';
+  $names = Set::extract('/Location/name', $dataTags);
+  $names = array_unique($names);
+  foreach ($names as $name) {
+    echo $html->link($name, '/explorer/location/'.$name).' ';
+  }
 ?>
 <?php endif; /* if (count($dataLocations) > 0) */ ?>  
 

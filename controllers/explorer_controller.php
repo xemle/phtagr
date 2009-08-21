@@ -23,9 +23,9 @@
 
 class ExplorerController extends AppController
 {
-  var $components = array('RequestHandler', 'Query', 'FilterManager');
+  var $components = array('RequestHandler', 'FilterManager', 'Search', 'QueryBuilder');
   var $uses = array('Media', 'MyFile', 'Group', 'Tag', 'Category', 'Location');
-  var $helpers = array('form', 'formular', 'html', 'javascript', 'ajax', 'imageData', 'time', 'query', 'explorerMenu', 'rss');
+  var $helpers = array('form', 'formular', 'html', 'javascript', 'ajax', 'imageData', 'time', 'explorerMenu', 'rss', 'search', 'navigator');
 
   function beforeFilter() {
     if ($this->action == 'points' && 
@@ -34,35 +34,33 @@ class ExplorerController extends AppController
     }
 
     parent::beforeFilter();
-
-    $this->Query->controller =& $this;
-    $this->Query->parseArgs();
+    
+    $this->Search->parseArgs();
   }
 
   function beforeRender() {
-    $this->params['query'] = $this->Query->getParams();
-    $this->set('feeds', array(
-      $this->_getMediaRss() => array('title' => 'Media RSS of current search', 'id' => 'gallery') 
-      ));
-  }
+    $paginateActions = array('category', 'data', 'group', 'location', 'query', 'tag', 'user');
+    if (in_array($this->action, $paginateActions)) {
+      $this->data = $this->Search->paginate();
 
-  function _getMediaRss() {
-    $args = array();
-    foreach ($this->passedArgs as $name => $value) {
-      if (is_numeric($name)) {
-        $name = $this->action;
-        if (in_array($name, array('tag', 'category', 'location'))) {
-          $name = Inflector::pluralize($name);
+      if ($this->hasRole(ROLE_USER)) {
+        $groups = $this->Group->findAll(array('Group.user_id' => $this->getUserId()), false, array('Group.name'));
+        if ($groups) {
+          $groups = Set::combine($groups, "{n}.Group.id", "{n}.Group.name");
         }
+        $groups[0] = '[Keep]';
+        $groups[-1] = '[No Group]';
+        $this->set('groups', $groups);
       }
-      $args[] = $name.':'.$value;
+
+      $mediaRss = '/explorer/media/'.$this->Search->getUri();
+      $this->set('feeds', array(
+        $mediaRss => array('title' => 'Media RSS of current search', 'id' => 'gallery') 
+        ));
     }
-    $args[] =  "media.rss";
-    return '/explorer/media/'.implode('/', $args);
   }
 
   function index() {
-    $this->_setDataAndRender();
   }
 
   function quicksearch($quicksearch = false) {
@@ -74,67 +72,76 @@ class ExplorerController extends AppController
       // Perform queries for each Tags, Categories and Locations
       // seperately:
 
-			// Split the query so that we have a list of tags/categories/locations.
-			// For now we split at whitespaces, improvements could be made to not
-			// split multiple tags/categories/locations enclosed in quotation marks
-			$quicksearch = preg_split('/\s+/', trim($quicksearch));
+      // Split the query so that we have a list of tags/categories/locations.
+      // For now we split at whitespaces, improvements could be made to not
+      // split multiple tags/categories/locations enclosed in quotation marks
+      $quicksearch = preg_split('/\s+/', trim($quicksearch));
 
       // Reduce results to 6 
-      $this->Query->setPageSize(6);
+      $this->Search->setShow(6);
 
       // Add tag to the query
-      $this->Query->addTags($quicksearch);
+      $this->Search->addTags($quicksearch);
       // Set variable dataTags for view
-      $this->Query->setTagOp(1);
-      $this->set('dataTags', $this->Query->paginate());
+      $this->Search->setTagOp('OR');
+      $this->set('dataTags', $this->Search->paginate());
       // Reset query
-			$this->Query->clearTags ();
-      $this->Query->setTagOp(0);
+      $this->Search->delTags();
+      $this->Search->delTagOp();
 
-      $this->Query->addCategories($quicksearch);
-      $this->Query->setCategoryOp(1);
-      $this->set('dataCategories', $this->Query->paginate());
-			$this->Query->clearCategories();
-      $this->Query->setCategoryOp(0);
+      $this->Search->addCategories($quicksearch);
+      $this->Search->setCategoryOp('OR');
+      $this->set('dataCategories', $this->Search->paginate());
+      $this->Search->delCategories();
+      $this->Search->delCategoryOp();
 
-      $this->Query->addLocations($quicksearch);
-      $this->Query->setLocationOp(1);
-      $this->set('dataLocations', $this->Query->paginate());
-      $this->Query->clearLocations();
-      $this->Query->setLocationOp(0);
+      $this->Search->addLocations($quicksearch);
+      $this->Search->setLocationOp('OR');
+      $this->set('dataLocations', $this->Search->paginate());
+      $this->Search->delLocations();
+      $this->Search->delLocationOp();
+    } else {
+      $this->set('dataTags', array());
+      $this->set('dataCategories', array());
+      $this->set('dataLocations', array());
     }
     $this->set('quicksearch', $quicksearch);
   }
 
   function query() {
     if (!empty($this->data)) {
-      $this->Query->addTags($this->data['Media']['tags']);
-      $this->Query->setTagOp($this->data['Media']['tag_op']);
-      $this->Query->addCategories($this->data['Media']['categories']);
-      $this->Query->setCategoryOp($this->data['Media']['category_op']);
-      $this->Query->addLocations($this->data['Media']['locations']);
+      $this->Search->addTags(preg_split('/\s*,\s*/', trim($this->data['Media']['tags'])));
+      $this->Search->setTagOp($this->data['Media']['tag_op']);
 
-      $this->Query->setDateFrom($this->data['Media']['date_from']);
-      $this->Query->setDateTo($this->data['Media']['date_to']);
+      $this->Search->addCategories(preg_split('/\s*,\s*/', trim($this->data['Media']['categories'])));
+      $this->Search->setCategoryOp($this->data['Media']['category_op']);
 
-      $this->Query->setPageSize($this->data['Query']['show']);
+      $this->Search->addLocations(preg_split('/\s*,\s*/', trim($this->data['Media']['locations'])));
+      $this->Search->setLocationOp($this->data['Media']['location_op']);
+      $this->Search->setOperand($this->data['Media']['operand']);
+
+      $this->Search->setFrom($this->data['Media']['from']);
+      $this->Search->setTo($this->data['Media']['to']);
+
+      $this->Search->setShow($this->data['Option']['show']);
+      $this->Search->setSort($this->data['Option']['sort']);
       if ($this->hasRole(ROLE_GUEST)) {
-        $this->Query->setFilename($this->data['Media']['filename']);
-        $this->Query->setFiletype($this->data['Media']['file_type']);
+        $this->Search->setName($this->data['Media']['name']);
+        $this->Search->setType($this->data['Media']['type']);
         // Allow to search for my images
         if ($this->data['User']['username'] == $this->getUserId()) {
-          $this->Query->setUser($this->data['User']['username']);
+          $this->Search->setUser($this->data['User']['username']);
         }
       }
 
       if ($this->hasRole(ROLE_USER)) {
-        $this->Query->setVisibility($this->data['Media']['visibility']);
+        $this->Search->setVisibility($this->data['Media']['visibility']);
 
-        $this->Query->setUser($this->data['User']['username']);
-        $this->Query->setGroupId($this->data['Group']['id']);
+        $this->Search->setUser($this->data['User']['username']);
+        $this->Search->setGroup($this->data['Group']['name']);
       } 
     } 
-    $this->_setDataAndRender();
+    $this->render('index');
   }
 
   function search() {
@@ -145,19 +152,21 @@ class ExplorerController extends AppController
       $groups[-1] = '';
       $this->set('groups', $groups);
     }
-    $this->set('userId', $this->Query->getUserId() == $this->getUserId() ? $this->getUserId() : false);
+    $this->set('userId', $this->Search->getUserId() == $this->getUserId() ? $this->getUserId() : false);
     $this->set('userRole', $this->getUserRole());
-    $this->set('mainMenuExplorer', array());
   }
 
-  function user($idOrName) {
-    $this->Query->setUser($idOrName);
-    $this->_setDataAndRender();
+  function user($username, $param = false, $value = false) {
+    $this->Search->setUser($username);
+    if ($param && $value && in_array($param, array('tag', 'category', 'location'))) {
+      $this->Search->addParam($param, explode(',', $value));
+    }
+    $this->render('index');
   }
 
-  function group($id) {
-    $this->Query->setGroupId($id);
-    $this->_setDataAndRender();
+  function group($name) {
+    $this->Search->addGroup($name);
+    $this->render('index');
   }
 
   function date($year = null, $month = null, $day = null) {
@@ -181,45 +190,38 @@ class ExplorerController extends AppController
       }
       $from = mktime(0, 0, 0, $month, $day, $year);
       $to = mktime(0, 0, 0, $m, $d, $y);
-      $this->Query->setDateFrom($from);
-      $this->Query->setDateTo($to-1);
-      $this->Query->setOrder('-date');
+      $this->Search->setFrom($from);
+      $this->Search->setTo($to-1);
+      $this->Search->setOrder('-date');
+    } elseif ($year) {
+      $from = strtotime($year);
+      if ($from) {
+        $this->Search->setFrom($from);
+        $this->Search->setOrder('-date');
+      }
+      if ($month) {
+        $to = strtotime($month);
+        if ($to) {
+          $this->Search->setTo($to);
+          $this->Search->setOrder('date');
+        }
+      }
     }
-    $this->_setDataAndRender();
+    $this->render('index');
   }
 
   function tag($tags) {
-    $this->Query->addTags(preg_split('/\s*,\s*/', trim($tags)));
-    $this->_setDataAndRender();
+    $this->Search->addTags(preg_split('/\s*,\s*/', trim($tags)));
+    $this->render('index');
   }
 
   function category($categories) {
-    $this->Query->addCategories(preg_split('/\s*,\s*/', trim($categories)));
-    $this->_setDataAndRender();
+    $this->Search->addCategories(preg_split('/\s*,\s*/', trim($categories)));
+    $this->render('index');
   }
 
   function location($locations) {
-    $this->Query->addLocations(preg_split('/\s*,\s*/', trim($locations)));
-    $this->_setDataAndRender();
-  }
-
-  function _setDataAndRender() {
-    $data = $this->Query->paginate();
-    if (count($data) == 0) {
-      $this->Session->setFlash("Sorry. No image or files found!");
-    }
-    $this->set('mainMenuExplorer', $this->Query->getMenu(&$data));
-
-    $this->set('data', &$data);
-    if ($this->hasRole(ROLE_USER)) {
-      $groups = $this->Group->findAll(array('Group.user_id' => $this->getUserId()), false, array('Group.name'));
-      if ($groups) 
-        $groups = Set::combine($groups, "{n}.Group.id", "{n}.Group.name");
-      $groups[0] = '[Keep]';
-      $groups[-1] = '[No Group]';
-      $this->set('groups', $groups);
-    }
-    $this->set('mediaRss', $this->_getMediaRss());
+    $this->Search->addLocations(preg_split('/\s*,\s*/', trim($locations)));
     $this->render('index');
   }
 
@@ -417,7 +419,7 @@ class ExplorerController extends AppController
       }
       $this->data = array();
     }
-    $this->_setDataAndRender();
+    $this->render('index');
   }
 
   /** 
@@ -610,9 +612,8 @@ class ExplorerController extends AppController
 
   function rss() {
     $this->layoutPath = 'rss';
-    $this->Query->setPageSize(30);
-    $this->Query->setOrder('newest');
-    $this->set('data', $this->Query->paginate());
+    $this->Search->setShow(30);
+    $this->Search->setOrder('newest');
 
     if (Configure::read('debug') > 1) {
       Configure::write('debug', 1);
@@ -625,15 +626,15 @@ class ExplorerController extends AppController
   }
 
   function media() {
-    $this->data = $this->Query->paginate();
     $this->layout = 'xml';
     if (Configure::read('debug') > 1) {
       Configure::write('debug', 1);
     }
+    $this->data = $this->Search->paginate();
   }
 
   function points($north, $south, $west, $east) {
-    $this->Query->setParam('order', 'random');
+    $this->Search->setSort('random');
 
     $north = floatval($north);
     $south = floatval($south);
@@ -646,20 +647,20 @@ class ExplorerController extends AppController
     while ($lat < $north) {
       $lng = $west;
       while ($lng < $east) {
-        $this->Query->setParams(array(
-          'north' => $lat+$stepLat, 'south' => $lat, 
-          'west' => $lng, 'east' => $lng+$stepLng));
-        $points = $this->Query->paginate();
+        $this->Search->setNorth($lat + $stepLat);
+        $this->Search->setSouth($lat);
+        $this->Search->setWest($lng);
+        $this->Search->setEast($lng + $stepLng);
+        $points = $this->Search->paginate();
         //Logger::trace("Found ".count($points)." points");
-        $this->data = am($this->Query->paginate(), $this->data);
+        $this->data = am($points, $this->data);
         $lng += $stepLng;
       }
       $lat += $stepLat;
     }
 
     $this->layout = 'xml';
-    Logger::trace("Query points of N:$north, S:$south, W:$west, E:$east: Found ".count($this->data)." points");
-    $this->Query->delParams(array('north', 'south', 'west', 'east'));
+    Logger::trace("Search points of N:$north, S:$south, W:$west, E:$east: Found ".count($this->data)." points");
     if (Configure::read('debug') > 1) {
       Configure::write('debug', 1);
     }

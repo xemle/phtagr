@@ -18,4 +18,3 @@
   echo $form->input('Media.quicksearch', array ('label' => false));
   echo $form->end('Search');
 ?>
-

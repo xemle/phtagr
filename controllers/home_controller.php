@@ -22,45 +22,37 @@
  */
 class HomeController extends AppController
 {
-	// Important to set the davroot in the Webdav Server
-	var $name = 'home';
+  var $name = 'home';
 
-  var $components = array('Query');
-  var $helpers = array('html', 'time', 'text', 'imageData');
+  var $components = array('Search');
+  var $helpers = array('html', 'time', 'text', 'cloud', 'imageData', 'search');
   var $uses = array('Media', 'Tag', 'Category', 'Comment');
 
   /** @todo improve the randomized newest media */
   function index() {
-    $this->Query->setOrder('newest');
-    $max = 50;
-    $this->Query->setPageSize($max);
-    $data = $this->Query->paginate();
+    $this->Search->setSort('newest');
+    $this->Search->setShow(50);
+    $data = $this->Search->paginate();
     // generate tossed index to variy the media 
     srand(time());
-    $toss = array();
-    for ($i = 0; $i < count($data); $i++) {
-      $toss[] = rand(0, 100);
+    while (count($data) > 12) {
+      $rnd = $rand(0, 50);
+      if (isset($data[$rnd])) {
+        unset($data[$rnd]);
+      }
     }
-    asort($toss);
-    // reassign index
-    $tossData = array();
-    foreach ($toss as $index => $r) {
-      $tossData[] =& $data[$index];
-    }
-    $this->set('newMedia', $tossData);
+    $this->set('newMedia', $data);
 
-    $this->Query->setOrder('random');
-    $this->Query->setPageSize(1);
-    $this->set('randomMedia', $this->Query->paginate());
+    $this->Search->setSort('random');
+    $this->Search->setShow(1);
+    $this->set('randomMedia', $this->Search->paginate());
 
-    $cloud = $this->Query->getCloud(35);
-    $this->set('cloudTags', $cloud);
+    $user = $this->getUser();
+    $this->set('cloudTags', $this->Media->cloud($user, 'Tag', 50));
+    $this->set('cloudCategories', $this->Media->cloud($user, 'Category', 50));
 
-    $cloud = $this->Query->getCloud(25, 'Category');
-    $this->set('cloudCategories', $cloud);
-
-    $acl = "1 = 1".$this->Media->buildWhereAcl($this->getUser());
-    $comments = $this->Comment->findAll($acl, null, 'Comment.date DESC', 4);
+    $conditions = $this->Media->buildAclConditions($this->getUser());
+    $comments = $this->Comment->findAll($conditions, null, 'Comment.date DESC', 4);
     $this->set('comments', $comments);
   }
 }

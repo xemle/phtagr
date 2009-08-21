@@ -147,8 +147,8 @@ class MediaController extends AppController
       default:
         $flag = ACL_READ_PREVIEW; break;
     }
-    //$conditions = "Media.id = $id AND Media.flag & ".MEDIA_FLAG_ACTIVE.$this->Media->buildWhereAcl($user, 0, $flag);
-    $conditions = "Media.id = $id".$this->Media->buildWhereAcl($user, 0, $flag);
+    $conditions = $this->Media->buildAclConditions($user, 0, $flag);
+    $conditions[] = "Media.id = $id";
     $media = $this->Media->find($conditions);
     if (!$media) {
       Logger::debug("Deny access to image $id");

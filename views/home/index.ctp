@@ -6,7 +6,10 @@
       <h3>Random Media</h3>
       <?php 
         if (isset($randomMedia)) {
-          echo $imageData->mediaLink($randomMedia[0], array('type' => 'preview', 'size' => 340, 'div' => 'image'));
+          $params = '/'.$search->serialize(array('sort' => 'random'));
+          echo $imageData->mediaLink($randomMedia[0], array('type' => 'preview', 'size' => 340, 'div' => 'image', 'params' => $params));
+          $link = $search->getUri(array('sort' => 'random'));
+          echo "<p>See more ".$html->link('random media...', $link)."</p>";
         } 
       ?>
     </div>
@@ -14,17 +17,20 @@
 
   <div class="c50r">
     <div class="subcr">
-      <h3>Recent added Media</h3>
+      <h3>Newest Media</h3>
       <?php
         $cells = array();
         $i = 0;
+        $keys = array_keys($newMedia);
         for ($c = 0; $c < 3; $c++) {
           $row = array();
           for ($r = 0; $r < 4; $r++) {
-            if (!isset($newMedia[$i])) {
+            if (!isset($keys[$i])) {
               continue;
             }
-            $row[] = $imageData->mediaLink($newMedia[$i++], array('type' => 'mini', 'div' => 'image'));
+    
+            $params = '/'.$search->serialize(array('sort' => 'newest', 'pos' => $i + 1), false, false, array('defaults' => array('pos' => 1)));
+            $row[] = $imageData->mediaLink($newMedia[$keys[$i++]], array('type' => 'mini', 'div' => 'image', 'params' => $params));
           }
           $cells[] = $row;
         }
@@ -34,6 +40,10 @@
           <?php echo $html->tableCells($cells); ?>
         </tbody>
       </table>
+      <?php
+        $link = $search->getUri(array('sort' => 'newest'));
+        echo "<p>See ".$html->link('all new media...', $link)."</p>";
+      ?>
     </div>
   </div>
 </div><!-- subcolumns -->
@@ -68,50 +78,22 @@
 
   <div class="c50r">
     <div class="subcr">
-    <h3>Popular Tags</h3>
-      <?php if ($cloudTags && count($cloudTags)): ?>
-      <?php 
-      $min = $cloudTags['_min'];
-      $max = $cloudTags['_max'];
-      $steps = 300/($max-$min+1);
-      foreach($cloudTags as $key => $tag) {
-        if (is_numeric($key)) {
-          //debug($tag);
-          $name = $tag['Tag']['name'];
-          $hits = $tag['Tag']['hits'];
-          $size = 100+floor(($hits-$min)*$steps);
-          echo "<span style=\"font-size: {$size}%\">";
-          echo $html->link($name, "/explorer/tag/$name");
-          echo "</span> ";
+      <h3>Popular Tags</h3>
+        <?php
+        if (isset($cloudTags) && count($cloudTags)) {
+          echo $cloud->cloud($cloudTags, '/explorer/tag/');
+        } else {
+          echo '<p>No tags assigned</p>';
         }
-      }
-      ?>
-      <?php else: ?>
-      <p>No tags found!</p>
-      <?php endif; ?>
-    <h3>Popular Categories</h3>
-      <?php if ($cloudCategories && count($cloudCategories)): ?>
-      <?php 
-      $min = $cloudCategories['_min'];
-      $max = $cloudCategories['_max'];
-      $steps = 300/($max-$min+1);
-      foreach($cloudCategories as $key => $tag) {
-        if (is_numeric($key)) {
-          //debug($tag);
-          $name = $tag['Category']['name'];
-          $hits = $tag['Category']['hits'];
-          $size = 100+floor(($hits-$min)*$steps);
-          echo "<span style=\"font-size: {$size}%\">";
-          echo $html->link($name, "/explorer/category/$name");
-          echo "</span> ";
+        ?>
+      <h3>Popular Categories</h3>
+        <?php
+        if (isset($cloudCategories) && count($cloudCategories)) {
+          echo $cloud->cloud($cloudCategories, '/explorer/category/');
+        } else {
+          echo '<p>No categories assigned</p>';
         }
-      }
-      ?>
-      <?php else: ?>
-      <p>No categories found!</p>
-      <?php endif; ?>
-    </div>
+        ?>
+     </div>
   </div>
 </div><!-- subcolumns -->
-
-

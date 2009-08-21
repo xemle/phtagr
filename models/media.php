@@ -43,7 +43,7 @@ class Media extends AppModel
     ACL_LEVEL_USER => 'uacl',
     ACL_LEVEL_OTHER => 'oacl');
 
-  var $actsAs = array('Type', 'Flag', 'Cache');
+  var $actsAs = array('Type', 'Flag', 'Cache', 'Exclude');
 
   function beforeDelete($cascade = true) {
     // Delete media cache files
@@ -385,38 +385,38 @@ class Media extends AppModel
     the id of the current user, the user is treated as 'My Medias'. Otherwise
     the default acl will apply 
     @param level Level of ACL which image must be have. Default is ACL_READ_PREVIEW.
-    @return returns sql statement for the where clause which checks the access
-    to the image */
-  function buildWhereAcl($user, $userId = 0, $level = ACL_READ_PREVIEW) {
+    @return returns asscess conditions which considers the access to the media */
+  function buildAclConditions($user, $userId = 0, $level = ACL_READ_PREVIEW) {
     $level = intval($level);
-    $acl = '';
+    $conditions = array();
     if ($userId > 0 && $user['User']['id'] == $userId) {
       // My Medias
-      if ($user['User']['role'] >= ROLE_USER)
-        $acl .= " AND Media.user_id = $userId";
-      elseif ($user['User']['role'] == ROLE_GUEST) {
+      if ($user['User']['role'] >= ROLE_USER) {
+        $conditions[] = "Media.user_id = $userId";
+      } elseif ($user['User']['role'] == ROLE_GUEST) {
         if (count($user['Member'])) {
           $groupIds = Set::extract($user, 'Member.{n}.id');
           if (count($groupIds) > 1) {
-            $acl .= " AND Media.group_id in ( ".implode(", ", $groupIds)." )";
-            $acl .= " AND Media.gacl >= $level";
+            $conditions[] = "Media.group_id in ( ".implode(", ", $groupIds)." )";
+            $conditions[] = "Media.gacl >= $level";
           } elseif (count($groupIds) == 1) {
-            $acl .= " AND Media.group_id = {$groupIds[0]}";
-            $acl .= " AND Media.gacl >= $level";
+            $conditions[] = "Media.group_id = {$groupIds[0]}";
+            $conditions[] = "Media.gacl >= $level";
           }
         } else {
           // no images
-          $acl .= " AND 1 = 0";
+          $conditions[] = "1 = 0";
         }
       }
     } else {
       // Another user, if set
-      if ($userId > 0)
-        $acl .= " AND Media.user_id = $userId";
+      if ($userId > 0) {
+        $conditions[] = "Media.user_id = $userId";
+      }
 
       // General ACL
       if ($user['User']['role'] < ROLE_ADMIN) {
-        $acl .= " AND (";
+        $acl = "(";
         // All images of group on Guests and Users
         if ($user['User']['role'] >= ROLE_GUEST && count($user['Member'])) {
           $groupIds = Set::extract($user, 'Member.{n}.id');
@@ -438,9 +438,10 @@ class Media extends AppModel
         }
         // Public 
         $acl .= " Media.oacl >= $level )";
+        $conditions[] = $acl;
       }
     }
-    return $acl;
+    return $conditions;
   }
 
   /** Checks if a user can read the original file 
@@ -455,16 +456,17 @@ class Media extends AppModel
     }
 
     $db =& ConnectionManager::getDataSource($this->useDbConfig);
-    $conditions = '';
+    $conditions = array();
     if (is_dir($filename)) {
       $path = $db->value(Folder::slashTerm($filename).'%');
-      $conditions .= "Media.path LIKE $path";
+      $conditions[] = "Media.path LIKE $path";
     } else {
       $path = $db->value(Folder::slashTerm(dirname($filename)));
       $file = $db->value(basename($filename));
-      $conditions .= "Media.path=$path AND Media.file=$file";
+      $conditions[] = "Media.path=$path AND Media.file=$file";
     }
-    $conditions .= $this->buildWhereAcl($user, 0, $flag);
+    $acl = $this->buildAclConditions($user, 0, $flag);
+    $conditions = am($conditions, $acl);
 
     return $this->hasAny($conditions);
   }
@@ -490,33 +492,44 @@ class Media extends AppModel
     }
   }
 
-  function queryCloud($user, $model='Tag', $num=50) {
-    $db =& ConnectionManager::getDataSource($this->useDbConfig);
+  function cloud($user, $assoc = 'Tag', $num = 50) {
+    if (!isset($this->hasAndBelongsToMany[$assoc])) {
+      return array();
+    }
+    $myTable = $this->tablePrefix.$this->table;
 
-    $myTable = $db->fullTableName($this->table, false);
+    $table = $this->{$assoc}->tablePrefix.$this->{$assoc}->table;
+    $alias = $this->{$assoc}->alias;
+    $key = $this->{$assoc}->primaryKey;
 
-    $table = $db->fullTableName($this->{$model}->table, false);
-    $alias = $this->{$model}->alias;
-    $key = $this->{$model}->primaryKey;
+    $config = $this->hasAndBelongsToMany[$assoc];
 
-    $joinTable = $this->hasAndBelongsToMany[$model]['joinTable'];
-    $joinTable = $db->fullTableName($joinTable, false);
-    $joinAlias = $this->hasAndBelongsToMany[$model]['with'];
-    $foreignKey = $this->hasAndBelongsToMany[$model]['foreignKey'];
-    $associationForeignKey = $this->hasAndBelongsToMany[$model]['associationForeignKey'];
+    $joinTable = $this->tablePrefix.$config['joinTable'];
+    $joinAlias = $config['with'];
+    $foreignKey = $config['foreignKey'];
+    $associationForeignKey = $config['associationForeignKey'];
 
+    $acl = $this->buildAclConditions($user);
+    if ($acl) {
+      $aclWhere = ' AND '.implode(' AND ', $acl);
+    } else {
+      $aclWhere = '';
+    }
     $sql="SELECT `$alias`.`name`,COUNT(`$alias`.`name`) AS hits".
          " FROM `$table` AS `$alias`,".
          "  `$joinTable` AS `$joinAlias`,".
          "  `$myTable` AS `{$this->alias}`".
          " WHERE `$alias`.`$key` = `$joinAlias`.`$associationForeignKey`".
          "   AND `$joinAlias`.`$foreignKey` = `{$this->alias}`.`{$this->primaryKey}`".
-    //     "   AND Media.flag & ".MEDIA_FLAG_ACTIVE.
-         $this->buildWhereAcl($user).
+         $aclWhere.
          " GROUP BY `$alias`.`name` ".
          " ORDER BY hits DESC LIMIT 0,".intval($num);
 
-    return $this->query($sql);
+    $data = $this->query($sql);
+    if (count($data)) {
+      $data = Set::combine($data, "{n}.$assoc.name", "{n}.0.hits");
+    }
+    return $data;
   }
 
   /** Deletes all HABTM association from images of a given user like Tag, Categories 

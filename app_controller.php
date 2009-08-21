@@ -21,7 +21,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-App::import('File', 'Search', array('file' => APP.'logger.php'));
+App::import('File', 'Logger', array('file' => APP.'logger.php'));
 
 class AppController extends Controller
 {

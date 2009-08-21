@@ -147,3 +147,5 @@ class ZipComponent extends Object {
     return $newFile;
   }
 }
+
+?>
