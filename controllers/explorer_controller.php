@@ -39,7 +39,7 @@ class ExplorerController extends AppController
   }
 
   function beforeRender() {
-    $paginateActions = array('category', 'data', 'group', 'location', 'query', 'tag', 'user');
+    $paginateActions = array('category', 'date', 'group', 'index', 'location', 'query', 'tag', 'user');
     if (in_array($this->action, $paginateActions)) {
       $this->data = $this->Search->paginate();
 
@@ -613,7 +613,7 @@ class ExplorerController extends AppController
   function rss() {
     $this->layoutPath = 'rss';
     $this->Search->setShow(30);
-    $this->Search->setOrder('newest');
+    $this->Search->setSort('newest');
 
     if (Configure::read('debug') > 1) {
       Configure::write('debug', 1);
@@ -623,6 +623,7 @@ class ExplorerController extends AppController
         'link' => "/explorer/rss",
         'description' => "Recently Published Images" )
       );
+    $this->data = $this->Search->paginate();
   }
 
   function media() {
