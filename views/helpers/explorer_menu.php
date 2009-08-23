@@ -23,7 +23,7 @@
 
 class ExplorerMenuHelper extends AppHelper
 {
-  var $helpers = array('html', 'search', 'menu');
+  var $helpers = array('html', 'search', 'menu', 'piclens');
 
   var $_id;
 
@@ -52,6 +52,25 @@ class ExplorerMenuHelper extends AppHelper
     }
     arsort($result);
     return $result;
+  }
+
+  function _getSlideshowItem() {
+    $id = 'menu-slideshow';
+
+    $extra = " <div class=\"actionlist\" id=\"$id\">";
+    $link = "javascript:startSlideshow('high');";
+    $icon = $this->html->image('icons/star.png', array('alt' => 'high', 'title' => "Show media in high quality (if available)"));
+    $extra .= $this->html->link($icon, $link, false, false, false);
+    $extra .= "</div>";
+
+    $text = $this->html->link('Start Slideshow', "javascript:startSlideshow('');", false, false, false);
+    $item = array(
+      'text' => $text.$extra,
+      'type' => 'multi',
+      'onmouseover' => "toggleVisibility('$id', 'inline');",
+      'onmouseout' => "toggleVisibility('$id', 'inline');"
+      );
+    return $item;
   }
 
   function _getAssociationExtra($association, $value, $id) {
@@ -171,6 +190,7 @@ class ExplorerMenuHelper extends AppHelper
   }
 
   function getMainMenu() {
+    $out = '';
     $data = $this->data;
     $this->search->initialize();
     $items = array();
@@ -178,7 +198,9 @@ class ExplorerMenuHelper extends AppHelper
 
     $search = '/explorer/search';
     $items[] = array('text' => $this->html->link('Advanced Search', $search));
-    $items[] = array('text' => $this->html->link('Start Slideshow', 'javascript:startSlideshow();'));
+
+    $items[] = $this->_getSlideshowItem();
+    $out .= $this->piclens->slideshow();
 
     $subMenu = $this->_getAssociationSubMenu('tag');
     if ($subMenu !== false) {
@@ -201,7 +223,7 @@ class ExplorerMenuHelper extends AppHelper
     $items[] = array('text' => 'Options', 'type' => 'text', 'submenu' => array('items' => $subItems));
 
     $menu = array('items' => $items);
-    return $this->menu->getMainMenu($menu);
+    return $out.$this->menu->getMainMenu($menu);
   }
 }
 ?>

@@ -28,8 +28,23 @@ class NavigatorHelper extends AppHelper {
     $this->Search->initialize();
   }
 
+  function getPageCount() {
+    if (isset($this->params['search'])) {
+      return $this->params['search']['pageCount'];
+    }
+    return 0;
+  }
+
   function hasPages() {
     return (isset($this->params['search']) && $this->params['search']['pageCount'] > 1);
+  }
+
+  function hasPrev() {
+    if (isset($this->params['search']) && 
+      $this->params['search']['prevPage']) {
+      return true;
+    }
+    return false;
   }
 
   function prev() {
@@ -70,6 +85,14 @@ class NavigatorHelper extends AppHelper {
     }
 
     return $output;
+  }
+
+  function hasNext() {
+    if (isset($this->params['search']) && 
+      $this->params['search']['nextPage']) {
+      return true;
+    }
+    return false;
   }
 
   function next() {

@@ -53,9 +53,9 @@ class ExplorerController extends AppController
         $this->set('groups', $groups);
       }
 
-      $mediaRss = '/explorer/media/'.$this->Search->getUri();
+      $mediaRss = '/explorer/media';
       $this->set('feeds', array(
-        $mediaRss => array('title' => 'Media RSS of current search', 'id' => 'gallery') 
+        $mediaRss => array('title' => 'Media RSS', 'id' => 'gallery') 
         ));
     }
   }
@@ -147,9 +147,10 @@ class ExplorerController extends AppController
   function search() {
     if ($this->hasRole(ROLE_USER)) {
       $groups = $this->Group->findAll(array('Group.user_id' => $this->getUserId()), false, array('Group.name'));
-      if ($groups) 
+      if ($groups) {
         $groups = Set::combine($groups, "{n}.Group.id", "{n}.Group.name");
-      $groups[-1] = '';
+      }
+      $groups[-1] = 'Any';
       $this->set('groups', $groups);
     }
     $this->set('userId', $this->Search->getUserId() == $this->getUserId() ? $this->getUserId() : false);

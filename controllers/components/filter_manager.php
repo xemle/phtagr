@@ -110,7 +110,7 @@ class FilterManagerComponent extends Object {
         }
       }
       if (count($new)) {
-        Logger::trace("Loaded filter $name with extension(s): ".implode(', ', $new));
+        //Logger::trace("Loaded filter $name with extension(s): ".implode(', ', $new));
       }
       $this->filters[$filterName] =& $filter;
     }
