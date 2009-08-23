@@ -23,7 +23,7 @@
 
 class PiclensHelper extends AppHelper
 {
-  var $helpers = array('Html', 'Search');
+  var $helpers = array('Html', 'Search', 'Javascript');
 
   function initialize() {
     $this->Search->initialize();
