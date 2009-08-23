@@ -66,6 +66,7 @@ class SystemController extends AppController {
     $items = $this->getMenuItems();
     $menu = array('items' => $items, 'active' => $this->here);
     $this->set('mainMenu', $menu);
+    parent::beforeRender();
   }
 }
 ?>

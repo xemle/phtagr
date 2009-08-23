@@ -50,6 +50,7 @@ class BrowserController extends AppController
 
   function beforeRender() {
     $this->_setMenu();
+    parent::beforeRender();
   }
 
   function _setMenu() {

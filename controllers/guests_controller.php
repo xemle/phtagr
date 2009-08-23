@@ -34,6 +34,7 @@ class GuestsController extends AppController {
 
   function beforeRender() {
     $this->_setMenu();
+    parent::beforeRender();
   }
 
   function index() {

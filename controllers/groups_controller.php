@@ -34,6 +34,7 @@ class GroupsController extends AppController {
 
   function beforeRender() {
     $this->_setMenu();
+    parent::beforeRender();
   }
 
   function index() {

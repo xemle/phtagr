@@ -48,6 +48,30 @@ class Option extends AppModel {
     return $options;
   }
 
+  /** Returns the user options as array
+    @param user User model data
+    @return Array of options */
+  function getOptions($user) {
+    $options = array();
+    if (!isset($user['Option'])) {
+      return $options;
+    }
+    foreach ($user['Option'] as $o) {
+      $name = $o['name'];
+      $value = $o['value'];
+      if (substr($name, -2) == '[]') {
+        $name = substr($name, 0, strlen($name) - 2);
+        if (!isset($options[$name])) {
+          $options[$name] = array();
+        }
+        $options[$name][] = $value;
+      } else {
+        $options[$name] = $value;
+      }
+    }
+    return $options;
+  }
+
   function getTree($userId) {
     $this->unbindModel(array('belongsTo' => array('User')));
     $data = $this->findAll("user_id = $userId OR user_id = 0 ORDER BY user_id ASC");

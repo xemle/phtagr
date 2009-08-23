@@ -12,6 +12,9 @@
     echo $html->link(_("Logout"), "/users/logout"). " ($name)";
   } else {
     echo $html->link(_("Login"), "/users/login");
+    if ($option->get('user.register.enable', 0)) {
+      echo ' | '.$html->link(_("Register"), "/users/register");
+    }
   }
 
   echo $form->create(null, array('url' => array('controller' => 'explorer', 'action' => 'quicksearch'))); 

@@ -58,6 +58,7 @@ class ExplorerController extends AppController
         $mediaRss => array('title' => 'Media RSS', 'id' => 'gallery') 
         ));
     }
+    parent::beforeRender();
   }
 
   function index() {

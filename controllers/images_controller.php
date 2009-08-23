@@ -35,6 +35,7 @@ class ImagesController extends AppController
 
   function beforeRender() {
     $this->set('feeds', '/explorer/rss');
+    parent::beforeRender();
   }
 
   /** Simple crawler detection

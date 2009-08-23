@@ -31,6 +31,7 @@ class UsersController extends AppController
 
   function beforeRender() {
     $this->_setMenu();
+    parent::beforeRender();
   }
 
   function _getMenuItems() {
