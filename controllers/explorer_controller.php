@@ -1,4 +1,4 @@
-<?php
+<?PHp
 /*
  * phtagr.
  * 
@@ -39,7 +39,7 @@ class ExplorerController extends AppController
   }
 
   function beforeRender() {
-    $paginateActions = array('category', 'date', 'group', 'index', 'location', 'query', 'tag', 'user');
+    $paginateActions = array('category', 'date', 'edit', 'group', 'index', 'location', 'query', 'tag', 'user');
     if (in_array($this->action, $paginateActions)) {
       $this->data = $this->Search->paginate();
 

@@ -1,7 +1,7 @@
 <?php 
   $controller = $this->params['controller'];
   if ($controller == 'explorer' || $controller == 'images') {
-    $paginateActions = array('category', 'date', 'group', 'index', 'location', 'query', 'tag', 'user');
+    $paginateActions = array('category', 'date', 'edit', 'group', 'index', 'location', 'query', 'tag', 'user');
     if (in_array($this->action, $paginateActions)) {
       echo $explorerMenu->getMainMenu();
     } elseif (isset($mainMenu)) {
