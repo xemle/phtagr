@@ -140,7 +140,10 @@ class QueryBuilderComponent extends Object
         // array values
         foreach ($values as $key => $value) {
           if (preg_match('/^-(.*)$/', $value, $matches)) {
-            $exclusions[$name] = $matches[1];
+            if (!isset($exclusions[$name])) {
+              $exclusions[$name] = array();
+            }
+            $exclusions[$name][] = $matches[1];
             unset($data[$name][$key]);
           }
         }
@@ -210,6 +213,7 @@ class QueryBuilderComponent extends Object
   }
   
   function build($data) {
+    Logger::debug($data);
     $exclude = $this->_extractExclusions(&$data);
     $query = $this->buildConditions(&$data);
     if (count($exclude)) {
