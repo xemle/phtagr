@@ -249,25 +249,25 @@ class Logger extends Object {
 
   /** Add span block around the level message */
   function _logHtml($time, $level, $image, $user, $file, $lineno, $msg) {
-    $line="<span class=\"time\">$time </span>"
+    $line = "<span class=\"time\">$time </span>"
       ."<span class=\"$level\">[$level] </span>";
 
-    $line.="<span class=\"file\">$file:$lineno</span>";
+    $line .= "<span class=\"file\">$file:$lineno</span>";
 
-    $msg=htmlentities($msg, ENT_QUOTES, "UTF-8");
-    $line.="<span class=\"msg\">$msg</span><br />";
+    $msg = htmlentities($msg, ENT_QUOTES, "UTF-8");
+    $line .= "<span class=\"msg\">$msg</span><br />";
     $this->_lines[] = $line;
   }
 
   function _openFile() {
-    if ($this->_filename=='') {
+    if ($this->_filename == '') {
       return false;
     }
 
     $this->_file = fopen($this->_filename, 'a');
     if (!$this->_file) {
       return false;
-      $this->_file=null;
+      $this->_file = null;
     }
     return true;
   }
@@ -279,53 +279,54 @@ class Logger extends Object {
   }
 
   function _logFile($line) {
-    if ($this->_file!=null) {
+    if ($this->_file != null) {
       fwrite($this->_file, $line);
     }
   }
 
   function fatal($msg) {
-    $logger = self::getInstance();
-    $logger->write($msg, L_FATAL);
+    $_this = self::getInstance();
+    $_this->write($msg, L_FATAL);
   }
 
   function err($msg) {
-    $logger = self::getInstance();
-    $logger->write($msg, L_ERR);
+    $_this = self::getInstance();
+    $_this->write($msg, L_ERR);
   }
 
   function warn($msg) {
-    $logger = self::getInstance();
-    $logger->write($msg, L_WARN);
+    $_this = self::getInstance();
+    $_this->write($msg, L_WARN);
   }
 
   function notice($msg) {
-    $logger = self::getInstance();
-    $logger->write($msg, L_NOTICE);
+    $_this = self::getInstance();
+    $_this->write($msg, L_NOTICE);
   }
 
   function info($msg) {
-    $logger = self::getInstance();
-    $logger->write($msg, L_INFO);
+    $_this = self::getInstance();
+    $_this->write($msg, L_INFO);
   }
 
   function verbose($msg) {
-    $logger = self::getInstance();
-    $logger->write($msg, L_VERBOSE);
+    $_this = self::getInstance();
+    $_this->write($msg, L_VERBOSE);
   }
 
   function debug($msg) {
-    $logger = self::getInstance();
-    $logger->write($msg, L_DEBUG);
+    $_this = self::getInstance();
+    $_this->write($msg, L_DEBUG);
   }
 
   function trace($msg) {
-    $logger = self::getInstance();
-    $logger->write($msg, L_TRACE);
+    $_this = self::getInstance();
+    $_this->write($msg, L_TRACE);
   }
 
   function write($msg, $level=L_INFO) {
-    $this->_write($level, $msg);
+    $_this = self::getInstance();
+    $_this->_write($level, $msg);
   }
   
   function bt() {
@@ -336,7 +337,8 @@ class Logger extends Object {
       $step = am(array('file' => 'null', 'line' => '0', 'function' => ''), $step);
       $trace[] = $step['file'].':'.$step['line'].' '.$step['function'].'()';
     }
-    $this->debug($trace);
+    $_this = self::getInstance();
+    $_this->write($trace, L_INFO);
   }
 }
 
