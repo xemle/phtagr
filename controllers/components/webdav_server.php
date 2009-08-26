@@ -163,7 +163,8 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
       'Property' => array('foreignKey' => 'file_id'), 
       'Lock' => array('foreignKey' => 'file_id')
       )));
-    $files = $this->controller->MyFile->findAll(array('path' => $path));
+    $files = $this->controller->MyFile->find('all', array('conditions' => array('path' => $path)));
+    //Logger::debug($files);
 
     // Build cache array
     foreach ($files as $file) {
@@ -178,6 +179,10 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
    @param filename Filename of file
    @return file model data or false if file was not found */
   function _getFile($filename) {
+    if (is_dir($filename)) {
+      return false;
+    }
+
     $path = Folder::slashTerm(dirname($filename));
     $file = basename($filename);
     if (!isset($this->_fileCache[$path])) {
@@ -217,11 +222,13 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
       }
     }
 
-    if (strpos($base, $this->_davRoot)!==0) 
-      $this->_SERVER['PATH_INFO']='/'; 
-    else 
-      $this->_SERVER['PATH_INFO']=substr($base, strlen($this->_davRoot)); 
-    $this->_SERVER['SCRIPT_NAME']=$this->_davRoot;
+    if (strpos($base, $this->_davRoot) !== 0) {
+      Logger::warn("Request '$base' does not match DAV root '{$this->_davRoot}'. Reset request to '/'");
+      $this->_SERVER['PATH_INFO'] = '/'; 
+    } else {
+      $this->_SERVER['PATH_INFO'] = substr($base, strlen($this->_davRoot)); 
+    }
+    $this->_SERVER['SCRIPT_NAME'] = $this->_davRoot;
 
     // let the base class do all the work
     parent::ServeRequest();
@@ -245,16 +252,14 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
     @return True if user is authorized to read directory. False otherwise 
     @todo This function must be implemented */
   function _canRead($fspath) {
-    $user = $this->controller->getUser();
-    if (is_dir($fspath)) {
-      $allow = $this->controller->MyFile->canRead($fspath, $user);
-    } else {
-      $file = $this->_getFile($fspath);
-      Logger::debug($file);
-      $allow = $this->controller->MyFile->checkAccess(&$file, &$user, ACL_READ_ORIGINAL, ACL_READ_MASK);
+    if ($this->controller->getUserRole() >= ROLE_USER) {
+      return true;
     }
+
+    $user = $this->controller->getUser();
+    $allow = $this->controller->MyFile->canRead($fspath, $user);
     if (!$allow) {
-      Logger::trace("Deny user {$user['User']['id']} to access '$fspath'");
+      Logger::trace("Deny user {$user['User']['username']} ({$user['User']['id']}) access to '$fspath'");
     }
     return $allow;
   }
@@ -277,9 +282,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
       return false;
     }
 
-    $userRole = $this->controller->getUserRole();
-    if ($userRole <= ROLE_GUEST &&
-      !$this->_canRead($fspath)) {
+    if (!$this->_canRead($fspath)) {
       Logger::warn("User is not allowed to read '$fspath'");
       return false;
     }
@@ -307,8 +310,9 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
             continue;
           // @todo Improve the read check if user is a guest. Query files from
           // the database instead
-          if ($userRole <= ROLE_GUEST && !$this->_canRead($fspath.$filename))
+          if (!$this->_canRead($fspath.$filename)) {
             continue; 
+          }
           $files["files"][]=$this->fileinfo($options["path"].$filename);
         }
         // TODO recursion needed if "Depth: infinite"
@@ -502,8 +506,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
       return false;
     }
 
-    if ($this->controller->getUserRole() <= ROLE_GUEST &&
-      !$this->_canRead($fspath)) {
+    if (!$this->_canRead($fspath)) {
       Logger::warn("User is not allowed to view content of '$fspath'");
       return false;
     }
@@ -614,8 +617,9 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
     foreach($files as $filename) {
       $fullpath=$fspath."/".$filename;
       // check access for guest accounts
-      if (!$this->_canRead($fullpath))
+      if (!$this->_canRead($fullpath)) {
         continue;
+      }
 
       $name  =htmlspecialchars($this->_unslashify($filename));
       $link=$baseUri.$this->pathRawurlencode($path.$name);

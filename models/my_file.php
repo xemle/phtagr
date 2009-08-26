@@ -241,21 +241,28 @@ class MyFile extends AppModel
     uses('sanitize');
     $sanitize = new Sanitize();
 
-    $conditions = '';
+    $conditions = array();
     if (is_dir($filename)) {
-      $sqlPath = $sanitize->escape($filename);
-      $conditions .= "File.path LIKE '$sqlPath%'";
+      $sqlPath = $sanitize->escape(Folder::slashTerm($filename));
+      $conditions[] = "File.path LIKE '$sqlPath%'";
     } else {
       $sqlPath = $sanitize->escape(Folder::slashTerm(dirname($filename)));
       $sqlFile = $sanitize->escape(basename($filename));
-      $conditions .= "File.path = '$sqlPath' AND File.file = '$sqlFile'";
+      $conditions[] = "File.path = '$sqlPath'";
+      $conditions[] = "File.file = '$sqlFile'";
     }
-    // @TODO Fix ACL
-    //$acl = $this->Media->buildAclConditions($user, 0, $flag);
-    //$conditions = am($conditions, $acl);
-    Logger::debug($conditions);
 
-    return $this->hasAny($conditions);
+    $acl = $this->Media->buildAclConditions($user, 0, $flag);
+    $ownFiles = 'File.user_id = '.$user['User']['id'];
+
+    $conditions[] = '('.$ownFiles.' OR ('.implode(' AND ', $acl).'))';
+
+    $result = $this->find('all', array('fields' => 'File.id', 'conditions' => $conditions, 'limit' => 1));
+    if ($result) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   function checkAccess($data, $user, $flag, $mask) {
