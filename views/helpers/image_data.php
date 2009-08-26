@@ -214,7 +214,7 @@ class ImageDataHelper extends AppHelper {
     $output = '<span title="Access for group members">group</span>';
     if (isset($data['Group']['name'])) {
       $name = $data['Group']['name'];
-      $output .= ' ('.$this->Html->link($name, $this->Search->getUri(array(), array('group' => $data['Group']['name'])), array('title' => "This media belongs to the group '$name'")).')';
+      $output .= ' ('.$this->Html->link($name, $this->Search->getUri(array(), array('groups' => $data['Group']['name'])), array('title' => "This media belongs to the group '$name'")).')';
     }
     $output .= ': ';
     $output .= $this->_acl2icon($data['Media']['gacl'], 'Group members can ').' ';

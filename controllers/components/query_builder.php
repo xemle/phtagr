@@ -47,6 +47,7 @@ class QueryBuilderComponent extends Object
     'to' => array('field' => 'Media.date', 'operand' => '<='),
     'tags' => array('custom' => 'buildHabtm'),
     'type' => array('field' => 'Media.type', 'mapping' => array('image' => MEDIA_TYPE_IMAGE, 'video' => MEDIA_TYPE_VIDEO)),
+    'visibility' => true, // calls buildVisibility
     'west' => array('field' => 'Media.longitude', 'operand' => '>='),
     );
 
@@ -96,8 +97,17 @@ class QueryBuilderComponent extends Object
       - mapping: Array of value mapping
     @return Sanitized condition */
   function _buildCondition($field, $value, $options = false) {
+    if (is_string($options)) {
+      $o['operand'] = $options;
+      $options = $o;
+    }
     $options = am(array('operand' => '=', 'mapping' => array()), $options);
+    $operands = array('=', '>', '<', '>=', '<=', 'IN', 'NOT IN', 'LIKE');
     extract($options);
+    if (!in_array(strtoupper($operand), $operands)) {
+      Logger::err("Illigal operand '$operand'. Set it to '='");
+      $operand = '=';
+    }
     
     if (isset($mapping) && !is_array($value) && isset($mapping[$value])) {
       $value = $mapping[$value];
