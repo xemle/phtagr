@@ -92,14 +92,9 @@ class MyFile extends AppModel
     if (!$this->hasFlag(null, FILE_FLAG_EXTERNAL)) {
       $filename = $this->getFilename();
       if (!@unlink($filename)) {
-        Logger::err("Could not delete file $filename");
+        Logger::err("Could not delete internal file $filename");
       } else {
-        Logger::verbose("Delete file $filename");
-      }
-      if ($this->hasFlag(null, FILE_FLAG_DEPENDENT) && 
-        $this->hasMedia()) {
-        Logger::verbose("Delete media {$this->data['Media']['id']} from dependent file {$this->data['File']['id']}");
-        $this->Media->delete($this->data['Media']['id']);
+        Logger::verbose("Delete internal file $filename");
       }
     }
     // prepare associations for deletion
@@ -109,6 +104,15 @@ class MyFile extends AppModel
         'Lock' => array('foreignKey' => 'file_id', 'dependent' => true)
       )));
     return true;
+  }
+
+  /** If the media depends on the file the function deletes the media */
+  function afterDelete() {
+    if ($this->hasFlag(null, FILE_FLAG_DEPENDENT) && 
+      $this->hasMedia()) {
+      Logger::verbose("Delete media {$this->data['Media']['id']} from dependent file {$this->data['File']['id']}");
+      $this->Media->delete($this->data['File']['media_id']);
+    }
   }
 
   /** Search for an image by filename 
@@ -201,6 +205,26 @@ class MyFile extends AppModel
       return false;
     }
     return true;
+  }
+
+  /** Unlink the media from the file and delete external file if required
+    @param mediaId Id of the media or array of media Ids. */
+  function unlinkMedia($mediaId) {
+    $files = $this->find('all', array('conditions' => array('File.media_id' => $mediaId)));
+    if (!$files) {
+      return true;
+    }
+    
+    $ids = Set::extract('/File/id', $files);
+    Logger::debug("Unlink media $mediaId of files ".implode(', ', $ids));
+    $this->updateAll(array('media_id' => null, 'readed' => null), array('id' => $ids));
+
+    foreach ($files as $file) {
+      if ($this->hasFlag($file, FILE_FLAG_EXTERNAL)) {
+        Logger::debug("Delete external file {$file['File']['id']} from database");
+        $this->delete($file['File']['id']);
+      } 
+    }
   }
 
   /** Checks if a user can read the original file 

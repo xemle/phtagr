@@ -53,6 +53,7 @@ class ImageDataHelper extends AppHelper {
       Logger::err("Wrong media size $resize");
     }
 
+    $resize = false;
     switch ($size) {
       case 'mini':
         $resize = OUTPUT_SIZE_MINI;

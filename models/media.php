@@ -53,6 +53,10 @@ class Media extends AppModel
     return true;
   }
 
+  function afterDelete() {
+    $this->File->unlinkMedia($this->id);
+  }
+
   function addDefaultAcl(&$data, $user) {
     if (!$data) {
       $data =& $this->data;

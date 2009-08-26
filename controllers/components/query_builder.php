@@ -213,7 +213,6 @@ class QueryBuilderComponent extends Object
   }
   
   function build($data) {
-    Logger::debug($data);
     $exclude = $this->_extractExclusions(&$data);
     $query = $this->buildConditions(&$data);
     if (count($exclude)) {
