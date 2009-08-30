@@ -261,43 +261,49 @@ class BrowserController extends AppController
     $this->set('files', $files);
   }
 
+  /** Synchronize the meta data of the media with its file(s). All media with
+   * the MEDIA_FLAG_DIRTY are synced or shortly before the maximum execution
+   * time is exceed. */
   function sync() {
     $userId = $this->getUserId();
-    $synced = 0;
-    $errors = 0;
+    $data = array('synced' => 0, 'errors' => 0, 'unsynced' => 0, 'total' => 0);
 
+    // clear file cache 
     @clearstatcache();
-    $this->Media->unbindAll();
-    $result = $this->Media->findAll("Media.user_id = $userId AND Media.flag & ".MEDIA_FLAG_DIRTY." > 0", array("Media.id"));
-    if (!$result) {
-      Logger::info("No images found for synchronization");
-      $this->data['total'] = 0;
-    } else {
-      $ids = Set::extract($result, '{n}.Media.id');
-      $executionTime = ini_get('max_execution_time');
-      $start = getMicrotime();
-      foreach ($ids as $id) {
-        $media = $this->Media->findById($id);
+    $start = $now = getMicrotime();
+    $executionTime = ini_get('max_execution_time') - 5;
+
+    $conditions= array('Media.user_id' => $userId, 'Media.flag & '.MEDIA_FLAG_DIRTY.' > 0');
+    $data['total'] = $this->Media->find('count', array('conditions' => $conditions));
+    $query = array('conditions' => $conditions, 'limit' => 10, 'order' => 'Media.modified ASC');
+    $results = $this->Media->find('all', $query);
+    while (count($results)) {
+      foreach ($results as $media) {
         if (!$this->FilterManager->write($media)) {
-          Logger::err("Could not export media $id");
-          $errors++;
+          Logger::err("Could not export media {$media['Media']['name']} ({$media['Media']['id']})");
+          $data['errors']++;
         } else {
-          Logger::verbose("Synced media $id");
-          $synced++;
+          Logger::verbose("Synced meta data of media {$media['Media']['name']} ({$media['Media']['id']})");
+          $data['synced']++;
         }
 
-        // Consume only maximum of execution time
-        $time = getMicrotime()-$start;
-        if ($time > $executionTime - 5) {
+        $now = getMicrotime();
+        if ($now - $start > $executionTime) {
           break;
         }
+        $modified = $media['Media']['modified'];
       }
-      $this->data['total'] = count($ids);
+      if ($now - $start > $executionTime) {
+        break;
+      }
+      // ensure we query not already called media (which might be unsynced due
+      // an error)
+      $query['conditions']['Media.modified >'] = $modified;
+      $results = $this->Media->find('all', $query);
     }
 
-    $this->data['synced'] = $synced;
-    $this->data['unsynced'] = $this->data['total'] - $synced;
-    $this->data['errors'] = $errors;
+    $data['unsynced'] = $this->Media->find('count', array('conditions' => $conditions));
+    $this->data = $data;
   }
 
   function view() {
@@ -314,7 +320,7 @@ class BrowserController extends AppController
     $files['quota'] = $user['User']['quota'];
     $files['free'] = $files['quota'] - $files['bytes'];
     $files['active'] = $this->Media->find('count', array('conditions' => "User.id = $userId"));
-    $files['dirty'] = $this->Media->find('count', array('conditions' => "User.id = $userId"));
+    $files['dirty'] = $this->Media->find('count', array('conditions' => array('User.id' => $userId, 'Media.flag & '.MEDIA_FLAG_DIRTY.' > 0')));
     $files['video'] = $this->Media->find('count', array('conditions' => "User.id = $userId AND Media.duration > 0"));
     $files['external'] = $this->MyFile->find('count', array('conditions' => "User.id = $userId AND File.flag & $external = $external"));
     $files['public'] = $this->Media->find('count', array('conditions' => "User.id = $userId AND Media.oacl >= ".ACL_READ_PREVIEW));
