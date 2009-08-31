@@ -336,7 +336,7 @@ class QueryBuilderComponent extends Object
       // get users id for backwards compatibility
       $u = $this->controller->User->findByUsername($data['user']);
       if ($u && ($u['User']['role'] >= ROLE_USER ||
-          $u['role'] == ROLE_GUEST && $u['User']['id'] == $user['User']['id'])) {
+          $u['User']['role'] == ROLE_GUEST && $u['User']['id'] == $user['User']['id'])) {
         $userId = $u['User']['id'];
       } else {
         // user not found or wrong invalid guest name
