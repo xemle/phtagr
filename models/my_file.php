@@ -58,14 +58,18 @@ class MyFile extends AppModel
       $type = $this->_getTypeFromFilename($filename);
     }
 
-    $new = array();
-    $new['File']['path'] = $path;
-    $new['File']['file'] = $file;
-    $new['File']['size'] = $size;
-    $new['File']['time'] = date("Y-m-d H:i:s", filemtime($filename));
-    $new['File']['flag'] = $flag;
-    $new['File']['type'] = $type;
-    $new['File']['user_id'] = $userId;
+    $new = array(
+      'File' => array(
+        'path' => $path,
+        'file' => $file,
+        'size' => $size,
+        'time' => date("Y-m-d H:i:s", filemtime($filename)),
+        'flag' => $flag,
+        'type' => $type,
+        'user_id' => $userId,
+        'media_id' => null
+        )
+      );
     $new = parent::create($new, true);
 
     return $new;
@@ -208,15 +212,34 @@ class MyFile extends AppModel
   }
 
   /** Unlink the media from the file and delete external file if required
-    @param mediaId Id of the media or array of media Ids. */
-  function unlinkMedia($mediaId) {
-    $files = $this->find('all', array('conditions' => array('File.media_id' => $mediaId)));
+    @param data Media ID or file model data. If the media ID is given, all
+    files are unlinked from the media. If the file model data is given, only
+    the media of this single file is unlinked 
+    @param fileId Optional file id */
+  function unlinkMedia($data, $fileId = false) {
+    if (is_numeric($data)) {
+      $conditions = array('File.media_id' => $data);
+      if ($fileId) {
+        $conditions['File.id'] = intval($fileId);
+      }
+    } elseif (is_array($data) && isset($data['File']['id'])) {
+      $conditions = array('File.id' => $data['File']['id']);
+    } elseif (!$data && $fileId) {
+      $conditions = array('File.id' => intval($fileId));
+    } else {
+      Logger::warn("Invalid input");
+      Logger::debug($data);
+      return false;
+    }
+
+    $files = $this->find('all', array('conditions' => $conditions, 'recursive' => -1));
     if (!$files) {
+      Logger::debug("No files found to unlink media");
       return true;
     }
     
     $ids = Set::extract('/File/id', $files);
-    Logger::debug("Unlink media $mediaId of files ".implode(', ', $ids));
+    Logger::debug("Unlink media of files ".implode(', ', $ids));
     $this->updateAll(array('media_id' => null, 'readed' => null), array('id' => $ids));
 
     foreach ($files as $file) {

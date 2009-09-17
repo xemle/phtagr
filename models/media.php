@@ -57,6 +57,67 @@ class Media extends AppModel
     $this->File->unlinkMedia($this->id);
   }
 
+  /** Unlink a file form a media. This function takes care of deleting the
+    * media. The media will be deleted if the file is dependent or no other
+    * dependent file is left for the media.
+    @param data Media model data or media Id. If it is false, it will use
+    $this->id.
+    @param fileId File id of the file to be unlinked */
+  function unlinkFile(&$data, $fileId) {
+    if (is_numeric($data)) {
+      $mediaId = $data;
+    } elseif (isset($data['Media']['id'])) {
+      $mediaId = $data['Media']['id'];
+    } elseif (isset($data['id'])) {
+      $mediaId = $data['id'];
+    } else {
+      $mediaId = $this->id;
+    }
+
+    if (!$mediaId || $fileId <= 0) {
+      Logger::err("Invalid input");
+      return false;
+    }
+
+    $media = $this->findById($mediaId);
+    if (!$media) {
+      Logger::warn("Could not found media with id $mediaId");
+      return false;
+    }
+    $fileIds = Set::extract("/File/id", $media);
+    if (!in_array($fileId, $fileIds)) {
+      Logger::warn("Media $mediaId does not have file $fileId");
+      return false;
+    }
+
+    // Delete if: 1. only one file. 2. file with fileId is dependent. Or 3. if
+    // no other file is dependend
+    if (count($fileIds) == 1) {
+      $delete = true;
+    } else {
+      $delete = true;
+      foreach ($media['File'] as $file) {
+        if ($file['id'] == $fileId) {
+          if ($this->File->hasFlag($file, FILE_FLAG_DEPENDENT)) {
+            $delete = true;
+            break;
+          }
+          continue;
+        } 
+        if ($this->File->hasFlag($file, FILE_FLAG_DEPENDENT)) {
+          $delete = false;
+        }
+      }
+    }
+    if ($delete) {
+      Logger::info("Delete media $mediaId");
+      $this->delete($mediaId);
+    } else {
+      $this->File->unlinkMedia(false, $fileId);
+    }
+    return true; 
+  }
+
   function addDefaultAcl(&$data, $user) {
     if (!$data) {
       $data =& $this->data;

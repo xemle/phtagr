@@ -16,12 +16,15 @@ table.default tbody tr.even {
   background-color: #eee;
 }
 
+table.default tbody tr.selected {
+  background-color: #ccffcc;
+}
+
 table.default tbody tr:hover,
 table.default tbody tr:hover a {
   color: #fff;
   background-color: #f63;
 }
-
 
 table.bare {
   border: 0;

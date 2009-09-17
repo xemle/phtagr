@@ -1,6 +1,9 @@
 <h1>File Overview</h1>
 
-<table>
+<table class="default">
+<thead>
+  <?php echo $html->tableHeaders(array('Description', 'Value')); ?>
+</thead>
 <tbody>
 <?php
   $cells = array();
@@ -21,7 +24,7 @@
   $cells[] = array('Visible for group members', $files['group']);
   $cells[] = array('Private files', $files['private']);
   $cells[] = array('Unsynced files', $files['dirty']);
-  echo $html->tableCells($cells);
+  echo $html->tableCells($cells, array('class' => 'odd'), array('class' => 'even'));
 ?>
 </tbody>
 </table>

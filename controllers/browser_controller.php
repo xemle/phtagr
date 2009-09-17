@@ -27,7 +27,7 @@ class BrowserController extends AppController
 
   var $components = array('FileManager', 'RequestHandler', 'FilterManager', 'Upload', 'Zip');
   var $uses = array('User', 'MyFile', 'Media', 'Tag', 'Category', 'Location', 'Option');
-  var $helpers = array('form', 'formular', 'html', 'number');
+  var $helpers = array('form', 'formular', 'html', 'number', 'FileList');
 
   /** Array of filesystem root directories. */
   var $_fsRoots = array();
@@ -95,7 +95,7 @@ class BrowserController extends AppController
     }
 
     // Check alias syntax
-    if (!preg_match('/^[A-Za-z0-9][A-Za-z0-9\-_\.\:]+$/', $alias)) {
+    if (!preg_match('/^[A-Za-z0-9][A-Za-z0-9\-_\.\: ]+$/', $alias)) {
       Logger::err("Name '$alias' as alias is invalid");
       return false;
     }
@@ -106,18 +106,17 @@ class BrowserController extends AppController
   }
 
   /** @return Returns the path of the current request */
-  function getPath() {
-    if (count($this->params['pass'])) {
-      $path = implode('/', $this->params['pass']);
+  function _getPathFromUrl($strip = 0, $len = false) {
+    $strip = max(0, $strip);
+    if (count($this->params['pass']) - $strip - abs($len) > 0) {
+      if ($len) {
+        $dirs = array_slice($this->params['pass'], $strip, $len);
+      } else {
+        $dirs = array_slice($this->params['pass'], $strip);
+      }
+      $path = '/'.implode('/', $dirs).'/';
     } else {
       $path = '/';
-    }
-  
-    if (strlen($path) && $path[strlen($path)-1] != '/') {
-      $path .= '/';
-    }
-    if ($path[0] != '/') {
-      $path = '/'.$path;
     }
     return $path;
   }
@@ -126,13 +125,13 @@ class BrowserController extends AppController
     @param path
     @return canonicalized path */
   function _canonicalPath($path) {
-    $paths=explode('/', $path);
-    $canonical=array();
+    $paths = explode('/', $path);
+    $canonical = array();
     foreach ($paths as $p) { 
-      if ($p ==='' || $p == '.') {
+      if ($p === '' || $p == '.') {
         continue;
       }
-      if ($p =='..') { 
+      if ($p == '..') { 
         array_pop($canonical);
         continue;
       }
@@ -173,33 +172,52 @@ class BrowserController extends AppController
     return $fspath;
   }
 
+  /** Read path from database and filesystem and returns array of files
+    @param fsPath Filesystem path
+    @return Array of files or false on error */
+  function _readPath($fsPath) {
+    if (!$fsPath || !is_dir($fsPath)) {
+      Logger::err("Invalid path $fsPath");
+      return false;
+    }
+    $userId = $this->getUserId();
+    $fsPath = Folder::slashTerm($fsPath);
+
+    // read database and the filesystem and compare it.
+    $dbFiles = $this->MyFile->find('all', array('conditions' => array('path' => $fsPath), 'recursive' => -1));
+    $dbFileNames = Set::extract('/File/file', $dbFiles);
+
+    $folder =& new Folder();
+    $folder->cd($fsPath);
+    list($fsDirs, $fsFiles) = $folder->read();
+
+    // add missing files
+    $diffFiles = array_diff($fsFiles, $dbFileNames);
+    foreach($diffFiles as $file) {
+      $dbFiles[] = $this->MyFile->create($fsPath.$file, $userId);
+    }
+    // cut 'File' array index 
+    $files = array();
+    foreach($dbFiles as $file) {
+      $files[] = $file['File'];
+    }
+    
+    $dirs = array();
+    foreach($fsDirs as $dir) {
+      $file = $this->MyFile->create($fsPath.$dir, $userId);
+      $dirs[] = $file['File'];
+    }
+
+    return array($dirs, $files);
+  }
+
   function index() {
-    $path = $this->getPath();
+    $path = $this->_getPathFromUrl();
     $fsPath = $this->_getFsPath($path);
 
     if ($fsPath) {
-      $folder =& new Folder();
-      $folder->cd($fsPath);
-      list($dirs, $files) = $folder->read();
-
-      // TODO get supported extensions from file filter
-      $videos = array('avi', 'mov', 'mpg', 'mpeg', 'thm');
-      $images = array('jpeg', 'jpg');
-      $maps = array('log');
-      $list = array();
-      foreach ($files as $file) {
-        $ext = strtolower(substr($file, strrpos($file, '.')+1));
-        if (in_array($ext, $images)) {
-          $list[$file] = 'image';
-        } elseif (in_array($ext, $videos)) {
-          $list[$file] = 'video';
-        } elseif (in_array($ext, $maps)) {
-          $list[$file] = 'maps';
-        } else {
-          $list[$file] = 'unknown';
-        }
-      }
-      $files = $list;
+      list($dirs, $files) = $this->_readPath($fsPath);
+      $isExternal = $this->FileManager->isExternal($fsPath);
     } else {
       if (strlen($path) > 1) {
         Logger::debug("Invalid path: '$path'. Redirect to index");
@@ -207,40 +225,39 @@ class BrowserController extends AppController
       }
       // filesystem path could not be resolved. Take all aliases of filesystem
       // roots
-      $dirs = array_keys($this->_fsRoots);
+      $dirs = array();
+      foreach(array_keys($this->_fsRoots) as $dir) {
+        $dirs[] = array(
+          'file' => $dir,
+          'path' => $dir
+          );
+      }
       $files = array();
+      $isExternal = true;
     }
     
     $this->set('path', $path);
     $this->set('dirs', $dirs);
     $this->set('files', $files);
-
-    // Check for internal path
-    $userRoot = $this->User->getRootDir($this->getUser());
-    if ($fsPath && strpos($fsPath, $userRoot) === 0) {
-      $isInternal = true;
-    } else {
-      $isInternal = false;
-    }
-    $this->set('isInternal', $isInternal);
+    $this->set('isInternal', !$isExternal);
   }
 
   function import() {
-    $user = $this->getUser();
-    // parameter preparation
-    $data = am(array('path' => '/', 'import' => array()), 
-                $this->data['Browser']);
+    $path = $this->_getPathFromUrl();
+    if (empty($this->data)) {
+      Logger::warn("Empty post data");
+      $this->redirect('index/'.$path);
+    }
 
-    $path = $data['path'];
     // Get dir and imports
     $dirs = array();
     $files = array();
     $toRead = array();
-    foreach ($data['import'] as $file) {
+    foreach ($this->data['Browser']['import'] as $file) {
       if (!$file) {
         continue;
       }
-      $fsPath = $this->_getFsPath($file);
+      $fsPath = $this->_getFsPath($path.$file);
       if (is_dir($fsPath)) {
         $dirs[] = Folder::slashTerm($fsPath);
         $toRead[] = $fsPath;
@@ -255,10 +272,45 @@ class BrowserController extends AppController
     $errors = $this->FilterManager->errors;
     $this->Session->setFlash("Imported $readed files ($errors errors)");
 
-    // Set data for view
-    $this->set('path', $path);
-    $this->set('dirs', $dirs);
-    $this->set('files', $files);
+    $this->redirect('index/'.$path);
+  }
+
+  function unlink() {
+    $path = $this->_getPathFromUrl();
+    $fsPath = $this->_getFsPath($path);
+    $file = $this->MyFile->findByFilename($fsPath);
+    if (!$file) {
+      Logger::err("File not found: $fsPath");
+      $this->redirect('index/'.$path);
+    } elseif ($file['User']['id'] != $this->getUserId()) {
+      Logger::warn("Deny access to file: $fsPath");
+    } else {
+      $this->Session->setFlash("Media {$file['File']['media_id']} was unlinked successfully");
+      $this->Media->unlinkFile($file['File']['media_id'], $file['File']['id']);
+    }
+    $this->redirect('index/'.$this->_getPathFromUrl(0, -1));
+  }
+
+  function delete() {
+    $path = $this->_getPathFromUrl();
+    $fsPath = $this->_getFsPath($path);
+    if (file_exists($fsPath)) {
+      $path = $this->_getPathFromUrl(0, -1);
+      $isDir = false;
+      if (is_dir($fsPath)) {
+        $isDir = true;
+      }
+      if ($this->FileManager->delete($fsPath)) {
+        if ($isDir) {
+          $this->Session->setFlash('Deleted directory successfully');
+        } else {
+          $this->Session->setFlash('Deleted file successfully');
+        }
+      } else {
+        $this->Session->setFlash('Could not delete file or directory');
+      }
+    }
+    $this->redirect('index/'.$path);
   }
 
   /** Synchronize the meta data of the media with its file(s). All media with
@@ -332,7 +384,7 @@ class BrowserController extends AppController
   }
 
   function folder() {
-    $path = $this->getPath();
+    $path = $this->_getPathFromUrl();
     $fsPath = $this->_getFsPath($path);
     // Check for internal path
     if (!$fsPath) {
@@ -366,7 +418,7 @@ class BrowserController extends AppController
   }
 
   function upload() {
-    $path = $this->getPath();
+    $path = $this->_getPathFromUrl();
     $fsPath = $this->_getFsPath($path);
     if (!$fsPath) {
       Logger::warn("Invalid path for upload");

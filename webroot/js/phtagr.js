@@ -105,3 +105,25 @@ var thumbSelectInvert = function() {
   }
 };
 
+/** Selects the table row from the state of the current checkboxs somewhere
+ * below the table row element
+  @param checkBox Element of the checkbox */
+var selectTableRow = function(checkBox) {
+  if (checkBox == null) {
+    return false;
+  }
+
+  var p = checkBox.parentNode;
+  while (p && p.nodeName.toUpperCase() != 'TR') {
+    p = p.parentNode;
+  }
+  if (!p) {
+    return false;
+  }
+
+  if (checkBox.checked) {
+    p.className += ' selected';
+  } else {
+    p.className = p.className.replace(' selected', '');
+  }
+};

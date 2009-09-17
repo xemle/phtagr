@@ -1,7 +1,7 @@
 <h1>File Upload</h1>
 <?php $session->flash(); ?>
 
-<p>You upload files to folder <?php echo $html->link($path, 'index/'.$path); ?></p>
+<p>You upload files to folder <?php echo $fileList->location($path); ?></p>
 <p>You can upload maximal <?php echo $number->toReadableSize($free); ?> and <?php echo $number->toReadableSize($max); ?> at once.</p>
 
 <?php echo $form->create(false, array('action' => 'upload/'.$path, 'type' => 'file')); ?>
