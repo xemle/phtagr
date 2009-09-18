@@ -99,7 +99,11 @@ foreach ($this->data as $media): ?>
 <div class="edit">
 <?php if ($canWriteTag): ?>
 <?php 
-  echo $form->create(null, array('id' => 'explorer', 'action' => 'edit/'.$search->serialize())); 
+  $url = '/'.$this->action.'/'.implode('/', $this->params['pass']);
+  foreach ($this->params['named'] as $key => $value) {
+    $url .= "/$key:$value";
+  }
+  echo $form->create(null, array('id' => 'explorer', 'action' => 'edit/'.$url));
 ?>
 <fieldset><legend>Metadata</legend>
 <?php echo $form->hidden('Media.ids', array('id' => 'MediaIds')) ?>

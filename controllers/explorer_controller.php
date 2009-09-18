@@ -192,20 +192,20 @@ class ExplorerController extends AppController
       }
       $from = mktime(0, 0, 0, $month, $day, $year);
       $to = mktime(0, 0, 0, $m, $d, $y);
-      $this->Search->setFrom($from);
-      $this->Search->setTo($to-1);
-      $this->Search->setOrder('-date');
+      $this->Search->setFrom(date('Y-m-d H:i:s', $from));
+      $this->Search->setTo(date('Y-m-d H:i:s', $to - 1));
+      $this->Search->setSort('-date');
     } elseif ($year) {
       $from = strtotime($year);
       if ($from) {
-        $this->Search->setFrom($from);
-        $this->Search->setOrder('-date');
+        $this->Search->setFrom(date('Y-m-d H:i:s', $from));
+        $this->Search->setSort('-date');
       }
       if ($month) {
         $to = strtotime($month);
         if ($to) {
-          $this->Search->setTo($to);
-          $this->Search->setOrder('date');
+          $this->Search->setTo(date('Y-m-d H:i:s', $to));
+          $this->Search->setSort('date');
         }
       }
     }
@@ -421,7 +421,11 @@ class ExplorerController extends AppController
       }
       $this->data = array();
     }
-    $this->render('index');
+    $url = implode('/', $this->params['pass']);
+    foreach ($this->params['named'] as $key => $value) {
+      $url .= "/$key:$value";
+    }
+    $this->redirect($url);
   }
 
   /** 
