@@ -277,11 +277,18 @@ class SearchComponent extends Search
       );
 
     $data = $this->controller->Media->findById($id);
-    if ($count == 0 || !$data) {
+    $user = $this->controller->getUser();
+    $access = $this->controller->Media->checkAccess(&$data, $user, ACL_READ_PREVIEW, ACL_READ_MASK);
+    if ($count == 0 || !$data || !$access) {
+      if (!$data) {
+        Logger::info("Media $id not found");
+      } else {
+        Logger::verbose("Deny access to media $id");
+      }
       $this->controller->params['search'] = $params;
       return array();
     }
-    $this->controller->Media->setAccessFlags(&$data, $this->controller->getUser());
+    $this->controller->Media->setAccessFlags(&$data, $user);
 
     $pos = $this->getPos(1);
     $mediaOffset = 1; // offset from previews media
