@@ -1,4 +1,4 @@
-<?PHp
+<?PHP
 /*
  * phtagr.
  * 
@@ -25,7 +25,7 @@ class ExplorerController extends AppController
 {
   var $components = array('RequestHandler', 'FilterManager', 'Search', 'QueryBuilder');
   var $uses = array('Media', 'MyFile', 'Group', 'Tag', 'Category', 'Location');
-  var $helpers = array('form', 'formular', 'html', 'javascript', 'ajax', 'imageData', 'time', 'explorerMenu', 'rss', 'search', 'navigator');
+  var $helpers = array('form', 'formular', 'html', 'javascript', 'ajax', 'imageData', 'time', 'explorerMenu', 'rss', 'search', 'navigator', 'tab');
 
   function beforeFilter() {
     if ($this->action == 'points' && 

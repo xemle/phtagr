@@ -1,0 +1,34 @@
+.tab {
+  padding: 0 0 2pt 4pt;
+  margin: 0;
+  border-bottom: 1px solid black;
+}
+.tab li {
+  margin: 0;
+  padding: 0pt 1pt;
+  display: inline;
+}
+.tab li a {
+  padding: 2pt;
+  cursor: pointer;
+  border: 1px solid black;
+  text-decoration: none;
+  background-color:#eee;
+  color: black;
+}
+.tab li.tabActive a {
+  padding: 3.5pt 3.5pt 2pt 3.5pt;
+  font-weight: bold;
+  background-color: #fff;
+  border-bottom: 1px solid white;
+}
+.tab li a:hover {
+  color: #fff;
+  background-color:#182e7a; 
+  border: 1px solid black;
+}
+.tabContent {
+}
+.tabHidden {
+  display: none;
+}

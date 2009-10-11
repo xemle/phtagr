@@ -127,3 +127,33 @@ var selectTableRow = function(checkBox) {
     p.className = p.className.replace(' selected', '');
   }
 };
+
+var activateTab = function(id, name) {
+  var header = document.getElementById(name+'-header-'+id);
+  var content = document.getElementById(name+'-content-'+id);
+  if (!header || !content) {
+    return false;
+  }
+  if (header.className.indexOf('tabActive') < 0) {
+    header.className += ' tabActive';
+  }
+  if (content.className.indexOf('tabHidden') >= 0) {
+    content.className = content.className.replace(/\s*tabHidden/g, '');
+  }
+
+  // disable others
+  var i = 0;
+  header = document.getElementById(name+'-header-'+i);
+  content = document.getElementById(name+'-content-'+i);
+  while (header && content) {
+    if (i != id && header.className.indexOf('tabActive') >= 0) {
+      header.className = header.className.replace(/\s*tabActive/, '');
+    }
+    if (i != id && content.className.indexOf('tabHidden') < 0) {
+      content.className += ' tabHidden';
+    }
+    i++;
+    header = document.getElementById(name+'-header-'+i);
+    content = document.getElementById(name+'-content-'+i);
+  }
+}.defaults(-1, 'tab');

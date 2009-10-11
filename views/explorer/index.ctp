@@ -97,6 +97,8 @@ foreach ($this->data as $media): ?>
 <?php endif; ?>
 
 <div class="edit">
+<?php echo $tab->menu(array(array('name' => "Metadata", 'active' => true), "Access Rights")); ?>
+
 <?php if ($canWriteTag): ?>
 <?php 
   $url = '/'.$this->action.'/'.implode('/', $this->params['pass']);
@@ -105,7 +107,8 @@ foreach ($this->data as $media): ?>
   }
   echo $form->create(null, array('id' => 'explorer', 'action' => 'edit/'.$url));
 ?>
-<fieldset><legend>Metadata</legend>
+<?php echo $tab->open(0, true); ?>
+<fieldset>
 <?php echo $form->hidden('Media.ids', array('id' => 'MediaIds')) ?>
 <?php 
   if ($canWriteMeta) {
@@ -121,8 +124,10 @@ foreach ($this->data as $media): ?>
   }
 ?>
 </fieldset>
+<?php echo $tab->close(); ?>
 <?php if ($canWriteAcl): ?>
-<fieldset><legend>Access Rights</legend>
+<?php echo $tab->open(1); ?>
+<fieldset>
 <?php
   $aclSelect = array(
     ACL_LEVEL_KEEP => '[Keep]',
@@ -137,8 +142,8 @@ foreach ($this->data as $media): ?>
   echo $form->input('Group.id', array('type' => 'select', 'options' => $groups, 'selected' => 0, 'label' => "Default image group?"));
 ?>
 </fieldset>
+<?php echo $tab->close(); ?>
 <?php endif; // canWriteAcl==true ?>
-<?php echo $form->submit('Apply'); ?>
-</form>
+<?php echo $form->end('Apply'); ?>
 <?php endif; // canWriteTag==true ?>
 </div>
