@@ -285,6 +285,25 @@ class ImageDataHelper extends AppHelper {
     return $output;
   }
 
+  function geoLocation($data) {
+    if (!isset($data['Media']['longitude']) || !isset($data['Media']['latitude'])) {
+      return $false;
+    }
+    $long = $data['Media']['longitude'];
+    $lat = $data['Media']['latitude'];
+    $longSuffix = 'E';
+    $latSuffix = 'N';
+    if ($long < 0) {
+      $longSuffix = 'W';
+      $long *= -1;
+    }
+    if ($lat < 0) {
+      $latSuffix = 'S';
+      $lat *= -1;
+    }
+    return sprintf("%.2f%s/%.2f%s", $lat, $latSuffix, $long, $longSuffix);
+  }
+
   function metaTable($data, $withMap = false) {
     $cells= array();
     if (!$data) 
@@ -306,8 +325,16 @@ class ImageDataHelper extends AppHelper {
     if (count($data['Category'])) {
       $cells[] = array('Categories:', $this->_metaHabtm(&$data, 'Category'));
     }
+
+    $locations = array();
     if (count($data['Location'])) {
-      $cells[] = array('Locations:', $this->_metaHabtm(&$data, 'Location'));
+      $locations[] = $this->_metaHabtm(&$data, 'Location');
+    }
+    if (isset($data['Media']['longitude']) && isset($data['Media']['latitude'])) {
+      $locations[] = $this->geoLocation(&$data);
+    }
+    if (count($locations)) {
+      $cells[] = array('Locations:', implode(', ', $locations));
     }
 
     if ($data['Media']['isOwner']) {

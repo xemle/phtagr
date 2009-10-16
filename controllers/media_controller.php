@@ -165,8 +165,12 @@ class MediaController extends AppController
   function _getSourceFile($media) {
     if ($this->Media->isType($media, MEDIA_TYPE_VIDEO)) {
       $sourceFilename = $this->VideoPreview->getPreviewFilename($media);
-    } else {
+    } elseif (count($media['File']) > 0) {
       $sourceFilename = $this->Media->File->getFilename($media['File'][0]);
+    } else {
+      Logger::err("No file attached to media {$media['Media']['id']}");
+      Logger::debug($media);
+      $this->redirect(null, 500);
     }
     if(!is_readable($sourceFilename)) {
       Logger::debug("Media file (id {$media['Media']['id']}) is not readable: $sourceFilename");

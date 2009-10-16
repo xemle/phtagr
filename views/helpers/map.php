@@ -38,7 +38,9 @@ class MapHelper extends AppHelper
   function container() {
     return $this->output('<div id="mapbox" style="display: none;">
     <div id="map"></div>
-    <a href="#" onclick="toggleVisibility(\'mapbox\')">Close Map</a>
+    <div id="mapInfo">
+      <a href="#" onclick="toggleVisibility(\'mapbox\')">Close Map</a>
+    </div>
     </div>
     ');
   }
@@ -53,6 +55,7 @@ var showMap = function(id, latitude, longitude) {
     var options = { url: '".Router::url('/explorer/points')."' };
     map = new PMap(latitude, longitude, options);
     map.setMediaMarker(id, latitude, longitude);
+    map.updateInfo();
     map.updateMarkers();
   }
 };";

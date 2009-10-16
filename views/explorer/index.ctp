@@ -97,10 +97,15 @@ foreach ($this->data as $media): ?>
 <?php endif; ?>
 
 <div class="edit">
-<?php echo $tab->menu(array(array('name' => "Metadata", 'active' => true), "Access Rights")); ?>
 
 <?php if ($canWriteTag): ?>
 <?php 
+  $items = array(array('name' => "Metadata", 'active' => true));
+  if ($canWriteAcl) {
+    $items[] = "Access Rights";
+  }
+  echo $tab->menu($items);
+
   $url = '/'.$this->action.'/'.implode('/', $this->params['pass']);
   foreach ($this->params['named'] as $key => $value) {
     $url .= "/$key:$value";
@@ -121,6 +126,7 @@ foreach ($this->data as $media): ?>
     echo $form->input('Locations.sublocation', array('maxlength' => 32));
     echo $form->input('Locations.state', array('maxlength' => 32));
     echo $form->input('Locations.country', array('maxlength' => 32));
+    echo $form->input('Media.geo', array('label' => 'Geo data', 'maxlength' => 32, 'after' => '<span class="hint">latitude, longitude</span>'));
   }
 ?>
 </fieldset>

@@ -343,6 +343,14 @@ class ExplorerController extends AppController
           Logger::warn("Could not convert time of '{$this->data['Media']['date']}'");
         }
       }
+      $geoData = false;
+      if (!empty($this->data['Media']['geo'])) {
+        if ($this->data['Media']['geo'] == '-' || $this->data['Media']['geo'] == '-,-') {
+          $geoData = array('latitude' => null, 'longitude' => null);
+        } elseif (preg_match('/^\s*([+\-]?[0-9]+(\.[0-9]+)?)\s*,\s*([+\-]?[0-9]+(\.[0-9]+)?)\s*$/', $this->data['Media']['geo'], $m)) {
+          $geoData = array('latitude' => $m[1], 'longitude' => $m[3]);
+        }
+      }
 
       $ids = split(',', $this->data['Media']['ids']);
       $ids = array_unique($ids);
@@ -381,6 +389,14 @@ class ExplorerController extends AppController
           $this->_handleHabtm(&$media, 'Category', $categories);
           $this->_removeLocation(&$media, &$delLocations);
           $this->_handleHabtm(&$media, 'Location', $locations);
+          if ($geoData) {
+            foreach ($geoData as $geo => $value) {
+              if ($media['Media'][$geo] !== $value) {
+                $media['Media'][$geo] = $value;
+                $changedMeta = true;
+              }
+            }      
+          }
         } else {
           Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change metadata of image ".$media['Media']['id']);
         }
@@ -483,6 +499,16 @@ class ExplorerController extends AppController
           $locations = $this->Location->filterItems($locations);
           $ids = $this->Location->CreateIdList($locations, true);
           $media['Location']['Location'] = $ids;      
+          if (!empty($this->data['Media']['geo'])) {
+            if ($this->data['Media']['geo'] == '-' || $this->data['Media']['geo'] == '-,-') {
+              $media['Media']['latitude'] = null;
+              $media['Media']['longitude'] = null;
+            } elseif (preg_match('/^\s*([+\-]?[0-9]+(\.[0-9]+)?)\s*,\s*([+\-]?[0-9]+(\.[0-9]+)?)\s*$/', $this->data['Media']['geo'], $m)) {
+              $geoData = array('latitude' => $m[1], 'longitude' => $m[3]);
+              $media['Media']['latitude'] = $m[1];
+              $media['Media']['longitude'] = $m[3];
+            }
+          }
         } else {
           Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change meta data of image ".$id);
         }

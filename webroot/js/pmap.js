@@ -184,6 +184,7 @@ PMap.prototype.setQueryUrl = function(url){
 }
 
 PMap.prototype.onMoveEnd = function() {
+  this.updateInfo();
   this.updateMarkers();
 }
 
@@ -191,3 +192,14 @@ PMap.prototype.onZoomEnd = function(oldLevel, newLevel) {
   this.updateMarkers();
 }
 
+PMap.prototype.updateInfo = function() {
+  var e = document.getElementById("mapInfo");
+  if (!e) {
+    return false;
+  }
+  var text = "Center of map: ";
+  text = text + this.gmap.getCenter().lat().toFixed(4);
+  text = text + "," + this.gmap.getCenter().lng().toFixed(4);
+  text = text + " ";
+  e.firstChild.nodeValue = text;
+}

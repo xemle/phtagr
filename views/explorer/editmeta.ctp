@@ -19,6 +19,12 @@
   echo $form->input('Locations.sublocation', array('value' => $locations[LOCATION_SUBLOCATION]));
   echo $form->input('Locations.state', array('value' => $locations[LOCATION_STATE]));
   echo $form->input('Locations.country', array('value' => $locations[LOCATION_COUNTRY]));
+  if ($data['Media']['latitude'] || $data['Media']['longitude']) {
+    $geo = $data['Media']['latitude'].', '.$data['Media']['longitude'];
+  } else {
+    $geo = '';
+  }
+  echo $form->input('Media.geo', array('value' => $geo, 'label' => 'Geo data'));
 ?>
 </fieldset>
 <?php
