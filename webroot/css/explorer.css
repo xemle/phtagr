@@ -127,7 +127,30 @@
   height: 350px;
   border: 1px solid #000;
 }
-
+.mapContextMenu * {
+  margin: 0;
+  padding: 0;
+}
+.mapContextMenu {
+  display: block;
+  border: 1px solid blue;
+  background-color: #eee;
+}
+.mapContextMenu ul {
+  list-style-type: none;
+}
+.mapContextMenu * a {
+  padding: 0 2px;
+  text-decoration:none;
+  display: block;
+}
+.mapContextMenu * a:focus {
+  outline: none;
+}       
+.mapContextMenu * a:hover {
+  background: #ddd;
+}       
+       
 /** Patches for the menu list */
 #submenu li.multi {
   margin: 0;

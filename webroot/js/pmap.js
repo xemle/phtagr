@@ -36,6 +36,7 @@ function PMap(latitude, longitude, options) {
   this.currentId = null; /**< Current image marker's id */
   this.url = null;    /**< base URL for background queries */
   this.isLoaded = false;
+  this.contextMenu = null;
   this._updatingMarkers = false;
   this._continueUpdateMarkers = false;
 
@@ -66,6 +67,7 @@ function PMap(latitude, longitude, options) {
     GEvent.bind(this.gmap, "moveend", this, this.onMoveEnd);
     GEvent.bind(this.gmap, "zoomend", this, this.onZoomEnd);
     this.isLoaded = true;
+    this.contextMenu = new PContextMenu(this.gmap);
   }
 }
 
@@ -202,4 +204,113 @@ PMap.prototype.updateInfo = function() {
   text = text + "," + this.gmap.getCenter().lng().toFixed(4);
   text = text + " ";
   e.firstChild.nodeValue = text;
+}
+
+/** PContextMenu bases on http://www.ajaxlines.com/ajax/stuff/article/context_menu_in_google_maps_api.php */
+function PContextMenu(gMap) {
+  this.initialize(gMap);
+}
+
+/** Add a link to the context menu
+  @param text Link entry name
+  @param fnc Function which will be executed on clicking the entry */
+PContextMenu.prototype.addLink = function(text, fnc) {
+  var that = this;
+
+  var a = document.createElement("a");
+
+  var aHref = document.createAttribute("href");
+  aHref.nodeValue = "javascript:void(0);";
+  a.setAttributeNode(aHref);
+
+  GEvent.addDomListener(a, "click", fnc);
+
+  // handling of context menu
+  GEvent.addDomListener(a, "click", function() {
+    that.hide();
+    // unfocus link
+    a.blur(); // most browsers
+    if (a.hideFocus) { // ie
+      a.hideFocus = false;
+    }
+    a.style.outline = 'none'; // mozilla
+  });
+
+  a.appendChild(document.createTextNode(text));
+
+  var li = document.createElement("li");
+  li.appendChild(a);
+  this._ulContainer.appendChild(li);    
+}
+
+PContextMenu.prototype.show = function() {
+  this.contextmenu.style.display = ""; 
+}
+
+PContextMenu.prototype.hide = function() {
+  this.contextmenu.style.display = "none"; 
+}
+
+PContextMenu.prototype.getHeight = function() {
+  return this._ulContainer.childNodes.length * 20;
+}
+
+PContextMenu.prototype.getWidth = function() {
+  return 120;
+}
+
+//The object constructor
+PContextMenu.prototype.initialize = function(gMap){
+  var that = this;
+  this._map = gMap;
+ 
+  this.contextmenu = document.createElement("div");
+  this.contextmenu.className = "mapContextMenu";
+  this._ulContainer = document.createElement("ul");
+  this._ulContainer.id = "contextMenuContainer";
+  this.contextmenu.appendChild(this._ulContainer);   
+  this.addLink("Zoom out", function() {
+    that._map.zoomOut();
+  });
+  this.addLink("Zoom in", function() {
+    that._map.zoomIn();
+  });
+  this.addLink("Zoom in here", function() {
+    var point = that._map.fromContainerPixelToLatLng(that.clickedPixel);
+    that._map.zoomIn(point,true);
+  });
+  this.addLink("Center here", function() {
+    var point = that._map.fromContainerPixelToLatLng(that.clickedPixel);
+    that._map.panTo(point);
+  });
+  this.hide();
+  this._map.getContainer().appendChild(this.contextmenu);   
+
+  //Event listeners that will interact with our context menu
+  GEvent.addListener(gMap, "singlerightclick", function(pixel, tile, obj) {
+    that.clickedPixel = pixel;
+    var x = pixel.x;
+    var y = pixel.y;
+    //Prevents the menu to go out of the map margins, in this case the expected
+    //menu size is 150x110
+    if (x > that._map.getSize().width - that.getWidth()) { 
+      x = that._map.getSize().width - that.getWidth();
+    }
+    if (y > that._map.getSize().height - that.getHeight()) { 
+      y = that._map.getSize().height - that.getHeight();
+    }
+    var pos = new GControlPosition(G_ANCHOR_TOP_LEFT, new GSize(x,y)); 
+    pos.apply(that.contextmenu);
+
+    // Open context menu only on non-markers
+    if (obj == null) {
+      that.show();
+    }
+  });   
+  GEvent.addListener(gMap, "move", function() {
+    that.hide();
+  });
+  GEvent.addListener(gMap, "click", function(overlay, point) {
+    that.hide();
+  });   
 }
