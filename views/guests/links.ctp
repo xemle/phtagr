@@ -12,21 +12,28 @@ Copy the links with with right mouse click and select <i>Copy link address.</i>
 <p>Following link provides a direct link to <i>My Images</i> of the guest which
 omits the login with username and password.</p>
 
-
+<?php
+  $myMedia = Router::url('/explorer/user/'.$this->data['Guest']['username'].'/key:'.$this->data['Guest']['key'], true);
+?>
 <ul>
-  <li><?php echo $html->link('My Images of Guest '.$this->data['Guest']['username'], Router::url('/explorer/user/'.$this->data['Guest']['id'].'/key:'.$this->data['Guest']['key'], true)); ?></li>
+  <li><?php echo $html->link('My Media of Guest '.$this->data['Guest']['username'], $myMedia); ?> (Link: <code><?php echo $myMedia; ?></code>)</li>
 </ul>
 
 
 <h2>RSS</h2>
 
 <p>Following links provide a authenticated RSS and Media RSS links.</p>
-
+<?php
+  $recentMedia = Router::url('/explorer/rss/key:'.$this->data['Guest']['key'], true);
+  $recentComments = Router::url('/comments/rss/key:'.$this->data['Guest']['key'], true);
+  $mediaRss = Router::url('/explorer/media/key:'.$this->data['Guest']['key'].'/media.rss', true);
+  $myMediaMediaRss = Router::url('/explorer/media/user:'.$this->data['Guest']['username'].'/key:'.$this->data['Guest']['key'].'/media.rss', true);
+?>
 <ul>
-  <li><?php echo $html->link('Recent Images', Router::url('/explorer/rss/key:'.$this->data['Guest']['key'], true)); ?></li>
-  <li><?php echo $html->link('Recent Comments', Router::url('/comments/rss/key:'.$this->data['Guest']['key'], true)); ?></li>
-  <li><?php echo $html->link('Media RSS', Router::url('/explorer/media/key:'.$this->data['Guest']['key'].'/media.rss', true)); ?></li>
-  <li><?php echo $html->link('My Images Media RSS', Router::url('/explorer/media/user:'.$this->data['Guest']['id'].'/key:'.$this->data['Guest']['key'].'/media.rss', true)); ?></li>
+  <li><?php echo $html->link('Recent Media', $recentMedia); ?> (Link: <code><?php echo $recentMedia; ?></code>)</li>
+  <li><?php echo $html->link('Recent Comments', $recentComments); ?> (Link: <code><?php echo $recentComments; ?></code>)</li>
+  <li><?php echo $html->link('Media RSS', $mediaRss); ?> (Link: <code><?php echo $mediaRss; ?></code>)</li>
+  <li><?php echo $html->link('Media RSS of My Media', $myMediaMediaRss); ?> (Link: <code><?php echo $myMediaMediaRss; ?></code>)</li>
 </ul>
 
 <p>Click <?php echo $html->link('renew key',
