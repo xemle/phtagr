@@ -28,7 +28,7 @@
   }
   echo $html->meta('rss', '/explorer/rss', array('title' => 'Recent images'));
   echo $html->meta('rss', '/comments/rss', array('title' => 'Recent comments'));
- 
+  echo $scripts_for_layout; 
 ?>
 
 <!--[if lte IE 7]>

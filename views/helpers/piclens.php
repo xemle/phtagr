@@ -30,7 +30,7 @@ class PiclensHelper extends AppHelper
   }
 
   function slideshow() {
-    $out = $this->Html->tag('script', false, array('type' => 'text/javascript', 'src' => Router::url('/piclenslite/piclens_optimized.js')));
+    $this->Javascript->link(Router::url('/piclenslite/piclens_optimized.js', true), false);
     $swf = Router::url("/piclenslite/PicLensLite.swf");
     $feed = Router::url($this->Search->getUri(false, false, false, array('baseUri' => '/explorer/media')));
     $code = "PicLensLite.setLiteURLs({swf:'$swf'});
@@ -41,7 +41,7 @@ var startSlideshow = function(quality) {
   }
   PicLensLite.start({feedUrl:feed});
 }";
-    $out .= $this->Javascript->codeBlock($code);
+    $out = $this->Javascript->codeBlock($code);
     return $out;
   }
 }
