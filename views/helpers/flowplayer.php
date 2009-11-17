@@ -37,9 +37,8 @@ class FlowplayerHelper extends AppHelper
     list($width, $height) = $this->ImageData->getimagesize($this->data, OUTPUT_SIZE_VIDEO);
     $height += 28;
     $id = $media['Media']['id'];
-    $preview = "<img src=\"".Router::url("/media/preview/$id", true)."\" width=\"$width\" height=\"$height\" />";
 
-    $out = $this->Html->tag('a', $preview, array(
+    $out = $this->Html->tag('a', false, array(
       'href' => Router::url("/media/video/$id/$id.flv", true),
       'style' => "display:block; width: {$width}px; height: {$height}px;",
       'id' => 'player'
