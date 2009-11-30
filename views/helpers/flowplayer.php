@@ -35,7 +35,7 @@ class FlowplayerHelper extends AppHelper
   /** Creates the link container for the flowplayer */
   function link($media) {
     list($width, $height) = $this->ImageData->getimagesize($this->data, OUTPUT_SIZE_VIDEO);
-    $height += 28;
+    $height += 24;
     $id = $media['Media']['id'];
 
     $out = $this->Html->tag('a', false, array(

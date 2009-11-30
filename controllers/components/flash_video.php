@@ -46,6 +46,18 @@ class FlashVideoComponent extends Object {
     return array($width, $height);
   }
 
+  /** Evaluates if the media is a flash movie 
+    @param media Current media
+    @param file Video file of the media
+    @return True if current media is a flash movie */
+  function isFlash($media, $file) {
+    if ($this->controller->MyFile->getExtension($file) == 'flv' &&
+      $media['Media']['width'] <= OUTPUT_SIZE_VIDEO &&
+      $media['Media']['height'] <= OUTPUT_SIZE_VIDEO) {
+      return true;
+    }
+    return false;
+  }
 
   function create($media, $options = array()) {
     $options = am(array('size' => OUTPUT_SIZE_VIDEO, 'bitrate' => OUTPUT_BITRATE_VIDEO), $options);
@@ -61,6 +73,10 @@ class FlashVideoComponent extends Object {
 
     $src = $this->controller->MyFile->getFilename($video);
     Logger::debug($src);
+    if ($this->isFlash($media, $video)) {
+      Logger::verbose("Use media's flash video as source: $src");
+      return $src;
+    }
     $cache = $this->FileCache->getFilename($media);
 
     if (!$cache) {

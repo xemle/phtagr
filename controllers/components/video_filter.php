@@ -35,7 +35,7 @@ class VideoFilterComponent extends BaseFilterComponent {
   }
 
   function _getVideoExtensions() {
-    return array('avi', 'mov', 'mpeg', 'mpg');
+    return array('avi', 'mov', 'mpeg', 'mpg', 'flv');
   }
   function getExtensions() {
     return am($this->_getVideoExtensions(), array('thm' => array('priority' => 5)));
@@ -135,8 +135,8 @@ class VideoFilterComponent extends BaseFilterComponent {
 
     $bin = $this->controller->getOption('bin.ffmpeg', 'ffmpeg');
     $command = "$bin -i ".escapeshellarg($filename)." -t 0.0 2>&1";
-    $output=array();
-    $result=-1;
+    $output = array();
+    $result = -1;
     $t1 = getMicrotime();
     exec($command, &$output, &$result);
     $t2 = getMicrotime();
@@ -153,14 +153,14 @@ class VideoFilterComponent extends BaseFilterComponent {
       Logger::trace($output);
 
       foreach ($output as $line) {
-        $words=preg_split("/[\s,]+/", trim($line));
-        if ($words[0]=="Duration:") {
-          $times=preg_split("/:/", $words[1]);
-          $time=$times[0]*3600+$times[1]*60+intval($times[2]);
+        $words = preg_split("/[\s,]+/", trim($line));
+        if (count($words) >= 2 && $words[0] == "Duration:") {
+          $times = preg_split("/:/", $words[1]);
+          $time = $times[0] * 3600 + $times[1] * 60 + intval($times[2]);
           $data['duration'] = $time;
           Logger::trace("Extract duration of '$filename': $time");
-        } elseif ($words[2]=="Video:") {
-          list($width, $height)=split("x", $words[5]);
+        } elseif (count($words) >= 6 && $words[2] == "Video:") {
+          list($width, $height) = split("x", $words[5]);
           $data['width'] = $width;
           $data['height'] = $height;
           Logger::trace("Extract video size of '$filename': $width x $height");
