@@ -5,10 +5,12 @@
   <description>Media RSS of phTagr (<?php echo $_SERVER['SERVER_NAME']; ?>)</description>
 <?php $search->initialize(); ?>
 <?php if ($navigator->hasPrev()): ?>
-  <atom:link rel="previous" href="<?php echo Router::url($search->getUrl(false, array('page' => $search->getPage(1) - 1, false, array('baseUrl' => '/explorer/media/'))).'/media.rss', true); ?>" />
+  <atom:link rel="self" href="<?php echo Router::url($search->getUri(false, false, false, array('baseUri' => '/explorer/media')).'/media.rss', true); ?>" />
+  <atom:link rel="previous" href="<?php echo Router::url($search->getUri(false, array('page' => $search->getPage(1) - 1), false, array('baseUri' => '/explorer/media')).'/media.rss', true); ?>" />
 <?php endif; ?>
 <?php if ($navigator->hasNext()): ?>
-  <atom:link rel="next" href="<?php echo Router::url($search->getUrl(false, array('page' => $search->getPage(1) + 1, false, array('baseUrl' => '/explorer/media/'))).'/media.rss', true); ?>" />
+  <atom:link rel="next" href="<?php echo Router::url($search->getUri(false, array('page' => $search->getPage(1) + 1), false, array('baseUri' => '/explorer/media')).'/media.rss', true); ?>" />
+<?php Logger::debug($search->getUri(false, array('page' => ($search->getPage(1) - 1)), false, array('baseUri' => '/explorer/media'))); ?>
 <?php endif; ?>
 <?php
   $keyParam = "";
@@ -40,7 +42,7 @@
     <media:thumbnail url="<?php echo Router::url($thumbUrl, true); ?>" <?php echo $thumbSize[3]; ?> />
     <media:content url="<?php echo Router::url($contentUrl, true); ?>" <?php echo $previewSize[3]; ?> />
     <guid><?php echo Router::url("/media/view/{$media['Media']['id']}", true); ?></guid>
-    <description type="html" />
+    <description><?php echo h($media['Media']['name'].' by '.$media['User']['username']); ?></description>
   </item>
 <?php endforeach; ?>
 </channel>
