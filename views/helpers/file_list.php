@@ -74,7 +74,7 @@ class FileListHelper extends AppHelper
     $row[] = '';
     $actions = array();
     if ($options['isInternal']) {
-      $actions[] = ' '.$this->Html->link('delete', "delete/$path", array('style' => 'color: red', 'onclick' => "return confirm('Delete folder $path?')"));
+      $actions[] = $this->Html->link('delete', "delete/$path", array('style' => 'color: red', 'onclick' => "return confirm('Delete folder $path?')"));
     }
     $row[] = implode('', $actions);
     return $row;
@@ -94,10 +94,18 @@ class FileListHelper extends AppHelper
     }
     $row[] = $this->Number->toReadableSize($file['size']);
     $actions = array();
-    if ($options['isInternal']) {
-      $actions[] = ' '.$this->Html->link('delete', "delete/$path/{$file['file']}", array('style' => 'color: red'));
+
+    // Download link for internal files and imported external files
+    if ($options['isInternal'] || $file['media_id'] > 0) {
+      $icon = $this->Html->image('icons/disk.png', array('alt' => 'download', 'title' => 'Download '.$file['file']));
+      $actions[] = $this->Html->link($icon, "index/$path/{$file['file']}", null, null, false);
     }
-    $row[] = implode('', $actions);
+
+    // Delete link for internal files
+    if ($options['isInternal']) {
+      $actions[] = $this->Html->link('delete', "delete/$path/{$file['file']}", array('style' => 'color: red'));
+    }
+    $row[] = implode(' ', $actions);
     return $row;
   }
 

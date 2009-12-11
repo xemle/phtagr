@@ -278,7 +278,12 @@ class MyFile extends AppModel
     $acl = $this->Media->buildAclConditions($user, 0, $flag);
     $ownFiles = 'File.user_id = '.$user['User']['id'];
 
-    $conditions[] = '('.$ownFiles.' OR ('.implode(' AND ', $acl).'))';
+    $access = '('.$ownFiles;
+    if ($acl) {
+      $access .= ' OR ('.implode(' AND ', $acl).')';
+    }
+    $access .= ')';
+    $conditions[] = $access;
 
     $result = $this->find('all', array('fields' => 'File.id', 'conditions' => $conditions, 'limit' => 1));
     if ($result) {
@@ -437,6 +442,27 @@ class MyFile extends AppModel
       $folder->delete($path);
     }
     return true;
+  }
+
+  /** Get options for Media View of a file
+    @param filename Filename of the media
+    @return Array of Media Option for the view. */
+  function getMediaViewOptions($filename) {
+    $path = substr($filename, 0, strrpos($filename, DS) + 1);
+    $file = substr($filename, strrpos($filename, DS) + 1);
+    $ext = strtolower(substr($file, strrpos($file, '.') + 1));
+    $name = substr($file, 0, strrpos($file, '.'));
+    $modified = date("Y-m-d H:i:s", filemtime($filename));
+
+    $options = array(
+      'id' => $file,
+      'name' => $name,
+      'extension' => $ext,
+      'path' => $path,
+      'modified' => $modified,
+      'mimeType' => array('thm' => 'image/jpeg'));
+
+    return $options;
   }
 
 }

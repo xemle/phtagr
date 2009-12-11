@@ -107,27 +107,6 @@ class MediaController extends AppController
     //header('Cache-Control: max-age=0');
   }
 
-  /** Get options for Media View of a file
-    @param filename Filename of the media
-    @return Array of Media Option for the view. */
-  function _getMediaOptions($filename) {
-    $path = substr($filename, 0, strrpos($filename, DS) + 1);
-    $file = substr($filename, strrpos($filename, DS) + 1);
-    $ext = strtolower(substr($file, strrpos($file, '.') + 1));
-    $name = substr($file, 0, strrpos($file, '.'));
-    $modified = date("Y-m-d H:i:s", filemtime($filename));
-
-    $options = array(
-      'id' => $file,
-      'name' => $name,
-      'extension' => $ext,
-      'path' => $path,
-      'modified' => $modified,
-      'mimeType' => array('thm' => 'image/jpeg'));
-
-    return $options;
-  }
-
   /** Fetch image from database and checks access 
     @param id Media id
     @param outputType 
@@ -214,7 +193,7 @@ class MediaController extends AppController
 
     $this->_handleClientCache($dst);
 
-    $mediaOptions = $this->_getMediaOptions($dst);
+    $mediaOptions = $this->MyFile->getMediaViewOptions($dst);
     $this->view = 'Media';
     $this->set($mediaOptions);
   }
@@ -259,7 +238,7 @@ class MediaController extends AppController
     Logger::info("Request of image $id: video");
     $filename = $this->_createFlashVideo($id, OUTPUT_TYPE_VIDEO);
 
-    $mediaOptions = $this->_getMediaOptions($filename);
+    $mediaOptions = $this->MyFile->getMediaViewOptions($filename);
     $mediaOptions['download'] = true;
     $this->view = 'Media';
     $this->set($mediaOptions);
@@ -280,7 +259,7 @@ class MediaController extends AppController
     Logger::info("Request of media {$file['Media']['id']}: file $id '{$file['File']['file']}'");
     $filename = $this->MyFile->getFilename($file);  
 
-    $mediaOptions = $this->_getMediaOptions($filename);
+    $mediaOptions = $this->MyFile->getMediaViewOptions($filename);
     $mediaOptions['download'] = true;
     $this->view = 'Media';
     $this->set($mediaOptions);

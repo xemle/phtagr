@@ -211,13 +211,30 @@ class BrowserController extends AppController
     return array($dirs, $files);
   }
 
+  function _readFile($filename) {
+    $user = $this->getUser();
+    if (!$this->MyFile->canRead($filename, $user)) {
+      Logger::info("User cannot read $filename");
+      $this->redirect(null, 404);
+    }
+    
+    $options = $this->MyFile->getMediaViewOptions($filename);
+    $options['download'] = true; 
+    $this->set($options);
+    $this->view = 'Media';
+  }
+
   function index() {
     $path = $this->_getPathFromUrl();
     $fsPath = $this->_getFsPath($path);
 
     if ($fsPath) {
-      list($dirs, $files) = $this->_readPath($fsPath);
-      $isExternal = $this->FileManager->isExternal($fsPath);
+      if (is_file($fsPath)) {
+        return $this->_readFile($fsPath);
+      } else {
+        list($dirs, $files) = $this->_readPath($fsPath);
+        $isExternal = $this->FileManager->isExternal($fsPath);
+      }
     } else {
       if (strlen($path) > 1) {
         Logger::debug("Invalid path: '$path'. Redirect to index");
