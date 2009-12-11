@@ -28,12 +28,14 @@ if (count($dataTags) > 0) : ?>
 </div>
 
 <?php
-  echo 'See more results with tag ';
+  echo 'See more results with tag: ';
   $names = Set::extract('/Tag/name', $dataTags);
   $names = array_unique($names);
+  $links = array();
   foreach ($names as $name) {
-    echo $html->link($name, '/explorer/tag/'.$name).' ';
+    $links[] = $html->link($name, '/explorer/tag/'.$name);
   }
+  echo implode(', ', $links);
 ?>
 <?php endif; /* if (count($dataTags) > 0) */ ?>  
 
@@ -49,12 +51,14 @@ if (count($dataCategories) > 0) : ?>
 </div>
 
 <?php
-  echo 'See more results with Category ';
-  $names = Set::extract('/Category/name', $dataTags);
+  echo 'See more results with category: ';
+  $names = Set::extract('/Category/name', $dataCategories);
   $names = array_unique($names);
+  $links = array();
   foreach ($names as $name) {
-    echo $html->link($name, '/explorer/category/'.$name).' ';
+    $links[] = $html->link($name, '/explorer/category/'.$name);
   }
+  echo implode(', ', $links);
 ?>
 <?php endif; /* if (count($dataCategories) > 0) */ ?>  
 
@@ -70,12 +74,14 @@ if (count($dataLocations) > 0) : ?>
 </div>
 
 <?php
-  echo 'See more results with Location ';
-  $names = Set::extract('/Location/name', $dataTags);
+  echo 'See more results with location: ';
+  $names = Set::extract('/Location/name', $dataLocations);
   $names = array_unique($names);
+  $links = array();
   foreach ($names as $name) {
-    echo $html->link($name, '/explorer/location/'.$name).' ';
+    $links[] = $html->link($name, '/explorer/location/'.$name);
   }
+  echo implode(', ', $links);
 ?>
 <?php endif; /* if (count($dataLocations) > 0) */ ?>  
 
