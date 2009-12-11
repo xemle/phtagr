@@ -2,10 +2,10 @@
 <channel>
   <title><?php echo $_SERVER['SERVER_NAME']; ?> Media RSS</title>
   <link><?php echo Router::url('/', true); ?></link>
-  <description>Media RSS of phTagr (<?php echo $_SERVER['SERVER_NAME']; ?>)</description>
+  <description>Media RSS of phTagr (<?php echo Router::url('/', true); ?>)</description>
 <?php $search->initialize(); ?>
-<?php if ($navigator->hasPrev()): ?>
   <atom:link rel="self" href="<?php echo Router::url($search->getUri(false, false, false, array('baseUri' => '/explorer/media')).'/media.rss', true); ?>" />
+<?php if ($navigator->hasPrev()): ?>
   <atom:link rel="previous" href="<?php echo Router::url($search->getUri(false, array('page' => $search->getPage(1) - 1), false, array('baseUri' => '/explorer/media')).'/media.rss', true); ?>" />
 <?php endif; ?>
 <?php if ($navigator->hasNext()): ?>
@@ -42,7 +42,13 @@
     <media:thumbnail url="<?php echo Router::url($thumbUrl, true); ?>" <?php echo $thumbSize[3]; ?> />
     <media:content url="<?php echo Router::url($contentUrl, true); ?>" <?php echo $previewSize[3]; ?> />
     <guid><?php echo Router::url("/media/view/{$media['Media']['id']}", true); ?></guid>
-    <description><?php echo h($media['Media']['name'].' by '.$media['User']['username']); ?></description>
+    <?php 
+      if ($media['Media']['caption']) {
+        echo $html->tag('description', $media['Media']['caption']); 
+      } else {
+        echo "<description />\n";
+      }
+    ?>
   </item>
 <?php endforeach; ?>
 </channel>
