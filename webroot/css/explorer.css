@@ -38,6 +38,11 @@
   border: 1px solid black;
 }
 
+.mediaPreview {
+  margin: 0px;
+  padding: 2px 2px;
+}
+
 .user {
   text-align: center;
 }

@@ -187,6 +187,8 @@ class ImageFilterComponent extends BaseFilterComponent {
 
     $v['aperture'] = $this->_extract($data, 'Aperture', NULL);
     $v['shutter'] = $this->_extract($data, 'ShutterSpeed', NULL);
+    $v['model'] = $this->_extract($data, 'Model', null);
+    $v['iso'] = $this->_extract($data, 'ISO', null);
 
     // fetch GPS coordinates
     $latitude = $this->_extract($data, 'GPSLatitude', null);

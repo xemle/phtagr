@@ -25,12 +25,13 @@ App::import('Core', 'Sanitize');
 
 class ImageDataHelper extends AppHelper {
 
-  var $helpers = array('Ajax', 'Html', 'Form', 'Search');
+  var $helpers = array('Ajax', 'Html', 'Form', 'Search', 'Option');
 
   var $Sanitize = null;
 
   function beforeRender() {
     $this->Search->initialize();
+    $this->Option->beforeRender();
     $this->Sanitize =& new Sanitize();
   }
 
@@ -469,5 +470,33 @@ class ImageDataHelper extends AppHelper {
     return $icon;
   }
 
+  function niceShutter($value) {
+    if ($value >= 1) {
+      return sprintf("%.1fs", $value);
+    } else {
+      $invert = round(1 / $value);
+      return sprintf("1/%ds", $invert);
+    }
+  }
+
+  function getPathLink($file) {
+    if (isset($file['File'])) {
+      $file = $file['File'];
+    }
+    $path = $file['path'];
+
+    $fsRoots = $this->Option->get('path.fsroot', array());
+    $fsRoots[] = USER_DIR.$file['user_id'].DS.'files'.DS;
+    rsort($fsRoots);
+
+    foreach ($fsRoots as $root) {
+      if (strpos($path, $root) === 0) {
+        $dirs = explode(DS, trim($root, DS));
+        $postfix = substr($path, strlen($root));
+        return '/browser/index/'.$dirs[count($dirs)-1].'/'.$postfix;
+      }
+    }
+    return false;
+  }
 }
 ?>

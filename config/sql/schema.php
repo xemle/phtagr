@@ -125,6 +125,7 @@ class PhtagrSchema extends CakeSchema {
 			'orientation' => array('type'=>'integer', 'null' => true, 'default' => NULL, 'length' => 4),
 			'aperture' => array('type'=>'float', 'null' => true, 'default' => NULL),
 			'shutter' => array('type'=>'float', 'null' => true, 'default' => NULL),
+			'iso' => array('type'=>'integer', 'null' => true, 'default' => NULL),
 			'model' => array('type'=>'string', 'null' => true, 'default' => NULL, 'length' => 128),
 			'duration' => array('type'=>'integer', 'null' => true, 'default' => '-1'),
 			'latitude' => array('type'=>'float', 'null' => true, 'default' => NULL),

@@ -25,7 +25,7 @@ class ImagesController extends AppController
 {
   var $components = array('RequestHandler', 'Search');
   var $uses = array('Media', 'Group', 'Tag', 'Category', 'Location');
-  var $helpers = array('form', 'formular', 'html', 'javascript', 'ajax', 'imageData', 'time', 'search', 'explorerMenu', 'rss', 'map', 'navigator', 'flowplayer');
+  var $helpers = array('form', 'formular', 'html', 'javascript', 'ajax', 'imageData', 'time', 'search', 'explorerMenu', 'rss', 'map', 'navigator', 'flowplayer', 'tab', 'number', 'option');
 
   function beforeFilter() {
     parent::beforeFilter();
@@ -103,9 +103,6 @@ class ImagesController extends AppController
         $this->data['Comment'] = am($comment['Comment'], $this->data['Comment']);
         //$this->data = am($this->Session->read('Comment.data'), $this->data);
         $this->Session->del('Comment.data');
-      }
-      if ($this->Media->isType($this->data, MEDIA_TYPE_VIDEO)) {
-        $this->render('video');
       }
     }
   }
