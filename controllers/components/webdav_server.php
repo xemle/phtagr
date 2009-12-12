@@ -50,7 +50,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
 
   var $controller = null;
 
-  var $components = array('FileManager');
+  var $components = array('FileManager', 'FilterManager');
 
   function WebdavServer() {
     $this->HTTP_WebDAV_Server();
@@ -62,6 +62,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
     $this->controller = &$controller;
     // set current controller URL
     $this->setDavRoot($controller->webroot.$controller->name);
+    $this->FilterManager->startup(&$controller);
   }
 
   /** Set a new filesystem root directory
@@ -516,7 +517,12 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
       return $this->GetDir($fspath, $options);
     }
  
-    // TODO synchronize file if neccessary
+    // Update metadata on dirty file
+    $file = $this->controller->MyFile->findByFilename($fspath);
+    if ($file && $this->controller->Media->hasFlag($file, MEDIA_FLAG_DIRTY)) {
+      $media = $this->controller->Media->findById($file['Media']['id']);
+      $this->FilterManager->write($media);
+    }
 
     // detect resource type
     $options['mimetype']=$this->_mimetype($fspath); 

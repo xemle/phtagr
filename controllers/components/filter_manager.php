@@ -46,6 +46,10 @@ class FilterManagerComponent extends Object {
       Logger::err("Could not find filter with name 'BaseFilter'");
       return false;
     }
+    if (!isset($controller->MyFile) || !isset($controller->Media)) {
+      Logger::err("Model MyFile and Media is not found");
+      return false;
+    }
     $this->MyFile =& $controller->MyFile;
     $this->Media =& $controller->Media;
     $this->loadFilter(array('ImageFilter', 'VideoFilter', 'GpsFilter'));
@@ -304,6 +308,10 @@ class FilterManagerComponent extends Object {
 
   /** Export database to file */
   function write(&$media) {
+    if (!count($media['File'])) {
+      Logger::warn("No files found for media {$media['Media']['id']}");
+      return false;
+    }
     foreach ($media['File'] as $file) {
       $file = $this->MyFile->findById($file['id']);
       $filename = $this->MyFile->getFilename($file);

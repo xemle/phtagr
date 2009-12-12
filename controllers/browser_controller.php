@@ -218,6 +218,13 @@ class BrowserController extends AppController
       $this->redirect(null, 404);
     }
     
+    // Update metadata on dirty file
+    $file = $this->MyFile->findByFilename($filename);
+    if ($file && $this->Media->hasFlag($file, MEDIA_FLAG_DIRTY)) {
+      $media = $this->Media->findById($file['Media']['id']);
+      $this->FilterManager->write($media);
+    }
+
     $options = $this->MyFile->getMediaViewOptions($filename);
     $options['download'] = true; 
     $this->set($options);

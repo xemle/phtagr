@@ -36,7 +36,7 @@ class MediaController extends AppController
                       OUTPUT_TYPE_HIGH => array('size' => OUTPUT_SIZE_HIGH, 'quality' => 90),
                       OUTPUT_TYPE_VIDEO => array('size' => OUTPUT_SIZE_VIDEO, 'bitrate' => OUTPUT_BITRATE_VIDEO)
                     );
-  var $components = array('ImageResizer', 'VideoPreview', 'FlashVideo', 'FileCache');
+  var $components = array('ImageResizer', 'VideoPreview', 'FlashVideo', 'FileCache', 'FilterManager');
 
   function beforeFilter() {
     // Reduce security level for this controller if required. Security level
@@ -255,6 +255,10 @@ class MediaController extends AppController
     if (!$this->Media->checkAccess(&$file, $user, ACL_READ_ORIGINAL, ACL_READ_MASK)) {
       Logger::warn("User {$user['User']['id']} has no previleges to access image ".$file['Media']['id']);
       $this->redirect(null, 404);
+    }
+    if ($this->Media->hasFlag($file, MEDIA_FLAG_DIRTY)) {
+      $media = $this->Media->findById($file['Media']['id']);
+      $this->FilterManager->write($media);
     }
     Logger::info("Request of media {$file['Media']['id']}: file $id '{$file['File']['file']}'");
     $filename = $this->MyFile->getFilename($file);  
