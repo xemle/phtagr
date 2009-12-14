@@ -52,8 +52,7 @@ foreach ($this->data as $media): ?>
 
 <div class="user">
 <?php
-  if ($this->action != 'user' ||
-    $this->params['pass'][0] != $session->read('User.username')) {
+  if ($search->getUser() != $session->read('User.username')) {
     echo "by ".$html->link($media['User']['username'], "/explorer/user/".$media['User']['username']);
   }
   $extra = array();
@@ -106,10 +105,7 @@ foreach ($this->data as $media): ?>
   }
   echo $tab->menu($items);
 
-  $url = '/'.$this->action.'/'.implode('/', $this->params['pass']);
-  foreach ($this->params['named'] as $key => $value) {
-    $url .= "/$key:$value";
-  }
+  $url = $search->serialize();
   echo $form->create(null, array('id' => 'explorer', 'action' => 'edit/'.$url));
 ?>
 <?php echo $tab->open(0, true); ?>

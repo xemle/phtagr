@@ -10,9 +10,9 @@
     $userId = $session->read('User.id');
     $role = $session->read('User.role');
     $myImages = false;
-    if ($controller == 'explorer' && 
-      $action == 'user' &&
-      $this->params['pass'][0] == $session->read('User.username')) {
+    if (isset($search) && 
+      ($controller == 'explorer' || $controller == 'images') && 
+      $search->getUser() == $session->read('User.username')) {
       $myImages = true;
     }
     $items[] = array(

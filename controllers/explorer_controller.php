@@ -441,7 +441,7 @@ class ExplorerController extends AppController
     foreach ($this->params['named'] as $key => $value) {
       $url .= "/$key:$value";
     }
-    $this->redirect($url);
+    $this->redirect('query/'.$url);
   }
 
   /** 

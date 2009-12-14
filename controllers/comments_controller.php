@@ -26,7 +26,7 @@ class CommentsController extends AppController
   var $name = 'Comments';
   var $uses = array('Comment', 'Media', 'Tag');
   var $helpers = array('html', 'time', 'text', 'Form', 'Rss', 'paginator');
-  var $components = array('Search', 'Captcha', 'Email');
+  var $components = array('Captcha', 'Email');
 
   var $paginate = array (
     'fields' => array ('Comment.id', 'Comment.name', 'Comment.date', 'Comment.text', 'Media.id', 'Media.name' ),
@@ -35,11 +35,16 @@ class CommentsController extends AppController
       'Comment.date' => 'desc'
     )
   );
+  var $namedArgs = '';
 
   function beforeFilter() {
     parent::beforeFilter();
 
-    $this->Search->parseArgs();
+    $params = array();
+    foreach ($this->params['named'] as $key => $value) {
+      $params[] = $key.':'.$value;
+    }
+    $this->namedArgs = implode('/', $params);
   }
 
   function index() {
@@ -58,7 +63,6 @@ class CommentsController extends AppController
   function add() {
     if (!empty($this->data) && isset($this->data['Media']['id'])) {
       $mediaId = intval($this->data['Media']['id']);
-      $url = $this->Search->getUri(false, false, false, array('baseUri' => '/images/view/'.$this->data['Media']['id'], 'defaults' => array('pos' => 1)));
       $user = $this->getUser();
       $userId = $this->getUserId();
       $role = $this->getUserRole();
@@ -79,7 +83,7 @@ class CommentsController extends AppController
         $this->Session->delete('captcha');
         $this->Session->write('Comment.data', $this->data);
         $this->Session->write('Comment.validationErrors', $this->Comment->validationErrors);
-        $this->redirect("/images/view/$mediaId/$url"); 
+        $this->redirect("/images/view/$mediaId/{$this->namedArgs}"); 
       }
       $this->Session->delete('captcha');
 
@@ -122,7 +126,7 @@ class CommentsController extends AppController
         $this->Session->write('Comment.data', $this->data);
         $this->Session->write('Comment.validationErrors', $this->Comment->validationErrors);
       }
-      $this->redirect("/images/view/$mediaId/$url");
+      $this->redirect("/images/view/$mediaId/{$this->namedArgs}");
     } else {
       $this->redirect("/explorer");
     }
@@ -239,8 +243,7 @@ class CommentsController extends AppController
       $this->Session->setFlash("Deny deletion of comment");
       Logger::warn("Deny deletion of comment");
     }
-    $url = $this->Search->getUri(false, false, false, array('baseUri' => '/images/view/'.$this->data['Media']['id'], 'defaults' => array('pos' => 1)));
-    $this->redirect("/images/view/".$comment['Media']['id']."/$url");
+    $this->redirect("/images/view/".$comment['Media']['id']."/{$this->namedArgs}");
   }
 
   function captcha() {

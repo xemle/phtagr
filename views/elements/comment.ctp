@@ -1,6 +1,6 @@
 <?php 
   $search->initialize();
-  $params = $search->getParams();
+  $searchParams = $search->serialize(false, false, false, array('defaults' => array('pos' => 1)));
 ?>
 <div class="comments">
 <?php if (count($this->data['Comment'])): ?>
@@ -19,7 +19,7 @@
 <span class="date"><?php echo $time->relativeTime($comment['date']); ?></span>
 <?php 
   if ($this->data['Media']['isOwner'] || $comment['user_id'] == $userId) {
-    echo $html->link('(delete)', '/comments/delete/'.$comment['id'].'/'.$params);
+    echo $html->link('(delete)', '/comments/delete/'.$comment['id'].'/'.$searchParams);
   }
 ?>:
 </div><!-- comment meta -->
@@ -32,7 +32,7 @@
 <?php endif; /* has comments */ ?>
 
 <h3>Add new Comment</h3>
-<?php echo $form->create('Comment', array('action' => 'add/'.$params)); ?>
+<?php echo $form->create('Comment', array('action' => 'add/'.$searchParams)); ?>
 <fieldset>
 <?php
   echo $form->hidden('Media.id', array('value' => $this->data['Media']['id']));

@@ -248,12 +248,6 @@ class SearchComponent extends Search
       $this->controller->Media->setAccessFlags(&$data[$i], $user);
     }
     
-    if ($this->getUser(false) != false) {
-      $username = $this->getUser();
-      $params['baseUri'] = '/explorer/user/'.$username;
-      $params['defaults']['user'] = $username;
-    }
-
     // Set data for search helper
     $this->controller->params['search'] = $params;
 
@@ -337,11 +331,6 @@ class SearchComponent extends Search
 
     $params['current'] = $id;
     $params['pos'] = $this->getPos(1);
-    if ($this->getUser(false) != false) {
-      $username = $this->getUser();
-      $params['baseUri'] = '/explorer/user/'.$username;
-      $params['defaults']['user'] = $username;
-    }
 
     // Set data for search helper
     $this->controller->params['search'] = $params;
