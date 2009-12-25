@@ -669,6 +669,8 @@ class ExplorerController extends AppController
   function points($north, $south, $west, $east) {
     $this->Search->setSort('random');
 
+    $this->data = array();
+
     $north = floatval($north);
     $south = floatval($south);
     $west = floatval($west);
@@ -677,6 +679,7 @@ class ExplorerController extends AppController
     $stepLat = ($north - $south) / 3;
     $stepLng = ($east - $west) / 3;
     $lat = $south;
+
     while ($lat < $north) {
       $lng = $west;
       while ($lng < $east) {
@@ -686,7 +689,9 @@ class ExplorerController extends AppController
         $this->Search->setEast($lng + $stepLng);
         $points = $this->Search->paginate();
         //Logger::trace("Found ".count($points)." points");
-        $this->data = am($points, $this->data);
+        if ($points) {
+          $this->data = am($points, $this->data);
+        }
         $lng += $stepLng;
       }
       $lat += $stepLat;
