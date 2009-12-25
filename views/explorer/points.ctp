@@ -1,7 +1,7 @@
 <markers>
 <?php foreach ($this->data as $media): ?>
   <marker id="<?php echo $media['Media']['id']; ?>" lat="<?php echo $media['Media']['latitude']; ?>" lng="<?php echo $media['Media']['longitude']; ?>" >
-    <name><?php echo $media['Media']['name']; ?></name>
+    <name><?php echo h($media['Media']['name']); ?></name>
     <icon><?php echo Router::url('/media/mini/'.$media['Media']['id'].'/'.$media['Media']['file'], true); ?></icon>
     <description><![CDATA[<h3><?php 
       echo $media['Media']['name']; 

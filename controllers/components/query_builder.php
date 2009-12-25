@@ -129,7 +129,7 @@ class QueryBuilderComponent extends Object
     @param data Parameter data
     @param skip Parameter list which are not evaluated and skiped
     @return exclusions parameter */
-  function _extractExclusions(&$data, $skip = array('sort')) {
+  function _extractExclusions(&$data, $skip = array('sort', 'north', 'south', 'west', 'east')) {
     $exclusions = array();
     if (!count($data)) {
       return $exclusions;
