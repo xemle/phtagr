@@ -435,6 +435,7 @@ class DATABASE_CONFIG
 
     if (!empty($this->data)) {
       $this->data['User']['role'] = ROLE_ADMIN;
+      $this->data['User']['quota'] = '100 MB';
       $this->User->create($this->data);
       if (empty($this->data['User']['confirm'])) {
         $this->User->invalidate('confirm', 'Password confirmation is missing');
@@ -518,9 +519,7 @@ class DATABASE_CONFIG
           Logger::err("Command for '$command': '$bin' is missing or not executeable!");
         }
       }
-      if (!count($missing)) {
-        $this->redirect('finish');
-      }
+      $this->redirect('finish');
     } else {
       foreach ($this->commands as $command) {
         $bin = $this->__findCommand($command);
@@ -537,8 +536,8 @@ class DATABASE_CONFIG
   }
   
   function finish() {
-    if (!$this->__hasCommands()) {
-      $this->redirect('system');
+    if (!$this->__hasSysOp()) {
+      $this->redirect('user');
     }
 
     $this->requireRole(ROLE_SYSOP);

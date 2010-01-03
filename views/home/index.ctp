@@ -5,7 +5,7 @@
     <div class="subcl">
       <h3>Random Media</h3>
       <?php 
-        if (isset($randomMedia)) {
+        if (count($randomMedia)) {
           $params = '/'.$search->serialize(array('sort' => 'random'));
           echo $imageData->mediaLink($randomMedia[0], array('type' => 'preview', 'size' => 340, 'div' => 'image', 'params' => $params));
           $link = $search->getUri(array('sort' => 'random'));
@@ -34,9 +34,12 @@
             $params = '/'.$search->serialize(array('sort' => 'newest', 'page' => $page, 'pos' => $pos), false, false, array('defaults' => array('pos' => 1)));
             $row[] = $imageData->mediaLink($newMedia[$keys[$i++]], array('type' => 'mini', 'div' => 'image', 'params' => $params));
           }
-          $cells[] = $row;
+          if (count($row)) {
+            $cells[] = $row;
+          }
         }
       ?> 
+      <?php if (count($cells)): ?>
       <table class="bare">
         <tbody>
           <?php echo $html->tableCells($cells); ?>
@@ -46,6 +49,7 @@
         $link = $search->getUri(array('sort' => 'newest'));
         echo "<p>See ".$html->link('all new media...', $link)."</p>";
       ?>
+      <?php endif; ?>
     </div>
   </div>
 </div><!-- subcolumns -->
