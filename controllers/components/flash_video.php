@@ -108,19 +108,21 @@ class FlashVideoComponent extends Object {
         Logger::info("Created flash video '$flashFilename' of '$src'");
       }
       
-      $bin = $this->controller->getOption('bin.flvtool2', 'flvtool2');
-      $command = "$bin -U ".escapeshellarg($flashFilename);
-      $output = array();
-      $result = -1;
-      $t1 = getMicrotime();
-      exec($command, &$output, &$result);
-      $t2 = getMicrotime();
-      Logger::debug("Command '$command' returnd $result and required ".round($t2-$t1, 4)."ms");
-      if ($result != 0) {
-        Logger::err("Command '$command' returned unexcpected $result");
-        $this->redirect(null, 500);
-      } else {
-        Logger::info("Updated flash video '$flashFilename' with meta tags");
+      $bin = $this->controller->getOption('bin.flvtool2');
+      if ($bin) {
+        $command = "$bin -U ".escapeshellarg($flashFilename);
+        $output = array();
+        $result = -1;
+        $t1 = getMicrotime();
+        exec($command, &$output, &$result);
+        $t2 = getMicrotime();
+        Logger::debug("Command '$command' returnd $result and required ".round($t2-$t1, 4)."ms");
+        if ($result != 0) {
+          Logger::err("Command '$command' returned unexcpected $result");
+          $this->redirect(null, 500);
+        } else {
+          Logger::info("Updated flash video '$flashFilename' with meta tags");
+        }
       }
     }
     if (!is_file($flashFilename)) { 
