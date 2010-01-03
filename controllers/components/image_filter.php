@@ -50,7 +50,13 @@ class ImageFilterComponent extends BaseFilterComponent {
   function read($file, &$media, $options = array()) {
     $options = am(array('noSave' => false), $options);
     $filename = $this->MyFile->getFilename($file);
-    $meta = $this->_readMetaData($filename);
+
+    if ($this->controller->getOption('bin.exiftool')) {
+      $meta = $this->_readMetaData($filename);
+    } else {
+      $meta = $this->_readMetaDataGetId3($filename);
+    }
+
     if ($meta === false) {
       return false;
     }
@@ -70,7 +76,11 @@ class ImageFilterComponent extends BaseFilterComponent {
       $isNew = true;
     };
 
-    $this->_extractImageData(&$media, $meta);
+    if ($this->controller->getOption('bin.exiftool')) {
+      $this->_extractImageData(&$media, $meta);
+    } else {
+      $this->_extractImageDataGetId3(&$media, $meta);
+    }
     if ($options['noSave']) {
       return 1;
     } elseif (!$this->Media->save($media)) {
@@ -121,6 +131,9 @@ class ImageFilterComponent extends BaseFilterComponent {
     * @param filename Filename to read 
     * @result Array of metadata or false on error */
   function _readMetaData($filename) {
+    if (!$this->controller->getOption('bin.exiftool')) {
+      return false;
+    }
     // read meta data
     $bin = $this->controller->getOption('bin.exiftool', 'exiftool');
     $command = "$bin -S -n ".escapeshellarg($filename);
@@ -145,6 +158,28 @@ class ImageFilterComponent extends BaseFilterComponent {
       $data[$name] = $value;
     }
     return $data;
+  }
+
+  /** Extracts the date of the file. It extracts the date of IPTC and EXIF.
+   * IPTC has the priority. 
+    @param data Meta data 
+    @return Date of the meta data or now if not data information was found */
+  function _extractMediaDateGetId3($data) {
+    // IPTC date
+    $dateIptc = $this->_extract($data, 'iptc/IPTCApplication/DateCreated/0', null);
+    if ($dateIptc) {
+      $dateIptc = substr($dateIptc, 0, 4).'-'.substr($dateIptc, 4, 2).'-'.substr($dateIptc, 6);
+      $time = $this->_extract($data, 'iptc/IPTCApplication/TimeCreated/0', null);
+      if ($time) {
+        $time = substr($time, 0, 2).':'.substr($time, 2, 2).':'.substr($time, 4);
+        $dateIptc .= ' '.$time;
+      } else {
+        $dateIptc .= ' 00:00:00';
+      }
+      return $dateIptc;
+    }
+    // No IPTC date: Extract Exif date or now
+    return $this->_extract($data, 'jpg/exif/EXIF/DateTimeOriginal', date('Y-m-d H:i:s', time()));
   }
 
   /** Extracts the date of the file. It extracts the date of IPTC and EXIF.
@@ -195,11 +230,14 @@ class ImageFilterComponent extends BaseFilterComponent {
     $latitudeRef = $this->_extract($data, 'GPSLatitudeRef', null);
     $longitude = $this->_extract($data, 'GPSLongitude', null);
     $longitudeRef = $this->_extract($data, 'GPSLongitudeRef', null);
+
     if ($latitude && $latitudeRef && $longitude && $longitudeRef) {
-      if ($latitudeRef == 'S')
+      if ($latitudeRef == 'S' && $latitude > 0) {
         $latitude *= -1;
-      if ($longitudeRef == 'W')
+      }
+      if ($longitudeRef == 'W' && $longitude > 0) {
         $longitude *= -1;
+      }
       $v['latitude'] = $latitude; 
       $v['longitude'] = $longitude; 
     }
@@ -229,6 +267,100 @@ class ImageFilterComponent extends BaseFilterComponent {
     return $media;
   }
 
+  function _compute($value) {
+    if ($value && preg_match('/(\d+)\/(\d+)/', $value, $m)) {
+      return ($m[1] / $m[2]);
+    } else {
+      return $value;
+    }
+  }
+
+  function _computeGps($values) {
+    if (!is_array($values) || count($values) < 3) {
+      return $values;
+    }
+
+    $d = $this->_compute($values[0]);
+    $m = $this->_compute($values[1]);
+    $s = $this->_compute($values[2]); 
+      
+    $v = floatVal($d + ($m / 60) + ($s / 3600));
+    return $v;
+  }
+
+  function _computeSutter($value) {
+    if (!$value) {
+      return $value;
+    }
+
+    $v = 1 / pow(2, $this->_compute($value));
+    return $v;
+  }
+
+  /** Extract the image data from the exif tool array and save it as Media
+   * @param data Data array from exif tool array 
+   * @return Array of the the image data array as image model data 
+   */
+  function _extractImageDataGetId3($media, $data) {
+    $user = $this->controller->getUser();
+
+    $v = &$media['Media'];
+
+    // Media information
+    $v['name'] = $this->_extract($data, 'filename');
+    // TODO Read IPTC date, than EXIF date
+    $v['date'] = $this->_extractMediaDateGetId3($data);
+    $v['width'] = $this->_extract($data, 'jpg/exif/COMPUTED/Width', 0);
+    $v['height'] = $this->_extract($data, 'jpg/exif/COMPUTED/Height', 0);
+    $v['duration'] = -1;
+    $v['orientation'] = $this->_extract($data, 'jpg/exif/IFD0/Orientation', 1);
+
+    $v['aperture'] = $this->_compute($this->_extract($data, 'jpg/exif/EXIF/ApertureValue', null));
+    $v['shutter'] = $this->_computeSutter($this->_extract($data, 'jpg/exif/EXIF/ShutterSpeedValue', null));
+    $v['model'] = $this->_extract($data, 'jpg/exif/IFD0/Model', null);
+    $v['iso'] = $this->_extract($data, 'jpg/exif/EXIF/ISOSpeedRatings', null);
+
+    // fetch GPS coordinates
+    $latitude = $this->_computeGps($this->_extract($data, 'jpg/exif/GPS/GPSLatitude', null));
+    $latitudeRef = $this->_extract($data, 'jpg/exif/GPS/GPSLatitudeRef', null);
+    $longitude = $this->_computeGps($this->_extract($data, 'jpg/exif/GPS/GPSLongitude', null));
+    $longitudeRef = $this->_extract($data, 'jpg/exif/GPS/GPSLongitudeRef', null);
+    if ($latitude && $latitudeRef && $longitude && $longitudeRef) {
+      if ($latitudeRef == 'S' && $latitude > 0) {
+        $latitude *= -1;
+      }
+      if ($longitudeRef == 'W' && $longitude > 0) {
+        $longitude *= -1;
+      }
+      $v['latitude'] = $latitude; 
+      $v['longitude'] = $longitude; 
+    }
+   
+    // Associations to meta data: Tags, Categories, Locations
+    $keywords = $this->_extract($data, 'iptc/IPTCApplication/Keywords', array());
+    $ids = $this->controller->Tag->createIdListFromText(implode(',', $keywords), 'name', true);
+    if (count($ids) > 0)
+      $media['Tag']['Tag'] = am($ids, set::extract($media, 'Tag.{n}.id'));
+    
+    $categories = $this->_extract($data, 'iptc/IPTCApplication/SupplementalCategories', array());
+    $ids = $this->controller->Category->createIdListFromText(implode(',', $categories), 'name', true);
+    if (count($ids) > 0)
+      $media['Category']['Category'] = am($ids, set::extract($media, 'Category.{n}.id'));
+  
+    // City, Sub-location, Province-State, Country-PrimaryLocationName
+    $items = array();
+    foreach ($this->locationMap as $type => $name) {
+      $value = $this->_extract($data, 'iptc/IPTCApplication/'.$name.'/0');
+      if ($value)
+        $items[] = array('name' => $value, 'type' => $type);
+    }
+    $ids = $this->controller->Location->createIdList($items, true);
+    if (count($ids) > 0)
+      $media['Location']['Location'] = am($ids,  set::extract($media, 'Location.{n}.id'));
+
+    return $media;
+  }
+
   /** Write the meta data to an image file 
    * @param file File model data
    * @param media Media model data
@@ -239,6 +371,10 @@ class ImageFilterComponent extends BaseFilterComponent {
       Logger::err("File or media is empty");
       return false;
     }
+    if (!$this->controller->getOption('bin.exiftool')) {
+      Logger::err("Exiftool is not defined. Abored writing of meta data");
+      return false;
+    } 
     $filename = $this->MyFile->getFilename($file);
     if (!file_exists($filename) || !is_writeable(dirname($filename)) || !is_writeable($filename)) {
       Logger::warn("File: $filename does not exists nor is readable");
@@ -343,19 +479,17 @@ class ImageFilterComponent extends BaseFilterComponent {
     $latitudeRef = $this->_extract($data, 'GPSLatitudeRef', null);
     $longitude = $this->_extract($data, 'GPSLongitude', null);
     $longitudeRef = $this->_extract($data, 'GPSLongitudeRef', null);
+
     if ($latitude && $latitudeRef && $longitude && $longitudeRef) {
-      if ($latitudeRef == 'S') {
+      if ($latitudeRef == 'S' && $latitude > 0) {
         $latitude *= -1;
       }
-      if ($longitudeRef == 'W') {
+      if ($longitudeRef == 'W' && $longitude > 0) {
         $longitude *= -1;
       }
-    } else {
-      $latitude = null;
-      $longitude = null;
     }
+
     $latitudeDb = $media['Media']['latitude'];
-    Logger::debug("$latitude || $latitude != $latitudeDb");
     if ($latitude != $latitudeDb) {
       if (!$latitudeDb) {
         $latitudeRef = '';
@@ -369,8 +503,7 @@ class ImageFilterComponent extends BaseFilterComponent {
       $args .= ' -GPSLatitude='.escapeshellarg($latitudeDb);
       $args .= ' -GPSLatitudeRef='.escapeshellarg($latitudeRef);
     }
-    $longitude = $this->_extract($data, 'GPSLongitude', null);
-    $longitudeRef = $this->_extract($data, 'GPSLongitudeRef', null);
+
     $longitudeDb = $media['Media']['longitude'];
     if ($longitude != $longitudeDb) {
       if (!$longitudeDb) {
@@ -387,7 +520,6 @@ class ImageFilterComponent extends BaseFilterComponent {
     }
     return $args;
   }
-
 
   /** Create arguments to export the metadata from the database to the file.
     * @param data metadata from the file (Exiftool information)
@@ -455,17 +587,22 @@ class ImageFilterComponent extends BaseFilterComponent {
   /** Search for an given hash values by a key. If the key does not exists,
    * return the default value
    * @param data Hash array
-   * @param key Key of the hash value
+   * @param key Path or key of the hash value
    * @param default Default Value which will be return, if the key does not
    *        exists. Default value is null.
    * @return The hash value or the default value, id hash key is not set */
   function _extract($data, $key, $default = null) {
-    if (isset($data) && isset($data[$key]))
-      return $data[$key];
-    else
-      return $default;
+    $paths = explode('/', trim($key, '/'));
+    $result =& $data;
+    foreach ($paths as $p) {
+      if (!isset($result[$p])) {
+        return $default;
+      }
+      $result =& $result[$p];
+    }
+    return $result;
   }
-  
+
   /** Generates a unique temporary filename
     * @param filename Current filename
     */
@@ -478,6 +615,24 @@ class ImageFilterComponent extends BaseFilterComponent {
       $count++;
     }
     return $tmp;
+  }
+  
+  function _readMetaDataGetId3($filename) {
+    App::import('vendor', 'getid3/getid3');
+    $getId3 = new getId3();
+    // disable not required modules
+    $getId3->option_tag_id3v1 = false;
+    $getId3->option_tag_id3v2 = false;
+    $getId3->option_tag_lyrics3 = false;
+    $getId3->option_tag_apetag = false;
+
+    $data = $getId3->analyze($filename);
+    if (isset($data['error'])) {
+      Logger::err("GetId3 analyzing error: {$data['error'][0]}");
+      Logger::debug($data);
+      return false;
+    }
+    return $data;
   }
 
 /*
