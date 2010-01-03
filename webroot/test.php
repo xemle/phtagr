@@ -62,6 +62,9 @@ ini_set('display_errors', 1);
 if (!include(CORE_PATH . 'cake' . DS . 'bootstrap.php')) {
 	trigger_error("Can't find CakePHP core.  Check the value of CAKE_CORE_INCLUDE_PATH in app/webroot/test.php.  It should point to the directory containing your " . DS . "cake core directory and your " . DS . "vendors root directory.", E_USER_ERROR);
 }
+if (function_exists('ini_set')) {
+	ini_set('include_path', PEAR . PATH_SEPARATOR . ini_get("include_path"));
+}
 
 $corePath = Configure::corePaths('cake');
 if (isset($corePath[0])) {
