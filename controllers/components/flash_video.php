@@ -87,7 +87,11 @@ class FlashVideoComponent extends Object {
     $flashFilename = $cache.$options['size'].'.flv';
 
     if (!file_exists($flashFilename)) {
-      $bin = $this->controller->getOption('bin.ffmpeg', 'ffmpeg');
+      $bin = $this->controller->getOption('bin.ffmpeg');
+      if (!$bin) {
+        Logger::warn("Path to external program ffmpeg is missing");
+        $this->controller->redirect(null, 500);
+      }
       list($width, $height) = $this->_scaleSize($media, $options['size']);
       $command = "$bin -i ".escapeshellarg($src)." -s {$width}x{$height} -r 15 -b {$options['bitrate']} -ar 22050 -ab 48 -y ".escapeshellarg($flashFilename);
       $output = array();

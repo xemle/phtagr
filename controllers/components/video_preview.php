@@ -83,7 +83,12 @@ class VideoPreviewComponent extends Object {
       Logger::err("Could not write video thumb. Path '".dirname($thumbFilename)."' is not writable");
       return false;
     }
-    $bin = $this->controller->getOption('bin.ffmpeg', 'ffmpeg');
+    $bin = $this->controller->getOption('bin.ffmpeg');
+    if (!$bin) {
+      Logger::info("FFmpeg is missing to create video preview. Use phtagrs dummy picture");
+      $dummy = APP.'webroot'.DS.'img'.DS.'dummy_video_preview.jpg';
+      return $dummy;
+    }
     $command = "$bin -i ".escapeshellarg($videoFilename)." -t 0.001 -f mjpeg -y ".escapeshellarg($thumbFilename);
     $output = array();
     $result = -1;

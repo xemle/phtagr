@@ -35,8 +35,13 @@ class VideoFilterComponent extends BaseFilterComponent {
   }
 
   function _getVideoExtensions() {
-    return array('avi', 'mov', 'mpeg', 'mpg', 'flv');
+    if ($this->controller->getOption('bin.ffmpeg')) {
+      return array('avi', 'mov', 'mpeg', 'mpg', 'flv');
+    } else {
+      return array('flv');
+    }
   }
+
   function getExtensions() {
     return am($this->_getVideoExtensions(), array('thm' => array('priority' => 5)));
   }
@@ -133,6 +138,31 @@ class VideoFilterComponent extends BaseFilterComponent {
 
     $data =& $media['Media'];
 
+    if ($this->controller->getOption('bin.ffmpeg')) {
+      $media = $this->_readFfmpeg(&$media, $filename);
+    } else {
+      $media = $this->_readGetId3(&$media, $filename);
+    }
+    if (!$media || !$this->Media->save($media)) {
+      Logger::err("Could not save media");
+      return -1;
+    } elseif ($isNew || !$this->MyFile->hasMedia($file)) {
+      $mediaId = $isNew ? $this->Media->getLastInsertID() : $data['id'];
+      if (!$this->MyFile->setMedia($file, $mediaId)) {
+        $this->Media->delete($mediaId);
+        return -1;
+      }
+    }
+
+    $this->MyFile->updateReaded($file);
+    $this->MyFile->setFlag($file, FILE_FLAG_DEPENDENT);
+
+    return 1;
+  }
+
+  function _readFfmpeg(&$media, $filename) {
+    $data =& $media['Media'];
+
     $bin = $this->controller->getOption('bin.ffmpeg', 'ffmpeg');
     $command = "$bin -i ".escapeshellarg($filename)." -t 0.0 2>&1";
     $output = array();
@@ -144,10 +174,10 @@ class VideoFilterComponent extends BaseFilterComponent {
     
     if ($result != 1) {
       Logger::err("Command '$command' returned unexcpected $result");
-      return -1;
+      return false;
     } elseif (!count($output)) {
       Logger::err("Command returned no output!");
-      return -1;
+      return false;
     } else {
       Logger::debug("Command '$command' returned $result");
       Logger::trace($output);
@@ -167,21 +197,30 @@ class VideoFilterComponent extends BaseFilterComponent {
         }
       }
     }
-    if (!$this->Media->save($media)) {
-      Logger::err("Could not save media");
-      return -1;
-    } elseif ($isNew || !$this->MyFile->hasMedia($file)) {
-      $mediaId = $isNew ? $this->Media->getLastInsertID() : $data['id'];
-      if (!$this->MyFile->setMedia($file, $mediaId)) {
-        $this->Media->delete($mediaId);
-        return -1;
-      }
+    return $media;
+  }
+
+  function _readGetId3(&$media, $filename) {
+    App::import('vendor', 'getid3/getid3');
+    $getId3 = new getId3();
+    // disable not required modules
+    $getId3->option_tag_id3v1 = false;
+    $getId3->option_tag_id3v2 = false;
+    $getId3->option_tag_lyrics3 = false;
+    $getId3->option_tag_apetag = false;
+
+    $data = $getId3->analyze($filename);
+    if (isset($data['error'])) {
+      Logger::err("GetId3 analyzing error: {$data['error'][0]}");
+      Logger::debug($data);
+      return false;
     }
 
-    $this->MyFile->updateReaded($file);
-    $this->MyFile->setFlag($file, FILE_FLAG_DEPENDENT);
-
-    return 1;
+    $media['Media']['duration'] = $data['meta']['onMetaData']['duration'];
+    $media['Media']['width'] = $data['meta']['onMetaData']['width'];
+    $media['Media']['height'] = $data['meta']['onMetaData']['height'];
+    
+    return $media;    
   }
 
   // Check for video thumb
