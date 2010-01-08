@@ -66,7 +66,7 @@
 	}
 	if (!defined('CORE_PATH')) {
 		 if (function_exists('ini_set')) {
-			  ini_set('include_path', CAKE_CORE_INCLUDE_PATH . PATH_SEPARATOR . ROOT . DS . APP_DIR . DS . PATH_SEPARATOR . ini_get('include_path'));
+			  ini_set('include_path', CAKE_CORE_INCLUDE_PATH . PATH_SEPARATOR . ROOT . DS . APP_DIR . DS . PATH_SEPARATOR . ROOT . DS . APP_DIR . DS . 'vendors' . DS . 'Pear' . PATH_SEPARATOR . ini_get('include_path'));
 			  define('APP_PATH', null);
 			  define('CORE_PATH', null);
 		 } else {
@@ -76,9 +76,6 @@
 	}
 	if (!include(CORE_PATH . 'cake' . DS . 'bootstrap.php')) {
 		trigger_error("Can't find CakePHP core.  Check the value of CAKE_CORE_INCLUDE_PATH in app/webroot/index.php.  It should point to the directory containing your " . DS . "cake core directory and your " . DS . "vendors root directory.", E_USER_ERROR);
-	}
-	if (function_exists('ini_set')) {
-		ini_set('include_path', PEAR . PATH_SEPARATOR . ini_get("include_path"));
 	}
 	if (isset($_GET['url']) && $_GET['url'] === 'favicon.ico') {
 		return;
