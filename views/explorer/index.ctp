@@ -52,7 +52,7 @@ foreach ($this->data as $media): ?>
 
 <div class="user">
 <?php
-  if ($search->getUser() != $session->read('User.username')) {
+  if (!$search->getUser() || $search->getUser() != $session->read('User.username')) {
     echo "by ".$html->link($media['User']['username'], "/explorer/user/".$media['User']['username']);
   }
   $extra = array();
