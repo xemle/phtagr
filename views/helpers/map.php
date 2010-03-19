@@ -26,8 +26,9 @@ class MapHelper extends AppHelper
 
   function loadScripts($mapKey) {
     $scripts = array(
-      Router::url('/js/pmap.js'),
-      'http://maps.google.com/maps?file=api&amp;v=2&amp;key='.htmlentities($mapKey));
+      'http://maps.google.com/maps?file=api&amp;v=2&amp;key='.htmlentities($mapKey),
+      Router::url('/js/pmap.js')
+      );
     $out = '';
     foreach ($scripts as $script) {
       $out .= "<script src=\"$script\" type=\"text/javascript\"></script>\n";
@@ -37,7 +38,7 @@ class MapHelper extends AppHelper
 
   function container() {
     return $this->output('<div id="mapbox" style="display: none;">
-    <div id="map"></div>
+    <div id="map" style="width: 100%; height: 350px;"></div>
     <div id="mapInfo">
       <a href="#" onclick="toggleVisibility(\'mapbox\')">Close Map</a>
     </div>
