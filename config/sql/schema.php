@@ -76,17 +76,7 @@ class PhtagrSchema extends CakeSchema {
 			'id' => array('type'=>'integer', 'null' => false, 'default' => NULL, 'key' => 'primary'),
 			'user_id' => array('type'=>'integer', 'null' => true, 'default' => NULL),
 			'name' => array('type'=>'string', 'null' => false, 'length' => 32),
-			'type' => array('type'=>'integer', 'null' => true, 'default' => '0', 'length' => 3),
-			'access' => array('type'=>'integer', 'null' => true, 'default' => '0', 'length' => 3),
-			'tagging' => array('type'=>'integer', 'null' => true, 'default' => '0', 'length' => 3),
-			'media_view' => array('type'=>'integer', 'null' => true, 'default' => '0', 'length' => 3),
-			'description' => array('type'=>'string', 'null' => false, 'length' => 256),
 			'indexes' => array('PRIMARY' => array('column' => 'id', 'unique' => 1), 'id' => array('column' => 'id', 'unique' => 0))
-		);
-	var $groups_media = array(
-			'media_id' => array('type'=>'integer', 'null' => false, 'default' => '0'),
-			'group_id' => array('type'=>'integer', 'null' => false, 'default' => '0'),
-			'indexes' => array('PRIMARY' => array('column' => array('media_id', 'group_id'), 'unique' => 1), 'mediaid' => array('column' => 'media_id', 'unique' => 0), 'groupid' => array('column' => 'group_id', 'unique' => 0))
 		);
 	var $groups_users = array(
 			'user_id' => array('type'=>'integer', 'null' => false, 'default' => '0'),

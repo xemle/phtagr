@@ -65,7 +65,6 @@ define('OUTPUT_SIZE_VIDEO', 480);
 // ffmpeg option fo '-b'. Size could be suffixed by k or m
 define('OUTPUT_BITRATE_VIDEO', '786k');
 
-// Deprecaded ACL constants
 // ACL constants
 // Reading bits are the three highest bits
 define("ACL_READ_MASK", 0xe0);
@@ -84,21 +83,6 @@ define("ACL_LEVEL_PRIVATE", 1);
 define("ACL_LEVEL_GROUP",   2);
 define("ACL_LEVEL_USER",  3);
 define("ACL_LEVEL_OTHER",  4);
-
-define("GROUP_TYPE_SYSTEM",   1);
-define("GROUP_TYPE_PUBLIC",   2);
-define("GROUP_TYPE_HIDDEN",   3);
-
-define("GROUP_ACCESS_MEMBER",     1);
-define("GROUP_ACCESS_REGISTERED", 2);
-define("GROUP_ACCESS_ANONYMOUS",  3);
-
-define("GROUP_TAGGING_READONLY",  1);
-define("GROUP_TAGGING_ONLYADD",   2);
-define("GROUP_TAGGING_FULL",      3);
-
-define("GROUP_MEDIAVIEW_VIEW", 1);
-define("GROUP_MEDIAVIEW_FULL", 2);
 
 define("COMMENT_AUTH_NONE",     0);
 define("COMMENT_AUTH_NAME",     1);

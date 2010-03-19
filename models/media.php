@@ -26,7 +26,8 @@ class Media extends AppModel
   var $name = 'Media';
 
   var $belongsTo = array(
-    'User' => array());
+    'User' => array(),
+    'Group' => array());
   
   var $hasMany = array(
     'Comment' => array('dependent' => true),
@@ -35,9 +36,13 @@ class Media extends AppModel
   var $hasAndBelongsToMany = array(
     'Tag' => array(),
     'Category' => array(),
-    'Location' => array('order' => 'Location.type'),
-    'Group' => array());
+    'Location' => array('order' => 'Location.type'));
   
+  var $_aclMap = array(
+    ACL_LEVEL_GROUP => 'gacl',
+    ACL_LEVEL_USER => 'uacl',
+    ACL_LEVEL_OTHER => 'oacl');
+
   var $actsAs = array('Type', 'Flag', 'Cache', 'Exclude');
 
   function beforeDelete($cascade = true) {
