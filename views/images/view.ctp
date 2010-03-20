@@ -11,9 +11,8 @@ echo $navigator->prevMedia().' '.$navigator->up().' '.$navigator->nextMedia();
 <?php
   $withMap = false;
   if (isset($this->data['Media']['longitude']) && isset($this->data['Media']['latitude']) &&
-    isset($mapKey)) {
+    $map->hasApi()) {
     $withMap = true;
-    echo $map->loadScripts($mapKey);
     echo $map->script();
   }
 ?>

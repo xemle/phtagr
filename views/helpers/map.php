@@ -22,45 +22,63 @@
  */
 class MapHelper extends AppHelper
 {
-  var $helpers = array("Javascript");
+  var $helpers = array("Html", "Javascript", "Search", "Option");
 
-  function loadScripts($mapKey) {
-    $scripts = array(
-      'http://maps.google.com/maps?file=api&amp;v=2&amp;key='.htmlentities($mapKey),
-      Router::url('/js/pmap.js')
-      );
-    $out = '';
-    foreach ($scripts as $script) {
-      $out .= "<script src=\"$script\" type=\"text/javascript\"></script>\n";
-    }
-    return $this->output($out);
+  var $googleMapApiUrl = 'http://maps.google.com/maps?file=api&amp;v=2&amp;key=';
+
+  function initialize() {
+    $this->Search->initialize();
+  }
+
+  function hasApi() {
+    return ($this->Option->get('google.map.key') != false);
   }
 
   function container() {
     return $this->output('<div id="mapbox" style="display: none;">
-    <div id="map" style="width: 100%; height: 350px;"></div>
-    <div id="mapInfo">
-      <a href="#" onclick="toggleVisibility(\'mapbox\')">Close Map</a>
+    <div id="map" style="width: 100%; height: 250px;"></div>
+    <div id="mapStatusLine">
+      <div id="mapInfo">
+      </div>
+      <div id="mapSearch">
+        <label for="mapSearch">Goto:</label>
+        <input type="text" id="mapSearch" size="32" onkeydown="if ((event.which && event.which == 13) || (event.keyCode && event.keyCode == 13)) { map.showAddress(this.value); return false; } else { return true; }"/>
+      </div>
+      <div id="mapActions">
+        <a href="#" onclick="toggleVisibility(\'mapbox\')">Close Map</a>
+      </div>
     </div>
     </div>
     ');
   }
 
   function script() {
-    $out = "
+    if (!$this->hasApi()) {
+      return $this->output();
+    }
+
+    $out = $this->Javascript->link($this->googleMapApiUrl . h($this->Option->get('google.map.key')), true);
+    $out .= $this->Javascript->link('/js/pmap.js', true);
+
+    $code = "
 var map = null;
 var showMap = function(id, latitude, longitude) {
   toggleVisibility('mapbox');
 
   if (undefined == map) {
-    var options = { url: '".Router::url('/explorer/points')."' };
+
+    var options = { 
+      url: '" . Router::url('/explorer/points/' . $this->Search->serialize(), true) . "' 
+      };
+
     map = new PMap(latitude, longitude, options);
     map.setMediaMarker(id, latitude, longitude);
     map.updateInfo();
     map.updateMarkers();
   }
 };";
-    return $this->output($this->Javascript->codeBlock($out));
+    $out .= $this->Javascript->codeBlock($code);
+    return $this->output($out);
   }
 }
 

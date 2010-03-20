@@ -40,6 +40,7 @@ function PMap(latitude, longitude, options) {
   this.resizeControl = null;
   this._updatingMarkers = false;
   this._continueUpdateMarkers = false;
+  this.geocoder = false;
 
   options = options || {};
   var domId = 'map';
@@ -206,6 +207,34 @@ PMap.prototype.updateInfo = function() {
   text = text + "," + this.gmap.getCenter().lng().toFixed(4);
   text = text + " ";
   e.firstChild.nodeValue = text;
+}
+
+PMap.prototype.showAddress = function(address) {
+  var that = this;
+  if (!this.geocoder) {
+    this.geocoder = new GClientGeocoder();
+  }
+  this.geocoder.getLocations(
+    address,
+    function(response) {
+      if (!response || response.Status.code != 200) {
+        alert("\"" + address + "\" not found");
+      } else {
+        place = response.Placemark[0];
+        point = new GLatLng(place.Point.coordinates[1],
+                            place.Point.coordinates[0]);
+        var accuracy = place.AddressDetails.Accuracy;
+        var zoom = 1;
+        if (accuracy <= 1) { zoom = 4; } // country
+        else if (accuracy <= 3) { zoom = 6; } // sub-region
+        else if (accuracy <= 4) { zoom = 12; } // town 
+        else if (accuracy <= 5) { zoom = 14; } // postcode
+        else { zoom = 16; } // intersection
+        that.gmap.setCenter(point, zoom);
+        that.updateMarkers();
+      }
+    }
+  );
 }
 
 /** PContextMenu bases on http://www.ajaxlines.com/ajax/stuff/article/context_menu_in_google_maps_api.php */
