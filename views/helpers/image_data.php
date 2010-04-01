@@ -108,15 +108,14 @@ class ImageDataHelper extends AppHelper {
     return $result;
   }
   
-  /** Creates an media image with the link
+  /** Creates an media source as HTML img tag
     @param media Media model data
     @param options Media size or option array. Options are
       type - Type of the media. String values: 'mini', 'thumb', 'preview', 'original'
       size - Size of the media - optional.
       param - Extra url parameter 
-      div - Wrapped div arround the link with the class given in the div options
     @return HTML link with media image */
-  function mediaLink($media, $options = array()) {
+  function mediaImage($media, $options) {
     if (!isset($media['Media']['id'])) {
       Logger::err("Media id is not set");
       return false;
@@ -124,7 +123,7 @@ class ImageDataHelper extends AppHelper {
     if (!is_array($options)) {
       $options = array('type' => $options);
     }
-    $options = am(array('type' => 'thumb', 'params' => false, 'size' => false, 'div' => false), $options);
+    $options = am(array('type' => 'thumb', 'size' => false), $options);
 
     if (!in_array($options['type'], array('mini', 'thumb', 'preview', 'original'))) {
       Logger::err("Wrong media type {$options['type']}");
@@ -136,14 +135,40 @@ class ImageDataHelper extends AppHelper {
 
     $imgSrc = Router::url("/media/{$options['type']}/{$media['Media']['id']}");
     $size = $this->getimagesize($media, $options['size']);
-    $alt = $this->Sanitize->html($media['Media']['name'], true);
-    $img = "<img src=\"$imgSrc\" {$size[3]} alt=\"$alt\" title=\"$alt\" />";
+    $alt = h($media['Media']['name']);
+
+    $out = "<img src=\"$imgSrc\" {$size[3]} alt=\"$alt\" title=\"$alt\" />";
+    return $this->output($out);
+  }
+
+  /** Creates an media image with the link
+    @param media Media model data
+    @param options Media size or option array. Options are
+      type - Type of the media. String values: 'mini', 'thumb', 'preview', 'original'
+      size - Size of the media - optional.
+      param - Extra url parameter 
+      div - Wrapped div arround the link with the class given in the div options
+      before - (Optional) Text before image link
+      after - (Optional) Text after image link
+    @return HTML link with media image */
+  function mediaLink($media, $options = array()) {
+    if (!isset($media['Media']['id'])) {
+      Logger::err("Media id is not set");
+      return false;
+    }
+
+    $img = $this->mediaImage(&$media, $options);
+
+    $options = am(array('div' => false, 'params' => false, 'before' => '', 'after' => ''), $options);
+
     $link = "/images/view/{$media['Media']['id']}";
     if ($options['params']) {
       $link .= $options['params'];
     }
 
     $out = $this->Html->link($img, $link, false, false, false);
+    $out = $options['before'] . $out . $options['after'];
+
     if ($options['div']) {
       $out = '<div class="'.$options['div'].'">'.$out.'</div>';
     }
@@ -159,10 +184,14 @@ class ImageDataHelper extends AppHelper {
     @return Link of the date search */
   function getDateLink(&$media, $option = false) {
     $date = $media['Media']['date'];
+    $user = array();
+    if ($this->Search->getUser()) {
+      $user['user'] = $this->Search->getUser();
+    }
     if ($option == 'from') {
-      return $this->Search->getUri(array('from' => $date, 'sort' => '-date'));
+      return $this->Search->getUri(array('from' => $date, 'sort' => '-date'), $user);
     } elseif ($option == 'to') {
-      return $this->Search->getUri(array('to' => $date, 'sort' => 'date'));
+      return $this->Search->getUri(array('to' => $date, 'sort' => 'date'), $user);
     } elseif (preg_match('/^(\d+(.\d+)?)([hdm])$/', $option, $matches)) {
       $offset = $matches[1].$matches[2];
       switch ($matches[3]) {
@@ -184,7 +213,7 @@ class ImageDataHelper extends AppHelper {
 
     $from = date('Y-m-d H:i:s', strtotime($date) - $offset);
     $to = date('Y-m-d H:i:s', strtotime($date) + $offset);
-    return $this->Search->getUri(array('from' => $from, 'to' => $to));
+    return $this->Search->getUri(array('from' => $from, 'to' => $to), $user);
   }
 
   /** Returns an single icon of a acl */
