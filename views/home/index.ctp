@@ -6,8 +6,13 @@
       <h3>Random Media</h3>
       <?php 
         if (count($randomMedia)) {
+          $media = $randomMedia[0];
           $params = '/'.$search->serialize(array('sort' => 'random'));
-          echo $imageData->mediaLink($randomMedia[0], array('type' => 'preview', 'size' => 340, 'div' => 'image', 'params' => $params));
+
+          $cite = "<cite>" . h($media['Media']['name']) . " by " . $html->link($media['User']['username'], '/explorer/user/' . $media['User']['username']) . "</cite>";
+
+          echo $imageData->mediaLink($media, array('type' => 'preview', 'size' => 340, 'div' => 'image', 'params' => $params, 'after' => $cite));
+
           $link = $search->getUri(array('sort' => 'random'));
           echo "<p>See more ".$html->link('random media...', $link)."</p>";
         } 
