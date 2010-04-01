@@ -85,12 +85,13 @@
 <div id="footer">
 <?php echo View::element('footer'); ?>
 </div><!-- footer -->
-
 </div><!-- page -->
+
 <div id="border-bottom">
   <div id="edge-bl"></div>
   <div id="edge-br"></div>
 </div>
 </div><!-- page margins -->
+<?php echo $cakeDebug; ?> 
 </body>
 </html>
