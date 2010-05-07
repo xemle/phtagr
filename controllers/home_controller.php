@@ -31,22 +31,23 @@ class HomeController extends AppController
 
   /** Check database configuration and connection. If missing redirect to 
    * the setup. */
-	function beforeFilter() {
-		if (!file_exists(CONFIGS . 'database.php')) {
-			$this->redirect('/setup');
+  function beforeFilter() {
+    if (!file_exists(CONFIGS . 'database.php')) {
+      $this->redirect('/setup');
     }
 
-		App::import('Core', 'ConnectionManager');
-		$db =& ConnectionManager::getDataSource('default');
+    App::import('Core', 'ConnectionManager');
+    $db =& ConnectionManager::getDataSource('default');
     if (empty($db->connection)) {
-			$this->redirect('/setup');
+      $this->redirect('/setup');
     }
-    parent::beforeFilter();
-		
-		// Database connection is OK. Load components and models
-		$this->uses = array('Media', 'Tag', 'Category', 'Comment');
+    
+    // Database connection is OK. Load components and models
+    $this->uses = array('Media', 'Tag', 'Category', 'Comment');
     $this->constructClasses();
-	  $this->pageTitle = __("Home", true);
+    $this->pageTitle = __("Home", true);
+
+    parent::beforeFilter();
   }
 
   /** @todo improve the randomized newest media */
