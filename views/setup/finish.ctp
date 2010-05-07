@@ -1,7 +1,7 @@
-<h1>Setup Complete</h1>
+<h1><?php __("Setup Complete"); ?></h1>
 
 <div class="info">
-Congratulations! Your configuration of phTagr is completed. Have fun using phTagr!
+<?php __("Congratulations! Your configuration of phTagr is completed. Have fun using phTagr!"); ?>
 </div>
 
-<p><?php echo $html->link('Click here', '/'); ?> to start phTagr.</p>
+<p><?php printf(__("Click %s to start phTagr.", true), $html->link(__('here', true), '/')); ?></p>

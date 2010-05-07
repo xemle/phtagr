@@ -2,9 +2,9 @@
 /*
  * phtagr.
  * 
- * Multi-user image gallery.
+ * social photo gallery for your community.
  * 
- * Copyright (C) 2006-2009 Sebastian Felis, sebastian@phtagr.org
+ * Copyright (C) 2006-2010 Sebastian Felis, sebastian@phtagr.org
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -57,7 +57,7 @@ class OptionsController extends AppController {
       $this->_set($userId, 'acl.read.original', $this->data);
       $this->_set($userId, 'acl.read.preview', $this->data);
 
-      $this->Session->setFlash("Settings saved");
+      $this->Session->setFlash(__("Settings saved", true));
     }
     $tree = $this->Option->getTree($userId);
     $this->Option->addDefaultAclTree(&$tree);
@@ -70,7 +70,7 @@ class OptionsController extends AppController {
     } else {
       $groups = array();
     }
-    $groups[-1] = '[No Group]';
+    $groups[-1] = __('[No Group]', true);
     $this->set('groups', $groups);
   }
 
@@ -83,10 +83,10 @@ class OptionsController extends AppController {
       Logger::debug($this->data);
       if (!$this->User->save($this->data, true, array('firstname', 'lastname', 'password', 'email'))) {
         Logger::err("Could not update user profile");
-        $this->Session->setFlash("Could not save profile!");
+        $this->Session->setFlash(__("Could not save profile!", true));
       } else {
         Logger::info("User $userId profile updated");
-        $this->Session->setFlash("Profile saved");
+        $this->Session->setFlash(__("Profile saved", true));
       }
     }
     $this->data = $this->User->findById($userId);
@@ -112,12 +112,12 @@ class OptionsController extends AppController {
   function getMenuItems() {
     $items = array();
     if ($this->hasRole(ROLE_USER)) {
-      $items[] = array('text' => 'Profile', 'link' => '/options/profile');
-      $items[] = array('text' => 'Guest Accounts', 'link' => '/guests');
-      $items[] = array('text' => 'Groups', 'link' => '/groups');
+      $items[] = array('text' => __('Profile', true), 'link' => '/options/profile');
+      $items[] = array('text' => __('Guest Accounts', true), 'link' => '/guests');
+      $items[] = array('text' => __('Groups', true), 'link' => '/groups');
     }
-    $items[] = array('text' => 'Access Rights', 'link' => '/options/acl');
-    $items[] = array('text' => 'RSS', 'link' => '/options/rss');
+    $items[] = array('text' => __('Access Rights', true), 'link' => '/options/acl');
+    $items[] = array('text' => __('RSS', true), 'link' => '/options/rss');
     return $items;
   }
 

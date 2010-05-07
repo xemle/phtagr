@@ -1,4 +1,5 @@
-<h1>Browser</h1>
+<h1><?php __("Browser"); ?></h1>
+
 <?php $session->flash(); ?>
 
-View folder <?php echo $html->link($path, "index/$path"); ?>
+<p><?php printf(__("View folder %s", true), $html->link($path, "index/$path")); ?></p>

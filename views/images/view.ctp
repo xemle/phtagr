@@ -29,7 +29,7 @@ echo $navigator->prevMedia().' '.$navigator->up().' '.$navigator->nextMedia();
 </div>
 
 <?php
-  $items = array(array('name' => "General", 'active' => true), "Media Details");
+  $items = array(array('name' => __("General", true), 'active' => true), __("Media Details", true));
   echo $tab->menu($items);
 ?>
 <?php echo $tab->open(0, true); ?>
@@ -47,34 +47,34 @@ echo $navigator->prevMedia().' '.$navigator->up().' '.$navigator->nextMedia();
 <table class="bare"> 
 <?php 
   $cells = array();
-  $cells[] = array("User:", $html->link($this->data['User']['username'], '/explorer/user/'.$this->data['User']['username']));
+  $cells[] = array(__("User", true), $html->link($this->data['User']['username'], '/explorer/user/'.$this->data['User']['username']));
   if ($this->data['Media']['isOwner']) {
     $files = array();
     foreach ($this->data['File'] as $file) {
       $link = $imageData->getPathLink($file);
       $files[] = $html->link($file['file'], $link).' ('.$number->toReadableSize($file['size']).')';
     }
-    $cells[] = array("File(s):", implode(', ', $files));
+    $cells[] = array(__("File(s)", true), implode(', ', $files));
   }
-  $cells[] = array("View Count:", $this->data['Media']['clicks']);
-  $cells[] = array("Created:", $time->relativeTime($this->data['Media']['created']));
-  $cells[] = array("Last modified:", $time->relativeTime($this->data['Media']['modified']));
-  $cells[] = array("Size:", $this->data['Media']['width'].'px * '.$this->data['Media']['height'].'px');
+  $cells[] = array(__("View Count", true), $this->data['Media']['clicks']);
+  $cells[] = array(__("Created", true), $time->relativeTime($this->data['Media']['created']));
+  $cells[] = array(__("Last modified", true), $time->relativeTime($this->data['Media']['modified']));
+  $cells[] = array(__("Size", true), $this->data['Media']['width'].'px * '.$this->data['Media']['height'].'px');
 
   if ($this->data['Media']['model']) {
-    $cells[] = array("Model:", $this->data['Media']['model']);
+    $cells[] = array(__("Model", true), $this->data['Media']['model']);
   }
   if ($this->data['Media']['duration'] > 0) {
-    $cells[] = array("Duration:", $this->data['Media']['duration'].'s');
+    $cells[] = array(__("Duration", true), $this->data['Media']['duration'].'s');
   } else {
     if ($this->data['Media']['aperture'] > 0) {
-      $cells[] = array("Aperture:", $this->data['Media']['aperture']);
+      $cells[] = array(__("Aperture", true), $this->data['Media']['aperture']);
     }
     if ($this->data['Media']['shutter'] > 0) {
-      $cells[] = array("Shutter:", $imageData->niceShutter($this->data['Media']['shutter']));
+      $cells[] = array(__("Shutter", true), $imageData->niceShutter($this->data['Media']['shutter']));
     }
     if ($this->data['Media']['iso'] > 0) {
-      $cells[] = array("ISO:", $this->data['Media']['iso']);
+      $cells[] = array(__("ISO", true), $this->data['Media']['iso']);
     }
   }
   echo $html->tableCells($cells);

@@ -1,14 +1,13 @@
+<h1><?php __('New Group'); ?></h1>
+
 <?php $session->flash(); ?>
 
 <?php echo $form->create(null, array('action' => 'add')); ?>
 
-<fieldset><legend>Create new group</legend>
-<table class="formular">
+<fieldset><legend><?php __('Create new group'); ?></legend>
 <?php
-  echo $form->input('Group.name');
+  echo $form->input('Group.name', array('label' => __('Name', true)));
 ?>
-</table>
-
 </fieldset>
-<?php echo $form->submit('Create'); ?>
-</form>
+
+<?php echo $form->end(__('Create', true)); ?>

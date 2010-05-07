@@ -1,22 +1,21 @@
-<h1>Profile</h1>
+<h1><?php __('Profile'); ?></h1>
 
 <?php $session->flash(); ?>
 
 <?php echo $form->create(null, array('action' => 'profile')); ?>
-<fieldset><legend>General</legend>
+<fieldset><legend><?php __('General'); ?></legend>
 <?php
-  echo $form->input('User.username');
-  echo $form->input('User.firstname');
-  echo $form->input('User.lastname');
-  echo $form->input('User.email');
+  echo $form->input('User.username', array('label' => __('Username', true)));
+  echo $form->input('User.firstname', array('label' => __('First name', true)));
+  echo $form->input('User.lastname', array('label' => __('Last name', true)));
+  echo $form->input('User.email', array('label' => __('Email', true)));
 ?>
 </fieldset>
 
-<fieldset><legend>Password</legend>
+<fieldset><legend><?php __('Password'); ?></legend>
 <?php
-  echo $form->input('User.password');
-  echo $form->input('User.confirm', array('type' => 'password'));
+  echo $form->input('User.password', array('label' => __('Password', true)));
+  echo $form->input('User.confirm', array('type' => 'password', 'label' => __('Confirm', true)));
 ?>
 </fieldset>
-<?php echo $form->submit('Save'); ?>
-<?php echo $form->end(); ?>
+<?php echo $form->end(__('Save', true)); ?>

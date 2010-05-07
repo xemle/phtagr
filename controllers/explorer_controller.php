@@ -2,9 +2,9 @@
 /*
  * phtagr.
  * 
- * Multi-user image gallery.
+ * social photo gallery for your community.
  * 
- * Copyright (C) 2006-2009 Sebastian Felis, sebastian@phtagr.org
+ * Copyright (C) 2006-2010 Sebastian Felis, sebastian@phtagr.org
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -48,8 +48,8 @@ class ExplorerController extends AppController
         if ($groups) {
           $groups = Set::combine($groups, "{n}.Group.id", "{n}.Group.name");
         }
-        $groups[0] = '[Keep]';
-        $groups[-1] = '[No Group]';
+        $groups[0] = __('[Keep]', true);
+        $groups[-1] = __('[No Group]', true);
         $this->set('groups', $groups);
       }
 

@@ -2,9 +2,9 @@
 /*
  * phtagr.
  * 
- * Multi-user image gallery.
+ * social photo gallery for your community.
  * 
- * Copyright (C) 2006-2009 Sebastian Felis, sebastian@phtagr.org
+ * Copyright (C) 2006-2010 Sebastian Felis, sebastian@phtagr.org
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -61,32 +61,32 @@ class GuestsController extends AppController {
       $this->data['Guest']['creator_id'] = $userId;
       $this->data['Guest']['role'] = ROLE_GUEST;
       if ($this->Guest->hasAny(array("Guest.username" => $this->data['Guest']['username']))) {
-        $this->Session->setFlash("Sorry. Username is already taken");
+        $this->Session->setFlash(__("Sorry. Username is already taken", true));
       } elseif ($this->Guest->save($this->data, true, array('username', 'password', 'role', 'creator_id', 'email', 'quota'))) {
         $guestId = $this->Guest->getLastInsertID();
         $guest = $this->Guest->findById($guestId);
         $user = $this->getUser();
         Logger::info("User '{$user['User']['username']}' ({$user['User']['id']}) created a guest account '{$guest['Guest']['username']}' ({$guest['Guest']['id']})");
-        $this->Session->setFlash("Guest account '{$this->data['Guest']['username']}' was successfully created");
+        $this->Session->setFlash(sprintf(__("Guest account '%s' was successfully created", true), $this->data['Guest']['username']));
         $this->redirect("edit/$guestId");
       } else {
-        $this->Session->setFlash("Sorry. Guest account '{$this->data['Guest']['username']}' could not created");
+        $this->Session->setFlash(__("Sorry. Guest account could not created"));
       }
     }
   }
 
   function _addGuestMenu($guest) {
     $this->menuItems[] = array(
-      'text' => 'Guest '.$guest['Guest']['username'], 
+      'text' => sprintf(__('Guest: %s', true), $guest['Guest']['username']), 
       'type' => 'text', 
       'submenu' => array(
         'items' => array(
           array(
-            'text' => 'Edit', 
+            'text' => __('Edit', true), 
             'link' => 'edit/'.$guest['Guest']['id']
             ),
           array(
-            'text' => 'Links', 
+            'text' => __('Links', true), 
             'link' => 'links/'.$guest['Guest']['id']
             )
           )
@@ -99,7 +99,8 @@ class GuestsController extends AppController {
     $userId = $this->getUserId();
     
     if (!$this->Guest->hasAny(array('id' => $guestId, 'creator_id' => $userId))) {
-      $this->Session->setFlash("Sorry. Could not find requested guest '$guestId' of user '$userId'");
+      $this->Session->setFlash(__("Sorry. Could not find requested guest"));
+      Logger::debug("Sorry. Could not find requested guest '$guestId' of user '$userId'");
       $this->redirect("index");
     }
 
@@ -107,13 +108,13 @@ class GuestsController extends AppController {
       $this->Guest->id = $guestId;
       $this->Guest->set($this->data);
       if ($this->Guest->save(null, true, array('username', 'password', 'email', 'expires', 'quota'))) {
-        $this->Session->setFlash("Guest was saved");
+        $this->Session->setFlash(__("Guest data were saved"));
         $auth = max(0, min(3, $this->data['Comment']['auth']));
         $this->Option->setValue('comment.auth', $auth, $guestId);
       } else {
         Logger::err("Could not save guest");
         Logger::trace($this->Guest->validationErrors);
-        $this->Session->setFlash("Guest could not be saved!");
+        $this->Session->setFlash(__("Updates could not be saved!"));
       }
     }
     $this->data = $this->Guest->findById($guestId);
@@ -129,11 +130,11 @@ class GuestsController extends AppController {
     $userId = $this->getUserId();
     $guest = $this->Guest->find(array('Guest.id' => $guestId, 'Creator.id' => $userId));
     if (!$guest) {
-      $this->Session->setFlash("Could not find requested guest for deletion");
+      $this->Session->setFlash(__("Could not find requested guest"));
     } else {
       $user = $this->getUser();
       Logger::info("User '{$user['User']['username']}' ({$user['User']['id']}) deleted guest account '{$guest['Guest']['username']}' ({$guest['Guest']['id']})");
-      $this->Session->setFlash("Guest account '{$guest['Guest']['username']}' deleted!");
+      $this->Session->setFlash(sprintf(__("Guest account '%s' deleted!", true), $guest['Guest']['username']));
       $this->Guest->delete($guestId);
     }
     $this->redirect("index");

@@ -2,9 +2,9 @@
 /*
  * phtagr.
  * 
- * Multi-user image gallery.
+ * social photo gallery for your community.
  * 
- * Copyright (C) 2006-2009 Sebastian Felis, sebastian@phtagr.org
+ * Copyright (C) 2006-2010 Sebastian Felis, sebastian@phtagr.org
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -46,6 +46,8 @@ class BrowserController extends AppController
         $this->_addFsRoot($root);
       }
     }
+
+    $this->pageTitle = __('My Files', true);
   }
 
   function beforeRender() {
@@ -55,14 +57,14 @@ class BrowserController extends AppController
 
   function _setMenu() {
     $items = array();
-    $items[] = array('text' => 'Import Files', 'link' => 'index', 'type' => ($this->action=='index'?'active':false));
+    $items[] = array('text' => __('Import Files', true), 'link' => 'index', 'type' => ($this->action=='index'?'active':false));
     if (count($this->_fsRoots) > 1) {
-      $items[] = array('text' => 'Upload', 'link' => 'upload/files');
+      $items[] = array('text' => __('Upload', true), 'link' => 'upload/files');
     } else {
-      $items[] = array('text' => 'Upload', 'link' => 'upload');
+      $items[] = array('text' => __('Upload', true), 'link' => 'upload');
     }
-    $items[] = array('text' => 'Synchronize', 'link' => 'sync');
-    $items[] = array('text' => 'Overview', 'link' => 'view');
+    $items[] = array('text' => __('Synchronize', true), 'link' => 'sync');
+    $items[] = array('text' => __('Overview', true), 'link' => 'view');
     $menu = array('items' => $items);
     $this->set('mainMenu', $menu);
   }

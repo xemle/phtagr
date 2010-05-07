@@ -1,16 +1,16 @@
-<h1>Guest Creation</h1>
+<h1><?php __('Guest Creation'); ?></h1>
 
 <?php $session->flash(); ?>
 
 <?php echo $form->create('Guest', array('action' => 'add')); ?>
 
-<fieldset><legend>Create new guest account</legend>
+<fieldset><legend><?php __('Create new guest account'); ?></legend>
 <?php
-  echo $form->input('Guest.username');
-  echo $form->input('Guest.email');
-  echo $form->input('Guest.password');
-  echo $form->input('Guest.confirm', array('type' => 'password'));
+  echo $form->input('Guest.username', array('label' => __('Username', true)));
+  echo $form->input('Guest.email', array('label' => __('Email', true)));
+  echo $form->input('Guest.password', array('label' => __('Password', true)));
+  echo $form->input('Guest.confirm', array('type' => 'password', 'label' => __('Confirm', true)));
 ?>
 </fieldset>
-<?php echo $form->submit('Create'); ?>
+<?php echo $form->submit(__('Create', true)); ?>
 </form>

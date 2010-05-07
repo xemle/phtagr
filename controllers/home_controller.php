@@ -2,9 +2,9 @@
 /*
  * phtagr.
  * 
- * Multi-user image gallery.
+ * social photo gallery for your community.
  * 
- * Copyright (C) 2006-2009 Sebastian Felis, sebastian@phtagr.org
+ * Copyright (C) 2006-2010 Sebastian Felis, sebastian@phtagr.org
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -26,7 +26,28 @@ class HomeController extends AppController
 
   var $components = array('Search');
   var $helpers = array('html', 'time', 'text', 'cloud', 'imageData', 'search');
-  var $uses = array('Media', 'Tag', 'Category', 'Comment');
+  /** Don't load models for setup check */
+  var $uses = null;
+
+  /** Check database configuration and connection. If missing redirect to 
+   * the setup. */
+	function beforeFilter() {
+		if (!file_exists(CONFIGS . 'database.php')) {
+			$this->redirect('/setup');
+    }
+
+		App::import('Core', 'ConnectionManager');
+		$db =& ConnectionManager::getDataSource('default');
+    if (empty($db->connection)) {
+			$this->redirect('/setup');
+    }
+    parent::beforeFilter();
+		
+		// Database connection is OK. Load components and models
+		$this->uses = array('Media', 'Tag', 'Category', 'Comment');
+    $this->constructClasses();
+	  $this->pageTitle = __("Home", true);
+  }
 
   /** @todo improve the randomized newest media */
   function index() {

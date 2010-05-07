@@ -4,16 +4,16 @@
     $role = $session->read('User.role');
     $name = $session->read('User.username');
     if ($role >= ROLE_SYSOP) {
-      echo $html->link('System', "/admin/users")." | ";
+      echo $html->link(__('System', true), "/admin/system/general")." | ";
     }
     if ($role >= ROLE_USER) {
-      echo $html->link('Preferences', "/options/profile")." | ";
+      echo $html->link(__('Preferences', true), "/options/profile")." | ";
     }
-    echo $html->link(_("Logout"), "/users/logout"). " ($name)";
+    echo $html->link(__("Logout", true), "/users/logout"). " ($name)";
   } else {
-    echo $html->link(_("Login"), "/users/login");
+    echo $html->link(__("Login", true), "/users/login");
     if ($option->get('user.register.enable', 0)) {
-      echo ' | '.$html->link(_("Register"), "/users/register");
+      echo ' | '.$html->link(__("Register", true), "/users/register");
     }
   }
 

@@ -1,16 +1,17 @@
-<?php $session->flash(); ?>
-<h1>Welcome to phTagr</h1>
+<h1><?php __("Welcome"); ?></h1>
 
-</p>Welcome to the installation procedure of phTagr. Following steps are required to install it:</p>
+<?php $session->flash(); ?>
+
+</p><?php __("Welcome to the installation procedure of phTagr. Following steps are required to install it:"); ?></p>
 
 <ul>
-  <li>Check for required paths</li>
-  <li>Configuration of database connection</li>
-  <li>Initialize required tables</li>
-  <li>Create administration account</li>
-  <li>Check required external programs</li>
+  <li><?php __("Check for required paths"); ?></li>
+  <li><?php __("Configuration of database connection"); ?></li>
+  <li><?php __("Initialize required tables"); ?></li>
+  <li><?php __("Create administration account"); ?></li>
+  <li><?php __("Check required external programs"); ?></li>
 </ul>
 
-<p>Cookies are required to install and run phTagr.</p>
+<p><?php __("Note: Cookies are required to install and run phTagr."); ?></p>
 
-<p>This setup will step through the required steps. Please <?php echo $html->link('click here', 'path'); ?> to continue the installation.</p>
+<p><?php printf(__("This setup will step through the required steps. Please click %s to start the installation.", true), $html->link(__('continue', true), 'path')); ?></p>

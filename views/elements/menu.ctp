@@ -3,7 +3,7 @@
   $action = $this->params['action'];
   $items = array();
   $items[] = array(
-    'text' => 'Home', 
+    'text' => __('Home', true), 
     'link' => '/', 
     'type' => ($controller == 'home'?'current':''));
   if ($session->check('User.id')) {
@@ -16,24 +16,24 @@
       $myImages = true;
     }
     $items[] = array(
-      'text' => 'Explorer', 
+      'text' => __('Explorer', true), 
       'link' => '/explorer', 
       'type' => ($controller == 'explorer' && !$myImages?'current':''));
 
     if ($role >= ROLE_GUEST) {
       $items[] = array('text' => 
-        'My Images', 
+        __('My Photos', true), 
         'link' => "/explorer/user/".$session->read('User.username'), 
         'type' => ($controller == 'explorer' && $myImages?'current':''));
     }
     if ($role >= ROLE_USER)
       $items[] = array(
-        'text' => 'My Files', 
+        'text' => __('My Files', true), 
         'link' => '/browser', 
         'type' => ($controller == 'browser'?'current':''));
   } else {
     $items[] = array(
-      'text' => 'Explorer', 
+      'text' => __('Explorer', true), 
       'link' => '/explorer', 
       'type' => ($controller == 'explorer'?'current':''));
   }

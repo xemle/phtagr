@@ -2,9 +2,9 @@
 /*
  * phtagr.
  * 
- * Multi-user image gallery.
+ * social photo gallery for your community.
  * 
- * Copyright (C) 2006-2009 Sebastian Felis, sebastian@phtagr.org
+ * Copyright (C) 2006-2010 Sebastian Felis, sebastian@phtagr.org
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -250,14 +250,14 @@ class SetupController extends AppController {
     $content = $file->read();
     $newContent = preg_replace("/$oldSalt/", $salt, $content);
     if (!$file->write($newContent)) {
-      $this->Session->setFlash("Could not write configureation to '$this->core'");
+      $this->Session->setFlash(sprintf(__("Could not write configuration to '%s'", true), $this->core));
       Logger::err("Could not write configuration to '$this->core'");
     } else {
       Configure::write('Security.salt', $salt);
       $this->Session->destroy();
       $this->Session->renew();
 
-      $this->Session->setFlash("Update core settings");
+      $this->Session->setFlash(__("Update core settings", true));
       Logger::info("Set new security salt to '$this->core'");
       $this->redirect('index');
     }
@@ -353,7 +353,7 @@ class DATABASE_CONFIG
         $this->redirect('database');
       } else {
         Logger::err("Could not write database configuration file '{$this->dbConfig}'");
-        $this->Session->setFlash("Could not write database configuration file");
+        $this->Session->setFlash(__("Could not write database configuration file", true));
       }
       $file->close();
     } else {
@@ -384,7 +384,7 @@ class DATABASE_CONFIG
     }
 
     if (!$this->__hasConnection()) {
-      $this->Session->setFlash('Could not connect to database. Please check your database configuration!');
+      $this->Session->setFlash(__('Could not connect to database. Please check your database configuration!', true));
       $this->Session->write('configError', true);
       $this->redirect('config');
     }
@@ -414,11 +414,11 @@ class DATABASE_CONFIG
     }
 
     if (!$check) {
-      $this->Session->setFlash("All required tables are created");
+      $this->Session->setFlash(__("All required tables are created", true));
       $this->redirect('user');
     } else {
       Logger::trace($errors);
-      $this->Session->setFlash("Could not create tables correctly. Please see logfile for details");
+      $this->Session->setFlash(__("Could not create tables correctly. Please see logfile for details", true));
     }
   }
 
@@ -446,11 +446,11 @@ class DATABASE_CONFIG
         $this->Session->write('User.role', ROLE_ADMIN);
         $this->Session->write('User.username', $this->data['User']['username']);
         Logger::info("Admin account '{$this->data['User']['username']}' was created");
-        $this->Session->setFlash("Admin account was successfully created");
+        $this->Session->setFlash(__("Admin account was successfully created", true));
         $this->redirect('system');
       } else {
         Logger::err("Admin account '{$this->data['User']['username']}' could not be created");
-        $this->Session->setFlash("Could not create admin account. Please retry");
+        $this->Session->setFlash(__("Could not create admin account. Please retry", true));
       }
     } elseif (!isset($this->data['User']['username'])) {
       $this->data['User']['username'] = 'admin';
@@ -578,10 +578,10 @@ class DATABASE_CONFIG
       $errors = $this->UpgradeSchema->upgrade();
       if ($errors == false) {
         $this->UpgradeSchema->deleteModelCache();
-        $this->Session->setFlash("Database was upgraded successfully");
+        $this->Session->setFlash(__("Database was upgraded successfully", true));
         $this->redirect('/admin/setup/uptodate');
       } else {
-        $this->Session->setFlash("The database could not upgraded completely. The log file might discover the issue");
+        $this->Session->setFlash(__("The database could not upgraded completely. The log file might discover the issue", true));
       }
     }
     $this->set('errors', $errors);

@@ -1,13 +1,14 @@
-<h1>Groups</h1>
-<?php if ($session->check('Message.flash')) $session->flash(); ?>
+<h1><?php __('Groups'); ?></h1>
+
+<?php $session->flash(); ?>
 
 <?php if (!empty($this->data)): ?>
 <table class="default">
 <thead>
   <tr>
-    <td>Name</td>
-    <td>Members</td>
-    <td>Actions</td>
+    <td><?php __('Name'); ?></td>
+    <td><?php __('Members'); ?></td>
+    <td><?php __('Actions'); ?></td>
   </tr>
 </thead>
 
@@ -31,11 +32,6 @@
 </table>
 <?php else: ?>
 <div class="info">
-Currently no image groups are assigned. At the one hand each image could be
-assigned to a specific group. On the other hand a guest can be member of a set
-of groups. The guest is than able to view the images from his groups. 
+<?php __('Currently no image groups are assigned. At the one hand each image could be assigned to a specific group. On the other hand a guest can be member of a set of groups. The guest is than able to view the images from his groups.'); ?>
 </div>
 <?php endif; ?>
-<?php
-//debug($this->data);
-?>

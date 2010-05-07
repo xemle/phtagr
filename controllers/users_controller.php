@@ -2,9 +2,9 @@
 /*
  * phtagr.
  * 
- * Multi-user image gallery.
+ * social photo gallery for your community.
  * 
- * Copyright (C) 2006-2009 Sebastian Felis, sebastian@phtagr.org
+ * Copyright (C) 2006-2010 Sebastian Felis, sebastian@phtagr.org
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -36,9 +36,9 @@ class UsersController extends AppController
 
   function _getMenuItems() {
     $items = array();
-    $items[] = array('text' => 'List users', 'link' => 'index');
-    $items[] = array('text' => 'Add user', 'link' => 'add');
-    $items[] = array('text' => 'Registration', 'link' => 'register');
+    $items[] = array('text' => __('List users', true), 'link' => 'index');
+    $items[] = array('text' => __('Add user', true), 'link' => 'add');
+    $items[] = array('text' => __('Registration', true), 'link' => 'register');
     $items = am($items, $this->menuItems);
     return $items;
   }

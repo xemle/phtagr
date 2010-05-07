@@ -2,9 +2,9 @@
 /*
  * phtagr.
  * 
- * Multi-user image gallery.
+ * social photo gallery for your community.
  * 
- * Copyright (C) 2006-2009 Sebastian Felis, sebastian@phtagr.org
+ * Copyright (C) 2006-2010 Sebastian Felis, sebastian@phtagr.org
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -54,7 +54,7 @@ class NavigatorHelper extends AppHelper {
     }
     $current = $this->params['search']['page'];
     $link = $this->Search->getUri(false, array('page' => $current - 1));
-    return $this->Html->link('prev', $link, array('class' => 'prev'));
+    return $this->Html->link(__('prev', true), $link, array('class' => 'prev'));
   }
 
   function numbers() {
@@ -102,7 +102,7 @@ class NavigatorHelper extends AppHelper {
     }
     $current = $this->params['search']['page'];
     $link = $this->Search->getUri(false, array('page' => $current + 1));
-    return $this->Html->link('next', $link, array('class' => 'next'));
+    return $this->Html->link(__('next', true), $link, array('class' => 'next'));
   }
 
   function prevMedia() {
@@ -115,7 +115,7 @@ class NavigatorHelper extends AppHelper {
     $page = ceil($pos / $this->Search->getShow());
     $baseUri = '/images/view/'.$params['prevMedia'];
     $link = $this->Search->getUri(false, array('pos' => $pos, 'page' => $page), false, array('baseUri' => $baseUri, 'defaults' => array('pos' => 1)));
-    return $this->Html->link('prev', $link, array('class' => 'prev'));
+    return $this->Html->link(__('prev', true), $link, array('class' => 'prev'));
   }
 
   function up() {
@@ -124,7 +124,7 @@ class NavigatorHelper extends AppHelper {
     }
     $params = $this->params['search'];
     $link = $this->Search->getUri(false, false, 'pos').'#media-'.$params['current'];
-    return $this->Html->link('up', $link, array('class' => 'up'));
+    return $this->Html->link(__('up', true), $link, array('class' => 'up'));
   }
 
   function nextMedia() {
@@ -137,7 +137,7 @@ class NavigatorHelper extends AppHelper {
     $page = ceil($pos / $this->Search->getShow());
     $baseUri = '/images/view/'.$params['nextMedia'];
     $link = $this->Search->getUri(false, array('pos' => $pos, 'page' => $page), false, array('baseUri' => $baseUri, 'defaults' => array('pos' => 1)));
-    return $this->Html->link('next', $link, array('class' => 'next'));
+    return $this->Html->link(__('next', true), $link, array('class' => 'next'));
   }
 }
 ?>
