@@ -1,8 +1,6 @@
-# $Id: db_acl.sql 4605 2007-03-09 23:26:37Z phpnut $
+# $Id$
 #
-# Copyright 2005-2007,	Cake Software Foundation, Inc.
-#								1785 E. Sahara Avenue, Suite 490-204
-#								Las Vegas, Nevada 89104
+# Copyright 2005-2010,	Cake Software Foundation, Inc.
 #
 # Licensed under The MIT License
 # Redistributions of files must retain the above copyright notice.

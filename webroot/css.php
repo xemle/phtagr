@@ -1,5 +1,5 @@
 <?php
-/* SVN FILE: $Id: css.php 4853 2007-04-12 08:59:09Z phpnut $ */
+/* SVN FILE: $Id$ */
 /**
  * Short description for file.
  *
@@ -7,24 +7,21 @@
  *
  * PHP versions 4 and 5
  *
- * CakePHP(tm) :  Rapid Development Framework <http://www.cakephp.org/>
- * Copyright 2005-2007, Cake Software Foundation, Inc.
- *								1785 E. Sahara Avenue, Suite 490-204
- *								Las Vegas, Nevada 89104
+ * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
+ * Copyright 2005-2010, Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
  * Licensed under The MIT License
  * Redistributions of files must retain the above copyright notice.
  *
- * @filesource
- * @copyright		Copyright 2005-2007, Cake Software Foundation, Inc.
- * @link				http://www.cakefoundation.org/projects/info/cakephp CakePHP(tm) Project
- * @package			cake
- * @subpackage		cake.app.webroot
- * @since			CakePHP(tm) v 0.2.9
- * @version			$Revision: 4853 $
- * @modifiedby		$LastChangedBy: phpnut $
- * @lastmodified	$Date: 2007-04-12 10:59:09 +0200 (Thu, 12 Apr 2007) $
- * @license			http://www.opensource.org/licenses/mit-license.php The MIT License
+ * @copyright     Copyright 2005-2010, Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * @link          http://cakephp.org CakePHP(tm) Project
+ * @package       cake
+ * @subpackage    cake.app.webroot
+ * @since         CakePHP(tm) v 0.2.9
+ * @version       $Revision$
+ * @modifiedby    $LastChangedBy$
+ * @lastmodified  $Date$
+ * @license       http://www.opensource.org/licenses/mit-license.php The MIT License
  */
 if (!defined('CAKE_CORE_INCLUDE_PATH')) {
 	header('HTTP/1.1 404 Not Found');
@@ -33,7 +30,9 @@ if (!defined('CAKE_CORE_INCLUDE_PATH')) {
 /**
  * Enter description here...
  */
+if (!class_exists('File')) {
 	uses('file');
+}
 /**
  * Enter description here...
  *
@@ -42,7 +41,7 @@ if (!defined('CAKE_CORE_INCLUDE_PATH')) {
  * @return unknown
  */
 	function make_clean_css($path, $name) {
-		require(VENDORS . 'csspp' . DS . 'csspp.php');
+		App::import('Vendor', 'csspp' . DS . 'csspp');
 		$data = file_get_contents($path);
 		$csspp = new csspp();
 		$output = $csspp->compress($data);
@@ -95,8 +94,8 @@ if (!defined('CAKE_CORE_INCLUDE_PATH')) {
 
 	header("Date: " . date("D, j M Y G:i:s ", $templateModified) . 'GMT');
 	header("Content-Type: text/css");
-	header("Expires: " . gmdate("D, j M Y H:i:s", time() + DAY) . " GMT");
-	header("Cache-Control: cache"); // HTTP/1.1
+	header("Expires: " . gmdate("D, d M Y H:i:s", time() + DAY) . " GMT");
+	header("Cache-Control: max-age=86400, must-revalidate"); // HTTP/1.1
 	header("Pragma: cache");        // HTTP/1.0
 	print $output;
 ?>

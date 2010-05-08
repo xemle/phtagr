@@ -1,5 +1,5 @@
 <?php
-/* SVN FILE: $Id: inflections.php 4410 2007-02-02 13:31:21Z phpnut $ */
+/* SVN FILE: $Id$ */
 /**
  * Custom Inflected Words.
  *
@@ -8,24 +8,21 @@
  *
  * PHP versions 4 and %
  *
- * CakePHP(tm) :  Rapid Development Framework <http://www.cakephp.org/>
- * Copyright 2005-2007, Cake Software Foundation, Inc.
- *								1785 E. Sahara Avenue, Suite 490-204
- *								Las Vegas, Nevada 89104
+ * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
+ * Copyright 2005-2010, Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
  * Licensed under The MIT License
  * Redistributions of files must retain the above copyright notice.
  *
- * @filesource
- * @copyright		Copyright 2005-2007, Cake Software Foundation, Inc.
- * @link				http://www.cakefoundation.org/projects/info/cakephp CakePHP(tm) Project
- * @package			cake
- * @subpackage		cake.app.config
- * @since			CakePHP(tm) v 1.0.0.2312
- * @version			$Revision: 4410 $
- * @modifiedby		$LastChangedBy: phpnut $
- * @lastmodified	$Date: 2007-02-02 14:31:21 +0100 (Fri, 02 Feb 2007) $
- * @license			http://www.opensource.org/licenses/mit-license.php The MIT License
+ * @copyright     Copyright 2005-2010, Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * @link          http://cakephp.org CakePHP(tm) Project
+ * @package       cake
+ * @subpackage    cake.app.config
+ * @since         CakePHP(tm) v 1.0.0.2312
+ * @version       $Revision$
+ * @modifiedby    $LastChangedBy$
+ * @lastmodified  $Date$
+ * @license       http://www.opensource.org/licenses/mit-license.php The MIT License
  */
 /**
  * This is a key => value array of regex used to match words.
@@ -55,18 +52,5 @@
  *  $singularRules = array('/(s)tatuses$/i' => '\1\2tatus', '/(matr)ices$/i' =>'\1ix','/(vert|ind)ices$/i')
  */
 	$singularRules = array();
-/**
- * This is a key only array of singular words that should not be inflected.
- * You should not have to change this value below if you do change it use same format
- * as the $uninflectedPlural above.
- */
-	$uninflectedSingular = $uninflectedPlural;
-/**
- * This is a key => value array of singular irregular words.
- * Most of the time this will be a reverse of the above $irregularPlural array
- * You should not have to change this value below if you do change it use same format
- *
- * $irregularSingular = array('atlases' => 'atlas', 'beefs' => 'beef', 'brothers' => 'brother')
- */
-	$irregularSingular = array_flip($irregularPlural);
+
 ?>
