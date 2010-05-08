@@ -39,6 +39,6 @@
 /**
  * Routes for phTagr
  */
-	Router::connect('/', array('controller' => 'pages', 'action' => 'display', 'home'));
+	Router::connect('/', array('controller' => 'home', 'action' => 'index'));
 	Router::connect('/webdav/*', array('controller' => 'webdav', 'action' => 'index'));
 ?>
