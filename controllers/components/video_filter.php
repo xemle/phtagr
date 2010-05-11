@@ -57,12 +57,17 @@ class VideoFilterComponent extends BaseFilterComponent {
     $pattern = basename($thumbFilename);
     $pattern = substr($pattern, 0, strrpos($pattern, '.')+1).'('.implode($this->_getVideoExtensions(), '|').')';
     $found = $folder->find($pattern);
-    if (count($found) && is_readable(Folder::addPathElement($path, $found[0]))) {
-      $videoFilename = Folder::addPathElement($path, $found[0]);
-      $video = $this->controller->MyFile->findByFilename($videoFilename);
-      if ($video) {
-        return $video;
-      } 
+    if (!count($found)) {
+      return false;
+    }
+    foreach ($found as $file) {
+      if (is_readable(Folder::addPathElement($path, $file))) {
+        $videoFilename = Folder::addPathElement($path, $file);
+        $video = $this->controller->MyFile->findByFilename($videoFilename);
+        if ($video) {
+          return $video;
+        }
+      }
     } 
     return false;
   }
