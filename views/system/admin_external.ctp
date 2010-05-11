@@ -2,7 +2,7 @@
 
 <?php $session->flash(); ?>
 
-<?php echo $form->create(null, array('action' => 'index')); ?>
+<?php echo $form->create(null, array('action' => 'external')); ?>
 <fieldset><legend><?php __('External Programs'); ?></legend>
 <?php
   echo $form->input('bin.exiftool', array('label' => sprintf(__("Path to %s", true), "exiftool"))); 

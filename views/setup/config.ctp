@@ -15,6 +15,5 @@
   echo $form->input('db.prefix', array('label' => __('Prefix', true)));
 ?>
 </fieldset>
-<?php Logger::debug(apache_request_headers()); ?>
 <?php echo $form->submit(__('Continue', true)); ?>
 </form>
