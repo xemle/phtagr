@@ -43,6 +43,17 @@
  */
 	Configure::write('App.encoding', 'UTF-8');
 /**
+ * In some php versions escapeshellarg() removes special characters like german
+ * umlaut. This bug causes wrong system calls to files like import of media
+ * with umlaut. The call setlocale() to an UTF8 character set fixes this
+ * problem. Check your character sets of our environment with "local -a" and
+ * enter it below.
+ *
+ * See also http://bugs.php.net/bug.php?id=44945
+ *          http://bugs.php.net/bug.php?id=44564
+ */
+  //setlocale(LC_CTYPE, "UTF8", "en_US.UTF-8");
+/**
  * To configure CakePHP *not* to use mod_rewrite and to
  * use CakePHP pretty URLs, remove these .htaccess
  * files:
