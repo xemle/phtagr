@@ -28,6 +28,7 @@ class UpgradeMediaSchemaShell extends Shell {
 
   var $uses = array('Media', 'MyFile');
   var $db = null;
+  var $deletePolicy = false;
 
   function initialize() {
     $this->UpgradeSchema =& new UpgradeSchemaComponent();
@@ -131,6 +132,36 @@ class UpgradeMediaSchemaShell extends Shell {
   function _migrateMedia($media) {
     // create file model
     $filename = $media['Media']['path'].$media['Media']['file'];
+    if (!file_exists($filename)) {
+      Logger::err("Cannot find media {$media['Media']['id']}: $filename");
+      if ($this->deletePolicy == "a") {
+        Logger::warn("Delete not existing media file {$media['Media']['id']}: $filename");
+        $this->out("Auto delete not existing media file {$media['Media']['id']}: $filename");
+        $this->Media->delete($media['Media']['id']);
+        return false;
+      } 
+      $a = false;
+      while (!in_array($a, array("d", "s", "r", "a", "c"))) {
+        $a = $this->in("Could not find media {$media['Media']['id']}: $filename!\n[d]elete, [s]kip, [r]etry, delete [a]ll, [c]ancel", array("d", "s", "r", "a", "c"), "d");
+      }
+      if ($a == "d" || $a == "a") {
+        Logger::warn("Delete media {$media['Media']['id']}: $filename");
+        $this->Media->delete($media['Media']['id']);
+        if ($a == "a") {
+          $this->deletePolicy = "a";
+        }
+        return true;
+      } elseif ($a == "s") {
+        Logger::warn("Skip media {$media['Media']['id']}: $filename");
+        return true;
+      } elseif ($a == "r") {
+        clearstatcache();
+        $media = $this->Media->findById($media['Media']['id']);
+        return $this->_migrateMedia($media);
+      } elseif ($a == "c") {
+        $this->error("Missing media {$media['Media']['id']}", "User abort");
+      }
+    }
     $file = $this->MyFile->create($filename, $media['Media']['user_id']);
     $file['File']['media_id'] = $media['Media']['id'];
     $file['File']['readed'] = date("Y-m-d H:i:s", filemtime($filename));
