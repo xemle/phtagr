@@ -119,6 +119,7 @@ foreach ($this->data as $media): ?>
   if ($canWriteMeta) {
     echo $form->input('Categories.text', array('label' => __('Categories', true), 'maxlength' => 320)); 
     echo $form->input('Locations.city', array('maxlength' => 32, 'label' => __('City', true)));
+    echo $form->input('Locations.sublocation', array('maxlength' => 32, 'label' => __('Sublocation', true)));
     echo $form->input('Locations.state', array('maxlength' => 32, 'label' => __('State', true)));
     echo $form->input('Locations.country', array('maxlength' => 32, 'label' => __('Country', true)));
     echo $form->input('Media.geo', array('label' => __('Geo data', true), 'maxlength' => 32, 'after' => '<span class="hint">' . __('latitude, longitude', true) . '</span>'));
