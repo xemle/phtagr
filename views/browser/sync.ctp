@@ -8,7 +8,7 @@
 <p><?php 
   printf(__("Synchronized %d of %d media", true), $this->data['synced'], $this->data['total']);
   if ($this->data['unsynced']) {
-    printf(__(" %d media remains unsynced. %s", true), $html->link(__('Synchronize again?', true), 'sync')); 
+    printf(__(" %d media remains unsynced. %s", true), $this->data['unsynced'], $html->link(__('Synchronize again?', true), 'sync')); 
   }
 ?></p>
 <?php else: ?>
