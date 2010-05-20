@@ -396,7 +396,7 @@ class BrowserController extends AppController
     $bytes = $this->MyFile->findAll(array("User.id" => $userId), array('SUM(File.size) AS Bytes'));
     $files['bytesAll'] = $bytes[0][0]['Bytes'];
     $files['quota'] = $user['User']['quota'];
-    $files['free'] = $files['quota'] - $files['bytes'];
+    $files['free'] = max(0, $files['quota'] - $files['bytes']);
     $files['active'] = $this->Media->find('count', array('conditions' => "User.id = $userId"));
     $files['dirty'] = $this->Media->find('count', array('conditions' => array('User.id' => $userId, 'Media.flag & '.MEDIA_FLAG_DIRTY.' > 0')));
     $files['video'] = $this->Media->find('count', array('conditions' => "User.id = $userId AND Media.duration > 0"));
@@ -480,7 +480,7 @@ class BrowserController extends AppController
     $userId = $this->getUserId();
     $bytes = $this->MyFile->countBytes($userId);
     $quota = $user['User']['quota'];
-    $free = $quota - $bytes;
+    $free = max(0, $quota - $bytes);
     $this->set('quota', $quota);
     $this->set('free', $free);
     $max = strtoupper(ini_get('upload_max_filesize'));
