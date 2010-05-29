@@ -89,6 +89,7 @@ define("GROUP_TYPE_SYSTEM",   1);
 define("GROUP_TYPE_PUBLIC",   2);
 define("GROUP_TYPE_HIDDEN",   3);
 
+define("GROUP_ACCESS_PRIVATE",    0);
 define("GROUP_ACCESS_MEMBER",     1);
 define("GROUP_ACCESS_REGISTERED", 2);
 define("GROUP_ACCESS_ANONYMOUS",  3);

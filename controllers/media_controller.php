@@ -49,6 +49,7 @@ class MediaController extends AppController
       Configure::write('debug', 1);
     }
     parent::beforeFilter();
+    $this->Media->setUser($this->getUser());
   }
   
   function _getCacheDir($data) {
@@ -118,21 +119,18 @@ class MediaController extends AppController
     }
 
     $user = $this->getUser();
-    switch ($outputType) {
-      case OUTPUT_TYPE_VIDEO:
-        $flag = ACL_READ_PREVIEW; break;
-      case OUTPUT_TYPE_HIGH:
-        $flag = ACL_READ_HIGH; break;
-      default:
-        $flag = ACL_READ_PREVIEW; break;
-    }
-    $conditions = $this->Media->buildAclConditions($user, 0, $flag);
-    $conditions[] = "Media.id = $id";
-    $media = $this->Media->find($conditions);
+    $media = $this->Media->find("Media.id = $id");
     if (!$media) {
       Logger::debug("Deny access to image $id");
       $this->redirect(null, 403);
     }
+
+    $media = $this->Media->setMediaAccess($media);
+    Logger::debug($media);
+    if ($outputType == OUTPUT_TYPE_HIGH && $media['Media']['media_view'] < GROUP_MEDIAVIEW_FULL) {
+      Logger::debug("Deny access to high output for media $id");
+      $this->redirect(null, 403);
+    }        
     
     return $media;
   }
@@ -252,12 +250,13 @@ class MediaController extends AppController
       Logger::warn("User {$user['User']['id']} requested file {$file['File']['id']} without media");
       $this->redirect(null, 404);
     }
-    if (!$this->Media->checkAccess(&$file, $user, ACL_READ_ORIGINAL, ACL_READ_MASK)) {
+    $media = $this->Media->find("Media.id = " . $file['Media']['id']);
+    $media = $this->Media->setMediaAccess($media);
+    if ($media['Media']['media_view'] < GROUP_MEDIAVIEW_FULL) {
       Logger::warn("User {$user['User']['id']} has no previleges to access image ".$file['Media']['id']);
       $this->redirect(null, 404);
     }
-    if ($this->Media->hasFlag($file, MEDIA_FLAG_DIRTY)) {
-      $media = $this->Media->findById($file['Media']['id']);
+    if ($this->Media->hasFlag($media, MEDIA_FLAG_DIRTY)) {
       $this->FilterManager->write($media);
     }
     Logger::info("Request of media {$file['Media']['id']}: file $id '{$file['File']['file']}'");

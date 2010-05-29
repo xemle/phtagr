@@ -89,4 +89,5 @@ echo $navigator->prevMedia().' '.$navigator->up().' '.$navigator->nextMedia();
 }
 ?>
 
+<?php debug($this->data); ?>
 <?php echo View::element('comment'); ?>

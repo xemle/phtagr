@@ -26,19 +26,22 @@ class Media extends AppModel
   var $name = 'Media';
 
   var $belongsTo = array(
-    'User' => array());
+    'User' => array()
+    );
   
   var $hasMany = array(
     'Comment' => array('dependent' => true),
-    'File' => array('className' => 'MyFile'));
+    'File' => array('className' => 'MyFile')
+    );
 
   var $hasAndBelongsToMany = array(
     'Tag' => array(),
     'Category' => array(),
     'Location' => array('order' => 'Location.type'),
-    'Group' => array());
+    'Group' => array('conditions' => array('Group.type !=' => GROUP_TYPE_SYSTEM))
+    );
   
-  var $actsAs = array('Type', 'Flag', 'Cache', 'Exclude');
+  var $actsAs = array('Type', 'Flag', 'Cache', 'Exclude', 'GroupAccess');
 
   function beforeDelete($cascade = true) {
     // Delete media cache files
@@ -130,6 +133,29 @@ class Media extends AppModel
     $data['Media']['uacl'] = $acl['uacl'];
     $data['Media']['oacl'] = $acl['oacl'];
     return $data;
+  }
+
+  function setGroups(&$media, &$user, $groups = array()) {
+    if (is_array($media)) {
+      $mediaId = $media['Media']['id'];
+    } else {
+      $mediaId = $media;
+    }
+    $dummy = array(
+      'Media' => array('id' => $mediaId),
+      'Group' => array('Group' => array($user['User']['system_group_id']))
+      );
+    if (count($groups)) {
+      $groups = $this->Group->find('all', array('fields' => 'Group.id', 'conditions' => array('Group.name' => $groups)));
+      $groupIds = Set::extract('/Group/id', $groups);
+      $dummy['Group']['Group'] = am($dummy['Group']['Group'], $groupIds);
+    }
+    Logger::debug($dummy);
+    if (!$this->save($dummy)) {
+      Logger::err("Could not update media group of media {$media['Media']['id']}");
+      return false;
+    }
+    return true;
   }
 
   /** Returns the file model by its type

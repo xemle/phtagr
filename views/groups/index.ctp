@@ -4,29 +4,61 @@
 <?php if (!empty($this->data)): ?>
 <table class="default">
 <thead>
-  <tr>
-    <td>Name</td>
-    <td>Members</td>
-    <td>Actions</td>
-  </tr>
+<?php 
+  $headers = array(__("Name", true), __("Description", true), __("Type", true), __("Access", true), __("Media View", true), __("Tagging", true), __("Members", true), __("Actions", true));
+  echo $html->tableHeaders($headers);
+?>
 </thead>
 
 <tbody>
-<?php $row=0; foreach($this->data as $group): ?>
-  <tr class="<?=($row++%2)?"even":"odd";?>">
-    <td><?php echo $html->link($group['Group']['name'], 'edit/'.$group['Group']['id']); ?></td>
-    <td><?php echo count($group['Member']) ?></td>
-    <td><div class="actionlist"><?php 
-      $delConfirm = "Do you realy want to delete the group '{$group['Group']['name']}'?";
-      echo $html->link(
-          $html->image('icons/pencil.png', array('alt' => 'Edit', 'title' => 'Edit')),
+<?php 
+  $cells = array();
+
+  $typeOptions = array(
+    GROUP_TYPE_PUBLIC => 'Public',
+    GROUP_TYPE_HIDDEN => 'Hidden'
+    );
+  $accessOptions = array(
+    GROUP_ACCESS_MEMBER => 'Group Member',
+    GROUP_ACCESS_REGISTERED => 'Registered',
+    GROUP_ACCESS_ANONYMOUS => 'Anonymous'
+    );
+  $mediaViewOptions = array(
+    GROUP_MEDIAVIEW_VIEW => 'View',
+    GROUP_MEDIAVIEW_FULL => 'Full'
+    );
+  $taggingOptions = array(
+    GROUP_TAGGING_READONLY => 'Read Only',
+    GROUP_TAGGING_ONLYADD => 'Only Add',
+    GROUP_TAGGING_FULL => 'Full'
+    ); 
+
+  foreach($this->data as $group) {
+
+    $delConfirm = h("Do you realy want to delete the group {$group['Group']['name']}?");
+
+    $actions = '<div class="actionlist">';
+    $actions .= $html->link(
+        $html->image('icons/pencil.png', array('alt' => 'Edit', 'title' => 'Edit')),
           'edit/'.$group['Group']['id'], null, false, false).' '.
         $html->link( 
           $html->image('icons/delete.png', array('alt' => 'Delete', 'title' => 'Delete')),
-          'delete/'.$group['Group']['id'], null, $delConfirm, false); ?>
-    </div></td>
-  </tr>
-<?php endforeach; ?>
+          'delete/'.$group['Group']['id'], null, $delConfirm, false);
+    $actions .= '</div>';
+
+    $cells[] = array(
+      $html->link($group['Group']['name'], 'edit/'.$group['Group']['id'], array('title' => h($group['Group']['description']))),
+      $text->truncate($group['Group']['description'], 32, '...', false),
+      $typeOptions[$group['Group']['type']],
+      $accessOptions[$group['Group']['access']],
+      $mediaViewOptions[$group['Group']['media_view']],
+      $taggingOptions[$group['Group']['tagging']],
+      count($group['Member']),
+      $actions
+      );
+  }
+  echo $html->tableCells($cells, array('class' => 'odd'),  array('class' => 'even'));
+?>
 </tbody>
 </table>
 <?php else: ?>

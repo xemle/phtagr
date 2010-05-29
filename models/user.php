@@ -27,8 +27,12 @@ class User extends AppModel
 
   var $actsAs = array('Cipher' => array());
 
+  var $hasOne = array(
+                  'SystemGroup' => array('dependent' => true, 'className' => 'Group', 'conditions' => array('SystemGroup.type' => GROUP_TYPE_SYSTEM))
+                  );
+
   var $hasMany = array(
-                  'Group' => array('dependent' => true),
+                  'Group' => array('dependent' => true, 'conditions' => array('Group.type !=' => GROUP_TYPE_SYSTEM)),
                   'Option' => array('dependent' => true, 'dependent' => true),
                   'Guest' => array('foreignKey' => 'creator_id', 'dependent' => true)
                   );
@@ -126,9 +130,25 @@ class User extends AppModel
     if (empty($this->data['User']['expires'])) {
       $this->data['User']['expires'] = null;
     }
-  
+
     return true;
   }
+
+  /** Creates the system user group on new user (except users with USER_ROLE_GUEST)
+   * @param created True if a new user was created
+   */
+  function afterSave($created) {
+    if (!$created) {
+      return true;
+    }
+
+    $user = $this->findById($this->getLastInsertID());
+    if ($user['User']['role'] > ROLE_GUEST) {
+      $this->Group->createSystemGroup($user);
+    }
+    return true;
+  }
+
 
   function beforeDelete($cascade) {
     App::import('Model', 'Media');
@@ -163,12 +183,15 @@ class User extends AppModel
     return $this->hasAny("role >= $role");
   }
 
+  /** Creates and return the user model data of an anonymous user
+   * @return Anonymous user model data */
   function getNobody() {
     $nobody = array(
         'User' => array(
             'id' => -1, 
             'username' => '', 
             'role' => ROLE_NOBODY), 
+        'Group' => array(),
         'Member' => array(),
         'Option' => $this->Option->addDefaults(array()));
     return $nobody;

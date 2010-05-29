@@ -94,6 +94,7 @@ class ImageFilterComponent extends BaseFilterComponent {
         return -1;
       } else {
         Logger::info("Created new Media (id $mediaId)");
+        $media = $this->Media->setGroups($mediaId, &$user);
       }
     } else {
       Logger::verbose("Updated media (id ".$media['Media']['id'].")");

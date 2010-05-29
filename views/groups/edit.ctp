@@ -1,6 +1,41 @@
 <h1>Group: <?php echo $this->data['Group']['name']; ?></h1>
 <?php $session->flash() ?>
 
+<?php echo $form->create(null, array("action" => "edit/".$this->data['Group']['id'])); ?>
+<fieldset><legend>Group Settings</legend>
+
+<?php
+  echo $form->hidden('Group.id');
+  echo $form->input('Group.name');
+
+  echo $form->input('Group.description', array('type' => 'textbox'));
+
+  $typeOptions = array(
+    GROUP_TYPE_PUBLIC => 'Public',
+    GROUP_TYPE_HIDDEN => 'Hidden'
+    );
+  $accessOptions = array(
+    GROUP_ACCESS_MEMBER => 'Group Member',
+    GROUP_ACCESS_REGISTERED => 'Registered',
+    GROUP_ACCESS_ANONYMOUS => 'Anonymous'
+    );
+  $mediaViewOptions = array(
+    GROUP_MEDIAVIEW_VIEW => 'View',
+    GROUP_MEDIAVIEW_FULL => 'Full'
+    );
+  $taggingOptions = array(
+    GROUP_TAGGING_READONLY => 'Read Only',
+    GROUP_TAGGING_ONLYADD => 'Only Add',
+    GROUP_TAGGING_FULL => 'Full'
+    );
+
+  echo $form->input('Group.type', array('type' => 'select', 'options' => $typeOptions, 'label' => 'Group Type'));
+  echo $form->input('Group.access', array('type' => 'select', 'options' => $accessOptions, 'label' => 'Access'));
+  echo $form->input('Group.media_view', array('type' => 'select', 'options' => $mediaViewOptions, 'label' => 'Media View'));
+  echo $form->input('Group.tagging', array('type' => 'select', 'options' => $taggingOptions, 'label' => 'Tagging Options'));?>
+</fieldset>
+<?php echo $form->end("Apply Settings"); ?>
+
 <?php if(count($this->data['Member'])): ?>
 <h2>Member List</h2>
 <table class="default">
@@ -37,7 +72,7 @@
 
 <fieldset><legend>Add member</legend>
 <div class="input"><label>Group</label>
-<?php echo $ajax->autocomplete('User.username', '/groups/autocomplete'); ?></div>
+<?php echo $ajax->autocomplete('Member.username', '/groups/autocomplete'); ?></div>
 </fieldset>
 <?php echo $form->submit('Add'); ?>
 </form>

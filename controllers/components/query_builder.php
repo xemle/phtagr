@@ -47,7 +47,8 @@ class QueryBuilderComponent extends Object
     'to' => array('field' => 'Media.date', 'operand' => '<='),
     'tags' => array('custom' => 'buildHabtm'),
     'type' => array('field' => 'Media.type', 'mapping' => array('image' => MEDIA_TYPE_IMAGE, 'video' => MEDIA_TYPE_VIDEO)),
-    'visibility' => true, // calls buildVisibility
+    //'visibility' => true, // calls buildVisibility
+    'user' => true,
     'west' => array('field' => 'Media.longitude', 'operand' => '>='),
     );
 
@@ -204,7 +205,6 @@ class QueryBuilderComponent extends Object
         }
       }
     }
-    $this->_buildAccessConditions(&$data, &$query);
 
     // paging, offsets and limit
     if (!empty($data['pos'])) { 
@@ -326,26 +326,24 @@ class QueryBuilderComponent extends Object
     }
   }
 
-  function _buildAccessConditions(&$data, &$query) {
-    if (isset($data['visibility'])) {
-      return true;
-    }
+  function buildUser(&$data, &$query, $value) {
     $user = $this->controller->getUser();
     $userId = 0;
-    if (isset($data['user'])) {
-      // get users id for backwards compatibility
-      $u = $this->controller->User->findByUsername($data['user']);
-      if ($u && ($u['User']['role'] >= ROLE_USER ||
-          $u['User']['role'] == ROLE_GUEST && $u['User']['id'] == $user['User']['id'])) {
-        $userId = $u['User']['id'];
-      } else {
-        // user not found or wrong invalid guest name
-        Logger::warn("Invalid user. Disable search");
-        $query['conditions'][] = '1 = 0';
-      }
+
+    // get users id for backwards compatibility
+    $u = $this->controller->User->findByUsername($value);
+    if ($u && ($u['User']['role'] >= ROLE_USER ||
+        $u['User']['role'] == ROLE_GUEST && $u['User']['id'] == $user['User']['id'])) {
+      $userId = $u['User']['id'];
+    } else {
+      // user not found or wrong invalid guest name
+      Logger::warn("Invalid user. Disable search");
+      $query['conditions'][] = '1 = 0';
     }
-    $acl = $this->controller->Media->buildAclConditions($user, $userId);
-    $query['conditions'] = am($query['conditions'], $acl);
+
+    if ($userId) {
+      $query['conditions'][] = "User.id = $userId";
+    }
   }
 
   function buildVisibility(&$data, &$query, $value) {

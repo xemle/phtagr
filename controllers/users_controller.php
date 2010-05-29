@@ -24,7 +24,7 @@
 class UsersController extends AppController
 {
   var $components = array('RequestHandler', 'Cookie', 'Email', 'Captcha');
-  var $uses = array('Option'); 
+  var $uses = array('Option', 'Group'); 
   var $helpers = array('form', 'formular', 'number');
   var $paginate = array('limit' => 10, 'order' => array('User.username' => 'asc')); 
   var $menuItems = array();
@@ -169,6 +169,12 @@ class UsersController extends AppController
     $this->redirect('/');
   }
 
+  function profile($username) {
+    $user = $this->User->findByUsername($username);
+
+    $this->data = $user; 
+  }
+ 
   function admin_index() {
     $this->requireRole(ROLE_SYSOP, array('loginRedirect' => '/admin/users'));
 
@@ -299,7 +305,7 @@ class UsersController extends AppController
         if ($this->User->save($this->data, true, array('username', 'password', 'role', 'email'))) {
           Logger::info("New user {$this->data['User']['username']} was created");
           $this->Session->setFlash('User was created');
-          $this->redirect('/admin/users/edit/'.$this->User->id);
+          $this->redirect('/admin/users/edit/' . $this->User->id);
         } else {
           Logger::warn("Creation of user {$this->data['User']['username']} failed");
           $this->Session->setFlash('Could not create user!');
@@ -317,6 +323,13 @@ class UsersController extends AppController
       $this->Session->setFlash("Could not delete user: user not found!");
       $this->redirect('/admin/users/');
     } else {
+      if ($user['User']['role'] == ROLE_ADMIN) {
+        $count = $this->User->find('count', array('conditions' => array('User.role >=' => ROLE_ADMIN)));
+        if ($count < 2) {
+          $this->Session->setFlash("Could not delete last admin account");
+          $this->redirect('/admin/users/');
+        }
+      }
       $this->User->del($id);
       Logger::notice("All data of user '{$user['User']['username']}' ($id) deleted");
       $this->Session->setFlash("User '{$user['User']['username']}' was deleted");

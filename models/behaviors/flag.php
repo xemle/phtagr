@@ -102,5 +102,57 @@ class FlagBehavior extends ModelBehavior
     }
   }
 
+  /** Merge flags from an array given in an array of $data[Model][flag]
+    @param model Current model
+    @param data model data
+    @param mask Allowed flag mask */
+  function mergeFlags(&$model, &$data, $mask) {
+    if (!$data) {
+      $data = $model->data;
+    }
+    
+    if (is_array($data[$model->alias]['flag'])) {
+      $flags = 0;
+      foreach ($data[$model->alias]['flag'] as $flag) {
+        $flags |= $flag;
+      }
+      $data[$model->alias]['flag'] = ($flags & $mask);
+    }
+  }
+
+  function explodeFlags(&$model, &$data, $mapping = false) {
+    if (!isset($data[$model->alias]['flag'])) {
+      Logger::warn("Flag data is missing");
+      Logger::trace($data);
+      return;
+    }
+    $flags = $data[$model->alias]['flag'];
+
+    if (!$mapping) {
+      $mapping = $this->config[$model->name]['mapping'];
+    }
+    foreach ($mapping as $flag => $name) {
+      if (($flags & $flag) > 0) {
+        $data[$model->alias][$name] = true;
+      } else {
+        $data[$model->alias][$name] = false;
+      }
+    }
+  }
+
+  function implodeFlags(&$model, &$data, $mapping = false) {
+    if (!$mapping) {
+      $mapping = $this->config[$model->name]['mapping'];
+    }
+
+    $flags = 0;
+    foreach ($mapping as $flag => $name) {
+      if (isset($data[$model->alias][$name]) && $data[$model->alias][$name] > 0) {
+        $flags |= $flag;
+      }
+    }
+    $data[$model->alias]['flag'] = $flags;
+  } 
 }
+
 ?>

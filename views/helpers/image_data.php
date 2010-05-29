@@ -25,7 +25,7 @@ App::import('Core', 'Sanitize');
 
 class ImageDataHelper extends AppHelper {
 
-  var $helpers = array('Ajax', 'Html', 'Form', 'Search', 'Option');
+  var $helpers = array('Ajax', 'Html', 'Form', 'Search', 'Option', 'Session');
 
   var $Sanitize = null;
 
@@ -277,10 +277,37 @@ class ImageDataHelper extends AppHelper {
   }
 
   function _metaAccess($data) {
-    $id = $data['Media']['id'];
-    $output = '<div class="actionlist">';
-    $output .= $this->_acl2text($data);
+    $groups = array();
+    $userId = $this->Session->read('User.id');
+    foreach($data['Group'] as $id => $group) {
+      if ($group['user_id'] == $userId) {
+        $text = $this->Html->link($group['name'], $this->Search->getUri(array('groups' => $group['name'])));
+        $text .= ' (';
+        if ($group['tagging'] == GROUP_TAGGING_ONLYADD) {
+          $text .= $this->Html->image('icons/tag_blue_add.png', array('alt' => '+', 'title' => 'Tags could be added'));
+        } elseif ($group['tagging'] == GROUP_TAGGING_FULL) {
+          $text .= $this->Html->image('icons/tag_blue_edit.png', array('alt' => 'w', 'title' => 'Tags could be edited'));
+        } 
+        if ($group['media_view'] == GROUP_MEDIAVIEW_FULL) {
+          $text .= $this->Html->image('icons/disk.png', array('alt' => '+', 'title' => 'Download allowed'));
+        } 
+        $text .= $this->Html->link(
+          $this->Html->image('icons/pencil.png', array('alt' => 'edit', 'title' => 'Edit this group')), 
+          '/groups/edit/' . $group['id'], false, false, false
+          ) . ')';
+        // @TODO: Add links for edit, hints for tagging and viewing
+      
+        $groups[] = $text;
+      } elseif ($group['type'] == GROUP_TYPE_PUBLIC) {
+        $groups[] = $this->Html->link($group['name'], $this->Search->getUri(array('groups' => $group['name'])));
+      }
+    }
+    if (!count($groups)) {
+      return '';
+    }
 
+    $output = '<div class="actionlist">';
+    $output .= implode(', ', $groups);
     $output .= '</div>';
 
     return $output;
@@ -337,24 +364,25 @@ class ImageDataHelper extends AppHelper {
     if (count($locations)) {
       $cells[] = array('Locations:', implode(', ', $locations));
     }
-
-    if ($data['Media']['isOwner']) {
-      $cells[] = array('Access:', $this->_metaAccess($data));
+     
+    $groups = $this->_metaAccess($data);
+    if ($groups) {
+      $cells[] = array('Groups:', $groups);
     }
     
     // Action list 
     $output = '';
-    if ($data['Media']['canWriteTag']) {
+    if ($data['Media']['tagging'] > GROUP_TAGGING_READONLY) {
       $output = $this->Form->checkbox('selected][', array('value' => $mediaId, 'id' => 'select-'.$mediaId, 'onclick' => "selectMedia($mediaId);"));
     }
 
-    if ($data['Media']['canWriteTag']) {
+    if ($data['Media']['tagging'] > GROUP_TAGGING_READONLY) {
       $output .= ' '.$this->Ajax->link(
         $this->Html->image('icons/tag_blue_edit.png', array('alt' => 'Edit tags', 'title' => 'Edit tags')), 
         '/explorer/editmeta/'.$mediaId, 
         array('update' => 'meta-'.$mediaId), null, false);
     }
-    if ($data['Media']['canReadOriginal']) {
+    if ($data['Media']['media_view'] == GROUP_MEDIAVIEW_FULL) {
       foreach ($data['File'] as $file) {
         $output .= ' '.$this->Html->link(
           $this->Html->image('icons/disk.png', 
@@ -376,7 +404,7 @@ class ImageDataHelper extends AppHelper {
       $output .= ' '.$this->Ajax->link(
         $this->Html->image('icons/key.png', 
           array('alt' => 'Edit ACL', 'title' => 'Edit access rights')), 
-        '/explorer/editacl/'.$mediaId, 
+        '/explorer/editgroups/'.$mediaId, 
         array('update' => 'meta-'.$mediaId), null, false);
       if ($data['Media']['isDirty'])
         $output .= ' '.$this->Ajax->link(
@@ -452,14 +480,14 @@ class ImageDataHelper extends AppHelper {
   function getVisibilityIcon(&$media) {
     $icon = false;
     if (isset($media['Media']['isOwner']) && $media['Media']['isOwner']) {
-      switch ($media['Media']['visibility']) {
-        case ACL_LEVEL_OTHER: 
+      switch ($media['Media']['access']) {
+        case GROUP_ACCESS_ANONYMOUS: 
           $icon = $this->Html->image('icons/world.png', array('title' => 'This media is public visible'));;
           break;
-        case ACL_LEVEL_USER: 
+        case GROUP_ACCESS_REGISTERED: 
           $icon = $this->Html->image('icons/group.png', array('title' => 'This media is visible for users'));;
           break;
-        case ACL_LEVEL_GROUP: 
+        case GROUP_ACCESS_MEMBER: 
           $icon = $this->Html->image('icons/user.png', array('title' => 'This media is visible for group members'));;
           break;
         default: 

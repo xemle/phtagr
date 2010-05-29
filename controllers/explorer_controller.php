@@ -36,6 +36,7 @@ class ExplorerController extends AppController
     parent::beforeFilter();
     
     $this->Search->parseArgs();
+    $this->Media->setUser($this->getUser());
   }
 
   function beforeRender() {
@@ -568,6 +569,26 @@ class ExplorerController extends AppController
     //Configure::write('debug', 0);
   }
 
+  function editgroups($id) {
+    if (!$this->RequestHandler->isAjax() || !$this->RequestHandler->isPost()) {
+      Logger::warn("Decline wrong ajax request");
+      $this->redirect(null, '404');
+    }
+    $id = intval($id);
+    $user = $this->getUser();
+    $media = $this->Media->findById($id);
+    $media = $this->Media->setMediaAccess($media);
+
+    if ($media['Media']['user_id'] != $user['User']['id'] && $user['User']['role'] < ROLE_ADMIN) {
+      Logger::warn("User {$user['User']['username']} ({$user['User']['id']}) has no previleges to change groups of media ".$id);
+      $this->redirect(null, '404');
+    }
+
+    $this->set('data', $media);
+    $this->layout='bare';
+    //Configure::write('debug', 0);
+  }
+
   function saveacl($id) {
     if (!$this->RequestHandler->isAjax() || !$this->RequestHandler->isPost()) {
       Logger::warn("Decline wrong ajax request");
@@ -615,6 +636,67 @@ class ExplorerController extends AppController
     Configure::write('debug', 0);
   }
 
+  function savegroups($id) {
+    if (!$this->RequestHandler->isAjax() || !$this->RequestHandler->isPost()) {
+      Logger::warn("Decline wrong ajax request");
+      $this->redirect(null, '404');
+    }
+    $id = intval($id);
+    $this->layout='bare';
+    if (isset($this->data)) {
+      // Call find() instead of read(). read() populates resultes to the model,
+      // which causes problems at save()
+      $media = $this->Media->findById($id);
+      $user = $this->getUser();
+      $userId = $user['User']['id'];
+      if ($media['Media']['user_id'] == $user['User']['id'] || $user['User']['role'] >= ROLE_ADMIN) {
+        $this->Media->setGroups($media, $user, preg_split('/\s*,\s*/', trim($this->data['Group']['names'])));
+      } else {
+        Logger::warn("User {$user['User']['id']} denied to change groups of media {$media['Media']['id']}");
+      }
+    }
+    $media = $this->Media->findById($id);
+    $this->Media->setMediaAccess(&$media);
+    $this->set('data', $media);
+    $this->layout='bare';
+    $this->render('updatemeta');
+    Configure::write('debug', 0);
+  }
+
+
+  function autocomplete($type) {
+    if (!$this->RequestHandler->isAjax() || !$this->RequestHandler->isPost()) {
+      Logger::warn("Decline wrong ajax request");
+      $this->redirect(null, '404');
+    }
+    switch ($type) {
+      case 'group':
+        $groups = $this->Media->Group->find('all', array(
+          'fields' => 'Group.name', 
+          'conditions' => array('Group.name LIKE' => $this->data['Group']['names'] . '%'), 
+          'limit' => 6,
+          'recursive' => -1)
+          );
+        $this->data = Set::extract('/Group/name', $groups);
+        break;
+      case 'tag':
+        $tags = $this->Media->Tag->find('all', array(
+          'fields' => 'Tag.name', 
+          'conditions' => array('Tag.name LIKE' => $this->data['Tag']['names'] . '%'), 
+          'limit' => 6,
+          'recursive' => -1)
+          );
+        $this->data = Set::extract('/Tag/name', $tags);
+        break;
+      default:
+        Logger::err("Undefined autocomplete type $type");
+        $this->redirect(null, '404');
+    }
+    $this->layout = 'bare';
+    Configure::write('debug', 0);
+  }
+
+
   function sync($id) {
     if (!$this->RequestHandler->isAjax() || !$this->RequestHandler->isPost()) {
       Logger::warn("Decline wrong ajax request");
@@ -628,13 +710,13 @@ class ExplorerController extends AppController
       Logger::err("User '{$user['User']['username']}' ({$user['User']['id']}) requested non existing image id '$id'");
       $this->redirect(null, 401);
     }
-    $this->Media->setAccessFlags(&$media, $user);
+    $this->Media->setMediaAcess(&$media);
     if (!$media['Media']['isOwner']) {
       Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to sync image '$id'");
     } else {
       $this->FilterManager->write($media);
       $media =  $this->Media->findById($id);
-      $this->Media->setAccessFlags(&$media, $user);
+      $this->Media->setMediaAccess(&$media);
     }
     $this->set('data', $media);
     $this->layout='bare';

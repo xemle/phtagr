@@ -69,7 +69,7 @@ class PhtagrSchema extends CakeSchema {
 			'file' => array('type'=>'string', 'null' => false, 'length' => 254), /* should be 255. Bug: Schema::read() removes default lengths, while Schema::compare() doesn't which causes unnecessary changes */
 			'size' => array('type'=>'integer', 'null' => false),
 			'time' => array('type'=>'datetime', 'null' => false),
-			'readed' => array('type'=>'datetime', 'null' => true, 'default' => NULL),
+			'read' => array('type'=>'datetime', 'null' => true, 'default' => NULL),
 			'indexes' => array('PRIMARY' => array('column' => 'id', 'unique' => 1), 'id' => array('column' => 'id', 'unique' => 0), 'user_id' => array('column' => 'user_id', 'unique' => 0), 'media_id' => array('column' => 'media_id', 'unique' => 0))
 		);
 	var $groups = array(
@@ -181,6 +181,7 @@ class PhtagrSchema extends CakeSchema {
 			'password' => array('type'=>'string', 'null' => false, 'length' => 60),
 			'role' => array('type'=>'integer', 'null' => true, 'default' => NULL, 'length' => 3),
 			'creator_id' => array('type'=>'integer', 'null' => true, 'default' => '0', 'length' => 10),
+			'system_group_id' => array('type'=>'integer', 'null' => true, 'default' => '0', 'length' => 10),
 			'expires' => array('type'=>'datetime', 'null' => true, 'default' => NULL),
 			'key' => array('type'=>'string', 'null' => true, 'default' => NULL, 'length' => 64),
 			'quota' => array('type'=>'float', 'null' => true, 'default' => 0.0),

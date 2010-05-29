@@ -21,15 +21,21 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 class GroupsController extends AppController {
+
   var $name = 'Groups';
+
   var $uses = array('Group', 'User');
-  var $components = array('RequestHandler');
-  var $helpers = array('form', 'ajax');
+
+  var $components = array('RequestHandler', 'Security');
+
+  var $helpers = array('form', 'ajax', 'text');
+
   var $menuItems = array();
 
   function beforeFilter() {
     parent::beforeFilter();
     $this->requireRole(ROLE_USER);
+    Logger::debug($_SESSION);
   }
 
   function beforeRender() {
@@ -39,7 +45,7 @@ class GroupsController extends AppController {
 
   function index() {
     $userId = $this->getUserId();
-    $this->data = $this->Group->findAll(array('User.id' => $userId));
+    $this->data = $this->Group->findAll(array('User.id' => $userId, 'Group.type !=' => GROUP_TYPE_SYSTEM));
   }
 
   function autocomplete() {
@@ -49,8 +55,16 @@ class GroupsController extends AppController {
     $userId = $this->getUserId();
     uses('sanitize');
     $sanitize = new Sanitize();
-    $escUsername = $sanitize->escape($this->data['User']['username']);
-    $guests = $this->User->findAll("User.creator_id=$userId AND User.username LIKE '%$escUsername%'");
+    $escUsername = $sanitize->escape($this->data['Member']['username']);
+    $guests = $this->User->find('all', array(
+      'conditions' => array(
+        "User.role >=" => ROLE_USER, 
+        "User.username LIKE" => "%{$this->data['Member']['username']}%"
+        ), 
+      'fields' => array(
+        'User.username', 'User.id'
+      )));
+    Logger::debug($guest);
     $this->data = $guests;
     $this->layout = "bare";
   }
@@ -59,7 +73,7 @@ class GroupsController extends AppController {
     if (!empty($this->data)) {
       $userId = $this->getUserId();
       $this->data['Group']['user_id'] = $userId;
-      if ($this->Group->hasAny(array('name' => $this->data['Group']['name'], 'user_id' => $userId))) {
+      if ($this->Group->hasAny(array('name' => $this->data['Group']['name']))) {
         $this->Session->setFlash("Group '{$this->data['Group']['name']}' already exists");
       } elseif ($this->Group->save($this->data)) {
         $groupId = $this->Group->getLastInsertID();
@@ -81,7 +95,21 @@ class GroupsController extends AppController {
       $this->Session->setFlash("Could not find group.");
       $this->redirect("index");
     }
-    $this->data = $group;
+
+    if (!empty($this->data)) {
+      Logger::debug($this->data);
+      if (!$this->Group->save($this->data)) {
+        Logger::warn("Could not update group $groupId");
+        $this->Session->setFlash("Could not update group {$this->data['Group']['name']}");
+        $this->data = $group;
+      } else {
+        Logger::verbose("Group $groupId was updated");
+        $this->Session->setFlash("Group {$this->data['Group']['name']} was updated");
+        $this->data = $this->Group->findById($groupId);
+      }
+    } else {
+      $this->data = $group;
+    }
 
     $this->menuItems[] = array(
       'text' => 'Group '.$this->data['Group']['name'], 
@@ -115,11 +143,12 @@ class GroupsController extends AppController {
   }
 
   function addMember($groupId) {
+    Logger::debug($this->data);
     if (!empty($this->data)) {
       $userId = $this->getUserId();
       $group = $this->Group->find(array('Group.id' => $groupId, 'Group.user_id' => $userId));
       // TODO Allow only users and own guests? Currently allow all guests and users
-      $user = $this->User->findByUsername($this->data['User']['username']);
+      $user = $this->User->findByUsername($this->data['Member']['username']);
 
       if (!$group) {
         $this->Session->setFlash("Could not find given group!");
@@ -140,6 +169,7 @@ class GroupsController extends AppController {
         $this->redirect("edit/$groupId");
       }
     }
+    $this->redirect("edit/$groupId");
   }
 
   function deleteMember($groupId, $memberId) {

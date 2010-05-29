@@ -30,5 +30,6 @@
 ?>
 </fieldset>
 
-<?php echo $form->submit('Save'); ?>
-</form>
+<?php echo $form->end('Save'); ?>
+
+<?php debug($this->data); ?>

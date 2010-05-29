@@ -16,9 +16,6 @@
 </script>
 <?php
 $cell=0;
-$canWriteTag=false;
-$canWriteMeta=false;
-$canWriteAcl=false;
 $pos = ($search->getPage(1)-1) * $search->getShow(12) + 1;
 foreach ($this->data as $media): ?>
 <?php $side = $cell % 2 ? 'r' : 'l'; ?>
@@ -38,15 +35,6 @@ foreach ($this->data as $media): ?>
   echo "<img src=\"".Router::url("/media/thumb/".$media['Media']['id'])."\" $size[3] alt=\"".$media['Media']['name']."\"/>"; 
   echo "</a>";
 
-  if ($media['Media']['canWriteTag']) {
-    $canWriteTag=true;
-  }
-  if ($media['Media']['canWriteMeta']) {
-    $canWriteMeta=true;
-  }
-  if ($media['Media']['canWriteAcl']) {
-    $canWriteAcl=true;
-  }
 ?>
 </div>
 
@@ -82,7 +70,12 @@ foreach ($this->data as $media): ?>
 <?php /* fix for odd number */ if ($cell % 2): ?></div><!-- subcolumns --><?php endif; ?>
 </div>
 
-<?php if ($canWriteTag): ?>
+<?php 
+  $canTag = max(Set::extract('/Media/tagging', $this->data)) > GROUP_TAGGING_READONLY ? true : false;
+  $isOwner = in_array(true, Set::extract('/Media/isOwner', $this->data));
+?>
+
+<?php if ($canTag): ?>
 <div class="paginator"><div class="subpaginator">
 <a href="javascript:void(0);" onclick="thumbSelectAll();">Select All</a>
 <a href="javascript:void(0);" onclick="thumbSelectInvert();">Invert Selection</a>
@@ -97,10 +90,10 @@ foreach ($this->data as $media): ?>
 
 <div class="edit">
 
-<?php if ($canWriteTag): ?>
+<?php if ($canTag): ?>
 <?php 
   $items = array(array('name' => "Metadata", 'active' => true));
-  if ($canWriteAcl) {
+  if ($isOwner) {
     $items[] = "Access Rights";
   }
   echo $tab->menu($items);
@@ -112,40 +105,32 @@ foreach ($this->data as $media): ?>
 <fieldset>
 <?php echo $form->hidden('Media.ids', array('id' => 'MediaIds')) ?>
 <?php 
-  if ($canWriteMeta) {
+  if ($canTag) {
     echo $form->input('Media.date', array('type' => 'text', 'after' => '<span class="hint">E.g. 2008-08-07 15:30</span>')); 
   }
   echo $form->input('Tags.text', array('label' => 'Tags', 'maxlength' => 320, 'after' => '<span class="hint">E.g. newtag, -oldtag</span>')); 
-  if ($canWriteMeta) {
-    echo $form->input('Categories.text', array('label' => 'Categories', 'maxlength' => 320)); 
-    echo $form->input('Locations.city', array('maxlength' => 32));
-    echo $form->input('Locations.sublocation', array('maxlength' => 32));
-    echo $form->input('Locations.state', array('maxlength' => 32));
-    echo $form->input('Locations.country', array('maxlength' => 32));
-    echo $form->input('Media.geo', array('label' => 'Geo data', 'maxlength' => 32, 'after' => '<span class="hint">latitude, longitude</span>'));
-  }
+  
+  echo '<div class="input text">'. $form->label('Tag') . $ajax->autocomplete('Tags.names', 'autocomplete/tag', array('maxlength' => 320)) . '<span class="hint">E.g. newtag, -oldtag</span>' . '</div>'; 
+
+  echo $form->input('Categories.text', array('label' => 'Categories', 'maxlength' => 320)); 
+  echo $form->input('Locations.city', array('maxlength' => 32));
+  echo $form->input('Locations.sublocation', array('maxlength' => 32));
+  echo $form->input('Locations.state', array('maxlength' => 32));
+  echo $form->input('Locations.country', array('maxlength' => 32));
+  echo $form->input('Media.geo', array('label' => 'Geo data', 'maxlength' => 32, 'after' => '<span class="hint">latitude, longitude</span>'));
 ?>
 </fieldset>
 <?php echo $tab->close(); ?>
-<?php if ($canWriteAcl): ?>
+<?php if ($isOwner): ?>
 <?php echo $tab->open(1); ?>
 <fieldset>
 <?php
-  $aclSelect = array(
-    ACL_LEVEL_KEEP => '[Keep]',
-    ACL_LEVEL_OTHER => 'Everyone',
-    ACL_LEVEL_USER => 'Users',
-    ACL_LEVEL_GROUP => 'Group members',
-    ACL_LEVEL_PRIVATE => 'Me only');
-  echo $form->input('acl.read.preview', array('type' => 'select', 'options' => $aclSelect, 'selected' => ACL_LEVEL_KEEP, 'label' => "Who can view the image?"));
-  echo $form->input('acl.read.original', array('type' => 'select', 'options' => $aclSelect, 'selected' => ACL_LEVEL_KEEP, 'label' => "Who can download the image?"));
-  echo $form->input('acl.write.tag', array('type' => 'select', 'options' => $aclSelect, 'selected' => ACL_LEVEL_KEEP, 'label' => "Who can add tags?"));
-  echo $form->input('acl.write.meta', array('type' => 'select', 'options' => $aclSelect, 'selected' => ACL_LEVEL_KEEP, 'label' => "Who can edit all meta data?"));
-  echo $form->input('Group.id', array('type' => 'select', 'options' => $groups, 'selected' => 0, 'label' => "Default image group?"));
+  echo $ajax->autocomplete('Group.names', 'autocomplete/group', array('tokens' => ','));
 ?>
 </fieldset>
 <?php echo $tab->close(); ?>
-<?php endif; // canWriteAcl==true ?>
+<?php endif; // isOwner == true ?>
+
 <?php echo $form->end('Apply'); ?>
-<?php endif; // canWriteTag==true ?>
+<?php endif; // canTag == true ?>
 </div>
