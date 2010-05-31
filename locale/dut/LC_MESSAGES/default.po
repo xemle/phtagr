@@ -1,0 +1,1352 @@
+# LANGUAGE translation of CakePHP Application
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from file: Revision: 6527 /app/webroot/test.php
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2010-05-07 23:36+0200\n"
+"PO-Revision-Date: 2010-05-31 20:37+0100\n"
+"Last-Translator: Remy Wetzels <remy@wh.nl>\n"
+"Language-Team: Remy Wetzels <r.wetzels@chello.nl>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Poedit-Language: Dutch\n"
+"X-Poedit-Country: NETHERLANDS\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+#: /controllers/browser_controller.php:50
+#: /views/elements/menu.ctp:31
+msgid "My Files"
+msgstr "Mijn bestanden"
+
+#: /controllers/browser_controller.php:60
+msgid "Import Files"
+msgstr "Bestanden inlezen"
+
+#: /controllers/browser_controller.php:62;64
+#: /views/browser/upload.ctp:14
+msgid "Upload"
+msgstr "Uploaden"
+
+#: /controllers/browser_controller.php:66
+msgid "Synchronize"
+msgstr "Synchroniseren"
+
+#: /controllers/browser_controller.php:67
+msgid "Overview"
+msgstr "Overzicht"
+
+#: /controllers/comments_controller.php:57
+msgid "Invalid Comment."
+msgstr "Ongeldig kommentaar."
+
+#: /controllers/comments_controller.php:115
+msgid "The Comment has been saved"
+msgstr "Het kommentaar is opgeslagen"
+
+#: /controllers/comments_controller.php:123
+msgid "The Comment could not be saved. Please, try again."
+msgstr "Het kommentaar kon niet worden opgeslagen. Probeer opnieuw."
+
+#: /controllers/comments_controller.php:225
+msgid "Invalid id for Comment"
+msgstr "Verkeerd id voor het kommentaar"
+
+#: /controllers/comments_controller.php:239
+msgid "Comment deleted"
+msgstr "Kommentaar verwijderd"
+
+#: /controllers/explorer_controller.php:51
+#: /views/explorer/index.ctp:134
+msgid "[Keep]"
+msgstr "[Behouden]"
+
+#: /controllers/explorer_controller.php:52
+#: /controllers/options_controller.php:73
+msgid "[No Group]"
+msgstr "[Geen groep]"
+
+#: /controllers/groups_controller.php:63
+msgid "Group '%s' already exists"
+msgstr "Groep '%s' bestaat al"
+
+#: /controllers/groups_controller.php:69
+msgid "Add successfully group '%s'"
+msgstr "Groep '%s' toegevoegd"
+
+#: /controllers/groups_controller.php:72
+msgid "Could not add group '%s'!"
+msgstr "Kan groep '%s' niet toevoegen!"
+
+#: /controllers/groups_controller.php:81;112;125;149;155
+msgid "Could not find group"
+msgstr "Kan de groep niet vinden"
+
+#: /controllers/groups_controller.php:87
+#: /views/groups/edit.ctp:1
+msgid "Group: %s"
+msgstr "Groep: %s"
+
+#: /controllers/groups_controller.php:92
+#: /controllers/guests_controller.php:85
+#: /views/guests/index.ctp:23
+msgid "Edit"
+msgstr "Bewerken"
+
+#: /controllers/groups_controller.php:110
+msgid "Successfully deleted group '%s'"
+msgstr "Groep '%s' verwijderd"
+
+#: /controllers/groups_controller.php:128
+msgid "Could not find user with username '%s'"
+msgstr "Kan de gebruiker met gebruikersnaam '%s' niet vinden"
+
+#: /controllers/groups_controller.php:136
+msgid "Add user '%s' to group '%s'"
+msgstr "Voeg gebruiker '%s' aan groep '%s' toe"
+
+#: /controllers/groups_controller.php:138
+msgid "Could not add user '%s' to group '%s'!"
+msgstr "Kan gebruiker '%s' niet aan groep '%s' toevoegen!"
+
+#: /controllers/groups_controller.php:160
+msgid "Could not save group"
+msgstr "Kan groep niet bewaren"
+
+#: /controllers/groups_controller.php:164
+msgid "Member was successfully deleted from group '%s'"
+msgstr "Gebruiker is verwijderd van groep '%s'"
+
+#: /controllers/groups_controller.php:173
+msgid "List groups"
+msgstr "Groepenlijst"
+
+#: /controllers/groups_controller.php:174
+msgid "Add group"
+msgstr "Voeg groep toe"
+
+#: /controllers/guests_controller.php:64
+msgid "Sorry. Username is already taken"
+msgstr "Sorry. Gebruikersnaam is al in gebruik"
+
+#: /controllers/guests_controller.php:70
+msgid "Guest account '%s' was successfully created"
+msgstr "Gast code '%s' is aangemaakt"
+
+#: /controllers/guests_controller.php:73
+msgid "Sorry. Guest account could not created"
+msgstr "Sorry. Gast account kon niet worden aangemaakt"
+
+#: /controllers/guests_controller.php:80
+#: /views/guests/edit.ctp:1
+msgid "Guest: %s"
+msgstr "Gast: %s"
+
+#: /controllers/guests_controller.php:89
+msgid "Links"
+msgstr "Links"
+
+#: /controllers/guests_controller.php:102
+msgid "Sorry. Could not find requested guest"
+msgstr "Sorry. Kan de gast niet vinden"
+
+#: /controllers/guests_controller.php:111
+msgid "Guest data were saved"
+msgstr "Gast gegevens opgeslagen"
+
+#: /controllers/guests_controller.php:117
+msgid "Updates could not be saved!"
+msgstr "Veranderingen konden niet worden opgeslagen!"
+
+#: /controllers/guests_controller.php:133
+msgid "Could not find requested guest"
+msgstr "Kon de opgevraagde gast niet vinden"
+
+#: /controllers/guests_controller.php:137
+msgid "Guest account '%s' deleted!"
+msgstr "Gast account '%s' verwijderd!"
+
+#: /controllers/home_controller.php:49
+#: /views/elements/menu.ctp:6
+msgid "Home"
+msgstr "Home"
+
+#: /controllers/options_controller.php:60
+msgid "Settings saved"
+msgstr "Instellingen opgeslagen"
+
+#: /controllers/options_controller.php:86
+msgid "Could not save profile!"
+msgstr "Kan profiel niet opslaan!"
+
+#: /controllers/options_controller.php:89
+msgid "Profile saved"
+msgstr "Profiel opgeslagen"
+
+#: /controllers/options_controller.php:115
+#: /views/options/profile.ctp:1
+msgid "Profile"
+msgstr "Profiel"
+
+#: /controllers/options_controller.php:116
+msgid "Guest Accounts"
+msgstr "Gast accounts"
+
+#: /controllers/options_controller.php:117
+#: /views/groups/index.ctp:1
+#: /views/guests/index.ctp:10
+msgid "Groups"
+msgstr "Groepen"
+
+#: /controllers/options_controller.php:119
+#: /views/explorer/index.ctp:104
+#: /views/options/acl.ctp:1
+msgid "Access Rights"
+msgstr "Toegangsrechten"
+
+#: /controllers/options_controller.php:120
+#: /views/guests/links.ctp:21
+msgid "RSS"
+msgstr "RSS"
+
+#: /controllers/setup_controller.php:253
+msgid "Could not write configuration to '%s'"
+msgstr "Kan configuratie niet schrijven naar '%s'"
+
+#: /controllers/setup_controller.php:260
+msgid "Update core settings"
+msgstr "Basis instellingen gewijzigd"
+
+#: /controllers/setup_controller.php:356
+msgid "Could not write database configuration file"
+msgstr "Kan database configuratie bestand niet schrijven"
+
+#: /controllers/setup_controller.php:387
+msgid "Could not connect to database. Please check your database configuration!"
+msgstr "Kan geen verbinding naar de database maken. Controleer uw database instellingen"
+
+#: /controllers/setup_controller.php:417
+msgid "All required tables are created"
+msgstr "Alle benodigde tabellen zijn aangemaakt"
+
+#: /controllers/setup_controller.php:421
+msgid "Could not create tables correctly. Please see logfile for details"
+msgstr "Kan de tabellen niet correct aanmaken. Bekijk het logbestand voor meer informatie"
+
+#: /controllers/setup_controller.php:449
+msgid "Admin account was successfully created"
+msgstr "Administratie code met succes aangemaakt"
+
+#: /controllers/setup_controller.php:453
+msgid "Could not create admin account. Please retry"
+msgstr "Kan administratie code niet aanmaken. Probeer opnieuw"
+
+#: /controllers/setup_controller.php:581
+msgid "Database was upgraded successfully"
+msgstr "Database is met succes vernieuwd"
+
+#: /controllers/setup_controller.php:584
+msgid "The database could not upgraded completely. The log file might discover the issue"
+msgstr "De database kon niet worden vernieuwd. Het logbestand kan meer informatie bevatten omtrent het probleem"
+
+#: /controllers/system_controller.php:68
+#: /views/images/view.ctp:32
+#: /views/options/profile.ctp:6
+#: /views/system/admin_general.ctp:1;6
+msgid "General"
+msgstr "Algemeen"
+
+#: /controllers/system_controller.php:69
+msgid "User Accounts"
+msgstr "Gebruikers"
+
+#: /controllers/system_controller.php:70
+#: /views/setup/system.ctp:1
+#: /views/system/admin_external.ctp:6
+msgid "External Programs"
+msgstr "Externe programma's"
+
+#: /controllers/users_controller.php:39
+msgid "List users"
+msgstr "Gebruikerslijst"
+
+#: /controllers/users_controller.php:40
+msgid "Add user"
+msgstr "Gebruiker toevoegen"
+
+#: /controllers/users_controller.php:41
+msgid "Registration"
+msgstr "Registratie"
+
+#: /controllers/components/upgrade_schema.php:196
+msgid "Model '%s' does not exists"
+msgstr "Model '%s' bestaat niet"
+
+#: /views/browser/folder.ctp:1
+msgid "Create Folder"
+msgstr "Map aanmaken"
+
+#: /views/browser/folder.ctp:5
+#: /views/browser/index.ctp:7;16
+msgid "Location %s"
+msgstr "Lokatie %s"
+
+#: /views/browser/folder.ctp:9
+msgid "Folder Name"
+msgstr "Map naam"
+
+#: /views/browser/folder.ctp:11
+#: /views/groups/add.ctp:13
+#: /views/guests/add.ctp:15
+#: /views/setup/user.ctp:15
+msgid "Create"
+msgstr "Aanmaken"
+
+#: /views/browser/import.ctp:1
+msgid "Browser"
+msgstr "Browser"
+
+#: /views/browser/import.ctp:5
+msgid "View folder %s"
+msgstr "Bekijk map %s"
+
+#: /views/browser/index.ctp:1
+msgid "File Browser"
+msgstr "Bestands verkenner"
+
+#: /views/browser/index.ctp:9;18
+msgid " (%s or %s here)"
+msgstr "(%s of %s hier)"
+
+#: /views/browser/index.ctp:10;19
+msgid "Upload files"
+msgstr "Bestanden uploaden"
+
+#: /views/browser/index.ctp:11;20
+msgid "create folder"
+msgstr "map aanmaken"
+
+#: /views/browser/index.ctp:24
+msgid "Import"
+msgstr "Importeren"
+
+#: /views/browser/sync.ctp:1
+msgid "File Synchronization"
+msgstr "Bestandssynchronisatie"
+
+#: /views/browser/sync.ctp:4
+msgid "Some files could not be updated with new metadata. Mainly this happens if the files are write protected. Please have a look to the log files for details."
+msgstr "Bepaalde bestanden konden niet gewijzigd worden. Dat gebeurd meestal als de bestanden niet beschrijfbaar zijn. Bekijk de logbestanden voor meer informatie."
+
+#: /views/browser/sync.ctp:9
+msgid "Synchronized %d of %d media"
+msgstr "%s van %s media bestanden gesynchroniseerd"
+
+#: /views/browser/sync.ctp:11
+msgid " %d media remains unsynced. %s"
+msgstr "%d media bestanden blijven ongesynchroniseerd. %s"
+
+#: /views/browser/sync.ctp:11
+msgid "Synchronize again?"
+msgstr "Opnieuw synchroniseren?"
+
+#: /views/browser/sync.ctp:15
+msgid "All media are synchronized"
+msgstr "Alle media is gesynchroniseerd"
+
+#: /views/browser/upload.ctp:1
+msgid "File Upload"
+msgstr "Bestand upload"
+
+#: /views/browser/upload.ctp:5
+msgid "You upload files to folder %s"
+msgstr "U upload bestanden naar map %s"
+
+#: /views/browser/upload.ctp:6
+msgid "You can upload maximal %s and %s at once"
+msgstr "U kan maximaal %s van %s ineens uploaden"
+
+#: /views/browser/upload.ctp:11
+msgid "Extract ZIP archive"
+msgstr "ZIP archief uitpakken"
+
+#: /views/browser/view.ctp:1
+msgid "File Overview"
+msgstr "Bestandsoverzicht"
+
+#: /views/browser/view.ctp:5
+msgid "Description"
+msgstr "Beschrijving"
+
+#: /views/browser/view.ctp:5
+msgid "Value"
+msgstr "Waarde"
+
+#: /views/browser/view.ctp:10
+msgid "Files total"
+msgstr "Bestanden totaal"
+
+#: /views/browser/view.ctp:11
+msgid "Count of images/videos"
+msgstr "Som van beelden/video's"
+
+#: /views/browser/view.ctp:13
+msgid "External images/videos"
+msgstr "Externe beelden/video's"
+
+#: /views/browser/view.ctp:14
+msgid "Bytes total (with external sources)"
+msgstr "Bytes totaal (met externe bronnen)"
+
+#: /views/browser/view.ctp:16
+msgid "Bytes total"
+msgstr "Bytes totaal"
+
+#: /views/browser/view.ctp:19
+msgid "Quota (free)"
+msgstr "Quota (vrij)"
+
+#: /views/browser/view.ctp:21
+msgid "Videos"
+msgstr "Video's"
+
+#: /views/browser/view.ctp:22
+msgid "Public files"
+msgstr "Publieke bestanden"
+
+#: /views/browser/view.ctp:23
+msgid "Visible for users"
+msgstr "Zichtbaar voor gebruikers"
+
+#: /views/browser/view.ctp:24
+msgid "Visible for group members"
+msgstr "Zichtbaar voor groepsleden"
+
+#: /views/browser/view.ctp:25
+msgid "Private files"
+msgstr "Prive bestanden"
+
+#: /views/browser/view.ctp:26
+msgid "Unsynced files"
+msgstr "Niet gesynchroniseerde bestanden"
+
+#: /views/elements/comment.ctp:7
+#: /views/guests/edit.ctp:19
+msgid "Comments"
+msgstr "Kommentaar"
+
+#: /views/elements/comment.ctp:22
+msgid "(delete)"
+msgstr "(verwijderen)"
+
+#: /views/elements/comment.ctp:34
+msgid "Add new Comment"
+msgstr "Nieuw kommentaat toevoegen"
+
+#: /views/elements/comment.ctp:42
+#: /views/groups/add.ctp:9
+#: /views/groups/index.ctp:9
+#: /views/guests/edit.ctp:23
+#: /views/guests/index.ctp:9
+msgid "Name"
+msgstr "Naam"
+
+#: /views/elements/comment.ctp:43
+msgid "Will not be published"
+msgstr "Wordt niet gepubliceerd"
+
+#: /views/elements/comment.ctp:44
+msgid "Optional"
+msgstr "Optioneel"
+
+#: /views/elements/comment.ctp:48
+msgid "Verification"
+msgstr "Verifikatie"
+
+#: /views/elements/comment.ctp:52
+msgid "Comment"
+msgstr "Kommentaar"
+
+#: /views/elements/comment.ctp:53
+msgid "Notify me on new comments"
+msgstr "Alarmeer mij bij nieuwe kommentaren"
+
+#: /views/elements/comment.ctp:56
+msgid "Add Comment"
+msgstr "Kommentaar toevoegen"
+
+#: /views/elements/menu.ctp:19;36
+#: /views/images/notfound.ctp:3
+msgid "Explorer"
+msgstr "Verkenner"
+
+#: /views/elements/menu.ctp:25
+msgid "My Photos"
+msgstr "Mijn foto's"
+
+#: /views/elements/topnav.ctp:7
+msgid "System"
+msgstr "Systeem"
+
+#: /views/elements/topnav.ctp:10
+msgid "Preferences"
+msgstr "Voorkeuren"
+
+#: /views/elements/topnav.ctp:12
+msgid "Logout"
+msgstr "Afmelden"
+
+#: /views/elements/topnav.ctp:14
+msgid "Login"
+msgstr "Aanmelden"
+
+#: /views/elements/topnav.ctp:16
+msgid "Register"
+msgstr "Registreren"
+
+#: /views/explorer/editacl.ctp:7
+msgid "Who can view image?"
+msgstr "Wie kan een beeld zien"
+
+#: /views/explorer/editacl.ctp:8
+#: /views/explorer/index.ctp:140
+#: /views/options/acl.ctp:15
+msgid "Who can download the image?"
+msgstr "Wie kan een beeld downloaden"
+
+#: /views/explorer/editacl.ctp:9
+msgid "Who can edit the tags?"
+msgstr "Wie kan labels wijzigen"
+
+#: /views/explorer/editacl.ctp:10
+#: /views/explorer/index.ctp:142
+#: /views/options/acl.ctp:17
+msgid "Who can edit all meta data?"
+msgstr "Wie kan alle meta gegevens wijzigen?"
+
+#: /views/explorer/editacl.ctp:11
+#: /views/groups/edit.ctp:40
+#: /views/guests/edit.ctp:41;70
+msgid "Group"
+msgstr "Groep"
+
+#: /views/explorer/editacl.ctp:15
+#: /views/explorer/editmeta.ctp:31
+#: /views/guests/edit.ctp:33
+#: /views/options/acl.ctp:21
+#: /views/options/profile.ctp:21
+#: /views/setup/system.ctp:33
+#: /views/system/admin_external.ctp:20
+#: /views/system/admin_general.ctp:12
+msgid "Save"
+msgstr "Opslaan"
+
+#: /views/explorer/editacl.ctp:16
+#: /views/explorer/editmeta.ctp:32
+#: /views/setup/admin_upgrade.ctp:10
+msgid "Cancel"
+msgstr "Afbreken"
+
+#: /views/explorer/editmeta.ctp:15
+#: /views/helpers/image_data.php:350
+msgid "Date"
+msgstr "Datum"
+
+#: /views/explorer/editmeta.ctp:16
+#: /views/explorer/index.ctp:118
+#: /views/helpers/explorer_menu.php:207
+#: /views/helpers/image_data.php:353
+msgid "Tags"
+msgstr "Labels"
+
+#: /views/explorer/editmeta.ctp:17
+#: /views/explorer/index.ctp:120
+#: /views/helpers/explorer_menu.php:212
+#: /views/helpers/image_data.php:356
+msgid "Categories"
+msgstr "Kategorie"
+
+#: /views/explorer/editmeta.ctp:18
+#: /views/explorer/index.ctp:121
+msgid "City"
+msgstr "Stad"
+
+#: /views/explorer/editmeta.ctp:19
+msgid "Sublocation"
+msgstr "Sub lokatie"
+
+#: /views/explorer/editmeta.ctp:20
+#: /views/explorer/index.ctp:122
+msgid "State"
+msgstr "Staat"
+
+#: /views/explorer/editmeta.ctp:21
+#: /views/explorer/index.ctp:123
+msgid "Country"
+msgstr "Land"
+
+#: /views/explorer/editmeta.ctp:27
+#: /views/explorer/index.ctp:124
+msgid "Geo data"
+msgstr "Geo gegevens"
+
+#: /views/explorer/index.ctp:87
+msgid "Select All"
+msgstr "Selekteer allemaal"
+
+#: /views/explorer/index.ctp:88
+msgid "Invert Selection"
+msgstr "Selektie omkeren"
+
+#: /views/explorer/index.ctp:102
+msgid "Metadata"
+msgstr "Meta gegevens"
+
+#: /views/explorer/index.ctp:116
+msgid "E.g. 2008-08-07 15:30"
+msgstr "Bijv. 2008-08-07 15:30"
+
+#: /views/explorer/index.ctp:118
+msgid "E.g. newtag, -oldtag"
+msgstr "Bijv. nieuwelabel, -oudelabel"
+
+#: /views/explorer/index.ctp:124
+msgid "latitude, longitude"
+msgstr "breedte, hoogte"
+
+#: /views/explorer/index.ctp:135
+#: /views/helpers/image_data.php:472
+#: /views/options/acl.ctp:5
+msgid "Everyone"
+msgstr "Iedereen"
+
+#: /views/explorer/index.ctp:136
+#: /views/helpers/image_data.php:471
+msgid "Users"
+msgstr "Gebruikers"
+
+#: /views/explorer/index.ctp:137
+#: /views/helpers/image_data.php:470
+msgid "Group members"
+msgstr "Groepsleden"
+
+#: /views/explorer/index.ctp:138
+#: /views/helpers/image_data.php:469
+#: /views/options/acl.ctp:8
+msgid "Me only"
+msgstr "Alleen mijzelf"
+
+#: /views/explorer/index.ctp:139
+#: /views/options/acl.ctp:14
+msgid "Who can view the image?"
+msgstr "Wie kan het beeld zien?"
+
+#: /views/explorer/index.ctp:141
+#: /views/options/acl.ctp:16
+msgid "Who can add tags?"
+msgstr "Wie kan labels toevoegen?"
+
+#: /views/explorer/index.ctp:143
+#: /views/options/acl.ctp:18
+msgid "Default image group?"
+msgstr "Standaard beeld groep?"
+
+#: /views/explorer/index.ctp:148
+msgid "Apply"
+msgstr "Toepassen"
+
+#: /views/groups/add.ctp:1
+msgid "New Group"
+msgstr " Nieuwe groep"
+
+#: /views/groups/add.ctp:7
+msgid "Create new group"
+msgstr "Nieuwe groep aanmaken"
+
+#: /views/groups/edit.ctp:6
+msgid "Member List"
+msgstr "Leden lijst"
+
+#: /views/groups/edit.ctp:10
+msgid "Member"
+msgstr "Lid"
+
+#: /views/groups/edit.ctp:11
+#: /views/groups/index.ctp:11
+#: /views/guests/edit.ctp:42
+#: /views/guests/index.ctp:11
+#: /views/helpers/image_data.php:420
+msgid "Actions"
+msgstr "Acties"
+
+#: /views/groups/edit.ctp:24
+msgid "Do you really want to delete the member '%s' from this group '%s'?"
+msgstr "Weet U zeker dat U het lid '%s' van deze groep '%s' verwijderen wilt?"
+
+#: /views/groups/edit.ctp:26
+#: /views/guests/index.ctp:26
+msgid "Delete"
+msgstr "Verwijderen"
+
+#: /views/groups/edit.ctp:34
+msgid "Currently this group has no members. Please add users to grant access to your private images."
+msgstr "Deze groep heeft op dit moment geen leden. Voeg gebruikers toe om toegang te verlenen aan uw eigen beelden."
+
+#: /views/groups/edit.ctp:39
+msgid "Add member"
+msgstr "Lid toevoegen"
+
+#: /views/groups/edit.ctp:43
+msgid "Add"
+msgstr "Voeg toe"
+
+#: /views/groups/edit.ctp:45
+msgid "Show all groups"
+msgstr "Alle groepen tonen"
+
+#: /views/groups/index.ctp:10
+msgid "Members"
+msgstr "Leden"
+
+#: /views/groups/index.ctp:35
+msgid "Currently no image groups are assigned. At the one hand each image could be assigned to a specific group. On the other hand a guest can be member of a set of groups. The guest is than able to view the images from his groups."
+msgstr "Er zijn momenteel geen beeld groepen toegewezen. U kunt elk beeld aan een specifieke groep toewijzen. Een gast kan lid zijn van een aantal groepen. De gast heeft dan de mogelijkheid om de beelden van die groep te bekijken."
+
+#: /views/guests/add.ctp:1
+msgid "Guest Creation"
+msgstr "Aanmaken gast"
+
+#: /views/guests/add.ctp:7
+msgid "Create new guest account"
+msgstr "Nieuwe gast code aanmaken"
+
+#: /views/guests/add.ctp:9
+#: /views/options/profile.ctp:8
+#: /views/setup/config.ctp:13
+#: /views/setup/user.ctp:9
+msgid "Username"
+msgstr "Gebruikersnaam"
+
+#: /views/guests/add.ctp:10
+#: /views/guests/edit.ctp:8;15
+#: /views/options/profile.ctp:11
+#: /views/setup/user.ctp:12
+msgid "Email"
+msgstr "E-mail"
+
+#: /views/guests/add.ctp:11
+#: /views/guests/edit.ctp:13
+#: /views/options/profile.ctp:15;17
+#: /views/setup/config.ctp:14
+#: /views/setup/user.ctp:10
+msgid "Password"
+msgstr "Wachtwoord"
+
+#: /views/guests/add.ctp:12
+#: /views/guests/edit.ctp:16
+#: /views/options/profile.ctp:18
+#: /views/setup/user.ctp:11
+msgid "Confirm"
+msgstr "Bevestigen"
+
+#: /views/guests/edit.ctp:6
+msgid "Guest"
+msgstr "Gast"
+
+#: /views/guests/edit.ctp:9
+msgid "Expires"
+msgstr "Verloopt"
+
+#: /views/guests/edit.ctp:10
+msgid "Enable WebDAV access"
+msgstr "WebDAV toegang aanzetten"
+
+#: /views/guests/edit.ctp:22
+msgid "None"
+msgstr "Geen"
+
+#: /views/guests/edit.ctp:24
+msgid "Name and captcha"
+msgstr "Naam en captcha"
+
+#: /views/guests/edit.ctp:28
+msgid "Authentication"
+msgstr "Authenticatie"
+
+#: /views/guests/edit.ctp:37
+msgid "Group List"
+msgstr "Groepslijst"
+
+#: /views/guests/edit.ctp:65
+msgid "Currently this guest account has no assigned groups. Please add groups to grant access to your personal images."
+msgstr "Dit gast account heeft momenteel geen toegewezen groepen. Voeg groepen toe om toegang tot uw eigen beelden te geven."
+
+#: /views/guests/edit.ctp:69
+msgid "Group Assignements"
+msgstr "Groepstoewijzingen"
+
+#: /views/guests/edit.ctp:73
+msgid "Add Group"
+msgstr "Groep toevoegen"
+
+#: /views/guests/index.ctp:1
+#: /views/options/acl.ctp:7
+msgid "Guests"
+msgstr "Gasten"
+
+#: /views/guests/index.ctp:35
+msgid "Currently, no guest accounts are set. You can create guests accounts to grant access to your images e.g. to your friends or family. Please add also some groups to the guest to grant access to this guest for these groups."
+msgstr "Op dit moment zijn er geen gast accounts gezet. U kunt gast account aanmaken om toegang te geven tot uw beelden aan bijvoorbeeld uw vrienden of familie. Voeg ook enkele groepen toe aan deze gast om de gast toegang te geven voor deze groepen."
+
+#: /views/guests/links.ctp:1
+msgid "Authenticated Links"
+msgstr "Geauthentiseerde links"
+
+#: /views/guests/links.ctp:4
+msgid "Following links contains an authentication key which should be used carefully. Copy the links with with right mouse click and select <i>Copy link address</i>."
+msgstr "De volgende links bevatten een authenticatie sleutel die zorgvuldig gebruikt dient te worden. Kopi&euml;er de links met de rechter muisknop en selecteer <i>Copy link address</i>."
+
+#: /views/guests/links.ctp:7
+#: /views/options/rss.ctp:7
+msgid "The links are valid for the current session. For permanent login the user has to login via username and password."
+msgstr "De links zijn geldig voor de huidige sessie. Voor permanente aangemeldt te zijn, meld u aan met gebruikersnaam en wachtwoord."
+
+#: /views/guests/links.ctp:9
+msgid "Direct Link"
+msgstr "Direkte link"
+
+#: /views/guests/links.ctp:11
+msgid "Following link provides a direct link to <i>My Photos</i> of the guest which omits the login with username and password."
+msgstr "De volgende links geven een direkte link naar <i>Mijn foto's</i> van de gast die de aanmelding met gebruikersnaam en wachtwoord overslaat."
+
+#: /views/guests/links.ctp:23
+msgid "Following links provide a authenticated RSS and Media RSS links."
+msgstr "Volgende links bevatten een geautheniseerde RSS en een Media RSS link."
+
+#: /views/guests/links.ctp:31
+msgid "Recent Media"
+msgstr "Recente media"
+
+#: /views/guests/links.ctp:32
+#: /views/home/index.ctp:65
+#: /views/options/rss.ctp:11
+msgid "Recent Comments"
+msgstr "Recent kommentaar"
+
+#: /views/guests/links.ctp:33
+#: /views/options/rss.ctp:12
+msgid "Media RSS"
+msgstr "Media RSS"
+
+#: /views/guests/links.ctp:34
+msgid "Media RSS of My Media"
+msgstr "Media RSS van Mijn Media"
+
+#: /views/guests/links.ctp:37
+msgid "Click %s to renew the authentication key. All previous links become invalid."
+msgstr "Klik %s om de authenticatie sleutel te vernieuwen. Alle vorige links worden hiermee ongeldig."
+
+#: /views/guests/links.ctp:37
+#: /views/options/rss.ctp:15
+msgid "renew key"
+msgstr "Sleutel vernieuwen"
+
+#: /views/helpers/explorer_menu.php:62
+msgid "Show media in high quality (if available)"
+msgstr "Bekijk media in hoge kwaliteit (indien voorhanden)"
+
+#: /views/helpers/explorer_menu.php:66
+msgid "Start Slideshow"
+msgstr "Slideshow starten"
+
+#: /views/helpers/explorer_menu.php:125
+msgid "Order"
+msgstr "Volgorde"
+
+#: /views/helpers/explorer_menu.php:130
+msgid "Show oldest first"
+msgstr "Oudste eerst tonen"
+
+#: /views/helpers/explorer_menu.php:134
+msgid "Show newest first"
+msgstr "Nieuwste eerst tonen"
+
+#: /views/helpers/explorer_menu.php:138
+msgid "Show popular first"
+msgstr "Populairste eerst tonen"
+
+#: /views/helpers/explorer_menu.php:142
+msgid "Show random order"
+msgstr "In willekeurige volgorde tonen"
+
+#: /views/helpers/explorer_menu.php:146
+msgid "Show changes first"
+msgstr "Wijzigingen eerst tonen"
+
+#: /views/helpers/explorer_menu.php:150
+msgid "Show last views first"
+msgstr "Laatste eerst tonen"
+
+#: /views/helpers/explorer_menu.php:167
+msgid "Pagesize"
+msgstr "Pagina grootte"
+
+#: /views/helpers/explorer_menu.php:200
+msgid "Advanced Search"
+msgstr "Uitgebreid zoeken"
+
+#: /views/helpers/explorer_menu.php:217
+#: /views/helpers/image_data.php:367
+msgid "Locations"
+msgstr "Lokaties"
+
+#: /views/helpers/explorer_menu.php:223
+msgid "Options"
+msgstr "Opties"
+
+#: /views/helpers/image_data.php:271
+msgid "View media of previous dates"
+msgstr "Bekijk de media van vorige datums"
+
+#: /views/helpers/image_data.php:274
+msgid "View media of this day"
+msgstr "Bekijk de media van vandaag"
+
+#: /views/helpers/image_data.php:277
+msgid "View media of this week"
+msgstr "Bekijk de media van deze week"
+
+#: /views/helpers/image_data.php:280
+msgid "View media of this month"
+msgstr "Bekijk de media van deze maand"
+
+#: /views/helpers/image_data.php:283
+msgid "View media of next dates"
+msgstr "Bekijk de media van toekomstige datums"
+
+#: /views/helpers/image_data.php:371
+msgid "Access"
+msgstr "Toegang"
+
+#: /views/helpers/image_data.php:382;382
+msgid "Edit tags"
+msgstr "Labels wijzigen"
+
+#: /views/helpers/image_data.php:390
+msgid "Save file %s"
+msgstr "Bestand %s opslaan"
+
+#: /views/helpers/image_data.php:398
+msgid "Show location in a map"
+msgstr "Lokatie op map tonen"
+
+#: /views/helpers/image_data.php:407
+msgid "Edit access rights"
+msgstr "Toegangsrechten wijzigen"
+
+#: /views/helpers/image_data.php:413
+msgid "Synchronize db with image"
+msgstr "Synchroniseer db met beeld"
+
+#: /views/helpers/image_data.php:413
+msgid "Synchronize meta data with the image"
+msgstr "Synchroniseer de meta gegevens met het beeld"
+
+#: /views/helpers/image_data.php:468
+msgid "Keep"
+msgstr "Bewaren"
+
+#: /views/helpers/image_data.php:486
+msgid "This media is public visible"
+msgstr "Deze media is publiekelijk zichtbaar"
+
+#: /views/helpers/image_data.php:489
+msgid "This media is visible for users"
+msgstr "Deze media is zichtbaar voor gebruikers"
+
+#: /views/helpers/image_data.php:492
+msgid "This media is visible for group members"
+msgstr "Deze media is zichtbaar voor groepsleden"
+
+#: /views/helpers/image_data.php:495
+msgid "This media is private"
+msgstr "Deze media is priv&eacutre;"
+
+#: /views/helpers/menu.php:133
+msgid "Main Menu"
+msgstr "Hoofdmenu"
+
+#: /views/helpers/navigator.php:57;118
+msgid "prev"
+msgstr "vorige"
+
+#: /views/helpers/navigator.php:105;140
+msgid "next"
+msgstr "volgende"
+
+#: /views/helpers/navigator.php:127
+msgid "up"
+msgstr "omhoog"
+
+#: /views/home/index.ctp:1
+msgid "Welcome to phTagr"
+msgstr "Welkom bij phTagr"
+
+#: /views/home/index.ctp:6
+msgid "Random Media"
+msgstr "Willekeurige media"
+
+#: /views/home/index.ctp:12
+msgid "%s by %s"
+msgstr "%s door %s"
+
+#: /views/home/index.ctp:17
+msgid "See more %s"
+msgstr "Bekijk meer %s"
+
+#: /views/home/index.ctp:17
+msgid "random media..."
+msgstr "willekeurige media..."
+
+#: /views/home/index.ctp:25
+msgid "Newest Media"
+msgstr "Nieuwste media"
+
+#: /views/home/index.ctp:55
+msgid "See %s"
+msgstr "Zie %s"
+
+#: /views/home/index.ctp:55
+msgid "all new media..."
+msgstr "alle nieuwe media..."
+
+#: /views/home/index.ctp:84
+msgid "Older comments..."
+msgstr "Ouder kommentaar"
+
+#: /views/home/index.ctp:92
+msgid "Popular Tags"
+msgstr "Populaire labels"
+
+#: /views/home/index.ctp:97
+msgid "No tags assigned"
+msgstr "Geen labels toegewezen"
+
+#: /views/home/index.ctp:100
+msgid "Popular Categories"
+msgstr "Populaire kategorieen"
+
+#: /views/home/index.ctp:105
+msgid "No categories assigned"
+msgstr "Geen kategorieen toegewezen"
+
+#: /views/images/notfound.ctp:1
+msgid "No media Found"
+msgstr "Geen media gevonden"
+
+#: /views/images/notfound.ctp:3
+msgid "No media found. Please goto the %s and try again"
+msgstr "Geen media gevonden. Ga naar de %s en probeer opnieuw"
+
+#: /views/images/view.ctp:32
+msgid "Media Details"
+msgstr "Media details"
+
+#: /views/images/view.ctp:50
+#: /views/options/acl.ctp:6
+msgid "User"
+msgstr "Gebruiker"
+
+#: /views/images/view.ctp:57
+msgid "File(s)"
+msgstr "Bestand(en)"
+
+#: /views/images/view.ctp:59
+msgid "View Count"
+msgstr "Keer bekeken"
+
+#: /views/images/view.ctp:60
+msgid "Created"
+msgstr "Aangemaakt"
+
+#: /views/images/view.ctp:61
+msgid "Last modified"
+msgstr "Laatst gewijzigd"
+
+#: /views/images/view.ctp:62
+msgid "Size"
+msgstr "Grootte"
+
+#: /views/images/view.ctp:65
+msgid "Model"
+msgstr "Model"
+
+#: /views/images/view.ctp:68
+msgid "Duration"
+msgstr "Duur"
+
+#: /views/images/view.ctp:71
+msgid "Aperture"
+msgstr "Opening"
+
+#: /views/images/view.ctp:74
+msgid "Shutter"
+msgstr "Sluiter"
+
+#: /views/images/view.ctp:77
+msgid "ISO"
+msgstr "ISO"
+
+#: /views/options/acl.ctp:11
+msgid "Default Access Rights"
+msgstr "Standaard toegangsrechten"
+
+#: /views/options/acl.ctp:12
+msgid "The following access rights are applied to new images."
+msgstr "De volgende toegangsrechten worden toegepast bij nieuwe beelden"
+
+#: /views/options/profile.ctp:9
+msgid "First name"
+msgstr "Voornaam"
+
+#: /views/options/profile.ctp:10
+msgid "Last name"
+msgstr "Achternaam"
+
+#: /views/options/rss.ctp:1
+msgid "Authenticated RSS"
+msgstr "Geauthentiseerde RSS"
+
+#: /views/options/rss.ctp:4
+msgid "Following links contain authentication keys of your account. Using these links you are authenticated directly without username and password. The links could be spoofed easily and should be used carefully."
+msgstr "De volgende links bevatten authenticatie sleutels van uw account. Via deze links bent U direkt geauthentiseerd zonder gebruikersnaam of wachtwoord. De links kunnen makkelijk misbruikt worden en moeten zorgvuldig gebruikt worden."
+
+#: /views/options/rss.ctp:10
+msgid "Recent Images"
+msgstr "Recente beelden"
+
+#: /views/options/rss.ctp:15
+msgid "Click %s to renew the authentication key. All previous keys become invalid."
+msgstr "Klik %s om de authenticatie sleutel te vernieuwen. Alle vorige sleutels worden ongeldig."
+
+#: /views/setup/admin_upgrade.ctp:1
+#: /views/setup/admin_uptodate.ctp:1
+msgid "Database upgrade"
+msgstr "Database vernieuwen"
+
+#: /views/setup/admin_upgrade.ctp:6
+msgid "The database schema requires an upgrade. Do you want to perform the upgrade?"
+msgstr "De database dient te worden vernieuwd. Wilt U dit doorvoeren?"
+
+#: /views/setup/admin_upgrade.ctp:9
+msgid "Upgrade"
+msgstr "Vernieuwen"
+
+#: /views/setup/admin_uptodate.ctp:6
+msgid "Your database is up-to-date."
+msgstr "De database is up-to-date."
+
+#: /views/setup/admin_uptodate.ctp:9
+#: /views/setup/config.ctp:19
+#: /views/setup/configro.ctp:30
+#: /views/setup/saltro.ctp:15
+msgid "Continue"
+msgstr "Doorgaan"
+
+#: /views/setup/config.ctp:1
+#: /views/setup/configro.ctp:1
+msgid "Database connection"
+msgstr "Database verbinding"
+
+#: /views/setup/config.ctp:5
+msgid "This step creates the configuration for the database connection. Please add your database connection settings here."
+msgstr "Deze stap maakt de configuratie voor de database verbinding aan. Verander uw database verbindings gegevens hier."
+
+#: /views/setup/config.ctp:9;12
+msgid "Database"
+msgstr "Database"
+
+#: /views/setup/config.ctp:11
+msgid "Host"
+msgstr "Gastsysteem"
+
+#: /views/setup/config.ctp:15
+msgid "Prefix"
+msgstr "Voorvoegsel"
+
+#: /views/setup/configro.ctp:6
+msgid "The configuration file for the database connection could not be written. Please create a database configuration file by your own!"
+msgstr "Het configuratie bestand voor de database verbinding kon niet geschreven worden. Maak a.u.b. zelf het configuratie bestand aan!"
+
+#: /views/setup/configro.ctp:9
+msgid "Below a sample configuration file is shown. Please adapt your database credentials and continue."
+msgstr "Beneden wordt een configuratie voorbeeld bestand getoond. Pas uw database gegevens aan en ga verder."
+
+#: /views/setup/database.ctp:1
+msgid "Initialize Database"
+msgstr "Database initialiseren"
+
+#: /views/setup/database.ctp:3
+msgid "All tables are now initialized"
+msgstr "Alle tabellen zijn nu geinitialiseerd"
+
+#: /views/setup/finish.ctp:1
+msgid "Setup Complete"
+msgstr "Configuratie beeindigd"
+
+#: /views/setup/finish.ctp:4
+msgid "Congratulations! Your configuration of phTagr is completed. Have fun using phTagr!"
+msgstr "Proficiat! Uw configuratie van phTagr is compleet. Veel plezier met het gebruiken van phTagr!"
+
+#: /views/setup/finish.ctp:7
+msgid "Click %s to start phTagr."
+msgstr "Klik %s om phTagr the starten."
+
+#: /views/setup/finish.ctp:7
+#: /views/system/admin_external.ctp:15
+msgid "here"
+msgstr "hier"
+
+#: /views/setup/index.ctp:1
+msgid "Welcome"
+msgstr "Welkom"
+
+#: /views/setup/index.ctp:5
+msgid "Welcome to the installation procedure of phTagr. Following steps are required to install it:"
+msgstr "Welkom bij de installatie procedure van phTagr. The volgende stappen zijn nodig voor installatie:"
+
+#: /views/setup/index.ctp:8
+msgid "Check for required paths"
+msgstr "Test de benodigde paden"
+
+#: /views/setup/index.ctp:9
+msgid "Configuration of database connection"
+msgstr "Configuratie van de database verbinding"
+
+#: /views/setup/index.ctp:10
+msgid "Initialize required tables"
+msgstr "Initialiseren benodigde tabellen"
+
+#: /views/setup/index.ctp:11
+msgid "Create administration account"
+msgstr "Administratie code aanmaken"
+
+#: /views/setup/index.ctp:12
+msgid "Check required external programs"
+msgstr "Testen van benodigde externe programma's"
+
+#: /views/setup/index.ctp:15
+msgid "Note: Cookies are required to install and run phTagr."
+msgstr "Opmerking: Cookies zijn benodigd om phTagr te installeren en te starten."
+
+#: /views/setup/index.ctp:17
+msgid "This setup will step through the required steps. Please click %s to start the installation."
+msgstr "Deze installatie zal de benodigde stappen doorlopen. Klik %s om de installatie te starten."
+
+#: /views/setup/index.ctp:17
+#: /views/setup/salt.ctp:5
+#: /views/setup/saltro.ctp:7
+msgid "continue"
+msgstr "doorgaan"
+
+#: /views/setup/path.ctp:1
+msgid "Path settings"
+msgstr "Pad instellingen"
+
+#: /views/setup/path.ctp:7
+msgid "Following paths are missing. Please create these paths!"
+msgstr "De volgende paden zijn afwezig. Graag deze paden aanmaken!"
+
+#: /views/setup/path.ctp:19
+msgid "Following paths are not writeable. Please change the permissions!"
+msgstr "De volgende paden zijn niet beschrijfbaar. Verander a.u.b. de permissies!"
+
+#: /views/setup/path.ctp:29
+msgid "Retry"
+msgstr "Opnieuw"
+
+#: /views/setup/salt.ctp:1
+#: /views/setup/saltro.ctp:1
+msgid "Security settings"
+msgstr "Beveiligings instellingen"
+
+#: /views/setup/salt.ctp:5
+msgid "An error occured while setting the security salt. Please have look to the log files and click on %s"
+msgstr "Er is een fout opgetreden tijdens het zetten van de beveiligings sleutel. Bekijk het log bestand en klik op %s"
+
+#: /views/setup/saltro.ctp:5
+msgid "phTagr could not set the security salt because the a configuration file file is write protected.  Please change the configuration manually"
+msgstr "phTagr kon de beveiligings sleutel niet zetten omdat het configuratie bestand schrijfbeschermd is. Verander a.u.b. de configuratie met de hand"
+
+#: /views/setup/saltro.ctp:7
+msgid "Change the <b>Security.salt</b> setting in the core configuration file <code>%s</code> (line %i) to a random string with alpha numeric values. You can change the setting to the provided value below. After changing, click on %s."
+msgstr "Verander de <b>Security.salt</b> instelling in het basis configuratie bestand <code>%s</code> (line %i) naar een willekeurige string bestaande uit alfa-numerieke waardes. U kunt de instelling veranderen naar ondersteunde waarde. Na verandering, klik op %s."
+
+#: /views/setup/saltro.ctp:9
+msgid "Current security salt value"
+msgstr "Huidige beveiligings sleutel waarde"
+
+#: /views/setup/saltro.ctp:12
+msgid "New security salt value"
+msgstr "Nieuwe beveiligings sleutel waarde"
+
+#: /views/setup/system.ctp:5
+msgid "Congratulation! phTagr just runs fine now!"
+msgstr "Proficiat! phTagr loopt nu prima!"
+
+#: /views/setup/system.ctp:7
+msgid "phTagr can use <u>optional</u> external programs to enlarge the functionality. exiftool is used to export the meta data to images like tags, categories or (geo) locations. ffmpeg supports other video file formats like AVI, MPEG, or MOV. And convert supports better thumbnail creation for bigger photos."
+msgstr "phTagr kan <u>optioneel</u> externe programma's gebruiken om de funktionaliteit te vergroten. exiftool wordt gebruikt om meta gegevens als labels, kategori&euml;en of (geo) lokaties te exporteren naar beelden. ffmpeg ondersteund video formaten als AVI, MPEG of MOV. En convert ondersteunt het aanmaken van kleinere voorbeelden van grote foto's."
+
+#: /views/setup/system.ctp:9
+msgid "You can set the file path of these exteranl programs here or set them later in the system preferences."
+msgstr "U kunt de paden van de externe programma's hier instellen of u kunt dit later in systeem instellingen doen."
+
+#: /views/setup/system.ctp:11
+msgid "Skip these settings"
+msgstr "Deze instellingen overslaan"
+
+#: /views/setup/system.ctp:15
+msgid "Following programs could not be found: %s."
+msgstr "De volgende programma's konden niet worden gevonden."
+
+#: /views/setup/system.ctp:20
+msgid "FFMPEG does not support the MP3 audio format. Sound will be disabled for videos!"
+msgstr "FFMPEG heeft geen ondersteuning voor het MP3 audio formaat. Geluid zal onderdrukt worden voor video's!"
+
+#: /views/setup/system.ctp:27;28;29;30
+#: /views/system/admin_external.ctp:8;9;10;11
+msgid "Path to %s"
+msgstr "Pad naar %s"
+
+#: /views/setup/user.ctp:1
+msgid "Create admin account"
+msgstr "Administratief account aanmaken"
+
+#: /views/system/admin_external.ctp:1
+msgid "Sytem Settings"
+msgstr "Systeem instellingen"
+
+#: /views/system/admin_external.ctp:14
+msgid "Google Maps"
+msgstr "Google Maps"
+
+#: /views/system/admin_external.ctp:15
+msgid "Enter here your API map key for %s. You can signup %s for a new key. No API map key is required for local setup with localhost."
+msgstr "Voeg hier uw API map sleutel voor %s. U kunt %s aanmelden voor een nieuwe sleutel. Er is geen API map sleutel benodigd voor de lokale instelling met localhost."
+
+#: /views/system/admin_external.ctp:17
+msgid "API key"
+msgstr "API sleutel"
+
+#: /views/system/admin_general.ctp:8
+msgid "Gallery title"
+msgstr "Galerie titel"
+
+#: /webroot/test.php:75
+msgid "Debug setting does not allow access to this url."
+msgstr "Test instellingen weigeren toegang naar deze url."
+
