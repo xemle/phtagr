@@ -111,13 +111,17 @@ class FileManagerComponent extends Object {
     if (!$user) {
       $user = $this->controller->getUser();
     }
-    $userDir = USER_DIR.$user['User']['id'].DS.'files'.DS;
-    $folder = new Folder();
-    if (!$folder->create($userDir)) {
-      Logger::err("Could not create users root directory '$userDir'");
-      return false;
+
+    // create untailed directory, otherwise Folder->create() might act wrong
+    $userDir = USER_DIR . $user['User']['id'] . DS . 'files';
+    if (!is_dir($userDir)) {
+      $Folder = new Folder();
+      if (!$Folder->create($userDir)) {
+        Logger::err(sprintf("Directory %s NOT created", $userDir));
+        return false;
+      }
     }
-    return $userDir;
+    return Folder::slashTerm($userDir);
   }
 
   /** Evaluates if a filename is external or internal 

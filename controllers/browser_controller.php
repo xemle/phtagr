@@ -77,6 +77,14 @@ class BrowserController extends AppController
   '.')
   @return True on success. False otherwise */
   function _addFsRoot($root, $alias = null) {
+    if (!$root) {
+      Logger::warn("Invalid directory. Input is empty");
+      return false;
+    } elseif (!@is_dir($root)) {
+      Logger::err("Directory of '$root' does not exists");
+      return false;
+    }
+
     $root = Folder::slashTerm($root);
 
     if ($alias == null) {
@@ -88,11 +96,6 @@ class BrowserController extends AppController
     }
 
     if (isset($this->_fsRoots[$alias])) {
-      return false;
-    }
-
-    if (!@is_dir($root)) {
-      Logger::err("Directory of '$root' does not exists");
       return false;
     }
 
