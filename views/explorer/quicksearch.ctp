@@ -12,7 +12,7 @@ $cell=0;
 
 if (count($dataTags) + count($dataCategories) + count($dataLocations) == 0): ?>
 <div class="info">
-Sorry, nothing was found for <?php echo $quicksearch; ?>
+<?php printf(__("Sorry, nothing was found for %s", true), h($quicksearch)); ?>
 </div>
 <?php endif; ?>
 

@@ -76,13 +76,13 @@ class ExplorerController extends AppController
       // Split the query so that we have a list of tags/categories/locations.
       // For now we split at whitespaces, improvements could be made to not
       // split multiple tags/categories/locations enclosed in quotation marks
-      $quicksearch = preg_split('/\s+/', trim($quicksearch));
+      $words = preg_split('/\s+/', trim($quicksearch));
 
       // Reduce results to 6 
       $this->Search->setShow(6);
 
       // Add tag to the query
-      $this->Search->addTags($quicksearch);
+      $this->Search->addTags($words);
       // Set variable dataTags for view
       $this->Search->setTagOp('OR');
       $this->set('dataTags', $this->Search->paginate());
@@ -90,13 +90,13 @@ class ExplorerController extends AppController
       $this->Search->delTags();
       $this->Search->delTagOp();
 
-      $this->Search->addCategories($quicksearch);
+      $this->Search->addCategories($words);
       $this->Search->setCategoryOp('OR');
       $this->set('dataCategories', $this->Search->paginate());
       $this->Search->delCategories();
       $this->Search->delCategoryOp();
 
-      $this->Search->addLocations($quicksearch);
+      $this->Search->addLocations($words);
       $this->Search->setLocationOp('OR');
       $this->set('dataLocations', $this->Search->paginate());
       $this->Search->delLocations();
