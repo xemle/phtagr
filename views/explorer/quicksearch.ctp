@@ -1,88 +1,62 @@
 <h1>Quick Search Results</h1>
 <?php $session->flash(); ?>
 
-<div class="minis">
-<script type="text/javascript">
-  var mediaData = [];
-</script>
 
 <?php
 $search->initialize();
 $cell=0;
 
-if (count($dataTags) + count($dataCategories) + count($dataLocations) == 0): ?>
+if (!count($this->data)): ?>
 <div class="info">
 <?php printf(__("Sorry, nothing was found for %s", true), h($quicksearch)); ?>
 </div>
+<?php else: ?>
+
+<h2><?php printf(__('Results of %s', true), h($quicksearch)); ?></h2>
+<div class="minis" align="left">
+<script type="text/javascript">
+  var mediaData = [];
+</script>
+
+<?php 
+  foreach($this->data as $media) {
+    echo $imageData->mediaLink($media, 'mini').' ';
+  }
+?>
+</div>
+
+<?php
+  $tags = Set::extract('/Tag/name', $this->data);
+  if (count($tags)) {
+    echo '<p>' . __('See more results of tag', true) .  ': ';
+    $tags = array_unique($tags);
+    $links = array();
+    foreach ($tags as $name) {
+      $links[] = $html->link($name, '/explorer/tag/'.$name);
+    }
+    echo implode(', ', $links) . '</p>';
+  }
+
+  $categories = Set::extract('/Category/name', $this->data);
+  if (count($categories)) {
+    echo '<p>' . __('See more results of category', true) .  ': ';
+    $categories = array_unique($categories);
+    $links = array();
+    foreach ($categories as $name) {
+      $links[] = $html->link($name, '/explorer/category/'.$name);
+    }
+    echo implode(', ', $links) . '</p>';
+  }
+
+  $locations = Set::extract('/Location/name', $this->data);
+  if (count($locations)) {
+    echo '<p>' . __('See more results of location', true) .  ': ';
+    $locations = array_unique($locations);
+    $links = array();
+    foreach ($locations as $name) {
+      $links[] = $html->link($name, '/explorer/location/'.$name);
+    }
+    echo implode(', ', $links) . '</p>';
+  }
+?>
 <?php endif; ?>
-
-<?php // -- Output for Tags --
-if (count($dataTags) > 0) : ?>
-<h2>Results for Tags:</h2>
-<div align="left"> 
-<?php 
-  foreach($dataTags as $media) {
-    echo $imageData->mediaLink($media, 'mini').' ';
-  }
-?>
-</div>
-
-<?php
-  echo 'See more results with tag: ';
-  $names = Set::extract('/Tag/name', $dataTags);
-  $names = array_unique($names);
-  $links = array();
-  foreach ($names as $name) {
-    $links[] = $html->link($name, '/explorer/tag/'.$name);
-  }
-  echo implode(', ', $links);
-?>
-<?php endif; /* if (count($dataTags) > 0) */ ?>  
-
-<?php // -- Output for Categories --
-if (count($dataCategories) > 0) : ?>
-<h2>Results for Categories:</h2>
-<div align="left"> 
-<?php 
-  foreach($dataCategories as $media) {
-    echo $imageData->mediaLink($media, 'mini').' ';
-  }
-?>
-</div>
-
-<?php
-  echo 'See more results with category: ';
-  $names = Set::extract('/Category/name', $dataCategories);
-  $names = array_unique($names);
-  $links = array();
-  foreach ($names as $name) {
-    $links[] = $html->link($name, '/explorer/category/'.$name);
-  }
-  echo implode(', ', $links);
-?>
-<?php endif; /* if (count($dataCategories) > 0) */ ?>  
-
-<?php // -- Output for Locations --
-if (count($dataLocations) > 0) : ?>
-<h2>Results for Locations:</h2>
-<div align="left"> 
-<?php 
-  foreach($dataLocations as $media) {
-    echo $imageData->mediaLink($media, 'mini').' ';
-  }
-?>
-</div>
-
-<?php
-  echo 'See more results with location: ';
-  $names = Set::extract('/Location/name', $dataLocations);
-  $names = array_unique($names);
-  $links = array();
-  foreach ($names as $name) {
-    $links[] = $html->link($name, '/explorer/location/'.$name);
-  }
-  echo implode(', ', $links);
-?>
-<?php endif; /* if (count($dataLocations) > 0) */ ?>  
-
-</div>

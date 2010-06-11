@@ -191,10 +191,7 @@ class UpgradeSchemaComponent extends Object{
         $modelName = $this->modelMapping[$table];
       }
       if (!in_array($modelName, $models)) {
-        Logger::err("Model '$modelName' does not exists");
-        $columns[$table] = "Model '$modelName' does not exists";
-        trigger_error(sprintf(__("Model '%s' does not exists", true), $modelName), E_USER_WARNING);
-        continue;
+        Logger::warn("Model '$modelName' does not exists");
       }
 
       $columns[$table] = $this->db->alterSchema(array($table => $changes), $table);

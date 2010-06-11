@@ -337,5 +337,25 @@ class SearchComponent extends Search
  
     return $data;
   }
+
+  function quicksearch($text, $show = 12) {
+    $words = preg_split('/\s+/', trim($text));
+
+    $tmp = array();
+    foreach($words as $word) {
+      $tmp[] = '*' . $word . '*';
+    }
+    $words = $tmp;
+
+    $this->addTags($words, false);
+    $this->addCategories($words, false);
+    $this->addLocations($words, false);
+    $this->setOperand('OR');
+
+    $this->setSort('default', false);
+    $this->setShow($show);
+
+    return $this->paginate();
+  }    
 }
 ?>

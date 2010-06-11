@@ -35,12 +35,12 @@ class PhtagrSchema extends CakeSchema {
 	var $categories = array(
 			'id' => array('type'=>'integer', 'null' => false, 'default' => NULL, 'key' => 'primary'),
 			'name' => array('type'=>'string', 'null' => true, 'default' => NULL, 'length' => 64, 'key' => 'index'),
-			'indexes' => array('PRIMARY' => array('column' => 'id', 'unique' => 1), 'name' => array('column' => 'name', 'unique' => 0))
+			'indexes' => array('PRIMARY' => array('column' => 'id', 'unique' => 1), 'name_index' => array('column' => 'name', 'unique' => 0))
 		);
 	var $categories_media = array(
 			'media_id' => array('type'=>'integer', 'null' => false, 'default' => '0'),
 			'category_id' => array('type'=>'integer', 'null' => false, 'default' => '0'),
-			'indexes' => array('PRIMARY' => array('column' => array('media_id', 'category_id'), 'unique' => 1), 'setid' => array('column' => 'category_id', 'unique' => 0))
+			'indexes' => array('PRIMARY' => array('column' => array('media_id', 'category_id'), 'unique' => 1), 'category_id_index' => array('column' => 'category_id', 'unique' => 0), 'media_id_index' => array('column' => 'media_id', 'unique' => 0))
 		);
 	var $comments = array(
 			'id' => array('type'=>'integer', 'null' => false, 'default' => NULL, 'key' => 'primary'),
@@ -70,18 +70,18 @@ class PhtagrSchema extends CakeSchema {
 			'size' => array('type'=>'integer', 'null' => false),
 			'time' => array('type'=>'datetime', 'null' => false),
 			'readed' => array('type'=>'datetime', 'null' => true, 'default' => NULL),
-			'indexes' => array('PRIMARY' => array('column' => 'id', 'unique' => 1), 'id' => array('column' => 'id', 'unique' => 0), 'user_id' => array('column' => 'user_id', 'unique' => 0), 'media_id' => array('column' => 'media_id', 'unique' => 0))
+			'indexes' => array('PRIMARY' => array('column' => 'id', 'unique' => 1), 'user_id_index' => array('column' => 'user_id', 'unique' => 0), 'media_id_index' => array('column' => 'media_id', 'unique' => 0))
 		);
 	var $groups = array(
 			'id' => array('type'=>'integer', 'null' => false, 'default' => NULL, 'key' => 'primary'),
 			'user_id' => array('type'=>'integer', 'null' => true, 'default' => NULL),
 			'name' => array('type'=>'string', 'null' => false, 'length' => 32),
-			'indexes' => array('PRIMARY' => array('column' => 'id', 'unique' => 1), 'id' => array('column' => 'id', 'unique' => 0))
+			'indexes' => array('PRIMARY' => array('column' => 'id', 'unique' => 1))
 		);
 	var $groups_users = array(
 			'user_id' => array('type'=>'integer', 'null' => false, 'default' => '0'),
 			'group_id' => array('type'=>'integer', 'null' => false, 'default' => '0'),
-			'indexes' => array('PRIMARY' => array('column' => array('user_id', 'group_id'), 'unique' => 1), 'userid' => array('column' => 'user_id', 'unique' => 0), 'groupid' => array('column' => 'group_id', 'unique' => 0))
+			'indexes' => array('PRIMARY' => array('column' => array('user_id', 'group_id'), 'unique' => 1), 'user_id_index' => array('column' => 'user_id', 'unique' => 0), 'group_id_index' => array('column' => 'group_id', 'unique' => 0))
 		);
 	var $locks = array(
 			'id' => array('type'=>'integer', 'null' => false, 'default' => NULL, 'key' => 'primary'),
@@ -94,18 +94,18 @@ class PhtagrSchema extends CakeSchema {
 			'exclusivelock' => array('type'=>'integer', 'null' => false, 'default' => '0'),
 			'created' => array('type'=>'datetime', 'null' => true, 'default' => NULL),
 			'modified' => array('type'=>'datetime', 'null' => true, 'default' => NULL),
-			'indexes' => array('PRIMARY' => array('column' => 'id', 'unique' => 1), 'token' => array('column' => 'token', 'unique' => 0), 'expires' => array('column' => 'expires', 'unique' => 0))
+			'indexes' => array('PRIMARY' => array('column' => 'id', 'unique' => 1), 'token_index' => array('column' => 'token', 'unique' => 0), 'expires_index' => array('column' => 'expires', 'unique' => 0))
 		);
 	var $locations = array(
 			'id' => array('type'=>'integer', 'null' => false, 'default' => NULL, 'key' => 'primary'),
 			'name' => array('type'=>'string', 'null' => false, 'length' => 64, 'key' => 'index'),
 			'type' => array('type'=>'integer', 'null' => true, 'default' => NULL, 'length' => 3),
-			'indexes' => array('PRIMARY' => array('column' => 'id', 'unique' => 1), 'name' => array('column' => 'name', 'unique' => 0))
+			'indexes' => array('PRIMARY' => array('column' => 'id', 'unique' => 1), 'name_index' => array('column' => 'name', 'unique' => 0))
 		);
 	var $locations_media = array(
 			'location_id' => array('type'=>'integer', 'null' => false, 'default' => '0'),
 			'media_id' => array('type'=>'integer', 'null' => false, 'default' => '0'),
-			'indexes' => array('PRIMARY' => array('column' => array('media_id', 'location_id'), 'unique' => 1), 'locationid' => array('column' => 'location_id', 'unique' => 0))
+			'indexes' => array('PRIMARY' => array('column' => array('media_id', 'location_id'), 'unique' => 1), 'location_id_index' => array('column' => 'location_id', 'unique' => 0), 'media_id_index' => array('column' => 'media_id', 'unique' => 0))
 		);
 	var $media = array(
 			'id' => array('type'=>'integer', 'null' => false, 'default' => NULL, 'key' => 'primary'),
@@ -136,19 +136,19 @@ class PhtagrSchema extends CakeSchema {
 			'ranking' => array('type'=>'float', 'null' => true, 'default' => '0', 'key' => 'index'),
 			'voting' => array('type'=>'float', 'null' => true, 'default' => '0'),
 			'votes' => array('type'=>'integer', 'null' => true, 'default' => '0'),
-			'indexes' => array('PRIMARY' => array('column' => 'id', 'unique' => 1), 'date' => array('column' => 'date', 'unique' => 0), 'ranking' => array('column' => 'ranking', 'unique' => 0), 'id' => array('column' => 'id', 'unique' => 0), 'oacl' => array('column' => 'oacl', 'unique' => 0))
+			'indexes' => array('PRIMARY' => array('column' => 'id', 'unique' => 1), 'date_index' => array('column' => 'date', 'unique' => 0), 'ranking_index' => array('column' => 'ranking', 'unique' => 0), 'oacl_index' => array('column' => 'oacl', 'unique' => 0))
 		);
 	var $media_tags = array(
 			'media_id' => array('type'=>'integer', 'null' => false, 'default' => '0'),
 			'tag_id' => array('type'=>'integer', 'null' => false, 'default' => '0'),
-			'indexes' => array('PRIMARY' => array('column' => array('media_id', 'tag_id'), 'unique' => 1), 'imageid' => array('column' => 'media_id', 'unique' => 0), 'tagid' => array('column' => 'tag_id', 'unique' => 0))
+			'indexes' => array('PRIMARY' => array('column' => array('media_id', 'tag_id'), 'unique' => 1), 'media_id_index' => array('column' => 'media_id', 'unique' => 0), 'tag_id_index' => array('column' => 'tag_id', 'unique' => 0))
 		);
 	var $options = array(
 			'id' => array('type'=>'integer', 'null' => false, 'default' => NULL, 'key' => 'primary'),
 			'user_id' => array('type'=>'integer', 'null' => true, 'default' => NULL),
 			'name' => array('type'=>'string', 'null' => true, 'default' => NULL, 'length' => 64),
 			'value' => array('type'=>'string', 'null' => true, 'default' => NULL, 'length' => 192),
-			'indexes' => array('PRIMARY' => array('column' => 'id', 'unique' => 1), 'user_id' => array('column' => 'user_id', 'unique' => 0))
+			'indexes' => array('PRIMARY' => array('column' => 'id', 'unique' => 1), 'user_id_index' => array('column' => 'user_id', 'unique' => 0))
 		);
 	var $properties = array(
 			'id' => array('type'=>'integer', 'null' => false, 'default' => NULL, 'key' => 'primary'),
@@ -161,7 +161,7 @@ class PhtagrSchema extends CakeSchema {
 	var $tags = array(
 			'id' => array('type'=>'integer', 'null' => false, 'default' => NULL, 'key' => 'primary'),
 			'name' => array('type'=>'string', 'null' => true, 'default' => NULL, 'length' => 64, 'key' => 'index'),
-			'indexes' => array('PRIMARY' => array('column' => 'id', 'unique' => 1), 'name' => array('column' => 'name', 'unique' => 0))
+			'indexes' => array('PRIMARY' => array('column' => 'id', 'unique' => 1), 'name_index' => array('column' => 'name', 'unique' => 0))
 		);
 	var $users = array(
 			'id' => array('type'=>'integer', 'null' => false, 'default' => NULL, 'key' => 'primary'),
@@ -177,7 +177,7 @@ class PhtagrSchema extends CakeSchema {
 			'firstname' => array('type'=>'string', 'null' => true, 'default' => NULL, 'length' => 32),
 			'lastname' => array('type'=>'string', 'null' => false, 'length' => 32),
 			'email' => array('type'=>'string', 'null' => true, 'default' => NULL, 'length' => 64),
-			'indexes' => array('PRIMARY' => array('column' => 'id', 'unique' => 1), 'id' => array('column' => 'id', 'unique' => 0))
+			'indexes' => array('PRIMARY' => array('column' => 'id', 'unique' => 1))
 		);
 }
 ?>

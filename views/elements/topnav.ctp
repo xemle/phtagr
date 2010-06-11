@@ -18,7 +18,7 @@
   }
 
   echo "\n<div class=\"searchBox\" ><div class=\"searchBoxSub\" >";
-  echo $form->create(null, array('url' => array('controller' => 'explorer', 'action' => 'quicksearch'))); 
+  echo $form->create(null, array('url' => '/explorer/quicksearch')); 
   echo $form->input('Media.quicksearch', array ('label' => false, 'div' => false));
   $icon = Router::url("/img/icons/zoom.png");
   echo "<input type=\"image\" src=\"$icon\" width=\"16\" height=\"16\" id=\"go\" alt=\"Search\" title=\"Search\" />";

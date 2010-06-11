@@ -70,41 +70,7 @@ class ExplorerController extends AppController
     } 
 
     if ($quicksearch) {
-      // Perform queries for each Tags, Categories and Locations
-      // seperately:
-
-      // Split the query so that we have a list of tags/categories/locations.
-      // For now we split at whitespaces, improvements could be made to not
-      // split multiple tags/categories/locations enclosed in quotation marks
-      $words = preg_split('/\s+/', trim($quicksearch));
-
-      // Reduce results to 6 
-      $this->Search->setShow(6);
-
-      // Add tag to the query
-      $this->Search->addTags($words);
-      // Set variable dataTags for view
-      $this->Search->setTagOp('OR');
-      $this->set('dataTags', $this->Search->paginate());
-      // Reset query
-      $this->Search->delTags();
-      $this->Search->delTagOp();
-
-      $this->Search->addCategories($words);
-      $this->Search->setCategoryOp('OR');
-      $this->set('dataCategories', $this->Search->paginate());
-      $this->Search->delCategories();
-      $this->Search->delCategoryOp();
-
-      $this->Search->addLocations($words);
-      $this->Search->setLocationOp('OR');
-      $this->set('dataLocations', $this->Search->paginate());
-      $this->Search->delLocations();
-      $this->Search->delLocationOp();
-    } else {
-      $this->set('dataTags', array());
-      $this->set('dataCategories', array());
-      $this->set('dataLocations', array());
+      $this->data = $this->Search->quicksearch($quicksearch, 6);
     }
     $this->set('quicksearch', $quicksearch);
   }

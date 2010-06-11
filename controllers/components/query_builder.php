@@ -240,7 +240,7 @@ class QueryBuilderComponent extends Object
           $counts = array();
           $conditions = array();
           foreach ($query['_counts'] as $count) {
-            $counts[] = "( $count + 1 )";
+            $counts[] = "( COALESCE($count, 0) + 1 )";
             $conditions[] = "COALESCE($count, 0)";
           }
           $query['conditions'][] = '( '.implode(' + ', $conditions).' ) > 0';
@@ -299,7 +299,20 @@ class QueryBuilderComponent extends Object
     $habtm = Inflector::singularize($name);
 
     $field = Inflector::camelize($habtm).'.name';
-    $query['conditions'][] = $this->_buildCondition($field, $value);
+
+    $tags = array();
+    foreach($value as $v) {
+      if (preg_match('/[*\?]/', $v)) {
+        $v = preg_replace('/\*/', '%', $v);
+        $v = preg_replace('/\?/', '_', $v);
+        $query['conditions'][] = $this->_buildCondition($field, $v, array('operand' => 'LIKE'));
+      } else {
+        $tags[] = $v;
+      }
+    }
+    if (count($tags)) {
+      $query['conditions'][] = $this->_buildCondition($field, $tags);
+    }
 
     $fieldCount = Inflector::camelize($habtm).'Count';
     $query['_counts'][] = $fieldCount;
