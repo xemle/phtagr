@@ -106,7 +106,7 @@ class OptionsController extends AppController {
         Logger::debug($this->User->validationErrors);
       }
     }
-    $this->set('data', $this->User->findById($userId));
+    $this->data = $this->User->findById($userId);
   }
 
   function getMenuItems() {
