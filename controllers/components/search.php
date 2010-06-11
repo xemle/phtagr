@@ -219,6 +219,7 @@ class SearchComponent extends Search
       'nextPage' => false, 
       'prevPage' => false,
       'baseUri' => $this->baseUri,
+      'afterUri' => false,
       'defaults' => $this->defaults,
       'data' => $this->getParams()
       );
@@ -265,6 +266,7 @@ class SearchComponent extends Search
       'current' => false,
       'prevMedia' => false,
       'nextMedia' => false, 
+      'afterUri' => false,
       'baseUri' => $this->baseUri,
       'defaults' => $this->defaults,
       'data' => $this->getParams()

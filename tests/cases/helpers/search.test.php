@@ -10,6 +10,7 @@ class SearchHelperTest extends CakeTestCase {
     $this->Search = new SearchHelper();
     $this->Search->params['search']['data'] = array();
     $this->Search->params['search']['baseUri'] = '/explorer/query';
+    $this->Search->params['search']['afterUri'] = false;
     $this->Search->params['search']['defaults'] = array(
       'show' => 12,
       'page' => 1,
@@ -27,6 +28,7 @@ class SearchHelperTest extends CakeTestCase {
     $result = $this->Search->config;
     $this->assertEqual($result, array(
       'baseUri' => '/explorer/query',
+      'afterUri' => false,
       'defaults' => array(
         'show' => 12,
         'page' => 1,
@@ -166,11 +168,32 @@ class SearchHelperTest extends CakeTestCase {
     // delete has higher priority as add
     $result = $this->Search->getUri(false, array('show' => 24), array('show'));
     $this->assertEqual($result, '/explorer/query/page:2/pos:13');
-    
+
     // reset search
     $this->Search->delPos();
     $this->Search->delPage();
     $this->Search->config['defaults']['pos'] = false;
+   
+    // afterUri tests
+    $result = $this->Search->getUri(false, false, false, array('afterUri' => '/media.rss'));
+    $this->assertEqual($result, '/explorer/query/media.rss');
+
+    // default afterUri
+    $this->Search->config['afterUri'] = '/media.rss';
+    $result = $this->Search->getUri();
+    $this->assertEqual($result, '/explorer/query/media.rss');
+
+    // overwrite default afterUri
+    $result = $this->Search->getUri(false, false, false, array('afterUri' => false));
+    $this->assertEqual($result, '/explorer/query');
+
+    // overwrite default afterUri
+    $result = $this->Search->getUri(false, false, false, array('afterUri' => '/rss.rss'));
+    $this->assertEqual($result, '/explorer/query/rss.rss');
+
+    // reset default afterUri
+    $this->Search->config['afterUri'] = false;
+
   }
 }
 ?>

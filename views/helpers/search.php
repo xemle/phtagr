@@ -28,7 +28,8 @@ class SearchHelper extends Search {
   var $helpers = array('Html'); 
 
   var $config = array(
-    'baseUri' => '/explorer/query', 
+    'baseUri' => '/explorer/query',
+    'afterUri' => false,
     'defaults' => array(
       'page' => 1,
       'pos' => false,
@@ -48,6 +49,7 @@ class SearchHelper extends Search {
       $params = $this->params['search'];
       $this->_data = $params['data'];
       $this->config['baseUri'] = $params['baseUri'];
+      $this->config['afterUri'] = $params['afterUri'];
       $this->config['defaults'] = $params['defaults'];
       if (isset($params['myMedia'])) {
         $this->isMyMedia = true;
@@ -185,11 +187,14 @@ class SearchHelper extends Search {
   function getUri($data = false, $add = false, $del = false, $options = array()) {
     $serial = $this->serialize($data, $add, $del, $options);
     $config = am($this->config, $options);
+    $uri = $config['baseUri'];
     if ($serial) {
-      return $config['baseUri'].'/'.$serial;
-    } else {
-      return $config['baseUri'];
+      $uri .= '/' . $serial;
     }
+    if ($config['afterUri']) {
+      $uri .= $config['afterUri'];
+    }
+    return $uri;
   }
 
   function link($data = false, $add = false, $del = false, $options = array()) {
