@@ -55,7 +55,7 @@ class SearchHelper extends Search {
         $this->isMyMedia = true;
       }
     }
-    $this->config = am($config, $this->config);
+    $this->config = am($this->config, $config);
   }
 
   /** Add parameter to the data array

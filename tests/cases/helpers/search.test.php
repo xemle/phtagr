@@ -25,8 +25,7 @@ class SearchHelperTest extends CakeTestCase {
   }
 
   function testConfig() {
-    $result = $this->Search->config;
-    $this->assertEqual($result, array(
+    $expected = array(
       'baseUri' => '/explorer/query',
       'afterUri' => false,
       'defaults' => array(
@@ -35,7 +34,30 @@ class SearchHelperTest extends CakeTestCase {
         'pos' => false,
         'tagOp' => 'AND'
         )
+      );
+    $this->assertEqual($this->Search->config, $expected);
+    
+    $this->Search->initialize(array(
+      'baseUri' => '/explorer/media', 
+      'afterUri' => '/media.rss'
       ));
+    $expected2 = array(
+      'baseUri' => '/explorer/media',
+      'afterUri' => '/media.rss',
+      'defaults' => array(
+        'show' => 12,
+        'page' => 1,
+        'pos' => false,
+        'tagOp' => 'AND'
+        )
+      );
+    $this->assertEqual($this->Search->config, $expected2);
+
+    $this->Search->initialize(array(
+      'baseUri' => '/explorer/query', 
+      'afterUri' => false
+      ));
+    $this->assertEqual($this->Search->config, $expected);
   }
 
   function testSerialize() {
