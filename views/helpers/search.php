@@ -43,7 +43,8 @@ class SearchHelper extends Search {
   var $singulars = array('pos');
 
   /** Initialize query parameters from the global parameter array, which is
-   * set by the query component */
+   * set by the query component. All search parameters are reset after calling
+   * this function. All previous changes are overritten */
   function initialize($config = array()) {
     if (isset($this->params['search'])) {
       $params = $this->params['search'];
@@ -54,6 +55,10 @@ class SearchHelper extends Search {
       if (isset($params['myMedia'])) {
         $this->isMyMedia = true;
       }
+    }
+    if (isset($config['defaults'])) {
+      $this->config['defaults'] = am($this->config['defaults'], $config['defaults']);
+      unset($config['defaults']);
     }
     $this->config = am($this->config, $config);
   }
@@ -66,7 +71,6 @@ class SearchHelper extends Search {
       return $data;
     }
     $add = (array)$add;
-
     foreach ($add as $name => $values) {
       if (!in_array($name, $this->singulars) && Inflector::pluralize($name) == $name || is_array($values)) {
         $name = Inflector::pluralize($name);
