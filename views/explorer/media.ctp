@@ -3,43 +3,49 @@
   <title><?php echo $_SERVER['SERVER_NAME']; ?> Media RSS</title>
   <link><?php echo Router::url('/', true); ?></link>
   <description>Media RSS of phTagr (<?php echo Router::url('/', true); ?>)</description>
-<?php $search->initialize(); ?>
-  <atom:link rel="self" href="<?php echo Router::url($search->getUri(false, false, false, array('baseUri' => '/explorer/media')).'/media.rss', true); ?>" />
-<?php if ($navigator->hasPrev()): ?>
-  <atom:link rel="previous" href="<?php echo Router::url($search->getUri(false, array('page' => $search->getPage(1) - 1), false, array('baseUri' => '/explorer/media')).'/media.rss', true); ?>" />
-<?php endif; ?>
-<?php if ($navigator->hasNext()): ?>
-  <atom:link rel="next" href="<?php echo Router::url($search->getUri(false, array('page' => $search->getPage(1) + 1), false, array('baseUri' => '/explorer/media')).'/media.rss', true); ?>" />
-<?php Logger::debug($search->getUri(false, array('page' => ($search->getPage(1) - 1)), false, array('baseUri' => '/explorer/media'))); ?>
-<?php endif; ?>
+<?php 
+  $search->initialize(array('baseUri' => '/explorer/media', 'afterUri' => '/media.rss', 'defaults' => array('pos' => 1))); 
+?>
 <?php
-  $keyParam = "";
+  $keyParam = '';
   if ($session->check('Authentication.key')) {
-    $keyParam = "key:".$session->read('Authentication.key').'/';
+    $search->setKey($session->read('Authentication.key'));
+    $keyParam = '/key:' . $session->read('Authentication.key');
   }
   $quality = 'preview';
   if (isset($this->params['named']['quality']) && 
     $this->params['named']['quality'] == 'high') {
+    $search->setQuality('high');
     $quality = 'high';
   }
 ?>
-<?php foreach ($this->data as $media): ?>
+  <atom:link rel="self" href="<?php echo Router::url($search->getUri(), true); ?>" />
+<?php if ($navigator->hasPrev()): ?>
+  <atom:link rel="previous" href="<?php echo Router::url($search->getUri(false, array('page' => $search->getPage(1) - 1)), true); ?>" />
+<?php endif; ?>
+<?php if ($navigator->hasNext()): ?>
+  <atom:link rel="next" href="<?php echo Router::url($search->getUri(false, array('page' => $search->getPage(1) + 1)), true); ?>" />
+<?php endif; ?>
+<?php 
+  $offset = $search->getShow() * ($search->getPage(1) - 1) + 1;
+  foreach ($this->data as $media): ?>
   <item>
     <title><?php echo $media['Media']['name']." by ".$media['User']['username']; ?></title>
     <link><?php 
-      $url = "/images/view/{$media['Media']['id']}";
-      echo Router::url($url.'/'.$keyParam.$search->serialize(), true); ?></link>
+      $url = "/images/view/{$media['Media']['id']}/";
+      echo Router::url($url . $search->serialize(false, array('pos' => $offset++), array('quality')), true); Logger::debug($offset);?></link>
     <?php 
       $thumbSize = $imageData->getimagesize($media, OUTPUT_SIZE_THUMB);
-      $previewSize = $imageData->getimagesize($media, OUTPUT_SIZE_PREVIEW);
-      $thumbUrl = "/media/thumb/{$media['Media']['id']}/$keyParam{$media['Media']['name']}";
+      $thumbUrl = sprintf("/media/thumb/%d%s/%s", $media['Media']['id'], $keyParam, $media['Media']['name']);
+
       if ($media['Media']['canReadOriginal'] && $quality == 'high') {
-        $contentUrl = "/media/high/{$media['Media']['id']}/$keyParam{$media['Media']['name']}";
+        $contentUrl = sprintf("/media/high/%d%s/%s", $media['Media']['id'], $keyParam, $media['Media']['name']);
+        $previewSize = $imageData->getimagesize($media, OUTPUT_SIZE_HIGH);
       } else {
-        $contentUrl = "/media/preview/{$media['Media']['id']}/$keyParam{$media['Media']['name']}";
+        $contentUrl = sprintf("/media/preview/%d%s/%s", $media['Media']['id'], $keyParam, $media['Media']['name']);
+        $previewSize = $imageData->getimagesize($media, OUTPUT_SIZE_PREVIEW);
       }
-    ?>
-    <media:thumbnail url="<?php echo Router::url($thumbUrl, true); ?>" <?php echo $thumbSize[3]; ?> />
+    ?><media:thumbnail url="<?php echo Router::url($thumbUrl, true); ?>" <?php echo $thumbSize[3]; ?> />
     <media:content url="<?php echo Router::url($contentUrl, true); ?>" <?php echo $previewSize[3]; ?> />
     <guid><?php echo Router::url("/media/view/{$media['Media']['id']}", true); ?></guid>
     <?php 
