@@ -460,21 +460,41 @@ class BrowserController extends AppController
       Logger::warn("Could not upload in external path: $fsPath");
       $this->redirect("index/".$path);
     }
-    if ($this->Upload->isUpload()) {
-      $filename = $this->Upload->upload(array('root' => $fsPath, 'overwrite' => false));
-      if ($filename) {
-        Logger::info("File '$filename' uploaded successfully");
-        if (substr(strtolower($filename), -4) == '.zip' && $this->data['File']['extract']) {
-          $files = $this->Zip->unzip($filename);
-          $this->Session->setFlash("File uploaded successfully and ".count($files)." files were extracted");
-          if ($this->FileManager->delete($filename)) {
-            Logger::info("Delete archive $filename");
-          }
-        } else {
-          $this->Session->setFlash("File uploaded successfully");
-        }
+    if (!empty($this->data)) {
+      if (!$this->Upload->isUpload()) {
+        Logger::info("No upload data available");
+        $this->redirect("index/".$path);
+      } elseif (!$this->FileManager->canWrite($this->Upload->getSize())) {
+        $this->Session->setFlash(__("Your upload quota is exceeded", true));
+        Logger::warn("User upload quota exceeded. Upload denied.");
+        $this->redirect("index/".$path);
       } else {
-        $this->Session->setFlash("Could not upload file");
+        $files = $this->Upload->upload($fsPath, array('overwrite' => false));
+        $extracted = 0;
+        Logger::debug($files);
+        if (!$files || !count($files)) {
+          $this->Session->setFlash(__("Could not upload files", true));
+        } else {
+          Logger::info(sprintf("Uploaded %d file(s): %s", count($files), implode(', ', $files)));
+          foreach ($files as $file) {
+            if (substr(strtolower($file), -4) == '.zip' && $this->data['File']['extract']) {
+              $zipFiles = $this->Zip->unzip($file);
+              if ($zipFiles !== false) {
+                $extracted += count($zipFiles);
+                if ($this->FileManager->delete($file)) {
+                  Logger::info("Delete archive $file");
+                }
+              } else {
+                Logger::warn("Could not extract $file");
+              }
+            }
+          }
+          if ($extracted) {
+            $this->Session->setFlash(sprintf(__("Uploaded %d and %d extraced file(s)", true), count($files), $extracted));
+          } else {
+            $this->Session->setFlash(sprintf(__("Uploaded %d file(s)", true), count($files)));
+          }
+        }
       }
     }
 
