@@ -33,7 +33,7 @@
     <title><?php echo $media['Media']['name']." by ".$media['User']['username']; ?></title>
     <link><?php 
       $url = "/images/view/{$media['Media']['id']}/";
-      echo Router::url($url . $search->serialize(false, array('pos' => $offset++), array('quality')), true); Logger::debug($offset);?></link>
+      echo Router::url($url . $search->serialize(false, array('pos' => $offset++), array('quality')), true); ?></link>
     <?php 
       $thumbSize = $imageData->getimagesize($media, OUTPUT_SIZE_THUMB);
       $thumbUrl = sprintf("/media/thumb/%d%s/%s", $media['Media']['id'], $keyParam, $media['Media']['name']);

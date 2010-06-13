@@ -362,7 +362,22 @@ class QueryBuilderComponent extends Object
   }
 
   function buildVisibility(&$data, &$query, $value) {
-    $query['conditions'][] = $this->_buildCondition("User.id", $this->controller->getUserId());
+    // allow only admins to query others visibility, otherwise query only media
+    // of the current user
+    $me = $this->controller->getUser();
+    if (isset($data['user']) && $data['user'] != $me['User']['username'] && $me['User']['role'] == ROLE_ADMIN) {
+      $user = $this->controller->User->findByUsername($data['user']);
+      if ($user && $user['User']['role'] >= ROLE_USER) {
+        $userId = $user['User']['id'];
+      } else {
+        $userId = -1;
+      }
+    } else {
+      $userId = $this->controller->getUserId();
+    }
+    $query['conditions'][] = $this->_buildCondition("User.id", $userId);
+
+    // setup visibility level
     switch ($value) {
       case 'private':
         $query['conditions'][] = $this->_buildCondition("Media.gacl", ACL_READ_PREVIEW, '<');

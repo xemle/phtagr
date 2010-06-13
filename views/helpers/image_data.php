@@ -25,7 +25,7 @@ App::import('Core', 'Sanitize');
 
 class ImageDataHelper extends AppHelper {
 
-  var $helpers = array('Ajax', 'Html', 'Form', 'Search', 'Option');
+  var $helpers = array('Ajax', 'Html', 'Form', 'Search', 'Option', 'Session');
 
   var $Sanitize = null;
 
@@ -367,7 +367,7 @@ class ImageDataHelper extends AppHelper {
       $cells[] = array(__('Locations', true), implode(', ', $locations));
     }
 
-    if ($data['Media']['isOwner']) {
+    if ($data['Media']['isOwner'] || $this->Session->read('User.role') == ROLE_ADMIN) {
       $cells[] = array(__('Access', true), $this->_metaAccess($data));
     }
     
