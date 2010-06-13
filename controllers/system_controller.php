@@ -41,6 +41,7 @@ class SystemController extends AppController {
     $this->requireRole(ROLE_SYSOP);
     if (isset($this->data)) {
       $this->_set(0, 'general.title', $this->data);
+      $this->_set(0, 'home.welcomeText', $this->data);
     }
     $this->data = $this->Option->getTree(0);
   }

@@ -1,4 +1,4 @@
-<h1><?php __("Welcome to phTagr"); ?></h1>
+<h1><?php echo h($option->get('home.welcomeText', __("Welcome to phTagr", true))); ?></h1>
 
 <div class="subcolumns">
   <div class="c50l">

@@ -6,6 +6,7 @@
 <fieldset><legend><?php __('General'); ?></legend>
 <?php
   echo $form->input('general.title', array('label' => __('Gallery title', true)));
+  echo $form->input('home.welcomeText', array('label' => __('Welcome text', true)));
 ?>
 </fieldset>
 
