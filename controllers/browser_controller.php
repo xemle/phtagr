@@ -461,6 +461,7 @@ class BrowserController extends AppController
       $this->redirect("index/".$path);
     }
     if (!empty($this->data)) {
+      $fsPath = Folder::slashTerm($fsPath);
       if (!$this->Upload->isUpload()) {
         Logger::info("No upload data available");
         $this->redirect("index/".$path);
@@ -478,11 +479,11 @@ class BrowserController extends AppController
           Logger::info(sprintf("Uploaded %d file(s): %s", count($files), implode(', ', $files)));
           foreach ($files as $file) {
             if (substr(strtolower($file), -4) == '.zip' && $this->data['File']['extract']) {
-              $zipFiles = $this->Zip->unzip($file);
+              $zipFiles = $this->Zip->unzip($fsPath . $file);
               if ($zipFiles !== false) {
                 $extracted += count($zipFiles);
-                if ($this->FileManager->delete($file)) {
-                  Logger::info("Delete archive $file");
+                if ($this->FileManager->delete($fsPath . $file)) {
+                  Logger::info("Delete extracted archive $file");
                 }
               } else {
                 Logger::warn("Could not extract $file");

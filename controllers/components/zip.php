@@ -68,9 +68,9 @@ class ZipComponent extends Object {
     $stat['files'] = array();
     $size = 0;
     for ($i = 0; $i < $this->Zip->numFiles; $i++) {
-      $stat = $this->Zip->statIndex($i);
-      $size += $stat['size'];
-      $stat['files'][$i] = $stat;
+      $fileInfo = $this->Zip->statIndex($i);
+      $size += $fileInfo['size'];
+      $stat['files'][$i] = $fileInfo;
     }
     $this->Zip->close();
     $stat['size'] = $size;
