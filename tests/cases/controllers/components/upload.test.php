@@ -58,16 +58,16 @@ class UploadComponentTest extends CakeTestCase {
   function testInitialStates() {
     // initial no upload
     $result = $this->Upload->isUpload();
-    $this->assertEqual($result, false);
+    $this->assertEqual(false, $result);
 
     $result = $this->Upload->getSize();
-    $this->assertEqual($result, 0);
+    $this->assertEqual(0, $result);
 
     $result = $this->Upload->hasErrors();
-    $this->assertEqual($result, false);
+    $this->assertEqual(false, $result);
 
     $result = $this->Upload->getErrors();
-    $this->assertEqual($result, false);
+    $this->assertEqual(false, $result);
   }
 
   function testGetUploadsSingle() {
@@ -89,26 +89,26 @@ class UploadComponentTest extends CakeTestCase {
         )
       );
     $result = $this->Upload->getUploads($data);
-    $this->assertEqual($result, $expected);
+    $this->assertEqual($expected, $result);
 
     // Read from the internal upload array
     $result = $this->Upload->getUploads();
-    $this->assertEqual($result, $expected);
+    $this->assertEqual($expected, $result);
 
     // clear test
     $this->Upload->clear();
     $this->Controller->data = false;
     $result = $this->Upload->getUploads();
-    $this->assertEqual($result, null);
+    $this->assertEqual(null, $result);
 
     // read data from controller
     $this->Controller->data =& $data;
     $result = $this->Upload->getUploads();
-    $this->assertEqual($result, $expected);
+    $this->assertEqual($expected, $result);
 
     $result = $this->Upload->hasErrors();
     $expected = false;
-    $this->assertEqual($result, $expected);
+    $this->assertEqual($expected, $result);
   }
 
   function testGetUploadsMulti() {
@@ -178,14 +178,14 @@ class UploadComponentTest extends CakeTestCase {
       );
     $this->Controller->data =& $data;
     $result = $this->Upload->getUploads();
-    $this->assertEqual($result, $expected);
+    $this->assertEqual($expected, $result);
 
     $result = $this->Upload->hasErrors();
-    $this->assertEqual($result, true);
+    $this->assertEqual(true, $result);
 
     $result = $this->Upload->getSize();
     $expected = 221950;
-    $this->assertEqual($result, $expected);
+    $this->assertEqual($expected, $result);
   }
 
   function _buildUploadFolders() {
@@ -193,8 +193,8 @@ class UploadComponentTest extends CakeTestCase {
     $dst = TEST_FILES . 'dst' . DS;
     $this->Folder->create($src);
     $this->Folder->create($dst);
-    $this->assertEqual(is_dir($src), true);
-    $this->assertEqual(is_dir($dst), true);
+    $this->assertEqual(true, is_dir($src));
+    $this->assertEqual(true, is_dir($dst));
   }
 
   function _deleteUploadFolders() {
@@ -202,8 +202,8 @@ class UploadComponentTest extends CakeTestCase {
     $dst = TEST_FILES . 'dst' . DS;
     $this->Folder->delete($src);
     $this->Folder->delete($dst);
-    $this->assertEqual(is_dir($src), false);
-    $this->assertEqual(is_dir($dst), false);
+    $this->assertEqual(false, is_dir($src));
+    $this->assertEqual(false, is_dir($dst));
   }
 
   function testUpload() {
@@ -240,9 +240,9 @@ class UploadComponentTest extends CakeTestCase {
       );
     $this->Controller->data =& $data;
 
-    $this->assertEqual(copy(TEST_FILES_TMP . 'f0e1d2c3.tmp', $src . 'f0e1d2c3.tmp'), true);
-    $this->assertEqual(copy(TEST_FILES_TMP . 'f1e2d3c4.tmp', $src . 'f1e2d3c4.tmp'), true);
-    $this->assertEqual(copy(TEST_FILES_TMP . 'f2e3d4c5.tmp', $src . 'f2e3d4c5.tmp'), true);
+    $this->assertEqual(true, copy(TEST_FILES_TMP . 'f0e1d2c3.tmp', $src . 'f0e1d2c3.tmp'));
+    $this->assertEqual(true, copy(TEST_FILES_TMP . 'f1e2d3c4.tmp', $src . 'f1e2d3c4.tmp'));
+    $this->assertEqual(true, copy(TEST_FILES_TMP . 'f2e3d4c5.tmp', $src . 'f2e3d4c5.tmp'));
 
     $noPath = TEST_FILES_TMP . 'tmp123' . DS;
     $result = $this->Upload->upload($noPath);
@@ -254,10 +254,10 @@ class UploadComponentTest extends CakeTestCase {
       1 => 'img_7795.jpg',
       2 => 'IMG_6131.JPG'
       );
-    $this->assertEqual($result, $expected);
+    $this->assertEqual($expected, $result);
 
     // overwrite test
-    $this->assertEqual(copy(TEST_FILES_TMP . 'f2e3d4c5.tmp', $src . 'f2e3d4c5.tmp'), true);
+    $this->assertEqual(true, copy(TEST_FILES_TMP . 'f2e3d4c5.tmp', $src . 'f2e3d4c5.tmp'));
     $data = array(
       'Upload' => array(
         'data' => array(
@@ -271,21 +271,25 @@ class UploadComponentTest extends CakeTestCase {
       );
     $this->Upload->clear();
     $result = $this->Upload->isUpload($data);
-    $this->assertEqual($result, true);
+    $this->assertEqual(true, $result);
 
     $result = $this->Upload->upload($dst, array('overwrite' => true));
     $expected = array(0 => 'IMG_6131.JPG');
-    $this->assertEqual($result, $expected);
+    $this->assertEqual($expected, $result);
 
-    $this->assertEqual(copy(TEST_FILES_TMP . 'f2e3d4c5.tmp', $src . 'f2e3d4c5.tmp'), true);
+    $this->assertEqual(true, copy(TEST_FILES_TMP . 'f2e3d4c5.tmp', $src . 'f2e3d4c5.tmp'));
+    $count = $this->Upload->FileManager->_mock->getCallCount('createUniqueFilename');
+    $this->Upload->FileManager->setReturnValueAt($count, 'createUniqueFilename', 'IMG_6131.0.JPG');
     $result = $this->Upload->upload($dst, array('overwrite' => false));
     $expected = array(0 => 'IMG_6131.0.JPG');
-    $this->assertEqual($result, $expected);
+    $this->assertEqual($expected, $result);
 
-    $this->assertEqual(copy(TEST_FILES_TMP . 'f2e3d4c5.tmp', $src . 'f2e3d4c5.tmp'), true);
+    $this->assertEqual(true, copy(TEST_FILES_TMP . 'f2e3d4c5.tmp', $src . 'f2e3d4c5.tmp'));
+    $count = $this->Upload->FileManager->_mock->getCallCount('createUniqueFilename');
+    $this->Upload->FileManager->setReturnValueAt($count, 'createUniqueFilename', 'IMG_6131.1.JPG');
     $result = $this->Upload->upload($dst, array('overwrite' => false));
     $expected = array(0 => 'IMG_6131.1.JPG');
-    $this->assertEqual($result, $expected);
+    $this->assertEqual($expected, $result);
 
     $this->_deleteUploadFolders(); 
   }
@@ -294,7 +298,7 @@ class UploadComponentTest extends CakeTestCase {
     $src = TEST_FILES . 'src' . DS;
     $dst = TEST_FILES . 'dst' . DS;
     $this->_buildUploadFolders();
-    $this->assertEqual(copy(TEST_FILES_TMP . 'f0e1d2c3.tmp', $src . 'f0e1d2c3.tmp'), true);
+    $this->assertEqual(true, copy(TEST_FILES_TMP . 'f0e1d2c3.tmp', $src . 'f0e1d2c3.tmp'));
 
     $data = array(
       'error' => 1,
@@ -323,7 +327,7 @@ class UploadComponentTest extends CakeTestCase {
           )
         )
       );
-    $this->assertEqual($result, $expected);
+    $this->assertEqual($expected, $result);
 
     $data = array(
       'error' => 0,
@@ -334,10 +338,10 @@ class UploadComponentTest extends CakeTestCase {
       );
     $this->Upload->clear();
     $result = $this->Upload->isUpload($data);
-    $this->assertEqual($result, true);
+    $this->assertEqual(true, $result);
     $this->Upload->upload($dst);
 
-    $this->assertEqual(copy(TEST_FILES_TMP . 'f0e1d2c3.tmp', $src . 'f0e1d2c3.tmp'), true);
+    $this->assertEqual(true, copy(TEST_FILES_TMP . 'f0e1d2c3.tmp', $src . 'f0e1d2c3.tmp'));
 
     // FileManager->canWrite() error - Quota check failed
     $count = $this->Upload->FileManager->_mock->getCallCount('canWrite');
@@ -358,7 +362,7 @@ class UploadComponentTest extends CakeTestCase {
           )
         )
       );
-    $this->assertEqual($result, $expected);
+    $this->assertEqual($expected, $result);
 
     // FileManager->add() error
     $count = $this->Upload->FileManager->_mock->getCallCount('add');
@@ -378,7 +382,7 @@ class UploadComponentTest extends CakeTestCase {
           )
         )
       );
-    $this->assertEqual($result, $expected);
+    $this->assertEqual($expected, $result);
 
     $this->_deleteUploadFolders(); 
   }
