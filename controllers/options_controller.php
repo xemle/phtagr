@@ -80,7 +80,6 @@ class OptionsController extends AppController {
     $userId = $this->getUserId();
     if (!empty($this->data)) {
       $this->User->id = $userId;
-      Logger::debug($this->data);
       if (!$this->User->save($this->data, true, array('firstname', 'lastname', 'password', 'email'))) {
         Logger::err("Could not update user profile");
         $this->Session->setFlash(__("Could not save profile!", true));
@@ -88,8 +87,12 @@ class OptionsController extends AppController {
         Logger::info("User $userId profile updated");
         $this->Session->setFlash(__("Profile saved", true));
       }
+      $browser = Set::extract("/Option/user/browser/full", $this->data);
+      $this->Option->setValue('user.browser.full', $browser[0], $userId);
     }
     $this->data = $this->User->findById($userId);
+    $this->data['Option'] = $this->Option->getTree($userId);
+    Logger::debug($this->data['Option']);
     unset($this->data['User']['password']);
   }
 
@@ -122,6 +125,7 @@ class OptionsController extends AppController {
   }
 
   function beforeRender() {
+    parent::beforeRender();
     $items = $this->getMenuItems();
     $menu = array('items' => $items, 'active' => $this->here);
     $this->set('mainMenu', $menu);

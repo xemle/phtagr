@@ -26,11 +26,19 @@
         'link' => "/explorer/user/".$session->read('User.username'), 
         'type' => ($controller == 'explorer' && $myImages?'current':''));
     }
-    if ($role >= ROLE_USER)
-      $items[] = array(
-        'text' => __('My Files', true), 
-        'link' => '/browser', 
-        'type' => ($controller == 'browser'?'current':''));
+    if ($role >= ROLE_USER) {
+      if (!$option->get('user.browser.full', 0)) {
+        $items[] = array(
+          'text' => __('Upload', true), 
+          'link' => '/browser/quickupload', 
+          'type' => ($controller == 'browser' && $action == 'quickupload'?'current':''));
+      } else {
+        $items[] = array(
+          'text' => __('My Files', true), 
+          'link' => '/browser', 
+          'type' => ($controller == 'browser' && $action != 'quickupload'?'current':''));
+      }
+    }
   } else {
     $items[] = array(
       'text' => __('Explorer', true), 

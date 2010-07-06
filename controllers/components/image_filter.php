@@ -58,6 +58,7 @@ class ImageFilterComponent extends BaseFilterComponent {
     }
 
     if ($meta === false) {
+      $this->FilterManager->addError($filename, 'NoMetaDataFound');
       return false;
     }
 
@@ -82,25 +83,29 @@ class ImageFilterComponent extends BaseFilterComponent {
       $this->_extractImageDataGetId3(&$media, $meta);
     }
     if ($options['noSave']) {
-      return 1;
+      return $media;
     } elseif (!$this->Media->save($media)) {
       Logger::err("Could not save Media");
       Logger::trace($media);
-      return -1;
-    } elseif ($isNew) {
+      $this->FilterManager->addError($filename, 'MediaSaveError');
+      return false;
+    } 
+    if ($isNew) {
       $mediaId = $this->Media->getLastInsertID();
       if (!$this->MyFile->setMedia($file, $mediaId)) {
         $this->Media->delete($mediaId);
-        return -1;
+        $this->FilterManager->addError($filename, 'FileSaveError');
+        return false;
       } else {
         Logger::info("Created new Media (id $mediaId)");
+        $media = $this->Media->findById($mediaId);
       }
     } else {
       Logger::verbose("Updated media (id ".$media['Media']['id'].")");
     }
     $this->MyFile->updateReaded($file);
     $this->MyFile->setFlag($file, FILE_FLAG_DEPENDENT);
-    return 1;
+    return $media;
   }
 
   /** Clear image metadata from a file
@@ -628,6 +633,7 @@ class ImageFilterComponent extends BaseFilterComponent {
 
     $data = $getId3->analyze($filename);
     if (isset($data['error'])) {
+      $this->FilterManager->addError($filename, 'VendorError', '', $data['error']);
       Logger::err("GetId3 analyzing error: {$data['error'][0]}");
       Logger::debug($data);
       return false;

@@ -237,6 +237,29 @@ class FileManagerComponent extends Object {
     }
     return $this->MyFile->move($src, $dst);
   }
+
+  /** Creates a unique filename within a path and a filename. The new filename
+   * has the pattern of name.unique-number.extension
+    @param path Path for the filename
+    @param filename Filename 
+    @return unique filename */
+  function createUniqueFilename($path, $filename) {
+    $path = Folder::slashTerm($path);
+    if (!file_exists($path . $filename)) {
+      return $filename;
+    }
+    $name = substr($filename, 0, strrpos($filename, '.'));
+    $ext = substr($filename, strrpos($filename, '.') + 1);
+    $found = false;
+    $count = 0;
+    while (!$found) {
+      $new = $name . '.' . $count . '.' . $ext;
+      if (!file_exists($path . $new)) {
+        return $new;
+      }
+      $count++;
+    }
+  }
 }
 
 ?>

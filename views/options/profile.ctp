@@ -18,4 +18,9 @@
   echo $form->input('User.confirm', array('type' => 'password', 'label' => __('Confirm', true)));
 ?>
 </fieldset>
+<fieldset><legend><?php __('Others'); ?></legend>
+<?php
+  echo $form->input('Option.user.browser.full', array('type' => 'checkbox', 'label' => __('Show advanced file browser', true)));
+?>
+</fieldset>
 <?php echo $form->end(__('Save', true)); ?>

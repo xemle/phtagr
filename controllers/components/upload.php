@@ -176,7 +176,7 @@ class UploadComponent extends Object {
 
       if ($folder->find($filename)) {
         if (!$options['overwrite']) {
-          $filename = $this->createUniqueFilename($path, $filename);
+          $filename = $this->FileManager->createUniqueFilename($path, $filename);
         } else {
           $this->FileManager->delete($path . $filename);
         }
@@ -207,26 +207,6 @@ class UploadComponent extends Object {
       $uploaded[] = $filename;
     }
     return $uploaded;
-  }
-  
-  /** Creates a unique filename within a path and a filename. The new filename
-   * has the pattern of name.unique-number.extension
-    @param path Path for the filename
-    @param filename Filename 
-    @return unique filename */
-  function createUniqueFilename($path, $filename) {
-    $path = Folder::slashTerm($path);
-    $name = substr($filename, 0, strrpos($filename, '.'));
-    $ext = substr($filename, strrpos($filename, '.') + 1);
-    $found = false;
-    $count = 0;
-    while (!$found) {
-      $new = $name . '.' . $count . '.' . $ext;
-      if (!file_exists($path . $new)) {
-        return $new;
-      }
-      $count++;
-    }
   }
 }
 ?>

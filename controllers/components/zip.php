@@ -134,7 +134,7 @@ class ZipComponent extends Object {
 
   /** Exract file from zip file 
     @param file Array of file stat
-    @param dst Destination of filei
+    @param dst Destination of file
     @result filename on success */
   function _extract($file, $dst) {
     $fp = $this->Zip->getStream($file['name']);
@@ -143,16 +143,18 @@ class ZipComponent extends Object {
       return false;
     }
     if (dirname($file['name']) != '') {
-      $fileDir = $dst . dirname($file['name']);
-      if (!is_dir($fileDir)) {
-        if (!$this->Folder->mkdir($fileDir)) {
-          Logger::err("Could not create directory $fileDir");
+      $dst .= dirname($file['name']);
+      if (!is_dir($dst)) {
+        if (!$this->Folder->mkdir($dst)) {
+          Logger::err("Could not create directory $dst");
           return false;
         } else {
-          Logger::verbose("Create directory $fileDir");
+          Logger::verbose("Create directory $dst");
         }
       }
     }
+    $this->Folder->cd($dst);
+    $dst = Folder::slashTerm($dst);
 
     // skip directories, which have zero size
     if ($file['size'] === 0) {
@@ -160,7 +162,7 @@ class ZipComponent extends Object {
       return false;
     }
 
-    $newFile = $dst . $file['name'];
+    $newFile = $dst . $this->FileManager->createUniqueFilename($dst, basename($file['name']));
     $tp = fopen($newFile, 'w');
     if (!$tp) {
       fclose($fp);
@@ -189,6 +191,7 @@ class ZipComponent extends Object {
     Logger::verbose("Extracted {$file['name']} ($written Bytes)");
     return $newFile;
   }
+
 }
 
 ?>

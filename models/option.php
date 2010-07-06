@@ -36,7 +36,7 @@ class Option extends AppModel {
     $defaultOptions = $this->findAllByUserId(0);
     foreach ($defaultOptions as $default) {
       $name = $default[$this->name]['name'];
-      if (strlen($name)>2 && substr($name, -2) == '[]') {
+      if (strlen($name) > 2 && substr($name, -2) == '[]') {
         $options[] = $default[$this->name];
       } else {
         $exists = in_array($name, $ownOptions);
@@ -86,10 +86,11 @@ class Option extends AppModel {
 
     foreach ($data as $item) {
       // Option is set as item
-      if (isset($item['Option']))
+      if (isset($item['Option'])) {
         $option = &$item['Option'];
-      else
+      } else {
         $option = &$item;
+      }
 
       // Skip if subpath does not match
       if (isset($subPath) && strpos($option['name'], $subPath) !== 0) {
@@ -110,10 +111,11 @@ class Option extends AppModel {
         }
         $node = &$node[$path];
       }
-      if ($isArray)
+      if ($isArray) {
         $node[] = $option['value'];
-      else
+      } else {
         $node = $option['value'];
+      }
     }
     return $tree;
   }
