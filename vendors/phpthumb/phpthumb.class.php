@@ -1151,7 +1151,7 @@ class phpthumb {
 				$commandline .= ' --version';
 				$this->DebugMessage('ImageMagick version checked with "'.$commandline.'"', __FILE__, __LINE__);
 				$versionstring[1] = trim(phpthumb_functions::SafeExec($commandline));
-				if (eregi('^Version: [^0-9]*([ 0-9\\.\\:Q/]+) (http|file)\:', $versionstring[1], $matches)) {
+				if (eregi('^Version: [^0-9]*([ 0-9\\.\\:Q/\-]+) (http|file)\:', $versionstring[1], $matches)) {
 					$versionstring[0] = $matches[1];
 				} else {
 					$versionstring[0] = false;
@@ -1424,7 +1424,6 @@ class phpthumb {
 
 						} elseif ($this->sw || $this->sh || $this->sx || $this->sy) {
 
-							$commandline .= ' -crop '.($this->sw ? $this->sw : $this->source_width).'x'.($this->sh ? $this->sh : $this->source_height).'+'.$this->sx.'+'.$this->sy;
 							// this is broken for aoe=1, but unsure how to fix. Send advice to info@silisoftware.com
 							if ($this->w || $this->h) {
 								if ($this->ImageMagickSwitchAvailable('repage')) {
@@ -1441,6 +1440,7 @@ class phpthumb {
 								}
 								$commandline .= ' -'.$IMresizeParameter.' '.$this->w.'x'.$this->h;
 							}
+							$commandline .= ' -crop '.($this->sw ? $this->sw : $this->source_width).'x'.($this->sh ? $this->sh : $this->source_height).'+'.$this->sx.'+'.$this->sy;
 
 						} else {
 
