@@ -499,16 +499,59 @@ class BrowserController extends AppController
     return $result;    
   }
 
-  function _getMaxUploadSize() {
-    $max = strtoupper(ini_get('upload_max_filesize'));
-    if (preg_match('/^([0-9]+)([TGMK])B?$/', $max, $matches)) {
-      $max = $matches[1];
-      switch ($matches[2]) {
-        case 'T': $max *= 1024; 
-        case 'G': $max *= 1024; 
-        case 'M': $max *= 1024; 
-        case 'B': $max *= 1024; 
+  function __fromReadableSize($readable) {
+    if (is_float($readable) || is_numeric($readable)) {
+      return $readable;
+    } elseif (preg_match_all('/^\s*(0|[1-9][0-9]*)(\.[0-9]+)?\s*([KkMmGg][Bb]?)?\s*$/', $readable, $matches, PREG_SET_ORDER)) {
+      $matches = $matches[0];
+      $size = (float)$matches[1];
+      if (is_numeric($matches[2])) {
+        $size += $matches[2];
       }
+      if (is_string($matches[3])) {
+        switch ($matches[3][0]) {
+          case 'k':
+          case 'K':
+            $size = $size * 1024;
+            break;
+          case 'm':
+          case 'M':
+            $size = $size * 1024 * 1024;
+            break;
+          case 'g':
+          case 'G':
+            $size = $size * 1024 * 1024 * 1024;
+            break;
+          default:
+            Logger::err("Unknown unit {$matches[3]}");
+        }
+      }
+      if ($size < 0) {
+        Logger::err("Size is negtive: $size");
+        return 0;
+      }
+      return $size;
+    } else {
+      return 0;
+    }
+  }
+
+  /** Evaluates the maximum upload size by php configuration of post_max_size,
+ * upload_max_filesize, and memory_limit */
+  function _getMaxUploadSize() {
+    $max = 1024 * 1024 * 1024;
+    if (!function_exists('ini_get')) {
+      return 16 * 1024 * 1024;
+    }
+
+    if (ini_get('upload_max_filesize')) {
+      $max = min($max, $this->__fromReadableSize(ini_get('upload_max_filesize')));
+    }
+    if (ini_get('post_max_size')) {
+      $max = min($max, $this->__fromReadableSize(ini_get('post_max_size')));
+    }
+    if (ini_get('memory_limit')) {
+      $max = min($max, $this->__fromReadableSize(ini_get('memory_limit')));
     }
     return $max;
   }
