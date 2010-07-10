@@ -20,7 +20,7 @@
     <td><?php
       $delConfirm = "Do you really want to detete the path '$root' of '{$this->data['User']['username']}'?";
       echo $html->link($html->image('icons/delete.png', array('alt' => 'Delete', 'title' => "Delete path '$root'")),
-    '/admin/users/delpath/'.$this->data['User']['id'].'/'.$root, null, $delConfirm, false);?></td>
+    '/admin/users/delpath/'.$this->data['User']['id'].'/'.$root, array('escape' => false), $delConfirm);?></td>
   </tr>
 <?php endforeach; ?>
 </tbody>

@@ -444,7 +444,7 @@ class BrowserController extends AppController
       $name = $this->data['Folder']['name'];
 
       $newFolder = Folder::slashTerm($fsPath).$name;
-      if ($folder->mkdir($newFolder)) {
+      if ($folder->create($newFolder)) {
         Logger::verbose("Create folder $newFolder");
         $this->Session->setFlash("Folder $name created");
         $this->redirect("index/".$path.$name);

@@ -145,7 +145,7 @@ class ZipComponent extends Object {
     if (dirname($file['name']) != '') {
       $dst .= dirname($file['name']);
       if (!is_dir($dst)) {
-        if (!$this->Folder->mkdir($dst)) {
+        if (!$this->Folder->create($dst)) {
           Logger::err("Could not create directory $dst");
           return false;
         } else {
