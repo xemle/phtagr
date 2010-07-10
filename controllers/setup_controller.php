@@ -21,7 +21,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-uses('file', 'model' . DS . 'schema');
 
 class SetupController extends AppController {
 
@@ -35,6 +34,7 @@ class SetupController extends AppController {
   var $User = null;
   var $Option = null;
   var $commands = array('exiftool', 'convert', 'ffmpeg', 'flvtool2');
+  var $checks = array();
 
   function beforeFilter() {
     Configure::write('Cache.disable', true);
@@ -55,11 +55,17 @@ class SetupController extends AppController {
   /** Initialize the database schema and data source
     @return True if the database source could be loaded */
   function __initDataSource() {
+    if (isset($this->checks['initDataSource'])) {
+      return $this->checks['initDataSource'];
+    }
+
     if (!$this->__hasConfig()) {
+      $this->checks['initDataSource'] = true;
       return false;
     }
 
-    return $this->UpgradeSchema->initDataSource();
+    $this->checks['initDataSource'] = $this->UpgradeSchema->initDataSource();
+    return $this->checks['initDataSource'];
   }
 
   function __loadModel($models) {
@@ -88,17 +94,28 @@ class SetupController extends AppController {
   }
 
   function __hasSalt() {
+    if (isset($this->checks['hasSalt'])) {
+      return $this->checks['hasSalt'];
+    }
+
     Logger::debug("Check for settings in core");
     if (Configure::read('Security.salt') == 'DYhG93b0qyJfIxfs2guVoUubWwvniR2G0FgaC9mi') {
       Logger::warn("Detecting unsecure security salt");
+      $this->checks['hasSalt'] = false;
       return false;
     }
 
+    $this->checks['hasSalt'] = true;
     return true;
   }
 
   function __hasSession() {
-    return $this->Session->check('setup');
+    if (isset($this->checks['hasSession'])) {
+      return $this->checks['hasSession'];
+    }
+
+    $this->checks['hasSession'] = $this->Session->check('setup');
+    return $this->checks['hasSession'];
   }
 
   function __checkSession() {
@@ -111,66 +128,99 @@ class SetupController extends AppController {
 
   /** Checks for required writable paths */
   function __hasPaths() {
+    if (isset($this->checks['hasPaths'])) {
+      return $this->checks['hasPaths'];
+    }
+
     Logger::debug("Check for writable paths");
     foreach ($this->paths as $path) {
-      if (!is_dir($path) || !is_writeable($path))
+      if (!is_dir($path) || !is_writeable($path)) {
+        $this->checks['hasPaths'] = false;
         return false;
+      }
     }
+    $this->checks['hasPaths'] = true;
     return true;
   }
 
   /** Checks the existence of the database configuration */
   function __hasConfig() {
-    if (!$this->__hasPaths())
+    if (isset($this->checks['hasConfig'])) {
+      return $this->checks['hasConfig'];
+    }
+
+    if (!$this->__hasPaths()) {
       return false;
+    }
 
     Logger::debug("Check for database configuration");
-    return is_readable($this->dbConfig);
+    $this->checks['hasConfig'] = is_readable($this->dbConfig);
+    return $this->checks['hasConfig'];
   }
 
   /** Checks the database connection */
   function __hasConnection() {
+    if (isset($this->checks['hasConnection'])) {
+      return $this->checks['hasConnection'];
+    }
+
     if (!$this->__hasConfig()) {
+      $this->checks['hasConnection'] = false;
       return false;
     }
     Logger::debug("Check for database connection");
 
     if (!$this->UpgradeSchema->initDataSource()) {
+      $this->checks['hasConnection'] = false;
       return false;
     }
 
-    return $this->UpgradeSchema->isConnected();
+    $this->checks['hasConnection'] = $this->UpgradeSchema->isConnected();
+    return $this->checks['hasConnection'];
   }
 
   /** Checks for existing tables
     @param tables. Array of tables names. Default array('users')
     @return True if all given tables exists */
   function __hasTables($tables = array('users')) {
+    if (isset($this->checks['hasTables'])) {
+      return $this->checks['hasTables'];
+    }
+
     if (!$this->__hasConnection()) {
+      $this->checks['hasTables'] = false;
       return false;
     }
 
     Logger::debug("Check for initial required tables");
     if (!$this->UpgradeSchema->hasTables($tables)) {
       Logger::debug("require tables");
+      $this->checks['hasTables'] = false;
       return false;
     } else {
+      $this->checks['hasTables'] = true;
       return true;
     }
   }
 
   /** Check for administration account */
   function __hasSysOp() {
+    if (isset($this->checks['hasSysOp'])) {
+      return $this->checks['hasSysOp'];
+    }
     if (!$this->__hasTables(array('users'))) {
+      $this->checks['hasSysOp'] = false;
       return false;
     }
 
     Logger::debug("Check for admin account");
     if (!$this->__loadModel('User')) {
+      $this->checks['hasSysOp'] = false;
       return false;
     }
 
-    return $this->User->hasAnyWithRole(ROLE_SYSOP);
+    $this->checks['hasSysOp'] = $this->User->hasAnyWithRole(ROLE_SYSOP);
+    return $this->checks['hasSysOp'];
   }
 
   function __hasCommands($commands = null) {

@@ -21,8 +21,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-App::import('Model', 'CakeSchema');
-
 class UpgradeSchemaComponent extends Object{
 
   var $controller = null;
@@ -158,10 +156,28 @@ class UpgradeSchemaComponent extends Object{
     return $errors;
   }
 
+  /** Strips table prefix from a schema tables
+  @param schema Current schema to strip
+  @return New schema with striped tables names */
+  function _stripTablePrefix($schema) {
+    $prefix = $this->db->config['prefix'];
+    foreach ($schema['tables'] as $table => $columns) {
+      if (strpos($table, $prefix) === 0) {
+        $stripped = substr($table, strlen($prefix));
+        if (!isset($schema['tables'][$stripped])) {
+          $schema['tables'][$stripped] = $columns;
+          unset($schema['tables'][$table]);
+        }
+      }
+    }
+    return $schema;
+  }
+
   function _getAlteredColumns($noDrop = false) {
     // Reset sources for refetching
     $this->db->_sources = null;
     $Old = $this->cakeSchema->read();
+    $Old = $this->_stripTablePrefix($Old);
     $compare = $this->cakeSchema->compare($Old, $this->schema);
     $models = Configure::listObjects('model');
 
@@ -229,12 +245,12 @@ class UpgradeSchemaComponent extends Object{
   function requireUpgrade() {
     $missingTables = $this->_getMissingTables($this->schema);
     if ($missingTables) {
-      Logger::info("Missing table(s): ".implode(", ", array_keys($missingTables)));
+      Logger::verbose("Missing table(s): ".implode(", ", array_keys($missingTables)));
       return true;
     }
     $alterColumns = $this->_getAlteredColumns($this->schema);
     if ($alterColumns) {
-      Logger::info("Table change(s): ".implode(", ", array_keys($alterColumns)));
+      Logger::verbose("Table change(s): ".implode(", ", array_keys($alterColumns)));
       return true;
     }
     return false;
