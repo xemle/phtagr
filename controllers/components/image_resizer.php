@@ -28,7 +28,7 @@ class ImageResizerComponent extends Object {
 
   var $controller = null;
 
-  function startup(&$controller) {
+  function initialize(&$controller) {
     $this->controller =& $controller;
   }
 

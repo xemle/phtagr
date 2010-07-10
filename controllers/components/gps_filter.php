@@ -26,7 +26,7 @@ class GpsFilterComponent extends BaseFilterComponent {
   var $controller = null;
   var $components = array('Nmea');
 
-  function startup(&$controller) {
+  function initialize(&$controller) {
     $this->controller =& $controller;
   }
 
@@ -80,7 +80,7 @@ class GpsFilterComponent extends BaseFilterComponent {
     }
     Logger::trace($conditions);
     $this->Media->unbindAll();
-    $mediaSet = $this->Media->findAll($conditions);
+    $mediaSet = $this->Media->find('all', array('conditions' => $conditions));
     if (!count($mediaSet)) {
       Logger::info("No images found for GPS interval");
       return false;

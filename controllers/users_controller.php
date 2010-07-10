@@ -589,7 +589,7 @@ class UsersController extends AppController
    * account
     @param user User model data (of the new user) */
   function _sendNewAccountNotifiactionEmail($user) {
-    $sysOps = $this->User->findAll("User.role >= ".ROLE_SYSOP);
+    $sysOps = $this->User->find('all', array('conditions' => "User.role >= ".ROLE_SYSOP));
     if (!$sysOps) {
       Logger::err("Could not find system operators");
       return false;

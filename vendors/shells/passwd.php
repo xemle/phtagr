@@ -45,7 +45,7 @@ class PasswdShell extends Shell {
   /** Decrypt all passwords */
   function encrypt() {
     if ('y' == $this->in('Are you sure you want to upgrade all passwords?', array('y', 'n'), 'n')) {
-      $users = $this->User->findall('User.password NOT LIKE "$E$%"');
+      $users = $this->User->find('all', array('conditions' => 'User.password NOT LIKE "$E$%"'));
       if (!count($users)) {
         $this->out("No users found with plain passwords");
       } else {

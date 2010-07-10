@@ -26,7 +26,7 @@ class VideoPreviewComponent extends Object {
   var $controller = null;
   var $components = array('FileCache', 'FileManager');
 
-  function startup(&$controller) {
+  function initialize(&$controller) {
     $this->controller =& $controller;
   }
 

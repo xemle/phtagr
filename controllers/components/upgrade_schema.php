@@ -21,7 +21,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-uses('file', 'model' . DS . 'schema');
+App::import('Model', 'CakeSchema');
 
 class UpgradeSchemaComponent extends Object{
 
@@ -32,7 +32,7 @@ class UpgradeSchemaComponent extends Object{
   var $schema = null;
   var $modelMapping = array('files' => 'MyFile', 'media' => 'Media');
 
-  function startup(&$controller) {
+  function initialize(&$controller) {
     $this->controller = $controller;
   }
 

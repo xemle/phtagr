@@ -44,7 +44,7 @@ class ExplorerController extends AppController
       $this->data = $this->Search->paginate();
 
       if ($this->hasRole(ROLE_USER)) {
-        $groups = $this->Group->findAll(array('Group.user_id' => $this->getUserId()), false, array('Group.name'));
+        $groups = $this->Group->find('all', array('conditions' => array('Group.user_id' => $this->getUserId()), 'order' => 'Group.name'));
         if ($groups) {
           $groups = Set::combine($groups, "{n}.Group.id", "{n}.Group.name");
         }
@@ -108,7 +108,7 @@ class ExplorerController extends AppController
 
   function search() {
     if ($this->hasRole(ROLE_USER)) {
-      $groups = $this->Group->findAll(array('Group.user_id' => $this->getUserId()), false, array('Group.name'));
+      $groups = $this->Group->find('all', array('conditions' => array('Group.user_id' => $this->getUserId()), 'order' => 'Group.name'));
       if ($groups) {
         $groups = Set::combine($groups, "{n}.Group.id", "{n}.Group.name");
       }
@@ -514,7 +514,7 @@ class ExplorerController extends AppController
     $this->set('data', $media);
     $this->layout='bare';
     if ($this->Media->checkAccess(&$media, &$user, 1, 0)) {
-      $groups = $this->Group->findAll(array('User.id' => $this->getUserId()));
+      $groups = $this->Group->find('all', array('conditions' => (array('User.id' => $this->getUserId()))));
       if (!empty($groups)) {
         $groups = Set::combine($groups, '{n}.Group.id', '{n}.Group.name');
       } else {

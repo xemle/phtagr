@@ -29,7 +29,7 @@ class ImageFilterComponent extends BaseFilterComponent {
                         LOCATION_STATE => 'Province-State',
                         LOCATION_COUNTRY => 'Country-PrimaryLocationName');
 
-  function startup(&$controller) {
+  function initialize(&$controller) {
     $this->controller =& $controller;
   }
 

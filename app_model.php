@@ -54,7 +54,7 @@ class AppModel extends Model
       if ($item['name'][0]=='-') {
         $item['name'] = substr($item['name'], 1);
       }
-      $data = $this->findAll(array('and' => $item), array('id'));
+      $data = $this->find('all', array('conditions' => array('and' => $item), 'fields' => array('id')));
       if (!empty($data)) {
         $newIds = Set::extract($data, '{n}.'.$this->name.'.id');
         $ids = array_merge($ids, $newIds);

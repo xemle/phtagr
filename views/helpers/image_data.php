@@ -166,7 +166,7 @@ class ImageDataHelper extends AppHelper {
       $link .= $options['params'];
     }
 
-    $out = $this->Html->link($img, $link, false, false, false);
+    $out = $this->Html->link($img, $link, array('escape' => false));
     $out = $options['before'] . $out . $options['after'];
 
     if ($options['div']) {
@@ -381,14 +381,14 @@ class ImageDataHelper extends AppHelper {
       $output .= ' '.$this->Ajax->link(
         $this->Html->image('icons/tag_blue_edit.png', array('alt' => __('Edit tags', true), 'title' => __('Edit tags', true))), 
         '/explorer/editmeta/'.$mediaId, 
-        array('update' => 'meta-'.$mediaId), null, false);
+        array('update' => 'meta-'.$mediaId, 'escape' => false));
     }
     if ($data['Media']['canReadOriginal']) {
       foreach ($data['File'] as $file) {
         $output .= ' '.$this->Html->link(
           $this->Html->image('icons/disk.png', 
             array('alt' => $file['file'], 'title' => sprintf(__('Save file %s', true), $file['file']))), 
-          '/media/file/'.$file['id'].'/'.$file['file'], null, null, false);
+          '/media/file/'.$file['id'].'/'.$file['file'], array('escape' => false));
       }
     }
 
@@ -397,8 +397,7 @@ class ImageDataHelper extends AppHelper {
           $this->Html->image('icons/map.png',
             array('alt' => 'Show location in a map', 'title' => __('Show location in a map', true))),
           '#',
-          array('onclick' => sprintf('showMap(%d, %f,%f);return false;', $data['Media']['id'], $data['Media']['latitude'],$data['Media']['longitude'])),
-          null, false);
+          array('onclick' => sprintf('showMap(%d, %f,%f);return false;', $data['Media']['id'], $data['Media']['latitude'],$data['Media']['longitude']), 'escape' => false));
     }
     
     if ($data['Media']['isOwner']) {
@@ -406,13 +405,13 @@ class ImageDataHelper extends AppHelper {
         $this->Html->image('icons/key.png', 
           array('alt' => 'Edit ACL', 'title' => __('Edit access rights', true))), 
         '/explorer/editacl/'.$mediaId, 
-        array('update' => 'meta-'.$mediaId), null, false);
+        array('update' => 'meta-'.$mediaId, 'escape' => false));
       if ($data['Media']['isDirty'])
         $output .= ' '.$this->Ajax->link(
           $this->Html->image('icons/database_refresh.png', 
             array('alt' => __('Synchronize db with image', true), 'title' => __('Synchronize meta data with the image', true))), 
           '/explorer/sync/'.$mediaId, 
-          array('update' => 'meta-'.$mediaId), null, false);
+          array('update' => 'meta-'.$mediaId, 'escape' => false));
     }
 
     if ($output) {

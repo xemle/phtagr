@@ -74,7 +74,7 @@ class Option extends AppModel {
 
   function getTree($userId) {
     $this->unbindModel(array('belongsTo' => array('User')));
-    $data = $this->findAll("user_id = $userId OR user_id = 0 ORDER BY user_id ASC");
+    $data = $this->find('all', array('conditions' => "user_id = $userId OR user_id = 0 ORDER BY user_id ASC"));
     return $this->buildTree($data);
   }
 

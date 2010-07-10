@@ -30,7 +30,7 @@ class ZipComponent extends Object {
   var $Folder = null;
   var $_stats = array();
 
-  function startup(&$controller) {
+  function initialize(&$controller) {
     $this->controller = $controller;
     $this->Folder = new Folder();
     if (class_exists('ZipArchive')) {

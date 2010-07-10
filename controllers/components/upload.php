@@ -38,7 +38,7 @@ class UploadComponent extends Object {
    * needs a special web test with ugly post data handling */
   var $_testRun = false;
 
-  function startup(&$controller) {
+  function initialize(&$controller) {
     $this->controller = $controller;
   }
   

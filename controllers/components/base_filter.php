@@ -30,7 +30,7 @@ class BaseFilterComponent extends Object {
   var $Media = null;
   var $MyFile = null;
 
-  function startup(&$controller) {
+  function initialize(&$controller) {
     $this->controller =& $controller;
   }
 

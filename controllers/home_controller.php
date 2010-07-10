@@ -74,7 +74,7 @@ class HomeController extends AppController
     $this->set('cloudCategories', $this->Media->cloud($user, 'Category', 50));
 
     $conditions = $this->Media->buildAclConditions($this->getUser());
-    $comments = $this->Comment->findAll($conditions, null, 'Comment.date DESC', 4);
+    $comments = $this->Comment->find('all', array('conditions' => $conditions, 'order' => 'Comment.date DESC', 'limit' => 4));
     $this->set('comments', $comments);
   }
 }

@@ -64,7 +64,7 @@ class OptionsController extends AppController {
     $this->data = $tree;
 
     $this->set('userId', $userId);
-    $groups = $this->Group->findAll("Group.user_id = $userId", null, array('Group.name' => 'ASC'));
+    $groups = $this->Group->find('all', array('conditions' => "Group.user_id = $userId", 'order' => array('Group.name' => 'ASC')));
     if ($groups) {
       $groups = Set::combine($groups, '{n}.Group.id', '{n}.Group.name');
     } else {

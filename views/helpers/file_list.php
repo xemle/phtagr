@@ -99,7 +99,7 @@ class FileListHelper extends AppHelper
     // Download link for internal files and imported external files
     if ($options['isInternal'] || $file['media_id'] > 0) {
       $icon = $this->Html->image('icons/disk.png', array('alt' => 'download', 'title' => 'Download '.$file['file']));
-      $actions[] = $this->Html->link($icon, "index/$path/{$file['file']}", null, null, false);
+      $actions[] = $this->Html->link($icon, "index/$path/{$file['file']}", array('escape' => false));
     }
 
     // Delete link for internal files

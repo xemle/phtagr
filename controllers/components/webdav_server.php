@@ -58,11 +58,11 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
     $this->_davRoot="";
   }
 
-  function startup(&$controller) {
+  function initialize(&$controller) {
     $this->controller = &$controller;
     // set current controller URL
     $this->setDavRoot($controller->webroot.$controller->name);
-    $this->FilterManager->startup(&$controller);
+    $this->FilterManager->initialize(&$controller);
   }
 
   /** Set a new filesystem root directory
