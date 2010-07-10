@@ -1,6 +1,6 @@
 <h1><?php __("Media Upload"); ?></h1>
 
-<?php $session->flash(); ?>
+<?php echo $session->flash(); ?>
 
 <?php if (count($imports)): ?>
 <h2><?php __("Your uploaded media"); ?></h2>

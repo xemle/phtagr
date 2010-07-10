@@ -1,6 +1,6 @@
 <h1><?php __("External Programs"); ?></h1>
 
-<?php $session->flash(); ?>
+<?php echo $session->flash(); ?>
 
 <p><?php __("Congratulation! phTagr just runs fine now!"); ?></p>
 

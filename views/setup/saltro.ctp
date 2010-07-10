@@ -1,6 +1,6 @@
 <h1><?php __("Security settings"); ?></h1>
 
-<?php $session->flash(); ?>
+<?php echo $session->flash(); ?>
 
 <p><?php __("phTagr could not set the security salt because the a configuration file file is write protected.  Please change the configuration manually"); ?></p>
 

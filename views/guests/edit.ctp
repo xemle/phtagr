@@ -1,6 +1,6 @@
 <h1><?php printf(__('Guest: %s', true), $this->data['Guest']['username']); ?></h1>
 
-<?php $session->flash(); ?>
+<?php echo $session->flash(); ?>
 
 <?php echo $form->create(null, array('action' => 'edit/'.$this->data['Guest']['id']));?>
 <fieldset><legend><?php __('Guest'); ?></legend>

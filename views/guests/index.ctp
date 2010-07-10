@@ -1,6 +1,6 @@
 <h1><?php __('Guests'); ?></h1>
 
-<?php $session->flash(); ?>
+<?php echo $session->flash(); ?>
 
 <?php if (!empty($this->data)): ?>
 <table class="default">

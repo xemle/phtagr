@@ -1,6 +1,6 @@
 <h1>Add new User</h1>
 
-<?php $session->flash(); ?>
+<?php echo $session->flash(); ?>
 
 <?php echo $form->create('User', array('action' => 'add')); ?>
 <fieldset><legend>Create new user</legend>

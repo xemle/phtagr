@@ -1,6 +1,6 @@
 <h1><?php __('File Browser'); ?></h1>
 
-<?php $session->flash(); ?>
+<?php echo $session->flash(); ?>
 
 <?php echo $form->create('Browser', array('action' => 'import/'.$path)); ?>
 

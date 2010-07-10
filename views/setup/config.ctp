@@ -1,6 +1,6 @@
 <h1><?php __("Database connection"); ?></h1>
 
-<?php $session->flash(); ?>
+<?php echo $session->flash(); ?>
 
 <p><?php __("This step creates the configuration for the database connection. Please add your database connection settings here."); ?></p>
 

@@ -1,6 +1,6 @@
 <h1>User: <?=$this->data['User']['username']?></h1>
 
-<?php $session->flash(); ?>
+<?php echo $session->flash(); ?>
 
 
 <?php if (isset($fsroots['path']['fsroot'])): ?>

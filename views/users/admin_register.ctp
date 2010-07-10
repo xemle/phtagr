@@ -1,5 +1,5 @@
 <h1>User Registration</h1>
-<?php $session->flash(); ?>
+<?php echo $session->flash(); ?>
 
 <?php echo $form->create(null, array('action' => 'register')); ?>
 <fieldset><legend>Registration</legend>

@@ -1,5 +1,5 @@
 <h1>Comments</h1>
-<?php $session->flash(); ?>
+<?php echo $session->flash(); ?>
 
 <?php if ($comments): ?>
 <div class="paginator"><div class="subpaginator">

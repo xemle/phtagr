@@ -1,6 +1,6 @@
 <h1><?php __("Meta Data Synchronization"); ?></h1>
 
-<?php $session->flash(); ?>
+<?php echo $session->flash(); ?>
 
 <p><?php __("phTagr embedds meta data like tags, categories, or (geo) location information direct into the image video files."); ?></p>
 

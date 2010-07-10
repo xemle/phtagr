@@ -1,6 +1,6 @@
 <h1><?php __("Database upgrade"); ?></h1>
 
-<?php $session->flash(); ?>
+<?php echo $session->flash(); ?>
 
 <div class="info">
 <?php __("The database schema requires an upgrade. Do you want to perform the upgrade?"); ?>

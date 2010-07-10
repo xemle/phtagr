@@ -1,6 +1,6 @@
 <h1><?php __("Database upgrade"); ?></h1>
 
-<?php $session->flash(); ?>
+<?php echo $session->flash(); ?>
 
 <div class="info">
 <?php __("Your database is up-to-date."); ?>

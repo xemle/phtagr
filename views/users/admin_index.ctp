@@ -1,5 +1,5 @@
 <h1>Users</h1>
-<?php $session->flash(); ?>
+<?php echo $session->flash(); ?>
 
 <?php $paginator->options(array('update' => 'main_content', 'indicator' => 'spinner'));?>
 

@@ -1,5 +1,5 @@
 <h1>Explorer</h1>
-<?php $session->flash(); ?>
+<?php echo $session->flash(); ?>
 
 <?php 
   $search->initialize();

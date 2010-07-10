@@ -1,6 +1,6 @@
 <h1><?php __("Path settings"); ?></h1>
 
-<?php $session->flash(); ?>
+<?php echo $session->flash(); ?>
 
 <?php if (count($missing)): ?>
 <div class="error">

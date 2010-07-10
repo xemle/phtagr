@@ -1,6 +1,6 @@
 <h1><?php __("Welcome"); ?></h1>
 
-<?php $session->flash(); ?>
+<?php echo $session->flash(); ?>
 
 </p><?php __("Welcome to the installation procedure of phTagr. Following steps are required to install it:"); ?></p>
 

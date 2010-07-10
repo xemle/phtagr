@@ -1,6 +1,6 @@
 <h1><?php __("Database connection"); ?></h1>
 
-<?php $session->flash(); ?>
+<?php echo $session->flash(); ?>
 
 <div class="warning">
 <?php __("The configuration file for the database connection could not be written. Please create a database configuration file by your own!"); ?>

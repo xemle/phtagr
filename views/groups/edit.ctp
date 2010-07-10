@@ -1,6 +1,6 @@
 <h1><?php printf(__('Group: %s', true), $this->data['Group']['name']); ?></h1>
 
-<?php $session->flash() ?>
+<?php echo $session->flash() ?>
 
 <?php if(count($this->data['Member'])): ?>
 <h2><?php __('Member List'); ?></h2>

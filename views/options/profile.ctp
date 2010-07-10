@@ -1,6 +1,6 @@
 <h1><?php __('Profile'); ?></h1>
 
-<?php $session->flash(); ?>
+<?php echo $session->flash(); ?>
 
 <?php echo $form->create(null, array('action' => 'profile')); ?>
 <fieldset><legend><?php __('General'); ?></legend>
