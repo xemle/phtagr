@@ -21,10 +21,10 @@
       $delConfirm = "Do you realy want to delete the guest account '{$guest['Guest']['username']}'?";
       echo $html->link(
           $html->image('icons/pencil.png', array('alt' => 'Edit', 'title' => __('Edit', true))),
-          'edit/'.$guest['Guest']['id'], null, false, false).' '.
+          'edit/'.$guest['Guest']['id'], array('escape' => false)).' '.
         $html->link( 
           $html->image('icons/delete.png', array('alt' => 'Delete', 'title' => __('Delete', true))),
-          'delete/'.$guest['Guest']['id'], null, $delConfirm, false); ?>
+          'delete/'.$guest['Guest']['id'], array('escape' => false), $delConfirm); ?>
     </div></td>
   </tr>
 <?php endforeach; ?>
