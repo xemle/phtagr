@@ -42,7 +42,7 @@ class UpgradeSchemaComponent extends Object{
     }
 
     App::import('Core', 'CakeSchema');
-    $options = am(array('path' => CONFIGS.'sql'.DS, 'name' => 'Phtagr'), $options);
+    $options = am(array('path' => CONFIGS.'schema'.DS, 'name' => 'Phtagr'), $options);
     $this->cakeSchema =& new CakeSchema($options);
     if (!$this->cakeSchema) {
       Logger::err("Could not create database schema");
@@ -60,7 +60,7 @@ class UpgradeSchemaComponent extends Object{
   }
 
   function loadSchema($options = array()) {
-    $options = am(array('path' => CONFIGS.'sql'.DS, 'name' => 'Phtagr'), $options);
+    $options = am(array('path' => CONFIGS.'schema'.DS, 'name' => 'Phtagr'), $options);
     $schema = $this->cakeSchema->load($options);
     if (!$schema) {
       Logger::err("Could not load schema!");

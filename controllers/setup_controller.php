@@ -364,7 +364,7 @@ class SetupController extends AppController {
       $this->redirect('path');
     }
 
-    $error = $this->Session->read('configError');
+    $error = $this->Session->check('configError') ? $this->Session->read('configError') : true;
     if ($this->__hasConfig() && !$error) {
       $this->redirect('database');
     }
@@ -406,10 +406,16 @@ class DATABASE_CONFIG
         $this->Session->setFlash(__("Could not write database configuration file", true));
       }
       $file->close();
+      unset($this->data['db']['password']);
+      $this->Session->write('configData', $this->data);
     } else {
-      $this->data['db']['host'] = 'localhost';
-      $this->data['db']['database'] = 'phtagr';
-      $this->data['db']['login'] = 'phtagr';
+      if ($this->Session->check('configData')) {
+        $this->data = $this->Session->read('configData');
+      } else {
+        $this->data['db']['host'] = 'localhost';
+        $this->data['db']['database'] = 'phtagr';
+        $this->data['db']['login'] = 'phtagr';
+      }
     }
     Logger::info("Request database configuration");
   }

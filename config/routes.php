@@ -1,7 +1,6 @@
 <?php
-/* SVN FILE: $Id$ */
 /**
- * Short description for file.
+ * Routes configuration
  *
  * In this file, you set up routes to your controllers and their actions.
  * Routes are very important mechanism that allows you to freely connect
@@ -20,10 +19,7 @@
  * @package       cake
  * @subpackage    cake.app.config
  * @since         CakePHP(tm) v 0.2.9
- * @version       $Revision$
- * @modifiedby    $LastChangedBy$
- * @lastmodified  $Date$
- * @license       http://www.opensource.org/licenses/mit-license.php The MIT License
+ * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
 /**
  * Here, we are connecting '/' (base path) to controller called 'Pages',
