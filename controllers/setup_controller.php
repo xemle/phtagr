@@ -274,12 +274,12 @@ class SetupController extends AppController {
     $chars  = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     $chars .= 'abcdefghijklmnopqrstuvwxyz';
     $chars .= '0123456789';
-    $len = strlen($chars);
+    $max = strlen($chars) - 1;
 
     srand(getMicrotime()*1000);
     $salt = '';
     for($i = 0; $i < 40; $i++) {
-      $salt .= $chars[rand(0, $len-1)];
+      $salt .= $chars[rand(0, $max)];
     }
 
     return $salt;
@@ -289,7 +289,7 @@ class SetupController extends AppController {
     if ($this->__hasSalt())
       $this->redirect('index');
 
-    if (!is_writeable(dirname($this->core))) {
+    if (!is_writeable(dirname($this->core)) || !is_writeable($this->core)) {
       $this->redirect('saltro');
     }
 
@@ -317,7 +317,7 @@ class SetupController extends AppController {
     if ($this->__hasSalt())
       $this->redirect('index');
 
-    if (is_writeable(dirname($this->core))) {
+    if (is_writeable(dirname($this->core)) && is_writeable($this->core)) {
       $this->redirect('salt');
     } 
 
