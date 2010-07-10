@@ -52,11 +52,6 @@ class ExplorerController extends AppController
         $groups[-1] = __('[No Group]', true);
         $this->set('groups', $groups);
       }
-
-      $mediaRss = '/explorer/media';
-      $this->set('feeds', array(
-        $mediaRss => array('title' => 'Media RSS', 'id' => 'gallery') 
-        ));
     }
     parent::beforeRender();
   }
