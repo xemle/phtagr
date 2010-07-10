@@ -26,4 +26,4 @@
 </ul>
 <?php endif; ?>
 
-<?php echo $html->link(__('Retry'), 'path'); ?>
+<?php echo $html->link(__('Retry', true), 'path'); ?>

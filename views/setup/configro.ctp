@@ -27,4 +27,4 @@ class DATABASE_CONFIG {
 }
 ?&gt;</code></pre></p>
 
-<p><?php echo $html->link(__('Continue'), 'configro'); ?></p>
+<p><?php echo $html->link(__('Continue', true), 'configro'); ?></p>
