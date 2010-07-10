@@ -36,11 +36,15 @@ class FileListHelper extends AppHelper
       case FILE_TYPE_VIDEOTHUMB: 
       case FILE_TYPE_VIDEO: $icon = 'film'; break;
       case FILE_TYPE_GPS: $icon = 'map'; break;
+      case FILE_TYPE_TEXT: break;
       default:
         Logger::warn("Unhanded file type $type");
         return false;
     }
-    return $this->Html->image("icons/$icon.png");
+    if ($icon) {
+      return $this->Html->image("icons/$icon.png");
+    } 
+    return false;
   }
 
   function _cmpFile($a, $b, $field = 'file') {

@@ -80,7 +80,6 @@ class FilterManagerComponent extends Object {
     }
     $filterName = $filter->getName();
     if (isset($this->filters[$filterName])) {
-      Logger::verbose("Filter $filterName already loaded");
       return true;
     }
     $filter->MyFile =& $this->MyFile;

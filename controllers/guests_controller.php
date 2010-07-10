@@ -39,7 +39,7 @@ class GuestsController extends AppController {
 
   function index() {
     $userId = $this->getUserId();
-    $this->data = $this->Guest->find('all', array('conditions' => 'Guest.creator_id' => $userId));
+    $this->data = $this->Guest->find('all', array('conditions' => array('Guest.creator_id' => $userId)));
   }
 
   function autocomplete() {
