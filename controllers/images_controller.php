@@ -102,7 +102,7 @@ class ImagesController extends AppController
         $this->Comment->validationErrors = $this->Session->read('Comment.validationErrors');
         $this->data['Comment'] = am($comment['Comment'], $this->data['Comment']);
         //$this->data = am($this->Session->read('Comment.data'), $this->data);
-        $this->Session->del('Comment.data');
+        $this->Session->delete('Comment.data');
       }
     }
   }

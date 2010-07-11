@@ -75,7 +75,7 @@
       </div><!-- comment meta -->
       
       <div class="text">
-      <?php echo $text->truncate(preg_replace('/\n/', '<br />', $comment['Comment']['text']), 220, '...', false, true); ?>
+      <?php echo preg_replace('/\n/', '<br />', $text->truncate($comment['Comment']['text'], 220, array('ending' => '...', 'exact' => false, 'html' => false))); ?>
       </div>
       </div><!-- comment -->
       <?php endforeach; /* comments */ ?>

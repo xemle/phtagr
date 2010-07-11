@@ -20,7 +20,7 @@
   $img = '<img src="'.Router::url('/media/mini/'.$comment['Media']['id'].'/'.$comment['Media']['name']).'" />';
   $link = '/images/view/'.$comment['Media']['id'];
   echo '<div class="image">'.$html->link($img, $link, array('escape' => false)).'</div>';?>
-<?php echo $text->truncate(preg_replace('/\n/', '<br />', $comment['Comment']['text']), 220, '...', false, true); ?>
+<?php echo preg_replace('/\n/', '<br />', $text->truncate($comment['Comment']['text'], 220, array('ending' => '...', 'exact' => false, 'html' => false))); ?>
 </div>
 </div><!-- comment -->
 <?php endforeach; /* comments */ ?>
