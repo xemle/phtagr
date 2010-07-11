@@ -26,7 +26,7 @@ class FlashVideoComponent extends Object {
   var $controller = null;
   var $components = array('FileCache');
 
-  function startup(&$controller) {
+  function initialize(&$controller) {
     $this->controller =& $controller;
   }
 

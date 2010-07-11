@@ -1,6 +1,6 @@
 <h1><?php __('Sytem Settings'); ?></h1>
 
-<?php $session->flash(); ?>
+<?php echo $session->flash(); ?>
 
 <?php echo $form->create(null, array('action' => 'external')); ?>
 <fieldset><legend><?php __('External Programs'); ?></legend>

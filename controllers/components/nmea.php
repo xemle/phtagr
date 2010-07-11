@@ -31,7 +31,7 @@ class NmeaComponent extends Object {
 
   var $times = array();
 
-  function startup(&$controller) {
+  function initialize(&$controller) {
     $this->controller =& $controller;
   }
 

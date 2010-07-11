@@ -39,7 +39,7 @@ class GuestsController extends AppController {
 
   function index() {
     $userId = $this->getUserId();
-    $this->data = $this->Guest->findAll(array('Guest.creator_id' => $userId));
+    $this->data = $this->Guest->find('all', array('conditions' => array('Guest.creator_id' => $userId)));
   }
 
   function autocomplete() {
@@ -50,7 +50,7 @@ class GuestsController extends AppController {
     uses('sanitize');
     $sanitize = new Sanitize();
     $escName = $sanitize->escape($this->data['Group']['name']);
-    $groups = $this->Group->findAll("Group.user_id=$userId AND Group.name LIKE '%$escName%'");
+    $groups = $this->Group->find('all', array('conditions' => "Group.user_id = $userId AND Group.name LIKE '%$escName%'"));
     $this->data = $groups;
     $this->layout = "bare";
   }

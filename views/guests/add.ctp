@@ -1,6 +1,6 @@
 <h1><?php __('Guest Creation'); ?></h1>
 
-<?php $session->flash(); ?>
+<?php echo $session->flash(); ?>
 
 <?php echo $form->create('Guest', array('action' => 'add')); ?>
 

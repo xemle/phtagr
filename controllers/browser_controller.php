@@ -406,9 +406,9 @@ class BrowserController extends AppController
     $external = (FILE_FLAG_EXTERNAL);
 
     $files['count'] = $this->MyFile->find('count', array('conditions' => "User.id = $userId"));
-    $bytes = $this->MyFile->findAll(array("User.id" => $userId, "File.flag & ".FILE_FLAG_EXTERNAL." = 0"), array('SUM(File.size) AS Bytes'));
+    $bytes = $this->MyFile->find('all', array('conditions' => array("User.id" => $userId, "File.flag & ".FILE_FLAG_EXTERNAL." = 0"), 'fields' => 'SUM(File.size) AS Bytes'));
     $files['bytes'] = floatval($bytes[0][0]['Bytes']);
-    $bytes = $this->MyFile->findAll(array("User.id" => $userId), array('SUM(File.size) AS Bytes'));
+    $bytes = $this->MyFile->find('all', array('conditions' => array("User.id" => $userId), 'fields' => 'SUM(File.size) AS Bytes'));
     $files['bytesAll'] = $bytes[0][0]['Bytes'];
     $files['quota'] = $user['User']['quota'];
     $files['free'] = max(0, $files['quota'] - $files['bytes']);
@@ -444,7 +444,7 @@ class BrowserController extends AppController
       $name = $this->data['Folder']['name'];
 
       $newFolder = Folder::slashTerm($fsPath).$name;
-      if ($folder->mkdir($newFolder)) {
+      if ($folder->create($newFolder)) {
         Logger::verbose("Create folder $newFolder");
         $this->Session->setFlash("Folder $name created");
         $this->redirect("index/".$path.$name);

@@ -30,7 +30,7 @@ class ZipComponent extends Object {
   var $Folder = null;
   var $_stats = array();
 
-  function startup(&$controller) {
+  function initialize(&$controller) {
     $this->controller = $controller;
     $this->Folder = new Folder();
     if (class_exists('ZipArchive')) {
@@ -145,7 +145,7 @@ class ZipComponent extends Object {
     if (dirname($file['name']) != '') {
       $dst .= dirname($file['name']);
       if (!is_dir($dst)) {
-        if (!$this->Folder->mkdir($dst)) {
+        if (!$this->Folder->create($dst)) {
           Logger::err("Could not create directory $dst");
           return false;
         } else {

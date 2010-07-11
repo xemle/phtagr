@@ -1,6 +1,6 @@
 <h1>User: <?=$this->data['User']['username']?></h1>
 
-<?php $session->flash(); ?>
+<?php echo $session->flash(); ?>
 
 <?php echo $form->create(null, array('action' => 'edit/'.$this->data['User']['id'])); ?>
 <fieldset><legend>General</legend>

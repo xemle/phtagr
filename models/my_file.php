@@ -314,7 +314,7 @@ class MyFile extends AppModel
     if (!$includeExternal) {
       $conditions[] = "File.flag & ".FILE_FLAG_EXTERNAL." = 0";
     }
-    $result = $this->findAll($conditions, array('SUM(File.size) AS bytes'));
+    $result = $this->find('all', array('conditions' => $conditions, 'fields' => array('SUM(File.size) AS bytes')));
     return intval($result[0][0]['bytes']);
   }
 

@@ -1,9 +1,8 @@
 <?php
-/* SVN FILE: $Id$ */
 /**
- * Short description for file.
+ * Index
  *
- * Long description for file
+ * The Front Controller for handling every request
  *
  * PHP versions 4 and 5
  *
@@ -18,10 +17,7 @@
  * @package       cake
  * @subpackage    cake.app.webroot
  * @since         CakePHP(tm) v 0.2.9
- * @version       $Revision$
- * @modifiedby    $LastChangedBy$
- * @lastmodified  $Date$
- * @license       http://www.opensource.org/licenses/mit-license.php The MIT License
+ * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
 /**
  * Use the DS to separate the directories in other defines
@@ -71,7 +67,7 @@
 	if (!defined('CORE_PATH')) {
 		if (function_exists('ini_set') && ini_set('include_path', CAKE_CORE_INCLUDE_PATH . PATH_SEPARATOR . ROOT . DS . APP_DIR . DS . PATH_SEPARATOR . ROOT . DS . APP_DIR . DS . 'vendors' . DS . 'Pear' . DS . PATH_SEPARATOR . ini_get('include_path'))) {
 			define('APP_PATH', null);
-			define('CORE_PATH', null);
+			define('CORE_PATH', ROOT . DS);
 		} else {
 			define('APP_PATH', ROOT . DS . APP_DIR . DS);
 			define('CORE_PATH', CAKE_CORE_INCLUDE_PATH . DS);
@@ -84,9 +80,6 @@
 		return;
 	} else {
 		$Dispatcher = new Dispatcher();
-		$Dispatcher->dispatch($url);
-	}
-	if (Configure::read() > 0) {
-		echo "<!-- " . round(getMicrotime() - $TIME_START, 4) . "s -->";
+		$Dispatcher->dispatch();
 	}
 ?>

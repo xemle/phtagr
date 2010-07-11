@@ -1,6 +1,6 @@
 <h1><?php __('General'); ?></h1>
 
-<?php $session->flash(); ?>
+<?php echo $session->flash(); ?>
 
 <?php echo $form->create(null, array('action' => 'general', 'admin' => true)); ?>
 <fieldset><legend><?php __('General'); ?></legend>

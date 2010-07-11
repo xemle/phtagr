@@ -36,11 +36,15 @@ class FileListHelper extends AppHelper
       case FILE_TYPE_VIDEOTHUMB: 
       case FILE_TYPE_VIDEO: $icon = 'film'; break;
       case FILE_TYPE_GPS: $icon = 'map'; break;
+      case FILE_TYPE_TEXT: break;
       default:
         Logger::warn("Unhanded file type $type");
         return false;
     }
-    return $this->Html->image("icons/$icon.png");
+    if ($icon) {
+      return $this->Html->image("icons/$icon.png");
+    } 
+    return false;
   }
 
   function _cmpFile($a, $b, $field = 'file') {
@@ -99,7 +103,7 @@ class FileListHelper extends AppHelper
     // Download link for internal files and imported external files
     if ($options['isInternal'] || $file['media_id'] > 0) {
       $icon = $this->Html->image('icons/disk.png', array('alt' => 'download', 'title' => 'Download '.$file['file']));
-      $actions[] = $this->Html->link($icon, "index/$path/{$file['file']}", null, null, false);
+      $actions[] = $this->Html->link($icon, "index/$path/{$file['file']}", array('escape' => false));
     }
 
     // Delete link for internal files

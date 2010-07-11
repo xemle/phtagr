@@ -26,7 +26,7 @@ class VideoFilterComponent extends BaseFilterComponent {
   var $controller = null;
   var $components = array('VideoPreview', 'FileManager');
 
-  function startup(&$controller) {
+  function initialize(&$controller) {
     $this->controller =& $controller;
   }
 

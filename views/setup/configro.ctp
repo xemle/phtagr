@@ -1,6 +1,6 @@
 <h1><?php __("Database connection"); ?></h1>
 
-<?php $session->flash(); ?>
+<?php echo $session->flash(); ?>
 
 <div class="warning">
 <?php __("The configuration file for the database connection could not be written. Please create a database configuration file by your own!"); ?>
@@ -27,4 +27,4 @@ class DATABASE_CONFIG {
 }
 ?&gt;</code></pre></p>
 
-<p><?php echo $html->link(__('Continue'), 'configro'); ?></p>
+<p><?php echo $html->link(__('Continue', true), 'configro'); ?></p>

@@ -1,5 +1,5 @@
 <h1><?php echo $this->data['Media']['name'] ?></h1>
-<?php $session->flash(); ?>
+<?php echo $session->flash(); ?>
 
 
 <div class="paginator"><div class="subpaginator">

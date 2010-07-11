@@ -1,5 +1,5 @@
 <h1>Comments</h1>
-<?php $session->flash(); ?>
+<?php echo $session->flash(); ?>
 
 <?php if ($comments): ?>
 <div class="paginator"><div class="subpaginator">
@@ -19,7 +19,7 @@
 <?php 
   $img = '<img src="'.Router::url('/media/mini/'.$comment['Media']['id'].'/'.$comment['Media']['name']).'" />';
   $link = '/images/view/'.$comment['Media']['id'];
-  echo '<div class="image">'.$html->link($img, $link, null, false, false).'</div>';?>
+  echo '<div class="image">'.$html->link($img, $link, array('escape' => false)).'</div>';?>
 <?php echo $text->truncate(preg_replace('/\n/', '<br />', $comment['Comment']['text']), 220, '...', false, true); ?>
 </div>
 </div><!-- comment -->

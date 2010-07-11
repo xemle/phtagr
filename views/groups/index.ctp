@@ -1,6 +1,6 @@
 <h1><?php __('Groups'); ?></h1>
 
-<?php $session->flash(); ?>
+<?php echo $session->flash(); ?>
 
 <?php if (!empty($this->data)): ?>
 <table class="default">
@@ -21,10 +21,10 @@
       $delConfirm = "Do you realy want to delete the group '{$group['Group']['name']}'?";
       echo $html->link(
           $html->image('icons/pencil.png', array('alt' => 'Edit', 'title' => 'Edit')),
-          'edit/'.$group['Group']['id'], null, false, false).' '.
+          'edit/'.$group['Group']['id'], array('escape' => false)).' '.
         $html->link( 
           $html->image('icons/delete.png', array('alt' => 'Delete', 'title' => 'Delete')),
-          'delete/'.$group['Group']['id'], null, $delConfirm, false); ?>
+          'delete/'.$group['Group']['id'], array('escape' => false), $delConfirm); ?>
     </div></td>
   </tr>
 <?php endforeach; ?>

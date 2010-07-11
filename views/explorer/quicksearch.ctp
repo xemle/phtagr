@@ -1,5 +1,5 @@
 <h1>Quick Search Results</h1>
-<?php $session->flash(); ?>
+<?php echo $session->flash(); ?>
 
 
 <?php

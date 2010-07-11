@@ -40,7 +40,7 @@ class FilterManagerComponent extends Object {
 
   var $errors = 0;
 
-  function startup(&$controller) {
+  function initialize(&$controller) {
     $this->controller =& $controller;
     if (!App::import('Component', 'BaseFilter')) {
       Logger::err("Could not find filter with name 'BaseFilter'");
@@ -80,7 +80,6 @@ class FilterManagerComponent extends Object {
     }
     $filterName = $filter->getName();
     if (isset($this->filters[$filterName])) {
-      Logger::verbose("Filter $filterName already loaded");
       return true;
     }
     $filter->MyFile =& $this->MyFile;
@@ -91,8 +90,8 @@ class FilterManagerComponent extends Object {
     // init components to setup the controller
     foreach ($filter->components as $name) {
       $component =& $filter->$name;
-      if (method_exists($component, 'startup')) {
-        $component->startup(&$this->controller);
+      if (method_exists($component, 'initialize')) {
+        $component->initialize(&$this->controller);
       }
     }
     $filter->init(&$this);

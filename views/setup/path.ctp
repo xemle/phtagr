@@ -1,6 +1,6 @@
 <h1><?php __("Path settings"); ?></h1>
 
-<?php $session->flash(); ?>
+<?php echo $session->flash(); ?>
 
 <?php if (count($missing)): ?>
 <div class="error">
@@ -26,4 +26,4 @@
 </ul>
 <?php endif; ?>
 
-<?php echo $html->link(__('Retry'), 'path'); ?>
+<?php echo $html->link(__('Retry', true), 'path'); ?>

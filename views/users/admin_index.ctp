@@ -1,5 +1,5 @@
 <h1>Users</h1>
-<?php $session->flash(); ?>
+<?php echo $session->flash(); ?>
 
 <?php $paginator->options(array('update' => 'main_content', 'indicator' => 'spinner'));?>
 
@@ -44,9 +44,9 @@ Page <?php echo $paginator->counter() ?>
     $delConfirm = "Do you really want to detete the user '{$user['User']['username']}'? This action is irreversible! All the data of the users will be deleted!";
 echo $html->link(
   $html->image('icons/pencil.png', array('alt' => 'Edit', 'title' => 'Edit')), 
-    '/admin/users/edit/'.$user['User']['id'], null, false, false).' '.
+    '/admin/users/edit/'.$user['User']['id'], array('escape' => false)).' '.
   $html->link($html->image('icons/delete.png', array('alt' => 'Delete', 'title' => 'Delete')), 
-    '/admin/users/del/'.$user['User']['id'], null, $delConfirm, false);?></td>
+    '/admin/users/del/'.$user['User']['id'], array('escape' => false), $delConfirm);?></td>
 </tr>
 <?php endforeach; ?>
 </tbody>

@@ -1,6 +1,6 @@
 <h1><?php __("File Upload"); ?></h1>
 
-<?php $session->flash(); ?>
+<?php echo $session->flash(); ?>
 
 <?php if ($free > 0): ?>
 <p><?php printf(__("You upload files to folder %s", true), $fileList->location($path)); ?></p>

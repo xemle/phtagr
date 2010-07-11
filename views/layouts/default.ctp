@@ -74,6 +74,5 @@
   <div id="edge-br"></div>
 </div>
 </div><!-- page margins -->
-<?php echo $cakeDebug; ?> 
 </body>
 </html>

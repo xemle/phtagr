@@ -1,6 +1,6 @@
 <h1><?php __("Create Folder"); ?></h1>
 
-<?php $session->flash(); ?>
+<?php echo $session->flash(); ?>
 
 <p><?php printf(__("Location %s", true), $fileList->location($path)); ?></p>
 

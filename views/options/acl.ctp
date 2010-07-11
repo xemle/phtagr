@@ -1,5 +1,5 @@
 <h1><?php __('Access Rights'); ?></h1>
-<?php $session->flash(); ?>
+<?php echo $session->flash(); ?>
 <?php 
   $aclSelect = array(
     ACL_LEVEL_OTHER => __('Everyone', true),

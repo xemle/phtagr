@@ -60,10 +60,10 @@ class ExplorerMenuHelper extends AppHelper
     $extra = " <div class=\"actionlist\" id=\"$id\">";
     $link = "javascript:startSlideshow('high');";
     $icon = $this->html->image('icons/star.png', array('alt' => 'high', 'title' => __("Show media in high quality (if available)", true)));
-    $extra .= $this->html->link($icon, $link, false, false, false);
+    $extra .= $this->html->link($icon, $link, array('escape' => false));
     $extra .= "</div>";
 
-    $text = $this->html->link(__('Start Slideshow', true), "javascript:startSlideshow('');", false, false, false);
+    $text = $this->html->link(__('Start Slideshow', true), "javascript:startSlideshow('');", array('escape' => false));
     $item = array(
       'text' => $text.$extra,
       'type' => 'multi',
@@ -79,16 +79,16 @@ class ExplorerMenuHelper extends AppHelper
     $plural = Inflector::pluralize($association);
     $addLink = $this->search->getUri(false, array($plural => $value), array($plural => '-'.$value, 'page'));
     $addIcon = $this->html->image('icons/add.png', array('alt' => '+', 'title' => "Include $association $value"));
-    $out .= $this->html->link($addIcon, $addLink, false, false, false);
+    $out .= $this->html->link($addIcon, $addLink, array('escape' => false));
 
     $delLink = $this->search->getUri(false, array($plural => '-'.$value), array($plural => $value, 'page'));
     $delIcon = $this->html->image('icons/delete.png', array('alt' => '-', 'title' => "Exclude $association $value"));
-    $out .= $this->html->link($delIcon, $delLink, false, false, false);
+    $out .= $this->html->link($delIcon, $delLink, array('escape' => false));
 
     if ($this->action == 'user') {
       $worldLink = "/explorer/$association/$value";
       $worldIcon = $this->html->image('icons/world.png', array('alt' => '-', 'title' => "View all media with $association $value"));
-      $out .= $this->html->link($worldIcon, $worldLink, false, false, false);
+      $out .= $this->html->link($worldIcon, $worldLink, array('escape' => false));
     }
 
     $out .= "</div>";
@@ -129,27 +129,27 @@ class ExplorerMenuHelper extends AppHelper
     
     $icon = $this->html->image('icons/date_previous.png', array('alt' => 'date asc', 'title' => __("Show oldest first", true)));
     $link = $this->search->getUri(false, array('sort' => '-date'), 'page');
-    $out .= $this->html->link($icon, $link, false, false, array('escape' => false));
+    $out .= $this->html->link($icon, $link, array('escape' => false));
     
     $icon = $this->html->image('icons/add.png', array('alt' => 'newest', 'title' => __("Show newest first", true)));
     $link = $this->search->getUri(false, array('sort' => 'newest'), 'page');
-    $out .= $this->html->link($icon, $link, false, false, array('escape' => false));
+    $out .= $this->html->link($icon, $link, array('escape' => false));
     
     $icon = $this->html->image('icons/heart.png', array('alt' => 'pouplarity', 'title' => __("Show popular first", true)));
     $link = $this->search->getUri(false, array('sort' => 'popularity'), 'page');
-    $out .= $this->html->link($icon, $link, false, false, array('escape' => false));
+    $out .= $this->html->link($icon, $link, array('escape' => false));
     
     $icon = $this->html->image('icons/images.png', array('alt' => 'random', 'title' => __("Show random order", true)));
     $link = $this->search->getUri(false, array('sort' => 'random'), 'page');
-    $out .= $this->html->link($icon, $link, false, false, array('escape' => false));
+    $out .= $this->html->link($icon, $link, array('escape' => false));
     
     $icon = $this->html->image('icons/pencil.png', array('alt' => 'changes', 'title' => __("Show changes first", true)));
     $link = $this->search->getUri(false, array('sort' => 'changes'), 'page');
-    $out .= $this->html->link($icon, $link, false, false, array('escape' => false));
+    $out .= $this->html->link($icon, $link, array('escape' => false));
     
     $icon = $this->html->image('icons/eye.png', array('alt' => 'views', 'title' => __("Show last views first", true)));
     $link = $this->search->getUri(false, array('sort' => 'viewed'), 'page');
-    $out .= $this->html->link($icon, $link, false, false, array('escape' => false));
+    $out .= $this->html->link($icon, $link, array('escape' => false));
 
     $out .= "</div>";
 
@@ -172,7 +172,7 @@ class ExplorerMenuHelper extends AppHelper
     foreach ($sizes as $size) {
       $page = ceil($pos / $size);
       $link = $this->search->getUri(false, array('show' => $size, 'page' => $page));
-      $links[] = $this->html->link($size, $link, false, false, array('escape' => false));
+      $links[] = $this->html->link($size, $link, array('escape' => false));
     }
 
     $id = 'page-item';

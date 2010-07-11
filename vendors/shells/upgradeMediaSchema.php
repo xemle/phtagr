@@ -213,7 +213,7 @@ class UpgradeMediaSchemaShell extends Shell {
 
     // fetch all media
     $this->Media->unbindAll();
-    $media = $this->Media->findAll("1 = 1", array('Media.id', 'Media.path', 'Media.file', 'Media.user_id', 'Media.flag'));
+    $media = $this->Media->find('all', array('fields' => array('Media.id', 'Media.path', 'Media.file', 'Media.user_id', 'Media.flag')));
     $this->out("Migrate ".count($media)." media...");
     Logger::verbose("Found ".count($media)." media to migrade ...");
 

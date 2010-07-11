@@ -2,7 +2,7 @@
 App::import('vendor', 'kcaptcha');
 class CaptchaComponent extends Object
 {
-  function startup(&$controller) {
+  function initialize(&$controller) {
     $this->controller = $controller;
   }
 

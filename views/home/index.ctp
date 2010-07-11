@@ -81,7 +81,7 @@
       <?php endforeach; /* comments */ ?>
       </div><!-- comments -->
       <div>
-        <?php echo $html->link(__("Older comments...", true), "/comments", NULL, false, false);?>
+        <?php echo $html->link(__("Older comments...", true), "/comments", array('escape' => false));?>
       </div>
       <?php endif; ?>    
     </div>

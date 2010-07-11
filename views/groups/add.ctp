@@ -1,6 +1,6 @@
 <h1><?php __('New Group'); ?></h1>
 
-<?php $session->flash(); ?>
+<?php echo $session->flash(); ?>
 
 <?php echo $form->create(null, array('action' => 'add')); ?>
 

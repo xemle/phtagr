@@ -1,5 +1,5 @@
 <h1>Password Request</h1>
-<?php $session->flash(); ?>
+<?php echo $session->flash(); ?>
 
 <?php echo $form->create('User', array('action' => 'password')); ?>
 <fieldset><legend>Account Data</legend>
