@@ -32,19 +32,25 @@ div.disabled {
   color: #C0C0C0;
 }
 
-div.auto_complete {
+.auto_complete {
   position: absolute;
-  width:250px;
+  width: 250px;
   background-color: white;
   border: 1px solid #888;
   margin: 0px;
-  padding: 0px;
+  padding:0px;
+} 
+.auto_complete ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
 }
-
-div.auto_complete * li {
-  list-style: none;
+.auto_complete ul li {
+  margin: 0;
+  padding: 3px;
 }
-
-li.selected { 
+.auto_complete ul li.selected { 
   background-color: #ffb; 
+  font-weight: bold;
 }
+

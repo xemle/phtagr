@@ -4,21 +4,36 @@
 ?>
 <fieldset>
 <?php
-  $tags = Set::extract($data, "Tag.{n}.name");
-  $tagText = implode(', ', $tags);
-  $categories = Set::extract($data, "Category.{n}.name");
-  $categoryText = implode(', ', $categories);
   $locations = array(LOCATION_CITY => '', LOCATION_SUBLOCATION => '', LOCATION_STATE => '', LOCATION_COUNTRY => '');
-  foreach ($data['Location'] as $location)
+  foreach ($data['Location'] as $location) {
     $locations[$location['type']] = $location['name'];
+  }
 
   echo $form->input('Media.date', array('type' => 'text', 'value' => $data['Media']['date'], 'label' => __("Date", true)));
-  echo $form->input('Tags.text', array('value' => $tagText, 'label' => __('Tags', true)));
-  echo $form->input('Categories.text', array('value' => $categoryText, 'label' => __('Categories', true)));
-  echo $form->input('Locations.city', array('value' => $locations[LOCATION_CITY], 'label' => __('City', true)));
-  echo $form->input('Locations.sublocation', array('value' => $locations[LOCATION_SUBLOCATION], 'label' => __('Sublocation', true)));
-  echo $form->input('Locations.state', array('value' => $locations[LOCATION_STATE], 'label' => __('State', true)));
-  echo $form->input('Locations.country', array('value' => $locations[LOCATION_COUNTRY], 'label' => __('Country', true)));
+  echo $html->tag('div',
+    $form->label('Tags.text', __('Tags', true)).
+    $ajax->autoComplete('Tags.text', 'autocomplete/tag', array('value' => implode(', ', Set::extract('/Tag/name', $data)), 'tokens' => ',')), 
+    array('class' => 'input text'));
+  echo $html->tag('div',
+    $form->label('Categories.text', __('Categories', true)).
+    $ajax->autoComplete('Categories.text', 'autocomplete/category', array('value' => implode(', ', Set::extract('/Category/name', $data)), 'tokens' => ',')), 
+    array('class' => 'input text'));
+  echo $html->tag('div',
+    $form->label('Locations.city', __('City', true)).
+    $ajax->autoComplete('Locations.city', 'autocomplete/city', array('value' => $locations[LOCATION_CITY])), 
+    array('class' => 'input text'));
+  echo $html->tag('div',
+    $form->label('Locations.sublocation', __('Sublocation', true)).
+    $ajax->autoComplete('Locations.sublocation', 'autocomplete/sublocation', array('value' => $locations[LOCATION_SUBLOCATION])), 
+    array('class' => 'input text'));
+  echo $html->tag('div',
+    $form->label('Locations.state', __('State', true)).
+    $ajax->autoComplete('Locations.state', 'autocomplete/state', array('value' => $locations[LOCATION_STATE])), 
+    array('class' => 'input text'));
+  echo $html->tag('div',
+    $form->label('Locations.country', __('Country', true)).
+    $ajax->autoComplete('Locations.country', 'autocomplete/country', array('value' => $locations[LOCATION_COUNTRY])), 
+    array('class' => 'input text'));
   if ($data['Media']['latitude'] || $data['Media']['longitude']) {
     $geo = $data['Media']['latitude'].', '.$data['Media']['longitude'];
   } else {

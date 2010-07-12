@@ -59,6 +59,61 @@ class ExplorerController extends AppController
   function index() {
   }
 
+  function autocomplete($type) {
+    switch ($type) {
+      case 'tag':
+        $data = $this->Media->Tag->find('all', array(
+          'conditions' => array('name LIKE' => $this->data['Tags']['text'].'%'), 
+          'limit' => 10
+          ));
+        $this->data = Set::extract('/Tag/name', $data);
+        break;
+      case 'category':
+        $data = $this->Media->Category->find('all', array(
+          'conditions' => array('name LIKE' => $this->data['Categories']['text'].'%'),
+          'limit' => 10
+          ));
+        $this->data = Set::extract('/Category/name', $data);
+        break;
+      case 'city':
+        $data = $this->Media->Location->find('all', array(
+          'conditions' => array('name LIKE' => $this->data['Locations']['city'].'%', 'type' => LOCATION_CITY),
+          'limit' => 10
+          ));
+        $this->data = Set::extract('/Location/name', $data);
+        break;
+      case 'sublocation':
+        $data = $this->Media->Location->find('all', array(
+          'conditions' => array('name LIKE' => $this->data['Locations']['sublocation'].'%', 'type' => LOCATION_SUBLOCATION),
+          'limit' => 10
+          ));
+        $this->data = Set::extract('/Location/name', $data);
+        break;
+      case 'state':
+        $data = $this->Media->Location->find('all', array(
+          'conditions' => array('name LIKE' => $this->data['Locations']['state'].'%', 'type' => LOCATION_STATE),
+          'limit' => 10
+          ));
+        $this->data = Set::extract('/Location/name', $data);
+        break;
+      case 'country':
+        $data = $this->Media->Location->find('all', array(
+          'conditions' => array('name LIKE' => $this->data['Locations']['country'].'%', 'type' => LOCATION_COUNTRY),
+          'limit' => 10
+          ));
+        $this->data = Set::extract('/Location/name', $data);
+        break;
+      default:
+        Logger::err("Unknown type $type");
+        $this->redirect(500);
+        break;
+    }
+    $this->layout = 'bare';
+    if (Configure::read('debug') > 1) {
+      Configure::write('debug', 1);
+    }
+  }
+
   function quicksearch($quicksearch = false) {
     if (!empty($this->data) && isset($this->data['Media']['quicksearch'])) {
       $quicksearch = $this->data['Media']['quicksearch'];

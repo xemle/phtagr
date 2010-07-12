@@ -4,9 +4,10 @@
 ?>
 <fieldset>
 <?php
-  $tags = Set::extract($data, "Tag.{n}.name");
-  $tagText = implode(', ', $tags);
-  echo $form->input('Tags.text', array('value' => $tagText, 'label' => 'Tags'));
+  echo $html->tag('div',
+    $form->label('Tags.text', __('Tags', true)).
+    $ajax->autoComplete('Tags.text', 'autocomplete/tag', array('value' => implode(', ', Set::extract('/Tag/name', $data)), 'tokens' => ',')), 
+    array('class' => 'input text'));
 ?>
 </fieldset>
 <?php

@@ -115,13 +115,33 @@ foreach ($this->data as $media): ?>
   if ($canWriteMeta) {
     echo $form->input('Media.date', array('type' => 'text', 'after' => '<span class="hint">' . __('E.g. 2008-08-07 15:30', true) . '</span>')); 
   }
-  echo $form->input('Tags.text', array('label' => __('Tags', true), 'maxlength' => 320, 'after' => '<span class="hint">' . __('E.g. newtag, -oldtag', true) . '</span>')); 
+  echo $html->tag('div',
+    $form->label('Tags.text', __('Tags', true)).
+    $ajax->autoComplete('Tags.text', 'autocomplete/tag', array('tokens' => ',')) . 
+    $html->tag('span', __('E.g. newtag, -oldtag', true), array('class' => 'hint')),
+    array('class' => 'input text'));
+
   if ($canWriteMeta) {
-    echo $form->input('Categories.text', array('label' => __('Categories', true), 'maxlength' => 320)); 
-    echo $form->input('Locations.city', array('maxlength' => 32, 'label' => __('City', true)));
-    echo $form->input('Locations.sublocation', array('maxlength' => 32, 'label' => __('Sublocation', true)));
-    echo $form->input('Locations.state', array('maxlength' => 32, 'label' => __('State', true)));
-    echo $form->input('Locations.country', array('maxlength' => 32, 'label' => __('Country', true)));
+    echo $html->tag('div',
+      $form->label('Categories.text', __('Categories', true)).
+      $ajax->autoComplete('Categories.text', 'autocomplete/category', array('tokens' => ',')), 
+      array('class' => 'input text'));
+    echo $html->tag('div',
+      $form->label('Locations.city', __('City', true)).
+      $ajax->autoComplete('Locations.city', 'autocomplete/city'), 
+      array('class' => 'input text'));
+    echo $html->tag('div',
+      $form->label('Locations.sublocation', __('Sublocation', true)).
+      $ajax->autoComplete('Locations.sublocation', 'autocomplete/sublocation'), 
+      array('class' => 'input text'));
+    echo $html->tag('div',
+      $form->label('Locations.state', __('State', true)).
+      $ajax->autoComplete('Locations.state', 'autocomplete/state'), 
+      array('class' => 'input text'));
+    echo $html->tag('div',
+      $form->label('Locations.country', __('Country', true)).
+      $ajax->autoComplete('Locations.country', 'autocomplete/country'), 
+      array('class' => 'input text'));
     echo $form->input('Media.geo', array('label' => __('Geo data', true), 'maxlength' => 32, 'after' => '<span class="hint">' . __('latitude, longitude', true) . '</span>'));
   }
 ?>
