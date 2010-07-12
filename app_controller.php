@@ -2,9 +2,9 @@
 /*
  * phtagr.
  * 
- * Multi-user image gallery.
+ * social photo gallery for your community.
  * 
- * Copyright (C) 2006-2009 Sebastian Felis, sebastian@phtagr.org
+ * Copyright (C) 2006-2010 Sebastian Felis, sebastian@phtagr.org
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -26,7 +26,7 @@ App::import('File', 'Logger', array('file' => APP.'logger.php'));
 class AppController extends Controller
 {
   var $helpers = array('html', 'form', 'session', 'javascript', 'menu', 'option');
-  var $components = array('Cookie');
+  var $components = array('Session', 'Cookie', 'Feed');
   var $uses = array('User', 'Option');
   
   var $_nobody = null;
@@ -35,12 +35,17 @@ class AppController extends Controller
   /** Calls _checkSession() to check the credentials of the user 
     @see _checkSession() */
   function beforeFilter() {
+    parent::beforeFilter();
     $this->_checkSession();
+    $this->Feed->add('/explorer/rss', array('title' => __('Recent photos', true)));
+    $this->Feed->add('/explorer/media', array('title' =>  __('Media RSS of recent photos', true), 'id' => 'gallery'));
+    $this->Feed->add('/comment/rss', array('title' => __('Recent comments', true)));
   }
 
   function beforeRender() {
-    $this->params['options'] = $this->Option->getOptions($this->getUser());
     parent::beforeRender();
+    $user = $this->User->findById($this->getUserId());
+    $this->params['options'] = $this->Option->getOptions($user);
   }
 
   function _checkCookie() {

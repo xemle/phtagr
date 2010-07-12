@@ -1,3 +1,3 @@
-<h1>Not Found</h1>
-<?php $session->flash(); ?>
-<div class="info">No media found. Please goto the <?php echo $html->link("Explorer", '/explorer'); ?> and try again.</div>
+<h1><?php __("No media Found"); ?></h1>
+<?php echo $session->flash(); ?>
+<div class="info"><?php printf(__("No media found. Please goto the %s and try again", true), $html->link(__("Explorer", true), '/explorer')); ?></div>

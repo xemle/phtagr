@@ -2,9 +2,9 @@
 /*
  * phtagr.
  * 
- * Multi-user image gallery.
+ * social photo gallery for your community.
  * 
- * Copyright (C) 2006-2009 Sebastian Felis, sebastian@phtagr.org
+ * Copyright (C) 2006-2010 Sebastian Felis, sebastian@phtagr.org
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -26,7 +26,7 @@ class VideoFilterComponent extends BaseFilterComponent {
   var $controller = null;
   var $components = array('VideoPreview', 'FileManager');
 
-  function startup(&$controller) {
+  function initialize(&$controller) {
     $this->controller =& $controller;
   }
 
@@ -57,12 +57,17 @@ class VideoFilterComponent extends BaseFilterComponent {
     $pattern = basename($thumbFilename);
     $pattern = substr($pattern, 0, strrpos($pattern, '.')+1).'('.implode($this->_getVideoExtensions(), '|').')';
     $found = $folder->find($pattern);
-    if (count($found) && is_readable(Folder::addPathElement($path, $found[0]))) {
-      $videoFilename = Folder::addPathElement($path, $found[0]);
-      $video = $this->controller->MyFile->findByFilename($videoFilename);
-      if ($video) {
-        return $video;
-      } 
+    if (!count($found)) {
+      return false;
+    }
+    foreach ($found as $file) {
+      if (is_readable(Folder::addPathElement($path, $file))) {
+        $videoFilename = Folder::addPathElement($path, $file);
+        $video = $this->controller->MyFile->findByFilename($videoFilename);
+        if ($video) {
+          return $video;
+        }
+      }
     } 
     return false;
   }
@@ -72,16 +77,18 @@ class VideoFilterComponent extends BaseFilterComponent {
     if (!$media) {
       $video = $this->_findVideo($file);
       if (!$video) {
+        $this->FilterManager->addError($filename, "VideoNotFound");
         Logger::err("Could not find video for video thumb $filename");
-        return -1;
+        return false;
       }
       $media = $this->Media->findById($video['File']['media_id']);
       if (!$media) {
+        $this->FilterManager->addError($filename, "MediaNotFound");
         Logger::err("Could not find media for video file. Maybe import it first");
-        return -1;
+        return false;
       }
     }
-    $ImageFilter = $this->Manager->getFilter('Image');
+    $ImageFilter = $this->FilterManager->getFilter('Image');
     Logger::debug("Read video thumbnail by ImageFilter: $filename");
     foreach (array('name', 'width', 'height', 'flag', 'duration') as $column) {
       if (isset($media['Media'][$column])) {
@@ -96,13 +103,14 @@ class VideoFilterComponent extends BaseFilterComponent {
     // restore overwritten values
     $media['Media'] = am($media['Media'], $tmp);
     if (!$this->Media->save($media)) {
+      $this->FilterManager->addError($filename, "MediaSaveError");
       Logger::err("Could not save media");
-      return -1;
+      return false;
     } 
     $this->MyFile->setMedia($file, $media['Media']['id']);
     $this->MyFile->updateReaded($file);
     Logger::verbose("Updated media from thumb file");
-    return 1;
+    return $this->Media->findById($media['Media']['id']);
   }
 
   /** Read the video data from the file 
@@ -114,8 +122,9 @@ class VideoFilterComponent extends BaseFilterComponent {
     if ($this->MyFile->isType($file, FILE_TYPE_VIDEOTHUMB)) {
       return $this->_readThumb($file, &$media);
     } elseif (!$this->MyFile->isType($file, FILE_TYPE_VIDEO)) {
+      $this->FilterManager->addError($filename, "FileNotSupported");
       Logger::err("File type is not supported: ".$this->MyFile->getFilename($file));
-      return -1;
+      return false;
     }
 
     $isNew = false;
@@ -136,28 +145,31 @@ class VideoFilterComponent extends BaseFilterComponent {
       $isNew = true;
     }
 
-    $data =& $media['Media'];
-
     if ($this->controller->getOption('bin.ffmpeg')) {
       $media = $this->_readFfmpeg(&$media, $filename);
     } else {
       $media = $this->_readGetId3(&$media, $filename);
     }
     if (!$media || !$this->Media->save($media)) {
+        $this->FilterManager->addError($filename, "MediaSaveError");
       Logger::err("Could not save media");
-      return -1;
-    } elseif ($isNew || !$this->MyFile->hasMedia($file)) {
+      return false;
+    }
+     
+    if ($isNew || !$this->MyFile->hasMedia($file)) {
       $mediaId = $isNew ? $this->Media->getLastInsertID() : $data['id'];
       if (!$this->MyFile->setMedia($file, $mediaId)) {
+        Logger::err("File was not saved: " . $filename);
+        $this->FilterManager->addError($filename, "FileSaveError");
         $this->Media->delete($mediaId);
-        return -1;
+        return false;
       }
     }
 
     $this->MyFile->updateReaded($file);
     $this->MyFile->setFlag($file, FILE_FLAG_DEPENDENT);
 
-    return 1;
+    return $this->Media->findById($media['Media']['id']);
   }
 
   function _readFfmpeg(&$media, $filename) {
@@ -242,8 +254,6 @@ class VideoFilterComponent extends BaseFilterComponent {
     if (!is_writable(dirname($this->MyFile->getFilename($video)))) {
       Logger::warn("Cannot create video thumb. Directory of video is not writeable");
     }
-    //$this->VideoPreview->controller =& $this->controller;
-    //Logger::debug($this->VideoPreview->controller->MyFile->alias);
     $thumb = $this->VideoPreview->create($video);
     if (!$thumb) {
       return false;
@@ -262,7 +272,7 @@ class VideoFilterComponent extends BaseFilterComponent {
       }
     }
     if ($this->MyFile->isType($file, FILE_TYPE_VIDEOTHUMB)) {
-      $imageFilter = $this->Manager->getFilter('Image');
+      $imageFilter = $this->FilterManager->getFilter('Image');
       if (!$imageFilter) {
         Logger::err("Could not get filter Image");
         return false;

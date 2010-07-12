@@ -37,8 +37,10 @@ function PMap(latitude, longitude, options) {
   this.url = null;    /**< base URL for background queries */
   this.isLoaded = false;
   this.contextMenu = null;
+  this.resizeControl = null;
   this._updatingMarkers = false;
   this._continueUpdateMarkers = false;
+  this.geocoder = false;
 
   options = options || {};
   var domId = 'map';
@@ -59,6 +61,7 @@ function PMap(latitude, longitude, options) {
     this.gmap.addControl(new GMapTypeControl());
     this.gmap.addControl(new GSmallMapControl());
     this.gmap.addControl(new GScaleControl());
+    this.gmap.addControl(new PResizeControl());
     this.gmap.enableScrollWheelZoom();
 
     this.gmap.setCenter(new GLatLng(latitude, longitude), zoom);
@@ -206,6 +209,34 @@ PMap.prototype.updateInfo = function() {
   e.firstChild.nodeValue = text;
 }
 
+PMap.prototype.showAddress = function(address) {
+  var that = this;
+  if (!this.geocoder) {
+    this.geocoder = new GClientGeocoder();
+  }
+  this.geocoder.getLocations(
+    address,
+    function(response) {
+      if (!response || response.Status.code != 200) {
+        alert("\"" + address + "\" not found");
+      } else {
+        place = response.Placemark[0];
+        point = new GLatLng(place.Point.coordinates[1],
+                            place.Point.coordinates[0]);
+        var accuracy = place.AddressDetails.Accuracy;
+        var zoom = 1;
+        if (accuracy <= 1) { zoom = 4; } // country
+        else if (accuracy <= 3) { zoom = 6; } // sub-region
+        else if (accuracy <= 4) { zoom = 12; } // town 
+        else if (accuracy <= 5) { zoom = 14; } // postcode
+        else { zoom = 16; } // intersection
+        that.gmap.setCenter(point, zoom);
+        that.updateMarkers();
+      }
+    }
+  );
+}
+
 /** PContextMenu bases on http://www.ajaxlines.com/ajax/stuff/article/context_menu_in_google_maps_api.php */
 function PContextMenu(gMap) {
   this.initialize(gMap);
@@ -312,5 +343,108 @@ PContextMenu.prototype.initialize = function(gMap){
   });
   GEvent.addListener(gMap, "click", function(overlay, point) {
     that.hide();
-  });   
+  });
+}
+
+/** PResizeControl to resize google's map
+  by xemle@phtagr.org
+  based on http://www.wolfpil.de/map-in-a-box.html 
+  by Wolfgang Pichler, wolfpil-at-gmail-com */
+function PResizeControl() {};
+PResizeControl.prototype = new GControl();
+PResizeControl.RESIZE_BOTH = 0;
+PResizeControl.RESIZE_WIDTH = 1;
+PResizeControl.RESIZE_HEIGHT = 2;
+PResizeControl.prototype.initialize = function(gMap) {
+  var that = this;
+  this._map = gMap;
+  this.resizable = false;
+
+  /** modes: 0 both, 1 only width, 2 only height */
+  this.mode = PResizeControl.RESIZE_HEIGHT;
+
+  this.minWidth = 150;
+  this.minHeight = 150;
+  this.maxWidth = 0;
+  this.maxHeight = 0;
+
+  this.diffX = 0;
+  this.diffY = 0;
+
+  var container = document.createElement("div");
+  container.style.width = "20px";
+  container.style.height = "20px";
+  // embedded image does not work with IE < 8
+  container.style.backgroundImage = "url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUBAMAAAB/pwA+AAAAAXNSR0IArs4c6QAAAA9QTFRFMBg0f39/0dDN7eri/v7+XsdLVAAAAAF0Uk5TAEDm2GYAAABNSURBVAjXRcpBDcAwDEPRKAymImghuCUw/qTWJI7nk/X0zXquZ+tH6E5df3TngPBA+ELY7UW2gWwDq02sNjHbwmwLoyVGS7ytbw62tA8zTA85AeAv2wAAAABJRU5ErkJggg%3D%3D)";
+
+  gMap.getContainer().appendChild(container);
+
+  GEvent.addDomListener(container, 'mousedown', function() { that.resizable = true; });
+  GEvent.addDomListener(document, 'mouseup', function() { that.resizable = false; });
+  GEvent.addDomListener(document, 'mousemove', function(e) { that.onmouseover(e); });
+
+  /* Move the 'Terms of Use' 25px to the left to make sure that it's fully
+   * readable */
+  var terms = gMap.getContainer().childNodes[2];
+  terms.style.marginRight = "25px";
+
+  return container;
+}
+
+PResizeControl.prototype.getDefaultPosition = function() {
+  return new GControlPosition(G_ANCHOR_BOTTOM_RIGHT,new GSize(0,0));
+}
+
+PResizeControl.prototype.onmouseover = function(e) {
+  // Include possible scroll values
+  var sx = window.scrollX || document.documentElement.scrollLeft || 0;
+  var sy = window.scrollY || document.documentElement.scrollTop || 0;
+
+  // IEs event definition
+  if(!e) { 
+    e = window.event;
+  }
+
+  mouseX = e.clientX + sx;
+  mouseY = e.clientY + sy;
+
+  /* Direction of mouse movement
+  *  deltaX: -1 for left, 1 for right
+  *  deltaY: -1 for up, 1 for down
+  */
+  var deltaX = mouseX - this.diffX;
+  var deltaY = mouseY - this.diffY;
+  // Store difference in object's variables
+  this.diffX = mouseX;
+  this.diffY = mouseY;
+
+  // resize button is being held
+  if (this.resizable) {
+    this.changeMapSize(deltaX, deltaY);
+  }
+
+  return false;
+}
+
+// Resizes the map's width and height by the given increment
+PResizeControl.prototype.changeMapSize = function(dx, dy) {
+  var container = this._map.getContainer();
+  var width = parseInt(container.style.width);
+  var height = parseInt(container.style.height);
+
+  width += dx;
+  height += dy;
+
+  if (this.minWidth) { width = Math.max(this.minWidth, width); }
+  if (this.maxWidth) { width = Math.min(this.maxWidth, width); }
+  if (this.minHeight) { height = Math.max(this.minHeight, height); }
+  if (this.maxHeight) { height = Math.min(this.maxHeight, height); }
+
+  if (this.mode != PResizeControl.RESIZE_HEIGHT) {
+   container.style.width = width + "px";
+  }
+  if (this.mode != PResizeControl.RESIZE_WIDTH) {
+    container.style.height = height + "px";
+  }
+  this._map.checkResize();
 }

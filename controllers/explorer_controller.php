@@ -2,9 +2,9 @@
 /*
  * phtagr.
  * 
- * Multi-user image gallery.
+ * social photo gallery for your community.
  * 
- * Copyright (C) 2006-2009 Sebastian Felis, sebastian@phtagr.org
+ * Copyright (C) 2006-2010 Sebastian Felis, sebastian@phtagr.org
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -45,19 +45,14 @@ class ExplorerController extends AppController
       $this->data = $this->Search->paginate();
 
       if ($this->hasRole(ROLE_USER)) {
-        $groups = $this->Group->findAll(array('Group.user_id' => $this->getUserId()), false, array('Group.name'));
+        $groups = $this->Group->find('all', array('conditions' => array('Group.user_id' => $this->getUserId()), 'order' => 'Group.name'));
         if ($groups) {
           $groups = Set::combine($groups, "{n}.Group.id", "{n}.Group.name");
         }
-        $groups[0] = '[Keep]';
-        $groups[-1] = '[No Group]';
+        $groups[0] = __('[Keep]', true);
+        $groups[-1] = __('[No Group]', true);
         $this->set('groups', $groups);
       }
-
-      $mediaRss = '/explorer/media';
-      $this->set('feeds', array(
-        $mediaRss => array('title' => 'Media RSS', 'id' => 'gallery') 
-        ));
     }
     parent::beforeRender();
   }
@@ -71,41 +66,7 @@ class ExplorerController extends AppController
     } 
 
     if ($quicksearch) {
-      // Perform queries for each Tags, Categories and Locations
-      // seperately:
-
-      // Split the query so that we have a list of tags/categories/locations.
-      // For now we split at whitespaces, improvements could be made to not
-      // split multiple tags/categories/locations enclosed in quotation marks
-      $quicksearch = preg_split('/\s+/', trim($quicksearch));
-
-      // Reduce results to 6 
-      $this->Search->setShow(6);
-
-      // Add tag to the query
-      $this->Search->addTags($quicksearch);
-      // Set variable dataTags for view
-      $this->Search->setTagOp('OR');
-      $this->set('dataTags', $this->Search->paginate());
-      // Reset query
-      $this->Search->delTags();
-      $this->Search->delTagOp();
-
-      $this->Search->addCategories($quicksearch);
-      $this->Search->setCategoryOp('OR');
-      $this->set('dataCategories', $this->Search->paginate());
-      $this->Search->delCategories();
-      $this->Search->delCategoryOp();
-
-      $this->Search->addLocations($quicksearch);
-      $this->Search->setLocationOp('OR');
-      $this->set('dataLocations', $this->Search->paginate());
-      $this->Search->delLocations();
-      $this->Search->delLocationOp();
-    } else {
-      $this->set('dataTags', array());
-      $this->set('dataCategories', array());
-      $this->set('dataLocations', array());
+      $this->data = $this->Search->quicksearch($quicksearch, 6);
     }
     $this->set('quicksearch', $quicksearch);
   }
@@ -148,7 +109,7 @@ class ExplorerController extends AppController
 
   function search() {
     if ($this->hasRole(ROLE_USER)) {
-      $groups = $this->Group->findAll(array('Group.user_id' => $this->getUserId()), false, array('Group.name'));
+      $groups = $this->Group->find('all', array('conditions' => array('Group.user_id' => $this->getUserId()), 'order' => 'Group.name'));
       if ($groups) {
         $groups = Set::combine($groups, "{n}.Group.id", "{n}.Group.name");
       }
@@ -554,7 +515,7 @@ class ExplorerController extends AppController
     $this->set('data', $media);
     $this->layout='bare';
     if ($this->Media->checkAccess(&$media, &$user, 1, 0)) {
-      $groups = $this->Group->findAll(array('User.id' => $this->getUserId()));
+      $groups = $this->Group->find('all', array('conditions' => (array('User.id' => $this->getUserId()))));
       if (!empty($groups)) {
         $groups = Set::combine($groups, '{n}.Group.id', '{n}.Group.name');
       } else {

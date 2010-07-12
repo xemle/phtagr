@@ -2,9 +2,9 @@
 /*
  * phtagr.
  * 
- * Multi-user image gallery.
+ * social photo gallery for your community.
  * 
- * Copyright (C) 2006-2009 Sebastian Felis, sebastian@phtagr.org
+ * Copyright (C) 2006-2010 Sebastian Felis, sebastian@phtagr.org
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -24,7 +24,7 @@
 class UsersController extends AppController
 {
   var $components = array('RequestHandler', 'Cookie', 'Email', 'Captcha');
-  var $uses = array('Option', 'Group'); 
+  var $uses = array('Option', 'Group', 'MyFile'); 
   var $helpers = array('form', 'formular', 'number');
   var $paginate = array('limit' => 10, 'order' => array('User.username' => 'asc')); 
   var $menuItems = array();
@@ -36,9 +36,9 @@ class UsersController extends AppController
 
   function _getMenuItems() {
     $items = array();
-    $items[] = array('text' => 'List users', 'link' => 'index');
-    $items[] = array('text' => 'Add user', 'link' => 'add');
-    $items[] = array('text' => 'Registration', 'link' => 'register');
+    $items[] = array('text' => __('List users', true), 'link' => 'index');
+    $items[] = array('text' => __('Add user', true), 'link' => 'add');
+    $items[] = array('text' => __('Registration', true), 'link' => 'register');
     $items = am($items, $this->menuItems);
     return $items;
   }
@@ -178,7 +178,17 @@ class UsersController extends AppController
   function admin_index() {
     $this->requireRole(ROLE_SYSOP, array('loginRedirect' => '/admin/users'));
 
-    $this->data = $this->paginate('User', array('User.role>='.ROLE_USER));
+    $this->data = $this->paginate('User', array('User.role >=' . ROLE_USER));
+    foreach ($this->data as $key => $user) {
+      $result = $this->MyFile->find('all', array('conditions' => array("User.id" => $user['User']['id'], "File.flag & ".FILE_FLAG_EXTERNAL." = 0"), 'fields' => array('SUM(File.size) AS Bytes')));
+      $bytes = floatval($result[0][0]['Bytes']);
+      $result =  $this->MyFile->find('all', array('conditions' => array("User.id" => $user['User']['id']), 'fields' => array('SUM(File.size) AS Bytes')));
+      $bytesAll = $result[0][0]['Bytes'];
+
+      $this->data[$key]['User']['bytes'] = $bytes; 
+      $this->data[$key]['User']['bytesAll'] = $bytesAll; 
+      $this->data[$key]['User']['free'] = max(0, $user['User']['quota'] - $bytes);
+    }
   }
 
   /** Ensure at least one admin exists
@@ -602,7 +612,7 @@ class UsersController extends AppController
    * account
     @param user User model data (of the new user) */
   function _sendNewAccountNotifiactionEmail($user) {
-    $sysOps = $this->User->findAll("User.role >= ".ROLE_SYSOP);
+    $sysOps = $this->User->find('all', array('conditions' => "User.role >= ".ROLE_SYSOP));
     if (!$sysOps) {
       Logger::err("Could not find system operators");
       return false;

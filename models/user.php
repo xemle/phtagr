@@ -2,9 +2,9 @@
 /*
  * phtagr.
  * 
- * Multi-user image gallery.
+ * social photo gallery for your community.
  * 
- * Copyright (C) 2006-2009 Sebastian Felis, sebastian@phtagr.org
+ * Copyright (C) 2006-2010 Sebastian Felis, sebastian@phtagr.org
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -207,14 +207,27 @@ class User extends AppModel
     return false;
   }
 
-  function generateKey($data) {
+  /** Generate a keystring
+    @param data User model data
+    @param length Key length. Default is 10. Must be beween 3 and 128.
+    @param alphabet Key alphabet as string. Default is [a-zA-Z0-9]. Must be at least 10 characters long.
+    @return User model data */
+  function generateKey($data, $length = 10, $alphabet = false) {
     srand(getMicrotime()*1000);
-    $h = '';
-    for ($i = 0; $i < 128; $i++) {
-      $h .= chr(rand(0, 255));
+
+    if (!$alphabet || strlen(strval($alphabet)) < 10) {
+      $alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      $alphabet .= 'abcdefghijklmnopqrstuvwxyz';
+      $alphabet .= '0123456789';
     }
-    $h .= time();
-    $data['User']['key'] = md5($h);
+    $length = min(128, max(3, intval($length)));
+    $count = strlen($alphabet);
+
+    $key = '';
+    for ($i = 0; $i < $length; $i++) {
+      $key .= substr($alphabet, rand(0, $count), 1);
+    }
+    $data['User']['key'] = $key;
     return $data;
   }
 

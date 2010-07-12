@@ -2,9 +2,9 @@
 /*
  * phtagr.
  * 
- * Multi-user image gallery.
+ * social photo gallery for your community.
  * 
- * Copyright (C) 2006-2009 Sebastian Felis, sebastian@phtagr.org
+ * Copyright (C) 2006-2010 Sebastian Felis, sebastian@phtagr.org
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -111,13 +111,17 @@ class FileManagerComponent extends Object {
     if (!$user) {
       $user = $this->controller->getUser();
     }
-    $userDir = USER_DIR.$user['User']['id'].DS.'files'.DS;
-    $folder = new Folder();
-    if (!$folder->create($userDir)) {
-      Logger::err("Could not create users root directory '$userDir'");
-      return false;
+
+    // create untailed directory, otherwise Folder->create() might act wrong
+    $userDir = USER_DIR . $user['User']['id'] . DS . 'files';
+    if (!is_dir($userDir)) {
+      $Folder = new Folder();
+      if (!$Folder->create($userDir)) {
+        Logger::err(sprintf("Directory %s NOT created", $userDir));
+        return false;
+      }
     }
-    return $userDir;
+    return Folder::slashTerm($userDir);
   }
 
   /** Evaluates if a filename is external or internal 
@@ -232,6 +236,29 @@ class FileManagerComponent extends Object {
       return false;
     }
     return $this->MyFile->move($src, $dst);
+  }
+
+  /** Creates a unique filename within a path and a filename. The new filename
+   * has the pattern of name.unique-number.extension
+    @param path Path for the filename
+    @param filename Filename 
+    @return unique filename */
+  function createUniqueFilename($path, $filename) {
+    $path = Folder::slashTerm($path);
+    if (!file_exists($path . $filename)) {
+      return $filename;
+    }
+    $name = substr($filename, 0, strrpos($filename, '.'));
+    $ext = substr($filename, strrpos($filename, '.') + 1);
+    $found = false;
+    $count = 0;
+    while (!$found) {
+      $new = $name . '.' . $count . '.' . $ext;
+      if (!file_exists($path . $new)) {
+        return $new;
+      }
+      $count++;
+    }
   }
 }
 

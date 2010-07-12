@@ -2,9 +2,9 @@
 /*
  * phtagr.
  * 
- * Multi-user image gallery.
+ * social photo gallery for your community.
  * 
- * Copyright (C) 2006-2009 Sebastian Felis, sebastian@phtagr.org
+ * Copyright (C) 2006-2010 Sebastian Felis, sebastian@phtagr.org
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -57,20 +57,20 @@ class OptionsController extends AppController {
       $this->_set($userId, 'acl.read.original', $this->data);
       $this->_set($userId, 'acl.read.preview', $this->data);
 
-      $this->Session->setFlash("Settings saved");
+      $this->Session->setFlash(__("Settings saved", true));
     }
     $tree = $this->Option->getTree($userId);
     $this->Option->addDefaultAclTree(&$tree);
     $this->data = $tree;
 
     $this->set('userId', $userId);
-    $groups = $this->Group->findAll("Group.user_id = $userId", null, array('Group.name' => 'ASC'));
+    $groups = $this->Group->find('all', array('conditions' => "Group.user_id = $userId", 'order' => array('Group.name' => 'ASC')));
     if ($groups) {
       $groups = Set::combine($groups, '{n}.Group.id', '{n}.Group.name');
     } else {
       $groups = array();
     }
-    $groups[-1] = '[No Group]';
+    $groups[-1] = __('[No Group]', true);
     $this->set('groups', $groups);
   }
 
@@ -80,16 +80,19 @@ class OptionsController extends AppController {
     $userId = $this->getUserId();
     if (!empty($this->data)) {
       $this->User->id = $userId;
-      Logger::debug($this->data);
       if (!$this->User->save($this->data, true, array('firstname', 'lastname', 'password', 'email'))) {
         Logger::err("Could not update user profile");
-        $this->Session->setFlash("Could not save profile!");
+        $this->Session->setFlash(__("Could not save profile!", true));
       } else {
         Logger::info("User $userId profile updated");
-        $this->Session->setFlash("Profile saved");
+        $this->Session->setFlash(__("Profile saved", true));
       }
+      $browser = Set::extract("/Option/user/browser/full", $this->data);
+      $this->Option->setValue('user.browser.full', $browser[0], $userId);
     }
     $this->data = $this->User->findById($userId);
+    $this->data['Option'] = $this->Option->getTree($userId);
+    Logger::debug($this->data['Option']);
     unset($this->data['User']['password']);
   }
 
@@ -106,22 +109,23 @@ class OptionsController extends AppController {
         Logger::debug($this->User->validationErrors);
       }
     }
-    $this->set('data', $this->User->findById($userId));
+    $this->data = $this->User->findById($userId);
   }
 
   function getMenuItems() {
     $items = array();
     if ($this->hasRole(ROLE_USER)) {
-      $items[] = array('text' => 'Profile', 'link' => '/options/profile');
-      $items[] = array('text' => 'Guest Accounts', 'link' => '/guests');
-      $items[] = array('text' => 'Groups', 'link' => '/groups');
+      $items[] = array('text' => __('Profile', true), 'link' => '/options/profile');
+      $items[] = array('text' => __('Guest Accounts', true), 'link' => '/guests');
+      $items[] = array('text' => __('Groups', true), 'link' => '/groups');
     }
-    $items[] = array('text' => 'Access Rights', 'link' => '/options/acl');
-    $items[] = array('text' => 'RSS', 'link' => '/options/rss');
+    $items[] = array('text' => __('Access Rights', true), 'link' => '/options/acl');
+    $items[] = array('text' => __('RSS', true), 'link' => '/options/rss');
     return $items;
   }
 
   function beforeRender() {
+    parent::beforeRender();
     $items = $this->getMenuItems();
     $menu = array('items' => $items, 'active' => $this->here);
     $this->set('mainMenu', $menu);

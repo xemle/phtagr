@@ -2,9 +2,9 @@
 /*
  * phtagr.
  * 
- * Multi-user image gallery.
+ * social photo gallery for your community.
  * 
- * Copyright (C) 2006-2009 Sebastian Felis, sebastian@phtagr.org
+ * Copyright (C) 2006-2010 Sebastian Felis, sebastian@phtagr.org
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -219,6 +219,7 @@ class SearchComponent extends Search
       'nextPage' => false, 
       'prevPage' => false,
       'baseUri' => $this->baseUri,
+      'afterUri' => false,
       'defaults' => $this->defaults,
       'data' => $this->getParams()
       );
@@ -265,6 +266,7 @@ class SearchComponent extends Search
       'current' => false,
       'prevMedia' => false,
       'nextMedia' => false, 
+      'afterUri' => false,
       'baseUri' => $this->baseUri,
       'defaults' => $this->defaults,
       'data' => $this->getParams()
@@ -336,5 +338,25 @@ class SearchComponent extends Search
  
     return $data;
   }
+
+  function quicksearch($text, $show = 12) {
+    $words = preg_split('/\s+/', trim($text));
+
+    $tmp = array();
+    foreach($words as $word) {
+      $tmp[] = '*' . $word . '*';
+    }
+    $words = $tmp;
+
+    $this->addTags($words, false);
+    $this->addCategories($words, false);
+    $this->addLocations($words, false);
+    $this->setOperand('OR');
+
+    $this->setSort('default', false);
+    $this->setShow($show);
+
+    return $this->paginate();
+  }    
 }
 ?>

@@ -1,6 +1,5 @@
-<?php $session->flash(); ?>
+<h1><?php __("Security settings"); ?></h1>
 
-<h1>Security</h1>
+<?php echo $session->flash(); ?>
 
-<p>An error occured while setting the security salt. Please have look to the
-log files and <?php echo $html->link('retry', 'salt'); ?></p>
+<p><?php printf(__("An error occured while setting the security salt. Please have look to the log files and click on %s", true), $html->link(__('continue', true), 'salt')); ?></p>

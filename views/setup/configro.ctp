@@ -1,11 +1,12 @@
-<?php $session->flash(); ?>
-<h1>Create Database Configuration</h1>
+<h1><?php __("Database connection"); ?></h1>
+
+<?php echo $session->flash(); ?>
 
 <div class="warning">
-The configuration file for the database connection could not be written. Please create a database configuration file by your own!
+<?php __("The configuration file for the database connection could not be written. Please create a database configuration file by your own!"); ?>
 </div>
 
-<p>Below a sample configuration file is shown. Please adapt your database credentials and click <?php echo $html->link('Retry', 'configro'); ?></p>
+<p><?php __("Below a sample configuration file is shown. Please adapt your database credentials and continue."); ?></p>
 
 <p><pre><?php echo $dbConfig; ?></pre></p>
 
@@ -26,4 +27,4 @@ class DATABASE_CONFIG {
 }
 ?&gt;</code></pre></p>
 
-<p><?php echo $html->link('Retry', 'configro'); ?> database connection.</p>
+<p><?php echo $html->link(__('Continue', true), 'configro'); ?></p>

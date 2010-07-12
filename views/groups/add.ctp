@@ -1,11 +1,12 @@
-<?php $session->flash(); ?>
+<h1><?php __('New Group'); ?></h1>
+
+<?php echo $session->flash(); ?>
 
 <?php echo $form->create(null, array('action' => 'add')); ?>
 
-<fieldset><legend>Create new group</legend>
-<table class="formular">
+<fieldset><legend><?php __('Create new group'); ?></legend>
 <?php
-  echo $form->input('Group.name');
+  echo $form->input('Group.name', array('label' => __('Name', true)));
   echo $form->input('Group.description', array('type' => 'textbox'));
 
   $typeOptions = array(
@@ -33,7 +34,5 @@
   echo $form->input('Group.tagging', array('type' => 'select', 'options' => $taggingOptions, 'label' => 'Tagging Options'));
 
 ?>
-</table>
-
 </fieldset>
 <?php echo $form->end(__('Create', true)); ?>

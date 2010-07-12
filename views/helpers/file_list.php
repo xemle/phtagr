@@ -2,9 +2,9 @@
 /*
  * phtagr.
  * 
- * Multi-user image gallery.
+ * social photo gallery for your community.
  * 
- * Copyright (C) 2006-2009 Sebastian Felis, sebastian@phtagr.org
+ * Copyright (C) 2006-2010 Sebastian Felis, sebastian@phtagr.org
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -33,13 +33,18 @@ class FileListHelper extends AppHelper
     switch ($type) {
       case FILE_TYPE_DIRECTORY: $icon = 'folder'; break;
       case FILE_TYPE_IMAGE: $icon = 'picture'; break;
+      case FILE_TYPE_VIDEOTHUMB: 
       case FILE_TYPE_VIDEO: $icon = 'film'; break;
       case FILE_TYPE_GPS: $icon = 'map'; break;
+      case FILE_TYPE_TEXT: break;
       default:
         Logger::warn("Unhanded file type $type");
         return false;
     }
-    return $this->Html->image("icons/$icon.png");
+    if ($icon) {
+      return $this->Html->image("icons/$icon.png");
+    } 
+    return false;
   }
 
   function _cmpFile($a, $b, $field = 'file') {
@@ -98,7 +103,7 @@ class FileListHelper extends AppHelper
     // Download link for internal files and imported external files
     if ($options['isInternal'] || $file['media_id'] > 0) {
       $icon = $this->Html->image('icons/disk.png', array('alt' => 'download', 'title' => 'Download '.$file['file']));
-      $actions[] = $this->Html->link($icon, "index/$path/{$file['file']}", null, null, false);
+      $actions[] = $this->Html->link($icon, "index/$path/{$file['file']}", array('escape' => false));
     }
 
     // Delete link for internal files

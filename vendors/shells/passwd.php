@@ -2,9 +2,9 @@
 /*
  * phtagr.
  * 
- * Multi-user image gallery.
+ * social photo gallery for your community.
  * 
- * Copyright (C) 2006-2009 Sebastian Felis, sebastian@phtagr.org
+ * Copyright (C) 2006-2010 Sebastian Felis, sebastian@phtagr.org
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -45,7 +45,7 @@ class PasswdShell extends Shell {
   /** Decrypt all passwords */
   function encrypt() {
     if ('y' == $this->in('Are you sure you want to upgrade all passwords?', array('y', 'n'), 'n')) {
-      $users = $this->User->findall('User.password NOT LIKE "$E$%"');
+      $users = $this->User->find('all', array('conditions' => 'User.password NOT LIKE "$E$%"'));
       if (!count($users)) {
         $this->out("No users found with plain passwords");
       } else {

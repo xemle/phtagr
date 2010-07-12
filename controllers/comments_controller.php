@@ -2,9 +2,9 @@
 /*
  * phtagr.
  * 
- * Multi-user image gallery.
+ * social photo gallery for your community.
  * 
- * Copyright (C) 2006-2009 Sebastian Felis, sebastian@phtagr.org
+ * Copyright (C) 2006-2010 Sebastian Felis, sebastian@phtagr.org
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -253,7 +253,7 @@ class CommentsController extends AppController
   function rss() {
     $this->layoutPath = 'rss';
     $conditions = $this->Media->buildAclConditions($this->getUser());
-    $this->data = $this->Comment->findAll($conditions, null, 'Comment.date DESC', 20);
+    $this->data = $this->Comment->find('all', array('conditions' => $conditions, 'order' => 'Comment.date DESC', 'limit' => 20));
 
     if (Configure::read('debug') > 1) {
       Configure::write('debug', 1);

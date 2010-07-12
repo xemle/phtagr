@@ -2,9 +2,9 @@
 /*
  * phtagr.
  * 
- * Multi-user image gallery.
+ * social photo gallery for your community.
  * 
- * Copyright (C) 2006-2009 Sebastian Felis, sebastian@phtagr.org
+ * Copyright (C) 2006-2010 Sebastian Felis, sebastian@phtagr.org
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -58,11 +58,11 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
     $this->_davRoot="";
   }
 
-  function startup(&$controller) {
+  function initialize(&$controller) {
     $this->controller = &$controller;
     // set current controller URL
     $this->setDavRoot($controller->webroot.$controller->name);
-    $this->FilterManager->startup(&$controller);
+    $this->FilterManager->initialize(&$controller);
   }
 
   /** Set a new filesystem root directory

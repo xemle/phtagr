@@ -1,6 +1,7 @@
 <?php
 App::import('Core', array('Controller'));
 App::import('Component', array('Search'));
+App::import('File', 'Logger', array('file' => APP.'logger.php'));
 
 Mock::generatePartial('SearchComponent', 'NoStopSearch', array('_stop'));
 
@@ -81,10 +82,21 @@ class SearchComponentTest extends CakeTestCase {
     $result = $this->Search->getShow();
     $this->assertEqual($result, 12);
 
+    // one rule, disabled validation
+    $this->Search->setShow('no validation', false);
+    $result = $this->Search->getShow();
+    $this->assertEqual($result, 'no validation');
+
     // multple rules
     $this->Search->addTag(array('he', 'the'));
     $result = $this->Search->getTags();
     $this->assertEqual($result, array('the'));
+
+    // multple rules, disabled validation
+    $result = $this->Search->delTags();
+    $this->Search->addTag(array('he', '+_?'), false);
+    $result = $this->Search->getTags();
+    $this->assertEqual($result, array('he', '+_?'));
 
     // disabled parameter
     $this->Search->setUser('joe');
@@ -100,6 +112,11 @@ class SearchComponentTest extends CakeTestCase {
     $this->Search->setWorld("rule it");
     $result = $this->Search->getWorld();
     $this->assertEqual($result, null);
+    
+    // disabled parameter with disabled validation
+    $this->Search->setWorld("rule it", false);
+    $result = $this->Search->getWorld();
+    $this->assertEqual($result, "rule it");
   }
 
 }

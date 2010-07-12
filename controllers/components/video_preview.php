@@ -2,9 +2,9 @@
 /*
  * phtagr.
  * 
- * Multi-user image gallery.
+ * social photo gallery for your community.
  * 
- * Copyright (C) 2006-2009 Sebastian Felis, sebastian@phtagr.org
+ * Copyright (C) 2006-2010 Sebastian Felis, sebastian@phtagr.org
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -26,7 +26,7 @@ class VideoPreviewComponent extends Object {
   var $controller = null;
   var $components = array('FileCache', 'FileManager');
 
-  function startup(&$controller) {
+  function initialize(&$controller) {
     $this->controller =& $controller;
   }
 
@@ -43,14 +43,20 @@ class VideoPreviewComponent extends Object {
     $found = $folder->find($pattern);
     if (count($found) && is_readable(Folder::addPathElement($path, $found[0]))) {
       $thumbFilename = Folder::addPathElement($path, $found[0]);
-      if ($insertIfMissing) {
-        $thumb = $this->FileManager>add($thumbFilename, $video['File']['user_id']);
-        $thumb['File']['media_id'] = $video['File']['media_id'];
-        if (!$this->controller->MyFile->save($thumb)) {
-          Logger::err("Could not add thumb to database of video {$video['File']['id']}");
-        } else {
-          Logger::verbose("Add missing video thumb $thumbFilename to database (".$this->controller->MyFile->getLastInsertId().")"); 
-        }
+      $thumb = $this->controller->MyFile->findByFilename($thumbFilename);
+      if (!$thumb && $insertIfMissing) {
+        $thumbId = $this->FileManager->add($thumbFilename, $video['File']['user_id']);
+        Logger::verbose("Add missing video thumb $thumbFilename to database: $thumbId"); 
+        $thumb = $this->controller->MyFile->findById($thumbId);
+      }
+      if (!$thumb) {
+        Logger::err("Could not find thumbnail in database");
+        return false;
+      }
+      if ($insertIfMissing &&
+        $thumb['File']['media_id'] != $video['File']['media_id'] &&
+        $this->controller->MyFile->setMedia($thumb, $video['File']['media_id'])) {
+        Logger::verbose("Link video thumb {$thumb['File']['id']} to media {$video['File']['media_id']}"); 
       }
       return $thumbFilename;
     } 
@@ -146,8 +152,14 @@ class VideoPreviewComponent extends Object {
       }
       $videoFile = $this->controller->MyFile->getFilename($video);
       $thumbFilename = $this->_findThumb($video);
-      if (!$thumbFilename && is_writeable(dirname($videoFile))) {
+      if ($thumbFilename) {
+        return $thumbFilename;
+      } elseif (!$thumbFilename && is_writeable(dirname($videoFile))) {
         $thumbFilename = $this->create($video);
+        $thumb = $this->controller->MyFile->findByFilename($thumbFilename);
+        if ($this->controller->MyFile->setMedia($thumb, $video['File']['media_id'])) {
+          Logger::verbose("Link thumbnail {$thumb['File']['id']} to media {$video['File']['media_id']}");
+        }
       } elseif (!$options['noCache']) {
         Logger::info("Origination directory of video is not writable. Use cache file ($cache)");
         $thumbFilename = $this->create($video, $cache);

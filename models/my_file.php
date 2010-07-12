@@ -2,9 +2,9 @@
 /*
  * phtagr.
  * 
- * Multi-user image gallery.
+ * social photo gallery for your community.
  * 
- * Copyright (C) 2006-2009 Sebastian Felis, sebastian@phtagr.org
+ * Copyright (C) 2006-2010 Sebastian Felis, sebastian@phtagr.org
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -314,7 +314,7 @@ class MyFile extends AppModel
     if (!$includeExternal) {
       $conditions[] = "File.flag & ".FILE_FLAG_EXTERNAL." = 0";
     }
-    $result = $this->findAll($conditions, array('SUM(File.size) AS bytes'));
+    $result = $this->find('all', array('conditions' => $conditions, 'fields' => array('SUM(File.size) AS bytes')));
     return intval($result[0][0]['bytes']);
   }
 

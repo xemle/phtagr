@@ -2,9 +2,9 @@
 /*
  * phtagr.
  * 
- * Multi-user image gallery.
+ * social photo gallery for your community.
  * 
- * Copyright (C) 2006-2009 Sebastian Felis, sebastian@phtagr.org
+ * Copyright (C) 2006-2010 Sebastian Felis, sebastian@phtagr.org
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -37,7 +37,17 @@ class SystemController extends AppController {
     $this->Option->setValue($path, $value, $userId);
   }
 
-  function index() {
+  function admin_general() {
+    $this->requireRole(ROLE_SYSOP);
+    if (isset($this->data)) {
+      $this->_set(0, 'general.title', $this->data);
+      $this->_set(0, 'home.welcomeText', $this->data);
+    }
+    $this->data = $this->Option->getTree(0);
+  }
+
+
+  function admin_external() {
     if (!empty($this->data)) {
       // TODO check valid acl
       $this->_set(0, 'bin.exiftool', $this->data);
@@ -51,14 +61,14 @@ class SystemController extends AppController {
       $this->Session->setFlash("Settings saved");
     }
     $tree = $this->Option->getTree(0);
-    Logger::trace($tree);
     $this->data = $tree;
   }
 
   function getMenuItems() {
     $items = array();
-    $items[] = array('text' => 'User Accounts', 'link' => '/admin/users');
-    $items[] = array('text' => 'Commands', 'link' => '/system/index');
+    $items[] = array('text' => __('General', true), 'link' => '/admin/system/general');
+    $items[] = array('text' => __('User Accounts', true), 'link' => '/admin/users');
+    $items[] = array('text' => __('External Programs', true), 'link' => '/admin/system/external');
     return $items;
   }
 

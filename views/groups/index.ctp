@@ -1,5 +1,6 @@
-<h1>Groups</h1>
-<?php if ($session->check('Message.flash')) $session->flash(); ?>
+<h1><?php __('Groups'); ?></h1>
+
+<?php echo $session->flash(); ?>
 
 <?php if (!empty($this->data)): ?>
 <table class="default">
@@ -40,15 +41,15 @@
     $actions = '<div class="actionlist">';
     $actions .= $html->link(
         $html->image('icons/pencil.png', array('alt' => 'Edit', 'title' => 'Edit')),
-          'edit/'.$group['Group']['id'], null, false, false).' '.
+          'edit/'.$group['Group']['id'], array('escape' => false)).' '.
         $html->link( 
           $html->image('icons/delete.png', array('alt' => 'Delete', 'title' => 'Delete')),
-          'delete/'.$group['Group']['id'], null, $delConfirm, false);
+          'delete/'.$group['Group']['id'], array('escape' => false), $delConfirm);
     $actions .= '</div>';
 
     $cells[] = array(
       $html->link($group['Group']['name'], 'edit/'.$group['Group']['id'], array('title' => h($group['Group']['description']))),
-      $text->truncate($group['Group']['description'], 32, '...', false),
+      $text->truncate($group['Group']['description'], 32, array('ending' => '...', 'exact' => false, 'html' => false)),
       $typeOptions[$group['Group']['type']],
       $accessOptions[$group['Group']['access']],
       $mediaViewOptions[$group['Group']['media_view']],
@@ -63,11 +64,6 @@
 </table>
 <?php else: ?>
 <div class="info">
-Currently no image groups are assigned. At the one hand each image could be
-assigned to a specific group. On the other hand a guest can be member of a set
-of groups. The guest is than able to view the images from his groups. 
+<?php __('Currently no image groups are assigned. At the one hand each image could be assigned to a specific group. On the other hand a guest can be member of a set of groups. The guest is than able to view the images from his groups.'); ?>
 </div>
 <?php endif; ?>
-<?php
-//debug($this->data);
-?>

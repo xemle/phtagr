@@ -1,8 +1,9 @@
-<?php $session->flash(); ?>
+<h1><?php __("Database upgrade"); ?></h1>
 
-<h1>Status</h1>
+<?php echo $session->flash(); ?>
+
 <div class="info">
-Your database is up-to-date.
+<?php __("Your database is up-to-date."); ?>
 </div>
 
-<?php echo $html->link("Continue", '/');
+<?php echo $html->link(__("Continue", true), '/');

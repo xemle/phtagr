@@ -2,9 +2,9 @@
 /*
  * phtagr.
  * 
- * Multi-user image gallery.
+ * social photo gallery for your community.
  * 
- * Copyright (C) 2006-2009 Sebastian Felis, sebastian@phtagr.org
+ * Copyright (C) 2006-2010 Sebastian Felis, sebastian@phtagr.org
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -27,7 +27,7 @@ class BrowserController extends AppController
 
   var $components = array('FileManager', 'RequestHandler', 'FilterManager', 'Upload', 'Zip');
   var $uses = array('User', 'MyFile', 'Media', 'Tag', 'Category', 'Location', 'Option');
-  var $helpers = array('form', 'formular', 'html', 'number', 'FileList');
+  var $helpers = array('form', 'formular', 'html', 'number', 'FileList', 'ImageData');
 
   /** Array of filesystem root directories. */
   var $_fsRoots = array();
@@ -46,6 +46,8 @@ class BrowserController extends AppController
         $this->_addFsRoot($root);
       }
     }
+
+    $this->pageTitle = __('My Files', true);
   }
 
   function beforeRender() {
@@ -54,15 +56,18 @@ class BrowserController extends AppController
   }
 
   function _setMenu() {
-    $items = array();
-    $items[] = array('text' => 'Import Files', 'link' => 'index', 'type' => ($this->action=='index'?'active':false));
-    if (count($this->_fsRoots) > 1) {
-      $items[] = array('text' => 'Upload', 'link' => 'upload/files');
-    } else {
-      $items[] = array('text' => 'Upload', 'link' => 'upload');
+    if ($this->action == 'quickupload') {
+      return;
     }
-    $items[] = array('text' => 'Synchronize', 'link' => 'sync');
-    $items[] = array('text' => 'Overview', 'link' => 'view');
+    $items = array();
+    $items[] = array('text' => __('Import Files', true), 'link' => 'index', 'type' => ($this->action=='index'?'active':false));
+    if (count($this->_fsRoots) > 1) {
+      $items[] = array('text' => __('Upload', true), 'link' => 'upload/files');
+    } else {
+      $items[] = array('text' => __('Upload', true), 'link' => 'upload');
+    }
+    $items[] = array('text' => __('Synchronize', true), 'link' => 'sync');
+    $items[] = array('text' => __('Overview', true), 'link' => 'view');
     $menu = array('items' => $items);
     $this->set('mainMenu', $menu);
   }
@@ -75,6 +80,14 @@ class BrowserController extends AppController
   '.')
   @return True on success. False otherwise */
   function _addFsRoot($root, $alias = null) {
+    if (!$root) {
+      Logger::warn("Invalid directory. Input is empty");
+      return false;
+    } elseif (!@is_dir($root)) {
+      Logger::err("Directory of '$root' does not exists");
+      return false;
+    }
+
     $root = Folder::slashTerm($root);
 
     if ($alias == null) {
@@ -86,11 +99,6 @@ class BrowserController extends AppController
     }
 
     if (isset($this->_fsRoots[$alias])) {
-      return false;
-    }
-
-    if (!@is_dir($root)) {
-      Logger::err("Directory of '$root' does not exists");
       return false;
     }
 
@@ -291,10 +299,17 @@ class BrowserController extends AppController
       }
     }
     
-    //Logger::debug($toRead);
+    $this->FilterManager->clearErrors();
     $readed = $this->FilterManager->readFiles($toRead);
-    $errors = $this->FilterManager->errors;
-    $this->Session->setFlash("Imported $readed files ($errors errors)");
+    $errorCount = count($this->FilterManager->errors);
+
+    $readCount = 0;
+    foreach ($readed as $file => $media) {
+      if ($media) {
+        $readCount++;
+      }
+    }
+    $this->Session->setFlash("Imported $readCount files ($errorCount) errors)");
 
     $this->redirect('index/'.$path);
   }
@@ -340,45 +355,47 @@ class BrowserController extends AppController
   /** Synchronize the meta data of the media with its file(s). All media with
    * the MEDIA_FLAG_DIRTY are synced or shortly before the maximum execution
    * time is exceed. */
-  function sync() {
+  function sync($action = false) {
     $userId = $this->getUserId();
-    $data = array('synced' => 0, 'errors' => 0, 'unsynced' => 0, 'total' => 0);
+    $data = array('action' => $action, 'synced' => array(), 'errors' => array(), 'unsynced' => 0);
 
-    // clear file cache 
-    @clearstatcache();
-    $start = $now = getMicrotime();
-    $executionTime = ini_get('max_execution_time') - 5;
+    $conditions = array('Media.user_id' => $userId, 'Media.flag & '.MEDIA_FLAG_DIRTY.' > 0');
+    $data['unsynced'] = $this->Media->find('count', array('conditions' => $conditions));
+    if ($action == 'run') {
+      $query = array('conditions' => $conditions, 'limit' => 10, 'order' => 'Media.modified ASC');
+      $results = $this->Media->find('all', $query);
 
-    $conditions= array('Media.user_id' => $userId, 'Media.flag & '.MEDIA_FLAG_DIRTY.' > 0');
-    $data['total'] = $this->Media->find('count', array('conditions' => $conditions));
-    $query = array('conditions' => $conditions, 'limit' => 10, 'order' => 'Media.modified ASC');
-    $results = $this->Media->find('all', $query);
-    while (count($results)) {
-      foreach ($results as $media) {
-        if (!$this->FilterManager->write($media)) {
-          Logger::err("Could not export media {$media['Media']['name']} ({$media['Media']['id']})");
-          $data['errors']++;
-        } else {
-          Logger::verbose("Synced meta data of media {$media['Media']['name']} ({$media['Media']['id']})");
-          $data['synced']++;
+      // clear file cache 
+      @clearstatcache();
+      $start = $now = getMicrotime();
+      $executionTime = ini_get('max_execution_time') - 5;
+
+      while (count($results)) {
+        foreach ($results as $media) {
+          if (!$this->FilterManager->write($media)) {
+            Logger::err("Could not export media {$media['Media']['name']} ({$media['Media']['id']})");
+            $data['errors'][] = $media;
+          } else {
+            Logger::verbose("Synced meta data of media {$media['Media']['name']} ({$media['Media']['id']})");
+            $data['synced'][] = $media;
+          }
+
+          $now = getMicrotime();
+          if ($now - $start > $executionTime) {
+            break;
+          }
+          $modified = $media['Media']['modified'];
         }
-
-        $now = getMicrotime();
         if ($now - $start > $executionTime) {
           break;
         }
-        $modified = $media['Media']['modified'];
+        // ensure we query not already called media (which might be unsynced due
+        // an error)
+        $query['conditions']['Media.modified >'] = $modified;
+        $results = $this->Media->find('all', $query);
       }
-      if ($now - $start > $executionTime) {
-        break;
-      }
-      // ensure we query not already called media (which might be unsynced due
-      // an error)
-      $query['conditions']['Media.modified >'] = $modified;
-      $results = $this->Media->find('all', $query);
+      $data['unsynced'] = $this->Media->find('count', array('conditions' => $conditions));
     }
-
-    $data['unsynced'] = $this->Media->find('count', array('conditions' => $conditions));
     $this->data = $data;
   }
 
@@ -389,12 +406,12 @@ class BrowserController extends AppController
     $external = (FILE_FLAG_EXTERNAL);
 
     $files['count'] = $this->MyFile->find('count', array('conditions' => "User.id = $userId"));
-    $bytes = $this->MyFile->findAll(array("User.id" => $userId, "File.flag & ".FILE_FLAG_EXTERNAL." = 0"), array('SUM(File.size) AS Bytes'));
+    $bytes = $this->MyFile->find('all', array('conditions' => array("User.id" => $userId, "File.flag & ".FILE_FLAG_EXTERNAL." = 0"), 'fields' => 'SUM(File.size) AS Bytes'));
     $files['bytes'] = floatval($bytes[0][0]['Bytes']);
-    $bytes = $this->MyFile->findAll(array("User.id" => $userId), array('SUM(File.size) AS Bytes'));
+    $bytes = $this->MyFile->find('all', array('conditions' => array("User.id" => $userId), 'fields' => 'SUM(File.size) AS Bytes'));
     $files['bytesAll'] = $bytes[0][0]['Bytes'];
     $files['quota'] = $user['User']['quota'];
-    $files['free'] = $files['quota'] - $files['bytes'];
+    $files['free'] = max(0, $files['quota'] - $files['bytes']);
     $files['active'] = $this->Media->find('count', array('conditions' => "User.id = $userId"));
     $files['dirty'] = $this->Media->find('count', array('conditions' => array('User.id' => $userId, 'Media.flag & '.MEDIA_FLAG_DIRTY.' > 0')));
     $files['video'] = $this->Media->find('count', array('conditions' => "User.id = $userId AND Media.duration > 0"));
@@ -427,7 +444,7 @@ class BrowserController extends AppController
       $name = $this->data['Folder']['name'];
 
       $newFolder = Folder::slashTerm($fsPath).$name;
-      if ($folder->mkdir($newFolder)) {
+      if ($folder->create($newFolder)) {
         Logger::verbose("Create folder $newFolder");
         $this->Session->setFlash("Folder $name created");
         $this->redirect("index/".$path.$name);
@@ -439,6 +456,117 @@ class BrowserController extends AppController
     }
     
     $this->set('path', $path);
+  }
+
+  function _upload($dst, $redirectOnFailure = false) {
+    if ($redirectOnFailure === false) {
+      $redirectOnFailure = $this->action;
+    }
+    $dst = Folder::slashTerm($dst);
+    if (!$this->Upload->isUpload()) {
+      Logger::info("No upload data available");
+      return false;
+    } elseif (!$this->FileManager->canWrite($this->Upload->getSize())) {
+      $this->Session->setFlash(__("Your upload quota is exceeded", true));
+      Logger::warn("User upload quota exceeded. Upload denied.");
+      return false;
+    }
+    $files = $this->Upload->upload($dst, array('overwrite' => false));
+    $result = array();
+    foreach($files as $file) {
+      $result[] = $dst . $file;
+    }
+    return $result;
+  }
+
+  function _extract($dst, $files) {
+    $result = array();
+    foreach ($files as $file) {
+      if (strtolower(substr($file, -4)) == '.zip') {
+        if (!$this->FileManager->canWrite($this->Zip->getExtractedSize($file))) {
+          Logger::warn("User upload quota exceeded. Unzip failed: " . $file);
+          continue;
+        }
+        $zipFiles = $this->Zip->unzip($file);
+        if ($zipFiles !== false) {
+          $result[$file] = $zipFiles;
+        } else {
+          Logger::warn("Could not extract $file");
+        }
+      }
+    }
+    
+    return $result;    
+  }
+
+  function __fromReadableSize($readable) {
+    if (is_float($readable) || is_numeric($readable)) {
+      return $readable;
+    } elseif (preg_match_all('/^\s*(0|[1-9][0-9]*)(\.[0-9]+)?\s*([KkMmGg][Bb]?)?\s*$/', $readable, $matches, PREG_SET_ORDER)) {
+      $matches = $matches[0];
+      $size = (float)$matches[1];
+      if (is_numeric($matches[2])) {
+        $size += $matches[2];
+      }
+      if (is_string($matches[3])) {
+        switch ($matches[3][0]) {
+          case 'k':
+          case 'K':
+            $size = $size * 1024;
+            break;
+          case 'm':
+          case 'M':
+            $size = $size * 1024 * 1024;
+            break;
+          case 'g':
+          case 'G':
+            $size = $size * 1024 * 1024 * 1024;
+            break;
+          default:
+            Logger::err("Unknown unit {$matches[3]}");
+        }
+      }
+      if ($size < 0) {
+        Logger::err("Size is negtive: $size");
+        return 0;
+      }
+      return $size;
+    } else {
+      return 0;
+    }
+  }
+
+  /** Evaluates the maximum upload size by php configuration of post_max_size,
+ * upload_max_filesize, and memory_limit */
+  function _getMaxUploadSize() {
+    $max = 1024 * 1024 * 1024;
+    if (!function_exists('ini_get')) {
+      return 16 * 1024 * 1024;
+    }
+
+    if (ini_get('upload_max_filesize')) {
+      $max = min($max, $this->__fromReadableSize(ini_get('upload_max_filesize')));
+    }
+    if (ini_get('post_max_size')) {
+      $max = min($max, $this->__fromReadableSize(ini_get('post_max_size')));
+    }
+    if (ini_get('memory_limit')) {
+      $max = min($max, $this->__fromReadableSize(ini_get('memory_limit')));
+    }
+    return $max;
+  }
+
+  /** Set quota information for the view */
+  function _setQuotaForView() {
+    // Fetch quota and free bytes
+    $user = $this->getUser();
+    $userId = $this->getUserId();
+    $bytes = $this->MyFile->countBytes($userId);
+    $quota = $user['User']['quota'];
+    $free = max(0, $quota - $bytes);
+    $this->set('quota', $quota);
+    $this->set('free', $free);
+    $this->set('max', $this->_getMaxUploadSize());
   }
 
   function upload() {
@@ -455,44 +583,87 @@ class BrowserController extends AppController
       Logger::warn("Could not upload in external path: $fsPath");
       $this->redirect("index/".$path);
     }
-    if ($this->Upload->isUpload()) {
-      $filename = $this->Upload->upload(array('root' => $fsPath, 'overwrite' => false));
-      if ($filename) {
-        Logger::info("File '$filename' uploaded successfully");
-        if (substr(strtolower($filename), -4) == '.zip' && $this->data['File']['extract']) {
-          $files = $this->Zip->unzip($filename);
-          $this->Session->setFlash("File uploaded successfully and ".count($files)." files were extracted");
-          if ($this->FileManager->delete($filename)) {
-            Logger::info("Delete archive $filename");
+    if (!empty($this->data) && $this->Upload->isUpload()) {
+      $files = $this->_upload($fsPath);
+
+      $fileCount = count($files);
+      $extractedCount = 0;
+      if ($this->data['File']['extract']) {
+        $zips = $this->_extract($fsPath, $files);
+        if ($zips) {
+          foreach ($zips as $zip => $extracted) {
+            $extractedCount += count($extracted);
+            $this->FileManager->delete($zip);
+            unset($files[array_search($zip, $files)]);
+            $files = am($files, $extracted);
           }
-        } else {
-          $this->Session->setFlash("File uploaded successfully");
         }
+      }  
+      if ($extractedCount) {
+        $this->Session->setFlash(sprintf(__("Uploaded %d and %d extraced file(s)", true), $fileCount, $extractedCount));
       } else {
-        $this->Session->setFlash("Could not upload file");
+        $this->Session->setFlash(sprintf(__("Uploaded %d file(s)", true), $fileCount));
       }
+    }
+    $this->set('path', $path);
+    $this->_setQuotaForView();
+  } 
+
+  function _getDailyUploadDir() {
+    $root = $this->User->getRootDir($this->getUser());
+    if (!$root) {
+      Logger::err("Invalid user upload directory");
+      $this->Session->setFlash(__("Error: Invalid upload directory", true));
+      return false;
     }
 
-    // Fetch quota and free bytes
-    $user = $this->getUser();
-    $userId = $this->getUserId();
-    $bytes = $this->MyFile->countBytes($userId);
-    $quota = $user['User']['quota'];
-    $free = $quota - $bytes;
-    $this->set('quota', $quota);
-    $this->set('free', $free);
-    $max = strtoupper(ini_get('upload_max_filesize'));
-    if (preg_match('/^([0-9]+)([TGMK])B?$/', $max, $matches)) {
-      $max = $matches[1];
-      switch ($matches[2]) {
-        case 'T': $max *= 1024; 
-        case 'G': $max *= 1024; 
-        case 'M': $max *= 1024; 
-        case 'B': $max *= 1024; 
-      }
+    $dst = $root . date('Y') . DS . date('Y-m-d') . DS;
+    $folder = new Folder($dst, true);
+    if (!$folder) {
+      Logger::err("Daily upload directory not created");
+      $this->Session->setFlash(__("Error: Invalid upload directory", true));
+      return false;
     }
-    $this->set('max', $max);
-    $this->set('path', $path);
-  } 
+    return $dst;
+  }
+
+  function quickupload() {
+    if (!empty($this->data)) {
+      if (!$this->Upload->isUpload()) {
+        Logger::info("No upload data");
+        $this->Session->setFlash(__("No files uploaded or upload errors", true));
+        $this->redirect($this->action);
+      }
+
+      $dst = $this->_getDailyUploadDir();     
+      if (!$dst) {
+        $this->redirect($this->action);
+      }
+
+      $files = $this->_upload($dst);
+      $zips = $this->_extract($dst, $files);
+      foreach ($zips as $zip => $extracted) {
+        $this->FileManager->delete($zip);
+        unset($files[array_search($zip, $files)]);
+        $files = am($files, $extracted);
+      }
+      if (!$files) {
+        $this->Session->setFlash(__("No files uploaded", true));
+        $this->redirect($this->action);
+      } else { 
+        $toRead = array();
+      }
+      $this->FilterManager->clearErrors();
+      $readed = $this->FilterManager->readFiles($files);
+      $errors = $this->FilterManager->errors;
+      $this->Session->setFlash(sprintf(__("Uploaded %d files with %d errors.", true), count($readed), count($errors)));
+      $this->set('imports', $readed);
+      $this->set('errors', $errors);
+    } else {
+      $this->set('imports', array());
+      $this->set('errors', array());
+    }
+    $this->_setQuotaForView();
+  }
 }
 ?>

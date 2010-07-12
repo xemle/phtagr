@@ -2,9 +2,9 @@
 /*
  * phtagr.
  * 
- * Multi-user image gallery.
+ * social photo gallery for your community.
  * 
- * Copyright (C) 2006-2009 Sebastian Felis, sebastian@phtagr.org
+ * Copyright (C) 2006-2010 Sebastian Felis, sebastian@phtagr.org
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -21,8 +21,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-uses('file', 'model' . DS . 'schema');
-
 class UpgradeSchemaComponent extends Object{
 
   var $controller = null;
@@ -32,7 +30,7 @@ class UpgradeSchemaComponent extends Object{
   var $schema = null;
   var $modelMapping = array('files' => 'MyFile', 'media' => 'Media');
 
-  function startup(&$controller) {
+  function initialize(&$controller) {
     $this->controller = $controller;
   }
 
@@ -44,7 +42,7 @@ class UpgradeSchemaComponent extends Object{
     }
 
     App::import('Core', 'CakeSchema');
-    $options = am(array('path' => CONFIGS.'sql'.DS, 'name' => 'Phtagr'), $options);
+    $options = am(array('path' => CONFIGS.'schema'.DS, 'name' => 'Phtagr'), $options);
     $this->cakeSchema =& new CakeSchema($options);
     if (!$this->cakeSchema) {
       Logger::err("Could not create database schema");
@@ -62,7 +60,7 @@ class UpgradeSchemaComponent extends Object{
   }
 
   function loadSchema($options = array()) {
-    $options = am(array('path' => CONFIGS.'sql'.DS, 'name' => 'Phtagr'), $options);
+    $options = am(array('path' => CONFIGS.'schema'.DS, 'name' => 'Phtagr'), $options);
     $schema = $this->cakeSchema->load($options);
     if (!$schema) {
       Logger::err("Could not load schema!");
@@ -158,10 +156,28 @@ class UpgradeSchemaComponent extends Object{
     return $errors;
   }
 
+  /** Strips table prefix from a schema tables
+  @param schema Current schema to strip
+  @return New schema with striped tables names */
+  function _stripTablePrefix($schema) {
+    $prefix = $this->db->config['prefix'];
+    foreach ($schema['tables'] as $table => $columns) {
+      if (strpos($table, $prefix) === 0) {
+        $stripped = substr($table, strlen($prefix));
+        if (!isset($schema['tables'][$stripped])) {
+          $schema['tables'][$stripped] = $columns;
+          unset($schema['tables'][$table]);
+        }
+      }
+    }
+    return $schema;
+  }
+
   function _getAlteredColumns($noDrop = false) {
     // Reset sources for refetching
     $this->db->_sources = null;
     $Old = $this->cakeSchema->read();
+    $Old = $this->_stripTablePrefix($Old);
     $compare = $this->cakeSchema->compare($Old, $this->schema);
     $models = Configure::listObjects('model');
 
@@ -191,10 +207,7 @@ class UpgradeSchemaComponent extends Object{
         $modelName = $this->modelMapping[$table];
       }
       if (!in_array($modelName, $models)) {
-        Logger::err("Model '$modelName' does not exists");
-        $columns[$table] = "Model '$modelName' does not exists";
-        trigger_error(sprintf(__("Model '$modelName' does not exists", true)), E_USER_WARNING);
-        continue;
+        Logger::warn("Model '$modelName' does not exists");
       }
 
       $columns[$table] = $this->db->alterSchema(array($table => $changes), $table);
@@ -232,12 +245,12 @@ class UpgradeSchemaComponent extends Object{
   function requireUpgrade() {
     $missingTables = $this->_getMissingTables($this->schema);
     if ($missingTables) {
-      Logger::info("Missing table(s): ".implode(", ", array_keys($missingTables)));
+      Logger::verbose("Missing table(s): ".implode(", ", array_keys($missingTables)));
       return true;
     }
     $alterColumns = $this->_getAlteredColumns($this->schema);
     if ($alterColumns) {
-      Logger::info("Table change(s): ".implode(", ", array_keys($alterColumns)));
+      Logger::verbose("Table change(s): ".implode(", ", array_keys($alterColumns)));
       return true;
     }
     return false;

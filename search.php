@@ -2,9 +2,9 @@
 /*
  * phtagr.
  * 
- * Multi-user image gallery.
+ * social photo gallery for your community.
  * 
- * Copyright (C) 2006-2009 Sebastian Felis, sebastian@phtagr.org
+ * Copyright (C) 2006-2010 Sebastian Felis, sebastian@phtagr.org
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -65,9 +65,11 @@ class Search extends Object
   /** Set a singular parameter 
     @param name Parameter name
     @param value Parameter value
+    @param validate Optional parameter to validate the parameter. Default is
+    true
     @return True on success */
-  function setParam($name, $value) {
-    if ($this->validate($name, $value)) {
+  function setParam($name, $value, $validate = true) {
+    if ($validate === false || $this->validate($name, $value)) {
       $this->_data[$name] = $value;    
       return true;
     } else {
@@ -75,17 +77,23 @@ class Search extends Object
     }
   }
 
-  function addParam($name, $value) {
+  /** Add a parameter to an array.
+    @param name Parameter name. 
+    @param value Parameter value (which will be pluralized)
+    @param validate Optional parameter to validate the parameter. Default is
+    true
+    @note The name will be pluralized. */
+  function addParam($name, $value, $validate = true) {
     $name = Inflector::pluralize($name);
     if (is_array($value)) {
       foreach ($value as $v) {
-        $this->addParam($name, $v);
+        $this->addParam($name, $v, $validate);
       }
       return;
     }
     
     if ((!isset($this->_data[$name]) || !in_array($value, $this->_data[$name])) &&
-      $this->validate($name, $value)) {
+      ($validate === false || $this->validate($name, $value))) {
       $this->_data[$name][] = $value;
     }
   }
@@ -133,11 +141,15 @@ class Search extends Object
       case 'set':
         if (count($args) == 1) {
           return $this->setParam($name, $args[0]);
+        } elseif (count($args) == 2) {
+          return $this->setParam($name, $args[0], $args[1]);
         }
         break;
       case 'add':
         if (count($args) == 1) {
           return $this->addParam($name, $args[0]);
+        } elseif (count($args) == 2) {
+          return $this->addParam($name, $args[0], $args[1]);
         }
         break;
       case 'del':

@@ -1,5 +1,4 @@
-<h1>Group: <?php echo $this->data['Group']['name']; ?></h1>
-<?php $session->flash() ?>
+<h1><?php printf(__('Group: %s', true), $this->data['Group']['name']); ?></h1>
 
 <?php echo $form->create(null, array("action" => "edit/".$this->data['Group']['id'])); ?>
 <fieldset><legend>Group Settings</legend>
@@ -37,12 +36,12 @@
 <?php echo $form->end("Apply Settings"); ?>
 
 <?php if(count($this->data['Member'])): ?>
-<h2>Member List</h2>
+<h2><?php __('Member List'); ?></h2>
 <table class="default">
 <thead>
   <tr>
-    <td>Member</td>
-    <td>Actions</td>
+    <td><?php __('Member'); ?></td>
+    <td><?php __('Actions'); ?></td>
   <tr>
 </thead>
 
@@ -55,9 +54,9 @@
       else 
         echo $member['username']; ?></td>
     <td><div class="actionlist"><?php
-      $delConfirm = "Do you really want to delete the member '{$member['username']}' from this group '{$this->data['Group']['name']}'?";
+      $delConfirm = sprintf(__("Do you really want to delete the member '%s' from this group '%s'?", true), $member['username'], $this->data['Group']['name']);
       echo $html->link( 
-        $html->image('icons/delete.png', array('alt' => 'Delete', 'title' => 'Delete')), 
+        $html->image('icons/delete.png', array('alt' => 'Delete', 'title' => __('Delete', true))), 
         '/groups/deleteMember/'.$this->data['Group']['id'].'/'.$member['id'], null, $delConfirm, false); ?>
     </div></td>
   </tr>
@@ -65,19 +64,15 @@
 </tbody>
 </table>
 <?php else: ?>
-<div class="info">Currently this group has no members. Please add users to grant access to your private images.</div>
+<div class="info"><?php __('Currently this group has no members. Please add users to grant access to your private images.'); ?></div>
 <?php endif; ?>
 
 <?php echo $form->create(null, array('action' => 'addMember/'.$this->data['Group']['id']));?>
 
-<fieldset><legend>Add member</legend>
-<div class="input"><label>Group</label>
+<fieldset><legend><?php __('Add member'); ?></legend>
+<div class="input"><label><?php __('Group'); ?></label>
 <?php echo $ajax->autocomplete('Member.username', '/groups/autocomplete'); ?></div>
 </fieldset>
-<?php echo $form->submit('Add'); ?>
-</form>
+<?php echo $form->end(__('Add', true)); ?>
 
-<?php 
-echo $html->link('List all groups', '/groups/index');
-?>
-<?php debug($this->data); ?>
+<?php echo $html->link(__('Show all groups', true), '/groups/index'); ?>

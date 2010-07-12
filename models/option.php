@@ -2,9 +2,9 @@
 /*
  * phtagr.
  * 
- * Multi-user image gallery.
+ * social photo gallery for your community.
  * 
- * Copyright (C) 2006-2009 Sebastian Felis, sebastian@phtagr.org
+ * Copyright (C) 2006-2010 Sebastian Felis, sebastian@phtagr.org
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -36,7 +36,7 @@ class Option extends AppModel {
     $defaultOptions = $this->findAllByUserId(0);
     foreach ($defaultOptions as $default) {
       $name = $default[$this->name]['name'];
-      if (strlen($name)>2 && substr($name, -2) == '[]') {
+      if (strlen($name) > 2 && substr($name, -2) == '[]') {
         $options[] = $default[$this->name];
       } else {
         $exists = in_array($name, $ownOptions);
@@ -74,7 +74,7 @@ class Option extends AppModel {
 
   function getTree($userId) {
     $this->unbindModel(array('belongsTo' => array('User')));
-    $data = $this->findAll("user_id = $userId OR user_id = 0 ORDER BY user_id ASC");
+    $data = $this->find('all', array('conditions' => "user_id = $userId OR user_id = 0 ORDER BY user_id ASC"));
     return $this->buildTree($data);
   }
 
@@ -86,10 +86,11 @@ class Option extends AppModel {
 
     foreach ($data as $item) {
       // Option is set as item
-      if (isset($item['Option']))
+      if (isset($item['Option'])) {
         $option = &$item['Option'];
-      else
+      } else {
         $option = &$item;
+      }
 
       // Skip if subpath does not match
       if (isset($subPath) && strpos($option['name'], $subPath) !== 0) {
@@ -110,10 +111,11 @@ class Option extends AppModel {
         }
         $node = &$node[$path];
       }
-      if ($isArray)
+      if ($isArray) {
         $node[] = $option['value'];
-      else
+      } else {
         $node = $option['value'];
+      }
     }
     return $tree;
   }

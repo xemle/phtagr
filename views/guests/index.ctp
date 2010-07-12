@@ -1,12 +1,14 @@
-<h1>Guests</h1>
-<?php $session->flash(); ?>
+<h1><?php __('Guests'); ?></h1>
+
+<?php echo $session->flash(); ?>
+
 <?php if (!empty($this->data)): ?>
 <table class="default">
 <thead>
   <tr>
-    <td>Name</td>
-    <td>Groups</td>
-    <td>Actions</td>
+    <td><?php __('Name'); ?></td>
+    <td><?php __('Groups'); ?></td>
+    <td><?php __('Actions'); ?></td>
   </tr>
 </thead>
 
@@ -18,11 +20,11 @@
     <td><div class="actionlist"><?php 
       $delConfirm = "Do you realy want to delete the guest account '{$guest['Guest']['username']}'?";
       echo $html->link(
-          $html->image('icons/pencil.png', array('alt' => 'Edit', 'title' => 'Edit')),
-          'edit/'.$guest['Guest']['id'], null, false, false).' '.
+          $html->image('icons/pencil.png', array('alt' => 'Edit', 'title' => __('Edit', true))),
+          'edit/'.$guest['Guest']['id'], array('escape' => false)).' '.
         $html->link( 
-          $html->image('icons/delete.png', array('alt' => 'Delete', 'title' => 'Delete')),
-          'delete/'.$guest['Guest']['id'], null, $delConfirm, false); ?>
+          $html->image('icons/delete.png', array('alt' => 'Delete', 'title' => __('Delete', true))),
+          'delete/'.$guest['Guest']['id'], array('escape' => false), $delConfirm); ?>
     </div></td>
   </tr>
 <?php endforeach; ?>
@@ -30,9 +32,7 @@
 </table>
 <?php else: ?>
 <div class="info">
-Currently, no guest accounts are set. You can create guests accounts to grant
-access to your images e.g. to your friends or family. Please add also some
-groups to the guest to grant access to this guest for these groups.
+<?php __('Currently, no guest accounts are set. You can create guests accounts to grant access to your images e.g. to your friends or family. Please add also some groups to the guest to grant access to this guest for these groups.'); ?>
 </div>
 <?php endif; ?>
 

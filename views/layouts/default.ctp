@@ -9,26 +9,8 @@
   echo $html->css('phtagr')."\n";
   echo $javascript->link(array('prototype', 'event-selectors', 'effects', 'controls', 'phtagr'))."\n";
   
-  /** allow 'feed_url', array('feed1_url', 'feed2_url'), or array('feed1_url' => array(attributes...)) */
-  if (!empty($feeds)) {
-    // only text as single url
-    if (!is_array($feeds))
-      $feeds = array($feeds);
-    // single feed url
-    if (count($feeds) && in_array('title', $feeds)) {
-      $feeds = array($feeds);
-    }
-    foreach ($feeds as $feed => $attr) {
-      if (is_numeric($feed)) {
-        $feed = $attr;
-        $attr = array();
-      }
-      echo $html->meta('rss', $feed, $attr);
-    }
-  }
-  echo $html->meta('rss', '/explorer/rss', array('title' => 'Recent images'));
-  echo $html->meta('rss', '/comments/rss', array('title' => 'Recent comments'));
   echo $scripts_for_layout; 
+  echo $feeds_for_layout; 
 ?>
 
 <!--[if lte IE 7]>
@@ -85,8 +67,8 @@
 <div id="footer">
 <?php echo View::element('footer'); ?>
 </div><!-- footer -->
-
 </div><!-- page -->
+
 <div id="border-bottom">
   <div id="edge-bl"></div>
   <div id="edge-br"></div>

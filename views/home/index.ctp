@@ -1,15 +1,20 @@
-<h1>Welcome to phTagr</h1>
+<h1><?php echo h($option->get('home.welcomeText', __("Welcome to phTagr", true))); ?></h1>
 
 <div class="subcolumns">
   <div class="c50l">
     <div class="subcl">
-      <h3>Random Media</h3>
+      <h3><?php __("Random Media"); ?></h3>
       <?php 
         if (count($randomMedia)) {
+          $media = $randomMedia[0];
           $params = '/'.$search->serialize(array('sort' => 'random'));
-          echo $imageData->mediaLink($randomMedia[0], array('type' => 'preview', 'size' => 340, 'div' => 'image', 'params' => $params));
+
+          $cite = "<cite>" . sprintf(__("%s by %s", true), h($media['Media']['name']), $html->link($media['User']['username'], '/explorer/user/' . $media['User']['username'])) . "</cite>";
+
+          echo $imageData->mediaLink($media, array('type' => 'preview', 'size' => 340, 'div' => 'image', 'params' => $params, 'after' => $cite));
+
           $link = $search->getUri(array('sort' => 'random'));
-          echo "<p>See more ".$html->link('random media...', $link)."</p>";
+          echo "<p>" . sprintf(__("See more %s", true), $html->link(__('random media...', true), $link))."</p>";
         } 
       ?>
     </div>
@@ -17,7 +22,7 @@
 
   <div class="c50r">
     <div class="subcr">
-      <h3>Newest Media</h3>
+      <h3><?php __("Newest Media"); ?></h3>
       <?php
         $cells = array();
         $i = 0;
@@ -47,7 +52,7 @@
       </table>
       <?php
         $link = $search->getUri(array('sort' => 'newest'));
-        echo "<p>See ".$html->link('all new media...', $link)."</p>";
+        echo "<p>" . sprintf(__("See %s", true), $html->link(__('all new media...', true), $link))."</p>";
       ?>
       <?php endif; ?>
     </div>
@@ -57,7 +62,7 @@
 <div class="subcolumns">
   <div class="c50l">
     <div class="subcl">
-    <h3>Recent Comments</h3>
+    <h3><?php __("Recent Comments"); ?></h3>
       <?php if ($comments): ?>
       <div class="comments">
       <?php $count = 0; ?>
@@ -70,13 +75,13 @@
       </div><!-- comment meta -->
       
       <div class="text">
-      <?php echo $text->truncate(preg_replace('/\n/', '<br />', $comment['Comment']['text']), 220, '...', false, true); ?>
+      <?php echo preg_replace('/\n/', '<br />', $text->truncate($comment['Comment']['text'], 220, array('ending' => '...', 'exact' => false, 'html' => false))); ?>
       </div>
       </div><!-- comment -->
       <?php endforeach; /* comments */ ?>
       </div><!-- comments -->
       <div>
-        <?php echo $html->link ("older comments...", "/comments", NULL, false, false);?>
+        <?php echo $html->link(__("Older comments...", true), "/comments", array('escape' => false));?>
       </div>
       <?php endif; ?>    
     </div>
@@ -84,20 +89,20 @@
 
   <div class="c50r">
     <div class="subcr">
-      <h3>Popular Tags</h3>
+      <h3><?php __("Popular Tags"); ?></h3>
         <?php
         if (isset($cloudTags) && count($cloudTags)) {
           echo $cloud->cloud($cloudTags, '/explorer/tag/');
         } else {
-          echo '<p>No tags assigned</p>';
+          echo '<p>' . __("No tags assigned") . '</p>';
         }
         ?>
-      <h3>Popular Categories</h3>
+      <h3><?php __("Popular Categories"); ?></h3>
         <?php
         if (isset($cloudCategories) && count($cloudCategories)) {
           echo $cloud->cloud($cloudCategories, '/explorer/category/');
         } else {
-          echo '<p>No categories assigned</p>';
+          echo '<p>' . __("No categories assigned") . '</p>';
         }
         ?>
      </div>

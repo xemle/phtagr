@@ -1,4 +1,4 @@
-<?php $session->flash(); ?>
+<?php echo $session->flash(); ?>
 
 <?php echo $form->create('User', array('action' => 'login')); ?>
 <fieldset>

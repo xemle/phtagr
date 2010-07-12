@@ -2,9 +2,9 @@
 /*
  * phtagr.
  * 
- * Multi-user image gallery.
+ * social photo gallery for your community.
  * 
- * Copyright (C) 2006-2009 Sebastian Felis, sebastian@phtagr.org
+ * Copyright (C) 2006-2010 Sebastian Felis, sebastian@phtagr.org
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -54,7 +54,7 @@ class AppModel extends Model
       if ($item['name'][0]=='-') {
         $item['name'] = substr($item['name'], 1);
       }
-      $data = $this->findAll(array('and' => $item), array('id'));
+      $data = $this->find('all', array('conditions' => array('and' => $item), 'fields' => array('id')));
       if (!empty($data)) {
         $newIds = Set::extract($data, '{n}.'.$this->name.'.id');
         $ids = array_merge($ids, $newIds);

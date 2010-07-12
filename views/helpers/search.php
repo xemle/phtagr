@@ -2,9 +2,9 @@
 /*
  * phtagr.
  * 
- * Multi-user image gallery.
+ * social photo gallery for your community.
  * 
- * Copyright (C) 2006-2009 Sebastian Felis, sebastian@phtagr.org
+ * Copyright (C) 2006-2010 Sebastian Felis, sebastian@phtagr.org
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -28,7 +28,8 @@ class SearchHelper extends Search {
   var $helpers = array('Html'); 
 
   var $config = array(
-    'baseUri' => '/explorer/query', 
+    'baseUri' => '/explorer/query',
+    'afterUri' => false,
     'defaults' => array(
       'page' => 1,
       'pos' => false,
@@ -42,18 +43,24 @@ class SearchHelper extends Search {
   var $singulars = array('pos');
 
   /** Initialize query parameters from the global parameter array, which is
-   * set by the query component */
+   * set by the query component. All search parameters are reset after calling
+   * this function. All previous changes are overritten */
   function initialize($config = array()) {
     if (isset($this->params['search'])) {
       $params = $this->params['search'];
       $this->_data = $params['data'];
       $this->config['baseUri'] = $params['baseUri'];
+      $this->config['afterUri'] = $params['afterUri'];
       $this->config['defaults'] = $params['defaults'];
       if (isset($params['myMedia'])) {
         $this->isMyMedia = true;
       }
     }
-    $this->config = am($config, $this->config);
+    if (isset($config['defaults'])) {
+      $this->config['defaults'] = am($this->config['defaults'], $config['defaults']);
+      unset($config['defaults']);
+    }
+    $this->config = am($this->config, $config);
   }
 
   /** Add parameter to the data array
@@ -64,7 +71,6 @@ class SearchHelper extends Search {
       return $data;
     }
     $add = (array)$add;
-
     foreach ($add as $name => $values) {
       if (!in_array($name, $this->singulars) && Inflector::pluralize($name) == $name || is_array($values)) {
         $name = Inflector::pluralize($name);
@@ -185,11 +191,14 @@ class SearchHelper extends Search {
   function getUri($data = false, $add = false, $del = false, $options = array()) {
     $serial = $this->serialize($data, $add, $del, $options);
     $config = am($this->config, $options);
+    $uri = $config['baseUri'];
     if ($serial) {
-      return $config['baseUri'].'/'.$serial;
-    } else {
-      return $config['baseUri'];
+      $uri .= '/' . $serial;
     }
+    if ($config['afterUri']) {
+      $uri .= $config['afterUri'];
+    }
+    return $uri;
   }
 
   function link($data = false, $add = false, $del = false, $options = array()) {

@@ -1,5 +1,5 @@
 <h1>Explorer</h1>
-<?php $session->flash(); ?>
+<?php echo $session->flash(); ?>
 
 <?php 
   $search->initialize();
@@ -40,7 +40,7 @@ foreach ($this->data as $media): ?>
 
 <div class="user">
 <?php
-  if ($search->getUser() != $session->read('User.username')) {
+  if (!$search->getUser() || $search->getUser() != $session->read('User.username')) {
     echo "by ".$html->link($media['User']['username'], "/explorer/user/".$media['User']['username']);
   }
   $extra = array();
@@ -77,8 +77,8 @@ foreach ($this->data as $media): ?>
 
 <?php if ($canTag): ?>
 <div class="paginator"><div class="subpaginator">
-<a href="javascript:void(0);" onclick="thumbSelectAll();">Select All</a>
-<a href="javascript:void(0);" onclick="thumbSelectInvert();">Invert Selection</a>
+<a href="javascript:void(0);" onclick="thumbSelectAll();"><?php __('Select All'); ?></a>
+<a href="javascript:void(0);" onclick="thumbSelectInvert();"><?php __('Invert Selection'); ?></a>
 </div></div>
 <?php endif; ?>
 
@@ -92,9 +92,9 @@ foreach ($this->data as $media): ?>
 
 <?php if ($canTag): ?>
 <?php 
-  $items = array(array('name' => "Metadata", 'active' => true));
+  $items = array(array('name' => __("Metadata", true), 'active' => true));
   if ($isOwner) {
-    $items[] = "Access Rights";
+    $items[] = __("Access Rights", true);
   }
   echo $tab->menu($items);
 
@@ -106,9 +106,9 @@ foreach ($this->data as $media): ?>
 <?php echo $form->hidden('Media.ids', array('id' => 'MediaIds')) ?>
 <?php 
   if ($canTag) {
-    echo $form->input('Media.date', array('type' => 'text', 'after' => '<span class="hint">E.g. 2008-08-07 15:30</span>')); 
+    echo $form->input('Media.date', array('type' => 'text', 'after' => '<span class="hint">' . __('E.g. 2008-08-07 15:30', true) . '</span>')); 
   }
-  echo $form->input('Tags.text', array('label' => 'Tags', 'maxlength' => 320, 'after' => '<span class="hint">E.g. newtag, -oldtag</span>')); 
+  echo $form->input('Tags.text', array('label' => __('Tags', true), 'maxlength' => 320, 'after' => '<span class="hint">' . __('E.g. newtag, -oldtag', true) . '</span>')); 
   
   echo '<div class="input text">'. $form->label('Tag') . $ajax->autocomplete('Tags.names', 'autocomplete/tag', array('maxlength' => 320)) . '<span class="hint">E.g. newtag, -oldtag</span>' . '</div>'; 
 
@@ -131,6 +131,6 @@ foreach ($this->data as $media): ?>
 <?php echo $tab->close(); ?>
 <?php endif; // isOwner == true ?>
 
-<?php echo $form->end('Apply'); ?>
+<?php echo $form->end(__('Apply', true)); ?>
 <?php endif; // canTag == true ?>
 </div>

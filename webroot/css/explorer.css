@@ -132,6 +132,33 @@
   height: 350px;
   border: 1px solid #000;
 }
+
+#mapStatusLine {
+  display: block;
+  width: 100%;
+  background-color: #ddd;
+  border: 1px solid #000;
+  margin: 0 4px 0 0;
+  padding: 1px;
+}
+#mapStatusLine div {
+  margin: 2px;
+  padding: 2px 4px;
+  border-left: 1px solid #888;
+  border-right: 1px solid #fff;
+  display: inline;
+}
+#mapSearch label,
+#mapSearch input {
+  margin: 0;
+  padding: 0;
+  float: none;
+  display: inline;
+}
+#mapSearch label {
+  margin: 0;
+}
+
 .mapContextMenu * {
   margin: 0;
   padding: 0;
@@ -172,4 +199,3 @@
 #submenu li.multi .actionlist {
   display: none;
 }
-

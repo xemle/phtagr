@@ -1,3 +1,3 @@
-<h1>Initialize Database</h1>
+<h1><?php __("Initialize Database"); ?></h1>
 
-<div class="info">All tables are now initialized</div>
+<div class="info"><?php __("All tables are now initialized"); ?></div>

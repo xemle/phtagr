@@ -2,9 +2,9 @@
 /*
  * phtagr.
  * 
- * Multi-user image gallery.
+ * social photo gallery for your community.
  * 
- * Copyright (C) 2006-2009 Sebastian Felis, sebastian@phtagr.org
+ * Copyright (C) 2006-2010 Sebastian Felis, sebastian@phtagr.org
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -108,15 +108,14 @@ class ImageDataHelper extends AppHelper {
     return $result;
   }
   
-  /** Creates an media image with the link
+  /** Creates an media source as HTML img tag
     @param media Media model data
     @param options Media size or option array. Options are
       type - Type of the media. String values: 'mini', 'thumb', 'preview', 'original'
       size - Size of the media - optional.
       param - Extra url parameter 
-      div - Wrapped div arround the link with the class given in the div options
     @return HTML link with media image */
-  function mediaLink($media, $options = array()) {
+  function mediaImage($media, $options) {
     if (!isset($media['Media']['id'])) {
       Logger::err("Media id is not set");
       return false;
@@ -124,7 +123,7 @@ class ImageDataHelper extends AppHelper {
     if (!is_array($options)) {
       $options = array('type' => $options);
     }
-    $options = am(array('type' => 'thumb', 'params' => false, 'size' => false, 'div' => false), $options);
+    $options = am(array('type' => 'thumb', 'size' => false), $options);
 
     if (!in_array($options['type'], array('mini', 'thumb', 'preview', 'original'))) {
       Logger::err("Wrong media type {$options['type']}");
@@ -136,14 +135,40 @@ class ImageDataHelper extends AppHelper {
 
     $imgSrc = Router::url("/media/{$options['type']}/{$media['Media']['id']}");
     $size = $this->getimagesize($media, $options['size']);
-    $alt = $this->Sanitize->html($media['Media']['name'], true);
-    $img = "<img src=\"$imgSrc\" {$size[3]} alt=\"$alt\" title=\"$alt\" />";
+    $alt = h($media['Media']['name']);
+
+    $out = "<img src=\"$imgSrc\" {$size[3]} alt=\"$alt\" title=\"$alt\" />";
+    return $this->output($out);
+  }
+
+  /** Creates an media image with the link
+    @param media Media model data
+    @param options Media size or option array. Options are
+      type - Type of the media. String values: 'mini', 'thumb', 'preview', 'original'
+      size - Size of the media - optional.
+      param - Extra url parameter 
+      div - Wrapped div arround the link with the class given in the div options
+      before - (Optional) Text before image link
+      after - (Optional) Text after image link
+    @return HTML link with media image */
+  function mediaLink($media, $options = array()) {
+    if (!isset($media['Media']['id'])) {
+      Logger::err("Media id is not set");
+      return false;
+    }
+
+    $img = $this->mediaImage(&$media, $options);
+
+    $options = am(array('div' => false, 'params' => false, 'before' => '', 'after' => ''), $options);
+
     $link = "/images/view/{$media['Media']['id']}";
     if ($options['params']) {
       $link .= $options['params'];
     }
 
-    $out = $this->Html->link($img, $link, false, false, false);
+    $out = $this->Html->link($img, $link, array('escape' => false));
+    $out = $options['before'] . $out . $options['after'];
+
     if ($options['div']) {
       $out = '<div class="'.$options['div'].'">'.$out.'</div>';
     }
@@ -159,10 +184,14 @@ class ImageDataHelper extends AppHelper {
     @return Link of the date search */
   function getDateLink(&$media, $option = false) {
     $date = $media['Media']['date'];
+    $user = array();
+    if ($this->Search->getUser()) {
+      $user['user'] = $this->Search->getUser();
+    }
     if ($option == 'from') {
-      return $this->Search->getUri(array('from' => $date, 'sort' => '-date'));
+      return $this->Search->getUri(array('from' => $date, 'sort' => '-date'), $user);
     } elseif ($option == 'to') {
-      return $this->Search->getUri(array('to' => $date, 'sort' => 'date'));
+      return $this->Search->getUri(array('to' => $date, 'sort' => 'date'), $user);
     } elseif (preg_match('/^(\d+(.\d+)?)([hdm])$/', $option, $matches)) {
       $offset = $matches[1].$matches[2];
       switch ($matches[3]) {
@@ -184,7 +213,7 @@ class ImageDataHelper extends AppHelper {
 
     $from = date('Y-m-d H:i:s', strtotime($date) - $offset);
     $to = date('Y-m-d H:i:s', strtotime($date) + $offset);
-    return $this->Search->getUri(array('from' => $from, 'to' => $to));
+    return $this->Search->getUri(array('from' => $from, 'to' => $to), $user);
   }
 
   /** Returns an single icon of a acl */
@@ -239,19 +268,19 @@ class ImageDataHelper extends AppHelper {
     $output .= ' ';
 
     $output .= '<div style="display: none;" class="actionlist" id="'.$id.'">';
-    $icon = $this->Html->image('icons/date_previous.png', array('alt' => '<', 'title' => "View media of previous dates"));
+    $icon = $this->Html->image('icons/date_previous.png', array('alt' => '<', 'title' => __("View media of previous dates", true)));
     $output .= $this->Html->link($icon, $this->getDateLink(&$data, 'to'), array('escape' => false));
 
-    $icon = $this->Html->image('icons/calendar_view_day.png', array('alt' => 'd', 'title' => "View media of this day"));
+    $icon = $this->Html->image('icons/calendar_view_day.png', array('alt' => 'd', 'title' => __("View media of this day", true)));
     $output .= $this->Html->link($icon, $this->getDateLink(&$data, '12h'), array('escape' => false));
 
-    $icon = $this->Html->image('icons/calendar_view_week.png', array('alt' => 'w', 'title' => "View media of this week"));
+    $icon = $this->Html->image('icons/calendar_view_week.png', array('alt' => 'w', 'title' => __("View media of this week", true)));
     $output .= $this->Html->link($icon, $this->getDateLink(&$data, '3.5d'), array('escape' => false));
 
-    $icon = $this->Html->image('icons/calendar_view_month.png', array('alt' => 'm', 'title' => "View media of this month"));
+    $icon = $this->Html->image('icons/calendar_view_month.png', array('alt' => 'm', 'title' => __("View media of this month", true)));
     $output .= $this->Html->link($icon, $this->getDateLink(&$data, '15d'), array('escape' => false));
 
-    $icon = $this->Html->image('icons/date_next.png', array('alt' => '>', 'title' => "View media of next dates"));
+    $icon = $this->Html->image('icons/date_next.png', array('alt' => '>', 'title' => __("View media of next dates", true)));
     $output .= $this->Html->link($icon, $this->getDateLink(&$data, 'from'), array('escape' => false));
     $output .= '</div></span>';
 
@@ -293,7 +322,7 @@ class ImageDataHelper extends AppHelper {
         } 
         $text .= $this->Html->link(
           $this->Html->image('icons/pencil.png', array('alt' => 'edit', 'title' => 'Edit this group')), 
-          '/groups/edit/' . $group['id'], false, false, false
+          '/groups/edit/' . $group['id'], array('escape' => false) 
           ) . ')';
         // @TODO: Add links for edit, hints for tagging and viewing
       
@@ -345,13 +374,13 @@ class ImageDataHelper extends AppHelper {
     if ($userId) {
       $this->Search->setUser($userId);
     }
-    $cells[] = array("Date:", $this->_metaDate(&$data));
+    $cells[] = array(__("Date", true), $this->_metaDate(&$data));
 
     if (count($data['Tag'])) {
-      $cells[] = array('Tags:', $this->_metaHabtm(&$data, 'Tag'));
+      $cells[] = array(__('Tags', true), $this->_metaHabtm(&$data, 'Tag'));
     }
     if (count($data['Category'])) {
-      $cells[] = array('Categories:', $this->_metaHabtm(&$data, 'Category'));
+      $cells[] = array(__('Categories', true), $this->_metaHabtm(&$data, 'Category'));
     }
 
     $locations = array();
@@ -362,7 +391,7 @@ class ImageDataHelper extends AppHelper {
       $locations[] = $this->geoLocation(&$data);
     }
     if (count($locations)) {
-      $cells[] = array('Locations:', implode(', ', $locations));
+      $cells[] = array(__('Locations', true), implode(', ', $locations));
     }
      
     $groups = $this->_metaAccess($data);
@@ -378,45 +407,44 @@ class ImageDataHelper extends AppHelper {
 
     if ($data['Media']['tagging'] > GROUP_TAGGING_READONLY) {
       $output .= ' '.$this->Ajax->link(
-        $this->Html->image('icons/tag_blue_edit.png', array('alt' => 'Edit tags', 'title' => 'Edit tags')), 
+        $this->Html->image('icons/tag_blue_edit.png', array('alt' => __('Edit tags', true), 'title' => __('Edit tags', true))), 
         '/explorer/editmeta/'.$mediaId, 
-        array('update' => 'meta-'.$mediaId), null, false);
+        array('update' => 'meta-'.$mediaId, 'escape' => false));
     }
     if ($data['Media']['media_view'] == GROUP_MEDIAVIEW_FULL) {
       foreach ($data['File'] as $file) {
         $output .= ' '.$this->Html->link(
           $this->Html->image('icons/disk.png', 
-            array('alt' => $file['file'], 'title' => 'Save file '.$file['file'])), 
-          '/media/file/'.$file['id'].'/'.$file['file'], null, null, false);
+            array('alt' => $file['file'], 'title' => sprintf(__('Save file %s', true), $file['file']))), 
+          '/media/file/'.$file['id'].'/'.$file['file'], array('escape' => false));
       }
     }
 
     if ($withMap && isset($data['Media']['latitude']) && isset($data['Media']['longitude'])) {
       $output .= ' '.$this->Html->link(
           $this->Html->image('icons/map.png',
-            array('alt' => 'Show location in a map', 'title' => 'Show location in a map')),
+            array('alt' => 'Show location in a map', 'title' => __('Show location in a map', true))),
           '#',
-          array('onclick' => sprintf('showMap(%d, %f,%f);return false;', $data['Media']['id'], $data['Media']['latitude'],$data['Media']['longitude'])),
-          null, false);
+          array('onclick' => sprintf('showMap(%d, %f,%f);return false;', $data['Media']['id'], $data['Media']['latitude'],$data['Media']['longitude']), 'escape' => false));
     }
     
     if ($data['Media']['isOwner']) {
       $output .= ' '.$this->Ajax->link(
         $this->Html->image('icons/key.png', 
-          array('alt' => 'Edit ACL', 'title' => 'Edit access rights')), 
+          array('alt' => 'Edit ACL', 'title' => __('Edit access rights', true))), 
         '/explorer/editgroups/'.$mediaId, 
-        array('update' => 'meta-'.$mediaId), null, false);
+        array('update' => 'meta-'.$mediaId, 'escape' => false));
       if ($data['Media']['isDirty'])
         $output .= ' '.$this->Ajax->link(
           $this->Html->image('icons/database_refresh.png', 
-            array('alt' => 'Synchronize db with image', 'title' => 'Synchronize meta data with the image')), 
+            array('alt' => __('Synchronize db with image', true), 'title' => __('Synchronize meta data with the image', true))), 
           '/explorer/sync/'.$mediaId, 
-          array('update' => 'meta-'.$mediaId), null, false);
+          array('update' => 'meta-'.$mediaId, 'escape' => false));
     }
 
     if ($output) {
       $output = "<div class=\"actionlist\">$output</div>\n";
-      $cells[] = array("Actions:", $output);
+      $cells[] = array(__("Actions", true), $output);
     }
 
     return $cells;
@@ -464,11 +492,11 @@ class ImageDataHelper extends AppHelper {
     //$this->log($data['Media']);
     //$this->log("level=$level, flag=$flag, mask=$mask");
     $acl = array(
-      ACL_LEVEL_KEEP => 'Keep',
-      ACL_LEVEL_PRIVATE => 'Me only',
-      ACL_LEVEL_GROUP => 'Group members',
-      ACL_LEVEL_USER => 'Users',
-      ACL_LEVEL_OTHER => 'Everyone');
+      ACL_LEVEL_KEEP => __('Keep', true),
+      ACL_LEVEL_PRIVATE => __('Me only', true),
+      ACL_LEVEL_GROUP => __('Group members', true),
+      ACL_LEVEL_USER => __('Users', true),
+      ACL_LEVEL_OTHER => __('Everyone', true));
     $options = am($options, array('type' => 'select', 'options' => $acl, 'selected' => $level));
     //$this->log($options);
     return $this->Form->input($fieldName, $options);
@@ -482,16 +510,16 @@ class ImageDataHelper extends AppHelper {
     if (isset($media['Media']['isOwner']) && $media['Media']['isOwner']) {
       switch ($media['Media']['access']) {
         case GROUP_ACCESS_ANONYMOUS: 
-          $icon = $this->Html->image('icons/world.png', array('title' => 'This media is public visible'));;
+          $icon = $this->Html->image('icons/world.png', array('title' => __('This media is public visible', true)));
           break;
         case GROUP_ACCESS_REGISTERED: 
-          $icon = $this->Html->image('icons/group.png', array('title' => 'This media is visible for users'));;
+          $icon = $this->Html->image('icons/group.png', array('title' => __('This media is visible for users', true)));
           break;
         case GROUP_ACCESS_MEMBER: 
-          $icon = $this->Html->image('icons/user.png', array('title' => 'This media is visible for group members'));;
+          $icon = $this->Html->image('icons/user.png', array('title' => __('This media is visible for group members', true)));
           break;
         default: 
-          $icon = $this->Html->image('icons/stop.png', array('title' => 'This media is private'));;
+          $icon = $this->Html->image('icons/stop.png', array('title' => __('This media is private', true)));
           break;
       }
     }

@@ -2,9 +2,9 @@
 /*
  * phtagr.
  * 
- * Multi-user image gallery.
+ * social photo gallery for your community.
  * 
- * Copyright (C) 2006-2009 Sebastian Felis, sebastian@phtagr.org
+ * Copyright (C) 2006-2010 Sebastian Felis, sebastian@phtagr.org
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -40,7 +40,7 @@ class FilterManagerComponent extends Object {
 
   var $errors = 0;
 
-  function startup(&$controller) {
+  function initialize(&$controller) {
     $this->controller =& $controller;
     if (!App::import('Component', 'BaseFilter')) {
       Logger::err("Could not find filter with name 'BaseFilter'");
@@ -69,55 +69,57 @@ class FilterManagerComponent extends Object {
       Logger::err("Could not find filter with name '$name'");
       return false;
     }
-    $componentName = $name.'Component';
+    $componentName = $name . 'Component';
     if (!class_exists($componentName)) {
       Logger::err("Could nod find class '$componentName'");
       return false;
     }
     $filter = new $componentName;
-    if ($this->_validateFilter($filter, $name)) {
-      $filterName = $filter->getName();
-      if (isset($this->filters[$filterName])) {
-        Logger::verbose("Filter $filterName already loaded");
-        return true;
-      }
-      $filter->MyFile =& $this->MyFile;
-      $filter->Media =& $this->Media;
-      $this->controller->Component->_loadComponents(&$filter);
-      // init components to setup the controller
-      foreach ($filter->components as $name) {
-        $component =& $filter->$name;
-        if (method_exists($component, 'startup')) {
-          $component->startup(&$this->controller);
-        }
-      }
-      $filter->init(&$this);
-
-      $extensions = $filter->getExtensions();
-      if (!is_array($extensions)) {
-        $extensions = array($extensions);
-      }
-      $new = array();
-      foreach($extensions as $ext => $config) {
-        if (is_numeric($ext)) {
-          $ext = $config;
-          $config = array();
-        }
-        $config = am(array('priority' => 8), $config);
-        $ext = strtolower($ext);
-        if (!isset($this->extensions[$ext])) {
-          $this->extensions[$ext] =& $filter;
-          $this->config[$ext] = $config;
-          $new[] = $ext;
-        } else {
-          Logger::warn("Filter for extension '$ext' already exists");
-        }
-      }
-      if (count($new)) {
-        //Logger::trace("Loaded filter $name with extension(s): ".implode(', ', $new));
-      }
-      $this->filters[$filterName] =& $filter;
+    if (!$this->_validateFilter($filter, $name)) {
+      return false;
     }
+    $filterName = $filter->getName();
+    if (isset($this->filters[$filterName])) {
+      return true;
+    }
+    $filter->MyFile =& $this->MyFile;
+    $filter->Media =& $this->Media;
+    $filter->FilterManager =& $this;
+
+    $this->controller->Component->_loadComponents(&$filter);
+    // init components to setup the controller
+    foreach ($filter->components as $name) {
+      $component =& $filter->$name;
+      if (method_exists($component, 'initialize')) {
+        $component->initialize(&$this->controller);
+      }
+    }
+    $filter->init(&$this);
+
+    $extensions = $filter->getExtensions();
+    if (!is_array($extensions)) {
+      $extensions = array($extensions);
+    }
+    $new = array();
+    foreach($extensions as $ext => $config) {
+      if (is_numeric($ext)) {
+        $ext = $config;
+        $config = array();
+      }
+      $config = am(array('priority' => 8), $config);
+      $ext = strtolower($ext);
+      if (!isset($this->extensions[$ext])) {
+        $this->extensions[$ext] =& $filter;
+        $this->config[$ext] = $config;
+        $new[] = $ext;
+      } else {
+        Logger::warn("Filter for extension '$ext' already exists");
+      }
+    }
+    if (count($new)) {
+      //Logger::trace("Loaded filter $name with extension(s): ".implode(', ', $new));
+    }
+    $this->filters[$filterName] =& $filter;
   }
 
   function getFilter($name) {
@@ -132,7 +134,7 @@ class FilterManagerComponent extends Object {
   }
 
   /** checks the filter for required functions
-    getExtensions(), setManager(), read(), write() */
+    init(), getExtensions(), read(), write() */
   function _validateFilter($filter, $name) {
     $methods = array('init', 'getExtensions', 'read', 'write');
     $missing = array();
@@ -148,6 +150,9 @@ class FilterManagerComponent extends Object {
     return true;
   }
 
+  /** Evaluate if a filename is supported by a filter
+    @param filename Filename
+    @return True if filename is supported. False otherwise */
   function isSupported($filename) {
     $ext = strtolower(substr($filename, strrpos($filename, '.') + 1));
     if (isset($this->extensions[$ext])) {
@@ -157,6 +162,9 @@ class FilterManagerComponent extends Object {
     }
   }
 
+  /** Returns a filter by filename
+    @param filename Filename
+    @result Filter which handles the file */
   function getFilterByExtension($filename) {
     $ext = strtolower(substr($filename, strrpos($filename, '.') + 1));
     if (isset($this->extensions[$ext])) {
@@ -167,6 +175,8 @@ class FilterManagerComponent extends Object {
     return null;
   }
 
+  /** Returns a list of supported file extensions as array
+    @return Array of supported file extensions */
   function getExtensions() {
     return array_keys($this->extensions);
   }
@@ -177,7 +187,7 @@ class FilterManagerComponent extends Object {
     $mapping = array();
     foreach ($files as $file) {
       $base = basename($file);
-      $ext = strtolower(substr($base, strrpos($base, '.')+1));
+      $ext = strtolower(substr($base, strrpos($base, '.') + 1));
       $mapping[$ext][] = $file;
     }
     return $mapping;
@@ -220,7 +230,9 @@ class FilterManagerComponent extends Object {
   }
 
   /** Read a file or files or directories 
-    @param single file or array of files and/or directories */
+    @param single file or array of files and/or directories 
+    @result Array of readed files. filename => Media model data (result of
+    FilterManager->read()) */
   function readFiles($files) {
     $stack = array();
     if (!is_array($files)) {
@@ -240,19 +252,31 @@ class FilterManagerComponent extends Object {
     $extStack = $this->_sortFilesByExtension($stack);
     $order = $this->_getExtensionsByPriority();
     //Logger::debug($order);
-    $readed = 0;
+
+    $result = array();
     foreach ($order as $ext) {
       if (!isset($extStack[$ext])) {
         continue;
       }
       foreach ($extStack[$ext] as $file) {
-        $result = $this->read($file);
-        if ($result > 0) {
-          $readed++;
-        }
+        $result[$file] = $this->read($file);
       }
     }
-    return $readed;
+    return $result;
+  }
+
+  /** Adds an error for a file
+    @param filename Current filename
+    @param error Error code
+    @param msg Optiona error message or longer description
+    @param data Optional error data */
+  function addError($filename, $error, $msg = '', $data = false) {
+    $this->errors[$filename] = array('error' => $error, 'msg' => $msg, 'data' => $data);
+  }
+
+  /** Clears the error array */
+  function clearErrors() {
+    $this->errors = array();
   }
 
   /** Import a file to the database
@@ -260,7 +284,7 @@ class FilterManagerComponent extends Object {
   function read($filename) {
     if (!is_readable($filename)) {
       Logger::err("Could not read file $filename");
-      $this->errors++;
+      $this->addError($filename, 'FileNotReadable');
       return false;
     }
     if (!$this->isSupported($filename)) {
@@ -269,7 +293,7 @@ class FilterManagerComponent extends Object {
     }
     if (!$this->MyFile->fileExists($filename) && !$this->FileManager->add($filename)) {
       Logger::err("Could not add file $filename");
-      $this->errors++;
+      $this->addError($filename, 'FileAddError');
       return false;
     }
 
@@ -291,7 +315,7 @@ class FilterManagerComponent extends Object {
       $readed = strtotime($file['File']['readed']);
       if ($readed && !$forceRead) {
         Logger::verbose("File '$filename' already readed. Skip reading!");
-        return 0;
+        return $media;
       }
     } else {
       $media = false;
@@ -300,9 +324,6 @@ class FilterManagerComponent extends Object {
     $filter = $this->getFilterByExtension($filename);
     Logger::debug("Read file $filename with filter ".$filter->getName());
     $result = $filter->read(&$file, &$media);
-    if ($result < 0) {
-      $this->errors++;
-    }
     return $result;
   }
 
@@ -310,6 +331,7 @@ class FilterManagerComponent extends Object {
   function write(&$media) {
     if (!count($media['File'])) {
       Logger::warn("No files found for media {$media['Media']['id']}");
+      $this->addError('Media-' . $media['Media']['id'], 'NoMediaFile');
       return false;
     }
     foreach ($media['File'] as $file) {

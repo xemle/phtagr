@@ -2,9 +2,9 @@
 /*
  * phtagr.
  * 
- * Multi-user image gallery.
+ * social photo gallery for your community.
  * 
- * Copyright (C) 2006-2009 Sebastian Felis, sebastian@phtagr.org
+ * Copyright (C) 2006-2010 Sebastian Felis, sebastian@phtagr.org
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -26,7 +26,7 @@ class GpsFilterComponent extends BaseFilterComponent {
   var $controller = null;
   var $components = array('Nmea');
 
-  function startup(&$controller) {
+  function initialize(&$controller) {
     $this->controller =& $controller;
   }
 
@@ -80,7 +80,7 @@ class GpsFilterComponent extends BaseFilterComponent {
     }
     Logger::trace($conditions);
     $this->Media->unbindAll();
-    $mediaSet = $this->Media->findAll($conditions);
+    $mediaSet = $this->Media->find('all', array('conditions' => $conditions));
     if (!count($mediaSet)) {
       Logger::info("No images found for GPS interval");
       return false;

@@ -1,44 +1,45 @@
-<h1>Guest: <?php echo $this->data['Guest']['username']; ?></h1>
-<?php $session->flash(); ?>
+<h1><?php printf(__('Guest: %s', true), $this->data['Guest']['username']); ?></h1>
+
+<?php echo $session->flash(); ?>
 
 <?php echo $form->create(null, array('action' => 'edit/'.$this->data['Guest']['id']));?>
-<fieldset><legend>Guest</legend>
+<fieldset><legend><?php __('Guest'); ?></legend>
 <?php
-  echo $form->input('Guest.email');
-  echo $form->input('Guest.expires', array('type' => 'text'));
-  echo $form->input('Guest.webdav', array('type' => 'checkbox', 'checked' => ($this->data['Guest']['quota']>0?'checked':''), 'label' => 'Enable WebDAV access'));
+  echo $form->input('Guest.email', array('label' => __('Email', true)));
+  echo $form->input('Guest.expires', array('type' => 'text', 'label' => __('Expires', true)));
+  echo $form->input('Guest.webdav', array('type' => 'checkbox', 'checked' => ($this->data['Guest']['quota'] > 0 ? 'checked' : ''), 'label' => __('Enable WebDAV access', true)));
 ?>
 </fieldset>
-<fieldset><legend>Password</legend>
+<fieldset><legend><?php __('Password'); ?></legend>
 <?php
-  echo $form->input('Guest.password');
-  echo $form->input('Guest.confirm', array('type' => 'password'));
+  echo $form->input('Guest.password', array('label' => __('Password', true)));
+  echo $form->input('Guest.confirm', array('type' => 'password', 'label' => __('Confirm', true)));
 ?>
 </fieldset>
-<fieldset><legend>Comments</legend>
+<fieldset><legend><?php __('Comments'); ?></legend>
 <?php
   $options = array(
-    0 => 'None',
-    1 => 'Name',
-    3 => 'Name and captcha' 
+    0 => __('None', true),
+    1 => __('Name', true),
+    3 => __('Name and captcha', true) 
     );
   $select = $this->data['Comment']['auth'];
   echo '<div class="input select">';
-  echo $form->label(null, 'Authentication');
+  echo $form->label(null, __('Authentication', true));
   echo $form->select('Comment.auth', $options, $select, null, false);
   echo '</div>';
 ?>
 </fieldset>
-<? echo $form->submit('Save'); ?>
+<? echo $form->submit(__('Save', true)); ?>
 </form>
 
 <?php if(count($this->data['Member'])): ?>
-<h2>Group List</h2>
+<h2><?php __('Group List'); ?></h2>
 <table class="default">
 <thead>
   <tr>
-    <td>Group</td>
-    <td>Actions</td>
+    <td><?php __('Group'); ?></td>
+    <td><?php __('Actions'); ?></td>
   <tr>
 </thead>
 
@@ -61,15 +62,14 @@
 </tbody>
 </table>
 <?php else: ?>
-<div class="info">Currently this guest account has no assigned groups.
-Please add groups to grant access to your personal images.</div>
+<div class="info"><?php __('Currently this guest account has no assigned groups. Please add groups to grant access to your personal images.'); ?></div>
 <?php endif; ?>
 
 <?php echo $form->create(null, array('action' => 'addGroup/'.$this->data['Guest']['id']));?>
-<fieldset><legend>Group Assignements</legend>
-<div class="input"><label>Group</label>
+<fieldset><legend><?php __('Group Assignements'); ?></legend>
+<div class="input"><label><?php __('Group'); ?></label>
 <?php echo $ajax->autocomplete('Group.name', '/guests/autocomplete'); ?></div>
 </fieldset>
-<?php echo $form->submit('Add Group'); ?>
+<?php echo $form->submit(__('Add Group', true)); ?>
 </form>
 
