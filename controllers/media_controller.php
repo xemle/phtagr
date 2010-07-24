@@ -51,6 +51,11 @@ class MediaController extends AppController
     parent::beforeFilter();
   }
   
+  function beforeRender() {
+    parent::beforeFilter();
+    $this->view = 'Media';
+  }
+
   function _getCacheDir($data) {
     if (!isset($data['Media']['id'])) {
       Logger::debug("Data does not contain id of the image");
