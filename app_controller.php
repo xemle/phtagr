@@ -44,7 +44,12 @@ class AppController extends Controller
 
   function beforeRender() {
     parent::beforeRender();
-    $user = $this->User->findById($this->getUserId());
+    if ($this->getUserId() > 0) {
+      // reread user for updated options
+      $user = $this->User->findById($this->getUserId());
+    } else {
+      $user = $this->getUser();
+    }
     $this->params['options'] = $this->Option->getOptions($user);
 
     if ($this->RequestHandler->isMobile()) {
