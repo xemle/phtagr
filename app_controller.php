@@ -26,7 +26,7 @@ App::import('File', 'Logger', array('file' => APP.'logger.php'));
 class AppController extends Controller
 {
   var $helpers = array('html', 'form', 'session', 'javascript', 'menu', 'option');
-  var $components = array('Session', 'Cookie', 'Feed');
+  var $components = array('Session', 'Cookie', 'Feed', 'RequestHandler');
   var $uses = array('User', 'Option');
   
   var $_nobody = null;
@@ -46,6 +46,11 @@ class AppController extends Controller
     parent::beforeRender();
     $user = $this->User->findById($this->getUserId());
     $this->params['options'] = $this->Option->getOptions($user);
+
+    if ($this->RequestHandler->isMobile()) {
+      $this->view = "Theme";
+      $this->theme = "mobile";
+    }
   }
 
   function _checkCookie() {

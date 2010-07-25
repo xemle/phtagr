@@ -1,0 +1,135 @@
+* {
+  margin: 0;
+  padding: 0;
+
+  font-family: Druid, "Bitstream Vera Sans", Verdana, Sans;
+  font-size: 10px;
+}
+
+body {
+  width: 100%;
+}
+
+h1,h2,h3 {
+  font-weight: bold;
+}
+h1 { font-size: 130%; margin-top: 9pt; }
+h2 { font-size: 120%; margin-top: 8pt; }
+h3 { font-size: 110%; margin-top: 6pt;}
+h1:first-child, h2:first-child, h3:first-child { margin-top: 0; }
+
+a {
+  text-decoration: none;
+}
+a img {
+  border: 1px black solid;
+}
+.thumb {
+  margin-left: 5%;
+}
+.header * {
+  display: inline;
+}
+.header {
+  display: block;
+  background: #3d3;
+  padding: 2px 5px;
+}
+.header h1 span.subheader {
+  color: white;
+  font-size: 80%;
+  font-style: italic;
+}
+.header .login {
+  float: right;
+}
+.header .login a {
+  padding: 2px;
+  text-decoration: none;
+  color: white;
+}
+.menu {
+  margin: 0;
+  display: block;
+  background: #eee;
+  border: 0px;
+  border-bottom: 1px solid black;
+}
+.menu ul li {
+  margin: 0;
+  display: inline;
+}
+.menu ul li {
+  color: black;
+  font-size: 120%;
+}
+.menu ul li a {
+  padding: 4px;
+}
+.menu ul li#current {
+  color: white;
+  font-weight: bold;
+  background: white;
+  border-top: 1px solid black;
+  border-left: 1px solid black;
+  border-right: 1px solid black;
+  border-bottom: 1px solid white;
+}
+.paginator {
+  display: block;
+  margin: 5px;
+}
+.paginator .subpaginator .current,
+.paginator .subpaginator a {
+  padding: 3px 5px;
+  border: 1px solid black;
+}
+.paginator .subpaginator .current {
+  background: #3d3;
+}
+.meta-info {
+  display: block;
+  background: #eee;
+}
+.footer {
+  display: block;
+  background: #888;
+}
+
+fieldset {
+  margin: 5pt;
+  border: none;
+}
+fieldset legend {
+  font-weight: bold;
+}
+fieldset div label {
+  display: block;
+  width: 100%;
+}
+fieldset div input[type=textfield],
+fieldset div input[type=text] {
+  width: 100%;
+  font-size: 150%;
+}
+input[type=checkbox] + label {
+  display: inline;
+}
+form * input[type=submit] {
+  font-size: 150%;
+  border: 2px solid black;
+  background: #3d3;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+}
+
+.message {
+  display: block;
+  font-size: 120%;
+  margin: 5pt;
+  padding: 5pt;
+  border: 1px solid black;
+  background: #fd3;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+}
