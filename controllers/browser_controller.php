@@ -27,7 +27,7 @@ class BrowserController extends AppController
 
   var $components = array('FileManager', 'RequestHandler', 'FilterManager', 'Upload', 'Zip');
   var $uses = array('User', 'MyFile', 'Media', 'Tag', 'Category', 'Location', 'Option');
-  var $helpers = array('form', 'formular', 'html', 'number', 'FileList', 'ImageData');
+  var $helpers = array('Form', 'Html', 'Number', 'FileList', 'ImageData');
 
   /** Array of filesystem root directories. */
   var $_fsRoots = array();

@@ -24,7 +24,7 @@ class GroupsController extends AppController {
   var $name = 'Groups';
   var $uses = array('Group', 'User');
   var $components = array('RequestHandler');
-  var $helpers = array('form', 'ajax');
+  var $helpers = array('Form', 'Ajax');
   var $menuItems = array();
 
   function beforeFilter() {

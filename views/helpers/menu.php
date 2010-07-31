@@ -22,7 +22,7 @@
  */
 class MenuHelper extends AppHelper
 {
-  var $helpers = array('html');
+  var $helpers = array('Html');
 
   var $_url = false;
 
@@ -113,7 +113,7 @@ class MenuHelper extends AppHelper
       $out .= ">";
 
       if ($item['link']) {
-        $out .= $this->html->link($item['text'], $item['link']); 
+        $out .= $this->Html->link($item['text'], $item['link']); 
       } elseif ($item['type'] == 'text') {
         $out .= "<span>".$item['text']."</span>";
       } else {

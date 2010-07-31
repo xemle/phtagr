@@ -25,7 +25,7 @@ class UsersController extends AppController
 {
   var $components = array('RequestHandler', 'Cookie', 'Email', 'Captcha');
   var $uses = array('Option'); 
-  var $helpers = array('form', 'formular', 'number');
+  var $helpers = array('Form', 'Number');
   var $paginate = array('limit' => 10, 'order' => array('User.username' => 'asc')); 
   var $menuItems = array();
 

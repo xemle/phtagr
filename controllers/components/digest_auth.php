@@ -33,7 +33,7 @@ class DigestAuthComponent extends Object
   var $controller = null;
   var $components = array('Session');
   
-  function initialize(&$controller) {
+  function startup(&$controller) {
     $this->controller = $controller;
   }
 

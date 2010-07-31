@@ -25,7 +25,7 @@ class CommentsController extends AppController
 {
   var $name = 'Comments';
   var $uses = array('Comment', 'Media', 'Tag');
-  var $helpers = array('html', 'time', 'text', 'Form', 'Rss', 'paginator');
+  var $helpers = array('Html', 'Time', 'Text', 'Form', 'Rss', 'Paginator');
   var $components = array('Captcha', 'Email');
 
   var $paginate = array (

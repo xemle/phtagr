@@ -23,7 +23,7 @@
 class OptionsController extends AppController {
 
   var $name = 'Options';
-  var $helpers = array('formular', 'form');
+  var $helpers = array('Form');
   var $uses = array('Option', 'Group');
 
   function beforeFilter() {

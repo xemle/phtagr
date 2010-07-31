@@ -25,7 +25,7 @@ class HomeController extends AppController
   var $name = 'home';
 
   var $components = array('Search');
-  var $helpers = array('html', 'time', 'text', 'cloud', 'imageData', 'search');
+  var $helpers = array('Html', 'Time', 'Text', 'Cloud', 'ImageData', 'Search');
   /** Don't load models for setup check */
   var $uses = null;
 
