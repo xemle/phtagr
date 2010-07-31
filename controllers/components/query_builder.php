@@ -37,6 +37,7 @@ class QueryBuilderComponent extends Object
   var $rules = array(
     'categories' => array('custom' => 'buildHabtm'),
     'east' => array('field' => 'Media.longitude', 'operand' => '<='),
+    'folder' => true, // calls buildFolder
     'from' => array('field' => 'Media.date', 'operand' => '>='),
     'groups' => 'Group.name',
     'locations' => array('custom' => 'buildHabtm'),
@@ -359,6 +360,12 @@ class QueryBuilderComponent extends Object
     }
     $acl = $this->controller->Media->buildAclConditions($user, $userId);
     $query['conditions'] = am($query['conditions'], $acl);
+  }
+
+  function buildFolder(&$data, &$query, $value) {
+    $query['conditions'][] = $this->_buildCondition("File.path", $value);
+    $query['conditions'][] = "FileCount > 0";
+    $query['_counts'][] = "FileCount";
   }
 
   function buildVisibility(&$data, &$query, $value) {

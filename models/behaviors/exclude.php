@@ -94,6 +94,7 @@ class ExcludeBehavior extends ModelBehavior {
     @param joinConditions Conditions
     @param options Options */
   function _buildHasManyJoins(&$Model, &$query, &$joinConditions, $options = array()) {
+    $options = am(array('type' => false, 'count' => true), $options);
     $options['type'] = strtoupper($options['type']);
     if (!in_array($options['type'], array(false, 'RIGHT', 'LEFT'))) {
       Logger::warn("Invalid join type: ".$options['type']);
@@ -124,7 +125,6 @@ class ExcludeBehavior extends ModelBehavior {
       $join .= ") AS $alias ON {$Model->alias}.id = $alias.$foreignKey";
       $query['joins'][] = $join;
     }
-    //Logger::debug($query);
   }
 
   /**
@@ -150,12 +150,16 @@ class ExcludeBehavior extends ModelBehavior {
         return false;
       }
       // Match 'Model.field'
-      if (!preg_match('/^(.*)\./', $condition, $matches)) {
+      if (!preg_match('/^([^.]+)\./', $condition, $matches)) {
         continue;
       }
       $name = $matches[1];
+      if ($name == $Model->alias) {
+        continue;
+      }
       $type = $this->_findBindingType($Model, $name);
       if (!$type) {
+        Logger::warn("Binding not found for $name");
         continue;
       }
       if ($type == 'hasAndBelongsToMany' || $type == 'hasMany') {
@@ -222,7 +226,6 @@ class ExcludeBehavior extends ModelBehavior {
     if ($exclude) {
       $query['conditions'][] = $this->_buildExclusion($Model, $exclude);
     }
-    //Logger::debug($query);
     return $query;
   }
 

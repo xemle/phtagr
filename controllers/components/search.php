@@ -41,7 +41,7 @@ class SearchComponent extends Search
     'from' => array('rule' => array('custom', '/^\d{4}-\d{2}-\d{2}([ T]\d{2}:\d{2}:\d{2})?$/')),
     'groups' => 'alphaNumeric',
     'media' => 'numeric',
-    'name' => 'alphaNumeric',
+    'name' => 'notEmpty',
     'north' => 'decimal',
     'locations' => array('rule' => array('maxLength', 30)),
     'location_op' => array('rule' => array('inList', array('AND', 'OR'))),

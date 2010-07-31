@@ -25,7 +25,7 @@ class ExplorerController extends AppController
 {
   var $components = array('RequestHandler', 'FilterManager', 'Search', 'QueryBuilder');
   var $uses = array('Media', 'MyFile', 'Group', 'Tag', 'Category', 'Location');
-  var $helpers = array('form', 'formular', 'html', 'javascript', 'ajax', 'imageData', 'time', 'explorerMenu', 'rss', 'search', 'navigator', 'tab');
+  var $helpers = array('Form', 'formular', 'Html', 'Javascript', 'Ajax', 'ImageData', 'Time', 'ExplorerMenu', 'Rss', 'Search', 'Navigator', 'Tab');
 
   function beforeFilter() {
     if ($this->action == 'points' && 
@@ -175,9 +175,25 @@ class ExplorerController extends AppController
   }
 
   function user($username, $param = false, $value = false) {
+    $user = $this->User->find('first', array('conditions' => array('User.username' => $username, 'User.role' >= ROLE_USER), 'recursive' => 0));
+    if (!$user) {
+      Logger::verbose(sprintf("User not found %s", $username));
+      $this->render('index');
+      return;
+    }
     $this->Search->setUser($username);
     if ($param && $value && in_array($param, array('tag', 'category', 'location'))) {
       $this->Search->addParam($param, explode(',', $value));
+    } elseif ($param == 'folder') {
+      $folder = implode('/', array_slice($this->params['pass'], 2));
+      $fsRoot = $this->User->getRootDir($user);
+      $fsFolder = implode(DS, array_slice($this->params['pass'], 2));
+      $fsFolder = Folder::slashTerm(Folder::addPathElement($fsRoot, $fsFolder));
+      if (!is_dir($fsRoot) || !is_dir($fsFolder)) {
+        Logger::info(sprintf("Invalid root %s or folder %s", $fsRoot, $fsFolder));
+        return;
+      }
+      $this->Search->setFolder($fsFolder, false);
     }
     $this->render('index');
   }
