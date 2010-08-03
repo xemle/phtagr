@@ -64,17 +64,10 @@ class FilterManagerComponent extends Object {
       }
       return true;
     }
-
-    if (!App::import('Component', $name)) {
-      Logger::err("Could not find filter with name '$name'");
+    if (!$this->controller->loadComponent($name, &$this)) {
       return false;
     }
-    $componentName = $name . 'Component';
-    if (!class_exists($componentName)) {
-      Logger::err("Could nod find class '$componentName'");
-      return false;
-    }
-    $filter = new $componentName;
+    $filter = &$this->{$name};
     if (!$this->_validateFilter($filter, $name)) {
       return false;
     }
@@ -86,14 +79,6 @@ class FilterManagerComponent extends Object {
     $filter->Media =& $this->Media;
     $filter->FilterManager =& $this;
 
-    $this->controller->Component->_loadComponents(&$filter);
-    // init components to setup the controller
-    foreach ($filter->components as $name) {
-      $component =& $filter->$name;
-      if (method_exists($component, 'initialize')) {
-        $component->initialize(&$this->controller);
-      }
-    }
     $filter->init(&$this);
 
     $extensions = $filter->getExtensions();
@@ -117,7 +102,7 @@ class FilterManagerComponent extends Object {
       }
     }
     if (count($new)) {
-      //Logger::trace("Loaded filter $name with extension(s): ".implode(', ', $new));
+      //Logger::trace("Loaded filter $filterName ($name) with extension(s): ".implode(', ', $new));
     }
     $this->filters[$filterName] =& $filter;
   }
