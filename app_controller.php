@@ -197,6 +197,37 @@ class AppController extends Controller
     $user = $this->getUser();
     return $this->Option->getValue($user, $name, $default);
   }
+
+  /** Load a component
+    */
+  function loadComponent($componentName, &$parent = null) {
+    if (is_array($componentName)) {
+      $loaded = true;
+      foreach ($componentName as $name) {
+        $loaded &= $this->loadComponent($name);
+      }
+      return $loaded;
+    }
+    
+    if (!$parent) {
+      $parent = &$this;
+    }
+    if (isset($parent->{$componentName})) {
+      return true;
+    }
+    if (!in_array($componentName, $parent->components)) {
+      $parent->components[] = $componentName;
+    }
+    $this->Component->_loadComponents($parent);
+    $this->Component->initialize($this);
+
+    if (isset($parent->{$componentName})) {
+      return true;
+    } else {
+      Logger::warn("Could not load component $componentName");
+      return false;
+    }
+  }
  
 }
 ?>
