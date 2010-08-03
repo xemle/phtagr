@@ -43,8 +43,12 @@ class WebdavController extends AppController
     $this->DigestAuth->authenticate();
 
     // Bind Properties and Locks to images persistently (only webdav is using it)
-    $this->MyFile->bind('Property', array('type' => 'hasMany', 'foreignKey' => 'file_id'));
-    $this->MyFile->bind('Lock', array('type' => 'hasMany', 'foreignKey' => 'file_id'));
+    $this->MyFile->bindModel(array(
+      'hasMany' => array(
+        'Property' => array('foreignKey' => 'file_id'),
+        'Lock' => array('foreignKey' => 'file_id')
+        )
+      ));
   }
 
   /** @todo Set webdav root to creator's root if user is guest */
