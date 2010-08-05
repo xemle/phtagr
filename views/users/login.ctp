@@ -2,16 +2,15 @@
 
 <?php echo $form->create('User', array('action' => 'login')); ?>
 <fieldset>
-<legend>Login</legend>
+<legend><?php __('Login'); ?></legend>
 <?php
-  echo $form->input('User.username');
-  echo $form->input('User.password');
+  echo $form->input('User.username', array('label' => __('Username', true)));
+  echo $form->input('User.password', array('label' => __('Password', true)));
 ?>
 </fieldset>
-<?php echo $form->submit('Login'); ?>
-</form>
+<?php echo $form->end(__('Login', true)); ?>
 
-<?php echo $html->link('Forgot your password', 'password'); ?>
+<?php echo $html->link(__('Forgot your password', true), 'password'); ?>
 <?php if ($register): ?>
- or create <?php echo $html->link('your account', 'register'); ?>
+ <?php printf(__("or %s", true), $html->link(__('sign up', true), 'register')); ?>
 <?php endif; ?>

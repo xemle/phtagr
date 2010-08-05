@@ -309,7 +309,7 @@ class BrowserController extends AppController
         $readCount++;
       }
     }
-    $this->Session->setFlash("Imported $readCount files ($errorCount) errors)");
+    $this->Session->setFlash(sprintf(__("Imported %d files (%d) errors)", true), $readCount, $errorCount));
 
     $this->redirect('index/'.$path);
   }
@@ -324,7 +324,7 @@ class BrowserController extends AppController
     } elseif ($file['User']['id'] != $this->getUserId()) {
       Logger::warn("Deny access to file: $fsPath");
     } else {
-      $this->Session->setFlash("Media {$file['File']['media_id']} was unlinked successfully");
+      $this->Session->setFlash(sprintf(__("Media %d was unlinked successfully", true), $file['File']['media_id']));
       $this->Media->unlinkFile($file['File']['media_id'], $file['File']['id']);
     }
     $this->redirect('index/'.$this->_getPathFromUrl(0, -1));
@@ -341,12 +341,12 @@ class BrowserController extends AppController
       }
       if ($this->FileManager->delete($fsPath)) {
         if ($isDir) {
-          $this->Session->setFlash('Deleted directory successfully');
+          $this->Session->setFlash(__('Deleted directory successfully', true));
         } else {
-          $this->Session->setFlash('Deleted file successfully');
+          $this->Session->setFlash(__('Deleted file successfully', true));
         }
       } else {
-        $this->Session->setFlash('Could not delete file or directory');
+        $this->Session->setFlash(__('Could not delete file or directory', true));
       }
     }
     $this->redirect('index/'.$path);
@@ -430,11 +430,11 @@ class BrowserController extends AppController
     // Check for internal path
     if (!$fsPath) {
       Logger::warn("Invalid path to create folder");
-      $this->Session->setFlash("Invalid path to create folder");
+      $this->Session->setFlash(__("Invalid path to create folder", true));
       $this->redirect("index");
     }
     if ($this->FileManager->isExternal($fsPath)) {
-      $this->Session->setFlash("Could not create folder here: $path");
+      $this->Session->setFlash(sprintf(__("Could not create folder here: %s", true), $path));
       Logger::warn("Could not create folder in external path: $fsPath");
       $this->redirect("index/".$path);
     }
@@ -450,7 +450,7 @@ class BrowserController extends AppController
         $this->redirect("index/".$path.$name);
       } else {
         Logger::err("Could not create folder $name in $fsPath");
-        $this->Session->setFlash("Could not create folder");
+        $this->Session->setFlash(__("Could not create folder", true));
         $this->redirect('folder/'.$path);
       }
     }
@@ -574,12 +574,12 @@ class BrowserController extends AppController
     $fsPath = $this->_getFsPath($path);
     if (!$fsPath) {
       Logger::warn("Invalid path for upload");
-      $this->Session->setFlash("Invalid path for upload");
+      $this->Session->setFlash(__("Invalid path for upload", true));
       $this->redirect("index");
     }
     // Check for internal path
     if ($this->FileManager->isExternal($fsPath)) {
-      $this->Session->setFlash("Could not upload here: $path");
+      $this->Session->setFlash(sprintf(__("Could not upload here: %s", true), $path));
       Logger::warn("Could not upload in external path: $fsPath");
       $this->redirect("index/".$path);
     }
