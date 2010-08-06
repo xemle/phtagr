@@ -1,4 +1,4 @@
-<h1>Explorer</h1>
+<h1><?php __('Explorer'); ?></h1>
 <?php echo $session->flash(); ?>
 
 <?php $search->initialize(); ?>

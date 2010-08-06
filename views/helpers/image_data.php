@@ -221,16 +221,16 @@ class ImageDataHelper extends AppHelper {
     $t='';
     // Write access
     if (($acl & ACL_WRITE_MASK) == ACL_WRITE_META) {
-      $t .= $this->Html->image('icons/tag.png', array('alt' => 'm', 'title' => $titlePrefix.'edit the meta data'));
+      $t .= $this->Html->image('icons/tag.png', array('alt' => 'm', 'title' => sprintf(__('%s can edit the meta data', true),  $titlePrefix)));
     } elseif (($acl & ACL_WRITE_MASK) == ACL_WRITE_TAG) {
-      $t .= $this->Html->image('icons/tag_blue.png', array('alt' => 't', 'title' => $titlePrefix.'edit the tags'));
+      $t .= $this->Html->image('icons/tag_blue.png', array('alt' => 't', 'title' => sprintf(__('%s can edit the tags', true),  $titlePrefix)));
     }
 
     // Read access
     if (($acl & ACL_READ_MASK) == ACL_READ_ORIGINAL) {
-      $t .= $this->Html->image('icons/disk.png', array('alt' => 'o', 'title' => $titlePrefix.'download this media'));
+      $t .= $this->Html->image('icons/disk.png', array('alt' => 'o', 'title' => sprintf(__('%s can download this media', true),  $titlePrefix)));
     } elseif (($acl & ACL_READ_MASK) == ACL_READ_PREVIEW) {
-      $t .= $this->Html->image('icons/picture.png', array('alt' => 'v', 'title' => $titlePrefix.'view this media'));
+      $t .= $this->Html->image('icons/picture.png', array('alt' => 'v', 'title' => sprintf(__('%s an view this media', true),  $titlePrefix)));
     }
     if ($t == '') {
       $t='-';
@@ -241,21 +241,21 @@ class ImageDataHelper extends AppHelper {
   /** Returns an text repesentation of the acl */
   function _acl2text($data) {
     //$output = $this->Html->image('icons/user.png', array('alt' => 'groups', 'title' => "Access for group members")).': ';
-    $output = '<span title="Access for group members">group</span>';
+    $output = $this->Html->tag('span', __('Group', true), array('title' => __('Access for group members', true)));
     if (isset($data['Group']['name'])) {
       $name = $data['Group']['name'];
-      $output .= ' ('.$this->Html->link($name, $this->Search->getUri(array(), array('groups' => $data['Group']['name'])), array('title' => "This media belongs to the group '$name'")).')';
+      $output .= ' ('.$this->Html->link($name, $this->Search->getUri(array(), array('groups' => $data['Group']['name'])), array('title' => sprintf(__("This media belongs to the group '%s'", true), $name))).')';
     }
     $output .= ': ';
-    $output .= $this->_acl2icon($data['Media']['gacl'], 'Group members can ').' ';
+    $output .= $this->_acl2icon($data['Media']['gacl'], __('Group members', true)).' ';
 
     //$output .= $this->Html->image('icons/group.png', array('alt' => 'users', 'title' => "Access for users")).': ';
-    $output .= '<span title="Access for users">users: </span> ';
-    $output .= $this->_acl2icon($data['Media']['uacl'], 'Users can ').' ';
+    $output .= $this->Html->tag('span', __('users:', true), array('title' => __('Access for users', true)));
+    $output .= $this->_acl2icon($data['Media']['uacl'], __('Users', true)).' ';
 
     //$output .= $this->Html->image('icons/world.png', array('alt' => 'public', 'title' => "Public access")).': ';
-    $output .= '<span title="Public access">public: </span> ';
-    $output .= $this->_acl2icon($data['Media']['oacl'], 'The public can ');
+    $output .= $this->Html->tag('span', __('public:', true), array('title' => __('Access for the public', true)));
+    $output .= $this->_acl2icon($data['Media']['oacl'], __('The public', true));
     return $output;
   }
 

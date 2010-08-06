@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2010-08-05 08:47+0200\n"
+"POT-Creation-Date: 2010-08-06 20:00+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Elena Vetrugno <evetrugno@gmx.de>\n"
 "Language-Team: \n"
@@ -169,6 +169,7 @@ msgstr "Gruppe: %s"
 
 #: /controllers/groups_controller.php:92
 #: /controllers/guests_controller.php:85
+#: /views/groups/index.ctp:23;23
 #: /views/guests/index.ctp:23
 #: /views/users/admin_index.ctp:46;46
 msgid "Edit"
@@ -555,7 +556,7 @@ msgstr "Öffentliche Medien"
 
 #: /views/browser/view.ctp:23
 msgid "Visible for users"
-msgstr "Sichtbar für Benutyer"
+msgstr "Sichtbar für Benutzer"
 
 #: /views/browser/view.ctp:24
 msgid "Visible for group members"
@@ -588,6 +589,7 @@ msgstr "Kommentar hinzufügen"
 #: /views/groups/index.ctp:9
 #: /views/guests/edit.ctp:23
 #: /views/guests/index.ctp:9
+#: /views/helpers/file_list.php:137
 msgid "Name"
 msgstr "Name"
 
@@ -615,9 +617,14 @@ msgstr "Benachrichtige mich bei neuen Kommentaren"
 msgid "Add Comment"
 msgstr "Kommentar hinzufügen"
 
+#: /views/elements/footer.ctp:4
+msgid "%s Social Web Gallery %s in %.3fs. Layout based on %s, Icons by %s"
+msgstr "%s Soziale Bildergallerie %s in %.3fs. Layout basiert auf %s, Icons von %s"
+
 #: /views/elements/menu.ctp:19;44
 #: /views/explorer/index.ctp:1
 #: /views/images/notfound.ctp:3
+#: /views/themed/mobile/explorer/index.ctp:1
 msgid "Explorer"
 msgstr "Explorer"
 
@@ -672,6 +679,7 @@ msgstr "Wer kann alle Metadaten ändern"
 #: /views/explorer/search.ctp:38
 #: /views/groups/edit.ctp:40
 #: /views/guests/edit.ctp:41;70
+#: /views/helpers/image_data.php:244
 msgid "Group"
 msgstr "Gruppe"
 
@@ -778,13 +786,13 @@ msgid "Everyone"
 msgstr "Jeder"
 
 #: /views/explorer/index.ctp:157
-#: /views/helpers/image_data.php:470
+#: /views/helpers/image_data.php:254;470
 msgid "Users"
 msgstr "Benutzer"
 
 #: /views/explorer/index.ctp:158
 #: /views/explorer/search.ctp:40
-#: /views/helpers/image_data.php:469
+#: /views/helpers/image_data.php:250;469
 msgid "Group members"
 msgstr "Gruppenmitglieder"
 
@@ -797,7 +805,7 @@ msgstr "Nur ich"
 #: /views/explorer/index.ctp:160
 #: /views/options/acl.ctp:14
 msgid "Who can view the image?"
-msgstr "Wer kan das Medium sehen?"
+msgstr "Wer kann das Medium sehen?"
 
 #: /views/explorer/index.ctp:162
 #: /views/options/acl.ctp:16
@@ -919,6 +927,7 @@ msgstr "Dateityp"
 #: /views/setup/config.ctp:13
 #: /views/setup/user.ctp:9
 #: /views/users/admin_add.ctp:8
+#: /views/users/admin_index.ctp:15
 #: /views/users/login.ctp:7
 #: /views/users/password.ctp:7
 #: /views/users/register.ctp:7
@@ -997,6 +1006,7 @@ msgstr "Mitglied"
 #: /views/groups/index.ctp:11
 #: /views/guests/edit.ctp:42
 #: /views/guests/index.ctp:11
+#: /views/helpers/file_list.php:137
 #: /views/helpers/image_data.php:419
 #: /views/users/admin_index.ctp:20
 #: /views/users/admin_path.ctp:13
@@ -1007,7 +1017,8 @@ msgstr "Aktionen"
 msgid "Do you really want to delete the member '%s' from this group '%s'?"
 msgstr "Möchten Sie wirklich das Mitglied '%s' von Gruppe '%s' entfernen?"
 
-#: /views/groups/edit.ctp:26
+#: /views/groups/edit.ctp:26;26
+#: /views/groups/index.ctp:26;26
 #: /views/guests/index.ctp:26
 #: /views/users/admin_index.ctp:48;48
 #: /views/users/admin_path.ctp:22
@@ -1034,6 +1045,10 @@ msgstr "Zeige alle Gruppen"
 #: /views/groups/index.ctp:10
 msgid "Members"
 msgstr "Gruppenmitglieder"
+
+#: /views/groups/index.ctp:21
+msgid "Do you realy want to delete the group '%s'?"
+msgstr "Möchten Sie wirklich die Gruppe '%s' löschen?"
 
 #: /views/groups/index.ctp:35
 msgid "Currently no image groups are assigned. At the one hand each image could be assigned to a specific group. On the other hand a guest can be member of a set of groups. The guest is than able to view the images from his groups."
@@ -1231,6 +1246,79 @@ msgstr "Zuletzt besuchte zuerst"
 msgid "Pagesize"
 msgstr "Seitengröße"
 
+#: /views/helpers/file_list.php:82
+msgid "Delete folder %s?"
+msgstr "Ordner %s löschen?"
+
+#: /views/helpers/file_list.php:95
+msgid "Unlink media from this file"
+msgstr "Medien von dieser Datei entfernen"
+
+#: /views/helpers/file_list.php:105
+msgid "Download %s"
+msgstr "%s herunterladen"
+
+#: /views/helpers/file_list.php:123
+msgid "(parent folder)"
+msgstr "(Höherer Ordner)"
+
+#: /views/helpers/file_list.php:125
+msgid "(this folder)"
+msgstr "(Dieser Ordner)"
+
+#: /views/helpers/file_list.php:137
+msgid "Media"
+msgstr "Media"
+
+#: /views/helpers/file_list.php:137
+#: /views/images/view.ctp:62
+msgid "Size"
+msgstr "Größe"
+
+#: /views/helpers/image_data.php:224
+msgid "%s can edit the meta data"
+msgstr "%s kann alle Metadaten ändern"
+
+#: /views/helpers/image_data.php:226
+msgid "%s can edit the tags"
+msgstr "%s kann die Schlüsselwörter editieren"
+
+#: /views/helpers/image_data.php:231
+msgid "%s can download this media"
+msgstr "%s kann das Medium herunterladen"
+
+#: /views/helpers/image_data.php:233
+msgid "%s an view this media"
+msgstr "%s kann das Medium sehen?"
+
+#: /views/helpers/image_data.php:244
+msgid "Access for group members"
+msgstr "Sichtbar für Gruppenmitglieder"
+
+#: /views/helpers/image_data.php:247
+msgid "This media belongs to the group '%s'"
+msgstr "Dieses Medium gehört zur Gruppe '%s'"
+
+#: /views/helpers/image_data.php:253
+msgid "users:"
+msgstr "Benutzer:"
+
+#: /views/helpers/image_data.php:253
+msgid "Access for users"
+msgstr "Sichtbar für Benutzer"
+
+#: /views/helpers/image_data.php:257
+msgid "public:"
+msgstr "Öffentlich:"
+
+#: /views/helpers/image_data.php:257
+msgid "Access for public access"
+msgstr "Zugriff für die Öffentlichkeit"
+
+#: /views/helpers/image_data.php:258
+msgid "The public"
+msgstr "Die Öffentlichkeit"
+
 #: /views/helpers/image_data.php:271
 msgid "View media of previous dates"
 msgstr "Zeige ältere Medien"
@@ -1401,10 +1489,6 @@ msgstr "Erstellt"
 #: /views/images/view.ctp:61
 msgid "Last modified"
 msgstr "Zuletzt modifiziert"
-
-#: /views/images/view.ctp:62
-msgid "Size"
-msgstr "Größe"
 
 #: /views/images/view.ctp:65
 msgid "Model"
@@ -1681,6 +1765,14 @@ msgstr "Gallerietitel"
 msgid "Welcome text"
 msgstr "Wilkommenstext"
 
+#: /views/themed/mobile/elements/footer.ctp:1
+msgid "%s Social Web Gallery %s - mobile version"
+msgstr "%s Soziale Bildergallerie %s - Mobile Version"
+
+#: /views/themed/mobile/elements/header.ctp:1
+msgid "mobile"
+msgstr "mobil"
+
 #: /views/themed/mobile/explorer/index.ctp:49
 #: /views/themed/mobile/images/view.ctp:47
 msgid "Location"
@@ -1724,6 +1816,18 @@ msgstr "<< Vorherige"
 msgid "Next >>"
 msgstr "Nächste >>"
 
+#: /views/users/admin_index.ctp:16
+msgid "Firstname"
+msgstr "Vorname"
+
+#: /views/users/admin_index.ctp:17
+msgid "Lastname"
+msgstr "Nachname"
+
+#: /views/users/admin_index.ctp:19
+msgid "User role"
+msgstr "Benutzerrolle"
+
 #: /views/users/admin_index.ctp:34
 msgid "SysOp"
 msgstr "SysOp"
@@ -1731,6 +1835,10 @@ msgstr "SysOp"
 #: /views/users/admin_index.ctp:37
 msgid "Nobody"
 msgstr "Keiner"
+
+#: /views/users/admin_index.ctp:39
+msgid "Unknown"
+msgstr "Unbekannt"
 
 #: /views/users/admin_index.ctp:44
 msgid "Do you really want to detete the user '%s'? This action is irreversible! All the data of the users will be deleted!"

@@ -18,12 +18,12 @@
     <td><?php echo $html->link($group['Group']['name'], 'edit/'.$group['Group']['id']); ?></td>
     <td><?php echo count($group['Member']) ?></td>
     <td><div class="actionlist"><?php 
-      $delConfirm = "Do you realy want to delete the group '{$group['Group']['name']}'?";
+      $delConfirm = sprintf(__("Do you realy want to delete the group '%s'?", true), $group['Group']['name']);
       echo $html->link(
-          $html->image('icons/pencil.png', array('alt' => 'Edit', 'title' => 'Edit')),
+          $html->image('icons/pencil.png', array('alt' => __('Edit', true), 'title' => __('Edit', true))),
           'edit/'.$group['Group']['id'], array('escape' => false)).' '.
         $html->link( 
-          $html->image('icons/delete.png', array('alt' => 'Delete', 'title' => 'Delete')),
+          $html->image('icons/delete.png', array('alt' => __('Delete', true), 'title' => __('Delete', true))),
           'delete/'.$group['Group']['id'], array('escape' => false), $delConfirm); ?>
     </div></td>
   </tr>

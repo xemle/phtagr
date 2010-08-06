@@ -1,1 +1,5 @@
-&copy; 2006-2010 by <a href="http://www.phtagr.org">phtagr.org</a> in <?php global $TIME_START; echo round(getMicrotime() - $TIME_START, 3) . "s"; ?>, Layout based on <a href="http://www.yaml.de/">YAML</a>, icons by <a href="http://www.famfamfam.com">FamFamFam</a>
+<?php 
+global $TIME_START; 
+$time = getMicrotime() - $TIME_START;
+printf(__("%s Social Web Gallery %s in %.3fs. Layout based on %s, Icons by %s", true), '&copy; 2006-2010',  $html->link('phtagr.org', 'http://www.phtagr.org'),  $time, $html->link('YAML', 'http://www.yaml.de'), $html->link('FamFamFam', 'http://www.famfamfam.com')); 
+?>

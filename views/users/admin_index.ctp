@@ -12,11 +12,11 @@ Page <?php echo $paginator->counter() ?>
 <table class="default">
 <thead>
 <tr>
-  <td><?php echo $paginator->sort('username'); ?></td>
-  <td><?php echo $paginator->sort('firstname'); ?></td>
-  <td><?php echo $paginator->sort('lastname'); ?></td>
+  <td><?php echo $paginator->sort(__('Username', true), 'username'); ?></td>
+  <td><?php echo $paginator->sort(__('Firstname', true), 'firstname'); ?></td>
+  <td><?php echo $paginator->sort(__('Lastname', true), 'lastname'); ?></td>
   <td><?php __('Guests'); ?></td>
-  <td><?php echo $paginator->sort('role'); ?></td>
+  <td><?php echo $paginator->sort(__('User role', true), 'role'); ?></td>
   <td><?php __('Actions'); ?></td>
 </tr>
 </thead>
@@ -25,9 +25,9 @@ Page <?php echo $paginator->counter() ?>
 <?php $row=0; foreach($this->data as $user): ?>
 <tr class="<?=($row++%2)?"even":"odd";?>">
   <td><?php echo $html->link($user['User']['username'], '/admin/users/edit/'.$user['User']['id']);?></td>
-  <td><?=$user['User']['firstname'];?></td>
-  <td><?=$user['User']['lastname'];?></td>
-  <td><?=count($user['Guest']); ?></td>
+  <td><?php echo $user['User']['firstname'];?></td>
+  <td><?php echo $user['User']['lastname'];?></td>
+  <td><?php count($user['Guest']); ?></td>
   <td><?php 
   switch ($user['User']['role']) {
     case ROLE_ADMIN: __('Admin'); break;
@@ -36,7 +36,7 @@ Page <?php echo $paginator->counter() ?>
     case ROLE_GUEST: __('Guest'); break;
     case ROLE_NOBODY: __('Nobody'); break;
     default: 
-      echo 'Unknown'; 
+      echo __('Unknown', true); 
       Logger::error("Unkown role of user: ".$user['User']['role']);
       break;
   };?></td>

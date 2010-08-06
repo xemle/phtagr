@@ -79,7 +79,7 @@ class FileListHelper extends AppHelper
     $row[] = '';
     $actions = array();
     if ($options['isInternal']) {
-      $actions[] = $this->Html->link('delete', "delete/$path", array('style' => 'color: red', 'onclick' => "return confirm('Delete folder $path?')"));
+      $actions[] = $this->Html->link('delete', "delete/$path", array('style' => 'color: red', 'onclick' => "return confirm('" . sprintf(__('Delete folder %s?', true), $path) . "')"));
     }
     $row[] = implode('', $actions);
     return $row;
@@ -92,7 +92,7 @@ class FileListHelper extends AppHelper
     $row[] = $file['file'];
     if (isset($file['media_id'])) {
       $mediaLink = $this->Html->link($file['media_id'], '/images/view/'.$file['media_id']);
-      $unlink = $this->Html->link('unlink', "unlink/$path/{$file['file']}", array('style' => 'color: red', 'title' => 'Unlink media from this file'));
+      $unlink = $this->Html->link('unlink', "unlink/$path/{$file['file']}", array('style' => 'color: red', 'title' => __('Unlink media from this file', true)));
       $row[] = $mediaLink.' '.$unlink;
     } else {
       $row[] = '';
@@ -102,7 +102,7 @@ class FileListHelper extends AppHelper
 
     // Download link for internal files and imported external files
     if ($options['isInternal'] || $file['media_id'] > 0) {
-      $icon = $this->Html->image('icons/disk.png', array('alt' => 'download', 'title' => 'Download '.$file['file']));
+      $icon = $this->Html->image('icons/disk.png', array('alt' => 'download', 'title' => sprintf(__('Download %s', true), $file['file'])));
       $actions[] = $this->Html->link($icon, "index/$path/{$file['file']}", array('escape' => false));
     }
 
@@ -120,9 +120,9 @@ class FileListHelper extends AppHelper
     $cells = array();
     if ($path != '/') {
       $parentPath = dirname($path);
-      $cells[] = $this->_dirRow($parentPath, '(parent folder)', array('checkBox' => false, 'isInternal' => false));
+      $cells[] = $this->_dirRow($parentPath, __('(parent folder)', true), array('checkBox' => false, 'isInternal' => false));
     }
-    $cells[] = $this->_dirRow($path, '(this folder)', $options);
+    $cells[] = $this->_dirRow($path, __('(this folder)', true), $options);
     usort($dirs, array("FileListHelper", "_cmpFile"));
     usort($files, array("FileListHelper", "_cmpFile"));
     foreach($dirs as $dir) {
@@ -134,7 +134,7 @@ class FileListHelper extends AppHelper
     $out .= "<table class=\"default\">\n";
     $out .= "<thead>\n";
     $out .= $this->Html->tableHeaders(
-      array('', 'Name', 'Media', 'Size', 'Actions')
+      array('', __('Name', true), __('Media', true), __('Size', true), __('Actions', true))
       );
     $out .= "</thead>\n";
     $out .= "<tbody>\n";

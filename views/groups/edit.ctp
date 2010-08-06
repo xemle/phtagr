@@ -23,7 +23,7 @@
     <td><div class="actionlist"><?php
       $delConfirm = sprintf(__("Do you really want to delete the member '%s' from this group '%s'?", true), $member['username'], $this->data['Group']['name']);
       echo $html->link( 
-        $html->image('icons/delete.png', array('alt' => 'Delete', 'title' => __('Delete', true))), 
+        $html->image('icons/delete.png', array('alt' => __('Delete', true), 'title' => __('Delete', true))), 
         '/groups/deleteMember/'.$this->data['Group']['id'].'/'.$member['id'], null, $delConfirm, false); ?>
     </div></td>
   </tr>

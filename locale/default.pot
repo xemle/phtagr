@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2010-08-05 08:47+0200\n"
+"POT-Creation-Date: 2010-08-06 20:07+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -171,6 +171,7 @@ msgstr ""
 
 #: /controllers/groups_controller.php:92
 #: /controllers/guests_controller.php:85
+#: /views/groups/index.ctp:23;23
 #: /views/guests/index.ctp:23
 #: /views/users/admin_index.ctp:46;46
 msgid "Edit"
@@ -590,6 +591,7 @@ msgstr ""
 #: /views/groups/index.ctp:9
 #: /views/guests/edit.ctp:23
 #: /views/guests/index.ctp:9
+#: /views/helpers/file_list.php:137
 msgid "Name"
 msgstr ""
 
@@ -617,9 +619,14 @@ msgstr ""
 msgid "Add Comment"
 msgstr ""
 
+#: /views/elements/footer.ctp:4
+msgid "%s Social Web Gallery %s in %.3fs. Layout based on %s, Icons by %s"
+msgstr ""
+
 #: /views/elements/menu.ctp:19;44
 #: /views/explorer/index.ctp:1
 #: /views/images/notfound.ctp:3
+#: /views/themed/mobile/explorer/index.ctp:1
 msgid "Explorer"
 msgstr ""
 
@@ -674,6 +681,7 @@ msgstr ""
 #: /views/explorer/search.ctp:38
 #: /views/groups/edit.ctp:40
 #: /views/guests/edit.ctp:41;70
+#: /views/helpers/image_data.php:244
 msgid "Group"
 msgstr ""
 
@@ -780,13 +788,13 @@ msgid "Everyone"
 msgstr ""
 
 #: /views/explorer/index.ctp:157
-#: /views/helpers/image_data.php:470
+#: /views/helpers/image_data.php:254;470
 msgid "Users"
 msgstr ""
 
 #: /views/explorer/index.ctp:158
 #: /views/explorer/search.ctp:40
-#: /views/helpers/image_data.php:469
+#: /views/helpers/image_data.php:250;469
 msgid "Group members"
 msgstr ""
 
@@ -921,6 +929,7 @@ msgstr ""
 #: /views/setup/config.ctp:13
 #: /views/setup/user.ctp:9
 #: /views/users/admin_add.ctp:8
+#: /views/users/admin_index.ctp:15
 #: /views/users/login.ctp:7
 #: /views/users/password.ctp:7
 #: /views/users/register.ctp:7
@@ -999,6 +1008,7 @@ msgstr ""
 #: /views/groups/index.ctp:11
 #: /views/guests/edit.ctp:42
 #: /views/guests/index.ctp:11
+#: /views/helpers/file_list.php:137
 #: /views/helpers/image_data.php:419
 #: /views/users/admin_index.ctp:20
 #: /views/users/admin_path.ctp:13
@@ -1009,7 +1019,8 @@ msgstr ""
 msgid "Do you really want to delete the member '%s' from this group '%s'?"
 msgstr ""
 
-#: /views/groups/edit.ctp:26
+#: /views/groups/edit.ctp:26;26
+#: /views/groups/index.ctp:26;26
 #: /views/guests/index.ctp:26
 #: /views/users/admin_index.ctp:48;48
 #: /views/users/admin_path.ctp:22
@@ -1035,6 +1046,10 @@ msgstr ""
 
 #: /views/groups/index.ctp:10
 msgid "Members"
+msgstr ""
+
+#: /views/groups/index.ctp:21
+msgid "Do you realy want to delete the group '%s'?"
 msgstr ""
 
 #: /views/groups/index.ctp:35
@@ -1233,6 +1248,79 @@ msgstr ""
 msgid "Pagesize"
 msgstr ""
 
+#: /views/helpers/file_list.php:82
+msgid "Delete folder %s?"
+msgstr ""
+
+#: /views/helpers/file_list.php:95
+msgid "Unlink media from this file"
+msgstr ""
+
+#: /views/helpers/file_list.php:105
+msgid "Download %s"
+msgstr ""
+
+#: /views/helpers/file_list.php:123
+msgid "(parent folder)"
+msgstr ""
+
+#: /views/helpers/file_list.php:125
+msgid "(this folder)"
+msgstr ""
+
+#: /views/helpers/file_list.php:137
+msgid "Media"
+msgstr ""
+
+#: /views/helpers/file_list.php:137
+#: /views/images/view.ctp:62
+msgid "Size"
+msgstr ""
+
+#: /views/helpers/image_data.php:224
+msgid "%s can edit the meta data"
+msgstr ""
+
+#: /views/helpers/image_data.php:226
+msgid "%s can edit the tags"
+msgstr ""
+
+#: /views/helpers/image_data.php:231
+msgid "%s can download this media"
+msgstr ""
+
+#: /views/helpers/image_data.php:233
+msgid "%s an view this media"
+msgstr ""
+
+#: /views/helpers/image_data.php:244
+msgid "Access for group members"
+msgstr ""
+
+#: /views/helpers/image_data.php:247
+msgid "This media belongs to the group '%s'"
+msgstr ""
+
+#: /views/helpers/image_data.php:253
+msgid "users:"
+msgstr ""
+
+#: /views/helpers/image_data.php:253
+msgid "Access for users"
+msgstr ""
+
+#: /views/helpers/image_data.php:257
+msgid "public:"
+msgstr ""
+
+#: /views/helpers/image_data.php:257
+msgid "Access for the public"
+msgstr ""
+
+#: /views/helpers/image_data.php:258
+msgid "The public"
+msgstr ""
+
 #: /views/helpers/image_data.php:271
 msgid "View media of previous dates"
 msgstr ""
@@ -1402,10 +1490,6 @@ msgstr ""
 
 #: /views/images/view.ctp:61
 msgid "Last modified"
-msgstr ""
-
-#: /views/images/view.ctp:62
-msgid "Size"
 msgstr ""
 
 #: /views/images/view.ctp:65
@@ -1683,6 +1767,14 @@ msgstr ""
 msgid "Welcome text"
 msgstr ""
 
+#: /views/themed/mobile/elements/footer.ctp:1
+msgid "%s Social Web Gallery %s - mobile version"
+msgstr ""
+
+#: /views/themed/mobile/elements/header.ctp:1
+msgid "mobile"
+msgstr ""
+
 #: /views/themed/mobile/explorer/index.ctp:49
 #: /views/themed/mobile/images/view.ctp:47
 msgid "Location"
@@ -1726,12 +1818,28 @@ msgstr ""
 msgid "Next >>"
 msgstr ""
 
+#: /views/users/admin_index.ctp:16
+msgid "Firstname"
+msgstr ""
+
+#: /views/users/admin_index.ctp:17
+msgid "Lastname"
+msgstr ""
+
+#: /views/users/admin_index.ctp:19
+msgid "User role"
+msgstr ""
+
 #: /views/users/admin_index.ctp:34
 msgid "SysOp"
 msgstr ""
 
 #: /views/users/admin_index.ctp:37
 msgid "Nobody"
+msgstr ""
+
+#: /views/users/admin_index.ctp:39
+msgid "Unknown"
 msgstr ""
 
 #: /views/users/admin_index.ctp:44

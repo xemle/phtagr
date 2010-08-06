@@ -1,4 +1,4 @@
-<h1><?php echo h($option->get('general.title', 'phTagr.')); ?><span class="subheader">mobile</span></h1>
+<h1><?php echo h($option->get('general.title', 'phTagr.')); ?><span class="subheader"><?php __('mobile'); ?></span></h1>
 <div class="login">
 <?php 
   if ($session->check('User.id')) {
