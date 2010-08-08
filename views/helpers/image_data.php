@@ -184,14 +184,14 @@ class ImageDataHelper extends AppHelper {
     @return Link of the date search */
   function getDateLink(&$media, $option = false) {
     $date = $media['Media']['date'];
-    $user = array();
+    $extra = array('show' => $this->Search->getShow());
     if ($this->Search->getUser()) {
-      $user['user'] = $this->Search->getUser();
+      $extra['user'] = $this->Search->getUser();
     }
     if ($option == 'from') {
-      return $this->Search->getUri(array('from' => $date, 'sort' => '-date'), $user);
+      return $this->Search->getUri(array('from' => $date, 'sort' => '-date'), $extra);
     } elseif ($option == 'to') {
-      return $this->Search->getUri(array('to' => $date, 'sort' => 'date'), $user);
+      return $this->Search->getUri(array('to' => $date, 'sort' => 'date'), $extra);
     } elseif (preg_match('/^(\d+(.\d+)?)([hdm])$/', $option, $matches)) {
       $offset = $matches[1].$matches[2];
       switch ($matches[3]) {
@@ -213,7 +213,7 @@ class ImageDataHelper extends AppHelper {
 
     $from = date('Y-m-d H:i:s', strtotime($date) - $offset);
     $to = date('Y-m-d H:i:s', strtotime($date) + $offset);
-    return $this->Search->getUri(array('from' => $from, 'to' => $to), $user);
+    return $this->Search->getUri(array('from' => $from, 'to' => $to), $extra);
   }
 
   /** Returns an single icon of a acl */
@@ -563,10 +563,10 @@ class ImageDataHelper extends AppHelper {
       return false;
     }
     $folder = substr($file['path'], strlen($userRoot));
-    if (DS == '/') {
+    if (DS == '\\') {
       $folder = implode('/', explode(DS, $folder));
     }
-    return $folder;
+    return trim($folder, '/');
   }
 
   /** Returns the folder link of the media 
