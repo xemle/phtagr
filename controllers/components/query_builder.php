@@ -363,7 +363,7 @@ class QueryBuilderComponent extends Object
   }
 
   function buildFolder(&$data, &$query, $value) {
-    $query['conditions'][] = $this->_buildCondition("File.path", $value);
+    $query['conditions'][] = $this->_buildCondition("File.path", $value . '%', array('operand' => 'LIKE'));
     $query['conditions'][] = "FileCount > 0";
     $query['_counts'][] = "FileCount";
   }

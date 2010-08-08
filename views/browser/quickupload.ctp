@@ -14,7 +14,7 @@
   $count++;
 ?>
 <?php endforeach; ?></p>
-<p><?php echo sprintf(__("See all uploaded media of today %s", true), $html->link(__("here", true), "/explorer/user/" . $session->read('User.username') . "/sort:newest")); ?>
+<p><?php echo sprintf(__("See all uploaded media of today %s", true), $html->link(__("here", true), "/explorer/user/" . $session->read('User.username') . "/folder/" . date('Y/Y-m-d', time()))); ?>
 <?php endif; // imports ?>
 
 <?php if ($free > 0): ?>

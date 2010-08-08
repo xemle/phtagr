@@ -526,5 +526,67 @@ class ImageDataHelper extends AppHelper {
     }
     return false;
   }
+
+  /** Returns the first file of a media which has the dependend flag
+    @param media Media model data
+    @result File model data or null */
+  function _getFirstDependendFile($media) {
+    if (!isset($media['File'])) {
+      return null;
+    }
+    foreach ($media['File'] as $file) {
+      if (isset($file['flag']) && ($file['flag'] & FILE_FLAG_DEPENDENT) > 0) {
+        return $file;
+      }
+    }
+    return null;
+  }
+
+  /** Returns the upload folder of an internal file
+    @param file
+    @return Relative upload folder or false on error */
+  function _getUploadFolder($file) {
+    if (!isset($file['user_id']) ||
+      !isset($file['flag']) ||
+      !isset($file['path'])) {
+      Logger::err("Invalide input");
+      Logger::trace($file);
+      return false;
+    }
+    if ($file['flag'] & FILE_FLAG_EXTERNAL > 0) {
+      Logger::trace("External files are not supported");
+      return false;
+    }
+    $userRoot = USER_DIR . $file['user_id'] . DS . 'files' . DS;
+    if (strpos($file['path'], $userRoot) !== 0) {
+      Logger::trace("Invalid upload path {$file['path']}");
+      return false;
+    }
+    $folder = substr($file['path'], strlen($userRoot));
+    if (DS == '/') {
+      $folder = implode('/', explode(DS, $folder));
+    }
+    return $folder;
+  }
+
+  /** Returns the folder link of the media 
+    @param media Media model data
+    @return Link string for user's folder of the media for the explorer */
+  function getFolderLinks($media) {
+    $file = $this->_getFirstDependendFile($media);
+    $folder = $this->_getUploadFolder($file);
+    if (!$folder) {
+      return false;
+    }
+    $paths = explode('/', $folder);
+    $links = array();
+    $base = '/explorer/user/'.$media['User']['username'].'/folder';
+    $links[] = $this->Html->link('root', $base);
+    foreach ($paths as $path) {
+      $base .= '/' . $path;
+      $links[] = $this->Html->link($path, $base);
+    }
+    return $links;
+  }
 }
 ?>

@@ -56,6 +56,10 @@ echo $navigator->prevMedia().' '.$navigator->up().' '.$navigator->nextMedia();
     }
     $cells[] = array(__("File(s)", true), implode(', ', $files));
   }
+  $folders = $imageData->getFolderLinks($this->data);
+  if ($folders) {
+    $cells[] = array(__("Folder", true), implode(' / ', $folders));
+  }
   $cells[] = array(__("View Count", true), $this->data['Media']['clicks']);
   $cells[] = array(__("Created", true), $time->relativeTime($this->data['Media']['created']));
   $cells[] = array(__("Last modified", true), $time->relativeTime($this->data['Media']['modified']));
