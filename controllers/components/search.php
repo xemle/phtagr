@@ -73,6 +73,7 @@ class SearchComponent extends Search
     'pos' => false,
     'show' => '12',
     'sort' => 'default',
+    'folder' => false
     );
 
   function initialize(&$controller) {
