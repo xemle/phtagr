@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: phTagr\n"
 "POT-Creation-Date: 2010-08-06 20:07+0200\n"
 "PO-Revision-Date: \n"
-"Last-Translator: Craig Tislar <edmfk@hot.ee>\n"
+"Last-Translator: Elena Vetrugno <evetrugno@gmx.de>\n"
 "Language-Team: Craig Tislar <edmfk@hot.ee>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1545,7 +1545,7 @@ msgstr "Järgnevad viited sisaldavad sinu konto autentimisvõtmeid. Nende viidet
 
 #: /views/options/rss.ctp:22
 msgid "Click %s to renew the authentication key. All previous keys become invalid."
-msgstr "Klõpsa % autentimisvõtme uuendamiseks. Kõik eelmised võtmed muutuvad kõlbmatuks."
+msgstr "Klõpsa %s autentimisvõtme uuendamiseks. Kõik eelmised võtmed muutuvad kõlbmatuks."
 
 #: /views/setup/admin_upgrade.ctp:1
 #: /views/setup/admin_uptodate.ctp:1

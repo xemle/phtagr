@@ -57,7 +57,7 @@ foreach ($this->data as $media): ?>
   }
   $extra = array();
   if ($media['Media']['clicks'] > 0) {
-    $extra[] = sprintf(__("%d %s", true), $media['Media']['clicks'], $html->image('icons/eye.png', array('alt' => __('Views', true), 'title' => sprintf("%d views", true), $media['Media']['clicks'])));
+    $extra[] = sprintf("%d %s", $media['Media']['clicks'], $html->image('icons/eye.png', array('alt' => __('Views', true), 'title' => sprintf("%d views", true), $media['Media']['clicks'])));
   }
   if (count($media['Comment'])) {
     $extra[] = sprintf(__("%d %s", true), count($media['Comment']), $html->image('icons/comments.png', array('alt' => __('Comments', true), 'title' => sprintf(__("%d comments", true), count($media['Comment'])))));

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2010-08-13 21:16+0200\n"
+"POT-Creation-Date: 2010-08-13 22:15+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -764,13 +764,13 @@ msgstr ""
 msgid "by %s"
 msgstr ""
 
-#: /views/explorer/index.ctp:60;63
-msgid "%d %s"
-msgstr ""
-
 #: /views/explorer/index.ctp:60
 #: /views/helpers/explorer_menu.php:150
 msgid "Views"
+msgstr ""
+
+#: /views/explorer/index.ctp:63
+msgid "%d %s"
 msgstr ""
 
 #: /views/explorer/index.ctp:63

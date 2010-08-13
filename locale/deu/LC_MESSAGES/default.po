@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2010-08-06 20:00+0200\n"
+"POT-Creation-Date: 2010-08-13 22:15+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Elena Vetrugno <evetrugno@gmx.de>\n"
 "Language-Team: \n"
@@ -141,7 +141,7 @@ msgstr "Kommentar wurde gelöscht"
 msgid "[Keep]"
 msgstr "[Beibehalten]"
 
-#: /controllers/explorer_controller.php:52
+#: /controllers/explorer_controller.php:52;594
 #: /controllers/options_controller.php:73
 msgid "[No Group]"
 msgstr "[Keine Gruppe]"
@@ -363,8 +363,6 @@ msgid "Registration"
 msgstr "Registration"
 
 #: /tests/cases/controllers/components/upload.test.php:14
-#: /tests/cases.bak/components/upload.test.php:14
-#: /tests/cases.bak/controllers/components/upload.test.php:14
 msgid "Test file directory %s must be writeable"
 msgstr "Testverzeichnis %s muss schreibbar sein"
 
@@ -571,49 +569,55 @@ msgid "Unsynced files"
 msgstr "Unsynchronisierte Medien"
 
 #: /views/elements/comment.ctp:7
+#: /views/explorer/index.ctp:63
 #: /views/guests/edit.ctp:19
 msgid "Comments"
 msgstr "Kommentare"
 
-#: /views/elements/comment.ctp:22
+#: /views/elements/comment.ctp:19
+msgid "%s said %s"
+msgstr "%s meinte %s"
+
+#: /views/elements/comment.ctp:23
 msgid "(delete)"
 msgstr "(löschen)"
 
-#: /views/elements/comment.ctp:34
+#: /views/elements/comment.ctp:35
 msgid "Add new Comment"
 msgstr "Kommentar hinzufügen"
 
-#: /views/elements/comment.ctp:42
+#: /views/elements/comment.ctp:43
 #: /views/explorer/search.ctp:30
 #: /views/groups/add.ctp:9
 #: /views/groups/index.ctp:9
 #: /views/guests/edit.ctp:23
 #: /views/guests/index.ctp:9
+#: /views/helpers/explorer_menu.php:154
 #: /views/helpers/file_list.php:137
 msgid "Name"
 msgstr "Name"
 
-#: /views/elements/comment.ctp:43
+#: /views/elements/comment.ctp:44
 msgid "Will not be published"
 msgstr "Wird nicht veröffentlicht"
 
-#: /views/elements/comment.ctp:44
+#: /views/elements/comment.ctp:45
 msgid "Optional"
 msgstr "Optional"
 
-#: /views/elements/comment.ctp:48
+#: /views/elements/comment.ctp:49
 msgid "Verification"
 msgstr "Verfikation"
 
-#: /views/elements/comment.ctp:52
+#: /views/elements/comment.ctp:53
 msgid "Comment"
 msgstr "Kommentar"
 
-#: /views/elements/comment.ctp:53
+#: /views/elements/comment.ctp:54
 msgid "Notify me on new comments"
 msgstr "Benachrichtige mich bei neuen Kommentaren"
 
-#: /views/elements/comment.ctp:56
+#: /views/elements/comment.ctp:57
 msgid "Add Comment"
 msgstr "Kommentar hinzufügen"
 
@@ -712,7 +716,7 @@ msgstr "Datum"
 #: /views/explorer/edittag.ctp:8
 #: /views/explorer/index.ctp:119
 #: /views/explorer/search.ctp:6
-#: /views/helpers/explorer_menu.php:207
+#: /views/helpers/explorer_menu.php:211
 #: /views/helpers/image_data.php:353
 #: /views/themed/mobile/explorer/index.ctp:31
 #: /views/themed/mobile/images/view.ctp:29
@@ -722,7 +726,7 @@ msgstr "Schlüsselwörter"
 #: /views/explorer/editmeta.ctp:18
 #: /views/explorer/index.ctp:126
 #: /views/explorer/search.ctp:7
-#: /views/helpers/explorer_menu.php:212
+#: /views/helpers/explorer_menu.php:216
 #: /views/helpers/image_data.php:356
 #: /views/themed/mobile/explorer/index.ctp:40
 #: /views/themed/mobile/images/view.ctp:38
@@ -753,6 +757,23 @@ msgstr "Land"
 #: /views/explorer/index.ctp:145
 msgid "Geo data"
 msgstr "Geodaten"
+
+#: /views/explorer/index.ctp:56
+msgid "by %s"
+msgstr "von %s"
+
+#: /views/explorer/index.ctp:60
+#: /views/helpers/explorer_menu.php:150
+msgid "Views"
+msgstr "Angeschaut"
+
+#: /views/explorer/index.ctp:63
+msgid "%d %s"
+msgstr "%d %s"
+
+#: /views/explorer/index.ctp:63
+msgid "%d comments"
+msgstr "%d Kommentare"
 
 #: /views/explorer/index.ctp:87
 msgid "Select All"
@@ -842,7 +863,7 @@ msgid "See more results of location"
 msgstr "Mehr Ergebnisse für Orte"
 
 #: /views/explorer/search.ctp:1
-#: /views/helpers/explorer_menu.php:200
+#: /views/helpers/explorer_menu.php:204
 msgid "Advanced Search"
 msgstr "Erweiterte Suche"
 
@@ -851,7 +872,7 @@ msgid "E.g. includeTag, -excludeTag"
 msgstr "Z.B. Wort, -ohne Wort"
 
 #: /views/explorer/search.ctp:8
-#: /views/helpers/explorer_menu.php:217
+#: /views/helpers/explorer_menu.php:221
 #: /views/helpers/image_data.php:367
 msgid "Locations"
 msgstr "Orte"
@@ -869,7 +890,7 @@ msgid "Date to"
 msgstr "Enddatum"
 
 #: /views/explorer/search.ctp:14
-#: /views/helpers/explorer_menu.php:223
+#: /views/helpers/explorer_menu.php:227
 msgid "Options"
 msgstr "Optionen"
 
@@ -886,6 +907,7 @@ msgid "Newest"
 msgstr "Neuste Medien"
 
 #: /views/explorer/search.ctp:19
+#: /views/helpers/explorer_menu.php:146
 msgid "Changes"
 msgstr "Änderungen"
 
@@ -1219,16 +1241,32 @@ msgid "Order"
 msgstr "Sortierung"
 
 #: /views/helpers/explorer_menu.php:130
+msgid "date asc"
+msgstr "Datum aufsteigend"
+
+#: /views/helpers/explorer_menu.php:130
 msgid "Show oldest first"
 msgstr "Älteste zuerst"
+
+#: /views/helpers/explorer_menu.php:134
+msgid "newest"
+msgstr "neuste"
 
 #: /views/helpers/explorer_menu.php:134
 msgid "Show newest first"
 msgstr "Neueste zuerst"
 
 #: /views/helpers/explorer_menu.php:138
+msgid "pouplarity"
+msgstr "populärste"
+
+#: /views/helpers/explorer_menu.php:138
 msgid "Show popular first"
 msgstr "Beliebteste zuerst"
+
+#: /views/helpers/explorer_menu.php:142
+msgid "random"
+msgstr "zufällig"
 
 #: /views/helpers/explorer_menu.php:142
 msgid "Show random order"
@@ -1242,7 +1280,11 @@ msgstr "Änderung zuerst"
 msgid "Show last views first"
 msgstr "Zuletzt besuchte zuerst"
 
-#: /views/helpers/explorer_menu.php:167
+#: /views/helpers/explorer_menu.php:154
+msgid "Order by name"
+msgstr "Nach Namen sortieren"
+
+#: /views/helpers/explorer_menu.php:171
 msgid "Pagesize"
 msgstr "Seitengröße"
 
@@ -1271,7 +1313,7 @@ msgid "Media"
 msgstr "Media"
 
 #: /views/helpers/file_list.php:137
-#: /views/images/view.ctp:62
+#: /views/images/view.ctp:66
 msgid "Size"
 msgstr "Größe"
 
@@ -1312,8 +1354,8 @@ msgid "public:"
 msgstr "Öffentlich:"
 
 #: /views/helpers/image_data.php:257
-msgid "Access for public access"
-msgstr "Zugriff für die Öffentlichkeit"
+msgid "Access for the public"
+msgstr "Zugriff für alle"
 
 #: /views/helpers/image_data.php:258
 msgid "The public"
@@ -1478,35 +1520,39 @@ msgstr "Details"
 msgid "File(s)"
 msgstr "Dateien"
 
-#: /views/images/view.ctp:59
+#: /views/images/view.ctp:61
+msgid "Folder"
+msgstr "Verzeichnis"
+
+#: /views/images/view.ctp:63
 msgid "View Count"
 msgstr "Anzahl der Ansichten"
 
-#: /views/images/view.ctp:60
+#: /views/images/view.ctp:64
 msgid "Created"
 msgstr "Erstellt"
 
-#: /views/images/view.ctp:61
+#: /views/images/view.ctp:65
 msgid "Last modified"
 msgstr "Zuletzt modifiziert"
 
-#: /views/images/view.ctp:65
+#: /views/images/view.ctp:69
 msgid "Model"
 msgstr "Model"
 
-#: /views/images/view.ctp:68
+#: /views/images/view.ctp:72
 msgid "Duration"
 msgstr "Dauer"
 
-#: /views/images/view.ctp:71
+#: /views/images/view.ctp:75
 msgid "Aperture"
 msgstr "Blende"
 
-#: /views/images/view.ctp:74
+#: /views/images/view.ctp:78
 msgid "Shutter"
 msgstr "Verschlusszeit"
 
-#: /views/images/view.ctp:77
+#: /views/images/view.ctp:81
 msgid "ISO"
 msgstr "ISO"
 
