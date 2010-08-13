@@ -11,13 +11,14 @@
 <div class="comment <?php echo ($count++%2)?'even':'odd'; ?>">
 <div class="meta">
 <span class="from"><?php 
+  $name = $comment['name'];
   if (!empty($comment['url'])) {
-    echo $html->link($comment['name'], $comment['url']);
-  } else {
-    echo $comment['name'];
-  } ?></span> said 
-<span class="date"><?php echo $time->relativeTime($comment['date']); ?></span>
-<?php 
+    $name = $html->link($comment['name'], $comment['url']);
+  }  
+  $time = $html->tag('span', $time->relativeTime($comment['date']), array('class' => 'date'));
+  printf(__("%s said %s", true), $name, $time);
+?>
+<?php
   if ($this->data['Media']['isOwner'] || $comment['user_id'] == $userId) {
     echo $html->link(__('(delete)', true), '/comments/delete/'.$comment['id'].'/'.$searchParams);
   }

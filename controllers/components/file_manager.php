@@ -29,7 +29,12 @@ class FileManagerComponent extends Object {
 
   function initialize(&$controller) {
     $this->controller = $controller;
-    $this->MyFile = $controller->MyFile;
+    if (!empty($controller->MyFile)) {
+      $this->MyFile = $controller->MyFile;
+    } else {
+      App::import('model', 'MyFile');
+      $this->MyFile = new MyFile();
+    }
     $this->User = $controller->User;
   }
 

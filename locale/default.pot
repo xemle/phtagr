@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2010-08-06 20:07+0200\n"
+"POT-Creation-Date: 2010-08-13 21:16+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -143,7 +143,7 @@ msgstr ""
 msgid "[Keep]"
 msgstr ""
 
-#: /controllers/explorer_controller.php:52
+#: /controllers/explorer_controller.php:52;594
 #: /controllers/options_controller.php:73
 msgid "[No Group]"
 msgstr ""
@@ -365,8 +365,6 @@ msgid "Registration"
 msgstr ""
 
 #: /tests/cases/controllers/components/upload.test.php:14
-#: /tests/cases.bak/components/upload.test.php:14
-#: /tests/cases.bak/controllers/components/upload.test.php:14
 msgid "Test file directory %s must be writeable"
 msgstr ""
 
@@ -573,49 +571,55 @@ msgid "Unsynced files"
 msgstr ""
 
 #: /views/elements/comment.ctp:7
+#: /views/explorer/index.ctp:63
 #: /views/guests/edit.ctp:19
 msgid "Comments"
 msgstr ""
 
-#: /views/elements/comment.ctp:22
+#: /views/elements/comment.ctp:19
+msgid "%s said %s"
+msgstr ""
+
+#: /views/elements/comment.ctp:23
 msgid "(delete)"
 msgstr ""
 
-#: /views/elements/comment.ctp:34
+#: /views/elements/comment.ctp:35
 msgid "Add new Comment"
 msgstr ""
 
-#: /views/elements/comment.ctp:42
+#: /views/elements/comment.ctp:43
 #: /views/explorer/search.ctp:30
 #: /views/groups/add.ctp:9
 #: /views/groups/index.ctp:9
 #: /views/guests/edit.ctp:23
 #: /views/guests/index.ctp:9
+#: /views/helpers/explorer_menu.php:154
 #: /views/helpers/file_list.php:137
 msgid "Name"
 msgstr ""
 
-#: /views/elements/comment.ctp:43
+#: /views/elements/comment.ctp:44
 msgid "Will not be published"
 msgstr ""
 
-#: /views/elements/comment.ctp:44
+#: /views/elements/comment.ctp:45
 msgid "Optional"
 msgstr ""
 
-#: /views/elements/comment.ctp:48
+#: /views/elements/comment.ctp:49
 msgid "Verification"
 msgstr ""
 
-#: /views/elements/comment.ctp:52
+#: /views/elements/comment.ctp:53
 msgid "Comment"
 msgstr ""
 
-#: /views/elements/comment.ctp:53
+#: /views/elements/comment.ctp:54
 msgid "Notify me on new comments"
 msgstr ""
 
-#: /views/elements/comment.ctp:56
+#: /views/elements/comment.ctp:57
 msgid "Add Comment"
 msgstr ""
 
@@ -714,7 +718,7 @@ msgstr ""
 #: /views/explorer/edittag.ctp:8
 #: /views/explorer/index.ctp:119
 #: /views/explorer/search.ctp:6
-#: /views/helpers/explorer_menu.php:207
+#: /views/helpers/explorer_menu.php:211
 #: /views/helpers/image_data.php:353
 #: /views/themed/mobile/explorer/index.ctp:31
 #: /views/themed/mobile/images/view.ctp:29
@@ -724,7 +728,7 @@ msgstr ""
 #: /views/explorer/editmeta.ctp:18
 #: /views/explorer/index.ctp:126
 #: /views/explorer/search.ctp:7
-#: /views/helpers/explorer_menu.php:212
+#: /views/helpers/explorer_menu.php:216
 #: /views/helpers/image_data.php:356
 #: /views/themed/mobile/explorer/index.ctp:40
 #: /views/themed/mobile/images/view.ctp:38
@@ -754,6 +758,23 @@ msgstr ""
 #: /views/explorer/editmeta.ctp:42
 #: /views/explorer/index.ctp:145
 msgid "Geo data"
+msgstr ""
+
+#: /views/explorer/index.ctp:56
+msgid "by %s"
+msgstr ""
+
+#: /views/explorer/index.ctp:60;63
+msgid "%d %s"
+msgstr ""
+
+#: /views/explorer/index.ctp:60
+#: /views/helpers/explorer_menu.php:150
+msgid "Views"
+msgstr ""
+
+#: /views/explorer/index.ctp:63
+msgid "%d comments"
 msgstr ""
 
 #: /views/explorer/index.ctp:87
@@ -844,7 +865,7 @@ msgid "See more results of location"
 msgstr ""
 
 #: /views/explorer/search.ctp:1
-#: /views/helpers/explorer_menu.php:200
+#: /views/helpers/explorer_menu.php:204
 msgid "Advanced Search"
 msgstr ""
 
@@ -853,7 +874,7 @@ msgid "E.g. includeTag, -excludeTag"
 msgstr ""
 
 #: /views/explorer/search.ctp:8
-#: /views/helpers/explorer_menu.php:217
+#: /views/helpers/explorer_menu.php:221
 #: /views/helpers/image_data.php:367
 msgid "Locations"
 msgstr ""
@@ -871,7 +892,7 @@ msgid "Date to"
 msgstr ""
 
 #: /views/explorer/search.ctp:14
-#: /views/helpers/explorer_menu.php:223
+#: /views/helpers/explorer_menu.php:227
 msgid "Options"
 msgstr ""
 
@@ -888,6 +909,7 @@ msgid "Newest"
 msgstr ""
 
 #: /views/explorer/search.ctp:19
+#: /views/helpers/explorer_menu.php:146
 msgid "Changes"
 msgstr ""
 
@@ -1221,7 +1243,15 @@ msgid "Order"
 msgstr ""
 
 #: /views/helpers/explorer_menu.php:130
+msgid "date asc"
+msgstr ""
+
+#: /views/helpers/explorer_menu.php:130
 msgid "Show oldest first"
+msgstr ""
+
+#: /views/helpers/explorer_menu.php:134
+msgid "newest"
 msgstr ""
 
 #: /views/helpers/explorer_menu.php:134
@@ -1229,7 +1259,15 @@ msgid "Show newest first"
 msgstr ""
 
 #: /views/helpers/explorer_menu.php:138
+msgid "pouplarity"
+msgstr ""
+
+#: /views/helpers/explorer_menu.php:138
 msgid "Show popular first"
+msgstr ""
+
+#: /views/helpers/explorer_menu.php:142
+msgid "random"
 msgstr ""
 
 #: /views/helpers/explorer_menu.php:142
@@ -1244,7 +1282,11 @@ msgstr ""
 msgid "Show last views first"
 msgstr ""
 
-#: /views/helpers/explorer_menu.php:167
+#: /views/helpers/explorer_menu.php:154
+msgid "Order by name"
+msgstr ""
+
+#: /views/helpers/explorer_menu.php:171
 msgid "Pagesize"
 msgstr ""
 
@@ -1273,7 +1315,7 @@ msgid "Media"
 msgstr ""
 
 #: /views/helpers/file_list.php:137
-#: /views/images/view.ctp:62
+#: /views/images/view.ctp:66
 msgid "Size"
 msgstr ""
 
@@ -1480,35 +1522,39 @@ msgstr ""
 msgid "File(s)"
 msgstr ""
 
-#: /views/images/view.ctp:59
+#: /views/images/view.ctp:61
+msgid "Folder"
+msgstr ""
+
+#: /views/images/view.ctp:63
 msgid "View Count"
 msgstr ""
 
-#: /views/images/view.ctp:60
+#: /views/images/view.ctp:64
 msgid "Created"
 msgstr ""
 
-#: /views/images/view.ctp:61
+#: /views/images/view.ctp:65
 msgid "Last modified"
 msgstr ""
 
-#: /views/images/view.ctp:65
+#: /views/images/view.ctp:69
 msgid "Model"
 msgstr ""
 
-#: /views/images/view.ctp:68
+#: /views/images/view.ctp:72
 msgid "Duration"
 msgstr ""
 
-#: /views/images/view.ctp:71
+#: /views/images/view.ctp:75
 msgid "Aperture"
 msgstr ""
 
-#: /views/images/view.ctp:74
+#: /views/images/view.ctp:78
 msgid "Shutter"
 msgstr ""
 
-#: /views/images/view.ctp:77
+#: /views/images/view.ctp:81
 msgid "ISO"
 msgstr ""
 
