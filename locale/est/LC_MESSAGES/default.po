@@ -1,0 +1,1933 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: phTagr\n"
+"POT-Creation-Date: 2010-08-06 20:07+0200\n"
+"PO-Revision-Date: \n"
+"Last-Translator: Craig Tislar <edmfk@hot.ee>\n"
+"Language-Team: Craig Tislar <edmfk@hot.ee>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Estonian\n"
+"X-Poedit-Country: ESTONIA\n"
+
+#: /app_controller.php:40
+msgid "Recent photos"
+msgstr "Hiljutised fotod"
+
+#: /app_controller.php:41
+msgid "Media RSS of recent photos"
+msgstr "Hiljutiste fotode RSS"
+
+#: /app_controller.php:42
+msgid "Recent comments"
+msgstr "Hiljutised kommentaarid"
+
+#: /controllers/browser_controller.php:50
+#: /views/elements/menu.ctp:37
+msgid "My Files"
+msgstr "Minu failid"
+
+#: /controllers/browser_controller.php:63
+msgid "Import Files"
+msgstr "Impordi faile"
+
+#: /controllers/browser_controller.php:65;67
+#: /views/browser/quickupload.ctp:34
+#: /views/browser/upload.ctp:19
+#: /views/elements/menu.ctp:32
+msgid "Upload"
+msgstr "Lae üles"
+
+#: /controllers/browser_controller.php:69
+msgid "Synchronize"
+msgstr "Sünkroniseeri"
+
+#: /controllers/browser_controller.php:70
+msgid "Overview"
+msgstr "Ülevaade"
+
+#: /controllers/browser_controller.php:312
+msgid "Imported %d files (%d) errors)"
+msgstr "Imporditud %d fail(i) (%d) viga)"
+
+#: /controllers/browser_controller.php:327
+msgid "Media %d was unlinked successfully"
+msgstr "Faili %d link eemaldati edukalt"
+
+#: /controllers/browser_controller.php:344
+msgid "Deleted directory successfully"
+msgstr "Kaust kustutati edukalt"
+
+#: /controllers/browser_controller.php:346
+msgid "Deleted file successfully"
+msgstr "Fail kustutati edukalt"
+
+#: /controllers/browser_controller.php:349
+msgid "Could not delete file or directory"
+msgstr "Ei saanud faili või kausta kustutada"
+
+#: /controllers/browser_controller.php:433
+msgid "Invalid path to create folder"
+msgstr "Kausta loomisel oli vigane rada"
+
+#: /controllers/browser_controller.php:437
+msgid "Could not create folder here: %s"
+msgstr "Ei saa luua kausta siia: %s"
+
+#: /controllers/browser_controller.php:453
+msgid "Could not create folder"
+msgstr "Ei saa luua kausta"
+
+#: /controllers/browser_controller.php:470
+msgid "Your upload quota is exceeded"
+msgstr "Sinu üleslaadimise limiit on ületatud"
+
+#: /controllers/browser_controller.php:577
+msgid "Invalid path for upload"
+msgstr "Vigane üleslaadimise rada"
+
+#: /controllers/browser_controller.php:582
+msgid "Could not upload here: %s"
+msgstr "Ei saa üles laadida siia: %s"
+
+#: /controllers/browser_controller.php:603
+msgid "Uploaded %d and %d extraced file(s)"
+msgstr "Üles laetud %d ja lahti pakitud %d fail(i)"
+
+#: /controllers/browser_controller.php:605
+msgid "Uploaded %d file(s)"
+msgstr "Üles laetud %d fail(i)"
+
+#: /controllers/browser_controller.php:616;624
+msgid "Error: Invalid upload directory"
+msgstr "Viga: vigane üleslaadimise kaust"
+
+#: /controllers/browser_controller.php:634
+msgid "No files uploaded or upload errors"
+msgstr "Ühtegi faili üles ei laetud või tekkis viga üleslaadimisel"
+
+#: /controllers/browser_controller.php:651
+msgid "No files uploaded"
+msgstr "Ühtegi faili üles ei laetud"
+
+#: /controllers/browser_controller.php:659
+msgid "Uploaded %d files with %d errors."
+msgstr "Laeti üles %d fail(i) %d veaga."
+
+#: /controllers/comments_controller.php:57
+msgid "Invalid Comment."
+msgstr "Vigane kommentaar"
+
+#: /controllers/comments_controller.php:115
+msgid "The Comment has been saved"
+msgstr "Kommentaar salvestati"
+
+#: /controllers/comments_controller.php:123
+msgid "The Comment could not be saved. Please, try again."
+msgstr "Kommentaari ei saadud salvestada. Palun proovi uuesti."
+
+#: /controllers/comments_controller.php:225
+msgid "Invalid id for Comment"
+msgstr "Vigane kommentaari ID"
+
+#: /controllers/comments_controller.php:239
+msgid "Comment deleted"
+msgstr "Kommentaar kustutatud"
+
+#: /controllers/explorer_controller.php:51
+#: /views/explorer/index.ctp:155
+msgid "[Keep]"
+msgstr "[Säilita]"
+
+#: /controllers/explorer_controller.php:52
+#: /controllers/options_controller.php:73
+msgid "[No Group]"
+msgstr "[Gruppi pole]"
+
+#: /controllers/groups_controller.php:63
+msgid "Group '%s' already exists"
+msgstr "Grupp '%s' on juba olemas"
+
+#: /controllers/groups_controller.php:69
+msgid "Add successfully group '%s'"
+msgstr "Lisa edukalt grupp '%s'"
+
+#: /controllers/groups_controller.php:72
+msgid "Could not add group '%s'!"
+msgstr "Ei saanud lisada gruppi '%s'!"
+
+#: /controllers/groups_controller.php:81;112;125;149;155
+msgid "Could not find group"
+msgstr "Ei leidnud gruppi"
+
+#: /controllers/groups_controller.php:87
+#: /views/groups/edit.ctp:1
+msgid "Group: %s"
+msgstr "Grupp: %s"
+
+#: /controllers/groups_controller.php:92
+#: /controllers/guests_controller.php:85
+#: /views/groups/index.ctp:23;23
+#: /views/guests/index.ctp:23
+#: /views/users/admin_index.ctp:46;46
+msgid "Edit"
+msgstr "Muuda"
+
+#: /controllers/groups_controller.php:110
+msgid "Successfully deleted group '%s'"
+msgstr "Edukalt kustutati grupp '%s'"
+
+#: /controllers/groups_controller.php:128
+msgid "Could not find user with username '%s'"
+msgstr "Ei suutnud leida kasutajat kasutajanimega '%s'"
+
+#: /controllers/groups_controller.php:136
+msgid "Add user '%s' to group '%s'"
+msgstr "Lisa kasutaja '%s' gruppi '%s'"
+
+#: /controllers/groups_controller.php:138
+msgid "Could not add user '%s' to group '%s'!"
+msgstr "Ei saanud lisada kasutajat '%s' gruppi '%s'!"
+
+#: /controllers/groups_controller.php:160
+msgid "Could not save group"
+msgstr "Ei saanud gruppi salvestada"
+
+#: /controllers/groups_controller.php:164
+msgid "Member was successfully deleted from group '%s'"
+msgstr "Liige kustutati edukalt grupist '%s'"
+
+#: /controllers/groups_controller.php:173
+msgid "List groups"
+msgstr "Gruppide nimekiri"
+
+#: /controllers/groups_controller.php:174
+msgid "Add group"
+msgstr "Lisa grupp"
+
+#: /controllers/guests_controller.php:64
+msgid "Sorry. Username is already taken"
+msgstr "Vabandust. See kasutajanimi on juba kasutuses"
+
+#: /controllers/guests_controller.php:70
+msgid "Guest account '%s' was successfully created"
+msgstr "Külaliskonto '%s' loodi edukalt"
+
+#: /controllers/guests_controller.php:73
+msgid "Sorry. Guest account could not created"
+msgstr "Vabandust. Külaliskontot ei saadud luua"
+
+#: /controllers/guests_controller.php:80
+#: /views/guests/edit.ctp:1
+msgid "Guest: %s"
+msgstr "Külaline: %s"
+
+#: /controllers/guests_controller.php:89
+msgid "Links"
+msgstr "Lingid"
+
+#: /controllers/guests_controller.php:102
+msgid "Sorry. Could not find requested guest"
+msgstr "Vabandust. Ei leidnud nõutud külalist"
+
+#: /controllers/guests_controller.php:111
+msgid "Guest data were saved"
+msgstr "Külalise andmed salvestati"
+
+#: /controllers/guests_controller.php:117
+msgid "Updates could not be saved!"
+msgstr "Uuendusi ei saanud salvestada!"
+
+#: /controllers/guests_controller.php:133
+msgid "Could not find requested guest"
+msgstr "Ei leidnud nõutud külalist"
+
+#: /controllers/guests_controller.php:137
+msgid "Guest account '%s' deleted!"
+msgstr "Külaliskonto '%s' kustutatud!"
+
+#: /controllers/home_controller.php:48
+#: /views/elements/menu.ctp:6
+msgid "Home"
+msgstr "Esileht"
+
+#: /controllers/options_controller.php:60
+msgid "Settings saved"
+msgstr "Seaded salvestatud"
+
+#: /controllers/options_controller.php:85
+msgid "Could not save profile!"
+msgstr "Ei saa profiili salvestada!"
+
+#: /controllers/options_controller.php:88
+msgid "Profile saved"
+msgstr "Profiil salvestatud"
+
+#: /controllers/options_controller.php:118
+#: /views/options/profile.ctp:1
+msgid "Profile"
+msgstr "Profiil"
+
+#: /controllers/options_controller.php:119
+msgid "Guest Accounts"
+msgstr "Külaliskontod"
+
+#: /controllers/options_controller.php:120
+#: /views/groups/index.ctp:1
+#: /views/guests/index.ctp:10
+msgid "Groups"
+msgstr "Grupid"
+
+#: /controllers/options_controller.php:122
+#: /views/explorer/index.ctp:104
+#: /views/options/acl.ctp:1
+msgid "Access Rights"
+msgstr "Juurdepääsu õigused"
+
+#: /controllers/options_controller.php:123
+#: /views/guests/links.ctp:21
+msgid "RSS"
+msgstr "RSS"
+
+#: /controllers/setup_controller.php:303
+msgid "Could not write configuration to '%s'"
+msgstr "Ei saadud kirjutada konfiguratsiooni '%s'"
+
+#: /controllers/setup_controller.php:310
+msgid "Update core settings"
+msgstr "Uuenda põhiseadeid"
+
+#: /controllers/setup_controller.php:406
+msgid "Could not write database configuration file"
+msgstr "Andmebaasi konfiguratsioonifail ei ole kirjutatav "
+
+#: /controllers/setup_controller.php:443
+msgid "Could not connect to database. Please check your database configuration!"
+msgstr "Ei saa andmebaasiga ühendust. Palun kontrolli oma andmebaasi konfiguratsiooni!"
+
+#: /controllers/setup_controller.php:473
+msgid "All required tables are created"
+msgstr "Kõik nõutavad tabelid on loodud"
+
+#: /controllers/setup_controller.php:477
+msgid "Could not create tables correctly. Please see logfile for details"
+msgstr "Ei saa korrektselt tabeleid luua. Palun vaata üksikasju logifailist"
+
+#: /controllers/setup_controller.php:505
+msgid "Admin account was successfully created"
+msgstr "Admini konto edukalt loodud"
+
+#: /controllers/setup_controller.php:509
+msgid "Could not create admin account. Please retry"
+msgstr "Ei saa luua admini kontot. Palun proovi uuesti"
+
+#: /controllers/setup_controller.php:637
+msgid "Database was upgraded successfully"
+msgstr "Andmebaas uuendati edukalt"
+
+#: /controllers/setup_controller.php:640
+msgid "The database could not upgraded completely. The log file might discover the issue"
+msgstr "Andmebaasi ei saadud täielikult uuendada. Logifail võib vastuse anda"
+
+#: /controllers/system_controller.php:69
+#: /views/images/view.ctp:32
+#: /views/options/profile.ctp:6
+#: /views/system/admin_general.ctp:1;6
+#: /views/users/admin_edit.ctp:6
+msgid "General"
+msgstr "Üldinfo"
+
+#: /controllers/system_controller.php:70
+msgid "User Accounts"
+msgstr "Kasutajakontod"
+
+#: /controllers/system_controller.php:71
+#: /views/setup/system.ctp:1
+#: /views/system/admin_external.ctp:6
+msgid "External Programs"
+msgstr "Välised programmid"
+
+#: /controllers/users_controller.php:39
+msgid "List users"
+msgstr "Kasutajate nimekiri"
+
+#: /controllers/users_controller.php:40
+msgid "Add user"
+msgstr "Lisa kasutaja"
+
+#: /controllers/users_controller.php:41
+#: /views/users/admin_register.ctp:5
+msgid "Registration"
+msgstr "Registreerimine"
+
+#: /tests/cases/controllers/components/upload.test.php:14
+#: /tests/cases.bak/components/upload.test.php:14
+#: /tests/cases.bak/controllers/components/upload.test.php:14
+msgid "Test file directory %s must be writeable"
+msgstr "Testifaili kaust %s peab olema kirjutatav"
+
+#: /views/browser/folder.ctp:1
+msgid "Create Folder"
+msgstr "Loo kaust"
+
+#: /views/browser/folder.ctp:5
+#: /views/browser/index.ctp:7;16
+msgid "Location %s"
+msgstr "Asukoht %s "
+
+#: /views/browser/folder.ctp:9
+msgid "Folder Name"
+msgstr "Kausta nimi"
+
+#: /views/browser/folder.ctp:11
+#: /views/groups/add.ctp:13
+#: /views/guests/add.ctp:15
+#: /views/setup/user.ctp:15
+#: /views/users/admin_add.ctp:14
+msgid "Create"
+msgstr "Loo"
+
+#: /views/browser/import.ctp:1
+msgid "Browser"
+msgstr "Lehitseja"
+
+#: /views/browser/import.ctp:5
+msgid "View folder %s"
+msgstr "Vaata kausta"
+
+#: /views/browser/index.ctp:1
+msgid "File Browser"
+msgstr "Failide lehitseja"
+
+#: /views/browser/index.ctp:9;18
+msgid " (%s or %s here)"
+msgstr " (%s või %s siin)"
+
+#: /views/browser/index.ctp:10;19
+#: /views/browser/upload.ctp:10
+msgid "Upload files"
+msgstr "Lae faile üles"
+
+#: /views/browser/index.ctp:11;20
+msgid "create folder"
+msgstr "loo kaust"
+
+#: /views/browser/index.ctp:24
+msgid "Import"
+msgstr "Impordi"
+
+#: /views/browser/quickupload.ctp:1
+msgid "Media Upload"
+msgstr "Failide üleslaadimine"
+
+#: /views/browser/quickupload.ctp:6
+msgid "Your uploaded media"
+msgstr "Sinu üleslaetud failid"
+
+#: /views/browser/quickupload.ctp:17
+msgid "See all uploaded media of today %s"
+msgstr "Vaata kõiki täna üleslaetud faile %s"
+
+#: /views/browser/quickupload.ctp:17
+#: /views/setup/finish.ctp:7
+#: /views/system/admin_external.ctp:15
+msgid "here"
+msgstr "siin"
+
+#: /views/browser/quickupload.ctp:23
+msgid "Upload your photos, videos, GPS logs or ZIP archives here."
+msgstr "Lae oma fotod, videod, GPS logid või ZIP-failid üles siin."
+
+#: /views/browser/quickupload.ctp:25
+msgid "Photos, Videos - ZIP Archives"
+msgstr "Fotod, videod - ZIP-failina"
+
+#: /views/browser/quickupload.ctp:26;27;28;29;30
+#: /views/browser/upload.ctp:11;12;13;14;15
+msgid "File or archive"
+msgstr "Fail või pakitud fail"
+
+#: /views/browser/quickupload.ctp:32
+msgid "You can upload maximal %s and %s at once. ZIP archives are extracted automatically."
+msgstr "Sa võid maksimaalselt üles laadida %s ja korraga %s. ZIP-failid pakitakse automaatselt lahti."
+
+#: /views/browser/quickupload.ctp:37
+#: /views/browser/upload.ctp:22
+msgid "You cannot upload files now. Your upload quota is exceeded."
+msgstr "Sa ei saa praegu faile üles laadida. Sinu üleslaadimise limiit on ületatud."
+
+#: /views/browser/sync.ctp:1
+msgid "Meta Data Synchronization"
+msgstr "Metaandmete sünkroniseerimine"
+
+#: /views/browser/sync.ctp:5
+msgid "phTagr embedds meta data like tags, categories, or (geo) location information direct into the image video files."
+msgstr "phTagr lisab metaandmed, nt sildid, kategooriad või (geo)asukoha info otse faili."
+
+#: /views/browser/sync.ctp:7
+msgid "Note:  In case you are using phTagr with external paths it is recommended to synchronize your images to store this important information within the media file.  After the synchronization these mata data could be read by other image programs or desktop search engines."
+msgstr "Märkus: Juhul, kui sa kasutad phTagr-i koos väliste radadega, siis on soovitav sünkroniseerida oma pildid, et säilitada see tähtis info faili sees.  Pärast sünkroniseerimist neid metaandmeid saab lugeda teiste pilditöötlusprogrammide või töölaua otsisüsteemide poolt."
+
+#: /views/browser/sync.ctp:10
+msgid "You have %d unsynchronized media. Click %s to start the synchronization (this might take some time)"
+msgstr "Sul on %d sünkroniseerimata fail(i). Klõpsa sünkroniseerimise alustamiseks %s (see võib võtta natuke aega)"
+
+#: /views/browser/sync.ctp:10;25
+msgid "sync"
+msgstr "sünkroniseeri"
+
+#: /views/browser/sync.ctp:14
+msgid "All media are synchronized"
+msgstr "Kõik failid on sünkroniseeritud"
+
+#: /views/browser/sync.ctp:18
+msgid "Some files could not be updated with new metadata. Mainly this happens if the files are write protected. Please have a look to the log files for details."
+msgstr "Mõningaid faile ei saadud uute metaandmetega uuendada. Tavaliselt juhtub see siis, kui failid on kirjutuskaitstud. Palun kontrolli üksikasju logifailidest."
+
+#: /views/browser/sync.ctp:23
+msgid "Synchronized %d media."
+msgstr "Sünkroniseeritud %d fail(i)"
+
+#: /views/browser/sync.ctp:25
+msgid " %d media remains unsynced. Click %s to synchronize again"
+msgstr " %d fail(id) jäi(d) sünkroniseerimata. Uuesti sünkroniseerimiseks klõpsa %s"
+
+#: /views/browser/upload.ctp:1
+msgid "File Upload"
+msgstr "Faili üleslaadimine"
+
+#: /views/browser/upload.ctp:6
+msgid "You upload files to folder %s"
+msgstr "Sa laed faile üles kausta %s"
+
+#: /views/browser/upload.ctp:7
+msgid "You can upload maximal %s and %s at once"
+msgstr "Sa võid maksimaalselt üles laadida %s ja korraga %s"
+
+#: /views/browser/upload.ctp:16
+msgid "Extract ZIP archive"
+msgstr "Paki ZIP-fail lahti"
+
+#: /views/browser/view.ctp:1
+msgid "File Overview"
+msgstr "Faili ülevaade"
+
+#: /views/browser/view.ctp:5
+msgid "Description"
+msgstr "Kirjeldus"
+
+#: /views/browser/view.ctp:5
+msgid "Value"
+msgstr "Väärtus"
+
+#: /views/browser/view.ctp:10
+msgid "Files total"
+msgstr "Faile kokku"
+
+#: /views/browser/view.ctp:11
+msgid "Count of images/videos"
+msgstr "Piltide/videote arv"
+
+#: /views/browser/view.ctp:13
+msgid "External images/videos"
+msgstr "Välised pildid/videod"
+
+#: /views/browser/view.ctp:14
+msgid "Bytes total (with external sources)"
+msgstr "Baiti kokku (koos väliste allikatega)"
+
+#: /views/browser/view.ctp:16
+msgid "Bytes total"
+msgstr "Baiti kokku"
+
+#: /views/browser/view.ctp:19
+msgid "Quota (free)"
+msgstr "Limiit (vaba)"
+
+#: /views/browser/view.ctp:21
+msgid "Videos"
+msgstr "Videod"
+
+#: /views/browser/view.ctp:22
+msgid "Public files"
+msgstr "Avalikud failid"
+
+#: /views/browser/view.ctp:23
+msgid "Visible for users"
+msgstr "Nähtavad kasutajatele"
+
+#: /views/browser/view.ctp:24
+msgid "Visible for group members"
+msgstr "Nähtavad grupiliikmetele"
+
+#: /views/browser/view.ctp:25
+msgid "Private files"
+msgstr "Privaatsed failid"
+
+#: /views/browser/view.ctp:26
+msgid "Unsynced files"
+msgstr "Sünkroniseerimata failid"
+
+#: /views/elements/comment.ctp:7
+#: /views/guests/edit.ctp:19
+msgid "Comments"
+msgstr "Kommentaarid"
+
+#: /views/elements/comment.ctp:22
+msgid "(delete)"
+msgstr "(kustuta)"
+
+#: /views/elements/comment.ctp:34
+msgid "Add new Comment"
+msgstr "Lisa uus kommentaar"
+
+#: /views/elements/comment.ctp:42
+#: /views/explorer/search.ctp:30
+#: /views/groups/add.ctp:9
+#: /views/groups/index.ctp:9
+#: /views/guests/edit.ctp:23
+#: /views/guests/index.ctp:9
+#: /views/helpers/file_list.php:137
+msgid "Name"
+msgstr "Nimi"
+
+#: /views/elements/comment.ctp:43
+msgid "Will not be published"
+msgstr "Ei avaldata"
+
+#: /views/elements/comment.ctp:44
+msgid "Optional"
+msgstr "Vajadusel"
+
+#: /views/elements/comment.ctp:48
+msgid "Verification"
+msgstr "Kontrollkood"
+
+#: /views/elements/comment.ctp:52
+msgid "Comment"
+msgstr "Kommentaar"
+
+#: /views/elements/comment.ctp:53
+msgid "Notify me on new comments"
+msgstr "Teavita mind uutest kommentaaridest"
+
+#: /views/elements/comment.ctp:56
+msgid "Add Comment"
+msgstr "Lisa kommentaar"
+
+#: /views/elements/footer.ctp:4
+msgid "%s Social Web Gallery %s in %.3fs. Layout based on %s, Icons by %s"
+msgstr "%s Sotsiaalne veebigalerii %s - %.3fs. Ülesehituse aluseks on %s, kasutatud %s ikoone"
+
+#: /views/elements/menu.ctp:19;44
+#: /views/explorer/index.ctp:1
+#: /views/images/notfound.ctp:3
+#: /views/themed/mobile/explorer/index.ctp:1
+msgid "Explorer"
+msgstr "Lehitseja"
+
+#: /views/elements/menu.ctp:25
+msgid "My Photos"
+msgstr "Minu fotod"
+
+#: /views/elements/topnav.ctp:7
+msgid "System"
+msgstr "Süsteem"
+
+#: /views/elements/topnav.ctp:10
+msgid "Preferences"
+msgstr "Eelistused"
+
+#: /views/elements/topnav.ctp:12
+#: /views/themed/mobile/elements/header.ctp:5
+msgid "Logout"
+msgstr "Logi välja"
+
+#: /views/elements/topnav.ctp:14
+#: /views/themed/mobile/elements/header.ctp:7
+#: /views/users/login.ctp:5;11
+msgid "Login"
+msgstr "Logi sisse"
+
+#: /views/elements/topnav.ctp:16
+msgid "Register"
+msgstr "Registreerima"
+
+#: /views/explorer/editacl.ctp:7
+msgid "Who can view image?"
+msgstr "Kes võib vaadata pilti?"
+
+#: /views/explorer/editacl.ctp:8
+#: /views/explorer/index.ctp:161
+#: /views/options/acl.ctp:15
+msgid "Who can download the image?"
+msgstr "Kes võib pilti alla laadida?"
+
+#: /views/explorer/editacl.ctp:9
+msgid "Who can edit the tags?"
+msgstr "Kes võib silte muuta?"
+
+#: /views/explorer/editacl.ctp:10
+#: /views/explorer/index.ctp:163
+#: /views/options/acl.ctp:17
+msgid "Who can edit all meta data?"
+msgstr "Kes võib muuta metaandmeid?"
+
+#: /views/explorer/editacl.ctp:11
+#: /views/explorer/search.ctp:38
+#: /views/groups/edit.ctp:40
+#: /views/guests/edit.ctp:41;70
+#: /views/helpers/image_data.php:244
+msgid "Group"
+msgstr "Grupp"
+
+#: /views/explorer/editacl.ctp:15
+#: /views/explorer/editmeta.ctp:46
+#: /views/guests/edit.ctp:33
+#: /views/options/acl.ctp:21
+#: /views/options/profile.ctp:26
+#: /views/setup/system.ctp:33
+#: /views/system/admin_external.ctp:20
+#: /views/system/admin_general.ctp:13
+#: /views/users/admin_edit.ctp:33
+#: /views/users/admin_register.ctp:9
+msgid "Save"
+msgstr "Salvesta"
+
+#: /views/explorer/editacl.ctp:16
+#: /views/explorer/editmeta.ctp:47
+#: /views/setup/admin_upgrade.ctp:10
+msgid "Cancel"
+msgstr "Katkesta"
+
+#: /views/explorer/editmeta.ctp:12
+#: /views/explorer/search.ctp:19
+#: /views/helpers/image_data.php:350
+msgid "Date"
+msgstr "Kuupäev "
+
+#: /views/explorer/editmeta.ctp:14
+#: /views/explorer/edittag.ctp:8
+#: /views/explorer/index.ctp:119
+#: /views/explorer/search.ctp:6
+#: /views/helpers/explorer_menu.php:207
+#: /views/helpers/image_data.php:353
+#: /views/themed/mobile/explorer/index.ctp:31
+#: /views/themed/mobile/images/view.ctp:29
+msgid "Tags"
+msgstr "Sildid"
+
+#: /views/explorer/editmeta.ctp:18
+#: /views/explorer/index.ctp:126
+#: /views/explorer/search.ctp:7
+#: /views/helpers/explorer_menu.php:212
+#: /views/helpers/image_data.php:356
+#: /views/themed/mobile/explorer/index.ctp:40
+#: /views/themed/mobile/images/view.ctp:38
+msgid "Categories"
+msgstr "Kategooriad"
+
+#: /views/explorer/editmeta.ctp:22
+#: /views/explorer/index.ctp:130
+msgid "City"
+msgstr "Linn"
+
+#: /views/explorer/editmeta.ctp:26
+#: /views/explorer/index.ctp:134
+msgid "Sublocation"
+msgstr "Täpsem asukoht"
+
+#: /views/explorer/editmeta.ctp:30
+#: /views/explorer/index.ctp:138
+msgid "State"
+msgstr "Riik, osariik"
+
+#: /views/explorer/editmeta.ctp:34
+#: /views/explorer/index.ctp:142
+msgid "Country"
+msgstr "Maa"
+
+#: /views/explorer/editmeta.ctp:42
+#: /views/explorer/index.ctp:145
+msgid "Geo data"
+msgstr "Geoandmed"
+
+#: /views/explorer/index.ctp:87
+msgid "Select All"
+msgstr "Märgista kõik"
+
+#: /views/explorer/index.ctp:88
+msgid "Invert Selection"
+msgstr "Vaheta märgistus"
+
+#: /views/explorer/index.ctp:102
+#: /views/explorer/search.ctp:4
+msgid "Metadata"
+msgstr "Metaandmed"
+
+#: /views/explorer/index.ctp:116
+msgid "E.g. 2008-08-07 15:30"
+msgstr "Nt 21.12.2009 15:30"
+
+#: /views/explorer/index.ctp:121
+msgid "E.g. newtag, -oldtag"
+msgstr "Nt vajalik silt, -mittevajalik silt"
+
+#: /views/explorer/index.ctp:145
+msgid "latitude, longitude"
+msgstr "laiuskraad, pikkuskraad"
+
+#: /views/explorer/index.ctp:156
+#: /views/helpers/image_data.php:471
+#: /views/options/acl.ctp:5
+msgid "Everyone"
+msgstr "Igaüks"
+
+#: /views/explorer/index.ctp:157
+#: /views/helpers/image_data.php:254;470
+msgid "Users"
+msgstr "Kasutajad"
+
+#: /views/explorer/index.ctp:158
+#: /views/explorer/search.ctp:40
+#: /views/helpers/image_data.php:250;469
+msgid "Group members"
+msgstr "Grupi liikmed"
+
+#: /views/explorer/index.ctp:159
+#: /views/helpers/image_data.php:468
+#: /views/options/acl.ctp:8
+msgid "Me only"
+msgstr "Ainult mina"
+
+#: /views/explorer/index.ctp:160
+#: /views/options/acl.ctp:14
+msgid "Who can view the image?"
+msgstr "Kes võib näha seda pilti?"
+
+#: /views/explorer/index.ctp:162
+#: /views/options/acl.ctp:16
+msgid "Who can add tags?"
+msgstr "Kes võib silte lisada?"
+
+#: /views/explorer/index.ctp:164
+#: /views/options/acl.ctp:18
+msgid "Default image group?"
+msgstr "Vaikimisi pildi grupp?"
+
+#: /views/explorer/index.ctp:169
+msgid "Apply"
+msgstr "Rakenda"
+
+#: /views/explorer/quicksearch.ctp:11
+msgid "Sorry, nothing was found for %s"
+msgstr "Vabandust, midagi ei leitud otsitavast %s"
+
+#: /views/explorer/quicksearch.ctp:15
+msgid "Results of %s"
+msgstr "Otsingutulemused: %s"
+
+#: /views/explorer/quicksearch.ctp:31
+msgid "See more results of tag"
+msgstr "Vaata veel tulemusi sildist"
+
+#: /views/explorer/quicksearch.ctp:42
+msgid "See more results of category"
+msgstr "Vaata veel tulemusi kategooriast"
+
+#: /views/explorer/quicksearch.ctp:53
+msgid "See more results of location"
+msgstr "Vaata veel tulemusi asukohast"
+
+#: /views/explorer/search.ctp:1
+#: /views/helpers/explorer_menu.php:200
+msgid "Advanced Search"
+msgstr "Laiendatud otsing"
+
+#: /views/explorer/search.ctp:6
+msgid "E.g. includeTag, -excludeTag"
+msgstr "Nt kaasav silt, -välistav silt"
+
+#: /views/explorer/search.ctp:8
+#: /views/helpers/explorer_menu.php:217
+#: /views/helpers/image_data.php:367
+msgid "Locations"
+msgstr "Asukohad"
+
+#: /views/explorer/search.ctp:10
+msgid "Date from"
+msgstr "Kuupäevast"
+
+#: /views/explorer/search.ctp:10
+msgid "E.g. 2008-08-07"
+msgstr "Nt 14.7.2010"
+
+#: /views/explorer/search.ctp:11
+msgid "Date to"
+msgstr "Kuupäevani"
+
+#: /views/explorer/search.ctp:14
+#: /views/helpers/explorer_menu.php:223
+msgid "Options"
+msgstr "Valikud"
+
+#: /views/explorer/search.ctp:17
+msgid "Page size"
+msgstr "Arv lehel"
+
+#: /views/explorer/search.ctp:19
+msgid "Default"
+msgstr "Vaikimisi"
+
+#: /views/explorer/search.ctp:19
+msgid "Newest"
+msgstr "Uusimad"
+
+#: /views/explorer/search.ctp:19
+msgid "Changes"
+msgstr "Muudetud"
+
+#: /views/explorer/search.ctp:19
+msgid "Random"
+msgstr "Suvaliselt"
+
+#: /views/explorer/search.ctp:19
+msgid "Popularity"
+msgstr "Populaarsemad"
+
+#: /views/explorer/search.ctp:20
+msgid "Sort by"
+msgstr "Järjesta:"
+
+#: /views/explorer/search.ctp:24
+msgid "Advanced"
+msgstr "Laiendatud"
+
+#: /views/explorer/search.ctp:31
+msgid "Any Type"
+msgstr "Igat tüüpi"
+
+#: /views/explorer/search.ctp:31
+msgid "Image or Photos"
+msgstr "Pildid või fotod"
+
+#: /views/explorer/search.ctp:31
+msgid "Video"
+msgstr "Video"
+
+#: /views/explorer/search.ctp:32
+msgid "File Type"
+msgstr "Faili tüüp"
+
+#: /views/explorer/search.ctp:36
+#: /views/guests/add.ctp:9
+#: /views/options/profile.ctp:8
+#: /views/setup/config.ctp:13
+#: /views/setup/user.ctp:9
+#: /views/users/admin_add.ctp:8
+#: /views/users/admin_index.ctp:15
+#: /views/users/login.ctp:7
+#: /views/users/password.ctp:7
+#: /views/users/register.ctp:7
+msgid "Username"
+msgstr "Kasutajanimi"
+
+#: /views/explorer/search.ctp:40
+msgid "Any"
+msgstr "Igaüks"
+
+#: /views/explorer/search.ctp:40
+msgid "Private"
+msgstr "Privaatne"
+
+#: /views/explorer/search.ctp:40
+#: /views/images/view.ctp:50
+#: /views/options/acl.ctp:6
+#: /views/users/admin_edit.ctp:11
+msgid "User"
+msgstr "Kasutaja"
+
+#: /views/explorer/search.ctp:40
+msgid "Public"
+msgstr "Avalik"
+
+#: /views/explorer/search.ctp:41
+msgid "Media visibility"
+msgstr "Failide nägemine"
+
+#: /views/explorer/search.ctp:44
+msgid "AND"
+msgstr "JA"
+
+#: /views/explorer/search.ctp:44
+msgid "OR"
+msgstr "VÕI"
+
+#: /views/explorer/search.ctp:45
+msgid "General Operand"
+msgstr "Peamine operaator"
+
+#: /views/explorer/search.ctp:46
+msgid "Tag operand"
+msgstr "Sildi operaator"
+
+#: /views/explorer/search.ctp:47
+msgid "Category operand"
+msgstr "Kategooria operaator"
+
+#: /views/explorer/search.ctp:48
+msgid "Location operand"
+msgstr "Asukoha operaator"
+
+#: /views/explorer/search.ctp:53
+msgid "Search"
+msgstr "Otsi"
+
+#: /views/groups/add.ctp:1
+msgid "New Group"
+msgstr "Uus grupp"
+
+#: /views/groups/add.ctp:7
+msgid "Create new group"
+msgstr "Loo uus grupp"
+
+#: /views/groups/edit.ctp:6
+msgid "Member List"
+msgstr "Liikmete nimekiri"
+
+#: /views/groups/edit.ctp:10
+#: /views/users/admin_index.ctp:35
+msgid "Member"
+msgstr "Liige"
+
+#: /views/groups/edit.ctp:11
+#: /views/groups/index.ctp:11
+#: /views/guests/edit.ctp:42
+#: /views/guests/index.ctp:11
+#: /views/helpers/file_list.php:137
+#: /views/helpers/image_data.php:419
+#: /views/users/admin_index.ctp:20
+#: /views/users/admin_path.ctp:13
+msgid "Actions"
+msgstr "Tegevused "
+
+#: /views/groups/edit.ctp:24
+msgid "Do you really want to delete the member '%s' from this group '%s'?"
+msgstr "Kas sa tõesti soovid kustutada liikme '%s' grupist '%s'?"
+
+#: /views/groups/edit.ctp:26;26
+#: /views/groups/index.ctp:26;26
+#: /views/guests/index.ctp:26
+#: /views/users/admin_index.ctp:48;48
+#: /views/users/admin_path.ctp:22
+msgid "Delete"
+msgstr "Kustuta"
+
+#: /views/groups/edit.ctp:34
+msgid "Currently this group has no members. Please add users to grant access to your private images."
+msgstr "Hetkel ei ole selles grupis liikmeid. Palun lisa kasutajaid, et garanteerida juurdepääs oma privaatpiltidele."
+
+#: /views/groups/edit.ctp:39
+msgid "Add member"
+msgstr "Lisa liige"
+
+#: /views/groups/edit.ctp:43
+#: /views/users/admin_path.ctp:41
+msgid "Add"
+msgstr "Lisa"
+
+#: /views/groups/edit.ctp:45
+msgid "Show all groups"
+msgstr "Näita kõiki gruppe"
+
+#: /views/groups/index.ctp:10
+msgid "Members"
+msgstr "Liikmed"
+
+#: /views/groups/index.ctp:21
+msgid "Do you realy want to delete the group '%s'?"
+msgstr "Kas sa tõesti soovid kustutada grupi '%s'?"
+
+#: /views/groups/index.ctp:35
+msgid "Currently no image groups are assigned. At the one hand each image could be assigned to a specific group. On the other hand a guest can be member of a set of groups. The guest is than able to view the images from his groups."
+msgstr "Praegu pole ühtki pildigruppi määratud. Ühest küljest võib iga pildi määrata kindlasse gruppi. Teisest küljest võib külaline olla mitme grupi liige. Külalisel on siis võimalik näha oma grupi pilte."
+
+#: /views/guests/add.ctp:1
+msgid "Guest Creation"
+msgstr "Külalise konto loomine"
+
+#: /views/guests/add.ctp:7
+msgid "Create new guest account"
+msgstr "Loo uus külalise konto"
+
+#: /views/guests/add.ctp:10
+#: /views/guests/edit.ctp:8
+#: /views/options/profile.ctp:11
+#: /views/setup/user.ctp:12
+#: /views/users/admin_add.ctp:9
+#: /views/users/admin_edit.ctp:10
+#: /views/users/password.ctp:8
+#: /views/users/register.ctp:10
+msgid "Email"
+msgstr "E-post"
+
+#: /views/guests/add.ctp:11
+#: /views/guests/edit.ctp:13;15
+#: /views/options/profile.ctp:15;17
+#: /views/setup/config.ctp:14
+#: /views/setup/user.ctp:10
+#: /views/users/admin_add.ctp:10
+#: /views/users/admin_edit.ctp:21
+#: /views/users/login.ctp:8
+#: /views/users/register.ctp:8
+msgid "Password"
+msgstr "Salasõna"
+
+#: /views/guests/add.ctp:12
+#: /views/guests/edit.ctp:16
+#: /views/options/profile.ctp:18
+#: /views/setup/user.ctp:11
+#: /views/users/admin_add.ctp:11
+#: /views/users/admin_edit.ctp:22
+#: /views/users/confirm.ctp:11
+#: /views/users/register.ctp:9
+msgid "Confirm"
+msgstr "Salasõna uuesti"
+
+#: /views/guests/edit.ctp:6
+#: /views/users/admin_index.ctp:36
+msgid "Guest"
+msgstr "Külaline"
+
+#: /views/guests/edit.ctp:9
+msgid "Expires"
+msgstr "Aegub"
+
+#: /views/guests/edit.ctp:10
+msgid "Enable WebDAV access"
+msgstr "Luba WebDAV juurdepääs"
+
+#: /views/guests/edit.ctp:22
+msgid "None"
+msgstr "Pole"
+
+#: /views/guests/edit.ctp:24
+msgid "Name and captcha"
+msgstr "Nimi ja visuaalkinnitus"
+
+#: /views/guests/edit.ctp:28
+msgid "Authentication"
+msgstr "Autentimine"
+
+#: /views/guests/edit.ctp:37
+msgid "Group List"
+msgstr "Grupi nimekiri"
+
+#: /views/guests/edit.ctp:65
+msgid "Currently this guest account has no assigned groups. Please add groups to grant access to your personal images."
+msgstr "Praegu ei ole sellel külalise kontol ühtegi gruppi määratud. Palun lisa grupid, et tagada juurdepääs sinu personaalsetele piltidele."
+
+#: /views/guests/edit.ctp:69
+msgid "Group Assignements"
+msgstr "Grupi määrangud"
+
+#: /views/guests/edit.ctp:73
+msgid "Add Group"
+msgstr "Lisa grupp"
+
+#: /views/guests/index.ctp:1
+#: /views/options/acl.ctp:7
+#: /views/users/admin_index.ctp:18
+msgid "Guests"
+msgstr "Külalised"
+
+#: /views/guests/index.ctp:35
+msgid "Currently, no guest accounts are set. You can create guests accounts to grant access to your images e.g. to your friends or family. Please add also some groups to the guest to grant access to this guest for these groups."
+msgstr "Praegu ei ole külaliste kontosid paika pandud. Sa võid luua kontod külalistele, et anda neile juurdepääs oma piltidele (nt sõbrad või perekond). Palun lisa ka mõned grupid külalisele, et anda sellele külalisele juurdepääs nendele gruppidele."
+
+#: /views/guests/links.ctp:1
+msgid "Authenticated Links"
+msgstr "Autenditud viited"
+
+#: /views/guests/links.ctp:4
+msgid "Following links contains an authentication key which should be used carefully. Copy the links with with right mouse click and select <i>Copy link address</i>."
+msgstr "Järgnevad viited sisaldavad autentimisvõtit, mida peab ettevaatlikult kasutama. Kopeeri viited hiire paremklõpsuga ja vali <i>Copy link address</i>."
+
+#: /views/guests/links.ctp:7
+#: /views/options/rss.ctp:7
+msgid "The links are valid for the current session. For permanent login the user has to login via username and password."
+msgstr "Viited kehtivad ainult jooksva sessiooni jooksul. Sisselogituks jäämiseks peab kasutaja logima sisse kasutajanime ja parooliga."
+
+#: /views/guests/links.ctp:9
+msgid "Direct Link"
+msgstr "Otseviide"
+
+#: /views/guests/links.ctp:11
+msgid "Following link provides a direct link to <i>My Photos</i> of the guest which omits the login with username and password."
+msgstr "Järgnev viide pakub otselinki <i>Minu fotod</i>-eni, mis jätab vahele kasutajanime ja parooliga sisselogimise."
+
+#: /views/guests/links.ctp:17
+msgid "My Media of Guest %s (Link %s)"
+msgstr "Külalise %s failid (viide %s)"
+
+#: /views/guests/links.ctp:23
+msgid "Following links provide a authenticated RSS and Media RSS links."
+msgstr "Järgnevad viited pakuvad autenditud RSS-i ja failide RSS-linke."
+
+#: /views/guests/links.ctp:31
+#: /views/options/rss.ctp:16
+msgid "Recent Media"
+msgstr "Uusimad failid"
+
+#: /views/guests/links.ctp:32
+#: /views/home/index.ctp:65
+#: /views/options/rss.ctp:17
+msgid "Recent Comments"
+msgstr "Uusimad kommentaarid"
+
+#: /views/guests/links.ctp:33
+#: /views/options/rss.ctp:18
+msgid "Media RSS"
+msgstr "Faili RSS"
+
+#: /views/guests/links.ctp:34
+#: /views/options/rss.ctp:19
+msgid "Media RSS of My Media"
+msgstr "Minu failide RSS"
+
+#: /views/guests/links.ctp:37
+msgid "Click %s to renew the authentication key. All previous links become invalid."
+msgstr "Klõpsa %s autentimisvõtme uuendamiseks. Kõik eelnevad viited muutuvad seejärel kasutuks."
+
+#: /views/guests/links.ctp:37
+#: /views/options/rss.ctp:22
+msgid "renew key"
+msgstr "uuenda"
+
+#: /views/helpers/explorer_menu.php:62
+msgid "Show media in high quality (if available)"
+msgstr "Vaata kõrge kvaliteediga faile (kui neid on)"
+
+#: /views/helpers/explorer_menu.php:66
+msgid "Start Slideshow"
+msgstr "Käivita slaidiseanss"
+
+#: /views/helpers/explorer_menu.php:125
+msgid "Order"
+msgstr "Järjekord"
+
+#: /views/helpers/explorer_menu.php:130
+msgid "Show oldest first"
+msgstr "Näita esmalt vanemaid"
+
+#: /views/helpers/explorer_menu.php:134
+msgid "Show newest first"
+msgstr "Näita esmalt uuemaid"
+
+#: /views/helpers/explorer_menu.php:138
+msgid "Show popular first"
+msgstr "Näita esmalt populaarsemaid"
+
+#: /views/helpers/explorer_menu.php:142
+msgid "Show random order"
+msgstr "Näita suvalises järjekorras "
+
+#: /views/helpers/explorer_menu.php:146
+msgid "Show changes first"
+msgstr "Näita esmalt muudatusi"
+
+#: /views/helpers/explorer_menu.php:150
+msgid "Show last views first"
+msgstr "Näita esmalt viimati vaadatuid"
+
+#: /views/helpers/explorer_menu.php:167
+msgid "Pagesize"
+msgstr "Arv lehel"
+
+#: /views/helpers/file_list.php:82
+msgid "Delete folder %s?"
+msgstr "Kustutada kaust %?"
+
+#: /views/helpers/file_list.php:95
+msgid "Unlink media from this file"
+msgstr "Ühenda meedia lahti sellest failist"
+
+#: /views/helpers/file_list.php:105
+msgid "Download %s"
+msgstr "Lae alla %s"
+
+#: /views/helpers/file_list.php:123
+msgid "(parent folder)"
+msgstr "(ülemkaust)"
+
+#: /views/helpers/file_list.php:125
+msgid "(this folder)"
+msgstr "see kaust"
+
+#: /views/helpers/file_list.php:137
+msgid "Media"
+msgstr "Meedia"
+
+#: /views/helpers/file_list.php:137
+#: /views/images/view.ctp:62
+msgid "Size"
+msgstr "Suurus"
+
+#: /views/helpers/image_data.php:224
+msgid "%s can edit the meta data"
+msgstr "Metaandmeid võib muuta: %s "
+
+#: /views/helpers/image_data.php:226
+msgid "%s can edit the tags"
+msgstr "Silte võib muuta: %"
+
+#: /views/helpers/image_data.php:231
+msgid "%s can download this media"
+msgstr "Faili võib alla laadida: %s"
+
+#: /views/helpers/image_data.php:233
+msgid "%s an view this media"
+msgstr "Seda faili võib näha: %s"
+
+#: /views/helpers/image_data.php:244
+msgid "Access for group members"
+msgstr "Juurdepääs grupiliikmetele"
+
+#: /views/helpers/image_data.php:247
+msgid "This media belongs to the group '%s'"
+msgstr "See fail kuulub gruppi '%s'"
+
+#: /views/helpers/image_data.php:253
+msgid "users:"
+msgstr "kasutajad:"
+
+#: /views/helpers/image_data.php:253
+msgid "Access for users"
+msgstr "Juurdepääs kasutajatele"
+
+#: /views/helpers/image_data.php:257
+msgid "public:"
+msgstr "avalik:"
+
+#: /views/helpers/image_data.php:257
+msgid "Access for the public"
+msgstr "Avalik juurdepääs"
+
+#: /views/helpers/image_data.php:258
+msgid "The public"
+msgstr "Avalikkus"
+
+#: /views/helpers/image_data.php:271
+msgid "View media of previous dates"
+msgstr "Vaata eelmiste kuupäevade faile"
+
+#: /views/helpers/image_data.php:274
+msgid "View media of this day"
+msgstr "Vaata selle päeva faile"
+
+#: /views/helpers/image_data.php:277
+msgid "View media of this week"
+msgstr "Vaata selle nädala faile"
+
+#: /views/helpers/image_data.php:280
+msgid "View media of this month"
+msgstr "Vaata selle kuu faile"
+
+#: /views/helpers/image_data.php:283
+msgid "View media of next dates"
+msgstr "Vaata järgmiste kuupäevade faile"
+
+#: /views/helpers/image_data.php:371
+msgid "Access"
+msgstr "Juurdepääs "
+
+#: /views/helpers/image_data.php:382;382
+msgid "Edit tags"
+msgstr "Muuda silte"
+
+#: /views/helpers/image_data.php:390
+msgid "Save file %s"
+msgstr "Salvesta omale fail %s"
+
+#: /views/helpers/image_data.php:398
+msgid "Show location in a map"
+msgstr "Näita asukohta kaardil"
+
+#: /views/helpers/image_data.php:406
+msgid "Edit access rights"
+msgstr "Muuda juurdepääsu õigusi"
+
+#: /views/helpers/image_data.php:412
+msgid "Synchronize db with image"
+msgstr "Sünkroniseeri pilt andmebaasis"
+
+#: /views/helpers/image_data.php:412
+msgid "Synchronize meta data with the image"
+msgstr "Sünkroniseeri pildi metaandmed"
+
+#: /views/helpers/image_data.php:467
+msgid "Keep"
+msgstr "Säilita"
+
+#: /views/helpers/image_data.php:485
+msgid "This media is public visible"
+msgstr "See fail on avalikult nähtav"
+
+#: /views/helpers/image_data.php:488
+msgid "This media is visible for users"
+msgstr "See fail on nähtav kasutajatele"
+
+#: /views/helpers/image_data.php:491
+msgid "This media is visible for group members"
+msgstr "See fail on nähtav grupiliikmetele"
+
+#: /views/helpers/image_data.php:494
+msgid "This media is private"
+msgstr "See fail on privaatne"
+
+#: /views/helpers/menu.php:133
+msgid "Main Menu"
+msgstr "Peamenüü"
+
+#: /views/helpers/navigator.php:57;118
+msgid "prev"
+msgstr "eelmine"
+
+#: /views/helpers/navigator.php:105;140
+msgid "next"
+msgstr "järgmine"
+
+#: /views/helpers/navigator.php:127
+msgid "up"
+msgstr "üles"
+
+#: /views/home/index.ctp:1
+#: /views/themed/mobile/home/index.ctp:1
+msgid "Welcome to phTagr"
+msgstr "Tere tulemast phTagr-i"
+
+#: /views/home/index.ctp:6
+#: /views/themed/mobile/home/index.ctp:3
+msgid "Random Media"
+msgstr "Suvalised failid"
+
+#: /views/home/index.ctp:12
+msgid "%s by %s"
+msgstr "%s, kasutajalt: %s"
+
+#: /views/home/index.ctp:17
+#: /views/themed/mobile/home/index.ctp:21
+msgid "See more %s"
+msgstr "Vaata veel %s"
+
+#: /views/home/index.ctp:17
+#: /views/themed/mobile/home/index.ctp:21
+msgid "random media..."
+msgstr "suvalisi faile..."
+
+#: /views/home/index.ctp:25
+#: /views/themed/mobile/home/index.ctp:25
+msgid "Newest Media"
+msgstr "Uusimad failid"
+
+#: /views/home/index.ctp:55
+#: /views/themed/mobile/home/index.ctp:52
+msgid "See %s"
+msgstr "Vaata %s"
+
+#: /views/home/index.ctp:55
+#: /views/themed/mobile/home/index.ctp:52
+msgid "all new media..."
+msgstr "kõiki uusi faile..."
+
+#: /views/home/index.ctp:84
+msgid "Older comments..."
+msgstr "Vanemad kommentaarid..."
+
+#: /views/home/index.ctp:92
+msgid "Popular Tags"
+msgstr "Populaarsed sildid"
+
+#: /views/home/index.ctp:97
+msgid "No tags assigned"
+msgstr "Silte pole määratud"
+
+#: /views/home/index.ctp:100
+msgid "Popular Categories"
+msgstr "Populaarsed kategooriad"
+
+#: /views/home/index.ctp:105
+msgid "No categories assigned"
+msgstr "Kategooriaid pole määratud"
+
+#: /views/images/notfound.ctp:1
+msgid "No media Found"
+msgstr "Faile ei leitud"
+
+#: /views/images/notfound.ctp:3
+msgid "No media found. Please goto the %s and try again"
+msgstr "Faile ei leitud. Palun mine %s ja proovi uuesti"
+
+#: /views/images/view.ctp:32
+msgid "Media Details"
+msgstr "Faili üksikasjad"
+
+#: /views/images/view.ctp:57
+msgid "File(s)"
+msgstr "Fail(i)"
+
+#: /views/images/view.ctp:59
+msgid "View Count"
+msgstr "Vaatamiste arv"
+
+#: /views/images/view.ctp:60
+msgid "Created"
+msgstr "Loodud"
+
+#: /views/images/view.ctp:61
+msgid "Last modified"
+msgstr "Viimati muudetud"
+
+#: /views/images/view.ctp:65
+msgid "Model"
+msgstr "Mudel"
+
+#: /views/images/view.ctp:68
+msgid "Duration"
+msgstr "Kestus"
+
+#: /views/images/view.ctp:71
+msgid "Aperture"
+msgstr "Ava"
+
+#: /views/images/view.ctp:74
+msgid "Shutter"
+msgstr "Säri"
+
+#: /views/images/view.ctp:77
+msgid "ISO"
+msgstr "ISO"
+
+#: /views/options/acl.ctp:11
+msgid "Default Access Rights"
+msgstr "Vaikimisi juurdepääsu õigused"
+
+#: /views/options/acl.ctp:12
+msgid "The following access rights are applied to new images."
+msgstr "Uutele piltidele rakendatakse järgnevaid juurdepääsu õigusi. "
+
+#: /views/options/profile.ctp:9
+#: /views/users/admin_edit.ctp:8
+msgid "First name"
+msgstr "Eesnimi"
+
+#: /views/options/profile.ctp:10
+#: /views/users/admin_edit.ctp:9
+msgid "Last name"
+msgstr "Perenimi"
+
+#: /views/options/profile.ctp:21
+msgid "Others"
+msgstr "Muud"
+
+#: /views/options/profile.ctp:23
+msgid "Show advanced file browser"
+msgstr "Näita üleslaadimisel laiendatud faililehitsejat"
+
+#: /views/options/rss.ctp:1
+msgid "Authenticated RSS"
+msgstr "Autenditud RSS"
+
+#: /views/options/rss.ctp:4
+msgid "Following links contain authentication keys of your account. Using these links you are authenticated directly without username and password. The links could be spoofed easily and should be used carefully."
+msgstr "Järgnevad viited sisaldavad sinu konto autentimisvõtmeid. Nende viidete kasutamisel autenditakse kasutaja koheselt ilma kasutajanime ja salasõnata. Neid viiteid saab lihtsalt maha viksida ja seepärast peab neid kasutama ettevaatlikult."
+
+#: /views/options/rss.ctp:22
+msgid "Click %s to renew the authentication key. All previous keys become invalid."
+msgstr "Klõpsa % autentimisvõtme uuendamiseks. Kõik eelmised võtmed muutuvad kõlbmatuks."
+
+#: /views/setup/admin_upgrade.ctp:1
+#: /views/setup/admin_uptodate.ctp:1
+msgid "Database upgrade"
+msgstr "Andmebaasi uuendus"
+
+#: /views/setup/admin_upgrade.ctp:6
+msgid "The database schema requires an upgrade. Do you want to perform the upgrade?"
+msgstr "Andmebaasiskeem nõuab uuendamist. Kas sa soovid uuendamist teostada?"
+
+#: /views/setup/admin_upgrade.ctp:9
+msgid "Upgrade"
+msgstr "Uuenda"
+
+#: /views/setup/admin_uptodate.ctp:6
+msgid "Your database is up-to-date."
+msgstr "Sinu andmebaas on värske"
+
+#: /views/setup/admin_uptodate.ctp:9
+#: /views/setup/config.ctp:18
+#: /views/setup/configro.ctp:30
+#: /views/setup/saltro.ctp:15
+msgid "Continue"
+msgstr "Jätka"
+
+#: /views/setup/config.ctp:1
+#: /views/setup/configro.ctp:1
+msgid "Database connection"
+msgstr "Andmebaasi ühendus"
+
+#: /views/setup/config.ctp:5
+msgid "This step creates the configuration for the database connection. Please add your database connection settings here."
+msgstr "Selles sammus saab seadistada konfiguratsiooni andmebaasiga ühendumiseks. Palun kirjuta siia oma andmebaasiga ühendumiseks vajaminevad andmed."
+
+#: /views/setup/config.ctp:9;12
+msgid "Database"
+msgstr "Andmebaas"
+
+#: /views/setup/config.ctp:11
+msgid "Host"
+msgstr "Host"
+
+#: /views/setup/config.ctp:15
+msgid "Prefix"
+msgstr "Eesliide"
+
+#: /views/setup/configro.ctp:6
+msgid "The configuration file for the database connection could not be written. Please create a database configuration file by your own!"
+msgstr "Andmebaasiga ühendumiseks vajalikku konfiguratsioonifaili ei saadud luua. Palun loo konfiguratsioonifail ise!"
+
+#: /views/setup/configro.ctp:9
+msgid "Below a sample configuration file is shown. Please adapt your database credentials and continue."
+msgstr "Allpool on toodud näidiskonfiguratsioonifail. Palun lisa oma andmebaasi andmed ja jätka."
+
+#: /views/setup/database.ctp:1
+msgid "Initialize Database"
+msgstr "Loo andmebaas"
+
+#: /views/setup/database.ctp:3
+msgid "All tables are now initialized"
+msgstr "Kõik tabelid on nüüd loodud"
+
+#: /views/setup/finish.ctp:1
+msgid "Setup Complete"
+msgstr "Paigaldatud"
+
+#: /views/setup/finish.ctp:4
+msgid "Congratulations! Your configuration of phTagr is completed. Have fun using phTagr!"
+msgstr "Õnnitlused! Sinu phTagr-i konfigureerimine on lõpetatud. Head phTagr-i kasutamist!"
+
+#: /views/setup/finish.ctp:7
+msgid "Click %s to go to home or %s your first media."
+msgstr "Klõpsa %s avalehele minekuks või %s oma esimene fail."
+
+#: /views/setup/finish.ctp:7
+msgid "upload"
+msgstr "lae üles"
+
+#: /views/setup/index.ctp:1
+msgid "Welcome"
+msgstr "Tere tulemast"
+
+#: /views/setup/index.ctp:5
+msgid "Welcome to the installation procedure of phTagr. Following steps are required to install it:"
+msgstr "Tere tulemast phTagr-i paigaldamisprotseduuri. Paigaldamiseks on vaja läbida järgmised sammud:"
+
+#: /views/setup/index.ctp:8
+msgid "Check for required paths"
+msgstr "Kontrolli nõutavaid radu"
+
+#: /views/setup/index.ctp:9
+msgid "Configuration of database connection"
+msgstr "Seadista andmebaasi ühenduse konfiguratsioon"
+
+#: /views/setup/index.ctp:10
+msgid "Initialize required tables"
+msgstr "Loo nõutavad tabelid"
+
+#: /views/setup/index.ctp:11
+msgid "Create administration account"
+msgstr "Loo admini konto"
+
+#: /views/setup/index.ctp:12
+msgid "Check required external programs"
+msgstr "Kontrolli nõutavaid väliseid programme"
+
+#: /views/setup/index.ctp:15
+msgid "Note: Cookies are required to install and run phTagr."
+msgstr "Märkus: phTagr-i paigaldamiseks ja töötamiseks on nõutavad küpsised (cookie'd)."
+
+#: /views/setup/index.ctp:17
+msgid "This setup will step through the required steps. Please click %s to start the installation."
+msgstr "Paigaldamiseks käiakse läbi nõutavad sammud. Palun %s paigaldamist. "
+
+#: /views/setup/index.ctp:17
+#: /views/setup/salt.ctp:5
+#: /views/setup/saltro.ctp:7
+msgid "continue"
+msgstr "jätka"
+
+#: /views/setup/path.ctp:1
+msgid "Path settings"
+msgstr "Raja seaded"
+
+#: /views/setup/path.ctp:7
+msgid "Following paths are missing. Please create these paths!"
+msgstr "Järgnevad rajad on puudu. Palun loo need rajad!"
+
+#: /views/setup/path.ctp:19
+msgid "Following paths are not writeable. Please change the permissions!"
+msgstr "Järgnevad rajad ei ole kirjutatavad. Palun muuda õigusi!"
+
+#: /views/setup/path.ctp:29
+msgid "Retry"
+msgstr "Korda"
+
+#: /views/setup/salt.ctp:1
+#: /views/setup/saltro.ctp:1
+msgid "Security settings"
+msgstr "Turvaseaded"
+
+#: /views/setup/salt.ctp:5
+msgid "An error occured while setting the security salt. Please have look to the log files and click on %s"
+msgstr "Turva-salt'i seadistamisel tekkis viga. Palun uuri logifaile ja klõpsa %s"
+
+#: /views/setup/saltro.ctp:5
+msgid "phTagr could not set the security salt because the a configuration file file is write protected.  Please change the configuration manually"
+msgstr "phTagr ei saa muuta turva-salt'i kuna konfiguratsioonifail on kirjutuskaitstud. Palun muuda konfiguratsiooni käsitsi."
+
+#: /views/setup/saltro.ctp:7
+msgid "Change the <b>Security.salt</b> setting in the core configuration file <code>%s</code> (line %d) to a random string with alpha numeric values. You can change the setting to the provided value below. After changing, click on %s."
+msgstr "Muuda <b>turva-salt'i</b> seadistus üldises konfiguratsioonifailis <code>%s</code> (line %i) suvaliseks sümbolijadaks. Sa võid kasutada allpooltoodud väärtust seadistuses. Pärast muutmist klõpsa %s."
+
+#: /views/setup/saltro.ctp:9
+msgid "Current security salt value"
+msgstr "Praegune turva-salt'i väärtus"
+
+#: /views/setup/saltro.ctp:12
+msgid "New security salt value"
+msgstr "Uus turva-salt'i väärtus"
+
+#: /views/setup/system.ctp:5
+msgid "Congratulation! phTagr just runs fine now!"
+msgstr "Õnnitlused! phTagr sai kenasti paigaldatud!"
+
+#: /views/setup/system.ctp:7
+msgid "phTagr can use <u>optional</u> external programs to enlarge the functionality. exiftool is used to export the meta data to images like tags, categories or (geo) locations. ffmpeg supports other video file formats like AVI, MPEG, or MOV. And convert supports better thumbnail creation for bigger photos."
+msgstr "phTagr kasutab oma funktsionaalsuse laiendamiseks <u>valikulisi</u> väliseid programme. exiftool aitab eksportida piltide metaandmeid (nt sildid, kategooriad või (geo) asukohad). ffmpeg toetab videofailide formaate nagu AVI, MPEG või MOV. Ja convert toetab paremat pisipiltide loomist suurtest piltidest."
+
+#: /views/setup/system.ctp:9
+msgid "You can set the file path of these exteranl programs here or set them later in the system preferences."
+msgstr "Sa võid siin nende väliste programmide failiraja paika panna või seadistada neid hiljem süsteemsetes eelistustes."
+
+#: /views/setup/system.ctp:11
+msgid "Skip these settings"
+msgstr "Jäta need seaded vahele"
+
+#: /views/setup/system.ctp:15
+msgid "Following programs could not be found: %s."
+msgstr "Järgnevaid programme ei leitud:  %s."
+
+#: /views/setup/system.ctp:20
+msgid "FFMPEG does not support the MP3 audio format. Sound will be disabled for videos!"
+msgstr "FFMPEG ei toeta MP3 audiovormingut. Video heli on blokeeritud!"
+
+#: /views/setup/system.ctp:27;28;29;30
+#: /views/system/admin_external.ctp:8;9;10;11
+msgid "Path to %s"
+msgstr "%s rada"
+
+#: /views/setup/user.ctp:1
+msgid "Create admin account"
+msgstr "Loo admini konto"
+
+#: /views/system/admin_external.ctp:1
+msgid "Sytem Settings"
+msgstr "Süsteemsed seaded"
+
+#: /views/system/admin_external.ctp:14
+msgid "Google Maps"
+msgstr "Google Maps"
+
+#: /views/system/admin_external.ctp:15
+msgid "Enter here your API map key for %s. You can signup %s for a new key. No API map key is required for local setup with localhost."
+msgstr "Sisesta siia oma  %s API võti. Uue võtme tarvis võid sa logida sisse %s. API võtit pole vaja localhost-iga kohaliku paigalduse jaoks."
+
+#: /views/system/admin_external.ctp:17
+msgid "API key"
+msgstr "API võti"
+
+#: /views/system/admin_general.ctp:8
+msgid "Gallery title"
+msgstr "Galerii pealkiri"
+
+#: /views/system/admin_general.ctp:9
+msgid "Welcome text"
+msgstr "Tervitustekst"
+
+#: /views/themed/mobile/elements/footer.ctp:1
+msgid "%s Social Web Gallery %s - mobile version"
+msgstr "%s Sotsiaalne veebigalerii %s - mobiilne versioon"
+
+#: /views/themed/mobile/elements/header.ctp:1
+msgid "mobile"
+msgstr "mobiilne"
+
+#: /views/themed/mobile/explorer/index.ctp:49
+#: /views/themed/mobile/images/view.ctp:47
+msgid "Location"
+msgstr "Asukoht"
+
+#: /views/users/admin_add.ctp:1
+msgid "Add new User"
+msgstr "Lisa uus kasutaja"
+
+#: /views/users/admin_add.ctp:6
+msgid "Create new user"
+msgstr "Loo uus kasutaja"
+
+#: /views/users/admin_edit.ctp:1
+#: /views/users/admin_path.ctp:1
+msgid " User: %s"
+msgstr "Kasutaja: %s"
+
+#: /views/users/admin_edit.ctp:11
+msgid "System Operator"
+msgstr "Süsteemi operaator"
+
+#: /views/users/admin_edit.ctp:13
+#: /views/users/admin_index.ctp:33
+msgid "Admin"
+msgstr "Admin"
+
+#: /views/users/admin_edit.ctp:28
+msgid "Expire date"
+msgstr "Aegumiskuupäev"
+
+#: /views/users/admin_edit.ctp:29
+msgid "Upload Quota"
+msgstr "Üleslaadimise limiit"
+
+#: /views/users/admin_index.ctp:6
+msgid "<< Prev"
+msgstr "<< Eelm"
+
+#: /views/users/admin_index.ctp:8
+msgid "Next >>"
+msgstr "Järgm >>"
+
+#: /views/users/admin_index.ctp:16
+msgid "Firstname"
+msgstr "Eesnimi"
+
+#: /views/users/admin_index.ctp:17
+msgid "Lastname"
+msgstr "Perenimi"
+
+#: /views/users/admin_index.ctp:19
+msgid "User role"
+msgstr "Kasutaja roll"
+
+#: /views/users/admin_index.ctp:34
+msgid "SysOp"
+msgstr "Süs.op."
+
+#: /views/users/admin_index.ctp:37
+msgid "Nobody"
+msgstr "Keegi"
+
+#: /views/users/admin_index.ctp:39
+msgid "Unknown"
+msgstr "Tundmatu"
+
+#: /views/users/admin_index.ctp:44
+msgid "Do you really want to detete the user '%s'? This action is irreversible! All the data of the users will be deleted!"
+msgstr "Kas sa tõesti soovid kustutada kasutaja '%s'? See tegevus on pöördumatu! Kõik kasutajate andmed kustutatakse!!!"
+
+#: /views/users/admin_path.ctp:7
+msgid "The user can import media files from following external directories:"
+msgstr "Kasutaja saab importida faile järgnevatest välistest kaustadest:"
+
+#: /views/users/admin_path.ctp:12;39
+msgid "Directory"
+msgstr "Kaust"
+
+#: /views/users/admin_path.ctp:21
+msgid "Do you really want to detete the path '%s' of '%s'?"
+msgstr "Kas sa tõesti soovid kustutada raja '%s' '%s'-st?"
+
+#: /views/users/admin_path.ctp:22
+msgid "Delete path '%s'"
+msgstr "Kustuta rada '%s'"
+
+#: /views/users/admin_path.ctp:31
+msgid "Currently no external directories are set for this user."
+msgstr "Selle kasutaja jaoks ei ole praegu väliseid kaustu seadistatud"
+
+#: /views/users/admin_path.ctp:33
+msgid "The user has a dedicated upload directory which is handled by phTagr itself. External directories can be added here to the user to allow the import of external media files from the local file system."
+msgstr "Kasutaja jaoks on olemas üleslaadimise kaust, mida haldab phTagr ise. Väliseid kaustu saab siia kasutaja jaoks lisada, et lubada importida väliseid faile kohalikust failisüsteemist."
+
+#: /views/users/admin_path.ctp:38
+msgid "Add Directory"
+msgstr "Lisa kaust"
+
+#: /views/users/admin_register.ctp:1
+msgid "User Registration"
+msgstr "Kasutaja registreerimine"
+
+#: /views/users/admin_register.ctp:6
+msgid "Allow anonymous registration"
+msgstr "Lubada anonüümset registreerimist"
+
+#: /views/users/admin_register.ctp:7
+msgid "Initial quota limit"
+msgstr "Esialgne limiit"
+
+#: /views/users/confirm.ctp:5
+msgid "Account Confirmation"
+msgstr "Konto informatsioon"
+
+#: /views/users/confirm.ctp:6
+msgid "Please insert your confirmation key to finalize the account creation."
+msgstr "Palun sisesta oma kinnitusvõti konto loomise lõpuni viimiseks."
+
+#: /views/users/confirm.ctp:8
+msgid "Key"
+msgstr "Võti"
+
+#: /views/users/login.ctp:13
+msgid "Forgot your password"
+msgstr "Unustasin salasõna"
+
+#: /views/users/login.ctp:15
+msgid "or %s"
+msgstr "või %s"
+
+#: /views/users/login.ctp:15
+msgid "sign up"
+msgstr "logi sisse"
+
+#: /views/users/password.ctp:1
+msgid "Password Request"
+msgstr "Salasõna päring"
+
+#: /views/users/password.ctp:5
+msgid "Account Data"
+msgstr "Konto andmed"
+
+#: /views/users/password.ctp:11
+msgid "Submit"
+msgstr "Saada"
+
+#: /views/users/register.ctp:5
+msgid "Create Account"
+msgstr "Loo konto"
+
+#: /views/users/register.ctp:15
+msgid "Sign Up"
+msgstr "Logi sisse"
+
+#: /webroot/test.php:88
+msgid "Debug setting does not allow access to this url."
+msgstr "Silumisseaded ei luba sellele URL-ile juurdepääsu."
+
