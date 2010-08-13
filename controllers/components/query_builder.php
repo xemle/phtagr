@@ -281,6 +281,12 @@ class QueryBuilderComponent extends Object
         case 'random':
           $query['order'][] = 'RAND()'; 
           break;
+        case 'name':
+          $query['order'][] = 'Media.name'; 
+          break;
+        case '-name':
+          $query['order'][] = 'Media.name DESC'; 
+          break;
         default:
           Logger::err("Unknown sort value: {$data['sort']}");
       }
@@ -363,7 +369,21 @@ class QueryBuilderComponent extends Object
   }
 
   function buildFolder(&$data, &$query, $value) {
-    $query['conditions'][] = $this->_buildCondition("File.path", $value . '%', array('operand' => 'LIKE'));
+    if (!isset($data['user']) || $value === false) {
+      return;
+    }
+    $me = $this->controller->getUser();
+    if ($data['user'] != $me['User']['username']) {
+      $user = $this->controller->User->find('first', array('conditions' => array('User.username' => $data['user'], 'User.role >=' => ROLE_USER), 'fields' => 'User.id', 'recursive' => -1));
+      if (!$user) {
+        return;
+      }
+      $userId = $user['User']['id'];
+    } else {
+      $userId = $this->controller->getUserId();
+    }
+    $uploadPath = USER_DIR . $userId . DS . 'files' . DS . $value . '%'; 
+    $query['conditions'][] = $this->_buildCondition("File.path", $uploadPath, array('operand' => 'LIKE'));
     $query['conditions'][] = "FileCount > 0";
     $query['_counts'][] = "FileCount";
   }

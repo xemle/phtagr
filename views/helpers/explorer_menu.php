@@ -127,28 +127,32 @@ class ExplorerMenuHelper extends AppHelper
     $id = 'order-item';
     $out .= " <div class=\"actionlist\" id=\"$id\">";
     
-    $icon = $this->Html->image('icons/date_previous.png', array('alt' => 'date asc', 'title' => __("Show oldest first", true)));
+    $icon = $this->Html->image('icons/date_previous.png', array('alt' => __('date asc', true), 'title' => __("Show oldest first", true)));
     $link = $this->Search->getUri(false, array('sort' => '-date'), 'page');
     $out .= $this->Html->link($icon, $link, array('escape' => false));
     
-    $icon = $this->Html->image('icons/add.png', array('alt' => 'newest', 'title' => __("Show newest first", true)));
+    $icon = $this->Html->image('icons/add.png', array('alt' => __('newest', true), 'title' => __("Show newest first", true)));
     $link = $this->Search->getUri(false, array('sort' => 'newest'), 'page');
     $out .= $this->Html->link($icon, $link, array('escape' => false));
     
-    $icon = $this->Html->image('icons/heart.png', array('alt' => 'pouplarity', 'title' => __("Show popular first", true)));
+    $icon = $this->Html->image('icons/heart.png', array('alt' => __('pouplarity', true), 'title' => __("Show popular first", true)));
     $link = $this->Search->getUri(false, array('sort' => 'popularity'), 'page');
     $out .= $this->Html->link($icon, $link, array('escape' => false));
     
-    $icon = $this->Html->image('icons/images.png', array('alt' => 'random', 'title' => __("Show random order", true)));
+    $icon = $this->Html->image('icons/images.png', array('alt' => __('random', true), 'title' => __("Show random order", true)));
     $link = $this->Search->getUri(false, array('sort' => 'random'), 'page');
     $out .= $this->Html->link($icon, $link, array('escape' => false));
     
-    $icon = $this->Html->image('icons/pencil.png', array('alt' => 'changes', 'title' => __("Show changes first", true)));
+    $icon = $this->Html->image('icons/pencil.png', array('alt' => __('Changes', true), 'title' => __("Show changes first", true)));
     $link = $this->Search->getUri(false, array('sort' => 'changes'), 'page');
     $out .= $this->Html->link($icon, $link, array('escape' => false));
     
-    $icon = $this->Html->image('icons/eye.png', array('alt' => 'views', 'title' => __("Show last views first", true)));
+    $icon = $this->Html->image('icons/eye.png', array('alt' => __('Views', true), 'title' => __("Show last views first", true)));
     $link = $this->Search->getUri(false, array('sort' => 'viewed'), 'page');
+    $out .= $this->Html->link($icon, $link, array('escape' => false));
+    
+    $icon = $this->Html->image('icons/folder_go.png', array('alt' => __('Name', true), 'title' => __("Order by name", true)));
+    $link = $this->Search->getUri(false, array('sort' => 'name'), 'page');
     $out .= $this->Html->link($icon, $link, array('escape' => false));
 
     $out .= "</div>";

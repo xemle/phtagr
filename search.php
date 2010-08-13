@@ -26,6 +26,9 @@ class Search extends Object
 
   var $_data;
 
+  /** List of chars to escape on setParam() */
+  var $escapeChars = '=,/';
+
   /** Clears all parameters and set them to the defaults*/
   function clear() {
     $this->_data = array();
@@ -70,7 +73,7 @@ class Search extends Object
     @return True on success */
   function setParam($name, $value, $validate = true) {
     if ($validate === false || $this->validate($name, $value)) {
-      $this->_data[$name] = $value;    
+      $this->_data[$name] = $value;
       return true;
     } else {
       return false;
@@ -167,6 +170,67 @@ class Search extends Object
         }
         break;
     }
+  }
+
+  function encode($input) {
+    $out = '';
+    $input = (string)$input;
+    $len = strlen($input);
+    for ($i = 0; $i < $len; $i++) {
+      $c = substr($input, $i, 1);
+      if (strpos($this->escapeChars, $c) !== false) {
+        $c = '=' . dechex(ord($c));
+      }
+      $out = $out . $c;
+    }
+    return $out;
+  }
+
+  function _c2h($c) {
+    $d = ord($c);
+    if ($d >= 48 && $d <= 57) {
+      return $d - 48;
+    } elseif ($d >= 65 && $d <= 70) {
+      return $d - 55;
+    } elseif ($d >= 97 && $d <= 102) {
+      return $d - 87;
+    } else {
+      return false;
+    }
+  }
+
+  function _dechex($c1, $c2) {
+    $d1 = $this->_c2h($c1);
+    $d2 = $this->_c2h($c2);
+    if ($d1 === false || $d2 === false) {
+      return false;
+    } else {
+      return chr($d1 * 16 + $d2);
+    }
+  }
+    
+  function decode($input) {
+    $out = '';
+    $input = (string)$input;
+    $len = strlen($input);
+    for ($i = 0; $i < $len; $i++) {
+      $c = substr($input, $i, 1);
+      if ($c == '=') {
+        if ($i + 2 >= $len) {
+          break;
+        }
+        $c1 = substr($input, $i + 1, 1);
+        $c2 = substr($input, $i + 2, 1);
+        $c = $this->_dechex($c1, $c2);
+        if ($c !== false) {
+          $out .= $c;
+        }
+        $i += 2;
+      } else {
+        $out .= $c;
+      }
+    }
+    return $out;
   }
 }
 ?>

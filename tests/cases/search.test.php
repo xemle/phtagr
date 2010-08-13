@@ -108,5 +108,20 @@ class SearchTest extends CakeTestCase {
     $result = $this->Search->getTags();
     $this->assertEqual($result, array(2 => 'tag3'));    
   }
+
+  function testEncode() {
+    $result = $this->Search->encode('=,/');
+    $this->assertEqual('=3d=2c=2f', $result);
+    $result = $this->Search->decode('=3d=2c=2f');
+    $this->assertEqual('=,/', $result);
+    // invalid hex
+    $result = $this->Search->decode('=/:=@F=`g=2');
+    $this->assertEqual('', $result);
+
+    $result = $this->Search->encode('2010/2010-08-13/photo.jpg');
+    $this->assertEqual('2010=2f2010-08-13=2fphoto.jpg', $result);
+    $result = $this->Search->decode('2010=2F2010-08-13=2Fphoto.jpg');
+    $this->assertEqual('2010/2010-08-13/photo.jpg', $result);
+  }
 }
 ?>

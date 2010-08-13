@@ -39,6 +39,7 @@ class SearchComponent extends Search
     'category_op' => array('rule' => array('inList', array('AND', 'OR'))),
     'east' => 'decimal',
     'from' => array('rule' => array('custom', '/^\d{4}-\d{2}-\d{2}([ T]\d{2}:\d{2}:\d{2})?$/')),
+    'folder' => 'notEmpty',
     'groups' => 'alphaNumeric',
     'media' => 'numeric',
     'name' => 'notEmpty',
@@ -49,7 +50,7 @@ class SearchComponent extends Search
     'page' => array('numericRule' => 'numeric', 'minRule' => array('rule' => array('comparison', '>=', 1))),
     'pos' => array('numericRule' => 'numeric', 'minRule' => array('rule' => array('comparison', '>=', 1))),
     'show' => array('numericRule' => 'numeric', 'minRule' => array('rule' => array('comparison', '>=', 4)), 'maxRule' => array('rule' => array('comparison', '<=', 240))),
-    'sort' => array('rule' => array('inList', array('date', '-date', 'newest', 'changes', 'viewed', 'popularity', 'random'))),
+    'sort' => array('rule' => array('inList', array('date', '-date', 'newest', 'changes', 'viewed', 'popularity', 'random', 'name'))),
     'south' => 'decimal',
     'tags' => array('rule' => array('maxLength', 30)),
     'tag_op' => array('rule' => array('inList', array('AND', 'OR'))),
@@ -73,7 +74,6 @@ class SearchComponent extends Search
     'pos' => false,
     'show' => '12',
     'sort' => 'default',
-    'folder' => false
     );
 
   function initialize(&$controller) {
@@ -196,12 +196,12 @@ class SearchComponent extends Search
       if (is_numeric($name) || empty($value)) {
         continue;
       }
-      $singles = array('pos'); // quick fix
+      $singles = array('pos', 'folder'); // quick fix
       if (!in_array($name, $singles) && $name == Inflector::pluralize($name)) {
         $values = explode(',', $value);
         $this->addParam($name, $values);
       } else {
-        $this->setParam($name, $value);
+        $this->setParam($name, $this->decode($value));
       }
     }
   }

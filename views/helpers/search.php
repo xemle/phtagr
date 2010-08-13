@@ -176,7 +176,7 @@ class SearchHelper extends Search {
         }
         if ($default === true || $default != $values) {
           // no default or disabled value
-          $params[] = $name.':'.$values;
+          $params[] = $name.':'.$this->encode($values);
         }
       } 
     }

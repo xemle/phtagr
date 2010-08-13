@@ -53,14 +53,14 @@ foreach ($this->data as $media): ?>
 <div class="user">
 <?php
   if (!$search->getUser() || $search->getUser() != $session->read('User.username')) {
-    echo "by ".$html->link($media['User']['username'], "/explorer/user/".$media['User']['username']);
+    printf(__("by %s", true), $html->link($media['User']['username'], "/explorer/user/".$media['User']['username']));
   }
   $extra = array();
   if ($media['Media']['clicks'] > 0) {
-    $extra[] = $media['Media']['clicks'].' '.$html->image('icons/eye.png', array('alt' => 'clicks', 'title' => "{$media['Media']['clicks']} clicks"));;
+    $extra[] = sprintf(__("%d %s", true), $media['Media']['clicks'], $html->image('icons/eye.png', array('alt' => __('Views', true), 'title' => sprintf("%d views", true), $media['Media']['clicks'])));
   }
   if (count($media['Comment'])) {
-    $extra[] = count($media['Comment']).' '.$html->image('icons/comments.png', array('alt' => 'comments', 'title' => count($media['Comment'])." comments"));
+    $extra[] = sprintf(__("%d %s", true), count($media['Comment']), $html->image('icons/comments.png', array('alt' => __('Comments', true), 'title' => sprintf(__("%d comments", true), count($media['Comment'])))));
   }
   if ($extra) {
     echo " (".implode(', ', $extra).")";

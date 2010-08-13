@@ -193,7 +193,7 @@ class ExplorerController extends AppController
         Logger::info(sprintf("Invalid root %s or folder %s", $fsRoot, $fsFolder));
         return;
       }
-      $this->Search->setFolder($fsFolder, false);
+      $this->Search->setFolder($folder, false);
     }
     $this->render('index');
   }
@@ -591,7 +591,7 @@ class ExplorerController extends AppController
       } else {
         $groups = array();
       }
-      $groups[-1] = '[No Group]';
+      $groups[-1] = __('[No Group]', true);
       $this->set('groups', $groups);
     } else {
       Logger::warn("User {$user['User']['username']} ({$user['User']['id']}) has no previleges to change ACL of image ".$id);
