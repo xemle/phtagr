@@ -15,7 +15,7 @@
   if (!empty($comment['url'])) {
     $name = $html->link($comment['name'], $comment['url']);
   }  
-  $time = $html->tag('span', $time->relativeTime($comment['date']), array('class' => 'date'));
+  $time = $html->tag('span', $this->Time->relativeTime($comment['date']), array('class' => 'date'));
   printf(__("%s said %s", true), $name, $time);
 ?>
 <?php
