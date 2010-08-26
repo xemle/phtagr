@@ -40,8 +40,35 @@ class AppController extends Controller
     $this->Feed->add('/explorer/rss', array('title' => __('Recent photos', true)));
     $this->Feed->add('/explorer/media', array('title' =>  __('Media RSS of recent photos', true), 'id' => 'gallery'));
     $this->Feed->add('/comment/rss', array('title' => __('Recent comments', true)));
+    
+    $this->_configureEmail();
   }
 
+  /** Configure email component on any SMTP configuration values in core.php */
+  function _configureEmail() {
+    if (isset($this->Email)) {
+      if (Configure::read('Mail.from')) {
+        $this->Email->from = Configure::read('Mail.from');
+      } else {
+        $this->Email->from = "phTagr <noreply@{$_SERVER['SERVER_NAME']}>";
+      }
+      if (Configure::read('Mail.replyTo')) {
+        $this->Email->replyTo = Configure::read('Mail.replyTo');
+      } else {
+        $this->Email->replyTo = "noreply@{$_SERVER['SERVER_NAME']}";
+      }
+      $names = array('host', 'port', 'username', 'password');
+      foreach($names as $name) {
+        $value = Configure::read("Smtp.$name");
+        if ($value) {
+          $this->Email->smtpOptions[$name] = $value;
+        }
+      }
+      if (!empty($this->Email->smtpOptions['host'])) {
+        $this->Email->delivery = 'smtp';
+      }
+    }
+ }
   function beforeRender() {
     parent::beforeRender();
     if ($this->getUserId() > 0) {
@@ -51,6 +78,7 @@ class AppController extends Controller
       $user = $this->getUser();
     }
     $this->params['options'] = $this->Option->getOptions($user);
+    $this->set('currentUser', $user);
 
     if ($this->RequestHandler->isMobile()) {
       $this->view = "Theme";

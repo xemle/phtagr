@@ -252,6 +252,18 @@
 	Configure::write('Acl.classname', 'DbAcl');
 	Configure::write('Acl.database', 'default');
 
+/** 
+ * Set here your external SMTP server configuration if your local machine does
+ * not have an SMPT server. If SMTP.host is not set PHP's function mail() is
+ * used to deliver emails.
+ */
+	//Configure::write('Mail.from', 'me@my.free.mail.hoster.com');
+	//Configure::write('Mail.replyTo', 'me@my.free.mail.hoster.com');
+	//Configure::write('Smtp.host', 'my.smpt.host.com');
+	//Configure::write('Smtp.port', '25');
+	//Configure::write('Smtp.username', 'my username');
+	//Configure::write('Smtp.password', 'my password');
+
 /**
  * If you are on PHP 5.3 uncomment this line and correct your server timezone
  * to fix the date & time related errors.
