@@ -1,0 +1,2048 @@
+#
+# Copyright Bartosz Feński <fenio@debian.org>
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 2.1.2\n"
+"POT-Creation-Date: 2010-08-13 22:15+0200\n"
+"PO-Revision-Date: 2010-09-03 07:37+0100\n"
+"Last-Translator: Elena Vetrugno <evetrugno@gmx.de>\n"
+"Language-Team: Polish <translation-team-pl@lists.sourceforge.net>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+
+#: /app_controller.php:40
+msgid "Recent photos"
+msgstr "Ostatnio dodane"
+
+#: /app_controller.php:41
+msgid "Media RSS of recent photos"
+msgstr "RSS ostatnio dodanych"
+
+#: /app_controller.php:42
+msgid "Recent comments"
+msgstr "Ostatnie komentarze"
+
+#: /controllers/browser_controller.php:50
+#: /views/elements/menu.ctp:37
+msgid "My Files"
+msgstr "Moje pliki"
+
+#: /controllers/browser_controller.php:63
+msgid "Import Files"
+msgstr "Importuj pliki"
+
+#: /controllers/browser_controller.php:65;67
+#: /views/browser/quickupload.ctp:34
+#: /views/browser/upload.ctp:19
+#: /views/elements/menu.ctp:32
+msgid "Upload"
+msgstr "Prześlij"
+
+#: /controllers/browser_controller.php:69
+msgid "Synchronize"
+msgstr "Synchronizuj"
+
+#: /controllers/browser_controller.php:70
+msgid "Overview"
+msgstr "Podgląd"
+
+#: /controllers/browser_controller.php:312
+#, fuzzy
+msgid "Imported %d files (%d) errors)"
+msgstr "Przesłano %d plików. %d błędów"
+
+#: /controllers/browser_controller.php:327
+#, fuzzy
+msgid "Media %d was unlinked successfully"
+msgstr "Baza danych została zaktualizowana"
+
+#: /controllers/browser_controller.php:344
+msgid "Deleted directory successfully"
+msgstr ""
+
+#: /controllers/browser_controller.php:346
+#, fuzzy
+msgid "Deleted file successfully"
+msgstr "Baza danych została zaktualizowana"
+
+#: /controllers/browser_controller.php:349
+msgid "Could not delete file or directory"
+msgstr ""
+
+#: /controllers/browser_controller.php:433
+#, fuzzy
+msgid "Invalid path to create folder"
+msgstr "utwórz katalog"
+
+#: /controllers/browser_controller.php:437
+#, fuzzy
+msgid "Could not create folder here: %s"
+msgstr "Użytkownik '%s' nieodnaleziony"
+
+#: /controllers/browser_controller.php:453
+#, fuzzy
+msgid "Could not create folder"
+msgstr "utwórz katalog"
+
+#: /controllers/browser_controller.php:470
+msgid "Your upload quota is exceeded"
+msgstr "Twój limit został przekroczony"
+
+#: /controllers/browser_controller.php:577
+#, fuzzy
+msgid "Invalid path for upload"
+msgstr "Nieprawidłowe id komentarza"
+
+#: /controllers/browser_controller.php:582
+#, fuzzy
+msgid "Could not upload here: %s"
+msgstr "Dodanie grupy '%s' nie powiodło się!"
+
+#: /controllers/browser_controller.php:603
+msgid "Uploaded %d and %d extraced file(s)"
+msgstr "Przesłano %d i wypakowano %d plik(ów)"
+
+#: /controllers/browser_controller.php:605
+msgid "Uploaded %d file(s)"
+msgstr "Przesłano %d plik(ów)"
+
+#: /controllers/browser_controller.php:616;624
+msgid "Error: Invalid upload directory"
+msgstr "Błąd: nieprawidłowy katalog docelowy"
+
+#: /controllers/browser_controller.php:634
+msgid "No files uploaded or upload errors"
+msgstr "Nie przesłano plików z powodu błędów"
+
+#: /controllers/browser_controller.php:651
+msgid "No files uploaded"
+msgstr "Nie przesłano plików"
+
+#: /controllers/browser_controller.php:659
+msgid "Uploaded %d files with %d errors."
+msgstr "Przesłano %d plików. %d błędów"
+
+#: /controllers/comments_controller.php:57
+msgid "Invalid Comment."
+msgstr "Nieprawidłowy komentarz"
+
+#: /controllers/comments_controller.php:115
+msgid "The Comment has been saved"
+msgstr "Komentarz został zapisany"
+
+#: /controllers/comments_controller.php:123
+msgid "The Comment could not be saved. Please, try again."
+msgstr "Komentarz nie mógł być zapisany. Spróbuj ponownie."
+
+#: /controllers/comments_controller.php:225
+msgid "Invalid id for Comment"
+msgstr "Nieprawidłowe id komentarza"
+
+#: /controllers/comments_controller.php:239
+msgid "Comment deleted"
+msgstr "Komentarz usunięty"
+
+#: /controllers/explorer_controller.php:51
+#: /views/explorer/index.ctp:155
+msgid "[Keep]"
+msgstr "[Zachowaj]"
+
+#: /controllers/explorer_controller.php:52;594
+#: /controllers/options_controller.php:73
+msgid "[No Group]"
+msgstr "[Brak grupy]"
+
+#: /controllers/groups_controller.php:63
+msgid "Group '%s' already exists"
+msgstr "Grupa '%s' już istnieje"
+
+#: /controllers/groups_controller.php:69
+msgid "Add successfully group '%s'"
+msgstr "Dodano grupę '%s'"
+
+#: /controllers/groups_controller.php:72
+msgid "Could not add group '%s'!"
+msgstr "Dodanie grupy '%s' nie powiodło się!"
+
+#: /controllers/groups_controller.php:81;112;125;149;155
+msgid "Could not find group"
+msgstr "Grupa nieodnaleziona"
+
+#: /controllers/groups_controller.php:87
+#: /views/groups/edit.ctp:1
+msgid "Group: %s"
+msgstr "Grupa: %s"
+
+#: /controllers/groups_controller.php:92
+#: /controllers/guests_controller.php:85
+#: /views/groups/index.ctp:23;23
+#: /views/guests/index.ctp:23
+#: /views/users/admin_index.ctp:46;46
+msgid "Edit"
+msgstr "Edytuj"
+
+#: /controllers/groups_controller.php:110
+msgid "Successfully deleted group '%s'"
+msgstr "Usunięto grupę '%s'"
+
+#: /controllers/groups_controller.php:128
+msgid "Could not find user with username '%s'"
+msgstr "Użytkownik '%s' nieodnaleziony"
+
+#: /controllers/groups_controller.php:136
+msgid "Add user '%s' to group '%s'"
+msgstr "Dodaj użytkownika '%s' do grupy '%s'"
+
+#: /controllers/groups_controller.php:138
+msgid "Could not add user '%s' to group '%s'!"
+msgstr "Dodanie użytkownika '%s' do grupy '%s' nie powiodło się!"
+
+#: /controllers/groups_controller.php:160
+msgid "Could not save group"
+msgstr "Zapisanie grupy nie powiodło się"
+
+#: /controllers/groups_controller.php:164
+msgid "Member was successfully deleted from group '%s'"
+msgstr "Użytkownik usunięty z grupy '%s'"
+
+#: /controllers/groups_controller.php:173
+msgid "List groups"
+msgstr "Pokaż grupy"
+
+#: /controllers/groups_controller.php:174
+msgid "Add group"
+msgstr "Dodaj grupę"
+
+#: /controllers/guests_controller.php:64
+msgid "Sorry. Username is already taken"
+msgstr "Użytkownik już istnieje"
+
+#: /controllers/guests_controller.php:70
+msgid "Guest account '%s' was successfully created"
+msgstr "Konto gościa '%s' zostało dodane"
+
+#: /controllers/guests_controller.php:73
+msgid "Sorry. Guest account could not created"
+msgstr "Dodanie konta gościa nie powiodło się"
+
+#: /controllers/guests_controller.php:80
+#: /views/guests/edit.ctp:1
+msgid "Guest: %s"
+msgstr "Gość: '%s'"
+
+#: /controllers/guests_controller.php:89
+msgid "Links"
+msgstr "Odsyłacze"
+
+#: /controllers/guests_controller.php:102
+msgid "Sorry. Could not find requested guest"
+msgstr "Odnalezienie wprowadzonego gościa nie powiodło się"
+
+#: /controllers/guests_controller.php:111
+msgid "Guest data were saved"
+msgstr "Dane gościa zostały zapisane"
+
+#: /controllers/guests_controller.php:117
+msgid "Updates could not be saved!"
+msgstr "Zapisanie zmian nie powiodło się!"
+
+#: /controllers/guests_controller.php:133
+msgid "Could not find requested guest"
+msgstr "Odnalezienie wprowadzonego gościa nie powiodło się"
+
+#: /controllers/guests_controller.php:137
+msgid "Guest account '%s' deleted!"
+msgstr "Konto gościa '%s' usunięto!"
+
+#: /controllers/home_controller.php:48
+#: /views/elements/menu.ctp:6
+msgid "Home"
+msgstr "Start"
+
+#: /controllers/options_controller.php:60
+msgid "Settings saved"
+msgstr "Ustawienia zapisane"
+
+#: /controllers/options_controller.php:85
+msgid "Could not save profile!"
+msgstr "Zapisanie profilu nie powiodło się!"
+
+#: /controllers/options_controller.php:88
+msgid "Profile saved"
+msgstr "Profil zapisany"
+
+#: /controllers/options_controller.php:118
+#: /views/options/profile.ctp:1
+msgid "Profile"
+msgstr "Profil"
+
+#: /controllers/options_controller.php:119
+msgid "Guest Accounts"
+msgstr "Konta gości"
+
+#: /controllers/options_controller.php:120
+#: /views/groups/index.ctp:1
+#: /views/guests/index.ctp:10
+msgid "Groups"
+msgstr "Grupy"
+
+#: /controllers/options_controller.php:122
+#: /views/explorer/index.ctp:104
+#: /views/options/acl.ctp:1
+msgid "Access Rights"
+msgstr "Prawa dostępu"
+
+#: /controllers/options_controller.php:123
+#: /views/guests/links.ctp:21
+msgid "RSS"
+msgstr "RSS"
+
+#: /controllers/setup_controller.php:303
+msgid "Could not write configuration to '%s'"
+msgstr "Zapisanie ustawień do '%s' nie powiodło się"
+
+#: /controllers/setup_controller.php:310
+msgid "Update core settings"
+msgstr "Zmień podstawowe ustawienia"
+
+#: /controllers/setup_controller.php:406
+msgid "Could not write database configuration file"
+msgstr "Zapisanie ustawień bazy danych nie powiodło się"
+
+#: /controllers/setup_controller.php:443
+msgid "Could not connect to database. Please check your database configuration!"
+msgstr "Połączenie z bazą danych nie powiodło się. Sprawdź ustawienia."
+
+#: /controllers/setup_controller.php:473
+msgid "All required tables are created"
+msgstr "Wszystkie tabele zostały utworzone"
+
+#: /controllers/setup_controller.php:477
+msgid "Could not create tables correctly. Please see logfile for details"
+msgstr "Utworzenie tabel nie powiodło się. Sprawdź dziennik zdarzeń"
+
+#: /controllers/setup_controller.php:505
+msgid "Admin account was successfully created"
+msgstr "Konto administratora zostało utworzone"
+
+#: /controllers/setup_controller.php:509
+msgid "Could not create admin account. Please retry"
+msgstr "Utworzenie konta administratora nie powiodło się. Spróbuj ponownie"
+
+#: /controllers/setup_controller.php:637
+msgid "Database was upgraded successfully"
+msgstr "Baza danych została zaktualizowana"
+
+#: /controllers/setup_controller.php:640
+msgid "The database could not upgraded completely. The log file might discover the issue"
+msgstr "Aktualizacja bazy danych nie powiodła się. Sprawdź dziennik zdarzeń"
+
+#: /controllers/system_controller.php:69
+#: /views/images/view.ctp:32
+#: /views/options/profile.ctp:6
+#: /views/system/admin_general.ctp:1;6
+#: /views/users/admin_edit.ctp:6
+msgid "General"
+msgstr "Ogólne"
+
+#: /controllers/system_controller.php:70
+msgid "User Accounts"
+msgstr "Konta użytkowników"
+
+#: /controllers/system_controller.php:71
+#: /views/setup/system.ctp:1
+#: /views/system/admin_external.ctp:6
+msgid "External Programs"
+msgstr "Zewnętrzne programy"
+
+#: /controllers/users_controller.php:39
+msgid "List users"
+msgstr "Pokaż użytkowników"
+
+#: /controllers/users_controller.php:40
+msgid "Add user"
+msgstr "Dodaj użytkownika"
+
+#: /controllers/users_controller.php:41
+#: /views/users/admin_register.ctp:5
+msgid "Registration"
+msgstr "Rejestracja"
+
+#: /tests/cases/controllers/components/upload.test.php:14
+msgid "Test file directory %s must be writeable"
+msgstr "Musi istniec możliwość zapisu w katalogu %s"
+
+#: /views/browser/folder.ctp:1
+msgid "Create Folder"
+msgstr "Utwórz katalog"
+
+#: /views/browser/folder.ctp:5
+#: /views/browser/index.ctp:7;16
+msgid "Location %s"
+msgstr "Lokalizacja %s"
+
+#: /views/browser/folder.ctp:9
+msgid "Folder Name"
+msgstr "Nazwa katalogu"
+
+#: /views/browser/folder.ctp:11
+#: /views/groups/add.ctp:13
+#: /views/guests/add.ctp:15
+#: /views/setup/user.ctp:15
+#: /views/users/admin_add.ctp:14
+msgid "Create"
+msgstr "Utwórz"
+
+#: /views/browser/import.ctp:1
+msgid "Browser"
+msgstr "Przeglądarka"
+
+#: /views/browser/import.ctp:5
+msgid "View folder %s"
+msgstr "Zobacz katalog %s"
+
+#: /views/browser/index.ctp:1
+msgid "File Browser"
+msgstr "Przeglądarka plików"
+
+#: /views/browser/index.ctp:9;18
+msgid " (%s or %s here)"
+msgstr " (%s lub %s)"
+
+#: /views/browser/index.ctp:10;19
+#: /views/browser/upload.ctp:10
+msgid "Upload files"
+msgstr "Prześlij pliki"
+
+#: /views/browser/index.ctp:11;20
+msgid "create folder"
+msgstr "utwórz katalog"
+
+#: /views/browser/index.ctp:24
+msgid "Import"
+msgstr "Importuj"
+
+#: /views/browser/quickupload.ctp:1
+msgid "Media Upload"
+msgstr "Prześlij obiekt"
+
+#: /views/browser/quickupload.ctp:6
+msgid "Your uploaded media"
+msgstr "Przesłane obiekty"
+
+#: /views/browser/quickupload.ctp:17
+msgid "See all uploaded media of today %s"
+msgstr "Zobacz wszystkie dzisiaj przesłane obiekty %s"
+
+#: /views/browser/quickupload.ctp:17
+#: /views/setup/finish.ctp:7
+#: /views/system/admin_external.ctp:15
+msgid "here"
+msgstr "tutaj"
+
+#: /views/browser/quickupload.ctp:23
+msgid "Upload your photos, videos, GPS logs or ZIP archives here."
+msgstr "Prześlij zdjęcia, wideo, logi GPS lub archiwa ZIP"
+
+#: /views/browser/quickupload.ctp:25
+msgid "Photos, Videos - ZIP Archives"
+msgstr "Zdjęcia, wideo - archiwa ZIP"
+
+#: /views/browser/quickupload.ctp:26;27;28;29;30
+#: /views/browser/upload.ctp:11;12;13;14;15
+msgid "File or archive"
+msgstr "Plik lub archiwum"
+
+#: /views/browser/quickupload.ctp:32
+msgid "You can upload maximal %s and %s at once. ZIP archives are extracted automatically."
+msgstr "Możesz przesłać maksymalnie %s i %s jednocześnie. Archiwa ZIP są wypakowywane automatycznie."
+
+#: /views/browser/quickupload.ctp:37
+#: /views/browser/upload.ctp:22
+msgid "You cannot upload files now. Your upload quota is exceeded."
+msgstr "Nie możesz przesyłać plików. Limit został przekroczony."
+
+#: /views/browser/sync.ctp:1
+msgid "Meta Data Synchronization"
+msgstr "Synchronizacja metadanych"
+
+#: /views/browser/sync.ctp:5
+msgid "phTagr embedds meta data like tags, categories, or (geo) location information direct into the image video files."
+msgstr "phTagr przydziela metadane takie jak znaczniki, kategorie lub geolokalizację bezpośrednio do obiektów."
+
+#: /views/browser/sync.ctp:7
+msgid "Note:  In case you are using phTagr with external paths it is recommended to synchronize your images to store this important information within the media file.  After the synchronization these mata data could be read by other image programs or desktop search engines."
+msgstr ""
+
+#: /views/browser/sync.ctp:10
+msgid "You have %d unsynchronized media. Click %s to start the synchronization (this might take some time)"
+msgstr "Jest %d obiektów jest niezsynchronizowanych. Kliknij %s by je zsynchronizować. Może to zająć trochę czasu."
+
+#: /views/browser/sync.ctp:10;25
+msgid "sync"
+msgstr "Synchronizuj"
+
+#: /views/browser/sync.ctp:14
+msgid "All media are synchronized"
+msgstr "Wszystkie obiekty zsynchronizowane"
+
+#: /views/browser/sync.ctp:18
+msgid "Some files could not be updated with new metadata. Mainly this happens if the files are write protected. Please have a look to the log files for details."
+msgstr ""
+
+#: /views/browser/sync.ctp:23
+msgid "Synchronized %d media."
+msgstr "Zsynchronizowano %s obiektów."
+
+#: /views/browser/sync.ctp:25
+msgid " %d media remains unsynced. Click %s to synchronize again"
+msgstr " %d obiektów jest niezsynchronizowanych. Kliknij %s by je zsynchronizować"
+
+#: /views/browser/upload.ctp:1
+msgid "File Upload"
+msgstr "Prześlij plik"
+
+#: /views/browser/upload.ctp:6
+msgid "You upload files to folder %s"
+msgstr "Przesyłasz pliki do katalogu %s"
+
+#: /views/browser/upload.ctp:7
+msgid "You can upload maximal %s and %s at once"
+msgstr "Możesz przesłać maksymalnie %s i %s jednocześnie"
+
+#: /views/browser/upload.ctp:16
+msgid "Extract ZIP archive"
+msgstr "Wypakuj archiwum ZIP"
+
+#: /views/browser/view.ctp:1
+msgid "File Overview"
+msgstr "Podgląd pliku"
+
+#: /views/browser/view.ctp:5
+msgid "Description"
+msgstr "Opis"
+
+#: /views/browser/view.ctp:5
+msgid "Value"
+msgstr "Wartość"
+
+#: /views/browser/view.ctp:10
+msgid "Files total"
+msgstr "Razem plików"
+
+#: /views/browser/view.ctp:11
+msgid "Count of images/videos"
+msgstr "Liczba zdjęć/wideo"
+
+#: /views/browser/view.ctp:13
+msgid "External images/videos"
+msgstr "Zewnętrzne zdjęcia/wideo"
+
+#: /views/browser/view.ctp:14
+msgid "Bytes total (with external sources)"
+msgstr "Razem bajtów (wraz z zewnętrznymi)"
+
+#: /views/browser/view.ctp:16
+msgid "Bytes total"
+msgstr "Razem bajtów"
+
+#: /views/browser/view.ctp:19
+msgid "Quota (free)"
+msgstr "Limit (wolne)"
+
+#: /views/browser/view.ctp:21
+msgid "Videos"
+msgstr "Wideo"
+
+#: /views/browser/view.ctp:22
+msgid "Public files"
+msgstr "Widoczne dla wszystkich"
+
+#: /views/browser/view.ctp:23
+msgid "Visible for users"
+msgstr "Widoczne dla użytkowników"
+
+#: /views/browser/view.ctp:24
+msgid "Visible for group members"
+msgstr "Widoczne dla członków grupy"
+
+#: /views/browser/view.ctp:25
+msgid "Private files"
+msgstr "Prywatne"
+
+#: /views/browser/view.ctp:26
+msgid "Unsynced files"
+msgstr "Niezsynchronizowane pliki"
+
+#: /views/elements/comment.ctp:7
+#: /views/explorer/index.ctp:63
+#: /views/guests/edit.ctp:19
+msgid "Comments"
+msgstr "Komentarze"
+
+#: /views/elements/comment.ctp:19
+#, fuzzy
+msgid "%s said %s"
+msgstr "%s przez %s"
+
+#: /views/elements/comment.ctp:23
+msgid "(delete)"
+msgstr "(usuń)"
+
+#: /views/elements/comment.ctp:35
+msgid "Add new Comment"
+msgstr "Dodaj komentarz"
+
+#: /views/elements/comment.ctp:43
+#: /views/explorer/search.ctp:30
+#: /views/groups/add.ctp:9
+#: /views/groups/index.ctp:9
+#: /views/guests/edit.ctp:23
+#: /views/guests/index.ctp:9
+#: /views/helpers/explorer_menu.php:154
+#: /views/helpers/file_list.php:137
+msgid "Name"
+msgstr "Nazwa"
+
+#: /views/elements/comment.ctp:44
+msgid "Will not be published"
+msgstr "Nie zostanie opublikowany"
+
+#: /views/elements/comment.ctp:45
+msgid "Optional"
+msgstr "Opcjonalny"
+
+#: /views/elements/comment.ctp:49
+msgid "Verification"
+msgstr "Weryfikacja"
+
+#: /views/elements/comment.ctp:53
+msgid "Comment"
+msgstr "Komentarz"
+
+#: /views/elements/comment.ctp:54
+msgid "Notify me on new comments"
+msgstr "Poinformuj mnie o nowych komentarzach"
+
+#: /views/elements/comment.ctp:57
+msgid "Add Comment"
+msgstr "Dodaj komentarz"
+
+#: /views/elements/footer.ctp:4
+msgid "%s Social Web Gallery %s in %.3fs. Layout based on %s, Icons by %s"
+msgstr ""
+
+#: /views/elements/menu.ctp:19;44
+#: /views/explorer/index.ctp:1
+#: /views/images/notfound.ctp:3
+#: /views/themed/mobile/explorer/index.ctp:1
+msgid "Explorer"
+msgstr "Przeglądarka"
+
+#: /views/elements/menu.ctp:25
+msgid "My Photos"
+msgstr "Moje"
+
+#: /views/elements/topnav.ctp:7
+msgid "System"
+msgstr "System"
+
+#: /views/elements/topnav.ctp:10
+msgid "Preferences"
+msgstr "Preferencje"
+
+#: /views/elements/topnav.ctp:12
+#: /views/themed/mobile/elements/header.ctp:5
+msgid "Logout"
+msgstr "Wyloguj"
+
+#: /views/elements/topnav.ctp:14
+#: /views/themed/mobile/elements/header.ctp:7
+#: /views/users/login.ctp:5;11
+msgid "Login"
+msgstr "Zaloguj"
+
+#: /views/elements/topnav.ctp:16
+msgid "Register"
+msgstr "Rejestracja"
+
+#: /views/explorer/editacl.ctp:7
+msgid "Who can view image?"
+msgstr "Kto może oglądać obiekt?"
+
+#: /views/explorer/editacl.ctp:8
+#: /views/explorer/index.ctp:161
+#: /views/options/acl.ctp:15
+msgid "Who can download the image?"
+msgstr "Kto może pobrać obiekt?"
+
+#: /views/explorer/editacl.ctp:9
+msgid "Who can edit the tags?"
+msgstr "Kto może edytować znaczniki?"
+
+#: /views/explorer/editacl.ctp:10
+#: /views/explorer/index.ctp:163
+#: /views/options/acl.ctp:17
+msgid "Who can edit all meta data?"
+msgstr "Kto może edytować wszystkie metadane?"
+
+#: /views/explorer/editacl.ctp:11
+#: /views/explorer/search.ctp:38
+#: /views/groups/edit.ctp:40
+#: /views/guests/edit.ctp:41;70
+#: /views/helpers/image_data.php:244
+msgid "Group"
+msgstr "Grupa"
+
+#: /views/explorer/editacl.ctp:15
+#: /views/explorer/editmeta.ctp:46
+#: /views/guests/edit.ctp:33
+#: /views/options/acl.ctp:21
+#: /views/options/profile.ctp:26
+#: /views/setup/system.ctp:33
+#: /views/system/admin_external.ctp:20
+#: /views/system/admin_general.ctp:13
+#: /views/users/admin_edit.ctp:33
+#: /views/users/admin_register.ctp:9
+msgid "Save"
+msgstr "Zapisz"
+
+#: /views/explorer/editacl.ctp:16
+#: /views/explorer/editmeta.ctp:47
+#: /views/setup/admin_upgrade.ctp:10
+msgid "Cancel"
+msgstr "Anuluj"
+
+#: /views/explorer/editmeta.ctp:12
+#: /views/explorer/search.ctp:19
+#: /views/helpers/image_data.php:350
+msgid "Date"
+msgstr "Data"
+
+#: /views/explorer/editmeta.ctp:14
+#: /views/explorer/edittag.ctp:8
+#: /views/explorer/index.ctp:119
+#: /views/explorer/search.ctp:6
+#: /views/helpers/explorer_menu.php:211
+#: /views/helpers/image_data.php:353
+#: /views/themed/mobile/explorer/index.ctp:31
+#: /views/themed/mobile/images/view.ctp:29
+msgid "Tags"
+msgstr "Znaczniki"
+
+#: /views/explorer/editmeta.ctp:18
+#: /views/explorer/index.ctp:126
+#: /views/explorer/search.ctp:7
+#: /views/helpers/explorer_menu.php:216
+#: /views/helpers/image_data.php:356
+#: /views/themed/mobile/explorer/index.ctp:40
+#: /views/themed/mobile/images/view.ctp:38
+msgid "Categories"
+msgstr "Kategorie"
+
+#: /views/explorer/editmeta.ctp:22
+#: /views/explorer/index.ctp:130
+msgid "City"
+msgstr "Miasto"
+
+#: /views/explorer/editmeta.ctp:26
+#: /views/explorer/index.ctp:134
+msgid "Sublocation"
+msgstr "Miejsce"
+
+#: /views/explorer/editmeta.ctp:30
+#: /views/explorer/index.ctp:138
+msgid "State"
+msgstr "Województwo"
+
+#: /views/explorer/editmeta.ctp:34
+#: /views/explorer/index.ctp:142
+msgid "Country"
+msgstr "Kraj"
+
+#: /views/explorer/editmeta.ctp:42
+#: /views/explorer/index.ctp:145
+msgid "Geo data"
+msgstr "Dane geolokacyjne"
+
+#: /views/explorer/index.ctp:56
+#, fuzzy
+msgid "by %s"
+msgstr "%s przez %s"
+
+#: /views/explorer/index.ctp:60
+#: /views/helpers/explorer_menu.php:150
+#, fuzzy
+msgid "Views"
+msgstr "Wideo"
+
+#: /views/explorer/index.ctp:63
+#, fuzzy
+msgid "%d %s"
+msgstr "%s przez %s"
+
+#: /views/explorer/index.ctp:63
+#, fuzzy
+msgid "%d comments"
+msgstr "Komentarze"
+
+#: /views/explorer/index.ctp:87
+msgid "Select All"
+msgstr "Wybierz wszystko"
+
+#: /views/explorer/index.ctp:88
+msgid "Invert Selection"
+msgstr "Odwróć zaznaczenie"
+
+#: /views/explorer/index.ctp:102
+#: /views/explorer/search.ctp:4
+msgid "Metadata"
+msgstr "Metadane"
+
+#: /views/explorer/index.ctp:116
+msgid "E.g. 2008-08-07 15:30"
+msgstr "Np. 2008-08-07 15:30"
+
+#: /views/explorer/index.ctp:121
+msgid "E.g. newtag, -oldtag"
+msgstr "Np. nowyznacznik, -staryznacznik"
+
+#: /views/explorer/index.ctp:145
+msgid "latitude, longitude"
+msgstr "szerokość, długość geograficzna"
+
+#: /views/explorer/index.ctp:156
+#: /views/helpers/image_data.php:471
+#: /views/options/acl.ctp:5
+msgid "Everyone"
+msgstr "Każdy"
+
+#: /views/explorer/index.ctp:157
+#: /views/helpers/image_data.php:254;470
+msgid "Users"
+msgstr "Użytkownicy"
+
+#: /views/explorer/index.ctp:158
+#: /views/explorer/search.ctp:40
+#: /views/helpers/image_data.php:250;469
+msgid "Group members"
+msgstr "Członkowie grupy"
+
+#: /views/explorer/index.ctp:159
+#: /views/helpers/image_data.php:468
+#: /views/options/acl.ctp:8
+msgid "Me only"
+msgstr "Tylko ja"
+
+#: /views/explorer/index.ctp:160
+#: /views/options/acl.ctp:14
+msgid "Who can view the image?"
+msgstr "Kto może oglądać ten obiekt?"
+
+#: /views/explorer/index.ctp:162
+#: /views/options/acl.ctp:16
+msgid "Who can add tags?"
+msgstr "Kto może dodawać znaczniki?"
+
+#: /views/explorer/index.ctp:164
+#: /views/options/acl.ctp:18
+msgid "Default image group?"
+msgstr "Domyślna grupa obiektu?"
+
+#: /views/explorer/index.ctp:169
+msgid "Apply"
+msgstr "Zastosuj"
+
+#: /views/explorer/quicksearch.ctp:11
+msgid "Sorry, nothing was found for %s"
+msgstr "Nic nie znaleziono dla frazy %s"
+
+#: /views/explorer/quicksearch.ctp:15
+msgid "Results of %s"
+msgstr "Wyniki wyszukiwania %s"
+
+#: /views/explorer/quicksearch.ctp:31
+msgid "See more results of tag"
+msgstr "Zobacz więcej wyników dla znacznika"
+
+#: /views/explorer/quicksearch.ctp:42
+msgid "See more results of category"
+msgstr "Zobacz więcej wyników dla kategorii"
+
+#: /views/explorer/quicksearch.ctp:53
+msgid "See more results of location"
+msgstr "Zobacz więcej wyników dla lokalizacji"
+
+#: /views/explorer/search.ctp:1
+#: /views/helpers/explorer_menu.php:204
+msgid "Advanced Search"
+msgstr "Zaawansowane wyszukiwanie"
+
+#: /views/explorer/search.ctp:6
+#, fuzzy
+msgid "E.g. includeTag, -excludeTag"
+msgstr "Np. nowyznacznik, -staryznacznik"
+
+#: /views/explorer/search.ctp:8
+#: /views/helpers/explorer_menu.php:221
+#: /views/helpers/image_data.php:367
+msgid "Locations"
+msgstr "Lokalizacje"
+
+#: /views/explorer/search.ctp:10
+#, fuzzy
+msgid "Date from"
+msgstr "Data"
+
+#: /views/explorer/search.ctp:10
+#, fuzzy
+msgid "E.g. 2008-08-07"
+msgstr "Np. 2008-08-07 15:30"
+
+#: /views/explorer/search.ctp:11
+#, fuzzy
+msgid "Date to"
+msgstr "Data"
+
+#: /views/explorer/search.ctp:14
+#: /views/helpers/explorer_menu.php:227
+msgid "Options"
+msgstr "Opcje"
+
+#: /views/explorer/search.ctp:17
+#, fuzzy
+msgid "Page size"
+msgstr "Rozmiar strony"
+
+#: /views/explorer/search.ctp:19
+#, fuzzy
+msgid "Default"
+msgstr "Usuń"
+
+#: /views/explorer/search.ctp:19
+#, fuzzy
+msgid "Newest"
+msgstr "Najnowsze obiekty"
+
+#: /views/explorer/search.ctp:19
+#: /views/helpers/explorer_menu.php:146
+#, fuzzy
+msgid "Changes"
+msgstr "Anuluj"
+
+#: /views/explorer/search.ctp:19
+#, fuzzy
+msgid "Random"
+msgstr "Losowy obiekt"
+
+#: /views/explorer/search.ctp:19
+#, fuzzy
+msgid "Popularity"
+msgstr "Popularne znaczniki"
+
+#: /views/explorer/search.ctp:20
+msgid "Sort by"
+msgstr ""
+
+#: /views/explorer/search.ctp:24
+#, fuzzy
+msgid "Advanced"
+msgstr "Zaawansowane wyszukiwanie"
+
+#: /views/explorer/search.ctp:31
+msgid "Any Type"
+msgstr ""
+
+#: /views/explorer/search.ctp:31
+msgid "Image or Photos"
+msgstr ""
+
+#: /views/explorer/search.ctp:31
+#, fuzzy
+msgid "Video"
+msgstr "Wideo"
+
+#: /views/explorer/search.ctp:32
+#, fuzzy
+msgid "File Type"
+msgstr "Prześlij plik"
+
+#: /views/explorer/search.ctp:36
+#: /views/guests/add.ctp:9
+#: /views/options/profile.ctp:8
+#: /views/setup/config.ctp:13
+#: /views/setup/user.ctp:9
+#: /views/users/admin_add.ctp:8
+#: /views/users/admin_index.ctp:15
+#: /views/users/login.ctp:7
+#: /views/users/password.ctp:7
+#: /views/users/register.ctp:7
+msgid "Username"
+msgstr "Nazwa użytkownika"
+
+#: /views/explorer/search.ctp:40
+msgid "Any"
+msgstr ""
+
+#: /views/explorer/search.ctp:40
+#, fuzzy
+msgid "Private"
+msgstr "Prywatne"
+
+#: /views/explorer/search.ctp:40
+#: /views/images/view.ctp:50
+#: /views/options/acl.ctp:6
+#: /views/users/admin_edit.ctp:11
+msgid "User"
+msgstr "Użytkownik"
+
+#: /views/explorer/search.ctp:40
+#, fuzzy
+msgid "Public"
+msgstr "Widoczne dla wszystkich"
+
+#: /views/explorer/search.ctp:41
+msgid "Media visibility"
+msgstr ""
+
+#: /views/explorer/search.ctp:44
+msgid "AND"
+msgstr ""
+
+#: /views/explorer/search.ctp:44
+msgid "OR"
+msgstr ""
+
+#: /views/explorer/search.ctp:45
+#, fuzzy
+msgid "General Operand"
+msgstr "Ogólne"
+
+#: /views/explorer/search.ctp:46
+msgid "Tag operand"
+msgstr ""
+
+#: /views/explorer/search.ctp:47
+#, fuzzy
+msgid "Category operand"
+msgstr "Kategorie"
+
+#: /views/explorer/search.ctp:48
+#, fuzzy
+msgid "Location operand"
+msgstr "Lokalizacja %s"
+
+#: /views/explorer/search.ctp:53
+msgid "Search"
+msgstr ""
+
+#: /views/groups/add.ctp:1
+msgid "New Group"
+msgstr "Nowa grupa"
+
+#: /views/groups/add.ctp:7
+msgid "Create new group"
+msgstr "Utwórz nową grupę"
+
+#: /views/groups/edit.ctp:6
+msgid "Member List"
+msgstr "Lista członków"
+
+#: /views/groups/edit.ctp:10
+#: /views/users/admin_index.ctp:35
+msgid "Member"
+msgstr "Członek"
+
+#: /views/groups/edit.ctp:11
+#: /views/groups/index.ctp:11
+#: /views/guests/edit.ctp:42
+#: /views/guests/index.ctp:11
+#: /views/helpers/file_list.php:137
+#: /views/helpers/image_data.php:419
+#: /views/users/admin_index.ctp:20
+#: /views/users/admin_path.ctp:13
+msgid "Actions"
+msgstr "Akcje"
+
+#: /views/groups/edit.ctp:24
+msgid "Do you really want to delete the member '%s' from this group '%s'?"
+msgstr "Naprawdę chcesz usunąć '%s' z grupy '%s'?"
+
+#: /views/groups/edit.ctp:26;26
+#: /views/groups/index.ctp:26;26
+#: /views/guests/index.ctp:26
+#: /views/users/admin_index.ctp:48;48
+#: /views/users/admin_path.ctp:22
+msgid "Delete"
+msgstr "Usuń"
+
+#: /views/groups/edit.ctp:34
+msgid "Currently this group has no members. Please add users to grant access to your private images."
+msgstr "Do tej grupy nikt nie należy. Dodaj użytkowników by przydzielić im uprawnienia do prywatnych obiektów."
+
+#: /views/groups/edit.ctp:39
+msgid "Add member"
+msgstr "Dodaj członka"
+
+#: /views/groups/edit.ctp:43
+#: /views/users/admin_path.ctp:41
+msgid "Add"
+msgstr "Dodaj"
+
+#: /views/groups/edit.ctp:45
+msgid "Show all groups"
+msgstr "Pokaż wszystkie grupy"
+
+#: /views/groups/index.ctp:10
+msgid "Members"
+msgstr "Członkowie"
+
+#: /views/groups/index.ctp:21
+#, fuzzy
+msgid "Do you realy want to delete the group '%s'?"
+msgstr "Naprawdę chcesz usunąć '%s' z grupy '%s'?"
+
+#: /views/groups/index.ctp:35
+msgid "Currently no image groups are assigned. At the one hand each image could be assigned to a specific group. On the other hand a guest can be member of a set of groups. The guest is than able to view the images from his groups."
+msgstr "Aktualnie nie ma żadnych grup. Każdy obiekt może być przydzielony do jakiejś grupy, a każdy gość może być członkiem różnych grup. Wtedy gość jest w stanie oglądać obiekty z grup do których należy."
+
+#: /views/guests/add.ctp:1
+msgid "Guest Creation"
+msgstr "Utworzenie gościa"
+
+#: /views/guests/add.ctp:7
+msgid "Create new guest account"
+msgstr "Utwórz nowe konto gościa"
+
+#: /views/guests/add.ctp:10
+#: /views/guests/edit.ctp:8
+#: /views/options/profile.ctp:11
+#: /views/setup/user.ctp:12
+#: /views/users/admin_add.ctp:9
+#: /views/users/admin_edit.ctp:10
+#: /views/users/password.ctp:8
+#: /views/users/register.ctp:10
+msgid "Email"
+msgstr "Email"
+
+#: /views/guests/add.ctp:11
+#: /views/guests/edit.ctp:13;15
+#: /views/options/profile.ctp:15;17
+#: /views/setup/config.ctp:14
+#: /views/setup/user.ctp:10
+#: /views/users/admin_add.ctp:10
+#: /views/users/admin_edit.ctp:21
+#: /views/users/login.ctp:8
+#: /views/users/register.ctp:8
+msgid "Password"
+msgstr "Hasło"
+
+#: /views/guests/add.ctp:12
+#: /views/guests/edit.ctp:16
+#: /views/options/profile.ctp:18
+#: /views/setup/user.ctp:11
+#: /views/users/admin_add.ctp:11
+#: /views/users/admin_edit.ctp:22
+#: /views/users/confirm.ctp:11
+#: /views/users/register.ctp:9
+msgid "Confirm"
+msgstr "Potwierdź"
+
+#: /views/guests/edit.ctp:6
+#: /views/users/admin_index.ctp:36
+msgid "Guest"
+msgstr "Gość"
+
+#: /views/guests/edit.ctp:9
+msgid "Expires"
+msgstr "Wygasa"
+
+#: /views/guests/edit.ctp:10
+msgid "Enable WebDAV access"
+msgstr "Aktywuj dostęp WebDAV"
+
+#: /views/guests/edit.ctp:22
+msgid "None"
+msgstr "Brak"
+
+#: /views/guests/edit.ctp:24
+msgid "Name and captcha"
+msgstr "Imię i captcha"
+
+#: /views/guests/edit.ctp:28
+msgid "Authentication"
+msgstr "Uwierzytelnianie"
+
+#: /views/guests/edit.ctp:37
+msgid "Group List"
+msgstr "Lista grup"
+
+#: /views/guests/edit.ctp:65
+msgid "Currently this guest account has no assigned groups. Please add groups to grant access to your personal images."
+msgstr "To konto gościa nie należy do żadnej z grup. Dodaj grupy by przydzielić uprawnienia do prywatnych obiektów."
+
+#: /views/guests/edit.ctp:69
+msgid "Group Assignements"
+msgstr "Przydział do grup"
+
+#: /views/guests/edit.ctp:73
+msgid "Add Group"
+msgstr "Dodaj grupę"
+
+#: /views/guests/index.ctp:1
+#: /views/options/acl.ctp:7
+#: /views/users/admin_index.ctp:18
+msgid "Guests"
+msgstr "Goście"
+
+#: /views/guests/index.ctp:35
+msgid "Currently, no guest accounts are set. You can create guests accounts to grant access to your images e.g. to your friends or family. Please add also some groups to the guest to grant access to this guest for these groups."
+msgstr ""
+
+#: /views/guests/links.ctp:1
+msgid "Authenticated Links"
+msgstr "Uwierzytelnione odsyłacze"
+
+#: /views/guests/links.ctp:4
+msgid "Following links contains an authentication key which should be used carefully. Copy the links with with right mouse click and select <i>Copy link address</i>."
+msgstr ""
+
+#: /views/guests/links.ctp:7
+#: /views/options/rss.ctp:7
+msgid "The links are valid for the current session. For permanent login the user has to login via username and password."
+msgstr ""
+
+#: /views/guests/links.ctp:9
+msgid "Direct Link"
+msgstr "Bezpośredni odsyłacz"
+
+#: /views/guests/links.ctp:11
+msgid "Following link provides a direct link to <i>My Photos</i> of the guest which omits the login with username and password."
+msgstr ""
+
+#: /views/guests/links.ctp:17
+msgid "My Media of Guest %s (Link %s)"
+msgstr ""
+
+#: /views/guests/links.ctp:23
+msgid "Following links provide a authenticated RSS and Media RSS links."
+msgstr ""
+
+#: /views/guests/links.ctp:31
+#: /views/options/rss.ctp:16
+msgid "Recent Media"
+msgstr "Ostatnie obiekty"
+
+#: /views/guests/links.ctp:32
+#: /views/home/index.ctp:65
+#: /views/options/rss.ctp:17
+msgid "Recent Comments"
+msgstr ""
+
+#: /views/guests/links.ctp:33
+#: /views/options/rss.ctp:18
+msgid "Media RSS"
+msgstr ""
+
+#: /views/guests/links.ctp:34
+#: /views/options/rss.ctp:19
+msgid "Media RSS of My Media"
+msgstr ""
+
+#: /views/guests/links.ctp:37
+msgid "Click %s to renew the authentication key. All previous links become invalid."
+msgstr ""
+
+#: /views/guests/links.ctp:37
+#: /views/options/rss.ctp:22
+msgid "renew key"
+msgstr ""
+
+#: /views/helpers/explorer_menu.php:62
+msgid "Show media in high quality (if available)"
+msgstr ""
+
+#: /views/helpers/explorer_menu.php:66
+msgid "Start Slideshow"
+msgstr "Zacznij pokaz"
+
+#: /views/helpers/explorer_menu.php:125
+msgid "Order"
+msgstr "Kolejność"
+
+#: /views/helpers/explorer_menu.php:130
+msgid "date asc"
+msgstr ""
+
+#: /views/helpers/explorer_menu.php:130
+msgid "Show oldest first"
+msgstr "Najpierw najstarsze"
+
+#: /views/helpers/explorer_menu.php:134
+#, fuzzy
+msgid "newest"
+msgstr "nast."
+
+#: /views/helpers/explorer_menu.php:134
+msgid "Show newest first"
+msgstr "Najpierw najnowsze"
+
+#: /views/helpers/explorer_menu.php:138
+msgid "pouplarity"
+msgstr ""
+
+#: /views/helpers/explorer_menu.php:138
+msgid "Show popular first"
+msgstr "Najpierw najpopularniejsze"
+
+#: /views/helpers/explorer_menu.php:142
+msgid "random"
+msgstr ""
+
+#: /views/helpers/explorer_menu.php:142
+msgid "Show random order"
+msgstr "Losowo"
+
+#: /views/helpers/explorer_menu.php:146
+msgid "Show changes first"
+msgstr "Najpierw zmienione"
+
+#: /views/helpers/explorer_menu.php:150
+msgid "Show last views first"
+msgstr "Najpierw ostatnio oglądane"
+
+#: /views/helpers/explorer_menu.php:154
+msgid "Order by name"
+msgstr ""
+
+#: /views/helpers/explorer_menu.php:171
+msgid "Pagesize"
+msgstr "Rozmiar strony"
+
+#: /views/helpers/file_list.php:82
+#, fuzzy
+msgid "Delete folder %s?"
+msgstr "Zobacz katalog %s"
+
+#: /views/helpers/file_list.php:95
+#, fuzzy
+msgid "Unlink media from this file"
+msgstr "Zobacz obiekt tygodnia"
+
+#: /views/helpers/file_list.php:105
+msgid "Download %s"
+msgstr ""
+
+#: /views/helpers/file_list.php:123
+#, fuzzy
+msgid "(parent folder)"
+msgstr "utwórz katalog"
+
+#: /views/helpers/file_list.php:125
+#, fuzzy
+msgid "(this folder)"
+msgstr "utwórz katalog"
+
+#: /views/helpers/file_list.php:137
+#, fuzzy
+msgid "Media"
+msgstr "Metadane"
+
+#: /views/helpers/file_list.php:137
+#: /views/images/view.ctp:66
+msgid "Size"
+msgstr "Rozmiar"
+
+#: /views/helpers/image_data.php:224
+#, fuzzy
+msgid "%s can edit the meta data"
+msgstr "Kto może edytować wszystkie metadane?"
+
+#: /views/helpers/image_data.php:226
+#, fuzzy
+msgid "%s can edit the tags"
+msgstr "Kto może edytować znaczniki?"
+
+#: /views/helpers/image_data.php:231
+#, fuzzy
+msgid "%s can download this media"
+msgstr "Kto może pobrać obiekt?"
+
+#: /views/helpers/image_data.php:233
+#, fuzzy
+msgid "%s an view this media"
+msgstr "Kto może oglądać ten obiekt?"
+
+#: /views/helpers/image_data.php:244
+#, fuzzy
+msgid "Access for group members"
+msgstr "Widoczne dla członków grupy"
+
+#: /views/helpers/image_data.php:247
+#, fuzzy
+msgid "This media belongs to the group '%s'"
+msgstr "Obiekt jest widoczny dla członków grupy"
+
+#: /views/helpers/image_data.php:253
+#, fuzzy
+msgid "users:"
+msgstr "Użytkownicy"
+
+#: /views/helpers/image_data.php:253
+#, fuzzy
+msgid "Access for users"
+msgstr "Widoczne dla użytkowników"
+
+#: /views/helpers/image_data.php:257
+msgid "public:"
+msgstr ""
+
+#: /views/helpers/image_data.php:257
+msgid "Access for the public"
+msgstr ""
+
+#: /views/helpers/image_data.php:258
+msgid "The public"
+msgstr ""
+
+#: /views/helpers/image_data.php:271
+msgid "View media of previous dates"
+msgstr "Poprzednie dni"
+
+#: /views/helpers/image_data.php:274
+msgid "View media of this day"
+msgstr "Zobacz obiekt dnia"
+
+#: /views/helpers/image_data.php:277
+msgid "View media of this week"
+msgstr "Zobacz obiekt tygodnia"
+
+#: /views/helpers/image_data.php:280
+msgid "View media of this month"
+msgstr "Zobacz obiekt miesiąca"
+
+#: /views/helpers/image_data.php:283
+msgid "View media of next dates"
+msgstr "Następne dni"
+
+#: /views/helpers/image_data.php:371
+msgid "Access"
+msgstr "Dostęp"
+
+#: /views/helpers/image_data.php:382;382
+msgid "Edit tags"
+msgstr "Edytuj znaczniki"
+
+#: /views/helpers/image_data.php:390
+msgid "Save file %s"
+msgstr "Zapisz plik %s"
+
+#: /views/helpers/image_data.php:398
+msgid "Show location in a map"
+msgstr "Pokaż lokalizację na mapie"
+
+#: /views/helpers/image_data.php:406
+msgid "Edit access rights"
+msgstr "Edytuj uprawnienia"
+
+#: /views/helpers/image_data.php:412
+msgid "Synchronize db with image"
+msgstr "Synchronizuj bazę z obrazem"
+
+#: /views/helpers/image_data.php:412
+msgid "Synchronize meta data with the image"
+msgstr "Synchronizuj metadane z obrazem"
+
+#: /views/helpers/image_data.php:467
+msgid "Keep"
+msgstr ""
+
+#: /views/helpers/image_data.php:485
+msgid "This media is public visible"
+msgstr "Obiekt jest widoczny publicznie"
+
+#: /views/helpers/image_data.php:488
+msgid "This media is visible for users"
+msgstr "Obiekt jest widoczny dla użytkowników"
+
+#: /views/helpers/image_data.php:491
+msgid "This media is visible for group members"
+msgstr "Obiekt jest widoczny dla członków grupy"
+
+#: /views/helpers/image_data.php:494
+msgid "This media is private"
+msgstr "Obiekt prywatny"
+
+#: /views/helpers/menu.php:133
+msgid "Main Menu"
+msgstr "Menu główne"
+
+#: /views/helpers/navigator.php:57;118
+msgid "prev"
+msgstr "poprz."
+
+#: /views/helpers/navigator.php:105;140
+msgid "next"
+msgstr "nast."
+
+#: /views/helpers/navigator.php:127
+msgid "up"
+msgstr "góra"
+
+#: /views/home/index.ctp:1
+#: /views/themed/mobile/home/index.ctp:1
+msgid "Welcome to phTagr"
+msgstr "Witaj w phTagr"
+
+#: /views/home/index.ctp:6
+#: /views/themed/mobile/home/index.ctp:3
+msgid "Random Media"
+msgstr "Losowy obiekt"
+
+#: /views/home/index.ctp:12
+msgid "%s by %s"
+msgstr "%s przez %s"
+
+#: /views/home/index.ctp:17
+#: /views/themed/mobile/home/index.ctp:21
+msgid "See more %s"
+msgstr "Zobacz więcej %s"
+
+#: /views/home/index.ctp:17
+#: /views/themed/mobile/home/index.ctp:21
+msgid "random media..."
+msgstr "losowy obiekt..."
+
+#: /views/home/index.ctp:25
+#: /views/themed/mobile/home/index.ctp:25
+msgid "Newest Media"
+msgstr "Najnowsze obiekty"
+
+#: /views/home/index.ctp:55
+#: /views/themed/mobile/home/index.ctp:52
+msgid "See %s"
+msgstr "Zobacz %s"
+
+#: /views/home/index.ctp:55
+#: /views/themed/mobile/home/index.ctp:52
+msgid "all new media..."
+msgstr "wszystkie nowe obiekty..."
+
+#: /views/home/index.ctp:84
+msgid "Older comments..."
+msgstr "Starsze komentarze..."
+
+#: /views/home/index.ctp:92
+msgid "Popular Tags"
+msgstr "Popularne znaczniki"
+
+#: /views/home/index.ctp:97
+msgid "No tags assigned"
+msgstr "Brak znaczników"
+
+#: /views/home/index.ctp:100
+msgid "Popular Categories"
+msgstr "Popularne kategorie"
+
+#: /views/home/index.ctp:105
+msgid "No categories assigned"
+msgstr "Brak kategorii"
+
+#: /views/images/notfound.ctp:1
+msgid "No media Found"
+msgstr "Nie znaleziono obiektów"
+
+#: /views/images/notfound.ctp:3
+msgid "No media found. Please goto the %s and try again"
+msgstr "Nie znaleziono obiektów. Przejdź do %s i spróbuj ponownie"
+
+#: /views/images/view.ctp:32
+msgid "Media Details"
+msgstr "Szczegóły obiektu"
+
+#: /views/images/view.ctp:57
+msgid "File(s)"
+msgstr "Plik(i)"
+
+#: /views/images/view.ctp:61
+#, fuzzy
+msgid "Folder"
+msgstr "Nazwa katalogu"
+
+#: /views/images/view.ctp:63
+msgid "View Count"
+msgstr "Ilość wyświetleń"
+
+#: /views/images/view.ctp:64
+msgid "Created"
+msgstr "Utworzony"
+
+#: /views/images/view.ctp:65
+msgid "Last modified"
+msgstr "Ostatnio modyfikowany"
+
+#: /views/images/view.ctp:69
+msgid "Model"
+msgstr "Model"
+
+#: /views/images/view.ctp:72
+msgid "Duration"
+msgstr "Czas naświetlania"
+
+#: /views/images/view.ctp:75
+msgid "Aperture"
+msgstr "Przesłona"
+
+#: /views/images/view.ctp:78
+msgid "Shutter"
+msgstr "Migawka"
+
+#: /views/images/view.ctp:81
+msgid "ISO"
+msgstr "ISO"
+
+#: /views/options/acl.ctp:11
+msgid "Default Access Rights"
+msgstr "Domyślne prawa dostępu"
+
+#: /views/options/acl.ctp:12
+msgid "The following access rights are applied to new images."
+msgstr ""
+
+#: /views/options/profile.ctp:9
+#: /views/users/admin_edit.ctp:8
+msgid "First name"
+msgstr "Imię"
+
+#: /views/options/profile.ctp:10
+#: /views/users/admin_edit.ctp:9
+msgid "Last name"
+msgstr "Nazwisko"
+
+#: /views/options/profile.ctp:21
+msgid "Others"
+msgstr "Inni"
+
+#: /views/options/profile.ctp:23
+msgid "Show advanced file browser"
+msgstr "Pokaż zaawansowany menedżer plików"
+
+#: /views/options/rss.ctp:1
+msgid "Authenticated RSS"
+msgstr "Uwierzytelniony RSS"
+
+#: /views/options/rss.ctp:4
+msgid "Following links contain authentication keys of your account. Using these links you are authenticated directly without username and password. The links could be spoofed easily and should be used carefully."
+msgstr ""
+
+#: /views/options/rss.ctp:22
+msgid "Click %s to renew the authentication key. All previous keys become invalid."
+msgstr ""
+
+#: /views/setup/admin_upgrade.ctp:1
+#: /views/setup/admin_uptodate.ctp:1
+msgid "Database upgrade"
+msgstr "Aktualizacja bazy danych"
+
+#: /views/setup/admin_upgrade.ctp:6
+msgid "The database schema requires an upgrade. Do you want to perform the upgrade?"
+msgstr "Schemat bazy danych wymaga aktualizacji. Wykonać ją?"
+
+#: /views/setup/admin_upgrade.ctp:9
+msgid "Upgrade"
+msgstr "Aktualizacja"
+
+#: /views/setup/admin_uptodate.ctp:6
+msgid "Your database is up-to-date."
+msgstr "Baza danych jest aktualna."
+
+#: /views/setup/admin_uptodate.ctp:9
+#: /views/setup/config.ctp:18
+#: /views/setup/configro.ctp:30
+#: /views/setup/saltro.ctp:15
+msgid "Continue"
+msgstr "Kontynuuj"
+
+#: /views/setup/config.ctp:1
+#: /views/setup/configro.ctp:1
+msgid "Database connection"
+msgstr "Połączenie z bazą danych"
+
+#: /views/setup/config.ctp:5
+msgid "This step creates the configuration for the database connection. Please add your database connection settings here."
+msgstr ""
+
+#: /views/setup/config.ctp:9;12
+msgid "Database"
+msgstr "Baza"
+
+#: /views/setup/config.ctp:11
+msgid "Host"
+msgstr "Host"
+
+#: /views/setup/config.ctp:15
+msgid "Prefix"
+msgstr "Prefiks"
+
+#: /views/setup/configro.ctp:6
+msgid "The configuration file for the database connection could not be written. Please create a database configuration file by your own!"
+msgstr ""
+
+#: /views/setup/configro.ctp:9
+msgid "Below a sample configuration file is shown. Please adapt your database credentials and continue."
+msgstr ""
+
+#: /views/setup/database.ctp:1
+msgid "Initialize Database"
+msgstr "Utworzenie bazy danych"
+
+#: /views/setup/database.ctp:3
+msgid "All tables are now initialized"
+msgstr "Wszystkie tabele zostały utworzone"
+
+#: /views/setup/finish.ctp:1
+msgid "Setup Complete"
+msgstr "Instalacja zakończona"
+
+#: /views/setup/finish.ctp:4
+msgid "Congratulations! Your configuration of phTagr is completed. Have fun using phTagr!"
+msgstr ""
+
+#: /views/setup/finish.ctp:7
+msgid "Click %s to go to home or %s your first media."
+msgstr ""
+
+#: /views/setup/finish.ctp:7
+#, fuzzy
+msgid "upload"
+msgstr "Prześlij"
+
+#: /views/setup/index.ctp:1
+msgid "Welcome"
+msgstr "Witaj"
+
+#: /views/setup/index.ctp:5
+msgid "Welcome to the installation procedure of phTagr. Following steps are required to install it:"
+msgstr ""
+
+#: /views/setup/index.ctp:8
+msgid "Check for required paths"
+msgstr ""
+
+#: /views/setup/index.ctp:9
+msgid "Configuration of database connection"
+msgstr ""
+
+#: /views/setup/index.ctp:10
+msgid "Initialize required tables"
+msgstr ""
+
+#: /views/setup/index.ctp:11
+msgid "Create administration account"
+msgstr ""
+
+#: /views/setup/index.ctp:12
+msgid "Check required external programs"
+msgstr ""
+
+#: /views/setup/index.ctp:15
+msgid "Note: Cookies are required to install and run phTagr."
+msgstr ""
+
+#: /views/setup/index.ctp:17
+msgid "This setup will step through the required steps. Please click %s to start the installation."
+msgstr ""
+
+#: /views/setup/index.ctp:17
+#: /views/setup/salt.ctp:5
+#: /views/setup/saltro.ctp:7
+msgid "continue"
+msgstr "kontynuuj"
+
+#: /views/setup/path.ctp:1
+msgid "Path settings"
+msgstr "Ustawienia ścieżek"
+
+#: /views/setup/path.ctp:7
+msgid "Following paths are missing. Please create these paths!"
+msgstr ""
+
+#: /views/setup/path.ctp:19
+msgid "Following paths are not writeable. Please change the permissions!"
+msgstr ""
+
+#: /views/setup/path.ctp:29
+msgid "Retry"
+msgstr "Powtórz"
+
+#: /views/setup/salt.ctp:1
+#: /views/setup/saltro.ctp:1
+msgid "Security settings"
+msgstr "Ustawienia bezpieczeństwa"
+
+#: /views/setup/salt.ctp:5
+msgid "An error occured while setting the security salt. Please have look to the log files and click on %s"
+msgstr ""
+
+#: /views/setup/saltro.ctp:5
+msgid "phTagr could not set the security salt because the a configuration file file is write protected.  Please change the configuration manually"
+msgstr ""
+
+#: /views/setup/saltro.ctp:7
+msgid "Change the <b>Security.salt</b> setting in the core configuration file <code>%s</code> (line %d) to a random string with alpha numeric values. You can change the setting to the provided value below. After changing, click on %s."
+msgstr ""
+
+#: /views/setup/saltro.ctp:9
+msgid "Current security salt value"
+msgstr ""
+
+#: /views/setup/saltro.ctp:12
+msgid "New security salt value"
+msgstr ""
+
+#: /views/setup/system.ctp:5
+msgid "Congratulation! phTagr just runs fine now!"
+msgstr ""
+
+#: /views/setup/system.ctp:7
+msgid "phTagr can use <u>optional</u> external programs to enlarge the functionality. exiftool is used to export the meta data to images like tags, categories or (geo) locations. ffmpeg supports other video file formats like AVI, MPEG, or MOV. And convert supports better thumbnail creation for bigger photos."
+msgstr ""
+
+#: /views/setup/system.ctp:9
+msgid "You can set the file path of these exteranl programs here or set them later in the system preferences."
+msgstr ""
+
+#: /views/setup/system.ctp:11
+msgid "Skip these settings"
+msgstr "Opuść ten krok"
+
+#: /views/setup/system.ctp:15
+msgid "Following programs could not be found: %s."
+msgstr "Następujących programów nie udało się znaleźć: %s"
+
+#: /views/setup/system.ctp:20
+msgid "FFMPEG does not support the MP3 audio format. Sound will be disabled for videos!"
+msgstr "FFMPEG nie obsługuje MP3. Nie będzie dźwięku w filmach wideo!"
+
+#: /views/setup/system.ctp:27;28;29;30
+#: /views/system/admin_external.ctp:8;9;10;11
+msgid "Path to %s"
+msgstr "Ścieżka do %s"
+
+#: /views/setup/user.ctp:1
+msgid "Create admin account"
+msgstr "Utwórz konto administratora"
+
+#: /views/system/admin_external.ctp:1
+msgid "Sytem Settings"
+msgstr "Ustawienia"
+
+#: /views/system/admin_external.ctp:14
+msgid "Google Maps"
+msgstr "Mapy Google"
+
+#: /views/system/admin_external.ctp:15
+msgid "Enter here your API map key for %s. You can signup %s for a new key. No API map key is required for local setup with localhost."
+msgstr ""
+
+#: /views/system/admin_external.ctp:17
+msgid "API key"
+msgstr "Klucz API"
+
+#: /views/system/admin_general.ctp:8
+msgid "Gallery title"
+msgstr "Nazwa galerii"
+
+#: /views/system/admin_general.ctp:9
+msgid "Welcome text"
+msgstr "Tekst powitalny"
+
+#: /views/themed/mobile/elements/footer.ctp:1
+msgid "%s Social Web Gallery %s - mobile version"
+msgstr ""
+
+#: /views/themed/mobile/elements/header.ctp:1
+#, fuzzy
+msgid "mobile"
+msgstr "Profil"
+
+#: /views/themed/mobile/explorer/index.ctp:49
+#: /views/themed/mobile/images/view.ctp:47
+#, fuzzy
+msgid "Location"
+msgstr "Lokalizacje"
+
+#: /views/users/admin_add.ctp:1
+#, fuzzy
+msgid "Add new User"
+msgstr "Dodaj użytkownika"
+
+#: /views/users/admin_add.ctp:6
+#, fuzzy
+msgid "Create new user"
+msgstr "Utwórz nową grupę"
+
+#: /views/users/admin_edit.ctp:1
+#: /views/users/admin_path.ctp:1
+#, fuzzy
+msgid " User: %s"
+msgstr "Użytkownicy"
+
+#: /views/users/admin_edit.ctp:11
+msgid "System Operator"
+msgstr ""
+
+#: /views/users/admin_edit.ctp:13
+#: /views/users/admin_index.ctp:33
+msgid "Admin"
+msgstr ""
+
+#: /views/users/admin_edit.ctp:28
+#, fuzzy
+msgid "Expire date"
+msgstr "Wygasa"
+
+#: /views/users/admin_edit.ctp:29
+#, fuzzy
+msgid "Upload Quota"
+msgstr "Prześlij"
+
+#: /views/users/admin_index.ctp:6
+msgid "<< Prev"
+msgstr ""
+
+#: /views/users/admin_index.ctp:8
+msgid "Next >>"
+msgstr ""
+
+#: /views/users/admin_index.ctp:16
+#, fuzzy
+msgid "Firstname"
+msgstr "Imię"
+
+#: /views/users/admin_index.ctp:17
+#, fuzzy
+msgid "Lastname"
+msgstr "Nazwisko"
+
+#: /views/users/admin_index.ctp:19
+#, fuzzy
+msgid "User role"
+msgstr "Użytkownik"
+
+#: /views/users/admin_index.ctp:34
+msgid "SysOp"
+msgstr ""
+
+#: /views/users/admin_index.ctp:37
+msgid "Nobody"
+msgstr ""
+
+#: /views/users/admin_index.ctp:39
+msgid "Unknown"
+msgstr ""
+
+#: /views/users/admin_index.ctp:44
+msgid "Do you really want to detete the user '%s'? This action is irreversible! All the data of the users will be deleted!"
+msgstr ""
+
+#: /views/users/admin_path.ctp:7
+msgid "The user can import media files from following external directories:"
+msgstr ""
+
+#: /views/users/admin_path.ctp:12;39
+#, fuzzy
+msgid "Directory"
+msgstr "Bezpośredni odsyłacz"
+
+#: /views/users/admin_path.ctp:21
+#, fuzzy
+msgid "Do you really want to detete the path '%s' of '%s'?"
+msgstr "Naprawdę chcesz usunąć '%s' z grupy '%s'?"
+
+#: /views/users/admin_path.ctp:22
+msgid "Delete path '%s'"
+msgstr ""
+
+#: /views/users/admin_path.ctp:31
+msgid "Currently no external directories are set for this user."
+msgstr ""
+
+#: /views/users/admin_path.ctp:33
+msgid "The user has a dedicated upload directory which is handled by phTagr itself. External directories can be added here to the user to allow the import of external media files from the local file system."
+msgstr ""
+
+#: /views/users/admin_path.ctp:38
+msgid "Add Directory"
+msgstr ""
+
+#: /views/users/admin_register.ctp:1
+#, fuzzy
+msgid "User Registration"
+msgstr "Rejestracja"
+
+#: /views/users/admin_register.ctp:6
+msgid "Allow anonymous registration"
+msgstr ""
+
+#: /views/users/admin_register.ctp:7
+msgid "Initial quota limit"
+msgstr ""
+
+#: /views/users/confirm.ctp:5
+msgid "Account Confirmation"
+msgstr ""
+
+#: /views/users/confirm.ctp:6
+msgid "Please insert your confirmation key to finalize the account creation."
+msgstr ""
+
+#: /views/users/confirm.ctp:8
+msgid "Key"
+msgstr ""
+
+#: /views/users/login.ctp:13
+msgid "Forgot your password"
+msgstr ""
+
+#: /views/users/login.ctp:15
+#, fuzzy
+msgid "or %s"
+msgstr "Zobacz więcej %s"
+
+#: /views/users/login.ctp:15
+msgid "sign up"
+msgstr ""
+
+#: /views/users/password.ctp:1
+#, fuzzy
+msgid "Password Request"
+msgstr "Hasło"
+
+#: /views/users/password.ctp:5
+msgid "Account Data"
+msgstr ""
+
+#: /views/users/password.ctp:11
+msgid "Submit"
+msgstr ""
+
+#: /views/users/register.ctp:5
+#, fuzzy
+msgid "Create Account"
+msgstr "Utwórz konto administratora"
+
+#: /views/users/register.ctp:15
+msgid "Sign Up"
+msgstr ""
+
+#: /webroot/test.php:88
+msgid "Debug setting does not allow access to this url."
+msgstr ""
+
+#~ msgid "Click %s to start phTagr."
+#~ msgstr "Kliknij %s by wystartować phTagr."
+
