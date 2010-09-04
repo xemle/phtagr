@@ -224,24 +224,61 @@ class User extends AppModel
   }
   
   function allowWebdav($user) {
-    if (isset($user['User']['quota']) && $user['User']['quota'] > 0)
+    if (isset($user['User']['quota']) && $user['User']['quota'] > 0) {
       return true;
+    }
     return false;
   }
 
   function canUpload($user, $size) {
     $this->bind('Media', array('type' => 'hasMany'));
     $userId = intval($user['User']['id']);
-    if ($userId < 1)
+    if ($userId < 1) {
       return false;
+    }
 
     $current = $this->Media->countBytes($userId, false);
     $quota = $user['User']['quota'];
-    if ($current + $size <= $quota) 
+    if ($current + $size <= $quota) {
       return true;
+    }
 
     return false;
   }
   
+  /** Selects visible users for users profile 
+    @param user Current user
+    @param username Username to select. 
+    @return Array of users model data. If username is set only one user model data */
+  function findVisibleUsers($user, $username = false) {
+    $conditions = array();
+    $findType = 'all';
+    $resusive = -1;
+    if ($username) {
+      $conditions['User.username'] = $username;
+      $findType = 'first';
+      $recursive = 2;
+    }
+    $joins = array();
+    if ($user['User']['role'] < ROLE_ADMIN) {
+      if ($user['User']['role'] < ROLE_GUEST) {
+        $conditions['User.visible_level'] = 4;
+      } else {
+        $groupIds = Set::extract('/Member/id', $user);
+        $conditions = array(
+          'OR' => array(
+            'User.visible_level >=' => 3,
+            'AND' => array(
+              'User.visible_level' => 2,
+              'MemberUser.group_id' => $groupIds
+            )
+          )
+        );
+        $prefix = $this->tablePrefix;
+        $joins[] = "LEFT JOIN `{$prefix}groups_users` AS `MemberUser` ON `MemberUser`.`user_id` = `User`.`id`";
+      }
+    }
+    return $this->find($findType, array('conditions' => $conditions, 'joins' => $joins, 'recusive' => $resusive, 'group' => 'User.id'));
+  }
 }
 ?>

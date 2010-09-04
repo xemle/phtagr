@@ -40,7 +40,7 @@ class SearchComponent extends Search
     'east' => 'decimal',
     'from' => array('rule' => array('custom', '/^\d{4}-\d{2}-\d{2}([ T]\d{2}:\d{2}:\d{2})?$/')),
     'folder' => 'notEmpty',
-    'groups' => 'alphaNumeric',
+    'groups' => 'notEmpty',
     'media' => 'numeric',
     'name' => 'notEmpty',
     'north' => 'decimal',
@@ -49,7 +49,7 @@ class SearchComponent extends Search
     'operand' => array('rule' => array('inList', array('AND', 'OR'))),
     'page' => array('numericRule' => 'numeric', 'minRule' => array('rule' => array('comparison', '>=', 1))),
     'pos' => array('numericRule' => 'numeric', 'minRule' => array('rule' => array('comparison', '>=', 1))),
-    'show' => array('numericRule' => 'numeric', 'minRule' => array('rule' => array('comparison', '>=', 4)), 'maxRule' => array('rule' => array('comparison', '<=', 240))),
+    'show' => array('numericRule' => 'numeric', 'minRule' => array('rule' => array('comparison', '>=', 1)), 'maxRule' => array('rule' => array('comparison', '<=', 240))),
     'sort' => array('rule' => array('inList', array('date', '-date', 'newest', 'changes', 'viewed', 'popularity', 'random', 'name'))),
     'south' => 'decimal',
     'tags' => array('rule' => array('maxLength', 30)),
@@ -120,10 +120,10 @@ class SearchComponent extends Search
       $result = $this->_dispatchRule($ruleSet, $value);
     } else {
       $result = true;
-      foreach ($ruleSet as $name => $rule) {
+      foreach ($ruleSet as $ruleName => $rule) {
         $result &= $this->_dispatchRule($rule, $value);
         if (!$result) {
-          Logger::verbose("Failed multiple rules on rule '$name': $value");
+          Logger::verbose("Failed multiple rules on rule '$ruleName' ($name): $value");
         }
       }
     }

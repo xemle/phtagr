@@ -19,6 +19,11 @@
   vertical-align: middle;
 }
 
+ul.bare {
+  list-style-type: none;
+  padding: 0;
+}
+
 /* Browser */
 ul#files {
   margin: 0; 

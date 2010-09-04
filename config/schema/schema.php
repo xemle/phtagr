@@ -76,6 +76,10 @@ class PhtagrSchema extends CakeSchema {
 			'id' => array('type'=>'integer', 'null' => false, 'default' => NULL, 'key' => 'primary'),
 			'user_id' => array('type'=>'integer', 'null' => true, 'default' => NULL),
 			'name' => array('type'=>'string', 'null' => false, 'length' => 32),
+			'description' => array('type'=>'string', 'null' => false, 'length' => 512),
+			'is_moderated' => array('type'=>'integer', 'null' => false, 'length' => 3, 'default' => 1),
+			'is_hidden' => array('type'=>'integer', 'null' => false, 'length' => 3, 'default' => 0),
+			'is_shared' => array('type'=>'integer', 'null' => false, 'length' => 3, 'default' => 1),
 			'indexes' => array('PRIMARY' => array('column' => 'id', 'unique' => 1))
 		);
 	var $groups_users = array(
@@ -177,6 +181,7 @@ class PhtagrSchema extends CakeSchema {
 			'firstname' => array('type'=>'string', 'null' => true, 'default' => NULL, 'length' => 32),
 			'lastname' => array('type'=>'string', 'null' => false, 'length' => 32),
 			'email' => array('type'=>'string', 'null' => true, 'default' => NULL, 'length' => 64),
+			'visible_level' => array('type'=>'integer', 'null' => false, 'default' => 4, 'length' => 3),
 			'indexes' => array('PRIMARY' => array('column' => 'id', 'unique' => 1))
 		);
 }

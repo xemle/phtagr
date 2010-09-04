@@ -210,7 +210,9 @@ class UpgradeSchemaComponent extends Object{
         Logger::warn("Model '$modelName' does not exists");
       }
 
-      $columns[$table] = $this->db->alterSchema(array($table => $changes), $table);
+      if ($changes && count($changes)) {
+        $columns[$table] = $this->db->alterSchema(array($table => $changes), $table);
+      }
     }
     
     if (!count($columns)) {
@@ -248,7 +250,7 @@ class UpgradeSchemaComponent extends Object{
       Logger::verbose("Missing table(s): ".implode(", ", array_keys($missingTables)));
       return true;
     }
-    $alterColumns = $this->_getAlteredColumns($this->schema);
+    $alterColumns = $this->_getAlteredColumns(false);
     if ($alterColumns) {
       Logger::verbose("Table change(s): ".implode(", ", array_keys($alterColumns)));
       return true;

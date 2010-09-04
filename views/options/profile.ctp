@@ -21,6 +21,13 @@
 <fieldset><legend><?php __('Others'); ?></legend>
 <?php
   echo $form->input('Option.user.browser.full', array('type' => 'checkbox', 'label' => __('Show advanced file browser', true)));
+  $options = array(
+    1 => __("Private", true),
+    2 => __("Group members", true),
+    3 => __("Users", true),
+    4 => __("Public", true)
+  );
+  echo $form->input('User.visible_level', array('type' => 'select', 'options' => $options, 'label' => 'Profile visibility'));
 ?>
 </fieldset>
 <?php echo $form->end(__('Save', true)); ?>

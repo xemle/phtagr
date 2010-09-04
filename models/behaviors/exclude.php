@@ -150,7 +150,7 @@ class ExcludeBehavior extends ModelBehavior {
         return false;
       }
       // Match 'Model.field'
-      if (!preg_match('/^([^.]+)\./', $condition, $matches)) {
+      if (!preg_match('/^(\w+)\./', $condition, $matches)) {
         continue;
       }
       $name = $matches[1];
@@ -159,7 +159,7 @@ class ExcludeBehavior extends ModelBehavior {
       }
       $type = $this->_findBindingType($Model, $name);
       if (!$type) {
-        Logger::warn("Binding not found for $name");
+        Logger::warn("Model binding not found for {$Model->alias}->$name for condition {$condition}");
         continue;
       }
       if ($type == 'hasAndBelongsToMany' || $type == 'hasMany') {

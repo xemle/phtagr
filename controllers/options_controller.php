@@ -80,7 +80,7 @@ class OptionsController extends AppController {
     $userId = $this->getUserId();
     if (!empty($this->data)) {
       $this->User->id = $userId;
-      if (!$this->User->save($this->data, true, array('firstname', 'lastname', 'password', 'email'))) {
+      if (!$this->User->save($this->data, true, array('firstname', 'lastname', 'password', 'email', 'visible_level'))) {
         Logger::err("Could not update user profile");
         $this->Session->setFlash(__("Could not save profile!", true));
       } else {
@@ -92,7 +92,6 @@ class OptionsController extends AppController {
     }
     $this->data = $this->User->findById($userId);
     $this->data['Option'] = $this->Option->getTree($userId);
-    Logger::debug($this->data['Option']);
     unset($this->data['User']['password']);
   }
 

@@ -44,13 +44,12 @@ class ExplorerController extends AppController
       $this->data = $this->Search->paginate();
 
       if ($this->hasRole(ROLE_USER)) {
-        $groups = $this->Group->find('all', array('conditions' => array('Group.user_id' => $this->getUserId()), 'order' => 'Group.name'));
-        if ($groups) {
-          $groups = Set::combine($groups, "{n}.Group.id", "{n}.Group.name");
-        }
-        $groups[0] = __('[Keep]', true);
-        $groups[-1] = __('[No Group]', true);
-        $this->set('groups', $groups);
+        $groups = $this->Group->getGroupsForMedia($this->getUser());
+        $groupSelect = Set::combine($groups, '{n}.Group.id', '{n}.Group.name');
+        asort($groupSelect);
+        $groupSelect[0] = __('[Keep]', true);
+        $groupSelect[-1] = __('[No Group]', true);
+        $this->set('groups', $groupSelect);
       }
     }
     parent::beforeRender();
@@ -194,6 +193,7 @@ class ExplorerController extends AppController
         return;
       }
       $this->Search->setFolder($folder, false);
+      $this->Search->setSort('name');
     }
     $this->render('index');
   }
@@ -321,8 +321,9 @@ class ExplorerController extends AppController
     }
 
     // Change access properties 
-    if ($groupId!=0)
+    if ($groupId != 0) {
       $media['Media']['group_id'] = $groupId;
+    }
 
     // Higher grants first
     $this->Media->setAcl(&$media, ACL_WRITE_META, ACL_WRITE_MASK, $this->data['acl']['write']['meta']);
@@ -357,13 +358,13 @@ class ExplorerController extends AppController
       
       $user = $this->getUser();
       $userId = $user['User']['id'];
-      $members = Set::extract($user, 'Member.{n}.id');
-
-      $groupId = -1;
-      if (isset($this->data['Group']['id'])) {
-        $groupId = $this->data['Group']['id'];
-        if ($groupId>0 && !$this->Group->hasAny("Group.user_id=$userId AND Group.id=$groupId"))
-          $groupId = -1;
+      $groupIds = Set::extract('/Group/id', $this->Group->getGroupsForMedia($this->getUser()));
+      $groupIds[] = -1; // no group
+      if (isset($this->data['Group']['id']) &&
+        in_array($this->data['Group']['id'], $groupIds)) {
+        $groupId = intval($this->data['Group']['id']);
+      } else {
+        $groupId = 0;
       }
     
       $date = false;
@@ -585,12 +586,9 @@ class ExplorerController extends AppController
     $this->set('data', $media);
     $this->layout='bare';
     if ($this->Media->checkAccess(&$media, &$user, 1, 0)) {
-      $groups = $this->Group->find('all', array('conditions' => (array('User.id' => $this->getUserId()))));
-      if (!empty($groups)) {
-        $groups = Set::combine($groups, '{n}.Group.id', '{n}.Group.name');
-      } else {
-        $groups = array();
-      }
+      $groups = $this->Group->getGroupsForMedia($user);
+      $groups = Set::combine($groups, '{n}.Group.id', '{n}.Group.name');
+      asort($groups);
       $groups[-1] = __('[No Group]', true);
       $this->set('groups', $groups);
     } else {
@@ -617,16 +615,15 @@ class ExplorerController extends AppController
         Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change ACL of image ".$id);
       } else {
         // check for existing group of user
-        $groupId = $this->data['Group']['id'];
-        if ($groupId > 0) {
-          $group = $this->Group->find(array('and' => array('User.id' => $userId, 'Group.id' => $groupId)));
+        $groupIds = Set::extract('/Group/id', $this->Group->getGroupsForMedia($user));
+        $groupIds[] = -1; // no group
+        if (isset($this->data['Group']['id']) && in_array($this->data['Group']['id'], $groupIds)) {
+          $groupId = $this->data['Group']['id'];
         } else {
-          $group = null;
+          $groupId = 0;
         }
-        if ($group) {
+        if ($groupId != 0) {
           $media['Media']['group_id'] = $groupId;
-        } else {
-          $media['Media']['group_id'] = -1;
         }
 
         // higher grants first

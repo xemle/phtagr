@@ -5,29 +5,54 @@
 <?php if (!empty($this->data)): ?>
 <table class="default">
 <thead>
-  <tr>
-    <td><?php __('Name'); ?></td>
-    <td><?php __('Members'); ?></td>
-    <td><?php __('Actions'); ?></td>
-  </tr>
+<?php
+  $headers = array(
+    __('Name', true), 
+    __('From User', true), 
+    __('Members', true), 
+    __('Actions', true));
+  echo $html->tableHeaders($headers);
+?>
 </thead>
 
 <tbody>
-<?php $row=0; foreach($this->data as $group): ?>
-  <tr class="<?=($row++%2)?"even":"odd";?>">
-    <td><?php echo $html->link($group['Group']['name'], 'edit/'.$group['Group']['id']); ?></td>
-    <td><?php echo count($group['Member']) ?></td>
-    <td><div class="actionlist"><?php 
+<?php
+  $cells = array();
+  $myGroupIds = Set::extract("/Group/id", $currentUser);
+  $memberIds = Set::extract("/Member/id", $currentUser);
+  $isAdmin = $currentUser['User']['role'] >= ROLE_ADMIN;
+
+  foreach($this->data as $group) {
+    $actions = array();
+    if (!in_array($group['Group']['id'], $memberIds)) {
+      $actions[] = $html->link(
+        $html->image('icons/group_add.png', array('alt' => __('Subscribe', true), 'title' => __('Subscribe', true))),
+        "subscribe/{$group['Group']['name']}", array('escape' => false));
+    } else {
+      $actions[] = $html->link(
+        $html->image('icons/group_delete.png', array('alt' => __('Unsubscribe', true), 'title' => __('Unsubscribe', true))),
+        "unsubscribe/{$group['Group']['name']}", array('escape' => false));
+    }
+
+    if (in_array($group['Group']['id'], $myGroupIds) || $isAdmin) {
+      $actions[] = $html->link(
+        $html->image('icons/pencil.png', array('alt' => __('Edit', true), 'title' => __('Edit', true))),
+        "edit/{$group['Group']['name']}", array('escape' => false));
       $delConfirm = sprintf(__("Do you realy want to delete the group '%s'?", true), $group['Group']['name']);
-      echo $html->link(
-          $html->image('icons/pencil.png', array('alt' => __('Edit', true), 'title' => __('Edit', true))),
-          'edit/'.$group['Group']['id'], array('escape' => false)).' '.
-        $html->link( 
-          $html->image('icons/delete.png', array('alt' => __('Delete', true), 'title' => __('Delete', true))),
-          'delete/'.$group['Group']['id'], array('escape' => false), $delConfirm); ?>
-    </div></td>
-  </tr>
-<?php endforeach; ?>
+      $actions[] = $html->link(
+        $html->image('icons/delete.png', array('alt' => __('Delete', true), 'title' => __('Delete', true))),
+        'delete/'.$group['Group']['id'], array('escape' => false), $delConfirm);
+    }
+    $row = array(
+      $html->link($group['Group']['name'], "view/{$group['Group']['name']}", array('title' => $group['Group']['description'])),
+      $html->link($group['User']['username'], "/user/view/{$group['User']['username']}"),
+      count($group['Member']),
+      $html->tag('div', implode(' ', $actions), array('class' => 'actionlist'))
+      );
+    $cells[] = $row;
+  }
+  echo $html->tableCells($cells, array('class' => 'odd'), array('class' => 'even'));
+?>
 </tbody>
 </table>
 <?php else: ?>

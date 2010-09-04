@@ -2,44 +2,16 @@
 
 <?php echo $session->flash() ?>
 
-<?php if(count($this->data['Member'])): ?>
-<h2><?php __('Member List'); ?></h2>
-<table class="default">
-<thead>
-  <tr>
-    <td><?php __('Member'); ?></td>
-    <td><?php __('Actions'); ?></td>
-  <tr>
-</thead>
+<?php echo $form->create(null, array('action' => "edit/{$this->data['Group']['name']}")); ?>
 
-<tbody>
-<?php $row=0; foreach($this->data['Member'] as $member): ?>
-  <tr class="<?=($row++%2)?"even":"odd";?>">
-    <td><?php 
-      if ($member['creator_id'] == $this->data['User']['id'])
-        echo $html->link($member['username'], '/guests/edit/'.$member['id']);
-      else 
-        echo $member['username']; ?></td>
-    <td><div class="actionlist"><?php
-      $delConfirm = sprintf(__("Do you really want to delete the member '%s' from this group '%s'?", true), $member['username'], $this->data['Group']['name']);
-      echo $html->link( 
-        $html->image('icons/delete.png', array('alt' => __('Delete', true), 'title' => __('Delete', true))), 
-        '/groups/deleteMember/'.$this->data['Group']['id'].'/'.$member['id'], null, $delConfirm, false); ?>
-    </div></td>
-  </tr>
-<?php endforeach; ?>
-</tbody>
-</table>
-<?php else: ?>
-<div class="info"><?php __('Currently this group has no members. Please add users to grant access to your private images.'); ?></div>
-<?php endif; ?>
-
-<?php echo $form->create(null, array('action' => 'addMember/'.$this->data['Group']['id']));?>
-
-<fieldset><legend><?php __('Add member'); ?></legend>
-<div class="input"><label><?php __('Group'); ?></label>
-<?php echo $ajax->autocomplete('User.username', '/groups/autocomplete'); ?></div>
+<fieldset><legend><?php __('Edit Group'); ?></legend>
+<?php 
+  echo $form->hidden('Group.id');
+  echo $form->input('Group.name', array('label' => __('Name', true)));
+  echo $form->input('Group.description', array('label' => __('Description', true), 'type' => 'blob'));
+  echo $form->input('Group.is_hidden', array('label' => __('This group is hidden', true), 'type' => 'checkbox'));
+  echo $form->input('Group.is_moderated', array('label' => __('New group members require a confirmation by the moderator', true), 'type' => 'checkbox'));
+  echo $form->input('Group.is_shared', array('label' => __('The group can be used by other members', true), 'type' => 'checkbox'));
+?>
 </fieldset>
-<?php echo $form->end(__('Add', true)); ?>
-
-<?php echo $html->link(__('Show all groups', true), '/groups/index'); ?>
+<?php echo $form->end(__('Save', true)); ?>

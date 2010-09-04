@@ -25,7 +25,7 @@ App::import('Core', 'Sanitize');
 
 class ImageDataHelper extends AppHelper {
 
-  var $helpers = array('Ajax', 'Html', 'Form', 'Search', 'Option', 'Session');
+  var $helpers = array('Session', 'Ajax', 'Html', 'Form', 'Search', 'Option', 'Session');
 
   var $Sanitize = null;
 
@@ -240,20 +240,18 @@ class ImageDataHelper extends AppHelper {
 
   /** Returns an text repesentation of the acl */
   function _acl2text($data) {
-    //$output = $this->Html->image('icons/user.png', array('alt' => 'groups', 'title' => "Access for group members")).': ';
     $output = $this->Html->tag('span', __('Group', true), array('title' => __('Access for group members', true)));
     if (isset($data['Group']['name'])) {
       $name = $data['Group']['name'];
-      $output .= ' ('.$this->Html->link($name, $this->Search->getUri(array(), array('groups' => $data['Group']['name'])), array('title' => sprintf(__("This media belongs to the group '%s'", true), $name))).')';
+      $output .= ' ('.$this->Html->link($name, $this->Search->getUri(array(), array('groups' => $data['Group']['name'])), array('title' => sprintf(__("This media belongs to the group '%s'", true), $name)))
+        . ' ' . $this->Html->link(__("View", true), "/groups/view/$name") . ')';
     }
     $output .= ': ';
     $output .= $this->_acl2icon($data['Media']['gacl'], __('Group members', true)).' ';
 
-    //$output .= $this->Html->image('icons/group.png', array('alt' => 'users', 'title' => "Access for users")).': ';
     $output .= $this->Html->tag('span', __('users:', true), array('title' => __('Access for users', true)));
     $output .= $this->_acl2icon($data['Media']['uacl'], __('Users', true)).' ';
 
-    //$output .= $this->Html->image('icons/world.png', array('alt' => 'public', 'title' => "Public access")).': ';
     $output .= $this->Html->tag('span', __('public:', true), array('title' => __('Access for the public', true)));
     $output .= $this->_acl2icon($data['Media']['oacl'], __('The public', true));
     return $output;
@@ -305,14 +303,21 @@ class ImageDataHelper extends AppHelper {
     return implode(', ', $links);
   }
 
-  function _metaAccess($data) {
-    $id = $data['Media']['id'];
-    $output = '<div class="actionlist">';
-    $output .= $this->_acl2text($data);
+  function _metaAccessFull($data) {
+    return $this->Html->tag('div', $this->_acl2text($data), array('class' => 'actionList'));
+  }
 
-    $output .= '</div>';
-
-    return $output;
+  function _metaAccessGroup($data) {
+    $output = '';
+    if (isset($data['Group']['name'])) {
+      $name = $data['Group']['name'];
+      $output .= $this->Html->link($name, $this->Search->getUri(array(), array('groups' => $data['Group']['name'])), array('title' => sprintf(__("This media belongs to the group '%s'", true), $name)));
+      $output .= ' ';
+      $output .= '(' . $this->Html->link(__('View', true), "/groups/view/{$data['Group']['name']}") . ')';
+    } else {
+      $output .= __('No group assigned', true);
+    }
+    return $this->Html->tag('div', $output, array('class' => 'actionList'));
   }
 
   function geoLocation($data) {
@@ -368,7 +373,9 @@ class ImageDataHelper extends AppHelper {
     }
 
     if ($data['Media']['isOwner'] || $this->Session->read('User.role') == ROLE_ADMIN) {
-      $cells[] = array(__('Access', true), $this->_metaAccess($data));
+      $cells[] = array(__('Access', true), $this->_metaAccessFull($data));
+    } elseif ($this->Session->read('User.role') >= ROLE_GUEST && !empty($data['Group']['name']) && !$data['Group']['is_hidden']) {
+      $cells[] = array(__('Group', true), $this->_metaAccessGroup($data));
     }
     
     // Action list 
