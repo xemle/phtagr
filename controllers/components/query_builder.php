@@ -36,7 +36,9 @@ class QueryBuilderComponent extends Object
   */
   var $rules = array(
     'categories' => array('custom' => 'buildHabtm'),
+    'created_from' => array('field' => 'Media.created', 'operand' => '>='),
     'east' => array('field' => 'Media.longitude', 'operand' => '<='),
+    'exclude_user' => array('field' => 'Media.user_id', 'operand' => '!='),
     'folder' => true, // calls buildFolder
     'from' => array('field' => 'Media.date', 'operand' => '>='),
     'groups' => 'Group.name',
@@ -103,7 +105,7 @@ class QueryBuilderComponent extends Object
       $options = $o;
     }
     $options = am(array('operand' => '=', 'mapping' => array()), $options);
-    $operands = array('=', '>', '<', '>=', '<=', 'IN', 'NOT IN', 'LIKE');
+    $operands = array('=', '!=', '>', '<', '>=', '<=', 'IN', 'NOT IN', 'LIKE');
     extract($options);
     if (!in_array(strtoupper($operand), $operands)) {
       Logger::err("Illigal operand '$operand'. Set it to '='");
@@ -114,13 +116,20 @@ class QueryBuilderComponent extends Object
       $value = $mapping[$value];
     }
     $condition = $field;
-    if (!is_array($value)) {
-      $condition .= " $operand ".$this->_sanitizeData($value);
-    } elseif (count($value) == 1) {
-      $condition .= " $operand ".$this->_sanitizeData(array_pop($value));
+    $value = (array)$value;
+    if (count($value) == 1 && $operand != 'IN' && $operand != 'NOT IN') {
+      $condition .= " $operand " . $this->_sanitizeData(array_pop($value));
     } else {
-      sort($value);
-      $condition .= ' IN ('.implode(', ', $this->_sanitizeData($value)).')';
+      if ($operand == '=') {
+        $operand = 'IN';
+      }
+      if ($operand != 'IN' && $operand != 'NOT IN') {
+        Logger::err("Illigal operand '$operand' for field '$field' with array values: " . implode(', ', $value) . ". Use first value.");
+        $condition .= " $operand ".$this->_sanitizeData(array_pop($value));
+      } else {
+        sort($value);
+        $condition .= " $operand (" . implode(', ', $this->_sanitizeData($value)) . ')';
+      }
     } 
     return $condition; 
   }

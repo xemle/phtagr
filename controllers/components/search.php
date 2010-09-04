@@ -37,7 +37,9 @@ class SearchComponent extends Search
   var $validate = array(
     'categories' => array('rule' => array('maxLength', 30)),
     'category_op' => array('rule' => array('inList', array('AND', 'OR'))),
+    'created_from' => array('rule' => array('custom', '/^\d{4}-\d{2}-\d{2}([ T]\d{2}:\d{2}:\d{2})?$/')),
     'east' => 'decimal',
+    'exclude_user' => 'numeric',
     'from' => array('rule' => array('custom', '/^\d{4}-\d{2}-\d{2}([ T]\d{2}:\d{2}:\d{2})?$/')),
     'folder' => 'notEmpty',
     'groups' => 'notEmpty',

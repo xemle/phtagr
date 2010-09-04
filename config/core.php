@@ -265,6 +265,12 @@
 	//Configure::write('Smtp.password', 'my password');
 
 /**
+ * Configure your URL for email notification of new media for the shell task
+ * notify. Run 
+ */
+	//Configure::write('Notification.url', 'http://demo.phtagr.org');
+
+/**
  * If you are on PHP 5.3 uncomment this line and correct your server timezone
  * to fix the date & time related errors.
  */

@@ -182,6 +182,9 @@ class PhtagrSchema extends CakeSchema {
 			'lastname' => array('type'=>'string', 'null' => false, 'length' => 32),
 			'email' => array('type'=>'string', 'null' => true, 'default' => NULL, 'length' => 64),
 			'visible_level' => array('type'=>'integer', 'null' => false, 'default' => 3, 'length' => 3),
+			'last_login' => array('type'=>'datetime', 'null' => false, 'default' => '2010-09-04 09:27:34'),
+			'notify_interval' => array('type'=>'integer', 'null' => false, 'default' => 86400), // one day
+			'last_notify' => array('type'=>'datetime', 'null' => false, 'default' => '2010-09-04 09:27:34'),
 			'indexes' => array('PRIMARY' => array('column' => 'id', 'unique' => 1))
 		);
 }
