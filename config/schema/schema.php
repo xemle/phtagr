@@ -181,7 +181,7 @@ class PhtagrSchema extends CakeSchema {
 			'firstname' => array('type'=>'string', 'null' => true, 'default' => NULL, 'length' => 32),
 			'lastname' => array('type'=>'string', 'null' => false, 'length' => 32),
 			'email' => array('type'=>'string', 'null' => true, 'default' => NULL, 'length' => 64),
-			'visible_level' => array('type'=>'integer', 'null' => false, 'default' => 4, 'length' => 3),
+			'visible_level' => array('type'=>'integer', 'null' => false, 'default' => 3, 'length' => 3),
 			'indexes' => array('PRIMARY' => array('column' => 'id', 'unique' => 1))
 		);
 }
