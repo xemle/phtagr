@@ -25,14 +25,16 @@
 
   foreach($this->data as $group) {
     $actions = array();
-    if (!in_array($group['Group']['id'], $memberIds)) {
-      $actions[] = $html->link(
-        $html->image('icons/group_add.png', array('alt' => __('Subscribe', true), 'title' => __('Subscribe', true))),
-        "subscribe/{$group['Group']['name']}", array('escape' => false));
-    } else {
-      $actions[] = $html->link(
-        $html->image('icons/group_delete.png', array('alt' => __('Unsubscribe', true), 'title' => __('Unsubscribe', true))),
-        "unsubscribe/{$group['Group']['name']}", array('escape' => false));
+    if ($currentUser['User']['id'] != $group['Group']['user_id']) {
+      if (!in_array($group['Group']['id'], $memberIds)) {
+        $actions[] = $html->link(
+          $html->image('icons/group_add.png', array('alt' => __('Subscribe', true), 'title' => __('Subscribe', true))),
+          "subscribe/{$group['Group']['name']}", array('escape' => false));
+      } else {
+        $actions[] = $html->link(
+          $html->image('icons/group_delete.png', array('alt' => __('Unsubscribe', true), 'title' => __('Unsubscribe', true))),
+          "unsubscribe/{$group['Group']['name']}", array('escape' => false));
+      }
     }
 
     if (in_array($group['Group']['id'], $myGroupIds) || $isAdmin) {
@@ -46,7 +48,7 @@
     }
     $row = array(
       $html->link($group['Group']['name'], "view/{$group['Group']['name']}", array('title' => $group['Group']['description'])),
-      $html->link($group['User']['username'], "/user/view/{$group['User']['username']}"),
+      $html->link($group['User']['username'], "/users/view/{$group['User']['username']}"),
       $text->truncate($group['Group']['description'], 30, array('ending' => '...', 'exact' => false, 'html' => false)),
       count($group['Member']),
       $html->tag('div', implode(' ', $actions), array('class' => 'actionlist'))

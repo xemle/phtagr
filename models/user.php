@@ -265,13 +265,11 @@ class User extends AppModel
         $conditions['User.visible_level'] = 4;
       } else {
         $groupIds = Set::extract('/Member/id', $user);
-        $conditions = array(
-          'OR' => array(
-            'User.visible_level >=' => 3,
-            'AND' => array(
-              'User.visible_level' => 2,
-              'MemberUser.group_id' => $groupIds
-            )
+        $conditions['OR'] = array(
+          'User.visible_level >=' => 3,
+          'AND' => array(
+            'User.visible_level' => 2,
+            'MemberUser.group_id' => $groupIds
           )
         );
         $prefix = $this->tablePrefix;
