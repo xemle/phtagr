@@ -162,7 +162,7 @@ class UpgradeSchemaComponent extends Object{
   function _stripTablePrefix($schema) {
     $prefix = $this->db->config['prefix'];
     foreach ($schema['tables'] as $table => $columns) {
-      if (strpos($table, $prefix) === 0) {
+      if ($prefix && strpos($table, $prefix) === 0) {
         $stripped = substr($table, strlen($prefix));
         if (!isset($schema['tables'][$stripped])) {
           $schema['tables'][$stripped] = $columns;
@@ -209,8 +209,16 @@ class UpgradeSchemaComponent extends Object{
       if (!in_array($modelName, $models)) {
         Logger::warn("Model '$modelName' does not exists");
       }
-
+      
+      if (!empty($changes['drop']['tableParameters'])) {
+        Logger::warn("tableParameters NIY. Drop tableParameters changes for $table");
+        unset($changes['drop']['tableParameters']);
+        if (!count($changes['drop'])) {
+          unset($changes['drop']);
+        }
+      }
       if ($changes && count($changes)) {
+        Logger::debug($changes);
         $columns[$table] = $this->db->alterSchema(array($table => $changes), $table);
       }
     }
