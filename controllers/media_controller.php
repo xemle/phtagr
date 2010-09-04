@@ -36,7 +36,7 @@ class MediaController extends AppController
                       OUTPUT_TYPE_HIGH => array('size' => OUTPUT_SIZE_HIGH, 'quality' => 90),
                       OUTPUT_TYPE_VIDEO => array('size' => OUTPUT_SIZE_VIDEO, 'bitrate' => OUTPUT_BITRATE_VIDEO)
                     );
-  var $components = array('ImageResizer', 'VideoPreview', 'FlashVideo', 'FileCache', 'FilterManager');
+  var $components = array('FileCache');
 
   function beforeFilter() {
     // Reduce security level for this controller if required. Security level
@@ -190,6 +190,7 @@ class MediaController extends AppController
           break;
       }
 
+      $this->loadComponent('ImageResizer');
       if (!$this->ImageResizer->resize($src, $dst, $options)) {
         Logger::err("Could not create image preview");
         $this->redirect(null, 500);
@@ -211,6 +212,7 @@ class MediaController extends AppController
     }
 
     $media = $this->_getMedia($id, $outputType);
+    $this->loadComponent('FlashVideo');
     $flashFilename = $this->FlashVideo->create($media, $this->_outputMap[$outputType]);
 
     if (!is_file($flashFilename)) { 
