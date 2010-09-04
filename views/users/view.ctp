@@ -52,4 +52,3 @@
 ?> 
 </tbody>
 </table>
-<?php debug($this->data); ?>
