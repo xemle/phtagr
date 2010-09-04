@@ -9,6 +9,7 @@
   $headers = array(
     __('Name', true), 
     __('From User', true), 
+    __('Description', true), 
     __('Members', true), 
     __('Actions', true));
   echo $html->tableHeaders($headers);
@@ -46,6 +47,7 @@
     $row = array(
       $html->link($group['Group']['name'], "view/{$group['Group']['name']}", array('title' => $group['Group']['description'])),
       $html->link($group['User']['username'], "/user/view/{$group['User']['username']}"),
+      $text->truncate($group['Group']['description'], 30, array('ending' => '...', 'exact' => false, 'html' => false)),
       count($group['Member']),
       $html->tag('div', implode(' ', $actions), array('class' => 'actionlist'))
       );

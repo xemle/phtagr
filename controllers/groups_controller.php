@@ -24,7 +24,7 @@ class GroupsController extends AppController {
   var $name = 'Groups';
   var $uses = array('Group', 'User', 'Media');
   var $components = array('RequestHandler', 'Security', 'Email', 'Search');
-  var $helpers = array('Form', 'Ajax', 'ImageData');
+  var $helpers = array('Form', 'Ajax', 'ImageData', 'Text');
   var $menuItems = array();
 
   function beforeFilter() {
@@ -40,9 +40,9 @@ class GroupsController extends AppController {
   function index() {
     $userId = $this->getUserId();
     if ($this->hasRole(ROLE_ADMIN)) {
-      $this->data = $this->Group->find('all');
+      $this->data = $this->Group->find('all', array('order' => 'Group.name'));
     } else {
-      $this->data = $this->Group->find('all', array('conditions' => (array('OR' => array('User.id' => $userId, 'Group.is_hidden' => false)))));
+      $this->data = $this->Group->find('all', array('conditions' => (array('OR' => array('User.id' => $userId, 'Group.is_hidden' => false))), 'order' => 'Group.name'));
     }
   }
 
@@ -96,7 +96,7 @@ class GroupsController extends AppController {
       return false;
     }
     Logger::info("Sent group subscribe request of user {$user['User']['username']} for group {$group['Group']['name']} to {$group['User']['username']}");
-    $this->Session->setFlash(__("Group subscription request was sent", true));
+    $this->Session->setFlash(__("Group subscription request was sent to the group owner", true));
     return true;
   }
 
@@ -163,7 +163,7 @@ class GroupsController extends AppController {
     }
     if ($group['Group']['is_moderated']) {
       $this->_sendSubscribtionRequest($group);
-      $this->redirect('index');
+      $this->redirect("view/$name");
     } else {
       $result = $this->Group->subscribe($group, $this->getUserId());
       $this->Session->setFlash($result['message']);

@@ -33,6 +33,8 @@
 <?php 
   $headers = array(
     __('Member', true),
+    __('User', true),
+    __('Description', true),
     __('Action', true),
     );
   echo $html->tableHeaders($headers);
@@ -42,12 +44,40 @@
 <tbody>
 <?php 
   $cells = array();
-  foreach ($this->data['Member'] as $group) {
+  $groupIds = Set::extract('/Group/id', $this->data);
+  //debug(Set::extract('/User[id=1]/username', $users));
+  foreach ($this->data['Group'] as $group) {
+    $username = implode('', Set::extract("/User[id={$group['user_id']}]/username", $users));
     $cells[] = array(
       $html->link($group['name'], "/groups/view/{$group['name']}"),
+      $html->link($username, "/user/view/$username"),
+      $text->truncate($group['description'], 30, array('ending' => '...', 'exact' => false, 'html' => false)),
       $html->link("View media", "/explorer/group/{$group['name']}")
       );
   }
+  foreach ($this->data['Member'] as $group) {
+    if (in_array($group['id'], $groupIds)) {
+      continue;
+    }
+    $username = implode('', Set::extract("/User[id={$group['user_id']}]/username", $users));
+    $cells[] = array(
+      $html->link($group['name'], "/groups/view/{$group['name']}"),
+      $html->link($username, "/user/view/$username"),
+      $text->truncate($group['description'], 30, array('ending' => '...', 'exact' => false, 'html' => false)),
+      $html->link("View media", "/explorer/group/{$group['name']}")
+      );
+  }
+
+  function compareCells($a, $b) {
+    if (strtolower($a[0]) == strtolower($b[0])) {
+      return 0;
+    } elseif (strtolower($a[0]) < strtolower($b[0])) {
+      return -1;
+    } else {
+      return 1;
+    }
+  }
+  usort($cells, 'compareCells');
   echo $html->tableCells($cells, array('class' => 'odd'), array('class' => 'even'));
 ?> 
 </tbody>

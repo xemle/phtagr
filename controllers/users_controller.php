@@ -25,7 +25,7 @@ class UsersController extends AppController
 {
   var $components = array('RequestHandler', 'Cookie', 'Email', 'Captcha');
   var $uses = array('Option', 'Media', 'MyFile'); 
-  var $helpers = array('Form', 'Number', 'Time');
+  var $helpers = array('Form', 'Number', 'Time', 'Text');
   var $paginate = array('limit' => 10, 'order' => array('User.username' => 'asc')); 
   var $menuItems = array();
 
@@ -112,6 +112,9 @@ class UsersController extends AppController
     $this->data['File']['count'] = $this->MyFile->find('count', array('conditions' => array('File.user_id' => $userId), 'recursive' => -1));
     $bytes = $this->MyFile->find('all', array('conditions' => array("File.user_id" => $userId), 'recursive' => -1, 'fields' => 'SUM(File.size) AS Bytes'));
     $this->data['File']['bytes'] = $bytes[0][0]['Bytes'];
+
+    $groupUserIds = Set::extract('/Group/user_id');
+    $this->set('users', $this->User->find('all', array('condition' => array('User.id' => $groupUserIds), 'recursive' => -1)));
   }
 
   /** Checks the login of the user. If the session variable 'loginRedirect' is
