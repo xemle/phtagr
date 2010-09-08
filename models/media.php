@@ -657,7 +657,7 @@ class Media extends AppModel
   function countByGroupId($groupIds) {
     $this->unbindModel(array('belongsTo' => array('Group')));
     return $this->find('count', array(
-      'conditions' => array('Group.id' => $groupId),
+      'conditions' => array('Group.id' => $groupIds),
       'joins' => array("JOIN `{$this->tablePrefix}groups` AS `Group` ON `Media`.`group_id` = `Group`.`id`")));
   }
 }
