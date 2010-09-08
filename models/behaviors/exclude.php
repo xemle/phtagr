@@ -33,15 +33,21 @@ class ExcludeBehavior extends ModelBehavior {
     $this->settings[$Model->alias] = array_merge($this->settings[$Model->alias], $settings);
   }
 
-  /**
+  /** Finds the model binding type between to models
     @param Model current model object
     @param name Name of binding
-    @result Type of the binding to the current model */
+    @result Type of the binding to the current model. Return value is one of
+    'hasOne', 'belongsTo', 'hasMany', 'hasAndBelongsToMany', or false on error.
+*/
   function _findBindingType(&$Model, $name) {
     if (isset($Model->hasAndBelongsToMany[$name])) {
       return 'hasAndBelongsToMany';
     } elseif (isset($Model->hasMany[$name])) {
       return 'hasMany';
+    } elseif (isset($Model->belongsTo[$name])) {
+      return 'belongsTo';
+    } elseif (isset($Model->hasOne[$name])) {
+      return 'hasOne';
     }
     return false;
   }
@@ -162,12 +168,13 @@ class ExcludeBehavior extends ModelBehavior {
         Logger::warn("Model binding not found for {$Model->alias}->$name for condition {$condition}");
         continue;
       }
-      if ($type == 'hasAndBelongsToMany' || $type == 'hasMany') {
-        if (!is_array($query['conditions'])) {
-          unset($query['conditions']);
-        } else  {
-          unset($conditions[$key]);
-        }
+      if ($type == 'hasOne' || $type == 'belongsTo') {
+        continue;
+      }
+      if (!is_array($query['conditions'])) {
+        unset($query['conditions']);
+      } else  {
+        unset($conditions[$key]);
       }
       $joinConditions[$type][$name][] = $condition;
     }
