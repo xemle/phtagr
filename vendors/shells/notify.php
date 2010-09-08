@@ -21,8 +21,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-//define('CONFIGS', 'your/configuration/path/to/config');
-
 App::import('Model', array('User', 'Media'));
 App::import('Core', array('Controller'));
 App::import('Component', array('Email', 'Search'));
@@ -184,7 +182,7 @@ class NotifyShell extends Shell {
       }
       if (!$this->dryrun) {
         $user['User']['last_notify'] = date('Y-m-d h:m:s', $now);
-        if (!$this->User->save($user, true, array('last_notify'))) {
+        if (!$this->User->save($user['User'], true, array('last_notify'))) {
           $this->out("Could not save user data of {$user['User']['username']}");
           Logger::err("Could not save user data of {$user['User']['username']}");
           Logger::debug($user);
