@@ -52,7 +52,10 @@ class User extends AppModel
       'message' => 'Invalid role'),
     'email' => array(
       'rule' => array('email'),
-      'message' => 'Email address is not valid')
+      'message' => 'Email address is not valid'),
+    'notify_interval' => array(
+      'rule' => array('inList', array(0, 1800, 3600, 8640, 604800, 2592000)),
+      'message' => 'Invalid notification interval')
     );
  
   function afterFind($result, $primary = false) {

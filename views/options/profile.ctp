@@ -27,7 +27,16 @@
     3 => __("Users", true),
     4 => __("Public", true)
   );
-  echo $form->input('User.visible_level', array('type' => 'select', 'options' => $options, 'label' => 'Profile visibility'));
+  echo $form->input('User.visible_level', array('type' => 'select', 'options' => $options, 'label' => __('Profile visibility', true)));
+  $options = array(
+    0 => __("Never", true),
+    1800 => __("Every 30 minutes", true),
+    3600 => __("Every hour", true),
+    8640 => __("Every day", true),
+    604800 => __("Every week", true),
+    2592000 => __("Every month", true)
+  );
+  echo $form->input('User.notify_interval', array('type' => 'select', 'options' => $options, 'label' => __('Send new media notifications', true)));
 ?>
 </fieldset>
 <?php echo $form->end(__('Save', true)); ?>

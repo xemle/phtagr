@@ -23,9 +23,9 @@
 
 class UsersController extends AppController
 {
-  var $components = array('RequestHandler', 'Cookie', 'Email', 'Captcha');
+  var $components = array('RequestHandler', 'Cookie', 'Email', 'Captcha', 'Search');
   var $uses = array('Option', 'Media', 'MyFile'); 
-  var $helpers = array('Form', 'Number', 'Time', 'Text');
+  var $helpers = array('Form', 'Number', 'Time', 'Text', 'ImageData');
   var $paginate = array('limit' => 10, 'order' => array('User.username' => 'asc')); 
   var $menuItems = array();
 
@@ -115,6 +115,10 @@ class UsersController extends AppController
 
     $groupUserIds = Set::extract('/Group/user_id');
     $this->set('users', $this->User->find('all', array('condition' => array('User.id' => $groupUserIds), 'recursive' => -1)));
+
+    $this->Search->setUser($this->data['User']['username']);
+    $this->Search->setShow(6);
+    $this->set('media', $this->Search->paginate());
   }
 
   /** Checks the login of the user. If the session variable 'loginRedirect' is

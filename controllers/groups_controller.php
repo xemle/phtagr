@@ -30,11 +30,22 @@ class GroupsController extends AppController {
   function beforeFilter() {
     parent::beforeFilter();
     $this->requireRole(ROLE_USER);
+    $this->Security->blackHoleCallback = 'fail';
+    $this->Security->requirePost = array('addMember');
+    if ($this->action == 'addMember') {
+      $this->Security->validatePost = false;
+    }
   }
 
   function beforeRender() {
     $this->_setMenu();
     parent::beforeRender();
+  }
+
+  function fail() {
+    Logger::err("The security component denied the form input");
+    Logger::debug($this->data);
+    $this->redirect('index');
   }
 
   function index() {
@@ -52,6 +63,8 @@ class GroupsController extends AppController {
       $this->Session->setFlash(sprintf(__("%s not found", true), __("Group", true)));
       $this->redirect('index');
     }
+    $this->Group->setAdmin(&$this->data, $this->getUser());
+    $this->set('mediaCount', $this->Media->find('count', array('condition' => array('Media.group_id' => $this->data['Group']['id']))));
 
     $this->Search->addGroup($name);
     $this->Search->setShow(6);
@@ -209,6 +222,46 @@ class GroupsController extends AppController {
       }
       $this->redirect("view/$name");
     }
+  }
+
+  function addMember($id) {
+    $group = $this->Group->findById($id);
+    if (!$this->Group->isAdmin(&$group, $this->getUser())) {
+      $this->Session->setFlash(__("You are not authorized to perform this action", true));
+      $this->redirect("view/{$group['Group']['name']}");
+    }
+    $user = $this->User->findByUsername($this->data['Member']['new']);
+    if (!$user) {
+      $this->Session->setFlash(__("%s not found", true), __("User", true));
+      $this->redirect("view/{$group['Group']['name']}");
+    }
+    $result = $this->Group->subscribe($group, $user['User']['id']);
+    if ($result['code'] >= 400 && $result['code'] < 500) {
+      $this->redirect("index");
+    } elseif ($result['code'] == 201) {
+      $this->Session->setFlash(sprintf(__("User %s is now subscribe to this group", true), $this->data['Member']['new']));
+    }
+    $this->redirect("view/{$group['Group']['name']}");
+  }
+
+  function deleteMember($groupName, $userName) {
+    $group = $this->Group->findByName($groupName);
+    if (!$this->Group->isAdmin(&$group, $this->getUser())) {
+      $this->Session->setFlash(__("You are not authorized to perform this action", true));
+      $this->redirect("view/{$group['Group']['name']}");
+    }
+    $user = $this->User->findByUsername($userName);
+    if (!$user) {
+      $this->Session->setFlash(__("%s not found", true), __("User", true));
+      $this->redirect("view/{$group['Group']['name']}");
+    }
+    $result = $this->Group->unsubscribe($group, $user['User']['id']);
+    if ($result['code'] >= 400 && $result['code'] < 500) {
+      $this->redirect("index");
+    } elseif ($result['code'] == 201) {
+      $this->Session->setFlash(sprintf(__("User %s is now unsubscribe from this group", true), $userName));
+    }
+    $this->redirect("view/{$group['Group']['name']}");
   }
 
   function edit($groupName) {

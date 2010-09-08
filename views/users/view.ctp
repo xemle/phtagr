@@ -45,7 +45,6 @@
 <?php 
   $cells = array();
   $groupIds = Set::extract('/Group/id', $this->data);
-  //debug(Set::extract('/User[id=1]/username', $users));
   foreach ($this->data['Group'] as $group) {
     $username = implode('', Set::extract("/User[id={$group['user_id']}]/username", $users));
     $cells[] = array(
@@ -62,7 +61,7 @@
     $username = implode('', Set::extract("/User[id={$group['user_id']}]/username", $users));
     $cells[] = array(
       $html->link($group['name'], "/groups/view/{$group['name']}"),
-      $html->link($username, "/user/view/$username"),
+      $html->link($username, "/users/view/$username"),
       $text->truncate($group['description'], 30, array('ending' => '...', 'exact' => false, 'html' => false)),
       $html->link("View media", "/explorer/group/{$group['name']}")
       );
@@ -82,3 +81,13 @@
 ?> 
 </tbody>
 </table>
+
+<?php if ($media): ?>
+<h2><?php __("Recent Media"); ?></h2>
+<p><?php
+  foreach($media as $m) {
+    echo $imageData->mediaLink($m, 'mini');
+  } 
+?></p>
+<p><?php printf(__('See all media of user %s', true), $html->link($this->data['User']['username'], "/explorer/user/{$this->data['User']['username']}")); ?></p>
+<?php endif; ?>

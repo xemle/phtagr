@@ -11,10 +11,11 @@
     __("This group has no description");
   } else {
     echo h($this->data['Group']['description']); 
-  }
-  printf(__(" by %s", true), $html->link($this->data['User']['username'], "/users/view/{$this->data['User']['username']}"));
-  if ($currentUser['User']['role'] >= ROLE_ADMIN || $currentUser['User']['id'] == $this->data['Group']['user_id']) {
-    echo ' ' . $html->link(__('Edit this', true), "edit/{$this->data['Group']['name']}");
+  } ?></p>
+<p><?php
+  printf(__("The group is owned by user %s and has %d media in total.", true), $html->link($this->data['User']['username'], "/users/view/{$this->data['User']['username']}"), $mediaCount);
+  if ($this->data['Group']['is_admin']) {
+    echo ' ' . $html->link(__('Edit', true), "edit/{$this->data['Group']['name']}");
   }
 ?></p>
 
@@ -46,8 +47,10 @@
 <?php 
   $headers = array(
     __('Member', true),
-    __('Action', true),
     );
+  if ($this->data['Group']['is_admin']) {
+    $headers[] = __('Action', true);
+  }
   echo $html->tableHeaders($headers);
 ?>
 </thead>
@@ -56,10 +59,23 @@
 <?php 
   $cells = array();
   foreach ($this->data['Member'] as $member) {
-    $cells[] = array(
+    $actions = array();
+    if ($this->data['Group']['is_admin']) {
+      $actions[] = $html->link(
+        $html->image('icons/delete.png', 
+          array(
+            'alt' => __('Delete', true), 
+            'title' => sprintf(__("Unsubscribe '%s'", true), $member['username'])
+          )
+        ), "deleteMember/{$this->data['Group']['name']}/{$member['username']}", array('escape' => false));
+    }
+    $row = array(
       $html->link($member['username'], "/users/view/{$member['username']}"),
-      $html->link($member['username'], "/users/view/{$member['username']}")
       );
+    if ($actions) {
+      $row[] = implode(' ', $actions);
+    }
+    $cells[] = $row;
   }
   echo $html->tableCells($cells, array('class' => 'odd'), array('class' => 'even'));
 ?> 
@@ -67,20 +83,29 @@
 </table>
 
 <?php 
-  $userId = $this->Session->read('User.id');
-  $memberIds = Set::extract('/Member/id', $this->data);
-  if (in_array($userId, $memberIds)) {
-    echo $html->link(__('Unsubscribe', true), "unsubscribe/{$this->data['Group']['name']}"); 
+  if ($this->data['Group']['is_admin']) {
+    echo $form->create('Group', array('action' => 'addMember'));
+    echo "<fieldset><legend>" . __("Add user", true) . "</legend>";
+    echo $form->input('Member.new', array('label' => __("Username", true), 'secure' => false));
+    echo "</fieldset>";
+    echo $form->submit("Add");
   } else {
-    echo $html->link(__('Subscribe', true), "subscribe/{$this->data['Group']['name']}"); 
+    $userId = $this->Session->read('User.id');
+    $memberIds = Set::extract('/Member/id', $this->data);
+    if (in_array($userId, $memberIds)) {
+      echo $html->link(__('Unsubscribe', true), "unsubscribe/{$this->data['Group']['name']}"); 
+    } else {
+      echo $html->link(__('Subscribe', true), "subscribe/{$this->data['Group']['name']}"); 
+    }
   }
 ?>
 
 <?php if ($media): ?>
-<h2><?php __("Example Media"); ?></h2>
-<?php 
+<h2><?php __("Recent Media"); ?></h2>
+<p><?php 
   foreach($media as $m) {
     echo $imageData->mediaLink($m, 'mini');
   }
-?>
+?></p>
+<p><?php printf(__('See all media of the group %s', true), $html->link($this->data['Group']['name'], "/explorer/group/{$this->data['Group']['name']}")); ?></p>
 <?php endif; ?>

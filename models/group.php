@@ -101,5 +101,23 @@ class Group extends AppModel
       return $this->returnCode(200, sprintf(__("You are not subscribed to group %s", true), $group['Group']['name']));
     }
   }
+
+  /** Evaluates if the group is writeable */
+  function isAdmin(&$group, &$user) {
+    if ($user['User']['role'] >= ROLE_ADMIN || $user['User']['id'] == $group['Group']['user_id']) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  /** Set the writeable flag of the group
+    @param group Group model data (as reference)
+    @param user Current user
+    @return Group model data */
+  function setAdmin(&$group, &$user) {
+    $group['Group']['is_admin'] = $this->isAdmin(&$group, &$user);
+    return $group;
+  }
 }
 ?>
