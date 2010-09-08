@@ -650,5 +650,15 @@ class Media extends AppModel
     $this->_deleteHasManyFromUser($userId);
     $this->deleteAll("Media.user_id = $userId");
   }
+
+  /** Count all media given by the group IDs
+    @param groupIds Single group ID value or array of group IDs
+    @return Count of media which are assigned to the given groups */
+  function countByGroupId($groupIds) {
+    $this->unbindModel(array('belongsTo' => array('Group')));
+    return $this->find('count', array(
+      'conditions' => array('Group.id' => $groupId),
+      'joins' => array("JOIN `{$this->tablePrefix}groups` AS `Group` ON `Media`.`group_id` = `Group`.`id`")));
+  }
 }
 ?>

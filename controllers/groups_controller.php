@@ -64,7 +64,7 @@ class GroupsController extends AppController {
       $this->redirect('index');
     }
     $this->Group->setAdmin(&$this->data, $this->getUser());
-    $this->set('mediaCount', $this->Media->find('count', array('condition' => array('Media.group_id' => $this->data['Group']['id']))));
+    $this->set('mediaCount', $this->Media->countByGroupId($this->data['Group']['id']));
 
     $this->Search->addGroup($name);
     $this->Search->setShow(6);
