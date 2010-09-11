@@ -148,6 +148,7 @@ class MediaController extends AppController
     @return filename of image */
   function _getSourceFile($media) {
     if ($this->Media->isType($media, MEDIA_TYPE_VIDEO)) {
+      $this->loadComponent('VideoPreview');
       $sourceFilename = $this->VideoPreview->getPreviewFilename($media);
     } elseif (count($media['File']) > 0) {
       $sourceFilename = $this->Media->File->getFilename($media['File'][0]);
