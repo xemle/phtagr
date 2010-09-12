@@ -111,12 +111,19 @@ class User extends AppModel
         unset($this->data['User']['confirm']);
         unset($this->data['User']['password']);
       } elseif (empty($this->data['User']['password'])) {
-        $this->invalidate('password', 'Password not given');
+        $this->invalidate('password', __('Password not given', true));
       } elseif (empty($this->data['User']['confirm'])) {
-        $this->invalidate('confirm', 'Password confirmation is missing');
+        $this->invalidate('confirm', __('Password confirmation is missing', true));
       } elseif ($this->data['User']['password'] != $this->data['User']['confirm']) {
-        $this->invalidate('password', 'Password confirmation mismatch');
-        $this->invalidate('confirm', 'Password confirmation mismatch');
+        $this->invalidate('password', __('Password confirmation mismatch', true));
+        $this->invalidate('confirm', __('Password confirmation mismatch', true));
+      }
+    }
+    $id = $this->id ? $this->id : $this->data['User']['id'];
+    if (isset($this->data['User']['username']) && $id) {
+      $other = $this->find('first', array('conditions' => array('User.username' => $this->data['User']['username']), 'recursive' => -1));
+      if ($other && $other['User']['id'] != $id) {
+        $this->invalidate('username', __('Username already taken', true));
       }
     }
   }
@@ -129,7 +136,7 @@ class User extends AppModel
     if (empty($this->data['User']['expires'])) {
       $this->data['User']['expires'] = null;
     }
-  
+    
     return true;
   }
 
