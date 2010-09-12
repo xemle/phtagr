@@ -32,7 +32,7 @@
 <thead>
 <?php 
   $headers = array(
-    __('Member', true),
+    __('Group', true),
     __('User', true),
     __('Description', true),
     __('Action', true),

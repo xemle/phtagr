@@ -55,6 +55,10 @@ class UsersController extends AppController
       }
       $menu = array('items' => $items);
       $this->set('mainMenu', $menu);
+    } elseif ($this->hasRole(ROLE_USER)) {
+      $items = $this->requestAction('/options/getMenuItems');
+      $menu = array('items' => $items);
+      $this->set('mainMenu', $menu);
     }
   }
 

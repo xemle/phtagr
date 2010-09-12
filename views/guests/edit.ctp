@@ -37,28 +37,29 @@
 <h2><?php __('Group List'); ?></h2>
 <table class="default">
 <thead>
-  <tr>
-    <td><?php __('Group'); ?></td>
-    <td><?php __('Actions'); ?></td>
-  <tr>
+<?php
+  $headers = array(
+    __('Group', true),
+    __('Actions', true)
+  );
+  echo $html->tableHeaders($headers);
+?>  
 </thead>
 
 <tbody>
-<?php $row=0; foreach($this->data['Member'] as $group): ?>
-  <tr class="<?=($row++%2)?"even":"odd";?>">
-    <td><?php 
-      if ($group['user_id'] == $userId)
-        echo $html->link($group['name'], '/groups/edit/'.$group['id']); 
-      else
-        echo $group['name']; ?></td>
-    <td><div class="actionlist"><?php
-      $delConfirm = "Do you really want to delete the group '{$group['name']}' from this guest '{$this->data['Guest']['username']}'?";
-      echo $html->link( 
+<?php 
+  $cells = array();
+  foreach($this->data['Member'] as $group) {
+    $delConfirm = sprintf(__("Do you really want to delete the group '%s' from this guest '%s'?", true), $group['name'], $this->data['Guest']['username']);
+    $cells[] = array(
+      $html->link($group['name'], '/groups/view/'.$group['name']),
+      $html->link( 
         $html->image('icons/delete.png', array('alt' => 'Delete', 'title' => 'Delete')), 
-        '/guests/deleteGroup/'.$this->data['Guest']['id'].'/'.$group['id'], null, $delConfirm, false); ?>
-    </div></td>
-  </tr>
-<?php endforeach; ?>
+        '/guests/deleteGroup/'.$this->data['Guest']['id'].'/'.$group['id'], array('escape' => false), $delConfirm)
+    );
+  }
+  echo $html->tableCells($cells, array('class' => 'odd'), array('class' => 'even'));
+?>
 </tbody>
 </table>
 <?php else: ?>

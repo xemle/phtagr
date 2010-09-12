@@ -30,7 +30,5 @@
 </tbody>
 </table>
 <?php else: ?>
-<div class="info">
-<?php __('Currently no image groups are assigned. At the one hand each image could be assigned to a specific group. On the other hand a guest can be member of a set of groups. The guest is than able to view the images from his groups.'); ?>
-</div>
+<p><?php __('User list is empty'); ?></p>
 <?php endif; ?>
