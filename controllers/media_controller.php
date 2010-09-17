@@ -266,6 +266,7 @@ class MediaController extends AppController
     }
     if ($this->Media->hasFlag($file, MEDIA_FLAG_DIRTY)) {
       $media = $this->Media->findById($file['Media']['id']);
+      $this->loadComponent('FilterManager');
       $this->FilterManager->write($media);
     }
     Logger::info("Request of media {$file['Media']['id']}: file $id '{$file['File']['file']}'");
