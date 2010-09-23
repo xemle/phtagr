@@ -54,7 +54,7 @@ class User extends AppModel
       'rule' => array('email'),
       'message' => 'Email address is not valid'),
     'notify_interval' => array(
-      'rule' => array('inList', array(0, 1800, 3600, 8640, 604800, 2592000)),
+      'rule' => array('inList', array(0, 1800, 3600, 86400, 604800, 2592000)),
       'message' => 'Invalid notification interval')
     );
  
@@ -119,13 +119,19 @@ class User extends AppModel
         $this->invalidate('confirm', __('Password confirmation mismatch', true));
       }
     }
-    $id = $this->id ? $this->id : $this->data['User']['id'];
+    $id = false;
+    if ($this->id) {
+      $id = $this->id;
+    } elseif (isset($this->data['User']['id'])) {
+      $id = $this->data['User']['id'];
+    }
     if (isset($this->data['User']['username']) && $id) {
       $other = $this->find('first', array('conditions' => array('User.username' => $this->data['User']['username']), 'recursive' => -1));
       if ($other && $other['User']['id'] != $id) {
         $this->invalidate('username', __('Username already taken', true));
       }
     }
+    return true;
   }
 
   function beforeSave() {
