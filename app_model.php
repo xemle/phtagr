@@ -237,6 +237,17 @@ class AppModel extends Model
       }
     }
   }
+
+  /** Get a string representation of a model
+    @param data Model data
+    @return String alias:ID */
+  function toString($data) {
+    $data = $this->stripAlias($data);
+    if (isset($data['id'])) {
+      return $this->alias . ":" . $data['id'];
+    }
+    return $this->alias;
+  }
 }
 
 ?>

@@ -27,7 +27,8 @@ if (!App::import('Vendor', "phpthumb", true, array(), "phpthumb.class.php")) {
 class ImageResizerComponent extends Object {
 
   var $controller = null;
-
+  var $components = array('Command');
+ 
   function initialize(&$controller) {
     $this->controller =& $controller;
   }
@@ -155,14 +156,7 @@ class ImageResizerComponent extends Object {
     }
 
     $bin = $this->controller->getOption('bin.exiftool', 'exiftool');
-    $command = $bin.' -all= '.escapeshellarg($filename);
-    $output = array();
-    $result = -1;
-    $t1 = getMicrotime();
-    exec($command, &$output, &$result);
-    $t2 = getMicrotime();
-    Logger::trace("$bin call needed ".round($t2-$t1, 4)."ms");
-
+    $this->Command->run($bin, array('-all=', $filename));
     Logger::debug("Cleaned meta data of '$filename'");
   }
 

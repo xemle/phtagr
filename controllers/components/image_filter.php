@@ -22,6 +22,8 @@
  */
 
 class ImageFilterComponent extends BaseFilterComponent {
+  var $controller = null;
+  var $components = array('Command');
 
   var $locationMap = array(
                         LOCATION_CITY => 'City', 
@@ -121,13 +123,7 @@ class ImageFilterComponent extends BaseFilterComponent {
     }
 
     $bin = $this->controller->getOption('bin.exiftool', 'exiftool');
-    $command = $bin.' -all= '.escapeshellarg($filename);
-    $output = array();
-    $result = -1;
-    $t1 = getMicrotime();
-    exec($command, &$output, &$result);
-    $t2 = getMicrotime();
-    Logger::trace("$bin call needed ".round($t2-$t1, 4)."ms");
+    $this->Command->run($bin, array('-all=', $filename));
 
     Logger::debug("Cleaned meta data of '$filename'");
   }
@@ -141,14 +137,8 @@ class ImageFilterComponent extends BaseFilterComponent {
     }
     // read meta data
     $bin = $this->controller->getOption('bin.exiftool', 'exiftool');
-    $command = "$bin -S -n ".escapeshellarg($filename);
-    $output = array();
-    $result = -1;
-    $t1 = getMicrotime();
-    exec($command, &$output, &$result);
-    $t2 = getMicrotime();
-    Logger::trace("$bin call needed ".round($t2-$t1, 4)."ms");
-    
+    $result = $this->Command->run($bin, array('-S', '-n', $filename));
+    $output = $this->Command->output;
     if ($result == 127) {
       Logger::err("$bin could not be found!");
       return false;
@@ -355,7 +345,7 @@ class ImageFilterComponent extends BaseFilterComponent {
     // City, Sub-location, Province-State, Country-PrimaryLocationName
     $items = array();
     foreach ($this->locationMap as $type => $name) {
-      $value = $this->_extract($data, 'iptc/IPTCApplication/'.$name.'/0');
+      $value = $this->_extract($data, "iptc/IPTCApplication/$name/0");
       if ($value)
         $items[] = array('name' => $value, 'type' => $type);
     }
@@ -393,7 +383,7 @@ class ImageFilterComponent extends BaseFilterComponent {
     }
 
     $args = $this->_createExportArguments($data, $media);
-    if ($args == '') {
+    if (!count($args)) {
       Logger::debug("File '$filename' has no metadata changes");
       if (!$this->Media->deleteFlag($media, MEDIA_FLAG_DIRTY)) {
         $this->controller->warn("Could not update image data of media {$media['Media']['id']}");
@@ -403,29 +393,25 @@ class ImageFilterComponent extends BaseFilterComponent {
 
     $tmp = $this->_getTempFilename($filename);
     $bin = $this->controller->getOption('bin.exiftool', 'exiftool');
-    $command = "$bin $args -o ".escapeshellarg($tmp).' '.escapeshellarg($filename);
-    Logger::trace("Execute command: \"$command\"");
-    $output = array();
-    $result = -1;
-    $t1 = getMicrotime();
-    exec($command, &$output, &$result);
-    $t2 = getMicrotime();
-    Logger::trace("$bin call needed ".round($t2-$t1, 4)."ms");
+    $args['-o'] = $tmp;
+    $args[] = $filename;
+    $result = $this->Command->run($bin, $args);
 
     if ($result != 0 || !file_exists($tmp)) {
-      Logger::err("$bin returns with error: $result (command: $command)");
-      if (file_exists($tmp))
-        unlink($tmp);
+      Logger::err("$bin returns with error: $result");
+      if (file_exists($tmp)) {
+        @unlink($tmp);
+      }
       return false;
     } else {
       $tmp2 = $this->_getTempFilename($filename);
       if (!rename($filename, $tmp2)) {
         Logger::err("Could not rename original file '$filename' to temporary file '$tmp2'");
-        unlink($tmp);
+        @unlink($tmp);
         return false;
       }
       rename($tmp, $filename);
-      unlink($tmp2);
+      @unlink($tmp2);
     }
     
     $this->MyFile->update($file);
@@ -442,8 +428,10 @@ class ImageFilterComponent extends BaseFilterComponent {
     @note IPTC dates are set in the default timezone */
   function _createExportDate($data, $media) {
     // Remove IPTC data and time if database date is not set
+    $args = array();
     if (!$media['Media']['date']) {
-      $arg .= ' -DateCreated-= -TimeCreated-=';
+      $args[] = '-DateCreated-=';
+      $args[] = '-TimeCreated-=';
       return '';
     }
 
@@ -468,17 +456,16 @@ class ImageFilterComponent extends BaseFilterComponent {
       }
     }
 
-    $arg = '';
     if ($timeDb && (!$timeFile || ($timeFile != $timeDb))) {
-      $arg .= ' -DateCreated='.escapeshellarg(date("Y:m:d", $timeDb));
-      $arg .= ' -TimeCreated='.escapeshellarg(date("H:i:sO", $timeDb));
+      $args[] = '-DateCreated=' . date("Y:m:d", $timeDb);
+      $args[] = '-TimeCreated=' . date("H:i:sO", $timeDb);
       //Logger::trace("Set new date via IPTC: $arg");
     }
-    return $arg;
+    return $args;
   }
 
   function _createExportGps(&$data, &$media) {
-    $args = '';
+    $args = array();
 
     $latitude = $this->_extract($data, 'GPSLatitude', null);
     $latitudeRef = $this->_extract($data, 'GPSLatitudeRef', null);
@@ -505,8 +492,8 @@ class ImageFilterComponent extends BaseFilterComponent {
       } else  {
         $latitudeRef = 'N';
       }
-      $args .= ' -GPSLatitude='.escapeshellarg($latitudeDb);
-      $args .= ' -GPSLatitudeRef='.escapeshellarg($latitudeRef);
+      $args[] = '-GPSLatitude=' . $latitudeDb;
+      $args[] = '-GPSLatitudeRef=' . $latitudeRef;
     }
 
     $longitudeDb = $media['Media']['longitude'];
@@ -520,8 +507,8 @@ class ImageFilterComponent extends BaseFilterComponent {
       } else  {
         $longitudeRef = 'E';
       }
-      $args .= ' -GPSLongitude='.escapeshellarg($longitudeDb);
-      $args .= ' -GPSLongitudeRef='.escapeshellarg($longitudeRef);
+      $args[] = '-GPSLongitude=' . $longitudeDb;
+      $args[] = '-GPSLongitudeRef=' . $longitudeRef;
     }
     return $args;
   }
@@ -530,49 +517,56 @@ class ImageFilterComponent extends BaseFilterComponent {
     * @param data metadata from the file (Exiftool information)
     * @param image Media data array */
   function _createExportArguments($data, $media) {
-    $args = '';
+    $args = array();
 
-    $args .= $this->_createExportDate($data, $media);
-    $args .= $this->_createExportGps($data, $media);
+    $args = am($args, $this->_createExportDate($data, $media));
+    $args = am($args, $this->_createExportGps($data, $media));
 
     // Associations to meta data: Tags, Categories, Locations
     $keywords = $this->_extract($data, 'Keywords');
-    if ($keywords)
+    if ($keywords) {
       $fileTags = array_unique(preg_split('/\s*,\s*/', trim($keywords)));
-    else
+    } else {
       $fileTags = array();
+    }
 
-    if (count($media['Tag']))
+    if (count($media['Tag'])) {
       $dbTags = Set::extract($media, "Tag.{n}.name");
-    else
+    } else {
       $dbTags = array();
+    }
 
-    foreach (array_diff($fileTags, $dbTags) as $del) 
-      $args .= " -Keywords-=".escapeshellarg($del);
-    foreach (array_diff($dbTags, $fileTags) as $add) 
-      $args .= " -Keywords+=".escapeshellarg($add);
+    foreach (array_diff($fileTags, $dbTags) as $del) {
+      $args[] = '-Keywords-=' . $del;
+    }
+    foreach (array_diff($dbTags, $fileTags) as $add) {
+      $args[] = '-Keywords+=' . $add;
+    }
 
     $categories = $this->_extract($data, 'SupplementalCategories');
-    if ($categories)
+    if ($categories) {
       $fileCategories = array_unique(preg_split('/\s*,\s*/', trim($categories)));
-    else
+    } else {
       $fileCategories = array();
+    }
 
-    if (count($media['Category']))
+    if (count($media['Category'])) {
       $dbCategories = Set::extract($media, "Category.{n}.name");
-    else
+    } else {
       $dbCategories = array();
-
-    foreach (array_diff($fileCategories, $dbCategories) as $del) 
-      $args .= " -SupplementalCategories-=".escapeshellarg($del);
-    foreach (array_diff($dbCategories, $fileCategories) as $add) 
-      $args .= " -SupplementalCategories+=".escapeshellarg($add);
-
+    }
+    foreach (array_diff($fileCategories, $dbCategories) as $del) {
+      $args[] = '-SupplementalCategories-=' . $del;
+    }
+    foreach (array_diff($dbCategories, $fileCategories) as $add) {
+      $args[] = '-SupplementalCategories+=' . $add;
+    }
     // Locations
-    if (count($media['Location']))
+    if (count($media['Location'])) {
       $dbLocations = Set::combine($media, "Location.{n}.type", "Location.{n}.name");
-    else
+    } else {
       $dbLocations = array();
+    }
 
     foreach ($this->locationMap as $type => $name) {
       $fileValue = $this->_extract($data, $name);
@@ -580,9 +574,9 @@ class ImageFilterComponent extends BaseFilterComponent {
 
       // DB overwrites file!
       if (!$fileValue && $dbValue) {
-        $args .= " -$name=".escapeshellarg($dbValue);
+        $args[] = "-$name=" . $dbValue;
       } elseif($fileValue && !$dbValue) {
-        $args .= " -$name=";
+        $args[] = "-$name=";
       }
     }
 

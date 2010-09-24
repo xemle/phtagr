@@ -660,5 +660,22 @@ class Media extends AppModel
       'conditions' => array('Group.id' => $groupIds),
       'joins' => array("JOIN `{$this->tablePrefix}groups` AS `Group` ON `Media`.`group_id` = `Group`.`id`")));
   }
+
+  /** Returns the rotation of the media
+    @return One of 0, 90, 180, 270 degree */
+  function getRotationInDegree($media) {
+    $degree = 0;
+    $data = $this->stripAlias($media);
+    switch ($data['orientation']) {
+      case 1: break;
+      case 3: $degree = 180; break;
+      case 6: $degree = 90; break;
+      case 8: $degree = 270; break;
+      default:
+        Logger::warn("Unsupported rotation flag: {$data['orientation']} for {$this->toString($data)}");
+        break;
+    }
+    return $degree;
+  }
 }
 ?>

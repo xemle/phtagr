@@ -24,7 +24,7 @@
 class VideoPreviewComponent extends Object {
 
   var $controller = null;
-  var $components = array('FileCache', 'FileManager');
+  var $components = array('FileCache', 'FileManager', 'Command');
 
   function initialize(&$controller) {
     $this->controller =& $controller;
@@ -92,18 +92,16 @@ class VideoPreviewComponent extends Object {
     $bin = $this->controller->getOption('bin.ffmpeg');
     if (!$bin) {
       Logger::info("FFmpeg is missing to create video preview. Use phtagrs dummy picture");
-      $dummy = APP.'webroot'.DS.'img'.DS.'dummy_video_preview.jpg';
+      $dummy = APP . 'webroot' . DS . 'img' . DS . 'dummy_video_preview.jpg';
       return $dummy;
     }
-    $command = "$bin -i ".escapeshellarg($videoFilename)." -t 0.001 -f mjpeg -y ".escapeshellarg($thumbFilename);
-    $output = array();
-    $result = -1;
-    $t1 = getMicrotime();
-    exec($command, &$output, &$result);
-    $t2 = getMicrotime();
-    Logger::debug("Command '$command' returnd $result and required ".round($t2-$t1, 4)."ms");
+    $result = $this->Command->run($bin, array(
+      '-i' => $videoFilename, 
+      '-t' => 0.001, 
+      '-f' => 'mjpeg', 
+      '-y', $thumbFilename));
     if ($result != 0) {
-      Logger::err("Command '$command' returned unexcpected $result");
+      Logger::err("Command '$bin' returned unexcpected $result");
       return false;  
     } else {
       Logger::info("Created video thumbnail of '$videoFilename'");
@@ -118,7 +116,7 @@ class VideoPreviewComponent extends Object {
     @param image Media model data
     @return Cached preview filename */
   function getPreviewFilenameCache($media) {
-    $path = $this->FileCache->getPath($media['Media']['user_id'], $media['Media']['id']);
+    $path = $this->FileCache->getPath($media);
     $file = $this->FileCache->getFilenamePrefix($media['Media']['id']);
     $thumbFilename = $path.$file.'preview.thm';
     return $thumbFilename;

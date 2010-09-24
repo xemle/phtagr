@@ -24,7 +24,7 @@
 class VideoFilterComponent extends BaseFilterComponent {
 
   var $controller = null;
-  var $components = array('VideoPreview', 'FileManager');
+  var $components = array('VideoPreview', 'FileManager', 'Command');
 
   function initialize(&$controller) {
     $this->controller =& $controller;
@@ -151,11 +151,12 @@ class VideoFilterComponent extends BaseFilterComponent {
       $media = $this->_readGetId3(&$media, $filename);
     }
     if (!$media || !$this->Media->save($media)) {
-        $this->FilterManager->addError($filename, "MediaSaveError");
+      $this->FilterManager->addError($filename, "MediaSaveError");
       Logger::err("Could not save media");
       return false;
     }
      
+    $mediaId = $media['Media']['id'];
     if ($isNew || !$this->MyFile->hasMedia($file)) {
       $mediaId = $isNew ? $this->Media->getLastInsertID() : $data['id'];
       if (!$this->MyFile->setMedia($file, $mediaId)) {
@@ -164,34 +165,30 @@ class VideoFilterComponent extends BaseFilterComponent {
         $this->Media->delete($mediaId);
         return false;
       }
+      $media = $this->Media->findById($mediaId);
     }
 
     $this->MyFile->updateReaded($file);
     $this->MyFile->setFlag($file, FILE_FLAG_DEPENDENT);
 
-    return $this->Media->findById($media['Media']['id']);
+    return $this->Media->findById($mediaId);
   }
 
   function _readFfmpeg(&$media, $filename) {
     $data =& $media['Media'];
 
     $bin = $this->controller->getOption('bin.ffmpeg', 'ffmpeg');
-    $command = "$bin -i ".escapeshellarg($filename)." -t 0.0 2>&1";
-    $output = array();
-    $result = -1;
-    $t1 = getMicrotime();
-    exec($command, &$output, &$result);
-    $t2 = getMicrotime();
-    Logger::debug("Command '$command' returnd $result and required ".round($t2-$t1, 4)."ms");
-    
+    $this->Command->redirectError = true;
+    $result = $this->Command->run($bin, array('-i' => $filename, '-t', 0.0));
+    $output = $this->Command->output;
+ 
     if ($result != 1) {
-      Logger::err("Command '$command' returned unexcpected $result");
+      Logger::err("Command '$bin' returned unexcpected $result");
       return false;
     } elseif (!count($output)) {
       Logger::err("Command returned no output!");
       return false;
     } else {
-      Logger::debug("Command '$command' returned $result");
       Logger::trace($output);
 
       foreach ($output as $line) {

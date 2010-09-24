@@ -63,5 +63,21 @@ class TypeBehavior extends ModelBehavior
       Logger::err("Could not update type of model {$model->alias} {$data['id']} to type {$type}");
     }
   }
+
+  function getType(&$model, $data) {
+    if (!$data) {
+      $data =& $model->data;
+    }
+    if (isset($data[$model->alias])) {
+      $data =& $data[$model->alias];
+    }
+
+    if (!isset($data['type'])) {
+      Logger::err("Precondition failed");
+      return null;
+    }
+
+    return $data['type'];
+  }
 }
 ?>

@@ -30,16 +30,15 @@ class FileCacheComponent extends Object {
   }
 
   /** Returns the cache path of the user
-    @param userId Id of the current user
-    @param mediaId Id of the current image/file
+    @param media Media model data
     @param create Creates the directory if true. If false and the directory
     does not exists, it returns false. Default is true.
     @return Path for the cache file. False on error */
-  function getPath($userId, $mediaId, $create = true) {
-    $userId = intval($userId);
-    $mediaId = intval($mediaId);
+  function getPath($media, $create = true) {
+    $userId = intval($media['Media']['user_id']);
+    $mediaId = intval($media['Media']['id']);
 
-    $cacheDir = USER_DIR.$userId.DS.'cache'.DS;
+    $cacheDir = USER_DIR . $userId . DS . 'cache' . DS;
     $dir = intval($mediaId/1000);
     $cacheDir .= sprintf("%04d", $dir).DS;
 
@@ -53,39 +52,40 @@ class FileCacheComponent extends Object {
         Logger::err("Could not create cache dir '$cacheDir'");
         return false;
       } else {
-        Logger::debug("Create cache dir '$cacheDir'");
+        Logger::debug("Cache dir '$cacheDir' created");
       }
+    } 
+    if (!is_writeable($cacheDir)) {
+      Logger::err("Cache directory '$cacheDir' is not writeable");
+      return false;
     }
     return $cacheDir;
   }
 
   /** Returns the filename prefix of the cache file
-    @param mediaId Id of the current image/file
+    @param id ID of the current image/file
     @return filename prefix */
-  function getFilenamePrefix($mediaId) {
-    $mediaId = intval($mediaId);
-
-    $prefix = sprintf("%07d-", $mediaId);
+  function getFilenamePrefix($id) {
+    $prefix = sprintf("%07d-", intval($id));
     return $prefix;
   }
 
-  /** Returns the full cache filename prefix of a media
-    @param media Media model data
-    @param cache filename prefix */
-  function getFilename($media) {
-    if (!isset($media['Media']['id']) || !isset($media['Media']['user_id'])) {
-      Logger::err("Precondition failed");
-      Logger::debug($media);
-      return false;
-    }
-    $userId = $media['Media']['user_id'];
-    $mediaId = $media['Media']['id'];
+  function getFilename($media, $alias, $ext = 'jpg') {
+    $prefix = $this->getFilenamePrefix($media['Media']['id']);
+    return $prefix . $alias . "." . $ext;
+  }
 
-    $path = $this->getPath($userId, $mediaId);
+  /** Returns the full path of the cache file 
+    @param media Media model data
+    @param alias Alias for cache file
+    @param ext (Optional) file extension. Default is 'jpg'
+    @return Full path of the cache file. False on error */
+  function getFilePath($media, $alias, $ext = 'jpg') {
+    $path = $this->getPath($media);
     if (!$path) {
       return false;
     }
-    return $path.$this->getFilenamePrefix($mediaId);
+    return $path . $this->getFilename($media, $alias, $ext);
   }
 
   /** Deletes all cached files of a specific image/file.

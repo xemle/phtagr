@@ -68,6 +68,7 @@ define('OUTPUT_SIZE_MINI', 75);
 define('OUTPUT_SIZE_THUMB', 220);
 define('OUTPUT_SIZE_PREVIEW', 600);
 define('OUTPUT_SIZE_HIGH', 1280);
+define('OUTPUT_SIZE_HD', 1600);
 define('OUTPUT_SIZE_VIDEO', 480);
 // ffmpeg option fo '-b'. Size could be suffixed by k or m
 define('OUTPUT_BITRATE_VIDEO', '786k');
