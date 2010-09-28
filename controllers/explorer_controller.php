@@ -210,7 +210,7 @@ class ExplorerController extends AppController
         $y = $year;
         $month = intval($month);
         $m = $month + 1;
-        if ($day && $day > 0 && $day < 13) {
+        if ($day && $day > 0 && $day < 32) {
           $m = $month;
           $day = intval($day);
           $d = $day + 1;
