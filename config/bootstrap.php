@@ -123,5 +123,11 @@ define("LOCATION_SUBLOCATION", 0x02);
 define("LOCATION_STATE", 0x03);
 define("LOCATION_COUNTRY", 0x04);
 
+/** Add pear path within vendor path to the include_path */
+if (function_exists('ini_set') && function_exists('ini_get')) {
+  $path = ini_get('include_path');
+  $vendorPearPath = APP . 'vendors' . DS . 'Pear' . DS;
+  ini_set('include_path', $vendorPearPath . PATH_SEPARATOR . ini_get('include_path'));
+}
 //EOF
 ?>
