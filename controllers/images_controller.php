@@ -23,7 +23,7 @@
 
 class ImagesController extends AppController
 {
-  var $components = array('RequestHandler', 'Search');
+  var $components = array('RequestHandler', 'Search', 'FastFileResponder');
   var $uses = array('Media', 'Group', 'Tag', 'Category', 'Location');
   var $helpers = array('Form', 'Html', 'Javascript', 'Ajax', 'ImageData', 'Time', 'Search', 'ExplorerMenu', 'Rss', 'Map', 'Navigator', 'Flowplayer', 'Tab', 'Number', 'Option');
 
@@ -104,6 +104,7 @@ class ImagesController extends AppController
         //$this->data = am($this->Session->read('Comment.data'), $this->data);
         $this->Session->delete('Comment.data');
       }
+      $this->FastFileResponder->add($this->data, 'preview');
     }
   }
 }

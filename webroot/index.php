@@ -73,6 +73,17 @@
 			define('CORE_PATH', CAKE_CORE_INCLUDE_PATH . DS);
 		}
 	}
+	if (isset($_GET['url']) && preg_match('/media\/\w+\/\d+/', $_GET['url'])) {
+		require ROOT . DS . APP_DIR . DS . 'fast_file_responder.php';
+
+		$fileResponder = new FastFileResponder();
+		if ($fileResponder->exists()) {
+			$fileResponder->send();
+		} else {
+			$fileResponder->close();
+			unset($fileResponder);
+		}
+	}
 	if (!include(CORE_PATH . 'cake' . DS . 'bootstrap.php')) {
 		trigger_error("CakePHP core could not be found.  Check the value of CAKE_CORE_INCLUDE_PATH in APP/webroot/index.php.  It should point to the directory containing your " . DS . "cake core directory and your " . DS . "vendors root directory.", E_USER_ERROR);
 	}

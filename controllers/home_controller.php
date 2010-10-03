@@ -24,7 +24,7 @@ class HomeController extends AppController
 {
   var $name = 'home';
 
-  var $components = array('Search');
+  var $components = array('Search', 'FastFileResponder');
   var $helpers = array('Html', 'Time', 'Text', 'Cloud', 'ImageData', 'Search');
   /** Don't load models for setup check */
   var $uses = null;
@@ -54,20 +54,23 @@ class HomeController extends AppController
   function index() {
     $this->Search->setSort('newest');
     $this->Search->setShow(50);
-    $data = $this->Search->paginate();
+    $newest = $this->Search->paginate();
     // generate tossed index to variy the media 
     srand(time());
-    while (count($data) > 12) {
+    while (count($newest) > 12) {
       $rnd = rand(0, 50);
-      if (isset($data[$rnd])) {
-        unset($data[$rnd]);
+      if (isset($newest[$rnd])) {
+        unset($newest[$rnd]);
       }
     }
-    $this->set('newMedia', $data);
+    $this->FastFileResponder->addAll($newest, 'mini');
+    $this->set('newMedia', $newest);
 
     $this->Search->setSort('random');
     $this->Search->setShow(1);
-    $this->set('randomMedia', $this->Search->paginate());
+    $random = $this->Search->paginate();
+    $this->FastFileResponder->addAll($random, 'preview');
+    $this->set('randomMedia', $random);
 
     $user = $this->getUser();
     $this->set('cloudTags', $this->Media->cloud($user, 'Tag', 50));
@@ -75,6 +78,7 @@ class HomeController extends AppController
 
     $conditions = $this->Media->buildAclConditions($this->getUser());
     $comments = $this->Comment->find('all', array('conditions' => $conditions, 'order' => 'Comment.date DESC', 'limit' => 4));
+    $this->FastFileResponder->addAll($comments, 'mini');
     $this->set('comments', $comments);
   }
 }

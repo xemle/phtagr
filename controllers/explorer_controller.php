@@ -23,7 +23,7 @@
 
 class ExplorerController extends AppController
 {
-  var $components = array('RequestHandler', 'FilterManager', 'Search', 'QueryBuilder');
+  var $components = array('RequestHandler', 'FilterManager', 'Search', 'QueryBuilder', 'FastFileResponder');
   var $uses = array('Media', 'MyFile', 'Group', 'Tag', 'Category', 'Location');
   var $helpers = array('Form', 'Html', 'Javascript', 'Ajax', 'ImageData', 'Time', 'ExplorerMenu', 'Rss', 'Search', 'Navigator', 'Tab');
 
@@ -42,6 +42,7 @@ class ExplorerController extends AppController
     $paginateActions = array('category', 'date', 'edit', 'group', 'index', 'location', 'query', 'tag', 'user');
     if (in_array($this->action, $paginateActions)) {
       $this->data = $this->Search->paginate();
+      $this->FastFileResponder->addAll($this->data, 'thumb');
 
       if ($this->hasRole(ROLE_USER)) {
         $groups = $this->Group->getGroupsForMedia($this->getUser());
@@ -728,6 +729,7 @@ class ExplorerController extends AppController
 
     $this->layout = 'xml';
     Logger::trace("Search points of N:$north, S:$south, W:$west, E:$east: Found ".count($this->data)." points");
+    $this->FastFileResponder->addAll($this->data);
     if (Configure::read('debug') > 1) {
       Configure::write('debug', 1);
     }
