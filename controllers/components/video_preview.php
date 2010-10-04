@@ -25,9 +25,11 @@ class VideoPreviewComponent extends Object {
 
   var $controller = null;
   var $components = array('FileCache', 'FileManager', 'Command');
+  var $_semaphoreId = null;
 
   function initialize(&$controller) {
     $this->controller =& $controller;
+    $this->_semaphoreId = sem_get(4713);
   }
 
   /** Finds the video thumb of a video 
@@ -95,11 +97,13 @@ class VideoPreviewComponent extends Object {
       $dummy = APP . 'webroot' . DS . 'img' . DS . 'dummy_video_preview.jpg';
       return $dummy;
     }
+    sem_acquire($this->_semaphoreId);
     $result = $this->Command->run($bin, array(
       '-i' => $videoFilename, 
       '-t' => 0.001, 
       '-f' => 'mjpeg', 
       '-y', $thumbFilename));
+    sem_release($this->_semaphoreId);
     if ($result != 0) {
       Logger::err("Command '$bin' returned unexcpected $result");
       return false;  
