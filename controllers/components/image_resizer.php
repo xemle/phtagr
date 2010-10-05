@@ -154,16 +154,20 @@ class ImageResizerComponent extends Object {
   function clearMetaData($filename) {
     if (!file_exists($filename)) {
       Logger::err("Filename '$filename' does not exists");
-      return;
+      return false;
     }
     if (!is_writeable($filename)) {
       Logger::err("Filename '$filename' is not writeable");
-      return;
+      return false;
     }
 
     $bin = $this->controller->getOption('bin.exiftool', 'exiftool');
-    $this->Command->run($bin, array('-all=', $filename));
+    if ($this->Command->run($bin, array('-all=', '-overwrite_original', $filename)) != 0) {
+      Logger::err("Cleaning of meta data of file '$filename' failed");
+      return false;
+    }
     Logger::debug("Cleaned meta data of '$filename'");
+    return true;
   }
 
 }
