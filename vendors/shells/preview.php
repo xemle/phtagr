@@ -61,12 +61,12 @@ class AppControllerMock extends AppController {
   }
 }
 
-class GeneratePreviewShell extends Shell {
+class PreviewShell extends Shell {
 
   var $Controller = null;
  
   var $verbose = false;
-  var $force = false;
+  var $chunkSize = 100;
   var $sizes = array('mini', 'thumb', 'preview', 'high');
 
   function initialize() {
@@ -97,34 +97,30 @@ class GeneratePreviewShell extends Shell {
   function help() {
     $this->out("Help screen");
     $this->hr();
-    $this->out("This shell generates preview images in bulk.");
+    $this->out("This shell generates preview images in batch mode.");
     $this->out("");
-    $this->out("create");
-    $this->out("\tCreate previews.");
+    $this->out("generate");
+    $this->out("\tGenerate previews.");
     $this->hr();
     $this->out("Options:");
-    $this->out("-size (mini|thumb|preview|high)");
-    $this->out("\tSet the minimum preview size.");
-    $this->out("-user username");
-    $this->out("\tGererate only previews for given user.");
     $this->out("-max count");
     $this->out("\tMaximum generation count. Default is 10. Use 0 to generate all previews.");
     $this->out("-start-chunk number");
     $this->out("\tSet the start chunk number. A chunk has a size of 100 media. Default is 1.");
+    $this->out("-size (mini|thumb|preview|high)");
+    $this->out("\tSet the minimum preview size. Default is thumb.");
+    $this->out("-user username");
+    $this->out("\tGenerate only previews for given user.");
+    $this->out("-verbose");
+    $this->out("\tBe verbose");
     $this->hr();
     exit();
   }
 
-  function create() {
-    $args = array('verbose', 'force');
-    foreach($args as $arg) {
-      if (in_array($arg, $this->args)) {
-        $this->{$arg} = true;
-      }
-    }
+  function generate() {
+    $this->verbose = isset($this->params['verbose']) ? true : false;
 
     $size = in_array($this->params['size'], $this->sizes) ? $this->params['size'] : 'thumb';
-    $chunkSize = 100;
     $user = isset($this->params['user']) ? $this->params['user'] : false;
     $chunk = isset($this->params['start-chunk']) ? max(1, intval($this->params['start-chunk'])) : 1;
     $generateMax = isset($this->params['max']) ? $this->params['max'] : 100;
@@ -134,7 +130,7 @@ class GeneratePreviewShell extends Shell {
     @clearstatcache();
     $errors = array();
     while (true) {
-      $this->Search->setShow($chunkSize, false);
+      $this->Search->setShow($this->chunkSize, false);
       $this->Search->setPage($chunk);
       if ($user) {
         $this->Search->setUser($user);
