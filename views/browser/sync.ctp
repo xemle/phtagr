@@ -20,7 +20,7 @@
 
 <?php if ($this->data['action'] == 'run'): ?>
 <p><?php 
-  printf(__("Synchronized %d media.", true), $this->data['synced']);
+  printf(__("Synchronized %d media.", true), count($this->data['synced']));
   if ($this->data['unsynced']) {
     printf(__(" %d media remains unsynced. Click %s to synchronize again", true), $this->data['unsynced'], $html->link(__('sync', true), 'sync/run')); 
   }
