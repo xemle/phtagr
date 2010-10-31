@@ -25,7 +25,7 @@ App::import('Core', 'Sanitize');
 
 class ImageDataHelper extends AppHelper {
 
-  var $helpers = array('Session', 'Ajax', 'Html', 'Form', 'Search', 'Option', 'Session');
+  var $helpers = array('Session', 'Ajax', 'Html', 'Form', 'Search', 'Option');
 
   var $Sanitize = null;
 
@@ -181,6 +181,7 @@ class ImageDataHelper extends AppHelper {
       - from: All media after given media
       - to: All media before given media
       - offset: given in hours (3h), days (3.5d) or months (6m) 
+      - interval: Set interval where 
     @return Link of the date search */
   function getDateLink(&$media, $option = false) {
     $date = $media['Media']['date'];
@@ -192,6 +193,10 @@ class ImageDataHelper extends AppHelper {
       return $this->Search->getUri(array('from' => $date, 'sort' => '-date'), $extra);
     } elseif ($option == 'to') {
       return $this->Search->getUri(array('to' => $date, 'sort' => 'date'), $extra);
+    } elseif ($option == 'addTo' && $this->Search->getFrom()) {
+      return $this->Search->getUri(array('from' => $this->Search->getFrom(), 'to' => $date), $extra);
+    } elseif ($option == 'addFrom' && $this->Search->getTo()) {
+      return $this->Search->getUri(array('to' => $this->Search->getTo(), 'from' => $date), $extra);
     } elseif (preg_match('/^(\d+(.\d+)?)([hdm])$/', $option, $matches)) {
       $offset = $matches[1].$matches[2];
       switch ($matches[3]) {
@@ -268,6 +273,16 @@ class ImageDataHelper extends AppHelper {
     $output .= '<div style="display: none;" class="actionlist" id="'.$id.'">';
     $icon = $this->Html->image('icons/date_previous.png', array('alt' => '<', 'title' => __("View media of previous dates", true)));
     $output .= $this->Html->link($icon, $this->getDateLink(&$data, 'to'), array('escape' => false));
+    
+    if ($this->Search->getFrom() && !$this->Search->getTo()) {
+      $icon = $this->Html->image('icons/date_interval.png', array('alt' => '<>', 'title' => __("View media of interval", true)));
+      $output .= $this->Html->link($icon, $this->getDateLink(&$data, 'addTo'), array('escape' => false));
+    }
+
+    if ($this->Search->getFrom() && $this->Search->getTo()) {
+      $icon = $this->Html->image('icons/date_interval_add_prev.png', array('alt' => '<>', 'title' => __("Set new end date of interval", true)));
+      $output .= $this->Html->link($icon, $this->getDateLink(&$data, 'addTo'), array('escape' => false));
+    }
 
     $icon = $this->Html->image('icons/calendar_view_day.png', array('alt' => 'd', 'title' => __("View media of this day", true)));
     $output .= $this->Html->link($icon, $this->getDateLink(&$data, '12h'), array('escape' => false));
@@ -277,6 +292,16 @@ class ImageDataHelper extends AppHelper {
 
     $icon = $this->Html->image('icons/calendar_view_month.png', array('alt' => 'm', 'title' => __("View media of this month", true)));
     $output .= $this->Html->link($icon, $this->getDateLink(&$data, '15d'), array('escape' => false));
+
+    if ($this->Search->getTo() && !$this->Search->getFrom()) {
+      $icon = $this->Html->image('icons/date_interval.png', array('alt' => '<>', 'title' => __("View media of interval", true)));
+      $output .= $this->Html->link($icon, $this->getDateLink(&$data, 'addFrom'), array('escape' => false));
+    }
+
+    if ($this->Search->getTo() && $this->Search->getFrom()) {
+      $icon = $this->Html->image('icons/date_interval_add_next.png', array('alt' => '<>', 'title' => __("Set new start date for interval", true)));
+      $output .= $this->Html->link($icon, $this->getDateLink(&$data, 'addFrom'), array('escape' => false));
+    }
 
     $icon = $this->Html->image('icons/date_next.png', array('alt' => '>', 'title' => __("View media of next dates", true)));
     $output .= $this->Html->link($icon, $this->getDateLink(&$data, 'from'), array('escape' => false));
