@@ -4,6 +4,9 @@
 <?php 
   $search->initialize();
 ?>
+<?php
+  echo $breadcrumb->breadcrumb($crumbs);
+?>
 <?php if ($navigator->hasPages()): ?>
 <div class="paginator"><div class="subpaginator">
 <?php echo $navigator->prev().' '.$navigator->numbers().' '.$navigator->next(); ?>
@@ -34,9 +37,18 @@ foreach ($this->data as $media): ?>
 <div class="image">
 <?php 
   $size = $imageData->getimagesize($media, OUTPUT_SIZE_THUMB);
-  echo "<a href=\"".Router::url("/images/view/".$media['Media']['id'].'/'.$search->serialize(false, array('pos' => $pos++), false, array('defaults' => array('pos' => 1))))."\">";
-  echo "<img src=\"".Router::url("/media/thumb/".$media['Media']['id'])."\" $size[3] alt=\"".$media['Media']['name']."\"/>"; 
-  echo "</a>";
+  $imageCrumbs = $this->Breadcrumb->replace($crumbs, 'page', $search->getPage());
+  $imageCrumbs = $this->Breadcrumb->replace($imageCrumbs, 'pos', $pos++);
+  if ($search->getShow(12) != 12) {
+    $imageCrumbs = $this->Breadcrumb->replace($imageCrumbs, 'show', $search->getShow());
+  }
+  
+  echo $html->tag('a',
+    $html->tag('img', false, array(
+      'src' => Router::url("/media/thumb/".$media['Media']['id']),
+      'width' => $size[0], 'height' => $size[1], 
+      'alt' => $media['Media']['name'])),
+    array('href' => Router::url("/images/view/".$media['Media']['id'].'/'.$breadcrumb->params($imageCrumbs))));
 
   if ($media['Media']['canWriteTag']) {
     $canWriteTag=true;
@@ -105,7 +117,7 @@ foreach ($this->data as $media): ?>
   }
   echo $tab->menu($items);
 
-  $url = $search->serialize();
+  $url = $breadcrumb->params($crumbs);
   echo $form->create(null, array('id' => 'explorer', 'action' => 'edit/'.$url));
 ?>
 <?php echo $tab->open(0, true); ?>

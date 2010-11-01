@@ -208,6 +208,57 @@ class SearchComponent extends Search
     }
   }
 
+  /** Convert the current search parameter to breadcrump stack
+    @return Array of crumbs */
+  function convertToCrumbs() {
+    $params = $this->getParams();
+    Logger::debug($params);
+    $crumbs = array();
+    foreach ($params as $name => $value) {
+      if (is_array($value)) {
+        $name = Inflector::singularize($name);
+        foreach ($value as $crumb) {
+          $crumbs[] = "$name:$crumb";
+        }
+      } else {
+        $crumbs[] = "$name:$value";
+      }
+    }
+    return $crumbs;
+  }
+
+  function _getPrameterFromCrumbs($crumbs) {
+    $listTypes = array('tag', 'category', 'location', 'group');
+    foreach ($crumbs as $crumb) {
+      if (empty($crumb)) {
+        continue;
+      }
+      if (!preg_match('/^(\w+):(.*)$/', $crumb, $match)) {
+        Logger::warn("Invalid crumb: $crumb");
+        continue;
+      }
+      $type = $match[1];
+      $value = $match[2];
+      if (in_array($type, $listTypes)) {
+        $values = split(',', $value);
+        foreach ($values as $value) {
+          $this->addParam($type, $value);
+        }
+      } else {
+        $this->setParam($type, $value);
+      }
+    }
+  }
+
+  function paginateByCrumbs($crumbs) {
+    $tmp = $this->getParams();
+    $this->clear();
+    $this->_getPrameterFromCrumbs($crumbs);
+    $data = $this->paginate();
+    $this->setParams($tmp);
+    return $data;
+  }
+
   function paginate() {
     $query = $this->QueryBuilder->build($this->getParams()); 
     $tmp = $query;
@@ -255,6 +306,15 @@ class SearchComponent extends Search
     // Set data for search helper
     $this->controller->params['search'] = $params;
 
+    return $data;
+  }
+
+  function paginateMediaByCrumb($id, $crumbs) {
+    $tmp = $this->getParams();
+    $this->clear();
+    $this->_getPrameterFromCrumbs($crumbs);
+    $data = $this->paginateMedia($id);
+    $this->setParams($tmp);
     return $data;
   }
 

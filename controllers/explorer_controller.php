@@ -25,7 +25,9 @@ class ExplorerController extends AppController
 {
   var $components = array('RequestHandler', 'FilterManager', 'Search', 'QueryBuilder', 'FastFileResponder');
   var $uses = array('Media', 'MyFile', 'Group', 'Tag', 'Category', 'Location');
-  var $helpers = array('Form', 'Html', 'Javascript', 'Ajax', 'ImageData', 'Time', 'ExplorerMenu', 'Rss', 'Search', 'Navigator', 'Tab');
+  var $helpers = array('Form', 'Html', 'Javascript', 'Ajax', 'ImageData', 'Time', 'ExplorerMenu', 'Rss', 'Search', 'Navigator', 'Tab', 'Breadcrumb');
+
+  var $crumbs = array();
 
   function beforeFilter() {
     if ($this->action == 'points' && 
@@ -34,14 +36,17 @@ class ExplorerController extends AppController
     }
 
     parent::beforeFilter();
-    
-    $this->Search->parseArgs();
+    $url = $this->params['url']['url'];
+    $encoded = array_splice(split('/', trim($url, '/')), 2);
+    foreach ($encoded as $crumb) {
+      $this->crumbs[] = $this->Search->decode($crumb);
+    }
   }
 
   function beforeRender() {
-    $paginateActions = array('category', 'date', 'edit', 'group', 'index', 'location', 'query', 'tag', 'user');
+    $paginateActions = array('category', 'date', 'edit', 'group', 'index', 'location', 'query', 'tag', 'user', 'view');
     if (in_array($this->action, $paginateActions)) {
-      $this->data = $this->Search->paginate();
+      $this->data = $this->Search->paginateByCrumbs($this->crumbs);
       $this->FastFileResponder->addAll($this->data, 'thumb');
 
       if ($this->hasRole(ROLE_USER)) {
@@ -53,10 +58,22 @@ class ExplorerController extends AppController
         $this->set('groups', $groupSelect);
       }
     }
+    $this->set('crumbs', $this->crumbs);
+    $this->params['crumbs'] = $this->crumbs;
     parent::beforeRender();
   }
 
   function index() {
+    //$this->render('table');
+  }
+
+  function view() {
+    if (!empty($this->data)) {
+      $crumbs = split('/', $this->data['breadcrumb']['current']);
+      $crumbs[] = $this->data['breadcrumb']['input'];
+      $this->crumbs = $crumbs;
+    }
+    $this->render('index');
   }
 
   function autocomplete($type) {
@@ -155,8 +172,9 @@ class ExplorerController extends AppController
         $this->Search->setVisibility($this->data['Media']['visibility']);
 
         $this->Search->setUser($this->data['User']['username']);
-        $this->Search->setGroup($this->data['Group']['name']);
+        $this->Search->addGroup($this->data['Group']['name']);
       } 
+      $this->crumbs = $this->Search->convertToCrumbs();
     } 
     $this->render('index');
   }
@@ -181,9 +199,12 @@ class ExplorerController extends AppController
       $this->render('index');
       return;
     }
-    $this->Search->setUser($username);
+    $crumbs = array("user:$username");
     if ($param && $value && in_array($param, array('tag', 'category', 'location'))) {
-      $this->Search->addParam($param, explode(',', $value));
+      $values = preg_split('/\s*,\s*/', trim($value));
+      foreach ($values as $value) {
+        $crumbs[] = "$param:$value";
+      }
     } elseif ($param == 'folder') {
       $folder = implode('/', array_slice($this->params['pass'], 2));
       $fsRoot = $this->User->getRootDir($user);
@@ -193,18 +214,20 @@ class ExplorerController extends AppController
         Logger::info(sprintf("Invalid root %s or folder %s", $fsRoot, $fsFolder));
         return;
       }
-      $this->Search->setFolder($folder, false);
-      $this->Search->setSort('name');
+      $crumbs[] = "folder:$folder";
+      $crumbs[] = "sort:name";
     }
+    $this->crumbs = $crumbs;
     $this->render('index');
   }
 
   function group($name) {
-    $this->Search->addGroup($name);
+    $this->crumbs = array('group:' . $name);
     $this->render('index');
   }
 
   function date($year = null, $month = null, $day = null) {
+    $this->crumbs = array();
     if ($year && $year > 1950 && $year < 2050) {
       $year = intval($year);
       if ($month && $month > 0 && $month < 13) {
@@ -225,38 +248,54 @@ class ExplorerController extends AppController
       }
       $from = mktime(0, 0, 0, $month, $day, $year);
       $to = mktime(0, 0, 0, $m, $d, $y);
-      $this->Search->setFrom(date('Y-m-d H:i:s', $from));
-      $this->Search->setTo(date('Y-m-d H:i:s', $to - 1));
-      $this->Search->setSort('-date');
+      $this->crumbs[] = 'from:' . date('Y-m-d H:i:s', $from);
+      $this->crumbs[] = 'to:' . date('Y-m-d H:i:s', $to);
+      $this->crumbs[] = 'sort:-date';
     } elseif ($year) {
       $from = strtotime($year);
+      $sort = 'sort:date';
       if ($from) {
-        $this->Search->setFrom(date('Y-m-d H:i:s', $from));
-        $this->Search->setSort('-date');
+        $this->crumbs[] = 'from:' . date('Y-m-d H:i:s', $from);
+        $sort = 'sort:-date';
       }
       if ($month) {
         $to = strtotime($month);
         if ($to) {
-          $this->Search->setTo(date('Y-m-d H:i:s', $to));
-          $this->Search->setSort('date');
+          $this->crumbs[] = 'to:' . date('Y-m-d H:i:s', $to);
         }
       }
+      $this->crumbs[] = $sort;
     }
     $this->render('index');
   }
 
   function tag($tags) {
-    $this->Search->addTags(preg_split('/\s*,\s*/', trim($tags)));
+    $tags = preg_split('/\s*,\s*/', trim($tags));
+    $crumbs = array();
+    foreach($tags as $tag) {
+      $crumbs[] = 'tag:' . $tag;
+    }
+    $this->crumbs = $crumbs;
     $this->render('index');
   }
 
   function category($categories) {
-    $this->Search->addCategories(preg_split('/\s*,\s*/', trim($categories)));
+    $categories = preg_split('/\s*,\s*/', trim($categories));
+    $crumbs = array();
+    foreach($categories as $category) {
+      $crumbs[] = 'category:' . $category;
+    }
+    $this->crumbs = $crumbs;
     $this->render('index');
   }
 
   function location($locations) {
-    $this->Search->addLocations(preg_split('/\s*,\s*/', trim($locations)));
+    $locations = preg_split('/\s*,\s*/', trim($locations));
+    $crumbs = array();
+    foreach($locations as $location) {
+      $crumbs[] = 'location:' . $location;
+    }
+    $this->crumbs = $crumbs;
     $this->render('index');
   }
 
@@ -471,11 +510,7 @@ class ExplorerController extends AppController
       }
       $this->data = array();
     }
-    $url = implode('/', $this->params['pass']);
-    foreach ($this->params['named'] as $key => $value) {
-      $url .= "/$key:$value";
-    }
-    $this->redirect('query/'.$url);
+    $this->redirect('view/' . implode('/', $this->crumbs));
   }
 
   /** 

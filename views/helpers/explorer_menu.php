@@ -23,7 +23,7 @@
 
 class ExplorerMenuHelper extends AppHelper
 {
-  var $helpers = array('Html', 'Search', 'Menu', 'Piclens');
+  var $helpers = array('Html', 'Search', 'Breadcrumb', 'Menu', 'Piclens', 'Form');
 
   var $_id;
 
@@ -73,21 +73,21 @@ class ExplorerMenuHelper extends AppHelper
     return $item;
   }
 
-  function _getAssociationExtra($association, $value, $id) {
+  function _getAssociationExtra($name, $value, $id) {
     $out = " <div class=\"actionlist\" id=\"$id\">";
+    $crumbs = $this->Breadcrumb->filterCrumbs($this->params['crumbs']);
 
-    $plural = Inflector::pluralize($association);
-    $addLink = $this->Search->getUri(false, array($plural => $value), array($plural => '-'.$value, 'page'));
-    $addIcon = $this->Html->image('icons/add.png', array('alt' => '+', 'title' => "Include $association $value"));
+    $addLink = $this->Breadcrumb->crumbUrl($this->Breadcrumb->replace($crumbs, array($name, '-' . $value), $value));
+    $addIcon = $this->Html->image('icons/add.png', array('alt' => '+', 'title' => "Include $name $value"));
     $out .= $this->Html->link($addIcon, $addLink, array('escape' => false));
 
-    $delLink = $this->Search->getUri(false, array($plural => '-'.$value), array($plural => $value, 'page'));
-    $delIcon = $this->Html->image('icons/delete.png', array('alt' => '-', 'title' => "Exclude $association $value"));
+    $delLink = $this->Breadcrumb->crumbUrl($this->Breadcrumb->replace($crumbs, array($name, $value), '-' . $value));
+    $delIcon = $this->Html->image('icons/delete.png', array('alt' => '-', 'title' => "Exclude $name $value"));
     $out .= $this->Html->link($delIcon, $delLink, array('escape' => false));
 
     if ($this->action == 'user') {
-      $worldLink = "/explorer/$association/$value";
-      $worldIcon = $this->Html->image('icons/world.png', array('alt' => '-', 'title' => "View all media with $association $value"));
+      $worldLink = "/explorer/$name/$value";
+      $worldIcon = $this->Html->image('icons/world.png', array('alt' => '-', 'title' => "View all media with $name $value"));
       $out .= $this->Html->link($worldIcon, $worldLink, array('escape' => false));
     }
 
@@ -126,29 +126,30 @@ class ExplorerMenuHelper extends AppHelper
 
     $id = 'order-item';
     $out .= " <div class=\"actionlist\" id=\"$id\">";
+    $crumbs = $this->Breadcrumb->filterCrumbs($this->params['crumbs']);
     
     $icon = $this->Html->image('icons/date_previous.png', array('alt' => __('date asc', true), 'title' => __("Show oldest first", true)));
-    $link = $this->Search->getUri(false, array('sort' => '-date'), 'page');
+    $link = $this->Breadcrumb->crumbUrl($this->Breadcrumb->replace($crumbs, 'sort', '-date'));
     $out .= $this->Html->link($icon, $link, array('escape' => false));
     
     $icon = $this->Html->image('icons/add.png', array('alt' => __('newest', true), 'title' => __("Show newest first", true)));
-    $link = $this->Search->getUri(false, array('sort' => 'newest'), 'page');
+    $link = $this->Breadcrumb->crumbUrl($this->Breadcrumb->replace($crumbs, 'sort', 'newest'));
     $out .= $this->Html->link($icon, $link, array('escape' => false));
     
     $icon = $this->Html->image('icons/heart.png', array('alt' => __('pouplarity', true), 'title' => __("Show popular first", true)));
-    $link = $this->Search->getUri(false, array('sort' => 'popularity'), 'page');
+    $link = $this->Breadcrumb->crumbUrl($this->Breadcrumb->replace($crumbs, 'sort', 'popularity'));
     $out .= $this->Html->link($icon, $link, array('escape' => false));
     
     $icon = $this->Html->image('icons/images.png', array('alt' => __('random', true), 'title' => __("Show random order", true)));
-    $link = $this->Search->getUri(false, array('sort' => 'random'), 'page');
+    $link = $this->Breadcrumb->crumbUrl($this->Breadcrumb->replace($crumbs, 'sort', 'random'));
     $out .= $this->Html->link($icon, $link, array('escape' => false));
     
     $icon = $this->Html->image('icons/pencil.png', array('alt' => __('Changes', true), 'title' => __("Show changes first", true)));
-    $link = $this->Search->getUri(false, array('sort' => 'changes'), 'page');
+    $link = $this->Breadcrumb->crumbUrl($this->Breadcrumb->replace($crumbs, 'sort', 'changes'));
     $out .= $this->Html->link($icon, $link, array('escape' => false));
     
     $icon = $this->Html->image('icons/eye.png', array('alt' => __('Views', true), 'title' => __("Show last views first", true)));
-    $link = $this->Search->getUri(false, array('sort' => 'viewed'), 'page');
+    $link = $this->Breadcrumb->crumbUrl($this->Breadcrumb->replace($crumbs, 'sort', 'viewed'));
     $out .= $this->Html->link($icon, $link, array('escape' => false));
     
     $icon = $this->Html->image('icons/folder_go.png', array('alt' => __('Name', true), 'title' => __("Order by name", true)));
@@ -167,7 +168,9 @@ class ExplorerMenuHelper extends AppHelper
   }
 
   function _getPageItem() {
-    $link = $this->Search->getUri(false, array('show' => '12'), 'page');
+    $crumbs = $this->Breadcrumb->filterCrumbs($this->params['crumbs']);
+
+    $link = $this->Breadcrumb->crumbUrl($this->Breadcrumb->replace($crumbs, 'show', 12));
     $out = $this->Html->link(__("Pagesize", true), $link);
 
     $pos = $this->Search->getPage(1) * $this->Search->getShow(1);
@@ -175,7 +178,7 @@ class ExplorerMenuHelper extends AppHelper
     $links = array();
     foreach ($sizes as $size) {
       $page = ceil($pos / $size);
-      $link = $this->Search->getUri(false, array('show' => $size, 'page' => $page));
+      $link = $this->Breadcrumb->crumbUrl($this->Breadcrumb->replace($this->Breadcrumb->replace($crumbs, 'show', $size), 'page', $page));
       $links[] = $this->Html->link($size, $link, array('escape' => false));
     }
 

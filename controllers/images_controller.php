@@ -26,16 +26,21 @@ class ImagesController extends AppController
   var $components = array('RequestHandler', 'Search', 'FastFileResponder');
   var $uses = array('Media', 'Group', 'Tag', 'Category', 'Location');
   var $helpers = array('Form', 'Html', 'Javascript', 'Ajax', 'ImageData', 'Time', 'Search', 'ExplorerMenu', 'Rss', 'Map', 'Navigator', 'Flowplayer', 'Tab', 'Number', 'Option');
+  var $crumbs = array();
 
   function beforeFilter() {
     parent::beforeFilter();
 
-    $this->Search->parseArgs();
+    $encoded = array_splice(split('/', $this->params['url']['url']), 3);
+    foreach ($encoded as $crumb) {
+      $this->crumbs[] = $this->Search->decode($crumb);
+    }
   }
 
   function beforeRender() {
-    $this->set('feeds', '/explorer/rss');
     parent::beforeRender();
+    $this->set('crumbs', $this->crumbs);
+    $this->params['crumbs'] = $this->crumbs;
   }
 
   /** Simple crawler detection
@@ -79,7 +84,7 @@ class ImagesController extends AppController
   }
 
   function view($id) {
-    $this->data = $this->Search->paginateMedia($id);
+    $this->data = $this->Search->paginateMediaByCrumb($id, $this->crumbs);
     if (!$this->data) {
       $this->render('notfound');
     } else {

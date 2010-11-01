@@ -1,0 +1,60 @@
+ul.p-breadcrumb {
+  width: 100%;
+}
+ul.p-breadcrumb li,
+ul.p-breadcrumb li ul,
+ul.p-breadcrumb li ul li,
+ul.p-breadcrumb li form input,
+ul.p-breadcrumb li form {
+  margin: 0;
+  padding: 0;
+  display: inline-block;
+  list-style-type: none;
+  vertical-align:middle;
+}
+ul.p-breadcrumb li,
+ul.p-breadcrumb li ul li {
+  padding: 0 2px;
+  height: 20px;
+}
+ul.p-breadcrumb li ul li {
+  background-color: #eee;
+}
+ul.p-breadcrumb li.p-breadcrumb-header {
+  font-weight: bold;
+  background-color: #182E7A;
+  color: white;
+  padding: 0 7px;
+}
+ul.p-breadcrumb li ul li:hover {
+  background-color:#f63; 
+} 
+ul.p-breadcrumb li ul li:hover a {
+  color: #fff;
+} 
+ul.p-breadcrumb li ul li a.p-breadcrumb-exclude {
+  color: red;
+}
+ul.p-breadcrumb li ul li a.p-breadcrumb-remove span {
+  display: none;
+}
+ul.p-breadcrumb li ul li a.p-breadcrumb-remove {
+  background-image: url('../img/button-close.png');
+  background-repeat:no-repeat;
+  background-position: center;
+  vertical-align:middle;
+  width: 15px;
+  padding: 0 10px;
+}
+ul.p-breadcrumb li ul li a.p-breadcrumb-remove:hover {
+  background-image: url('../img/button-close-hover.png');
+}
+ul.p-breadcrumb li form input[type=text] {
+  height: 18px;
+  width: 120px;
+}
+ul.p-breadcrumb li form input[type=submit] {
+  height: 20px;
+  padding: 0 7px;
+}
+

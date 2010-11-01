@@ -25,7 +25,7 @@ App::import('Core', 'Sanitize');
 
 class ImageDataHelper extends AppHelper {
 
-  var $helpers = array('Session', 'Ajax', 'Html', 'Form', 'Search', 'Option');
+  var $helpers = array('Session', 'Ajax', 'Html', 'Form', 'Search', 'Option', 'Breadcrumb');
 
   var $Sanitize = null;
 
@@ -146,7 +146,7 @@ class ImageDataHelper extends AppHelper {
     @param options Media size or option array. Options are
       type - Type of the media. String values: 'mini', 'thumb', 'preview', 'original'
       size - Size of the media - optional.
-      param - Extra url parameter 
+      params - Extra url parameter 
       div - Wrapped div arround the link with the class given in the div options
       before - (Optional) Text before image link
       after - (Optional) Text after image link
@@ -186,17 +186,22 @@ class ImageDataHelper extends AppHelper {
   function getDateLink(&$media, $option = false) {
     $date = $media['Media']['date'];
     $extra = array('show' => $this->Search->getShow());
+    $crumbs = array();
+    $from = $to = $sort = $offset = false;
     if ($this->Search->getUser()) {
-      $extra['user'] = $this->Search->getUser();
+      $crumbs[] = 'user:' . $this->Search->getUser();
     }
     if ($option == 'from') {
-      return $this->Search->getUri(array('from' => $date, 'sort' => '-date'), $extra);
+      $from = $date;
+      $sort = '-date';
     } elseif ($option == 'to') {
-      return $this->Search->getUri(array('to' => $date, 'sort' => 'date'), $extra);
+      $to = $date;
     } elseif ($option == 'addTo' && $this->Search->getFrom()) {
-      return $this->Search->getUri(array('from' => $this->Search->getFrom(), 'to' => $date), $extra);
+      $from = $this->Search->getFrom();
+      $to = $date;
     } elseif ($option == 'addFrom' && $this->Search->getTo()) {
-      return $this->Search->getUri(array('to' => $this->Search->getTo(), 'from' => $date), $extra);
+      $from = $date;
+      $to = $this->Search->getTo();
     } elseif (preg_match('/^(\d+(.\d+)?)([hdm])$/', $option, $matches)) {
       $offset = $matches[1].$matches[2];
       switch ($matches[3]) {
@@ -215,10 +220,23 @@ class ImageDataHelper extends AppHelper {
     } else {
       $offset = (integer)$option;
     }
+    
+    if ($offset) {
+      $from = date('Y-m-d H:i:s', strtotime($date) - $offset);
+      $to = date('Y-m-d H:i:s', strtotime($date) + $offset);
+    }
 
-    $from = date('Y-m-d H:i:s', strtotime($date) - $offset);
-    $to = date('Y-m-d H:i:s', strtotime($date) + $offset);
-    return $this->Search->getUri(array('from' => $from, 'to' => $to), $extra);
+    if ($from) {
+      $crumbs[] = 'from:' . $from;
+    }
+    if ($to) {
+      $crumbs[] = 'to:' . $to;
+    }
+    if ($sort) {
+      $crumbs[] = 'sort:' . $sort;
+    }
+    return $this->Breadcrumb->crumbUrl($crumbs);
+    //return $this->Search->getUri(array('from' => $from, 'to' => $to), $extra);
   }
 
   /** Returns an single icon of a acl */

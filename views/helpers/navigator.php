@@ -22,7 +22,7 @@
  */
 
 class NavigatorHelper extends AppHelper {
-  var $helpers = array('Html', 'Search'); 
+  var $helpers = array('Html', 'Search', 'Breadcrumb'); 
 
   function beforeRender() {
     $this->Search->initialize();
@@ -52,8 +52,9 @@ class NavigatorHelper extends AppHelper {
       !$this->params['search']['prevPage']) {
       return false;
     }
-    $current = $this->params['search']['page'];
-    $link = $this->Search->getUri(false, array('page' => $current - 1));
+    $prev = $this->params['search']['page'] - 1;
+    $crumbs = $this->params['crumbs'];
+    $link = $this->Breadcrumb->crumbUrl($this->Breadcrumb->replace($crumbs, 'page', $prev));
     return $this->Html->link(__('prev', true), $link, array('class' => 'prev'));
   }
 
@@ -63,6 +64,7 @@ class NavigatorHelper extends AppHelper {
     }
 
     $params = $this->params['search'];
+    $crumbs = $this->params['crumbs'];
     $output = '';
     
     if ($params['pageCount'] > 1) {
@@ -75,7 +77,7 @@ class NavigatorHelper extends AppHelper {
         else if ($count <= 12 ||
             ($i < 3 || $i > $count-2 ||
             ($i-$current < 4 && $current-$i<4))) {
-          $link = $this->Search->getUri(false, array('page' => $i));
+          $link = $this->Breadcrumb->crumbUrl($this->Breadcrumb->replace($crumbs, 'page', $i));
           $output .= ' '.$this->Html->link($i, $link);
         }
         else if ($i == $count-2 || $i == 3) {
@@ -100,8 +102,9 @@ class NavigatorHelper extends AppHelper {
       !$this->params['search']['nextPage']) {
       return false;
     }
-    $current = $this->params['search']['page'];
-    $link = $this->Search->getUri(false, array('page' => $current + 1));
+    $next = $this->params['search']['page'] + 1;
+    $crumbs = $this->params['crumbs'];
+    $link = $this->Breadcrumb->crumbUrl($this->Breadcrumb->replace($crumbs, 'page', $next));
     return $this->Html->link(__('next', true), $link, array('class' => 'next'));
   }
 
@@ -111,10 +114,13 @@ class NavigatorHelper extends AppHelper {
       return;
     }
     $params = $this->params['search'];
+    $crumbs = $this->params['crumbs'];
     $pos = $this->Search->getPos(1) - 1;
     $page = ceil($pos / $this->Search->getShow());
-    $baseUri = '/images/view/'.$params['prevMedia'];
-    $link = $this->Search->getUri(false, array('pos' => $pos, 'page' => $page), false, array('baseUri' => $baseUri, 'defaults' => array('pos' => 1)));
+    $baseUri = '/images/view/'.$params['prevMedia'] . '/';
+    $crumbs = $this->params['crumbs'];
+    $crumbParams = $this->Breadcrumb->params($this->Breadcrumb->replace($this->Breadcrumb->replace($crumbs, 'page', $page), 'pos', $pos));
+    $link = $baseUri . $crumbParams;
     return $this->Html->link(__('prev', true), $link, array('class' => 'prev'));
   }
 
@@ -123,8 +129,9 @@ class NavigatorHelper extends AppHelper {
       return;
     }
     $params = $this->params['search'];
-    $link = $this->Search->getUri(false, false, 'pos').'#media-'.$params['current'];
-    return $this->Html->link(__('up', true), $link, array('class' => 'up'));
+    $link = $this->Breadcrumb->crumbUrl($this->params['crumbs'], false, array('pos'));
+    $link .= '#media-'.$params['current'];
+    return $this->Html->link(__('overview', true), $link, array('class' => 'up'));
   }
 
   function nextMedia() {
@@ -135,8 +142,10 @@ class NavigatorHelper extends AppHelper {
     $params = $this->params['search'];
     $pos = $this->Search->getPos(1) + 1;
     $page = ceil($pos / $this->Search->getShow());
-    $baseUri = '/images/view/'.$params['nextMedia'];
-    $link = $this->Search->getUri(false, array('pos' => $pos, 'page' => $page), false, array('baseUri' => $baseUri, 'defaults' => array('pos' => 1)));
+    $baseUri = '/images/view/'.$params['nextMedia'] . '/';
+    $crumbs = $this->params['crumbs'];
+    $crumbParams = $this->Breadcrumb->params($this->Breadcrumb->replace($this->Breadcrumb->replace($crumbs, 'page', $page), 'pos', $pos));
+    $link = $baseUri . $crumbParams;
     return $this->Html->link(__('next', true), $link, array('class' => 'next'));
   }
 }
