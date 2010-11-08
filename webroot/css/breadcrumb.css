@@ -2,8 +2,8 @@ ul.p-breadcrumb {
   width: 100%;
 }
 ul.p-breadcrumb li,
-ul.p-breadcrumb li ul,
-ul.p-breadcrumb li ul li,
+ul.p-breadcrumb li ul.p-breadcrumb-list,
+ul.p-breadcrumb li ul.p-breadcrumb-list li,
 ul.p-breadcrumb li form input,
 ul.p-breadcrumb li form {
   margin: 0;
@@ -13,11 +13,11 @@ ul.p-breadcrumb li form {
   vertical-align:middle;
 }
 ul.p-breadcrumb li,
-ul.p-breadcrumb li ul li {
+ul.p-breadcrumb li ul.p-breadcrumb-list li {
   padding: 0 2px;
   height: 20px;
 }
-ul.p-breadcrumb li ul li {
+ul.p-breadcrumb li ul.p-breadcrumb-list li {
   background-color: #eee;
 }
 ul.p-breadcrumb li.p-breadcrumb-header {
@@ -26,19 +26,19 @@ ul.p-breadcrumb li.p-breadcrumb-header {
   color: white;
   padding: 0 7px;
 }
-ul.p-breadcrumb li ul li:hover {
+ul.p-breadcrumb li ul.p-breadcrumb-list li:hover {
   background-color:#f63; 
 } 
-ul.p-breadcrumb li ul li:hover a {
+ul.p-breadcrumb li ul.p-breadcrumb-list li:hover a {
   color: #fff;
 } 
-ul.p-breadcrumb li ul li a.p-breadcrumb-exclude {
+ul.p-breadcrumb li ul.p-breadcrumb-list li a.p-breadcrumb-exclude {
   color: red;
 }
-ul.p-breadcrumb li ul li a.p-breadcrumb-remove span {
+ul.p-breadcrumb li ul.p-breadcrumb-list li a.p-breadcrumb-remove span {
   display: none;
 }
-ul.p-breadcrumb li ul li a.p-breadcrumb-remove {
+ul.p-breadcrumb li ul.p-breadcrumb-list li a.p-breadcrumb-remove {
   background-image: url('../img/button-close.png');
   background-repeat:no-repeat;
   background-position: center;
@@ -46,7 +46,7 @@ ul.p-breadcrumb li ul li a.p-breadcrumb-remove {
   width: 15px;
   padding: 0 10px;
 }
-ul.p-breadcrumb li ul li a.p-breadcrumb-remove:hover {
+ul.p-breadcrumb li ul.p-breadcrumb-list li a.p-breadcrumb-remove:hover {
   background-image: url('../img/button-close-hover.png');
 }
 ul.p-breadcrumb li form input[type=text] {

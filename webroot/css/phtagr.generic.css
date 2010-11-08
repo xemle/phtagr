@@ -43,7 +43,8 @@ div.disabled {
   background-color: white;
   border: 1px solid #888;
   margin: 0px;
-  padding:0px;
+  padding: 0px;
+  z-index: 2;
 } 
 .auto_complete ul {
   list-style-type: none;
@@ -53,6 +54,7 @@ div.disabled {
 .auto_complete ul li {
   margin: 0;
   padding: 3px;
+  width: 95%;
 }
 .auto_complete ul li.selected { 
   background-color: #ffb; 

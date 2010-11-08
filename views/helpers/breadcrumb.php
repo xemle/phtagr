@@ -23,7 +23,7 @@
 
 class BreadcrumbHelper extends AppHelper
 {
-  var $helpers = array('Html', 'Form', 'Search');
+  var $helpers = array('Html', 'Form', 'Ajax', 'Search');
 
   /** Return breadcrumb params for building urls
     @param crumbs Current breadcrumb stack
@@ -73,6 +73,10 @@ class BreadcrumbHelper extends AppHelper
       $needle = $needle[0];
     }
     foreach ($crumbs as $crumb) {
+      $crumb = trim($crumb);
+      if (!$crumb) {
+        continue;
+      }
       if (!preg_match('/^(\w+):(.+$)/', $crumb, $match)) {
         Logger::warn("Invalid crumb: $crumb");
         continue;
@@ -131,21 +135,22 @@ class BreadcrumbHelper extends AppHelper
         $options['class'] = 'p-breadcrumb-exclude';
       }
       $removeOptions = array('class' => 'p-breadcrumb-remove', 'escape' => false);
-      $links[] = "<li>$name:" 
+      $links[] = $this->Html->tag('li', 
+        "$name:" 
         .$this->Html->link($value, $this->crumbUrl(array_slice($crumbs, 0, $key + 1)), $options) 
-        .$this->Html->link($this->Html->tag('span', '[x]'), $this->crumbUrl($remove), $removeOptions) 
-        .'</li>';
+        .$this->Html->link($this->Html->tag('span', '[x]'), $this->crumbUrl($remove), $removeOptions));
     }
 
     $form = $this->Form->create(null, array('action' => 'view'));
     $form .= $this->Form->hidden('breadcrumb.current', array('value' => implode('/', $crumbs), 'div' => false));
-    $form .= $this->Form->input('breadcrumb.input', array('div' => false, 'label' => false));
+    $form .= $this->Ajax->autoComplete('breadcrumb.input', 'autocomplete/crumb'); 
+    //$form .= $this->Form->input('breadcrumb.input', array('div' => false, 'label' => false));
     $form .= $this->Form->submit('add', array('div' => false));
     $form .= $this->Form->end();
 
     return $this->Html->tag('ul', 
       $this->Html->tag('li', __('Filter', true), array('class' => 'p-breadcrumb-header'))
-        .$this->Html->tag('li', $this->Html->tag('ul', implode("\n", $links)), array('class' => 'p-breadcrumb-crumb'))
+        .$this->Html->tag('li', $this->Html->tag('ul', implode("\n", $links), array('class' => 'p-breadcrumb-list')))
         .$this->Html->tag('li', $form, array('class' => 'p-breadcrumb-input')),
       array('class' => 'p-breadcrumb'));
   }

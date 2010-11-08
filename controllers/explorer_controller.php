@@ -77,58 +77,154 @@ class ExplorerController extends AppController
   }
 
   function autocomplete($type) {
-    switch ($type) {
-      case 'tag':
-        $data = $this->Media->Tag->find('all', array(
-          'conditions' => array('name LIKE' => $this->data['Tags']['text'].'%'), 
-          'limit' => 10
-          ));
-        $this->data = Set::extract('/Tag/name', $data);
-        break;
-      case 'category':
-        $data = $this->Media->Category->find('all', array(
-          'conditions' => array('name LIKE' => $this->data['Categories']['text'].'%'),
-          'limit' => 10
-          ));
-        $this->data = Set::extract('/Category/name', $data);
-        break;
-      case 'city':
-        $data = $this->Media->Location->find('all', array(
-          'conditions' => array('name LIKE' => $this->data['Locations']['city'].'%', 'type' => LOCATION_CITY),
-          'limit' => 10
-          ));
-        $this->data = Set::extract('/Location/name', $data);
-        break;
-      case 'sublocation':
-        $data = $this->Media->Location->find('all', array(
-          'conditions' => array('name LIKE' => $this->data['Locations']['sublocation'].'%', 'type' => LOCATION_SUBLOCATION),
-          'limit' => 10
-          ));
-        $this->data = Set::extract('/Location/name', $data);
-        break;
-      case 'state':
-        $data = $this->Media->Location->find('all', array(
-          'conditions' => array('name LIKE' => $this->data['Locations']['state'].'%', 'type' => LOCATION_STATE),
-          'limit' => 10
-          ));
-        $this->data = Set::extract('/Location/name', $data);
-        break;
-      case 'country':
-        $data = $this->Media->Location->find('all', array(
-          'conditions' => array('name LIKE' => $this->data['Locations']['country'].'%', 'type' => LOCATION_COUNTRY),
-          'limit' => 10
-          ));
-        $this->data = Set::extract('/Location/name', $data);
-        break;
-      default:
-        Logger::err("Unknown type $type");
-        $this->redirect(500);
-        break;
+    if (in_array($type, array('tag', 'category', 'city', 'sublocation', 'state', 'country'))) {
+      if ($type == 'tag' || $type == 'category') {
+        $field = Inflector::camelize(Inflector::pluralize($type));
+        $value = $this->data[$field]['text'];
+      } else {
+        $value = $this->data['Locations'][$type];
+      }
+      $this->data = $this->_getAssociation($type, $value);
+    } elseif ($type == 'crumb') {
+      $queryMap = array(
+        'category' => '_getAssociation', 
+        'category_op' => array('OR', 'AND'),
+        'city' => '_getAssociation', 
+        'country' => '_getAssociation', 
+        'from' => 'true',
+        'group' => '_getAssociation', 
+        'location' => '_getAssociation', 
+        'location_op' => array('OR', 'AND'), 
+        'operand' => array('OR', 'AND'), 
+        'show' => array(2, 6, 12, 24, 60, 120, 240),
+        'sort' => array('date', '-date', 'newest', 'random'), 
+        'state' => '_getAssociation', 
+        'sublocation' => '_getAssociation',
+        'tag' => '_getAssociation', 
+        'tag_op' => array('OR', 'AND'), 
+        'to' => 'true',
+        'user' => '_getAssociation'
+      );
+      $queryTypes = array_keys($queryMap);
+      $input = trim($this->data['breadcrumb']['input']);
+      $this->data = array();
+      if (strpos($input, ':') === false) {
+        // Search for crumb type
+        // collect all if input is empty or starts with the input
+        foreach ($queryTypes as $types) {
+          if ($input == '' || strpos($types, $input) === 0) {
+            $this->data[] = $types . ':';
+          }
+        }
+      } else {
+        // Search for crumb value
+        preg_match('/(\w+):(-)?(.*)/', $input, $matches);
+        $crumbType = $matches[1];
+        $input = $matches[3];
+        $exclude = $matches[2];
+
+        if (!in_array($crumbType, $queryTypes)) {
+          Logger::debug("Invalid crumb type: $crumbType");
+          $this->redirect(404);
+        }
+        if (is_array($queryMap[$crumbType])) {
+          $data = $queryMap[$crumbType];
+          $exclude = '';
+        } elseif ($queryMap[$crumbType] === true) {
+          $data = '';
+        } else {
+          $method = $queryMap[$crumbType];
+          $data = $this->{$method}($crumbType, $input);
+        }
+        foreach ($data as $value) {
+          $this->data[] = "$crumbType:$exclude$value";
+        }
+      }
+    } else {
+      Logger::warn("Invalid autocomlete type: $type");
+      $this->redirect(404);
     }
     $this->layout = 'bare';
     if (Configure::read('debug') > 1) {
       Configure::write('debug', 1);
     }
+  }
+
+  function _getDate($type, $value) {
+  }
+
+  function _getAssociation($type, $value) {
+    $result = array();
+    switch ($type) {
+      case 'tag':
+        $data = $this->Media->Tag->find('all', array(
+          'conditions' => array('name LIKE' => $value.'%'), 
+          'limit' => 10
+          ));
+        $result = Set::extract('/Tag/name', $data);
+        break;
+      case 'category':
+        $data = $this->Media->Category->find('all', array(
+          'conditions' => array('name LIKE' => $value.'%'),
+          'limit' => 10
+          ));
+        $result = Set::extract('/Category/name', $data);
+        break;
+      case 'location':
+        $data = $this->Media->Location->find('all', array(
+          'conditions' => array('name LIKE' => $value.'%'),
+          'limit' => 10
+          ));
+        $result = Set::extract('/Location/name', $data);
+        break;
+      case 'city':
+        $data = $this->Media->Location->find('all', array(
+          'conditions' => array('name LIKE' => $value.'%', 'type' => LOCATION_CITY),
+          'limit' => 10
+          ));
+        $result = Set::extract('/Location/name', $data);
+        break;
+      case 'sublocation':
+        $data = $this->Media->Location->find('all', array(
+          'conditions' => array('name LIKE' => $value.'%', 'type' => LOCATION_SUBLOCATION),
+          'limit' => 10
+          ));
+        $result = Set::extract('/Location/name', $data);
+        break;
+      case 'state':
+        $data = $this->Media->Location->find('all', array(
+          'conditions' => array('name LIKE' => $value.'%', 'type' => LOCATION_STATE),
+          'limit' => 10
+          ));
+        $result = Set::extract('/Location/name', $data);
+        break;
+      case 'country':
+        $data = $this->Media->Location->find('all', array(
+          'conditions' => array('name LIKE' => $value.'%', 'type' => LOCATION_COUNTRY),
+          'limit' => 10
+          ));
+        $result = Set::extract('/Location/name', $data);
+        break;
+      case 'group':
+        $data = $this->Media->Group->find('all', array(
+          'conditions' => array('name LIKE' => $value.'%'),
+          'limit' => 10
+          ));
+        $result = Set::extract('/Group/name', $data);
+        break;
+      case 'user':
+        $data = $this->Media->User->find('all', array(
+          'conditions' => array('username LIKE' => $value.'%'),
+          'limit' => 10
+          ));
+        $result = Set::extract('/User/username', $data);
+        break;
+      default:
+        Logger::err("Unknown type $type");
+        $this->redirect(404);
+        break;
+    }
+    return $result;
   }
 
   function quicksearch($quicksearch = false) {
