@@ -26,7 +26,6 @@ echo $javascript->codeBlock("var mediaIds = [" . implode(', ', Set::extract('/Me
 foreach ($this->data as $media): ?>
 
 <div class="p-explorer-cell unselected" id="media-<?php echo $media['Media']['id']; ?>">
-<div class="p-explorer-cell">
 <h2><?php echo $media['Media']['name']; ?></h2>
 <?php 
   $size = $imageData->getimagesize($media, OUTPUT_SIZE_THUMB);
