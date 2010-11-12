@@ -17,9 +17,15 @@
 <?php
 $cell=0;
 $pos = ($search->getPage(1)-1) * $search->getShow(12) + 1;
+$canWriteTag = max(Set::extract('/Media/canWriteTag', $this->data));
+$canWriteMeta = max(Set::extract('/Media/canWriteMeta', $this->data));
+$canWriteAcl = max(Set::extract('/Media/canWriteAcl', $this->data));
+
+echo $javascript->codeBlock("var mediaIds = [" . implode(', ', Set::extract('/Media/id', $this->data)) . "];");
+
 foreach ($this->data as $media): ?>
 
-<div class="p-explorer-cell">
+<div class="p-explorer-cell unselected" id="media-<?php echo $media['Media']['id']; ?>">
 <h2><?php echo $media['Media']['name']; ?></h2>
 <?php 
   $size = $imageData->getimagesize($media, OUTPUT_SIZE_THUMB);
