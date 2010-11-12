@@ -36,11 +36,7 @@ class ExplorerController extends AppController
     }
 
     parent::beforeFilter();
-    $url = $this->params['url']['url'];
-    $encoded = array_splice(split('/', trim($url, '/')), 2);
-    foreach ($encoded as $crumb) {
-      $this->crumbs[] = $this->Search->decode($crumb);
-    }
+    $this->crumbs = $this->Search->urlToCrumbs($this->params['url']['url'], 2);
   }
 
   function beforeRender() {
@@ -606,7 +602,7 @@ class ExplorerController extends AppController
       }
       $this->data = array();
     }
-    $this->redirect('view/' . implode('/', $this->crumbs));
+    $this->redirect('view/' . implode('/', $this->Search->encodeCrumbs($this->crumbs)));
   }
 
   /** 

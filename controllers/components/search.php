@@ -208,6 +208,37 @@ class SearchComponent extends Search
     }
   }
 
+  /** Convert an URL to decoded crumbs
+   * 
+   * @param $url Current URL
+   * @param $skip Skip parts splited by slash '/'
+   * @return Array of crumbs
+   */
+  function urlToCrumbs($url, $skip = 2) {
+    $encoded = array_splice(split('/', trim($url, '/')), $skip);
+    $crumbs = array();
+    foreach ($encoded as $crumb) {
+      $crumbs[] = $this->decode($crumb);
+    }
+  	return $crumbs;
+  }
+  
+  /** Encode crumbs for an final URL string
+   * 
+   * @param $crumbs Array of crumbs
+   * @return Array of encoded crumbs for an URL
+   */
+  function encodeCrumbs($crumbs) {
+    $escaped = array();
+    foreach ($crumbs as $crumb) {
+      if (!preg_match('/^(\w+):(.*)$/', $crumb, $matches)) {
+        continue;
+      }
+      $escaped[] = $matches[1] . ":" . $this->encode($matches[2]);
+    }
+  	return $escaped;
+  }
+  
   /** Convert the current search parameter to breadcrump stack
     @return Array of crumbs */
   function convertToCrumbs() {
