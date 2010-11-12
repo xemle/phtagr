@@ -205,7 +205,7 @@
 }
 .p-explorer-cell {
   display: inline-block;
-  width: 250px;
+  width: 240px;
   height: 100%;
   position: relative;
 }
@@ -214,7 +214,7 @@
   display: table-cell;
   text-align: center;
   vertical-align: middle;
-  width: 250px;
+  width: 240px;
   height: 220px;
 }
 .p-explorer-cell-image * {
@@ -236,7 +236,7 @@
 }
 .p-explorer-cell-meta {
   display: block;
-  width: 250px;
+  width: 240px;
   border: 1px  solid #888;
   opacity: .0;
   background-color: white;
