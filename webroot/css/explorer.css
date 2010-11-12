@@ -199,3 +199,54 @@
 #submenu li.multi .actionlist {
   display: none;
 }
+
+.p-explorer-cell h2 {
+  font-size: 10pt;
+}
+.p-explorer-cell {
+  display: inline-block;
+  width: 250px;
+  height: 100%;
+  position: relative;
+}
+
+.p-explorer-cell-image {
+  display: table-cell;
+  text-align: center;
+  vertical-align: middle;
+  width: 250px;
+  height: 220px;
+}
+.p-explorer-cell-image * {
+  vertical-align: middle;
+}
+/*\*//*/
+.p-explorer-cell-image {
+  display: block;
+}
+.p-explorer-cell-image {
+  display: inline-block;
+  height: 100%;
+  width: 1px;
+}
+/**/
+.p-explorer-cell-caption {
+  text-align: center;
+  height: 12pt;
+}
+.p-explorer-cell-meta {
+  display: block;
+  width: 250px;
+  border: 1px  solid #888;
+  opacity: .0;
+  background-color: white;
+  position: absolute;
+  bottom: 12pt;
+}
+.p-explorer-cell-meta table tbody tr td {
+  margin: 0;
+  padding: 0;
+}
+.p-explorer-cell-meta:hover {
+  opacity: .9;
+}

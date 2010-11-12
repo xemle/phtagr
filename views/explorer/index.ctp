@@ -13,28 +13,14 @@
 </div></div>
 <?php endif; ?>
 
-<div class="thumbs">
-<script type="text/javascript">
-  var mediaData = [];
-</script>
+<div class="p-explorer-cells">
 <?php
 $cell=0;
-$canWriteTag=false;
-$canWriteMeta=false;
-$canWriteAcl=false;
 $pos = ($search->getPage(1)-1) * $search->getShow(12) + 1;
 foreach ($this->data as $media): ?>
-<?php $side = $cell % 2 ? 'r' : 'l'; ?>
-<?php if (!($cell % 2)): ?><div class="subcolumns"><?php endif; ?>
-<?php 
-  $icon = $imageData->getVisibilityIcon(&$media);
-?>
-<div class="c50<?=$side; ?>"><div class="subc<?=$side; ?> unselected thumb" id="media-<?= $media['Media']['id'];?>" >
-<script type="text/javascript">
-  mediaData[<?php echo $media['Media']['id']; ?>] = [];
-</script>
-<h2><?php if ($icon) { echo $icon.' '; } ?><?php echo $media['Media']['name']; ?></h2>
-<div class="image">
+
+<div class="p-explorer-cell">
+<h2><?php echo $media['Media']['name']; ?></h2>
 <?php 
   $size = $imageData->getimagesize($media, OUTPUT_SIZE_THUMB);
   $imageCrumbs = $this->Breadcrumb->replace($crumbs, 'page', $search->getPage());
@@ -43,26 +29,17 @@ foreach ($this->data as $media): ?>
     $imageCrumbs = $this->Breadcrumb->replace($imageCrumbs, 'show', $search->getShow());
   }
   
+  // image centrering from http://www.brunildo.org/test/img_center.html
+  echo '<div class="p-explorer-cell-image"><span></span>';
   echo $html->tag('a',
     $html->tag('img', false, array(
       'src' => Router::url("/media/thumb/".$media['Media']['id']),
       'width' => $size[0], 'height' => $size[1], 
       'alt' => $media['Media']['name'])),
     array('href' => Router::url("/images/view/".$media['Media']['id'].'/'.$breadcrumb->params($imageCrumbs))));
-
-  if ($media['Media']['canWriteTag']) {
-    $canWriteTag=true;
-  }
-  if ($media['Media']['canWriteMeta']) {
-    $canWriteMeta=true;
-  }
-  if ($media['Media']['canWriteAcl']) {
-    $canWriteAcl=true;
-  }
+  echo "</div>";
 ?>
-</div>
-
-<div class="user">
+<div class="p-explorer-cell-caption">
 <?php
   if (!$search->getUser() || $search->getUser() != $session->read('User.username')) {
     printf(__("by %s", true), $html->link($media['User']['username'], "/explorer/user/".$media['User']['username']));
@@ -80,18 +57,14 @@ foreach ($this->data as $media): ?>
 ?>
 </div>
 
-<div class="meta">
-<div id="<?php echo 'meta-'.$media['Media']['id']; ?>">
+<div class="p-explorer-cell-meta" id="<?php echo 'meta-'.$media['Media']['id']; ?>">
 <table>
   <?php echo $html->tableCells($imageData->metaTable(&$media)); ?>
 </table>
-</div>
 </div><!-- meta -->
+</div><!-- cell -->
 
-</div><!-- c50 --></div><!-- subc -->
-<?php if ($side == 'r'): ?></div><!-- subcolumns --><?php endif; ?>
 <?php $cell++; endforeach; ?>
-<?php /* fix for odd number */ if ($cell % 2): ?></div><!-- subcolumns --><?php endif; ?>
 </div>
 
 <?php if ($canWriteTag): ?>
