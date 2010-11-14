@@ -45,8 +45,7 @@ class ImageDataHelper extends AppHelper {
     @return array of sizes. array(height, width, html size) */
   function getimagesize($media, $size = false, $square=false) {
     if (!isset($media['Media']['width']) ||
-      !isset($media['Media']['height']) ||
-      !isset($media['Media']['orientation'])) {
+      !isset($media['Media']['height'])) {
       return array(0 => 0, 1 => 0, 3 => '');
     }
 
@@ -94,7 +93,7 @@ class ImageDataHelper extends AppHelper {
     $result = array();
 
     // Rotate the image according to the orientation
-    $orientation = $media['Media']['orientation'];
+    $orientation = isset($media['Media']['orientation']) ? $media['Media']['orientation'] : 1;
     if ($orientation >= 5 && $orientation <= 8) {
       $result[0] = $height;
       $result[1] = $width;
