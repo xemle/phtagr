@@ -3,6 +3,3 @@
     RewriteRule    ^$    webroot/    [L]
     RewriteRule    (.*) webroot/$1    [L]
 </IfModule>
-
-# Upload Limit of 128 MB
-LimitRequestBody 134217728 
