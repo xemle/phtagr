@@ -297,24 +297,28 @@ class ExplorerController extends AppController
       foreach ($values as $value) {
         $crumbs[] = "$param:$value";
       }
+      $crumbs = am($crumbs, $this->Search->urlToCrumbs($this->params['url']['url'], 5));
     } elseif ($param == 'folder') {
       $folder = implode('/', array_slice($this->params['pass'], 2));
       $fsRoot = $this->User->getRootDir($user);
       $fsFolder = implode(DS, array_slice($this->params['pass'], 2));
       $fsFolder = Folder::slashTerm(Folder::addPathElement($fsRoot, $fsFolder));
-      if (!is_dir($fsRoot) || !is_dir($fsFolder)) {
+      if (is_dir($fsRoot) && is_dir($fsFolder)) {
+        $crumbs[] = "folder:$folder";
+        $crumbs[] = "sort:name";
+      } else {
         Logger::info(sprintf("Invalid root %s or folder %s", $fsRoot, $fsFolder));
-        return;
+        $this->Session->setFlash(sprintf(__("Invalid folder: %s", true), $folder));
       }
-      $crumbs[] = "folder:$folder";
-      $crumbs[] = "sort:name";
+    } else {
+      $crumbs = am($crumbs, $this->Search->urlToCrumbs($this->params['url']['url'], 3));
     }
     $this->crumbs = $crumbs;
     $this->render('index');
   }
 
   function group($name) {
-    $this->crumbs = array('group:' . $name);
+    $this->crumbs = am(array('group:' . $name), $this->Search->urlToCrumbs($this->params['url']['url'], 3));
     $this->render('index');
   }
 
@@ -367,7 +371,7 @@ class ExplorerController extends AppController
     foreach($tags as $tag) {
       $crumbs[] = 'tag:' . $tag;
     }
-    $this->crumbs = $crumbs;
+    $this->crumbs = am($crumbs, $this->Search->urlToCrumbs($this->params['url']['url'], 3));
     $this->render('index');
   }
 
@@ -377,7 +381,7 @@ class ExplorerController extends AppController
     foreach($categories as $category) {
       $crumbs[] = 'category:' . $category;
     }
-    $this->crumbs = $crumbs;
+    $this->crumbs = am($crumbs, $this->Search->urlToCrumbs($this->params['url']['url'], 3));
     $this->render('index');
   }
 
@@ -387,7 +391,7 @@ class ExplorerController extends AppController
     foreach($locations as $location) {
       $crumbs[] = 'location:' . $location;
     }
-    $this->crumbs = $crumbs;
+    $this->crumbs = am($crumbs, $this->Search->urlToCrumbs($this->params['url']['url'], 3));
     $this->render('index');
   }
 

@@ -24,7 +24,7 @@
 class BreadcrumbHelper extends AppHelper
 {
   var $helpers = array('Html', 'Form', 'Ajax', 'Search');
-
+  
   /** Return breadcrumb params for building urls
     @param crumbs Current breadcrumb stack
     @param crumb Optional additional crumb
@@ -98,7 +98,7 @@ class BreadcrumbHelper extends AppHelper
     @param crumbs Current breadcrumb stack
     @param exclude Array of excluded types. Default it excludes type of show, pos, and page
     @return Filtered crumbs */
-  function filterCrumbs($crumbs, $exclude = array('show', 'pos', 'page')) {
+  function filterCrumbs($crumbs, $exclude = array('key', 'page', 'pos', 'show')) {
     $filter = array();
     foreach ($crumbs as $crumb) {
       if (!preg_match('/^(\w+):.+/', $crumb, $match)) {
