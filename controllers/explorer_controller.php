@@ -860,7 +860,7 @@ class ExplorerController extends AppController
 
     $this->layout = 'xml';
     Logger::trace("Search points of N:$north, S:$south, W:$west, E:$east: Found ".count($this->data)." points");
-    $this->FastFileResponder->addAll($this->data);
+    $this->FastFileResponder->addAll($this->data, 'mini');
     if (Configure::read('debug') > 1) {
       Configure::write('debug', 1);
     }
