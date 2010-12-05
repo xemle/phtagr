@@ -247,7 +247,6 @@ class SearchComponent extends Search
     @return Array of crumbs */
   function convertToCrumbs() {
     $params = $this->getParams();
-    Logger::debug($params);
     $crumbs = array();
     foreach ($params as $name => $value) {
       if (is_array($value)) {
@@ -262,7 +261,7 @@ class SearchComponent extends Search
     return $crumbs;
   }
 
-  function _getPrameterFromCrumbs($crumbs) {
+  function _getParameterFromCrumbs($crumbs) {
     $listTypes = array('tag', 'category', 'location', 'group');
     foreach ($crumbs as $crumb) {
       if (empty($crumb)) {
@@ -288,7 +287,7 @@ class SearchComponent extends Search
   function paginateByCrumbs($crumbs) {
     $tmp = $this->getParams();
     $this->clear();
-    $this->_getPrameterFromCrumbs($crumbs);
+    $this->_getParameterFromCrumbs($crumbs);
     $data = $this->paginate();
     $this->setParams($tmp);
     return $data;
@@ -347,7 +346,7 @@ class SearchComponent extends Search
   function paginateMediaByCrumb($id, $crumbs) {
     $tmp = $this->getParams();
     $this->clear();
-    $this->_getPrameterFromCrumbs($crumbs);
+    $this->_getParameterFromCrumbs($crumbs);
     $data = $this->paginateMedia($id);
     $this->setParams($tmp);
     return $data;
