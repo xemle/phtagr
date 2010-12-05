@@ -43,6 +43,7 @@ class SearchComponent extends Search
     'from' => array('rule' => array('custom', '/^\d{4}-\d{2}-\d{2}([ T]\d{2}:\d{2}:\d{2})?$/')),
     'folder' => 'notEmpty',
     'groups' => 'notEmpty',
+    'key' => false,
     'media' => 'numeric',
     'name' => 'notEmpty',
     'north' => 'decimal',
@@ -218,6 +219,9 @@ class SearchComponent extends Search
     $encoded = array_splice(split('/', trim($url, '/')), $skip);
     $crumbs = array();
     foreach ($encoded as $crumb) {
+      if (!preg_match('/^\w+:.+/', $crumb)) {
+        continue;
+      }
       $crumbs[] = $this->decode($crumb);
     }
   	return $crumbs;

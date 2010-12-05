@@ -816,7 +816,7 @@ class ExplorerController extends AppController
         'link' => "/explorer/rss",
         'description' => "Recently Published Images" )
       );
-    $this->data = $this->Search->paginate();
+    $this->data = $this->Search->paginateByCrumbs($this->crumbs);
   }
 
   function media() {
@@ -824,7 +824,7 @@ class ExplorerController extends AppController
     if (Configure::read('debug') > 1) {
       Configure::write('debug', 1);
     }
-    $this->data = $this->Search->paginate();
+    $this->data = $this->Search->paginateByCrumbs($this->crumbs);
   }
 
   function points($north, $south, $west, $east) {
