@@ -28,7 +28,7 @@ App::import('File', 'Logger', array('file' => APP . 'logger.php'));
 class AppControllerMock extends AppController {
   var $uses = array('User', 'Option', 'MyFile', 'Media');
   var $components = array('FilterManager');
-  var $user = null;
+  var $userMock = null;
   
   function startup() {
     $this->constructClasses();
@@ -57,7 +57,11 @@ class AppControllerMock extends AppController {
   }
 
   function getUser() {
-    return $this->user;
+    if (!$this->userMock) {
+      $this->userMock = $this->User->getNobody();
+      $this->userMock['User']['role'] = ROLE_ADMIN;
+    }
+    return $this->userMock;
   }
 }
 
@@ -72,10 +76,6 @@ class SyncShell extends Shell {
     $this->Controller =& new AppControllerMock();
     $this->Controller->startup();
     $this->Controller->checkAndBindComponents(&$this);
-
-    $shellAdmin = $this->User->getNobody();
-    $shellAdmin['User']['role'] = ROLE_ADMIN;
-    $this->Controller->user = $shellAdmin;
 
     $this->PreviewManager->Media = &$this->Media;
   }
@@ -119,7 +119,7 @@ class SyncShell extends Shell {
     $syncMax = isset($this->params['max']) ? $this->params['max'] : 100;
     $syncMax = min(100000, max(0, intval($syncMax)));
 
-    $synced = 1;
+    $synced = 0;
     @clearstatcache();
     $errors = array();
     $conditions = array('Media.flag & '.MEDIA_FLAG_DIRTY.' > 0');
@@ -146,7 +146,11 @@ class SyncShell extends Shell {
         }
         $synced++; 
       }
-      if ($syncMax > 0 && $synced >= $syncMax) {
+      if (($syncMax > 0 && $synced >= $syncMax) || count($data) == 0) {
+        // fix counting which started by zero
+        if ($synced > 0) {
+          $synced++;
+        }
         $this->out("Synced $synced media. Exit.");
         break;
       }
