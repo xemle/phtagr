@@ -372,7 +372,8 @@ class ImageFilterComponent extends BaseFilterComponent {
     } 
     $filename = $this->MyFile->getFilename($file);
     if (!file_exists($filename) || !is_writeable(dirname($filename)) || !is_writeable($filename)) {
-      Logger::warn("File: $filename does not exists nor is readable");
+      $id = isset($media['Media']['id']) ? $media['Media']['id'] : 0;
+      Logger::warn("File: $filename (#$id) does not exists nor is readable");
       return false;
     }
 

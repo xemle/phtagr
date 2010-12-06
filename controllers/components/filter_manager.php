@@ -319,18 +319,22 @@ class FilterManagerComponent extends Object {
       $this->addError('Media-' . $media['Media']['id'], 'NoMediaFile');
       return false;
     }
+    $success = true;
+    $filterMissing = false;
     foreach ($media['File'] as $file) {
       $file = $this->MyFile->findById($file['id']);
       $filename = $this->MyFile->getFilename($file);
       $filter = $this->getFilterByExtension($filename);
       if (!$filter) {
         Logger::verbose("Could not find a filter for $filename");
+        $filterMissing = true;  
         continue;
       }
+      $filterMissing = false;
       Logger::trace("Call filter ".$filter->getName()." for $filename");
-      $filter->write($file, &$media);
+      $success |= $filter->write($file, &$media);
     }      
-    return true;
+    return $success && !$filterMissing;
   }
 
 }

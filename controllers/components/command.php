@@ -37,6 +37,8 @@ class CommandComponent extends Object {
     foreach ($args as $param => $value) {
       if (!is_numeric($param)) {
         $escaped .= ' ' . $param;
+      } elseif (strlen($value) == 0) {
+        continue;
       }
       $escaped .= ' ' . escapeshellarg($value);
     }
