@@ -4,7 +4,7 @@
   $aclSelect = array(
     ACL_LEVEL_OTHER => __('Everyone', true),
     ACL_LEVEL_USER => __('User', true),
-    ACL_LEVEL_GROUP => __('Guests', true),
+    ACL_LEVEL_GROUP => __('Group Members', true),
     ACL_LEVEL_PRIVATE => __('Me only', true));
 ?>
 <?php echo $form->create(null, array('action' => 'acl')); ?>
