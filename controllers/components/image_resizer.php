@@ -28,12 +28,14 @@ class ImageResizerComponent extends Object {
 
   var $controller = null;
   var $components = array('Command');
-  var $_semaphoreId = null;
+  var $_semaphoreId = false;
  
   function initialize(&$controller) {
     $this->controller =& $controller;
     // allow only to converts at the same time to reduce system load
-    $this->_semaphoreId = sem_get(4711, 2);
+    if (function_exists('sem_get')) {
+      $this->_semaphoreId = sem_get(4711, 2);
+    }
   }
 
   /** Resize an image 
@@ -94,11 +96,15 @@ class ImageResizerComponent extends Object {
     }
 
     $t0 = getMicrotime();
-    sem_acquire($this->_semaphoreId);
+    if ($this->_semaphoreId) {
+      sem_acquire($this->_semaphoreId);
+    }
     $t1 = getMicrotime();
     $result = $phpThumb->GenerateThumbnail();
     $t2 = getMicrotime();
-    sem_release($this->_semaphoreId);
+    if ($this->_semaphoreId) {
+      sem_release($this->_semaphoreId);
+    }
     if ($result) {
       Logger::debug("Render {$options['size']}x{$options['size']} image in ".round($t2-$t1, 4)."ms to '{$phpThumb->cache_filename}'");
       $phpThumb->RenderToFile($phpThumb->cache_filename);

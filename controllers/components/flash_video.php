@@ -30,11 +30,13 @@ class FlashVideoComponent extends Object {
     'bitrate' => OUTPUT_BITRATE_VIDEO,
     'framerate' => 30
     );
-  var $_semaphoreId = null;  
+  var $_semaphoreId = false;  
 
   function initialize(&$controller) {
     $this->controller =& $controller;
-    $this->_semaphoreId = sem_get(4712);
+    if (function_exists('sem_get')) {
+      $this->_semaphoreId = sem_get(4712);
+    }
   }
 
   function _scaleSize($media, $size) {
@@ -113,9 +115,13 @@ class FlashVideoComponent extends Object {
       '-ar' => 22050,
       '-ab' => 48,
       '-y', $dst);
-    sem_acquire($this->_semaphoreId);
+    if ($this->_semaphoreId) {
+      sem_acquire($this->_semaphoreId);
+    }
     $result = $this->Command->run($bin, $args);
-    sem_release($this->_semaphoreId);
+    if ($this->_semaphoreId) {
+      sem_release($this->_semaphoreId);
+    }
     if ($result != 0) {
       Logger::err("Command '$bin' returned unexcpected with $result");
       @unlink($dst);
