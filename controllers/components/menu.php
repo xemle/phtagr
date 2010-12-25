@@ -26,14 +26,17 @@ class MenuComponent extends Object {
 	var $components = array('Session');
   var $name = 'MenuComponent';
 
-  var $controller = null;
+  var $controller;
 
-  var $items = array();
+  /** Menu data */
+  var $menus = array();
+
+  var $currentMenu = 'main';
 
   function initialize(&$controller) {
-		$this->controller = $controller;
-		$username = $this->Session->read('User.username');
-
+    $this->controller =& $controller;
+    $this->setCurrentMenu('main');
+    /*
 		$this->items[] = array('text' => __('Overview', true), 'link' => '/dashboard');
  		$this->items[] = array('text' => __('Account Settings', true), 'link' => '/dashboard/users/modify');
   	$this->items[] = array('text' => __('Groups', true), 'link' => '/dashboard/groups');
@@ -42,22 +45,54 @@ class MenuComponent extends Object {
 		$this->items[] = array('text' => __(' - Manage Memberships', true), 'link' => '/dashboard/groups/manage');
 		$this->items[] = array('text' => __('My Media', true), 'link' => "/explorer/user/{$username}");
 		$this->items[] = array('text' => __('Upload', true), 'link' => "/browser/quickupload");
+    */
+  }
 
-		// TODO add a link for the system administration
-	}
+  function beforeRender() {
+    $this->controller->params['menus'] = $this->menus;
+  }
+
+  /** Set the current menu 
+    @param name Menu name */
+  function setCurrentMenu($name) {
+    $this->currentMenu = $name;
+    if (!isset($this->menus[$name])) {
+      $this->menus[$name] = array('options' => array());
+    }
+  }
+
+  function _addItemToParent($menu, &$items) {
+    foreach ($items as &$item) {
+      if (!is_array($item) || count($item) == 0) {
+        continue;
+      }
+      if (isset($item['id']) && $item['id'] == $menu['parent']) {
+        $item[] = $menu;
+      } else {
+        $this->_addItemToParent($menu, $item);
+      }   
+    }
+  }
+
+  /** Add menu item 
+    @param title Menu title
+    @param url Menu url
+    @param options e.g. html link class options */
+  function addItem($title, $url, $options = array()) {
+    $item = am(array('title' => $title, 'url' => $url), $options);
+    $menu =& $this->menus[$this->currentMenu];
+    if (isset($options['parent'])) {
+      $this->_addItemToParent($item, $menu);
+    } else {
+      $menu[] = $item;
+    }
+  }
   
-  /** Set menu output for layout */
-  function setMenu() {
-		$this->controller->set('mainMenu', array('items' => $this->items, 'active' => $this->controller->here));
-  }
-
-  /** Clears all menu */
-  function clear() {
-    $this->items = array();
-  }
-
-  function add($title, $link) {
-		$this->items[] = array('text' => $title, 'link' => $link);
+  /** Set menu option for current menu 
+    @param name Option name
+    @param value Option value */
+  function setOption($name, $value) {
+    $this->menus[$this->currentMenu]['options'][$name] = $value; 
   }
 }
 ?>
