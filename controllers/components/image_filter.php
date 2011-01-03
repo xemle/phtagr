@@ -84,6 +84,17 @@ class ImageFilterComponent extends BaseFilterComponent {
     } else {
       $this->_extractImageDataGetId3(&$media, $meta);
     }
+    // fallback for image size
+    if (!isset($media['Media']['width']) || $media['Media']['width'] == 0 ||
+      !isset($media['Media']['height']) || $media['Media']['height'] == 0) {
+      $size = getimagesize($filename);
+      if ($size) {
+        $media['Media']['width'] = $size[0];
+        $media['Media']['height'] = $size[1];
+      } else {
+        Logger::warn("Could not determine image size of $filename");
+      }
+    }
     if ($options['noSave']) {
       return $media;
     } elseif (!$this->Media->save($media)) {
