@@ -159,7 +159,7 @@ class NotifyShell extends Shell {
         }
         continue;
       } 
-      $nextNotify = strtotime($user['User']['last_notify']);
+      $nextNotify = strtotime($user['User']['last_notify']) + $user['User']['notify_interval'];
       if ($nextNotify > $now && !$this->force) {
         if ($this->verbose) {
           $this->out("Update interval to short for user {$user['User']['username']}");
