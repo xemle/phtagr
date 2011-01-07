@@ -32,7 +32,7 @@
     0 => __("Never", true),
     1800 => __("Every 30 minutes", true),
     3600 => __("Every hour", true),
-    8640 => __("Every day", true),
+    86400 => __("Every day", true),
     604800 => __("Every week", true),
     2592000 => __("Every month", true)
   );
