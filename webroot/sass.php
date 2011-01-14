@@ -23,7 +23,7 @@
  * @package			PHamlP
  * @subpackage	Cake
  */
-$sassOptions = array('style', 'property_syntax', 'cache', 'always_update', 'template_location', 'css_location', 'cache_location', 'load_paths', 'line', 'line_numbers');
+$sassOptions = array('style', 'property_syntax', 'cache', 'always_update', 'template_location', 'css_location', 'cache_location', 'load_paths', 'line', 'line_numbers', 'extensions');
 /**
  * @var array options
  * The following options are available:

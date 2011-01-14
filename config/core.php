@@ -242,6 +242,7 @@
 	Configure::write('Asset.filter.css', 'sass.php');
 	Configure::write('Sass.cache_location', TMP . DS . 'cache' . DS . 'sass');
 	//Configure::write('Sass.style', 'compressed');
+	Configure::write('Sass.extensions', array('Compass' => array()));
 
 /**
  * Plug in your own custom JavaScript compressor by dropping a script in your webroot to handle the
