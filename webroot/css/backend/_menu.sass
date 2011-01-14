@@ -1,0 +1,38 @@
+@import border-radius
+@import gradient
+
+=menu-colors($f, $bg)
+  color: $f
+  background-color: $bg
+  +linear-gradient(colour-stops($bg, lighten($bg, 20%)))
+
+=menu-ident($percent)
+  width: percentage($percent / 100)
+  padding-top: 5px
+  padding-bottom: 5px
+  padding-left: percentage(1 - ($percent / 100))
+
+=menu-item($percent)
+  display: block
+  +menu-ident($percent)
+  +menu-colors($menuColor, $menuBackgroundColor)
+  &:hover
+    +menu-colors($menuHoverColor, $menuHoverBackgroundColor)
+
+#sidebar ul 
+  list-style-type: none
+  margin: 0
+  padding: 0
+  li
+    margin: 0
+    a
+      +menu-item(90)
+    ul 
+      list-style-type: none
+      margin: 0
+      padding: 0
+      li
+        margin: 0
+        a
+          +menu-item(80)
+

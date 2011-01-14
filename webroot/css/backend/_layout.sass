@@ -1,0 +1,62 @@
+@import border-radius
+@import grid
+@import gradient
+
+#header 
+  +column(24, true)
+  @include border-bottom-radius(10px)
+  background-color: $headerBackgroundColor
+  * 
+    font-size: 120% 
+    font-weight: bold
+  .sub
+    padding: 10px
+  * a 
+    color: white
+    &:hover
+      color: white
+      background-color: inherit
+    &:visited
+      color: white
+      background-color: inherit
+
+#main
+  +column(24, true)
+  @include border-top-radius(10px)
+  background-color: $contentBackgroundColor
+  #sidebar
+    +column(6)
+    @include border-top-left-radius(10px)
+    background-color: darken($sidebarBackgroundColor, 10%)
+ 
+  #content 
+    +column(18, true)
+    @include border-top-right-radius(10px)
+    background-color: $contentBackgroundColor
+
+#footer 
+  @include border-bottom-radius(10px)
+  +column(24, true)
+  background-color: $footerBackgroundColor
+  p
+    padding: 5px
+
+.box
+  position: relative
+  padding: 5px
+  h1
+    @include border-radius(5px)
+    +linear-gradient(colour-stops(#999, lighten(#999, 20%)))
+    border: 1px solid #999
+    padding: 8px 12px
+  .utils
+    @include border-radius(5px)
+    +linear-gradient(colour-stops(darken(#999, 10%), lighten(#999, 20%)))
+    position: absolute
+    top: 10px
+    right: 10px
+    border: 1px solid #999 
+    padding: 4px 8px
+    &:hover
+      +linear-gradient(colour-stops(lighten(#999, 30%), #999))
+

@@ -1,0 +1,31 @@
+$backgroundColor: #aaa
+$headerBackgroundColor: #080
+$sidebarBackgroundColor: #fff
+$contentBackgroundColor: #fff
+$footerBackgroundColor: #888
+
+$linkColor: #f00
+
+$menuColor: #000
+$menuBackgroundColor: #fff
+$menuActiveColor: #888
+$menuActiveBackgroundColor: #833
+$menuHoverColor: #303
+$menuHoverBackgroundColor: #999
+
+* 
+  margin: 0
+  padding: 0
+  font-family: Verdana, sans
+
+@import backend/text
+@import backend/layout
+@import backend/menu
+@import backend/form
+@import jquery_ui
+@import grid
+
+body
+  background-color: $backgroundColor
+  @include container
+
