@@ -641,9 +641,8 @@ class SassScriptFunctions {
 		if (!$number instanceof SassNumber || $number->hasUnits()) {
 			throw new SassScriptFunctionException('{what} must be a {type}', array('{what}'=>'number', '{type}'=>'unitless SassNumber'), SassScriptParser::$context->node);
 		}
-		$number->value *= 100;
-		$number->units = '%';
-		return $number;
+		$value = $number->getValue() * 100;
+		return new SassNumber($value.'%');
 	}
 
 	/**

@@ -186,7 +186,7 @@ class SassPropertyNode extends SassNode {
 				return false; 
 			}
 	  	if ($token->level === 0) {
-	  		throw new SassPropertyNodeException('Properties can not be assigned at root level', array(), $this);
+	  		throw new SassPropertyNodeException('Properties can not be assigned at root level', array(), null);
 	  	}
 	  	else {
 				return true;

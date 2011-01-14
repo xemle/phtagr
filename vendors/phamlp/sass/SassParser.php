@@ -295,13 +295,14 @@ class SassParser {
 		
 		if (!empty($options['extensions'])) {
 			foreach ($options['extensions'] as $extension=>$extOptions) {
-				include dirname(__FILE__).DIRECTORY_SEPARATOR.'extensions'.DIRECTORY_SEPARATOR.$extension.DIRECTORY_SEPARATOR.'config.php';
+				$name = strtolower($extension);
+				include dirname(__FILE__).DIRECTORY_SEPARATOR.'extensions'.DIRECTORY_SEPARATOR.$name.DIRECTORY_SEPARATOR.'config.php';
 				$configClass = 'SassExtentions'.$extension.'Config';
 				$config = new $configClass;
 				$config->config($extOptions);
 				
-				$lp = dirname(__FILE__).DIRECTORY_SEPARATOR.'extensions'.DIRECTORY_SEPARATOR.$extension.DIRECTORY_SEPARATOR.'frameworks';
-				$fp = dirname(__FILE__).DIRECTORY_SEPARATOR.'extensions'.DIRECTORY_SEPARATOR.$extension.DIRECTORY_SEPARATOR.'functions';
+				$lp = dirname(__FILE__).DIRECTORY_SEPARATOR.'extensions'.DIRECTORY_SEPARATOR.$name.DIRECTORY_SEPARATOR.'frameworks';
+				$fp = dirname(__FILE__).DIRECTORY_SEPARATOR.'extensions'.DIRECTORY_SEPARATOR.$name.DIRECTORY_SEPARATOR.'functions';
 				$options['load_paths'] = (empty($options['load_paths']) ?
 					array($lp) : array_merge($options['load_paths'], $lp));
 				$options['function_paths'] = (empty($options['function_paths']) ?

@@ -219,6 +219,10 @@ abstract class SassLiteral {
 	public function op_or($other) {
 		return ($this->toBoolean() ? $this : $other);
 	}
+
+  public function op_assign($other) {
+    return $other;
+  }
 	
 	/**
 	 * The SassScript xor operation.

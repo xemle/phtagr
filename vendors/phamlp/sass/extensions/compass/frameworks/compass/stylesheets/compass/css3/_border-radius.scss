@@ -54,7 +54,7 @@ $default-border-radius: 5px !default;
       not -khtml,
       not official
     );
-    @include experimental("border-radius", $radius unquote("/") $vertical-radius,
+    @include experimental(border-radius, $radius unquote("/") $vertical-radius,
       -moz,
       not -webkit,
       -o,
@@ -75,7 +75,7 @@ $default-border-radius: 5px !default;
 
 @mixin border-corner-radius($vert, $horz, $radius: $default-border-radius) {
   // Support for mozilla's syntax for specifying a corner
-  @include experimental("border-radius-#{$vert}#{$horz}", $radius,
+  @include experimental(unquote("border-radius-#{$vert}#{$horz}"), $radius,
     -moz,
     not -webkit,
     not -o,
@@ -83,7 +83,7 @@ $default-border-radius: 5px !default;
     not -khtml,
     not official
   );
-  @include experimental("border-#{$vert}-#{$horz}-radius", $radius,
+  @include experimental(unquote("border-#{$vert}-#{$horz}-radius"), $radius,
     not -moz,
     -webkit,
     -o,

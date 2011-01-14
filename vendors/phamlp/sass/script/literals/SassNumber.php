@@ -149,6 +149,9 @@ class SassNumber extends SassLiteral {
 		return new SassNumber(($this->value * -1).$this->units);
 	}
 
+	public function op_unary_concat() {
+		return $this;
+	}
 	/**
 	 * Multiplies this value by the value of other
 	 * @param mixed SassNumber|SassColour: value to multiply by
@@ -390,7 +393,13 @@ class SassNumber extends SassLiteral {
 	public function isUnitless() {
 	  return empty($this->numeratorUnits) && empty($this->denominatorUnits);
 	}
-
+	/**
+	 * Returns a value indicating if this number has units.
+	 * @return boolean true if this number has, false if not
+	 */
+	public function hasUnits() {
+		return !$this->isUnitless();
+	}
 	/**
 	 * Returns a value indicating if this number has units that can be represented
 	 * in CSS.
