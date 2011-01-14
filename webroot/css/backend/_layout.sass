@@ -1,17 +1,22 @@
 @import border-radius
 @import grid
 @import gradient
+@import text-shadow
+@import box-shadow
 
 #header 
   +column(24, true)
   @include border-bottom-radius(10px)
   background-color: $headerBackgroundColor
+  +linear-gradient(colour-stops($headerBackgroundColor, darken($headerBackgroundColor, 20%)))
+  border: 1px solid $headerBackgroundColor
   * 
     font-size: 120% 
     font-weight: bold
   .sub
     padding: 10px
   * a 
+    +text-shadow(black, 0, 2px, 0)
     color: white
     &:hover
       color: white
@@ -33,6 +38,12 @@
     +column(18, true)
     @include border-top-right-radius(10px)
     background-color: $contentBackgroundColor
+    h1
+      display: block
+      width: 100%
+      font-size: 120%
+      padding: 10px 0
+      background-color: darken($contentBackgroundColor, 20%)
 
 #footer 
   @include border-bottom-radius(10px)
@@ -46,17 +57,16 @@
   padding: 5px
   h1
     @include border-radius(5px)
-    +linear-gradient(colour-stops(#999, lighten(#999, 20%)))
-    border: 1px solid #999
-    padding: 8px 12px
-  .utils
-    @include border-radius(5px)
-    +linear-gradient(colour-stops(darken(#999, 10%), lighten(#999, 20%)))
-    position: absolute
-    top: 10px
-    right: 10px
-    border: 1px solid #999 
-    padding: 4px 8px
-    &:hover
-      +linear-gradient(colour-stops(lighten(#999, 30%), #999))
-
+    +linear-gradient(colour-stops(#ddd, lighten(#ddd, 20%)))
+    border: 1px solid #aaa
+    padding: 3px 12px
+    
+.info,
+.message
+  display: block
+  +border-radius(5px)
+  margin: 20px
+  padding: 10px
+  +linear-gradient(colour-stops(#efffd0, darken(#ffd, 20%)))
+  border: 1px solid darken(#ffd, 20%)
+  +box-shadow(#cda, 2px, 2px, 1px)

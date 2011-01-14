@@ -31,12 +31,36 @@ class OptionsController extends AppController {
 
     $this->requireRole(ROLE_GUEST, array('redirect' => '/'));
   }
+  
+  function beforeRender() {
+    $this->layout = 'backend';
+    $options = array('parent' => 'item-options');
+    $this->Menu->addItem(__('Default Rights', true), 'acl', $options);
+    $this->Menu->addItem(__('Default Rights', true), 'profile', $options);
+    parent::beforeRender();
+  }
+
+  function getMenuItems() {
+    $items = array();
+    if ($this->hasRole(ROLE_USER)) {
+      $items[] = array('text' => __('Profile', true), 'link' => '/options/profile');
+      $items[] = array('text' => __('Users', true), 'link' => '/users');
+      $items[] = array('text' => __('Guest Accounts', true), 'link' => '/guests');
+      $items[] = array('text' => __('Groups', true), 'link' => '/groups');
+      $items[] = array('text' => __('Access Rights', true), 'link' => '/options/acl');
+    }
+    $items[] = array('text' => __('RSS', true), 'link' => '/options/rss');
+    return $items;
+  }
 
   function _set($userId, $path, $data) {
     $value = Set::extract($data, $path);
     $this->Option->setValue($path, $value, $userId);
   }
 
+  function index() {
+    // dummy
+  }
   function acl() {
     $this->requireRole(ROLE_USER);
 
@@ -111,24 +135,5 @@ class OptionsController extends AppController {
     $this->data = $this->User->findById($userId);
   }
 
-  function getMenuItems() {
-    $items = array();
-    if ($this->hasRole(ROLE_USER)) {
-      $items[] = array('text' => __('Profile', true), 'link' => '/options/profile');
-      $items[] = array('text' => __('Users', true), 'link' => '/users');
-      $items[] = array('text' => __('Guest Accounts', true), 'link' => '/guests');
-      $items[] = array('text' => __('Groups', true), 'link' => '/groups');
-      $items[] = array('text' => __('Access Rights', true), 'link' => '/options/acl');
-    }
-    $items[] = array('text' => __('RSS', true), 'link' => '/options/rss');
-    return $items;
-  }
-
-  function beforeRender() {
-    parent::beforeRender();
-    $items = $this->getMenuItems();
-    $menu = array('items' => $items, 'active' => $this->here);
-    $this->set('mainMenu', $menu);
-  }
 }
 ?>

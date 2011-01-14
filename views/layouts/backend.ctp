@@ -25,24 +25,9 @@
 <div id="sidebar">
 <div class="box">
 <h1>Menu</h1>
-<div class="utils">
-  <a href="#">Utils</a>
-</div>
-<ul>
-  <li><?php echo $html->link(__("Users", true), array('controllers' => 'users')); ?></li>
-  <li class="active"><?php echo $html->link(__("Users", true), array('controllers' => 'users')); ?></li>
-  <li><?php echo $html->link(__("Users", true), array('controllers' => 'users')); ?></li>
-  <li><?php echo $html->link(__("Users", true), array('controllers' => 'users')); ?>
-    <ul>
-      <li><?php echo $html->link(__("Users", true), array('controllers' => 'users')); ?></li>
-      <li><?php echo $html->link(__("Users", true), array('controllers' => 'users')); ?></li>
-      <li><?php echo $html->link(__("Users", true), array('controllers' => 'users')); ?></li>
-    </ul>
-  </li>
-</ul>
+<?php echo $menu->menu('main'); ?>
 </div>
 </div>
-
 <div id="content">
 <?php echo $content_for_layout?>
 </div>

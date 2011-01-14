@@ -39,4 +39,7 @@
   echo $form->input('User.notify_interval', array('type' => 'select', 'options' => $options, 'label' => __('Send new media notifications', true)));
 ?>
 </fieldset>
-<?php echo $form->end(__('Save', true)); ?>
+<?php 
+  echo $form->submit(__('Save', true), array('class' => 'ui-button')); 
+  echo $form->end();
+?>

@@ -39,6 +39,9 @@ class GroupsController extends AppController {
 
   function beforeRender() {
     $this->_setMenu();
+    $this->layout = 'backend';
+    $options = array('parent' => 'item-groups');
+    $this->Menu->addItem(__('List Groups', true), array('action' => 'index'), $options);
     parent::beforeRender();
   }
 

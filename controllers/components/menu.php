@@ -34,6 +34,9 @@ class MenuComponent extends Object {
   var $currentMenu = 'main';
 
   function initialize(&$controller) {
+    if ($this->controller) {
+      return;
+    }
     $this->controller =& $controller;
     $this->setCurrentMenu('main');
     /*
@@ -46,10 +49,21 @@ class MenuComponent extends Object {
 		$this->items[] = array('text' => __('My Media', true), 'link' => "/explorer/user/{$username}");
 		$this->items[] = array('text' => __('Upload', true), 'link' => "/browser/quickupload");
     */
+    $this->setBasicMainMenu();
+  }
+
+  function setBasicMainMenu() {
+    $this->addItem(__('Account Settings', true), array('controller' => 'options'), array('id' => 'item-options'));
+    $this->addItem(__('Groups', true), array('controller' => 'groups'), array('id' => 'item-groups'));
+    $this->addItem(__('Users', true), array('controller' => 'users'), array('id' => 'item-users'));
+    $this->addItem(__('Media Files', true), array('controller' => 'browser'), array('id' => 'item-browser'));
+    Logger::debug('Super holla');
+    Logger::bt();
   }
 
   function beforeRender() {
     $this->controller->params['menus'] = $this->menus;
+    $this->controller->set('menus_for_layout', $this->menus);
   }
 
   /** Set the current menu 

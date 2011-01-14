@@ -15,7 +15,8 @@
 =menu-item($percent)
   display: block
   +menu-ident($percent)
-  +menu-colors($menuColor, $menuBackgroundColor)
+  color: $menuColor
+  background-color: $menuBackgroundColor
   &:hover
     +menu-colors($menuHoverColor, $menuHoverBackgroundColor)
 

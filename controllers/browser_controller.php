@@ -51,11 +51,15 @@ class BrowserController extends AppController
   }
 
   function beforeRender() {
-    $this->_setMenu();
+    $this->layout = 'backend';
+    $options = array('parent' => 'item-browser');
+    $this->Menu->addItem(__('Import Files', true), array('controller' => 'browser', 'action' => 'import'), $options);
+    $this->Menu->addItem(__('Upload', true), array('controller' => 'browser', 'action' => 'upload'), $options);
     parent::beforeRender();
   }
 
   function _setMenu() {
+    return;
     if ($this->action == 'quickupload') {
       return;
     }
@@ -69,7 +73,6 @@ class BrowserController extends AppController
     $items[] = array('text' => __('Synchronize', true), 'link' => 'sync');
     $items[] = array('text' => __('Overview', true), 'link' => 'view');
     $menu = array('items' => $items);
-    $this->set('mainMenu', $menu);
   }
 
   /** Add a root to the chroot aliases 

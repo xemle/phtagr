@@ -30,17 +30,13 @@ class UsersController extends AppController
   var $menuItems = array();
 
   function beforeRender() {
-    $this->_setMenu();
+    $this->layout = 'backend';
+    $this->Menu->setCurrentMenu('main');
+    $options = array('parent' => 'item-users');
+    $this->Menu->addItem(__('List users', true), array('controller' => 'users', 'action' => 'index'), $options);
+    $this->Menu->addItem(__('Add user', true), array('controller' => 'users', 'action' => 'add'), $options);
+    $this->Menu->addItem(__('Registration', true), array('controller' => 'users', 'action' => 'register'), $options);
     parent::beforeRender();
-  }
-
-  function _getMenuItems() {
-    $items = array();
-    $items[] = array('text' => __('List users', true), 'link' => 'index');
-    $items[] = array('text' => __('Add user', true), 'link' => 'add');
-    $items[] = array('text' => __('Registration', true), 'link' => 'register');
-    $items = am($items, $this->menuItems);
-    return $items;
   }
 
   function _setMenu() {
