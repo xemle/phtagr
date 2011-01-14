@@ -57,8 +57,6 @@ class MenuComponent extends Object {
     $this->addItem(__('Groups', true), array('controller' => 'groups'), array('id' => 'item-groups'));
     $this->addItem(__('Users', true), array('controller' => 'users'), array('id' => 'item-users'));
     $this->addItem(__('Media Files', true), array('controller' => 'browser'), array('id' => 'item-browser'));
-    Logger::debug('Super holla');
-    Logger::bt();
   }
 
   function beforeRender() {
