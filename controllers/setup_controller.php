@@ -35,6 +35,8 @@ class SetupController extends AppController {
   var $Option = null;
   var $commands = array('exiftool', 'convert', 'ffmpeg', 'flvtool2');
   var $checks = array();
+  var $Migration = null;
+  var $Version = null;
 
   function beforeFilter() {
     Configure::write('Cache.disable', true);
@@ -68,6 +70,9 @@ class SetupController extends AppController {
     return $this->checks['initDataSource'];
   }
 
+  /** Load models of given array
+    @param models array of models 
+    @return true on success */
   function __loadModel($models) {
     if (!$this->UpgradeSchema->isConnected()) {
       Logger::warn("Not connected");
@@ -451,29 +456,13 @@ class DATABASE_CONFIG
 
     $this->__checkSession();
 
-    $Schema = $this->UpgradeSchema->loadSchema();
-    Logger::info("Check current database schema");
-    $errors = $this->UpgradeSchema->upgrade();
-
-    $check = false;
-    if ($errors['tables']) {
-      $check = true;
-      Logger::err("Not all tables could be created: ".array_keys($errors['tables']));
-    } else {
-      Logger::info("All tables exists");
-    }
-    if ($errors['columns']) {
-      $check = true;
-      Logger::err("Not all columngs could be altered: ".array_keys($errors['columns']));
-    } else {
-      Logger::info("All tables are correct");
-    }
-
-    if (!$check) {
+    try {
+      $this->__loadMigration();
+      $this->Migration->run(array('type' => 'app', 'direction' => 'up'));
       $this->Session->setFlash(__("All required tables are created", true));
       $this->redirect('user');
-    } else {
-      Logger::trace($errors);
+    } catch (MigrationVersionException $errors) {
+      Logger::trace($errors->getMessage());
       $this->Session->setFlash(__("Could not create tables correctly. Please see logfile for details", true));
     }
   }
@@ -617,28 +606,64 @@ class DATABASE_CONFIG
     }
   }
 
+  /** Load Migration plugin
+    @return True on success */
+  function __loadMigration() {
+    if (!empty($this->Migration)) {
+      return true;
+    }
+    App::import('Lib', 'Migrations.MigrationVersion');
+    $this->Migration = new MigrationVersion(array('connection' => 'default')); 
+    if (empty($this->Migration)) {
+      Logger::err("Could not load class Migrations.MigrationVersion");
+      return false;
+    }
+    return true;
+  }
+
+  function _initMigration() {
+    if (!$this->__loadMigration()) {
+      Logger::err("Cannot init migration");
+      return false;
+    }
+
+    $version = $this->Migration->getVersion('app');
+    if ($version == 0) {
+      $this->Migration->setVersion(1, 'app');
+    }
+    return true;
+  }
+
+  function _requiresUpgrade() {
+    if (!$this->_initMigration()) {
+      Logger::err("Cannot get migration");
+      return true;
+    }
+    $currentVersion = $this->Migration->getVersion('app');
+    $migrationVersion = max(array_keys($this->Migration->getMapping('app')));
+    if ($currentVersion < $migrationVersion) {
+      return true;
+    }
+    return false;
+  }
+
   function admin_upgrade($action = null) {
-    if (!$this->__hasSysOp()) 
+    if (!$this->__hasSysOp()) {
       $this->redirect('/setup');
+    }
     $this->requireRole(ROLE_SYSOP);
 
-    if (!$this->UpgradeSchema->loadSchema()) {
-      Logger::err("Could not load schema");
+    if (!$this->_initMigration()) {
+      Logger::err("Cannot init migration data");
+      $this->Session->setFlash(__("Cannot initialize database migration data", true));
+      return false;
     }
-    if (!$this->UpgradeSchema->requireUpgrade()) {
-      $this->redirect('/admin/setup/uptodate');
+    
+    if (!$this->_requiresUpgrade()) {
+      $this->redirect('uptodate');
     }
-
     $errors = false;
     if ($action == 'run') {
-      $errors = $this->UpgradeSchema->upgrade();
-      if ($errors == false) {
-        $this->UpgradeSchema->deleteModelCache();
-        $this->Session->setFlash(__("Database was upgraded successfully", true));
-        $this->redirect('/admin/setup/uptodate');
-      } else {
-        $this->Session->setFlash(__("The database could not upgraded completely. The log file might discover the issue", true));
-      }
     }
     $this->set('errors', $errors);
   }
@@ -649,10 +674,6 @@ class DATABASE_CONFIG
     }
     $this->requireRole(ROLE_SYSOP);
 
-    $this->UpgradeSchema->loadSchema();
-    if ($this->UpgradeSchema->requireUpgrade()) {
-      $this->redirect('/admin/setup/upgrade');
-    }
   }
 }
 ?>

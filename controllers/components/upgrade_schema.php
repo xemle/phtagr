@@ -41,16 +41,8 @@ class UpgradeSchemaComponent extends Object{
       return true;
     }
 
-    App::import('Core', 'CakeSchema');
-    $options = am(array('path' => CONFIGS.'schema'.DS, 'name' => 'Phtagr'), $options);
-    $this->cakeSchema =& new CakeSchema($options);
-    if (!$this->cakeSchema) {
-      Logger::err("Could not create database schema");
-      return false;
-    }
-
     App::import('Core', 'ConnectionManager');
-    $this->db =& ConnectionManager::getDataSource($this->cakeSchema->connection);
+    $this->db =& ConnectionManager::getDataSource('default');
     if (!$this->db) {
       Logger::err("Could not create database source");
       return false;
@@ -59,6 +51,7 @@ class UpgradeSchemaComponent extends Object{
     return true;
   }
 
+  /*
   function loadSchema($options = array()) {
     $options = am(array('path' => CONFIGS.'schema'.DS, 'name' => 'Phtagr'), $options);
     $schema = $this->cakeSchema->load($options);
@@ -68,7 +61,7 @@ class UpgradeSchemaComponent extends Object{
     $this->schema = $schema;
     return $schema;
   }
-
+  */
 
   function isConnected() {
     if (!empty($this->db) && $this->db->connected) {
@@ -101,157 +94,7 @@ class UpgradeSchemaComponent extends Object{
     }
     return true;
   }
-
-  /** Checks the current database for missing tables. If tables are missing, it
-   * returns an array of creation statements 
-    @param Schema Current Schema
-    @param Create statements or false if all required tables are in the
-    database */
-  function _getMissingTables() {
-    // Reset sources for refetching
-    $sources = $this->db->listSources();
-    $requiredTables = array();
-    $missingTables = array();
-    foreach ($this->schema->tables as $table => $fields) {
-      $tableName = $this->db->fullTableName($table, false);
-      $requiredTables[] = $tableName;
-      if (!in_array($tableName, $sources)) {
-        $missingTables[$table] = $this->db->createSchema($this->schema, $table);
-      }
-    }
-    // set tables sources only to the required tables. This overwrites current
-    // list and hides not required tables
-    $this->db->_sources = $requiredTables;
-
-    if (!count($missingTables)) {
-      return false;
-    }
-    return $missingTables;
-  }
   
-  /** Create tables according to create statements
-    @param Schema Current table schema
-    @param Array of creation statements
-    @return On success it returns false. If error occurs, it returns the
-    creation statements */
-  function _createTables($newTables) {
-    if (empty($this->schema) || !$newTables) {
-      return false;
-    }
-
-    $errors = array();
-    foreach ($newTables as $table => $sql) {
-      $tableName = $this->db->fullTableName($table, false);
-      if (!$this->db->_execute($sql)) {
-        $errors[$table] = $sql;
-        Logger::err("Could not create table '$tableName'");
-        Logger::debug($sql);
-      } else {
-        Logger::info("Created new table '$tableName'");
-      }
-    }
-    if (!count($errors)) {
-      return false;
-    }
-    return $errors;
-  }
-
-  /** Strips table prefix from a schema tables
-  @param schema Current schema to strip
-  @return New schema with striped tables names */
-  function _stripTablePrefix($schema) {
-    $prefix = $this->db->config['prefix'];
-    foreach ($schema['tables'] as $table => $columns) {
-      if ($prefix && strpos($table, $prefix) === 0) {
-        $stripped = substr($table, strlen($prefix));
-        if (!isset($schema['tables'][$stripped])) {
-          $schema['tables'][$stripped] = $columns;
-          unset($schema['tables'][$table]);
-        }
-      }
-    }
-    return $schema;
-  }
-
-  function _getAlteredColumns($noDrop = false) {
-    // Reset sources for refetching
-    $this->db->_sources = null;
-    $Old = $this->cakeSchema->read();
-    $Old = $this->_stripTablePrefix($Old);
-    $compare = $this->cakeSchema->compare($Old, $this->schema);
-    $models = Configure::listObjects('model');
-
-    // remove column drops if required
-    if ($noDrop) {
-      foreach ($compare as $table => $changes) {
-        if (isset($compare[$table]['drop'])) {
-          unset($compare[$table]['drop']);
-        }
-      }
-    }
-
-    // Check changes
-    $columns = array();
-    $sources = $this->db->listSources();
-    foreach ($compare as $table => $changes) {
-      // Check for existing table
-      $tableName = $this->db->fullTableName($table, false);
-      if (!in_array($tableName, $sources)) {
-        Logger::warn("Skip table changes of not existing table '$tableName'");
-        continue;
-      }
-      // Check for existing model
-      if (!isset($this->modelMapping[$table])) {
-        $modelName = Inflector::classify($table);
-      } else {
-        $modelName = $this->modelMapping[$table];
-      }
-      if (!in_array($modelName, $models)) {
-        Logger::warn("Model '$modelName' does not exists");
-      }
-      
-      if (!empty($changes['drop']['tableParameters'])) {
-        Logger::warn("tableParameters NIY. Drop tableParameters changes for $table");
-        unset($changes['drop']['tableParameters']);
-        if (!count($changes['drop'])) {
-          unset($changes['drop']);
-        }
-      }
-      if ($changes && count($changes)) {
-        Logger::debug($changes);
-        $columns[$table] = $this->db->alterSchema(array($table => $changes), $table);
-      }
-    }
-    
-    if (!count($columns)) {
-      return false;
-    }
-    return $columns;
-  }
-
-  function _alterColumns($columns) {
-    if (empty($this->schema) || !$columns)  {
-      return false;
-    }
-
-    $errors = array();
-    foreach ($columns as $table => $sql) {
-      $tableName = $this->db->fullTableName($table, false);
-      if (!$this->db->_execute($sql)) {
-        $errors[$table] = $sql;
-        Logger::err("Could not update table '$tableName'");
-        Logger::debug($sql);
-      } else {
-        Logger::info("Upgraded table '$tableName'");
-        Logger::trace($sql);
-      }
-    }
-    if (!count($errors)) {
-      return false;
-    }
-    return $errors;
-  }
-
   function requireUpgrade() {
     $missingTables = $this->_getMissingTables($this->schema);
     if ($missingTables) {
@@ -264,17 +107,6 @@ class UpgradeSchemaComponent extends Object{
       return true;
     }
     return false;
-  }
-
-  /** @todo Drop not required tables */
-  function _createMissingTables() {
-    $missingTables = $this->_getMissingTables();
-    return $this->_createTables($missingTables);
-  }
-
-  function _upgradeTables($noDrop = false) {
-    $alterColumns = $this->_getAlteredColumns($noDrop);
-    return $this->_alterColumns($alterColumns);
   }
 
   function upgrade($noDrop = false) {
