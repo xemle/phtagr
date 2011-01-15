@@ -36,7 +36,7 @@ class OptionsController extends AppController {
     $this->layout = 'backend';
     $options = array('parent' => 'item-options');
     $this->Menu->addItem(__('Default Rights', true), 'acl', $options);
-    $this->Menu->addItem(__('Default Rights', true), 'profile', $options);
+    $this->Menu->addItem(__('Profile', true), 'profile', $options);
     parent::beforeRender();
   }
 
@@ -50,7 +50,6 @@ class OptionsController extends AppController {
       $items[] = array('text' => __('Access Rights', true), 'link' => '/options/acl');
     }
     $items[] = array('text' => __('RSS', true), 'link' => '/options/rss');
-    return $items;
   }
 
   function _set($userId, $path, $data) {
@@ -61,6 +60,7 @@ class OptionsController extends AppController {
   function index() {
     // dummy
   }
+
   function acl() {
     $this->requireRole(ROLE_USER);
 
