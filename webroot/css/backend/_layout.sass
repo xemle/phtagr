@@ -4,6 +4,9 @@
 @import text-shadow
 @import box-shadow
 
+#page
+  @include container
+
 #header 
   +column(24, true)
   @include border-bottom-radius(10px)
@@ -57,8 +60,11 @@
   padding: 5px
   h1
     @include border-radius(5px)
-    +linear-gradient(colour-stops(#ddd, lighten(#ddd, 20%)))
-    border: 1px solid #aaa
+    background-color: #eee
+    +linear-gradient(colour-stops(#eee, darken(#eee, 10%)))
+    color: #666
+    +text-shadow(white, 1px, 0px, 0)
+    border: 1px solid #bbb
     padding: 3px 12px
     
 .info,

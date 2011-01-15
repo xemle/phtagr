@@ -40,4 +40,13 @@ form
         font-size: 100%
         width: 50%
         +default-input
-
+  .submit input[type=submit]
+    border: 1px solid #ddd
+    +border-radius(5px)
+    padding: 3px 5px
+    +linear-gradient(colour-stops(#eee, darken(#eee, 20%)))
+    color: #555
+    +text-shadow(white, 1px, 1px)
+    &:hover
+      +linear-gradient(colour-stops(#ddd, darken(#ddd, 20%)))
+      color: black

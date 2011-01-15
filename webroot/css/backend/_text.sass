@@ -7,10 +7,12 @@ a
   color: $linkColor
 
   &:hover
-    color: $contentBackgroundColor
-    background-color: $linkColor
+    color: darken($linkColor, 30%)
   &:visited
-    color: darken($linkColor, 10%) #page 
+    color: darken($linkColor, 10%)
+
+img
+  border: none
 
 ul, ol
   list-style-type: none

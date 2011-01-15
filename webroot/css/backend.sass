@@ -1,18 +1,17 @@
 $backgroundColor: #aaa
 $headerBackgroundColor: #080
-$sidebarBackgroundColor: #fff
+$sidebarBackgroundColor: #eee
 $contentBackgroundColor: #fff
 $footerBackgroundColor: #888
 
-$linkColor: #f00
-
+$linkColor: #44f
 
 $menuColor: #000
-$menuBackgroundColor: $sidebarBackgroundColor	
+$menuBackgroundColor: $sidebarBackgroundColor
 $menuActiveColor: #888
 $menuActiveBackgroundColor: #833
 $menuHoverColor: #303
-$menuHoverBackgroundColor: #999
+$menuHoverBackgroundColor: #79b
 
 * 
   margin: 0
@@ -23,11 +22,9 @@ $menuHoverBackgroundColor: #999
 @import backend/layout
 @import backend/menu
 @import backend/form
+@import backend/table
 @import jquery_ui
 @import grid
 
 body
-  background-color: $backgroundColor
-  @include container
-  overflow: inherit
-
+  background: $backgroundColor
