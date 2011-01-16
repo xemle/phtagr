@@ -3,9 +3,9 @@
 @import border-radius
 
 =default-input
-  padding: 4px
   +border-radius(3px)
   border: #aaa 1px solid
+  padding: 5px
   background-color: #efefef
   &:hover
     border: #999 1px solid
@@ -17,29 +17,38 @@
 form
   overflow: hidden
   fieldset
-    padding-bottom: 20px
+    padding: 15px 0
     border: 0
     overflow: hidden
     legend
       font-weight: bold
     div
       padding: 5px 0
+      position: relative
       display: block
       width: 100% 
       label
-        display: block;
+        display: inline
+        float: left
+        width: 30%
       input[type=text],
-      input[type=checkbox],
       input[type=password],
       textarea
-        padding-left: 30%
-        font-size: 100%
         width: 50%
+        font-size: 100%
         +default-input
       select
         font-size: 100%
-        width: 50%
+        width: 52%
         +default-input
+      &.checkbox 
+        input[type=checkbox]
+          margin-left: 30%
+          margin-right: 5px
+        label
+          float: none
+          display: inline-block
+          width: 50%
   .submit input[type=submit]
     border: 1px solid #ddd
     +border-radius(5px)
