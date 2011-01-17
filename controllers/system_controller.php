@@ -63,20 +63,5 @@ class SystemController extends AppController {
     $tree = $this->Option->getTree(0);
     $this->data = $tree;
   }
-
-  function getMenuItems() {
-    $items = array();
-    $items[] = array('text' => __('General', true), 'link' => '/admin/system/general');
-    $items[] = array('text' => __('User Accounts', true), 'link' => '/admin/users');
-    $items[] = array('text' => __('External Programs', true), 'link' => '/admin/system/external');
-    return $items;
-  }
-
-  function beforeRender() {
-    $items = $this->getMenuItems();
-    $menu = array('items' => $items, 'active' => $this->here);
-    $this->set('mainMenu', $menu);
-    parent::beforeRender();
-  }
 }
 ?>

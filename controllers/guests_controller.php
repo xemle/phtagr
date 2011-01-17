@@ -25,7 +25,6 @@ class GuestsController extends AppController {
   var $uses = array('Group', 'User', 'Guest');
   var $components = array('RequestHandler');
   var $helpers = array('Form', 'Ajax');
-  var $menuItems = array();
 
   function beforeFilter() {
     parent::beforeFilter();
@@ -33,7 +32,6 @@ class GuestsController extends AppController {
   }
 
   function beforeRender() {
-    $this->_setMenu();
     parent::beforeRender();
   }
 
@@ -75,25 +73,6 @@ class GuestsController extends AppController {
     }
   }
 
-  function _addGuestMenu($guest) {
-    $this->menuItems[] = array(
-      'text' => sprintf(__('Guest: %s', true), $guest['Guest']['username']), 
-      'type' => 'text', 
-      'submenu' => array(
-        'items' => array(
-          array(
-            'text' => __('Edit', true), 
-            'link' => 'edit/'.$guest['Guest']['id']
-            ),
-          array(
-            'text' => __('Links', true), 
-            'link' => 'links/'.$guest['Guest']['id']
-            )
-          )
-        )
-      );
-  }
-
   function edit($guestId) {
     $guestId = intval($guestId);
     $userId = $this->getUserId();
@@ -121,7 +100,6 @@ class GuestsController extends AppController {
     unset($this->data['Guest']['password']);
     $this->data['Comment']['auth'] = $this->Option->getValue($this->data, 'comment.auth', COMMENT_AUTH_NONE);
     $this->set('userId', $userId);
-    $this->_addGuestMenu($this->data);
   }
 
   /**
@@ -222,28 +200,6 @@ class GuestsController extends AppController {
       }
     }
     $this->data = $this->Guest->findById($guestId);
-    $this->_addGuestMenu($this->data);
-  }
-
-  function _getMenuItems() {
-    $items = array();
-    $items[] = array('text' => 'List Guests', 'link' => 'index');
-    $items[] = array('text' => 'Add Guest', 'link' => 'add');
-    $items = am($items, $this->menuItems);
-    return $items;
-  }
-
-  function _setMenu() {
-    $items = $this->requestAction('/options/getMenuItems');
-    $me = '/'.strtolower(Inflector::pluralize($this->name));
-    foreach ($items as $index => $item) {
-      if ($item['link'] == $me) {
-        $item['submenu'] = array('items' => $this->_getMenuItems());
-        $items[$index] = $item;
-      }
-    }
-    $menu = array('items' => $items);
-    $this->set('mainMenu', $menu);
   }
 }
 ?>

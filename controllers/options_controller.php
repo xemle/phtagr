@@ -25,8 +25,13 @@ class OptionsController extends AppController {
   var $name = 'Options';
   var $helpers = array('Form');
   var $uses = array('Option', 'Group');
+  var $subMenu = false;
 
   function beforeFilter() {
+    $this->subMenu = array(
+      'acl' => __("Default Rights", true),
+      'profile' => __("Profile", true),
+      );
     parent::beforeFilter();
 
     $this->requireRole(ROLE_GUEST, array('redirect' => '/'));
@@ -34,22 +39,7 @@ class OptionsController extends AppController {
   
   function beforeRender() {
     $this->layout = 'backend';
-    $options = array('parent' => 'item-options');
-    $this->Menu->addItem(__('Default Rights', true), 'acl', $options);
-    $this->Menu->addItem(__('Profile', true), 'profile', $options);
     parent::beforeRender();
-  }
-
-  function getMenuItems() {
-    $items = array();
-    if ($this->hasRole(ROLE_USER)) {
-      $items[] = array('text' => __('Profile', true), 'link' => '/options/profile');
-      $items[] = array('text' => __('Users', true), 'link' => '/users');
-      $items[] = array('text' => __('Guest Accounts', true), 'link' => '/guests');
-      $items[] = array('text' => __('Groups', true), 'link' => '/groups');
-      $items[] = array('text' => __('Access Rights', true), 'link' => '/options/acl');
-    }
-    $items[] = array('text' => __('RSS', true), 'link' => '/options/rss');
   }
 
   function _set($userId, $path, $data) {

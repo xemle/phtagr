@@ -25,10 +25,14 @@ class GroupsController extends AppController {
   var $uses = array('Group', 'User', 'Media');
   var $components = array('RequestHandler', 'Security', 'Email', 'Search');
   var $helpers = array('Form', 'Ajax', 'ImageData', 'Text');
-  var $menuItems = array();
+  var $subMenu = false;
 
   function beforeFilter() {
     parent::beforeFilter();
+    $this->subMenu = array(
+      'index' => __("List Group", true),
+      'create' => __("Create Group", true),
+      );
     $this->requireRole(ROLE_USER);
     $this->Security->blackHoleCallback = 'fail';
     $this->Security->requirePost = array('addMember');
@@ -39,9 +43,6 @@ class GroupsController extends AppController {
 
   function beforeRender() {
     $this->layout = 'backend';
-    $options = array('parent' => 'item-groups');
-    $this->Menu->addItem(__('List Groups', true), array('action' => 'index'), $options);
-    $this->Menu->addItem(__('Create Group', true), array('action' => 'create'), $options);
     parent::beforeRender();
   }
 

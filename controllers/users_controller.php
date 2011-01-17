@@ -27,35 +27,20 @@ class UsersController extends AppController
   var $uses = array('Option', 'Media', 'MyFile'); 
   var $helpers = array('Form', 'Number', 'Time', 'Text', 'ImageData');
   var $paginate = array('limit' => 10, 'order' => array('User.username' => 'asc')); 
-  var $menuItems = array();
+  var $subMenu = false;
+
+  function beforeFilter() {
+    parent::beforeFilter();
+    $this->subMenu = array(
+      'index' => __("List User", true),
+      'add' => __("Add User", true),
+      'register' => __("Registration", true),
+      );
+  }
 
   function beforeRender() {
     $this->layout = 'backend';
-    $this->Menu->setCurrentMenu('main');
-    $options = array('parent' => 'item-users');
-    $this->Menu->addItem(__('List users', true), array('controller' => 'users', 'action' => 'index'), $options);
-    $this->Menu->addItem(__('Add user', true), array('controller' => 'users', 'action' => 'add'), $options);
-    $this->Menu->addItem(__('Registration', true), array('controller' => 'users', 'action' => 'register'), $options);
     parent::beforeRender();
-  }
-
-  function _setMenu() {
-    if ($this->hasRole(ROLE_SYSOP)) {
-      $items = $this->requestAction('/system/getMenuItems');
-      $me = '/admin/'.strtolower(Inflector::pluralize($this->name));
-      foreach ($items as $index => $item) {
-        if ($item['link'] == $me) {
-          $item['submenu'] = array('items' => $this->_getMenuItems());
-          $items[$index] = $item;
-        }
-      }
-      $menu = array('items' => $items);
-      $this->set('mainMenu', $menu);
-    } elseif ($this->hasRole(ROLE_USER)) {
-      $items = $this->requestAction('/options/getMenuItems');
-      $menu = array('items' => $items);
-      $this->set('mainMenu', $menu);
-    }
   }
 
   function __fromReadableSize($readable) {
@@ -245,22 +230,6 @@ class UsersController extends AppController
 
     $this->set('fsroots', $this->Option->buildTree($this->data, 'path.fsroot'));
     $this->set('allowAdminRole', ($this->getUserRole() == ROLE_ADMIN) ? true : false);
-    $this->menuItems[] = array(
-      'text' => 'User '.$this->data['User']['username'], 
-      'type' => 'text', 
-      'submenu' => array(
-        'items' => array(
-          array(
-            'text' => 'Edit', 
-            'link' => 'edit/'.$id
-            ),
-          array(
-            'text' => 'External Paths', 
-            'link' => 'path/'.$id
-            )
-          )
-        )
-      );
   }
 
   function admin_path($id) {
@@ -291,23 +260,6 @@ class UsersController extends AppController
     unset($this->data['User']['password']);
 
     $this->set('fsroots', $this->Option->buildTree($this->data, 'path.fsroot'));
-
-    $this->menuItems[] = array(
-      'text' => 'User '.$this->data['User']['username'], 
-      'type' => 'text', 
-      'submenu' => array(
-        'items' => array(
-          array(
-            'text' => 'Edit', 
-            'link' => 'edit/'.$id
-            ),
-          array(
-            'text' => 'External Paths', 
-            'link' => 'path/'.$id
-            )
-          )
-        )
-      );
   }
  
   function admin_add() {

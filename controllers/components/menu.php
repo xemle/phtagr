@@ -53,13 +53,40 @@ class MenuComponent extends Object {
   }
 
   function setBasicMainMenu() {
-    $this->addItem(__('Account Settings', true), array('controller' => 'options'), array('id' => 'item-options'));
-    $this->addItem(__('Groups', true), array('controller' => 'groups'), array('id' => 'item-groups'));
-    $this->addItem(__('Users', true), array('controller' => 'users'), array('id' => 'item-users'));
-    $this->addItem(__('Media Files', true), array('controller' => 'browser'), array('id' => 'item-browser'));
+    $controllers = array(
+      'options' => __('Account Settings', true),
+      'groups' => __('Groups', true),
+      'users' => __('Users', true),
+      'browser' => __('Media Files', true)
+      );
+    foreach ($controllers as $ctrl => $text) {
+      $options = array('id' => 'item-' . $ctrl);
+      if (strtolower($this->controller->name) == $ctrl) {
+        $options['active'] = true;
+      }
+      $this->addItem($text, array('controller' => $ctrl), $options);
+    } 
+  }
+
+  function &getData(&$data, $key) {
+    $p =& $data[$key];
+    return $p;
   }
 
   function beforeRender() {
+    if (isset($this->controller->subMenu)) {
+      $name = strtolower($this->controller->name);
+      $parentId = 'item-' . $name;
+      $parentItem =& $this->getItem($parentId);
+      foreach ($this->controller->subMenu as $action => $title) {
+        $options = array('parent' => $parentId);
+        if ($this->controller->action == $action) {
+          $options['active'] = true;
+        }
+        $item = am(array('title' => $title, 'url' => array('controller' => $name, 'action' => $action)), $options);
+        $parentItem[] = $item;
+      }
+    }
     $this->controller->params['menus'] = $this->menus;
     $this->controller->set('menus_for_layout', $this->menus);
   }
@@ -73,19 +100,6 @@ class MenuComponent extends Object {
     }
   }
 
-  function _addItemToParent($menu, &$items) {
-    foreach ($items as &$item) {
-      if (!is_array($item) || count($item) == 0) {
-        continue;
-      }
-      if (isset($item['id']) && $item['id'] == $menu['parent']) {
-        $item[] = $menu;
-      } else {
-        $this->_addItemToParent($menu, $item);
-      }   
-    }
-  }
-
   /** Add menu item 
     @param title Menu title
     @param url Menu url
@@ -94,12 +108,40 @@ class MenuComponent extends Object {
     $item = am(array('title' => $title, 'url' => $url), $options);
     $menu =& $this->menus[$this->currentMenu];
     if (isset($options['parent'])) {
-      $this->_addItemToParent($item, $menu);
+      $parent =& $this->getItem($options['parent']);
+      if ($parent) {
+        $parent[] = $item;
+      }
     } else {
       $menu[] = $item;
     }
   }
-  
+
+  function &_findItem($id, &$items) {
+    $keys = array_keys($items);
+    $found = false;
+    foreach($keys as $key) {
+      if (is_array($items[$key])) {
+        $found =& $this->_findItem($id, &$items[$key]);
+        if ($found) {
+          return $found;
+        }
+      } else if ($key == 'id' && $items[$key] == $id) {
+        return $items;
+      }
+    }
+    return $found;
+  }
+
+  function &getItem($id, $menuName = null) {
+    if (!$menuName) {
+      $menu =& $this->menus[$this->currentMenu];
+    } else {
+      $menu =& $this->menus[$menuName];
+    }
+    return $this->_findItem($id, &$menu);    
+  } 
+
   /** Set menu option for current menu 
     @param name Option name
     @param value Option value */
