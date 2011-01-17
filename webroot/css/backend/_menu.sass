@@ -16,11 +16,8 @@
   display: block
   +menu-ident($percent)
   color: $menuColor
-  background-color: $menuBackgroundColor
   border-bottom: 1px solid #ddd
-  &:hover
-    +menu-colors($menuHoverColor, $menuHoverBackgroundColor)
-
+  
 #sidebar ul 
   list-style-type: none
   margin: 0
@@ -29,6 +26,13 @@
     margin: 0
     a
       +menu-item(90)
+      background-color: $menuBackgroundColor
+      &:hover
+        +menu-colors($menuHoverColor, $menuHoverBackgroundColor)
+    span.active
+      +menu-item(90)
+      color: $menuActiveColor
+      background-color: $menuActiveBackgroundColor 
     ul 
       list-style-type: none
       margin: 0
@@ -37,4 +41,8 @@
         margin: 0
         a
           +menu-item(80)
+        span.active
+          +menu-item(80)
+          color: $menuActiveColor
+          background-color: lighten($menuActiveBackgroundColor, 20%)
 
