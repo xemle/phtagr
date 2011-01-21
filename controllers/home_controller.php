@@ -57,7 +57,7 @@ class HomeController extends AppController
     $newest = $this->Search->paginate();
     // generate tossed index to variy the media 
     srand(time());
-    while (count($newest) > 12) {
+    while (count($newest) > 32) {
       $rnd = rand(0, 50);
       if (isset($newest[$rnd])) {
         unset($newest[$rnd]);

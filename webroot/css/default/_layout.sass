@@ -1,0 +1,109 @@
+@import border-radius
+@import grid
+@import "compass/css3/gradient"
+@import text-shadow
+@import box-shadow
+
+*
+  margin: 0
+  padding: 0
+
+#page
+  display: block
+  width: 100%
+
+#header 
+  background-color: $headerBackgroundColor
+  +linear-gradient(color-stops($headerBackgroundColor, darken($headerBackgroundColor, 20%)))
+  border-bottom: 2px solid darken($headerBackgroundColor, 20%)
+  width: 100%
+  .sub
+    width: 950px
+    display: block
+    margin: 0 auto
+    h1
+      padding: 5px 0
+      color: white
+      font-size: 250% 
+      display: inline-block
+    .subtitle
+      color: white
+      display: inline-block
+    #top-menu
+      float: right
+      margin: 10px 0
+      li
+        float: left
+        padding: 5px
+        a
+          color: darken(white, 50%)
+          +text-shadow(black, 1px, 0px, 0)
+        &:hover
+          +border-radius(5px)
+          background-color: darken($headerBackgroundColor, 25%)
+          border-color: darken($headerBackgroundColor, 35%)
+          a
+            color: white
+
+#main-menu 
+  width: 100%
+  background-color:darken($headerBackgroundColor, 30%)
+  .sub
+    width: 950px;
+    display: block
+    margin: 0 auto
+    ul
+      li 
+        margin: 5px 10px
+        margin-left: 0
+        padding: 5px 15px
+        background-color: lighten(black, 20%)
+        display: inline-block
+        +border-radius(5px)
+        a, &:active, &:visited
+          color: lighten(black, 60%)
+          +text-shadow(black, 1px, 0px, 0)
+        &:hover
+          background-color: lighten(black, 40%)
+          a
+            color: white
+            
+
+
+#main
+  +container
+  .sub
+    +column(24, true)
+    #content .sub
+      +column(24, true)
+
+#footer 
+  +container
+  .sub
+    +column(24, true)
+    background-color: $footerBackgroundColor
+    p
+      padding: 5px
+
+.box
+  position: relative
+  padding: 5px
+  h1
+    @include border-radius(5px)
+    background-color: #eee
+    +linear-gradient(colour-stops(#eee, darken(#eee, 10%)))
+    color: #666
+    +text-shadow(white, 1px, 0px, 0)
+    border: 1px solid #bbb
+    padding: 3px 12px
+    
+.info,
+.message
+  display: block
+  +border-radius(5px)
+  margin: 20px
+  padding: 10px
+  background-color: #efffd0
+  +linear-gradient(colour-stops(#efffd0, darken(#ffd, 20%)))
+  border: 1px solid darken(#ffd, 20%)
+  +box-shadow(#cda, 2px, 2px, 1px)

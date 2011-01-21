@@ -34,15 +34,19 @@ class CloudHelper extends AppHelper
     }
     $max = max($data);
     $min = min($data);
-    $steps = 300 / ($max - $min + 1);
+    $sizes = array('xxs', 'xs', 's', 'm', 'l', 'xl', 'xxl');
+    $width = min($max - $min, 7);
 
     $out = '';
     ksort($data);
     foreach($data as $name => $hits) {
-      $size = 100 + floor(($hits - $min) * $steps);
-      $out .= "<span style=\"font-size: {$size}%\">";
-      $out .= $this->Html->link($name, $urlPrefix.$name);
-      $out .= "</span> ";                      
+      if ($max - $min > 0) {
+        $percentage = ($hits - $min) / ($max - $min);
+      } else {
+        $percentage = 1;
+      }
+      $index = ceil($percentage * $width + (7 - $width) / 2) - 1;
+      $out .= $this->Html->link($name, $urlPrefix.$name, array('class' => $sizes[$index]));
     }
 
     return $out;

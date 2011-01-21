@@ -134,9 +134,15 @@ class ImageDataHelper extends AppHelper {
 
     $imgSrc = Router::url("/media/{$options['type']}/{$media['Media']['id']}");
     $size = $this->getimagesize($media, $options['size']);
-    $alt = h($media['Media']['name']);
+    $alt = $media['Media']['name'];
 
-    $out = "<img src=\"$imgSrc\" {$size[3]} alt=\"$alt\" title=\"$alt\" />";
+    $attrs = array('src' => $imgSrc, 'width' => $size[0], 'height' => $size[1], 'alt' => $alt, 'title' => $alt, 'class' => 'media-link');
+    foreach (array('class', 'id') as $name) {
+      if (isset($options[$name])) {
+        $attrs[$name] = $options[$name];
+      }
+    }
+    $out = $this->Html->tag('img', false, $attrs);
     return $this->output($out);
   }
 

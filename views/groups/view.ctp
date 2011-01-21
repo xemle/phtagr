@@ -88,7 +88,10 @@
     echo "<fieldset><legend>" . __("Add user", true) . "</legend>";
     echo $form->input('Member.new', array('label' => __("Username", true), 'secure' => false));
     echo "</fieldset>";
-    echo $form->submit("Add");
+    echo $html->tag('ul', 
+      $html->tag('li', $form->submit(__('Add', true)), array('escape' => false)),
+      array('class' => 'buttons', 'escape' => false));
+    echo $form->end();
   } else {
     $userId = $this->Session->read('User.id');
     $memberIds = Set::extract('/Member/id', $this->data);

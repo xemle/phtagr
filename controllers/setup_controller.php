@@ -39,6 +39,7 @@ class SetupController extends AppController {
   var $Version = null;
 
   function beforeFilter() {
+    $this->layout = 'backend';
     Configure::write('Cache.disable', true);
     $this->UpgradeSchema->modelMapping = array('files' => 'MyFile');
     $this->core = CONFIGS.'core.php';

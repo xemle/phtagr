@@ -31,6 +31,7 @@ class OptionsController extends AppController {
     $this->subMenu = array(
       'acl' => __("Default Rights", true),
       'profile' => __("Profile", true),
+      'rss' => __("RSS Feeds", true),
       );
     parent::beforeFilter();
 

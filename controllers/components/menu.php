@@ -39,16 +39,6 @@ class MenuComponent extends Object {
     }
     $this->controller =& $controller;
     $this->setCurrentMenu('main');
-    /*
-		$this->items[] = array('text' => __('Overview', true), 'link' => '/dashboard');
- 		$this->items[] = array('text' => __('Account Settings', true), 'link' => '/dashboard/users/modify');
-  	$this->items[] = array('text' => __('Groups', true), 'link' => '/dashboard/groups');
-		$this->items[] = array('text' => __(' - Search Group', true), 'link' => '/dashboard/groups/search');
-		$this->items[] = array('text' => __(' - Create Group', true), 'link' => '/dashboard/groups/create');
-		$this->items[] = array('text' => __(' - Manage Memberships', true), 'link' => '/dashboard/groups/manage');
-		$this->items[] = array('text' => __('My Media', true), 'link' => "/explorer/user/{$username}");
-		$this->items[] = array('text' => __('Upload', true), 'link' => "/browser/quickupload");
-    */
     $this->setBasicMainMenu();
   }
 
@@ -57,6 +47,7 @@ class MenuComponent extends Object {
       'options' => __('Account Settings', true),
       'groups' => __('Groups', true),
       'users' => __('Users', true),
+      'guests' => __('Guests', true),
       'browser' => __('Media Files', true)
       );
     foreach ($controllers as $ctrl => $text) {

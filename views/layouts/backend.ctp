@@ -34,7 +34,7 @@
 </div><!-- main -->
 
 <div id="footer"><div class="sub">
-<p>This is the very cool footer</p>
+<p>&copy; 2006-2011 by <?php echo $html->link("Gallery phTagr", 'http://www.phtagr.org'); ?></p>
 </div></div>
 </body>
 </html>

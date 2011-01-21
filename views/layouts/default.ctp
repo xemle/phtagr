@@ -6,73 +6,46 @@
 <?php 
   echo $html->charset('UTF-8')."\n";
   echo $html->meta('icon')."\n";
-  echo $html->css('phtagr')."\n";
-  echo $javascript->link(array('prototype', 'event-selectors', 'effects', 'controls', 'phtagr'))."\n";
-  
+  echo $html->css('default')."\n";
+  echo $javascript->link('phtagr');
   echo $scripts_for_layout; 
-  echo $feeds_for_layout; 
 ?>
-
-<!--[if lte IE 7]>
-<?php echo $html->css('patches/patch_phtagr')."\n"; ?>
-<![endif]-->
 </head>
 
-<body>
-<div id="page_margins">
-<div id="border-top">
-  <div id="edge-tl"></div>
-  <div id="edge-tr"></div>
-</div>
-<div id="page">
+<body><div id="page">
 
-<div id="header">
-<div id="topnav">
-<a class="skip" href="#navigation" title="skip link">Skip to the navigation</a><span class="hideme">.</span>
-<a class="skip" href="#main_content" title="skip link">Skip to the content</a><span class="hideme">.</span>
-<?php echo View::element('topnav'); ?>
-</div>
-<?php echo View::element('header'); ?>
-</div><!-- header -->
+<div id="header"><div class="sub">
+<h1><?php echo $option->get('general.title', 'phTagr.'); ?></h1>
+<span class="subtitle"><?php echo $option->get('general.subtitle', 'Social Web Gallery'); ?></span>
+<ul id="top-menu">
+  <li><a href="#">Login</a></li>
+  <li><a href="#">Sign Up</a></li>
+  <li><a href="#">Dashboard</a></li>
+</ul>
 
-<div id="nav">
-<a id="navigation" name="navigation"></a>
-<div id="nav_main">
-<?php echo View::element('menu'); ?>
-</div>
-</div>
+</li>
+</div></div><!-- #header/sub -->
 
-<div id="main">
+<div id="main-menu"><div class="sub">
+<ul>
+  <li><?php echo $html->link('Home', '/'); ?></li>
+  <li><?php echo $html->link('Explorer', '/explorer'); ?></li>
+  <li><?php echo $html->link('My Photos', '/explorer'); ?></li>
+  <li><?php echo $html->link('Upload', '/browser/quickupload'); ?></li>
+</ul>
+</div></div><!-- #main-menu/sub -->
 
-<div id="col1">
-<div id="col1_content" class="clearfix">
-<?php echo View::element('main_menu'); ?>
-</div>
-</div>
+<div id="main"><div class="sub">
 
-<div id="col3">
-<div id="col3_content" class="clearfix">
-<div id="spinner" style="display: none; float: right; ">
-  <?php echo $html->image('spinner.gif'); ?>
-</div>
-<div id="main_content">
+<div id="content"><div class="sub">
 <?php echo $content_for_layout?>
-</div>
-<div id="ie_clearing">&nbsp;</div>
-</div>
-</div>
+</div></div><!-- #content/sub -->
 
-</div><!-- main -->
+</div></div><!-- #main/sub -->
 
-<div id="footer">
-<?php echo View::element('footer'); ?>
-</div><!-- footer -->
-</div><!-- page -->
+<div id="footer"><div class="sub">
+<p>&copy; 2006-2011 by <?php echo $html->link("Open Source Social Web Gallery phTagr", 'http://www.phtagr.org'); ?></p>
+</div></div><!-- #footer/sub -->
 
-<div id="border-bottom">
-  <div id="edge-bl"></div>
-  <div id="edge-br"></div>
-</div>
-</div><!-- page margins -->
-</body>
+</div></body><!-- #page -->
 </html>

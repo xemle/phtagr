@@ -25,10 +25,15 @@ class GuestsController extends AppController {
   var $uses = array('Group', 'User', 'Guest');
   var $components = array('RequestHandler');
   var $helpers = array('Form', 'Ajax');
+  var $subMenu = false;
 
   function beforeFilter() {
     parent::beforeFilter();
+    $this->layout = 'backend';
     $this->requireRole(ROLE_USER);
+    $this->subMenu = array(
+      'add' => __('New Guest', true)
+      );
   }
 
   function beforeRender() {

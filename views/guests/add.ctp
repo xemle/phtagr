@@ -12,5 +12,9 @@
   echo $form->input('Guest.confirm', array('type' => 'password', 'label' => __('Confirm', true)));
 ?>
 </fieldset>
-<?php echo $form->submit(__('Create', true)); ?>
-</form>
+<?php 
+  echo $html->tag('ul', 
+    $html->tag('li', $form->submit(__('Add', true)), array('escape' => false)),
+    array('class' => 'buttons', 'escape' => false));
+  echo $form->end();
+?>

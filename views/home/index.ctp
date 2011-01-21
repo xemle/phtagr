@@ -1,110 +1,86 @@
-<h1><?php echo h($option->get('home.welcomeText', __("Welcome to phTagr", true))); ?></h1>
+<div class="random-media">
+<h3><?php __("Random Media"); ?></h3>
+<?php 
+  if (count($randomMedia)) {
+    $media = $randomMedia[0];
+    $params = '/'.$search->serialize(array('sort' => 'random'));
 
-<div class="subcolumns">
-  <div class="c50l">
-    <div class="subcl">
-      <h3><?php __("Random Media"); ?></h3>
-      <?php 
-        if (count($randomMedia)) {
-          $media = $randomMedia[0];
-          $params = '/'.$search->serialize(array('sort' => 'random'));
+    $cite = "<cite>" . sprintf(__("%s by %s", true), h($media['Media']['name']), $html->link($media['User']['username'], '/explorer/user/' . $media['User']['username'])) . "</cite>";
 
-          $cite = "<cite>" . sprintf(__("%s by %s", true), h($media['Media']['name']), $html->link($media['User']['username'], '/explorer/user/' . $media['User']['username'])) . "</cite>";
+    echo $html->tag('div', 
+      $imageData->mediaLink($media, array('type' => 'preview', 'params' => $params)).$cite,
+      array('class' => 'clip', 'escape' => false));
 
-          echo $imageData->mediaLink($media, array('type' => 'preview', 'size' => 340, 'div' => 'image', 'params' => $params, 'after' => $cite));
+    $link = $search->getUri(array('sort' => 'random'));
+    echo "<p>" . sprintf(__("See more %s", true), $html->link(__('random media...', true), $link))."</p>";
+  } 
+?>
+</div>
 
-          $link = $search->getUri(array('sort' => 'random'));
-          echo "<p>" . sprintf(__("See more %s", true), $html->link(__('random media...', true), $link))."</p>";
-        } 
-      ?>
-    </div>
-  </div>
+<div class="newest-media">
+<h3><?php __("Newest Media"); ?></h3>
+<?php
+  $links = array();
+  $max = 6 * 4;
+  $keys = array_keys($newMedia);
+  foreach ($keys as $i) {
+    if (count($links) >= $max) {
+      continue;
+    }
+    $pos = $i + 1;
+    $page = ceil($pos / $search->getShow(12));
+    $params = '/'.$search->serialize(array('sort' => 'newest', 'page' => $page, 'pos' => $pos), false, false, array('defaults' => array('pos' => 1)));
+    $links[] = $imageData->mediaLink($newMedia[$i], array('type' => 'mini', 'params' => $params));
+  }
+  echo $html->tag('div', implode("\n", $links), array('class' => 'images', 'escape' => false));
+  $link = $search->getUri(array('sort' => 'newest'));
+  echo "<p>" . sprintf(__("See %s", true), $html->link(__('all new media...', true), $link))."</p>";
+?>
+</div>
 
-  <div class="c50r">
-    <div class="subcr">
-      <h3><?php __("Newest Media"); ?></h3>
-      <?php
-        $cells = array();
-        $i = 0;
-        $keys = array_keys($newMedia);
-        for ($c = 0; $c < 3; $c++) {
-          $row = array();
-          for ($r = 0; $r < 4; $r++) {
-            if (!isset($keys[$i])) {
-              continue;
-            }
-    
-            $pos = $keys[$i] + 1;
-            $page = ceil($pos / $search->getShow(12));
-            $params = '/'.$search->serialize(array('sort' => 'newest', 'page' => $page, 'pos' => $pos), false, false, array('defaults' => array('pos' => 1)));
-            $row[] = $imageData->mediaLink($newMedia[$keys[$i++]], array('type' => 'mini', 'div' => 'image', 'params' => $params));
-          }
-          if (count($row)) {
-            $cells[] = $row;
-          }
-        }
-      ?> 
-      <?php if (count($cells)): ?>
-      <table class="bare">
-        <tbody>
-          <?php echo $html->tableCells($cells); ?>
-        </tbody>
-      </table>
-      <?php
-        $link = $search->getUri(array('sort' => 'newest'));
-        echo "<p>" . sprintf(__("See %s", true), $html->link(__('all new media...', true), $link))."</p>";
-      ?>
-      <?php endif; ?>
-    </div>
-  </div>
-</div><!-- subcolumns -->
+<div class="recent-comments">
+<h3><?php __("Recent Comments"); ?></h3>
+<?php if ($comments): ?>
+<div class="comments">
+<?php $count = 0; ?>
+<?php foreach ($comments as $comment): ?>
+<div class="comment <?php echo ($count++ % 2) ? 'even' : 'odd'; ?>">
+<?php echo $imageData->mediaLink($comment, array('type' => 'mini', 'div' => 'image')); ?>
+<div class="meta">
+<span class="from"><?php echo $comment['Comment']['name'] ?></span> said 
+<span class="date"><?php echo $time->relativeTime($comment['Comment']['date']); ?>:</span>
+</div><!-- comment meta -->
 
-<div class="subcolumns">
-  <div class="c50l">
-    <div class="subcl">
-    <h3><?php __("Recent Comments"); ?></h3>
-      <?php if ($comments): ?>
-      <div class="comments">
-      <?php $count = 0; ?>
-      <?php foreach ($comments as $comment): ?>
-      <div class="comment <?php echo ($count++ % 2) ? 'even' : 'odd'; ?>">
-      <?php echo $imageData->mediaLink($comment, array('type' => 'mini', 'div' => 'image')); ?>
-      <div class="meta">
-      <span class="from"><?php echo $comment['Comment']['name'] ?></span> said 
-      <span class="date"><?php echo $time->relativeTime($comment['Comment']['date']); ?>:</span>
-      </div><!-- comment meta -->
-      
-      <div class="text">
-      <?php echo preg_replace('/\n/', '<br />', $text->truncate($comment['Comment']['text'], 220, array('ending' => '...', 'exact' => false, 'html' => false))); ?>
-      </div>
-      </div><!-- comment -->
-      <?php endforeach; /* comments */ ?>
-      </div><!-- comments -->
-      <div>
-        <?php echo $html->link(__("Older comments...", true), "/comments", array('escape' => false));?>
-      </div>
-      <?php endif; ?>    
-    </div>
-  </div>
+<div class="text">
+<?php echo preg_replace('/\n/', '<br />', $text->truncate($comment['Comment']['text'], 220, array('ending' => '...', 'exact' => false, 'html' => false))); ?>
+</div>
+</div><!-- comment -->
+<?php endforeach; /* comments */ ?>
+</div><!-- comments -->
+<p><?php echo $html->link(__("Older comments...", true), "/comments", array('escape' => false));?></p>
+<?php endif; ?>    
+</div>
 
-  <div class="c50r">
-    <div class="subcr">
-      <h3><?php __("Popular Tags"); ?></h3>
-        <?php
-        if (isset($cloudTags) && count($cloudTags)) {
-          echo $cloud->cloud($cloudTags, '/explorer/tag/');
-        } else {
-          echo '<p>' . __("No tags assigned") . '</p>';
-        }
-        ?>
-      <h3><?php __("Popular Categories"); ?></h3>
-        <?php
-        if (isset($cloudCategories) && count($cloudCategories)) {
-          echo $cloud->cloud($cloudCategories, '/explorer/category/');
-        } else {
-          echo '<p>' . __("No categories assigned") . '</p>';
-        }
-        ?>
-     </div>
-  </div>
-</div><!-- subcolumns -->
+<div class="tag-cloud">
+<h3><?php __("Popular Tags"); ?></h3>
+<div class="cloud">
+<?php
+if (isset($cloudTags) && count($cloudTags)) {
+  echo $cloud->cloud($cloudTags, '/explorer/tag/');
+} else {
+  echo '<p>' . __("No tags assigned") . '</p>';
+}
+?>
+</div></div>
+
+<div class="category-cloud">
+<h3><?php __("Popular Categories"); ?></h3>
+<div class="could">
+<?php
+if (isset($cloudCategories) && count($cloudCategories)) {
+  echo $cloud->cloud($cloudCategories, '/explorer/category/');
+} else {
+  echo '<p>' . __("No categories assigned") . '</p>';
+}
+?>
+</div></div>
