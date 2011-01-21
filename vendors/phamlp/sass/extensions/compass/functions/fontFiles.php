@@ -23,7 +23,7 @@ class SassExtentionsCompassFunctionsFontFiles {
 		$args = func_get_args();
 		$files = array();
 		while ($args) {
-			$files[] = '#{font_url('.array_shift($args)."} format('".array_shift($args)."')";
+			$files[] = '#{font_url('.array_shift($args).")} format('".trim(array_shift($args), '\'"')."')";
 		}
 		return new SassString(join(", ", $files));
 	}
