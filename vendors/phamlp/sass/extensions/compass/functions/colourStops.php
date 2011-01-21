@@ -109,7 +109,7 @@ class SassExtentionsCompassFunctionsColourStops {
 			}
 		 
 			$last_value = $stop;
-			$colourStops[] = "colour-stop({$stop->toString()}, {$pos->colour->toString()})";
+			$colourStops[] = "color-stop({$stop->toString()}, {$pos->colour->toString()})";
 		}
 		
 		return new SassString(join(', ', $colourStops));
