@@ -187,7 +187,8 @@ class SassExtentionsCompassFunctionsColourStops {
 	}
 
 	public static function color_stops() {
-		return self::colour_stops(func_get_args());
+		$args = func_get_args();
+		return call_user_func_array(array('SassExtentionsCompassFunctionsColourStops', 'colour_stops'), $args);
 	}
 	
 	public static function colour_stops() {
