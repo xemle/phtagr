@@ -8,5 +8,9 @@
 <fieldset>
   <?php echo $form->input('Folder.name', array ('label' => __("Folder Name", true))); ?>
 </fieldset>
-<?php echo $form->submit(__("Create", true)); ?>
-<?php echo $form->end(); ?>
+<?php 
+  echo $html->tag('ul', 
+    $html->tag('li', $form->submit(__('Create', true)), array('escape' => false)),
+    array('class' => 'buttons', 'escape' => false));
+  echo $form->end();
+?>

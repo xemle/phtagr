@@ -18,4 +18,9 @@
   echo $form->input('acl.group', array('type' => 'select', 'options' => $groups, 'label' => __("Default image group?", true)));
 ?>
 </fieldset>
-<?php echo $form->end(__('Save', true)); ?>
+<?php 
+  echo $html->tag('ul', 
+    $html->tag('li', $form->submit(__('save', true)), array('escape' => false)),
+    array('class' => 'buttons', 'escape' => false));
+  echo $form->end();
+?>

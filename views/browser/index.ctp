@@ -21,5 +21,7 @@
   } ?>. 
 </p>
 
-<?php echo $form->end(__('Import', true));?>
-
+<?php 
+  echo $form->submit(__('Import', true));
+  echo $form->end();
+?>

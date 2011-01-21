@@ -16,7 +16,12 @@
   <?php echo $form->input('File.extract', array('label' => __('Extract ZIP archive', true), 'checked' => true, 'type' => 'checkbox')); ?>
 </fieldset>
 
-<?php echo $form->end(__("Upload", true)); ?>
+<?php 
+  echo $html->tag('ul', 
+    $html->tag('li', $form->submit(__('Upload', true)), array('escape' => false)),
+    array('class' => 'buttons', 'escape' => false));
+  echo $form->end();
+?>
 
 <?php else: ?>
 <p class="info"><?php __("You cannot upload files now. Your upload quota is exceeded."); ?></p>

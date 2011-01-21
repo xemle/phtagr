@@ -14,4 +14,9 @@
 ?>
 </fieldset>
 
-<?php echo $form->end(__('Create', true)); ?>
+<?php 
+  echo $html->tag('ul', 
+    $html->tag('li', $form->submit(__('Create', true)), array('escape' => false)),
+    array('class' => 'buttons', 'escape' => false));
+  echo $form->end();
+?>

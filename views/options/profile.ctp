@@ -40,6 +40,8 @@
 ?>
 </fieldset>
 <?php 
-  echo $form->submit(__('Save', true), array('class' => 'ui-button')); 
+  echo $html->tag('ul', 
+    $html->tag('li', $form->submit(__('Save', true)), array('escape' => false)),
+    array('class' => 'buttons', 'escape' => false));
   echo $form->end();
 ?>
