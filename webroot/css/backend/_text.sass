@@ -1,9 +1,14 @@
+@import font-face
++font-face(DroidSans, font-files("droid/droidsans-webfont.woff", "woff", "droid/droidsans-webfont.ttf", "truetype"), "droid/droidsans-webfont.eot")
++font-face(DroidSans-bold, font-files("droid/droidsans-bold-webfont.woff", "woff", "droid/droidsans-bold-webfont.ttf", "truetype"), "droid/droidsans-bold-webfont.eot")
++font-face(Ubuntu, font-files("ubuntu/ubuntu-r-webfont.woff", "woff", "ubuntu/ubuntu-r-webfont.ttf", "truetype"), "ubuntu/ubuntu-r-webfont.eot")
++font-face(Ubuntu-bold, font-files("ubuntu/ubuntu-b-webfont.woff", "woff", "ubuntu/ubuntu-b-webfont.ttf", "truetype"), "ubuntu/ubuntu-b-webfont.eot")
+
 *
-  font-family: Verdana, sans
-  font-size: 12pt
+  font-size: 11pt
   font-weight: normal
   text-decoration: none
-
+  font-family: Ubuntu, Verdana, sans
 a
   color: $linkColor
 
@@ -24,6 +29,7 @@ p
 #content 
   h2, 
   h3
+    font-family: Ubuntu-bold
     padding: 10px 0
   ul li
     padding: 5px 0

@@ -13,9 +13,8 @@
 
 #header 
   +column(24, true)
-  @include border-bottom-radius(10px)
   background-color: $headerBackgroundColor
-  +linear-gradient(colour-stops($headerBackgroundColor, darken($headerBackgroundColor, 20%)))
+  +linear-gradient(color-stops($headerBackgroundColor, darken($headerBackgroundColor, 20%)))
   border: 1px solid $headerBackgroundColor
   * 
     font-size: 120% 
@@ -34,12 +33,11 @@
 
 #main
   +column(24, true)
-  @include border-top-radius(10px)
   background-color: $contentBackgroundColor
   #sidebar
     +column(6)
     @include border-top-left-radius(10px)
-    background-color: darken($sidebarBackgroundColor, 10%)
+    background-color: $sidebarBackgroundColor
  
   #content 
     +column(18, true)
@@ -50,10 +48,9 @@
       width: 100%
       font-size: 120%
       padding: 10px 0
-      background-color: darken($contentBackgroundColor, 20%)
+      background-color: darken($contentBackgroundColor, 10%)
 
 #footer 
-  @include border-bottom-radius(10px)
   +column(24, true)
   background-color: $footerBackgroundColor
   p

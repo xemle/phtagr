@@ -14,12 +14,26 @@
     border: #a00 1px solid
     background-color: #ffd
 
+=default-button
+  border: 1px solid #ddd
+  +border-radius(5px)
+  padding: 3px 5px
+  +linear-gradient(colour-stops(#eee, darken(#eee, 20%)))
+  color: #666
+  +text-shadow(white, 1px, 1px)
+  &:hover
+    background-color: $menuActiveBackgroundColor
+    +linear-gradient(colour-stops($menuActiveBackgroundColor, darken($menuActiveBackgroundColor, 20%)))
+    color: white
+    +text-shadow(black, -1px, -1px)
+    border-color: darken($menuActiveBackgroundColor, 20%)P
+
 form
   overflow: hidden
+  width: 710px
   fieldset
     padding: 15px 0
     border: 0
-    overflow: hidden
     legend
       font-weight: bold
     div
@@ -35,11 +49,9 @@ form
       input[type=password],
       textarea
         width: 50%
-        font-size: 100%
         +default-input
       select
-        font-size: 100%
-        width: 52%
+        width: 51.5%
         +default-input
       &.checkbox 
         input[type=checkbox]
@@ -49,13 +61,12 @@ form
           float: none
           display: inline-block
           width: 50%
-  .submit input[type=submit]
-    border: 1px solid #ddd
-    +border-radius(5px)
-    padding: 3px 5px
-    +linear-gradient(colour-stops(#eee, darken(#eee, 20%)))
-    color: #555
-    +text-shadow(white, 1px, 1px)
-    &:hover
-      +linear-gradient(colour-stops(#ddd, darken(#ddd, 20%)))
-      color: black
+  ul.buttons 
+    margin-left: 30%
+    li 
+      display: inline-block
+      margin-right: 10px
+      input
+        +default-button
+  .submit input
+    +default-button
