@@ -75,7 +75,7 @@ if (isset($cloudTags) && count($cloudTags)) {
 
 <div class="category-cloud">
 <h3><?php __("Popular Categories"); ?></h3>
-<div class="could">
+<div class="cloud">
 <?php
 if (isset($cloudCategories) && count($cloudCategories)) {
   echo $cloud->cloud($cloudCategories, '/explorer/category/');

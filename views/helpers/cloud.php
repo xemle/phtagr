@@ -45,7 +45,7 @@ class CloudHelper extends AppHelper
       } else {
         $percentage = 1;
       }
-      $index = ceil($percentage * $width + (7 - $width) / 2) - 1;
+      $index = max(0, ceil($percentage * $width + (7 - $width) / 2) - 1);
       $out .= $this->Html->link($name, $urlPrefix.$name, array('class' => $sizes[$index]));
     }
 
