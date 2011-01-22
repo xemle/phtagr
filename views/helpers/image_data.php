@@ -35,74 +35,118 @@ class ImageDataHelper extends AppHelper {
     $this->Sanitize =& new Sanitize();
   }
 
-  /** Returns the image size of the given media. This function considers the
-    orientaion of the media.
+  /** Returns the rotated size of the media
     @param media Media model data
-    @param size New size. Numeric value of maximum width or height. Possible
-    text values: 'mini', 'thumb', 'preview', 'original'. If false than it
-    returns the media size
-    @param square Returns the squared size of resize value 
-    @return array of sizes. array(height, width, html size) */
-  function getimagesize($media, $size = false, $square=false) {
-    if (!isset($media['Media']['width']) ||
-      !isset($media['Media']['height'])) {
-      return array(0 => 0, 1 => 0, 3 => '');
-    }
-
-    if ($size && !is_numeric($size) && !in_array($size, array('mini', 'thumb', 'preview', 'original'))) {
-      Logger::err("Wrong media size $resize");
-    }
-
-    $resize = false;
-    switch ($size) {
-      case 'mini':
-        $resize = OUTPUT_SIZE_MINI;
-        $square = true;
-        break;
-      case 'thumb':
-        $resize = OUTPUT_SIZE_THUMB;
-        break;
-      case 'preview':
-        $resize = OUTPUT_SIZE_PREVIEW;
-        break;
-      case 'original':
-        $resize = false;
-        break;
-      default:
-        if ($size && is_numeric($size)) {
-          $resize = $size;
-        }
-    }
-
-    $width = $media['Media']['width'];
-    $height = $media['Media']['height'];
-    if ($resize) {
-      if ($square) {
-        $width = $resize;
-        $height = $resize;
-      } else {
-        if ($width > $resize && $width >= $height) {
-          $height = intval($resize * ($height / $width));
-          $width = $resize;
-        } elseif ($height > $resize && $height > $width) {
-          $width = intval($resize * ($width / $height));
-          $height = $resize;
-        }
-      }
-    }
-    $result = array();
-
+    @return Array of width and height */
+  function getRotatedSize($media) {
     // Rotate the image according to the orientation
     $orientation = isset($media['Media']['orientation']) ? $media['Media']['orientation'] : 1;
     if ($orientation >= 5 && $orientation <= 8) {
-      $result[0] = $height;
-      $result[1] = $width;
+      $width = $media['Media']['height'];
+      $height = $media['Media']['width'];
     } else {
-      $result[0] = $width;
-      $result[1] = $height;
+      $width = $media['Media']['width'];
+      $height = $media['Media']['height'];
+    }
+    return array($width, $height);
+  }
+
+  /** Get resized size with maximum size
+    @return array of width and height */
+  function resize($width, $height, $size) {
+    if ($width > $height && $width > $size) {
+      $height = floor($height * $size / $width);
+      $width = $size;
+    } else if ($height > $width && $height > $size) {
+      $width = floor($width * $size / $height);
+      $height = $size;
+    }
+    return array($width, $height);
+  }
+
+  /** Get squared width and height with maximum size
+    @return array of width and height */
+  function square($width, $height, $size) {
+    if (min($width, $height) < $size) {
+      list($width, $height) = $this->resize($width, $height, $size);
+    } else {
+      $width = $size;
+      $height = $size;
+    }
+    return array($width, $height);
+  }
+
+  /** Get resized size with maximum width 
+    @return array of width and height */
+  function resizeWidth($width, $height, $size) {
+    if ($width > $size) {
+      $height = floor($height * $size / $width);
+      $width = $size;
+    }
+    return array($width, $height);
+  }
+
+  /** Returns the image size of the given media. This function considers the
+    orientaion of the media.
+    @param media Media model data
+    @param options New size given as single value. Numeric value of maximum
+    width or height. Possible text values: 'mini', 'thumb', 'preview',
+    'original'.  If false than it returns the media size. If options is an 
+    array following options are supported
+      - height - Maximum height
+      - width - Maximum width
+      - square - Square the sizes
+      - size - size
+    @return array of sizes. array(height, width, false, html size) */
+  function getimagesize($media, $options = false) {
+    if (!isset($media['Media']['width']) ||
+      !isset($media['Media']['height'])) {
+      return array(0 => 0, 1 => 0, 2 => false, 3 => '');
+    }
+    if (!is_array($options)) {
+      $options = array('size' => $options);
+    }
+    $options = am(array('size' => false, 'width' => false, 'height' => false, 'square' => false), $options); 
+    $size = $options['size'];
+
+    if ($size && !is_numeric($size) && !in_array($size, array('mini', 'thumb', 'preview', 'original'))) {
+      Logger::err("Wrong media size $size");
+      return;
     }
 
-    $result[3] = "height=\"{$result[1]}\" width=\"{$result[0]}\"";
+    $map = array(
+      'mini' => OUTPUT_SIZE_MINI, 
+      'thumb' => OUTPUT_SIZE_THUMB,
+      'preview' => OUTPUT_SIZE_PREVIEW,
+      'original' => false
+      );
+    $resize = false;
+    $square = false;
+    if ($size) {
+      if (isset($map[$size])) {
+        $resize = $map[$size];
+      } else if (is_numeric($size)) {
+        $resize = $size;
+      }
+      if ($size == 'mini') {
+        $square = true;
+      }
+    }
+
+    list($width, $height) = $this->getRotatedSize($media);
+
+    if ($options['width'] && $width > $options['width']) {
+      list($width, $height) = $this->resizeWidth($width, $height, $options['width']);
+    } elseif ($options['height'] && $height > $options['height']) {
+      list($height, $width) = $this->resizeWidth($height, $width, $options['height']);
+    } elseif ($resize) {
+      if ($square) {
+        list($width, $height) = $this->square($width, $height, $resize);
+      } else {
+        list($width, $height) = $this->resize($width, $height, $resize);
+      }
+    }
+    $result = array(0 => $width, 1 => $height, 2 => false, 3 => "width=\"$width\" height=\"$height\"");
 
     return $result;
   }
@@ -122,18 +166,22 @@ class ImageDataHelper extends AppHelper {
     if (!is_array($options)) {
       $options = array('type' => $options);
     }
-    $options = am(array('type' => 'thumb', 'size' => false), $options);
+    $mediaOptions = am(array('type' => 'thumb', 'size' => false, 'width' => false, 'height' => false), $options);
 
-    if (!in_array($options['type'], array('mini', 'thumb', 'preview', 'original'))) {
+    if (!in_array($mediaOptions['type'], array('mini', 'thumb', 'preview', 'original'))) {
       Logger::err("Wrong media type {$options['type']}");
       return false;
     }
-    if (!$options['size']) {
-      $options['size'] = $options['type'];
+    if (!$mediaOptions['size'] && !$mediaOptions['width'] && !$mediaOptions['height']) {
+      $mediaOptions['size'] = $mediaOptions['type'];
     }
 
     $imgSrc = Router::url("/media/{$options['type']}/{$media['Media']['id']}");
-    $size = $this->getimagesize($media, $options['size']);
+    $size = $this->getimagesize($media, $mediaOptions);
+    if (!$size) {
+      Logger::err("Could not fetch media size of type {$mediaOptions['type']} or size {$mediaOptions['size']}");
+      return false;
+    }
     $alt = $media['Media']['name'];
 
     $attrs = array('src' => $imgSrc, 'width' => $size[0], 'height' => $size[1], 'alt' => $alt, 'title' => $alt, 'class' => 'media-link');

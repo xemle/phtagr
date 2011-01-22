@@ -8,7 +8,7 @@
     $cite = "<cite>" . sprintf(__("%s by %s", true), h($media['Media']['name']), $html->link($media['User']['username'], '/explorer/user/' . $media['User']['username'])) . "</cite>";
 
     echo $html->tag('div', 
-      $imageData->mediaLink($media, array('type' => 'preview', 'params' => $params)).$cite,
+      $imageData->mediaLink($media, array('type' => 'preview', 'params' => $params, 'width' => 470)).$cite,
       array('class' => 'clip', 'escape' => false));
 
     $link = $search->getUri(array('sort' => 'random'));
