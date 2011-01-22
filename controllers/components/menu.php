@@ -65,6 +65,7 @@ class MenuComponent extends Object {
   }
 
   function beforeRender() {
+    $this->setCurrentMenu('main');
     if (isset($this->controller->subMenu)) {
       $name = strtolower($this->controller->name);
       $parentId = 'item-' . $name;
