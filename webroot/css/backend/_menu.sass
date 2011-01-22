@@ -1,5 +1,6 @@
 @import border-radius
 @import gradient
+@import grid
 
 =menu-colors($f, $bg)
   color: $f
@@ -19,10 +20,10 @@
   border-bottom: 1px solid #ddd
   
 #sidebar ul 
+  +column(6)
   list-style-type: none
-  margin: 10px 0
-  padding: 0
   li
+    padding: 0 5px
     margin: 0
     a
       +menu-item(90)
