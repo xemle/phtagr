@@ -175,7 +175,7 @@ class MenuHelper extends AppHelper
       $items[] = $this->Html->tag('li', $item . $submenu, $attrs);
     }
     if (count($items)) {
-      return $this->Html->tag('ul', implode("\n", $items));
+      return $this->Html->tag('ul', implode("\n", $items), $options);
     }
     return false;
   }
@@ -185,7 +185,7 @@ class MenuHelper extends AppHelper
       return false;
     }
     $menu = $this->params['menus'][$name];
-    return $this->_getSubMenu($menu, am($options, $menu['options']));
+    return $this->_getSubMenu($menu, am($options, array('id' => $name), $menu['options']));
   }
 }
 ?>
