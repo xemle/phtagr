@@ -42,6 +42,18 @@ class AppController extends Controller
     $this->Feed->add('/comment/rss', array('title' => __('Recent comments', true)));
     
     $this->_configureEmail();
+
+    $this->Menu->setCurrentMenu('top-menu');
+    $role = $this->getUserRole();
+    if ($role == ROLE_NOBODY) {
+      $this->Menu->addItem(__('Login', true), array('controller' => 'users', 'action' => 'login'));
+      if ($this->getOption('user.register.enable', 0)) {
+        $this->Menu->addItem(__('Sign Up', true), array('controller' => 'users', 'action' => 'register'));
+      }
+    } else {
+      $this->Menu->addItem(__('Logout', true), array('controller' => 'users', 'action' => 'logout'));
+      $this->Menu->addItem(__('Dashboard', true), array('controller' => 'options'));
+    }
   }
 
   /** Configure email component on any SMTP configuration values in core.php */
