@@ -2,19 +2,19 @@
 @import tag-cloud
 @import opacity
 *
-  .random-media 
+  #random-media 
     +column(12)
 
-  .newest-media
+  #newest-media
     +column(12, true)
 
-  .recent-comments
+  #recent-comments
     clear: both
-  .recent-comments, .tag-cloud 
+  #recent-comments, #tag-cloud 
     +column(8)
-  .category-cloud
+  #category-cloud
     +column(8, true)
-  .tag-cloud, .category-cloud
+  #tag-cloud, #category-cloud
     .cloud
       +column(8)
       +tag-cloud(14pt)
@@ -23,7 +23,7 @@
         padding-left: 0
       a
         display: inline-block
-* .random-media .clip
+* #random-media .clip
   position: relative
   display: block
   overflow: hidden
@@ -38,7 +38,7 @@
     padding: 5px
     &:hover
       +opacity(.9)
-* .recent-comments
+* #recent-comments
     .comments
       .comment
         clear: both

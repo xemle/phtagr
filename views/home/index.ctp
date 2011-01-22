@@ -1,4 +1,4 @@
-<div class="random-media">
+<div id="random-media">
 <h3><?php __("Random Media"); ?></h3>
 <?php 
   if (count($randomMedia)) {
@@ -17,7 +17,7 @@
 ?>
 </div>
 
-<div class="newest-media">
+<div id="newest-media">
 <h3><?php __("Newest Media"); ?></h3>
 <?php
   $links = array();
@@ -38,7 +38,7 @@
 ?>
 </div>
 
-<div class="recent-comments">
+<div id="recent-comments">
 <h3><?php __("Recent Comments"); ?></h3>
 <?php if ($comments): ?>
 <div class="comments">
@@ -61,7 +61,7 @@
 <?php endif; ?>    
 </div>
 
-<div class="tag-cloud">
+<div id="tag-cloud">
 <h3><?php __("Popular Tags"); ?></h3>
 <div class="cloud">
 <?php
@@ -73,7 +73,7 @@ if (isset($cloudTags) && count($cloudTags)) {
 ?>
 </div></div>
 
-<div class="category-cloud">
+<div id="category-cloud">
 <h3><?php __("Popular Categories"); ?></h3>
 <div class="cloud">
 <?php
