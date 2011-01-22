@@ -27,6 +27,7 @@ foreach ($this->data as $media): ?>
 
 <div class="p-explorer-cell unselected" id="media-<?php echo $media['Media']['id']; ?>">
 <h2><?php echo $media['Media']['name']; ?></h2>
+
 <?php 
   $size = $imageData->getimagesize($media, OUTPUT_SIZE_THUMB);
   $imageCrumbs = $this->Breadcrumb->replace($crumbs, 'page', $search->getPage());
@@ -70,6 +71,13 @@ foreach ($this->data as $media): ?>
 </div><!-- meta -->
 </div><!-- cell -->
 
+<?php 
+  for ($i = 2; $i <= 6; $i++) {
+    if ($cell % $i == 0) {
+      echo $html->tag('span', false, array('class' => "cell-row-$i"));
+    }
+  }
+?>
 <?php $cell++; endforeach; ?>
 </div>
 

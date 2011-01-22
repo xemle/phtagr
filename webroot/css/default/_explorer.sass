@@ -1,0 +1,70 @@
+@import grid
+@import border-radius
+@import opacity
+@import gradient
+.paginator .subpaginator
+  .current, a
+    padding: 3px 6px
+  a:hover
+    padding: 2px 5px
+    +border-radius(3px)
+    background-color: #666
+    border: 1px solid #888
+  .current
+    font-family: Ubuntu-bold
+
+// Fix to overwrite '#content h2' rule
+#content * .p-explorer-cell h2
+  padding: 2px
+  font-family: Ubuntu
+
+* .p-explorer-cells
+  +column(18)
+  .p-explorer-cell
+    margin: 3px 0
+    +column(6, true)
+    position: relative
+    h2
+      position: absolute
+      top: 0
+      z-index: 2
+      margin: 0
+      +opacity(.0)
+      background-color: #000
+    .p-explorer-cell-caption
+      padding: 3px
+      position: absolute
+      top: 14pt
+      +opacity(.0)
+      background-color: #000
+    .p-explorer-cell-image
+      display: table-cell
+      text-align: center
+      vertical-align: middle
+      width: 220px
+      height: 220px
+      *
+        vertical-align: middle
+        overflow: hidden
+    .p-explorer-cell-meta
+      position: absolute
+      overflow: visible
+      top: 0
+      left: 225px
+      margin: 0 5px
+      padding: 5px
+      display: block
+      width: 300px
+      z-index: -1
+      background-color: #333
+      +linear-gradient(colour-stops(#333, darken(#333, 10%)))
+      border: 1px solid #888
+      +border-radius(3px)
+      +opacity(0.0)
+    &:hover
+      h2, .p-explorer-cell-caption
+        +opacity(0.7)    
+      .p-explorer-cell-meta
+        +opacity(1)
+        z-index: 3
+

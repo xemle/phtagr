@@ -8,9 +8,15 @@
   echo $form->input('User.password', array('label' => __('Password', true)));
 ?>
 </fieldset>
-<?php echo $form->end(__('Login', true)); ?>
-
-<?php echo $html->link(__('Forgot your password', true), 'password'); ?>
-<?php if ($register): ?>
- <?php printf(__("or %s", true), $html->link(__('sign up', true), 'register')); ?>
-<?php endif; ?>
+<?php 
+  $signup = '';
+  if ($register) {
+    $signup = $html->link(__('Sign Up', true), 'register');
+  }
+  echo $html->tag('ul', 
+    $html->tag('li', $form->submit(__('Login', true)), array('escape' => false))
+    . $html->tag('li', $html->link(__('Forgot your password', true), 'password'), array('escape' => false))
+    . $signup,
+    array('class' => 'buttons', 'escape' => false));
+  echo $form->end();
+?>
