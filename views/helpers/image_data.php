@@ -36,25 +36,21 @@ class ImageDataHelper extends AppHelper {
   }
 
   /** Returns the rotated size of the media
-    @param media Media model data
-    @return Array of width and height */
-  function getRotatedSize($media) {
+    @return Array of rotated width and height */
+  function rotate($width, $height, $orientation) {
     // Rotate the image according to the orientation
-    $orientation = isset($media['Media']['orientation']) ? $media['Media']['orientation'] : 1;
+    $orientation = $orientation ? $orientation : 1;
     if ($orientation >= 5 && $orientation <= 8) {
-      $width = $media['Media']['height'];
-      $height = $media['Media']['width'];
+      return array($height, $width);
     } else {
-      $width = $media['Media']['width'];
-      $height = $media['Media']['height'];
+      return array($width, $height);
     }
-    return array($width, $height);
   }
 
   /** Get resized size with maximum size
     @return array of width and height */
   function resize($width, $height, $size) {
-    if ($width > $height && $width > $size) {
+    if ($width >= $height && $width > $size) {
       $height = floor($height * $size / $width);
       $width = $size;
     } else if ($height > $width && $height > $size) {
@@ -133,7 +129,7 @@ class ImageDataHelper extends AppHelper {
       }
     }
 
-    list($width, $height) = $this->getRotatedSize($media);
+    list($width, $height) = $this->rotate($media['Media']['width'], $media['Media']['height'], $media['Media']['orientation']);
 
     if ($options['width'] && $width > $options['width']) {
       list($width, $height) = $this->resizeWidth($width, $height, $options['width']);
