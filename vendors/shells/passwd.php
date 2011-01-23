@@ -20,16 +20,14 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-App::import('model', array('user', 'image'));
+App::import('Model', 'User');
 
 class PasswdShell extends Shell {
 
   var $User = null;
-  var $Image = null;
 
   function initialize() {
     $this->User =& new User();
-    $this->Image =& new Image();
 
     $this->out("phtagr shell utilities");
     $this->hr();
@@ -108,8 +106,9 @@ class PasswdShell extends Shell {
 
   /** Test password */
   function verify() {
-    if (!isset($this->args[0]))
+    if (!isset($this->args[0])) {
       $this->error("Missing Argument", "Username is not given");
+    }
 
     $userIdOrName = $this->args[0];
     if (is_numeric($userIdOrName))
@@ -126,9 +125,20 @@ class PasswdShell extends Shell {
     }
   }
 
+  function show() {
+    $users = $this->User->find('all', array('recursive' => 1));
+    foreach ($users as $user) {
+      $this->out("{$user['User']['id']}\t{$user['User']['username']}");
+    }
+    $this->hr();
+    $this->out(count($users) . " user(s)");
+  }
+
   function help() {
     $this->out("Help screen");
     $this->hr();
+    $this->out("show");
+    $this->out("\tList all users");
     $this->out("passwd <username|user id>");
     $this->out("\tChange password of a given user");
     $this->out("encrypt");
