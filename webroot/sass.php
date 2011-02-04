@@ -91,11 +91,21 @@ header("Expires: " . gmdate("D, j M Y H:i:s", time() + DAY) . " GMT");
 header("Cache-Control: cache"); // HTTP/1.1
 header("Pragma: cache");        // HTTP/1.0
 
-if (preg_match('|\.\.|', $url) || !preg_match('|^ccss/(.+)$|i', $url, $regs)) {
+if (preg_match('|\.\.|', $url) || !preg_match('|^(\w+/)?ccss/(.+)$|i', $url, $regs)) {
 	die('Wrong file name.');
 }
 
-$cssFile = CSS . $regs[1];
+$cssPath = CSS;
+if ($regs[1]) {
+  $plugin = trim($regs[1], '/');
+  if (is_dir('.' . DS . $plugin . DS . 'css')) {
+    $cssPath = '.' . DS . $plugin . DS . 'css' . DS;
+  } else {
+    $path = App::pluginPath($plugin);
+    $cssPath = $path . 'webroot' . DS . 'css' . DS;
+  }
+}
+$cssFile = $cssPath . $regs[2];
 $sassFile = str_replace('.css', '.sass', $cssFile);
 
 // Parse the Sass file if there is one
