@@ -52,6 +52,8 @@ class ExplorerController extends AppController
         $groupSelect[0] = __('[Keep]', true);
         $groupSelect[-1] = __('[No Group]', true);
         $this->set('groups', $groupSelect);
+      } else {
+        $this->set('groups', array());
       }
     }
     $this->set('crumbs', $this->crumbs);
