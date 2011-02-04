@@ -35,13 +35,21 @@ form
   fieldset
     width: 100%
     border: 0
-    padding: 4px
     legend
-      color: white
+      color: darken(white, 10%)
       font-family: Ubuntu-bold
       width: 100%
       border-bottom: 1px solid darken(white, 10%)
+      padding: 4px
+      background-color: #124;
+      &:hover
+        cursor: pointer
+    &.hidden legend
+      background-color: #222;
+      &:hover
+        background-color: lighten(#124, 10%)
     div
+      padding: 4px
       display: block
       margin: 4px 0
       width: 100% 

@@ -17,7 +17,7 @@ echo $javascript->codeBlock("var mediaIds = [" . implode(', ', Set::extract('/Me
 
 foreach ($this->data as $media): ?>
 
-<div class="p-explorer-cell" id="media-<?php echo $media['Media']['id']; ?>">
+<div class="p-explorer-cell <?php echo $media['Media']['canWriteTag'] ? 'editable' : ''; ?>" id="media-<?php echo $media['Media']['id']; ?>">
 <h2><?php 
   if (!$search->getUser() || $search->getUser() != $session->read('User.username')) {
     printf(__("%s by %s", true), h($media['Media']['name']), $html->link($media['User']['username'], "/explorer/user/".$media['User']['username']));
@@ -63,9 +63,24 @@ foreach ($this->data as $media): ?>
 
 <div class="p-explorer-cell-actions" id="action-<?php echo $media['Media']['id']; ?>">
 <ul>
-  <li><a class="add" href="javascript:void"><?php echo $this->Html->image('icons/add.png', array('title' => __('Add to the selection', true), 'alt' => 'add')); ?></a></li>
-  <li><a class="del" href="javascript:void"><?php echo $this->Html->image('icons/delete.png', array('title' => __('Remove from the selection', true), 'alt' => 'remove')); ?></a></li>
-  <li><a href="javascript:void"><?php echo $this->Html->image('icons/disk.png', array('title' => __('Download this media', true), 'alt' => 'download')); ?></a></li>
+<?php 
+  if ($media['Media']['canWriteTag']) {
+    $addIcon = $this->Html->image('icons/add.png', array('title' => __('Add to the selection', true), 'alt' => 'add'));
+    echo $html->tag('li', 
+      $html->link($addIcon, 'javascript:void', array('escape' => false, 'class' => 'add')),
+      array('escape' => false));
+    $delIcon = $this->Html->image('icons/delete.png', array('title' => __('Remove from the selection', true), 'alt' => 'remove'));
+    echo $html->tag('li', 
+      $html->link($delIcon, 'javascript:void', array('escape' => false, 'class' => 'del')),
+      array('escape' => false));
+  }
+  if ($media['Media']['canReadOriginal']) {
+    $diskIcon = $this->Html->image('icons/disk.png', array('title' => __('Download this media', true), 'alt' => 'download'));
+    echo $html->tag('li', 
+      $html->link($diskIcon, Router::url('/media/download/' . $media['Media']['id'] . '/' . $media['Media']['name'], true), array('escape' => false, 'class' => 'download')),
+      array('escape' => false));
+  }
+?>
   <li><a href="javascript:void"><?php echo __('More...', true); ?></a></li>
 </ul>
 </div>
@@ -105,6 +120,24 @@ foreach ($this->data as $media): ?>
     $('#invert-selection').click(function() {
       $('#content .sub .p-explorer-cell').invertMediaSelection();
     });
+    $('#explorer fieldset').addClass('hidden').each(function() {
+      $(this).children('.input').hide();
+      $(this).find('legend').click(function() {
+        var parent = $(this).parent();
+        if ($(parent).hasClass('hidden')) {
+          $(parent).find('.input').slideDown('middle');
+          $(parent).removeClass('hidden');
+          $('#explorer .submit:hidden').show();
+        } else {
+          $(parent).find('.input').slideUp('fast');
+          $(parent).addClass('hidden');
+          if (!$('#explorer fieldset').not('.hidden').size()) {
+            $('#explorer .submit').hide();
+          }
+        }
+      });
+    });
+    $('#explorer .submit').hide();
   });
   
 })(jQuery);
@@ -125,19 +158,12 @@ foreach ($this->data as $media): ?>
 
 <?php if ($canWriteTag): ?>
 <?php 
-  $items = array(array('name' => __("Metadata", true), 'active' => true));
-  if ($canWriteAcl) {
-    $items[] = __("Access Rights", true);
-  }
-  echo $tab->menu($items);
-
   $url = $breadcrumb->params($crumbs);
   echo $form->create(null, array('id' => 'explorer', 'action' => 'edit/'.$url));
 ?>
-<?php echo $tab->open(0, true); ?>
-<fieldset>
-<?php echo $form->hidden('Media.ids', array('id' => 'MediaIds')) ?>
+<fieldset id="p-explorer-edit-meta"><legend><?php __("Metadata"); ?></legend>
 <?php 
+  echo $form->hidden('Media.ids', array('id' => 'MediaIds'));
   if ($canWriteMeta) {
     echo $form->input('Media.date', array('type' => 'text', 'after' => '<span class="hint">' . __('E.g. 2008-08-07 15:30', true) . '</span>')); 
   }
@@ -172,10 +198,8 @@ foreach ($this->data as $media): ?>
   }
 ?>
 </fieldset>
-<?php echo $tab->close(); ?>
 <?php if ($canWriteAcl): ?>
-<?php echo $tab->open(1); ?>
-<fieldset>
+<fieldset id="p-explorer-edit-access"><legend><?php __("Access Rights"); ?></legend>
 <?php
   $aclSelect = array(
     ACL_LEVEL_KEEP => __('[Keep]', true),
@@ -190,7 +214,6 @@ foreach ($this->data as $media): ?>
   echo $form->input('Group.id', array('type' => 'select', 'options' => $groups, 'selected' => 0, 'label' => __("Default image group?", true)));
 ?>
 </fieldset>
-<?php echo $tab->close(); ?>
 <?php endif; // canWriteAcl==true ?>
 <?php echo $form->end(__('Apply', true)); ?>
 <?php endif; // canWriteTag==true ?>
