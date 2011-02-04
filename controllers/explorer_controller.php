@@ -525,8 +525,9 @@ class ExplorerController extends AppController
       $ids = array_unique($ids);
       foreach ($ids as $id) {
         $id = intval($id);
-        if ($id == 0)
+        if ($id == 0) {
           continue;
+        }
 
         $media = $this->Media->findById($id);
         if (!$media) {

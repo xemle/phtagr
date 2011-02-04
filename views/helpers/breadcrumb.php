@@ -136,9 +136,10 @@ class BreadcrumbHelper extends AppHelper
       }
       $removeOptions = array('class' => 'p-breadcrumb-remove', 'escape' => false);
       $links[] = $this->Html->tag('li', 
-        "$name:" 
+        $this->Html->tag('span', "$name:", array('class' => 'p-breadcrumb-type'))
         .$this->Html->link($value, $this->crumbUrl(array_slice($crumbs, 0, $key + 1)), $options) 
-        .$this->Html->link($this->Html->tag('span', '[x]'), $this->crumbUrl($remove), $removeOptions));
+        .$this->Html->link($this->Html->tag('span', '[x]'), $this->crumbUrl($remove), $removeOptions),
+        array('class' => 'p-breadcrumb-crumb'));
     }
 
     $form = $this->Form->create(null, array('action' => 'view'));
@@ -149,10 +150,10 @@ class BreadcrumbHelper extends AppHelper
     $form .= $this->Form->end();
 
     return $this->Html->tag('ul', 
-      $this->Html->tag('li', __('Filter', true), array('class' => 'p-breadcrumb-header'))
-        .$this->Html->tag('li', $this->Html->tag('ul', implode("\n", $links), array('class' => 'p-breadcrumb-list')))
-        .$this->Html->tag('li', $form, array('class' => 'p-breadcrumb-input')),
-      array('class' => 'p-breadcrumb'));
+      $this->Html->tag('li', $this->Html->tag('span', __('Filter', true)), array('class' => 'p-breadcrumb-header', 'escape' => false))
+        .implode("\n", $links)
+        .$this->Html->tag('li', $form, array('class' => 'p-breadcrumb-input'), array('escape' => false)),
+      array('class' => 'p-breadcrumb', 'escape' => false));
   }
 }
 ?>

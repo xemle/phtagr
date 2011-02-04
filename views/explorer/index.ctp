@@ -1,33 +1,30 @@
 <h1><?php __('Explorer'); ?></h1>
 <?php echo $session->flash(); ?>
 
-<?php 
-  $search->initialize();
-?>
-<?php
-  echo $breadcrumb->breadcrumb($crumbs);
-?>
-<?php if ($navigator->hasPages()): ?>
-<div class="paginator"><div class="subpaginator">
-<?php echo $navigator->prev().' '.$navigator->numbers().' '.$navigator->next(); ?>
-</div></div>
-<?php endif; ?>
-
+<?php $search->initialize(); ?>
 <div class="p-explorer-cells">
+<?php echo $breadcrumb->breadcrumb($crumbs); ?>
+<?php echo $navigator->pages() ?>
+
 <?php
 $cell=0;
 $pos = ($search->getPage(1)-1) * $search->getShow(12) + 1;
-$canWriteTag = max(Set::extract('/Media/canWriteTag', $this->data));
-$canWriteMeta = max(Set::extract('/Media/canWriteMeta', $this->data));
-$canWriteAcl = max(Set::extract('/Media/canWriteAcl', $this->data));
+$canWriteTag = max(Set::extract('/Media/canWriteTag', $this->data), 0);
+$canWriteMeta = max(Set::extract('/Media/canWriteMeta', $this->data), 0);
+$canWriteAcl = max(Set::extract('/Media/canWriteAcl', $this->data), 0);
 
 echo $javascript->codeBlock("var mediaIds = [" . implode(', ', Set::extract('/Media/id', $this->data)) . "];");
 
 foreach ($this->data as $media): ?>
 
-<div class="p-explorer-cell unselected" id="media-<?php echo $media['Media']['id']; ?>">
-<h2><?php echo $media['Media']['name']; ?></h2>
-
+<div class="p-explorer-cell" id="media-<?php echo $media['Media']['id']; ?>">
+<h2><?php 
+  if (!$search->getUser() || $search->getUser() != $session->read('User.username')) {
+    printf(__("%s by %s", true), h($media['Media']['name']), $html->link($media['User']['username'], "/explorer/user/".$media['User']['username']));
+  } else {
+    echo h($media['Media']['name']);
+  }
+?></h2>
 <?php 
   $size = $imageData->getimagesize($media, OUTPUT_SIZE_THUMB);
   $imageCrumbs = $this->Breadcrumb->replace($crumbs, 'page', $search->getPage());
@@ -64,6 +61,15 @@ foreach ($this->data as $media): ?>
 ?>
 </div>
 
+<div class="p-explorer-cell-actions" id="action-<?php echo $media['Media']['id']; ?>">
+<ul>
+  <li><a class="add" href="javascript:void"><?php echo $this->Html->image('icons/add.png', array('title' => __('Add to the selection', true), 'alt' => 'add')); ?></a></li>
+  <li><a class="del" href="javascript:void"><?php echo $this->Html->image('icons/delete.png', array('title' => __('Remove from the selection', true), 'alt' => 'remove')); ?></a></li>
+  <li><a href="javascript:void"><?php echo $this->Html->image('icons/disk.png', array('title' => __('Download this media', true), 'alt' => 'download')); ?></a></li>
+  <li><a href="javascript:void"><?php echo __('More...', true); ?></a></li>
+</ul>
+</div>
+
 <div class="p-explorer-cell-meta" id="<?php echo 'meta-'.$media['Media']['id']; ?>">
 <table>
   <?php echo $html->tableCells($imageData->metaTable(&$media)); ?>
@@ -79,22 +85,43 @@ foreach ($this->data as $media): ?>
   }
 ?>
 <?php $cell++; endforeach; ?>
-</div>
+<?php 
+  echo $this->Javascript->codeBlock("
+(function($) {
+  $(document).ready(function() {
+    $('#content .sub .p-explorer-cell .p-explorer-cell-actions').each(function() {
+      var id = $(this).attr('id').split('-')[1];
+      var media = $('#media-' + id)
+      $(this).find('ul li .add').click(function() {
+        $(media).selectMedia();
+      });
+      $(this).find('ul li .del').hide().click(function() {
+        $(media).unselectMedia();
+      });
+    });
+    $('#select-all').click(function() {
+      $('#content .sub .p-explorer-cell').selectMedia();
+    });
+    $('#invert-selection').click(function() {
+      $('#content .sub .p-explorer-cell').invertMediaSelection();
+    });
+  });
+  
+})(jQuery);
+");
+?>
 
 <?php if ($canWriteTag): ?>
-<div class="paginator"><div class="subpaginator">
-<a href="javascript:void(0);" onclick="thumbSelectAll();"><?php __('Select All'); ?></a>
-<a href="javascript:void(0);" onclick="thumbSelectInvert();"><?php __('Invert Selection'); ?></a>
+<div class="p-navigator-pages"><div class="sub">
+<a id="select-all" href="javascript:void"><?php __('Select All'); ?></a>
+<a id="invert-selection" href="javascript:void"><?php __('Invert Selection'); ?></a>
 </div></div>
 <?php endif; ?>
 
-<?php if ($navigator->hasPages()): ?>
-<div class="paginator"><div class="subpaginator">
-<?php echo $navigator->prev().' '.$navigator->numbers().' '.$navigator->next(); ?>
-</div></div>
-<?php endif; ?>
+<?php echo $navigator->pages() ?>
+</div><!-- cells -->
 
-<div class="edit">
+<div class="p-explorer-sidebar">
 
 <?php if ($canWriteTag): ?>
 <?php 

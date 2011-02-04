@@ -2,16 +2,20 @@
 @import border-radius
 @import opacity
 @import gradient
-.paginator .subpaginator
-  .current, a
-    padding: 3px 6px
-  a:hover
-    padding: 2px 5px
-    +border-radius(3px)
-    background-color: #666
-    border: 1px solid #888
-  .current
-    font-family: Ubuntu-bold
+.p-navigator-pages
+  width: 100%
+  display: block
+  margin: 3px
+  .sub
+    .current, a
+      padding: 3px 6px
+    a:hover
+      padding: 2px 5px
+      +border-radius(3px)
+      background-color: #666
+      border: 1px solid #888
+    .current
+      font-family: Ubuntu-bold
 
 // Fix to overwrite '#content h2' rule
 #content * .p-explorer-cell h2
@@ -20,8 +24,10 @@
 
 * .p-explorer-cells
   +column(18)
+  .selected .p-explorer-cell-image
+    background-color: #101820
   .p-explorer-cell
-    margin: 3px 0
+    margin: 0px 0
     +column(6, true)
     position: relative
     h2
@@ -41,9 +47,10 @@
       display: table-cell
       text-align: center
       vertical-align: middle
-      width: 220px
+      width: 230px
       height: 220px
       *
+        text-align: center
         vertical-align: middle
         overflow: hidden
     .p-explorer-cell-meta
@@ -61,10 +68,58 @@
       border: 1px solid #888
       +border-radius(3px)
       +opacity(0.0)
+    .p-explorer-cell-actions
+      position: absolute
+      right: 0
+      bottom: 0
+      +opacity(0.0)
+      ul
+        li
+          display: inline
+          a img
+            vertical-align: center
     &:hover
-      h2, .p-explorer-cell-caption
+      h2 
         +opacity(0.7)    
-      .p-explorer-cell-meta
-        +opacity(1)
-        z-index: 3
+      .p-explorer-cell-actions
+        +opacity(0.2)
+        &:hover
+          +opacity(1.0)
+      //.p-explorer-cell-meta
+      //  +opacity(1)
+      //  z-index: 3
+* .p-explorer-sidebar
+  +column(6,true)
 
+#content * ul.p-breadcrumb
+    width: 100%
+    display: inline-block
+    li
+      padding: 3px 5px
+      display: inline-block
+      &.p-breadcrumb-header
+        background-color: #444
+      &.p-breadcrumb-crumb
+        .p-breadcrumb-remove
+          display: inline-block
+          background-image: url("../img/button-close.png")
+          background-position: center center
+          background-repeat: no-repeat
+          vertical-align: middle
+          padding: 0 2px
+          width: 15px
+          span
+            color: black
+      &.p-breadcrumb-input form 
+        background-color: inherit
+        overflow: inherit
+        width: inherit
+        input, div
+          display: inline-block
+        input
+          background-color: #444
+          border: 1px solid #666
+        input[type=text]
+          padding: 1px
+        input[type=submit]
+          &:hover

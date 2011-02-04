@@ -148,5 +148,17 @@ class NavigatorHelper extends AppHelper {
     $link = $baseUri . $crumbParams;
     return $this->Html->link(__('next', true), $link, array('class' => 'next'));
   }
+
+  function pages() {
+    if (!$this->hasPages()) {
+      return;
+    }
+    $out = $this->Html->tag('div', 
+      $this->Html->tag('div', 
+        $this->prev() . ' ' . $this->numbers() . ' ' . $this->next(),
+        array('class' => 'sub', 'escape' => false)),
+      array('class' => 'p-navigator-pages', 'escape' => false));
+    return $out;
+  }
 }
 ?>
