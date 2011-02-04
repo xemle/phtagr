@@ -7,7 +7,7 @@
   echo $html->charset('UTF-8')."\n";
   echo $html->meta('icon')."\n";
   echo $html->css('backend')."\n";
-  echo $javascript->link('phtagr');
+  echo $html->script('phtagr');
   echo $scripts_for_layout; 
 ?>
 

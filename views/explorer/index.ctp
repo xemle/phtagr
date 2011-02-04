@@ -13,7 +13,7 @@ $canWriteTag = max(Set::extract('/Media/canWriteTag', $this->data), 0);
 $canWriteMeta = max(Set::extract('/Media/canWriteMeta', $this->data), 0);
 $canWriteAcl = max(Set::extract('/Media/canWriteAcl', $this->data), 0);
 
-echo $javascript->codeBlock("var mediaIds = [" . implode(', ', Set::extract('/Media/id', $this->data)) . "];");
+echo $html->scriptBlock("var mediaIds = [" . implode(', ', Set::extract('/Media/id', $this->data)) . "];");
 
 foreach ($this->data as $media): ?>
 
@@ -101,7 +101,7 @@ foreach ($this->data as $media): ?>
 ?>
 <?php $cell++; endforeach; ?>
 <?php 
-  echo $this->Javascript->codeBlock("
+  echo $this->Html->scriptBlock("
 (function($) {
   $(document).ready(function() {
     $('#content .sub .p-explorer-cell .p-explorer-cell-actions').each(function() {

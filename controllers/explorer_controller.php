@@ -25,7 +25,7 @@ class ExplorerController extends AppController
 {
   var $components = array('RequestHandler', 'FilterManager', 'Search', 'QueryBuilder', 'FastFileResponder');
   var $uses = array('Media', 'MyFile', 'Group', 'Tag', 'Category', 'Location');
-  var $helpers = array('Form', 'Html', 'Javascript', 'Ajax', 'ImageData', 'Time', 'ExplorerMenu', 'Rss', 'Search', 'Navigator', 'Tab', 'Breadcrumb');
+  var $helpers = array('Form', 'Html', 'Ajax', 'ImageData', 'Time', 'ExplorerMenu', 'Rss', 'Search', 'Navigator', 'Tab', 'Breadcrumb');
 
   var $crumbs = array();
 

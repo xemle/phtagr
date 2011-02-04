@@ -22,7 +22,7 @@
  */
 class MapHelper extends AppHelper
 {
-  var $helpers = array("Html", "Javascript", "Search", "Option");
+  var $helpers = array("Html", "Search", "Option");
 
   var $googleMapApiUrl = 'http://maps.google.com/maps?file=api&amp;v=2&amp;key=';
 
@@ -57,8 +57,7 @@ class MapHelper extends AppHelper
       return $this->output();
     }
 
-    $out = $this->Javascript->link($this->googleMapApiUrl . h($this->Option->get('google.map.key')), true);
-    $out .= $this->Javascript->link('/js/pmap.js', true);
+    $out = $this->Html->script(array($this->googleMapApiUrl . h($this->Option->get('google.map.key')), 'pmap'), array('inline' => false);
 
     $code = "
 var map = null;
@@ -77,7 +76,7 @@ var showMap = function(id, latitude, longitude) {
     map.updateMarkers();
   }
 };";
-    $out .= $this->Javascript->codeBlock($code);
+    $out .= $this->Html->scriptBlock($code);
     return $this->output($out);
   }
 }

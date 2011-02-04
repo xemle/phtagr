@@ -7,12 +7,8 @@
   echo $html->charset('UTF-8')."\n";
   echo $html->meta('icon')."\n";
   echo $html->css('default')."\n";
-  echo $javascript->link('jquery-1.5.min');
-  echo $javascript->link('jquery-phtagr');
-  echo $javascript->link('prototype');
-  echo $javascript->link('effects');
-  echo $javascript->link('controls');
-  //echo $javascript->link('jquery-ui-1.8.8.custom.min');
+  echo $html->script('jquery-1.5.min');
+  echo $html->script('jquery-phtagr');
   echo $scripts_for_layout; 
 ?>
 </head>
