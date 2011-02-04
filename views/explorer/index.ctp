@@ -167,33 +167,19 @@ foreach ($this->data as $media): ?>
   if ($canWriteMeta) {
     echo $form->input('Media.date', array('type' => 'text', 'after' => '<span class="hint">' . __('E.g. 2008-08-07 15:30', true) . '</span>')); 
   }
-  echo $html->tag('div',
-    $form->label('Tags.text', __('Tags', true)).
-    $ajax->autoComplete('Tags.text', 'autocomplete/tag', array('tokens' => ',')) . 
-    $html->tag('span', __('E.g. newtag, -oldtag', true), array('class' => 'hint')),
-    array('class' => 'input text'));
-
+  echo $form->input('Tags.text', array('label' => __('Tags', true), 'after' => $html->tag('span', __('E.g. newtag, -oldtag', true), array('class' => 'hint'))));
+  echo $autocomplete->autoComplete('Tags.text', 'autocomplete/tag', array('split' => true));
   if ($canWriteMeta) {
-    echo $html->tag('div',
-      $form->label('Categories.text', __('Categories', true)).
-      $ajax->autoComplete('Categories.text', 'autocomplete/category', array('tokens' => ',')), 
-      array('class' => 'input text'));
-    echo $html->tag('div',
-      $form->label('Locations.city', __('City', true)).
-      $ajax->autoComplete('Locations.city', 'autocomplete/city'), 
-      array('class' => 'input text'));
-    echo $html->tag('div',
-      $form->label('Locations.sublocation', __('Sublocation', true)).
-      $ajax->autoComplete('Locations.sublocation', 'autocomplete/sublocation'), 
-      array('class' => 'input text'));
-    echo $html->tag('div',
-      $form->label('Locations.state', __('State', true)).
-      $ajax->autoComplete('Locations.state', 'autocomplete/state'), 
-      array('class' => 'input text'));
-    echo $html->tag('div',
-      $form->label('Locations.country', __('Country', true)).
-      $ajax->autoComplete('Locations.country', 'autocomplete/country'), 
-      array('class' => 'input text'));
+    echo $form->input('Categories.text', array('label' => __('Categories', true)));
+    echo $autocomplete->autoComplete('Categories.text', 'autocomplete/category', array('split' => true));
+    echo $form->input('Locations.city', array('label' => __('City', true)));
+    echo $autocomplete->autoComplete('Locations.city', 'autocomplete/city');
+    echo $form->input('Locations.sublocation', array('label' => __('Sublocation', true)));
+    echo $autocomplete->autoComplete('Locations.sublocation', 'autocomplete/sublocation');
+    echo $form->input('Locations.state', array('label' => __('State', true)));
+    echo $autocomplete->autoComplete('Locations.state', 'autocomplete/state');
+    echo $form->input('Locations.country', array('label' => __('Country', true)));
+    echo $autocomplete->autoComplete('Locations.country', 'autocomplete/country');
     echo $form->input('Media.geo', array('label' => __('Geo data', true), 'maxlength' => 32, 'after' => '<span class="hint">' . __('latitude, longitude', true) . '</span>'));
   }
 ?>

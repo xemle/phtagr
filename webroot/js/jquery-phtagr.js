@@ -47,4 +47,56 @@
       }
     });
   };
+
+  $.fn.cakeAutoComplete = function(fieldId, url, options) {
+    var options = options || {}
+    var names = fieldId.split('.');
+    var data = { data: {} };
+    var val = data['data'];
+    for(var i = 0; i < names.length - 1; i++) {
+      val[names[i]] = {};
+      val = val[names[i]];
+    }
+    $(this).bind( "keydown", function( event ) {
+      if ( event.keyCode === $.ui.keyCode.TAB &&
+          $( this ).data( "autocomplete" ).menu.active ) {
+        event.preventDefault();
+      }
+    })
+    .autocomplete({
+      minLength: 0,
+      source: function( request, response ) {
+        // delegate back to autocomplete, but extract the last term
+        var input = request.term;
+        if (options['split']) {
+          input = input.split(/,\s*/).pop();
+        }
+        val[names[names.length - 1]] = input;
+        $.post(url, data, function(data) {
+          var result = new Array();
+          $(data).find('li').each(function() {
+            result.push($(this).text());
+          });
+          response(result);
+        }, 'xml');
+      },
+      focus: function() {
+        // prevent value inserted on focus
+        return false;
+      },
+      select: function( event, ui ) {
+        if (options['split']) {
+          var terms = this.value.split(/,\s*/);
+          terms.pop();
+          terms.push( ui.item.value );
+          terms.push( "" );
+          this.value = terms.join( ", " );
+        } else {
+          this.value = ui.item.value;
+        }
+        return false;
+      }
+    });
+  };
 })(jQuery);
+

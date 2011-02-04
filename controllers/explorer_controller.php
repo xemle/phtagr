@@ -25,7 +25,7 @@ class ExplorerController extends AppController
 {
   var $components = array('RequestHandler', 'FilterManager', 'Search', 'QueryBuilder', 'FastFileResponder');
   var $uses = array('Media', 'MyFile', 'Group', 'Tag', 'Category', 'Location');
-  var $helpers = array('Form', 'Html', 'Ajax', 'ImageData', 'Time', 'ExplorerMenu', 'Rss', 'Search', 'Navigator', 'Tab', 'Breadcrumb');
+  var $helpers = array('Form', 'Html', 'Ajax', 'ImageData', 'Time', 'ExplorerMenu', 'Rss', 'Search', 'Navigator', 'Tab', 'Breadcrumb', 'Autocomplete');
 
   var $crumbs = array();
 
@@ -142,7 +142,7 @@ class ExplorerController extends AppController
       Logger::warn("Invalid autocomlete type: $type");
       $this->redirect(404);
     }
-    $this->layout = 'bare';
+    $this->layout = 'xml';
     if (Configure::read('debug') > 1) {
       Configure::write('debug', 1);
     }
