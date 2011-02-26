@@ -1,14 +1,32 @@
-Hi <?php echo $user['User']['username']; ?>!
-
-There are new media available at <?php echo $url; ?>.
-
-<?php foreach($media as $m): ?>
-<?php printf("%s published %s (link: %s)\n", $m['User']['username'], $m['Media']['name'], $url . '/images/view/' . $m['Media']['id']); ?>
-<?php endforeach; ?>
-
-See all new media at <?php echo $url . '/explorer'; ?>
+<?php printf(__("Hi %s!", true), $user['User']['username']); ?>
 
 
-Sincerly, your phTagr agent
+<?php printf(__("New media available at %s", true), $html->link($url, $url)); ?>
 
-PS: If you do not like to receive this notification again, please configure the notification interval in your user profile.
+
+<?php 
+  $userToMedia = array();
+  foreach ($media as $m) {
+    $username = $m['User']['username'];
+    if (!isset($userToMedia[$username])) {
+      $userToMedia[$username] = array();
+    }
+    $userToMedia[$username][] = $m;
+  }
+  
+  foreach ($userToMedia as $user => $userMedia) {
+    echo sprintf(__("User %s published following media", true), $user) . "\r\n";
+    foreach ($userMedia as $m) {
+      echo "{$m['Media']['name']} (Link: $url/images/view/{$m['Media']['id']})\r\n";
+    }
+    echo "\r\n";
+  }
+?>
+
+<?php printf(__("See all new media at %s", true), $url . '/explorer/view/sort:newest'); ?>
+
+
+<?php __("Sincerly, your phTagr agent"); ?>
+
+
+<?php __("PS: If you do not like to receive this notification again, please configure the notification interval in your user profile.") ?>
