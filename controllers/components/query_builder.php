@@ -345,7 +345,7 @@ class QueryBuilderComponent extends Object
 
     switch ($operand) {
       case 'AND':
-        $query['conditions'][] = $fieldCount.' = '.count($data[$name]);
+        $query['conditions'][] = $fieldCount.' >= '.count($data[$name]);
         break;
       case 'OR':
         $query['conditions'][] = $fieldCount.' > 0';
