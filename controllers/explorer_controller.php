@@ -150,6 +150,11 @@ class ExplorerController extends AppController
   /** Find needle in tags, categories, locations, or users */
   function _findGenericCrumb($needle) {
     $needle = trim($needle);
+    $prefix = '';
+    if (substr($needle, 0, 1) == '-') {
+      $prefix = '-';
+      $needle = substr($needle, 1);
+    }
     if (strlen($needle) < 2) {
       return;
     }
@@ -161,30 +166,31 @@ class ExplorerController extends AppController
       'all', array('conditions' => array("Tag.name like" => $needle), 'recursive' => 0, 'limit' => 10
       )));
     foreach ($tags as $tag) {
-      $this->data[] = 'tag:' . $tag;
+      $this->data[] = 'tag:' . $prefix . $tag;
     }
     $categories = Set::extract('/Category/name', $this->Media->Category->find(
       'all', array('conditions' => array("Category.name like" => $needle), 'recursive' => 0, 'limit' => 10
       )));
     foreach ($categories as $category) {
-      $this->data[] = 'category:' . $category;
+      $this->data[] = 'category:' . $prefix . $category;
     }
     $locations = array_unique(Set::extract('/Location/name', $this->Media->Location->find(
       'all', array('conditions' => array("Location.name like" => $needle), 'recursive' => 0, 'limit' => 10
       ))));
     foreach ($locations as $location) {
-      $this->data[] = 'location:' . $location;
+      $this->data[] = 'location:' . $prefix . $location;
     }
     $groups = Set::extract('/Group/name', $this->Media->Group->find(
       'all', array('conditions' => array("Group.name like" => $needle), 'recursive' => 0, 'limit' => 10
       )));
     foreach ($groups as $group) {
-      $this->data[] = 'group:' . $group;
+      $this->data[] = 'group:' . $prefix . $group;
     }
     $users = Set::extract('/User/username', $this->Media->User->find(
       'all', array('conditions' => array("User.username like" => $needle), 'recursive' => 0, 'limit' => 10
       )));
     foreach ($users as $user) {
+      // TODO excluding of users are currently not supported
       $this->data[] = 'user:' . $user;
     }
   }
