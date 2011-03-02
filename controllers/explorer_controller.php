@@ -109,6 +109,7 @@ class ExplorerController extends AppController
       if (strpos($input, ':') === false) {
         // Search for crumb type
         // collect all if input is empty or starts with the input
+        $this->_findGenericCrumb($input);
         foreach ($queryTypes as $types) {
           if ($input == '' || strpos($types, $input) === 0) {
             $this->data[] = $types . ':';
@@ -145,6 +146,48 @@ class ExplorerController extends AppController
     $this->layout = 'xml';
     if (Configure::read('debug') > 1) {
       Configure::write('debug', 1);
+    }
+  }
+
+  /** Find needle in tags, categories, locations, or users */
+  function _findGenericCrumb($needle) {
+    $needle = trim($needle);
+    if (strlen($needle) < 2) {
+      return;
+    }
+    App::import('Sanitize');
+    $sanitize = new Sanitize();
+    $needle = $sanitize->escape($needle) . '%';
+
+    $tags = Set::extract('/Tag/name', $this->Media->Tag->find(
+      'all', array('conditions' => array("Tag.name like" => $needle), 'recursive' => 0, 'limit' => 10
+      )));
+    foreach ($tags as $tag) {
+      $this->data[] = 'tag:' . $tag;
+    }
+    $categories = Set::extract('/Category/name', $this->Media->Category->find(
+      'all', array('conditions' => array("Category.name like" => $needle), 'recursive' => 0, 'limit' => 10
+      )));
+    foreach ($categories as $category) {
+      $this->data[] = 'category:' . $category;
+    }
+    $locations = array_unique(Set::extract('/Location/name', $this->Media->Location->find(
+      'all', array('conditions' => array("Location.name like" => $needle), 'recursive' => 0, 'limit' => 10
+      ))));
+    foreach ($locations as $location) {
+      $this->data[] = 'location:' . $location;
+    }
+    $groups = Set::extract('/Group/name', $this->Media->Group->find(
+      'all', array('conditions' => array("Group.name like" => $needle), 'recursive' => 0, 'limit' => 10
+      )));
+    foreach ($groups as $group) {
+      $this->data[] = 'group:' . $group;
+    }
+    $users = Set::extract('/User/username', $this->Media->User->find(
+      'all', array('conditions' => array("User.username like" => $needle), 'recursive' => 0, 'limit' => 10
+      )));
+    foreach ($users as $user) {
+      $this->data[] = 'user:' . $user;
     }
   }
 
