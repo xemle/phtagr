@@ -54,10 +54,9 @@ div.disabled {
 .auto_complete ul li {
   margin: 0;
   padding: 3px;
-  width: 95%;
+  width: 100%;
 }
 .auto_complete ul li.selected { 
   background-color: #ffb; 
-  font-weight: bold;
 }
 
