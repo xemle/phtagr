@@ -87,8 +87,6 @@ class ExplorerController extends AppController
       $queryMap = array(
         'category' => '_getAssociation', 
         'category_op' => array('OR', 'AND'),
-        'city' => '_getAssociation', 
-        'country' => '_getAssociation', 
         'from' => 'true',
         'group' => '_getAssociation', 
         'location' => '_getAssociation', 
@@ -96,20 +94,23 @@ class ExplorerController extends AppController
         'operand' => array('OR', 'AND'), 
         'show' => array(2, 6, 12, 24, 60, 120, 240),
         'sort' => array('date', '-date', 'newest', 'random'), 
-        'state' => '_getAssociation', 
-        'sublocation' => '_getAssociation',
         'tag' => '_getAssociation', 
         'tag_op' => array('OR', 'AND'), 
+        'type' => array('image', 'video'),
         'to' => 'true',
         'user' => '_getAssociation'
       );
       $queryTypes = array_keys($queryMap);
-      $input = trim($this->data['Breadcrumb']['input']);
+      $input = trim($this->data['breadcrumb']['input']);
+      // cut input to maximum of 64 chars
+      if (strlen($input) > 64) {
+        $input = substr($input, 0, 64);
+      }
       $this->data = array();
       if (strpos($input, ':') === false) {
         // Search for crumb type
         // collect all if input is empty or starts with the input
-        $this->_findGenericCrumb($input);
+        $this->_findGenericCrumb($input, $queryMap);
         foreach ($queryTypes as $types) {
           if ($input == '' || strpos($types, $input) === 0) {
             $this->data[] = $types . ':';
@@ -150,8 +151,7 @@ class ExplorerController extends AppController
   }
 
   /** Find needle in tags, categories, locations, or users */
-  function _findGenericCrumb($needle) {
-    $needle = trim($needle);
+  function _findGenericCrumb($needle, $queryMap) {
     $prefix = '';
     if (substr($needle, 0, 1) == '-') {
       $prefix = '-';
@@ -162,38 +162,51 @@ class ExplorerController extends AppController
     }
     App::import('Sanitize');
     $sanitize = new Sanitize();
-    $needle = $sanitize->escape($needle) . '%';
+    $sqlNeedle = $sanitize->escape($needle) . '%';
 
     $tags = Set::extract('/Tag/name', $this->Media->Tag->find(
-      'all', array('conditions' => array("Tag.name like" => $needle), 'recursive' => 0, 'limit' => 10
+      'all', array('conditions' => array("Tag.name like" => $sqlNeedle), 'recursive' => 0, 'limit' => 10
       )));
     foreach ($tags as $tag) {
       $this->data[] = 'tag:' . $prefix . $tag;
     }
     $categories = Set::extract('/Category/name', $this->Media->Category->find(
-      'all', array('conditions' => array("Category.name like" => $needle), 'recursive' => 0, 'limit' => 10
+      'all', array('conditions' => array("Category.name like" => $sqlNeedle), 'recursive' => 0, 'limit' => 10
       )));
     foreach ($categories as $category) {
       $this->data[] = 'category:' . $prefix . $category;
     }
     $locations = array_unique(Set::extract('/Location/name', $this->Media->Location->find(
-      'all', array('conditions' => array("Location.name like" => $needle), 'recursive' => 0, 'limit' => 10
+      'all', array('conditions' => array("Location.name like" => $sqlNeedle), 'recursive' => 0, 'limit' => 10
       ))));
     foreach ($locations as $location) {
       $this->data[] = 'location:' . $prefix . $location;
     }
     $groups = Set::extract('/Group/name', $this->Media->Group->find(
-      'all', array('conditions' => array("Group.name like" => $needle), 'recursive' => 0, 'limit' => 10
+      'all', array('conditions' => array("Group.name like" => $sqlNeedle), 'recursive' => 0, 'limit' => 10
       )));
     foreach ($groups as $group) {
       $this->data[] = 'group:' . $prefix . $group;
     }
     $users = Set::extract('/User/username', $this->Media->User->find(
-      'all', array('conditions' => array("User.username like" => $needle), 'recursive' => 0, 'limit' => 10
+      'all', array('conditions' => array("User.username like" => $sqlNeedle), 'recursive' => 0, 'limit' => 10
       )));
     foreach ($users as $user) {
       // TODO excluding of users are currently not supported
       $this->data[] = 'user:' . $user;
+    }
+
+    $needle = strtolower($needle);
+    $len = strlen($needle);
+    foreach ($queryMap as $type => $values) {
+      if (!is_array($values)) {
+        continue;
+      }
+      foreach ($values as $value) {
+        if (substr(strtolower($value), 0, $len) == $needle) {
+          $this->data[] = $type . ':' . $value;
+        }
+      }
     }
   }
 
