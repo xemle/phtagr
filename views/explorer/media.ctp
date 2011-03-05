@@ -47,7 +47,7 @@
       }
     ?><media:thumbnail url="<?php echo Router::url($thumbUrl, true); ?>" <?php echo $thumbSize[3]; ?> />
     <media:content url="<?php echo Router::url($contentUrl, true); ?>" <?php echo $previewSize[3]; ?> />
-    <guid><?php echo Router::url("/media/view/{$media['Media']['id']}", true); ?></guid>
+    <guid><?php echo Router::url("/images/view/{$media['Media']['id']}", true); ?></guid>
     <?php 
       if ($media['Media']['caption']) {
         echo $html->tag('description', $media['Media']['caption']); 

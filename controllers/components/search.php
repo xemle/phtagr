@@ -219,12 +219,13 @@ class SearchComponent extends Search
     $encoded = array_splice(split('/', trim($url, '/')), $skip);
     $crumbs = array();
     foreach ($encoded as $crumb) {
-      if (!preg_match('/^\w+:.+/', $crumb)) {
+      if (!preg_match('/^(\w+):(.+)$/', $crumb, $matches)) {
         continue;
       }
+      $crumb = Inflector::singularize($matches[1]) . ":" . trim($matches[2]);
       $crumbs[] = $this->decode($crumb);
     }
-  	return $crumbs;
+    return $crumbs;
   }
   
   /** Encode crumbs for an final URL string
@@ -240,7 +241,7 @@ class SearchComponent extends Search
       }
       $escaped[] = $matches[1] . ":" . $this->encode($matches[2]);
     }
-  	return $escaped;
+    return $escaped;
   }
   
   /** Convert the current search parameter to breadcrump stack
@@ -271,7 +272,7 @@ class SearchComponent extends Search
         Logger::warn("Invalid crumb: $crumb");
         continue;
       }
-      $type = $match[1];
+      $type = Inflector::singularize($match[1]);
       $value = $match[2];
       if (in_array($type, $listTypes)) {
         $values = split(',', $value);
