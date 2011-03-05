@@ -1,5 +1,8 @@
 ul.p-breadcrumb {
   width: 100%;
+  margin: 0px;
+  padding: 4px;
+  background-color: #019801;
 }
 ul.p-breadcrumb li,
 ul.p-breadcrumb li ul.p-breadcrumb-list,
@@ -12,8 +15,8 @@ ul.p-breadcrumb li form {
   list-style-type: none;
   vertical-align:middle;
 }
-ul.p-breadcrumb li,
-ul.p-breadcrumb li ul.p-breadcrumb-list li {
+ul.p-breadcrumb > li,
+ul.p-breadcrumb > li > ul.p-breadcrumb-list > li {
   padding: 0 2px;
   height: 20px;
 }
