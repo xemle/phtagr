@@ -214,7 +214,9 @@ class GuestsController extends AppController {
     }
 
     if ($action == 'renew' || empty($guest['Guest']['key'])) {
-      $this->Guest->generateKey(&$guest);
+      // reuse function of User model
+      $this->User->generateKey(&$guest);
+      $guest['Guest']['key'] = $guest['User']['key'];
       $this->Guest->id = $guestId;
       if (!$this->Guest->save($guest, false, array('key'))) {
         Logger::err("Could not save user data");
