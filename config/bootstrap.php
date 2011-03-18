@@ -49,6 +49,7 @@
  *
  */
 Inflector::rules('plural', array('uninflected' => array('[Bb]rowser')));
+Inflector::rules('singular', array('uninflected' => array('pos')));
 
 define('ROLE_NOBODY', 0);
 define('ROLE_GUEST', 1);
