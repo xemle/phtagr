@@ -34,4 +34,4 @@
   <li><?php echo $html->link(__('Media RSS of My Media', true), $myMediaMediaRss); ?> (Link: <code><?php echo $myMediaMediaRss; ?></code>)</li>
 </ul>
 
-<p><?php printf(__('Click %s to renew the authentication key. All previous links become invalid.', true), $html->link(__('renew key', true), 'rss/'.$this->data['Guest']['id'].'/renew')); ?></p>
+<p><?php printf(__('Click %s to renew the authentication key. All previous links become invalid.', true), $html->link(__('renew key', true), 'links/'.$this->data['Guest']['id'].'/renew')); ?></p>
