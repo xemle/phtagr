@@ -67,8 +67,8 @@ class ExplorerController extends AppController
 
   function view() {
     if (!empty($this->data)) {
-      $crumbs = split('/', $this->data['breadcrumb']['current']);
-      $crumbs[] = $this->data['breadcrumb']['input'];
+      $crumbs = split('/', $this->data['Breadcrumb']['current']);
+      $crumbs[] = $this->data['Breadcrumb']['input'];
       $this->crumbs = $crumbs;
     }
     $this->render('index');
@@ -104,7 +104,7 @@ class ExplorerController extends AppController
         'user' => '_getAssociation'
       );
       $queryTypes = array_keys($queryMap);
-      $input = trim($this->data['breadcrumb']['input']);
+      $input = trim($this->data['Breadcrumb']['input']);
       $this->data = array();
       if (strpos($input, ':') === false) {
         // Search for crumb type

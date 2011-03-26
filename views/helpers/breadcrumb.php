@@ -23,7 +23,7 @@
 
 class BreadcrumbHelper extends AppHelper
 {
-  var $helpers = array('Html', 'Form', 'Ajax', 'Search');
+  var $helpers = array('Html', 'Form', 'Autocomplete', 'Search');
   
   /** Return breadcrumb params for building urls
     @param crumbs Current breadcrumb stack
@@ -143,9 +143,10 @@ class BreadcrumbHelper extends AppHelper
     }
 
     $form = $this->Form->create(null, array('action' => 'view'));
-    $form .= $this->Form->hidden('breadcrumb.current', array('value' => implode('/', $crumbs), 'div' => false));
-    $form .= $this->Ajax->autoComplete('breadcrumb.input', 'autocomplete/crumb'); 
-    //$form .= $this->Form->input('breadcrumb.input', array('div' => false, 'label' => false));
+    $form .= $this->Form->hidden('Breadcrumb.current', array('value' => implode('/', $crumbs), 'div' => false));
+    //$form .= $this->Ajax->autoComplete('breadcrumb.input', 'autocomplete/crumb'); 
+    $form .= $this->Form->input('Breadcrumb.input', array('div' => false, 'label' => false));
+    $form .= $this->Autocomplete->autoComplete('Breadcrumb.input', 'autocomplete/crumb'); 
     $form .= $this->Form->submit('add', array('div' => false));
     $form .= $this->Form->end();
 

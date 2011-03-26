@@ -25,7 +25,7 @@ App::import('File', 'Logger', array('file' => APP.'logger.php'));
 
 class AppController extends Controller
 {
-  var $helpers = array('Html', 'Form', 'Session', 'Menu', 'Option');
+  var $helpers = array('Html', 'Js', 'Form', 'Session', 'Menu', 'Option');
   var $components = array('Session', 'Cookie', 'Feed', 'RequestHandler', 'Menu');
   var $uses = array('User', 'Option');
   

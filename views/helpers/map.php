@@ -57,7 +57,7 @@ class MapHelper extends AppHelper
       return $this->output();
     }
 
-    $out = $this->Html->script(array($this->googleMapApiUrl . h($this->Option->get('google.map.key')), 'pmap'), array('inline' => false);
+    $out = $this->Html->script(array($this->googleMapApiUrl . h($this->Option->get('google.map.key')), 'pmap'), array('inline' => false));
 
     $code = "
 var map = null;

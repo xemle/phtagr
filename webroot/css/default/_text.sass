@@ -1,6 +1,7 @@
 @import font-face
 +font-face(Ubuntu, font-files("ubuntu/ubuntu-r-webfont.woff", "woff", "ubuntu/ubuntu-r-webfont.ttf", "truetype"), "ubuntu/ubuntu-r-webfont.eot")
 +font-face(Ubuntu-bold, font-files("ubuntu/ubuntu-b-webfont.woff", "woff", "ubuntu/ubuntu-b-webfont.ttf", "truetype"), "ubuntu/ubuntu-b-webfont.eot")
++font-face(Cousine, font-files("cousine/cousine-regular-latin-webfont.woff", "woff", "cousine/cousine-regular-latin-webfont.ttf", "truetype"), "cousine/cousine-regular-latin-webfont.eot")
 
 *
   color: $fontColor
@@ -37,4 +38,25 @@ code
   ul li
     padding: 5px 0
 
-
+.error, .notice
+  margin: 5px 0
+  padding: 10px
+  color: black
+  *  
+    color: black
+.error
+  border: 1px solid red
+  background-color: lighten(red, 30%)
+.notice
+  border: 1px solid yellow
+  background-color: lighten(yellow, 30%)
+pre
+  padding: 10px
+  background-color: #aaa
+  color: #333
+  font-family: Cousine, monospace 
+  *
+    font-family: Cousine, monospace 
+    color: #333
+  strong
+    color: #000

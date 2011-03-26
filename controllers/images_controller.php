@@ -23,6 +23,7 @@
 
 class ImagesController extends AppController
 {
+  var $name = 'Images';
   var $components = array('RequestHandler', 'Search', 'FastFileResponder');
   var $uses = array('Media', 'Group', 'Tag', 'Category', 'Location');
   var $helpers = array('Form', 'Html', 'Ajax', 'ImageData', 'Time', 'Search', 'ExplorerMenu', 'Rss', 'Map', 'Navigator', 'Flowplayer', 'Tab', 'Number', 'Option');

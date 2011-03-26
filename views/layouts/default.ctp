@@ -8,10 +8,11 @@
   echo $html->meta('icon')."\n";
   echo $html->css('default')."\n";
   echo $html->script('jquery-1.5.min');
-  echo $html->script('jquery-phtagr');
   // jquery ui
   echo $html->css('custom-phtagr/jquery-ui-1.8.9.custom');
   echo $html->script('jquery-ui-1.8.9.custom.min');
+
+  echo $html->script('jquery-phtagr');
   echo $scripts_for_layout; 
 ?>
 </head>

@@ -100,8 +100,9 @@ foreach ($this->data as $media): ?>
   }
 ?>
 <?php $cell++; endforeach; ?>
+
 <?php 
-  echo $this->Html->scriptBlock("
+  echo $this->Html->scriptBlock(<<<'JS'
 (function($) {
   $(document).ready(function() {
     $('#content .sub .p-explorer-cell .p-explorer-cell-actions').each(function() {
@@ -121,18 +122,19 @@ foreach ($this->data as $media): ?>
       $('#content .sub .p-explorer-cell').invertMediaSelection();
     });
     $('#explorer fieldset').addClass('hidden').each(function() {
-      $(this).children('.input').hide();
-      $(this).find('legend').click(function() {
-        var parent = $(this).parent();
-        if ($(parent).hasClass('hidden')) {
-          $(parent).find('.input').slideDown('middle');
-          $(parent).removeClass('hidden');
+      $(this).children('div').hide();
+      $(this).children('legend').click(function() {
+        var $fieldset = $(this).parent();
+        if ($fieldset.hasClass('hidden')) {
+          $fieldset.children('div').slideDown('middle');
+          $fieldset.removeClass('hidden');
           $('#explorer .submit:hidden').show();
         } else {
-          $(parent).find('.input').slideUp('fast');
-          $(parent).addClass('hidden');
-          if (!$('#explorer fieldset').not('.hidden').size()) {
-            $('#explorer .submit').hide();
+          $fieldset.children('div').slideUp('fast');
+          $fieldset.addClass('hidden');
+          var $form = $fieldset.parent();
+          if (!$form.children('fieldset').not('.hidden').size()) {
+            $form.children('.submit').hide();
           }
         }
       });
@@ -141,13 +143,14 @@ foreach ($this->data as $media): ?>
   });
   
 })(jQuery);
-");
+JS
+);
 ?>
 
 <?php if ($canWriteTag): ?>
 <div class="p-navigator-pages"><div class="sub">
-<a id="select-all" href="javascript:void"><?php __('Select All'); ?></a>
-<a id="invert-selection" href="javascript:void"><?php __('Invert Selection'); ?></a>
+<a id="select-all"><?php __('Select All'); ?></a>
+<a id="invert-selection"><?php __('Invert Selection'); ?></a>
 </div></div>
 <?php endif; ?>
 
@@ -161,7 +164,7 @@ foreach ($this->data as $media): ?>
   $url = $breadcrumb->params($crumbs);
   echo $form->create(null, array('id' => 'explorer', 'action' => 'edit/'.$url));
 ?>
-<fieldset id="p-explorer-edit-meta"><legend><?php __("Metadata"); ?></legend>
+<fieldset id="p-explorer-edit-meta"><legend><?php __("Metadata"); ?></legend><div>
 <?php 
   echo $form->hidden('Media.ids', array('id' => 'MediaIds'));
   if ($canWriteMeta) {
@@ -183,9 +186,9 @@ foreach ($this->data as $media): ?>
     echo $form->input('Media.geo', array('label' => __('Geo data', true), 'maxlength' => 32, 'after' => '<span class="hint">' . __('latitude, longitude', true) . '</span>'));
   }
 ?>
-</fieldset>
+</div></fieldset>
 <?php if ($canWriteAcl): ?>
-<fieldset id="p-explorer-edit-access"><legend><?php __("Access Rights"); ?></legend>
+<fieldset id="p-explorer-edit-access"><legend><?php __("Access Rights"); ?></legend><div>
 <?php
   $aclSelect = array(
     ACL_LEVEL_KEEP => __('[Keep]', true),
@@ -199,7 +202,7 @@ foreach ($this->data as $media): ?>
   echo $form->input('acl.write.meta', array('type' => 'select', 'options' => $aclSelect, 'selected' => ACL_LEVEL_KEEP, 'label' => __("Who can edit all meta data?", true)));
   echo $form->input('Group.id', array('type' => 'select', 'options' => $groups, 'selected' => 0, 'label' => __("Default image group?", true)));
 ?>
-</fieldset>
+<div></fieldset>
 <?php endif; // canWriteAcl==true ?>
 <?php echo $form->end(__('Apply', true)); ?>
 <?php endif; // canWriteTag==true ?>

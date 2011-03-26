@@ -60,7 +60,7 @@ playlist: [
     autoPlay: false,
     autoBuffering: false
   }
-]});\n";
+]});\n");
   }
 
   function video($media) {
