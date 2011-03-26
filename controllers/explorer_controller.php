@@ -101,7 +101,7 @@ class ExplorerController extends AppController
         'user' => '_getAssociation'
       );
       $queryTypes = array_keys($queryMap);
-      $input = trim($this->data['breadcrumb']['input']);
+      $input = trim($this->data['Breadcrumb']['input']);
       // cut input to maximum of 64 chars
       if (strlen($input) > 64) {
         $input = substr($input, 0, 64);
