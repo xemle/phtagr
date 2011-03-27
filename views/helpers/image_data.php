@@ -430,6 +430,65 @@ class ImageDataHelper extends AppHelper {
     }
     return sprintf("%.2f%s/%.2f%s", $lat, $latSuffix, $long, $longSuffix);
   }
+  
+  /** Creates a link list of names with urlBase and name 
+    @param urlBase Base URL which is combinded with each name item
+    @param names Names names of links
+    */
+  function linkList($urlBase, $names) {
+    $links = array();
+    foreach ($names as $name) {
+      $links[] = $this->Html->link($name, $urlBase . '/' . $name);
+    }
+    return $links;
+  }
+
+  /** Returns link for global search, user search, include and exclude */
+  function getExtendSearchUrls($crumbs, $username, $name, $value) {
+    $urls = array();
+    $baseUrl = '/explorer';
+    $urls['global'] = "$baseUrl/$name/$value";
+    if ($username) {
+      $urls['user'] = "$baseUrl/user/$username/$name/$value";
+    }
+    $addCrumb = $this->Breadcrumb->replace($crumbs, array($name, '-' . $value), $value);
+    $delCrumb = $this->Breadcrumb->replace($crumbs, array($name, $value), '-' . $value);
+    $urls['add'] = $this->Breadcrumb->crumbUrl($addCrumb);
+    $urls['del'] = $this->Breadcrumb->crumbUrl($delCrumb);
+    return $urls;
+  }
+
+  function getAllExtendSearchUrls($crumbs, $username, $name, $values) {
+    $urls = array();
+    foreach ($values as $value) {
+      $urls[$value] = $this->getExtendSearchUrls($crumbs, $username, $name, $value);
+    }
+    return $urls;
+  }
+
+  function getExtendSearchLinks($urls, $value) {
+    $output = '';
+    $icons = array();
+    if (isset($urls['user'])) {
+      $output = $this->Html->link($value, $urls['user']);
+      $icons[] = $this->Html->link($this->getIcon('world', false, sprintf(__("Search global for %s", true), $value)), $urls['global'], array('escape' => false));
+    } else {
+      $output = $this->Html->link($value, $urls['global']);
+    }
+    $icons[] = $this->Html->link($this->getIcon('add', false, sprintf(__("Include %s from search", true), $value)), $urls['add'], array('escape' => false));
+    $icons[] = $this->Html->link($this->getIcon('delete', false, sprintf(__("Exclude %s from search", true), $value)), $urls['del'], array('escape' => false));
+    return '<span class="search-item">' . $output . '<span class="search-icons">' . implode('', $icons) . '</span></span>';
+  }
+
+  function getIcon($name, $alt = false, $title = false) {
+    if (!$alt) {
+      $alt = $name;
+    }
+    if (!$title) {
+      $title = $alt;
+    } 
+    return $this->Html->image("icons/$name.png", array('alt' => $alt, 'title' => $title));
+  }
 
   function metaTable($data, $withMap = false) {
     $cells= array();
@@ -490,34 +549,6 @@ class ImageDataHelper extends AppHelper {
           '/media/file/'.$file['id'].'/'.$file['file'], array('escape' => false));
       }
     }
-
-    if ($withMap && isset($data['Media']['latitude']) && isset($data['Media']['longitude'])) {
-      $output .= ' '.$this->Html->link(
-          $this->Html->image('icons/map.png',
-            array('alt' => 'Show location in a map', 'title' => __('Show location in a map', true))),
-          '#',
-          array('onclick' => sprintf('showMap(%d, %f,%f);return false;', $data['Media']['id'], $data['Media']['latitude'],$data['Media']['longitude']), 'escape' => false));
-    }
-    
-    if ($data['Media']['isOwner']) {
-      $output .= ' '.$this->Ajax->link(
-        $this->Html->image('icons/key.png', 
-          array('alt' => 'Edit ACL', 'title' => __('Edit access rights', true))), 
-        '/explorer/editacl/'.$mediaId, 
-        array('update' => 'meta-'.$mediaId, 'escape' => false));
-      if ($data['Media']['isDirty'])
-        $output .= ' '.$this->Ajax->link(
-          $this->Html->image('icons/database_refresh.png', 
-            array('alt' => __('Synchronize db with image', true), 'title' => __('Synchronize meta data with the image', true))), 
-          '/explorer/sync/'.$mediaId, 
-          array('update' => 'meta-'.$mediaId, 'escape' => false));
-    }
-
-    if ($output) {
-      $output = "<div class=\"actionlist\">$output</div>\n";
-      $cells[] = array(__("Actions", true), $output);
-    }
-
     return $cells;
   }
 

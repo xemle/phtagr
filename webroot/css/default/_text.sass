@@ -22,21 +22,20 @@ img
 ul, ol
   list-style-type: none
 
-p
-  padding: 5px 0
-code
-  font-family: Cousine
-  font-size: 10pt
-  background-color: darken(white, 10%)
-  color: lighten(black, 20%)
 
-#content 
-  h2, 
-  h3
+#content > .sub
+  h2, h3
     font-family: Ubuntu-bold
     padding: 10px 0
-  ul li
+  > ul > li
     padding: 5px 0
+  > p
+    padding: 5px 0
+  > code
+    font-family: Cousine
+    font-size: 10pt
+    background-color: darken(white, 10%)
+    color: lighten(black, 20%)
 
 .error, .notice
   margin: 5px 0

@@ -2,147 +2,191 @@
 @import border-radius
 @import opacity
 @import gradient
+
 .p-navigator-pages
   width: 100%
   display: block
   margin: 3px
-  .sub
-    .current, a
+  > .sub
+    text-align: center
+    > .current, > a
+      color: gray
+      cursor: pointer
       padding: 3px 6px
-    a:hover
+    > a:hover
+      color: white
       padding: 2px 5px
-      +border-radius(3px)
-      background-color: #666
+      background-color: #555
       border: 1px solid #888
-    .current
+      +border-radius(3px)
+    > .current 
+      color: white
       font-family: Ubuntu-bold
 
-// Fix to overwrite '#content h2' rule
-#content * .p-explorer-cell h2
-  padding: 2px
-  font-family: Ubuntu
-
-* .p-explorer-cells
-  +column(18)
-  .selected .p-explorer-cell-image
-    background-color: #101820
-  .p-explorer-cell
-    margin: 0px 0
+.p-explorer-cells
+  +column(24, true)
+  clear: both
+  > .cell0, > .cell1, > .cell2
+    +column(6)
+  > .cell3
     +column(6, true)
+  > .cell0
+    clear: both
+  > .p-explorer-cell
     position: relative
+    &.selected > .p-explorer-cell-image
+      background-color: #d8acde;
     h2
+      font-family: Ubuntu ! important
+      font-weight: normal 
+      padding: 2px 2px ! important
       position: absolute
       top: 0
       z-index: 2
       margin: 0
       +opacity(.0)
       background-color: #000
-    .p-explorer-cell-caption
-      padding: 3px
-      position: absolute
-      top: 14pt
-      +opacity(.0)
-      background-color: #000
-    .p-explorer-cell-image
+    > .p-explorer-cell-image
       display: table-cell
       text-align: center
       vertical-align: middle
       width: 230px
-      height: 220px
-      *
-        text-align: center
+      height: 230px
+      > a
         vertical-align: middle
+        > img
+          vertical-align: middle   
+      > *
+        text-align: center
         overflow: hidden
-    .p-explorer-cell-meta
+    > .p-explorer-cell-actions
       position: absolute
-      overflow: visible
-      top: 0
-      left: 225px
-      margin: 0 5px
-      padding: 5px
-      display: block
-      width: 300px
-      z-index: -1
-      background-color: #333
-      +linear-gradient(colour-stops(#333, darken(#333, 10%)))
-      border: 1px solid #888
-      +border-radius(3px)
+      right: 2px
+      top: 214px
       +opacity(0.0)
-    .p-explorer-cell-actions
-      position: absolute
-      right: 0
-      bottom: 0
-      +opacity(0.0)
-      ul
-        li
-          display: inline
-          a img
-            vertical-align: center
+      > ul > li
+        display: inline
+        > a > img
+          vertical-align: center
+    > .p-explorer-cell-meta 
+      *
+        font-size: 9pt
+      p
+        color: #444 
+        margin: 0
+        padding: 0
     &:hover
-      h2 
-        +opacity(0.7)    
+      > h2
+        +opacity(1.0)
+      > .p-explorer-cell-actions
+        +opacity(.3)
         &:hover
           +opacity(1.0)
-      .p-explorer-cell-actions
-        +opacity(0.2)
-        &:hover
-          +opacity(1.0)
-      //.p-explorer-cell-meta
-      //  +opacity(1)
-      //  z-index: 3
-* .p-explorer-sidebar
-  +column(6,true)
 
-#content * ul.p-breadcrumb
-    width: 100%
+ul.p-breadcrumb
+  width: 100%
+  margin: 4px 0px
+  display: inline-block
+  > li
+    padding: 1px 3px ! important
     display: inline-block
-    li
-      padding: 3px 5px
-      display: inline-block
-      &.p-breadcrumb-header
-        background-color: #444
-      &.p-breadcrumb-crumb
-        .p-breadcrumb-remove
+    &.p-breadcrumb-header
+      background-color: #444
+      > span
+        padding: 0 3px
+        font-family: Ubuntu-bold
+    &.p-breadcrumb-crumb
+      > span
+        padding-left: 3px
+      > .p-breadcrumb-remove
+        background-image: url("../img/button-close.png")
+        background-position: center center
+        background-repeat: no-repeat
+        vertical-align: middle
+        padding: 0 10px
+        width: 15px
+        > span
+          display: none
+    &.p-breadcrumb-input > form 
+      background-color: inherit
+      overflow: inherit
+      width: inherit
+      > div
+        > input, > div
           display: inline-block
-          background-image: url("../img/button-close.png")
-          background-position: center center
-          background-repeat: no-repeat
-          vertical-align: middle
-          padding: 0 2px
-          width: 15px
-          span
-            color: black
-      &.p-breadcrumb-input form 
-        background-color: inherit
-        overflow: inherit
-        width: inherit
-        input, div
-          display: inline-block
-        input
+        > input
+          border: 1px solid #888
           background-color: #444
-          border: 1px solid #666
-        input[type=text]
+        > input[type=text]
           padding: 1px
-        input[type=submit]
+        > input[type=submit]
           &:hover
+
+#p-explorer-menu-space
+  display: block
+  height: 24px
+#p-explorer-menu
+  +column(24, true)
+  z-index: 10
+  position: fixed
+  background-color: #111
+  &:hover
+    +opacity(1.0)
+  > ul 
+    margin: 5px 0
+    > li
+      display: inline
+      > a
+        cursor: pointer
+        border: 1px solid #111
+        padding: 3px
+        color: #666
+      &:hover > a, &.active > a
+        color: #aaa
+        background-color: #444
+        border: 1px solid #444
+        +border-radius(3px)
+      &.active > a
+        padding: 3px 3px 4px 3px
+        color: #ddd
+        +border-bottom-radius(0px)
+        border-bottom: 1px solid #444
+  > #p-explorer-menu-content
+    background-color: #444
+    > #p-explorer-all-meta 
+      padding: 5px
+      > p
+        padding: 3px 0
+        position: relative 
+        > .search-item
+          padding: 0 2px
+          position: relative
+          > .search-icons
+            display: none
+            z-index: 2
+            position: absolute
+            padding: 2px
+            left: 0px
+            width: 48px
+            > a 
+              display: inline-block
+              > img
+                vertical-align: bottom
+          &:hover 
+            > a
+              color: white
+            > .search-icons
+              background-color: #ffd
+              +border-radius(3px)
+              border: 1px solid: darken(#ffd, 20%)
+              display: inline-block
+
+.p-explorer-input
+  +column(24, true)
+  z-index: 9
+  position: fixed
+  bottom: 26px
+  background-color: gray
+
 .auto_complete
   display: none
-//.auto_complete
-//  position: absolute
-//  width: 250px
-//  background-color: white
-//  border: 1px solid #888
-//  margin: 0px
-//  padding: 0px
-//  z-index: 2
-//  ul 
-//    list-style-type: none
-//    margin: 0
-//    padding: 0
-//    li
-//      margin: 0
-//      padding: 3px
-//      width: 95%
-//      &.selected
-//        background-color: #ffb; 
-//        font-weight: bold;

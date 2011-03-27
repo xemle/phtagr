@@ -3,9 +3,9 @@
 @import border-radius
 
 =default-input
-  +border-radius(2px)
+  +border-radius(3px)
   border: #aaa 1px solid
-  padding: 1px
+  padding: 2px
   background-color: #efefef
   &:hover
     border: #999 1px solid
@@ -29,47 +29,34 @@
     border-color: darken($menuActiveBackgroundColor, 20%)P
 
 form
-  background-color: #ddd
   overflow: hidden
-  width: 230px
+  width: 710px
   fieldset
-    width: 100%
+    padding: 15px 0
     border: 0
     legend
-      color: darken(white, 10%)
       font-family: Ubuntu-bold
-      width: 100%
+      width: 81.5%
       border-bottom: 1px solid darken(white, 10%)
-      padding: 4px
-      background-color: #124;
-      &:hover
-        cursor: pointer
-    &.hidden legend
-      background-color: #222;
-      &:hover
-        background-color: lighten(#124, 10%)
     div
-      padding: 4px
+      padding: 5px 0
+      position: relative
       display: block
-      margin: 4px 0
       width: 100% 
       label
-        color: black
-        display: block
-        width: 
+        padding: 5px 3px
+        text-align: right
+        display: inline
+        float: left
+        width: 30%
       input[type=text],
       input[type=password],
       textarea
-        color: black
-        width: 96%
+        width: 50%
         +default-input
       select
-        color: black
-        width: 97%
+        width: 51.5%
         +default-input
-        option
-          color: black
-          padding: 2px
       &.checkbox 
         input[type=checkbox]
           margin-left: 30%

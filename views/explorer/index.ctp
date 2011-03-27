@@ -1,23 +1,21 @@
-<h1><?php __('Explorer'); ?></h1>
-<?php echo $session->flash(); ?>
-
 <?php $search->initialize(); ?>
-<div class="p-explorer-cells">
-<?php echo $breadcrumb->breadcrumb($crumbs); ?>
-<?php echo $navigator->pages() ?>
 
+<?php echo $this->element('explorer_menu'); ?>
+
+<?php echo $session->flash(); ?>
+<?php echo $navigator->pages() ?>
+<?php echo $breadcrumb->breadcrumb($crumbs); ?>
+
+<div class="p-explorer-cells">
 <?php
-$cell=0;
+$cell = 0;
 $pos = ($search->getPage(1)-1) * $search->getShow(12) + 1;
-$canWriteTag = max(Set::extract('/Media/canWriteTag', $this->data), 0);
-$canWriteMeta = max(Set::extract('/Media/canWriteMeta', $this->data), 0);
-$canWriteAcl = max(Set::extract('/Media/canWriteAcl', $this->data), 0);
 
 echo $html->scriptBlock("var mediaIds = [" . implode(', ', Set::extract('/Media/id', $this->data)) . "];");
 
 foreach ($this->data as $media): ?>
 
-<div class="p-explorer-cell <?php echo $media['Media']['canWriteTag'] ? 'editable' : ''; ?>" id="media-<?php echo $media['Media']['id']; ?>">
+<div class="p-explorer-cell <?php echo ($media['Media']['canWriteTag'] ? 'editable' : '') . " cell" . ($cell % 4); ?>" id="media-<?php echo $media['Media']['id']; ?>">
 <h2><?php 
   if (!$search->getUser() || $search->getUser() != $session->read('User.username')) {
     printf(__("%s by %s", true), h($media['Media']['name']), $html->link($media['User']['username'], "/explorer/user/".$media['User']['username']));
@@ -43,23 +41,6 @@ foreach ($this->data as $media): ?>
     array('href' => Router::url("/images/view/".$media['Media']['id'].'/'.$breadcrumb->params($imageCrumbs))));
   echo "</div>";
 ?>
-<div class="p-explorer-cell-caption">
-<?php
-  if (!$search->getUser() || $search->getUser() != $session->read('User.username')) {
-    printf(__("by %s", true), $html->link($media['User']['username'], "/explorer/user/".$media['User']['username']));
-  }
-  $extra = array();
-  if ($media['Media']['clicks'] > 0) {
-    $extra[] = sprintf("%d %s", $media['Media']['clicks'], $html->image('icons/eye.png', array('alt' => __('Views', true), 'title' => sprintf(__("%d views", true), $media['Media']['clicks']))));
-  }
-  if (count($media['Comment'])) {
-    $extra[] = sprintf(__("%d %s", true), count($media['Comment']), $html->image('icons/comments.png', array('alt' => __('Comments', true), 'title' => sprintf(__("%d comments", true), count($media['Comment'])))));
-  }
-  if ($extra) {
-    echo " (".implode(', ', $extra).")";
-  }
-?>
-</div>
 
 <div class="p-explorer-cell-actions" id="action-<?php echo $media['Media']['id']; ?>">
 <ul>
@@ -81,25 +62,43 @@ foreach ($this->data as $media): ?>
       array('escape' => false));
   }
 ?>
-  <li><a href="javascript:void"><?php echo __('More...', true); ?></a></li>
 </ul>
 </div>
 
 <div class="p-explorer-cell-meta" id="<?php echo 'meta-'.$media['Media']['id']; ?>">
+<p id="p-explorer-date">Date: <?php echo $html->link($media['Media']['date'], $imageData->getDateLink($media, '3d')); ?></p>
+<?php if (count($media['Tag'])): ?>
+  <p id="p-explorer-tags"><?php echo __("Tags") . ': ' . implode(', ', $imageData->linkList('/explorer/tag', Set::extract('/Tag/name', $media))); ?></p>
+<?php endif; ?>
+<?php if (count($media['Category'])): ?>
+  <p id="p-explorer-categories"><?php echo __("Categories") . ': ' . implode(', ', $imageData->linkList('/explorer/category', Set::extract('/Category/name', $media))); ?></p>
+<?php endif; ?>
+<?php if (count($media['Location'])): ?>
+  <p id="p-explorer-locations"><?php echo __("Locations") . ': ' . implode(', ', $imageData->linkList('/explorer/location', Set::extract('/Location/name', $media))); ?></p>
+<?php endif; ?>
+<!--
 <table>
   <?php echo $html->tableCells($imageData->metaTable(&$media)); ?>
 </table>
+-->
 </div><!-- meta -->
 </div><!-- cell -->
 
-<?php 
-  for ($i = 2; $i <= 6; $i++) {
-    if ($cell % $i == 0) {
-      echo $html->tag('span', false, array('class' => "cell-row-$i"));
-    }
-  }
-?>
 <?php $cell++; endforeach; ?>
+</div><!-- cells -->
+
+<?php 
+  $canWriteTag = max(Set::extract('/Media/canWriteTag', $this->data), 0);
+  if ($canWriteTag): ?>
+<div class="p-navigator-pages"><div class="sub">
+<a id="select-all"><?php __('Select All'); ?></a>
+<a id="invert-selection"><?php __('Invert Selection'); ?></a>
+</div></div>
+<?php endif; ?>
+
+<?php echo $navigator->pages() ?>
+
+
 
 <?php 
   echo $this->Html->scriptBlock(<<<'JS'
@@ -121,89 +120,58 @@ foreach ($this->data as $media): ?>
     $('#invert-selection').click(function() {
       $('#content .sub .p-explorer-cell').invertMediaSelection();
     });
-    $('#explorer fieldset').addClass('hidden').each(function() {
-      $(this).children('div').hide();
-      $(this).children('legend').click(function() {
-        var $fieldset = $(this).parent();
-        if ($fieldset.hasClass('hidden')) {
-          $fieldset.children('div').slideDown('middle');
-          $fieldset.removeClass('hidden');
-          $('#explorer .submit:hidden').show();
-        } else {
-          $fieldset.children('div').slideUp('fast');
-          $fieldset.addClass('hidden');
-          var $form = $fieldset.parent();
-          if (!$form.children('fieldset').not('.hidden').size()) {
-            $form.children('.submit').hide();
-          }
-        }
-      });
+
+    $.fn.activateExplorerMenu = function(id, target) {
+      $item = $(id);
+      $target = $(target);
+      if (!$item || !$target) {
+        return;
+      }
+      $item.siblings('.active').removeClass('active');
+      if ($item.hasClass('active')) {
+        $item.removeClass('active');
+        $target.removeClass('active').hide();
+      } else {
+        $('#p-explorer-menu-content .active').removeClass('active').hide();
+        $item.addClass('active');
+        $target.addClass('active').show();
+      }
+      if ($target[0].nodeName == 'FIELDSET' && $target.hasClass('active')) {
+        $('#explorer').children('.submit').show();
+      } else {
+        $('#explorer').children('.submit').hide();
+      }
+    }
+    $('#p-explorer-all-meta').hide();
+    $('#p-explorer-button-all-meta').click(function() {
+      $(this).activateExplorerMenu('#p-explorer-button-all-meta', '#p-explorer-all-meta');
     });
-    $('#explorer .submit').hide();
+    $('#p-explorer-edit-meta').hide();
+    $('#p-explorer-button-meta').click(function() {
+      $(this).activateExplorerMenu('#p-explorer-button-meta', '#p-explorer-edit-meta');
+    });
+    $('#p-explorer-edit-access').hide();
+    $('#p-explorer-button-access').click(function() {
+      $(this).activateExplorerMenu('#p-explorer-button-access', '#p-explorer-edit-access');
+    });
+    $('#explorer').children('.submit').hide();
+
+    $.fn.placeExplorerMenu = function() {
+      $('#p-explorer-menu').css('top', Math.max(0, $('#content').position().top - window.pageYOffset));
+    }
+    $(window).scroll(function() {
+      $(this).placeExplorerMenu();
+    });
+    $(window).resize(function() {
+      $(this).placeExplorerMenu();
+    });
+    $('#p-explorer-menu-space').css('height', ($('#p-explorer-menu').height()) + 3 + 'px');
   });
-  
+  $(window).load(function() {
+    $(this).placeExplorerMenu();
+  }); 
 })(jQuery);
 JS
 );
 ?>
 
-<?php if ($canWriteTag): ?>
-<div class="p-navigator-pages"><div class="sub">
-<a id="select-all"><?php __('Select All'); ?></a>
-<a id="invert-selection"><?php __('Invert Selection'); ?></a>
-</div></div>
-<?php endif; ?>
-
-<?php echo $navigator->pages() ?>
-</div><!-- cells -->
-
-<div class="p-explorer-sidebar">
-
-<?php if ($canWriteTag): ?>
-<?php 
-  $url = $breadcrumb->params($crumbs);
-  echo $form->create(null, array('id' => 'explorer', 'action' => 'edit/'.$url));
-?>
-<fieldset id="p-explorer-edit-meta"><legend><?php __("Metadata"); ?></legend><div>
-<?php 
-  echo $form->hidden('Media.ids', array('id' => 'MediaIds'));
-  if ($canWriteMeta) {
-    echo $form->input('Media.date', array('type' => 'text', 'after' => '<span class="hint">' . __('E.g. 2008-08-07 15:30', true) . '</span>')); 
-  }
-  echo $form->input('Tags.text', array('label' => __('Tags', true), 'after' => $html->tag('span', __('E.g. newtag, -oldtag', true), array('class' => 'hint'))));
-  echo $autocomplete->autoComplete('Tags.text', 'autocomplete/tag', array('split' => true));
-  if ($canWriteMeta) {
-    echo $form->input('Categories.text', array('label' => __('Categories', true)));
-    echo $autocomplete->autoComplete('Categories.text', 'autocomplete/category', array('split' => true));
-    echo $form->input('Locations.city', array('label' => __('City', true)));
-    echo $autocomplete->autoComplete('Locations.city', 'autocomplete/city');
-    echo $form->input('Locations.sublocation', array('label' => __('Sublocation', true)));
-    echo $autocomplete->autoComplete('Locations.sublocation', 'autocomplete/sublocation');
-    echo $form->input('Locations.state', array('label' => __('State', true)));
-    echo $autocomplete->autoComplete('Locations.state', 'autocomplete/state');
-    echo $form->input('Locations.country', array('label' => __('Country', true)));
-    echo $autocomplete->autoComplete('Locations.country', 'autocomplete/country');
-    echo $form->input('Media.geo', array('label' => __('Geo data', true), 'maxlength' => 32, 'after' => '<span class="hint">' . __('latitude, longitude', true) . '</span>'));
-  }
-?>
-</div></fieldset>
-<?php if ($canWriteAcl): ?>
-<fieldset id="p-explorer-edit-access"><legend><?php __("Access Rights"); ?></legend><div>
-<?php
-  $aclSelect = array(
-    ACL_LEVEL_KEEP => __('[Keep]', true),
-    ACL_LEVEL_OTHER => __('Everyone', true),
-    ACL_LEVEL_USER => __('Users', true),
-    ACL_LEVEL_GROUP => __('Group members', true),
-    ACL_LEVEL_PRIVATE => __('Me only', true));
-  echo $form->input('acl.read.preview', array('type' => 'select', 'options' => $aclSelect, 'selected' => ACL_LEVEL_KEEP, 'label' => __("Who can view the image?", true)));
-  echo $form->input('acl.read.original', array('type' => 'select', 'options' => $aclSelect, 'selected' => ACL_LEVEL_KEEP, 'label' => __("Who can download the image?", true)));
-  echo $form->input('acl.write.tag', array('type' => 'select', 'options' => $aclSelect, 'selected' => ACL_LEVEL_KEEP, 'label' => __("Who can add tags?", true)));
-  echo $form->input('acl.write.meta', array('type' => 'select', 'options' => $aclSelect, 'selected' => ACL_LEVEL_KEEP, 'label' => __("Who can edit all meta data?", true)));
-  echo $form->input('Group.id', array('type' => 'select', 'options' => $groups, 'selected' => 0, 'label' => __("Default image group?", true)));
-?>
-<div></fieldset>
-<?php endif; // canWriteAcl==true ?>
-<?php echo $form->end(__('Apply', true)); ?>
-<?php endif; // canWriteTag==true ?>
-</div>

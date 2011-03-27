@@ -17,79 +17,77 @@
   +linear-gradient(color-stops($headerBackgroundColor, darken($headerBackgroundColor, 20%)))
   border-bottom: 2px solid darken($headerBackgroundColor, 20%)
   width: 100%
-  .sub
+  > .sub
     width: 950px
     display: block
     margin: 0 auto
-    h1
+    > h1
       padding: 5px 0
       color: white
       font-size: 250% 
       display: inline-block
       +text-shadow(#444, 2px, 0px, 0)
-    .subtitle
+    > .subtitle
       color: white
       display: inline-block
-    #top-menu
+    > #top-menu
       float: right
       margin: 10px 0
-      li
+      > li
         float: left
         padding: 5px
-        a
+        > a
           color: darken(white, 50%)
           +text-shadow(black, 1px, 0px, 0)
         &:hover
           +border-radius(5px)
           background-color: darken($headerBackgroundColor, 25%)
           border-color: darken($headerBackgroundColor, 35%)
-          a
+          > a
             color: white
 
 #main-menu 
   width: 100%
   background-color:darken($headerBackgroundColor, 30%)
-  .sub
+  > .sub
     width: 950px;
     display: block
     margin: 0 auto
-    ul
-      li 
+    > ul
+      > li 
         margin: 5px
         margin-left: 0
         padding: 5px 15px
         background-color: lighten(black, 20%)
         display: inline-block
         +border-radius(5px)
-        a, &:active, &:visited
+        > a, &:active, &:visited
           color: lighten(black, 60%)
           +text-shadow(black, 1px, 0px, 0)
         &:hover
           background-color: lighten(black, 40%)
-          a
+          > a
             color: white
-            
-
 
 #main
   +container
-  .sub
+  > .sub
     +column(24, true)
-    #content .sub
+    #content > .sub
       +column(24, true)
 
 #footer 
   +container
-  .sub
+  > .sub
     +column(24, true)
     background-color: $footerBackgroundColor
-    p
+    > p
       padding: 5px
 
 .box
   position: relative
   padding: 5px
-  h1
+  > h1
     @include border-radius(5px)
     background-color: #eee
     +linear-gradient(colour-stops(#eee, darken(#eee, 10%)))
