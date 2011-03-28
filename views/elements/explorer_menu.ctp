@@ -26,24 +26,43 @@
   ksort($categoryUrls);
   $locationUrls = $imageData->getAllExtendSearchUrls($crumbs, $user, 'location', array_unique(Set::extract('/Location/name', $this->data)));
   ksort($locationUrls);
+
+  if (count($tagUrls)) {
+    echo "<p>" . __("Tags", true) . ": ";
+    foreach ($tagUrls as $name => $urls) {
+      echo $imageData->getExtendSearchLinks($urls, $name) . ' ';
+    }
+    echo "</p>\n";
+  }
+  if (count($categoryUrls)) {
+    echo "<p>" . __("Categories", true) . ": ";
+    foreach ($categoryUrls as $name => $urls) {
+      echo $imageData->getExtendSearchLinks($urls, $name) . ' ';
+    }
+    echo "</p>\n";
+  }
+  if (count($locationUrls)) {
+    echo "<p>" . __("Locations", true) . ": ";
+    foreach ($locationUrls as $name => $urls) {
+      echo $imageData->getExtendSearchLinks($urls, $name) . ' ';
+    }
+    echo "</p>\n";
+  }
 ?>
-<p><?php 
-  echo __("Tags", true) . ": ";
-  foreach ($tagUrls as $name => $urls) {
-    echo $imageData->getExtendSearchLinks($urls, $name) . ' ';
+<p><?php
+  $userUrls = $imageData->getAllExtendSearchUrls($crumbs, false, 'user', array_unique(Set::extract('/User/username', $this->data)));
+  echo __('Users', true), ": ";
+  foreach ($userUrls as $name => $urls) {
+    echo $imageData->getExtendSearchLinks($urls, $name, ($name == $user)) . ' ';
   }
 ?></p>
-<p><?php 
-  echo __("Categories", true) . ": ";
-  foreach ($categoryUrls as $name => $urls) {
-    echo $imageData->getExtendSearchLinks($urls, $name) . ' ';
+<p><?php
+  echo __('Pagesize', true), ": ";
+  $links = array();
+  foreach (array(6, 12, 24, 60, 120, 240) as $size) {
+    $links[] = $html->link($size, $breadcrumb->crumbUrl($breadcrumb->replace($crumbs, 'show', $size)));
   }
-?></p>
-<p><?php 
-  echo __("Locations", true) . ": ";
-  foreach ($locationUrls as $name => $urls) {
-    echo $imageData->getExtendSearchLinks($urls, $name) . ' ';
-  }
+  echo implode(', ', $links);
 ?></p>
 </div>
 <?php 

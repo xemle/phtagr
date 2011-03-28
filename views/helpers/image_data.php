@@ -466,7 +466,7 @@ class ImageDataHelper extends AppHelper {
     return $urls;
   }
 
-  function getExtendSearchLinks($urls, $value) {
+  function getExtendSearchLinks($urls, $value, $withExclude = true) {
     $output = '';
     $icons = array();
     if (isset($urls['user'])) {
@@ -476,7 +476,9 @@ class ImageDataHelper extends AppHelper {
       $output = $this->Html->link($value, $urls['global']);
     }
     $icons[] = $this->Html->link($this->getIcon('add', false, sprintf(__("Include %s from search", true), $value)), $urls['add'], array('escape' => false));
-    $icons[] = $this->Html->link($this->getIcon('delete', false, sprintf(__("Exclude %s from search", true), $value)), $urls['del'], array('escape' => false));
+    if ($withExclude) {
+      $icons[] = $this->Html->link($this->getIcon('delete', false, sprintf(__("Exclude %s from search", true), $value)), $urls['del'], array('escape' => false));
+    }
     return '<span class="search-item">' . $output . '<span class="search-icons"><ul><li>' . implode('</li><li>', $icons) . '</li></ul></span></span>';
   }
 
