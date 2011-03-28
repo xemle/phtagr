@@ -1,7 +1,10 @@
 <?php
-  $canWriteTag = max(Set::extract('/Media/canWriteTag', $this->data), 0);
-  $canWriteMeta = max(Set::extract('/Media/canWriteMeta', $this->data), 0);
-  $canWriteAcl = max(Set::extract('/Media/canWriteAcl', $this->data), 0);
+  $canWriteTag = $canWriteMeta = $canWriteAcl = 0;
+  if (count($this->data)) {
+    $canWriteTag = max(Set::extract('/Media/canWriteTag', $this->data));
+    $canWriteMeta = max(Set::extract('/Media/canWriteMeta', $this->data));
+    $canWriteAcl = max(Set::extract('/Media/canWriteAcl', $this->data));
+  }
 ?>
 <div id="p-explorer-menu">
 <ul>
