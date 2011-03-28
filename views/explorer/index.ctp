@@ -8,10 +8,9 @@
 
 <div class="p-explorer-cells">
 <?php
+$canWriteTag = count($this->data) ? max(Set::extract('/Media/canWriteTag', $this->data)) : 0;
 $cell = 0;
 $pos = ($search->getPage(1)-1) * $search->getShow(12) + 1;
-
-echo $html->scriptBlock("var mediaIds = [" . implode(', ', Set::extract('/Media/id', $this->data)) . "];");
 
 foreach ($this->data as $media): ?>
 
@@ -56,10 +55,12 @@ foreach ($this->data as $media): ?>
       array('escape' => false));
   }
   if ($media['Media']['canReadOriginal']) {
-    $diskIcon = $this->Html->image('icons/disk.png', array('title' => __('Download this media', true), 'alt' => 'download'));
-    echo $html->tag('li', 
-      $html->link($diskIcon, Router::url('/media/download/' . $media['Media']['id'] . '/' . $media['Media']['name'], true), array('escape' => false, 'class' => 'download')),
-      array('escape' => false));
+    foreach ($media['File'] as $file) {
+      $diskIcon = $this->Html->image('icons/disk.png', array('title' => sprintf(__('Download file %s', true), $file['file']), 'alt' => 'download'));
+      echo $html->tag('li', 
+        $html->link($diskIcon, Router::url('/media/file/' . $file['id'] . '/' . $file['file'], true), array('escape' => false, 'class' => 'download')),
+        array('escape' => false));
+    }
   }
 ?>
 </ul>
@@ -88,7 +89,6 @@ foreach ($this->data as $media): ?>
 </div><!-- cells -->
 
 <?php 
-  $canWriteTag = max(Set::extract('/Media/canWriteTag', $this->data), 0);
   if ($canWriteTag): ?>
 <div class="p-navigator-pages"><div class="sub">
 <a id="select-all"><?php __('Select All'); ?></a>
