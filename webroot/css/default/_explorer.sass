@@ -35,7 +35,7 @@
   > .p-explorer-cell
     position: relative
     &.selected > .p-explorer-cell-image
-      background-color: #d8acde;
+      background-color: #203c60
     h2
       font-family: Ubuntu ! important
       font-weight: normal 
@@ -159,27 +159,31 @@ ul.p-breadcrumb
         padding: 3px 0
         position: relative 
         > .search-item
-          padding: 0 2px
+          padding: 2px 2px
           position: relative
           > .search-icons
             display: none
             z-index: 2
             position: absolute
-            padding: 2px
+            margin-top: 17px
+            top: 0px 
             left: 0px
-            width: 48px
-            > a 
-              display: inline-block
-              > img
-                vertical-align: bottom
+            width: 64px
+            > ul 
+              padding: 2px
+              float: left
+              background-color: #ffd
+              +border-radius(4px)
+              border: 1px solid darken(#ffd, 60%)
+              > li
+                display: inline-block
+                > a > img
+                  vertical-align: bottom
           &:hover 
             > a
               color: white
             > .search-icons
-              background-color: #ffd
-              +border-radius(3px)
-              border: 1px solid: darken(#ffd, 20%)
-              display: inline-block
+              display: inline-block 
 
 .p-explorer-input
   +column(24, true)
