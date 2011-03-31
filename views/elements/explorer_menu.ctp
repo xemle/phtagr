@@ -17,7 +17,7 @@
   <?php endif; // canWriteTag ?>
 </ul>
 <div id="p-explorer-menu-content">
-<div id="p-explorer-all-meta">
+<div id="p-explorer-all-meta"><dl class="search-list">
 <?php
   $user = $search->getUser();
   $tagUrls = $imageData->getAllExtendSearchUrls($crumbs, $user, 'tag', array_unique(Set::extract('/Tag/name', $this->data)));
@@ -28,43 +28,42 @@
   ksort($locationUrls);
 
   if (count($tagUrls)) {
-    echo "<p>" . __("Tags", true) . ": ";
+    echo "<dt>" . __("Tags", true) . "</dt><dd><ul>\n";
     foreach ($tagUrls as $name => $urls) {
-      echo $imageData->getExtendSearchLinks($urls, $name) . ' ';
+      echo $imageData->getExtendSearchLinks($urls, $name) . "\n";
     }
-    echo "</p>\n";
+    echo "</ul></dd>\n";
   }
   if (count($categoryUrls)) {
-    echo "<p>" . __("Categories", true) . ": ";
+    echo "<dt>" . __("Categories", true) . "</dt><dd><ul>\n";
     foreach ($categoryUrls as $name => $urls) {
-      echo $imageData->getExtendSearchLinks($urls, $name) . ' ';
+      echo $imageData->getExtendSearchLinks($urls, $name) . "\n";
     }
-    echo "</p>\n";
+    echo "</ul></dd>\n";
   }
   if (count($locationUrls)) {
-    echo "<p>" . __("Locations", true) . ": ";
+    echo "<dt>" . __("Locations", true) . "</dt><dd><ul>\n";
     foreach ($locationUrls as $name => $urls) {
-      echo $imageData->getExtendSearchLinks($urls, $name) . ' ';
+      echo $imageData->getExtendSearchLinks($urls, $name) . "\n";
     }
-    echo "</p>\n";
+    echo "</ul></dd>\n";
   }
 ?>
-<p><?php
+<dt><?php echo __('Users', true); ?></dt>
+<dd><ul><?php
   $userUrls = $imageData->getAllExtendSearchUrls($crumbs, false, 'user', array_unique(Set::extract('/User/username', $this->data)));
-  echo __('Users', true), ": ";
   foreach ($userUrls as $name => $urls) {
     echo $imageData->getExtendSearchLinks($urls, $name, ($name == $user)) . ' ';
   }
-?></p>
-<p><?php
-  echo __('Pagesize', true), ": ";
-  $links = array();
+?></ul></dd>
+<dt><?php echo __('Pagesize', true); ?></dt>
+<dd><ul><?php  $links = array();
   foreach (array(6, 12, 24, 60, 120, 240) as $size) {
     $links[] = $html->link($size, $breadcrumb->crumbUrl($breadcrumb->replace($crumbs, 'show', $size)));
   }
-  echo implode(', ', $links);
-?></p>
-</div>
+  echo '<li>' . implode('</li><li>', $links) . '</li>';
+?></ul></dd>
+</dl></div>
 <?php 
   $url = $breadcrumb->params($crumbs);
   echo $form->create(null, array('id' => 'explorer', 'action' => 'edit/'.$url));

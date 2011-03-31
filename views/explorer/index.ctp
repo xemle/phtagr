@@ -42,8 +42,9 @@ foreach ($this->data as $media): ?>
 ?>
 
 <div class="p-explorer-cell-actions" id="action-<?php echo $media['Media']['id']; ?>">
+<?php if ($media['Media']['canWriteTag'] || $media['Media']['canReadOriginal']): ?>
 <ul>
-<?php 
+<?php
   if ($media['Media']['canWriteTag']) {
     $addIcon = $this->Html->image('icons/add.png', array('title' => __('Add to the selection', true), 'alt' => 'add'));
     echo $html->tag('li', 
@@ -64,18 +65,19 @@ foreach ($this->data as $media): ?>
   }
 ?>
 </ul>
+<?php endif; ?>
 </div>
 
 <div class="p-explorer-cell-meta" id="<?php echo 'meta-'.$media['Media']['id']; ?>">
-<p id="p-explorer-date">Date: <?php echo $html->link($media['Media']['date'], $imageData->getDateLink($media, '3d')); ?></p>
+<p class="p-explorer-date">Date: <?php echo $html->link($media['Media']['date'], $imageData->getDateLink($media, '3d')); ?></p>
 <?php if (count($media['Tag'])): ?>
-  <p id="p-explorer-tags"><?php echo __("Tags") . ': ' . implode(', ', $imageData->linkList('/explorer/tag', Set::extract('/Tag/name', $media))); ?></p>
+  <p class="p-explorer-tags"><?php echo __("Tags") . ': ' . implode(', ', $imageData->linkList('/explorer/tag', Set::extract('/Tag/name', $media))); ?></p>
 <?php endif; ?>
 <?php if (count($media['Category'])): ?>
-  <p id="p-explorer-categories"><?php echo __("Categories") . ': ' . implode(', ', $imageData->linkList('/explorer/category', Set::extract('/Category/name', $media))); ?></p>
+  <p class="p-explorer-categories"><?php echo __("Categories") . ': ' . implode(', ', $imageData->linkList('/explorer/category', Set::extract('/Category/name', $media))); ?></p>
 <?php endif; ?>
 <?php if (count($media['Location'])): ?>
-  <p id="p-explorer-locations"><?php echo __("Locations") . ': ' . implode(', ', $imageData->linkList('/explorer/location', Set::extract('/Location/name', $media))); ?></p>
+  <p class="p-explorer-locations"><?php echo __("Locations") . ': ' . implode(', ', $imageData->linkList('/explorer/location', Set::extract('/Location/name', $media))); ?></p>
 <?php endif; ?>
 <!--
 <table>

@@ -479,7 +479,7 @@ class ImageDataHelper extends AppHelper {
     if ($withExclude) {
       $icons[] = $this->Html->link($this->getIcon('delete', false, sprintf(__("Exclude %s from search", true), $value)), $urls['del'], array('escape' => false));
     }
-    return '<span class="search-item">' . $output . '<span class="search-icons"><ul><li>' . implode('</li><li>', $icons) . '</li></ul></span></span>';
+    return '<li>' . $output . '<div class="tooltip-actions"><ul><li>' . implode('</li><li>', $icons) . '</li></ul></div></li>';
   }
 
   function getIcon($name, $alt = false, $title = false) {

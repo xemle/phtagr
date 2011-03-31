@@ -154,14 +154,18 @@ ul.p-breadcrumb
   > #p-explorer-menu-content
     background-color: #444
     > #p-explorer-all-meta 
-      padding: 5px
-      > p
-        padding: 3px 0
-        position: relative 
-        > .search-item
-          padding: 2px 2px
-          position: relative
-          > .search-icons
+      padding: 10px
+      > dl.search-list
+        > dt
+          margin-top: 4px
+        > dd
+          margin-bottom: 4px
+        > dd > ul > li
+          display: inline-block
+          padding: 3px 0
+          padding-right: 4px
+          position: relative 
+          > .tooltip-actions
             display: none
             z-index: 2
             position: absolute
@@ -182,7 +186,7 @@ ul.p-breadcrumb
           &:hover 
             > a
               color: white
-            > .search-icons
+            > .tooltip-actions
               display: inline-block 
 
 .p-explorer-input
