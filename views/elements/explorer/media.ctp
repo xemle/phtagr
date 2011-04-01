@@ -9,7 +9,7 @@
 <?php 
   $size = $imageData->getimagesize($media, OUTPUT_SIZE_THUMB);
   $imageCrumbs = $this->Breadcrumb->replace($crumbs, 'page', $search->getPage());
-  $imageCrumbs = $this->Breadcrumb->replace($imageCrumbs, 'pos', $pos++);
+  $imageCrumbs = $this->Breadcrumb->replace($imageCrumbs, 'pos', ($pos + $index));
   if ($search->getShow(12) != 12) {
     $imageCrumbs = $this->Breadcrumb->replace($imageCrumbs, 'show', $search->getShow());
   }

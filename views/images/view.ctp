@@ -1,10 +1,8 @@
 <h1><?php echo $this->data['Media']['name'] ?></h1>
 <?php echo $session->flash(); ?>
 
-
 <div class="paginator"><div class="subpaginator">
 <?php
-echo $navigator->prevMedia().' '.$navigator->up().' '.$navigator->nextMedia();
 ?>
 </div></div>
 
@@ -17,15 +15,27 @@ echo $navigator->prevMedia().' '.$navigator->up().' '.$navigator->nextMedia();
   }
 ?>
 
-<div class="mediaPreview">
+<div id="p-media-preview">
+<div class="image">
+<span></span>
 <?php 
   if (($this->data['Media']['type'] & MEDIA_TYPE_VIDEO) > 0) {
     echo $flowplayer->video($this->data);
   } else {
-    $size = $imageData->getimagesize($this->data, OUTPUT_SIZE_PREVIEW);
+    $size = $imageData->getimagesize($this->data, 950);
     echo "<img src=\"".Router::url("/media/preview/".$this->data['Media']['id'])."\" $size[3] alt=\"{$this->data['Media']['name']}\"/>"; 
   }
 ?>
+</div>
+<div class="navigator">
+<div class="up"><div class="sub"><?php echo $navigator->up(); ?></div></div>
+<?php if ($navigator->hasPrevMedia()): ?>
+<div class="prev"><div class="sub"><?php echo $navigator->prevMedia(); ?></div></div>
+<?php endif; ?>
+<?php if ($navigator->hasNextMedia()): ?>
+<div class="next"><div class="sub"><?php echo $navigator->nextMedia(); ?></div></div>
+<?php endif; ?>
+</div>
 </div>
 
 <?php
@@ -91,5 +101,46 @@ echo $navigator->prevMedia().' '.$navigator->up().' '.$navigator->nextMedia();
   echo $map->container();
 }
 ?>
+<?php echo $this->Html->scriptBlock(<<<'JS'
+(function($) {
+$.fn.resizeImageHeight = function(size) {
+  var $image = $(this);
+  var w = $image.attr('width');
+  var h = $image.attr('height');
+  if (0 >= Math.min(w, h) || size > h) {
+    return;
+  }
+  $image.attr('width', size * (w / h));
+  $image.attr('height', size); 
+};
+$.fn.resizeImage = function(size) {
+  var $image = $(this);
+  var w = $image.attr('width');
+  var h = $image.attr('height');
+  if (0 >= Math.min(w, h) || size > Math.max(w, h)) {
+    return;
+  }
+  var ratio;
+  if (w > h) {
+    h = size * (h / w);
+    w = size;
+  } else {
+    w = size * (w / h);
+    h = size;
+  }
+  $image.attr('width', w);
+  $image.attr('height', h); 
+};
+$(document).ready(function() {
+  $media = $('#p-media-preview');
+  if ($media) {
+    var top = $media.position().top;
+    var size = window.innerHeight - top - 10;
+    $media.find('img').resizeImageHeight(size);
+  }
+});
+})(jQuery);
+JS
+); ?>
 
 <?php echo View::element('comment'); ?>

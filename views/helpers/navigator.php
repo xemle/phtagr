@@ -115,6 +115,10 @@ class NavigatorHelper extends AppHelper {
     return $this->Html->link(__('next', true), $link, array('class' => 'next'));
   }
 
+  function hasPrevMedia() {
+    return !empty($this->params['search']['prevMedia']);
+  }
+
   function prevMedia() {
     if (!isset($this->params['search']) ||
       !$this->params['search']['prevMedia']) {
@@ -139,6 +143,10 @@ class NavigatorHelper extends AppHelper {
     $link = $this->Breadcrumb->crumbUrl($this->params['crumbs'], false, array('pos'));
     $link .= '#media-'.$params['current'];
     return $this->Html->link(__('overview', true), $link, array('class' => 'up'));
+  }
+
+  function hasNextMedia() {
+    return !empty($this->params['search']['nextMedia']);
   }
 
   function nextMedia() {

@@ -49,7 +49,7 @@ class FlowplayerHelper extends AppHelper
   /** Creates the start script for the flowplayer */
   function player($media) {
     $id = $media['Media']['id'];
-    return $this->Html->codeBlock("flowplayer('player', '".Router::url("/flowplayer/flowplayer-3.1.5.swf", true)."', {
+    return $this->Html->scriptBlock("flowplayer('player', '".Router::url("/flowplayer/flowplayer-3.1.5.swf", true)."', {
 playlist: [
   {
     url: '".Router::url("/media/preview/$id/$id.jpg", true)."',
