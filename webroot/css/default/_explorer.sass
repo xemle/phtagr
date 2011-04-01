@@ -145,11 +145,17 @@ ul.p-breadcrumb
 #p-explorer-menu-space
   display: block
   height: 24px
+
+$menu-color = #111
+$menu-bg-color = lighten($menu-color, 25%)
+$menu-link-color = #666
+$menu-link-hover-color = lighten($menu-link-color, 40%)
+
 #p-explorer-menu
   +column(24, true)
   z-index: 10
   position: fixed
-  background-color: #111
+  background-color: $menu-color
   &:hover
     +opacity(1.0)
   > ul 
@@ -158,21 +164,38 @@ ul.p-breadcrumb
       display: inline
       > a
         cursor: pointer
-        border: 1px solid #111
+        border: 1px solid $menu-color
         padding: 3px
-        color: #666
+        color: $menu-link-color
       &:hover > a, &.active > a
-        color: #aaa
-        background-color: #444
-        border: 1px solid #444
+        color: $menu-link-hover-color
+        background-color: $menu-bg-color
+        border: 1px solid $menu-bg-color
         +border-radius(3px)
       &.active > a
         padding: 3px 3px 4px 3px
         color: #ddd
         +border-bottom-radius(0px)
-        border-bottom: 1px solid #444
+        border-bottom: 1px solid $menu-bg-color
+  > .pages > ul
+    position: absolute
+    right: 0
+    top: 0
+    margin: 5px
+    > li
+      display: inline-block
+      color: $menu-link-color
+      > a
+        color: $menu-link-color
+        padding: 3px
+        border: 1px solid $menu-color
+        &:hover
+          color: $menu-link-hover-color
+          background-color: $menu-bg-color
+          +border-radius(3px)
+          border: 1px solid $menu-bg-color
   > #p-explorer-menu-content
-    background-color: #444
+    background-color: $menu-bg-color
     > #p-explorer-all-meta 
       padding: 10px
       > dl.search-list

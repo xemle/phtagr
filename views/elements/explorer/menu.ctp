@@ -16,6 +16,17 @@
   <?php endif; // canWriteAcl ?>
   <?php endif; // canWriteTag ?>
 </ul>
+<div class="pages">
+<ul>
+<?php if ($navigator->hasPrev()): ?>
+<li><?php echo $navigator->prev(); ?></li>
+<?php endif; ?>
+<li><?php printf(__("Page %d of %d", true), $navigator->getCurrentPage(), $navigator->getPageCount()); ?></li>
+<?php if ($navigator->hasNext()): ?>
+<li><?php echo $navigator->next(); ?></li>
+<?php endif; ?>
+</ul>
+</div>
 <div id="p-explorer-menu-content">
 <div id="p-explorer-all-meta"><dl class="search-list">
 <?php

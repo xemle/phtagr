@@ -3,7 +3,6 @@
 <?php echo $this->element('explorer/menu'); ?>
 
 <?php echo $session->flash(); ?>
-<?php echo $navigator->pages() ?>
 <?php echo $breadcrumb->breadcrumb($crumbs); ?>
 
 <?php 

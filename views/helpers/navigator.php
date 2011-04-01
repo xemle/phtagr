@@ -35,6 +35,13 @@ class NavigatorHelper extends AppHelper {
     return 0;
   }
 
+  function getCurrentPage() {
+    if (isset($this->params['search']['page'])) {
+      return $this->params['search']['page'];
+    }
+    return 0;
+  }
+
   function hasPages() {
     return (isset($this->params['search']) && $this->params['search']['pageCount'] > 1);
   }

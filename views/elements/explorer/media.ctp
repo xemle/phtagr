@@ -30,13 +30,17 @@
 <ul>
 <?php
   if ($media['Media']['canWriteTag']) {
-    $addIcon = $this->Html->image('icons/add.png', array('title' => __('Add to the selection', true), 'alt' => 'add'));
+    $addIcon = $imageData->getIcon('add',  __('Select media', true));
     echo $html->tag('li', 
       $html->link($addIcon, 'javascript:void', array('escape' => false, 'class' => 'add')),
       array('escape' => false));
-    $delIcon = $this->Html->image('icons/delete.png', array('title' => __('Remove from the selection', true), 'alt' => 'remove'));
+    $delIcon = $imageData->getIcon('delete',  __('Deselect media', true));
     echo $html->tag('li', 
       $html->link($delIcon, 'javascript:void', array('escape' => false, 'class' => 'del')),
+      array('escape' => false));
+    $editIcon = $imageData->getIcon('tag',  __('Edit meta data', true));
+    echo $html->tag('li', 
+      $html->link($editIcon, 'javascript:void', array('escape' => false, 'class' => 'edit')),
       array('escape' => false));
   }
   if ($media['Media']['canReadOriginal']) {
