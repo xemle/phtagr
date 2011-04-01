@@ -1,106 +1,10 @@
 <?php $search->initialize(); ?>
 
-<?php echo $this->element('explorer_menu'); ?>
+<?php echo $this->element('explorer/menu'); ?>
 
 <?php echo $session->flash(); ?>
 <?php echo $navigator->pages() ?>
 <?php echo $breadcrumb->breadcrumb($crumbs); ?>
-
-<div class="p-explorer-cells">
-<?php
-$canWriteTag = count($this->data) ? max(Set::extract('/Media/canWriteTag', $this->data)) : 0;
-$cell = 0;
-$pos = ($search->getPage(1)-1) * $search->getShow(12) + 1;
-
-foreach ($this->data as $media): ?>
-
-<div class="p-explorer-cell <?php echo ($media['Media']['canWriteTag'] ? 'editable' : '') . " cell" . ($cell % 4); ?>" id="media-<?php echo $media['Media']['id']; ?>">
-<h2><?php 
-  if (!$search->getUser() || $search->getUser() != $session->read('User.username')) {
-    printf(__("%s by %s", true), h($media['Media']['name']), $html->link($media['User']['username'], "/explorer/user/".$media['User']['username']));
-  } else {
-    echo h($media['Media']['name']);
-  }
-?></h2>
-<?php 
-  $size = $imageData->getimagesize($media, OUTPUT_SIZE_THUMB);
-  $imageCrumbs = $this->Breadcrumb->replace($crumbs, 'page', $search->getPage());
-  $imageCrumbs = $this->Breadcrumb->replace($imageCrumbs, 'pos', $pos++);
-  if ($search->getShow(12) != 12) {
-    $imageCrumbs = $this->Breadcrumb->replace($imageCrumbs, 'show', $search->getShow());
-  }
-  
-  // image centrering from http://www.brunildo.org/test/img_center.html
-  echo '<div class="p-explorer-cell-image"><span></span>';
-  echo $html->tag('a',
-    $html->tag('img', false, array(
-      'src' => Router::url("/media/thumb/".$media['Media']['id']),
-      'width' => $size[0], 'height' => $size[1], 
-      'alt' => $media['Media']['name'])),
-    array('href' => Router::url("/images/view/".$media['Media']['id'].'/'.$breadcrumb->params($imageCrumbs))));
-  echo "</div>";
-?>
-
-<div class="p-explorer-cell-actions" id="action-<?php echo $media['Media']['id']; ?>">
-<?php if ($media['Media']['canWriteTag'] || $media['Media']['canReadOriginal']): ?>
-<ul>
-<?php
-  if ($media['Media']['canWriteTag']) {
-    $addIcon = $this->Html->image('icons/add.png', array('title' => __('Add to the selection', true), 'alt' => 'add'));
-    echo $html->tag('li', 
-      $html->link($addIcon, 'javascript:void', array('escape' => false, 'class' => 'add')),
-      array('escape' => false));
-    $delIcon = $this->Html->image('icons/delete.png', array('title' => __('Remove from the selection', true), 'alt' => 'remove'));
-    echo $html->tag('li', 
-      $html->link($delIcon, 'javascript:void', array('escape' => false, 'class' => 'del')),
-      array('escape' => false));
-  }
-  if ($media['Media']['canReadOriginal']) {
-    foreach ($media['File'] as $file) {
-      $diskIcon = $this->Html->image('icons/disk.png', array('title' => sprintf(__('Download file %s', true), $file['file']), 'alt' => 'download'));
-      echo $html->tag('li', 
-        $html->link($diskIcon, Router::url('/media/file/' . $file['id'] . '/' . $file['file'], true), array('escape' => false, 'class' => 'download')),
-        array('escape' => false));
-    }
-  }
-?>
-</ul>
-<?php endif; ?>
-</div>
-
-<div class="p-explorer-cell-meta" id="<?php echo 'meta-'.$media['Media']['id']; ?>">
-<p class="p-explorer-date">Date: <?php echo $html->link($media['Media']['date'], $imageData->getDateLink($media, '3d')); ?></p>
-<?php if (count($media['Tag'])): ?>
-  <p class="p-explorer-tags"><?php echo __("Tags") . ': ' . implode(', ', $imageData->linkList('/explorer/tag', Set::extract('/Tag/name', $media))); ?></p>
-<?php endif; ?>
-<?php if (count($media['Category'])): ?>
-  <p class="p-explorer-categories"><?php echo __("Categories") . ': ' . implode(', ', $imageData->linkList('/explorer/category', Set::extract('/Category/name', $media))); ?></p>
-<?php endif; ?>
-<?php if (count($media['Location'])): ?>
-  <p class="p-explorer-locations"><?php echo __("Locations") . ': ' . implode(', ', $imageData->linkList('/explorer/location', Set::extract('/Location/name', $media))); ?></p>
-<?php endif; ?>
-<!--
-<table>
-  <?php echo $html->tableCells($imageData->metaTable(&$media)); ?>
-</table>
--->
-</div><!-- meta -->
-</div><!-- cell -->
-
-<?php $cell++; endforeach; ?>
-</div><!-- cells -->
-
-<?php 
-  if ($canWriteTag): ?>
-<div class="p-navigator-pages"><div class="sub">
-<a id="select-all"><?php __('Select All'); ?></a>
-<a id="invert-selection"><?php __('Invert Selection'); ?></a>
-</div></div>
-<?php endif; ?>
-
-<?php echo $navigator->pages() ?>
-
-
 
 <?php 
   echo $this->Html->scriptBlock(<<<'JS'
@@ -136,7 +40,7 @@ foreach ($this->data as $media): ?>
       } else {
         $('#p-explorer-menu-content .active').removeClass('active').hide();
         $item.addClass('active');
-        $target.addClass('active').show();
+        $target.addClass('active').slideDown('fast');
       }
       if ($target[0].nodeName == 'FIELDSET' && $target.hasClass('active')) {
         $('#explorer').children('.submit').show();
@@ -168,6 +72,14 @@ foreach ($this->data as $media): ?>
       $(this).placeExplorerMenu();
     });
     $('#p-explorer-menu-space').css('height', ($('#p-explorer-menu').height()) + 3 + 'px');
+    $('.tooltip-actions').each(function() {
+      var $tooltip = $(this);
+      $(this).parent().delayedHover(function() {
+        $tooltip.show('fast');
+      }, function() {
+        $tooltip.hide();
+      }, 350);
+    });
   });
   $(window).load(function() {
     $(this).placeExplorerMenu();
@@ -177,3 +89,25 @@ JS
 );
 ?>
 
+<div class="p-explorer-cells">
+<?php
+$canWriteTag = count($this->data) ? max(Set::extract('/Media/canWriteTag', $this->data)) : 0;
+$index = 0;
+$pos = ($search->getPage(1)-1) * $search->getShow(12) + 1;
+
+foreach ($this->data as $media) {
+  echo $this->element('explorer/media', array('media' => $media, 'index' => $index, 'pos' => $pos));
+  $index++;
+}
+?>
+</div><!-- cells -->
+
+<?php 
+  if ($canWriteTag): ?>
+<div class="p-navigator-pages"><div class="sub">
+<a id="select-all"><?php __('Select All'); ?></a>
+<a id="invert-selection"><?php __('Invert Selection'); ?></a>
+</div></div>
+<?php endif; ?>
+
+<?php echo $navigator->pages() ?>

@@ -3,6 +3,26 @@
 @import opacity
 @import gradient
 
+=tooltip-actions
+  display: none
+  z-index: 2
+  position: absolute
+  top: 0px 
+  left: 0px
+  width: 150px
+  &:hover
+    display: inline-block
+  > ul 
+    padding: 2px
+    float: left
+    background-color: #ffd
+    +border-radius(4px)
+    border: 1px solid darken(#ffd, 60%)
+    > li
+      display: inline-block
+      > a > img
+        vertical-align: bottom
+
 .p-navigator-pages
   width: 100%
   display: block
@@ -42,8 +62,8 @@
       padding: 2px 2px ! important
       position: absolute
       top: 0
-      z-index: 2
-      margin: 0
+      z-index: 1
+      margin: 1px
       +opacity(.0)
       background-color: #000
     > .p-explorer-cell-image
@@ -166,29 +186,23 @@ ul.p-breadcrumb
           padding-right: 4px
           position: relative 
           > .tooltip-actions
-            display: none
-            z-index: 2
-            position: absolute
             margin-top: 17px
-            top: 0px 
-            left: 0px
-            width: 64px
-            > ul 
-              padding: 2px
-              float: left
-              background-color: #ffd
-              +border-radius(4px)
-              border: 1px solid darken(#ffd, 60%)
-              > li
-                display: inline-block
-                > a > img
-                  vertical-align: bottom
+            +tooltip-actions
           &:hover 
             > a
               color: white
-            > .tooltip-actions
-              display: inline-block 
 
+dl.single-media
+  > dd, > dt
+    display: inline-block
+  > dt
+    margin-left: 3px
+    &.date
+      position: relative
+      > .tooltip-actions
+        margin-top: 13px
+        +tooltip-actions
+      
 .p-explorer-input
   +column(24, true)
   z-index: 9

@@ -98,5 +98,18 @@
       }
     });
   };
+  $.fn.delayedHover = function(over, out, delay) {
+    var timerId = false;
+    $(this).hover(function() {
+      timerId = setTimeout(function() {
+        over();
+      }, delay);
+    }, function() {
+      if (timerId) {
+        clearTimeout(timerId);
+      }
+      out();
+    });
+  };
 })(jQuery);
 
