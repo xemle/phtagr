@@ -6,10 +6,10 @@
 <?php echo $breadcrumb->breadcrumb($crumbs); ?>
 
 <?php 
-  echo $this->Html->scriptBlock(<<<'JS'
+  $script = <<<'JS'
 (function($) {
   $(document).ready(function() {
-    $('#content .sub .p-explorer-cell .p-explorer-cell-actions').each(function() {
+    $('.p-explorer-media-actions').each(function() {
       var id = $(this).attr('id').split('-')[1];
       var media = $('#media-' + id)
       $(this).find('ul li .add').click(function() {
@@ -18,12 +18,35 @@
       $(this).find('ul li .del').hide().click(function() {
         $(media).unselectMedia();
       });
+      $(this).find('ul li .edit').click(function() {
+        $('#dialog').children().remove();
+        $('#dialog').load(':BASE_URLexplorer/editmeta/' + id, function() {
+          $(this).dialog({
+            modal: true, 
+            width: 750,
+            title: ':EDIT_TITLE',
+            buttons: {
+              ':SAVE': function() {
+                var $form = $('#form-meta-' + id);
+                $.post($form.attr('action'), $form.serialize(), function(data) {
+                  $('#description-' + id).html(data);
+                  $('#description-' + id).find('.tooltip-actions').tooltipAction();
+                });
+                $(this).dialog("close");
+              },
+              ':CANCEL': function() {
+                $(this).dialog("close");
+              }
+            }
+          });
+        });  
+      });
     });
     $('#select-all').click(function() {
-      $('#content .sub .p-explorer-cell').selectMedia();
+      $('#content .sub .p-explorer-media').selectMedia();
     });
     $('#invert-selection').click(function() {
-      $('#content .sub .p-explorer-cell').invertMediaSelection();
+      $('#content .sub .p-explorer-media').invertMediaSelection();
     });
 
     $.fn.activateExplorerMenu = function(id, target) {
@@ -71,24 +94,35 @@
       $(this).placeExplorerMenu();
     });
     $('#p-explorer-menu-space').css('height', ($('#p-explorer-menu').height()) + 3 + 'px');
-    $('.tooltip-actions').each(function() {
-      var $tooltip = $(this);
-      $(this).parent().delayedHover(function() {
-        $tooltip.show('fast');
-      }, function() {
-        $tooltip.hide();
-      }, 350);
-    });
+    $.fn.tooltipAction = function() {
+      $(this).each(function() {
+        var $tooltip = $(this);
+        $(this).parent().delayedHover(function() {
+          $tooltip.show('fast');
+        }, function() {
+          $tooltip.hide();
+        }, 350);
+      })
+    };
+    $('.tooltip-actions').tooltipAction();
   });
   $(window).load(function() {
     $(this).placeExplorerMenu();
   }); 
 })(jQuery);
-JS
-);
+JS;
+  $vars = array(
+    'BASE_URL' => Router::url('/', true), 
+    'EDIT_TITLE' => __("Edit Meta Data", true),
+    'SAVE' => __("Update", true), 
+    'CANCEL' => __("Cancel", true));
+  foreach ($vars as $name => $value) {
+    $script = preg_replace("/:$name/", $value, $script);
+  }
+  echo $this->Html->scriptBlock($script);
 ?>
 
-<div class="p-explorer-cells">
+<div class="p-explorer-media-list">
 <?php
 $canWriteTag = count($this->data) ? max(Set::extract('/Media/canWriteTag', $this->data)) : 0;
 $index = 0;
@@ -110,3 +144,5 @@ foreach ($this->data as $media) {
 <?php endif; ?>
 
 <?php echo $navigator->pages() ?>
+
+<div id="dialog"></div>

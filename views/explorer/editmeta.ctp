@@ -1,6 +1,6 @@
 <?php 
   $mediaId = $data['Media']['id'];
-  echo $ajax->form('savemeta/'.$mediaId, 'post', array('url' => '/explorer/savemeta/'.$mediaId, 'update' => 'meta-'.$mediaId, 'id' => 'form-meta-'.$mediaId)); 
+  echo $form->create(null, array('url' => 'savemeta/'.$mediaId, 'id' => 'form-meta-'.$mediaId)); 
 ?>
 <fieldset>
 <?php
@@ -42,8 +42,4 @@
   echo $form->input('Media.geo', array('value' => $geo, 'label' => __('Geo data', true)));
 ?>
 </fieldset>
-<?php
-  echo $form->submit(__('Save', true), array('div' => false)); 
-  echo $ajax->link(__('Cancel', true), '/explorer/updatemeta/'.$mediaId, array('update' => 'meta-'.$mediaId, 'class' => 'reset'));
-?>
 </form>

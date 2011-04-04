@@ -1,3 +1,1 @@
-<table>
-  <?php echo $html->tableCells($imageData->metaTable(&$data)); ?>
-</table>
+<?php echo $this->element('explorer/description', array('media' => $this->data)); ?>

@@ -679,7 +679,7 @@ class ExplorerController extends AppController
     * @todo Check and handle non-ajax request
     */
   function editmeta($id) {
-    if (!$this->RequestHandler->isAjax() || !$this->RequestHandler->isPost()) {
+    if (!$this->RequestHandler->isAjax()) {
       Logger::warn("Decline wrong ajax request");
       $this->redirect(null, '404');
     }
@@ -749,7 +749,7 @@ class ExplorerController extends AppController
     }
     $media = $this->Media->findById($id);
     $this->Media->setAccessFlags(&$media, $user);
-    $this->set('data', $media);
+    $this->data = $media;
     Configure::write('debug', 0);
     $this->render('updatemeta');
   }

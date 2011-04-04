@@ -1,4 +1,4 @@
-<div class="p-explorer-cell <?php echo ($media['Media']['canWriteTag'] ? 'editable' : '') . " cell" . ($index % 4); ?>" id="media-<?php echo $media['Media']['id']; ?>">
+<div class="p-explorer-media <?php echo ($media['Media']['canWriteTag'] ? 'editable' : '') . " cell" . ($index % 4); ?>" id="media-<?php echo $media['Media']['id']; ?>">
 <h2><?php 
   if (!$search->getUser() || $search->getUser() != $session->read('User.username')) {
     printf(__("%s by %s", true), h($media['Media']['name']), $html->link($media['User']['username'], "/explorer/user/".$media['User']['username']));
@@ -15,7 +15,7 @@
   }
   
   // image centrering from http://www.brunildo.org/test/img_center.html
-  echo '<div class="p-explorer-cell-image"><span></span>';
+  echo '<div class="p-explorer-media-image"><span></span>';
   echo $html->tag('a',
     $html->tag('img', false, array(
       'src' => Router::url("/media/thumb/".$media['Media']['id']),
@@ -25,7 +25,7 @@
   echo "</div>";
 ?>
 
-<div class="p-explorer-cell-actions" id="action-<?php echo $media['Media']['id']; ?>">
+<div class="p-explorer-media-actions" id="action-<?php echo $media['Media']['id']; ?>">
 <?php if ($media['Media']['canWriteTag'] || $media['Media']['canReadOriginal']): ?>
 <ul>
 <?php
@@ -55,22 +55,8 @@
 </ul>
 <?php endif; ?>
 </div>
-
-<div class="p-explorer-cell-meta" id="<?php echo 'meta-'.$media['Media']['id']; ?>">
-<?php echo $this->element('explorer/date', array('media' => $media)); ?>
-<?php if (count($media['Tag'])): ?>
-  <dd class="tag list"><?php echo __("Tags", true); ?></dd>
-  <dt><?php echo implode(', ', $imageData->linkList('/explorer/tag', Set::extract('/Tag/name', $media))); ?></dt>
-<?php endif; ?>
-<?php if (count($media['Category'])): ?>
-  <dd class="category list"><?php echo __("Categories", true); ?></dd>
-  <dt><?php echo implode(', ', $imageData->linkList('/explorer/category', Set::extract('/Category/name', $media))); ?></dt>
-<?php endif; ?>
-<?php if (count($media['Location'])): ?>
-  <dd class="location list"><?php echo __("Locations", true); ?></dd>
-  <dt><?php echo implode(', ', $imageData->linkList('/explorer/location', Set::extract('/Location/name', $media))); ?></dt>
-<?php endif; ?>
-</dl>
-</div><!-- meta -->
+<div class="p-explorer-media-description" id="<?php echo 'description-'.$media['Media']['id']; ?>">
+<?php echo $this->element('explorer/description', array('media' => $media)); ?>
+</div>
 </div><!-- cell -->
 
