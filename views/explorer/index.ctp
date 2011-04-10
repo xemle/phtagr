@@ -64,11 +64,6 @@
         $item.addClass('active');
         $target.addClass('active').slideDown('fast');
       }
-      if ($target[0].nodeName == 'FIELDSET' && $target.hasClass('active')) {
-        $('#explorer').children('.submit').show();
-      } else {
-        $('#explorer').children('.submit').hide();
-      }
     }
     $('#p-explorer-all-meta').hide();
     $('#p-explorer-button-all-meta').click(function() {
@@ -82,8 +77,7 @@
     $('#p-explorer-button-access').click(function() {
       $(this).activateExplorerMenu('#p-explorer-button-access', '#p-explorer-edit-access');
     });
-    $('#explorer').children('.submit').hide();
-
+    $('#explorer').find('.submit input').button();
     $.fn.placeExplorerMenu = function() {
       $('#p-explorer-menu').css('top', Math.max(0, $('#content').position().top - window.pageYOffset));
     }

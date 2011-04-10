@@ -26,7 +26,7 @@
 <li><?php echo $navigator->next(); ?></li>
 <?php endif; ?>
 </ul>
-</div>
+</div><!-- pages -->
 <div id="p-explorer-menu-content">
 <div id="p-explorer-all-meta"><dl class="search-list">
 <?php
@@ -74,18 +74,19 @@
   }
   echo '<li>' . implode('</li><li>', $links) . '</li>';
 ?></ul></dd>
-</dl></div>
+</dl></div><!-- all meta -->
 <?php 
   $url = $breadcrumb->params($crumbs);
   echo $form->create(null, array('id' => 'explorer', 'action' => 'edit/'.$url));
 ?>
-<fieldset id="p-explorer-edit-meta"><legend><?php __("Metadata"); ?></legend><div>
+<div id="p-explorer-edit-meta">
+<fieldset><legend><?php __("Metadata"); ?></legend>
 <?php 
   echo $form->hidden('Media.ids', array('id' => 'MediaIds'));
   if ($canWriteMeta) {
-    echo $form->input('Media.date', array('type' => 'text', 'after' => '<span class="hint">' . __('E.g. 2008-08-07 15:30', true) . '</span>')); 
+    echo $form->input('Media.date', array('type' => 'text', 'after' => $html->tag('div', __('E.g. 2008-08-07 15:30', true), array('class' => 'description')))); 
   }
-  echo $form->input('Tags.text', array('label' => __('Tags', true), 'after' => $html->tag('span', __('E.g. newtag, -oldtag', true), array('class' => 'hint'))));
+  echo $form->input('Tags.text', array('label' => __('Tags', true), 'after' => $html->tag('div', __('E.g. newtag, -oldtag', true), array('class' => 'description'))));
   echo $autocomplete->autoComplete('Tags.text', 'autocomplete/tag', array('split' => true));
   if ($canWriteMeta) {
     echo $form->input('Categories.text', array('label' => __('Categories', true)));
@@ -98,12 +99,15 @@
     echo $autocomplete->autoComplete('Locations.state', 'autocomplete/state');
     echo $form->input('Locations.country', array('label' => __('Country', true)));
     echo $autocomplete->autoComplete('Locations.country', 'autocomplete/country');
-    echo $form->input('Media.geo', array('label' => __('Geo data', true), 'maxlength' => 32, 'after' => '<span class="hint">' . __('latitude, longitude', true) . '</span>'));
+    echo $form->input('Media.geo', array('label' => __('Geo data', true), 'maxlength' => 32, 'after' => $html->tag('div', __('latitude, longitude', true), array('class' => 'description'))));
   }
 ?>
-</div></fieldset>
+</fieldset>
+<?php echo $form->submit(__('Apply', true)); ?>
+</div>
 <?php if ($canWriteAcl): ?>
-<fieldset id="p-explorer-edit-access"><legend><?php __("Access Rights"); ?></legend><div>
+<div id="p-explorer-edit-access">
+<fieldset><legend><?php __("Access Rights"); ?></legend>
 <?php
   $aclSelect = array(
     ACL_LEVEL_KEEP => __('[Keep]', true),
@@ -117,10 +121,11 @@
   echo $form->input('acl.write.meta', array('type' => 'select', 'options' => $aclSelect, 'selected' => ACL_LEVEL_KEEP, 'label' => __("Who can edit all meta data?", true)));
   echo $form->input('Group.id', array('type' => 'select', 'options' => $groups, 'selected' => 0, 'label' => __("Default image group?", true)));
 ?>
-</div></fieldset>
+</fieldset>
+<?php echo $form->submit(__('Apply', true)); ?>
+</div>
 <?php endif; // canWriteAcl==true ?>
-<?php echo $form->end(__('Apply', true)); ?>
-</div><!-- form -->
+<?php echo $form->end(); ?>
+</div>
 </div><!-- explorer menu -->
 <div id="p-explorer-menu-space"></div>
-

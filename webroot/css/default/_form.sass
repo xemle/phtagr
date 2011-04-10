@@ -4,6 +4,7 @@
 
 =default-input
   +border-radius(3px)
+  color: black
   border: #aaa 1px solid
   padding: 2px
   background-color: #efefef
@@ -29,48 +30,56 @@
     border-color: darken($menuActiveBackgroundColor, 20%)P
 
 form
-  overflow: hidden
-  width: 710px
-  fieldset
+  > fieldset, > div > fieldset
     padding: 15px 0
     border: 0
-    legend
+    > legend
       font-family: Ubuntu-bold
       width: 81.5%
       border-bottom: 1px solid darken(white, 10%)
-    div
+    > div
+      +column(19, true)
       padding: 5px 0
       position: relative
-      display: block
-      width: 100% 
-      label
-        padding: 5px 3px
+      clear: both
+      > label
+        +column(6)
         text-align: right
-        display: inline
-        float: left
-        width: 30%
-      input[type=text],
-      input[type=password],
-      textarea
-        width: 50%
+      > input[type=text], > input[type=password], > textarea
+        +column(6)
         +default-input
-      select
-        width: 51.5%
+      > select
+        +column(6)
         +default-input
+        > option
+          padding: 3px
+          color: black
       &.checkbox 
-        input[type=checkbox]
-          margin-left: 30%
-          margin-right: 5px
-        label
-          float: none
-          display: inline-block
-          width: 50%
-  ul.buttons 
-    margin-left: 30%
-    li 
+        > input[type=checkbox]
+          float: left
+          display: block
+          overflow: hidden
+          margin-left: 240px
+          margin-right: 10px
+          width: 40px
+        > label
+          width: 210px
+          text-align: left
+      > div.description
+        +column(6, true)
+      > div.error
+        clear: both
+        +prepend(6)
+        +column(12, true)
+    > div.error
+      background: darken(red, 30%)
+  > ul.buttons, > div > ul.buttons 
+    +prepend(6)
+    > li 
       display: inline-block
       margin-right: 10px
-      input
-        +default-button
-  .submit input
-    +default-button
+      > input
+  > .submit, > div > .submit
+    +prepend(6)
+
+

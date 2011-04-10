@@ -37,18 +37,18 @@ ul, ol
     background-color: darken(white, 10%)
     color: lighten(black, 20%)
 
-.error, .notice
-  margin: 5px 0
-  padding: 10px
-  color: black
-  *  
+  > .error, > .notice
+    margin: 5px 0
+    padding: 10px
     color: black
-.error
-  border: 1px solid red
-  background-color: lighten(red, 30%)
-.notice
-  border: 1px solid yellow
-  background-color: lighten(yellow, 30%)
+    > *  
+      color: black
+  > .error
+    border: 1px solid red
+    background-color: lighten(red, 30%)
+  > .notice
+    border: 1px solid yellow
+    background-color: lighten(yellow, 30%)
 pre
   padding: 10px
   background-color: #aaa
