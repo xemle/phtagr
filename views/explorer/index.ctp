@@ -23,7 +23,7 @@
         $('#dialog').load(':BASE_URLexplorer/editmeta/' + id, function() {
           $(this).dialog({
             modal: true, 
-            width: 750,
+            width: 520,
             title: ':EDIT_TITLE',
             buttons: {
               ':SAVE': function() {
