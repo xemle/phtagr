@@ -86,30 +86,54 @@ if (!defined('CAKE_CORE_INCLUDE_PATH')) {
 	exit('File Not Found');
 }
 
-header("Content-Type: text/css");
+if (preg_match('|\.\.|', $url) || !preg_match('|^(\w+/)?ccss/(.+)(\.[^.]+)?$|iU', $url, $regs)) {
+	die('Wrong file name.');
+}
+
+$mime = array(
+	'txt'  => 'text/plain',
+	'htm'  => 'text/html',
+	'html' => 'text/html',
+
+	'css'  => 'text/css',
+
+	'png'  => 'image/png',
+	'jpeg' => 'image/jpeg',
+	'jpg'  => 'image/jpeg',
+	'gif'  => 'image/gif',
+	'bmp'  => 'image/bmp',
+	'ico'  => 'image/vnd.microsoft.icon',
+	'tiff' => 'image/tiff',
+	'svg'  => 'image/svg+xml');
+$ext = strtolower(substr($regs[3], 1));
+if (isset($mime[$ext])) {
+	header("Content-Type: " . $mime[$ext]);
+} else {
+	header("Content-Type: application/octet-stream");
+}
 header("Expires: " . gmdate("D, j M Y H:i:s", time() + DAY) . " GMT");
 header("Cache-Control: cache"); // HTTP/1.1
 header("Pragma: cache");        // HTTP/1.0
 
-if (preg_match('|\.\.|', $url) || !preg_match('|^(\w+/)?ccss/(.+)$|i', $url, $regs)) {
-	die('Wrong file name.');
-}
-
 $cssPath = CSS;
 if ($regs[1]) {
-  $plugin = trim($regs[1], '/');
-  if (is_dir('.' . DS . $plugin . DS . 'css')) {
-    $cssPath = '.' . DS . $plugin . DS . 'css' . DS;
-  } else {
-    $path = App::pluginPath($plugin);
-    $cssPath = $path . 'webroot' . DS . 'css' . DS;
-  }
+	$plugin = trim($regs[1], '/');
+	if (is_dir('.' . DS . $plugin . DS . 'css')) {
+		$cssPath = '.' . DS . $plugin . DS . 'css' . DS;
+	} else {
+		$path = App::pluginPath($plugin);
+		$cssPath = $path . 'webroot' . DS . 'css' . DS;
+	}
 }
-$cssFile = $cssPath . $regs[2];
-$sassFile = str_replace('.css', '.sass', $cssFile);
+
+$cssFile = $cssPath . $regs[2] . $regs[3];
+$sassFile = false;
+if ($ext === 'css') {
+	$sassFile = str_replace('.css', '.sass', $cssFile);
+}
 
 // Parse the Sass file if there is one
-if (file_exists($sassFile)) {
+if ($sassFile && file_exists($sassFile)) {
 	$options = array();
 	foreach ($sassOptions as $option) {
 		$_option = Configure::read("Sass.$option");
