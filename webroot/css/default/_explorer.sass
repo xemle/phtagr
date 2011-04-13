@@ -24,9 +24,9 @@
         vertical-align: bottom
 
 .p-navigator-pages
-  width: 100%
+  +column(24, true)
   display: block
-  margin: 3px
+  padding: 5px 0
   > .sub
     text-align: center
     > .current, > a
@@ -61,7 +61,8 @@
       font-weight: normal 
       padding: 2px 2px ! important
       position: absolute
-      top: 0
+      top: 1
+      left: 1
       z-index: 1
       margin: 1px
       +opacity(.0)
