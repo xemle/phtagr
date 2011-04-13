@@ -2,6 +2,7 @@
 @import border-radius
 
 $nav-button-padding = 100px
+
 #p-media-preview
   position: relative
   > .image
@@ -60,3 +61,17 @@ $nav-button-padding = 100px
       padding-left: $nav-button-padding
       > .sub
         +border-left-radius(15px)
+
+#image-tabs
+  margin: 10px 0 5px 0
+
+#comments
+  margin: 5px 0
+  > h3
+    font-size: 120%
+  > .comment
+    padding: 5px
+    &.even
+      background: lighten(black, 10%)
+    > .text
+      margin: 5px 0px 5px 20px

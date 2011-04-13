@@ -2,9 +2,9 @@
   $search->initialize();
   $searchParams = $search->serialize(false, false, false, array('defaults' => array('pos' => 1)));
 ?>
-<div class="comments">
+<div id="comments">
 <?php if (count($this->data['Comment'])): ?>
-<h3><?php __('Comments', true); ?></h3>
+<h3><?php echo __('Comments', true); ?></h3>
 <?php $count = 0; ?>
 <?php foreach ($this->data['Comment'] as $key => $comment): ?>
 <?php if (!is_numeric($key)) continue; ?>
@@ -33,7 +33,7 @@
 <?php endif; /* has comments */ ?>
 
 <h3><?php __("Add new Comment", true); ?></h3>
-<?php echo $form->create('Comment', array('action' => 'add/'.$searchParams)); ?>
+<?php echo $form->create('Comment', array('action' => 'add/'.$searchParams, 'id' => 'comment-add')); ?>
 <fieldset>
 <?php
   echo $form->hidden('Media.id', array('value' => $this->data['Media']['id']));

@@ -8,7 +8,7 @@
 
 <?php
   $withMap = false;
-  if (isset($this->data['Media']['longitude']) && isset($this->data['Media']['latitude']) &&
+  if (false && isset($this->data['Media']['longitude']) && isset($this->data['Media']['latitude']) &&
     $map->hasApi()) {
     $withMap = true;
     echo $map->script();
@@ -22,7 +22,8 @@
   if (($this->data['Media']['type'] & MEDIA_TYPE_VIDEO) > 0) {
     echo $flowplayer->video($this->data);
   } else {
-    $size = $imageData->getimagesize($this->data, 950);
+    //$size = $imageData->getimagesize($this->data, OUTPUT_SIZE_PREVIEW);
+    $size = $imageData->getimagesize($this->data, 960);
     echo "<img src=\"".Router::url("/media/preview/".$this->data['Media']['id'])."\" $size[3] alt=\"{$this->data['Media']['name']}\"/>"; 
   }
 ?>
@@ -38,11 +39,12 @@
 </div>
 </div>
 
+<div id="image-tabs">
 <?php
-  $items = array(array('name' => __("General", true), 'active' => true), __("Media Details", true));
+  $items = array(__("General", true), __("Media Details", true));
   echo $tab->menu($items);
 ?>
-<?php echo $tab->open(0, true); ?>
+<?php echo $tab->open(0); ?>
 <div class="meta">
 <div id="meta-<?php echo $this->data['Media']['id']; ?>">
 <table class="bare"> 
@@ -96,6 +98,7 @@
 </table>
 </div>
 <?php echo $tab->close(); ?>
+</div><!-- tabs -->
 
 <?php if ($withMap) {
   echo $map->container();
@@ -120,7 +123,6 @@ $.fn.resizeImage = function(size) {
   if (0 >= Math.min(w, h) || size > Math.max(w, h)) {
     return;
   }
-  var ratio;
   if (w > h) {
     h = size * (h / w);
     w = size;
@@ -138,6 +140,8 @@ $(document).ready(function() {
     var size = window.innerHeight - top - 10;
     $media.find('img').resizeImageHeight(size);
   }
+  $("#image-tabs").tabs();
+  $("#comment-add :submit").button();
 });
 })(jQuery);
 JS
