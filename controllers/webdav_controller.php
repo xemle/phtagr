@@ -23,7 +23,7 @@
 
 class WebdavController extends AppController
 {
-  var $components=array('RequestHandler', 'DigestAuth', 'FileCache', 'WebdavServer');
+  var $components=array('RequestHandler', 'DigestAuth', 'FileCache');
 
   var $uses = array('User', 'MyFile', 'Media', 'Property', 'Lock');
   // Important to set the davroot in the Webdav Server
@@ -49,6 +49,9 @@ class WebdavController extends AppController
         'Lock' => array('foreignKey' => 'file_id')
         )
       ));
+
+    // Preload WebdavServer component which requires a running session
+    $this->loadComponent('WebdavServer');
   }
 
   /** @todo Set webdav root to creator's root if user is guest */

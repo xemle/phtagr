@@ -247,7 +247,7 @@ class User extends AppModel
   }
 
   function canUpload($user, $size) {
-    $this->bind('Media', array('type' => 'hasMany'));
+    $this->bindModel(array('hasMany' => array('Media')));
     $userId = intval($user['User']['id']);
     if ($userId < 1) {
       return false;
