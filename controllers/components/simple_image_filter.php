@@ -71,6 +71,9 @@ class SimpleImageFilterComponent extends BaseFilterComponent {
         Logger::warn("Could not determine image size of $filename");
       }
     }
+    if (!isset($media['Media']['date'])) {
+      $media['Media']['date'] = date('Y-m-d H:i:s', time());
+    }
     if ($options['noSave']) {
       return $media;
     } elseif (!$this->Media->save($media)) {
