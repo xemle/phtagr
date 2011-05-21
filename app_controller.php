@@ -52,7 +52,7 @@ class AppController extends Controller
     $this->Menu->addItem(__('Explorer', true), array('controller' => 'explorer'));
     if ($this->hasRole(ROLE_GUEST)) {
       $user = $this->getUser();
-      $this->Menu->addItem(__('My Photos', true), array('controller' => 'explorer', 'action' => 'users', 'id' => $user['User']['username']));
+      $this->Menu->addItem(__('My Photos', true), array('controller' => 'explorer', 'action' => 'user', $user['User']['username']));
     }
     if ($this->hasRole(ROLE_USER)) {
       $this->Menu->addItem(__('Upload', true), array('controller' => 'browser', 'action' => 'quickupload'));
