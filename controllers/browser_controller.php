@@ -37,6 +37,7 @@ class BrowserController extends AppController
     $this->subMenu = array(
       'import' => __("Import Files", true),
       'upload' => __("Upload", true),
+      'sync' => __("Meta Data Sync", true),
       );
 
     $this->requireRole(ROLE_USER, array('redirect' => '/'));
