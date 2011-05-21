@@ -51,7 +51,7 @@ class SystemController extends AppController {
   function index() {
     if (isset($this->data)) {
       $this->_set(0, 'general.title', $this->data);
-      $this->_set(0, 'home.welcomeText', $this->data);
+      $this->_set(0, 'general.subtitle', $this->data);
     }
     $this->data = $this->Option->getTree(0);
   }
