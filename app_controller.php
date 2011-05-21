@@ -42,7 +42,24 @@ class AppController extends Controller
     $this->Feed->add('/comment/rss', array('title' => __('Recent comments', true)));
     
     $this->_configureEmail();
+    $this->_setMainMenu();
+    $this->_setTopMenu();
+  }
+  
+  function _setMainMenu() {
+    $this->Menu->setCurrentMenu('main-menu');
+    $this->Menu->addItem(__('Home', true), array('controller' => 'false', 'action' => 'false'));
+    $this->Menu->addItem(__('Explorer', true), array('controller' => 'explorer'));
+    if ($this->hasRole(ROLE_GUEST)) {
+      $user = $this->getUser();
+      $this->Menu->addItem(__('My Photos', true), array('controller' => 'explorer', 'action' => 'users', 'id' => $user['User']['username']));
+    }
+    if ($this->hasRole(ROLE_USER)) {
+      $this->Menu->addItem(__('Upload', true), array('controller' => 'browser', 'action' => 'quickupload'));
+    }
+  }
 
+  function _setTopMenu() {
     $this->Menu->setCurrentMenu('top-menu');
     $role = $this->getUserRole();
     if ($role == ROLE_NOBODY) {

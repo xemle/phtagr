@@ -26,12 +26,7 @@
 </div></div><!-- #header/sub -->
 
 <div id="main-menu"><div class="sub">
-<ul>
-  <li><?php echo $html->link('Home', '/'); ?></li>
-  <li><?php echo $html->link('Explorer', '/explorer'); ?></li>
-  <li><?php echo $html->link('My Photos', '/explorer'); ?></li>
-  <li><?php echo $html->link('Upload', '/browser/quickupload'); ?></li>
-</ul>
+<?php echo $menu->menu('main-menu'); ?>
 </div></div><!-- #main-menu/sub -->
 
 <div id="main"><div class="sub">
