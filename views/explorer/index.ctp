@@ -113,7 +113,7 @@ JS;
   foreach ($vars as $name => $value) {
     $script = preg_replace("/:$name/", $value, $script);
   }
-  echo $this->Html->scriptBlock($script);
+  echo $this->Html->scriptBlock($script, array('inline' => false));
 ?>
 
 <div class="p-explorer-media-list">
