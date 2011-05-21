@@ -1,19 +1,4 @@
-<h1><?php echo $this->data['Media']['name'] ?></h1>
 <?php echo $session->flash(); ?>
-
-<div class="paginator"><div class="subpaginator">
-<?php
-?>
-</div></div>
-
-<?php
-  $withMap = false;
-  if (false && isset($this->data['Media']['longitude']) && isset($this->data['Media']['latitude']) &&
-    $map->hasApi()) {
-    $withMap = true;
-    echo $map->script();
-  }
-?>
 
 <div id="p-media-preview">
 <div class="image">
@@ -51,7 +36,7 @@
 <div class="meta">
 <div id="meta-<?php echo $this->data['Media']['id']; ?>">
 <table class="bare"> 
-  <?php echo $html->tableCells($imageData->metaTable(&$this->data, $withMap)); ?>
+  <?php echo $html->tableCells($imageData->metaTable(&$this->data)); ?>
 </table>
 </div>
 </div><!-- meta -->
