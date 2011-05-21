@@ -39,7 +39,6 @@ class MenuComponent extends Object {
     }
     $this->controller =& $controller;
     $this->setCurrentMenu('main');
-    $this->setBasicMainMenu();
   }
 
   function setBasicMainMenu() {
@@ -50,6 +49,10 @@ class MenuComponent extends Object {
       'guests' => __('Guests', true),
       'browser' => __('Media Files', true)
       );
+    if ($this->controller->hasRole(ROLE_SYSOP)) {
+      $controllers['system'] = __("System", true);
+    }
+ 
     foreach ($controllers as $ctrl => $text) {
       $options = array('id' => 'item-' . $ctrl);
       if (strtolower($this->controller->name) == $ctrl) {
@@ -66,6 +69,7 @@ class MenuComponent extends Object {
 
   function beforeRender() {
     $this->setCurrentMenu('main');
+    $this->setBasicMainMenu();
     if (isset($this->controller->subMenu)) {
       $name = strtolower($this->controller->name);
       $parentId = 'item-' . $name;

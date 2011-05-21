@@ -25,11 +25,22 @@ class SystemController extends AppController {
   var $name = 'System';
   var $helpers = array('Form');
   var $uses = array('Option');
+  var $subMenu = array();
 
   function beforeFilter() {
     parent::beforeFilter();
-
     $this->requireRole(ROLE_SYSOP, array('redirect' => '/'));
+
+    $this->subMenu = array(
+      'index' => __("General", true),
+      'external' => __("External Programs", true),
+      'map' => __("Map Settings", true)
+      );
+  }
+
+  function beforeRender() {
+    $this->layout = 'backend';
+    parent::beforeRender();
   }
 
   function _set($userId, $path, $data) {
@@ -37,8 +48,7 @@ class SystemController extends AppController {
     $this->Option->setValue($path, $value, $userId);
   }
 
-  function admin_general() {
-    $this->requireRole(ROLE_SYSOP);
+  function index() {
     if (isset($this->data)) {
       $this->_set(0, 'general.title', $this->data);
       $this->_set(0, 'home.welcomeText', $this->data);
@@ -46,15 +56,23 @@ class SystemController extends AppController {
     $this->data = $this->Option->getTree(0);
   }
 
-
-  function admin_external() {
+  function external() {
     if (!empty($this->data)) {
       // TODO check valid acl
       $this->_set(0, 'bin.exiftool', $this->data);
       $this->_set(0, 'bin.convert', $this->data);
       $this->_set(0, 'bin.ffmpeg', $this->data);
       $this->_set(0, 'bin.flvtool2', $this->data);
+      // debug
+      $this->set('commit', $this->data);
+      $this->Session->setFlash("Settings saved");
+    }
+    $tree = $this->Option->getTree(0);
+    $this->data = $tree;
+  }
 
+  function map() {
+    if (!empty($this->data)) {
       $this->_set(0, 'google.map.key', $this->data);
       // debug
       $this->set('commit', $this->data);
