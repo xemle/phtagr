@@ -42,6 +42,9 @@
 <div id="image-tabs">
 <?php
   $items = array(__("General", true), __("Media Details", true));
+  if ($map->hasApi() && $map->hasMediaGeo($this->data)) {
+    $items['map'] = __("Map", true);
+  }
   echo $tab->menu($items);
 ?>
 <?php echo $tab->open(0); ?>
@@ -98,13 +101,18 @@
 </table>
 </div>
 <?php echo $tab->close(); ?>
+<?php if ($map->hasApi() && $map->hasMediaGeo($this->data)): ?>
+<?php 
+  echo $tab->open('map');
+  echo $map->container();
+  echo $map->script();
+  echo $tab->close(); 
+?>
+<?php endif; ?>
 </div><!-- tabs -->
 
-<?php if ($withMap) {
-  echo $map->container();
-}
-?>
-<?php echo $this->Html->scriptBlock(<<<'JS'
+<?php 
+  $script = <<<'JS'
 (function($) {
 $.fn.resizeImageHeight = function(size) {
   var $image = $(this);
@@ -140,11 +148,29 @@ $(document).ready(function() {
     var size = window.innerHeight - top - 10;
     $media.find('img').resizeImageHeight(size);
   }
-  $("#image-tabs").tabs();
+  $("#image-tabs").tabs({
+    show: function(event, ui) {
+      if (ui.panel.id == 'tab-map') {
+        if ($('#map').children().length == 0) {
+          $('#mapbox').show();
+          loadMap(:ID, :LATITUDE, :LONGITUDE); 
+        }
+      }
+      return true;
+    }
+  });
   $("#comment-add :submit").button();
 });
 })(jQuery);
-JS
-); ?>
+JS;
+  $vars = array(
+    'ID' => $this->data['Media']['id'],
+    'LATITUDE' => ($this->data['Media']['latitude'] ? $this->data['Media']['latitude'] : 0),
+    'LONGITUDE' => ($this->data['Media']['longitude'] ? $this->data['Media']['longitude'] : 0));
+  foreach ($vars as $name => $value) {
+    $script = preg_replace("/:$name/", $value, $script);
+  }
+  echo $this->Html->scriptBlock($script, array('inline' => false));
+?>
 
 <?php echo View::element('comment'); ?>

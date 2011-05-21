@@ -34,18 +34,23 @@ class MapHelper extends AppHelper
     return ($this->Option->get('google.map.key') != false);
   }
 
+  function hasMediaGeo($media) {
+    $data = $media;
+    if (isset($media['Media'])) {
+      $data = $media['Media'];
+    }
+    return !empty($data['latitude']) && !empty($data['longitude']);
+  }
+
   function container() {
     return $this->output('<div id="mapbox" style="display: none;">
-    <div id="map" style="width: 100%; height: 250px;"></div>
+    <div id="map" style="width: 100%; height: 450px;"></div>
     <div id="mapStatusLine">
       <div id="mapInfo">
       </div>
       <div id="mapSearch">
         <label for="mapSearch">Goto:</label>
         <input type="text" id="mapSearch" size="32" onkeydown="if ((event.which && event.which == 13) || (event.keyCode && event.keyCode == 13)) { map.showAddress(this.value); return false; } else { return true; }"/>
-      </div>
-      <div id="mapActions">
-        <a href="#" onclick="toggleVisibility(\'mapbox\')">Close Map</a>
       </div>
     </div>
     </div>
@@ -57,13 +62,11 @@ class MapHelper extends AppHelper
       return $this->output();
     }
 
-    $out = $this->Html->script(array($this->googleMapApiUrl . h($this->Option->get('google.map.key')), 'pmap'), array('inline' => false));
+    $out = $this->Html->script(array($this->googleMapApiUrl . h($this->Option->get('google.map.key')), 'prototype', 'pmap'), array('inline' => false));
 
     $code = "
 var map = null;
-var showMap = function(id, latitude, longitude) {
-  toggleVisibility('mapbox');
-
+var loadMap = function(id, latitude, longitude) {
   if (undefined == map) {
 
     var options = { 
@@ -76,7 +79,7 @@ var showMap = function(id, latitude, longitude) {
     map.updateMarkers();
   }
 };";
-    $out .= $this->Html->scriptBlock($code);
+    $out .= $this->Html->scriptBlock($code, array('inline' => false));
     return $this->output($out);
   }
 }
