@@ -34,7 +34,8 @@ class SystemController extends AppController {
     $this->subMenu = array(
       'index' => __("General", true),
       'external' => __("External Programs", true),
-      'map' => __("Map Settings", true)
+      'map' => __("Map Settings", true),
+      'upgrade' => __("Database Upgrade", true)
       );
   }
 
@@ -80,6 +81,38 @@ class SystemController extends AppController {
     }
     $tree = $this->Option->getTree(0);
     $this->data = $tree;
+  }
+  
+  /** Database upgrade via the Migraions plugin */
+  function upgrade($action = '') {
+    App::import('Lib', 'Migrations.MigrationVersion');
+    $Migration = new MigrationVersion(array('connection' => 'default'));
+    if (empty($Migration)) {
+      Logger::err("Could not load class Migrations.MigrationVersion");
+      $this->redirect(false, 505);
+    }
+    $currentVersion = $Migration->getVersion('app');
+    $migrationVersion = max(array_keys($Migration->getMapping('app')));
+    if ($action == 'run' && $currentVersion < $migrationVersion) {
+      if (!$Migration->run(array('type' => 'app', 'direction' => 'up'))) {
+        $this->Session->setFlash(__("Database migration failed. Please see the log files for errors.", true));
+        Logger::error("Could not run migration");
+      } else {
+        Logger::info("Upgraded database from version $currentVersion to " . max(array_keys($Migration->getMapping('app'))));
+        $this->Session->setFlash(__("The database migration was successful.", true));
+      }
+    }
+    $this->set('currentVersion', $Migration->getVersion('app'));
+    $mappings = $Migration->getMapping('app');
+    $this->set('maxVersion', max(array_keys($mappings)));
+
+    $newMappingNames = array();
+    foreach ($mappings as $version => $mapping) {
+      if ($version > $currentVersion) {
+        $newMappingNames[] = $mapping['name'];
+      }
+    }
+    $this->set('newMappingNames', $newMappingNames);
   }
 }
 ?>

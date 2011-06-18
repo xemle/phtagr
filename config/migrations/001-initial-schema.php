@@ -7,7 +7,7 @@ class M4d1f861d09384b5d91c01828cbdd56cb extends CakeMigration {
  * @var string
  * @access public
  */
-	public $description = '';
+	public $description = 'Initial schema';
 
 /**
  * Actions to be performed

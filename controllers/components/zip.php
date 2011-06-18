@@ -129,6 +129,7 @@ class ZipComponent extends Object {
       }
     }
     $this->Zip->close();
+    Logger::debug($newFiles);
     return $newFiles;
   }
 
@@ -143,7 +144,10 @@ class ZipComponent extends Object {
       return false;
     }
     if (dirname($file['name']) != '') {
-      $dst .= dirname($file['name']);
+      $dirname = dirname($file['name']);
+      if ($dirname != '.') {
+        $dst .= dirname($file['name']);
+      }
       if (!is_dir($dst)) {
         if (!$this->Folder->create($dst)) {
           Logger::err("Could not create directory $dst");
