@@ -100,6 +100,9 @@ class ExplorerController extends AppController
         'to' => 'true',
         'user' => '_getAssociation'
       );
+      if ($this->hasRole(ROLE_USER)) {
+        $queryMap['visibility'] = array('private', 'group', 'users', 'public');
+      }
       $queryTypes = array_keys($queryMap);
       $input = trim($this->data['Breadcrumb']['input']);
       // cut input to maximum of 64 chars
