@@ -92,6 +92,10 @@ class SystemController extends AppController {
       $this->redirect(false, 505);
     }
     $currentVersion = $Migration->getVersion('app');
+    // Fallback of older databases: Add fist version if not exists
+    if ($currentVersion == 0) {
+      $Migration->setVersion(1, 'app');
+    }
     $migrationVersion = max(array_keys($Migration->getMapping('app')));
     if ($action == 'run' && $currentVersion < $migrationVersion) {
       if (!$Migration->run(array('type' => 'app', 'direction' => 'up'))) {
