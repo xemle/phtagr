@@ -9,7 +9,13 @@
   } else {
     //$size = $imageData->getimagesize($this->data, OUTPUT_SIZE_PREVIEW);
     $size = $imageData->getimagesize($this->data, 960);
-    echo "<img src=\"".Router::url("/media/preview/".$this->data['Media']['id'])."\" $size[3] alt=\"{$this->data['Media']['name']}\"/>"; 
+    $src = Router::url("/media/preview/".$this->data['Media']['id']);
+    $img = $html->tag('img', null, array('src' => $src, 'width' => $size[0], 'height' => $size[1], 'alt' => $this->data['Media']['name']));
+    if ($navigator->hasNextMedia()) {
+      echo $html->link($img, $navigator->getNextMediaUrl(), array('escape' => false));
+    } else {
+      echo $img;
+    }
   }
 ?>
 </div>
