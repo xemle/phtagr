@@ -62,7 +62,7 @@ function PMap(latitude, longitude, options) {
     this.gmap.addControl(new GSmallMapControl());
     this.gmap.addControl(new GScaleControl());
     this.gmap.addControl(new PResizeControl());
-    this.gmap.enableScrollWheelZoom();
+    //this.gmap.enableScrollWheelZoom();
 
     this.gmap.setCenter(new GLatLng(latitude, longitude), zoom);
     this.initBaseIcon();
