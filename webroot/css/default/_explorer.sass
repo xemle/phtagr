@@ -95,9 +95,12 @@
       *
         font-size: 9pt
       p
-        color: #444 
+        color: #080808
         margin: 0
         padding: 0
+    > .p-explorer-media-description
+      *
+        color: #444
     &:hover
       > h2
         +opacity(1.0)
@@ -105,7 +108,11 @@
         +opacity(.3)
         &:hover
           +opacity(1.0)
-
+      > .p-explorer-media-description
+        *
+          color: #888
+        a
+          color: $linkColor
 ul.p-breadcrumb
   width: 100%
   margin: 4px 0px
@@ -149,8 +156,24 @@ ul.p-breadcrumb
   display: block
   height: 24px
 
-$menu-color = #111
-$menu-bg-color = lighten($menu-color, 25%)
+$header-bg = #333
+$header-border = #222
+$header-text = #ccc
+$content-bg = #000
+$content-border = #222
+$content-text = #aaa
+$clickable-default-bg = #222
+$clickable-default-border = #222
+$clickable-default-text = #ddd
+$clickable-hover-bg = #2259a5
+$clickable-hover-border = #123e78
+$clickable-hover-text = #fff
+$clickable-active-bg = #123e78
+$clickable-active-border = #103565
+$clickable-active-text = #fff
+
+$menu-color = #222
+$menu-bg-color = black
 $menu-link-color = #666
 $menu-link-hover-color = lighten($menu-link-color, 40%)
 
@@ -158,47 +181,52 @@ $menu-link-hover-color = lighten($menu-link-color, 40%)
   +column(24, true)
   z-index: 10
   position: fixed
-  background-color: $menu-color
-  &:hover
-    +opacity(1.0)
+  background-color: $header-bg
   > ul 
-    margin: 5px 0
+    margin: 5px 1px
     > li
       display: inline
       > a
-        cursor: pointer
-        border: 1px solid $menu-color
         padding: 3px
-        color: $menu-link-color
-      &:hover > a, &.active > a
-        color: $menu-link-hover-color
-        background-color: $menu-bg-color
-        border: 1px solid $menu-bg-color
-        +border-radius(3px)
+        cursor: pointer
+        color: $clickable-default-text
+        background-color: $clickable-default-bg
+        border: 1px solid $clickable-default-border
+        +border-radius(2px)
+      &:hover > a
+        color: $clickable-hover-text
+        background-color: $clickable-hover-bg
+        border: 1px solid $clickable-hover-border
       &.active > a
-        padding: 3px 3px 4px 3px
-        color: #ddd
-        +border-bottom-radius(0px)
-        border-bottom: 1px solid $menu-bg-color
+        padding: 4px 3px
+        color: #clickable-active-text
+        background-color: $clickable-active-bg
+        border-bottom: 1px solid $clickable-active-border
   > .pages > ul
     position: absolute
     right: 0
     top: 0
-    margin: 5px
+    margin: 5px 1px
     > li
       display: inline-block
-      color: $menu-link-color
+      color: $content-text
       > a
-        color: $menu-link-color
         padding: 3px
-        border: 1px solid $menu-color
+        color: $clickable-default-text
+        background-color: $clickable-default-bg
+        border: 1px solid $clickable-default-border
+        +border-radius(2px)
         &:hover
-          color: $menu-link-hover-color
-          background-color: $menu-bg-color
-          +border-radius(3px)
-          border: 1px solid $menu-bg-color
+          color: $clickable-hover-text
+          background-color: $clickable-hover-bg
+          border: 1px solid $clickable-hover-border
+        &:active
+          color: $clickable-active-text
+          background-color: $clickable-active-bg
+          border: 1px solid $clickable-active-border
   > #p-explorer-menu-content
-    background-color: $menu-bg-color
+    border: 1px solid $content-border
+    background-color: $content-bg
     > #p-explorer-all-meta 
       padding: 10px
       > dl.search-list
