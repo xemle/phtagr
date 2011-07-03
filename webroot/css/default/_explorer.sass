@@ -1,27 +1,49 @@
+@import colors
 @import grid
 @import border-radius
 @import opacity
 @import gradient
 
-=tooltip-actions
+.tooltip-anchor
+  display: inline-block
+  position: relative
+
+.tooltip-actions
   display: none
   z-index: 2
   position: absolute
+  margin-top: 12px
   top: 0px 
-  left: 0px
-  width: 150px
-  &:hover
+  left: -10px
+  width: 100px
+  padding: 3px 10px 10px 10px
+  > .sub
     display: inline-block
-  > ul 
     padding: 2px
-    float: left
     background-color: #ffd
     +border-radius(4px)
     border: 1px solid darken(#ffd, 60%)
-    > li
-      display: inline-block
-      > a > img
+    > a > img
         vertical-align: bottom
+
+=link
+  color: $linkColor
+  &:hover
+    color: white
+
+=clickable
+  color: $clickable-default-text
+  background-color: $clickable-default-bg
+  border: 1px solid $clickable-default-border
+  +border-radius(3px)
+  &:hover 
+    color: $clickable-hover-text
+    background-color: $clickable-hover-bg
+    border: 1px solid $clickable-hover-border
+  &:active
+    color: #clickable-active-text
+    background-color: $clickable-active-bg
+    border-bottom: 1px solid $clickable-active-border
 
 .p-navigator-pages
   +column(24, true)
@@ -29,31 +51,31 @@
   padding: 5px 0
   > .sub
     text-align: center
-    > .current, > a
-      color: gray
-      cursor: pointer
+    > a
+      margin: 0px 2px
       padding: 3px 6px
-    > a:hover
-      color: white
-      padding: 2px 5px
-      background-color: #555
-      border: 1px solid #888
-      +border-radius(3px)
+      cursor: pointer
+      +clickable
     > .current 
-      color: white
+      margin: 0px 2px
+      padding: 3px 6px
       font-family: Ubuntu-bold
+      color: white
 
-.p-explorer-media-list
+.p-explorer-media-list > .row
+  margin: 2px 0px
   +column(24, true)
-  clear: both
+  > .clear
+    display: block
+    clear: both
   > .cell0, > .cell1, > .cell2
     +column(6)
   > .cell3
     +column(6, true)
-  > .cell0
-    clear: both
   > .p-explorer-media
     position: relative
+    &:hover
+      background-color: $clickable-default-bg
     &.selected > .p-explorer-media-image
       background-color: #203c60
     h2
@@ -67,11 +89,14 @@
       margin: 1px
       +opacity(.0)
       background-color: #000
+      a
+        +link
     > .p-explorer-media-image
       display: table-cell
       text-align: center
-      vertical-align: middle
+      vertical-align: bottom 
       width: 230px
+      padding: 3px
       height: 230px
       > a
         vertical-align: middle
@@ -99,6 +124,7 @@
         margin: 0
         padding: 0
     > .p-explorer-media-description
+      margin-top: 3px
       *
         color: #444
     &:hover
@@ -112,7 +138,7 @@
         *
           color: #888
         a
-          color: $linkColor
+          +link
 ul.p-breadcrumb
   width: 100%
   margin: 4px 0px
@@ -156,22 +182,6 @@ ul.p-breadcrumb
   display: block
   height: 24px
 
-$header-bg = #333
-$header-border = #222
-$header-text = #ccc
-$content-bg = #000
-$content-border = #222
-$content-text = #aaa
-$clickable-default-bg = #222
-$clickable-default-border = #222
-$clickable-default-text = #ddd
-$clickable-hover-bg = #2259a5
-$clickable-hover-border = #123e78
-$clickable-hover-text = #fff
-$clickable-active-bg = #123e78
-$clickable-active-border = #103565
-$clickable-active-text = #fff
-
 $menu-color = #222
 $menu-bg-color = black
 $menu-link-color = #666
@@ -189,19 +199,9 @@ $menu-link-hover-color = lighten($menu-link-color, 40%)
       > a
         padding: 3px
         cursor: pointer
-        color: $clickable-default-text
-        background-color: $clickable-default-bg
-        border: 1px solid $clickable-default-border
-        +border-radius(2px)
-      &:hover > a
-        color: $clickable-hover-text
-        background-color: $clickable-hover-bg
-        border: 1px solid $clickable-hover-border
+        +clickable
       &.active > a
         padding: 4px 3px
-        color: #clickable-active-text
-        background-color: $clickable-active-bg
-        border-bottom: 1px solid $clickable-active-border
   > .pages > ul
     position: absolute
     right: 0
@@ -212,39 +212,21 @@ $menu-link-hover-color = lighten($menu-link-color, 40%)
       color: $content-text
       > a
         padding: 3px
-        color: $clickable-default-text
-        background-color: $clickable-default-bg
-        border: 1px solid $clickable-default-border
-        +border-radius(2px)
-        &:hover
-          color: $clickable-hover-text
-          background-color: $clickable-hover-bg
-          border: 1px solid $clickable-hover-border
-        &:active
-          color: $clickable-active-text
-          background-color: $clickable-active-bg
-          border: 1px solid $clickable-active-border
+        +clickable
   > #p-explorer-menu-content
     border: 1px solid $content-border
     background-color: $content-bg
     > #p-explorer-all-meta 
       padding: 10px
-      > dl.search-list
-        > dt
-          margin-top: 4px
-        > dd
-          margin-bottom: 4px
-        > dd > ul > li
-          display: inline-block
-          padding: 3px 0
-          padding-right: 4px
-          position: relative 
-          > .tooltip-actions
-            margin-top: 17px
-            +tooltip-actions
-          &:hover 
-            > a
-              color: white
+      > p
+        margin: 3px 0
+        > .tooltip-anchor
+          > a
+            padding: 0 3px
+            +link
+        > a
+          padding: 0 3px
+          +link
     > form > div
       padding: 10px 0
 
@@ -256,11 +238,6 @@ dl.single-media
     clear: left
   > dt
     margin-left: 3px
-    &.date
-      position: relative
-      > .tooltip-actions
-        margin-top: 13px
-        +tooltip-actions
 
 .p-explorer-input
   +column(24, true)

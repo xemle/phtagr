@@ -479,7 +479,7 @@ class ImageDataHelper extends AppHelper {
     if ($withExclude) {
       $icons[] = $this->Html->link($this->getIcon('delete', false, sprintf(__("Exclude %s from search", true), $value)), $urls['del'], array('escape' => false));
     }
-    return '<li>' . $output . '<div class="tooltip-actions"><ul><li>' . implode('</li><li>', $icons) . '</li></ul></div></li>';
+    return "<span class=\"tooltip-anchor\">" . $output . '<span class="tooltip-actions"><span class="sub">' . implode($icons) . '</span></span></span> ';
   }
 
   function getIcon($name, $alt = false, $title = false) {
@@ -653,7 +653,8 @@ class ImageDataHelper extends AppHelper {
       if (strpos($path, $root) === 0) {
         $dirs = explode(DS, trim($root, DS));
         $postfix = substr($path, strlen($root));
-        return '/browser/index/'.$dirs[count($dirs)-1].'/'.$postfix;
+        $rootDir = count($fsRoots) > 1 ? $dirs[count($dirs)-1] . "/" : "";
+        return '/browser/index/'.$rootDir.$postfix;
       }
     }
     return false;

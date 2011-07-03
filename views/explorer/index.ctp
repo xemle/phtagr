@@ -122,10 +122,17 @@ $canWriteTag = count($this->data) ? max(Set::extract('/Media/canWriteTag', $this
 $index = 0;
 $pos = ($search->getPage(1)-1) * $search->getShow(12) + 1;
 
+
+echo '<div class="row">';
 foreach ($this->data as $media) {
   echo $this->element('explorer/media', array('media' => $media, 'index' => $index, 'pos' => $pos));
   $index++;
+  if ($index % 4 == 0) {
+    echo "<div class=\"clear\"> </div></div>\n";
+    echo "<div class=\"row\">";
+  }
 }
+echo '<div class="clear"></div></div>';
 ?>
 </div><!-- cells -->
 
