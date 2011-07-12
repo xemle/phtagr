@@ -26,7 +26,7 @@
   $select = $this->data['Comment']['auth'];
   echo '<div class="input select">';
   echo $form->label(null, __('Authentication', true));
-  echo $form->select('Comment.auth', $options, $select, null, false);
+  echo $form->select('Comment.auth', $options, $select, array('empty' => false));
   echo '</div>';
 ?>
 </fieldset>
