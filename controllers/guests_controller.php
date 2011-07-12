@@ -105,6 +105,9 @@ class GuestsController extends AppController {
     unset($this->data['Guest']['password']);
     $this->data['Comment']['auth'] = $this->Option->getValue($this->data, 'comment.auth', COMMENT_AUTH_NONE);
     $this->set('userId', $userId);
+    $this->subMenu[] = array('url' => array('action' => $this->action, $guestId), 'title' => __("Edit", true), 'active' => true,
+      array('url' => array('action' => 'links', $guestId), 'title' => __("RSS", true)),
+      );
   }
 
   /**
@@ -207,6 +210,9 @@ class GuestsController extends AppController {
       }
     }
     $this->data = $this->Guest->findById($guestId);
+    $this->subMenu[] = array('url' => array('action' => 'edit', $guestId), 'title' => __("Edit", true), 'active' => true,
+      array('url' => array('action' => 'links', $guestId), 'title' => __("RSS", true), 'active' => true),
+      );
   }
 }
 ?>
