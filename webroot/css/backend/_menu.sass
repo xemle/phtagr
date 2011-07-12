@@ -1,48 +1,35 @@
-@import border-radius
-@import gradient
-@import grid
-
-=menu-colors($f, $bg)
-  color: $f
-  background-color: $bg
-  +linear-gradient(colour-stops($bg, lighten($bg, 20%)))
-
-=menu-ident($percent)
-  width: percentage($percent / 100)
-  padding-top: 5px
-  padding-bottom: 5px
-  padding-left: percentage(1 - ($percent / 100))
-
-=menu-item($percent)
-  display: block
-  +menu-ident($percent)
-  color: $menuColor
-  border-bottom: 1px solid #ddd
-  
-#sidebar ul 
-  +column(6)
-  list-style-type: none
-  li
-    margin: 0 5px
-    a
-      +menu-item(90)
-      background-color: $menuBackgroundColor
-      &:hover
-        +menu-colors($menuHoverColor, $menuHoverBackgroundColor)
-    span.active
-      +menu-item(90)
-      color: $menuActiveColor
-      background-color: $menuActiveBackgroundColor 
-    ul 
-      list-style-type: none
-      margin: 0
-      padding: 0
-      li
-        margin: 0 10px 0 0
-        a
-          +menu-item(80)
-        span.active
-          +menu-item(80)
-          color: $menuActiveColor
-          background-color: lighten($menuActiveBackgroundColor, 20%)
+#sidebar > .box
+  overflow: hidden
+  > ul
+    display: block
+    width: 220px
+    margin: 5px
+  ul 
+    display: block
+    list-style-type: none
+  li > a
+    display: block
+    padding: 5px
+    color: $menuColor
+    &:hover
+      color: $menuHoverColor
+      background-color: $menuHoverBackgroundColor
+  li > .active
+    display: block
+    padding: 5px
+    color: $menuActiveColor
+    background-color: $menuActiveBackgroundColor
+  > ul > li > ul
+    margin-bottom: 5px
+    > li
+      > .active
+        padding-left: 20px
+        background-color: lighten($menuActiveBackgroundColor, 20%)
+      > a
+        padding-left: 20px
+        width: 195px
+      > ul > li > a
+        width: 175px
+        padding-left: 40px
+    
 

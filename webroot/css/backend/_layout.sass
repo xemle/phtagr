@@ -16,20 +16,19 @@
   background-color: $headerBackgroundColor
   +linear-gradient(color-stops($headerBackgroundColor, darken($headerBackgroundColor, 20%)))
   border: 1px solid $headerBackgroundColor
-  * 
-    font-size: 120% 
-    font-weight: bold
-  .sub
-    padding: 10px
-  * a 
-    +text-shadow(black, 0, 2px, 0)
-    color: white
-    &:hover
+  > .sub
+    padding: 15px
+    > a 
+      font-size: 200% 
+      font-weight: bold
+      +text-shadow(black, 0, 2px, 0)
       color: white
-      background-color: inherit
-    &:visited
-      color: white
-      background-color: inherit
+      &:hover
+        color: white
+        background-color: inherit
+      &:visited
+        color: white
+        background-color: inherit
 
 #main
   +column(24, true)
@@ -43,7 +42,7 @@
     +column(18, true)
     @include border-top-right-radius(10px)
     background-color: $contentBackgroundColor
-    h1
+    > h1
       display: block
       width: 100%
       font-size: 120%
@@ -58,14 +57,13 @@
 
 .box
   position: relative
-  h1
+  > h1
+    font-size: 120%
     margin: 5px
-    @include border-radius(5px)
+    padding: 3px
     background-color: #eee
-    +linear-gradient(colour-stops(#eee, darken(#eee, 10%)))
-    color: #666
+    color: #444
     +text-shadow(white, 1px, 0px, 0)
-    border: 1px solid #bbb
     padding: 3px 12px
     
 .info,
