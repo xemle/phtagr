@@ -23,13 +23,19 @@
     margin-bottom: 5px
     > li
       > .active
+        width: 195px
         padding-left: 20px
-        background-color: lighten($menuActiveBackgroundColor, 20%)
+        background-color: lighten($menuActiveBackgroundColor, 10%)
       > a
         padding-left: 20px
         width: 195px
-      > ul > li > a
-        width: 175px
-        padding-left: 40px
+      > ul > li 
+        > .active
+          width: 175px
+          padding-left: 40px
+          background-color: lighten($menuActiveBackgroundColor, 20%)
+        > a
+          width: 175px
+          padding-left: 40px
     
 

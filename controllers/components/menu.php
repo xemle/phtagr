@@ -58,7 +58,7 @@ class MenuComponent extends Object {
       if (strtolower($this->controller->name) == $ctrl) {
         $options['active'] = true;
       }
-      $this->addItem($text, array('controller' => $ctrl, 'admin' => false), $options);
+      $this->addItem($text, array('controller' => $ctrl, 'admin' => false, 'action' => 'index'), $options);
     } 
   }
 

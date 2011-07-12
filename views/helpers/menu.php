@@ -167,14 +167,14 @@ class MenuHelper extends AppHelper
       }
       $attrs = $this->_excludeKeys($item);
       $submenu = $this->_getSubMenu($item, $options);
+      $linkOptions = array();
       if (isset($attrs['active']) && $attrs['active']) {
-        $item = $this->Html->tag('span', $item['title'], array('class' => $attrs['active'] ? 'active' : 'inactive'));
-      } else {
-        if (!$item['url']) {
-          $item['url'] = array('controller' => $item['controller'], 'action' => $item['action'], 'admin' => $item['admin']);
-        }
-        $item = $this->Html->link($item['title'], $item['url']);
+        $linkOptions['class'] = 'active';
+      } 
+      if (!$item['url']) {
+        $item['url'] = array('controller' => $item['controller'], 'action' => $item['action'], 'admin' => $item['admin']);
       }
+      $item = $this->Html->link($item['title'], $item['url'], $linkOptions);
       $items[] = $this->Html->tag('li', $item . $submenu, $attrs);
     }
     if (count($items)) {
@@ -188,6 +188,7 @@ class MenuHelper extends AppHelper
       return false;
     }
     $menu = $this->params['menus'][$name];
+    Logger::debug($menu);
     return $this->_getSubMenu($menu, am($options, array('id' => $name), $menu['options']));
   }
 }
