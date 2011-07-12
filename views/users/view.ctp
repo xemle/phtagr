@@ -1,4 +1,9 @@
-<h1><?php printf(__('User %s', true), $this->data['User']['username']); ?></h1>
+<h1><?php 
+  printf(__('User %s', true), $this->data['User']['username']);  
+  if ($currentUser['User']['role'] >= ROLE_SYSOP) {
+    echo " " . $html->link(__("Edit", true), array('action' => 'edit', 'admin' => true, $this->data['User']['id']));
+  }
+?></h1>
 
 <?php echo $session->flash() ?>
 
