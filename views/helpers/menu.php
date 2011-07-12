@@ -167,9 +167,12 @@ class MenuHelper extends AppHelper
       }
       $attrs = $this->_excludeKeys($item);
       $submenu = $this->_getSubMenu($item, $options);
-      if (isset($attrs['active'])) {
+      if (isset($attrs['active']) && $attrs['active']) {
         $item = $this->Html->tag('span', $item['title'], array('class' => $attrs['active'] ? 'active' : 'inactive'));
       } else {
+        if (!$item['url']) {
+          $item['url'] = array('controller' => $item['controller'], 'action' => $item['action'], 'admin' => $item['admin']);
+        }
         $item = $this->Html->link($item['title'], $item['url']);
       }
       $items[] = $this->Html->tag('li', $item . $submenu, $attrs);

@@ -58,7 +58,7 @@ class MenuComponent extends Object {
       if (strtolower($this->controller->name) == $ctrl) {
         $options['active'] = true;
       }
-      $this->addItem($text, array('controller' => $ctrl), $options);
+      $this->addItem($text, array('controller' => $ctrl, 'admin' => false), $options);
     } 
   }
 
@@ -75,11 +75,15 @@ class MenuComponent extends Object {
       $parentId = 'item-' . $name;
       $parentItem =& $this->getItem($parentId);
       foreach ($this->controller->subMenu as $action => $title) {
-        $options = array('parent' => $parentId);
-        if ($this->controller->action == $action) {
-          $options['active'] = true;
+        $defaults = array('parent' => $parentId, 'active' => false, 'controller' => $name, 'action' => false, 'admin' => false, 'url' => false);
+        if (is_numeric($action)) {
+          $item = am($defaults, $title);
+        } else {
+          $item = am($defaults, array('title' => $title, 'action' => $action));
         }
-        $item = am(array('title' => $title, 'url' => array('controller' => $name, 'action' => $action)), $options);
+        if ($this->controller->action == $item['action']) {
+          $item['active'] = true;
+        }
         $parentItem[] = $item;
       }
     }

@@ -33,9 +33,13 @@ class UsersController extends AppController
     parent::beforeFilter();
     $this->subMenu = array(
       'index' => __("List User", true),
-      'add' => __("Add User", true),
-      'register' => __("Registration", true),
       );
+    if ($this->hasRole(ROLE_SYSOP)) {
+      $this->subMenu = am($this->subMenu, array(
+        array('action' => 'add', 'title' => __("Add User", true), 'admin' => true),
+        array('action' => 'register', 'title' => __("Registration", true), 'admin' => true),
+        ));
+    }
   }
 
   function beforeRender() {
