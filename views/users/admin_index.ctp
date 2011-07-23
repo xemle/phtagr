@@ -3,9 +3,9 @@
 
 <?php $paginator->options(array('update' => 'main_content', 'indicator' => 'spinner'));?>
 
-<?php echo $paginator->prev(__('<< Prev', true), null, null, array('class' => 'disabled')); ?>
+<?php echo $paginator->prev(__('Prev', true), null, null, array('class' => 'disabled')); ?>
 <?php echo " | "; echo $paginator->numbers(); ?>
-<?php echo $paginator->next(__('Next >>', true), null, null, array('class' => 'disabled')); ?>
+<?php echo $paginator->next(__('Next', true), null, null, array('class' => 'disabled')); ?>
 
 Page <?php echo $paginator->counter() ?>
 

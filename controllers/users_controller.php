@@ -88,6 +88,7 @@ class UsersController extends AppController
   }
 
   function index() {
+    $this->set('isAdmin', $this->hasRole(ROLE_SYSOP));
     $this->data = $this->User->findVisibleUsers($this->getUser());
   }
 
@@ -320,12 +321,12 @@ class UsersController extends AppController
     $user = $this->User->findById($id);
     if (!$user) {
       $this->Session->setFlash(__("Could not delete user: user not found!", true));
-      $this->redirect('/admin/users/');
+      $this->redirect('index');
     } else {
-      $this->User->del($id);
+      $this->User->delete($id);
       Logger::notice("All data of user '{$user['User']['username']}' ($id) deleted");
       $this->Session->setFlash(sprintf(__("User %s was deleted", true), $user['User']['username']));
-      $this->redirect('/admin/users/');
+      $this->redirect('index');
     }
   }
 
