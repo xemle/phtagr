@@ -1,9 +1,10 @@
+@import grid
+
 #sidebar > .box
+  margin: 5px 0
   overflow: hidden
   > ul
     display: block
-    width: 220px
-    margin: 5px
   ul 
     display: block
     list-style-type: none
@@ -16,26 +17,25 @@
       background-color: $menuHoverBackgroundColor
   li > .active
     display: block
-    padding: 5px
     color: $menuActiveColor
     background-color: $menuActiveBackgroundColor
   > ul > li > ul
     margin-bottom: 5px
     > li
       > .active
-        width: 195px
+        width: 205px
         padding-left: 20px
         background-color: lighten($menuActiveBackgroundColor, 10%)
       > a
         padding-left: 20px
-        width: 195px
+        width: 205px
       > ul > li 
         > .active
-          width: 175px
+          width: 185px
           padding-left: 40px
           background-color: lighten($menuActiveBackgroundColor, 20%)
         > a
-          width: 175px
+          width: 185px
           padding-left: 40px
     
 

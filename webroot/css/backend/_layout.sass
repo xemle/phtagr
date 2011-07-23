@@ -35,7 +35,6 @@
   background-color: $contentBackgroundColor
   #sidebar
     +column(6)
-    @include border-top-left-radius(10px)
     background-color: $sidebarBackgroundColor
  
   #content 
@@ -59,18 +58,15 @@
   position: relative
   > h1
     font-size: 120%
-    margin: 5px
-    padding: 3px
+    padding: 5px
     background-color: #eee
     color: #444
     +text-shadow(white, 1px, 0px, 0)
-    padding: 3px 12px
     
 .info,
 .message
   display: block
-  +border-radius(5px)
-  margin: 20px
+  margin: 5px 0
   padding: 10px
   background-color: #efffd0
   +linear-gradient(colour-stops(#efffd0, darken(#ffd, 20%)))
