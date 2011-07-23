@@ -188,7 +188,6 @@ class MenuHelper extends AppHelper
       return false;
     }
     $menu = $this->params['menus'][$name];
-    Logger::debug($menu);
     return $this->_getSubMenu($menu, am($options, array('id' => $name), $menu['options']));
   }
 }
