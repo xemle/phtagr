@@ -208,8 +208,9 @@ class Option extends AppModel {
       $userId = $this->data['User']['id'];
     }
     $conditions = array('user_id' => $userId, 'name' => $name);
-    if ($value)
+    if ($value) {
       $conditions['value'] = $value;
+    }
 
     $this->deleteAll(array('AND' => $conditions));
   }
