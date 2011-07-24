@@ -49,7 +49,7 @@
   };
 
   $.fn.cakeAutoComplete = function(fieldId, url, options) {
-    var options = options || {}
+    var options = options || {};
     var names = fieldId.split('.');
     var data = { data: {} };
     var val = data['data'];
@@ -112,4 +112,3 @@
     });
   };
 })(jQuery);
-
