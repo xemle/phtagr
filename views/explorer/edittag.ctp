@@ -4,14 +4,8 @@
 ?>
 <fieldset>
 <?php
-  echo $html->tag('div',
-    $form->label('Tags.text', __('Tags', true)).
-    $ajax->autoComplete('Tags.text', 'autocomplete/tag', array('value' => implode(', ', Set::extract('/Tag/name', $data)), 'tokens' => ',')), 
-    array('class' => 'input text'));
+  echo $form->input('Tags.text', array('label' => __('Tags', true), 'value' => join(', ', Set::extract('/Tag/name', $data))));
+  echo $autocomplete->autoComplete('Tags.text', 'autocomplete/tag', array('split' => true));
 ?>
 </fieldset>
-<?php
-  echo $form->submit('Save', array('div' => false)); 
-  echo $ajax->link('Cancel', '/explorer/updatemeta/'.$mediaId, array('update' => 'meta-'.$mediaId, 'class' => 'reset'));
-?>
 </form>
