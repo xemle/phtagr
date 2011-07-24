@@ -93,7 +93,7 @@ class ExplorerController extends AppController
         'location_op' => array('OR', 'AND'), 
         'operand' => array('OR', 'AND'), 
         'show' => array(2, 6, 12, 24, 60, 120, 240),
-        'sort' => array('date', '-date', 'newest', 'random'), 
+        'sort' => array('changes', 'date', '-date', 'name', 'newest', 'popularity', 'random', 'viewed'), 
         'tag' => '_getAssociation', 
         'tag_op' => array('OR', 'AND'), 
         'type' => array('image', 'video'),
