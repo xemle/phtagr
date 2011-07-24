@@ -743,11 +743,15 @@ class ExplorerController extends AppController
             }
           }
         } else {
-          Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change meta data of image ".$id);
+          // unset to keep HABTM relations of category and location
+          unset($media['Category']);
+          unset($media['Location']);
         }
         $media['Media']['modified'] = null;
         $media['Media']['flag'] |= MEDIA_FLAG_DIRTY;
-        $this->Media->save($media);
+        if (!$this->Media->save($media)) {
+          Logger::warn("Update meta data of media $id failed");
+        }
       }
     }
     $media = $this->Media->findById($id);
