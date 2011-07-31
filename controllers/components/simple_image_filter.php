@@ -33,7 +33,7 @@ class SimpleImageFilterComponent extends BaseFilterComponent {
   }
 
   function getExtensions() {
-    return array('png', 'tiff', 'tif', 'gif');
+    return array('bmp', 'gif', 'png', 'psd', 'tif', 'tiff');
   }
 
   /** Read the meta data from the file 
@@ -68,7 +68,8 @@ class SimpleImageFilterComponent extends BaseFilterComponent {
         $media['Media']['width'] = $size[0];
         $media['Media']['height'] = $size[1];
       } else {
-        Logger::warn("Could not determine image size of $filename");
+        Logger::error("Could not determine image size of $filename");
+        return false;
       }
     }
     if (!isset($media['Media']['date'])) {
