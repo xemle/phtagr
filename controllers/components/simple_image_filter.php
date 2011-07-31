@@ -33,7 +33,7 @@ class SimpleImageFilterComponent extends BaseFilterComponent {
   }
 
   function getExtensions() {
-    return array('png', 'tiff', 'gif');
+    return array('png', 'tiff', 'tif', 'gif');
   }
 
   /** Read the meta data from the file 
