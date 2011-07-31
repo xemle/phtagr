@@ -170,7 +170,7 @@ class ImageEmailComponent extends EmailComponent {
       $msg = array_merge($msg, explode("\r\n", $data)); 
       $msg[] = '';
     }
-    Logger::debug($msg);
+    //Logger::debug($msg);
     return $msg;
   }
 }
