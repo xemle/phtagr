@@ -40,10 +40,10 @@ class UsersController extends AppController
         array('action' => 'register', 'title' => __("Registration", true), 'admin' => true),
         ));
     }
+    $this->layout = 'backend';
   }
 
   function beforeRender() {
-    $this->layout = 'backend';
     parent::beforeRender();
   }
 
@@ -167,6 +167,7 @@ class UsersController extends AppController
       unset($this->data['User']['password']);
     }
     $this->set('register', $this->Option->getValue($this->getUser(), 'user.register.enable', 0));
+    $this->layout = 'default';
   }
 
   function logout() {

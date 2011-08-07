@@ -1,6 +1,6 @@
 <?php echo $session->flash(); ?>
 
-<?php echo $form->create('User', array('action' => 'login')); ?>
+<?php echo $form->create('User', array('action' => 'login', 'class' => 'login')); ?>
 <fieldset>
 <legend><?php __('Login'); ?></legend>
 <?php
@@ -10,13 +10,19 @@
 </fieldset>
 <?php 
   $signup = '';
+  echo $form->submit(__('Login', true));
+  echo $html->link(__('Forgot your password', true), 'password');
   if ($register) {
-    $signup = $html->link(__('Sign Up', true), 'register');
+    echo $html->link(__('Sign Up', true), 'register');
   }
-  echo $html->tag('ul', 
-    $html->tag('li', $form->submit(__('Login', true)), array('escape' => false))
-    . $html->tag('li', $html->link(__('Forgot your password', true), 'password'), array('escape' => false))
-    . $signup,
-    array('class' => 'buttons', 'escape' => false));
   echo $form->end();
+  $script = <<<'JS'
+(function($) {
+  $(document).ready(function() {
+    $(':submit').button();
+    $('.message').addClass("ui-widget ui-corner-all ui-state-highlight");
+  });
+})(jQuery);
+JS;
+  echo $this->Html->scriptBlock($script, array('inline' => false));
 ?>
