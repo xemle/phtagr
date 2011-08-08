@@ -411,6 +411,7 @@ class UsersController extends AppController
         }
       }
     }
+    $this->layout = 'default';
   }
 
   function register() {
