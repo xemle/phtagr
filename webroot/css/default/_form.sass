@@ -28,7 +28,7 @@ form.default
         +column(6)
         margin-top: 15px
         text-align: right
-      input
+      input[type=text], textarea
         +column(6, true)
         +default-input
         font-size: 15pt
@@ -36,11 +36,20 @@ form.default
         margin-top: 10px
       > img
         margin-top: 12px
-      > .error
+      > .error, > .description
         clear: left
         +prepend(6)
         +column(6, true)
         margin-top: 3px
+    > .checkbox 
+      input[type=checkbox]
+        margin-left: 240px
+        margin-right: 5px
+      label
+        width: 200px 
+        float: none
+        text-align: left
+        display: inline-block
   div.submit
     +prepend(6)
     margin-top: 15px

@@ -33,7 +33,7 @@
 <?php endif; /* has comments */ ?>
 
 <h3><?php __("Add new Comment", true); ?></h3>
-<?php echo $form->create('Comment', array('action' => 'add/'.$searchParams, 'id' => 'comment-add')); ?>
+<?php echo $form->create('Comment', array('action' => 'add/'.$searchParams, 'id' => 'comment-add', 'class' => 'default')); ?>
 <fieldset>
 <?php
   echo $form->hidden('Media.id', array('value' => $this->data['Media']['id']));
@@ -41,8 +41,8 @@
 <?php 
   if (($commentAuth & COMMENT_AUTH_NAME) > 0) {
     echo $form->input('Comment.name', array('label' => __('Name', true)));
-    echo $form->input('Comment.email', array('after' => '<span class="hint">' . __('Will not be published', true) . '</span>'));
-    echo $form->input('Comment.url', array('after' => '<span class="hint">' . __('Optional', true) . '</span>', 'required' => false));
+    echo $form->input('Comment.email', array('after' => '<span class="description">' . __('Will not be published', true) . '</span>'));
+    echo $form->input('Comment.url', array('after' => '<span class="description">' . __('Optional', true) . '</span>', 'required' => false));
   }
   if (($commentAuth & COMMENT_AUTH_CAPTCHA) > 0) {
     echo '<div class="input text"><label>&nbsp;</label><img src="'.$html->url('/comments/captcha/verify.jpg').'" /></div>';
