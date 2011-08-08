@@ -4,7 +4,7 @@
 
 <p><?php __("This step creates the configuration for the database connection. Please add your database connection settings here."); ?></p>
 
-<?php echo $form->create(null, array('action' => 'config')); ?>
+<?php echo $form->create(null, array('action' => 'config', 'class' => 'default')); ?>
 
 <fieldset><legend><?php __("Database"); ?></legend>
 <?php 
@@ -17,3 +17,13 @@
 </fieldset>
 <?php echo $form->submit(__('Continue', true)); ?>
 </form>
+<?php
+    $script = <<<'JS'
+(function($) {
+  $(document).ready(function() {
+    $(':submit').button();
+  });
+})(jQuery);
+JS;
+  echo $this->Html->scriptBlock($script, array('inline' => false));
+?>

@@ -8,7 +8,7 @@
 
 <p><?php __("You can set the file path of these exteranl programs here or set them later in the system preferences."); ?></p>
 
-<p><?php echo $html->link(__("Skip these settings", true), array("action" => "finish")); ?></p>
+<?php echo $html->link(__("Skip these settings", true), array("action" => "finish"), array('class' => 'button')); ?>
 
 <?php if (count($missing)): ?>
 <div class="info">
@@ -21,7 +21,7 @@
 </div>
 <?php endif; ?>
 
-<?php echo $form->create(null, array('action' => 'system')); ?>
+<?php echo $form->create(null, array('action' => 'system', 'class' => 'default')); ?>
 <fieldset>
 <?php 
   echo $form->input('bin.exiftool', array('label' => sprintf(__("Path to %s", true), "exiftool")));
@@ -30,4 +30,16 @@
   echo $form->input('bin.flvtool2', array('label' => sprintf(__("Path to %s", true), "flvtool2")));
 ?>
 </fieldset>
-<?php echo $form->submit(__('Save', true)); ?>
+<?php echo $form->end(__('Save', true)); ?>
+<?php
+  $script = <<<'JS'
+(function($) {
+  $(document).ready(function() {
+    $(':submit').button();
+    $('.button').button();
+  });
+})(jQuery);
+JS;
+  echo $this->Html->scriptBlock($script, array('inline' => false));
+?>
+

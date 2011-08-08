@@ -48,6 +48,7 @@ class SetupController extends AppController {
     if (isset($this->params['admin']) && $this->params['admin'] && $this->__hasSysOp()) {
       parent::beforeFilter();
     } else {
+      $this->layout = 'default';
       return false;
     }
   }
@@ -458,8 +459,18 @@ class DATABASE_CONFIG
     $this->__checkSession();
 
     try {
-      $this->__loadMigration();
-      $this->Migration->run(array('type' => 'app', 'direction' => 'up'));
+      if (!$this->__loadMigration()) {
+        $this->Session->setFlash(__('Could not initialize database'));
+        Logger::error("Initialization of database migration failed");
+        return;
+      }
+      $maxVersion = max(array_keys($this->Migration->getMapping('app')));
+      if (!$this->Migration->run(array('type' => 'app', 'direction' => 'up', 'version' => $maxVersion))) {
+        $this->Session->setFlash(__('Could not initialize database'));
+        Logger::error("Initial database migration failed");
+        return;
+      } 
+      Logger::info("Successful database migration to verion " . $this->Migration->getVersion('app'));
       $this->Session->setFlash(__("All required tables are created", true));
       $this->redirect('user');
     } catch (MigrationVersionException $errors) {
@@ -619,6 +630,7 @@ class DATABASE_CONFIG
       Logger::err("Could not load class Migrations.MigrationVersion");
       return false;
     }
+    Logger::debug('Loaded Migration plugin');
     return true;
   }
 
@@ -631,6 +643,7 @@ class DATABASE_CONFIG
     $version = $this->Migration->getVersion('app');
     if ($version == 0) {
       $this->Migration->setVersion(1, 'app');
+      Logger::info('Init database migration to version 1');
     }
     return true;
   }

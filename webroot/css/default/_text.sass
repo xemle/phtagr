@@ -24,11 +24,18 @@ ul, ol
 
 
 #content > .sub
-  h2, h3
+  h1, h2, h3
     font-family: Ubuntu-bold
     padding: 10px 0
-  > ul > li
-    padding: 5px 0
+  h1
+    font-size: 15pt
+  > p, > p > a, > ul > li
+    font-size: 12pt
+  > ul
+    padding: 10px 0
+    list-style-type: circle 
+    > li
+      padding: 5px 0 5px 20px
   > p
     padding: 5px 0
   > code
@@ -37,7 +44,7 @@ ul, ol
     background-color: darken(white, 10%)
     color: lighten(black, 20%)
 
-  > .error, > .notice
+  > .error, > .notice, > .warning
     margin: 5px 0
     padding: 10px
     color: black
@@ -46,7 +53,7 @@ ul, ol
   > .error
     border: 1px solid red
     background-color: lighten(red, 30%)
-  > .notice
+  > .notice, > .warning
     border: 1px solid yellow
     background-color: lighten(yellow, 30%)
 pre

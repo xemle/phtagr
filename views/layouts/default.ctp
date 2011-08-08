@@ -31,7 +31,7 @@
 
 <div id="main"><div class="sub">
 
-<div id="content content-<?php echo $this->params['controller']; ?>"><div class="sub">
+<div id="content" class="content content-<?php echo $this->params['controller']; ?>"><div class="sub">
 <?php echo $content_for_layout?>
 </div></div><!-- #content/sub -->
 

@@ -2,7 +2,7 @@
 
 <?php echo $session->flash(); ?>
 
-</p><?php __("Welcome to the installation procedure of phTagr. Following steps are required to install it:"); ?></p>
+<p><?php __("Welcome to the installation procedure of phTagr. Following steps are required to install it:"); ?></p>
 
 <ul>
   <li><?php __("Check for required paths"); ?></li>

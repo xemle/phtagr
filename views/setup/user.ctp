@@ -2,7 +2,7 @@
 
 <?php echo $session->flash(); ?>
 
-<?php echo $form->create(null, array('action' => 'user')); ?>
+<?php echo $form->create(null, array('action' => 'user', 'class' => 'default')); ?>
 
 <fieldset>
 <?php 
@@ -12,7 +12,15 @@
   echo $form->input('User.email', array('label' => __("Email", true)));
 ?>
 </fieldset>
-<?php echo $form->submit(__('Create', true)); ?>
-
-</form>
+<?php echo $form->end(__('Create', true)); ?>
+<?php
+  $script = <<<'JS'
+(function($) {
+  $(document).ready(function() {
+    $(':submit').button();
+  });
+})(jQuery);
+JS;
+  echo $this->Html->scriptBlock($script, array('inline' => false));
+?>
 
