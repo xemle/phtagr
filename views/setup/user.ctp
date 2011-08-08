@@ -2,7 +2,7 @@
 
 <?php echo $session->flash(); ?>
 
-<?php echo $form->create(null, array('action' => 'user', 'class' => 'default')); ?>
+<?php echo $form->create(null, array('action' => 'user')); ?>
 
 <fieldset>
 <?php 

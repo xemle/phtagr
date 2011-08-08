@@ -206,8 +206,10 @@ class AppController extends Controller
  
   function getUser() {
     if (!$this->_checkUser() || !$this->_user) {
-      if (!$this->_nobody) {
+      if (!$this->_nobody && isset($this->User)) {
         $this->_nobody = $this->User->getNobody();
+      } elseif (!$this->_nobody) {
+        $this->_nobody = array('User' => array('username' => '', 'password' => '', 'role' => ROLE_NOBODY));
       }
       return $this->_nobody;
     }

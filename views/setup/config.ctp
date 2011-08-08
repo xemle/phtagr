@@ -4,7 +4,7 @@
 
 <p><?php __("This step creates the configuration for the database connection. Please add your database connection settings here."); ?></p>
 
-<?php echo $form->create(null, array('action' => 'config', 'class' => 'default')); ?>
+<?php echo $form->create(null, array('action' => 'config')); ?>
 
 <fieldset><legend><?php __("Database"); ?></legend>
 <?php 

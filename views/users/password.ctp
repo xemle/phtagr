@@ -3,7 +3,7 @@
 
 <p><?php __("Please insert your username and email address to request your lost password."); ?>
 
-<?php echo $form->create('User', array('action' => 'password', 'class' => 'default')); ?>
+<?php echo $form->create('User', array('action' => 'password')); ?>
 <fieldset><legend><?php __('Account Data'); ?></legend>
 <?php
   echo $form->input('User.username', array('label' => __('Username', true)));

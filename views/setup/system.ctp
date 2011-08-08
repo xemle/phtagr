@@ -21,7 +21,7 @@
 </div>
 <?php endif; ?>
 
-<?php echo $form->create(null, array('action' => 'system', 'class' => 'default')); ?>
+<?php echo $form->create(null, array('action' => 'system')); ?>
 <fieldset>
 <?php 
   echo $form->input('bin.exiftool', array('label' => sprintf(__("Path to %s", true), "exiftool")));
