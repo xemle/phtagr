@@ -442,6 +442,7 @@ class UsersController extends AppController
     unset($this->data['User']['password']);
     unset($this->data['User']['confirm']);
     unset($this->data['Captcha']['verification']);
+    $this->layout = 'default';
   }
 
   function captcha() {

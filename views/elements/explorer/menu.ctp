@@ -77,7 +77,7 @@
 </div><!-- all meta -->
 <?php 
   $url = $breadcrumb->params($crumbs);
-  echo $form->create(null, array('id' => 'explorer', 'action' => 'edit/'.$url));
+  echo $form->create(null, array('id' => 'explorer', 'action' => 'edit/'.$url, 'class' => 'explorer-menu'));
 ?>
 <div id="p-explorer-edit-meta">
 <fieldset><legend><?php __("Metadata"); ?></legend>

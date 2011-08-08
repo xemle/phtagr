@@ -1,6 +1,6 @@
 <?php echo $session->flash(); ?>
 
-<?php echo $form->create('User', array('action' => 'register')); ?>
+<?php echo $form->create('User', array('action' => 'register', 'class' => 'default')); ?>
 <fieldset>
 <legend><?php __('Create Account'); ?></legend>
 <?php
@@ -12,5 +12,16 @@
   echo $form->input('Captcha.verification');
 ?>
 </fieldset>
-<?php echo $form->end(__('Sign Up', true)); ?>
+<?php 
+  echo $form->end(__('Sign Up', true)); 
 
+  $script = <<<'JS'
+(function($) {
+  $(document).ready(function() {
+    $(':submit').button();
+    $('.message').addClass("ui-widget ui-corner-all ui-state-highlight");
+  }); 
+})(jQuery);
+JS;
+  echo $this->Html->scriptBlock($script, array('inline' => false));
+?>
