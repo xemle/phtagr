@@ -15,6 +15,7 @@
   <li id="p-explorer-button-access"><a><?php __("Edit Access Rights"); ?></a></li>
   <?php endif; // canWriteAcl ?>
   <?php endif; // canWriteTag ?>
+  <li id="p-explorer-button-slideshow"><a><?php __("Slideshow"); ?></a></li>
 </ul>
 <div class="pages">
 <ul>

@@ -23,7 +23,7 @@
 
 class ExplorerController extends AppController
 {
-  var $components = array('RequestHandler', 'FilterManager', 'Search', 'QueryBuilder', 'FastFileResponder');
+  var $components = array('RequestHandler', 'FilterManager', 'Search', 'QueryBuilder', 'FastFileResponder', 'Feed');
   var $uses = array('Media', 'MyFile', 'Group', 'Tag', 'Category', 'Location');
   var $helpers = array('Form', 'Html', 'Ajax', 'ImageData', 'Time', 'ExplorerMenu', 'Rss', 'Search', 'Navigator', 'Tab', 'Breadcrumb', 'Autocomplete');
 
@@ -58,6 +58,7 @@ class ExplorerController extends AppController
     }
     $this->set('crumbs', $this->crumbs);
     $this->params['crumbs'] = $this->crumbs;
+    $this->Feed->add('/explorer/media/' . join('/', $this->Search->encodeCrumbs($this->crumbs)), array('title' => __('Slideshow Media RSS', true), 'id' => 'slideshow'));
     parent::beforeRender();
   }
 

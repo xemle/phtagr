@@ -14,6 +14,7 @@
 
   echo $html->script('jquery-phtagr');
   echo $scripts_for_layout; 
+  echo $feeds_for_layout;
 ?>
 </head>
 

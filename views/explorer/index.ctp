@@ -81,6 +81,11 @@
     $('#p-explorer-button-access').click(function() {
       $(this).activateExplorerMenu('#p-explorer-button-access', '#p-explorer-edit-access');
     });
+    $('#p-explorer-button-slideshow').click(function() {
+      var feed = $('#slideshow').attr('href');
+      feed += "/quality:high";
+      PicLensLite.start({feedUrl: feed});
+    });
     $('#explorer').find('.submit input').button();
     $.fn.placeExplorerMenu = function() {
       $('#p-explorer-menu').css('top', Math.max(0, $('#content').position().top - window.pageYOffset));
@@ -117,6 +122,7 @@ JS;
   foreach ($vars as $name => $value) {
     $script = preg_replace("/:$name/", $value, $script);
   }
+  echo $this->Javascript->link('/piclenslite/piclens_optimized', false);
   echo $this->Html->scriptBlock($script, array('inline' => false));
 ?>
 
