@@ -43,6 +43,12 @@
       $html->link($editIcon, 'javascript:void', array('escape' => false, 'class' => 'edit')),
       array('escape' => false));
   }
+  if ($search->getUser() == $currentUser['User']['username'] && $media['Media']['canWriteAcl']) {
+    $keyIcon = $this->Html->image('icons/key.png', array('title' => __('Edit access rights', true), 'alt' => 'Edit ACL'));
+    echo $html->tag('li', 
+      $html->link($keyIcon, 'javascript:void', array('escape' => false, 'class' => 'acl')),
+      array('escape' => false));
+  }
   if ($media['Media']['canReadOriginal']) {
     foreach ($media['File'] as $file) {
       $diskIcon = $this->Html->image('icons/disk.png', array('title' => sprintf(__('Download file %s', true), $file['file']), 'alt' => 'download'));

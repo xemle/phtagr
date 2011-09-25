@@ -35,6 +35,18 @@ form
         font-size: 12pt
         width: 224px
         margin-top: 10px
+      select
+        +default-input
+        font-size: 12pt
+        margin-top: 10px
+        option
+          padding: 3px 0
+          font-size: 12pt
+          background-color: $clickable-default-bg
+          &.selected
+            background-color: $clickable-active-bg
+          &:hover
+            background-color: $clickable-hover-bg
       > img
         margin-top: 12px
       > .error, > .description

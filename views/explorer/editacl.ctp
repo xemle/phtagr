@@ -1,6 +1,6 @@
 <?php 
   $mediaId = $data['Media']['id'];
-  echo $ajax->form('saveacl/'.$mediaId, 'post', array('url' => '/explorer/saveacl/'.$mediaId, 'update' => 'meta-'.$mediaId)); 
+  echo $form->create(null, array('url' => 'saveacl/'.$mediaId, 'id' => 'form-acl-'.$mediaId));
 ?>
 <fieldset>
 <?php
@@ -11,8 +11,4 @@
   echo $form->input('Group.id', array('type' => 'select', 'options' => $groups, 'selected' => $data['Media']['group_id'], 'label' => __('Group', true)));
 ?>
 </fieldset>
-<?php
-  echo $form->submit(__('Save', true), array('div' => false)); 
-  echo $ajax->link(__('Cancel', true), '/explorer/updatemeta/'.$mediaId, array('update' => 'meta-'.$mediaId, 'class' => 'reset'));
-?>
 </form>

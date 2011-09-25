@@ -767,7 +767,7 @@ class ExplorerController extends AppController
    * @todo Check and handle non-ajax request 
    */
   function updatemeta($id) {
-    if (!$this->RequestHandler->isAjax() || !$this->RequestHandler->isPost()) {
+    if (!$this->RequestHandler->isAjax()) {
       Logger::warn("Decline wrong ajax request");
       $this->redirect(null, '404');
     }
@@ -780,7 +780,7 @@ class ExplorerController extends AppController
   }
 
   function editacl($id) {
-    if (!$this->RequestHandler->isAjax() || !$this->RequestHandler->isPost()) {
+    if (!$this->RequestHandler->isAjax()) {
       Logger::warn("Decline wrong ajax request");
       $this->redirect(null, '404');
     }
@@ -804,7 +804,7 @@ class ExplorerController extends AppController
   }
 
   function saveacl($id) {
-    if (!$this->RequestHandler->isAjax() || !$this->RequestHandler->isPost()) {
+    if (!$this->RequestHandler->isAjax()) {
       Logger::warn("Decline wrong ajax request");
       $this->redirect(null, '404');
     }
@@ -816,6 +816,7 @@ class ExplorerController extends AppController
       $media = $this->Media->findById($id);
       $user = $this->getUser();
       $userId = $user['User']['id'];
+      $this->Search->setUser($user['User']['username']); // Triggers acl descriptions
       if (!$this->Media->checkAccess(&$media, &$user, 1, 0)) {
         Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change ACL of image ".$id);
       } else {
@@ -839,14 +840,17 @@ class ExplorerController extends AppController
 
         $media['Media']['modified'] = null;
         $this->Media->save($media['Media'], true, array('group_id', 'gacl', 'uacl', 'oacl'));
+        Logger::info("Changed acl of media $id");
       }
     }
     $media = $this->Media->findById($id);
     $this->Media->setAccessFlags(&$media, $this->getUser());
-    $this->set('data', $media);
+    $this->data = $media;
     $this->layout='bare';
-    $this->render('updatemeta');
+    $this->Search->setUser($user['User']['username']);
+    $this->Search->setHelperData();
     Configure::write('debug', 0);
+    $this->render('updatemeta');
   }
 
   function sync($id) {

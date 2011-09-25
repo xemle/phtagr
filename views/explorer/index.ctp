@@ -45,6 +45,33 @@
           }
         });
       });
+      $(this).find('ul li .acl').click(function() {
+        var $dialog = $('#dialog');
+        $.ajax(':BASE_URLexplorer/editacl/' + id, {
+          success: function(data, xhr, status) {
+            $dialog.children().remove();
+            $dialog.append(data);
+            $dialog.dialog({
+              modal: true, 
+              width: 520,
+              title: ':ACL_TITLE',
+              buttons: {
+                ':SAVE': function() {
+                  var $form = $('#form-acl-' + id);
+                  $.post($form.attr('action'), $form.serialize(), function(data) {
+                    $('#description-' + id).html(data);
+                    $('#description-' + id).find('.tooltip-actions').tooltipAction();
+                  });
+                  $(this).dialog("close");
+                },
+                ':CANCEL': function() {
+                  $(this).dialog("close");
+                }
+              }
+            });
+          }
+        });
+      });
     });
     $('#select-all').click(function() {
       $('#content .sub .p-explorer-media').selectMedia();
@@ -117,6 +144,7 @@ JS;
   $vars = array(
     'BASE_URL' => Router::url('/', true), 
     'EDIT_TITLE' => __("Edit Meta Data", true),
+    'ACL_TITLE' => __("Edit Access Rights", true),
     'SAVE' => __("Update", true), 
     'CANCEL' => __("Cancel", true));
   foreach ($vars as $name => $value) {

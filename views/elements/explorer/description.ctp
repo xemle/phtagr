@@ -1,3 +1,4 @@
+<?php $search->initialize(); ?>
 <?php echo $this->element('explorer/date', array('media' => $media)); ?>
 <?php if (count($media['Tag'])): ?>
   <p class="tag list"><?php echo __("Tags", true); ?></dd>

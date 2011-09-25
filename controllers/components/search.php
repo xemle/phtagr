@@ -344,6 +344,23 @@ class SearchComponent extends Search
     return $data;
   }
 
+  /** 
+    Sets the data for the search helper 
+    */
+  function setHelperData() {
+    $params = array(
+      'pageCount' => 0, 
+      'current' => 0, 
+      'nextPage' => false, 
+      'prevPage' => false,
+      'baseUri' => $this->baseUri,
+      'afterUri' => false,
+      'defaults' => $this->defaults,
+      'data' => $this->getParams()
+      );
+    $this->controller->params['search'] = $params;
+  }
+
   function paginateMediaByCrumb($id, $crumbs) {
     $tmp = $this->getParams();
     $this->clear();
