@@ -111,15 +111,27 @@
 <fieldset><legend><?php __("Access Rights"); ?></legend>
 <?php
   $aclSelect = array(
-    ACL_LEVEL_KEEP => __('[Keep]', true),
-    ACL_LEVEL_OTHER => __('Everyone', true),
+    ACL_LEVEL_PRIVATE => __('Me', true),
+    ACL_LEVEL_GROUP => __('Group', true),
     ACL_LEVEL_USER => __('Users', true),
-    ACL_LEVEL_GROUP => __('Group members', true),
-    ACL_LEVEL_PRIVATE => __('Me only', true));
-  echo $form->input('acl.read.preview', array('type' => 'select', 'options' => $aclSelect, 'selected' => ACL_LEVEL_KEEP, 'label' => __("Who can view the image?", true)));
-  echo $form->input('acl.read.original', array('type' => 'select', 'options' => $aclSelect, 'selected' => ACL_LEVEL_KEEP, 'label' => __("Who can download the image?", true)));
-  echo $form->input('acl.write.tag', array('type' => 'select', 'options' => $aclSelect, 'selected' => ACL_LEVEL_KEEP, 'label' => __("Who can add tags?", true)));
-  echo $form->input('acl.write.meta', array('type' => 'select', 'options' => $aclSelect, 'selected' => ACL_LEVEL_KEEP, 'label' => __("Who can edit all meta data?", true)));
+    ACL_LEVEL_OTHER => __('All', true),
+    ACL_LEVEL_KEEP => __('Keep', true));
+  echo $html->tag('div',
+    $html->tag('label', __("Who can view the image", true)).
+    $html->tag('div', $form->radio('acl.read.preview', $aclSelect, array('legend' => false, 'value' => ACL_LEVEL_KEEP)), array('escape' => false, 'class' => 'radioSet')), 
+    array('escape' => false, 'class' => 'input radio'));
+  echo $html->tag('div',
+    $html->tag('label', __("Who can download the image?", true)).
+    $html->tag('div', $form->radio('acl.read.original', $aclSelect, array('legend' => false, 'value' => ACL_LEVEL_KEEP)), array('escape' => false, 'class' => 'radioSet')), 
+    array('escape' => false, 'class' => 'input radio'));
+  echo $html->tag('div',
+    $html->tag('label', __("Who can add tags?", true)).
+    $html->tag('div', $form->radio('acl.write.tag', $aclSelect, array('legend' => false, 'value' => ACL_LEVEL_KEEP)), array('escape' => false, 'class' => 'radioSet')), 
+    array('escape' => false, 'class' => 'input radio'));
+  echo $html->tag('div',
+    $html->tag('label', __("Who can edit all meta data?", true)).
+    $html->tag('div', $form->radio('acl.write.meta', $aclSelect, array('legend' => false, 'value' => ACL_LEVEL_KEEP)), array('escape' => false, 'class' => 'radioSet')), 
+    array('escape' => false, 'class' => 'input radio'));
   echo $form->input('Group.id', array('type' => 'select', 'options' => $groups, 'selected' => 0, 'label' => __("Default image group?", true)));
 ?>
 </fieldset>

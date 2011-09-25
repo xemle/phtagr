@@ -23,7 +23,7 @@ form
     border: 0
     > div
       clear: left
-      label
+      > label
         +column(6)
         margin-top: 15px
         text-align: right
@@ -69,13 +69,13 @@ form
 
 form.explorer-menu
   fieldset
-    +column(12, true)
+    +column(24, true)
     padding: 5px 0
     border: 0
     legend
       display: none 
     > div
-      label
+      > label
         +column(6)
         margin-top: 12px
         text-align: right
@@ -90,12 +90,19 @@ form.explorer-menu
         display: inline-block
         +default-input
         option
-          padding: 13px
-          color: black
+          padding: 3px 0
+          color: white 
+          background-color: $clickable-default-bg
+          &.selected
+            background-color: $clickable-active-bg
+          &:hover
+            background-color: $clickable-hover-bg
       > div.description, > div.error
         margin-top: 2px
         +prepend(6)
         +column(6, true)
+      .radioSet
+        margin: 5px 0
     > div.error
       background: darken(red, 30%)
   div.submit

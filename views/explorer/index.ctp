@@ -135,6 +135,7 @@
       })
     };
     $('.tooltip-actions').tooltipAction();
+    $('.radioSet').buttonset();
   });
   $(window).load(function() {
     $(this).placeExplorerMenu();
