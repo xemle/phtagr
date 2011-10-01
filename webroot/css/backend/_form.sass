@@ -15,18 +15,15 @@
     background-color: #ffd
 
 =default-button
-  border: 1px solid #ddd
-  +border-radius(5px)
+  border: 1px solid #aaa
+  +border-radius(2px)
   padding: 5px 15px
-  +linear-gradient(colour-stops(#eee, darken(#eee, 20%)))
   color: #666
-  +text-shadow(white, 1px, 1px)
   &:hover
+    cursor:pointer
     background-color: $menuActiveBackgroundColor
-    +linear-gradient(colour-stops($menuActiveBackgroundColor, darken($menuActiveBackgroundColor, 20%)))
     color: white
-    +text-shadow(black, -1px, -1px)
-    border-color: darken($menuActiveBackgroundColor, 20%)P
+    border-color: darken($menuActiveBackgroundColor, 20%)
 
 form
   overflow: hidden
@@ -74,5 +71,7 @@ form
       margin-right: 10px
       > input
         +default-button
-  .submit > input
-    +default-button
+  div.submit 
+    padding-left: 30%
+    > input
+      +default-button
