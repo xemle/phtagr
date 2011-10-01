@@ -53,10 +53,10 @@ class BrowserController extends AppController
     }
 
     $this->pageTitle = __('My Files', true);
+    $this->layout = 'backend';
   }
 
   function beforeRender() {
-    $this->layout = 'backend';
     parent::beforeRender();
   }
 
@@ -652,6 +652,7 @@ class BrowserController extends AppController
       $this->set('errors', array());
     }
     $this->_setQuotaForView();
+    $this->layout = 'default';
   }
 }
 ?>

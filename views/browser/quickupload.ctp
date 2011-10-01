@@ -29,10 +29,19 @@
   <?php echo $form->input('File.upload][', array('type' => 'file', 'label' => __('File or archive', true), 'id' => 'FileUpload4')); ?>
   <?php echo $form->input('File.upload][', array('type' => 'file', 'label' => __('File or archive', true), 'id' => 'FileUpload5')); ?>
 </fieldset>
-<p><?php printf(__("You can upload maximal %s and %s at once. ZIP archives are extracted automatically.", true), $number->toReadableSize($free), $number->toReadableSize($max)); ?></p>
 
 <?php echo $form->end(__("Upload", true)); ?>
-
+<?php 
+    $script = <<<'JS'
+(function($) {
+  $(document).ready(function() {
+    $('input[type=submit]').button();
+  });
+})(jQuery);
+JS;
+  echo $this->Html->scriptBlock($script, array('inline' => false));
+?>
+<p><?php printf(__("You can upload maximal %s and %s at once. ZIP archives are extracted automatically.", true), $number->toReadableSize($free), $number->toReadableSize($max)); ?></p>
 <?php else: ?>
 <p class="info"><?php __("You cannot upload files now. Your upload quota is exceeded."); ?></p>
 <?php endif; ?>
