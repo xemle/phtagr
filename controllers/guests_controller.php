@@ -32,7 +32,7 @@ class GuestsController extends AppController {
     $this->layout = 'backend';
     $this->requireRole(ROLE_USER);
     $this->subMenu = array(
-      'add' => __('New Guest', true)
+      'create' => __('New Guest', true)
       );
   }
 
@@ -58,7 +58,7 @@ class GuestsController extends AppController {
     $this->layout = "bare";
   }
 
-  function add() {
+  function create() {
     if (!empty($this->data)) {
       $userId = $this->getUserId();
       $this->data['Guest']['creator_id'] = $userId;

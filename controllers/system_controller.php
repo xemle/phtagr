@@ -35,7 +35,8 @@ class SystemController extends AppController {
       'index' => __("General", true),
       'external' => __("External Programs", true),
       'map' => __("Map Settings", true),
-      'upgrade' => __("Database Upgrade", true)
+      'upgrade' => __("Database Upgrade", true),
+      'deleteUnusedMetaData' => __("Delete Unused Metadata", true)
       );
   }
 
@@ -117,6 +118,33 @@ class SystemController extends AppController {
       }
     }
     $this->set('newMappingNames', $newMappingNames);
+  }
+
+  function deleteUnusedMetaData($delete = '') {
+    App::import('Model', array('Tag', 'Category', 'Location'));
+
+    $this->Tag =& new Tag();
+    $this->Tag->bindModel(array('hasAndBelongsToMany' => array('Media')), false);
+    $this->Tag->Behaviors->attach('DeleteUnused', array('relatedHabtm' => 'Media'));
+    $unusedTagCount = count($this->Tag->findAllUnused());
+
+    $this->Category =& new Category();
+    $this->Category->bindModel(array('hasAndBelongsToMany' => array('Media')), false);
+    $this->Category->Behaviors->attach('DeleteUnused', array('relatedHabtm' => 'Media'));
+    $unusedCategoryCount = count($this->Category->findAllUnused());
+
+    $this->Location =& new Location();
+    $this->Location->bindModel(array('hasAndBelongsToMany' => array('Media')), false);
+    $this->Location->Behaviors->attach('DeleteUnused', array('relatedHabtm' => 'Media'));
+    $unusedLocationCount = count($this->Location->findAllUnused());
+
+    if ($delete == 'delete') {
+      $this->Tag->deleteAllUnused();
+      $this->Location->deleteAllUnused();
+      $this->Category->deleteAllUnused();
+      $this->Session->setFlash(__("All unused meta data are deleted", true));
+    }
+    $this->data = compact('unusedTagCount', 'unusedCategoryCount', 'unusedLocationCount');
   }
 }
 ?>
