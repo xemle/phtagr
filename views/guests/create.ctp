@@ -2,7 +2,7 @@
 
 <?php echo $session->flash(); ?>
 
-<?php echo $form->create('Guest', array('action' => 'add')); ?>
+<?php echo $form->create('Guest', array('action' => 'create')); ?>
 
 <fieldset><legend><?php __('Create new guest account'); ?></legend>
 <?php
