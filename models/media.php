@@ -707,6 +707,88 @@ class Media extends AppModel
   }
 
   /**
+   * Prepare the input data for edit
+   * 
+   * @param type $data User input data
+   * @return array Array of add and removals
+   */
+  function prepareMultiEditData(&$data) {
+    $tmp = array();
+    if (!empty($data['Media']['geo'])) {
+      $this->splitGeo(&$data, $data['Media']['geo']);
+    }
+    $fields = array('name', 'description', 'date', 'latitude', 'longitude');
+    foreach ($fields as $field) {
+      if (!empty($data['Media'][$field])) {
+        $tmp['Media'][$field] = $data['Media'][$field];
+      }
+    }
+      
+    $tag = $this->Tag->prepareMultiEditData(&$data);
+    if ($tag) {
+      $tmp['Tag'] = $tag['Tag'];
+    }
+    $category = $this->Category->prepareMultiEditData(&$data);
+    if ($category) {
+      $tmp['Category'] = $category['Category'];
+    }
+    $location = $this->Location->prepareMultiEditData(&$data);
+    if ($location) {
+      $tmp['Location'] = $location['Location'];
+    }
+    if (!count($tmp)) {
+      return false;
+    }
+    return $tmp;
+  }
+  
+  function editTagMulti(&$media, &$data) {
+    $tmp = array('Media' => array('id' => $media['Media']['id']));
+    
+    $tag = $this->Tag->editMetaMulti(&$media, &$data);
+    if ($tag) {
+      $tmp['Tag'] = $tag['Tag'];
+    }
+    $category = $this->Category->editMetaMulti(&$media, &$data);
+    if ($category) {
+      $tmp['Category'] = $category['Category'];
+    }
+    if (count($tmp) == 1 && count($tmp['Media']) == 1) {
+      return false;
+    }
+    return $tmp;
+  }
+  
+  function editMetaMulti(&$media, &$data) {
+    $tmp = array('Media' => array('id' => $media['Media']['id']));
+
+    $fields = array('name', 'description', 'date', 'latitude', 'longitude');
+    foreach ($fields as $field) {
+      if (empty($data['Media'][$field])) {
+        continue;
+      }
+      $tmp['Media'][$field] = $data['Media'][$field];
+    }
+    
+    $tag = $this->Tag->editMetaMulti(&$media, &$data);
+    if ($tag) {
+      $tmp['Tag'] = $tag['Tag'];
+    }
+    $category = $this->Category->editMetaMulti(&$media, &$data);
+    if ($category) {
+      $tmp['Category'] = $category['Category'];
+    }
+    $location = $this->Location->editMetaMulti(&$media, &$data);
+    if ($location) {
+      $tmp['Location'] = $location['Location'];
+    }
+    if (count($tmp) == 1 && count($tmp['Media']) == 1) {
+      return false;
+    }
+    return $tmp;
+  }
+  
+  /**
    * Creates an new media data with updated values of given data
    * 
    * @param type $media Media model data array

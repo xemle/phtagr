@@ -42,5 +42,51 @@ class Category extends AppModel
     }
   }
 
+  /**
+   * Prepare multi edit data for categories
+   * 
+   * @param type $data
+   * @return type 
+   */
+  function prepareMultiEditData(&$data) {
+    $names = $data['Category']['names'];
+    $words = $this->splitWords($names);
+    if (!count($words)) {
+      return false;
+    }
+    $addWords = $this->removeNegatedWords($words);
+    $deleteWords = $this->getNegatedWords($words);
+
+    $addCategories = $this->findAllByField($addWords);
+    $deleteCategories = $this->findAllByField($deleteWords, false);
+    
+    if (count($addCategories) || count($deleteCategories)) {
+      return array('Category' => array('addCategory' => Set::extract("/Category/id", $addCategories), 'deleteCategory' => Set::extract("/Category/id", $deleteCategories)));
+    } else {
+      return false;
+    }
+  }
+  
+  /**
+   * Add and delete categories according to the given data
+   * 
+   * @param type $media
+   * @param type $data
+   * @return type 
+   */
+  function editMetaMulti(&$media, &$data) {
+    if (empty($data['Category'])) {
+      return false;
+    }
+    $oldIds = Set::extract('/Category/id', $media);
+    $ids = am($oldIds, $data['Category']['addCategory']);
+    $ids = array_unique(array_diff($ids, $data['Category']['deleteCategory']));
+    if (array_diff($ids, $oldIds) || array_diff($oldIds, $ids)) {
+      return array('Category' => array('Category' => $ids));
+    } else {
+      return false;
+    }
+  }
+
 }
 ?>

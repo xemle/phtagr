@@ -108,7 +108,10 @@ class WordListBehavior extends ModelBehavior
         continue;
       }
       if ($word[0] == '-') {
-        $result[] = $word;
+        $word = trim(substr($word, 1));
+        if ($word) {
+          $result[] = $word;
+        }
       }
     }
     return $result;
@@ -128,7 +131,10 @@ class WordListBehavior extends ModelBehavior
         continue;
       }
       if ($word[0] == '-') {
-        $result[] = substr($word, 1);
+        $word = trim(substr($word, 1));
+        if ($word) {
+          $result[] = $word;
+        }
       } else {
         $result[] = $word;
       }
