@@ -521,7 +521,7 @@ class ExplorerController extends AppController
       
       $user = $this->getUser();
       $userId = $user['User']['id'];
-      $groupIds = Set::extract('/Group/id', $this->Group->getGroupsForMedia($this->getUser()));
+      $groupIds = Set::extract('/Group/id', $this->Group->getGroupsForMedia($user));
       $groupIds[] = -1; // no group
       if (isset($this->data['Group']['id']) &&
         in_array($this->data['Group']['id'], $groupIds)) {
@@ -530,30 +530,32 @@ class ExplorerController extends AppController
         $groupId = 0;
       }
     
-      foreach ($ids as $id) {
-        $media = $this->Media->findById($id);
-        if (!$media) {
-          Logger::debug("Could not find Media with id $id");
-          continue;
-        }
-
+      $allMedia = $this->Media->find('all', array('conditions' => array('Media.id' => $ids)));
+      $changedMedia = array();
+      foreach ($allMedia as $media) {
+        $this->Media->setAccessFlags(&$media, &$user);
         // primary access check
-        if (!$this->Media->checkAccess(&$media, &$user, ACL_WRITE_TAG, ACL_WRITE_MASK, &$members)) {
+        if (!$media['Media']['canWriteTag']) {
           Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change any metadata of image ".$id);
           continue;
         }
         
-        if (!$this->Media->checkAccess(&$media, &$user, ACL_WRITE_META, ACL_WRITE_MASK, &$members)) {
-          $tmp = $this->Media->editTagMulti(&$media, $editData);
-        } else {
+        if ($media['Media']['canWriteMeta']) {
           $tmp = $this->Media->editMetaMulti(&$media, $editData);
+        } else {
+          $tmp = $this->Media->editTagMulti(&$media, $editData);
         }
-
-        $changedMeta = false;
-        if ($tmp && $this->Media->save($tmp)) {
-          Logger::debug("Update meta data");
-          $changedMeta = true;
+        if ($tmp) {
+          $changedMedia[] = $tmp;
         }
+      }
+      if ($changedMedia) {
+        if (!$this->Media->saveAll($changedMedia)) {
+          Logger::warn("Could not save media: " . join(", ", Set::extract("/Media/id", $changedMedia)));
+        } else {
+          Logger::debug("Saved media: " . join(', ', Set::extract("/Media/id", $changedMedia)));
+        }
+      }
 
 //        $changedAcl = false;
 //        if (!empty($this->data['acl'])) {
@@ -577,7 +579,7 @@ class ExplorerController extends AppController
 //            Logger::info('Updated metadata or acl of '.$id);
 //          }
 //        }
-      }
+//      }
       $this->data = array();
     }
     $this->redirect('view/' . implode('/', $this->Search->encodeCrumbs($this->crumbs)));

@@ -749,13 +749,10 @@ class Media extends AppModel
     if ($tag) {
       $tmp['Tag'] = $tag['Tag'];
     }
-    $category = $this->Category->editMetaMulti(&$media, &$data);
-    if ($category) {
-      $tmp['Category'] = $category['Category'];
-    }
     if (count($tmp) == 1 && count($tmp['Media']) == 1) {
       return false;
     }
+    $tmp['Media']['isDirty'] = true;
     return $tmp;
   }
   
@@ -785,6 +782,7 @@ class Media extends AppModel
     if (count($tmp) == 1 && count($tmp['Media']) == 1) {
       return false;
     }
+    $tmp['Media']['isDirty'] = true;
     return $tmp;
   }
   
@@ -797,14 +795,16 @@ class Media extends AppModel
    */
   function editTagSingle(&$media, &$data) {
     $tmp = array('Media' => array('id' => $media['Media']['id']));
-    $tag = $this->Tag->editSingle(&$media, &$data);
+  
+    $tag = $this->Tag->editMetaSingle(&$media, &$data);
     if (isset($tag['Tag'])) {
       $tmp['Tag'] = $tag['Tag'];
     }
     if (count($tmp) == 1 && count($tmp['Media']) == 1) {
+      // Unchanged data
       return false;
     }
-    // Unchanged data
+    $tmp['Media']['isDirty'] = true;
     return $tmp;
   }
     
@@ -842,6 +842,7 @@ class Media extends AppModel
     if (count($tmp) == 1 && count($tmp['Media']) == 1) {
       return false;
     }
+    $tmp['Media']['isDirty'] = true;
     return $tmp;
   }
 }
