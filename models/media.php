@@ -752,7 +752,7 @@ class Media extends AppModel
     if (count($tmp) == 1 && count($tmp['Media']) == 1) {
       return false;
     }
-    $tmp['Media']['isDirty'] = true;
+    $tmp['Media']['flag'] = ($media['Media']['flag'] | MEDIA_FLAG_DIRTY);
     return $tmp;
   }
   
@@ -782,7 +782,7 @@ class Media extends AppModel
     if (count($tmp) == 1 && count($tmp['Media']) == 1) {
       return false;
     }
-    $tmp['Media']['isDirty'] = true;
+    $tmp['Media']['flag'] = ($media['Media']['flag'] | MEDIA_FLAG_DIRTY);
     return $tmp;
   }
   
@@ -804,7 +804,7 @@ class Media extends AppModel
       // Unchanged data
       return false;
     }
-    $tmp['Media']['isDirty'] = true;
+    $tmp['Media']['flag'] = ($media['Media']['flag'] | MEDIA_FLAG_DIRTY);
     return $tmp;
   }
     
@@ -842,7 +842,7 @@ class Media extends AppModel
     if (count($tmp) == 1 && count($tmp['Media']) == 1) {
       return false;
     }
-    $tmp['Media']['isDirty'] = true;
+    $tmp['Media']['flag'] = ($media['Media']['flag'] | MEDIA_FLAG_DIRTY);
     return $tmp;
   }
 }
