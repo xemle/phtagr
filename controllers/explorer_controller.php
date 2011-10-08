@@ -219,52 +219,61 @@ class ExplorerController extends AppController
 
   function _getAssociation($type, $value) {
     $result = array();
+    $isNegated = false;
+    $normalized = $value;
+    if ($value && $value[0] = '-') {
+      $normalized = trim(substr($value, 1));
+      $isNegated = true;
+    }
+    if (!$normalized) {
+      return $result;
+    }
     switch ($type) {
       case 'tag':
         $data = $this->Media->Tag->find('all', array(
-          'conditions' => array('name LIKE' => $value.'%'), 
+          'conditions' => array('name LIKE' => $normalized.'%'), 
           'limit' => 10
           ));
         $result = Set::extract('/Tag/name', $data);
         break;
       case 'category':
         $data = $this->Media->Category->find('all', array(
-          'conditions' => array('name LIKE' => $value.'%'),
+          'conditions' => array('name LIKE' => $normalized.'%'),
           'limit' => 10
           ));
         $result = Set::extract('/Category/name', $data);
         break;
       case 'location':
         $data = $this->Media->Location->find('all', array(
-          'conditions' => array('name LIKE' => $value.'%'),
+          'conditions' => array('name LIKE' => $normalized.'%'),
           'limit' => 10
           ));
         $result = Set::extract('/Location/name', $data);
         break;
       case 'city':
         $data = $this->Media->Location->find('all', array(
-          'conditions' => array('name LIKE' => $value.'%', 'type' => LOCATION_CITY),
+          'conditions' => array('name LIKE' => $normalized.'%', 'type' => LOCATION_CITY),
           'limit' => 10
           ));
         $result = Set::extract('/Location/name', $data);
         break;
       case 'sublocation':
         $data = $this->Media->Location->find('all', array(
-          'conditions' => array('name LIKE' => $value.'%', 'type' => LOCATION_SUBLOCATION),
+          'conditions' => array('name LIKE' => $normalized.'%', 'type' => LOCATION_SUBLOCATION),
           'limit' => 10
           ));
         $result = Set::extract('/Location/name', $data);
         break;
       case 'state':
         $data = $this->Media->Location->find('all', array(
-          'conditions' => array('name LIKE' => $value.'%', 'type' => LOCATION_STATE),
+          'conditions' => array('name LIKE' => $normalized.'%', 'type' => LOCATION_STATE),
           'limit' => 10
           ));
         $result = Set::extract('/Location/name', $data);
         break;
       case 'country':
         $data = $this->Media->Location->find('all', array(
-          'conditions' => array('name LIKE' => $value.'%', 'type' => LOCATION_COUNTRY),
+          'conditions' => array('name LIKE' => $normalized.'%', 'type' => LOCATION_COUNTRY),
           'limit' => 10
           ));
         $result = Set::extract('/Location/name', $data);
@@ -287,6 +296,13 @@ class ExplorerController extends AppController
         Logger::err("Unknown type $type");
         $this->redirect(404);
         break;
+    }
+    if ($isNegated && count($result)) {
+      $tmp = array();
+      foreach ($result as $name) {
+        $tmp[] = '-' . $name;
+      }
+      $result = $tmp;
     }
     return $result;
   }
