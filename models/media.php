@@ -677,5 +677,90 @@ class Media extends AppModel
     }
     return $degree;
   }
+
+  /**
+    Split the geo information to latitude and longitude
+
+    @param data Model Data
+    @param geo Geo data string
+    @return Model data 
+    */
+  function splitGeo(&$data, $geo) {
+    $numbers = preg_split('/\s*,\s*/', trim($geo));
+    if (count($numbers) != 2) {
+      Logger::debug("Invalid geo input: $geo");
+      return;
+    } elseif ($numbers[0] == "-") {
+      $data['Media']['latitude'] = null;
+      $data['Media']['longitude'] = null;
+      return;
+    } 
+    // validate numbers
+    foreach ($numbers as $number) {
+      if (!preg_match('/^[+-]?\d+(\.\d+)?$/', $number)) {
+        Logger::debug("Invalid geo input number: $number");
+        return;
+      }
+    }
+    $data['Media']['latitude'] = $numbers[0];
+    $data['Media']['longitude'] = $numbers[1];
+  }
+
+  /**
+   * Creates an new media data with updated values of given data
+   * 
+   * @param type $media Media model data array
+   * @param type $data Input data array
+   * @return type 
+   */
+  function editTagSingle(&$media, &$data) {
+    $tmp = array('Media' => array('id' => $media['Media']['id']));
+    $tag = $this->Tag->editSingle(&$media, &$data);
+    if (isset($tag['Tag'])) {
+      $tmp['Tag'] = $tag['Tag'];
+    }
+    if (count($tmp) == 1 && count($tmp['Media']) == 1) {
+      return false;
+    }
+    // Unchanged data
+    return $tmp;
+  }
+    
+  /**
+   * Creates an new media data with updated values of given data
+   * 
+   * @param type $media Media model data array
+   * @param type $data Input data array
+   * @return type 
+   */
+  function editMetaSingle(&$media, &$data) {
+    $tmp = array('Media' => array('id' => $media['Media']['id']));
+    if (!empty($data['Media']['geo'])) {
+      $this->splitGeo(&$data, $data['Media']['geo']);
+    }
+    $fields = array('name', 'description', 'date', 'latitude', 'longitude');
+    foreach ($fields as $field) {
+      if (isset($data['Media'][$field]) && $media['Media'][$field] !== $data['Media'][$field]) {
+        $tmp['Media'][$field] = $data['Media'][$field];
+      }
+    }
+    $tag = $this->Tag->editMetaSingle(&$media, &$data);
+    if (isset($tag['Tag'])) {
+      $tmp['Tag'] = $tag['Tag'];
+    }
+    $category = $this->Category->editMetaSingle(&$media, &$data);
+    if (isset($category['Category'])) {
+      $tmp['Category'] = $category['Category'];
+    }
+    $location = $this->Location->editMetaSingle(&$media, &$data);
+    if (isset($location['Location'])) {
+      $tmp['Location'] = $location['Location'];
+    }
+    // Unchanged data
+    if (count($tmp) == 1 && count($tmp['Media']) == 1) {
+      return false;
+    }
+    return $tmp;
+  }
 }
 ?>

@@ -24,6 +24,23 @@
 class Category extends AppModel
 {
   var $name = 'Category';
+  var $actsAs = array('WordList');
+  
+  function editMetaSingle(&$media, &$data) {
+    if (!isset($data['Category']['names'])) {
+      return false;
+    }
+    $words = $this->splitWords($data['Category']['names'], false);
+    $words = $this->removeNegatedWords($words);
+    $categories = $this->findAllByField($words);
+    $ids = array_unique(Set::extract("/Category/id", $categories));
+    $oldIds = Set::extract("/Category/id", $media);
+    if (count(array_diff($oldIds, $ids)) || count(array_diff($ids, $oldIds))) {
+      return array('Category' => array('Category' => $ids));
+    } else {
+      return false;
+    }
+  }
 
 }
 ?>

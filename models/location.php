@@ -31,7 +31,8 @@ class Location extends AppModel
                 LOCATION_SUBLOCATION => 'sublocation', 
                 LOCATION_STATE => 'state',
                 LOCATION_COUNTRY => 'country'); 
-
+  var $actsAs = array('WordList');
+  
   /** 
     @param name Location name. Valid values are: city, sublocation, state, country, and any.
     @return Returns the type value of a given location string */
@@ -77,6 +78,38 @@ class Location extends AppModel
       }
     }
     return $list;
+  }
+
+  function editMetaSingle(&$media, &$data) {
+    $ids = array();
+    foreach ($this->types as $type => $locationName) {
+      if ($type == LOCATION_ANY || !isset($data['Location'][$locationName])) {
+        continue;
+      }
+      $name = trim($data['Location'][$locationName]);
+      if (!$name || $name == '-') {
+        continue;
+      }        
+      $location = array('name' => $name, 'type' => $type);
+      $found = $this->find('first', array('conditions' => $location));
+      if (!$found) {
+        if (!$this->save($location)) {
+          Logger::warn("Could not create new $locationName '$name'");
+        } else {
+          Logger::debug("Create new $locationName '$name'");
+          $ids[] = $this->getInsertID();
+        }
+      } else {
+        $ids[] = $found['Location']['id'];
+      }
+    }
+    $ids = array_unique($ids);
+    $oldIds = Set::extract('/Location/id', $media);
+    if (count(array_diff($oldIds, $ids)) || count(array_diff($ids, $oldIds))) {
+      return array('Location' => array('Location' => $ids));
+    } else {
+      return false;
+    }
   }
 }
 ?>

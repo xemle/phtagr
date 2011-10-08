@@ -715,43 +715,27 @@ class ExplorerController extends AppController
     $id = intval($id);
     $this->layout='bare';
     $user = $this->getUser();
+    $username = $user['User']['username'];
     if (isset($this->data)) {
       $media = $this->Media->findById($id);
-
-      if (!$this->Media->checkAccess(&$media, &$user, ACL_WRITE_TAG, ACL_WRITE_MASK)) {
-        Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change tags of image ".$id);
+      if (!$media) {
+        Logger::warn("Invalid media id: $id");
+        $this->redirect(null, '404');
+      } elseif (!$this->Media->checkAccess(&$media, &$user, ACL_WRITE_TAG, ACL_WRITE_MASK)) {
+        Logger::warn("User '{$username}' ({$user['User']['id']}) has no previleges to change tags of image ".$id);
       } else {
-        $ids = $this->Tag->createIdListFromText($this->data['Tags']['text'], 'name', true);
-        $media['Tag']['Tag'] = $ids;
-
         if ($this->Media->checkAccess(&$media, &$user, ACL_WRITE_META, ACL_WRITE_MASK)) {
-          $media['Media']['date'] = $this->data['Media']['date'];
-          $ids = $this->Category->createIdListFromText($this->data['Categories']['text'], 'name', true);
-          $media['Category']['Category'] = $ids;
-
-          $locations = $this->Location->createLocationItems($this->data['Locations']);
-          $locations = $this->Location->filterItems($locations);
-          $ids = $this->Location->CreateIdList($locations, true);
-          $media['Location']['Location'] = $ids;      
-          if (!empty($this->data['Media']['geo'])) {
-            if ($this->data['Media']['geo'] == '-' || $this->data['Media']['geo'] == '-,-') {
-              $media['Media']['latitude'] = null;
-              $media['Media']['longitude'] = null;
-            } elseif (preg_match('/^\s*([+\-]?[0-9]+(\.[0-9]+)?)\s*,\s*([+\-]?[0-9]+(\.[0-9]+)?)\s*$/', $this->data['Media']['geo'], $m)) {
-              $geoData = array('latitude' => $m[1], 'longitude' => $m[3]);
-              $media['Media']['latitude'] = $m[1];
-              $media['Media']['longitude'] = $m[3];
-            }
-          }
+          Logger::debug("User {$username} updates metadata of media {$id}");
+          $tmp = $this->Media->editMetaSingle(&$media, &$this->data);
         } else {
-          // unset to keep HABTM relations of category and location
-          unset($media['Category']);
-          unset($media['Location']);
+          Logger::debug("User {$username} updates tags of media {$id}");
+          $tmp = $this->Media->editTagSingle(&$media, &$this->data);
         }
-        $media['Media']['modified'] = null;
-        $media['Media']['flag'] |= MEDIA_FLAG_DIRTY;
-        if (!$this->Media->save($media)) {
-          Logger::warn("Update meta data of media $id failed");
+        if (!$this->Media->save($tmp)) {
+          Logger::warn("Could not save media");
+          Logger::debug($tmp);
+        } else {
+          Logger::info("Updated meta of media {$tmp['Media']['id']}");
         }
       }
     }

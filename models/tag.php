@@ -24,6 +24,22 @@
 class Tag extends AppModel
 {
   var $name = 'Tag';
-
+  var $actsAs = array('WordList');
+  
+  function editMetaSingle(&$media, &$data) {
+    if (!isset($data['Tag']['names'])) {
+      return false;
+    }
+    $words = $this->splitWords($data['Tag']['names'], false);
+    $words = $this->removeNegatedWords($words);
+    $tags = $this->findAllByField($words);
+    $ids = array_unique(Set::extract("/Tag/id", $tags));
+    $oldIds = Set::extract("/Tag/id", $media);
+    if (count(array_diff($oldIds, $ids)) || count(array_diff($ids, $oldIds))) {
+      return array('Tag' => array('Tag' => $ids));
+    } else {
+      return false;
+    }
+  }
 }
 ?>
