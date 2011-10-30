@@ -231,7 +231,7 @@ class CommentsController extends AppController
 
     // Allow only comment owner, media owner or admins
     if ((isset($comment['User']['id']) && $comment['User']['id'] == $userId) || ($comment['Media']['user_id'] == $userId) || ($this->getUserRole() == ROLE_ADMIN)) {
-      if ($this->Comment->del($id)) {
+      if ($this->Comment->delete($id)) {
         $this->Session->setFlash(__('Comment deleted', true));
         Logger::info("Delete comment {$comment['Comment']['id']} of media {$comment['Media']['id']}");
       }
