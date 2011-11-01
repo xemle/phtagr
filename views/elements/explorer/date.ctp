@@ -20,7 +20,7 @@
 <?php endif; ?>
 <?php 
   echo $html->link($imageData->getIcon('calendar_view_day', __("View media of this day", true)), 
-    $imageData->getDateLink($media, '12d'), array('escape' => false)); 
+    $imageData->getDateLink($media, '12h'), array('escape' => false)); 
   echo $html->link($imageData->getIcon('calendar_view_week', __("View media of this week", true)), 
     $imageData->getDateLink($media, '3.5d'), array('escape' => false)); 
   echo $html->link($imageData->getIcon('calendar_view_month', __("View media of this month", true)), 
