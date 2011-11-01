@@ -1,26 +1,32 @@
-<?php $search->initialize(); ?>
-<?php echo $this->element('explorer/date', array('media' => $media)); ?>
-<?php if (count($media['Tag'])): ?>
-  <p class="tag list"><?php echo __("Tags", true); ?></dd>
-  <?php echo implode(', ', $imageData->linkList('/explorer/tag', Set::extract('/Tag/name', $media))); ?></p>
-<?php endif; ?>
-<?php if (count($media['Category'])): ?>
-  <p class="category list"><?php echo __("Categories", true); ?>
-  <?php echo implode(', ', $imageData->linkList('/explorer/category', Set::extract('/Category/name', $media))); ?></p>
-<?php endif; ?>
-<?php if (count($media['Location'])): ?>
-  <p class="location list"><?php echo __("Locations", true); ?>
-  <?php echo implode(', ', $imageData->linkList('/explorer/location', Set::extract('/Location/name', $media))); ?></p>
-<?php endif; ?>
-<?php if ($search->getUser() == $currentUser['User']['username'] && !empty($media['Group']['name'])): ?>
-  <p class="group list"><?php echo __("Group", true); ?></dd>
-  <?php echo $html->link($media['Group']['name'], '/explorer/group/' . $media['Group']['name']); ?></p>
-<?php endif; ?>
-<?php if ($search->getUser() == $currentUser['User']['username'] && $currentUser['User']['role'] >= ROLE_USER): ?>
-  <p class="access list"><?php echo __("Access", true); ?>
-  <?php 
-    echo $imageData->_acl2icon($media['Media']['gacl'], __('Group members', true)).', ';
-    echo $imageData->_acl2icon($media['Media']['uacl'], __('Users', true)).', ';
-    echo $imageData->_acl2icon($media['Media']['oacl'], __('All', true));
-  ?></p>
-<?php endif; ?>
+<?php 
+  $search->initialize(); 
+  echo $this->element('explorer/date', array('media' => $media));
+  if (count($media['Tag'])) {
+    echo $this->Html->tag('p', 
+      __("Tags", true).' '.implode(', ', $imageData->linkList('/explorer/tag', Set::extract('/Tag/name', $media))), 
+      array('class' => 'tag list', 'escape' => false));
+  }
+  if (count($media['Category'])) {
+    echo $this->Html->tag('p',
+      __("Categories", true).' '.implode(', ', $imageData->linkList('/explorer/category', Set::extract('/Category/name', $media))),
+      array('class' => 'category list', 'escape' => false));
+  }
+  if (count($media['Location'])) {
+    echo $this->Html->tag('p',
+      __("Locations", true).' '.implode(', ', $imageData->linkList('/explorer/location', Set::extract('/Location/name', $media))),
+      array('class' => 'location list', 'escape' => false));
+  }
+  if ($search->getUser() == $currentUser['User']['username'] && !empty($media['Group']['name'])) {
+    echo $this->Html->tag('p',
+      __("Group", true).' '.implode(', ', $imageData->linkList('/explorer/group', Set::extract('/Group/name', $media))),
+      array('class' => 'group list', 'escape' => false));
+  }
+  if ($search->getUser() == $currentUser['User']['username'] && $currentUser['User']['role'] >= ROLE_USER) {
+    echo $this->Html->tag('p',
+      __("Access", true).' '
+        .$imageData->_acl2icon($media['Media']['gacl'], __('Group members', true)) . ', '
+        .$imageData->_acl2icon($media['Media']['uacl'], __('Users', true)) . ', '
+        .$imageData->_acl2icon($media['Media']['oacl'], __('All', true)),
+      array('class' => 'access list', 'escape' => false));
+    }
+?>

@@ -486,11 +486,12 @@ class ExplorerController extends AppController
     if (!isset($this->data['Group']['id'])) {
       return;
     }
+    $groupId = $this->data['Group']['id'];
     $user = $this->getUser();
     $groupIds = Set::extract('/Group/id', $this->Group->getGroupsForMedia($user));
     $groupIds[] = -1; // no group
-    if (in_array($this->data['Group']['id'], $groupIds)) {
-      $this->data['Media']['group_id'] = $this->data['Group']['id'];
+    if (in_array($groupId, $groupIds)) {
+      $this->data['Media']['group_id'] = $groupId;
     } else {
       $this->data['Media']['group_id'] = 0;
     }
@@ -601,6 +602,8 @@ class ExplorerController extends AppController
     $media = $this->Media->findById($id);
     $this->Media->setAccessFlags(&$media, $user);
     $this->data = $media;
+    $this->Search->setUser($user['User']['username']);
+    $this->Search->setHelperData();
     Configure::write('debug', 0);
     $this->render('updatemeta');
   }
@@ -619,6 +622,9 @@ class ExplorerController extends AppController
     $this->Media->setAccessFlags(&$media, $this->getUser());
     $this->set('data', $media);
     $this->layout='bare';
+    $user = $this->getUser();
+    $this->Search->setUser($user['User']['username']);
+    $this->Search->setHelperData();
     Configure::write('debug', 0);
   }
 

@@ -744,6 +744,10 @@ class Media extends AppModel
       $this->setAcl(&$target, ACL_READ_PREVIEW, ACL_READ_MASK, $data['Media']['readPreview']); 
     }
 
+    // Set group
+    if (!empty($data['Media']['group_id'])) {
+      $target['Media']['group_id'] = $data['Media']['group_id'];
+    }
     // Remove unchanged values
     foreach ($fields as $field) {
       if ($target['Media'][$field] == $media['Media'][$field]) {
@@ -827,13 +831,10 @@ class Media extends AppModel
         $this->rotate(&$tmp, $media['Media']['orientation'], $data['Media']['rotation']);
       }
     }
-    if (count($tmp) == 1 && count($tmp['Media']) == 2) {
+    if (count($tmp) != 1 || count($tmp['Media']) != 2) {
       $tmp['Media']['flag'] = ($media['Media']['flag'] | MEDIA_FLAG_DIRTY);
     }
     if ($media['Media']['canWriteAcl']) {
-      if (isset($data['Media']['group_id']) && $media['Media']['group_id'] != $data['Media']['group_id']) {
-        $tmp['Media']['group_id'] = $media['Media']['group_id'];
-      }
       $this->updateAcl(&$tmp, &$media, &$data);
     }
     if (count($tmp) == 1 && count($tmp['Media']) == 2) {
@@ -887,13 +888,10 @@ class Media extends AppModel
         $this->rotate(&$tmp, $media['Media']['orientation'], $data['Media']['rotation']);
       }
     }
-    if (count($tmp) == 1 && count($tmp['Media']) == 2) {
+    if (count($tmp) != 1 || count($tmp['Media']) != 2) {
       $tmp['Media']['flag'] = ($media['Media']['flag'] | MEDIA_FLAG_DIRTY);
     }
     if ($media['Media']['canWriteAcl']) {
-      if (isset($data['Media']['group_id']) && $media['Media']['group_id'] != $data['Media']['group_id']) {
-        $tmp['Media']['group_id'] = $data['Media']['group_id'];
-      }
       $this->updateAcl(&$tmp, &$media, &$data);
     }
     // Unchanged data
