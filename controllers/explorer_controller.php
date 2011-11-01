@@ -78,10 +78,10 @@ class ExplorerController extends AppController
   function autocomplete($type) {
     if (in_array($type, array('tag', 'category', 'city', 'sublocation', 'state', 'country'))) {
       if ($type == 'tag' || $type == 'category') {
-        $field = Inflector::camelize(Inflector::pluralize($type));
-        $value = $this->data[$field]['text'];
+        $field = Inflector::camelize($type);
+        $value = $this->data[$field]['name'];
       } else {
-        $value = $this->data['Locations'][$type];
+        $value = $this->data['Location'][$type];
       }
       $this->data = $this->_getAssociation($type, $value);
     } elseif ($type == 'crumb') {
@@ -219,52 +219,61 @@ class ExplorerController extends AppController
 
   function _getAssociation($type, $value) {
     $result = array();
+    $isNegated = false;
+    $normalized = $value;
+    if ($value && $value[0] = '-') {
+      $normalized = trim(substr($value, 1));
+      $isNegated = true;
+    }
+    if (!$normalized) {
+      return $result;
+    }
     switch ($type) {
       case 'tag':
         $data = $this->Media->Tag->find('all', array(
-          'conditions' => array('name LIKE' => $value.'%'), 
+          'conditions' => array('name LIKE' => $normalized.'%'), 
           'limit' => 10
           ));
         $result = Set::extract('/Tag/name', $data);
         break;
       case 'category':
         $data = $this->Media->Category->find('all', array(
-          'conditions' => array('name LIKE' => $value.'%'),
+          'conditions' => array('name LIKE' => $normalized.'%'),
           'limit' => 10
           ));
         $result = Set::extract('/Category/name', $data);
         break;
       case 'location':
         $data = $this->Media->Location->find('all', array(
-          'conditions' => array('name LIKE' => $value.'%'),
+          'conditions' => array('name LIKE' => $normalized.'%'),
           'limit' => 10
           ));
         $result = Set::extract('/Location/name', $data);
         break;
       case 'city':
         $data = $this->Media->Location->find('all', array(
-          'conditions' => array('name LIKE' => $value.'%', 'type' => LOCATION_CITY),
+          'conditions' => array('name LIKE' => $normalized.'%', 'type' => LOCATION_CITY),
           'limit' => 10
           ));
         $result = Set::extract('/Location/name', $data);
         break;
       case 'sublocation':
         $data = $this->Media->Location->find('all', array(
-          'conditions' => array('name LIKE' => $value.'%', 'type' => LOCATION_SUBLOCATION),
+          'conditions' => array('name LIKE' => $normalized.'%', 'type' => LOCATION_SUBLOCATION),
           'limit' => 10
           ));
         $result = Set::extract('/Location/name', $data);
         break;
       case 'state':
         $data = $this->Media->Location->find('all', array(
-          'conditions' => array('name LIKE' => $value.'%', 'type' => LOCATION_STATE),
+          'conditions' => array('name LIKE' => $normalized.'%', 'type' => LOCATION_STATE),
           'limit' => 10
           ));
         $result = Set::extract('/Location/name', $data);
         break;
       case 'country':
         $data = $this->Media->Location->find('all', array(
-          'conditions' => array('name LIKE' => $value.'%', 'type' => LOCATION_COUNTRY),
+          'conditions' => array('name LIKE' => $normalized.'%', 'type' => LOCATION_COUNTRY),
           'limit' => 10
           ));
         $result = Set::extract('/Location/name', $data);
@@ -287,6 +296,13 @@ class ExplorerController extends AppController
         Logger::err("Unknown type $type");
         $this->redirect(404);
         break;
+    }
+    if ($isNegated && count($result)) {
+      $tmp = array();
+      foreach ($result as $name) {
+        $tmp[] = '-' . $name;
+      }
+      $result = $tmp;
     }
     return $result;
   }
@@ -463,59 +479,6 @@ class ExplorerController extends AppController
     $this->render('index');
   }
 
-  /** Updates the ids lists of a given association. It adds and deletes items
-    * to the habtm assoziation
-    @param data Array of image data
-    @param assoc Name of HABTM accosciation
-    @param items List of items
-    @return Updated array of image data */
-  function _handleHabtm(&$data, $assoc, $items) {
-    if (!count($items)) {
-      return $data;
-    }
-
-    // Create id itemss of deletion and addition
-    $add = $this->$assoc->filterItems($items);
-    $del = $this->$assoc->filterItems($items, false);
-   
-    $addIds = $this->$assoc->createIdList($add, 'name', true);
-    $delIds = $this->$assoc->createIdList($del, 'name', false);
-
-    // Remove and add association
-    $oldIds = Set::extract($data, "$assoc.{n}.id");
-    $ids = array_diff($oldIds, $delIds);
-    $ids = array_unique(am($ids, $addIds));
-
-    if (count($ids) != count($oldIds) ||
-      array_diff($oldIds, $ids))
-      $data[$assoc][$assoc] = $ids;
-    return $data;
-  }
-
-  /** 
-    @param Array of Locations
-    @return Array of location types, which will be overwritten */
-  function _getNewLocationsTypes($locations) {
-    $new = $this->Location->filterItems($locations);
-    $types = Set::extract($new, "{n}.type");
-    return $types;
-  }
-
-  /** Removes locations which will be overwritten
-    @param data Image data array
-    @param types Array of location types which will be overwritten */
-  function _removeLocation(&$data, $types) {
-    if (!count($data['Location']))
-      return;
-    foreach ($data['Location'] as $key => $location) {
-      if (!is_numeric($key))
-        continue;
-      if (in_array($location['type'], $types)) {
-        unset($data['Location'][$key]);
-      }
-    }
-  }
-
   function _editAcl(&$media, $groupId) {
     $changedAcl = false;
     // Backup old values
@@ -548,21 +511,17 @@ class ExplorerController extends AppController
 
   function edit() {
     if (isset($this->data)) {
-      // create item lists
-      $tags = $this->Tag->createItems($this->data['Tags']['text']);
-      if (isset($this->data['Categories']) && isset($this->data['Locations'])) {
-        $categories = $this->Category->createItems($this->data['Categories']['text']);
-        $locations = $this->Location->createLocationItems($this->data['Locations']);
-        $delLocations = $this->_getNewLocationsTypes($locations);
-      } else {
-        $categories = array();
-        $locations = array();
-        $delLocations = array();
+      $ids = preg_split('/\s*,\s*/', $this->data['Media']['ids']);
+      $ids = array_unique($ids);
+      if (!count($ids)) {
+        $this->redirect('view/' . implode('/', $this->Search->encodeCrumbs($this->crumbs)));
       }
+
+      $editData = $this->Media->prepareMultiEditData(&$this->data);
       
       $user = $this->getUser();
       $userId = $user['User']['id'];
-      $groupIds = Set::extract('/Group/id', $this->Group->getGroupsForMedia($this->getUser()));
+      $groupIds = Set::extract('/Group/id', $this->Group->getGroupsForMedia($user));
       $groupIds[] = -1; // no group
       if (isset($this->data['Group']['id']) &&
         in_array($this->data['Group']['id'], $groupIds)) {
@@ -571,108 +530,56 @@ class ExplorerController extends AppController
         $groupId = 0;
       }
     
-      $date = false;
-      if (!empty($this->data['Media']['date'])) {
-        $time = strtotime($this->data['Media']['date']);
-        if ($time !== false) {
-          $date = date("Y-m-d H:i:s", $time);
-        } else {
-          Logger::warn("Could not convert time of '{$this->data['Media']['date']}'");
-        }
-      }
-      $geoData = false;
-      if (!empty($this->data['Media']['geo'])) {
-        if ($this->data['Media']['geo'] == '-' || $this->data['Media']['geo'] == '-,-') {
-          $geoData = array('latitude' => null, 'longitude' => null);
-        } elseif (preg_match('/^\s*([+\-]?[0-9]+(\.[0-9]+)?)\s*,\s*([+\-]?[0-9]+(\.[0-9]+)?)\s*$/', $this->data['Media']['geo'], $m)) {
-          $geoData = array('latitude' => $m[1], 'longitude' => $m[3]);
-        }
-      }
-
-      $ids = split(',', $this->data['Media']['ids']);
-      $ids = array_unique($ids);
-      foreach ($ids as $id) {
-        $id = intval($id);
-        if ($id == 0) {
-          continue;
-        }
-
-        $media = $this->Media->findById($id);
-        if (!$media) {
-          Logger::debug("Could not find Media with id $id");
-          continue;
-        }
+      $allMedia = $this->Media->find('all', array('conditions' => array('Media.id' => $ids)));
+      $changedMedia = array();
+      foreach ($allMedia as $media) {
+        $this->Media->setAccessFlags(&$media, &$user);
         // primary access check
-        if (!$this->Media->checkAccess(&$media, &$user, ACL_WRITE_TAG, ACL_WRITE_MASK, &$members)) {
+        if (!$media['Media']['canWriteTag']) {
           Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change any metadata of image ".$id);
           continue;
         }
-
-        $changedMeta = false;
-
-        // Backup old associations
-        $habtms = array_keys($this->Media->hasAndBelongsToMany);
-        $oldHabtmIds = array();
-        foreach ($habtms as $habtm) {
-          $oldHabtmIds[$habtm] = Set::extract($media, "$habtm.{n}.id");
-        }
-
-        // Update metadata
-        $this->_handleHabtm(&$media, 'Tag', $tags);
-        if ($this->Media->checkAccess(&$media, &$user, ACL_WRITE_META, ACL_WRITE_MASK, &$members)) {
-          if ($date) {
-            $media['Media']['date'] = $date;
-            $changedMeta = true;
-          }
-          $this->_handleHabtm(&$media, 'Category', $categories);
-          $this->_removeLocation(&$media, &$delLocations);
-          $this->_handleHabtm(&$media, 'Location', $locations);
-          if ($geoData) {
-            foreach ($geoData as $geo => $value) {
-              if ($media['Media'][$geo] !== $value) {
-                $media['Media'][$geo] = $value;
-                $changedMeta = true;
-              }
-            }      
-          }
+        
+        if ($media['Media']['canWriteMeta']) {
+          $tmp = $this->Media->editMetaMulti(&$media, $editData);
         } else {
-          Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change metadata of image ".$media['Media']['id']);
+          $tmp = $this->Media->editTagMulti(&$media, $editData);
         }
-      
-        // Evaluate, if data changed and cleanup of unchanged HABTMs
-        foreach ($habtms as $habtm) {
-          if (isset($media[$habtm][$habtm]) && 
-            (count($media[$habtm][$habtm]) != count($oldHabtmIds[$habtm]) ||
-            count(array_diff($media[$habtm][$habtm], $oldHabtmIds[$habtm])))) {
-            $changedMeta = true;
-          } elseif (isset($media[$habtm])) {
-            unset($media[$habtm]);
-          }
-        }
-
-        $changedAcl = false;
-        if (!empty($this->data['acl'])) {
-          $this->Media->setAccessFlags(&$media, $user);
-
-          if ($this->Media->checkAccess(&$media, &$user, 1, 0)) {
-            $changedAcl = $this->_editAcl(&$media, $groupId);
-          } else {
-            Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change access rights of image ".$id);
-          }
-        }
-
-        if ($changedMeta || $changedAcl) { 
-          if ($changedMeta) {
-            $media['Media']['flag'] |= MEDIA_FLAG_DIRTY;
-          }
-          $media['Media']['modified'] = null;
-          if (!$this->Media->save($media)) {
-            Logger::warn('Could not save new metadata/acl to image '.$id);
-          } else {
-            Logger::info('Updated metadata or acl of '.$id);
-          }
+        if ($tmp) {
+          $changedMedia[] = $tmp;
         }
       }
+      if ($changedMedia) {
+        if (!$this->Media->saveAll($changedMedia)) {
+          Logger::warn("Could not save media: " . join(", ", Set::extract("/Media/id", $changedMedia)));
+        } else {
+          Logger::debug("Saved media: " . join(', ', Set::extract("/Media/id", $changedMedia)));
+        }
+      }
+
+//        $changedAcl = false;
+//        if (!empty($this->data['acl'])) {
+//          $this->Media->setAccessFlags(&$media, $user);
+//
+//          if ($this->Media->checkAccess(&$media, &$user, 1, 0)) {
+//            $changedAcl = $this->_editAcl(&$media, $groupId);
+//          } else {
+//            Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change access rights of image ".$id);
+//          }
+//        }
+//
+//        if ($changedMeta || $changedAcl) { 
+//          if ($changedMeta) {
+//            $media['Media']['flag'] |= MEDIA_FLAG_DIRTY;
+//          }
+//          $media['Media']['modified'] = null;
+//          if (!$this->Media->save($media)) {
+//            Logger::warn('Could not save new metadata/acl to image '.$id);
+//          } else {
+//            Logger::info('Updated metadata or acl of '.$id);
+//          }
+//        }
+//      }
       $this->data = array();
     }
     $this->redirect('view/' . implode('/', $this->Search->encodeCrumbs($this->crumbs)));
@@ -715,43 +622,27 @@ class ExplorerController extends AppController
     $id = intval($id);
     $this->layout='bare';
     $user = $this->getUser();
+    $username = $user['User']['username'];
     if (isset($this->data)) {
       $media = $this->Media->findById($id);
-
-      if (!$this->Media->checkAccess(&$media, &$user, ACL_WRITE_TAG, ACL_WRITE_MASK)) {
-        Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change tags of image ".$id);
+      if (!$media) {
+        Logger::warn("Invalid media id: $id");
+        $this->redirect(null, '404');
+      } elseif (!$this->Media->checkAccess(&$media, &$user, ACL_WRITE_TAG, ACL_WRITE_MASK)) {
+        Logger::warn("User '{$username}' ({$user['User']['id']}) has no previleges to change tags of image ".$id);
       } else {
-        $ids = $this->Tag->createIdListFromText($this->data['Tags']['text'], 'name', true);
-        $media['Tag']['Tag'] = $ids;
-
         if ($this->Media->checkAccess(&$media, &$user, ACL_WRITE_META, ACL_WRITE_MASK)) {
-          $media['Media']['date'] = $this->data['Media']['date'];
-          $ids = $this->Category->createIdListFromText($this->data['Categories']['text'], 'name', true);
-          $media['Category']['Category'] = $ids;
-
-          $locations = $this->Location->createLocationItems($this->data['Locations']);
-          $locations = $this->Location->filterItems($locations);
-          $ids = $this->Location->CreateIdList($locations, true);
-          $media['Location']['Location'] = $ids;      
-          if (!empty($this->data['Media']['geo'])) {
-            if ($this->data['Media']['geo'] == '-' || $this->data['Media']['geo'] == '-,-') {
-              $media['Media']['latitude'] = null;
-              $media['Media']['longitude'] = null;
-            } elseif (preg_match('/^\s*([+\-]?[0-9]+(\.[0-9]+)?)\s*,\s*([+\-]?[0-9]+(\.[0-9]+)?)\s*$/', $this->data['Media']['geo'], $m)) {
-              $geoData = array('latitude' => $m[1], 'longitude' => $m[3]);
-              $media['Media']['latitude'] = $m[1];
-              $media['Media']['longitude'] = $m[3];
-            }
-          }
+          Logger::debug("User {$username} updates metadata of media {$id}");
+          $tmp = $this->Media->editMetaSingle(&$media, &$this->data);
         } else {
-          // unset to keep HABTM relations of category and location
-          unset($media['Category']);
-          unset($media['Location']);
+          Logger::debug("User {$username} updates tags of media {$id}");
+          $tmp = $this->Media->editTagSingle(&$media, &$this->data);
         }
-        $media['Media']['modified'] = null;
-        $media['Media']['flag'] |= MEDIA_FLAG_DIRTY;
-        if (!$this->Media->save($media)) {
-          Logger::warn("Update meta data of media $id failed");
+        if (!$this->Media->save($tmp)) {
+          Logger::warn("Could not save media");
+          Logger::debug($tmp);
+        } else {
+          Logger::info("Updated meta of media {$tmp['Media']['id']}");
         }
       }
     }
