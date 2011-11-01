@@ -708,8 +708,8 @@ class Media extends AppModel
 
   function rotate(&$data, $orientation, $rotation) {
     $rotateClockwise = array(
-      1 => 8, 8 => 3, 3 => 6, 6 => 1, 
-      2 => 7, 7 => 4, 4 => 5, 5 => 2
+      1 => 6, 6 => 3, 3 => 8, 8 => 1, 
+      2 => 5, 5 => 4, 4 => 7, 7 => 2
       );
     $rotated = $orientation;
     switch ($rotation) {
