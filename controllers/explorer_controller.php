@@ -79,7 +79,7 @@ class ExplorerController extends AppController
     if (in_array($type, array('tag', 'category', 'city', 'sublocation', 'state', 'country'))) {
       if ($type == 'tag' || $type == 'category') {
         $field = Inflector::camelize($type);
-        $value = $this->data[$field]['name'];
+        $value = $this->data[$field]['names'];
       } else {
         $value = $this->data['Location'][$type];
       }
@@ -221,7 +221,7 @@ class ExplorerController extends AppController
     $result = array();
     $isNegated = false;
     $normalized = $value;
-    if ($value && $value[0] = '-') {
+    if ($value && $value[0] == '-') {
       $normalized = trim(substr($value, 1));
       $isNegated = true;
     }
