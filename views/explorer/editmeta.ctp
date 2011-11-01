@@ -19,7 +19,11 @@
     echo $autocomplete->autoComplete('Locations.state', 'autocomplete/state');
     echo $form->input('Location.country', array('label' => __('Country', true), 'value' => join('', Set::extract('/Location[type='.LOCATION_COUNTRY.']/name', $this->data))));
     echo $autocomplete->autoComplete('Locations.country', 'autocomplete/country');
-    echo $form->input('Media.geo', array('label' => __('Geo data', true), 'maxlength' => 32));
+    $geo = "";
+    if (isset($this->data['Media']['latitude']) && isset($this->data['Media']['longitude'])) {
+      $geo = $this->data['Media']['latitude'] . ', ' . $this->data['Media']['longitude'];
+    }
+    echo $form->input('Media.geo', array('label' => __('Geo data', true), 'value' => $geo, 'maxlength' => 32));
   }
   if ($this->data['Media']['canWriteCaption']) {
   echo $form->input('Media.date', array('type' => 'text', 'after' => $html->tag('div', __('E.g. 2008-08-07 15:30', true), array('class' => 'description'))));
