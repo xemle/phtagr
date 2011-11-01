@@ -108,8 +108,8 @@ class FileCacheComponent extends Object {
         Logger::trace("Delete cache file '$file'");
         $filename = $folder->addPathElement($cacheDir, $file);
         unlink($filename);
-        clearstatcache();
       }
+      clearstatcache();
     } else {
       Logger::trace("No cached files found for image $mediaId");
     }
