@@ -76,7 +76,6 @@ class SimpleImageFilterComponent extends BaseFilterComponent {
     if (!isset($media['Media']['date'])) {
       $media['Media']['date'] = date('Y-m-d H:i:s', time());
     }
-    $media['Media']['name'] = basename($filename);
     if ($options['noSave']) {
       return $media;
     } elseif (!$this->Media->save($media)) {
