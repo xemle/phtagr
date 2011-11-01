@@ -82,10 +82,12 @@ class Location extends AppModel
 
   function editMetaSingle(&$media, &$data) {
     $ids = array();
+    $changed = false;
     foreach ($this->types as $type => $locationName) {
       if ($type == LOCATION_ANY || !isset($data['Location'][$locationName])) {
         continue;
       }
+      $changed = true;
       $name = trim($data['Location'][$locationName]);
       if (!$name || $name == '-') {
         continue;
@@ -102,6 +104,9 @@ class Location extends AppModel
       } else {
         $ids[] = $found['Location']['id'];
       }
+    }
+    if (!$changed) {
+      return false;
     }
     $ids = array_unique($ids);
     $oldIds = Set::extract('/Location/id', $media);
