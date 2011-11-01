@@ -509,6 +509,23 @@ class ExplorerController extends AppController
     return $changedAcl;
   }
 
+  /**
+   * Check acl group of the user and set it as media group id 
+   */
+  function _checkAndSetGroupId() {
+    if (!isset($this->data['Group']['id'])) {
+      return;
+    }
+    $user = $this->getUser();
+    $groupIds = Set::extract('/Group/id', $this->Group->getGroupsForMedia($user));
+    $groupIds[] = -1; // no group
+    if (in_array($this->data['Group']['id'], $groupIds)) {
+      $this->data['Media']['group_id'] = $this->data['Group']['id'];
+    } else {
+      $this->data['Media']['group_id'] = 0;
+    }
+  }
+  
   function edit() {
     if (isset($this->data)) {
       $ids = preg_split('/\s*,\s*/', $this->data['Media']['ids']);
@@ -517,25 +534,16 @@ class ExplorerController extends AppController
         $this->redirect('view/' . implode('/', $this->Search->encodeCrumbs($this->crumbs)));
       }
 
+      $this->_checkAndSetGroupId();
       $editData = $this->Media->prepareMultiEditData(&$this->data);
       
       $user = $this->getUser();
-      $userId = $user['User']['id'];
-      $groupIds = Set::extract('/Group/id', $this->Group->getGroupsForMedia($user));
-      $groupIds[] = -1; // no group
-      if (isset($this->data['Group']['id']) &&
-        in_array($this->data['Group']['id'], $groupIds)) {
-        $groupId = intval($this->data['Group']['id']);
-      } else {
-        $groupId = 0;
-      }
-    
       $allMedia = $this->Media->find('all', array('conditions' => array('Media.id' => $ids)));
       $changedMedia = array();
       foreach ($allMedia as $media) {
         $this->Media->setAccessFlags(&$media, &$user);
         // primary access check
-        if (!$media['Media']['canWriteTag']) {
+        if (!$media['Media']['canWriteTag'] && !$media['Media']['canWriteAcl']) {
           Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change any metadata of image ".$id);
           continue;
         }
@@ -557,30 +565,6 @@ class ExplorerController extends AppController
           }
         }
       }
-
-//        $changedAcl = false;
-//        if (!empty($this->data['acl'])) {
-//          $this->Media->setAccessFlags(&$media, $user);
-//
-//          if ($this->Media->checkAccess(&$media, &$user, 1, 0)) {
-//            $changedAcl = $this->_editAcl(&$media, $groupId);
-//          } else {
-//            Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change access rights of image ".$id);
-//          }
-//        }
-//
-//        if ($changedMeta || $changedAcl) { 
-//          if ($changedMeta) {
-//            $media['Media']['flag'] |= MEDIA_FLAG_DIRTY;
-//          }
-//          $media['Media']['modified'] = null;
-//          if (!$this->Media->save($media)) {
-//            Logger::warn('Could not save new metadata/acl to image '.$id);
-//          } else {
-//            Logger::info('Updated metadata or acl of '.$id);
-//          }
-//        }
-//      }
       $this->data = array();
     }
     $this->redirect('view/' . implode('/', $this->Search->encodeCrumbs($this->crumbs)));
@@ -627,9 +611,10 @@ class ExplorerController extends AppController
       if (!$media) {
         Logger::warn("Invalid media id: $id");
         $this->redirect(null, '404');
-      } elseif (!$media['Media']['canWriteTag']) {
+      } elseif (!$media['Media']['canWriteTag'] && !$media['Media']['canWriteAcl']) {
         Logger::warn("User '{$username}' ({$user['User']['id']}) has no previleges to change tags of image ".$id);
       } else {
+        $this->_checkAndSetGroupId();
         $tmp = $this->Media->editSingle(&$media, &$this->data);
         if (!$this->Media->save($tmp)) {
           Logger::warn("Could not save media");
@@ -637,7 +622,7 @@ class ExplorerController extends AppController
         } else {
           Logger::info("Updated meta of media {$tmp['Media']['id']}");
         }
-        if ($tmp['Media']['orientation']) {
+        if (isset($tmp['Media']['orientation'])) {
           $this->FileCache->delete($tmp);
           Logger::debug("Deleted previews of media {$tmp['Media']['id']}");
         }

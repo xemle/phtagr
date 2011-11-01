@@ -131,19 +131,19 @@
     ACL_LEVEL_KEEP => __('Keep', true));
   echo $html->tag('div',
     $html->tag('label', __("Who can view the image", true)).
-    $html->tag('div', $form->radio('acl.read.preview', $aclSelect, array('legend' => false, 'value' => ACL_LEVEL_KEEP)), array('escape' => false, 'class' => 'radioSet')), 
+    $html->tag('div', $form->radio('Media.readPreview', $aclSelect, array('legend' => false, 'value' => ACL_LEVEL_KEEP)), array('escape' => false, 'class' => 'radioSet')), 
     array('escape' => false, 'class' => 'input radio'));
   echo $html->tag('div',
     $html->tag('label', __("Who can download the image?", true)).
-    $html->tag('div', $form->radio('acl.read.original', $aclSelect, array('legend' => false, 'value' => ACL_LEVEL_KEEP)), array('escape' => false, 'class' => 'radioSet')), 
+    $html->tag('div', $form->radio('Media.readOriginal', $aclSelect, array('legend' => false, 'value' => ACL_LEVEL_KEEP)), array('escape' => false, 'class' => 'radioSet')), 
     array('escape' => false, 'class' => 'input radio'));
   echo $html->tag('div',
     $html->tag('label', __("Who can add tags?", true)).
-    $html->tag('div', $form->radio('acl.write.tag', $aclSelect, array('legend' => false, 'value' => ACL_LEVEL_KEEP)), array('escape' => false, 'class' => 'radioSet')), 
+    $html->tag('div', $form->radio('Media.writeTag', $aclSelect, array('legend' => false, 'value' => ACL_LEVEL_KEEP)), array('escape' => false, 'class' => 'radioSet')), 
     array('escape' => false, 'class' => 'input radio'));
   echo $html->tag('div',
     $html->tag('label', __("Who can edit all meta data?", true)).
-    $html->tag('div', $form->radio('acl.write.meta', $aclSelect, array('legend' => false, 'value' => ACL_LEVEL_KEEP)), array('escape' => false, 'class' => 'radioSet')), 
+    $html->tag('div', $form->radio('Media.writeMeta', $aclSelect, array('legend' => false, 'value' => ACL_LEVEL_KEEP)), array('escape' => false, 'class' => 'radioSet')), 
     array('escape' => false, 'class' => 'input radio'));
   echo $form->input('Group.id', array('type' => 'select', 'options' => $groups, 'selected' => 0, 'label' => __("Default image group?", true)));
 ?>

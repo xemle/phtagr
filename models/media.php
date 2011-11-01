@@ -723,6 +723,35 @@ class Media extends AppModel
     }
   }
  
+  function updateAcl(&$target, &$media, &$data) {
+    $fields = array('gacl', 'uacl', 'oacl', 'group_id');
+    // copy acl fields to target
+    foreach ($fields as $field) {
+      $target['Media'][$field] = $media['Media'][$field];
+    }
+    // Higher grants first
+    if (!empty($data['Media']['writeMeta'])) {
+      $this->setAcl(&$target, ACL_WRITE_META, ACL_WRITE_MASK, $data['Media']['writeMeta']);
+    }
+    if (!empty($data['Media']['writeTag'])) {
+      $this->setAcl(&$target, ACL_WRITE_TAG, ACL_WRITE_MASK, $data['Media']['writeTag']);
+    }
+
+    if (!empty($data['Media']['readOriginal'])) {
+      $this->setAcl(&$target, ACL_READ_ORIGINAL, ACL_READ_MASK, $data['Media']['readOriginal']);
+    }
+    if (!empty($data['Media']['readPreview'])) {
+      $this->setAcl(&$target, ACL_READ_PREVIEW, ACL_READ_MASK, $data['Media']['readPreview']); 
+    }
+
+    // Remove unchanged values
+    foreach ($fields as $field) {
+      if ($target['Media'][$field] == $media['Media'][$field]) {
+        unset($target['Media'][$field]);
+      }
+    }
+  }
+  
   /**
    * Prepare the input data for edit
    * 
@@ -734,7 +763,7 @@ class Media extends AppModel
     if (!empty($data['Media']['geo'])) {
       $this->splitGeo(&$data, $data['Media']['geo']);
     }
-    $fields = array('name', 'description', 'date', 'latitude', 'longitude', 'rotation');
+    $fields = array('name', 'description', 'date', 'latitude', 'longitude', 'rotation', 'readPreview', 'readOriginal', 'writeTag', 'writeMeta', 'group_id');
     foreach ($fields as $field) {
       if (!empty($data['Media'][$field])) {
         $tmp['Media'][$field] = $data['Media'][$field];
@@ -799,9 +828,17 @@ class Media extends AppModel
       }
     }
     if (count($tmp) == 1 && count($tmp['Media']) == 2) {
+      $tmp['Media']['flag'] = ($media['Media']['flag'] | MEDIA_FLAG_DIRTY);
+    }
+    if ($media['Media']['canWriteAcl']) {
+      if (isset($data['Media']['group_id']) && $media['Media']['group_id'] != $data['Media']['group_id']) {
+        $tmp['Media']['group_id'] = $media['Media']['group_id'];
+      }
+      $this->updateAcl(&$tmp, &$media, &$data);
+    }
+    if (count($tmp) == 1 && count($tmp['Media']) == 2) {
       return false;
     }
-    $tmp['Media']['flag'] = ($media['Media']['flag'] | MEDIA_FLAG_DIRTY);
     return $tmp;
   }
   
@@ -850,11 +887,19 @@ class Media extends AppModel
         $this->rotate(&$tmp, $media['Media']['orientation'], $data['Media']['rotation']);
       }
     }
+    if (count($tmp) == 1 && count($tmp['Media']) == 2) {
+      $tmp['Media']['flag'] = ($media['Media']['flag'] | MEDIA_FLAG_DIRTY);
+    }
+    if ($media['Media']['canWriteAcl']) {
+      if (isset($data['Media']['group_id']) && $media['Media']['group_id'] != $data['Media']['group_id']) {
+        $tmp['Media']['group_id'] = $data['Media']['group_id'];
+      }
+      $this->updateAcl(&$tmp, &$media, &$data);
+    }
     // Unchanged data
     if (count($tmp) == 1 && count($tmp['Media']) == 2) {
       return false;
     }
-    $tmp['Media']['flag'] = ($media['Media']['flag'] | MEDIA_FLAG_DIRTY);
     return $tmp;
   }
 }
