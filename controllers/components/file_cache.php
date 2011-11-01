@@ -106,7 +106,9 @@ class FileCacheComponent extends Object {
       Logger::debug("Delete cached files of image $mediaId");
       foreach($files as $file) {
         Logger::trace("Delete cache file '$file'");
-        unlink($folder->addPathElement($cacheDir, $file));
+        $filename = $folder->addPathElement($cacheDir, $file);
+        unlink($filename);
+        clearstatcache();
       }
     } else {
       Logger::trace("No cached files found for image $mediaId");
@@ -122,6 +124,7 @@ class FileCacheComponent extends Object {
       $folder = new Folder();
       $folder->delete($cacheDir);
       Logger::info("Deleted cache dir '$cacheDir'");
+      clearstatcache();
     } else {
       Logger::debug("User $userId has no cached files");
     }
