@@ -479,36 +479,6 @@ class ExplorerController extends AppController
     $this->render('index');
   }
 
-  function _editAcl(&$media, $groupId) {
-    $changedAcl = false;
-    // Backup old values
-    $fieldsAcl = array('gacl', 'uacl', 'oacl', 'group_id');
-    foreach ($fieldsAcl as $field) {
-      $media['Media']['_'.$field] = $media['Media'][$field];
-    }
-
-    // Change access properties 
-    if ($groupId != 0) {
-      $media['Media']['group_id'] = $groupId;
-    }
-
-    // Higher grants first
-    $this->Media->setAcl(&$media, ACL_WRITE_META, ACL_WRITE_MASK, $this->data['acl']['write']['meta']);
-    $this->Media->setAcl(&$media, ACL_WRITE_TAG, ACL_WRITE_MASK, $this->data['acl']['write']['tag']);
-
-    $this->Media->setAcl(&$media, ACL_READ_ORIGINAL, ACL_READ_MASK, $this->data['acl']['read']['original']);
-    $this->Media->setAcl(&$media, ACL_READ_PREVIEW, ACL_READ_MASK, $this->data['acl']['read']['preview']);
-
-    // Evaluate changes
-    foreach ($fieldsAcl as $field) {
-      if ($media['Media']['_'.$field] != $media['Media'][$field]) {
-        $changedAcl = true;
-        break;
-      }
-    }
-    return $changedAcl;
-  }
-
   /**
    * Check acl group of the user and set it as media group id 
    */
