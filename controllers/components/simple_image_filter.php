@@ -72,6 +72,7 @@ class SimpleImageFilterComponent extends BaseFilterComponent {
         return false;
       }
     }
+    $media['Media']['name'] = basename($filename);
     if (!isset($media['Media']['date'])) {
       $media['Media']['date'] = date('Y-m-d H:i:s', time());
     }
