@@ -16,7 +16,7 @@
   <p class="group list"><?php echo __("Group", true); ?></dd>
   <?php echo $html->link($media['Group']['name'], '/explorer/group/' . $media['Group']['name']); ?></p>
 <?php endif; ?>
-<?php if ($search->getUser() == $currentUser['User']['username']): ?>
+<?php if ($search->getUser() == $currentUser['User']['username'] && $currentUser['User']['role'] >= ROLE_USER): ?>
   <p class="access list"><?php echo __("Access", true); ?>
   <?php 
     echo $imageData->_acl2icon($media['Media']['gacl'], __('Group members', true)).', ';
