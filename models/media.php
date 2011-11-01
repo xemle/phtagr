@@ -706,6 +706,23 @@ class Media extends AppModel
     $data['Media']['longitude'] = $numbers[1];
   }
 
+  function rotate(&$data, $orientation, $rotation) {
+    $rotateClockwise = array(
+      1 => 8, 8 => 3, 3 => 6, 6 => 1, 
+      2 => 7, 7 => 4, 4 => 5, 5 => 2
+      );
+    $rotated = $orientation;
+    switch ($rotation) {
+      case '270': $rotated = $rotateClockwise[$rotated];
+      case '180': $rotated = $rotateClockwise[$rotated];
+      case '90': $rotated = $rotateClockwise[$rotated];
+      default: break;
+    }
+    if ($rotated != $orientation) {
+      $data['Media']['orientation'] = $rotated;
+    }
+  }
+ 
   /**
    * Prepare the input data for edit
    * 
@@ -717,7 +734,7 @@ class Media extends AppModel
     if (!empty($data['Media']['geo'])) {
       $this->splitGeo(&$data, $data['Media']['geo']);
     }
-    $fields = array('name', 'description', 'date', 'latitude', 'longitude');
+    $fields = array('name', 'description', 'date', 'latitude', 'longitude', 'rotation');
     foreach ($fields as $field) {
       if (!empty($data['Media'][$field])) {
         $tmp['Media'][$field] = $data['Media'][$field];
@@ -742,104 +759,99 @@ class Media extends AppModel
     return $tmp;
   }
   
-  function editTagMulti(&$media, &$data) {
-    $tmp = array('Media' => array('id' => $media['Media']['id']));
-    
-    $tag = $this->Tag->editMetaMulti(&$media, &$data);
-    if ($tag) {
-      $tmp['Tag'] = $tag['Tag'];
-    }
-    if (count($tmp) == 1 && count($tmp['Media']) == 1) {
-      return false;
-    }
-    $tmp['Media']['flag'] = ($media['Media']['flag'] | MEDIA_FLAG_DIRTY);
-    return $tmp;
-  }
-  
-  function editMetaMulti(&$media, &$data) {
-    $tmp = array('Media' => array('id' => $media['Media']['id']));
+  function editMulti(&$media, &$data) {
+    $tmp = array('Media' => array('id' => $media['Media']['id'], 'user_id' => $media['Media']['user_id']));
 
-    $fields = array('name', 'description', 'date', 'latitude', 'longitude');
-    foreach ($fields as $field) {
-      if (empty($data['Media'][$field])) {
-        continue;
+    if ($media['Media']['canWriteTag']) {
+      $tag = $this->Tag->editMetaMulti(&$media, &$data);
+      if ($tag) {
+        $tmp['Tag'] = $tag['Tag'];
       }
-      $tmp['Media'][$field] = $data['Media'][$field];
     }
-    
-    $tag = $this->Tag->editMetaMulti(&$media, &$data);
-    if ($tag) {
-      $tmp['Tag'] = $tag['Tag'];
-    }
-    $category = $this->Category->editMetaMulti(&$media, &$data);
-    if ($category) {
-      $tmp['Category'] = $category['Category'];
-    }
-    $location = $this->Location->editMetaMulti(&$media, &$data);
-    if ($location) {
-      $tmp['Location'] = $location['Location'];
-    }
-    if (count($tmp) == 1 && count($tmp['Media']) == 1) {
-      return false;
-    }
-    $tmp['Media']['flag'] = ($media['Media']['flag'] | MEDIA_FLAG_DIRTY);
-    return $tmp;
-  }
-  
-  /**
-   * Creates an new media data with updated values of given data
-   * 
-   * @param type $media Media model data array
-   * @param type $data Input data array
-   * @return type 
-   */
-  function editTagSingle(&$media, &$data) {
-    $tmp = array('Media' => array('id' => $media['Media']['id']));
-  
-    $tag = $this->Tag->editMetaSingle(&$media, &$data);
-    if (isset($tag['Tag'])) {
-      $tmp['Tag'] = $tag['Tag'];
-    }
-    if (count($tmp) == 1 && count($tmp['Media']) == 1) {
-      // Unchanged data
-      return false;
-    }
-    $tmp['Media']['flag'] = ($media['Media']['flag'] | MEDIA_FLAG_DIRTY);
-    return $tmp;
-  }
-    
-  /**
-   * Creates an new media data with updated values of given data
-   * 
-   * @param type $media Media model data array
-   * @param type $data Input data array
-   * @return type 
-   */
-  function editMetaSingle(&$media, &$data) {
-    $tmp = array('Media' => array('id' => $media['Media']['id']));
-    if (!empty($data['Media']['geo'])) {
-      $this->splitGeo(&$data, $data['Media']['geo']);
-    }
-    $fields = array('name', 'description', 'date', 'latitude', 'longitude');
-    foreach ($fields as $field) {
-      if (isset($data['Media'][$field]) && $media['Media'][$field] !== $data['Media'][$field]) {
+    if ($media['Media']['canWriteMeta']) {
+      $category = $this->Category->editMetaMulti(&$media, &$data);
+      if ($category) {
+        $tmp['Category'] = $category['Category'];
+      }
+      $location = $this->Location->editMetaMulti(&$media, &$data);
+      if ($location) {
+        $tmp['Location'] = $location['Location'];
+      }
+      $fields = array('latitude', 'longitude');
+      foreach ($fields as $field) {
+        if (empty($data['Media'][$field])) {
+          continue;
+        }
         $tmp['Media'][$field] = $data['Media'][$field];
       }
     }
-    $tag = $this->Tag->editMetaSingle(&$media, &$data);
-    if (isset($tag['Tag'])) {
-      $tmp['Tag'] = $tag['Tag'];
+    if ($media['Media']['canWriteCaption']) {
+      $fields = array('name', 'caption', 'date');
+      foreach ($fields as $field) {
+        if (empty($data['Media'][$field])) {
+          continue;
+        } else {
+          $tmp['Media'][$field] = $data['Media'][$field];
+        }
+      }
+      if (isset($data['Media']['rotation'])) {
+        $this->rotate(&$tmp, $media['Media']['orientation'], $data['Media']['rotation']);
+      }
     }
-    $category = $this->Category->editMetaSingle(&$media, &$data);
-    if (isset($category['Category'])) {
-      $tmp['Category'] = $category['Category'];
+    if (count($tmp) == 1 && count($tmp['Media']) == 2) {
+      return false;
     }
-    $location = $this->Location->editMetaSingle(&$media, &$data);
-    if (isset($location['Location'])) {
-      $tmp['Location'] = $location['Location'];
+    $tmp['Media']['flag'] = ($media['Media']['flag'] | MEDIA_FLAG_DIRTY);
+    return $tmp;
+  }
+  
+  /**
+   * Creates an new media data with updated values of given data
+   * 
+   * @param type $media Media model data array
+   * @param type $data Input data array
+   * @return type 
+   */
+  function editSingle(&$media, &$data) {
+    $tmp = array('Media' => array('id' => $media['Media']['id'], 'user_id' => $media['Media']['user_id']));
+    if ($media['Media']['canWriteTag']) {
+      $tag = $this->Tag->editMetaSingle(&$media, &$data);
+      if (isset($tag['Tag'])) {
+        $tmp['Tag'] = $tag['Tag'];
+      }
+    } 
+    if ($media['Media']['canWriteMeta']) {
+      $category = $this->Category->editMetaSingle(&$media, &$data);
+      if (isset($category['Category'])) {
+        $tmp['Category'] = $category['Category'];
+      }
+      $location = $this->Location->editMetaSingle(&$media, &$data);
+      if (isset($location['Location'])) {
+        $tmp['Location'] = $location['Location'];
+      }
+      if (!empty($data['Media']['geo'])) {
+        $this->splitGeo(&$data, $data['Media']['geo']);
+      }
+      $fields = array('latitude', 'longitude', 'altitude');
+      foreach ($fields as $field) {
+        if (isset($data['Media'][$field]) && $media['Media'][$field] !== $data['Media'][$field]) {
+          $tmp['Media'][$field] = $data['Media'][$field];
+        }
+      }
+    }
+    if ($media['Media']['canWriteCaption']) {
+      $fields = array('name', 'description', 'date', 'latitude', 'longitude');
+      foreach ($fields as $field) {
+        if (isset($data['Media'][$field]) && $media['Media'][$field] !== $data['Media'][$field]) {
+          $tmp['Media'][$field] = $data['Media'][$field];
+        }
+      }
+      if (isset($data['Media']['rotation'])) {
+        $this->rotate(&$tmp, $media['Media']['orientation'], $data['Media']['rotation']);
+      }
     }
     // Unchanged data
-    if (count($tmp) == 1 && count($tmp['Media']) == 1) {
+    if (count($tmp) == 1 && count($tmp['Media']) == 2) {
       return false;
     }
     $tmp['Media']['flag'] = ($media['Media']['flag'] | MEDIA_FLAG_DIRTY);

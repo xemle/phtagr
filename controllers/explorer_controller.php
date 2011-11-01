@@ -23,7 +23,7 @@
 
 class ExplorerController extends AppController
 {
-  var $components = array('RequestHandler', 'FilterManager', 'Search', 'QueryBuilder', 'FastFileResponder', 'Feed');
+  var $components = array('RequestHandler', 'FilterManager', 'Search', 'QueryBuilder', 'FastFileResponder', 'Feed', 'FileCache');
   var $uses = array('Media', 'MyFile', 'Group', 'Tag', 'Category', 'Location');
   var $helpers = array('Form', 'Html', 'Ajax', 'ImageData', 'Time', 'ExplorerMenu', 'Rss', 'Search', 'Navigator', 'Tab', 'Breadcrumb', 'Autocomplete');
 
@@ -539,12 +539,7 @@ class ExplorerController extends AppController
           Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change any metadata of image ".$id);
           continue;
         }
-        
-        if ($media['Media']['canWriteMeta']) {
-          $tmp = $this->Media->editMetaMulti(&$media, $editData);
-        } else {
-          $tmp = $this->Media->editTagMulti(&$media, $editData);
-        }
+        $tmp = $this->Media->editMulti(&$media, $editData);
         if ($tmp) {
           $changedMedia[] = $tmp;
         }
@@ -554,6 +549,12 @@ class ExplorerController extends AppController
           Logger::warn("Could not save media: " . join(", ", Set::extract("/Media/id", $changedMedia)));
         } else {
           Logger::debug("Saved media: " . join(', ', Set::extract("/Media/id", $changedMedia)));
+        }
+        foreach ($changedMedia as $media) {
+          if ($media['Media']['orientation']) {
+            $this->FileCache->delete($media);
+            Logger::debug("Deleted previews of media {$media['Media']['id']}");
+          }
         }
       }
 
@@ -598,16 +599,13 @@ class ExplorerController extends AppController
     $user = $this->getUser();
     $media = $this->Media->findById($id);
     $this->Media->setAccessFlags(&$media, $user);
-    $this->set('data', $media);
-    $this->layout='bare';
-    if (!$this->Media->checkAccess(&$media, &$user, ACL_WRITE_META, ACL_WRITE_MASK)) {
-      if ($this->Media->checkAccess(&$media, &$user, ACL_WRITE_TAG, ACL_WRITE_MASK)) {
-        $this->render('edittag');
-      } else {
-        Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change ACL of image ".$id);
-        $this->render('updatemeta');
-      }
+    if (!$media['Media']['canWriteTag']) {
+      Logger::warn("User is not allowed to edit media {$media['Media']['id']}");
+      $this->redirect(null, '403');
     }
+    $this->data = $media;
+    $this->layout='bare';
+    $this->render('editmeta');
     //Configure::write('debug', 0);
   }
 
@@ -615,7 +613,7 @@ class ExplorerController extends AppController
    * @todo Check and handle non-ajax request 
    */
   function savemeta($id) {
-    if (!$this->RequestHandler->isAjax() || !$this->RequestHandler->isPost()) {
+    if (!$this->RequestHandler->isAjax()) {
       Logger::warn("Decline wrong ajax request");
       $this->redirect(null, '404');
     }
@@ -625,24 +623,23 @@ class ExplorerController extends AppController
     $username = $user['User']['username'];
     if (isset($this->data)) {
       $media = $this->Media->findById($id);
+      $this->Media->setAccessFlags(&$media, $user);
       if (!$media) {
         Logger::warn("Invalid media id: $id");
         $this->redirect(null, '404');
-      } elseif (!$this->Media->checkAccess(&$media, &$user, ACL_WRITE_TAG, ACL_WRITE_MASK)) {
+      } elseif (!$media['Media']['canWriteTag']) {
         Logger::warn("User '{$username}' ({$user['User']['id']}) has no previleges to change tags of image ".$id);
       } else {
-        if ($this->Media->checkAccess(&$media, &$user, ACL_WRITE_META, ACL_WRITE_MASK)) {
-          Logger::debug("User {$username} updates metadata of media {$id}");
-          $tmp = $this->Media->editMetaSingle(&$media, &$this->data);
-        } else {
-          Logger::debug("User {$username} updates tags of media {$id}");
-          $tmp = $this->Media->editTagSingle(&$media, &$this->data);
-        }
+        $tmp = $this->Media->editSingle(&$media, &$this->data);
         if (!$this->Media->save($tmp)) {
           Logger::warn("Could not save media");
           Logger::debug($tmp);
         } else {
           Logger::info("Updated meta of media {$tmp['Media']['id']}");
+        }
+        if ($tmp['Media']['orientation']) {
+          $this->FileCache->delete($tmp);
+          Logger::debug("Deleted previews of media {$tmp['Media']['id']}");
         }
       }
     }

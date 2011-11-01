@@ -69,6 +69,7 @@
                 }
               }
             });
+            $dialog.find('.radioSet').buttonset();
           }
         });
       });

@@ -1,8 +1,9 @@
 <?php
-  $canWriteTag = $canWriteMeta = $canWriteAcl = 0;
+  $canWriteTag = $canWriteMeta = $canWriteCaption = $canWriteAcl = 0;
   if (count($this->data)) {
     $canWriteTag = max(Set::extract('/Media/canWriteTag', $this->data));
     $canWriteMeta = max(Set::extract('/Media/canWriteMeta', $this->data));
+    $canWriteCaption = max(Set::extract('/Media/canWriteCaption', $this->data));
     $canWriteAcl = max(Set::extract('/Media/canWriteAcl', $this->data));
   }
 ?>
@@ -84,11 +85,10 @@
 <fieldset><legend><?php __("Metadata"); ?></legend>
 <?php 
   echo $form->hidden('Media.ids', array('id' => 'MediaIds'));
-  if ($canWriteMeta) {
-    echo $form->input('Media.date', array('type' => 'text', 'after' => $html->tag('div', __('E.g. 2008-08-07 15:30', true), array('class' => 'description')))); 
+  if ($canWriteTag) {
+    echo $form->input('Tag.names', array('label' => __('Tags', true), 'after' => $html->tag('div', __('E.g. newtag, -oldtag', true), array('class' => 'description'))));
+    echo $autocomplete->autoComplete('Tag.names', 'autocomplete/tag', array('split' => true));
   }
-  echo $form->input('Tag.names', array('label' => __('Tags', true), 'after' => $html->tag('div', __('E.g. newtag, -oldtag', true), array('class' => 'description'))));
-  echo $autocomplete->autoComplete('Tag.names', 'autocomplete/tag', array('split' => true));
   if ($canWriteMeta) {
     echo $form->input('Category.names', array('label' => __('Categories', true)));
     echo $autocomplete->autoComplete('Category.names', 'autocomplete/category', array('split' => true));
@@ -101,6 +101,19 @@
     echo $form->input('Location.country', array('label' => __('Country', true)));
     echo $autocomplete->autoComplete('Location.country', 'autocomplete/country');
     echo $form->input('Media.geo', array('label' => __('Geo data', true), 'maxlength' => 32, 'after' => $html->tag('div', __('latitude, longitude', true), array('class' => 'description'))));
+  }
+  if ($canWriteCaption) {
+    echo $form->input('Media.date', array('type' => 'text', 'after' => $html->tag('div', __('E.g. 2008-08-07 15:30', true), array('class' => 'description'))));
+    echo $form->input('Media.name', array('type' => 'text'));
+    echo $form->input('Media.caption', array('type' => 'textarea'));
+    $rotations = array(
+        '0' => __("Keep", true),
+        '90' => __("90 CW", true),
+        '180' => __("180 CW", true),
+        '270' => __("90 CCW", true)
+    );
+    echo $html->tag('div', $html->tag('label', __("Rotate", true)) .
+            $html->tag('div', $form->radio('Media.rotation', $rotations, array('legend' => false, 'value' => '0')), array('escape' => false, 'class' => 'radioSet')), array('escape' => false, 'class' => 'input radio'));
   }
 ?>
 </fieldset>
