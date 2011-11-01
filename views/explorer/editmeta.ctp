@@ -29,14 +29,6 @@
   echo $form->input('Media.date', array('type' => 'text', 'after' => $html->tag('div', __('E.g. 2008-08-07 15:30', true), array('class' => 'description'))));
   echo $form->input('Media.name', array('type' => 'text'));
   echo $form->input('Media.caption', array('type' => 'text'));
-  $rotations = array(
-      '0' => __("Keep", true),
-      '90' => __("90 CW", true),
-      '180' => __("180 CW", true),
-      '270' => __("90 CCW", true)
-  );
-  echo $html->tag('div', $html->tag('label', __("Rotate", true)) .
-          $html->tag('div', $form->radio('Media.rotation', $rotations, array('legend' => false, 'value' => '0')), array('escape' => false, 'class' => 'radioSet')), array('escape' => false, 'class' => 'input radio'));
 }
 ?>
 </fieldset>
