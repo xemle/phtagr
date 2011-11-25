@@ -878,7 +878,7 @@ class Media extends AppModel
       }
     }
     if ($media['Media']['canWriteCaption']) {
-      $fields = array('name', 'description', 'date', 'latitude', 'longitude');
+      $fields = array('name', 'caption', 'date', 'latitude', 'longitude');
       foreach ($fields as $field) {
         if (isset($data['Media'][$field]) && $media['Media'][$field] !== $data['Media'][$field]) {
           $tmp['Media'][$field] = $data['Media'][$field];

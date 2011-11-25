@@ -230,6 +230,7 @@ class ImageFilterComponent extends BaseFilterComponent {
     $v['shutter'] = $this->_extract($data, 'ShutterSpeed', NULL);
     $v['model'] = $this->_extract($data, 'Model', null);
     $v['iso'] = $this->_extract($data, 'ISO', null);
+    $v['caption'] = $this->_extract($data, 'Comment', null);
 
     // fetch GPS coordinates
     $latitude = $this->_extract($data, 'GPSLatitude', null);
@@ -325,6 +326,8 @@ class ImageFilterComponent extends BaseFilterComponent {
     $v['shutter'] = $this->_computeSutter($this->_extract($data, 'jpg/exif/EXIF/ShutterSpeedValue', null));
     $v['model'] = $this->_extract($data, 'jpg/exif/IFD0/Model', null);
     $v['iso'] = $this->_extract($data, 'jpg/exif/EXIF/ISOSpeedRatings', null);
+    Logger::debug($data);
+    $v['caption'] = $this->_extract($data, 'jpg/exif/EXIF/ISOSpeedRatings', null);
 
     // fetch GPS coordinates
     $latitude = $this->_computeGps($this->_extract($data, 'jpg/exif/GPS/GPSLatitude', null));
@@ -525,6 +528,23 @@ class ImageFilterComponent extends BaseFilterComponent {
     return $args;
   }
 
+  /**
+    * Create generic export argument
+    *
+    * @param data Exif data
+    * @param exifParam Exif parameter
+    * @param currentValue Current value
+    * @return Array of export arguments
+    */
+  function _createExportArgument(&$data, $exifParam, $currentValue) {
+    $args = array();
+    $fileValue = $this->_extract($data, $exifParam);
+    if ($fileValue != $currentValue) {
+      $args[] = "-$exifParam=$currentValue";
+    }
+    return $args;
+  }
+
   /** Create arguments to export the metadata from the database to the file.
     * @param data metadata from the file (Exiftool information)
     * @param image Media data array */
@@ -533,6 +553,9 @@ class ImageFilterComponent extends BaseFilterComponent {
 
     $args = am($args, $this->_createExportDate($data, $media));
     $args = am($args, $this->_createExportGps($data, $media));
+    
+    $args = am($args, $this->_createExportArgument(&$data, 'Orientation', $media['Media']['orientation']));
+    $args = am($args, $this->_createExportArgument(&$data, 'Comment', $media['Media']['caption']));
 
     // Associations to meta data: Tags, Categories, Locations
     $keywords = $this->_extract($data, 'Keywords');

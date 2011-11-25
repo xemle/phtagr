@@ -108,7 +108,7 @@ class SimpleImageFilterComponent extends BaseFilterComponent {
    * @param options Array of options
    * @return False on error */
   function write($file, $media = null, $options = array()) {
-    Logger::warn("Write action is not supported");
+    Logger::warn("Write action is not supported for {$file['File']['file']}");
     return false;
   }
 
