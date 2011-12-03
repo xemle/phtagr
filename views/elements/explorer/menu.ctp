@@ -1,4 +1,4 @@
-<?php
+<?Php
   $canWriteTag = $canWriteMeta = $canWriteCaption = $canWriteAcl = 0;
   if (count($this->data)) {
     $canWriteTag = max(Set::extract('/Media/canWriteTag', $this->data));
@@ -75,6 +75,17 @@
     $links[] = $html->link($size, $breadcrumb->crumbUrl($breadcrumb->replace($crumbs, 'show', $size)));
   }
   echo implode($links);
+?></p>
+<p><?php echo __('Sort', true) . " "; ?>
+<?php  $links = array();
+  $links[] = $html->link(__('newest', true), $breadcrumb->crumbUrl($breadcrumb->replace($crumbs, 'sort', 'newest')));
+  $links[] = $html->link(__('date', true), $breadcrumb->crumbUrl($breadcrumb->replace($crumbs, 'sort', 'date')));
+  $links[] = $html->link(__('date (reverse)', true), $breadcrumb->crumbUrl($breadcrumb->replace($crumbs, 'sort', '-date')));
+  $links[] = $html->link(__('name', true), $breadcrumb->crumbUrl($breadcrumb->replace($crumbs, 'sort', 'name')));
+  $links[] = $html->link(__('modified', true), $breadcrumb->crumbUrl($breadcrumb->replace($crumbs, 'sort', 'changes')));
+  $links[] = $html->link(__('view count', true), $breadcrumb->crumbUrl($breadcrumb->replace($crumbs, 'sort', 'viewed')));
+  $links[] = $html->link(__('random', true), $breadcrumb->crumbUrl($breadcrumb->replace($crumbs, 'sort', 'random')));
+  echo implode(' ', $links);
 ?></p>
 </div><!-- all meta -->
 <?php 
