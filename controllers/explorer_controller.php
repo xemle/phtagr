@@ -530,7 +530,7 @@ class ExplorerController extends AppController
           Logger::debug("Saved media: " . join(', ', Set::extract("/Media/id", $changedMedia)));
         }
         foreach ($changedMedia as $media) {
-          if ($media['Media']['orientation']) {
+          if (isset($media['Media']['orientation'])) {
             $this->FileCache->delete($media);
             Logger::debug("Deleted previews of media {$media['Media']['id']}");
           }
