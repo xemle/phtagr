@@ -8,7 +8,7 @@
     echo $flowplayer->video($this->data);
   } else {
     //$size = $imageData->getimagesize($this->data, OUTPUT_SIZE_PREVIEW);
-    $size = $imageData->getimagesize($this->data, 960);
+    $size = $imageData->getimagesize($this->data, 360);
     $src = Router::url("/media/preview/".$this->data['Media']['id']);
     $img = $html->tag('img', null, array('src' => $src, 'width' => $size[0], 'height' => $size[1], 'alt' => $this->data['Media']['name']));
     if ($navigator->hasNextMedia()) {
@@ -35,6 +35,9 @@
   $items = array(__("General", true), __("Media Details", true));
   if ($map->hasApi() && $map->hasMediaGeo($this->data)) {
     $items['map'] = __("Map", true);
+  }
+  if ($this->data['Media']['canWriteTag']) {
+    $items['edit'] = __("Edit", true);
   }
   echo $tab->menu($items);
 ?>
@@ -100,6 +103,17 @@
   echo $tab->close(); 
 ?>
 <?php endif; ?>
+<?php if ($this->data['Media']['canWriteTag']): ?>
+<?php 
+  echo $tab->open('edit');
+  echo $form->create(null, array('url' => 'update/'.$this->data['Media']['id'].'/'.join('/', $crumbs), 'id' => 'edit'));
+  echo "<fieldset>";
+  echo View::element('single_meta_form');
+  echo "</fieldset>";
+  echo $form->end(__('Save', true));
+  echo $tab->close(); 
+?>
+<?php endif; ?>
 </div><!-- tabs -->
 
 <?php 
@@ -151,6 +165,7 @@ $(document).ready(function() {
     }
   });
   $("#comment-add :submit").button();
+  $("#edit :submit").button();
 });
 })(jQuery);
 JS;

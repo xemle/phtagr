@@ -113,5 +113,37 @@ class ImagesController extends AppController
       $this->FastFileResponder->add($this->data, 'preview');
     }
   }
+
+  function update($id) {
+    if (!empty($this->data)) {
+      $user = $this->getUser();
+      $media = $this->Media->findById($id);
+      $this->Media->setAccessFlags(&$media, $user);
+      if (!$media) {
+        Logger::warn("Invalid media id: $id");
+        $this->redirect(null, '404');
+      } elseif (!$media['Media']['canWriteTag'] && !$media['Media']['canWriteAcl']) {
+        Logger::warn("User '{$username}' ({$user['User']['id']}) has no previleges to change tags of image ".$id);
+      } else {
+        //$this->_checkAndSetGroupId();
+        $tmp = $this->Media->editSingle(&$media, &$this->data);
+        if (!$this->Media->save($tmp)) {
+          Logger::warn("Could not save media");
+          Logger::debug($tmp);
+        } else {
+          Logger::info("Updated meta of media {$tmp['Media']['id']}");
+        }
+        if (isset($tmp['Media']['orientation'])) {
+          $this->FileCache->delete($tmp);
+          Logger::debug("Deleted previews of media {$tmp['Media']['id']}");
+        }
+      }
+    }
+    $url = 'view/' . $id;
+    if (count($this->crumbs)) {
+      $url .= '/' . join('/', $this->crumbs);
+    }
+    $this->redirect($url);
+  }
 }
 ?>
