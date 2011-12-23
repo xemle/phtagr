@@ -8,7 +8,7 @@
     echo $flowplayer->video($this->data);
   } else {
     //$size = $imageData->getimagesize($this->data, OUTPUT_SIZE_PREVIEW);
-    $size = $imageData->getimagesize($this->data, 360);
+    $size = $imageData->getimagesize($this->data, 960);
     $src = Router::url("/media/preview/".$this->data['Media']['id']);
     $img = $html->tag('img', null, array('src' => $src, 'width' => $size[0], 'height' => $size[1], 'alt' => $this->data['Media']['name']));
     if ($navigator->hasNextMedia()) {
