@@ -68,6 +68,8 @@ class AppController extends Controller
         $this->Menu->addItem(__('Sign Up', true), array('controller' => 'users', 'action' => 'register'));
       }
     } else {
+      $user = $this->getUser();
+      $this->Menu->addItem(sprintf(__('Howdy, %s!', true), $user['User']['username']), false);
       $this->Menu->addItem(__('Logout', true), array('controller' => 'users', 'action' => 'logout'));
       $this->Menu->addItem(__('Dashboard', true), array('controller' => 'options'));
     }

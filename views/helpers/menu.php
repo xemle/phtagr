@@ -87,8 +87,9 @@ class MenuHelper extends AppHelper
         continue; 
       }
 
-      if ($item['link'] == 'false' && $item['type'] == false)
+      if ($item['link'] == 'false' && $item['type'] == false) {
         $item['type'] == 'text';
+      }
 
       $out .= "<li";
       $attrs = array(); 
@@ -171,10 +172,15 @@ class MenuHelper extends AppHelper
       if (isset($attrs['active']) && $attrs['active']) {
         $linkOptions['class'] = 'active';
       } 
-      if (!$item['url']) {
+      if (!isset($item['url'])) {
         $item['url'] = array('controller' => $item['controller'], 'action' => $item['action'], 'admin' => $item['admin']);
       }
-      $item = $this->Html->link($item['title'], $item['url'], $linkOptions);
+      if ($item['url'] === false) {
+        $item = $item['title'];
+      } else {
+        $item = $this->Html->link($item['title'], $item['url'], $linkOptions);
+      }
+      Logger::debug($item);
       $items[] = $this->Html->tag('li', $item . $submenu, $attrs);
     }
     if (count($items)) {
