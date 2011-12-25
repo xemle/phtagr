@@ -172,7 +172,7 @@ class BreadcrumbHelper extends AppHelper
     $form .= $this->Form->hidden('Breadcrumb.current', array('value' => implode('/', $crumbs), 'div' => false));
     //$form .= $this->Ajax->autoComplete('breadcrumb.input', 'autocomplete/crumb'); 
     $form .= $this->Form->input('Breadcrumb.input', array('div' => false, 'label' => false));
-    $form .= $this->Autocomplete->autoComplete('Breadcrumb.input', 'autocomplete/crumb'); 
+    $form .= $this->Autocomplete->autoComplete('Breadcrumb.input', 'autocomplete/crumb', array('submitOnEnter' => true)); 
     $form .= $this->Form->submit('add', array('div' => false));
     $form .= "</div>";
     $form .= $this->Form->end();

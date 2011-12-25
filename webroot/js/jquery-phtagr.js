@@ -96,6 +96,10 @@
         }
         return false;
       }
+    }).keydown(function(e){
+      if (e.keyCode === 13 && options['submitOnEnter']) {
+        $(this).closest('form').submit();
+      }
     });
   };
   $.fn.delayedHover = function(over, out, delay) {
