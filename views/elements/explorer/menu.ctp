@@ -9,7 +9,7 @@
 ?>
 <div id="p-explorer-menu">
 <ul>
-  <li id="p-explorer-button-all-meta"><a><?php __("Show Metadata"); ?></a></li>
+  <li id="p-explorer-button-all-meta"><a><?php __("View Filter"); ?></a></li>
   <?php if ($canWriteTag): ?>
   <li id="p-explorer-button-meta"><a><?php __("Edit Metadata"); ?></a></li>
   <?php if ($canWriteAcl): ?>
