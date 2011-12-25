@@ -75,7 +75,7 @@ class MenuComponent extends Object {
       $parentId = 'item-' . $name;
       $parentItem =& $this->getItem($parentId);
       foreach ($this->controller->subMenu as $action => $title) {
-        $defaults = array('parent' => $parentId, 'active' => false, 'controller' => $name, 'action' => false, 'admin' => false, 'url' => false);
+        $defaults = array('parent' => $parentId, 'active' => false, 'controller' => $name, 'action' => false, 'admin' => false);
         if (is_numeric($action)) {
           $item = am($defaults, $title);
         } else {
