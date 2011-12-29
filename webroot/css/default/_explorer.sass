@@ -108,14 +108,17 @@
     > .p-explorer-media-actions
       position: absolute
       right: 2px
-      top: 196px
-      padding-top: 15px
-      padding-left: 15px
+      top: 208px
+      padding: 2px
+      background-color: $clickable-default-bg
       +opacity(0.0)
       > ul > li
         display: inline
         > a > img
+          padding: 4px
           vertical-align: center
+          &:hover
+            background-color: $clickable-default-text
     > .p-explorer-media-meta 
       *
         font-size: 9pt
