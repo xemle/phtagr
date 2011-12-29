@@ -479,24 +479,7 @@ class ExplorerController extends AppController
     $this->render('index');
   }
 
-  /**
-   * Check acl group of the user and set it as media group id 
-   */
-  function _checkAndSetGroupId() {
-    if (!isset($this->data['Group']['id'])) {
-      return;
-    }
-    $groupId = $this->data['Group']['id'];
-    $user = $this->getUser();
-    $groupIds = Set::extract('/Group/id', $this->Group->getGroupsForMedia($user));
-    $groupIds[] = -1; // no group
-    if (in_array($groupId, $groupIds)) {
-      $this->data['Media']['group_id'] = $groupId;
-    } else {
-      $this->data['Media']['group_id'] = 0;
-    }
-  }
-  
+ 
   function edit() {
     if (isset($this->data)) {
       $ids = preg_split('/\s*,\s*/', $this->data['Media']['ids']);
@@ -505,10 +488,10 @@ class ExplorerController extends AppController
         $this->redirect('view/' . implode('/', $this->Search->encodeCrumbs($this->crumbs)));
       }
 
-      $this->_checkAndSetGroupId();
+      $user = $this->getUser();
+      $this->Media->prepareGroupData(&$this->data, &$user);
       $editData = $this->Media->prepareMultiEditData(&$this->data);
       
-      $user = $this->getUser();
       $allMedia = $this->Media->find('all', array('conditions' => array('Media.id' => $ids)));
       $changedMedia = array();
       foreach ($allMedia as $media) {
@@ -637,7 +620,7 @@ class ExplorerController extends AppController
     $user = $this->getUser();
     $media = $this->Media->findById($id);
     $this->Media->setAccessFlags(&$media, $user);
-    $this->set('data', $media);
+    $this->data = $media;
     $this->layout='bare';
     if ($this->Media->checkAccess(&$media, &$user, 1, 0)) {
       $groups = $this->Group->getGroupsForMedia($user);
@@ -669,26 +652,10 @@ class ExplorerController extends AppController
       if (!$this->Media->checkAccess(&$media, &$user, 1, 0)) {
         Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change ACL of image ".$id);
       } else {
-        // check for existing group of user
-        $groupIds = Set::extract('/Group/id', $this->Group->getGroupsForMedia($user));
-        $groupIds[] = -1; // no group
-        if (isset($this->data['Group']['id']) && in_array($this->data['Group']['id'], $groupIds)) {
-          $groupId = $this->data['Group']['id'];
-        } else {
-          $groupId = 0;
-        }
-        if ($groupId != 0) {
-          $media['Media']['group_id'] = $groupId;
-        }
-
-        // higher grants first
-        $this->Media->setAcl(&$media, ACL_WRITE_TAG, ACL_WRITE_MASK, $this->data['acl']['write']['tag']);
-        $this->Media->setAcl(&$media, ACL_WRITE_META, ACL_WRITE_MASK, $this->data['acl']['write']['meta']);
-        $this->Media->setAcl(&$media, ACL_READ_PREVIEW, ACL_READ_MASK, $this->data['acl']['read']['preview']);
-        $this->Media->setAcl(&$media, ACL_READ_ORIGINAL, ACL_READ_MASK, $this->data['acl']['read']['original']);
-
-        $media['Media']['modified'] = null;
-        $this->Media->save($media['Media'], true, array('group_id', 'gacl', 'uacl', 'oacl'));
+        $this->Media->prepareGroupData(&$this->data, &$user);
+        $tmp = array('Media' => array('id' => $id));
+        $this->Media->updateAcl(&$tmp, &$media, &$this->data);
+        $this->Media->save($tmp, true);
         Logger::info("Changed acl of media $id");
       }
     }

@@ -39,6 +39,9 @@
   if ($this->data['Media']['canWriteTag']) {
     $items['edit'] = __("Edit", true);
   }
+  if ($this->data['Media']['canWriteAcl']) {
+    $items['acl'] = __("Access Right", true);
+  }
   echo $tab->menu($items);
 ?>
 <?php echo $tab->open(0); ?>
@@ -95,25 +98,32 @@
 </table>
 </div>
 <?php echo $tab->close(); ?>
-<?php if ($map->hasApi() && $map->hasMediaGeo($this->data)): ?>
 <?php 
-  echo $tab->open('map');
-  echo $map->container();
-  echo $map->script();
-  echo $tab->close(); 
+  if ($map->hasApi() && $map->hasMediaGeo($this->data)) {
+    echo $tab->open('map');
+    echo $map->container();
+    echo $map->script();
+    echo $tab->close(); 
+  }
+  if ($this->data['Media']['canWriteTag']) {
+    echo $tab->open('edit');
+    echo $form->create(null, array('url' => 'update/'.$this->data['Media']['id'].'/'.join('/', $crumbs), 'id' => 'edit'));
+    echo "<fieldset>";
+    echo View::element('single_meta_form');
+    echo "</fieldset>";
+    echo $form->end(__('Save', true));
+    echo $tab->close(); 
+  }
+  if ($this->data['Media']['canWriteAcl']) {
+    echo $tab->open('acl');
+    echo $form->create(null, array('url' => 'updateAcl/'.$this->data['Media']['id'].'/'.join('/', $crumbs), 'id' => 'acl'));
+    echo "<fieldset>";
+    echo View::element('single_acl_form');
+    echo "</fieldset>";
+    echo $form->end(__('Save', true));
+    echo $tab->close(); 
+  }
 ?>
-<?php endif; ?>
-<?php if ($this->data['Media']['canWriteTag']): ?>
-<?php 
-  echo $tab->open('edit');
-  echo $form->create(null, array('url' => 'update/'.$this->data['Media']['id'].'/'.join('/', $crumbs), 'id' => 'edit'));
-  echo "<fieldset>";
-  echo View::element('single_meta_form');
-  echo "</fieldset>";
-  echo $form->end(__('Save', true));
-  echo $tab->close(); 
-?>
-<?php endif; ?>
 </div><!-- tabs -->
 
 <?php 
@@ -166,6 +176,7 @@ $(document).ready(function() {
   });
   $("#comment-add :submit").button();
   $("#edit :submit").button();
+  $("#acl :submit").button();
 });
 })(jQuery);
 JS;

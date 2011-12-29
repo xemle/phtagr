@@ -312,7 +312,7 @@ class Media extends AppModel
 
     return $data;
   }
-
+  
   /** Generates a has and belongs to many relation query for the image
     @param id Id of the image
     @param model Model name
@@ -722,7 +722,35 @@ class Media extends AppModel
       $data['Media']['orientation'] = $rotated;
     }
   }
- 
+
+  /**
+    * Check acl group of the user and set it as media group id 
+    *
+    * @param data Data input
+    * @param user Current user
+    */
+  function prepareGroupData(&$data, &$user) {
+    if (!isset($data['Group']['id'])) {
+      return;
+    }
+    $groupId = $data['Group']['id'];
+    $groupIds = Set::extract('/Group/id', $this->Group->getGroupsForMedia($user));
+    $groupIds[] = -1; // no group
+    if (in_array($groupId, $groupIds)) {
+      $data['Media']['group_id'] = $groupId;
+    } else {
+      $data['Media']['group_id'] = 0;
+    }
+    return $data;
+  }
+
+  /** 
+    * Update ACL of media
+    *
+    * @param target Target model data
+    * @param media Media model data
+    * @param data Update data
+    */
   function updateAcl(&$target, &$media, &$data) {
     $fields = array('gacl', 'uacl', 'oacl', 'group_id');
     // copy acl fields to target

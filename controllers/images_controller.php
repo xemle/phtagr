@@ -32,6 +32,17 @@ class ImagesController extends AppController
   function beforeFilter() {
     parent::beforeFilter();
 
+    if ($this->hasRole(ROLE_USER)) {
+      $groups = $this->Group->getGroupsForMedia($this->getUser());
+      $groupSelect = Set::combine($groups, '{n}.Group.id', '{n}.Group.name');
+      asort($groupSelect);
+      $groupSelect[0] = __('[Keep]', true);
+      $groupSelect[-1] = __('[No Group]', true);
+      $this->set('groups', $groupSelect);
+    } else {
+      $this->set('groups', array());
+    }
+
     $encoded = array_splice(split('/', $this->params['url']['url']), 3);
     foreach ($encoded as $crumb) {
       $this->crumbs[] = $this->Search->decode($crumb);
@@ -122,7 +133,7 @@ class ImagesController extends AppController
       if (!$media) {
         Logger::warn("Invalid media id: $id");
         $this->redirect(null, '404');
-      } elseif (!$media['Media']['canWriteTag'] && !$media['Media']['canWriteAcl']) {
+      } elseif (!$media['Media']['canWriteTag']) {
         Logger::warn("User '{$username}' ({$user['User']['id']}) has no previleges to change tags of image ".$id);
       } else {
         //$this->_checkAndSetGroupId();
@@ -139,6 +150,32 @@ class ImagesController extends AppController
         }
       }
     }
+    $url = 'view/' . $id;
+    if (count($this->crumbs)) {
+      $url .= '/' . join('/', $this->crumbs);
+    }
+    $this->redirect($url);
+  }
+
+  function updateAcl($id) {
+    if (!empty($this->data)) {
+      $user = $this->getUser();
+      $media = $this->Media->findById($id);
+      $this->Media->setAccessFlags(&$media, $user);
+      if (!$media) {
+        Logger::warn("Invalid media id: $id");
+        $this->redirect(null, '404');
+      } elseif (!$media['Media']['canWriteAcl']) {
+        Logger::warn("User '{$username}' ({$user['User']['id']}) has no previleges to change tags of image ".$id);
+      } else {
+        $this->Media->prepareGroupData(&$this->data, &$user);
+        $tmp = array('Media' => array('id' => $id));
+        $this->Media->updateAcl(&$tmp, &$media, &$this->data);
+        $this->Media->save($tmp, true);
+        Logger::info("Changed acl of media $id");
+      }
+    }
+ 
     $url = 'view/' . $id;
     if (count($this->crumbs)) {
       $url .= '/' . join('/', $this->crumbs);
