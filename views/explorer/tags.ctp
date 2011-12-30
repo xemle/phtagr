@@ -1,4 +1,4 @@
 <h1>Explorer</h1>
 <code><pre>
-<?=pr($data, true); ?>
+<?php echo pr($data, true); ?>
 </code></pre>

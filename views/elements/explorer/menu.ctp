@@ -1,4 +1,4 @@
-<?Php
+<?php
   $canWriteTag = $canWriteMeta = $canWriteCaption = $canWriteAcl = 0;
   if (count($this->data)) {
     $canWriteTag = max(Set::extract('/Media/canWriteTag', $this->data));

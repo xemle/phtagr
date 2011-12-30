@@ -36,6 +36,6 @@
 
 <?php echo $form->create(null, array('action' => 'path/'.$this->data['User']['id'])); ?>
 <fieldset><legend><?php __('Add Directory'); ?></legend>
-<? echo $form->input('Option.path.fspath', array('label' => __('Directory', true))); ?>
+<?php echo $form->input('Option.path.fspath', array('label' => __('Directory', true))); ?>
 </fieldset>
 <?php echo $form->end(__('Add', true)); ?>

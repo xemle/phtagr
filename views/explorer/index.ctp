@@ -162,7 +162,6 @@ $canWriteTag = count($this->data) ? max(Set::extract('/Media/canWriteTag', $this
 $index = 0;
 $pos = ($search->getPage(1)-1) * $search->getShow(12) + 1;
 
-
 echo '<div class="row">';
 foreach ($this->data as $media) {
   echo $this->element('explorer/media', array('media' => $media, 'index' => $index, 'pos' => $pos));

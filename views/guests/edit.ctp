@@ -30,7 +30,7 @@
   echo '</div>';
 ?>
 </fieldset>
-<? echo $form->submit(__('Save', true)); ?>
+<?php echo $form->submit(__('Save', true)); ?>
 </form>
 
 <?php if(count($this->data['Member'])): ?>
