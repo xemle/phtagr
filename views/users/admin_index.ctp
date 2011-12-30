@@ -23,7 +23,7 @@ Page <?php echo $paginator->counter() ?>
 
 <tbody>
 <?php $row=0; foreach($this->data as $user): ?>
-<tr class="<?=($row++%2)?"even":"odd";?>">
+<tr class="<?php echo ($row++%2)?"even":"odd";?>">
   <td><?php echo $html->link($user['User']['username'], '/admin/users/edit/'.$user['User']['id']);?></td>
   <td><?php echo $user['User']['firstname'];?></td>
   <td><?php echo $user['User']['lastname'];?></td>

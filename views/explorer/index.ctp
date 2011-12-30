@@ -29,7 +29,7 @@ foreach ($this->data as $media): ?>
 <?php 
   $icon = $imageData->getVisibilityIcon(&$media);
 ?>
-<div class="c50<?=$side; ?>"><div class="subc<?=$side; ?> unselected thumb" id="media-<?= $media['Media']['id'];?>" >
+<div class="c50<?php echo $side; ?>"><div class="subc<?php echo $side; ?> unselected thumb" id="media-<?= $media['Media']['id'];?>" >
 <script type="text/javascript">
   mediaData[<?php echo $media['Media']['id']; ?>] = [];
 </script>

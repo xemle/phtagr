@@ -14,9 +14,9 @@
 
 <tbody>
 <?php $row=0; foreach($this->data as $guest): ?>
-  <tr class="<?=($row++%2)?"even":"odd";?>">
+  <tr class="<?php echo ($row++%2)?"even":"odd";?>">
     <td><?php echo $html->link($guest['Guest']['username'], 'edit/'.$guest['Guest']['id']); ?></td>
-    <td><?=count($guest['Member']);?></td>
+    <td><?php echo count($guest['Member']);?></td>
     <td><div class="actionlist"><?php 
       $delConfirm = "Do you realy want to delete the guest account '{$guest['Guest']['username']}'?";
       echo $html->link(
