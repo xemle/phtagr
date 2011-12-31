@@ -1,0 +1,73 @@
+@import border-radius
+@import grid
+@import "compass/css3/gradient"
+@import text-shadow
+@import box-shadow
+
+*
+  margin: 0
+  padding: 0
+
+#page
+  @include container
+
+#header 
+  +column(24, true)
+  background-color: $headerBackgroundColor
+  +linear-gradient(color-stops($headerBackgroundColor, darken($headerBackgroundColor, 20%)))
+  border: 1px solid $headerBackgroundColor
+  > .sub
+    padding: 15px
+    > a 
+      font-size: 200% 
+      font-weight: bold
+      +text-shadow(black, 0, 2px, 0)
+      color: white
+      &:hover
+        color: white
+        background-color: inherit
+      &:visited
+        color: white
+        background-color: inherit
+
+#main
+  +column(24, true)
+  background-color: $contentBackgroundColor
+  #sidebar
+    +column(6)
+    background-color: $sidebarBackgroundColor
+ 
+  #content 
+    +column(18, true)
+    @include border-top-right-radius(10px)
+    background-color: $contentBackgroundColor
+    > h1
+      display: block
+      width: 100%
+      font-size: 120%
+      padding: 10px 0
+      background-color: darken($contentBackgroundColor, 10%)
+
+#footer 
+  +column(24, true)
+  background-color: $footerBackgroundColor
+  p
+    padding: 5px
+
+.box
+  position: relative
+  > h1
+    font-size: 120%
+    padding: 5px
+    background-color: #eee
+    color: #444
+    +text-shadow(white, 1px, 0px, 0)
+    
+.info,
+.message
+  display: block
+  margin: 5px 0
+  padding: 10px
+  background-color: #ffffb0
+  border: 1px solid #ffdc1c
+  +border-radius(2px)

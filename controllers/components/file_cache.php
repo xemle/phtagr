@@ -91,11 +91,11 @@ class FileCacheComponent extends Object {
   /** Deletes all cached files of a specific image/file.
     @param userId Id of the current user
     @param mediaId Id of the current image/file */
-  function delete($userId, $mediaId) {
-    $mediaId = intval($mediaId);
-    $cacheDir = $this->getPath($userId, $mediaId, false);
+  function delete(&$media) {
+    $mediaId = intval($media['Media']['id']);
+    $cacheDir = $this->getPath(&$media, false);
     if (!$cacheDir) {
-      Logger::trace("No cache dir found for image $mediaId");
+      Logger::trace("No cache dir found for media $mediaId");
       return true;
     }
 
@@ -106,8 +106,10 @@ class FileCacheComponent extends Object {
       Logger::debug("Delete cached files of image $mediaId");
       foreach($files as $file) {
         Logger::trace("Delete cache file '$file'");
-        unlink($folder->addPathElement($cacheDir, $file));
+        $filename = $folder->addPathElement($cacheDir, $file);
+        unlink($filename);
       }
+      clearstatcache();
     } else {
       Logger::trace("No cached files found for image $mediaId");
     }
@@ -122,6 +124,7 @@ class FileCacheComponent extends Object {
       $folder = new Folder();
       $folder->delete($cacheDir);
       Logger::info("Deleted cache dir '$cacheDir'");
+      clearstatcache();
     } else {
       Logger::debug("User $userId has no cached files");
     }

@@ -1,0 +1,81 @@
+@import grid
+@import gradient
+@import border-radius
+
+=default-input
+  +border-radius(3px)
+  border: #aaa 1px solid
+  padding: 5px
+  background-color: #efefef
+  &:hover
+    border: #999 1px solid
+    background-color: #ffd
+  &:focus
+    border: #a00 1px solid
+    background-color: #ffd
+
+=default-button
+  border: 1px solid #aaa
+  +border-radius(2px)
+  padding: 5px 15px
+  color: #666
+  background-color: #efefef
+  &:hover
+    cursor:pointer
+    background-color: $menuActiveBackgroundColor
+    color: white
+    border-color: darken($menuActiveBackgroundColor, 20%)
+
+form
+  overflow: hidden
+  width: 710px
+  > fieldset
+    padding: 15px 0
+    border: 0
+    > legend
+      font-family: Ubuntu-bold
+      width: 81.5%
+      border-bottom: 1px solid darken(white, 10%)
+    > div
+      padding: 5px 0
+      position: relative
+      display: block
+      width: 100% 
+      > label
+        display: inline
+        float: left
+        width: 30%
+      > input[type=text],
+      > input[type=password],
+      > textarea
+        width: 50%
+        +default-input
+      > select
+        width: 51.5%
+        +default-input
+      &.checkbox 
+        > input[type=checkbox]
+          margin-left: 30%
+          margin-right: 5px
+        > label
+          float: none
+          display: inline-block
+          width: 50%
+      > .error-message
+        padding-left: 30%
+      &.error
+        background-color: #faa
+  ul.buttons 
+    margin-left: 30%
+    > li 
+      display: inline-block
+      margin-right: 10px
+      > input
+        +default-button
+  div.submit 
+    padding-left: 30%
+    > input
+      +default-button
+
+a.button
+  +default-button

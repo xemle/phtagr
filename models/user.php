@@ -147,14 +147,12 @@ class User extends AppModel
   }
 
   function beforeDelete($cascade) {
-    App::import('Model', 'Media');
-  
     $id = $this->id;
-    $this->Media =& new Media();
+    $this->bindModel(array('hasMany' => array('Media')));
     Logger::info("Delete all image database entries of user $id");
     $this->Media->deleteFromUser($id);
 
-    $this->MyFile =& new MyFile();
+    $this->bindModel(array('hasMany' => array('MyFile')));
     $this->MyFile->deleteAll("File.user_id = $id");
 
     $dir = USER_DIR.$id;

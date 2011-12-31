@@ -3,3 +3,4 @@ users
 config/core.php
 config/database.php
 .gitignore
+nbproject

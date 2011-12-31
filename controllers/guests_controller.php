@@ -25,15 +25,18 @@ class GuestsController extends AppController {
   var $uses = array('Group', 'User', 'Guest');
   var $components = array('RequestHandler');
   var $helpers = array('Form', 'Ajax');
-  var $menuItems = array();
+  var $subMenu = false;
 
   function beforeFilter() {
     parent::beforeFilter();
+    $this->layout = 'backend';
     $this->requireRole(ROLE_USER);
+    $this->subMenu = array(
+      'create' => __('New Guest', true)
+      );
   }
 
   function beforeRender() {
-    $this->_setMenu();
     parent::beforeRender();
   }
 
@@ -55,7 +58,7 @@ class GuestsController extends AppController {
     $this->layout = "bare";
   }
 
-  function add() {
+  function create() {
     if (!empty($this->data)) {
       $userId = $this->getUserId();
       $this->data['Guest']['creator_id'] = $userId;
@@ -73,25 +76,6 @@ class GuestsController extends AppController {
         $this->Session->setFlash(__("Sorry. Guest account could not created", true));
       }
     }
-  }
-
-  function _addGuestMenu($guest) {
-    $this->menuItems[] = array(
-      'text' => sprintf(__('Guest: %s', true), $guest['Guest']['username']), 
-      'type' => 'text', 
-      'submenu' => array(
-        'items' => array(
-          array(
-            'text' => __('Edit', true), 
-            'link' => 'edit/'.$guest['Guest']['id']
-            ),
-          array(
-            'text' => __('Links', true), 
-            'link' => 'links/'.$guest['Guest']['id']
-            )
-          )
-        )
-      );
   }
 
   function edit($guestId) {
@@ -121,7 +105,9 @@ class GuestsController extends AppController {
     unset($this->data['Guest']['password']);
     $this->data['Comment']['auth'] = $this->Option->getValue($this->data, 'comment.auth', COMMENT_AUTH_NONE);
     $this->set('userId', $userId);
-    $this->_addGuestMenu($this->data);
+    $this->subMenu[] = array('url' => array('action' => $this->action, $guestId), 'title' => __("Edit", true), 'active' => true,
+      array('url' => array('action' => 'links', $guestId), 'title' => __("RSS", true)),
+      );
   }
 
   /**
@@ -215,37 +201,19 @@ class GuestsController extends AppController {
 
     if ($action == 'renew' || empty($guest['Guest']['key'])) {
       // reuse function of User model
-      $this->User->generateKey(&$guest);
-      $guest['Guest']['key'] = $guest['User']['key'];
-      $this->Guest->id = $guestId;
-      if (!$this->Guest->save($guest, false, array('key'))) {
+      $tmp = array('Guest' => array('id' => $guestId));
+      $this->User->generateKey(&$tmp);
+      $tmp['Guest']['key'] = $tmp['User']['key'];
+      unset($tmp['User']['key']);
+      if (!$this->Guest->save($tmp, false, array('key'))) {
         Logger::err("Could not save user data");
         Logger::debug($this->Guest->validationErrors);
       }
     }
     $this->data = $this->Guest->findById($guestId);
-    $this->_addGuestMenu($this->data);
-  }
-
-  function _getMenuItems() {
-    $items = array();
-    $items[] = array('text' => 'List Guests', 'link' => 'index');
-    $items[] = array('text' => 'Add Guest', 'link' => 'add');
-    $items = am($items, $this->menuItems);
-    return $items;
-  }
-
-  function _setMenu() {
-    $items = $this->requestAction('/options/getMenuItems');
-    $me = '/'.strtolower(Inflector::pluralize($this->name));
-    foreach ($items as $index => $item) {
-      if ($item['link'] == $me) {
-        $item['submenu'] = array('items' => $this->_getMenuItems());
-        $items[$index] = $item;
-      }
-    }
-    $menu = array('items' => $items);
-    $this->set('mainMenu', $menu);
+    $this->subMenu[] = array('url' => array('action' => 'edit', $guestId), 'title' => __("Edit", true), 'active' => true,
+      array('url' => array('action' => 'links', $guestId), 'title' => __("RSS", true), 'active' => true),
+      );
   }
 }
 ?>

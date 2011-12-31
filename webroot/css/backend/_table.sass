@@ -1,0 +1,27 @@
+@import text-shadow
+
+table.default
+  padding: 5px 0
+  width: 100%
+  border-collapse: separate
+  border-spacing: 0
+  border: 0
+  thead tr th
+    padding: 3px
+    background: #ccc
+    +text-shadow(white, 1px, 0)
+    font-weight: none
+    text-align: left
+  tbody tr
+    &.odd td
+      background: #eee
+    &.even td
+      background: #fff
+    &.selected td
+      background: lighten($menuHoverBackgroundColor, 10%)
+    &:hover td
+      background: $menuHoverBackgroundColor
+    td
+      padding: 3px
+      border-bottom: 1px solid #eee
+

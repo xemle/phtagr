@@ -35,6 +35,13 @@ class NavigatorHelper extends AppHelper {
     return 0;
   }
 
+  function getCurrentPage() {
+    if (isset($this->params['search']['page'])) {
+      return $this->params['search']['page'];
+    }
+    return 0;
+  }
+
   function hasPages() {
     return (isset($this->params['search']) && $this->params['search']['pageCount'] > 1);
   }
@@ -108,6 +115,10 @@ class NavigatorHelper extends AppHelper {
     return $this->Html->link(__('next', true), $link, array('class' => 'next'));
   }
 
+  function hasPrevMedia() {
+    return !empty($this->params['search']['prevMedia']);
+  }
+
   function prevMedia() {
     if (!isset($this->params['search']) ||
       !$this->params['search']['prevMedia']) {
@@ -134,11 +145,11 @@ class NavigatorHelper extends AppHelper {
     return $this->Html->link(__('overview', true), $link, array('class' => 'up'));
   }
 
-  function nextMedia() {
-    if (!isset($this->params['search']) || 
-      !$this->params['search']['nextMedia']) {
-      return;
-    }
+  function hasNextMedia() {
+    return !empty($this->params['search']['nextMedia']);
+  }
+
+  function getNextMediaUrl() {
     $params = $this->params['search'];
     $pos = $this->Search->getPos(1) + 1;
     $page = ceil($pos / $this->Search->getShow());
@@ -146,7 +157,27 @@ class NavigatorHelper extends AppHelper {
     $crumbs = $this->params['crumbs'];
     $crumbParams = $this->Breadcrumb->params($this->Breadcrumb->replace($this->Breadcrumb->replace($crumbs, 'page', $page), 'pos', $pos));
     $link = $baseUri . $crumbParams;
-    return $this->Html->link(__('next', true), $link, array('class' => 'next'));
+    return $link;
+  }
+
+  function nextMedia() {
+    if (!isset($this->params['search']) || 
+      !$this->params['search']['nextMedia']) {
+      return;
+    }
+    return $this->Html->link(__('next', true), $this->getNextMediaUrl(), array('class' => 'next'));
+  }
+
+  function pages() {
+    if (!$this->hasPages()) {
+      return;
+    }
+    $out = $this->Html->tag('div', 
+      $this->Html->tag('div', 
+        $this->prev() . ' ' . $this->numbers() . ' ' . $this->next(),
+        array('class' => 'sub', 'escape' => false)),
+      array('class' => 'p-navigator-pages', 'escape' => false));
+    return $out;
   }
 }
 ?>

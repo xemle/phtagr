@@ -312,7 +312,7 @@ class Media extends AppModel
 
     return $data;
   }
-
+  
   /** Generates a has and belongs to many relation query for the image
     @param id Id of the image
     @param model Model name
@@ -676,6 +676,257 @@ class Media extends AppModel
         break;
     }
     return $degree;
+  }
+
+  /**
+    Split the geo information to latitude and longitude
+
+    @param data Model Data
+    @param geo Geo data string
+    @return Model data 
+    */
+  function splitGeo(&$data, $geo) {
+    $numbers = preg_split('/\s*,\s*/', trim($geo));
+    if (count($numbers) != 2) {
+      Logger::debug("Invalid geo input: $geo");
+      return;
+    } elseif ($numbers[0] == "-") {
+      $data['Media']['latitude'] = null;
+      $data['Media']['longitude'] = null;
+      return;
+    } 
+    // validate numbers
+    foreach ($numbers as $number) {
+      if (!preg_match('/^[+-]?\d+(\.\d+)?$/', $number)) {
+        Logger::debug("Invalid geo input number: $number");
+        return;
+      }
+    }
+    $data['Media']['latitude'] = $numbers[0];
+    $data['Media']['longitude'] = $numbers[1];
+  }
+
+  function rotate(&$data, $orientation, $rotation) {
+    $rotateClockwise = array(
+      1 => 6, 6 => 3, 3 => 8, 8 => 1, 
+      2 => 5, 5 => 4, 4 => 7, 7 => 2
+      );
+    $rotated = $orientation;
+    switch ($rotation) {
+      case '270': $rotated = $rotateClockwise[$rotated];
+      case '180': $rotated = $rotateClockwise[$rotated];
+      case '90': $rotated = $rotateClockwise[$rotated];
+      default: break;
+    }
+    if ($rotated != $orientation) {
+      $data['Media']['orientation'] = $rotated;
+    }
+  }
+
+  /**
+    * Check acl group of the user and set it as media group id 
+    *
+    * @param data Data input
+    * @param user Current user
+    */
+  function prepareGroupData(&$data, &$user) {
+    if (!isset($data['Group']['id'])) {
+      return;
+    }
+    $groupId = $data['Group']['id'];
+    $groupIds = Set::extract('/Group/id', $this->Group->getGroupsForMedia($user));
+    $groupIds[] = -1; // no group
+    if (in_array($groupId, $groupIds)) {
+      $data['Media']['group_id'] = $groupId;
+    } else {
+      $data['Media']['group_id'] = 0;
+    }
+    return $data;
+  }
+
+  /** 
+    * Update ACL of media
+    *
+    * @param target Target model data
+    * @param media Media model data
+    * @param data Update data
+    */
+  function updateAcl(&$target, &$media, &$data) {
+    $fields = array('gacl', 'uacl', 'oacl', 'group_id');
+    // copy acl fields to target
+    foreach ($fields as $field) {
+      $target['Media'][$field] = $media['Media'][$field];
+    }
+    // Higher grants first
+    if (!empty($data['Media']['writeMeta'])) {
+      $this->setAcl(&$target, ACL_WRITE_META, ACL_WRITE_MASK, $data['Media']['writeMeta']);
+    }
+    if (!empty($data['Media']['writeTag'])) {
+      $this->setAcl(&$target, ACL_WRITE_TAG, ACL_WRITE_MASK, $data['Media']['writeTag']);
+    }
+
+    if (!empty($data['Media']['readOriginal'])) {
+      $this->setAcl(&$target, ACL_READ_ORIGINAL, ACL_READ_MASK, $data['Media']['readOriginal']);
+    }
+    if (!empty($data['Media']['readPreview'])) {
+      $this->setAcl(&$target, ACL_READ_PREVIEW, ACL_READ_MASK, $data['Media']['readPreview']); 
+    }
+
+    // Set group
+    if (!empty($data['Media']['group_id'])) {
+      $target['Media']['group_id'] = $data['Media']['group_id'];
+    }
+    // Remove unchanged values
+    foreach ($fields as $field) {
+      if ($target['Media'][$field] == $media['Media'][$field]) {
+        unset($target['Media'][$field]);
+      }
+    }
+  }
+  
+  /**
+   * Prepare the input data for edit
+   * 
+   * @param type $data User input data
+   * @return array Array of add and removals
+   */
+  function prepareMultiEditData(&$data) {
+    $tmp = array();
+    if (!empty($data['Media']['geo'])) {
+      $this->splitGeo(&$data, $data['Media']['geo']);
+    }
+    $fields = array('name', 'description', 'date', 'latitude', 'longitude', 'rotation', 'readPreview', 'readOriginal', 'writeTag', 'writeMeta', 'group_id');
+    foreach ($fields as $field) {
+      if (!empty($data['Media'][$field])) {
+        $tmp['Media'][$field] = $data['Media'][$field];
+      }
+    }
+      
+    $tag = $this->Tag->prepareMultiEditData(&$data);
+    if ($tag) {
+      $tmp['Tag'] = $tag['Tag'];
+    }
+    $category = $this->Category->prepareMultiEditData(&$data);
+    if ($category) {
+      $tmp['Category'] = $category['Category'];
+    }
+    $location = $this->Location->prepareMultiEditData(&$data);
+    if ($location) {
+      $tmp['Location'] = $location['Location'];
+    }
+    if (!count($tmp)) {
+      return false;
+    }
+    return $tmp;
+  }
+  
+  function editMulti(&$media, &$data) {
+    $tmp = array('Media' => array('id' => $media['Media']['id'], 'user_id' => $media['Media']['user_id']));
+
+    if ($media['Media']['canWriteTag']) {
+      $tag = $this->Tag->editMetaMulti(&$media, &$data);
+      if ($tag) {
+        $tmp['Tag'] = $tag['Tag'];
+      }
+    }
+    if ($media['Media']['canWriteMeta']) {
+      $category = $this->Category->editMetaMulti(&$media, &$data);
+      if ($category) {
+        $tmp['Category'] = $category['Category'];
+      }
+      $location = $this->Location->editMetaMulti(&$media, &$data);
+      if ($location) {
+        $tmp['Location'] = $location['Location'];
+      }
+      $fields = array('latitude', 'longitude');
+      foreach ($fields as $field) {
+        if (empty($data['Media'][$field])) {
+          continue;
+        }
+        $tmp['Media'][$field] = $data['Media'][$field];
+      }
+    }
+    if ($media['Media']['canWriteCaption']) {
+      $fields = array('name', 'caption', 'date');
+      foreach ($fields as $field) {
+        if (empty($data['Media'][$field])) {
+          continue;
+        } else {
+          $tmp['Media'][$field] = $data['Media'][$field];
+        }
+      }
+      if (isset($data['Media']['rotation'])) {
+        $this->rotate(&$tmp, $media['Media']['orientation'], $data['Media']['rotation']);
+      }
+    }
+    if (count($tmp) != 1 || count($tmp['Media']) != 2) {
+      $tmp['Media']['flag'] = ($media['Media']['flag'] | MEDIA_FLAG_DIRTY);
+    }
+    if ($media['Media']['canWriteAcl']) {
+      $this->updateAcl(&$tmp, &$media, &$data);
+    }
+    if (count($tmp) == 1 && count($tmp['Media']) == 2) {
+      return false;
+    }
+    return $tmp;
+  }
+  
+  /**
+   * Creates an new media data with updated values of given data
+   * 
+   * @param type $media Media model data array
+   * @param type $data Input data array
+   * @return type 
+   */
+  function editSingle(&$media, &$data) {
+    $tmp = array('Media' => array('id' => $media['Media']['id'], 'user_id' => $media['Media']['user_id']));
+    if ($media['Media']['canWriteTag']) {
+      $tag = $this->Tag->editMetaSingle(&$media, &$data);
+      if (isset($tag['Tag'])) {
+        $tmp['Tag'] = $tag['Tag'];
+      }
+    } 
+    if ($media['Media']['canWriteMeta']) {
+      $category = $this->Category->editMetaSingle(&$media, &$data);
+      if (isset($category['Category'])) {
+        $tmp['Category'] = $category['Category'];
+      }
+      $location = $this->Location->editMetaSingle(&$media, &$data);
+      if (isset($location['Location'])) {
+        $tmp['Location'] = $location['Location'];
+      }
+      if (!empty($data['Media']['geo'])) {
+        $this->splitGeo(&$data, $data['Media']['geo']);
+      }
+      $fields = array('latitude', 'longitude', 'altitude');
+      foreach ($fields as $field) {
+        if (isset($data['Media'][$field]) && $media['Media'][$field] !== $data['Media'][$field]) {
+          $tmp['Media'][$field] = $data['Media'][$field];
+        }
+      }
+    }
+    if ($media['Media']['canWriteCaption']) {
+      $fields = array('name', 'caption', 'date', 'latitude', 'longitude');
+      foreach ($fields as $field) {
+        if (isset($data['Media'][$field]) && $media['Media'][$field] !== $data['Media'][$field]) {
+          $tmp['Media'][$field] = $data['Media'][$field];
+        }
+      }
+      if (isset($data['Media']['rotation'])) {
+        $this->rotate(&$tmp, $media['Media']['orientation'], $data['Media']['rotation']);
+      }
+    }
+    if (count($tmp) != 1 || count($tmp['Media']) != 2) {
+      $tmp['Media']['flag'] = ($media['Media']['flag'] | MEDIA_FLAG_DIRTY);
+    }
+    if ($media['Media']['canWriteAcl']) {
+      $this->updateAcl(&$tmp, &$media, &$data);
+    }
+    // Unchanged data
+    if (count($tmp) == 1 && count($tmp['Media']) == 2) {
+      return false;
+    }
+    return $tmp;
   }
 }
 ?>

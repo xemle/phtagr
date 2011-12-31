@@ -25,10 +25,14 @@ class GroupsController extends AppController {
   var $uses = array('Group', 'User', 'Media');
   var $components = array('RequestHandler', 'Security', 'Email', 'Search');
   var $helpers = array('Form', 'Ajax', 'ImageData', 'Text');
-  var $menuItems = array();
+  var $subMenu = false;
 
   function beforeFilter() {
     parent::beforeFilter();
+    $this->subMenu = array(
+      'index' => __("List Group", true),
+      'create' => __("Create Group", true),
+      );
     $this->requireRole(ROLE_USER);
     $this->Security->blackHoleCallback = 'fail';
     $this->Security->requirePost = array('addMember');
@@ -38,7 +42,7 @@ class GroupsController extends AppController {
   }
 
   function beforeRender() {
-    $this->_setMenu();
+    $this->layout = 'backend';
     parent::beforeRender();
   }
 
@@ -286,19 +290,6 @@ class GroupsController extends AppController {
       $this->Session->setFlash(__("Could not find group", true));
       $this->redirect("index");
     }
-
-    $this->menuItems[] = array(
-      'text' => sprintf(__('Group: %s', true), $groupName), 
-      'type' => 'text', 
-      'submenu' => array(
-        'items' => array(
-          array(
-            'text' => __('Edit', true), 
-            'link' => 'edit/'.$groupName
-            )
-          )
-        )
-      );
   }
 
   /**
@@ -318,25 +309,5 @@ class GroupsController extends AppController {
     $this->redirect("index");
   }
 
-  function _getMenuItems() {
-    $items = array();
-    $items[] = array('text' => __('List groups', true), 'link' => 'index');
-    $items[] = array('text' => __('Create group', true), 'link' => 'create');
-    $items = am($items, $this->menuItems);
-    return $items;
-  }
-
-  function _setMenu() {
-    $items = $this->requestAction('/options/getMenuItems');
-    $me = '/'.strtolower(Inflector::pluralize($this->name));
-    foreach ($items as $index => $item) {
-      if ($item['link'] == $me) {
-        $item['submenu'] = array('items' => $this->_getMenuItems());
-        $items[$index] = $item;
-      }
-    }
-    $menu = array('items' => $items);
-    $this->set('mainMenu', $menu);
-  }
 }
 ?>

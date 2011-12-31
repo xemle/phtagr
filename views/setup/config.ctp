@@ -17,3 +17,13 @@
 </fieldset>
 <?php echo $form->submit(__('Continue', true)); ?>
 </form>
+<?php
+    $script = <<<'JS'
+(function($) {
+  $(document).ready(function() {
+    $(':submit').button();
+  });
+})(jQuery);
+JS;
+  echo $this->Html->scriptBlock($script, array('inline' => false));
+?>

@@ -25,8 +25,8 @@ App::import('File', 'Logger', array('file' => APP.'logger.php'));
 
 class AppController extends Controller
 {
-  var $helpers = array('Html', 'Form', 'Session', 'Javascript', 'Menu', 'Option');
-  var $components = array('Session', 'Cookie', 'Feed', 'RequestHandler');
+  var $helpers = array('Html', 'Js', 'Form', 'Session', 'Menu', 'Option');
+  var $components = array('Session', 'Cookie', 'Feed', 'RequestHandler', 'Menu');
   var $uses = array('User', 'Option');
   
   var $_nobody = null;
@@ -42,6 +42,37 @@ class AppController extends Controller
     $this->Feed->add('/comment/rss', array('title' => __('Recent comments', true)));
     
     $this->_configureEmail();
+    $this->_setMainMenu();
+    $this->_setTopMenu();
+  }
+  
+  function _setMainMenu() {
+    $this->Menu->setCurrentMenu('main-menu');
+    $this->Menu->addItem(__('Home', true), "/");
+    $this->Menu->addItem(__('Explorer', true), array('controller' => 'explorer'));
+    if ($this->hasRole(ROLE_GUEST)) {
+      $user = $this->getUser();
+      $this->Menu->addItem(__('My Photos', true), array('controller' => 'explorer', 'action' => 'user', $user['User']['username']));
+    }
+    if ($this->hasRole(ROLE_USER)) {
+      $this->Menu->addItem(__('Upload', true), array('controller' => 'browser', 'action' => 'quickupload'));
+    }
+  }
+
+  function _setTopMenu() {
+    $this->Menu->setCurrentMenu('top-menu');
+    $role = $this->getUserRole();
+    if ($role == ROLE_NOBODY) {
+      $this->Menu->addItem(__('Login', true), array('controller' => 'users', 'action' => 'login'));
+      if ($this->getOption('user.register.enable', 0)) {
+        $this->Menu->addItem(__('Sign Up', true), array('controller' => 'users', 'action' => 'register'));
+      }
+    } else {
+      $user = $this->getUser();
+      $this->Menu->addItem(sprintf(__('Howdy, %s!', true), $user['User']['username']), false);
+      $this->Menu->addItem(__('Logout', true), array('controller' => 'users', 'action' => 'logout'));
+      $this->Menu->addItem(__('Dashboard', true), array('controller' => 'options'));
+    }
   }
 
   /** Configure email component on any SMTP configuration values in core.php */
@@ -177,8 +208,10 @@ class AppController extends Controller
  
   function getUser() {
     if (!$this->_checkUser() || !$this->_user) {
-      if (!$this->_nobody) {
+      if (!$this->_nobody && isset($this->User)) {
         $this->_nobody = $this->User->getNobody();
+      } elseif (!$this->_nobody) {
+        $this->_nobody = array('User' => array('username' => '', 'password' => '', 'role' => ROLE_NOBODY));
       }
       return $this->_nobody;
     }

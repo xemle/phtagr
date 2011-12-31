@@ -1,4 +1,4 @@
-<?PHP
+<?php
 /*
  * phtagr.
  * 
@@ -23,9 +23,9 @@
 
 class ExplorerController extends AppController
 {
-  var $components = array('RequestHandler', 'FilterManager', 'Search', 'QueryBuilder', 'FastFileResponder');
+  var $components = array('RequestHandler', 'FilterManager', 'Search', 'QueryBuilder', 'FastFileResponder', 'Feed', 'FileCache');
   var $uses = array('Media', 'MyFile', 'Group', 'Tag', 'Category', 'Location');
-  var $helpers = array('Form', 'Html', 'Javascript', 'Ajax', 'ImageData', 'Time', 'ExplorerMenu', 'Rss', 'Search', 'Navigator', 'Tab', 'Breadcrumb');
+  var $helpers = array('Form', 'Html', 'Ajax', 'ImageData', 'Time', 'ExplorerMenu', 'Rss', 'Search', 'Navigator', 'Tab', 'Breadcrumb', 'Autocomplete');
 
   var $crumbs = array();
 
@@ -52,10 +52,13 @@ class ExplorerController extends AppController
         $groupSelect[0] = __('[Keep]', true);
         $groupSelect[-1] = __('[No Group]', true);
         $this->set('groups', $groupSelect);
+      } else {
+        $this->set('groups', array());
       }
     }
     $this->set('crumbs', $this->crumbs);
     $this->params['crumbs'] = $this->crumbs;
+    $this->Feed->add('/explorer/media/' . join('/', $this->Search->encodeCrumbs($this->crumbs)), array('title' => __('Slideshow Media RSS', true), 'id' => 'slideshow'));
     parent::beforeRender();
   }
 
@@ -65,8 +68,8 @@ class ExplorerController extends AppController
 
   function view() {
     if (!empty($this->data)) {
-      $crumbs = split('/', $this->data['breadcrumb']['current']);
-      $crumbs[] = $this->data['breadcrumb']['input'];
+      $crumbs = split('/', $this->data['Breadcrumb']['current']);
+      $crumbs[] = $this->data['Breadcrumb']['input'];
       $this->crumbs = $crumbs;
     }
     $this->render('index');
@@ -75,10 +78,10 @@ class ExplorerController extends AppController
   function autocomplete($type) {
     if (in_array($type, array('tag', 'category', 'city', 'sublocation', 'state', 'country'))) {
       if ($type == 'tag' || $type == 'category') {
-        $field = Inflector::camelize(Inflector::pluralize($type));
-        $value = $this->data[$field]['text'];
+        $field = Inflector::camelize($type);
+        $value = $this->data[$field]['names'];
       } else {
-        $value = $this->data['Locations'][$type];
+        $value = $this->data['Location'][$type];
       }
       $this->data = $this->_getAssociation($type, $value);
     } elseif ($type == 'crumb') {
@@ -91,15 +94,18 @@ class ExplorerController extends AppController
         'location_op' => array('OR', 'AND'), 
         'operand' => array('OR', 'AND'), 
         'show' => array(2, 6, 12, 24, 60, 120, 240),
-        'sort' => array('date', '-date', 'newest', 'random'), 
+        'sort' => array('changes', 'date', '-date', 'name', 'newest', 'popularity', 'random', 'viewed'), 
         'tag' => '_getAssociation', 
         'tag_op' => array('OR', 'AND'), 
         'type' => array('image', 'video'),
         'to' => 'true',
         'user' => '_getAssociation'
       );
+      if ($this->hasRole(ROLE_USER)) {
+        $queryMap['visibility'] = array('private', 'group', 'user', 'public');
+      }
       $queryTypes = array_keys($queryMap);
-      $input = trim($this->data['breadcrumb']['input']);
+      $input = trim($this->data['Breadcrumb']['input']);
       // cut input to maximum of 64 chars
       if (strlen($input) > 64) {
         $input = substr($input, 0, 64);
@@ -142,7 +148,7 @@ class ExplorerController extends AppController
       Logger::warn("Invalid autocomlete type: $type");
       $this->redirect(404);
     }
-    $this->layout = 'bare';
+    $this->layout = 'xml';
     if (Configure::read('debug') > 1) {
       Configure::write('debug', 1);
     }
@@ -213,52 +219,61 @@ class ExplorerController extends AppController
 
   function _getAssociation($type, $value) {
     $result = array();
+    $isNegated = false;
+    $normalized = $value;
+    if ($value && $value[0] == '-') {
+      $normalized = trim(substr($value, 1));
+      $isNegated = true;
+    }
+    if (!$normalized) {
+      return $result;
+    }
     switch ($type) {
       case 'tag':
         $data = $this->Media->Tag->find('all', array(
-          'conditions' => array('name LIKE' => $value.'%'), 
+          'conditions' => array('name LIKE' => $normalized.'%'), 
           'limit' => 10
           ));
         $result = Set::extract('/Tag/name', $data);
         break;
       case 'category':
         $data = $this->Media->Category->find('all', array(
-          'conditions' => array('name LIKE' => $value.'%'),
+          'conditions' => array('name LIKE' => $normalized.'%'),
           'limit' => 10
           ));
         $result = Set::extract('/Category/name', $data);
         break;
       case 'location':
         $data = $this->Media->Location->find('all', array(
-          'conditions' => array('name LIKE' => $value.'%'),
+          'conditions' => array('name LIKE' => $normalized.'%'),
           'limit' => 10
           ));
         $result = Set::extract('/Location/name', $data);
         break;
       case 'city':
         $data = $this->Media->Location->find('all', array(
-          'conditions' => array('name LIKE' => $value.'%', 'type' => LOCATION_CITY),
+          'conditions' => array('name LIKE' => $normalized.'%', 'type' => LOCATION_CITY),
           'limit' => 10
           ));
         $result = Set::extract('/Location/name', $data);
         break;
       case 'sublocation':
         $data = $this->Media->Location->find('all', array(
-          'conditions' => array('name LIKE' => $value.'%', 'type' => LOCATION_SUBLOCATION),
+          'conditions' => array('name LIKE' => $normalized.'%', 'type' => LOCATION_SUBLOCATION),
           'limit' => 10
           ));
         $result = Set::extract('/Location/name', $data);
         break;
       case 'state':
         $data = $this->Media->Location->find('all', array(
-          'conditions' => array('name LIKE' => $value.'%', 'type' => LOCATION_STATE),
+          'conditions' => array('name LIKE' => $normalized.'%', 'type' => LOCATION_STATE),
           'limit' => 10
           ));
         $result = Set::extract('/Location/name', $data);
         break;
       case 'country':
         $data = $this->Media->Location->find('all', array(
-          'conditions' => array('name LIKE' => $value.'%', 'type' => LOCATION_COUNTRY),
+          'conditions' => array('name LIKE' => $normalized.'%', 'type' => LOCATION_COUNTRY),
           'limit' => 10
           ));
         $result = Set::extract('/Location/name', $data);
@@ -281,6 +296,13 @@ class ExplorerController extends AppController
         Logger::err("Unknown type $type");
         $this->redirect(404);
         break;
+    }
+    if ($isNegated && count($result)) {
+      $tmp = array();
+      foreach ($result as $name) {
+        $tmp[] = '-' . $name;
+      }
+      $result = $tmp;
     }
     return $result;
   }
@@ -457,212 +479,43 @@ class ExplorerController extends AppController
     $this->render('index');
   }
 
-  /** Updates the ids lists of a given association. It adds and deletes items
-    * to the habtm assoziation
-    @param data Array of image data
-    @param assoc Name of HABTM accosciation
-    @param items List of items
-    @return Updated array of image data */
-  function _handleHabtm(&$data, $assoc, $items) {
-    if (!count($items)) {
-      return $data;
-    }
-
-    // Create id itemss of deletion and addition
-    $add = $this->$assoc->filterItems($items);
-    $del = $this->$assoc->filterItems($items, false);
-   
-    $addIds = $this->$assoc->createIdList($add, 'name', true);
-    $delIds = $this->$assoc->createIdList($del, 'name', false);
-
-    // Remove and add association
-    $oldIds = Set::extract($data, "$assoc.{n}.id");
-    $ids = array_diff($oldIds, $delIds);
-    $ids = array_unique(am($ids, $addIds));
-
-    if (count($ids) != count($oldIds) ||
-      array_diff($oldIds, $ids))
-      $data[$assoc][$assoc] = $ids;
-    return $data;
-  }
-
-  /** 
-    @param Array of Locations
-    @return Array of location types, which will be overwritten */
-  function _getNewLocationsTypes($locations) {
-    $new = $this->Location->filterItems($locations);
-    $types = Set::extract($new, "{n}.type");
-    return $types;
-  }
-
-  /** Removes locations which will be overwritten
-    @param data Image data array
-    @param types Array of location types which will be overwritten */
-  function _removeLocation(&$data, $types) {
-    if (!count($data['Location']))
-      return;
-    foreach ($data['Location'] as $key => $location) {
-      if (!is_numeric($key))
-        continue;
-      if (in_array($location['type'], $types)) {
-        unset($data['Location'][$key]);
-      }
-    }
-  }
-
-  function _editAcl(&$media, $groupId) {
-    $changedAcl = false;
-    // Backup old values
-    $fieldsAcl = array('gacl', 'uacl', 'oacl', 'group_id');
-    foreach ($fieldsAcl as $field) {
-      $media['Media']['_'.$field] = $media['Media'][$field];
-    }
-
-    // Change access properties 
-    if ($groupId != 0) {
-      $media['Media']['group_id'] = $groupId;
-    }
-
-    // Higher grants first
-    $this->Media->setAcl(&$media, ACL_WRITE_META, ACL_WRITE_MASK, $this->data['acl']['write']['meta']);
-    $this->Media->setAcl(&$media, ACL_WRITE_TAG, ACL_WRITE_MASK, $this->data['acl']['write']['tag']);
-
-    $this->Media->setAcl(&$media, ACL_READ_ORIGINAL, ACL_READ_MASK, $this->data['acl']['read']['original']);
-    $this->Media->setAcl(&$media, ACL_READ_PREVIEW, ACL_READ_MASK, $this->data['acl']['read']['preview']);
-
-    // Evaluate changes
-    foreach ($fieldsAcl as $field) {
-      if ($media['Media']['_'.$field] != $media['Media'][$field]) {
-        $changedAcl = true;
-        break;
-      }
-    }
-    return $changedAcl;
-  }
-
+ 
   function edit() {
     if (isset($this->data)) {
-      // create item lists
-      $tags = $this->Tag->createItems($this->data['Tags']['text']);
-      if (isset($this->data['Categories']) && isset($this->data['Locations'])) {
-        $categories = $this->Category->createItems($this->data['Categories']['text']);
-        $locations = $this->Location->createLocationItems($this->data['Locations']);
-        $delLocations = $this->_getNewLocationsTypes($locations);
-      } else {
-        $categories = array();
-        $locations = array();
-        $delLocations = array();
-      }
-      
-      $user = $this->getUser();
-      $userId = $user['User']['id'];
-      $groupIds = Set::extract('/Group/id', $this->Group->getGroupsForMedia($this->getUser()));
-      $groupIds[] = -1; // no group
-      if (isset($this->data['Group']['id']) &&
-        in_array($this->data['Group']['id'], $groupIds)) {
-        $groupId = intval($this->data['Group']['id']);
-      } else {
-        $groupId = 0;
-      }
-    
-      $date = false;
-      if (!empty($this->data['Media']['date'])) {
-        $time = strtotime($this->data['Media']['date']);
-        if ($time !== false) {
-          $date = date("Y-m-d H:i:s", $time);
-        } else {
-          Logger::warn("Could not convert time of '{$this->data['Media']['date']}'");
-        }
-      }
-      $geoData = false;
-      if (!empty($this->data['Media']['geo'])) {
-        if ($this->data['Media']['geo'] == '-' || $this->data['Media']['geo'] == '-,-') {
-          $geoData = array('latitude' => null, 'longitude' => null);
-        } elseif (preg_match('/^\s*([+\-]?[0-9]+(\.[0-9]+)?)\s*,\s*([+\-]?[0-9]+(\.[0-9]+)?)\s*$/', $this->data['Media']['geo'], $m)) {
-          $geoData = array('latitude' => $m[1], 'longitude' => $m[3]);
-        }
-      }
-
-      $ids = split(',', $this->data['Media']['ids']);
+      $ids = preg_split('/\s*,\s*/', $this->data['Media']['ids']);
       $ids = array_unique($ids);
-      foreach ($ids as $id) {
-        $id = intval($id);
-        if ($id == 0)
-          continue;
+      if (!count($ids)) {
+        $this->redirect('view/' . implode('/', $this->Search->encodeCrumbs($this->crumbs)));
+      }
 
-        $media = $this->Media->findById($id);
-        if (!$media) {
-          Logger::debug("Could not find Media with id $id");
-          continue;
-        }
+      $user = $this->getUser();
+      $this->Media->prepareGroupData(&$this->data, &$user);
+      $editData = $this->Media->prepareMultiEditData(&$this->data);
+      
+      $allMedia = $this->Media->find('all', array('conditions' => array('Media.id' => $ids)));
+      $changedMedia = array();
+      foreach ($allMedia as $media) {
+        $this->Media->setAccessFlags(&$media, &$user);
         // primary access check
-        if (!$this->Media->checkAccess(&$media, &$user, ACL_WRITE_TAG, ACL_WRITE_MASK, &$members)) {
+        if (!$media['Media']['canWriteTag'] && !$media['Media']['canWriteAcl']) {
           Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change any metadata of image ".$id);
           continue;
         }
-
-        $changedMeta = false;
-
-        // Backup old associations
-        $habtms = array_keys($this->Media->hasAndBelongsToMany);
-        $oldHabtmIds = array();
-        foreach ($habtms as $habtm) {
-          $oldHabtmIds[$habtm] = Set::extract($media, "$habtm.{n}.id");
+        $tmp = $this->Media->editMulti(&$media, $editData);
+        if ($tmp) {
+          $changedMedia[] = $tmp;
         }
-
-        // Update metadata
-        $this->_handleHabtm(&$media, 'Tag', $tags);
-        if ($this->Media->checkAccess(&$media, &$user, ACL_WRITE_META, ACL_WRITE_MASK, &$members)) {
-          if ($date) {
-            $media['Media']['date'] = $date;
-            $changedMeta = true;
-          }
-          $this->_handleHabtm(&$media, 'Category', $categories);
-          $this->_removeLocation(&$media, &$delLocations);
-          $this->_handleHabtm(&$media, 'Location', $locations);
-          if ($geoData) {
-            foreach ($geoData as $geo => $value) {
-              if ($media['Media'][$geo] !== $value) {
-                $media['Media'][$geo] = $value;
-                $changedMeta = true;
-              }
-            }      
-          }
+      }
+      if ($changedMedia) {
+        if (!$this->Media->saveAll($changedMedia)) {
+          Logger::warn("Could not save media: " . join(", ", Set::extract("/Media/id", $changedMedia)));
         } else {
-          Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change metadata of image ".$media['Media']['id']);
+          Logger::debug("Saved media: " . join(', ', Set::extract("/Media/id", $changedMedia)));
         }
-      
-        // Evaluate, if data changed and cleanup of unchanged HABTMs
-        foreach ($habtms as $habtm) {
-          if (isset($media[$habtm][$habtm]) && 
-            (count($media[$habtm][$habtm]) != count($oldHabtmIds[$habtm]) ||
-            count(array_diff($media[$habtm][$habtm], $oldHabtmIds[$habtm])))) {
-            $changedMeta = true;
-          } elseif (isset($media[$habtm])) {
-            unset($media[$habtm]);
-          }
-        }
-
-        $changedAcl = false;
-        if (!empty($this->data['acl'])) {
-          $this->Media->setAccessFlags(&$media, $user);
-
-          if ($this->Media->checkAccess(&$media, &$user, 1, 0)) {
-            $changedAcl = $this->_editAcl(&$media, $groupId);
-          } else {
-            Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change access rights of image ".$id);
-          }
-        }
-
-        if ($changedMeta || $changedAcl) { 
-          if ($changedMeta) {
-            $media['Media']['flag'] |= MEDIA_FLAG_DIRTY;
-          }
-          $media['Media']['modified'] = null;
-          if (!$this->Media->save($media)) {
-            Logger::warn('Could not save new metadata/acl to image '.$id);
-          } else {
-            Logger::info('Updated metadata or acl of '.$id);
+        foreach ($changedMedia as $media) {
+          if (isset($media['Media']['orientation'])) {
+            $this->FileCache->delete($media);
+            Logger::debug("Deleted previews of media {$media['Media']['id']}");
           }
         }
       }
@@ -676,7 +529,7 @@ class ExplorerController extends AppController
     * @todo Check and handle non-ajax request
     */
   function editmeta($id) {
-    if (!$this->RequestHandler->isAjax() || !$this->RequestHandler->isPost()) {
+    if (!$this->RequestHandler->isAjax()) {
       Logger::warn("Decline wrong ajax request");
       $this->redirect(null, '404');
     }
@@ -684,16 +537,13 @@ class ExplorerController extends AppController
     $user = $this->getUser();
     $media = $this->Media->findById($id);
     $this->Media->setAccessFlags(&$media, $user);
-    $this->set('data', $media);
-    $this->layout='bare';
-    if (!$this->Media->checkAccess(&$media, &$user, ACL_WRITE_META, ACL_WRITE_MASK)) {
-      if ($this->Media->checkAccess(&$media, &$user, ACL_WRITE_TAG, ACL_WRITE_MASK)) {
-        $this->render('edittag');
-      } else {
-        Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change ACL of image ".$id);
-        $this->render('updatemeta');
-      }
+    if (!$media['Media']['canWriteTag']) {
+      Logger::warn("User is not allowed to edit media {$media['Media']['id']}");
+      $this->redirect(null, '403');
     }
+    $this->data = $media;
+    $this->layout='bare';
+    $this->render('editmeta');
     //Configure::write('debug', 0);
   }
 
@@ -701,52 +551,42 @@ class ExplorerController extends AppController
    * @todo Check and handle non-ajax request 
    */
   function savemeta($id) {
-    if (!$this->RequestHandler->isAjax() || !$this->RequestHandler->isPost()) {
+    if (!$this->RequestHandler->isAjax()) {
       Logger::warn("Decline wrong ajax request");
       $this->redirect(null, '404');
     }
     $id = intval($id);
     $this->layout='bare';
     $user = $this->getUser();
+    $username = $user['User']['username'];
     if (isset($this->data)) {
       $media = $this->Media->findById($id);
-
-      if (!$this->Media->checkAccess(&$media, &$user, ACL_WRITE_TAG, ACL_WRITE_MASK)) {
-        Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change tags of image ".$id);
+      $this->Media->setAccessFlags(&$media, $user);
+      if (!$media) {
+        Logger::warn("Invalid media id: $id");
+        $this->redirect(null, '404');
+      } elseif (!$media['Media']['canWriteTag'] && !$media['Media']['canWriteAcl']) {
+        Logger::warn("User '{$username}' ({$user['User']['id']}) has no previleges to change tags of image ".$id);
       } else {
-        $ids = $this->Tag->createIdListFromText($this->data['Tags']['text'], 'name', true);
-        $media['Tag']['Tag'] = $ids;
-
-        if ($this->Media->checkAccess(&$media, &$user, ACL_WRITE_META, ACL_WRITE_MASK)) {
-          $media['Media']['date'] = $this->data['Media']['date'];
-          $ids = $this->Category->createIdListFromText($this->data['Categories']['text'], 'name', true);
-          $media['Category']['Category'] = $ids;
-
-          $locations = $this->Location->createLocationItems($this->data['Locations']);
-          $locations = $this->Location->filterItems($locations);
-          $ids = $this->Location->CreateIdList($locations, true);
-          $media['Location']['Location'] = $ids;      
-          if (!empty($this->data['Media']['geo'])) {
-            if ($this->data['Media']['geo'] == '-' || $this->data['Media']['geo'] == '-,-') {
-              $media['Media']['latitude'] = null;
-              $media['Media']['longitude'] = null;
-            } elseif (preg_match('/^\s*([+\-]?[0-9]+(\.[0-9]+)?)\s*,\s*([+\-]?[0-9]+(\.[0-9]+)?)\s*$/', $this->data['Media']['geo'], $m)) {
-              $geoData = array('latitude' => $m[1], 'longitude' => $m[3]);
-              $media['Media']['latitude'] = $m[1];
-              $media['Media']['longitude'] = $m[3];
-            }
-          }
+        $this->_checkAndSetGroupId();
+        $tmp = $this->Media->editSingle(&$media, &$this->data);
+        if (!$this->Media->save($tmp)) {
+          Logger::warn("Could not save media");
+          Logger::debug($tmp);
         } else {
-          Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change meta data of image ".$id);
+          Logger::info("Updated meta of media {$tmp['Media']['id']}");
         }
-        $media['Media']['modified'] = null;
-        $media['Media']['flag'] |= MEDIA_FLAG_DIRTY;
-        $this->Media->save($media);
+        if (isset($tmp['Media']['orientation'])) {
+          $this->FileCache->delete($tmp);
+          Logger::debug("Deleted previews of media {$tmp['Media']['id']}");
+        }
       }
     }
     $media = $this->Media->findById($id);
     $this->Media->setAccessFlags(&$media, $user);
-    $this->set('data', $media);
+    $this->data = $media;
+    $this->Search->setUser($user['User']['username']);
+    $this->Search->setHelperData();
     Configure::write('debug', 0);
     $this->render('updatemeta');
   }
@@ -756,7 +596,7 @@ class ExplorerController extends AppController
    * @todo Check and handle non-ajax request 
    */
   function updatemeta($id) {
-    if (!$this->RequestHandler->isAjax() || !$this->RequestHandler->isPost()) {
+    if (!$this->RequestHandler->isAjax()) {
       Logger::warn("Decline wrong ajax request");
       $this->redirect(null, '404');
     }
@@ -765,11 +605,14 @@ class ExplorerController extends AppController
     $this->Media->setAccessFlags(&$media, $this->getUser());
     $this->set('data', $media);
     $this->layout='bare';
+    $user = $this->getUser();
+    $this->Search->setUser($user['User']['username']);
+    $this->Search->setHelperData();
     Configure::write('debug', 0);
   }
 
   function editacl($id) {
-    if (!$this->RequestHandler->isAjax() || !$this->RequestHandler->isPost()) {
+    if (!$this->RequestHandler->isAjax()) {
       Logger::warn("Decline wrong ajax request");
       $this->redirect(null, '404');
     }
@@ -777,7 +620,7 @@ class ExplorerController extends AppController
     $user = $this->getUser();
     $media = $this->Media->findById($id);
     $this->Media->setAccessFlags(&$media, $user);
-    $this->set('data', $media);
+    $this->data = $media;
     $this->layout='bare';
     if ($this->Media->checkAccess(&$media, &$user, 1, 0)) {
       $groups = $this->Group->getGroupsForMedia($user);
@@ -793,7 +636,7 @@ class ExplorerController extends AppController
   }
 
   function saveacl($id) {
-    if (!$this->RequestHandler->isAjax() || !$this->RequestHandler->isPost()) {
+    if (!$this->RequestHandler->isAjax()) {
       Logger::warn("Decline wrong ajax request");
       $this->redirect(null, '404');
     }
@@ -805,37 +648,25 @@ class ExplorerController extends AppController
       $media = $this->Media->findById($id);
       $user = $this->getUser();
       $userId = $user['User']['id'];
+      $this->Search->setUser($user['User']['username']); // Triggers acl descriptions
       if (!$this->Media->checkAccess(&$media, &$user, 1, 0)) {
         Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change ACL of image ".$id);
       } else {
-        // check for existing group of user
-        $groupIds = Set::extract('/Group/id', $this->Group->getGroupsForMedia($user));
-        $groupIds[] = -1; // no group
-        if (isset($this->data['Group']['id']) && in_array($this->data['Group']['id'], $groupIds)) {
-          $groupId = $this->data['Group']['id'];
-        } else {
-          $groupId = 0;
-        }
-        if ($groupId != 0) {
-          $media['Media']['group_id'] = $groupId;
-        }
-
-        // higher grants first
-        $this->Media->setAcl(&$media, ACL_WRITE_TAG, ACL_WRITE_MASK, $this->data['acl']['write']['tag']);
-        $this->Media->setAcl(&$media, ACL_WRITE_META, ACL_WRITE_MASK, $this->data['acl']['write']['meta']);
-        $this->Media->setAcl(&$media, ACL_READ_PREVIEW, ACL_READ_MASK, $this->data['acl']['read']['preview']);
-        $this->Media->setAcl(&$media, ACL_READ_ORIGINAL, ACL_READ_MASK, $this->data['acl']['read']['original']);
-
-        $media['Media']['modified'] = null;
-        $this->Media->save($media['Media'], true, array('group_id', 'gacl', 'uacl', 'oacl'));
+        $this->Media->prepareGroupData(&$this->data, &$user);
+        $tmp = array('Media' => array('id' => $id));
+        $this->Media->updateAcl(&$tmp, &$media, &$this->data);
+        $this->Media->save($tmp, true);
+        Logger::info("Changed acl of media $id");
       }
     }
     $media = $this->Media->findById($id);
     $this->Media->setAccessFlags(&$media, $this->getUser());
-    $this->set('data', $media);
+    $this->data = $media;
     $this->layout='bare';
-    $this->render('updatemeta');
+    $this->Search->setUser($user['User']['username']);
+    $this->Search->setHelperData();
     Configure::write('debug', 0);
+    $this->render('updatemeta');
   }
 
   function sync($id) {

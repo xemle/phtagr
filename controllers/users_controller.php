@@ -27,39 +27,24 @@ class UsersController extends AppController
   var $uses = array('Option', 'Media', 'MyFile'); 
   var $helpers = array('Form', 'Number', 'Time', 'Text', 'ImageData');
   var $paginate = array('limit' => 10, 'order' => array('User.username' => 'asc')); 
-  var $menuItems = array();
+  var $subMenu = false;
+
+  function beforeFilter() {
+    parent::beforeFilter();
+    $this->subMenu = array(
+      'index' => __("List User", true),
+      );
+    if ($this->hasRole(ROLE_SYSOP)) {
+      $this->subMenu = am($this->subMenu, array(
+        array('action' => 'add', 'title' => __("Add User", true), 'admin' => true),
+        array('action' => 'register', 'title' => __("Registration", true), 'admin' => true),
+        ));
+    }
+    $this->layout = 'backend';
+  }
 
   function beforeRender() {
-    $this->_setMenu();
     parent::beforeRender();
-  }
-
-  function _getMenuItems() {
-    $items = array();
-    $items[] = array('text' => __('List users', true), 'link' => 'index');
-    $items[] = array('text' => __('Add user', true), 'link' => 'add');
-    $items[] = array('text' => __('Registration', true), 'link' => 'register');
-    $items = am($items, $this->menuItems);
-    return $items;
-  }
-
-  function _setMenu() {
-    if ($this->hasRole(ROLE_SYSOP)) {
-      $items = $this->requestAction('/system/getMenuItems');
-      $me = '/admin/'.strtolower(Inflector::pluralize($this->name));
-      foreach ($items as $index => $item) {
-        if ($item['link'] == $me) {
-          $item['submenu'] = array('items' => $this->_getMenuItems());
-          $items[$index] = $item;
-        }
-      }
-      $menu = array('items' => $items);
-      $this->set('mainMenu', $menu);
-    } elseif ($this->hasRole(ROLE_USER)) {
-      $items = $this->requestAction('/options/getMenuItems');
-      $menu = array('items' => $items);
-      $this->set('mainMenu', $menu);
-    }
   }
 
   function __fromReadableSize($readable) {
@@ -103,6 +88,7 @@ class UsersController extends AppController
   }
 
   function index() {
+    $this->set('isAdmin', $this->hasRole(ROLE_SYSOP));
     $this->data = $this->User->findVisibleUsers($this->getUser());
   }
 
@@ -181,6 +167,7 @@ class UsersController extends AppController
       unset($this->data['User']['password']);
     }
     $this->set('register', $this->Option->getValue($this->getUser(), 'user.register.enable', 0));
+    $this->layout = 'default';
   }
 
   function logout() {
@@ -217,6 +204,19 @@ class UsersController extends AppController
     }
     return true;
   }
+  
+  /** Add 3rd level menu for user edit for admin */
+  function _addAdminEditMenu($userId) {
+    $subActions = array(
+      'password' => __("Password", true),
+      'path' => __("Local Paths", true));
+    $subItems = array('url' => array('admin' => true, 'action' => 'edit', $userId), 'title' => __('Edit', true), 'active' => true);
+    foreach ($subActions as $action => $title) {
+      $subItems[] = array('url' => array('admin' => true, 'action' => $action, $userId), 'title' => $title, 'active' => ('admin_'.$action == $this->action));
+    }
+    Logger::debug($this->action);
+    $this->subMenu[] = $subItems; 
+  }
 
   function admin_edit($id) {
     $this->requireRole(ROLE_SYSOP, array('loginRedirect' => '/admin/users'));
@@ -225,8 +225,7 @@ class UsersController extends AppController
     if (!empty($this->data) && $this->_lastAdminCheck($id)) {
       $this->data['User']['id'] = $id;
 
-      $this->User->set($this->data);
-      if ($this->User->save(null, true, array('password', 'email', 'expires', 'quota', 'firstname', 'lastname', 'role'))) {
+      if ($this->User->save($this->data, true, array('email', 'expires', 'quota', 'firstname', 'lastname', 'role'))) {
         Logger::debug("Data of user {$this->data['User']['id']} was updated");
         $this->Session->setFlash(__('User data was updated', true));
       } else {
@@ -234,37 +233,35 @@ class UsersController extends AppController
         Logger::debug($this->User->validationErrors);
         $this->Session->setFlash(__('Could not be updated', true));
       }
+    }
 
-      if (!empty($this->data['Option']['path']['fspath'])) {
-        $fsroot = $this->data['Option']['path']['fspath'];
-        $fsroot = Folder::slashTerm($fsroot);
+    $this->data = $this->User->findById($id);
+    $this->set('allowAdminRole', ($this->getUserRole() == ROLE_ADMIN) ? true : false);
 
-        if (is_dir($fsroot))
-          $this->Option->addValue('path.fsroot[]', $fsroot, $id);
+    $this->_addAdminEditMenu($id);
+  }
+
+  function admin_password($id) {
+    $this->requireRole(ROLE_SYSOP, array('loginRedirect' => '/admin/users'));
+
+    $id = intval($id);
+    if (!empty($this->data)) {
+      $this->data['User']['id'] = $id;
+
+      if ($this->User->save($this->data, true, array('password'))) {
+        Logger::debug("Data of user {$this->data['User']['id']} was updated");
+        $this->Session->setFlash(__('User data was updated', true));
+      } else {
+        Logger::err("Could not save user data");
+        Logger::debug($this->User->validationErrors);
+        $this->Session->setFlash(__('Could not be updated', true));
       }
     }
 
     $this->data = $this->User->findById($id);
     unset($this->data['User']['password']);
 
-    $this->set('fsroots', $this->Option->buildTree($this->data, 'path.fsroot'));
-    $this->set('allowAdminRole', ($this->getUserRole() == ROLE_ADMIN) ? true : false);
-    $this->menuItems[] = array(
-      'text' => 'User '.$this->data['User']['username'], 
-      'type' => 'text', 
-      'submenu' => array(
-        'items' => array(
-          array(
-            'text' => 'Edit', 
-            'link' => 'edit/'.$id
-            ),
-          array(
-            'text' => 'External Paths', 
-            'link' => 'path/'.$id
-            )
-          )
-        )
-      );
+    $this->_addAdminEditMenu($id);
   }
 
   function admin_path($id) {
@@ -295,23 +292,7 @@ class UsersController extends AppController
     unset($this->data['User']['password']);
 
     $this->set('fsroots', $this->Option->buildTree($this->data, 'path.fsroot'));
-
-    $this->menuItems[] = array(
-      'text' => 'User '.$this->data['User']['username'], 
-      'type' => 'text', 
-      'submenu' => array(
-        'items' => array(
-          array(
-            'text' => 'Edit', 
-            'link' => 'edit/'.$id
-            ),
-          array(
-            'text' => 'External Paths', 
-            'link' => 'path/'.$id
-            )
-          )
-        )
-      );
+    $this->_addAdminEditMenu($id);
   }
  
   function admin_add() {
@@ -341,12 +322,12 @@ class UsersController extends AppController
     $user = $this->User->findById($id);
     if (!$user) {
       $this->Session->setFlash(__("Could not delete user: user not found!", true));
-      $this->redirect('/admin/users/');
+      $this->redirect('index');
     } else {
-      $this->User->del($id);
+      $this->User->delete($id);
       Logger::notice("All data of user '{$user['User']['username']}' ($id) deleted");
       $this->Session->setFlash(sprintf(__("User %s was deleted", true), $user['User']['username']));
-      $this->redirect('/admin/users/');
+      $this->redirect('index');
     }
   }
 
@@ -430,6 +411,7 @@ class UsersController extends AppController
         }
       }
     }
+    $this->layout = 'default';
   }
 
   function register() {
@@ -461,6 +443,7 @@ class UsersController extends AppController
     unset($this->data['User']['password']);
     unset($this->data['User']['confirm']);
     unset($this->data['Captcha']['verification']);
+    $this->layout = 'default';
   }
 
   function captcha() {

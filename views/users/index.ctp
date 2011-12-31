@@ -1,4 +1,9 @@
-<h1><?php __('Users'); ?></h1>
+<h1><?php 
+  __('Users'); 
+  if ($isAdmin) {
+    echo ' ' . $html->link(__('Admin List', true), array('admin' => true, 'action' => 'index'));
+  }
+?></h1>
 
 <?php echo $session->flash(); ?>
 

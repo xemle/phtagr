@@ -1,42 +1,54 @@
-<h1><?php echo $this->data['Media']['name'] ?></h1>
 <?php echo $session->flash(); ?>
 
-
-<div class="paginator"><div class="subpaginator">
-<?php
-echo $navigator->prevMedia().' '.$navigator->up().' '.$navigator->nextMedia();
-?>
-</div></div>
-
-<?php
-  $withMap = false;
-  if (isset($this->data['Media']['longitude']) && isset($this->data['Media']['latitude']) &&
-    $map->hasApi()) {
-    $withMap = true;
-    echo $map->script();
-  }
-?>
-
-<div class="mediaPreview">
+<div id="p-media-preview">
+<div class="image">
+<span></span>
 <?php 
   if (($this->data['Media']['type'] & MEDIA_TYPE_VIDEO) > 0) {
     echo $flowplayer->video($this->data);
   } else {
-    $size = $imageData->getimagesize($this->data, OUTPUT_SIZE_PREVIEW);
-    echo "<img src=\"".Router::url("/media/preview/".$this->data['Media']['id'])."\" $size[3] alt=\"{$this->data['Media']['name']}\"/>"; 
+    //$size = $imageData->getimagesize($this->data, OUTPUT_SIZE_PREVIEW);
+    $size = $imageData->getimagesize($this->data, 960);
+    $src = Router::url("/media/preview/".$this->data['Media']['id']);
+    $img = $html->tag('img', null, array('src' => $src, 'width' => $size[0], 'height' => $size[1], 'alt' => $this->data['Media']['name']));
+    if ($navigator->hasNextMedia()) {
+      echo $html->link($img, $navigator->getNextMediaUrl(), array('escape' => false));
+    } else {
+      echo $img;
+    }
   }
 ?>
 </div>
+<div class="navigator">
+<div class="up"><div class="sub"><?php echo $navigator->up(); ?></div></div>
+<?php if ($navigator->hasPrevMedia()): ?>
+<div class="prev"><div class="sub"><?php echo $navigator->prevMedia(); ?></div></div>
+<?php endif; ?>
+<?php if ($navigator->hasNextMedia()): ?>
+<div class="next"><div class="sub"><?php echo $navigator->nextMedia(); ?></div></div>
+<?php endif; ?>
+</div>
+</div>
 
+<div id="image-tabs">
 <?php
-  $items = array(array('name' => __("General", true), 'active' => true), __("Media Details", true));
+  $items = array(__("General", true), __("Media Details", true));
+  if ($map->hasApi() && $map->hasMediaGeo($this->data)) {
+    $items['map'] = __("Map", true);
+  }
+  if ($this->data['Media']['canWriteTag']) {
+    $items['edit'] = __("Edit", true);
+  }
+  if ($this->data['Media']['canWriteAcl']) {
+    $items['acl'] = __("Access Right", true);
+  }
   echo $tab->menu($items);
 ?>
-<?php echo $tab->open(0, true); ?>
+<?php echo $tab->open(0); ?>
 <div class="meta">
 <div id="meta-<?php echo $this->data['Media']['id']; ?>">
 <table class="bare"> 
-  <?php echo $html->tableCells($imageData->metaTable(&$this->data, $withMap)); ?>
+  <?php echo $html->tableCells($imageData->metaTable(&$this->data)); ?>
 </table>
 </div>
 </div><!-- meta -->
@@ -86,10 +98,96 @@ echo $navigator->prevMedia().' '.$navigator->up().' '.$navigator->nextMedia();
 </table>
 </div>
 <?php echo $tab->close(); ?>
+<?php 
+  if ($map->hasApi() && $map->hasMediaGeo($this->data)) {
+    echo $tab->open('map');
+    echo $map->container();
+    echo $map->script();
+    echo $tab->close(); 
+  }
+  if ($this->data['Media']['canWriteTag']) {
+    echo $tab->open('edit');
+    echo $form->create(null, array('url' => 'update/'.$this->data['Media']['id'].'/'.join('/', $crumbs), 'id' => 'edit'));
+    echo "<fieldset>";
+    echo View::element('single_meta_form');
+    echo "</fieldset>";
+    echo $form->end(__('Save', true));
+    echo $tab->close(); 
+  }
+  if ($this->data['Media']['canWriteAcl']) {
+    echo $tab->open('acl');
+    echo $form->create(null, array('url' => 'updateAcl/'.$this->data['Media']['id'].'/'.join('/', $crumbs), 'id' => 'acl'));
+    echo "<fieldset>";
+    echo View::element('single_acl_form');
+    echo "</fieldset>";
+    echo $form->end(__('Save', true));
+    echo $tab->close(); 
+  }
+?>
+</div><!-- tabs -->
 
-<?php if ($withMap) {
-  echo $map->container();
-}
+<?php 
+  $script = <<<'JS'
+(function($) {
+$.fn.resizeImageHeight = function(size) {
+  var $image = $(this);
+  var w = $image.attr('width');
+  var h = $image.attr('height');
+  if (0 >= Math.min(w, h) || size > h) {
+    return;
+  }
+  $image.attr('width', size * (w / h));
+  $image.attr('height', size); 
+};
+$.fn.resizeImage = function(size) {
+  var $image = $(this);
+  var w = $image.attr('width');
+  var h = $image.attr('height');
+  if (0 >= Math.min(w, h) || size > Math.max(w, h)) {
+    return;
+  }
+  if (w > h) {
+    h = size * (h / w);
+    w = size;
+  } else {
+    w = size * (w / h);
+    h = size;
+  }
+  $image.attr('width', w);
+  $image.attr('height', h); 
+};
+$(document).ready(function() {
+  $media = $('#p-media-preview');
+  if ($media) {
+    var top = $media.position().top;
+    var size = window.innerHeight - top - 10;
+    $media.find('img').resizeImageHeight(size);
+  }
+  $("#image-tabs").tabs({
+    show: function(event, ui) {
+      if (ui.panel.id == 'tab-map') {
+        if ($('#map').children().length == 0) {
+          $('#mapbox').show();
+          loadMap(:ID, :LATITUDE, :LONGITUDE); 
+        }
+      }
+      return true;
+    }
+  });
+  $("#comment-add :submit").button();
+  $("#edit :submit").button();
+  $("#acl :submit").button();
+});
+})(jQuery);
+JS;
+  $vars = array(
+    'ID' => $this->data['Media']['id'],
+    'LATITUDE' => ($this->data['Media']['latitude'] ? $this->data['Media']['latitude'] : 0),
+    'LONGITUDE' => ($this->data['Media']['longitude'] ? $this->data['Media']['longitude'] : 0));
+  foreach ($vars as $name => $value) {
+    $script = preg_replace("/:$name/", $value, $script);
+  }
+  echo $this->Html->scriptBlock($script, array('inline' => false));
 ?>
 
 <?php echo View::element('comment'); ?>

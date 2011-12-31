@@ -1,183 +1,188 @@
-<h1><?php __('Explorer'); ?></h1>
+<?php $search->initialize(); ?>
+
+<?php echo $this->element('explorer/menu'); ?>
+
 <?php echo $session->flash(); ?>
+<?php echo $breadcrumb->breadcrumb($crumbs); ?>
 
 <?php 
-  $search->initialize();
-?>
-<?php
-  echo $breadcrumb->breadcrumb($crumbs);
-?>
-<?php if ($navigator->hasPages()): ?>
-<div class="paginator"><div class="subpaginator">
-<?php echo $navigator->prev().' '.$navigator->numbers().' '.$navigator->next(); ?>
-</div></div>
-<?php endif; ?>
+  $script = <<<'JS'
+(function($) {
+  $(document).ready(function() {
+    $('.p-explorer-media-actions').each(function() {
+      var id = $(this).attr('id').split('-')[1];
+      var media = $('#media-' + id)
+      $(this).find('ul li .add').click(function() {
+        $(media).selectMedia();
+      });
+      $(this).find('ul li .del').hide().click(function() {
+        $(media).unselectMedia();
+      });
+      $(this).find('ul li .edit').click(function() {
+        var $dialog = $('#dialog');
+        $.ajax(':BASE_URLexplorer/editmeta/' + id, {
+          success: function(data, xhr, status) {
+            $dialog.children().remove();
+            $dialog.append(data);
+            $dialog.dialog({
+              modal: true, 
+              width: 520,
+              title: ':EDIT_TITLE',
+              buttons: {
+                ':SAVE': function() {
+                  var $form = $('#form-meta-' + id);
+                  $.post($form.attr('action'), $form.serialize(), function(data) {
+                    $('#description-' + id).html(data);
+                    $('#description-' + id).find('.tooltip-actions').tooltipAction();
+                  });
+                  $(this).dialog("close");
+                },
+                ':CANCEL': function() {
+                  $(this).dialog("close");
+                }
+              }
+            });
+          }
+        });
+      });
+      $(this).find('ul li .acl').click(function() {
+        var $dialog = $('#dialog');
+        $.ajax(':BASE_URLexplorer/editacl/' + id, {
+          success: function(data, xhr, status) {
+            $dialog.children().remove();
+            $dialog.append(data);
+            $dialog.dialog({
+              modal: true, 
+              width: 520,
+              title: ':ACL_TITLE',
+              buttons: {
+                ':SAVE': function() {
+                  var $form = $('#form-acl-' + id);
+                  $.post($form.attr('action'), $form.serialize(), function(data) {
+                    $('#description-' + id).html(data);
+                    $('#description-' + id).find('.tooltip-actions').tooltipAction();
+                  });
+                  $(this).dialog("close");
+                },
+                ':CANCEL': function() {
+                  $(this).dialog("close");
+                }
+              }
+            });
+            $dialog.find('.radioSet').buttonset();
+          }
+        });
+      });
+    });
+    $('#select-all').click(function() {
+      $('#content .sub .p-explorer-media').selectMedia();
+    });
+    $('#invert-selection').click(function() {
+      $('#content .sub .p-explorer-media').invertMediaSelection();
+    });
 
-<div class="thumbs">
-<script type="text/javascript">
-  var mediaData = [];
-</script>
+    $.fn.activateExplorerMenu = function(id, target) {
+      $item = $(id);
+      $target = $(target);
+      if (!$item || !$target) {
+        return;
+      }
+      $item.siblings('.active').removeClass('active');
+      if ($item.hasClass('active')) {
+        $item.removeClass('active');
+        $target.removeClass('active').hide();
+      } else {
+        $('#p-explorer-menu-content .active').removeClass('active').hide();
+        $item.addClass('active');
+        $target.addClass('active').slideDown('fast');
+      }
+    }
+    $('#p-explorer-all-meta').hide();
+    $('#p-explorer-button-all-meta').click(function() {
+      $(this).activateExplorerMenu('#p-explorer-button-all-meta', '#p-explorer-all-meta');
+    });
+    $('#p-explorer-edit-meta').hide();
+    $('#p-explorer-button-meta').click(function() {
+      $(this).activateExplorerMenu('#p-explorer-button-meta', '#p-explorer-edit-meta');
+    });
+    $('#p-explorer-edit-access').hide();
+    $('#p-explorer-button-access').click(function() {
+      $(this).activateExplorerMenu('#p-explorer-button-access', '#p-explorer-edit-access');
+    });
+    $('#p-explorer-button-slideshow').click(function() {
+      var feed = $('#slideshow').attr('href');
+      feed += "/quality:high";
+      PicLensLite.start({feedUrl: feed});
+    });
+    $('#explorer').find('.submit input').button();
+    $.fn.placeExplorerMenu = function() {
+      $('#p-explorer-menu').css('top', Math.max(0, $('#content').position().top - window.pageYOffset));
+    }
+    $(window).scroll(function() {
+      $(this).placeExplorerMenu();
+    });
+    $(window).resize(function() {
+      $(this).placeExplorerMenu();
+    });
+    $('#p-explorer-menu-space').css('height', ($('#p-explorer-menu').height()) + 3 + 'px');
+    $.fn.tooltipAction = function() {
+      $(this).each(function() {
+        var $tooltip = $(this);
+        $(this).parent().delayedHover(function() {
+          $tooltip.show('fast');
+        }, function() {
+          $tooltip.hide();
+        }, 350);
+      })
+    };
+    $('.tooltip-actions').tooltipAction();
+    $('.radioSet').buttonset();
+  });
+  $(window).load(function() {
+    $(this).placeExplorerMenu();
+  }); 
+})(jQuery);
+JS;
+  $vars = array(
+    'BASE_URL' => Router::url('/', true), 
+    'EDIT_TITLE' => __("Edit Meta Data", true),
+    'ACL_TITLE' => __("Edit Access Rights", true),
+    'SAVE' => __("Update", true), 
+    'CANCEL' => __("Cancel", true));
+  foreach ($vars as $name => $value) {
+    $script = preg_replace("/:$name/", $value, $script);
+  }
+  echo $this->Javascript->link('/piclenslite/piclens_optimized', false);
+  echo $this->Html->scriptBlock($script, array('inline' => false));
+?>
+
+<div class="p-explorer-media-list">
 <?php
-$cell=0;
-$canWriteTag=false;
-$canWriteMeta=false;
-$canWriteAcl=false;
+$canWriteTag = count($this->data) ? max(Set::extract('/Media/canWriteTag', $this->data)) : 0;
+$index = 0;
 $pos = ($search->getPage(1)-1) * $search->getShow(12) + 1;
-foreach ($this->data as $media): ?>
-<?php $side = $cell % 2 ? 'r' : 'l'; ?>
-<?php if (!($cell % 2)): ?><div class="subcolumns"><?php endif; ?>
+
+echo '<div class="row">';
+foreach ($this->data as $media) {
+  echo $this->element('explorer/media', array('media' => $media, 'index' => $index, 'pos' => $pos));
+  $index++;
+  if ($index % 4 == 0) {
+    echo "<div class=\"clear\"> </div></div>\n";
+    echo "<div class=\"row\">";
+  }
+}
+echo '<div class="clear"></div></div>';
+?>
+</div><!-- cells -->
+
 <?php 
-  $icon = $imageData->getVisibilityIcon(&$media);
-?>
-<div class="c50<?php echo $side; ?>"><div class="subc<?php echo $side; ?> unselected thumb" id="media-<?= $media['Media']['id'];?>" >
-<script type="text/javascript">
-  mediaData[<?php echo $media['Media']['id']; ?>] = [];
-</script>
-<h2><?php if ($icon) { echo $icon.' '; } ?><?php echo $media['Media']['name']; ?></h2>
-<div class="image">
-<?php 
-  $size = $imageData->getimagesize($media, OUTPUT_SIZE_THUMB);
-  $imageCrumbs = $this->Breadcrumb->replace($crumbs, 'page', $search->getPage());
-  $imageCrumbs = $this->Breadcrumb->replace($imageCrumbs, 'pos', $pos++);
-  if ($search->getShow(12) != 12) {
-    $imageCrumbs = $this->Breadcrumb->replace($imageCrumbs, 'show', $search->getShow());
-  }
-  
-  echo $html->tag('a',
-    $html->tag('img', false, array(
-      'src' => Router::url("/media/thumb/".$media['Media']['id']),
-      'width' => $size[0], 'height' => $size[1], 
-      'alt' => $media['Media']['name'])),
-    array('href' => Router::url("/images/view/".$media['Media']['id'].'/'.$breadcrumb->params($imageCrumbs))));
-
-  if ($media['Media']['canWriteTag']) {
-    $canWriteTag=true;
-  }
-  if ($media['Media']['canWriteMeta']) {
-    $canWriteMeta=true;
-  }
-  if ($media['Media']['canWriteAcl']) {
-    $canWriteAcl=true;
-  }
-?>
-</div>
-
-<div class="user">
-<?php
-  if (!$search->getUser() || $search->getUser() != $session->read('User.username')) {
-    printf(__("by %s", true), $html->link($media['User']['username'], "/explorer/user/".$media['User']['username']));
-  }
-  $extra = array();
-  if ($media['Media']['clicks'] > 0) {
-    $extra[] = sprintf("%d %s", $media['Media']['clicks'], $html->image('icons/eye.png', array('alt' => __('Views', true), 'title' => sprintf(__("%d views", true), $media['Media']['clicks']))));
-  }
-  if (count($media['Comment'])) {
-    $extra[] = sprintf(__("%d %s", true), count($media['Comment']), $html->image('icons/comments.png', array('alt' => __('Comments', true), 'title' => sprintf(__("%d comments", true), count($media['Comment'])))));
-  }
-  if ($extra) {
-    echo " (".implode(', ', $extra).")";
-  }
-?>
-</div>
-
-<div class="meta">
-<div id="<?php echo 'meta-'.$media['Media']['id']; ?>">
-<table>
-  <?php echo $html->tableCells($imageData->metaTable(&$media)); ?>
-</table>
-</div>
-</div><!-- meta -->
-
-</div><!-- c50 --></div><!-- subc -->
-<?php if ($side == 'r'): ?></div><!-- subcolumns --><?php endif; ?>
-<?php $cell++; endforeach; ?>
-<?php /* fix for odd number */ if ($cell % 2): ?></div><!-- subcolumns --><?php endif; ?>
-</div>
-
-<?php if ($canWriteTag): ?>
-<div class="paginator"><div class="subpaginator">
-<a href="javascript:void(0);" onclick="thumbSelectAll();"><?php __('Select All'); ?></a>
-<a href="javascript:void(0);" onclick="thumbSelectInvert();"><?php __('Invert Selection'); ?></a>
+  if ($canWriteTag): ?>
+<div class="p-navigator-pages"><div class="sub">
+<a id="select-all"><?php __('Select All'); ?></a>
+<a id="invert-selection"><?php __('Invert Selection'); ?></a>
 </div></div>
 <?php endif; ?>
 
-<?php if ($navigator->hasPages()): ?>
-<div class="paginator"><div class="subpaginator">
-<?php echo $navigator->prev().' '.$navigator->numbers().' '.$navigator->next(); ?>
-</div></div>
-<?php endif; ?>
+<?php echo $navigator->pages() ?>
 
-<div class="edit">
-
-<?php if ($canWriteTag): ?>
-<?php 
-  $items = array(array('name' => __("Metadata", true), 'active' => true));
-  if ($canWriteAcl) {
-    $items[] = __("Access Rights", true);
-  }
-  echo $tab->menu($items);
-
-  $url = $breadcrumb->params($crumbs);
-  echo $form->create(null, array('id' => 'explorer', 'action' => 'edit/'.$url));
-?>
-<?php echo $tab->open(0, true); ?>
-<fieldset>
-<?php echo $form->hidden('Media.ids', array('id' => 'MediaIds')) ?>
-<?php 
-  if ($canWriteMeta) {
-    echo $form->input('Media.date', array('type' => 'text', 'after' => '<span class="hint">' . __('E.g. 2008-08-07 15:30', true) . '</span>')); 
-  }
-  echo $html->tag('div',
-    $form->label('Tags.text', __('Tags', true)).
-    $ajax->autoComplete('Tags.text', 'autocomplete/tag', array('tokens' => ',')) . 
-    $html->tag('span', __('E.g. newtag, -oldtag', true), array('class' => 'hint')),
-    array('class' => 'input text'));
-
-  if ($canWriteMeta) {
-    echo $html->tag('div',
-      $form->label('Categories.text', __('Categories', true)).
-      $ajax->autoComplete('Categories.text', 'autocomplete/category', array('tokens' => ',')), 
-      array('class' => 'input text'));
-    echo $html->tag('div',
-      $form->label('Locations.city', __('City', true)).
-      $ajax->autoComplete('Locations.city', 'autocomplete/city'), 
-      array('class' => 'input text'));
-    echo $html->tag('div',
-      $form->label('Locations.sublocation', __('Sublocation', true)).
-      $ajax->autoComplete('Locations.sublocation', 'autocomplete/sublocation'), 
-      array('class' => 'input text'));
-    echo $html->tag('div',
-      $form->label('Locations.state', __('State', true)).
-      $ajax->autoComplete('Locations.state', 'autocomplete/state'), 
-      array('class' => 'input text'));
-    echo $html->tag('div',
-      $form->label('Locations.country', __('Country', true)).
-      $ajax->autoComplete('Locations.country', 'autocomplete/country'), 
-      array('class' => 'input text'));
-    echo $form->input('Media.geo', array('label' => __('Geo data', true), 'maxlength' => 32, 'after' => '<span class="hint">' . __('latitude, longitude', true) . '</span>'));
-  }
-?>
-</fieldset>
-<?php echo $tab->close(); ?>
-<?php if ($canWriteAcl): ?>
-<?php echo $tab->open(1); ?>
-<fieldset>
-<?php
-  $aclSelect = array(
-    ACL_LEVEL_KEEP => __('[Keep]', true),
-    ACL_LEVEL_OTHER => __('Everyone', true),
-    ACL_LEVEL_USER => __('Users', true),
-    ACL_LEVEL_GROUP => __('Group members', true),
-    ACL_LEVEL_PRIVATE => __('Me only', true));
-  echo $form->input('acl.read.preview', array('type' => 'select', 'options' => $aclSelect, 'selected' => ACL_LEVEL_KEEP, 'label' => __("Who can view the image?", true)));
-  echo $form->input('acl.read.original', array('type' => 'select', 'options' => $aclSelect, 'selected' => ACL_LEVEL_KEEP, 'label' => __("Who can download the image?", true)));
-  echo $form->input('acl.write.tag', array('type' => 'select', 'options' => $aclSelect, 'selected' => ACL_LEVEL_KEEP, 'label' => __("Who can add tags?", true)));
-  echo $form->input('acl.write.meta', array('type' => 'select', 'options' => $aclSelect, 'selected' => ACL_LEVEL_KEEP, 'label' => __("Who can edit all meta data?", true)));
-  echo $form->input('Group.id', array('type' => 'select', 'options' => $groups, 'selected' => 0, 'label' => __("Default image group?", true)));
-?>
-</fieldset>
-<?php echo $tab->close(); ?>
-<?php endif; // canWriteAcl==true ?>
-<?php echo $form->end(__('Apply', true)); ?>
-<?php endif; // canWriteTag==true ?>
-</div>
+<div id="dialog"></div>

@@ -1,0 +1,68 @@
+@import font-face
++font-face(Ubuntu, font-files("ubuntu/ubuntu-r-webfont.woff", "woff", "ubuntu/ubuntu-r-webfont.ttf", "truetype"), "ubuntu/ubuntu-r-webfont.eot")
++font-face(Ubuntu-bold, font-files("ubuntu/ubuntu-b-webfont.woff", "woff", "ubuntu/ubuntu-b-webfont.ttf", "truetype"), "ubuntu/ubuntu-b-webfont.eot")
++font-face(Cousine, font-files("cousine/cousine-regular-latin-webfont.woff", "woff", "cousine/cousine-regular-latin-webfont.ttf", "truetype"), "cousine/cousine-regular-latin-webfont.eot")
+
+*
+  color: $fontColor
+  font-size: 10pt
+  font-weight: normal
+  text-decoration: none
+  font-family: Ubuntu, Verdana, sans
+a
+  color: $linkColor
+  &:hover
+    color: lighten($linkColor, 20%)
+  &:visited
+    color: darken($linkColor, 5%)
+
+img
+  border: none
+
+ul, ol
+  list-style-type: none
+
+
+#content > .sub
+  h1, h2, h3
+    font-family: Ubuntu-bold
+    padding: 10px 0
+  h1
+    font-size: 15pt
+  > p, > p > a, > ul > li
+    font-size: 12pt
+  > ul
+    padding: 10px 0
+    list-style-type: circle 
+    > li
+      padding: 5px 0 5px 20px
+  > p
+    padding: 5px 0
+  > code
+    font-family: Cousine
+    font-size: 10pt
+    background-color: darken(white, 10%)
+    color: lighten(black, 20%)
+
+  > .error, > .notice, > .warning
+    margin: 5px 0
+    padding: 10px
+    color: black
+    > *  
+      color: black
+  > .error
+    border: 1px solid red
+    background-color: lighten(red, 30%)
+  > .notice, > .warning
+    border: 1px solid yellow
+    background-color: lighten(yellow, 30%)
+pre
+  padding: 10px
+  background-color: #aaa
+  color: #333
+  font-family: Cousine, monospace 
+  *
+    font-family: Cousine, monospace 
+    color: #333
+  strong
+    color: #000

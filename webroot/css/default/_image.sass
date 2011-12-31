@@ -1,0 +1,80 @@
+@import grid
+@import border-radius
+
+$nav-button-padding = 100px
+
+#p-media-preview
+  position: relative
+  > .image
+    display: table-cell
+    width: 960px
+    text-align: center
+    vertical-align: middle
+    > img
+      text-align: center
+      vertical-align: middle
+  > .navigator
+    background-color: white
+    > div
+      > .sub
+        color: white
+        display: block
+        +opacity(0.0)
+        background-color: black
+        padding: 10px
+        border: 1px solid black
+        a
+          color: white
+          font-size: 15pt
+      &:hover > .sub
+        display: block
+        +opacity(0.5)
+        &:hover
+          +opacity(2)
+          background-color: lighten(black, 20%)
+          border: 1px solid lighten(black, 20%)
+    > .prev
+      position: absolute
+      top: 70px
+      left: 0
+      padding-right: $nav-button-padding
+      height: 100%;
+      > .sub
+        +border-right-radius(15px)
+    > .up
+      padding: 0
+      padding-bottom: $nav-button-padding
+      position: absolute
+      top: 0
+      width: 100%
+      > .sub
+        text-align: center
+        display: block
+        width: 120px
+        margin: 0 auto
+        +border-bottom-radius(15px)
+    > .next
+      position: absolute
+      top: 70px
+      right: 0
+      height: 100%
+      padding-left: $nav-button-padding
+      > .sub
+        +border-left-radius(15px)
+
+#image-tabs
+  margin: 10px 0 5px 0
+  .meta a
+      color: $linkColor
+    &:hover
+      color: white
+#comments
+  margin: 5px 0
+  > h3
+    font-size: 120%
+  > .comment
+    padding: 5px
+    &.even
+      background: lighten(black, 10%)
+    > .text
+      margin: 5px 0px 5px 20px

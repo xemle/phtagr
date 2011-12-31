@@ -1,0 +1,55 @@
+@import grid
+@import tag-cloud
+@import opacity
+*
+  #random-media 
+    +column(12)
+
+  #newest-media
+    +column(12, true)
+
+  #recent-comments
+    clear: both
+  #recent-comments
+    +column(12)
+  #tag-cloud 
+    +column(6)
+  #category-cloud
+    +column(6, true)
+  #tag-cloud, #category-cloud
+    .cloud
+      +column(6)
+      +tag-cloud(14pt)
+      .xxs, .xs, .s, .m, .l, .xl, .xxl
+        padding: 2px 5px
+        padding-left: 0
+      a
+        display: inline-block
+* #random-media .clip
+  position: relative
+  display: block
+  overflow: hidden
+  width: 100%
+  height: 309px
+  cite
+    position: absolute
+    bottom: 0
+    right: 0
+    background-color: black
+    +opacity(.6)
+    padding: 5px
+    &:hover
+      +opacity(.9)
+* #recent-comments
+    .comments
+      .comment
+        clear: both
+        .image
+          float: left
+        .meta, .text
+          margin-left: 85px
+          color: darken($fontColor, 50%)
+          .from
+            font-family: Ubuntu-bold
+    p
+      clear: both

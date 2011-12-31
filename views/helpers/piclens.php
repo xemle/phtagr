@@ -23,14 +23,14 @@
 
 class PiclensHelper extends AppHelper
 {
-  var $helpers = array('Html', 'Search', 'Javascript');
+  var $helpers = array('Html', 'Search');
 
   function initialize() {
     $this->Search->initialize();
   }
 
   function slideshow() {
-    $out = $this->Html->tag('script', false, array('type' => 'text/javascript', 'src' => Router::url('/piclenslite/piclens_optimized.js')));
+    $this->Html->script('/piclenslite/piclens_optimized', array('inline' => false));
     $swf = Router::url("/piclenslite/PicLensLite.swf");
     $feed = Router::url($this->Search->getUri(false, false, false, array('baseUri' => '/explorer/media')));
     $code = "PicLensLite.setLiteURLs({swf:'$swf'});
@@ -41,8 +41,7 @@ var startSlideshow = function(quality) {
   }
   PicLensLite.start({feedUrl:feed});
 }";
-    $out .= $this->Javascript->codeBlock($code);
-    return $out;
+    return $this->Html->scriptBlock($code);
   }
 }
 ?>

@@ -127,7 +127,7 @@ class PreviewManagerComponent extends Object {
     $this->controller->loadComponent('ImageResizer', &$this);
     if (!$this->ImageResizer->resize($src, $dst, $config)) {
       Logger::err("Resize of '$src' to '$dst' failed");
-      Logger::debug($config);
+      //Logger::debug($config);
       return false;
     }
     return $dst;

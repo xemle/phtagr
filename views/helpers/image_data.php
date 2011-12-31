@@ -35,74 +35,114 @@ class ImageDataHelper extends AppHelper {
     $this->Sanitize =& new Sanitize();
   }
 
+  /** Returns the rotated size of the media
+    @return Array of rotated width and height */
+  function rotate($width, $height, $orientation) {
+    // Rotate the image according to the orientation
+    $orientation = $orientation ? $orientation : 1;
+    if ($orientation >= 5 && $orientation <= 8) {
+      return array($height, $width);
+    } else {
+      return array($width, $height);
+    }
+  }
+
+  /** Get resized size with maximum size
+    @return array of width and height */
+  function resize($width, $height, $size) {
+    if ($width >= $height && $width > $size) {
+      $height = floor($height * $size / $width);
+      $width = $size;
+    } else if ($height > $width && $height > $size) {
+      $width = floor($width * $size / $height);
+      $height = $size;
+    }
+    return array($width, $height);
+  }
+
+  /** Get squared width and height with maximum size
+    @return array of width and height */
+  function square($width, $height, $size) {
+    if (min($width, $height) < $size) {
+      list($width, $height) = $this->resize($width, $height, $size);
+    } else {
+      $width = $size;
+      $height = $size;
+    }
+    return array($width, $height);
+  }
+
+  /** Get resized size with maximum width 
+    @return array of width and height */
+  function resizeWidth($width, $height, $size) {
+    if ($width > $size) {
+      $height = floor($height * $size / $width);
+      $width = $size;
+    }
+    return array($width, $height);
+  }
+
   /** Returns the image size of the given media. This function considers the
     orientaion of the media.
     @param media Media model data
-    @param size New size. Numeric value of maximum width or height. Possible
-    text values: 'mini', 'thumb', 'preview', 'original'. If false than it
-    returns the media size
-    @param square Returns the squared size of resize value 
-    @return array of sizes. array(height, width, html size) */
-  function getimagesize($media, $size = false, $square=false) {
+    @param options New size given as single value. Numeric value of maximum
+    width or height. Possible text values: 'mini', 'thumb', 'preview',
+    'original'.  If false than it returns the media size. If options is an 
+    array following options are supported
+      - height - Maximum height
+      - width - Maximum width
+      - square - Square the sizes
+      - size - size
+    @return array of sizes. array(height, width, false, html size) */
+  function getimagesize($media, $options = false) {
     if (!isset($media['Media']['width']) ||
       !isset($media['Media']['height'])) {
-      return array(0 => 0, 1 => 0, 3 => '');
+      return array(0 => 0, 1 => 0, 2 => false, 3 => '');
     }
+    if (!is_array($options)) {
+      $options = array('size' => $options);
+    }
+    $options = am(array('size' => false, 'width' => false, 'height' => false, 'square' => false), $options); 
+    $size = $options['size'];
 
     if ($size && !is_numeric($size) && !in_array($size, array('mini', 'thumb', 'preview', 'original'))) {
-      Logger::err("Wrong media size $resize");
+      Logger::err("Wrong media size $size");
+      return;
     }
 
+    $map = array(
+      'mini' => OUTPUT_SIZE_MINI, 
+      'thumb' => OUTPUT_SIZE_THUMB,
+      'preview' => OUTPUT_SIZE_PREVIEW,
+      'original' => false
+      );
     $resize = false;
-    switch ($size) {
-      case 'mini':
-        $resize = OUTPUT_SIZE_MINI;
+    $square = false;
+    if ($size) {
+      if (isset($map[$size])) {
+        $resize = $map[$size];
+      } else if (is_numeric($size)) {
+        $resize = $size;
+      }
+      if ($size == 'mini') {
         $square = true;
-        break;
-      case 'thumb':
-        $resize = OUTPUT_SIZE_THUMB;
-        break;
-      case 'preview':
-        $resize = OUTPUT_SIZE_PREVIEW;
-        break;
-      case 'original':
-        $resize = false;
-        break;
-      default:
-        if ($size && is_numeric($size)) {
-          $resize = $size;
-        }
-    }
-
-    $width = $media['Media']['width'];
-    $height = $media['Media']['height'];
-    if ($resize) {
-      if ($square) {
-        $width = $resize;
-        $height = $resize;
-      } else {
-        if ($width > $resize && $width >= $height) {
-          $height = intval($resize * ($height / $width));
-          $width = $resize;
-        } elseif ($height > $resize && $height > $width) {
-          $width = intval($resize * ($width / $height));
-          $height = $resize;
-        }
       }
     }
-    $result = array();
 
-    // Rotate the image according to the orientation
-    $orientation = isset($media['Media']['orientation']) ? $media['Media']['orientation'] : 1;
-    if ($orientation >= 5 && $orientation <= 8) {
-      $result[0] = $height;
-      $result[1] = $width;
-    } else {
-      $result[0] = $width;
-      $result[1] = $height;
+    list($width, $height) = $this->rotate($media['Media']['width'], $media['Media']['height'], $media['Media']['orientation']);
+
+    if ($options['width'] && $width > $options['width']) {
+      list($width, $height) = $this->resizeWidth($width, $height, $options['width']);
+    } elseif ($options['height'] && $height > $options['height']) {
+      list($height, $width) = $this->resizeWidth($height, $width, $options['height']);
+    } elseif ($resize) {
+      if ($square) {
+        list($width, $height) = $this->square($width, $height, $resize);
+      } else {
+        list($width, $height) = $this->resize($width, $height, $resize);
+      }
     }
-
-    $result[3] = "height=\"{$result[1]}\" width=\"{$result[0]}\"";
+    $result = array(0 => $width, 1 => $height, 2 => false, 3 => "width=\"$width\" height=\"$height\"");
 
     return $result;
   }
@@ -122,21 +162,31 @@ class ImageDataHelper extends AppHelper {
     if (!is_array($options)) {
       $options = array('type' => $options);
     }
-    $options = am(array('type' => 'thumb', 'size' => false), $options);
+    $mediaOptions = am(array('type' => 'thumb', 'size' => false, 'width' => false, 'height' => false), $options);
 
-    if (!in_array($options['type'], array('mini', 'thumb', 'preview', 'original'))) {
+    if (!in_array($mediaOptions['type'], array('mini', 'thumb', 'preview', 'original'))) {
       Logger::err("Wrong media type {$options['type']}");
       return false;
     }
-    if (!$options['size']) {
-      $options['size'] = $options['type'];
+    if (!$mediaOptions['size'] && !$mediaOptions['width'] && !$mediaOptions['height']) {
+      $mediaOptions['size'] = $mediaOptions['type'];
     }
 
     $imgSrc = Router::url("/media/{$options['type']}/{$media['Media']['id']}");
-    $size = $this->getimagesize($media, $options['size']);
-    $alt = h($media['Media']['name']);
+    $size = $this->getimagesize($media, $mediaOptions);
+    if (!$size) {
+      Logger::err("Could not fetch media size of type {$mediaOptions['type']} or size {$mediaOptions['size']}");
+      return false;
+    }
+    $alt = $media['Media']['name'];
 
-    $out = "<img src=\"$imgSrc\" {$size[3]} alt=\"$alt\" title=\"$alt\" />";
+    $attrs = array('src' => $imgSrc, 'width' => $size[0], 'height' => $size[1], 'alt' => $alt, 'title' => $alt, 'class' => 'media-link');
+    foreach (array('class', 'id') as $name) {
+      if (isset($options[$name])) {
+        $attrs[$name] = $options[$name];
+      }
+    }
+    $out = $this->Html->tag('img', false, $attrs);
     return $this->output($out);
   }
 
@@ -380,6 +430,67 @@ class ImageDataHelper extends AppHelper {
     }
     return sprintf("%.2f%s/%.2f%s", $lat, $latSuffix, $long, $longSuffix);
   }
+  
+  /** Creates a link list of names with urlBase and name 
+    @param urlBase Base URL which is combinded with each name item
+    @param names Names names of links
+    */
+  function linkList($urlBase, $names) {
+    $links = array();
+    foreach ($names as $name) {
+      $links[] = $this->Html->link($name, $urlBase . '/' . $name);
+    }
+    return $links;
+  }
+
+  /** Returns link for global search, user search, include and exclude */
+  function getExtendSearchUrls($crumbs, $username, $name, $value) {
+    $urls = array();
+    $baseUrl = '/explorer';
+    $urls['global'] = "$baseUrl/$name/$value";
+    if ($username) {
+      $urls['user'] = "$baseUrl/user/$username/$name/$value";
+    }
+    $addCrumb = $this->Breadcrumb->replace($crumbs, array($name, '-' . $value), $value);
+    $delCrumb = $this->Breadcrumb->replace($crumbs, array($name, $value), '-' . $value);
+    $urls['add'] = $this->Breadcrumb->crumbUrl($addCrumb);
+    $urls['del'] = $this->Breadcrumb->crumbUrl($delCrumb);
+    return $urls;
+  }
+
+  function getAllExtendSearchUrls($crumbs, $username, $name, $values) {
+    $urls = array();
+    foreach ($values as $value) {
+      $urls[$value] = $this->getExtendSearchUrls($crumbs, $username, $name, $value);
+    }
+    return $urls;
+  }
+
+  function getExtendSearchLinks($urls, $value, $withExclude = true) {
+    $output = '';
+    $icons = array();
+    if (isset($urls['user'])) {
+      $output = $this->Html->link($value, $urls['user']);
+      $icons[] = $this->Html->link($this->getIcon('world', false, sprintf(__("Search global for %s", true), $value)), $urls['global'], array('escape' => false));
+    } else {
+      $output = $this->Html->link($value, $urls['global']);
+    }
+    $icons[] = $this->Html->link($this->getIcon('add', false, sprintf(__("Include %s from search", true), $value)), $urls['add'], array('escape' => false));
+    if ($withExclude) {
+      $icons[] = $this->Html->link($this->getIcon('delete', false, sprintf(__("Exclude %s from search", true), $value)), $urls['del'], array('escape' => false));
+    }
+    return "<span class=\"tooltip-anchor\">" . $output . '<span class="tooltip-actions"><span class="sub">' . implode($icons) . '</span></span></span> ';
+  }
+
+  function getIcon($name, $alt = false, $title = false) {
+    if (!$alt) {
+      $alt = $name;
+    }
+    if (!$title) {
+      $title = $alt;
+    } 
+    return $this->Html->image("icons/$name.png", array('alt' => $alt, 'title' => $title));
+  }
 
   function metaTable($data, $withMap = false) {
     $cells= array();
@@ -440,34 +551,6 @@ class ImageDataHelper extends AppHelper {
           '/media/file/'.$file['id'].'/'.$file['file'], array('escape' => false));
       }
     }
-
-    if ($withMap && isset($data['Media']['latitude']) && isset($data['Media']['longitude'])) {
-      $output .= ' '.$this->Html->link(
-          $this->Html->image('icons/map.png',
-            array('alt' => 'Show location in a map', 'title' => __('Show location in a map', true))),
-          '#',
-          array('onclick' => sprintf('showMap(%d, %f,%f);return false;', $data['Media']['id'], $data['Media']['latitude'],$data['Media']['longitude']), 'escape' => false));
-    }
-    
-    if ($data['Media']['isOwner']) {
-      $output .= ' '.$this->Ajax->link(
-        $this->Html->image('icons/key.png', 
-          array('alt' => 'Edit ACL', 'title' => __('Edit access rights', true))), 
-        '/explorer/editacl/'.$mediaId, 
-        array('update' => 'meta-'.$mediaId, 'escape' => false));
-      if ($data['Media']['isDirty'])
-        $output .= ' '.$this->Ajax->link(
-          $this->Html->image('icons/database_refresh.png', 
-            array('alt' => __('Synchronize db with image', true), 'title' => __('Synchronize meta data with the image', true))), 
-          '/explorer/sync/'.$mediaId, 
-          array('update' => 'meta-'.$mediaId, 'escape' => false));
-    }
-
-    if ($output) {
-      $output = "<div class=\"actionlist\">$output</div>\n";
-      $cells[] = array(__("Actions", true), $output);
-    }
-
     return $cells;
   }
 
@@ -570,7 +653,8 @@ class ImageDataHelper extends AppHelper {
       if (strpos($path, $root) === 0) {
         $dirs = explode(DS, trim($root, DS));
         $postfix = substr($path, strlen($root));
-        return '/browser/index/'.$dirs[count($dirs)-1].'/'.$postfix;
+        $rootDir = count($fsRoots) > 1 ? $dirs[count($dirs)-1] . "/" : "";
+        return '/browser/index/'.$rootDir.$postfix;
       }
     }
     return false;

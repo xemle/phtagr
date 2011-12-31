@@ -1,0 +1,151 @@
+@import grid
+@import gradient
+@import border-radius
+
+=default-input
+  +border-radius(3px)
+  color: #aaa
+  border: #333 1px solid
+  padding: 2px
+  background-color: #111
+  &:hover
+    border: $clickable-hover-border 1px solid
+    background-color: #222
+  &:focus
+    color: #eee
+    border: $clickable-hover-bg 1px solid
+    background-color: #333
+
+form
+  fieldset
+    legend
+      padding: 20px 0 10px 240px
+      font-size: 12pt
+    border: 0
+    > div
+      clear: left
+      > label
+        +column(6)
+        margin-top: 15px
+        text-align: right
+      input[type=password], 
+      input[type=text], 
+      textarea
+        +column(6, true)
+        +default-input
+        font-size: 12pt
+        width: 224px
+        margin-top: 10px
+      select
+        +default-input
+        font-size: 12pt
+        margin-top: 10px
+        option
+          padding: 3px 0
+          font-size: 12pt
+          background-color: $clickable-default-bg
+          &.selected
+            background-color: $clickable-active-bg
+          &:hover
+            background-color: $clickable-hover-bg
+      > img
+        margin-top: 12px
+      > .error, > .description
+        clear: left
+        +prepend(6)
+        +column(6, true)
+        margin-top: 3px
+    > .checkbox 
+      input[type=checkbox]
+        margin-left: 240px
+        margin-right: 5px
+      label
+        width: 200px 
+        float: none
+        text-align: left
+        display: inline-block
+  div.submit
+    +prepend(6)
+    margin-top: 15px
+
+form.explorer-menu
+  fieldset
+    +column(24, true)
+    padding: 5px 0
+    border: 0
+    legend
+      display: none 
+    > div
+      > label
+        +column(6)
+        margin-top: 12px
+        text-align: right
+      input[type=text], textarea
+        +column(6, true)
+        margin-top: 10px
+        width: 224px
+        +default-input
+      select
+        margin-top: 10px
+        +column(6, true)
+        display: inline-block
+        +default-input
+        option
+          padding: 3px 0
+          color: white 
+          background-color: $clickable-default-bg
+          &.selected
+            background-color: $clickable-active-bg
+          &:hover
+            background-color: $clickable-hover-bg
+      > div.description, > div.error
+        margin-top: 2px
+        +prepend(6)
+        +column(6, true)
+      .radioSet
+        margin: 5px 0
+    > div.error
+      background: darken(red, 30%)
+  div.submit
+    clear: left
+    +prepend(6)
+
+form.login
+  +prepend(9)
+  +column(6)
+  margin: 20px 0 30px 0
+  fieldset
+    border: none
+    legend
+      text-align: left
+      padding-left: 0
+      padding-bottom: 20px
+      margin: 0
+      font-size: 15pt
+    > div
+      display: block
+      margin-top: 5px
+      margin-bottom: 10px
+    label
+      +span(6, true)
+      clear: left
+      text-align: left
+    input[type=text],
+    input[type=password]
+      +span(6, true)
+      +default-input
+      margin-top: 3px
+      padding: 4px
+      clear: left
+      font-size: 15pt
+  > div.submit
+      display: inline-block
+      padding-left: 0
+      a.button,
+      input[type=submit]
+        margin: 0 10px 5px 0
+        vertical-align: top
+
+form#comment-add
+  textarea
+    +column(12)

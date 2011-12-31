@@ -13,5 +13,4 @@
   echo $form->input('Group.is_shared', array('label' => __('This group is shared and other group members can use this group', true), 'type' => 'checkbox'));
 ?>
 </fieldset>
-
 <?php echo $form->end(__('Create', true)); ?>

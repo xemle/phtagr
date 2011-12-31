@@ -16,13 +16,6 @@
 ?>
 </fieldset>
 
-<fieldset><legend>Password</legend>
-<?php
-  echo $form->input('User.password', array('label' => __('Password', true)));
-  echo $form->input('User.confirm', array('label' => __('Confirm', true), 'type' => 'password'));
-?>
-</fieldset>
-
 <fieldset><legend>Other</legend>
 <?php
   echo $form->input('User.expires', array('label' => __('Expire date', true), 'type' => 'text'));

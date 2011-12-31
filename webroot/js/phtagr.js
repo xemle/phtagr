@@ -85,23 +85,23 @@ var selectMedia = function(id) {
 
 var thumbSelectAll = function() {
   var e = null;
-  for(var id in mediaData) {
-    e = document.getElementById('select-'+id);
+  for(var i in mediaIds) {
+    e = document.getElementById('select-'+mediaIds[i]);
     if (!e)
       continue;
     e.checked = true;
-    selectMedia(id);
+    selectMedia(mediaIds[i]);
   }
 };
 
 var thumbSelectInvert = function() {
   var e = null;
-  for(var id in mediaData) {
-    e = document.getElementById('select-'+id);
+  for(var i in mediaIds) {
+    e = document.getElementById('select-'+mediaIds[i]);
     if (!e)
       continue;
     e.checked = !e.checked;
-    selectMedia(id);
+    selectMedia(mediaIds[i]);
   }
 };
 

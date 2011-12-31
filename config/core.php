@@ -236,6 +236,13 @@
  * To use, prefix the CSS link URL with '/ccss/' instead of '/css/' or use HtmlHelper::css().
  */
 	//Configure::write('Asset.filter.css', 'css.php');
+/**
+ * Configuration for PHamlP. See http://code.google.com/p/phamlp/ for details.
+ */
+	Configure::write('Asset.filter.css', 'sass.php');
+	Configure::write('Sass.cache_location', TMP . DS . 'cache' . DS . 'sass');
+	//Configure::write('Sass.style', 'compressed');
+	Configure::write('Sass.extensions', array('Compass' => array('fonts_path' => '../fonts')));
 
 /**
  * Plug in your own custom JavaScript compressor by dropping a script in your webroot to handle the

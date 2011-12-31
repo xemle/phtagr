@@ -25,32 +25,22 @@ class TabHelper extends AppHelper
   var $helpers = array('Html');
 
   function menu($items, $prefix = 'tab') {
-    $out = "<ul class=\"tab\">\n";
+    $out = "<ul>\n";
     foreach ($items as $id => $item) {
       if (is_string($item)) {
         $item = array('name' => $item);
       }
-      $item = am(array('name' => false, 'active' => false), $item);
-      $attributes = array();
-      $attributes['id'] = "$prefix-header-$id";
-      if ($item['active']) {
-        $attributes['class'] = ' tabActive';
-      }
-      $attributes['onclick'] = "activateTab($id, '$prefix')";
-
-      $text = "<a name=\"$prefix-name-$id\">{$item['name']}</a>";
-      $out .= $this->Html->tag('li', $text, $attributes);
+      $item = am(array('name' => false, 'id' => "$prefix-$id"), $item);
+      $attributes = array('escape' => false);
+      $out .= $this->Html->tag('li', 
+        $this->Html->link($item['name'], '#' . $item['id']), $attributes);
     }
     $out .= "</ul>\n";
     return $out;
   }
 
-  function open($id, $active = false, $prefix = 'tab') {
-    $class = "tabContent";
-    if (!$active) {
-      $class .= " tabHidden";
-    }
-    $out = "<div class=\"$class\" id=\"$prefix-content-$id\">";
+  function open($id, $prefix = 'tab') {
+    $out = "<div id=\"$prefix-$id\">";
     return $out;
   }
   

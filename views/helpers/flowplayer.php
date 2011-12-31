@@ -23,12 +23,12 @@
 
 class FlowplayerHelper extends AppHelper
 {
-  var $helpers = array('Html', 'Javascript', 'ImageData');
+  var $helpers = array('Html', 'ImageData');
 
   /** Loads the required script of flowplayer for scripts_for_layout variable
    */
   function importPlayer() {
-    $this->Javascript->link('/flowplayer/flowplayer-3.1.4.min.js', false);
+    $this->Html->script('/flowplayer/flowplayer-3.1.4.min.js', array('inline' => false));
     return '';
   }
 
@@ -49,8 +49,7 @@ class FlowplayerHelper extends AppHelper
   /** Creates the start script for the flowplayer */
   function player($media) {
     $id = $media['Media']['id'];
-    $out = "<script type=\"text/javascript\">\n";
-    $out .= "flowplayer('player', '".Router::url("/flowplayer/flowplayer-3.1.5.swf", true)."', {
+    return $this->Html->scriptBlock("flowplayer('player', '".Router::url("/flowplayer/flowplayer-3.1.5.swf", true)."', {
 playlist: [
   {
     url: '".Router::url("/media/preview/$id/$id.jpg", true)."',
@@ -61,9 +60,7 @@ playlist: [
     autoPlay: false,
     autoBuffering: false
   }
-]});\n";
-    $out .= "</script>\n";
-    return $out;
+]});\n");
   }
 
   function video($media) {

@@ -87,8 +87,9 @@ class MenuHelper extends AppHelper
         continue; 
       }
 
-      if ($item['link'] == 'false' && $item['type'] == false)
+      if ($item['link'] == 'false' && $item['type'] == false) {
         $item['type'] == 'text';
+      }
 
       $out .= "<li";
       $attrs = array(); 
@@ -143,6 +144,56 @@ class MenuHelper extends AppHelper
     }
 
     return $this->output($this->_getMenu($data));
+  }
+  
+  function _excludeKeys($data, $excluds = array('title', 'url', 'parent')) {
+    $filtered = array();
+    foreach ($data as $key => $value) {
+      if (is_numeric($key) || in_array($key, $excluds)) {
+        continue;
+      }
+      $filtered[$key] = $value;
+    }
+    return $filtered;
+  }
+
+  function _getSubMenu($menu, $options) {
+    if (!is_array($menu)) {
+      return false;
+    }
+    $items = array();
+    foreach ($menu as $key => $item) {
+      if (!is_numeric($key)) {
+        continue;
+      }
+      $attrs = $this->_excludeKeys($item);
+      $submenu = $this->_getSubMenu($item, $options);
+      $linkOptions = array();
+      if (isset($attrs['active']) && $attrs['active']) {
+        $linkOptions['class'] = 'active';
+      } 
+      if (isset($item['url']) && $item['url'] === false) {
+        $item = $item['title'];
+      } else {
+        if (!isset($item['url'])) {
+          $item['url'] = array('controller' => $item['controller'], 'action' => $item['action'], 'admin' => $item['admin']);
+        } 
+        $item = $this->Html->link($item['title'], $item['url'], $linkOptions);
+      }
+      $items[] = $this->Html->tag('li', $item . $submenu, $attrs);
+    }
+    if (count($items)) {
+      return $this->Html->tag('ul', implode("\n", $items), $options);
+    }
+    return false;
+  }
+
+  function menu($name, $options = array()) {
+    if (!isset($this->params['menus'][$name])) {
+      return false;
+    }
+    $menu = $this->params['menus'][$name];
+    return $this->_getSubMenu($menu, am($options, array('id' => $name), $menu['options']));
   }
 }
 ?>

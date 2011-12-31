@@ -29,7 +29,7 @@ class MyFile extends AppModel
   var $belongsTo = array('Media', 'User');
 
   var $types = array(
-    FILE_TYPE_IMAGE => array('jpg', 'jpeg', 'png', 'gif'),
+    FILE_TYPE_IMAGE => array('bmp', 'gif', 'jpg', 'jpeg', 'png', 'psd', 'tif', 'tiff'),
     FILE_TYPE_SOUND => array('wav', 'mp3'),
     FILE_TYPE_VIDEO => array('avi', 'mpg', 'mpeg', 'mov', 'flv'),
     FILE_TYPE_VIDEOTHUMB => array('thm'),

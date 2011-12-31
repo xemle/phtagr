@@ -23,13 +23,25 @@
 
 class ImagesController extends AppController
 {
+  var $name = 'Images';
   var $components = array('RequestHandler', 'Search', 'FastFileResponder');
   var $uses = array('Media', 'Group', 'Tag', 'Category', 'Location');
-  var $helpers = array('Form', 'Html', 'Javascript', 'Ajax', 'ImageData', 'Time', 'Search', 'ExplorerMenu', 'Rss', 'Map', 'Navigator', 'Flowplayer', 'Tab', 'Number', 'Option');
+  var $helpers = array('Form', 'Html', 'Ajax', 'ImageData', 'Time', 'Search', 'ExplorerMenu', 'Rss', 'Map', 'Navigator', 'Flowplayer', 'Tab', 'Number', 'Option');
   var $crumbs = array();
 
   function beforeFilter() {
     parent::beforeFilter();
+
+    if ($this->hasRole(ROLE_USER)) {
+      $groups = $this->Group->getGroupsForMedia($this->getUser());
+      $groupSelect = Set::combine($groups, '{n}.Group.id', '{n}.Group.name');
+      asort($groupSelect);
+      $groupSelect[0] = __('[Keep]', true);
+      $groupSelect[-1] = __('[No Group]', true);
+      $this->set('groups', $groupSelect);
+    } else {
+      $this->set('groups', array());
+    }
 
     $encoded = array_splice(split('/', $this->params['url']['url']), 3);
     foreach ($encoded as $crumb) {
@@ -111,6 +123,64 @@ class ImagesController extends AppController
       }
       $this->FastFileResponder->add($this->data, 'preview');
     }
+  }
+
+  function update($id) {
+    if (!empty($this->data)) {
+      $user = $this->getUser();
+      $media = $this->Media->findById($id);
+      $this->Media->setAccessFlags(&$media, $user);
+      if (!$media) {
+        Logger::warn("Invalid media id: $id");
+        $this->redirect(null, '404');
+      } elseif (!$media['Media']['canWriteTag']) {
+        Logger::warn("User '{$username}' ({$user['User']['id']}) has no previleges to change tags of image ".$id);
+      } else {
+        //$this->_checkAndSetGroupId();
+        $tmp = $this->Media->editSingle(&$media, &$this->data);
+        if (!$this->Media->save($tmp)) {
+          Logger::warn("Could not save media");
+          Logger::debug($tmp);
+        } else {
+          Logger::info("Updated meta of media {$tmp['Media']['id']}");
+        }
+        if (isset($tmp['Media']['orientation'])) {
+          $this->FileCache->delete($tmp);
+          Logger::debug("Deleted previews of media {$tmp['Media']['id']}");
+        }
+      }
+    }
+    $url = 'view/' . $id;
+    if (count($this->crumbs)) {
+      $url .= '/' . join('/', $this->crumbs);
+    }
+    $this->redirect($url);
+  }
+
+  function updateAcl($id) {
+    if (!empty($this->data)) {
+      $user = $this->getUser();
+      $media = $this->Media->findById($id);
+      $this->Media->setAccessFlags(&$media, $user);
+      if (!$media) {
+        Logger::warn("Invalid media id: $id");
+        $this->redirect(null, '404');
+      } elseif (!$media['Media']['canWriteAcl']) {
+        Logger::warn("User '{$username}' ({$user['User']['id']}) has no previleges to change tags of image ".$id);
+      } else {
+        $this->Media->prepareGroupData(&$this->data, &$user);
+        $tmp = array('Media' => array('id' => $id));
+        $this->Media->updateAcl(&$tmp, &$media, &$this->data);
+        $this->Media->save($tmp, true);
+        Logger::info("Changed acl of media $id");
+      }
+    }
+ 
+    $url = 'view/' . $id;
+    if (count($this->crumbs)) {
+      $url .= '/' . join('/', $this->crumbs);
+    }
+    $this->redirect($url);
   }
 }
 ?>

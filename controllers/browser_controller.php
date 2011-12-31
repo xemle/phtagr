@@ -28,12 +28,17 @@ class BrowserController extends AppController
   var $components = array('FileManager', 'RequestHandler', 'FilterManager', 'Upload', 'Zip');
   var $uses = array('User', 'MyFile', 'Media', 'Tag', 'Category', 'Location', 'Option');
   var $helpers = array('Form', 'Html', 'Number', 'FileList', 'ImageData');
-
+  var $subMenu = false;
   /** Array of filesystem root directories. */
   var $_fsRoots = array();
 
   function beforeFilter() {
     parent::beforeFilter();
+    $this->subMenu = array(
+      'import' => __("Import Files", true),
+      'upload' => __("Upload", true),
+      'sync' => __("Meta Data Sync", true),
+      );
 
     $this->requireRole(ROLE_USER, array('redirect' => '/'));
 
@@ -48,28 +53,11 @@ class BrowserController extends AppController
     }
 
     $this->pageTitle = __('My Files', true);
+    $this->layout = 'backend';
   }
 
   function beforeRender() {
-    $this->_setMenu();
     parent::beforeRender();
-  }
-
-  function _setMenu() {
-    if ($this->action == 'quickupload') {
-      return;
-    }
-    $items = array();
-    $items[] = array('text' => __('Import Files', true), 'link' => 'index', 'type' => ($this->action=='index'?'active':false));
-    if (count($this->_fsRoots) > 1) {
-      $items[] = array('text' => __('Upload', true), 'link' => 'upload/files');
-    } else {
-      $items[] = array('text' => __('Upload', true), 'link' => 'upload');
-    }
-    $items[] = array('text' => __('Synchronize', true), 'link' => 'sync');
-    $items[] = array('text' => __('Overview', true), 'link' => 'view');
-    $menu = array('items' => $items);
-    $this->set('mainMenu', $menu);
   }
 
   /** Add a root to the chroot aliases 
@@ -664,6 +652,7 @@ class BrowserController extends AppController
       $this->set('errors', array());
     }
     $this->_setQuotaForView();
+    $this->layout = 'default';
   }
 }
 ?>

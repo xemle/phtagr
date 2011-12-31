@@ -1,0 +1,256 @@
+@import colors
+@import grid
+@import border-radius
+@import opacity
+@import gradient
+
+.tooltip-anchor
+  display: inline-block
+  position: relative
+
+.tooltip-actions
+  display: none
+  z-index: 2
+  position: absolute
+  margin-top: 12px
+  top: 0px 
+  left: -10px
+  width: 150px
+  padding: 3px 10px 10px 10px
+  > .sub
+    display: inline-block
+    padding: 2px
+    background-color: #ffd
+    +border-radius(4px)
+    border: 1px solid darken(#ffd, 60%)
+    > a > img
+        vertical-align: bottom
+
+=link
+  color: $linkColor
+  &:hover
+    color: white
+
+=clickable
+  color: $clickable-default-text
+  background-color: $clickable-default-bg
+  border: 1px solid $clickable-default-border
+  +border-radius(3px)
+  &:hover 
+    color: $clickable-hover-text
+    background-color: $clickable-hover-bg
+    border: 1px solid $clickable-hover-border
+  &:active
+    color: #clickable-active-text
+    background-color: $clickable-active-bg
+    border-bottom: 1px solid $clickable-active-border
+
+.p-navigator-pages
+  +column(24, true)
+  display: block
+  padding: 5px 0
+  > .sub
+    text-align: center
+    > a
+      margin: 0px 2px
+      padding: 3px 6px
+      cursor: pointer
+      +clickable
+    > .current 
+      margin: 0px 2px
+      padding: 3px 6px
+      font-family: Ubuntu-bold
+      color: white
+
+.p-explorer-media-list > .row
+  margin: 2px 0px
+  +column(24, true)
+  > .clear
+    display: block
+    clear: both
+  > .cell0, > .cell1, > .cell2
+    +column(6)
+  > .cell3
+    +column(6, true)
+  > .p-explorer-media
+    position: relative
+    &:hover
+      background-color: $clickable-default-bg
+    &.selected > .p-explorer-media-image
+      background-color: #203c60
+    h2
+      font-family: Ubuntu ! important
+      font-weight: normal 
+      padding: 2px 2px ! important
+      position: absolute
+      top: 1
+      left: 1
+      z-index: 1
+      margin: 1px
+      +opacity(.0)
+      background-color: #000
+      a
+        +link
+    > .p-explorer-media-image
+      display: table-cell
+      text-align: center
+      vertical-align: bottom 
+      width: 230px
+      padding: 3px
+      height: 230px
+      > a
+        vertical-align: middle
+        > img
+          vertical-align: middle   
+      > *
+        text-align: center
+        overflow: hidden
+    > .p-explorer-media-actions
+      position: absolute
+      right: 2px
+      top: 208px
+      padding: 2px
+      background-color: $clickable-default-bg
+      +opacity(0.0)
+      > ul > li
+        display: inline
+        > a > img
+          padding: 4px
+          vertical-align: center
+          &:hover
+            background-color: $clickable-default-text
+    > .p-explorer-media-meta 
+      *
+        font-size: 9pt
+      p
+        color: #080808
+        margin: 0
+        padding: 0
+    > .p-explorer-media-description
+      margin-top: 3px
+      *
+        color: #444
+    &:hover
+      > h2
+        +opacity(1.0)
+      > .p-explorer-media-actions
+        +opacity(.3)
+        &:hover
+          +opacity(1.0)
+      > .p-explorer-media-description
+        *
+          color: #888
+        a
+          +link
+ul.p-breadcrumb
+  width: 100%
+  margin: 4px 0px
+  display: inline-block
+  > li
+    padding: 1px 3px ! important
+    display: inline-block
+    &.p-breadcrumb-header
+      background-color: #444
+      > span
+        padding: 0 3px
+        font-family: Ubuntu-bold
+    &.p-breadcrumb-crumb
+      > span
+        padding-left: 3px
+      > .p-breadcrumb-remove
+        background-image: url("../img/button-close.png")
+        background-position: center center
+        background-repeat: no-repeat
+        vertical-align: middle
+        padding: 0 10px
+        width: 15px
+        > span
+          display: none
+    &.p-breadcrumb-input > form 
+      background-color: inherit
+      overflow: inherit
+      width: inherit
+      > div
+        > input, > div
+          display: inline-block
+        > input
+          border: 1px solid #888
+          background-color: #444
+        > input[type=text]
+          padding: 1px
+        > input[type=submit]
+          &:hover
+
+#p-explorer-menu-space
+  display: block
+  height: 24px
+
+$menu-color = #222
+$menu-bg-color = black
+$menu-link-color = #666
+$menu-link-hover-color = lighten($menu-link-color, 40%)
+
+#p-explorer-menu
+  +column(24, true)
+  z-index: 10
+  position: fixed
+  background-color: $header-bg
+  > ul 
+    margin: 5px 1px
+    > li
+      display: inline
+      > a
+        padding: 3px
+        cursor: pointer
+        +clickable
+      &.active > a
+        padding: 4px 3px
+        color: #clickable-active-text
+        background-color: $clickable-active-bg
+        border-bottom: 1px solid $clickable-active-border
+  > .pages > ul
+    position: absolute
+    right: 0
+    top: 0
+    margin: 5px 1px
+    > li
+      display: inline-block
+      color: $content-text
+      > a
+        padding: 3px
+        +clickable
+  > #p-explorer-menu-content
+    border: 1px solid $content-border
+    background-color: $content-bg
+    > #p-explorer-all-meta 
+      padding: 10px
+      > p
+        margin: 3px 0
+        > .tooltip-anchor
+          > a
+            padding: 0 3px
+            +link
+        > a
+          padding: 0 3px
+          +link
+    > form > div
+      padding: 10px 0
+
+dl.single-media
+  > dd, > dt
+    display: inline-block
+    float: left
+  > dd
+    clear: left
+  > dt
+    margin-left: 3px
+
+.p-explorer-input
+  +column(24, true)
+  z-index: 9
+  position: fixed
+  bottom: 26px
+  background-color: gray
+
+.auto_complete
+  display: none
