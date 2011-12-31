@@ -26,4 +26,14 @@
 </ul>
 <?php endif; ?>
 
-<?php echo $html->link(__('Retry', true), 'path'); ?>
+<?php echo $html->link(__('Retry', true), 'path', array('class' => 'button')); ?>
+<?php
+  $script = <<<'JS'
+(function($) {
+  $(document).ready(function() {
+    $('.button').button();
+  });
+})(jQuery);
+JS;
+  echo $this->Html->scriptBlock($script, array('inline' => false));
+?>

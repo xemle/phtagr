@@ -12,4 +12,15 @@
 <p><?php __("New security salt value"); ?></p>
 <pre>Configure::write('Security.salt', '<?php echo h($salt); ?>');</pre>
 
-<?php echo $html->link(__('Continue', true), 'saltro'); ?>
+<p></p>
+<?php echo $html->link(__('Continue', true), 'saltro', array('class' => 'button')); ?>
+<?php
+  $script = <<<'JS'
+(function($) {
+  $(document).ready(function() {
+    $('.button').button();
+  });
+})(jQuery);
+JS;
+  echo $this->Html->scriptBlock($script, array('inline' => false));
+?>

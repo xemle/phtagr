@@ -274,12 +274,13 @@ class SetupController extends AppController {
         $this->Session->write('loginRedirect', '/setup');
         $this->redirect('/users/login');
       }
-    } elseif (!$this->__hasSalt()) {
-      $this->redirect('salt');
-    }
-
+    } 
     $this->Session->write('setup', true);
     Logger::info("Start Setup of phTagr!");
+
+		if (!$this->__hasSalt()) {
+      $this->redirect('salt');
+    }
   }
 
   /** Generate a random salt string 
@@ -328,8 +329,9 @@ class SetupController extends AppController {
   }
 
   function saltro() {
-    if ($this->__hasSalt())
+    if ($this->__hasSalt()) {
       $this->redirect('index');
+		}
 
     if (is_writeable(dirname($this->core)) && is_writeable($this->core)) {
       $this->redirect('salt');
@@ -354,8 +356,9 @@ class SetupController extends AppController {
   }
 
   function path() {
-    if ($this->__hasPaths()) 
+    if ($this->__hasPaths()) {
       $this->redirect('config');
+		}
 
     $this->__checkSession();
 
@@ -467,7 +470,7 @@ class DATABASE_CONFIG
 
     try {
       if (!$this->__loadMigration()) {
-        $this->Session->setFlash(__('Could not initialize database'));
+        $this->Session->setFlash(__('Could not initialize database migration'));
         Logger::error("Initialization of database migration failed");
         return;
       }
