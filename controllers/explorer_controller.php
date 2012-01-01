@@ -568,7 +568,7 @@ class ExplorerController extends AppController
       } elseif (!$media['Media']['canWriteTag'] && !$media['Media']['canWriteAcl']) {
         Logger::warn("User '{$username}' ({$user['User']['id']}) has no previleges to change tags of image ".$id);
       } else {
-        $this->_checkAndSetGroupId();
+        $this->Media->prepareGroupData(&$this->data, &$user);
         $tmp = $this->Media->editSingle(&$media, &$this->data);
         if (!$this->Media->save($tmp)) {
           Logger::warn("Could not save media");
