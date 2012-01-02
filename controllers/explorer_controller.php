@@ -585,8 +585,10 @@ class ExplorerController extends AppController
     $media = $this->Media->findById($id);
     $this->Media->setAccessFlags(&$media, $user);
     $this->data = $media;
+    $this->Search->parseArgs();
     $this->Search->setUser($user['User']['username']);
     $this->Search->setHelperData();
+    Logger::debug($this->Search->getParams());
     Configure::write('debug', 0);
     $this->render('updatemeta');
   }
@@ -606,6 +608,7 @@ class ExplorerController extends AppController
     $this->set('data', $media);
     $this->layout='bare';
     $user = $this->getUser();
+    $this->Search->parseArgs();
     $this->Search->setUser($user['User']['username']);
     $this->Search->setHelperData();
     Configure::write('debug', 0);
@@ -663,6 +666,7 @@ class ExplorerController extends AppController
     $this->Media->setAccessFlags(&$media, $this->getUser());
     $this->data = $media;
     $this->layout='bare';
+    $this->Search->parseArgs();
     $this->Search->setUser($user['User']['username']);
     $this->Search->setHelperData();
     Configure::write('debug', 0);

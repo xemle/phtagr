@@ -9,70 +9,99 @@
   $script = <<<'JS'
 (function($) {
   $(document).ready(function() {
-    $('.p-explorer-media-actions').each(function() {
-      var id = $(this).attr('id').split('-')[1];
-      var media = $('#media-' + id)
-      $(this).find('ul li .add').click(function() {
-        $(media).selectMedia();
+    $.fn.tooltipAction = function() {
+      $(this).each(function() {
+        var $tooltip = $(this);
+        $(this).parent().delayedHover(function() {
+          $tooltip.show('fast');
+        }, function() {
+          $tooltip.hide();
+        }, 350);
       });
-      $(this).find('ul li .del').hide().click(function() {
-        $(media).unselectMedia();
-      });
-      $(this).find('ul li .edit').click(function() {
-        var $dialog = $('#dialog');
-        $.ajax(':BASE_URLexplorer/editmeta/' + id, {
-          success: function(data, xhr, status) {
-            $dialog.children().remove();
-            $dialog.append(data);
-            $dialog.dialog({
-              modal: true, 
-              width: 520,
-              title: ':EDIT_TITLE',
-              buttons: {
-                ':SAVE': function() {
-                  var $form = $('#form-meta-' + id);
-                  $.post($form.attr('action'), $form.serialize(), function(data) {
-                    $('#description-' + id).html(data);
-                    $('#description-' + id).find('.tooltip-actions').tooltipAction();
-                  });
-                  $(this).dialog("close");
-                },
-                ':CANCEL': function() {
-                  $(this).dialog("close");
-                }
+    };
+    $.fn.updateMeta = function(id, crumbs) {
+      var $dialog = $('#dialog');
+      $.ajax(':BASE_URLexplorer/editmeta/' + id + '/' + crumbs, {
+        success: function(data, xhr, status) {
+          $dialog.children().remove();
+          $dialog.append(data);
+          $dialog.dialog({
+            modal: true, 
+            width: 520,
+            title: ':EDIT_TITLE',
+            buttons: {
+              ':SAVE': function() {
+                var $form = $('#form-meta-' + id);
+                $.post($form.attr('action'), $form.serialize(), function(data) {
+                  $('#media-' + id).html(data);
+                  $('#media-' + id).mediaAction();
+                });
+                $(this).dialog("close");
+              },
+              ':CANCEL': function() {
+                $(this).dialog("close");
               }
-            });
-          }
-        });
+            }
+          });
+        }
       });
-      $(this).find('ul li .acl').click(function() {
-        var $dialog = $('#dialog');
-        $.ajax(':BASE_URLexplorer/editacl/' + id, {
-          success: function(data, xhr, status) {
-            $dialog.children().remove();
-            $dialog.append(data);
-            $dialog.dialog({
-              modal: true, 
-              width: 520,
-              title: ':ACL_TITLE',
-              buttons: {
-                ':SAVE': function() {
-                  var $form = $('#form-acl-' + id);
-                  $.post($form.attr('action'), $form.serialize(), function(data) {
-                    $('#description-' + id).html(data);
-                    $('#description-' + id).find('.tooltip-actions').tooltipAction();
-                  });
-                  $(this).dialog("close");
-                },
-                ':CANCEL': function() {
-                  $(this).dialog("close");
-                }
+    };
+    $.fn.updateAcl = function(id, crumbs) {
+      var $dialog = $('#dialog');
+      $.ajax(':BASE_URLexplorer/editacl/' + id + '/' + crumbs, {
+        success: function(data, xhr, status) {
+          $dialog.children().remove();
+          $dialog.append(data);
+          $dialog.dialog({
+            modal: true, 
+            width: 520,
+            title: ':ACL_TITLE',
+            buttons: {
+              ':SAVE': function() {
+                var $form = $('#form-acl-' + id);
+                $.post($form.attr('action'), $form.serialize(), function(data) {
+                  $('#media-' + id).html(data);
+                  $('#media-' + id).mediaAction();
+                });
+                $(this).dialog("close");
+              },
+              ':CANCEL': function() {
+                $(this).dialog("close");
               }
-            });
-            $dialog.find('.radioSet').buttonset();
-          }
-        });
+            }
+          });
+          $dialog.find('.radioSet').buttonset();
+        }
       });
+    };
+    $.fn.mediaAction = function() {
+      $(this).each(function() {
+        var id = $(this).attr('id').split('-')[1];
+        var media = $('#media-' + id);
+        // extract crumb data
+        var crumbs = media.find('.p-explorer-media-image a').attr('href').split('/');
+        var i = crumbs.length - 1;
+        while (i >= 0 && crumbs[i].indexOf(':') > 0) {
+          i--;
+        }
+        crumbs = crumbs.slice(i + 1).join('/');
+        $(this).find('ul li .add').click(function() {
+          $(media).selectMedia();
+        });
+        $(this).find('ul li .del').hide().click(function() {
+          $(media).unselectMedia();
+        });
+        $(this).find('ul li .edit').click(function() {
+          $(this).updateMeta(id, crumbs);
+        });
+        $(this).find('ul li .acl').click(function() {
+          $(this).updateAcl(id, crumbs);
+        });
+        $(this).find('.tooltip-actions').tooltipAction();
+      });
+    };
+    $('.p-explorer-media').each(function() {
+      $(this).mediaAction();
     });
     $('#select-all').click(function() {
       $('#content .sub .p-explorer-media').selectMedia();
@@ -96,7 +125,7 @@
         $item.addClass('active');
         $target.addClass('active').slideDown('fast');
       }
-    }
+    };
     $('#p-explorer-all-meta').hide();
     $('#p-explorer-button-all-meta').click(function() {
       $(this).activateExplorerMenu('#p-explorer-button-all-meta', '#p-explorer-all-meta');
@@ -117,7 +146,7 @@
     $('#explorer').find('.submit input').button();
     $.fn.placeExplorerMenu = function() {
       $('#p-explorer-menu').css('top', Math.max(0, $('#content').position().top - window.pageYOffset));
-    }
+    };
     $(window).scroll(function() {
       $(this).placeExplorerMenu();
     });
@@ -125,16 +154,6 @@
       $(this).placeExplorerMenu();
     });
     $('#p-explorer-menu-space').css('height', ($('#p-explorer-menu').height()) + 3 + 'px');
-    $.fn.tooltipAction = function() {
-      $(this).each(function() {
-        var $tooltip = $(this);
-        $(this).parent().delayedHover(function() {
-          $tooltip.show('fast');
-        }, function() {
-          $tooltip.hide();
-        }, 350);
-      })
-    };
     $('.tooltip-actions').tooltipAction();
     $('.radioSet').buttonset();
   });
@@ -164,7 +183,11 @@ $pos = ($search->getPage(1)-1) * $search->getShow(12) + 1;
 
 echo '<div class="row">';
 foreach ($this->data as $media) {
-  echo $this->element('explorer/media', array('media' => $media, 'index' => $index, 'pos' => $pos));
+  $editable = $media['Media']['canWriteTag'] ? 'editable' : '';
+  $cell = "cell" . ($index %4);
+  echo $html->tag('div', 
+    $this->element('explorer/media', array('media' => $media, 'index' => $index, 'pos' => $pos)),
+    array('class' => "p-explorer-media $editable $cell", 'id' => 'media-' . $media['Media']['id'], 'escape' => false));
   $index++;
   if ($index % 4 == 0) {
     echo "<div class=\"clear\"> </div></div>\n";

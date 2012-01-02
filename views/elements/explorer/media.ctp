@@ -1,4 +1,3 @@
-<div class="p-explorer-media <?php echo ($media['Media']['canWriteTag'] ? 'editable' : '') . " cell" . ($index % 4); ?>" id="media-<?php echo $media['Media']['id']; ?>">
 <h2><?php 
   if (!$search->getUser() || $search->getUser() != $session->read('User.username')) {
     printf(__("%s by %s", true), h($media['Media']['name']), $html->link($media['User']['username'], "/explorer/user/".$media['User']['username']));
@@ -64,5 +63,3 @@
 <div class="p-explorer-media-description" id="<?php echo 'description-'.$media['Media']['id']; ?>">
 <?php echo $this->element('explorer/description', array('media' => $media)); ?>
 </div>
-</div><!-- cell -->
-

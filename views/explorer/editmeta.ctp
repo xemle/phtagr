@@ -1,6 +1,7 @@
 <?php 
   $mediaId = $this->data['Media']['id'];
-  echo $form->create(null, array('url' => 'savemeta/'.$mediaId, 'id' => 'form-meta-'.$mediaId)); 
+  $crumbUrl = '/'.$breadcrumb->params($crumbs);
+  echo $form->create(null, array('url' => 'savemeta/'.$mediaId.$crumbUrl, 'id' => 'form-meta-'.$mediaId)); 
 ?>
 <fieldset>
 <?php
