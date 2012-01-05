@@ -36,7 +36,7 @@ class VideoFilterComponent extends BaseFilterComponent {
 
   function _getVideoExtensions() {
     if ($this->controller->getOption('bin.ffmpeg')) {
-      return array('avi', 'mov', 'mpeg', 'mpg', 'flv');
+      return array('avi', 'mov', 'mpeg', 'mpg', 'mts', 'mp4', 'flv');
     } else {
       return array('flv');
     }
@@ -145,8 +145,8 @@ class VideoFilterComponent extends BaseFilterComponent {
       $isNew = true;
     }
 
-    if ($this->controller->getOption('bin.ffmpeg')) {
-      $media = $this->_readFfmpeg(&$media, $filename);
+    if ($this->controller->getOption('bin.exiftool')) {
+      $media = $this->_readExiftool(&$media, $filename);
     } else {
       $media = $this->_readGetId3(&$media, $filename);
     }
@@ -174,15 +174,15 @@ class VideoFilterComponent extends BaseFilterComponent {
     return $this->Media->findById($mediaId);
   }
 
-  function _readFfmpeg(&$media, $filename) {
+  function _readExiftool(&$media, $filename) {
     $data =& $media['Media'];
 
-    $bin = $this->controller->getOption('bin.ffmpeg', 'ffmpeg');
+    $bin = $this->controller->getOption('bin.exiftool', 'exiftool');
     $this->Command->redirectError = true;
-    $result = $this->Command->run($bin, array('-i' => $filename, '-t', 0.0));
+    $result = $this->Command->run($bin, array('' => $filename));
     $output = $this->Command->output;
  
-    if ($result != 1) {
+    if ($result != 0) {
       Logger::err("Command '$bin' returned unexcpected $result");
       return false;
     } elseif (!count($output)) {
@@ -192,17 +192,25 @@ class VideoFilterComponent extends BaseFilterComponent {
       Logger::trace($output);
 
       foreach ($output as $line) {
-        $words = preg_split("/[\s,]+/", trim($line));
-        if (count($words) >= 2 && $words[0] == "Duration:") {
-          $times = preg_split("/:/", $words[1]);
-          $time = $times[0] * 3600 + $times[1] * 60 + intval($times[2]);
-          $data['duration'] = $time;
-          Logger::trace("Extract duration of '$filename': $time");
-        } elseif (count($words) >= 6 && $words[2] == "Video:") {
-          list($width, $height) = split("x", $words[5]);
-          $data['width'] = $width;
-          $data['height'] = $height;
-          Logger::trace("Extract video size of '$filename': $width x $height");
+        $words = preg_split("/\s+/", trim($line));
+        if ($words[0] == "Duration") {
+	  if ($words[3] == "s") {
+	    $time = preg_split("/\./", $words[2]);
+	    $data['duration'] = $time[0];
+            Logger::trace("Extract duration of '$filename': $time[0]");
+          }
+	  else {
+            $times = preg_split("/:/", $words[2]);
+            $time = $times[0] * 3600 + $times[1] * 60 + intval($times[2]);
+            $data['duration'] = $time;
+            Logger::trace("Extract duration of '$filename': $time");
+	  }
+        } elseif ($words[0] == "Image" && $words[1] == "Width") {
+          $data['width'] = $words[3];
+          Logger::trace("Extract video size of '$filename': $words[3]");
+        } elseif ($words[0] == "Image" && $words[1] == "Height") {
+          $data['height'] = $words[3];
+          Logger::trace("Extract video size of '$filename': $words[3]");
         }
       }
     }
