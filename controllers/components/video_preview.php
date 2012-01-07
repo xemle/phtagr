@@ -104,7 +104,7 @@ class VideoPreviewComponent extends Object {
     }
     $result = $this->Command->run($bin, array(
       '-i' => $videoFilename, 
-      '-t' => 0.001, 
+      '-vframes' => 1, 
       '-f' => 'mjpeg', 
       '-y', $thumbFilename));
     if ($this->_semaphoreId) {

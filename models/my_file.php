@@ -31,7 +31,7 @@ class MyFile extends AppModel
   var $types = array(
     FILE_TYPE_IMAGE => array('bmp', 'gif', 'jpg', 'jpeg', 'png', 'psd', 'tif', 'tiff'),
     FILE_TYPE_SOUND => array('wav', 'mp3'),
-    FILE_TYPE_VIDEO => array('avi', 'mpg', 'mpeg', 'mov', 'flv'),
+    FILE_TYPE_VIDEO => array('avi', 'mpg', 'mpeg', 'mov', 'mp4', 'mts', 'flv'),
     FILE_TYPE_VIDEOTHUMB => array('thm'),
     FILE_TYPE_TEXT => array('txt'),
     FILE_TYPE_GPS => array('log')
