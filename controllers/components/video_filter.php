@@ -181,7 +181,7 @@ class VideoFilterComponent extends BaseFilterComponent {
 
     $bin = $this->controller->getOption('bin.exiftool', 'exiftool');
     $this->Command->redirectError = true;
-    $result = $this->Command->run($bin, array('' => $filename));
+    $result = $this->Command->run($bin, array('-n', '-S', $filename));
     $output = $this->Command->output;
  
     if ($result != 0) {
@@ -191,29 +191,24 @@ class VideoFilterComponent extends BaseFilterComponent {
       Logger::err("Command returned no output!");
       return false;
     } else {
-      Logger::trace($output);
-
       foreach ($output as $line) {
-        $words = preg_split("/\s+/", trim($line));
-        if ($words[0] == "Duration") {
-	  if ($words[3] == "s") {
-	    $time = preg_split("/\./", $words[2]);
-	    $data['duration'] = $time[0];
-            Logger::trace("Extract duration of '$filename': $time[0]");
-          }
-	  else {
-            $times = preg_split("/:/", $words[2]);
-            $time = $times[0] * 3600 + $times[1] * 60 + intval($times[2]);
-            $data['duration'] = $time;
-            Logger::trace("Extract duration of '$filename': $time");
-	  }
-        } elseif ($words[0] == "Image" && $words[1] == "Width") {
-          $data['width'] = $words[3];
-          Logger::trace("Extract video size of '$filename': $words[3]");
-        } elseif ($words[0] == "Image" && $words[1] == "Height") {
-          $data['height'] = $words[3];
-          Logger::trace("Extract video size of '$filename': $words[3]");
+        if (!preg_match('/^(\w+): (.*)$/', $line, $m)) {
+          Logger::warn('Could not parse line: '.$line);
+          continue;
         }
+        if ($m[1] == 'ImageWidth') {
+          $data['width'] = intval($m[2]);
+          Logger::trace("Extract video width of '$filename': ".$data['width']);
+        } else if ($m[1] == 'ImageHeight') {
+          $data['height'] = intval($m[2]);
+          Logger::trace("Extract video height of '$filename': ".$data['height']);
+        } else if ($m[1] == 'Duration') {
+          $data['duration'] = ceil(intval($m[2]));
+          Logger::trace("Extract duration of '$filename': ".$data['duration']."s");
+        }
+      } 
+      if (!$data['width'] || !$data['height'] || !$data['duration']) {
+        Logger::warn("Could not extract width, height, or durration from '$filename'. Width is {$data['width']}, height is {$data['height']}, duration is {$data['duration']}");
       }
     }
     return $media;
@@ -244,8 +239,8 @@ class VideoFilterComponent extends BaseFilterComponent {
           $data['duration'] = $time;
           Logger::trace("Extract duration of '$filename': $time");
         } elseif (count($words) >= 6 && $words[2] == "Video:") {
-	  $words = preg_split("/,+/", trim($line));
-	  $data = preg_split("/\s+/", trim($words[2]));
+          $words = preg_split("/,+/", trim($line));
+          $data = preg_split("/\s+/", trim($words[2]));
           list($width, $height) = split("x", trim($data[0]));
           $data['width'] = $width;
           $data['height'] = $height;
