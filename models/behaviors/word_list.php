@@ -43,6 +43,7 @@ class WordListBehavior extends ModelBehavior
     $missing = array_diff($values, $found);
     foreach ($missing as $missingfield) {
       $new = array($alias => array($field => $missingfield));
+      $Model->create();
       if ($Model->save($new)) {
         $new = $Model->findById($Model->getInsertID());
         Logger::debug("Create new {$alias} with ${field} '$missingfield'");
