@@ -64,13 +64,15 @@ class MapHelper extends AppHelper
 
     $out = $this->Html->script(array($this->googleMapApiUrl . h($this->Option->get('google.map.key')), 'prototype', 'pmap'), array('inline' => false));
 
+    $url = Router::url('/explorer/points/' . $this->Search->serialize(), true);
+    $url = preg_replace("/'/", "\\'", $url);
     $code = "
 var map = null;
 var loadMap = function(id, latitude, longitude) {
   if (undefined == map) {
 
     var options = { 
-      url: '" . Router::url('/explorer/points/' . $this->Search->serialize(), true) . "' 
+      url: '$url'
       };
 
     map = new PMap(latitude, longitude, options);
