@@ -203,8 +203,8 @@ PMap.prototype.updateInfo = function() {
     return false;
   }
   var text = "Center of map: ";
-  text = text + this.gmap.getCenter().lat().toFixed(4);
-  text = text + "," + this.gmap.getCenter().lng().toFixed(4);
+  text = text + this.gmap.getCenter().lat().toFixed(6);
+  text = text + "," + this.gmap.getCenter().lng().toFixed(6);
   text = text + " ";
   e.firstChild.nodeValue = text;
 }
