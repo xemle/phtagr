@@ -21,7 +21,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-App::import('File', 'Search', array('file' => APP.'search.php'));
+if (!class_exists('Search')) {
+  App::import('File', 'Search', array('file' => APP.'search.php'));
+}
 
 class SearchHelper extends Search {
 

@@ -21,7 +21,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-class FastFileResponderComponent extends Object {
+class FastFileResponderComponent extends Component {
   var $controller = null;
   var $components = array('Session', 'FileCache');
   var $sessionKey = 'fastFile.items';

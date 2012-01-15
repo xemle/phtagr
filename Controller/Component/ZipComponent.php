@@ -21,7 +21,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-class ZipComponent extends Object {
+App::uses('Folder', 'Utility');
+
+class ZipComponent extends Component {
   
   var $name = 'ZipComponent';
   var $controller = null;

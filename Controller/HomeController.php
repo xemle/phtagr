@@ -36,9 +36,9 @@ class HomeController extends AppController
       $this->redirect('/setup');
     }
 
-    App::import('Core', 'ConnectionManager');
+    App::uses('ConnectionManager', 'Model');
     $db =& ConnectionManager::getDataSource('default');
-    if (empty($db->connection)) {
+    if (!$db->enabled()) {
       $this->redirect('/setup');
     }
     

@@ -21,7 +21,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-class BaseFilterComponent extends Object {
+class BaseFilterComponent extends Component {
 
   var $components = array();
   var $controller = null;

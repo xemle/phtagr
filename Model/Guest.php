@@ -93,7 +93,7 @@ class Guest extends AppModel
   }
 
   function generateKey($data) {
-    srand(getMicrotime()*1000);
+    srand(microtime(true)*1000);
     $h = '';
     for ($i = 0; $i < 128; $i++) {
       $h .= chr(rand(0, 255));

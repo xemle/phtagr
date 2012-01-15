@@ -1,26 +1,26 @@
-<?php echo $session->flash(); ?>
+<?php echo $this->Session->flash(); ?>
 
-<?php echo $form->create('User', array('action' => 'login', 'class' => 'login')); ?>
+<?php echo $this->Form->create('User', array('action' => 'login', 'class' => 'login')); ?>
 <fieldset>
 <legend><?php __('Login'); ?></legend>
 <?php
-  echo $form->input('User.username', array('label' => __('Username', true)));
-  echo $form->input('User.password', array('label' => __('Password', true)));
+  echo $this->Form->input('User.username', array('label' => __('Username', true)));
+  echo $this->Form->input('User.password', array('label' => __('Password', true)));
 ?>
 </fieldset>
 <div class="submit">
 <?php 
   $signup = '';
   
-  echo $form->submit(__('Login', true), array('div' => false));
+  echo $this->Form->submit(__('Login', true), array('div' => false));
   if ($register) {
-    echo " ".$html->link(__('Sign Up', true), 'register', array('class' => 'button'))." ";
+    echo " ".$this->Html->link(__('Sign Up', true), 'register', array('class' => 'button'))." ";
   }
-  echo "<br/>".$html->link(__('Forgot your password', true), 'password');
+  echo "<br/>".$this->Html->link(__('Forgot your password', true), 'password');
 ?>
 </div>
 <?php 
-  echo $form->end();
+  echo $this->Form->end();
   $script = <<<'JS'
 (function($) {
   $(document).ready(function() {

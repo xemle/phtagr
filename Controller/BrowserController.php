@@ -355,7 +355,7 @@ class BrowserController extends AppController
 
       // clear file cache 
       @clearstatcache();
-      $start = $now = getMicrotime();
+      $start = $now = microtime(true);
       $executionTime = ini_get('max_execution_time') - 5;
 
       while (count($results)) {
@@ -368,7 +368,7 @@ class BrowserController extends AppController
             $data['synced'][] = $media;
           }
 
-          $now = getMicrotime();
+          $now = microtime(true);
           if ($now - $start > $executionTime) {
             break;
           }

@@ -21,7 +21,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-class UpgradeSchemaComponent extends Object{
+class UpgradeSchemaComponent extends Component {
 
   var $controller = null;
   var $dbConfig = null; 
@@ -41,7 +41,7 @@ class UpgradeSchemaComponent extends Object{
       return true;
     }
 
-    App::import('Core', 'ConnectionManager');
+    App::uses('ConnectionManager', 'Model');
     $this->db =& ConnectionManager::getDataSource('default');
     if (!$this->db) {
       Logger::err("Could not create database source");

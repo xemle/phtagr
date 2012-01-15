@@ -48,14 +48,14 @@ class AppController extends Controller
   
   function _setMainMenu() {
     $this->Menu->setCurrentMenu('main-menu');
-    $this->Menu->addItem(__('Home', true), "/");
-    $this->Menu->addItem(__('Explorer', true), array('controller' => 'explorer'));
+    $this->Menu->addItem(__('Home'), "/");
+    $this->Menu->addItem(__('Explorer'), array('controller' => 'explorer'));
     if ($this->hasRole(ROLE_GUEST)) {
       $user = $this->getUser();
-      $this->Menu->addItem(__('My Photos', true), array('controller' => 'explorer', 'action' => 'user', $user['User']['username']));
+      $this->Menu->addItem(__('My Photos'), array('controller' => 'explorer', 'action' => 'user', $user['User']['username']));
     }
     if ($this->hasRole(ROLE_USER)) {
-      $this->Menu->addItem(__('Upload', true), array('controller' => 'browser', 'action' => 'quickupload'));
+      $this->Menu->addItem(__('Upload'), array('controller' => 'browser', 'action' => 'quickupload'));
     }
   }
 
@@ -63,15 +63,15 @@ class AppController extends Controller
     $this->Menu->setCurrentMenu('top-menu');
     $role = $this->getUserRole();
     if ($role == ROLE_NOBODY) {
-      $this->Menu->addItem(__('Login', true), array('controller' => 'users', 'action' => 'login'));
+      $this->Menu->addItem(__('Login'), array('controller' => 'users', 'action' => 'login'));
       if ($this->getOption('user.register.enable', 0)) {
-        $this->Menu->addItem(__('Sign Up', true), array('controller' => 'users', 'action' => 'register'));
+        $this->Menu->addItem(__('Sign Up'), array('controller' => 'users', 'action' => 'register'));
       }
     } else {
       $user = $this->getUser();
-      $this->Menu->addItem(sprintf(__('Howdy, %s!', true), $user['User']['username']), false);
-      $this->Menu->addItem(__('Logout', true), array('controller' => 'users', 'action' => 'logout'));
-      $this->Menu->addItem(__('Dashboard', true), array('controller' => 'options'));
+      $this->Menu->addItem(__('Howdy, %s!', $user['User']['username']), false);
+      $this->Menu->addItem(__('Logout'), array('controller' => 'users', 'action' => 'logout'));
+      $this->Menu->addItem(__('Dashboard'), array('controller' => 'options'));
     }
   }
 
@@ -143,7 +143,7 @@ class AppController extends Controller
    * the session 
    * @todo Check expired user */
   function _checkSession() {
-    $this->Session->activate();
+    //$this->Session->activate();
     if (!$this->Session->check('Session.requestCount')) {
       $this->Session->write('Session.requestCount', 1);
       $this->Session->write('Session.start', time());
@@ -279,15 +279,15 @@ class AppController extends Controller
     if (!in_array($componentName, $parent->components)) {
       $parent->components[] = $componentName;
     }
-    $this->Component->_loadComponents($parent);
-    $this->Component->initialize($this);
-
-    if (isset($parent->{$componentName})) {
-      return true;
-    } else {
+    $component = $this->Components->load($componentName);
+    if (!$component) {
       Logger::warn("Could not load component $componentName");
       return false;
     }
+    $parent->{$componentName} = $component;
+    $component->initialize(&$this);
+
+    return true;
   }
  
 }

@@ -21,7 +21,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-class FilterManagerComponent extends Object {
+class FilterManagerComponent extends Component {
 
   var $controller = null;
   var $components = array('FileManager');
@@ -50,8 +50,6 @@ class FilterManagerComponent extends Object {
       Logger::err("Model MyFile and Media is not found");
       return false;
     }
-    $this->MyFile =& $controller->MyFile;
-    $this->Media =& $controller->Media;
     $this->loadFilter(array('ImageFilter', 'SimpleImageFilter', 'VideoFilter', 'GpsFilter'));
   }
 
@@ -75,9 +73,7 @@ class FilterManagerComponent extends Object {
     if (isset($this->filters[$filterName])) {
       return true;
     }
-    $filter->MyFile =& $this->MyFile;
-    $filter->Media =& $this->Media;
-    $filter->FilterManager =& $this;
+    $filter->FilterManager = $this;
 
     $filter->init(&$this);
 

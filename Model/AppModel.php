@@ -232,10 +232,9 @@ class AppModel extends Model
       $name = Inflector::underscore($name);
       if (isset($data[$name])) {
         return $data[$name];
-      } else {
-        return null;
       }
     }
+    return parent::__get($name);
   }
 
   /** Get a string representation of a model

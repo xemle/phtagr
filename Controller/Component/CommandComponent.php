@@ -21,7 +21,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-class CommandComponent extends Object {
+class CommandComponent extends Component {
 
   var $controller = null;
   var $output = array();
@@ -59,9 +59,9 @@ class CommandComponent extends Object {
     if ($this->redirectError) {
       $this->lastCommand .= ' 2>&1';
     }
-    $t1 = getMicrotime();
+    $t1 = microtime(true);
     exec($this->lastCommand, &$output, &$result);
-    $t2 = getMicrotime();
+    $t2 = microtime(true);
     $this->output = $output;
     Logger::debug("Command '{$this->lastCommand}' returned $result and required ".round($t2-$t1, 4)."ms");
     return $result;

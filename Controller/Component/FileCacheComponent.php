@@ -21,7 +21,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-class FileCacheComponent extends Object {
+App::uses('Folder', 'Utility');
+
+class FileCacheComponent extends Component {
 
   var $controller = null;
 

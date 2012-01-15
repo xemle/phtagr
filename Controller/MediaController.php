@@ -20,14 +20,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-if (!App::import('Vendor', "phpthumb", true, array(), "phpthumb.class.php")) {
-  debug("Please install phpthumb properly");
-}
-
 class MediaController extends AppController
 {
   var $name = 'Media';
-  var $uses = array('Media', 'MyFile');
+  var $uses = array('User', 'Media', 'MyFile');
   var $layout = null;
   var $config = array(
     'video' => array('size' => OUTPUT_SIZE_VIDEO, 'bitrate' => OUTPUT_BITRATE_VIDEO)
@@ -48,8 +44,8 @@ class MediaController extends AppController
   }
   
   function beforeRender() {
-    parent::beforeFilter();
-    $this->view = 'Media';
+    parent::beforeRender();
+    $this->viewClass = 'Media';
   }
 
   /** Fetch the request headers. Getting headers sent by the client. Convert
@@ -109,8 +105,8 @@ class MediaController extends AppController
         $flag = ACL_READ_PREVIEW; break;
     }
     $conditions = $this->Media->buildAclConditions($user, 0, $flag);
-    $conditions[] = "Media.id = $id";
-    $media = $this->Media->find($conditions);
+    $conditions[] = 'Media.id = ' . $id;
+    $media = $this->Media->find('first', array('conditions' => $conditions));
     if (!$media) {
       Logger::verbose("Media not found or access denied for media $id");
       $this->redirect(null, 403);
@@ -129,7 +125,7 @@ class MediaController extends AppController
     $this->_handleClientCache($preview);
 
     $this->set($this->MyFile->getMediaViewOptions($preview));
-    $this->view = 'Media';
+    $this->viewClass = 'Media';
   }
 
   function _createFlashVideo($id) {
@@ -174,7 +170,7 @@ class MediaController extends AppController
     $filename = $this->_createFlashVideo($id);
     $mediaOptions = $this->MyFile->getMediaViewOptions($filename);
     $mediaOptions['download'] = true;
-    $this->view = 'Media';
+    $this->viewClass = 'Media';
     $this->set($mediaOptions);
   }
 
@@ -200,7 +196,7 @@ class MediaController extends AppController
 
     $mediaOptions = $this->MyFile->getMediaViewOptions($filename);
     $mediaOptions['download'] = true;
-    $this->view = 'Media';
+    $this->viewClass = 'Media';
     $this->set($mediaOptions);
   }
 }

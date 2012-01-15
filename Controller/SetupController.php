@@ -291,7 +291,7 @@ class SetupController extends AppController {
     $chars .= '0123456789';
     $max = strlen($chars) - 1;
 
-    srand(getMicrotime()*1000);
+    srand(microtime(true)*1000);
     $salt = '';
     for($i = 0; $i < 40; $i++) {
       $salt .= $chars[rand(0, $max)];

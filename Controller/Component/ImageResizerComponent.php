@@ -20,11 +20,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-if (!App::import('Vendor', "phpthumb", true, array(), "phpthumb.class.php")) {
+if (!class_exists('phpThumb') && !App::import('Vendor', "phpthumb", true, array(), "phpthumb/phpthumb.class.php")) {
   debug("Please install phpthumb properly");
 }
 
-class ImageResizerComponent extends Object {
+class ImageResizerComponent extends Component {
 
   var $controller = null;
   var $components = array('Command');
@@ -95,13 +95,13 @@ class ImageResizerComponent extends Object {
       $this->_getSquareOption(&$phpThumb, &$options);
     }
 
-    $t0 = getMicrotime();
+    $t0 = microtime(true);
     if ($this->_semaphoreId) {
       sem_acquire($this->_semaphoreId);
     }
-    $t1 = getMicrotime();
+    $t1 = microtime(true);
     $result = $phpThumb->GenerateThumbnail();
-    $t2 = getMicrotime();
+    $t2 = microtime(true);
     if ($this->_semaphoreId) {
       sem_release($this->_semaphoreId);
     }

@@ -21,7 +21,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
     
-App::import('Core', 'Sanitize');
+App::uses('Sanitize', 'Utility');
 
 class ImageDataHelper extends AppHelper {
 

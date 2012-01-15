@@ -21,7 +21,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-class PreviewManagerComponent extends Object {
+class PreviewManagerComponent extends Component {
 
   var $controller = null;
   var $components = array('FileCache');
@@ -62,31 +62,29 @@ class PreviewManagerComponent extends Object {
 
   function initialize(&$controller) {
     $this->controller =& $controller;
-    if (!isset($controller->MyFile) || !isset($controller->Media)) {
+    if (!isset($controller->Media)) {
       Logger::err("Model MyFile and Media is not found");
       return false;
     }
-    $this->MyFile =& $controller->MyFile;
-    $this->Media =& $controller->Media;
   }
 
   /** Return image source file of the media */
   function _getImageSoureFilename($media) {
-    $type = $this->Media->getType($media);
+    $type = $this->controller->Media->getType($media);
     if ($type != MEDIA_TYPE_IMAGE && $type != MEDIA_TYPE_VIDEO) {
-      Logger::err("Media type not supported: {$this->Media->getType($media)}");
+      Logger::err("Media type not supported: {$this->controller->Media->getType($media)}");
       return false;
     } 
     if ($type == MEDIA_TYPE_VIDEO) {
       $this->controller->loadComponent('VideoPreview', &$this);
       return $this->VideoPreview->getPreviewFilename($media);
     } 
-    $file = $this->Media->getFile($media, FILE_TYPE_IMAGE, false);
+    $file = $this->controller->Media->getFile($media, FILE_TYPE_IMAGE, false);
     if (!$file) {
       Logger::err("No files are attached to media {$media['Media']['id']}");
       return false;
     }
-    return $this->Media->File->getFilename($file);
+    return $this->controller->Media->File->getFilename($file);
   }
 
   /** Fetches the preview of a given media.
@@ -108,11 +106,11 @@ class PreviewManagerComponent extends Object {
     } else {
       $src = $this->_getImageSoureFilename($media);
       $config['clearMetaData'] = true;
-      $config['rotation'] = $this->Media->getRotationInDegree($media);
+      $config['rotation'] = $this->controller->Media->getRotationInDegree($media);
     }
     $dst = $this->FileCache->getFilePath($media, $name);
     if (!$dst) {
-      Logger::err("Could not get cache file path for media {$this->Media->toString($media)}");
+      Logger::err("Could not get cache file path for media {$this->controller->Media->toString($media)}");
       return false;
     }
     

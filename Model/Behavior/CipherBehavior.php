@@ -166,7 +166,7 @@ class CipherBehavior extends ModelBehavior
     @param len Length of resulting salt. Default is 4
     @return Randomly generated salt of the given lenth */
   function _generateSalt($value, $key = '9nHPrYcxmvTliA', $len = 4) {
-    srand(getMicrotime()*1000);
+    srand(microtime(true)*1000);
     $salt = '';
     $lenKey = strlen($key);
     $lenValue = strlen($value);

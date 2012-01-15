@@ -21,7 +21,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-class VideoPreviewComponent extends Object {
+class VideoPreviewComponent extends Component {
 
   var $controller = null;
   var $components = array('FileCache', 'FileManager', 'Command');

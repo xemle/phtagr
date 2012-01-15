@@ -21,10 +21,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-class FeedComponent extends Object {
+class FeedComponent extends Component {
   
   var $name = 'FeedComponent';
-
+  
   var $controller = null;
 
   var $_feeds = array();
@@ -40,9 +40,10 @@ class FeedComponent extends Object {
   
   /** Set feeds output for layout */
   function beforeRender() {
-    App::import('Helper', 'Html');
-    $html = new HtmlHelper();
-
+    App::uses('HtmlHelper', 'View/Helper');
+    App::uses('View', 'View');
+    $View = new View($this->controller, false);
+    $Html = new HtmlHelper($View);
     $output = '';
     foreach($this->_feeds as $url => $options) {
       if (!empty($options['type'])) {
@@ -55,7 +56,7 @@ class FeedComponent extends Object {
         $url = Router::url($options['url']);
         unset($options['url']);
       }
-      $output .= $html->meta($type, $url, $options);
+      $output .= $Html->meta($type, $url, $options);
     }
     $this->controller->set('feeds_for_layout', $output);
   }

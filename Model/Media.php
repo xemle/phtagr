@@ -240,9 +240,9 @@ class Media extends AppModel
       $data['Media']['visibility'] = ACL_LEVEL_PRIVATE;
     }
 
-    $data['Media']['isOwner'] = ife($data['Media']['user_id'] == $user['User']['id'], true, false);
+    $data['Media']['isOwner'] = ($data['Media']['user_id'] == $user['User']['id']) ? true : false;
     $data['Media']['canWriteAcl'] = $this->checkAccess(&$data, &$user, 1, 0, &$groups);    
-    $data['Media']['isDirty'] = ife(($data['Media']['flag'] & MEDIA_FLAG_DIRTY) > 0, true, false);
+    $data['Media']['isDirty'] = (($data['Media']['flag'] & MEDIA_FLAG_DIRTY) > 0) ? true : false;
 
     return $data;
   }

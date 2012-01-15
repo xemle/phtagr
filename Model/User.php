@@ -204,7 +204,7 @@ class User extends AppModel
     @param alphabet Key alphabet as string. Default is [a-zA-Z0-9]. Must be at least 10 characters long.
     @return User model data */
   function generateKey($data, $length = 10, $alphabet = false) {
-    srand(getMicrotime()*1000);
+    srand(microtime(true)*1000);
 
     if (!$alphabet || strlen(strval($alphabet)) < 10) {
       $alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';

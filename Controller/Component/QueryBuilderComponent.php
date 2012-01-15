@@ -21,12 +21,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-App::import('Core', array('Sanitize'));
+App::uses('Sanitize', 'Utility');
 
-class QueryBuilderComponent extends Object
+class QueryBuilderComponent extends Component
 {
-  var $components = array();
-
   var $controller = null;
 
   /**
@@ -56,7 +54,7 @@ class QueryBuilderComponent extends Object
 
   function initialize(&$controller) {
     $this->controller = &$controller;
-    $this->Sanitize =& new Sanitize();
+    $this->Sanitize = new Sanitize();
   }
 
   /** Get array value if exist or default value
