@@ -31,18 +31,15 @@ class Option extends AppModel {
                            ACL_LEVEL_OTHER => 'oacl');
 
   function addDefaults($options) {
-    $ownOptions = Set::extract($options, '{n}.name');
+    $ownOptions = Set::extract('/name', $options);
     $this->unbindModel(array('belongsTo' => array('User')));
     $defaultOptions = $this->findAllByUserId(0);
     foreach ($defaultOptions as $default) {
       $name = $default[$this->name]['name'];
       if (strlen($name) > 2 && substr($name, -2) == '[]') {
         $options[] = $default[$this->name];
-      } else {
-        $exists = in_array($name, $ownOptions);
-        if (!$exists) {
-          $options[] = $default[$this->name];
-        }
+      } else if ($ownOptions && in_array($name, $ownOptions)) {
+        $options[] = $default[$this->name];
       }
     }
     return $options;
@@ -178,7 +175,7 @@ class Option extends AppModel {
     } else {
       $userId = $this->data['User']['id'];
     }
-    $data = $this->find(array('AND' => array('user_id' => $userId, 'name' => $name)));
+    $data = $this->find('first', array('conditions' => array('Option.user_id' => $userId, 'Option.name' => $name)));
     if ($data) {
       $data['Option']['value'] = $value;
       $this->save($data);

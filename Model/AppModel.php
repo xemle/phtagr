@@ -21,6 +21,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+App::uses('Model', 'Model');
+
 class AppModel extends Model
 {
   /** Create an id list of specifc items

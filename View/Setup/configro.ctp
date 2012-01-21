@@ -1,12 +1,12 @@
-<h1><?php __("Database connection"); ?></h1>
+<h1><?php echo __("Database connection"); ?></h1>
 
-<?php echo $session->flash(); ?>
+<?php echo $this->Session->flash(); ?>
 
 <div class="warning">
-<?php __("The configuration file for the database connection could not be written. Please create a database configuration file by your own!"); ?>
+<?php echo __("The configuration file for the database connection could not be written. Please create a database configuration file by your own!"); ?>
 </div>
 
-<p><?php __("Below a sample configuration file is shown. Please adapt your database credentials and continue."); ?></p>
+<p><?php echo __("Below a sample configuration file is shown. Please adapt your database credentials and continue."); ?></p>
 
 <p><pre><?php echo $dbConfig; ?></pre></p>
 
@@ -27,7 +27,7 @@ class DATABASE_CONFIG {
 }
 ?&gt;</code></pre></p>
 
-<?php echo $html->link(__('Continue', true), 'configro', array('class' => 'button')); ?>
+<?php echo $this->Html->link(__('Continue', true), 'configro', array('class' => 'button')); ?>
 
 <?php
     $script = <<<'JS'

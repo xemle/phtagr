@@ -21,6 +21,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+App::uses('File', 'Utility');
 
 class SetupController extends AppController {
 
@@ -90,7 +91,7 @@ class SetupController extends AppController {
         continue;
       }
 
-      if (!App::import('model', $model)) {
+      if (!App::import('Model', $model)) {
         Logger::err("Could not load model '$model'");
         $success = false;
         continue;
@@ -221,7 +222,7 @@ class SetupController extends AppController {
     }
 
     Logger::debug("Check for admin account");
-    if (!$this->__loadModel('User')) {
+    if (!$this->__loadModel(array('User', 'Option'))) {
       $this->checks['hasSysOp'] = false;
       return false;
     }
@@ -396,23 +397,24 @@ class SetupController extends AppController {
     if (!empty($this->data)) {
       $output = "<?php 
 /** 
- * Automatic generated database configuration file by phTagr
+ * Automatic generated database configuration file by phTagr setup
  *
- * Date: ".date("Y-m-d H:i:s")."
+ * Creation date: ".date("Y-m-d H:i:s")."
  */
-class DATABASE_CONFIG
-{
-  var \$default = array('driver' => 'mysql',
-                'connect' => 'mysql_connect',
-                'persistent' => true,
-                'host' => '{$this->data['db']['host']}',
-                'login' => '{$this->data['db']['login']}',
-                'password' => '{$this->data['db']['password']}',
-                'database' => '{$this->data['db']['database']}',
-                'encoding' => 'utf8',
-                'prefix' => '{$this->data['db']['prefix']}');
+class DATABASE_CONFIG {
+              
+  public \$default = array(
+    'datasource' => 'Database/Mysql',
+    'persistent' => true,
+    'host' => '{$this->data['db']['host']}',
+    'login' => '{$this->data['db']['login']}',
+    'password' => '{$this->data['db']['password']}',
+    'database' => '{$this->data['db']['database']}',
+    'prefix' => '{$this->data['db']['prefix']}',
+    'encoding' => 'utf8'
+  );
 }
-?>";
+";
       $file =& new File($this->dbConfig, true, 644);
       if ($file->write($output)) {
         Logger::info("Database configuration file '{$this->dbConfig}' was written successfully");
@@ -427,11 +429,11 @@ class DATABASE_CONFIG
       $this->Session->write('configData', $this->data);
     } else {
       if ($this->Session->check('configData')) {
-        $this->data = $this->Session->read('configData');
+        $this->request->data = $this->Session->read('configData');
       } else {
-        $this->data['db']['host'] = 'localhost';
-        $this->data['db']['database'] = 'phtagr';
-        $this->data['db']['login'] = 'phtagr';
+        $this->request->data('db.host', 'localhost');
+        $this->request->data('db.database', 'phtagr');
+        $this->request->data('db.login', 'phtagr');
       }
     }
     Logger::info("Request database configuration");
@@ -500,27 +502,27 @@ class DATABASE_CONFIG
 
     $this->__checkSession();
 
-    if (!empty($this->data)) {
-      $this->data['User']['role'] = ROLE_ADMIN;
-      $this->data['User']['quota'] = '100 MB';
-      $this->User->create($this->data);
-      if (empty($this->data['User']['confirm'])) {
+    if (!empty($this->request->data)) {
+      $this->request->data['User']['role'] = ROLE_ADMIN;
+      $this->request->data['User']['quota'] = '100 MB';
+      $this->User->create($this->request->data);
+      if (empty($this->request->data['User']['confirm'])) {
         $this->User->invalidate('confirm', 'Password confirmation is missing');
       }
       if ($this->User->save()) {
         $userId = $this->User->getLastInsertID();
         $this->Session->write('User.id', $userId);
         $this->Session->write('User.role', ROLE_ADMIN);
-        $this->Session->write('User.username', $this->data['User']['username']);
-        Logger::info("Admin account '{$this->data['User']['username']}' was created");
+        $this->Session->write('User.username', $this->request->data['User']['username']);
+        Logger::info("Admin account '{$this->request->data['User']['username']}' was created");
         $this->Session->setFlash(__("Admin account was successfully created", true));
         $this->redirect('system');
       } else {
-        Logger::err("Admin account '{$this->data['User']['username']}' could not be created");
+        Logger::err("Admin account '{$this->request->data['User']['username']}' could not be created");
         $this->Session->setFlash(__("Could not create admin account. Please retry", true));
       }
-    } elseif (!isset($this->data['User']['username'])) {
-      $this->data['User']['username'] = 'admin';
+    } elseif (!isset($this->request->data['User']['username'])) {
+      $this->request->data['User']['username'] = 'admin';
     }
     Logger::info("Request account data for the admin");
   }
@@ -571,12 +573,15 @@ class DATABASE_CONFIG
     if ($this->__hasCommands()) {
       $this->redirect('/');
     }
+    if (!isset($this->Option->User)) {
+      Logger::warn("Could not associate User model to Option model");
+    }
 
     Logger::info("Check for required external programs");
     $missing = array();
-    if (!empty($this->data)) {
+    if (!empty($this->request->data)) {
       foreach ($this->commands as $command) {
-        $bin = Set::extract($this->data, 'bin.'.$command);
+        $bin = Set::extract($this->request->data, 'bin.'.$command);
         $file = new File($bin);
         if ($file->executable()) {
           $this->Option->setValue('bin.'.$command, $bin, 0);
@@ -590,14 +595,14 @@ class DATABASE_CONFIG
     } else {
       foreach ($this->commands as $command) {
         $bin = $this->__findCommand($command);
-        $this->data['bin'][$command] = $bin;
+        $this->request->data['bin'][$command] = $bin;
         if (!$bin) {
           $missing[] = $command;
         }
       }
     }
-    if (isset($this->data['bin']['ffmpeg'])) {
-      $this->set('mp3Support', $this->__checkMp3Support($this->data['bin']['ffmpeg']));
+    if (isset($this->request->data['bin']['ffmpeg'])) {
+      $this->set('mp3Support', $this->__checkMp3Support($this->request->data['bin']['ffmpeg']));
     }
     $this->set('missing', $missing);
   }
@@ -634,6 +639,7 @@ class DATABASE_CONFIG
     if (!empty($this->Migration)) {
       return true;
     }
+    CakePlugin::load('Migrations');
     if (!App::import('Lib', 'Migrations.MigrationVersion')) {
       Logger::err("Could not import Migrations plugin");
       return false;

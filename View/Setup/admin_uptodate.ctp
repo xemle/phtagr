@@ -1,9 +1,9 @@
-<h1><?php __("Database upgrade"); ?></h1>
+<h1><?php echo __("Database upgrade"); ?></h1>
 
-<?php echo $session->flash(); ?>
+<?php echo $this->Session->flash(); ?>
 
 <div class="info">
-<?php __("Your database is up-to-date."); ?>
+<?php echo __("Your database is up-to-date."); ?>
 </div>
 
-<?php echo $html->link(__("Continue", true), '/');
+<?php echo $this->Html->link(__("Continue", true), '/');

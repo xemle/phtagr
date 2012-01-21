@@ -1,10 +1,10 @@
-<h1><?php __("Path settings"); ?></h1>
+<h1><?php echo __("Path settings"); ?></h1>
 
-<?php echo $session->flash(); ?>
+<?php echo $this->Session->flash(); ?>
 
 <?php if (count($missing)): ?>
 <div class="error">
-<?php __("Following paths are missing. Please create these paths!"); ?>
+<?php echo __("Following paths are missing. Please create these paths!"); ?>
 </div>
 
 <ul>
@@ -16,7 +16,7 @@
 
 <?php if (count($readonly)): ?>
 <div class="error">
-<?php __("Following paths are not writeable. Please change the permissions!"); ?>
+<?php echo __("Following paths are not writeable. Please change the permissions!"); ?>
 </div>
 
 <ul>
@@ -26,7 +26,7 @@
 </ul>
 <?php endif; ?>
 
-<?php echo $html->link(__('Retry', true), 'path', array('class' => 'button')); ?>
+<?php echo $this->Html->link(__('Retry', true), 'path', array('class' => 'button')); ?>
 <?php
   $script = <<<'JS'
 (function($) {

@@ -64,7 +64,7 @@ class UpgradeSchemaComponent extends Component {
   */
 
   function isConnected() {
-    if (!empty($this->db) && $this->db->connected) {
+    if (!empty($this->db) && $this->db->enabled()) {
       return true;
     } else {
       return false;
