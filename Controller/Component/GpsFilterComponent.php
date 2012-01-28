@@ -54,7 +54,7 @@ class GpsFilterComponent extends BaseFilterComponent {
           $options);
     //Logger::trace($options);
 
-    $filename = $this->MyFile->getFilename($file);
+    $filename = $this->controller->MyFile->getFilename($file);
     if (!$this->Nmea->readFile($filename)) {
       Logger::warn('Could not read file $filename');
       return false;
@@ -79,8 +79,8 @@ class GpsFilterComponent extends BaseFilterComponent {
       $conditions['Media.longitude'] = null;
     }
     Logger::trace($conditions);
-    $this->Media->unbindAll();
-    $mediaSet = $this->Media->find('all', array('conditions' => $conditions));
+    $this->controller->Media->unbindAll();
+    $mediaSet = $this->controller->Media->find('all', array('conditions' => $conditions));
     if (!count($mediaSet)) {
       Logger::info("No images found for GPS interval");
       return false;
@@ -99,7 +99,7 @@ class GpsFilterComponent extends BaseFilterComponent {
       $media['Media']['latitude'] = $position['latitude'];
       $media['Media']['longitude'] = $position['longitude'];
       $media['Media']['flag'] |= MEDIA_FLAG_DIRTY;
-      if ($this->Media->save($media['Media'], true, array('latitude', 'longitude', 'flag'))) {
+      if ($this->controller->Media->save($media['Media'], true, array('latitude', 'longitude', 'flag'))) {
         Logger::debug("Update GPS position of image {$media['Media']['id']} to {$position['latitude']}/{$position['longitude']}");
       } else {
         Logger::warn("Could not update GPS position of image {$media['Media']['id']}");

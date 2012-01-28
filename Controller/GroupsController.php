@@ -24,14 +24,14 @@ class GroupsController extends AppController {
   var $name = 'Groups';
   var $uses = array('Group', 'User', 'Media');
   var $components = array('RequestHandler', 'Security', 'Email', 'Search');
-  var $helpers = array('Form', 'Ajax', 'ImageData', 'Text');
+  var $helpers = array('Form', 'ImageData', 'Text');
   var $subMenu = false;
 
   function beforeFilter() {
     parent::beforeFilter();
     $this->subMenu = array(
-      'index' => __("List Group", true),
-      'create' => __("Create Group", true),
+      'index' => __("List Group"),
+      'create' => __("Create Group"),
       );
     $this->requireRole(ROLE_USER);
     $this->Security->blackHoleCallback = 'fail';
@@ -48,27 +48,27 @@ class GroupsController extends AppController {
 
   function fail() {
     Logger::err("The security component denied the form input");
-    Logger::debug($this->data);
+    Logger::debug($this->request->data);
     $this->redirect('index');
   }
 
   function index() {
     $userId = $this->getUserId();
     if ($this->hasRole(ROLE_ADMIN)) {
-      $this->data = $this->Group->find('all', array('order' => 'Group.name'));
+      $this->request->data = $this->Group->find('all', array('order' => 'Group.name'));
     } else {
-      $this->data = $this->Group->find('all', array('conditions' => (array('OR' => array('User.id' => $userId, 'Group.is_hidden' => false))), 'order' => 'Group.name'));
+      $this->request->data = $this->Group->find('all', array('conditions' => (array('OR' => array('User.id' => $userId, 'Group.is_hidden' => false))), 'order' => 'Group.name'));
     }
   }
 
   function view($name) {
-    $this->data = $this->Group->findByName($name);
-    if (!$this->data) {
-      $this->Session->setFlash(sprintf(__("%s not found", true), __("Group", true)));
+    $this->request->data = $this->Group->findByName($name);
+    if (!$this->request->data) {
+      $this->Session->setFlash(__("%s not found", true, __("Group")));
       $this->redirect('index');
     }
-    $this->Group->setAdmin(&$this->data, $this->getUser());
-    $this->set('mediaCount', $this->Media->countByGroupId($this->data['Group']['id']));
+    $this->Group->setAdmin(&$this->request->data, $this->getUser());
+    $this->set('mediaCount', $this->Media->countByGroupId($this->request->data['Group']['id']));
 
     $this->Search->addGroup($name);
     $this->Search->setShow(6);
@@ -76,20 +76,20 @@ class GroupsController extends AppController {
   }
 
   function create() {
-    if (!empty($this->data)) {
+    if (!empty($this->request->data)) {
       $user = $this->getUser();
-      $this->data['Group']['user_id'] = $user['User']['id'];
-      if (!$this->Group->isNameUnique($this->data)) {
-        $this->Session->setFlash(sprintf(__("%s already exists", true), __('Group', true)));
-      } elseif ($this->Group->save($this->data)) {
+      $this->request->data['Group']['user_id'] = $user['User']['id'];
+      if (!$this->Group->isNameUnique($this->request->data)) {
+        $this->Session->setFlash(__("%s already exists", true, __('Group')));
+      } elseif ($this->Group->save($this->request->data)) {
         $groupId = $this->Group->getLastInsertID();
         $group = $this->Group->findById($groupId);
         $user = $this->getUser();
         Logger::info("User '{$user['User']['username']}' ({$user['User']['id']}) created group '{$group['Group']['name']}' ({$group['Group']['id']})");
-        $this->Session->setFlash(sprintf(__("Add successfully group '%s'", true), $this->data['Group']['name']));
+        $this->Session->setFlash(__("Add successfully group '%s'", $this->request->data['Group']['name']));
         $this->redirect("view/{$group['Group']['name']}");
       } else {
-        $this->Session->setFlash(sprintf(__("Could not create group '%s'", true), $this->data['Group']['name']));
+        $this->Session->setFlash(__("Could not create group '%s'", $this->request->data['Group']['name']));
       }
     }
   }
@@ -109,11 +109,11 @@ class GroupsController extends AppController {
       if ($this->Email->smtpError) {
         Logger::err($this->Email->smtpError);
       }
-      $this->Session->setFlash(__('Mail could not be sent', true));
+      $this->Session->setFlash(__('Mail could not be sent'));
       return false;
     }
     Logger::info("Sent group subscribe request of user {$user['User']['username']} for group {$group['Group']['name']} to {$group['User']['username']}");
-    $this->Session->setFlash(__("Group subscription request was sent to the group owner", true));
+    $this->Session->setFlash(__("Group subscription request was sent to the group owner"));
     return true;
   }
 
@@ -175,7 +175,7 @@ class GroupsController extends AppController {
   function subscribe($name) {
     $group = $this->Group->findByName($name);
     if (!$group) {
-      $this->Session->setFlash(sprintf(__("%s not found", true), __("Group", true)));
+      $this->Session->setFlash(__("%s not found", true, __("Group")));
       $this->redirect('index');
     }
     if ($group['Group']['is_moderated']) {
@@ -200,7 +200,7 @@ class GroupsController extends AppController {
     if ($this->getUserRole() < ROLE_ADMIN) {
       $conditions['Group.user_id'] = $this->getUserId();
     }
-    $group = $this->Group->find($conditions);
+    $group = $this->Group->find('all', array('conditions' => $conditions));
     $user = $this->User->findByUsername($userName);
     $userId = ($user) ? $user['User']['id'] : false;
     $result = $this->Group->subscribe($group, $userId);
@@ -231,19 +231,19 @@ class GroupsController extends AppController {
   function addMember($id) {
     $group = $this->Group->findById($id);
     if (!$this->Group->isAdmin(&$group, $this->getUser())) {
-      $this->Session->setFlash(__("You are not authorized to perform this action", true));
+      $this->Session->setFlash(__("You are not authorized to perform this action"));
       $this->redirect("view/{$group['Group']['name']}");
     }
-    $user = $this->User->findByUsername($this->data['Member']['new']);
+    $user = $this->User->findByUsername($this->request->data['Member']['new']);
     if (!$user) {
-      $this->Session->setFlash(__("%s not found", true), __("User", true));
+      $this->Session->setFlash(__("%s not found", true), __("User"));
       $this->redirect("view/{$group['Group']['name']}");
     }
     $result = $this->Group->subscribe($group, $user['User']['id']);
     if ($result['code'] >= 400 && $result['code'] < 500) {
       $this->redirect("index");
     } elseif ($result['code'] == 201) {
-      $this->Session->setFlash(sprintf(__("User %s is now subscribe to this group", true), $this->data['Member']['new']));
+      $this->Session->setFlash(__("User %s is now subscribe to this group", $this->request->data['Member']['new']));
     }
     $this->redirect("view/{$group['Group']['name']}");
   }
@@ -251,33 +251,33 @@ class GroupsController extends AppController {
   function deleteMember($groupName, $userName) {
     $group = $this->Group->findByName($groupName);
     if (!$this->Group->isAdmin(&$group, $this->getUser())) {
-      $this->Session->setFlash(__("You are not authorized to perform this action", true));
+      $this->Session->setFlash(__("You are not authorized to perform this action"));
       $this->redirect("view/{$group['Group']['name']}");
     }
     $user = $this->User->findByUsername($userName);
     if (!$user) {
-      $this->Session->setFlash(__("%s not found", true), __("User", true));
+      $this->Session->setFlash(__("%s not found", true), __("User"));
       $this->redirect("view/{$group['Group']['name']}");
     }
     $result = $this->Group->unsubscribe($group, $user['User']['id']);
     if ($result['code'] >= 400 && $result['code'] < 500) {
       $this->redirect("index");
     } elseif ($result['code'] == 201) {
-      $this->Session->setFlash(sprintf(__("User %s is now unsubscribe from this group", true), $userName));
+      $this->Session->setFlash(__("User %s is now unsubscribe from this group", $userName));
     }
     $this->redirect("view/{$group['Group']['name']}");
   }
 
   function edit($groupName) {
-    if (!empty($this->data)) {
-      if ($this->data['Group']['name'] != $groupName && !$this->Group->isNameUnique($this->data)) {
-        $this->Session->setFlash(sprintf(__("%s already exists", true), __('Group', true)));
-      } elseif (!$this->Group->save($this->data)) {
-        $this->Session->setFlash(sprintf(__("Could not save %s", true), __('Group', true)));
+    if (!empty($this->request->data)) {
+      if ($this->request->data['Group']['name'] != $groupName && !$this->Group->isNameUnique($this->request->data)) {
+        $this->Session->setFlash(__("%s already exists", true, __('Group')));
+      } elseif (!$this->Group->save($this->request->data)) {
+        $this->Session->setFlash(__("Could not save %s", true, __('Group')));
       } else {
-        $this->Session->setFlash(sprintf(__("%s updated", true), __('Group', true)));
-        if ($groupName != $this->data['Group']['name']) {
-          $this->redirect("edit/{$this->data['Group']['name']}");
+        $this->Session->setFlash(__("%s updated", true, __('Group')));
+        if ($groupName != $this->request->data['Group']['name']) {
+          $this->redirect("edit/{$this->request->data['Group']['name']}");
         }
       }
     }
@@ -285,9 +285,9 @@ class GroupsController extends AppController {
     if ($this->getUserRole() < ROLE_ADMIN) {
       $conditions['Group.user_id'] = $this->getUserId();
     }
-    $this->data = $this->Group->find($conditions);
-    if (!$this->data) {
-      $this->Session->setFlash(__("Could not find group", true));
+    $this->request->data = $this->Group->find('all', array('conditions' => $conditions));
+    if (!$this->request->data) {
+      $this->Session->setFlash(__("Could not find group"));
       $this->redirect("index");
     }
   }
@@ -297,14 +297,14 @@ class GroupsController extends AppController {
     @todo Check for permission! */
   function delete($groupId) {
     $userId = $this->getUserId();
-    $group = $this->Group->find(array('Group.id' => $groupId, 'Group.user_id' => $userId));
+    $group = $this->Group->find('first', array('conditions' => array('Group.id' => $groupId, 'Group.user_id' => $userId)));
     if ($group) {
       $this->Group->delete($groupId);
       $user = $this->getUser();
       Logger::info("User '{$user['User']['username']}' ({$user['User']['id']}) deleted group '{$group['Group']['name']}' ({$group['Group']['id']})");
-      $this->Session->setFlash(sprintf(__("Successfully deleted group '%s'", true), $group['Group']['name']));
+      $this->Session->setFlash(__("Successfully deleted group '%s'", $group['Group']['name']));
     } else {
-      $this->Session->setFlash(__("Could not find group", true));
+      $this->Session->setFlash(__("Could not find group"));
     }
     $this->redirect("index");
   }

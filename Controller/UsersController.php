@@ -32,12 +32,12 @@ class UsersController extends AppController
   function beforeFilter() {
     parent::beforeFilter();
     $this->subMenu = array(
-      'index' => __("List User", true),
+      'index' => __("List User"),
       );
     if ($this->hasRole(ROLE_SYSOP)) {
       $this->subMenu = am($this->subMenu, array(
-        array('action' => 'add', 'title' => __("Add User", true), 'admin' => true),
-        array('action' => 'register', 'title' => __("Registration", true), 'admin' => true),
+        array('action' => 'add', 'title' => __("Add User"), 'admin' => true),
+        array('action' => 'register', 'title' => __("Registration"), 'admin' => true),
         ));
     }
     $this->layout = 'backend';
@@ -89,24 +89,24 @@ class UsersController extends AppController
 
   function index() {
     $this->set('isAdmin', $this->hasRole(ROLE_SYSOP));
-    $this->data = $this->User->findVisibleUsers($this->getUser());
+    $this->request->data = $this->User->findVisibleUsers($this->getUser());
   }
 
   function view($name) {
-    $this->data = $this->User->findVisibleUsers($this->getUser(), $name);
-    if (!$this->data) {
+    $this->request->data = $this->User->findVisibleUsers($this->getUser(), $name);
+    if (!$this->request->data) {
       $this->redirect('index');
     }
-    $userId = $this->data['User']['id'];
-    $this->data['Media']['count'] = $this->Media->find('count', array('conditions' => array('Media.user_id' => $userId), 'recursive' => -1));
-    $this->data['File']['count'] = $this->MyFile->find('count', array('conditions' => array('File.user_id' => $userId), 'recursive' => -1));
+    $userId = $this->request->data['User']['id'];
+    $this->request->data['Media']['count'] = $this->Media->find('count', array('conditions' => array('Media.user_id' => $userId), 'recursive' => -1));
+    $this->request->data['File']['count'] = $this->MyFile->find('count', array('conditions' => array('File.user_id' => $userId), 'recursive' => -1));
     $bytes = $this->MyFile->find('all', array('conditions' => array("File.user_id" => $userId), 'recursive' => -1, 'fields' => 'SUM(File.size) AS Bytes'));
-    $this->data['File']['bytes'] = $bytes[0][0]['Bytes'];
+    $this->request->data['File']['bytes'] = $bytes[0][0]['Bytes'];
 
     $groupUserIds = Set::extract('/Group/user_id');
     $this->set('users', $this->User->find('all', array('condition' => array('User.id' => $groupUserIds), 'recursive' => -1)));
 
-    $this->Search->setUser($this->data['User']['username']);
+    $this->Search->setUser($this->request->data['User']['username']);
     $this->Search->setShow(6);
     $this->set('media', $this->Search->paginate());
   }
@@ -114,32 +114,31 @@ class UsersController extends AppController
   /** Checks the login of the user. If the session variable 'loginRedirect' is
    * set the user is forwarded to this given address on successful login. */
   function login() {
-    $failedText = __("Sorry. Wrong password or unknown username!", true);
-    if (!empty($this->data) && !$this->RequestHandler->isPost()) {
+    $failedText = __("Sorry. Wrong password or unknown username!");
+    if (!empty($this->request->data) && !$this->RequestHandler->isPost()) {
       Logger::warn("Authentication failed: Request was not HTTP POST");
       $this->Session->setFlash($failedText);
-      $this->data = null;
+      $this->request->data = null;
     }
-    if (empty($this->data['User']['username']) xor empty($this->data['User']['password'])) {
+    if (empty($this->request->data['User']['username']) xor empty($this->request->data['User']['password'])) {
       Logger::warn("Authentication failed: Username or password are not set");
-      $this->Session->setFlash(__("Please enter username and password!", true));
-      $this->data = null; 
+      $this->Session->setFlash(__("Please enter username and password!"));
+      $this->request->data = null; 
     }
 
-    if (!empty($this->data)) {
-      $user = $this->User->findByUsername($this->data['User']['username']);
+    if (!empty($this->request->data)) {
+      $user = $this->User->findByUsername($this->request->data['User']['username']);
 
       if (!$user) {
-        Logger::warn("Authentication failed: Unknown username '{$this->data['User']['username']}'!");
+        Logger::warn("Authentication failed: Unknown username '{$this->request->data['User']['username']}'!");
         $this->Session->setFlash($failedText);
       } elseif ($this->User->isExpired($user)) {
         Logger::warn("User account of '{$user['User']['username']}' (id {$user['User']['id']}) is expired!");
-        $this->Session->setFlash(__("Sorry. Your account is expired!", true));
+        $this->Session->setFlash(__("Sorry. Your account is expired!"));
       } else {
         $user = $this->User->decrypt(&$user);
-        if ($user['User']['password'] == $this->data['User']['password']) {
+        if ($user['User']['password'] == $this->request->data['User']['password']) {
           $this->Session->renew();
-          $this->Session->activate();
           if (!$this->Session->check('User.id') || $this->Session->read('User.id') != $user['User']['id']) {
             Logger::info("Start new session for '{$user['User']['username']}' (id {$user['User']['id']})");
             $this->User->writeSession($user, &$this->Session);
@@ -157,14 +156,14 @@ class UsersController extends AppController
             }
           } else {
             Logger::err("Could not write session information of user '{$user['User']['username']}' ({$user['User']['id']})");
-            $this->Session->setFlash(__("Sorry. Internal login procedure failed!", true));
+            $this->Session->setFlash(__("Sorry. Internal login procedure failed!"));
           }
         } else {
-          Logger::warn("Authentication failed: Incorrect password of username '{$this->data['User']['username']}'!");
+          Logger::warn("Authentication failed: Incorrect password of username '{$this->request->data['User']['username']}'!");
           $this->Session->setFlash($failedText);
         }
       }
-      unset($this->data['User']['password']);
+      unset($this->request->data['User']['password']);
     }
     $this->set('register', $this->Option->getValue($this->getUser(), 'user.register.enable', 0));
     $this->layout = 'default';
@@ -185,7 +184,7 @@ class UsersController extends AppController
   function admin_index() {
     $this->requireRole(ROLE_SYSOP, array('loginRedirect' => '/admin/users'));
 
-    $this->data = $this->paginate('User', array('User.role>='.ROLE_USER));
+    $this->request->data = $this->paginate('User', array('User.role>='.ROLE_USER));
   }
 
   /** Ensure at least one admin exists
@@ -194,11 +193,11 @@ class UsersController extends AppController
   function _lastAdminCheck($id) {
     $userId = $this->getUserId();
     $userRole = $this->getUserRole();
-    if ($userId == $id && $userRole == ROLE_ADMIN && $this->data['User']['role'] < ROLE_ADMIN) {
+    if ($userId == $id && $userRole == ROLE_ADMIN && $this->request->data['User']['role'] < ROLE_ADMIN) {
       $count = $this->User->find('count', array('conditions' => array('User.role >= '.ROLE_ADMIN)));
       if ($count == 1) {
         Logger::warn('Can not degrade last admin');
-        $this->Session->setFlash(__('Can not degrade last admin', true));
+        $this->Session->setFlash(__('Can not degrade last admin'));
         return false;
       }
     }
@@ -208,9 +207,9 @@ class UsersController extends AppController
   /** Add 3rd level menu for user edit for admin */
   function _addAdminEditMenu($userId) {
     $subActions = array(
-      'password' => __("Password", true),
-      'path' => __("Local Paths", true));
-    $subItems = array('url' => array('admin' => true, 'action' => 'edit', $userId), 'title' => __('Edit', true), 'active' => true);
+      'password' => __("Password"),
+      'path' => __("Local Paths"));
+    $subItems = array('url' => array('admin' => true, 'action' => 'edit', $userId), 'title' => __('Edit'), 'active' => true);
     foreach ($subActions as $action => $title) {
       $subItems[] = array('url' => array('admin' => true, 'action' => $action, $userId), 'title' => $title, 'active' => ('admin_'.$action == $this->action));
     }
@@ -222,20 +221,20 @@ class UsersController extends AppController
     $this->requireRole(ROLE_SYSOP, array('loginRedirect' => '/admin/users'));
 
     $id = intval($id);
-    if (!empty($this->data) && $this->_lastAdminCheck($id)) {
-      $this->data['User']['id'] = $id;
+    if (!empty($this->request->data) && $this->_lastAdminCheck($id)) {
+      $this->request->data['User']['id'] = $id;
 
-      if ($this->User->save($this->data, true, array('email', 'expires', 'quota', 'firstname', 'lastname', 'role'))) {
-        Logger::debug("Data of user {$this->data['User']['id']} was updated");
-        $this->Session->setFlash(__('User data was updated', true));
+      if ($this->User->save($this->request->data, true, array('email', 'expires', 'quota', 'firstname', 'lastname', 'role'))) {
+        Logger::debug("Data of user {$this->request->data['User']['id']} was updated");
+        $this->Session->setFlash(__('User data was updated'));
       } else {
         Logger::err("Could not save user data");
         Logger::debug($this->User->validationErrors);
-        $this->Session->setFlash(__('Could not be updated', true));
+        $this->Session->setFlash(__('Could not be updated'));
       }
     }
 
-    $this->data = $this->User->findById($id);
+    $this->request->data = $this->User->findById($id);
     $this->set('allowAdminRole', ($this->getUserRole() == ROLE_ADMIN) ? true : false);
 
     $this->_addAdminEditMenu($id);
@@ -245,21 +244,21 @@ class UsersController extends AppController
     $this->requireRole(ROLE_SYSOP, array('loginRedirect' => '/admin/users'));
 
     $id = intval($id);
-    if (!empty($this->data)) {
-      $this->data['User']['id'] = $id;
+    if (!empty($this->request->data)) {
+      $this->request->data['User']['id'] = $id;
 
-      if ($this->User->save($this->data, true, array('password'))) {
-        Logger::debug("Data of user {$this->data['User']['id']} was updated");
-        $this->Session->setFlash(__('User data was updated', true));
+      if ($this->User->save($this->request->data, true, array('password'))) {
+        Logger::debug("Data of user {$this->request->data['User']['id']} was updated");
+        $this->Session->setFlash(__('User data was updated'));
       } else {
         Logger::err("Could not save user data");
         Logger::debug($this->User->validationErrors);
-        $this->Session->setFlash(__('Could not be updated', true));
+        $this->Session->setFlash(__('Could not be updated'));
       }
     }
 
-    $this->data = $this->User->findById($id);
-    unset($this->data['User']['password']);
+    $this->request->data = $this->User->findById($id);
+    unset($this->request->data['User']['password']);
 
     $this->_addAdminEditMenu($id);
   }
@@ -268,48 +267,48 @@ class UsersController extends AppController
     $this->requireRole(ROLE_SYSOP, array('loginRedirect' => '/admin/users'));
 
     $id = intval($id);
-    if (!empty($this->data)) {
-      $this->data['User']['id'] = $id;
+    if (!empty($this->request->data)) {
+      $this->request->data['User']['id'] = $id;
 
-      $this->User->set($this->data);
+      $this->User->set($this->request->data);
 
-      if (!empty($this->data['Option']['path']['fspath'])) {
-        $fsroot = $this->data['Option']['path']['fspath'];
+      if (!empty($this->request->data['Option']['path']['fspath'])) {
+        $fsroot = $this->request->data['Option']['path']['fspath'];
         $fsroot = Folder::slashTerm($fsroot);
 
         if (is_dir($fsroot) && is_readable($fsroot)) {
           $this->Option->addValue('path.fsroot[]', $fsroot, $id);
-          $this->Session->setFlash(sprintf(__("Directory '%s' was added", true), $fsroot));
+          $this->Session->setFlash(__("Directory '%s' was added", $fsroot));
           Logger::info("Add external directory '$fsroot' to user $id");
         } else {
-          $this->Session->setFlash(sprintf(__("Directory '%s' could not be read", true), $fsroot));
+          $this->Session->setFlash(__("Directory '%s' could not be read", $fsroot));
           Logger::err("Directory '$fsroot' could not be read");
         }
       }
     }
 
-    $this->data = $this->User->findById($id);
-    unset($this->data['User']['password']);
+    $this->request->data = $this->User->findById($id);
+    unset($this->request->data['User']['password']);
 
-    $this->set('fsroots', $this->Option->buildTree($this->data, 'path.fsroot'));
+    $this->set('fsroots', $this->Option->buildTree($this->request->data, 'path.fsroot'));
     $this->_addAdminEditMenu($id);
   }
  
   function admin_add() {
     $this->requireRole(ROLE_SYSOP, array('loginRedirect' => '/admin/users'));
 
-    if (!empty($this->data)) {
-      if ($this->User->hasAny(array('User.username' => $this->data['User']['username']))) {
-        $this->Session->setFlash(__('Username already exists, please choose a different name!', true));
+    if (!empty($this->request->data)) {
+      if ($this->User->hasAny(array('User.username' => $this->request->data['User']['username']))) {
+        $this->Session->setFlash(__('Username already exists, please choose a different name!'));
       } else {
-        $this->data['User']['role'] = ROLE_USER;
-        if ($this->User->save($this->data, true, array('username', 'password', 'role', 'email'))) {
-          Logger::info("New user {$this->data['User']['username']} was created");
-          $this->Session->setFlash(__('User was created', true));
+        $this->request->data['User']['role'] = ROLE_USER;
+        if ($this->User->save($this->request->data, true, array('username', 'password', 'role', 'email'))) {
+          Logger::info("New user {$this->request->data['User']['username']} was created");
+          $this->Session->setFlash(__('User was created'));
           $this->redirect('/admin/users/edit/'.$this->User->id);
         } else {
-          Logger::warn("Creation of user {$this->data['User']['username']} failed");
-          $this->Session->setFlash(__('Could not create user!', true));
+          Logger::warn("Creation of user {$this->request->data['User']['username']} failed");
+          $this->Session->setFlash(__('Could not create user!'));
         }
       }
     }
@@ -321,12 +320,12 @@ class UsersController extends AppController
     $id = intval($id);
     $user = $this->User->findById($id);
     if (!$user) {
-      $this->Session->setFlash(__("Could not delete user: user not found!", true));
+      $this->Session->setFlash(__("Could not delete user: user not found!"));
       $this->redirect('index');
     } else {
       $this->User->delete($id);
       Logger::notice("All data of user '{$user['User']['username']}' ($id) deleted");
-      $this->Session->setFlash(sprintf(__("User %s was deleted", true), $user['User']['username']));
+      $this->Session->setFlash(__("User %s was deleted", $user['User']['username']));
       $this->redirect('index');
     }
   }
@@ -345,45 +344,45 @@ class UsersController extends AppController
     
     $this->Option->delValue('path.fsroot[]', $fsroot, $id);
     Logger::info("Deleted external directory '$fsroot' from user $id");
-    $this->Session->setFlash(sprintf(__("Deleted external directory '%s'", true), $fsroot));
+    $this->Session->setFlash(__("Deleted external directory '%s'", $fsroot));
     $this->redirect("path/$id");
   }
 
   function admin_register() {
     $this->requireRole(ROLE_SYSOP, array('loginRedirect' => '/admin/users'));
 
-    if (!empty($this->data)) {
-      if ($this->data['user']['register']['enable']) {
+    if (!empty($this->request->data)) {
+      if ($this->request->data['user']['register']['enable']) {
         $this->Option->setValue('user.register.enable', 1, 0);
       } else {
         $this->Option->setValue('user.register.enable', 0, 0);
       }
-      $quota = $this->__fromReadableSize($this->data['user']['register']['quota']);
+      $quota = $this->__fromReadableSize($this->request->data['user']['register']['quota']);
       $this->Option->setValue('user.register.quota', $quota, 0); 
-      $this->Session->setFlash(__("Options saved!", true));
+      $this->Session->setFlash(__("Options saved!"));
     }
-    $this->data = $this->Option->getTree($this->getUserId());
+    $this->request->data = $this->Option->getTree($this->getUserId());
 
     // add default values
-    if (!isset($this->data['user']['register']['enable'])) {
-      $this->data['user']['register']['enable'] = 0;
+    if (!isset($this->request->data['user']['register']['enable'])) {
+      $this->request->data['user']['register']['enable'] = 0;
     }
-    if (!isset($this->data['user']['register']['quota'])) {
-      $this->data['user']['register']['quota'] = (float)100*1024*1024;
+    if (!isset($this->request->data['user']['register']['quota'])) {
+      $this->request->data['user']['register']['quota'] = (float)100*1024*1024;
     }
     
   } 
  
   /** Password recovery */
   function password() {
-    if (!empty($this->data)) {
-      $user = $this->User->find(array(
-          'username' => $this->data['User']['username'], 
-          'email' => $this->data['User']['email']));
+    if (!empty($this->request->data)) {
+      $user = $this->User->find('first', array('conditions' => array(
+          'username' => $this->request->data['User']['username'], 
+          'email' => $this->request->data['User']['email'])));
       if (empty($user)) {
-        $this->Session->setFlash(__('No user with this email was found', true));
+        $this->Session->setFlash(__('No user with this email was found'));
         Logger::warn(sprintf("No user '%s' with email %s was found",
-            $this->data['User']['username'], $this->data['User']['email']));
+            $this->request->data['User']['username'], $this->request->data['User']['email']));
       } else {
         $this->Email->to = sprintf("%s %s <%s>", 
             $user['User']['firstname'],
@@ -401,13 +400,13 @@ class UsersController extends AppController
             $user['User']['username'], 
             $user['User']['id'],
             $user['User']['email']));
-          $this->Session->setFlash(__('Mail was sent!', true));
+          $this->Session->setFlash(__('Mail was sent!'));
         } else {
           Logger::err(sprintf("Could not send password mail to user '%s' (id %d) with address '%s'",
             $user['User']['username'],
             $user['User']['id'],
             $user['User']['email']));
-          $this->Session->setFlash(__('Mail could not be sent: unknown error!', true));
+          $this->Session->setFlash(__('Mail could not be sent: unknown error!'));
         }
       }
     }
@@ -422,27 +421,27 @@ class UsersController extends AppController
       $this->redirect('login');
     }
 
-    if (!empty($this->data)) {
-      if ($this->data['Captcha']['verification'] != $this->Session->read('user.register.captcha')) {
-        $this->Session->setFlash(__('Captcha verification failed', true));
+    if (!empty($this->request->data)) {
+      if ($this->request->data['Captcha']['verification'] != $this->Session->read('user.register.captcha')) {
+        $this->Session->setFlash(__('Captcha verification failed'));
         Logger::verbose("Captcha verification failed");
-      } elseif ($this->User->hasAny(array('User.username' => $this->data['User']['username']))) {
-        $this->Session->setFlash(__('Username already exists, please choose different name!', true));
-        Logger::info("Username already exists: {$this->data['User']['username']}");
+      } elseif ($this->User->hasAny(array('User.username' => $this->request->data['User']['username']))) {
+        $this->Session->setFlash(__('Username already exists, please choose different name!'));
+        Logger::info("Username already exists: {$this->request->data['User']['username']}");
       } else {
-        $user = $this->User->create($this->data);
+        $user = $this->User->create($this->request->data);
         if ($this->User->save($user['User'], true, array('id', 'username', 'password', 'email'))) {
-          Logger::info("New user {$this->data['User']['username']} was created");
+          Logger::info("New user {$this->request->data['User']['username']} was created");
           $this->_initRegisteredUser($this->User->getLastInsertID());
         } else {
-          Logger::err("Creation of user {$this->data['User']['username']} failed");
-          $this->Session->setFlash(__('Could not create user', true));
+          Logger::err("Creation of user {$this->request->data['User']['username']} failed");
+          $this->Session->setFlash(__('Could not create user'));
         }
       }
     }
-    unset($this->data['User']['password']);
-    unset($this->data['User']['confirm']);
-    unset($this->data['Captcha']['verification']);
+    unset($this->request->data['User']['password']);
+    unset($this->request->data['User']['confirm']);
+    unset($this->request->data['Captcha']['verification']);
     $this->layout = 'default';
   }
 
@@ -473,10 +472,10 @@ class UsersController extends AppController
     $this->Option->setValue('user.register.key', $key, $newUserId);
     // send confimation email
     if (!$this->_sendConfirmationEmail($user, $key)) {
-      $this->Session->setFlash(__("Could not send the confirmation email. Please contact the admin.", true));
+      $this->Session->setFlash(__("Could not send the confirmation email. Please contact the admin."));
       return false;
     }
-    $this->Session->setFlash(__("A confirmation email was sent to your email address", true));
+    $this->Session->setFlash(__("A confirmation email was sent to your email address"));
     $this->redirect("/users/confirm");
   }
 
@@ -488,12 +487,12 @@ class UsersController extends AppController
       $this->redirect(null, 404);
     }
 
-    if (!$key && !empty($this->data)) {
+    if (!$key && !empty($this->request->data)) {
       // check user input
-      if (empty($this->data['User']['key'])) {
-        $this->Session->setFlash(__("Please enter the confirmation key", true));
+      if (empty($this->request->data['User']['key'])) {
+        $this->Session->setFlash(__("Please enter the confirmation key"));
       } else { 
-        $key = $this->data['User']['key']; 
+        $key = $this->request->data['User']['key']; 
       }
     }
 
@@ -506,16 +505,16 @@ class UsersController extends AppController
     @param key Account confirmation key */
   function _checkConfirmation($key) {
     // check key. Option [belongsTo] User: The user is bound to option
-    $user = $this->Option->find(array("Option.value" => $key));
+    $user = $this->Option->find('first', array('conditions' => array("Option.value" => $key)));
     if (!$user) {
       Logger::trace("Could not find confirmation key");
-      $this->Session->setFlash(__("Could not find confirmation key", true));
+      $this->Session->setFlash(__("Could not find confirmation key"));
       return false;
     } 
 
     if (!isset($user['User']['id'])) {
       Logger::err("Could not find the user for register confirmation");
-      $this->Session->setFlash(__("Internal error occured", true));
+      $this->Session->setFlash(__("Internal error occured"));
       return false;
     }
     
@@ -524,7 +523,7 @@ class UsersController extends AppController
     $now = time();
     $expires = strtotime($user['User']['expires']);
     if ($now - $expires > (14 * 24 * 3600 + 3600)) {
-      $this->Session->setFlash(__("Could not find confirmation key", true));
+      $this->Session->setFlash(__("Could not find confirmation key"));
       Logger::err("Registration confirmation is expired.");
       $this->User->delete($user['User']['id']);
       Logger::info("Deleted user from expired registration");

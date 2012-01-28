@@ -101,8 +101,8 @@ class UploadComponent extends Component {
       return $this->_uploads;
     }
 
-    if (!$data && $this->controller->data) {
-      $data =& $this->controller->data;
+    if (!$data && $this->controller->request->data) {
+      $data =& $this->controller->request->data;
     }
 
     $uploads = $this->_extractUploads(&$data);

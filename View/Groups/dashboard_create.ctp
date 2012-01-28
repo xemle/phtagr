@@ -15,7 +15,7 @@
 <?php echo $this->Form->end(__('Create')); ?>
 
 <?php
-debug($this->data);
+debug($this->request->data);
 
 ?>
 <h1>Create Group</h1>
@@ -35,7 +35,7 @@ debug($this->data);
 <?php echo $this->Form->end(__('Create')); ?>
 
 <?php
-debug($this->data);
+debug($this->request->data);
 
 ?>
 <h1>Create Group</h1>
@@ -55,7 +55,7 @@ debug($this->data);
 <?php echo $this->Form->end(__('Create')); ?>
 
 <?php
-debug($this->data);
+debug($this->request->data);
 
 ?>
 <h1>Create Group</h1>
@@ -75,7 +75,7 @@ debug($this->data);
 <?php echo $this->Form->end(__('Create')); ?>
 
 <?php
-debug($this->data);
+debug($this->request->data);
 
 ?>
 <h1>Create Group</h1>
@@ -95,7 +95,7 @@ debug($this->data);
 <?php echo $this->Form->end(__('Create')); ?>
 
 <?php
-debug($this->data);
+debug($this->request->data);
 
 ?>
 <h1>Create Group</h1>
@@ -115,6 +115,6 @@ debug($this->data);
 <?php echo $this->Form->end(__('Create')); ?>
 
 <?php
-debug($this->data);
+debug($this->request->data);
 
 ?>

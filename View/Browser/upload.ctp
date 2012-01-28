@@ -3,7 +3,7 @@
 <?php echo $this->Session->flash(); ?>
 
 <?php if ($free > 0): ?>
-<p><?php echo __("You upload files to folder %s", $fileList->location($path)); ?></p>
+<p><?php echo __("You upload files to folder %s", $this->FileList->location($path)); ?></p>
 <p><?php echo __("You can upload maximal %s and %s at once", $this->Number->toReadableSize($free), $this->Number->toReadableSize($max)); ?></p>
 
 <?php echo $this->Form->create(false, array('action' => 'upload/'.$path, 'type' => 'file')); ?>

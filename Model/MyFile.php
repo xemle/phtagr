@@ -125,7 +125,7 @@ class MyFile extends AppModel
     $file = basename($filename);
     $path = Folder::slashTerm(dirname($filename));
 
-    return $this->find(array("path" => $path, "file" => $file));
+    return $this->find('first', array('conditions' => array("path" => $path, "file" => $file)));
   }
 
   /** Checks if a file exists already in the database.

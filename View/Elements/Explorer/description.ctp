@@ -1,6 +1,6 @@
 <?php 
   $this->Search->initialize(); 
-  echo $this->element('explorer/date', array('media' => $media));
+  echo $this->element('Explorer/date', array('media' => $media));
   if (count($media['Tag'])) {
     echo $this->Html->tag('p', 
       __("Tags").' '.implode(', ', $this->ImageData->linkList('/explorer/tag', Set::extract('/Tag/name', $media))), 

@@ -48,11 +48,11 @@
 <?php echo $this->ImageData->mediaLink($comment, array('type' => 'mini', 'div' => 'image')); ?>
 <div class="meta">
 <span class="from"><?php echo $comment['Comment']['name'] ?></span> said 
-<span class="date"><?php echo $time->relativeTime($comment['Comment']['date']); ?>:</span>
+<span class="date"><?php echo $this->Time->timeAgoInWords($comment['Comment']['date']); ?>:</span>
 </div><!-- comment meta -->
 
 <div class="text">
-<?php echo preg_replace('/\n/', '<br />', $text->truncate($comment['Comment']['text'], 220, array('ending' => '...', 'exact' => false, 'html' => false))); ?>
+<?php echo preg_replace('/\n/', '<br />', $this->Text->truncate($comment['Comment']['text'], 220, array('ending' => '...', 'exact' => false, 'html' => false))); ?>
 </div>
 </div><!-- comment -->
 <?php endforeach; /* comments */ ?>

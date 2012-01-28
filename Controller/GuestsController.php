@@ -24,7 +24,7 @@ class GuestsController extends AppController {
   var $name = 'Guests';
   var $uses = array('Group', 'User', 'Guest');
   var $components = array('RequestHandler');
-  var $helpers = array('Form', 'Ajax');
+  var $helpers = array('Form', 'Autocomplete');
   var $subMenu = false;
 
   function beforeFilter() {
@@ -32,7 +32,7 @@ class GuestsController extends AppController {
     $this->layout = 'backend';
     $this->requireRole(ROLE_USER);
     $this->subMenu = array(
-      'create' => __('New Guest', true)
+      'create' => __('New Guest')
       );
   }
 
@@ -42,7 +42,7 @@ class GuestsController extends AppController {
 
   function index() {
     $userId = $this->getUserId();
-    $this->data = $this->Guest->find('all', array('conditions' => array('Guest.creator_id' => $userId)));
+    $this->request->data = $this->Guest->find('all', array('conditions' => array('Guest.creator_id' => $userId)));
   }
 
   function autocomplete() {
@@ -52,28 +52,28 @@ class GuestsController extends AppController {
     $userId = $this->getUserId();
     uses('sanitize');
     $sanitize = new Sanitize();
-    $escName = $sanitize->escape($this->data['Group']['name']);
+    $escName = $sanitize->escape($this->request->data['Group']['name']);
     $groups = $this->Group->find('all', array('conditions' => "Group.user_id = $userId AND Group.name LIKE '%$escName%'"));
-    $this->data = $groups;
+    $this->request->data = $groups;
     $this->layout = "bare";
   }
 
   function create() {
-    if (!empty($this->data)) {
+    if (!empty($this->request->data)) {
       $userId = $this->getUserId();
-      $this->data['Guest']['creator_id'] = $userId;
-      $this->data['Guest']['role'] = ROLE_GUEST;
-      if ($this->Guest->hasAny(array("Guest.username" => $this->data['Guest']['username']))) {
-        $this->Session->setFlash(__("Sorry. Username is already taken", true));
-      } elseif ($this->Guest->save($this->data, true, array('username', 'password', 'role', 'creator_id', 'email', 'quota'))) {
+      $this->request->data['Guest']['creator_id'] = $userId;
+      $this->request->data['Guest']['role'] = ROLE_GUEST;
+      if ($this->Guest->hasAny(array("Guest.username" => $this->request->data['Guest']['username']))) {
+        $this->Session->setFlash(__("Sorry. Username is already taken"));
+      } elseif ($this->Guest->save($this->request->data, true, array('username', 'password', 'role', 'creator_id', 'email', 'quota'))) {
         $guestId = $this->Guest->getLastInsertID();
         $guest = $this->Guest->findById($guestId);
         $user = $this->getUser();
         Logger::info("User '{$user['User']['username']}' ({$user['User']['id']}) created a guest account '{$guest['Guest']['username']}' ({$guest['Guest']['id']})");
-        $this->Session->setFlash(sprintf(__("Guest account '%s' was successfully created", true), $this->data['Guest']['username']));
+        $this->Session->setFlash(__("Guest account '%s' was successfully created", $this->request->data['Guest']['username']));
         $this->redirect("edit/$guestId");
       } else {
-        $this->Session->setFlash(__("Sorry. Guest account could not created", true));
+        $this->Session->setFlash(__("Sorry. Guest account could not created"));
       }
     }
   }
@@ -83,30 +83,30 @@ class GuestsController extends AppController {
     $userId = $this->getUserId();
     
     if (!$this->Guest->hasAny(array('id' => $guestId, 'creator_id' => $userId))) {
-      $this->Session->setFlash(__("Sorry. Could not find requested guest", true));
+      $this->Session->setFlash(__("Sorry. Could not find requested guest"));
       Logger::debug("Sorry. Could not find requested guest '$guestId' of user '$userId'");
       $this->redirect("index");
     }
 
-    if (!empty($this->data)) {
+    if (!empty($this->request->data)) {
       $this->Guest->id = $guestId;
-      $this->Guest->set($this->data);
+      $this->Guest->set($this->request->data);
       if ($this->Guest->save(null, true, array('username', 'password', 'email', 'expires', 'quota'))) {
-        $this->Session->setFlash(__("Guest data were saved", true));
-        $auth = max(0, min(3, $this->data['Comment']['auth']));
+        $this->Session->setFlash(__("Guest data were saved"));
+        $auth = max(0, min(3, $this->request->data['Comment']['auth']));
         $this->Option->setValue('comment.auth', $auth, $guestId);
       } else {
         Logger::err("Could not save guest");
         Logger::trace($this->Guest->validationErrors);
-        $this->Session->setFlash(__("Updates could not be saved!", true));
+        $this->Session->setFlash(__("Updates could not be saved!"));
       }
     }
-    $this->data = $this->Guest->findById($guestId);
-    unset($this->data['Guest']['password']);
-    $this->data['Comment']['auth'] = $this->Option->getValue($this->data, 'comment.auth', COMMENT_AUTH_NONE);
+    $this->request->data = $this->Guest->findById($guestId);
+    unset($this->request->data['Guest']['password']);
+    $this->request->data['Comment']['auth'] = $this->Option->getValue($this->request->data, 'comment.auth', COMMENT_AUTH_NONE);
     $this->set('userId', $userId);
-    $this->subMenu[] = array('url' => array('action' => $this->action, $guestId), 'title' => __("Edit", true), 'active' => true,
-      array('url' => array('action' => 'links', $guestId), 'title' => __("RSS", true)),
+    $this->subMenu[] = array('url' => array('action' => $this->action, $guestId), 'title' => __("Edit"), 'active' => true,
+      array('url' => array('action' => 'links', $guestId), 'title' => __("RSS")),
       );
   }
 
@@ -114,29 +114,29 @@ class GuestsController extends AppController {
     @todo Reset all group information of image */
   function delete($guestId) {
     $userId = $this->getUserId();
-    $guest = $this->Guest->find(array('Guest.id' => $guestId, 'Creator.id' => $userId));
+    $guest = $this->Guest->find('first', array('conditions' => array('Guest.id' => $guestId, 'Creator.id' => $userId)));
     if (!$guest) {
-      $this->Session->setFlash(__("Could not find requested guest", true));
+      $this->Session->setFlash(__("Could not find requested guest"));
     } else {
       $user = $this->getUser();
       Logger::info("User '{$user['User']['username']}' ({$user['User']['id']}) deleted guest account '{$guest['Guest']['username']}' ({$guest['Guest']['id']})");
-      $this->Session->setFlash(sprintf(__("Guest account '%s' deleted!", true), $guest['Guest']['username']));
+      $this->Session->setFlash(__("Guest account '%s' deleted!", $guest['Guest']['username']));
       $this->Guest->delete($guestId);
     }
     $this->redirect("index");
   }
 
   function addGroup($groupId) {
-    if (!empty($this->data)) {
+    if (!empty($this->request->data)) {
       $userId = $this->getUserId();
-      $group = $this->Group->find(array('Group.name' => $this->data['Group']['name'], 'Group.user_id' => $userId));
-      $guest = $this->Guest->find(array('Guest.id' => $groupId, 'Creator.id' => $userId));
+      $group = $this->Group->find('first', array('conditions' => array('Group.name' => $this->request->data['Group']['name'], 'Group.user_id' => $userId)));
+      $guest = $this->Guest->find('first', array('conditions' => array('Guest.id' => $groupId, 'Creator.id' => $userId)));
 
       if (!$guest) {
         $this->Session->setFlash("The given user with id '$groupId' could not be found!");
         $this->redirect("index");
       } elseif (!$group) {
-        $this->Session->setFlash("The group '{$this->data['Group']['name']}' does not exists!");
+        $this->Session->setFlash("The group '{$this->request->data['Group']['name']}' does not exists!");
       } else {
         $list = Set::extract($guest, "Member.{n}.id");
         $list[] = $group['Group']['id'];
@@ -145,9 +145,9 @@ class GuestsController extends AppController {
         $this->Guest->set($guest);
         if ($this->Guest->save()) {
           Logger::info("Added group '{$group['Group']['name']}' ({$group['Group']['id']}) to guest '{$guest['Guest']['username']}' ({$guest['Guest']['id']})");
-          $this->Session->setFlash("The group '{$this->data['Group']['name']}' was added to your guest '{$guest['Guest']['username']}'");
+          $this->Session->setFlash("The group '{$this->request->data['Group']['name']}' was added to your guest '{$guest['Guest']['username']}'");
         } else {
-          $this->Session->setFlash("The group '{$this->data['Group']['name']}' could not be added to your guest '{$guest['Guest']['username']}'");
+          $this->Session->setFlash("The group '{$this->request->data['Group']['name']}' could not be added to your guest '{$guest['Guest']['username']}'");
         }
       }
       $this->redirect("edit/$groupId");
@@ -159,7 +159,7 @@ class GuestsController extends AppController {
     $groupId = intval($groupId);
     $userId = $this->getUserId();
 
-    $guest = $this->Guest->find(array('Guest.id' => $guestId, 'Creator.id' => $userId));
+    $guest = $this->Guest->find('first', array('conditions' => array('Guest.id' => $guestId, 'Creator.id' => $userId)));
     if (!$guest) {
       $this->Session->setFlash("Could not find guest!");
       $this->redirect("index");
@@ -192,7 +192,7 @@ class GuestsController extends AppController {
     $this->requireRole(ROLE_USER);
 
     $userId = $this->getUserId();
-    $guest = $this->Guest->find(array('Guest.id' => $guestId, 'Creator.id' => $userId));
+    $guest = $this->Guest->find('first', array('conditions' => array('Guest.id' => $guestId, 'Creator.id' => $userId)));
     if (!$guest) {
       $this->Session->setFlash("Could not find guest!");
       Logger::err("Could not find guest $guestId for user $userId");
@@ -210,9 +210,9 @@ class GuestsController extends AppController {
         Logger::debug($this->Guest->validationErrors);
       }
     }
-    $this->data = $this->Guest->findById($guestId);
-    $this->subMenu[] = array('url' => array('action' => 'edit', $guestId), 'title' => __("Edit", true), 'active' => true,
-      array('url' => array('action' => 'links', $guestId), 'title' => __("RSS", true), 'active' => true),
+    $this->request->data = $this->Guest->findById($guestId);
+    $this->subMenu[] = array('url' => array('action' => 'edit', $guestId), 'title' => __("Edit"), 'active' => true,
+      array('url' => array('action' => 'links', $guestId), 'title' => __("RSS"), 'active' => true),
       );
   }
 }

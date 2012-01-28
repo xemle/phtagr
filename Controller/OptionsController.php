@@ -29,9 +29,9 @@ class OptionsController extends AppController {
 
   function beforeFilter() {
     $this->subMenu = array(
-      'acl' => __("Default Rights", true),
-      'profile' => __("Profile", true),
-      'rss' => __("RSS Feeds", true),
+      'acl' => __("Default Rights"),
+      'profile' => __("Profile"),
+      'rss' => __("RSS Feeds"),
       );
     parent::beforeFilter();
 
@@ -56,27 +56,29 @@ class OptionsController extends AppController {
     $this->requireRole(ROLE_USER);
 
     $userId = $this->getUserId();
-    if (isset($this->data)) {
+    if (!empty($this->request->data)) {
       // TODO check valid acl
-      $this->_set($userId, 'acl.group', $this->data);
+      $this->_set($userId, 'acl.group', $this->request->data);
 
       // check values
-      if ($this->data['acl']['write']['meta'] > $this->data['acl']['write']['tag'])
-        $this->data['acl']['write']['meta'] = $this->data['acl']['write']['tag'];
-      if ($this->data['acl']['read']['original'] > $this->data['acl']['read']['preview'])
-        $this->data['acl']['read']['original'] = $this->data['acl']['read']['preview'];
+      if ($this->request->data['acl']['write']['meta'] > $this->request->data['acl']['write']['tag']) {
+        $this->request->data['acl']['write']['meta'] = $this->request->data['acl']['write']['tag'];
+      }
+      if ($this->request->data['acl']['read']['original'] > $this->request->data['acl']['read']['preview']) {
+        $this->request->data['acl']['read']['original'] = $this->request->data['acl']['read']['preview'];
+      }
 
-      $this->_set($userId, 'acl.write.tag', $this->data);
-      $this->_set($userId, 'acl.write.meta', $this->data);
+      $this->_set($userId, 'acl.write.tag', $this->request->data);
+      $this->_set($userId, 'acl.write.meta', $this->request->data);
 
-      $this->_set($userId, 'acl.read.original', $this->data);
-      $this->_set($userId, 'acl.read.preview', $this->data);
+      $this->_set($userId, 'acl.read.original', $this->request->data);
+      $this->_set($userId, 'acl.read.preview', $this->request->data);
 
-      $this->Session->setFlash(__("Settings saved", true));
+      $this->Session->setFlash(__("Settings saved"));
     }
     $tree = $this->Option->getTree($userId);
     $this->Option->addDefaultAclTree(&$tree);
-    $this->data = $tree;
+    $this->request->data = $tree;
 
     $this->set('userId', $userId);
     $groups = $this->Group->find('all', array('conditions' => "Group.user_id = $userId", 'order' => array('Group.name' => 'ASC')));
@@ -85,7 +87,7 @@ class OptionsController extends AppController {
     } else {
       $groups = array();
     }
-    $groups[-1] = __('[No Group]', true);
+    $groups[-1] = __('[No Group]');
     $this->set('groups', $groups);
   }
 
@@ -93,21 +95,21 @@ class OptionsController extends AppController {
     $this->requireRole(ROLE_USER);
 
     $userId = $this->getUserId();
-    if (!empty($this->data)) {
+    if (!empty($this->request->data)) {
       $this->User->id = $userId;
-      if (!$this->User->save($this->data['User'], true, array('username', 'firstname', 'lastname', 'password', 'email', 'visible_level', 'notify_interval'))) {
+      if (!$this->User->save($this->request->data['User'], true, array('username', 'firstname', 'lastname', 'password', 'email', 'visible_level', 'notify_interval'))) {
         Logger::err("Could not update user profile");
-        $this->Session->setFlash(__("Could not save profile!", true));
+        $this->Session->setFlash(__("Could not save profile!"));
       } else {
         Logger::info("User $userId profile updated");
-        $this->Session->setFlash(__("Profile saved", true));
+        $this->Session->setFlash(__("Profile saved"));
       }
-      $browser = Set::extract("/Option/user/browser/full", $this->data);
+      $browser = Set::extract("/Option/user/browser/full", $this->request->data);
       $this->Option->setValue('user.browser.full', $browser[0], $userId);
     }
-    $this->data = $this->User->findById($userId);
-    $this->data['Option'] = $this->Option->getTree($userId);
-    unset($this->data['User']['password']);
+    $this->request->data = $this->User->findById($userId);
+    $this->request->data['Option'] = $this->Option->getTree($userId);
+    unset($this->request->data['User']['password']);
   }
 
   function rss($action = null) {
@@ -123,7 +125,7 @@ class OptionsController extends AppController {
         Logger::debug($this->User->validationErrors);
       }
     }
-    $this->data = $this->User->findById($userId);
+    $this->request->data = $this->User->findById($userId);
   }
 
 }

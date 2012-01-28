@@ -9,5 +9,5 @@ function getItem($data) {
     'pubDate' => $data['Media']['created']);
 }
 
-echo $rss->items($this->data, 'getItem');
+echo $rss->items($this->request->data, 'getItem');
 ?>

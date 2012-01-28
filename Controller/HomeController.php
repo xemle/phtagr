@@ -45,7 +45,7 @@ class HomeController extends AppController
     // Database connection is OK. Load components and models
     $this->uses = array('Media', 'Tag', 'Category', 'Comment');
     $this->constructClasses();
-    $this->pageTitle = __("Home", true);
+    $this->pageTitle = __("Home");
 
     parent::beforeFilter();
   }

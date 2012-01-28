@@ -23,7 +23,7 @@
 
 </ul>
 <?php
-debug($this->data);
+debug($this->request->data);
 
 ?>
 <?php echo $this->Session->flash(); ?>
@@ -51,7 +51,7 @@ debug($this->data);
 
 </ul>
 <?php
-debug($this->data);
+debug($this->request->data);
 
 ?>
 <?php echo $this->Session->flash(); ?>
@@ -79,7 +79,7 @@ debug($this->data);
 
 </ul>
 <?php
-debug($this->data);
+debug($this->request->data);
 
 ?>
 <?php echo $this->Session->flash(); ?>
@@ -107,7 +107,7 @@ debug($this->data);
 
 </ul>
 <?php
-debug($this->data);
+debug($this->request->data);
 
 ?>
 <?php echo $this->Session->flash(); ?>
@@ -135,7 +135,7 @@ debug($this->data);
 
 </ul>
 <?php
-debug($this->data);
+debug($this->request->data);
 
 ?>
 <?php echo $this->Session->flash(); ?>
@@ -163,6 +163,6 @@ debug($this->data);
 
 </ul>
 <?php
-debug($this->data);
+debug($this->request->data);
 
 ?>

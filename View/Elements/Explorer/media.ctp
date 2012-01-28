@@ -61,5 +61,5 @@
 <?php endif; ?>
 </div>
 <div class="p-explorer-media-description" id="<?php echo 'description-'.$media['Media']['id']; ?>">
-<?php echo $this->element('explorer/description', array('media' => $media)); ?>
+<?php echo $this->element('Explorer/description', array('media' => $media)); ?>
 </div>

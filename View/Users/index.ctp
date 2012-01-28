@@ -7,7 +7,7 @@
 
 <?php echo $this->Session->flash(); ?>
 
-<?php if (!empty($this->data)): ?>
+<?php if (!empty($this->request->data)): ?>
 <table class="default">
 <thead>
 <?php
@@ -23,10 +23,10 @@
 <?php
   $cells = array();
 
-  foreach($this->data as $user) {
+  foreach($this->request->data as $user) {
     $row = array(
       $this->Html->link($user['User']['username'], "view/{$user['User']['username']}"),
-      $time->relativeTime($user['User']['created']),
+      $this->Time->timeAgoInWords($user['User']['created']),
       );
     $cells[] = $row;
   }

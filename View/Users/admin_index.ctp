@@ -1,28 +1,28 @@
 <h1>Users</h1>
 <?php echo $this->Session->flash(); ?>
 
-<?php $paginator->options(array('update' => 'main_content', 'indicator' => 'spinner'));?>
+<?php $this->Paginator->options(array('update' => 'main_content', 'indicator' => 'spinner'));?>
 
-<?php echo $paginator->prev(__('Prev'), null, null, array('class' => 'disabled')); ?>
-<?php echo " | "; echo $paginator->numbers(); ?>
-<?php echo $paginator->next(__('Next'), null, null, array('class' => 'disabled')); ?>
+<?php echo $this->Paginator->prev(__('Prev'), null, null, array('class' => 'disabled')); ?>
+<?php echo " | "; echo $this->Paginator->numbers(); ?>
+<?php echo $this->Paginator->next(__('Next'), null, null, array('class' => 'disabled')); ?>
 
-Page <?php echo $paginator->counter() ?>
+Page <?php echo $this->Paginator->counter() ?>
 
 <table class="default">
 <thead>
 <tr>
-  <td><?php echo $paginator->sort(__('Username'), 'username'); ?></td>
-  <td><?php echo $paginator->sort(__('Firstname'), 'firstname'); ?></td>
-  <td><?php echo $paginator->sort(__('Lastname'), 'lastname'); ?></td>
+  <td><?php echo $this->Paginator->sort(__('Username'), 'username'); ?></td>
+  <td><?php echo $this->Paginator->sort(__('Firstname'), 'firstname'); ?></td>
+  <td><?php echo $this->Paginator->sort(__('Lastname'), 'lastname'); ?></td>
   <td><?php echo __('Guests'); ?></td>
-  <td><?php echo $paginator->sort(__('User role'), 'role'); ?></td>
+  <td><?php echo $this->Paginator->sort(__('User role'), 'role'); ?></td>
   <td><?php echo __('Actions'); ?></td>
 </tr>
 </thead>
 
 <tbody>
-<?php $row=0; foreach($this->data as $user): ?>
+<?php $row=0; foreach($this->request->data as $user): ?>
 <tr class="<?php echo ($row++%2)?"even":"odd";?>">
   <td><?php echo $this->Html->link($user['User']['username'], '/admin/users/edit/'.$user['User']['id']);?></td>
   <td><?php echo $user['User']['firstname'];?></td>

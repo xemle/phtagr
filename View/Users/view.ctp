@@ -1,7 +1,7 @@
 <h1><?php 
-  __('User %s', $this->data['User']['username']);  
+  __('User %s', $this->request->data['User']['username']);  
   if ($currentUser['User']['role'] >= ROLE_SYSOP) {
-    echo " " . $this->Html->link(__("Edit"), array('action' => 'edit', 'admin' => true, $this->data['User']['id']));
+    echo " " . $this->Html->link(__("Edit"), array('action' => 'edit', 'admin' => true, $this->request->data['User']['id']));
   }
 ?></h1>
 
@@ -23,10 +23,10 @@
 <tbody>
 <?php 
   $cells = array();
-  $cells[] = array(__("Member since"), $this->Time->relativeTime($this->data['User']['created']));
-  $cells[] = array(__("Count of media"), $this->data['Media']['count']);
-  $cells[] = array(__("Count of files"), $this->data['File']['count']);
-  $cells[] = array(__("Size of files"), $this->Number->toReadableSize($this->data['File']['bytes']));
+  $cells[] = array(__("Member since"), $this->Time->timeAgoInWords($this->request->data['User']['created']));
+  $cells[] = array(__("Count of media"), $this->request->data['Media']['count']);
+  $cells[] = array(__("Count of files"), $this->request->data['File']['count']);
+  $cells[] = array(__("Size of files"), $this->Number->toReadableSize($this->request->data['File']['bytes']));
   echo $this->Html->tableCells($cells, array('class' => 'odd'), array('class' => 'even'));
 ?> 
 </tbody>
@@ -49,17 +49,17 @@
 <tbody>
 <?php 
   $cells = array();
-  $groupIds = Set::extract('/Group/id', $this->data);
-  foreach ($this->data['Group'] as $group) {
+  $groupIds = Set::extract('/Group/id', $this->request->data);
+  foreach ($this->request->data['Group'] as $group) {
     $username = implode('', Set::extract("/User[id={$group['user_id']}]/username", $users));
     $cells[] = array(
       $this->Html->link($group['name'], "/groups/view/{$group['name']}"),
       $this->Html->link($username, "/user/view/$username"),
-      $text->truncate($group['description'], 30, array('ending' => '...', 'exact' => false, 'html' => false)),
+      $this->Text->truncate($group['description'], 30, array('ending' => '...', 'exact' => false, 'html' => false)),
       $this->Html->link("View media", "/explorer/group/{$group['name']}")
       );
   }
-  foreach ($this->data['Member'] as $group) {
+  foreach ($this->request->data['Member'] as $group) {
     if (in_array($group['id'], $groupIds)) {
       continue;
     }
@@ -67,7 +67,7 @@
     $cells[] = array(
       $this->Html->link($group['name'], "/groups/view/{$group['name']}"),
       $this->Html->link($username, "/users/view/$username"),
-      $text->truncate($group['description'], 30, array('ending' => '...', 'exact' => false, 'html' => false)),
+      $this->Text->truncate($group['description'], 30, array('ending' => '...', 'exact' => false, 'html' => false)),
       $this->Html->link("View media", "/explorer/group/{$group['name']}")
       );
   }
@@ -94,5 +94,5 @@
     echo $this->ImageData->mediaLink($m, 'mini');
   } 
 ?></p>
-<p><?php echo __('See all media of user %s', $this->Html->link($this->data['User']['username'], "/explorer/user/{$this->data['User']['username']}")); ?></p>
+<p><?php echo __('See all media of user %s', $this->Html->link($this->request->data['User']['username'], "/explorer/user/{$this->request->data['User']['username']}")); ?></p>
 <?php endif; ?>

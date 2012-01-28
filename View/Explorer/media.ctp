@@ -20,15 +20,15 @@
   }
 ?>
   <atom:link rel="self" href="<?php echo Router::url($this->Search->getUri(), true); ?>" />
-<?php if ($navigator->hasPrev()): ?>
+<?php if ($this->Navigator->hasPrev()): ?>
   <atom:link rel="previous" href="<?php echo Router::url($this->Search->getUri(false, array('page' => $this->Search->getPage(1) - 1)), true); ?>" />
 <?php endif; ?>
-<?php if ($navigator->hasNext()): ?>
+<?php if ($this->Navigator->hasNext()): ?>
   <atom:link rel="next" href="<?php echo Router::url($this->Search->getUri(false, array('page' => $this->Search->getPage(1) + 1)), true); ?>" />
 <?php endif; ?>
 <?php 
   $offset = $this->Search->getShow() * ($this->Search->getPage(1) - 1) + 1;
-  foreach ($this->data as $media): ?>
+  foreach ($this->request->data as $media): ?>
   <item>
     <title><?php echo $media['Media']['name']." by ".$media['User']['username']; ?></title>
     <link><?php 

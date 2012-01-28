@@ -978,7 +978,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
       if ($prop["ns"] == "DAV:") {
         $options["props"][$key]['status']="403 Forbidden";
       } else {
-        $property = $this->controller->Property->find(array('Property.file_id' => $fileId, 'Property.name' => $prop['name'], 'Property.ns' => $prop['ns']));
+        $property = $this->controller->Property->find('first', array('conditions' => array('Property.file_id' => $fileId, 'Property.name' => $prop['name'], 'Property.ns' => $prop['ns'])));
         if (isset($prop["val"])) {
           if (!$property) {
             $property = array('Property' => array(
@@ -1036,7 +1036,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
     }
 
     if (isset($options["update"])) { // Lock Update
-      $lock = $this->controller->Lock->find(array('Lock.file_id' => $fileId, 'Lock.token' => $options['update']));
+      $lock = $this->controller->Lock->find('first' => array('conditions' => array('Lock.file_id' => $fileId, 'Lock.token' => $options['update'])));
       
       if ($lock) {
         $lock['Lock']['expires'] = date('Y-m-d H:i:s', $options['timeout']);
@@ -1087,7 +1087,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
       Logger::err("Could not find file for path '$fspath'");
       return "409 Conflict";
     }
-    $lock = $this->controller->Lock->find(array('Lock.file_id' => $fileId, 'Lock.token' => $options['token']));
+    $lock = $this->controller->Lock->find('first', array('conditions' => array('Lock.file_id' => $fileId, 'Lock.token' => $options['token'])));
     if (!$lock) {
       Logger::err("Could not find lock token '{$options['token']}' for file $fileId");
       return "409 Conflict";

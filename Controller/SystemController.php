@@ -24,7 +24,7 @@ class SystemController extends AppController {
 
   var $name = 'System';
   var $helpers = array('Form');
-  var $uses = array('Option');
+  var $uses = array('Media', 'Option');
   var $subMenu = array();
 
   function beforeFilter() {
@@ -32,11 +32,11 @@ class SystemController extends AppController {
     $this->requireRole(ROLE_SYSOP, array('redirect' => '/'));
 
     $this->subMenu = array(
-      'index' => __("General", true),
-      'external' => __("External Programs", true),
-      'map' => __("Map Settings", true),
-      'upgrade' => __("Database Upgrade", true),
-      'deleteUnusedMetaData' => __("Delete Unused Metadata", true)
+      'index' => __("General"),
+      'external' => __("External Programs"),
+      'map' => __("Map Settings"),
+      'upgrade' => __("Database Upgrade"),
+      'deleteUnusedMetaData' => __("Delete Unused Metadata")
       );
   }
 
@@ -51,41 +51,42 @@ class SystemController extends AppController {
   }
 
   function index() {
-    if (isset($this->data)) {
-      $this->_set(0, 'general.title', $this->data);
-      $this->_set(0, 'general.subtitle', $this->data);
+    if (isset($this->request->data)) {
+      $this->_set(0, 'general.title', $this->request->data);
+      $this->_set(0, 'general.subtitle', $this->request->data);
     }
-    $this->data = $this->Option->getTree(0);
+    $this->request->data = $this->Option->getTree(0);
   }
 
   function external() {
-    if (!empty($this->data)) {
+    if (!empty($this->request->data)) {
       // TODO check valid acl
-      $this->_set(0, 'bin.exiftool', $this->data);
-      $this->_set(0, 'bin.convert', $this->data);
-      $this->_set(0, 'bin.ffmpeg', $this->data);
-      $this->_set(0, 'bin.flvtool2', $this->data);
+      $this->_set(0, 'bin.exiftool', $this->request->data);
+      $this->_set(0, 'bin.convert', $this->request->data);
+      $this->_set(0, 'bin.ffmpeg', $this->request->data);
+      $this->_set(0, 'bin.flvtool2', $this->request->data);
       // debug
-      $this->set('commit', $this->data);
+      $this->set('commit', $this->request->data);
       $this->Session->setFlash("Settings saved");
     }
     $tree = $this->Option->getTree(0);
-    $this->data = $tree;
+    $this->request->data = $tree;
   }
 
   function map() {
-    if (!empty($this->data)) {
-      $this->_set(0, 'google.map.key', $this->data);
+    if (!empty($this->request->data)) {
+      $this->_set(0, 'google.map.key', $this->request->data);
       // debug
-      $this->set('commit', $this->data);
+      $this->set('commit', $this->request->data);
       $this->Session->setFlash("Settings saved");
     }
     $tree = $this->Option->getTree(0);
-    $this->data = $tree;
+    $this->request->data = $tree;
   }
   
   /** Database upgrade via the Migraions plugin */
   function upgrade($action = '') {
+    CakePlugin::load('Migrations');
     App::import('Lib', 'Migrations.MigrationVersion');
     $Migration = new MigrationVersion(array('connection' => 'default'));
     if (empty($Migration)) {
@@ -100,11 +101,11 @@ class SystemController extends AppController {
     $migrationVersion = max(array_keys($Migration->getMapping('app')));
     if ($action == 'run' && $currentVersion < $migrationVersion) {
       if (!$Migration->run(array('type' => 'app', 'direction' => 'up'))) {
-        $this->Session->setFlash(__("Database migration failed. Please see the log files for errors.", true));
+        $this->Session->setFlash(__("Database migration failed. Please see the log files for errors."));
         Logger::error("Could not run migration");
       } else {
         Logger::info("Upgraded database from version $currentVersion to " . max(array_keys($Migration->getMapping('app'))));
-        $this->Session->setFlash(__("The database migration was successful.", true));
+        $this->Session->setFlash(__("The database migration was successful."));
       }
     }
     $this->set('currentVersion', $Migration->getVersion('app'));
@@ -121,30 +122,27 @@ class SystemController extends AppController {
   }
 
   function deleteUnusedMetaData($delete = '') {
-    App::import('Model', array('Tag', 'Category', 'Location'));
+    $this->Media->Tag->bindModel(array('hasAndBelongsToMany' => array('Media')), false);
+    $this->Media->Tag->Behaviors->attach('DeleteUnused', array('relatedHabtm' => 'Media'));
 
-    $this->Tag =& new Tag();
-    $this->Tag->bindModel(array('hasAndBelongsToMany' => array('Media')), false);
-    $this->Tag->Behaviors->attach('DeleteUnused', array('relatedHabtm' => 'Media'));
-    $unusedTagCount = count($this->Tag->findAllUnused());
+    $this->Media->Category->bindModel(array('hasAndBelongsToMany' => array('Media')), false);
+    $this->Media->Category->Behaviors->attach('DeleteUnused', array('relatedHabtm' => 'Media'));
 
-    $this->Category =& new Category();
-    $this->Category->bindModel(array('hasAndBelongsToMany' => array('Media')), false);
-    $this->Category->Behaviors->attach('DeleteUnused', array('relatedHabtm' => 'Media'));
-    $unusedCategoryCount = count($this->Category->findAllUnused());
-
-    $this->Location =& new Location();
-    $this->Location->bindModel(array('hasAndBelongsToMany' => array('Media')), false);
-    $this->Location->Behaviors->attach('DeleteUnused', array('relatedHabtm' => 'Media'));
-    $unusedLocationCount = count($this->Location->findAllUnused());
+    $this->Media->Location->bindModel(array('hasAndBelongsToMany' => array('Media')), false);
+    $this->Media->Location->Behaviors->attach('DeleteUnused', array('relatedHabtm' => 'Media'));
 
     if ($delete == 'delete') {
-      $this->Tag->deleteAllUnused();
-      $this->Location->deleteAllUnused();
-      $this->Category->deleteAllUnused();
-      $this->Session->setFlash(__("All unused meta data are deleted", true));
+      $this->Media->Tag->deleteAllUnused();
+      $this->Media->Location->deleteAllUnused();
+      $this->Media->Category->deleteAllUnused();
+      $this->Session->setFlash(__("All unused meta data are deleted"));
     }
-    $this->data = compact('unusedTagCount', 'unusedCategoryCount', 'unusedLocationCount');
+
+    $unusedTagCount = count($this->Media->Tag->findAllUnused());
+    $unusedCategoryCount = count($this->Media->Category->findAllUnused());
+    $unusedLocationCount = count($this->Media->Location->findAllUnused());
+
+    $this->request->data = compact('unusedTagCount', 'unusedCategoryCount', 'unusedLocationCount');
   }
 }
 ?>

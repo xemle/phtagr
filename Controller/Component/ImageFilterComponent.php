@@ -31,10 +31,6 @@ class ImageFilterComponent extends BaseFilterComponent {
                         LOCATION_STATE => 'Province-State',
                         LOCATION_COUNTRY => 'Country-PrimaryLocationName');
 
-  function initialize(&$controller) {
-    $this->controller =& $controller;
-  }
-
   function getName() {
     return "Image";
   }
@@ -74,7 +70,7 @@ class ImageFilterComponent extends BaseFilterComponent {
       } else {
         $user = $this->controller->getUser();
       }
-      $media = $this->Media->addDefaultAcl(&$media, &$user);
+      $media = $this->controller->Media->addDefaultAcl(&$media, &$user);
       
       $isNew = true;
     };
@@ -105,7 +101,7 @@ class ImageFilterComponent extends BaseFilterComponent {
     } 
     if ($isNew) {
       $mediaId = $this->Media->getLastInsertID();
-      if (!$this->MyFile->setMedia($file, $mediaId)) {
+      if (!$this->controller->MyFile->setMedia($file, $mediaId)) {
         $this->Media->delete($mediaId);
         $this->FilterManager->addError($filename, 'FileSaveError');
         return false;
@@ -116,8 +112,8 @@ class ImageFilterComponent extends BaseFilterComponent {
     } else {
       Logger::verbose("Updated media (id ".$media['Media']['id'].")");
     }
-    $this->MyFile->updateReaded($file);
-    $this->MyFile->setFlag($file, FILE_FLAG_DEPENDENT);
+    $this->controller->MyFile->updateReaded($file);
+    $this->controller->MyFile->setFlag($file, FILE_FLAG_DEPENDENT);
     return $media;
   }
 
@@ -326,7 +322,7 @@ class ImageFilterComponent extends BaseFilterComponent {
     $v['shutter'] = $this->_computeSutter($this->_extract($data, 'jpg/exif/EXIF/ShutterSpeedValue', null));
     $v['model'] = $this->_extract($data, 'jpg/exif/IFD0/Model', null);
     $v['iso'] = $this->_extract($data, 'jpg/exif/EXIF/ISOSpeedRatings', null);
-    Logger::debug($data);
+    //Logger::debug($data);
     $v['caption'] = $this->_extract($data, 'jpg/exif/EXIF/ISOSpeedRatings', null);
 
     // fetch GPS coordinates
@@ -384,7 +380,7 @@ class ImageFilterComponent extends BaseFilterComponent {
       Logger::err("Exiftool is not defined. Abored writing of meta data");
       return false;
     } 
-    $filename = $this->MyFile->getFilename($file);
+    $filename = $this->controller->MyFile->getFilename($file);
     if (!file_exists($filename) || !is_writeable(dirname($filename)) || !is_writeable($filename)) {
       $id = isset($media['Media']['id']) ? $media['Media']['id'] : 0;
       Logger::warn("File: $filename (#$id) does not exists nor is readable");
@@ -429,7 +425,7 @@ class ImageFilterComponent extends BaseFilterComponent {
       @unlink($tmp2);
     }
     
-    $this->MyFile->update($file);
+    $this->controller->MyFile->update($file);
     if (!$this->Media->deleteFlag($media, MEDIA_FLAG_DIRTY)) {
       $this->controller->warn("Could not update image data of media {$media['Media']['id']}");
     }

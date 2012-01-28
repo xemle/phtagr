@@ -1,4 +1,4 @@
-<h1><?php echo __('Group %s', $this->data['Group']['name']); ?></h1>
+<h1><?php echo __('Group %s', $this->request->data['Group']['name']); ?></h1>
 
 <?php echo $this->Session->flash() ?>
 
@@ -9,7 +9,7 @@
   $headers = array(
     __('Member'),
     );
-  if ($this->data['Group']['is_admin']) {
+  if ($this->request->data['Group']['is_admin']) {
     $headers[] = __('Action');
   }
   echo $this->Html->tableHeaders($headers);
@@ -19,16 +19,16 @@
 <tbody>
 <?php 
   $cells = array();
-  foreach ($this->data['Member'] as $member) {
+  foreach ($this->request->data['Member'] as $member) {
     $actions = array();
-    if ($this->data['Group']['is_admin']) {
+    if ($this->request->data['Group']['is_admin']) {
       $actions[] = $this->Html->link(
         $this->Html->image('icons/delete.png', 
           array(
             'alt' => __('Delete'), 
             'title' => __("Unsubscribe '%s'", $member['username'])
           )
-        ), "deleteMember/{$this->data['Group']['name']}/{$member['username']}", array('escape' => false));
+        ), "deleteMember/{$this->request->data['Group']['name']}/{$member['username']}", array('escape' => false));
     }
     $row = array(
       $this->Html->link($member['username'], "/users/view/{$member['username']}"),

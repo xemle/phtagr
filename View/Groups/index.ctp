@@ -2,7 +2,7 @@
 
 <?php echo $this->Session->flash(); ?>
 
-<?php if (!empty($this->data)): ?>
+<?php if (!empty($this->request->data)): ?>
 <table class="default">
 <thead>
 <?php
@@ -23,7 +23,7 @@
   $memberIds = Set::extract("/Member/id", $currentUser);
   $isAdmin = $currentUser['User']['role'] >= ROLE_ADMIN;
 
-  foreach($this->data as $group) {
+  foreach($this->request->data as $group) {
     $actions = array();
     if ($currentUser['User']['id'] != $group['Group']['user_id']) {
       if (!in_array($group['Group']['id'], $memberIds)) {
@@ -49,7 +49,7 @@
     $row = array(
       $this->Html->link($group['Group']['name'], "view/{$group['Group']['name']}", array('title' => $group['Group']['description'])),
       $this->Html->link($group['User']['username'], "/users/view/{$group['User']['username']}"),
-      $text->truncate($group['Group']['description'], 30, array('ending' => '...', 'exact' => false, 'html' => false)),
+      $this->Text->truncate($group['Group']['description'], 30, array('ending' => '...', 'exact' => false, 'html' => false)),
       count($group['Member']),
       $this->Html->tag('div', implode(' ', $actions), array('class' => 'actionlist'))
       );

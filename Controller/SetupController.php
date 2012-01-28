@@ -316,14 +316,14 @@ class SetupController extends AppController {
     $content = $file->read();
     $newContent = preg_replace("/$oldSalt/", $salt, $content);
     if (!$file->write($newContent)) {
-      $this->Session->setFlash(sprintf(__("Could not write configuration to '%s'", true), $this->core));
+      $this->Session->setFlash(__("Could not write configuration to '%s'", $this->core));
       Logger::err("Could not write configuration to '$this->core'");
     } else {
       Configure::write('Security.salt', $salt);
       $this->Session->destroy();
       $this->Session->renew();
 
-      $this->Session->setFlash(__("Update core settings", true));
+      $this->Session->setFlash(__("Update core settings"));
       Logger::info("Set new security salt to '$this->core'");
       $this->redirect('index');
     }
@@ -394,7 +394,7 @@ class SetupController extends AppController {
     $this->__checkSession();
     $this->Session->delete('configError');
 
-    if (!empty($this->data)) {
+    if (!empty($this->request->data)) {
       $output = "<?php 
 /** 
  * Automatic generated database configuration file by phTagr setup
@@ -406,11 +406,11 @@ class DATABASE_CONFIG {
   public \$default = array(
     'datasource' => 'Database/Mysql',
     'persistent' => true,
-    'host' => '{$this->data['db']['host']}',
-    'login' => '{$this->data['db']['login']}',
-    'password' => '{$this->data['db']['password']}',
-    'database' => '{$this->data['db']['database']}',
-    'prefix' => '{$this->data['db']['prefix']}',
+    'host' => '{$this->request->data['db']['host']}',
+    'login' => '{$this->request->data['db']['login']}',
+    'password' => '{$this->request->data['db']['password']}',
+    'database' => '{$this->request->data['db']['database']}',
+    'prefix' => '{$this->request->data['db']['prefix']}',
     'encoding' => 'utf8'
   );
 }
@@ -422,11 +422,11 @@ class DATABASE_CONFIG {
         $this->redirect('database');
       } else {
         Logger::err("Could not write database configuration file '{$this->dbConfig}'");
-        $this->Session->setFlash(__("Could not write database configuration file", true));
+        $this->Session->setFlash(__("Could not write database configuration file"));
       }
       $file->close();
-      unset($this->data['db']['password']);
-      $this->Session->write('configData', $this->data);
+      unset($this->request->data['db']['password']);
+      $this->Session->write('configData', $this->request->data);
     } else {
       if ($this->Session->check('configData')) {
         $this->request->data = $this->Session->read('configData');
@@ -459,7 +459,7 @@ class DATABASE_CONFIG {
     }
 
     if (!$this->__hasConnection()) {
-      $this->Session->setFlash(__('Could not connect to database. Please check your database configuration!', true));
+      $this->Session->setFlash(__('Could not connect to database. Please check your database configuration!'));
       $this->Session->write('configError', true);
       $this->redirect('config');
     }
@@ -483,11 +483,11 @@ class DATABASE_CONFIG {
         return;
       } 
       Logger::info("Successful database migration to verion " . $this->Migration->getVersion('app'));
-      $this->Session->setFlash(__("All required tables are created", true));
+      $this->Session->setFlash(__("All required tables are created"));
       $this->redirect('user');
     } catch (MigrationVersionException $errors) {
       Logger::trace($errors->getMessage());
-      $this->Session->setFlash(__("Could not create tables correctly. Please see logfile for details", true));
+      $this->Session->setFlash(__("Could not create tables correctly. Please see logfile for details"));
     }
   }
 
@@ -515,11 +515,11 @@ class DATABASE_CONFIG {
         $this->Session->write('User.role', ROLE_ADMIN);
         $this->Session->write('User.username', $this->request->data['User']['username']);
         Logger::info("Admin account '{$this->request->data['User']['username']}' was created");
-        $this->Session->setFlash(__("Admin account was successfully created", true));
+        $this->Session->setFlash(__("Admin account was successfully created"));
         $this->redirect('system');
       } else {
         Logger::err("Admin account '{$this->request->data['User']['username']}' could not be created");
-        $this->Session->setFlash(__("Could not create admin account. Please retry", true));
+        $this->Session->setFlash(__("Could not create admin account. Please retry"));
       }
     } elseif (!isset($this->request->data['User']['username'])) {
       $this->request->data['User']['username'] = 'admin';
@@ -688,7 +688,7 @@ class DATABASE_CONFIG {
 
     if (!$this->_initMigration()) {
       Logger::err("Cannot init migration data");
-      $this->Session->setFlash(__("Cannot initialize database migration data", true));
+      $this->Session->setFlash(__("Cannot initialize database migration data"));
       return false;
     }
     

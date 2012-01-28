@@ -39,6 +39,8 @@ class BaseFilterComponent extends Component {
       $this->controller =& $manager->controller;
     }
     $this->Manager =& $manager;
+    $this->Media =& $manager->controller->Media;
+    $this->MyFile =& $manager->controller->MyFile;
     return true;
   }
 

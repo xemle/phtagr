@@ -54,15 +54,15 @@ class CommentsController extends AppController
 
   function view($id = null) {
     if (!$id) {
-      $this->Session->setFlash(__('Invalid Comment.', true));
+      $this->Session->setFlash(__('Invalid Comment.'));
       $this->redirect(array('action'=>'index'));
     }
     $this->set('comment', $this->Comment->read(null, $id));
   }
 
   function add() {
-    if (!empty($this->data) && isset($this->data['Media']['id'])) {
-      $mediaId = intval($this->data['Media']['id']);
+    if (!empty($this->request->data) && isset($this->request->data['Media']['id'])) {
+      $mediaId = intval($this->request->data['Media']['id']);
       $user = $this->getUser();
       $userId = $this->getUserId();
       $role = $this->getUserRole();
@@ -77,11 +77,11 @@ class CommentsController extends AppController
       }
 
       // Check capatcha if required
-      if (($auth & COMMENT_AUTH_CAPTCHA) > 0 && (!$this->Session->check('captcha') || $this->data['Captcha']['verification'] != $this->Session->read('captcha'))) {
+      if (($auth & COMMENT_AUTH_CAPTCHA) > 0 && (!$this->Session->check('captcha') || $this->request->data['Captcha']['verification'] != $this->Session->read('captcha'))) {
         $this->Session->setFlash("Verification failed");
-        Logger::warn("Captcha verification failed: ".$this->data['Captcha']['verification']." != ".$this->Session->read('captcha'));
+        Logger::warn("Captcha verification failed: ".$this->request->data['Captcha']['verification']." != ".$this->Session->read('captcha'));
         $this->Session->delete('captcha');
-        $this->Session->write('Comment.data', $this->data);
+        $this->Session->write('Comment.data', $this->request->data);
         $this->Session->write('Comment.validationErrors', $this->Comment->validationErrors);
         $this->redirect("/images/view/$mediaId/{$this->namedArgs}"); 
       }
@@ -101,18 +101,18 @@ class CommentsController extends AppController
       }
 
       $this->Comment->create();
-      $this->data['Comment']['media_id'] = $mediaId;
-      $this->data['Comment']['date'] = date("Y-m-d H:i:s", time());
+      $this->request->data['Comment']['media_id'] = $mediaId;
+      $this->request->data['Comment']['date'] = date("Y-m-d H:i:s", time());
       uses('Sanitize');
-      $this->data['Comment']['text'] = Sanitize::html($this->data['Comment']['text']);
+      $this->request->data['Comment']['text'] = Sanitize::html($this->request->data['Comment']['text']);
       if (($auth & COMMENT_AUTH_NAME) == 0) {
-        $this->data['Comment']['user_id'] = $user['User']['id'];
-        $this->data['Comment']['name'] = $user['User']['username'];
-        $this->data['Comment']['email'] = $user['User']['email'];
+        $this->request->data['Comment']['user_id'] = $user['User']['id'];
+        $this->request->data['Comment']['name'] = $user['User']['username'];
+        $this->request->data['Comment']['email'] = $user['User']['email'];
       }
-      if ($this->Comment->save($this->data)) {
+      if ($this->Comment->save($this->request->data)) {
         $commentId = $this->Comment->getLastInsertID();
-        $this->Session->setFlash(__('The Comment has been saved', true));
+        $this->Session->setFlash(__('The Comment has been saved'));
         Logger::info("New comment of media $mediaId");
         // Send email notification of other media owners
         if ($media['Media']['user_id'] != $userId) {
@@ -120,10 +120,10 @@ class CommentsController extends AppController
         }
         $this->_sendNotifies($mediaId, $commentId);
       } else {
-        $this->Session->setFlash(__('The Comment could not be saved. Please, try again.', true));
+        $this->Session->setFlash(__('The Comment could not be saved. Please, try again.'));
         Logger::err("Could not save comment to media $mediaId");
         Logger::trace($this->Comment->validationErrors);
-        $this->Session->write('Comment.data', $this->data);
+        $this->Session->write('Comment.data', $this->request->data);
         $this->Session->write('Comment.validationErrors', $this->Comment->validationErrors);
       }
       $this->redirect("/images/view/$mediaId/{$this->namedArgs}");
@@ -218,7 +218,7 @@ class CommentsController extends AppController
 
   function delete($id = null) {
     if (!$id) {
-      $this->Session->setFlash(__('Invalid id for Comment', true));
+      $this->Session->setFlash(__('Invalid id for Comment'));
       $this->redirect("/explorer");
     }
     $this->requireRole(ROLE_USER, array('loginRedirect' => '/comments/delete/'.$id));
@@ -232,7 +232,7 @@ class CommentsController extends AppController
     // Allow only comment owner, media owner or admins
     if ((isset($comment['User']['id']) && $comment['User']['id'] == $userId) || ($comment['Media']['user_id'] == $userId) || ($this->getUserRole() == ROLE_ADMIN)) {
       if ($this->Comment->delete($id)) {
-        $this->Session->setFlash(__('Comment deleted', true));
+        $this->Session->setFlash(__('Comment deleted'));
         Logger::info("Delete comment {$comment['Comment']['id']} of media {$comment['Media']['id']}");
       }
     } else {
@@ -249,7 +249,7 @@ class CommentsController extends AppController
   function rss() {
     $this->layoutPath = 'rss';
     $conditions = $this->Media->buildAclConditions($this->getUser());
-    $this->data = $this->Comment->find('all', array('conditions' => $conditions, 'order' => 'Comment.date DESC', 'limit' => 20));
+    $this->request->data = $this->Comment->find('all', array('conditions' => $conditions, 'order' => 'Comment.date DESC', 'limit' => 20));
 
     if (Configure::read('debug') > 1) {
       Configure::write('debug', 1);

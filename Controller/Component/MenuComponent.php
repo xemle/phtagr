@@ -43,14 +43,14 @@ class MenuComponent extends Component {
 
   function setBasicMainMenu() {
     $controllers = array(
-      'options' => __('Account Settings', true),
-      'groups' => __('Groups', true),
-      'users' => __('Users', true),
-      'guests' => __('Guests', true),
-      'browser' => __('Media Files', true)
+      'options' => __('Account Settings'),
+      'groups' => __('Groups'),
+      'users' => __('Users'),
+      'guests' => __('Guests'),
+      'browser' => __('Media Files')
       );
     if ($this->controller->hasRole(ROLE_SYSOP)) {
-      $controllers['system'] = __("System", true);
+      $controllers['system'] = __("System");
     }
  
     foreach ($controllers as $ctrl => $text) {

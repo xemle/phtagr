@@ -31,8 +31,8 @@
             title: ':EDIT_TITLE',
             buttons: {
               ':SAVE': function() {
-                var $this->Form = $('#form-meta-' + id);
-                $.post($this->Form.attr('action'), $this->Form.serialize(), function(data) {
+                var $form = $('#form-meta-' + id);
+                $.post($form.attr('action'), $form.serialize(), function(data) {
                   $('#media-' + id).html(data);
                   $('#media-' + id).mediaAction();
                 });
@@ -58,8 +58,8 @@
             title: ':ACL_TITLE',
             buttons: {
               ':SAVE': function() {
-                var $this->Form = $('#form-acl-' + id);
-                $.post($this->Form.attr('action'), $this->Form.serialize(), function(data) {
+                var $form = $('#form-acl-' + id);
+                $.post($form.attr('action'), $form.serialize(), function(data) {
                   $('#media-' + id).html(data);
                   $('#media-' + id).mediaAction();
                 });
@@ -177,12 +177,12 @@ JS;
 
 <div class="p-explorer-media-list">
 <?php
-$canWriteTag = count($this->data) ? max(Set::extract('/Media/canWriteTag', $this->data)) : 0;
+$canWriteTag = count($this->request->data) ? max(Set::extract('/Media/canWriteTag', $this->request->data)) : 0;
 $index = 0;
 $pos = ($this->Search->getPage(1)-1) * $this->Search->getShow(12) + 1;
 
 echo '<div class="row">';
-foreach ($this->data as $media) {
+foreach ($this->request->data as $media) {
   $editable = $media['Media']['canWriteTag'] ? 'editable' : '';
   $cell = "cell" . ($index %4);
   echo $this->Html->tag('div', 

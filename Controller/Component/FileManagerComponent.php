@@ -32,7 +32,7 @@ class FileManagerComponent extends Component {
     if (!empty($controller->MyFile)) {
       $this->MyFile = $controller->MyFile;
     } else {
-      App::import('model', 'MyFile');
+      App::uses('Model', 'MyFile');
       $this->MyFile = new MyFile();
     }
     $this->User = $controller->User;
@@ -57,7 +57,7 @@ class FileManagerComponent extends Component {
       } 
     }
 
-    $id = $this->MyFile->fileExists($filename);
+    $id = $this->controller->MyFile->fileExists($filename);
     if ($id) {
       Logger::verbose("File $filename already exists (id $id)");
       return $id;
@@ -66,10 +66,10 @@ class FileManagerComponent extends Component {
     if ($this->isExternal($filename)) {
       $flag |= FILE_FLAG_EXTERNAL;
     }
-    $file = $this->MyFile->create($filename, $userId, $flag);
+    $file = $this->controller->MyFile->create($filename, $userId, $flag);
 
-    if ($this->MyFile->save($file)) {
-      $id = $this->MyFile->getLastInsertID();
+    if ($this->controller->MyFile->save($file)) {
+      $id = $this->controller->MyFile->getLastInsertID();
       Logger::verbose("Insert file $filename to database (id $id)");
       return $id;
     } else {
@@ -86,9 +86,9 @@ class FileManagerComponent extends Component {
     if (is_string($file)) {
       if (is_dir($file)) {
         $deleteFolder = !$this->isExternal($file);
-        return $this->MyFile->deletePath($file, $deleteFolder);
+        return $this->controller->MyFile->deletePath($file, $deleteFolder);
       }
-      $id = $this->MyFile->fileExists($file);
+      $id = $this->controller->MyFile->fileExists($file);
       if (!$id) {
         Logger::warn("Could not find file $file");
         return false;
@@ -101,7 +101,7 @@ class FileManagerComponent extends Component {
       Logger::warn("Could not determine file from $file");
       return false;
     }
-    return $this->MyFile->delete($id);
+    return $this->controller->MyFile->delete($id);
   }
 
   /** Delete a file (Alias of delete()) */
@@ -163,7 +163,7 @@ class FileManagerComponent extends Component {
       $user = $this->controller->getUser();
     }
 
-    $current = $this->MyFile->countBytes($user['User']['id'], false);
+    $current = $this->controller->MyFile->countBytes($user['User']['id'], false);
     $quota = $user['User']['quota'];
     if ($current + $size <= $quota) {
       return true;
@@ -212,7 +212,7 @@ class FileManagerComponent extends Component {
         return false;
       } else {
         // Copy all properties
-        $srcFile = $this->MyFile->findByFilename($file);
+        $srcFile = $this->controller->MyFile->findByFilename($file);
         if (!$srcFile) {
           Logger::warn("Could not found source '$file' in database");
         } else {
@@ -240,7 +240,7 @@ class FileManagerComponent extends Component {
       Logger::err("Invalid destination: $dst. Destination is a file");
       return false;
     }
-    return $this->MyFile->move($src, $dst);
+    return $this->controller->MyFile->move($src, $dst);
   }
 
   /** Creates a unique filename within a path and a filename. The new filename

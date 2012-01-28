@@ -1,4 +1,4 @@
-<h1><?php echo __(" User: %s", $this->data['User']['username']); ?></h1>
+<h1><?php echo __(" User: %s", $this->request->data['User']['username']); ?></h1>
 
 <?php echo $this->Session->flash(); ?>
 
@@ -18,9 +18,9 @@
   <tr>
     <td><?php  echo "$root"; ?></td>
     <td><?php
-      $delConfirm = __("Do you really want to detete the path '%s' of '%s'?", $root, $this->data['User']['username']);
+      $delConfirm = __("Do you really want to detete the path '%s' of '%s'?", $root, $this->request->data['User']['username']);
       echo $this->Html->link($this->Html->image('icons/delete.png', array('alt' => __('Delete'), 'title' => __("Delete path '%s'", $root))),
-    '/admin/users/delpath/'.$this->data['User']['id'].'/'.$root, array('escape' => false), $delConfirm);?></td>
+    '/admin/users/delpath/'.$this->request->data['User']['id'].'/'.$root, array('escape' => false), $delConfirm);?></td>
   </tr>
 <?php endforeach; ?>
 </tbody>
@@ -34,7 +34,7 @@
 </div>
 <?php endif; ?>
 
-<?php echo $this->Form->create(null, array('action' => 'path/'.$this->data['User']['id'])); ?>
+<?php echo $this->Form->create(null, array('action' => 'path/'.$this->request->data['User']['id'])); ?>
 <fieldset><legend><?php echo __('Add Directory'); ?></legend>
 <?php echo $this->Form->input('Option.path.fspath', array('label' => __('Directory'))); ?>
 </fieldset>

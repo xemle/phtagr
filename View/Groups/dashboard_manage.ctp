@@ -12,7 +12,7 @@ echo $this->Html->tableHeaders($headers);
 <tbody>
 
 <?php 
-$allgroup_names = Set::extract('/Member/name', $this->data);
+$allgroup_names = Set::extract('/Member/name', $this->request->data);
 sort($allgroup_names);
 $cells = array();
 foreach ($allgroup_names as $group_name) {
@@ -27,7 +27,7 @@ echo $this->Html->tableCells($cells, array('class' => 'odd'), array('class' => '
 </table>
 
 <?php
-debug($this->data);
+debug($this->request->data);
 
 ?>
 <h1>Group Memberships</h1>
@@ -44,7 +44,7 @@ echo $this->Html->tableHeaders($headers);
 <tbody>
 
 <?php 
-$allgroup_names = Set::extract('/Member/name', $this->data);
+$allgroup_names = Set::extract('/Member/name', $this->request->data);
 sort($allgroup_names);
 $cells = array();
 foreach ($allgroup_names as $group_name) {
@@ -59,7 +59,7 @@ echo $this->Html->tableCells($cells, array('class' => 'odd'), array('class' => '
 </table>
 
 <?php
-debug($this->data);
+debug($this->request->data);
 
 ?>
 <h1>Group Memberships</h1>
@@ -76,7 +76,7 @@ echo $this->Html->tableHeaders($headers);
 <tbody>
 
 <?php 
-$allgroup_names = Set::extract('/Member/name', $this->data);
+$allgroup_names = Set::extract('/Member/name', $this->request->data);
 sort($allgroup_names);
 $cells = array();
 foreach ($allgroup_names as $group_name) {
@@ -91,7 +91,7 @@ echo $this->Html->tableCells($cells, array('class' => 'odd'), array('class' => '
 </table>
 
 <?php
-debug($this->data);
+debug($this->request->data);
 
 ?>
 <h1>Group Memberships</h1>
@@ -108,7 +108,7 @@ echo $this->Html->tableHeaders($headers);
 <tbody>
 
 <?php 
-$allgroup_names = Set::extract('/Member/name', $this->data);
+$allgroup_names = Set::extract('/Member/name', $this->request->data);
 sort($allgroup_names);
 $cells = array();
 foreach ($allgroup_names as $group_name) {
@@ -123,7 +123,7 @@ echo $this->Html->tableCells($cells, array('class' => 'odd'), array('class' => '
 </table>
 
 <?php
-debug($this->data);
+debug($this->request->data);
 
 ?>
 <h1>Group Memberships</h1>
@@ -140,7 +140,7 @@ echo $this->Html->tableHeaders($headers);
 <tbody>
 
 <?php 
-$allgroup_names = Set::extract('/Member/name', $this->data);
+$allgroup_names = Set::extract('/Member/name', $this->request->data);
 sort($allgroup_names);
 $cells = array();
 foreach ($allgroup_names as $group_name) {
@@ -155,7 +155,7 @@ echo $this->Html->tableCells($cells, array('class' => 'odd'), array('class' => '
 </table>
 
 <?php
-debug($this->data);
+debug($this->request->data);
 
 ?>
 <h1>Group Memberships</h1>
@@ -172,7 +172,7 @@ echo $this->Html->tableHeaders($headers);
 <tbody>
 
 <?php 
-$allgroup_names = Set::extract('/Member/name', $this->data);
+$allgroup_names = Set::extract('/Member/name', $this->request->data);
 sort($allgroup_names);
 $cells = array();
 foreach ($allgroup_names as $group_name) {
@@ -187,6 +187,6 @@ echo $this->Html->tableCells($cells, array('class' => 'odd'), array('class' => '
 </table>
 
 <?php
-debug($this->data);
+debug($this->request->data);
 
 ?>

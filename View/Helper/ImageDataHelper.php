@@ -25,7 +25,7 @@ App::uses('Sanitize', 'Utility');
 
 class ImageDataHelper extends AppHelper {
 
-  var $helpers = array('Session', 'Ajax', 'Html', 'Form', 'Search', 'Option', 'Breadcrumb');
+  var $helpers = array('Session', 'Html', 'Form', 'Search', 'Option', 'Breadcrumb');
 
   var $Sanitize = null;
 
@@ -537,6 +537,7 @@ class ImageDataHelper extends AppHelper {
       $output = $this->Form->checkbox('selected][', array('value' => $mediaId, 'id' => 'select-'.$mediaId, 'onclick' => "selectMedia($mediaId);"));
     }
 
+    /*
     if ($data['Media']['canWriteTag']) {
       $output .= ' '.$this->Ajax->link(
         $this->Html->image('icons/tag_blue_edit.png', array('alt' => __('Edit tags', true), 'title' => __('Edit tags'))), 
@@ -551,6 +552,7 @@ class ImageDataHelper extends AppHelper {
           '/media/file/'.$file['id'].'/'.$file['file'], array('escape' => false));
       }
     }
+    */
     return $cells;
   }
 

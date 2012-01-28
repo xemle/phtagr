@@ -35,9 +35,9 @@ class BrowserController extends AppController
   function beforeFilter() {
     parent::beforeFilter();
     $this->subMenu = array(
-      'import' => __("Import Files", true),
-      'upload' => __("Upload", true),
-      'sync' => __("Meta Data Sync", true),
+      'import' => __("Import Files"),
+      'upload' => __("Upload"),
+      'sync' => __("Meta Data Sync"),
       );
 
     $this->requireRole(ROLE_USER, array('redirect' => '/'));
@@ -52,7 +52,7 @@ class BrowserController extends AppController
       }
     }
 
-    $this->pageTitle = __('My Files', true);
+    $this->pageTitle = __('My Files');
     $this->layout = 'backend';
   }
 
@@ -264,7 +264,7 @@ class BrowserController extends AppController
 
   function import() {
     $path = $this->_getPathFromUrl();
-    if (empty($this->data)) {
+    if (empty($this->request->data)) {
       Logger::warn("Empty post data");
       $this->redirect('index/'.$path);
     }
@@ -273,7 +273,7 @@ class BrowserController extends AppController
     $dirs = array();
     $files = array();
     $toRead = array();
-    foreach ($this->data['Browser']['import'] as $file) {
+    foreach ($this->request->data['Browser']['import'] as $file) {
       if (!$file) {
         continue;
       }
@@ -297,7 +297,7 @@ class BrowserController extends AppController
         $readCount++;
       }
     }
-    $this->Session->setFlash(sprintf(__("Imported %d files (%d) errors)", true), $readCount, $errorCount));
+    $this->Session->setFlash(__("Imported %d files (%d) errors)", $readCount, $errorCount));
 
     $this->redirect('index/'.$path);
   }
@@ -312,7 +312,7 @@ class BrowserController extends AppController
     } elseif ($file['User']['id'] != $this->getUserId()) {
       Logger::warn("Deny access to file: $fsPath");
     } else {
-      $this->Session->setFlash(sprintf(__("Media %d was unlinked successfully", true), $file['File']['media_id']));
+      $this->Session->setFlash(__("Media %d was unlinked successfully", $file['File']['media_id']));
       $this->Media->unlinkFile($file['File']['media_id'], $file['File']['id']);
     }
     $this->redirect('index/'.$this->_getPathFromUrl(0, -1));
@@ -329,12 +329,12 @@ class BrowserController extends AppController
       }
       if ($this->FileManager->delete($fsPath)) {
         if ($isDir) {
-          $this->Session->setFlash(__('Deleted directory successfully', true));
+          $this->Session->setFlash(__('Deleted directory successfully'));
         } else {
-          $this->Session->setFlash(__('Deleted file successfully', true));
+          $this->Session->setFlash(__('Deleted file successfully'));
         }
       } else {
-        $this->Session->setFlash(__('Could not delete file or directory', true));
+        $this->Session->setFlash(__('Could not delete file or directory'));
       }
     }
     $this->redirect('index/'.$path);
@@ -384,13 +384,13 @@ class BrowserController extends AppController
       }
       $data['unsynced'] = $this->Media->find('count', array('conditions' => $conditions));
     }
-    $this->data = $data;
+    $this->request->data = $data;
   }
 
   function view() {
     $user = $this->getUser();
     $userId = $this->getUserId();
-    $this->data = $user;
+    $this->request->data = $user;
     $external = (FILE_FLAG_EXTERNAL);
 
     $files['count'] = $this->MyFile->find('count', array('conditions' => "User.id = $userId"));
@@ -418,18 +418,18 @@ class BrowserController extends AppController
     // Check for internal path
     if (!$fsPath) {
       Logger::warn("Invalid path to create folder");
-      $this->Session->setFlash(__("Invalid path to create folder", true));
+      $this->Session->setFlash(__("Invalid path to create folder"));
       $this->redirect("index");
     }
     if ($this->FileManager->isExternal($fsPath)) {
-      $this->Session->setFlash(sprintf(__("Could not create folder here: %s", true), $path));
+      $this->Session->setFlash(__("Could not create folder here: %s", $path));
       Logger::warn("Could not create folder in external path: $fsPath");
       $this->redirect("index/".$path);
     }
 
-    if (!empty($this->data['Folder']['name'])) {
+    if (!empty($this->request->data['Folder']['name'])) {
       $folder = new Folder($fsPath);
-      $name = $this->data['Folder']['name'];
+      $name = $this->request->data['Folder']['name'];
 
       $newFolder = Folder::slashTerm($fsPath).$name;
       if ($folder->create($newFolder)) {
@@ -438,7 +438,7 @@ class BrowserController extends AppController
         $this->redirect("index/".$path.$name);
       } else {
         Logger::err("Could not create folder $name in $fsPath");
-        $this->Session->setFlash(__("Could not create folder", true));
+        $this->Session->setFlash(__("Could not create folder"));
         $this->redirect('folder/'.$path);
       }
     }
@@ -455,7 +455,7 @@ class BrowserController extends AppController
       Logger::info("No upload data available");
       return false;
     } elseif (!$this->FileManager->canWrite($this->Upload->getSize())) {
-      $this->Session->setFlash(__("Your upload quota is exceeded", true));
+      $this->Session->setFlash(__("Your upload quota is exceeded"));
       Logger::warn("User upload quota exceeded. Upload denied.");
       return false;
     }
@@ -562,21 +562,21 @@ class BrowserController extends AppController
     $fsPath = $this->_getFsPath($path);
     if (!$fsPath) {
       Logger::warn("Invalid path for upload");
-      $this->Session->setFlash(__("Invalid path for upload", true));
+      $this->Session->setFlash(__("Invalid path for upload"));
       $this->redirect("index");
     }
     // Check for internal path
     if ($this->FileManager->isExternal($fsPath)) {
-      $this->Session->setFlash(sprintf(__("Could not upload here: %s", true), $path));
+      $this->Session->setFlash(__("Could not upload here: %s", $path));
       Logger::warn("Could not upload in external path: $fsPath");
       $this->redirect("index/".$path);
     }
-    if (!empty($this->data) && $this->Upload->isUpload()) {
+    if (!empty($this->request->data) && $this->Upload->isUpload()) {
       $files = $this->_upload($fsPath);
 
       $fileCount = count($files);
       $extractedCount = 0;
-      if ($this->data['File']['extract']) {
+      if ($this->request->data['File']['extract']) {
         $zips = $this->_extract($fsPath, $files);
         if ($zips) {
           foreach ($zips as $zip => $extracted) {
@@ -588,9 +588,9 @@ class BrowserController extends AppController
         }
       }  
       if ($extractedCount) {
-        $this->Session->setFlash(sprintf(__("Uploaded %d and %d extraced file(s)", true), $fileCount, $extractedCount));
+        $this->Session->setFlash(__("Uploaded %d and %d extraced file(s)", $fileCount, $extractedCount));
       } else {
-        $this->Session->setFlash(sprintf(__("Uploaded %d file(s)", true), $fileCount));
+        $this->Session->setFlash(__("Uploaded %d file(s)", $fileCount));
       }
     }
     $this->set('path', $path);
@@ -601,7 +601,7 @@ class BrowserController extends AppController
     $root = $this->User->getRootDir($this->getUser());
     if (!$root) {
       Logger::err("Invalid user upload directory");
-      $this->Session->setFlash(__("Error: Invalid upload directory", true));
+      $this->Session->setFlash(__("Error: Invalid upload directory"));
       return false;
     }
 
@@ -609,17 +609,17 @@ class BrowserController extends AppController
     $folder = new Folder($dst, true);
     if (!$folder) {
       Logger::err("Daily upload directory not created");
-      $this->Session->setFlash(__("Error: Invalid upload directory", true));
+      $this->Session->setFlash(__("Error: Invalid upload directory"));
       return false;
     }
     return $dst;
   }
 
   function quickupload() {
-    if (!empty($this->data)) {
+    if (!empty($this->request->data)) {
       if (!$this->Upload->isUpload()) {
         Logger::info("No upload data");
-        $this->Session->setFlash(__("No files uploaded or upload errors", true));
+        $this->Session->setFlash(__("No files uploaded or upload errors"));
         $this->redirect($this->action);
       }
 
@@ -636,7 +636,7 @@ class BrowserController extends AppController
         $files = am($files, $extracted);
       }
       if (!$files) {
-        $this->Session->setFlash(__("No files uploaded", true));
+        $this->Session->setFlash(__("No files uploaded"));
         $this->redirect($this->action);
       } else { 
         $toRead = array();
@@ -644,7 +644,7 @@ class BrowserController extends AppController
       $this->FilterManager->clearErrors();
       $readed = $this->FilterManager->readFiles($files);
       $errors = $this->FilterManager->errors;
-      $this->Session->setFlash(sprintf(__("Uploaded %d files with %d errors.", true), count($readed), count($errors)));
+      $this->Session->setFlash(__("Uploaded %d files with %d errors.", count($readed), count($errors)));
       $this->set('imports', $readed);
       $this->set('errors', $errors);
     } else {

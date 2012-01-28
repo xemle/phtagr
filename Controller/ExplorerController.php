@@ -25,7 +25,7 @@ class ExplorerController extends AppController
 {
   var $components = array('RequestHandler', 'FilterManager', 'Search', 'QueryBuilder', 'FastFileResponder', 'Feed', 'FileCache');
   var $uses = array('Media', 'MyFile', 'Group', 'Tag', 'Category', 'Location');
-  var $helpers = array('Form', 'Html', 'Ajax', 'ImageData', 'Time', 'ExplorerMenu', 'Rss', 'Search', 'Navigator', 'Tab', 'Breadcrumb', 'Autocomplete');
+  var $helpers = array('Form', 'Html', 'ImageData', 'Time', 'ExplorerMenu', 'Rss', 'Search', 'Navigator', 'Tab', 'Breadcrumb', 'Autocomplete');
 
   var $crumbs = array();
 
@@ -42,15 +42,15 @@ class ExplorerController extends AppController
   function beforeRender() {
     $paginateActions = array('category', 'date', 'edit', 'group', 'index', 'location', 'query', 'tag', 'user', 'view');
     if (in_array($this->action, $paginateActions)) {
-      $this->data = $this->Search->paginateByCrumbs($this->crumbs);
-      $this->FastFileResponder->addAll($this->data, 'thumb');
+      $this->request->data = $this->Search->paginateByCrumbs($this->crumbs);
+      $this->FastFileResponder->addAll($this->request->data, 'thumb');
 
       if ($this->hasRole(ROLE_USER)) {
         $groups = $this->Group->getGroupsForMedia($this->getUser());
         $groupSelect = Set::combine($groups, '{n}.Group.id', '{n}.Group.name');
         asort($groupSelect);
-        $groupSelect[0] = __('[Keep]', true);
-        $groupSelect[-1] = __('[No Group]', true);
+        $groupSelect[0] = __('[Keep]');
+        $groupSelect[-1] = __('[No Group]');
         $this->set('groups', $groupSelect);
       } else {
         $this->set('groups', array());
@@ -58,7 +58,7 @@ class ExplorerController extends AppController
     }
     $this->set('crumbs', $this->crumbs);
     $this->params['crumbs'] = $this->crumbs;
-    $this->Feed->add('/explorer/media/' . join('/', $this->Search->encodeCrumbs($this->crumbs)), array('title' => __('Slideshow Media RSS', true), 'id' => 'slideshow'));
+    $this->Feed->add('/explorer/media/' . join('/', $this->Search->encodeCrumbs($this->crumbs)), array('title' => __('Slideshow Media RSS'), 'id' => 'slideshow'));
     parent::beforeRender();
   }
 
@@ -67,9 +67,9 @@ class ExplorerController extends AppController
   }
 
   function view() {
-    if (!empty($this->data)) {
-      $crumbs = split('/', $this->data['Breadcrumb']['current']);
-      $crumbs[] = $this->data['Breadcrumb']['input'];
+    if (!empty($this->request->data)) {
+      $crumbs = split('/', $this->request->data['Breadcrumb']['current']);
+      $crumbs[] = $this->request->data['Breadcrumb']['input'];
       $this->crumbs = $crumbs;
     }
     $this->render('index');
@@ -79,11 +79,11 @@ class ExplorerController extends AppController
     if (in_array($type, array('tag', 'category', 'city', 'sublocation', 'state', 'country'))) {
       if ($type == 'tag' || $type == 'category') {
         $field = Inflector::camelize($type);
-        $value = $this->data[$field]['names'];
+        $value = $this->request->data[$field]['names'];
       } else {
-        $value = $this->data['Location'][$type];
+        $value = $this->request->data['Location'][$type];
       }
-      $this->data = $this->_getAssociation($type, $value);
+      $this->request->data = $this->_getAssociation($type, $value);
     } elseif ($type == 'crumb') {
       $queryMap = array(
         'category' => '_getAssociation', 
@@ -105,19 +105,19 @@ class ExplorerController extends AppController
         $queryMap['visibility'] = array('private', 'group', 'user', 'public');
       }
       $queryTypes = array_keys($queryMap);
-      $input = trim($this->data['Breadcrumb']['input']);
+      $input = trim($this->request->data['Breadcrumb']['input']);
       // cut input to maximum of 64 chars
       if (strlen($input) > 64) {
         $input = substr($input, 0, 64);
       }
-      $this->data = array();
+      $this->request->data = array();
       if (strpos($input, ':') === false) {
         // Search for crumb type
         // collect all if input is empty or starts with the input
         $this->_findGenericCrumb($input, $queryMap);
         foreach ($queryTypes as $types) {
           if ($input == '' || strpos($types, $input) === 0) {
-            $this->data[] = $types . ':';
+            $this->request->data[] = $types . ':';
           }
         }
       } else {
@@ -141,7 +141,7 @@ class ExplorerController extends AppController
           $data = $this->{$method}($crumbType, $input);
         }
         foreach ($data as $value) {
-          $this->data[] = "$crumbType:$exclude$value";
+          $this->request->data[] = "$crumbType:$exclude$value";
         }
       }
     } else {
@@ -172,32 +172,32 @@ class ExplorerController extends AppController
       'all', array('conditions' => array("Tag.name like" => $sqlNeedle), 'recursive' => 0, 'limit' => 10
       )));
     foreach ($tags as $tag) {
-      $this->data[] = 'tag:' . $prefix . $tag;
+      $this->request->data[] = 'tag:' . $prefix . $tag;
     }
     $categories = Set::extract('/Category/name', $this->Media->Category->find(
       'all', array('conditions' => array("Category.name like" => $sqlNeedle), 'recursive' => 0, 'limit' => 10
       )));
     foreach ($categories as $category) {
-      $this->data[] = 'category:' . $prefix . $category;
+      $this->request->data[] = 'category:' . $prefix . $category;
     }
     $locations = array_unique(Set::extract('/Location/name', $this->Media->Location->find(
       'all', array('conditions' => array("Location.name like" => $sqlNeedle), 'recursive' => 0, 'limit' => 10
       ))));
     foreach ($locations as $location) {
-      $this->data[] = 'location:' . $prefix . $location;
+      $this->request->data[] = 'location:' . $prefix . $location;
     }
     $groups = Set::extract('/Group/name', $this->Media->Group->find(
       'all', array('conditions' => array("Group.name like" => $sqlNeedle), 'recursive' => 0, 'limit' => 10
       )));
     foreach ($groups as $group) {
-      $this->data[] = 'group:' . $prefix . $group;
+      $this->request->data[] = 'group:' . $prefix . $group;
     }
     $users = Set::extract('/User/username', $this->Media->User->find(
       'all', array('conditions' => array("User.username like" => $sqlNeedle), 'recursive' => 0, 'limit' => 10
       )));
     foreach ($users as $user) {
       // TODO excluding of users are currently not supported
-      $this->data[] = 'user:' . $user;
+      $this->request->data[] = 'user:' . $user;
     }
 
     $needle = strtolower($needle);
@@ -208,7 +208,7 @@ class ExplorerController extends AppController
       }
       foreach ($values as $value) {
         if (substr(strtolower($value), 0, $len) == $needle) {
-          $this->data[] = $type . ':' . $value;
+          $this->request->data[] = $type . ':' . $value;
         }
       }
     }
@@ -308,47 +308,47 @@ class ExplorerController extends AppController
   }
 
   function quicksearch($quicksearch = false) {
-    if (!empty($this->data) && isset($this->data['Media']['quicksearch'])) {
-      $quicksearch = $this->data['Media']['quicksearch'];
+    if (!empty($this->request->data) && isset($this->request->data['Media']['quicksearch'])) {
+      $quicksearch = $this->request->data['Media']['quicksearch'];
     } 
 
     if ($quicksearch) {
-      $this->data = $this->Search->quicksearch($quicksearch, 6);
+      $this->request->data = $this->Search->quicksearch($quicksearch, 6);
     }
     $this->set('quicksearch', $quicksearch);
   }
 
   function query() {
-    if (!empty($this->data)) {
-      $this->Search->addTags(preg_split('/\s*,\s*/', trim($this->data['Media']['tags'])));
-      $this->Search->setTagOp($this->data['Media']['tag_op']);
+    if (!empty($this->request->data)) {
+      $this->Search->addTags(preg_split('/\s*,\s*/', trim($this->request->data['Media']['tags'])));
+      $this->Search->setTagOp($this->request->data['Media']['tag_op']);
 
-      $this->Search->addCategories(preg_split('/\s*,\s*/', trim($this->data['Media']['categories'])));
-      $this->Search->setCategoryOp($this->data['Media']['category_op']);
+      $this->Search->addCategories(preg_split('/\s*,\s*/', trim($this->request->data['Media']['categories'])));
+      $this->Search->setCategoryOp($this->request->data['Media']['category_op']);
 
-      $this->Search->addLocations(preg_split('/\s*,\s*/', trim($this->data['Media']['locations'])));
-      $this->Search->setLocationOp($this->data['Media']['location_op']);
-      $this->Search->setOperand($this->data['Media']['operand']);
+      $this->Search->addLocations(preg_split('/\s*,\s*/', trim($this->request->data['Media']['locations'])));
+      $this->Search->setLocationOp($this->request->data['Media']['location_op']);
+      $this->Search->setOperand($this->request->data['Media']['operand']);
 
-      $this->Search->setFrom($this->data['Media']['from']);
-      $this->Search->setTo($this->data['Media']['to']);
+      $this->Search->setFrom($this->request->data['Media']['from']);
+      $this->Search->setTo($this->request->data['Media']['to']);
 
-      $this->Search->setShow($this->data['Option']['show']);
-      $this->Search->setSort($this->data['Option']['sort']);
+      $this->Search->setShow($this->request->data['Option']['show']);
+      $this->Search->setSort($this->request->data['Option']['sort']);
       if ($this->hasRole(ROLE_GUEST)) {
-        $this->Search->setName($this->data['Media']['name']);
-        $this->Search->setType($this->data['Media']['type']);
+        $this->Search->setName($this->request->data['Media']['name']);
+        $this->Search->setType($this->request->data['Media']['type']);
         // Allow to search for my images
-        if ($this->data['User']['username'] == $this->getUserId()) {
-          $this->Search->setUser($this->data['User']['username']);
+        if ($this->request->data['User']['username'] == $this->getUserId()) {
+          $this->Search->setUser($this->request->data['User']['username']);
         }
       }
 
       if ($this->hasRole(ROLE_USER)) {
-        $this->Search->setVisibility($this->data['Media']['visibility']);
+        $this->Search->setVisibility($this->request->data['Media']['visibility']);
 
-        $this->Search->setUser($this->data['User']['username']);
-        $this->Search->addGroup($this->data['Group']['name']);
+        $this->Search->setUser($this->request->data['User']['username']);
+        $this->Search->addGroup($this->request->data['Group']['name']);
       } 
       $this->crumbs = $this->Search->convertToCrumbs();
     } 
@@ -392,7 +392,7 @@ class ExplorerController extends AppController
         $crumbs[] = "sort:name";
       } else {
         Logger::info(sprintf("Invalid root %s or folder %s", $fsRoot, $fsFolder));
-        $this->Session->setFlash(sprintf(__("Invalid folder: %s", true), $folder));
+        $this->Session->setFlash(__("Invalid folder: %s", $folder));
       }
     } else {
       $crumbs = am($crumbs, $this->Search->urlToCrumbs($this->params['url']['url'], 3));
@@ -481,16 +481,16 @@ class ExplorerController extends AppController
 
  
   function edit() {
-    if (isset($this->data)) {
-      $ids = preg_split('/\s*,\s*/', $this->data['Media']['ids']);
+    if (isset($this->request->data)) {
+      $ids = preg_split('/\s*,\s*/', $this->request->data['Media']['ids']);
       $ids = array_unique($ids);
       if (!count($ids)) {
         $this->redirect('view/' . implode('/', $this->Search->encodeCrumbs($this->crumbs)));
       }
 
       $user = $this->getUser();
-      $this->Media->prepareGroupData(&$this->data, &$user);
-      $editData = $this->Media->prepareMultiEditData(&$this->data);
+      $this->Media->prepareGroupData(&$this->request->data, &$user);
+      $editData = $this->Media->prepareMultiEditData(&$this->request->data);
       
       $allMedia = $this->Media->find('all', array('conditions' => array('Media.id' => $ids)));
       $changedMedia = array();
@@ -519,7 +519,7 @@ class ExplorerController extends AppController
           }
         }
       }
-      $this->data = array();
+      $this->request->data = array();
     }
     $this->redirect('view/' . implode('/', $this->Search->encodeCrumbs($this->crumbs)));
   }
@@ -541,7 +541,7 @@ class ExplorerController extends AppController
       Logger::warn("User is not allowed to edit media {$media['Media']['id']}");
       $this->redirect(null, '403');
     }
-    $this->data = $media;
+    $this->request->data = $media;
     $this->layout='bare';
     $this->render('editmeta');
     //Configure::write('debug', 0);
@@ -559,7 +559,7 @@ class ExplorerController extends AppController
     $this->layout='bare';
     $user = $this->getUser();
     $username = $user['User']['username'];
-    if (isset($this->data)) {
+    if (isset($this->request->data)) {
       $media = $this->Media->findById($id);
       $this->Media->setAccessFlags(&$media, $user);
       if (!$media) {
@@ -568,8 +568,8 @@ class ExplorerController extends AppController
       } elseif (!$media['Media']['canWriteTag'] && !$media['Media']['canWriteAcl']) {
         Logger::warn("User '{$username}' ({$user['User']['id']}) has no previleges to change tags of image ".$id);
       } else {
-        $this->Media->prepareGroupData(&$this->data, &$user);
-        $tmp = $this->Media->editSingle(&$media, &$this->data);
+        $this->Media->prepareGroupData(&$this->request->data, &$user);
+        $tmp = $this->Media->editSingle(&$media, &$this->request->data);
         if (!$this->Media->save($tmp)) {
           Logger::warn("Could not save media");
           Logger::debug($tmp);
@@ -584,7 +584,7 @@ class ExplorerController extends AppController
     }
     $media = $this->Media->findById($id);
     $this->Media->setAccessFlags(&$media, $user);
-    $this->data = $media;
+    $this->request->data = $media;
     $this->Search->parseArgs();
     $this->Search->setUser($user['User']['username']);
     $this->Search->setHelperData();
@@ -623,13 +623,13 @@ class ExplorerController extends AppController
     $user = $this->getUser();
     $media = $this->Media->findById($id);
     $this->Media->setAccessFlags(&$media, $user);
-    $this->data = $media;
+    $this->request->data = $media;
     $this->layout='bare';
     if ($this->Media->checkAccess(&$media, &$user, 1, 0)) {
       $groups = $this->Group->getGroupsForMedia($user);
       $groups = Set::combine($groups, '{n}.Group.id', '{n}.Group.name');
       asort($groups);
-      $groups[-1] = __('[No Group]', true);
+      $groups[-1] = __('[No Group]');
       $this->set('groups', $groups);
     } else {
       Logger::warn("User {$user['User']['username']} ({$user['User']['id']}) has no previleges to change ACL of image ".$id);
@@ -645,7 +645,7 @@ class ExplorerController extends AppController
     }
     $id = intval($id);
     $this->layout='bare';
-    if (isset($this->data)) {
+    if (isset($this->request->data)) {
       // Call find() instead of read(). read() populates resultes to the model,
       // which causes problems at save()
       $media = $this->Media->findById($id);
@@ -655,16 +655,16 @@ class ExplorerController extends AppController
       if (!$this->Media->checkAccess(&$media, &$user, 1, 0)) {
         Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change ACL of image ".$id);
       } else {
-        $this->Media->prepareGroupData(&$this->data, &$user);
+        $this->Media->prepareGroupData(&$this->request->data, &$user);
         $tmp = array('Media' => array('id' => $id));
-        $this->Media->updateAcl(&$tmp, &$media, &$this->data);
+        $this->Media->updateAcl(&$tmp, &$media, &$this->request->data);
         $this->Media->save($tmp, true);
         Logger::info("Changed acl of media $id");
       }
     }
     $media = $this->Media->findById($id);
     $this->Media->setAccessFlags(&$media, $this->getUser());
-    $this->data = $media;
+    $this->request->data = $media;
     $this->layout='bare';
     $this->Search->parseArgs();
     $this->Search->setUser($user['User']['username']);
@@ -713,7 +713,7 @@ class ExplorerController extends AppController
         'link' => "/explorer/rss",
         'description' => "Recently Published Images" )
       );
-    $this->data = $this->Search->paginateByCrumbs($this->crumbs);
+    $this->request->data = $this->Search->paginateByCrumbs($this->crumbs);
   }
 
   function media() {
@@ -721,13 +721,13 @@ class ExplorerController extends AppController
     if (Configure::read('debug') > 1) {
       Configure::write('debug', 1);
     }
-    $this->data = $this->Search->paginateByCrumbs($this->crumbs);
+    $this->request->data = $this->Search->paginateByCrumbs($this->crumbs);
   }
 
   function points($north, $south, $west, $east) {
     $this->Search->setSort('random');
 
-    $this->data = array();
+    $this->request->data = array();
 
     $north = floatval($north);
     $south = floatval($south);
@@ -748,7 +748,7 @@ class ExplorerController extends AppController
         $points = $this->Search->paginate();
         //Logger::trace("Found ".count($points)." points");
         if ($points) {
-          $this->data = am($points, $this->data);
+          $this->request->data = am($points, $this->request->data);
         }
         $lng += $stepLng;
       }
@@ -756,8 +756,8 @@ class ExplorerController extends AppController
     }
 
     $this->layout = 'xml';
-    Logger::trace("Search points of N:$north, S:$south, W:$west, E:$east: Found ".count($this->data)." points");
-    $this->FastFileResponder->addAll($this->data, 'mini');
+    Logger::trace("Search points of N:$north, S:$south, W:$west, E:$east: Found ".count($this->request->data)." points");
+    $this->FastFileResponder->addAll($this->request->data, 'mini');
     if (Configure::read('debug') > 1) {
       Configure::write('debug', 1);
     }

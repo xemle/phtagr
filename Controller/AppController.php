@@ -37,9 +37,9 @@ class AppController extends Controller
   function beforeFilter() {
     parent::beforeFilter();
     $this->_checkSession();
-    $this->Feed->add('/explorer/rss', array('title' => __('Recent photos', true)));
-    $this->Feed->add('/explorer/media', array('title' =>  __('Media RSS of recent photos', true), 'id' => 'gallery'));
-    $this->Feed->add('/comment/rss', array('title' => __('Recent comments', true)));
+    $this->Feed->add('/explorer/rss', array('title' => __('Recent photos')));
+    $this->Feed->add('/explorer/media', array('title' =>  __('Media RSS of recent photos'), 'id' => 'gallery'));
+    $this->Feed->add('/comment/rss', array('title' => __('Recent comments')));
     
     $this->_configureEmail();
     $this->_setMainMenu();

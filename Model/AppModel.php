@@ -231,9 +231,9 @@ class AppModel extends Model
   function __get($name) {
     if ($this->data) {
       $data = $this->stripAlias();
-      $name = Inflector::underscore($name);
-      if (isset($data[$name])) {
-        return $data[$name];
+      $unserscore = Inflector::underscore($name);
+      if (isset($data[$unserscore])) {
+        return $data[$unserscore];
       }
     }
     return parent::__get($name);

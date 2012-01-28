@@ -32,10 +32,10 @@ class ExplorerMenuHelper extends AppHelper
     @return Array of accociation name as key and their count as value */
   function _countAssociation($association) {
     $result = array();
-    if (isset($this->data['Media'])) {
-      $data = array($this->data);
+    if (isset($this->request->data['Media'])) {
+      $data = array($this->request->data);
     } else {
-      $data =& $this->data;
+      $data =& $this->request->data;
     }
     if (!$data) {
       return false;
@@ -198,7 +198,7 @@ class ExplorerMenuHelper extends AppHelper
 
   function getMainMenu() {
     $out = '';
-    $data = $this->data;
+    $data = $this->request->data;
     $this->Search->initialize();
     $items = array();
     $this->_id = 0;

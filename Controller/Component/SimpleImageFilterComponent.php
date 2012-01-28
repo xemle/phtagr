@@ -44,19 +44,19 @@ class SimpleImageFilterComponent extends BaseFilterComponent {
    * @return The image data array or False on error */
   function read($file, &$media, $options = array()) {
     $options = am(array('noSave' => false), $options);
-    $filename = $this->MyFile->getFilename($file);
+    $filename = $this->controller->MyFile->getFilename($file);
 
     $isNew = false;
     if (!$media) {
-      $media = $this->Media->create(array(
+      $media = $this->controller->Media->create(array(
         'type' => MEDIA_TYPE_IMAGE,
         ), true);
       if ($this->controller->getUserId() != $file['File']['user_id']) {
-        $user = $this->Media->User->findById($file['File']['user_id']);
+        $user = $this->controller->Media->User->findById($file['File']['user_id']);
       } else {
         $user = $this->controller->getUser();
       }
-      $media = $this->Media->addDefaultAcl(&$media, &$user);
+      $media = $this->controller->Media->addDefaultAcl(&$media, &$user);
       
       $isNew = true;
     };
@@ -78,27 +78,27 @@ class SimpleImageFilterComponent extends BaseFilterComponent {
     }
     if ($options['noSave']) {
       return $media;
-    } elseif (!$this->Media->save($media)) {
+    } elseif (!$this->controller->Media->save($media)) {
       Logger::err("Could not save Media");
       Logger::trace($media);
       $this->FilterManager->addError($filename, 'MediaSaveError');
       return false;
     } 
     if ($isNew) {
-      $mediaId = $this->Media->getLastInsertID();
-      if (!$this->MyFile->setMedia($file, $mediaId)) {
-        $this->Media->delete($mediaId);
+      $mediaId = $this->controller->Media->getLastInsertID();
+      if (!$this->controller->MyFile->setMedia($file, $mediaId)) {
+        $this->controller->Media->delete($mediaId);
         $this->FilterManager->addError($filename, 'FileSaveError');
         return false;
       } else {
         Logger::info("Created new Media (id $mediaId)");
-        $media = $this->Media->findById($mediaId);
+        $media = $this->controller->Media->findById($mediaId);
       }
     } else {
       Logger::verbose("Updated media (id ".$media['Media']['id'].")");
     }
-    $this->MyFile->updateReaded($file);
-    $this->MyFile->setFlag($file, FILE_FLAG_DEPENDENT);
+    $this->controller->MyFile->updateReaded($file);
+    $this->controller->MyFile->setFlag($file, FILE_FLAG_DEPENDENT);
     return $media;
   }
 

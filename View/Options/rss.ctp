@@ -7,10 +7,10 @@
 <p><?php echo __('The links are valid for the current session. For permanent login the user has to login via username and password.'); ?></p>
 
 <?php
-  $recentMedia = Router::url('/explorer/rss/key:'.$this->data['User']['key'], true);
-  $recentComments = Router::url('/comments/rss/key:'.$this->data['User']['key'], true);
-  $mediaRss = Router::url('/explorer/media/key:'.$this->data['User']['key'].'/media.rss', true);
-  $myMediaMediaRss = Router::url('/explorer/media/user:'.$this->data['User']['username'].'/key:'.$this->data['User']['key'].'/media.rss', true);
+  $recentMedia = Router::url('/explorer/rss/key:'.$this->request->data['User']['key'], true);
+  $recentComments = Router::url('/comments/rss/key:'.$this->request->data['User']['key'], true);
+  $mediaRss = Router::url('/explorer/media/key:'.$this->request->data['User']['key'].'/media.rss', true);
+  $myMediaMediaRss = Router::url('/explorer/media/user:'.$this->request->data['User']['username'].'/key:'.$this->request->data['User']['key'].'/media.rss', true);
 ?>
 <ul>
   <li><?php echo $this->Html->link(__('Recent Media'), $recentMedia); ?> (Link: <code><?php echo $recentMedia; ?></code>)</li>

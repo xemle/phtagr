@@ -2,7 +2,7 @@
 
 <?php echo $this->Session->flash(); ?>
 
-<?php if (!empty($this->data)): ?>
+<?php if (!empty($this->request->data)): ?>
 <table class="default">
 <thead>
   <tr>
@@ -13,7 +13,7 @@
 </thead>
 
 <tbody>
-<?php $row=0; foreach($this->data as $guest): ?>
+<?php $row=0; foreach($this->request->data as $guest): ?>
   <tr class="<?php echo ($row++%2)?"even":"odd";?>">
     <td><?php echo $this->Html->link($guest['Guest']['username'], 'edit/'.$guest['Guest']['id']); ?></td>
     <td><?php echo count($guest['Member']);?></td>
@@ -37,5 +37,5 @@
 <?php endif; ?>
 
 <?php
-//debug($this->data);
+//debug($this->request->data);
 ?>

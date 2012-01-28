@@ -1,5 +1,5 @@
 <markers>
-<?php foreach ($this->data as $media): ?>
+<?php foreach ($this->request->data as $media): ?>
   <marker id="<?php echo $media['Media']['id']; ?>" lat="<?php echo $media['Media']['latitude']; ?>" lng="<?php echo $media['Media']['longitude']; ?>" >
     <name><?php echo h($media['Media']['name']); ?></name>
     <icon><?php echo Router::url('/media/mini/'.$media['Media']['id'].'/mini.jpg', true); ?></icon>

@@ -151,6 +151,9 @@ class SearchHelper extends Search {
 
     $this->_addParams(&$data, $add);
     $this->_delParams(&$data, $del);
+    if (!$data) {
+      return '';
+    }
     ksort($data);
 
     foreach ($data as $name => $values) {

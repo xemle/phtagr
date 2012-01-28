@@ -21,6 +21,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+if (!App::import('Component', 'BaseFilter')) {
+  Logger::error("Could not load BaseFilter");
+}
+
 class FilterManagerComponent extends Component {
 
   var $controller = null;
@@ -42,10 +46,6 @@ class FilterManagerComponent extends Component {
 
   function initialize(&$controller) {
     $this->controller =& $controller;
-    if (!App::import('Component', 'BaseFilter')) {
-      Logger::err("Could not find filter with name 'BaseFilter'");
-      return false;
-    }
     if (!isset($controller->MyFile) || !isset($controller->Media)) {
       Logger::err("Model MyFile and Media is not found");
       return false;
@@ -272,13 +272,16 @@ class FilterManagerComponent extends Component {
       Logger::verbose("File $filename is not supported");
       return false;
     }
-    if (!$this->MyFile->fileExists($filename) && !$this->FileManager->add($filename)) {
+    if (!$this->controller->MyFile->fileExists($filename) && !$this->FileManager->add($filename)) {
       Logger::err("Could not add file $filename");
       $this->addError($filename, 'FileAddError');
       return false;
     }
 
-    $file = $this->MyFile->findByFilename($filename);
+    $file = $this->controller->MyFile->findByFilename($filename);
+    if (!$file) {
+      Logger::err("Could not find file with filename: " . $filename);
+    }
 
     // Check changes
     $fileTime = filemtime($filename);
@@ -291,8 +294,8 @@ class FilterManagerComponent extends Component {
       $forceRead = true;
     }
 
-    if ($this->MyFile->hasMedia($file)) {
-      $media = $this->Media->findById($file['File']['media_id']);
+    if ($this->controller->MyFile->hasMedia($file)) {
+      $media = $this->controller->Media->findById($file['File']['media_id']);
       $readed = strtotime($file['File']['readed']);
       if ($readed && !$forceRead) {
         Logger::verbose("File '$filename' already readed. Skip reading!");
@@ -318,8 +321,8 @@ class FilterManagerComponent extends Component {
     $success = true;
     $filterMissing = false;
     foreach ($media['File'] as $file) {
-      $file = $this->MyFile->findById($file['id']);
-      $filename = $this->MyFile->getFilename($file);
+      $file = $this->controller->MyFile->findById($file['id']);
+      $filename = $this->controller->MyFile->getFilename($file);
       $filter = $this->getFilterByExtension($filename);
       if (!$filter) {
         Logger::verbose("Could not find a filter for $filename");

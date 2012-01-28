@@ -6,7 +6,7 @@
 $this->Search->initialize();
 $cell=0;
 
-if (!count($this->data)): ?>
+if (!count($this->request->data)): ?>
 <div class="info">
 <?php echo __("Sorry, nothing was found for %s", h($quicksearch)); ?>
 </div>
@@ -19,14 +19,14 @@ if (!count($this->data)): ?>
 </script>
 
 <?php 
-  foreach($this->data as $media) {
+  foreach($this->request->data as $media) {
     echo $this->ImageData->mediaLink($media, 'mini').' ';
   }
 ?>
 </div>
 
 <?php
-  $tags = Set::extract('/Tag/name', $this->data);
+  $tags = Set::extract('/Tag/name', $this->request->data);
   if (count($tags)) {
     echo '<p>' . __('See more results of tag') .  ': ';
     $tags = array_unique($tags);
@@ -37,7 +37,7 @@ if (!count($this->data)): ?>
     echo implode(', ', $links) . '</p>';
   }
 
-  $categories = Set::extract('/Category/name', $this->data);
+  $categories = Set::extract('/Category/name', $this->request->data);
   if (count($categories)) {
     echo '<p>' . __('See more results of category') .  ': ';
     $categories = array_unique($categories);
@@ -48,7 +48,7 @@ if (!count($this->data)): ?>
     echo implode(', ', $links) . '</p>';
   }
 
-  $locations = Set::extract('/Location/name', $this->data);
+  $locations = Set::extract('/Location/name', $this->request->data);
   if (count($locations)) {
     echo '<p>' . __('See more results of location') .  ': ';
     $locations = array_unique($locations);

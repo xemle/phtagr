@@ -1,8 +1,8 @@
-<h1><?php echo __('Group: %s', $this->data['Group']['name']); ?></h1>
+<h1><?php echo __('Group: %s', $this->request->data['Group']['name']); ?></h1>
 
 <?php echo $this->Session->flash() ?>
 
-<?php echo $this->Form->create(null, array('action' => "edit/{$this->data['Group']['name']}")); ?>
+<?php echo $this->Form->create(null, array('action' => "edit/{$this->request->data['Group']['name']}")); ?>
 
 <fieldset><legend><?php echo __('Edit Group'); ?></legend>
 <?php 

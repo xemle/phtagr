@@ -26,7 +26,7 @@ class ImagesController extends AppController
   var $name = 'Images';
   var $components = array('RequestHandler', 'Search', 'FastFileResponder');
   var $uses = array('Media', 'Group', 'Tag', 'Category', 'Location');
-  var $helpers = array('Form', 'Html', 'Ajax', 'ImageData', 'Time', 'Search', 'ExplorerMenu', 'Rss', 'Map', 'Navigator', 'Flowplayer', 'Tab', 'Number', 'Option');
+  var $helpers = array('Form', 'Html', 'ImageData', 'Time', 'Search', 'ExplorerMenu', 'Rss', 'Map', 'Navigator', 'Flowplayer', 'Tab', 'Number', 'Option', 'Autocomplete');
   var $crumbs = array();
 
   function beforeFilter() {
@@ -36,8 +36,8 @@ class ImagesController extends AppController
       $groups = $this->Group->getGroupsForMedia($this->getUser());
       $groupSelect = Set::combine($groups, '{n}.Group.id', '{n}.Group.name');
       asort($groupSelect);
-      $groupSelect[0] = __('[Keep]', true);
-      $groupSelect[-1] = __('[No Group]', true);
+      $groupSelect[0] = __('[Keep]');
+      $groupSelect[-1] = __('[No Group]');
       $this->set('groups', $groupSelect);
     } else {
       $this->set('groups', array());
@@ -64,7 +64,7 @@ class ImagesController extends AppController
   /** Update the rating and clicks of a media. The rated media will be stored
    * in the session to avoid multiple rating per session. */
   function _updateRating() {
-    if (!$this->data || !isset($this->data['Media']['id'])) {
+    if (!$this->request->data || !isset($this->request->data['Media']['id'])) {
       Logger::warn("Precondition failed");
       return;
     }
@@ -78,7 +78,7 @@ class ImagesController extends AppController
     }
 
     // Check for media rating
-    $id = $this->data['Media']['id'];
+    $id = $this->request->data['Media']['id'];
     $ranked = array();
     if ($this->Session->check('Media.ranked')) {
       $ranked = $this->Session->read('Media.ranked');
@@ -88,7 +88,7 @@ class ImagesController extends AppController
       return;
     }
 
-    $this->Media->updateRanking($this->data);
+    $this->Media->updateRanking($this->request->data);
 
     // update rated media ids
     $ranked[] = $id;
@@ -96,8 +96,8 @@ class ImagesController extends AppController
   }
 
   function view($id) {
-    $this->data = $this->Search->paginateMediaByCrumb($id, $this->crumbs);
-    if (!$this->data) {
+    $this->request->data = $this->Search->paginateMediaByCrumb($id, $this->crumbs);
+    if (!$this->request->data) {
       $this->render('notfound');
     } else {
       $role = $this->getUserRole();
@@ -117,16 +117,16 @@ class ImagesController extends AppController
       if ($this->Session->check('Comment.data')) {
         $comment = $this->Session->read('Comment.data');
         $this->Comment->validationErrors = $this->Session->read('Comment.validationErrors');
-        $this->data['Comment'] = am($comment['Comment'], $this->data['Comment']);
-        //$this->data = am($this->Session->read('Comment.data'), $this->data);
+        $this->request->data['Comment'] = am($comment['Comment'], $this->request->data['Comment']);
+        //$this->request->data = am($this->Session->read('Comment.data'), $this->request->data);
         $this->Session->delete('Comment.data');
       }
-      $this->FastFileResponder->add($this->data, 'preview');
+      $this->FastFileResponder->add($this->request->data, 'preview');
     }
   }
 
   function update($id) {
-    if (!empty($this->data)) {
+    if (!empty($this->request->data)) {
       $user = $this->getUser();
       $media = $this->Media->findById($id);
       $this->Media->setAccessFlags(&$media, $user);
@@ -137,7 +137,7 @@ class ImagesController extends AppController
         Logger::warn("User '{$username}' ({$user['User']['id']}) has no previleges to change tags of image ".$id);
       } else {
         //$this->_checkAndSetGroupId();
-        $tmp = $this->Media->editSingle(&$media, &$this->data);
+        $tmp = $this->Media->editSingle(&$media, &$this->request->data);
         if (!$this->Media->save($tmp)) {
           Logger::warn("Could not save media");
           Logger::debug($tmp);
@@ -158,7 +158,7 @@ class ImagesController extends AppController
   }
 
   function updateAcl($id) {
-    if (!empty($this->data)) {
+    if (!empty($this->request->data)) {
       $user = $this->getUser();
       $media = $this->Media->findById($id);
       $this->Media->setAccessFlags(&$media, $user);
@@ -168,9 +168,9 @@ class ImagesController extends AppController
       } elseif (!$media['Media']['canWriteAcl']) {
         Logger::warn("User '{$username}' ({$user['User']['id']}) has no previleges to change tags of image ".$id);
       } else {
-        $this->Media->prepareGroupData(&$this->data, &$user);
+        $this->Media->prepareGroupData(&$this->request->data, &$user);
         $tmp = array('Media' => array('id' => $id));
-        $this->Media->updateAcl(&$tmp, &$media, &$this->data);
+        $this->Media->updateAcl(&$tmp, &$media, &$this->request->data);
         $this->Media->save($tmp, true);
         Logger::info("Changed acl of media $id");
       }

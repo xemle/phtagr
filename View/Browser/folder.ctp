@@ -2,7 +2,7 @@
 
 <?php echo $this->Session->flash(); ?>
 
-<p><?php echo __("Location %s", $fileList->location($path)); ?></p>
+<p><?php echo __("Location %s", $this->FileList->location($path)); ?></p>
 
 <?php echo $this->Form->create(false, array('action' => 'folder/'.$path)); ?>
 <fieldset>

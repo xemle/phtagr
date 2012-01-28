@@ -3,7 +3,7 @@
 <h1>Group Dashboard</h1>
 
 <?php
-debug($this->data);
+debug($this->request->data);
 
 ?>
 <?php echo $this->Session->flash(); ?>
@@ -11,7 +11,7 @@ debug($this->data);
 <h1>Group Dashboard</h1>
 
 <?php
-debug($this->data);
+debug($this->request->data);
 
 ?>
 <?php echo $this->Session->flash(); ?>
@@ -19,7 +19,7 @@ debug($this->data);
 <h1>Group Dashboard</h1>
 
 <?php
-debug($this->data);
+debug($this->request->data);
 
 ?>
 <?php echo $this->Session->flash(); ?>
@@ -27,7 +27,7 @@ debug($this->data);
 <h1>Group Dashboard</h1>
 
 <?php
-debug($this->data);
+debug($this->request->data);
 
 ?>
 <?php echo $this->Session->flash(); ?>
@@ -35,7 +35,7 @@ debug($this->data);
 <h1>Group Dashboard</h1>
 
 <?php
-debug($this->data);
+debug($this->request->data);
 
 ?>
 <?php echo $this->Session->flash(); ?>
@@ -43,6 +43,6 @@ debug($this->data);
 <h1>Group Dashboard</h1>
 
 <?php
-debug($this->data);
+debug($this->request->data);
 
 ?>

@@ -3,10 +3,10 @@
   $this->SearchParams = $this->Search->serialize(false, false, false, array('defaults' => array('pos' => 1)));
 ?>
 <div id="comments">
-<?php if (count($this->data['Comment'])): ?>
+<?php if (count($this->request->data['Comment'])): ?>
 <h3><?php echo __('Comments'); ?></h3>
 <?php $count = 0; ?>
-<?php foreach ($this->data['Comment'] as $key => $comment): ?>
+<?php foreach ($this->request->data['Comment'] as $key => $comment): ?>
 <?php if (!is_numeric($key)) continue; ?>
 <div class="comment <?php echo ($count++%2)?'even':'odd'; ?>">
 <div class="meta">
@@ -15,11 +15,11 @@
   if (!empty($comment['url'])) {
     $name = $this->Html->link($comment['name'], $comment['url']);
   }  
-  $time = $this->Html->tag('span', $this->Time->relativeTime($comment['date']), array('class' => 'date'));
-  __("%s said %s", $name, $time);
+  $this->Time = $this->Html->tag('span', $this->Time->timeAgoInWords($comment['date']), array('class' => 'date'));
+  __("%s said %s", $name, $this->Time);
 ?>
 <?php
-  if ($this->data['Media']['isOwner'] || $comment['user_id'] == $userId) {
+  if ($this->request->data['Media']['isOwner'] || $comment['user_id'] == $userId) {
     echo $this->Html->link(__('(delete)'), '/comments/delete/'.$comment['id'].'/'.$this->SearchParams);
   }
 ?>:
@@ -36,7 +36,7 @@
 <?php echo $this->Form->create('Comment', array('action' => 'add/'.$this->SearchParams, 'id' => 'comment-add')); ?>
 <fieldset>
 <?php
-  echo $this->Form->hidden('Media.id', array('value' => $this->data['Media']['id']));
+  echo $this->Form->hidden('Media.id', array('value' => $this->request->data['Media']['id']));
 ?>
 <?php 
   if (($commentAuth & COMMENT_AUTH_NAME) > 0) {

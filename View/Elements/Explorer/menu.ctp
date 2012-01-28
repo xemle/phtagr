@@ -1,10 +1,10 @@
 <?php
   $canWriteTag = $canWriteMeta = $canWriteCaption = $canWriteAcl = 0;
-  if (count($this->data)) {
-    $canWriteTag = max(Set::extract('/Media/canWriteTag', $this->data));
-    $canWriteMeta = max(Set::extract('/Media/canWriteMeta', $this->data));
-    $canWriteCaption = max(Set::extract('/Media/canWriteCaption', $this->data));
-    $canWriteAcl = max(Set::extract('/Media/canWriteAcl', $this->data));
+  if (count($this->request->data)) {
+    $canWriteTag = max(Set::extract('/Media/canWriteTag', $this->request->data));
+    $canWriteMeta = max(Set::extract('/Media/canWriteMeta', $this->request->data));
+    $canWriteCaption = max(Set::extract('/Media/canWriteCaption', $this->request->data));
+    $canWriteAcl = max(Set::extract('/Media/canWriteAcl', $this->request->data));
   }
 ?>
 <div id="p-explorer-menu">
@@ -33,11 +33,11 @@
 <div id="p-explorer-all-meta">
 <?php
   $user = $this->Search->getUser();
-  $tagUrls = $this->ImageData->getAllExtendSearchUrls($crumbs, $user, 'tag', array_unique(Set::extract('/Tag/name', $this->data)));
+  $tagUrls = $this->ImageData->getAllExtendSearchUrls($crumbs, $user, 'tag', array_unique(Set::extract('/Tag/name', $this->request->data)));
   ksort($tagUrls);
-  $categoryUrls = $this->ImageData->getAllExtendSearchUrls($crumbs, $user, 'category', array_unique(Set::extract('/Category/name', $this->data)));
+  $categoryUrls = $this->ImageData->getAllExtendSearchUrls($crumbs, $user, 'category', array_unique(Set::extract('/Category/name', $this->request->data)));
   ksort($categoryUrls);
-  $locationUrls = $this->ImageData->getAllExtendSearchUrls($crumbs, $user, 'location', array_unique(Set::extract('/Location/name', $this->data)));
+  $locationUrls = $this->ImageData->getAllExtendSearchUrls($crumbs, $user, 'location', array_unique(Set::extract('/Location/name', $this->request->data)));
   ksort($locationUrls);
 
   if (count($tagUrls)) {
@@ -64,7 +64,7 @@
 ?>
 <p><?php echo __('Users') . " "; ?>
 <?php
-  $userUrls = $this->ImageData->getAllExtendSearchUrls($crumbs, false, 'user', array_unique(Set::extract('/User/username', $this->data)));
+  $userUrls = $this->ImageData->getAllExtendSearchUrls($crumbs, false, 'user', array_unique(Set::extract('/User/username', $this->request->data)));
   foreach ($userUrls as $name => $urls) {
     echo $this->ImageData->getExtendSearchLinks($urls, $name, ($name == $user)) . ' ';
   }
@@ -98,19 +98,19 @@
   echo $this->Form->hidden('Media.ids', array('id' => 'MediaIds'));
   if ($canWriteTag) {
     echo $this->Form->input('Tag.names', array('label' => __('Tags'), 'after' => $this->Html->tag('div', __('E.g. newtag, -oldtag'), array('class' => 'description'))));
-    echo $autocomplete->autoComplete('Tag.names', 'autocomplete/tag', array('split' => true));
+    echo $this->Autocomplete->autoComplete('Tag.names', 'autocomplete/tag', array('split' => true));
   }
   if ($canWriteMeta) {
     echo $this->Form->input('Category.names', array('label' => __('Categories')));
-    echo $autocomplete->autoComplete('Category.names', 'autocomplete/category', array('split' => true));
+    echo $this->Autocomplete->autoComplete('Category.names', 'autocomplete/category', array('split' => true));
     echo $this->Form->input('Location.city', array('label' => __('City')));
-    echo $autocomplete->autoComplete('Location.city', 'autocomplete/city');
+    echo $this->Autocomplete->autoComplete('Location.city', 'autocomplete/city');
     echo $this->Form->input('Location.sublocation', array('label' => __('Sublocation')));
-    echo $autocomplete->autoComplete('Location.sublocation', 'autocomplete/sublocation');
+    echo $this->Autocomplete->autoComplete('Location.sublocation', 'autocomplete/sublocation');
     echo $this->Form->input('Location.state', array('label' => __('State')));
-    echo $autocomplete->autoComplete('Location.state', 'autocomplete/state');
+    echo $this->Autocomplete->autoComplete('Location.state', 'autocomplete/state');
     echo $this->Form->input('Location.country', array('label' => __('Country')));
-    echo $autocomplete->autoComplete('Location.country', 'autocomplete/country');
+    echo $this->Autocomplete->autoComplete('Location.country', 'autocomplete/country');
     echo $this->Form->input('Media.geo', array('label' => __('Geo data'), 'maxlength' => 32, 'after' => $this->Html->tag('div', __('latitude, longitude'), array('class' => 'description'))));
   }
   if ($canWriteCaption) {
