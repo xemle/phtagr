@@ -48,8 +48,8 @@ class SearchHelper extends Search {
    * set by the query component. All search parameters are reset after calling
    * this function. All previous changes are overritten */
   function initialize($config = array()) {
-    if (isset($this->params['search'])) {
-      $params = $this->params['search'];
+    if (isset($this->request->params['search'])) {
+      $params = $this->request->params['search'];
       $this->_data = $params['data'];
       $this->config['baseUri'] = $params['baseUri'];
       $this->config['afterUri'] = $params['afterUri'];

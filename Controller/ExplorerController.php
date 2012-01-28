@@ -36,7 +36,7 @@ class ExplorerController extends AppController
     }
 
     parent::beforeFilter();
-    $this->crumbs = $this->Search->urlToCrumbs($this->params['url']['url'], 2);
+    $this->crumbs = $this->Search->urlToCrumbs($this->request->url, 2);
   }
 
   function beforeRender() {
@@ -57,7 +57,7 @@ class ExplorerController extends AppController
       }
     }
     $this->set('crumbs', $this->crumbs);
-    $this->params['crumbs'] = $this->crumbs;
+    $this->request->params['crumbs'] = $this->crumbs;
     $this->Feed->add('/explorer/media/' . join('/', $this->Search->encodeCrumbs($this->crumbs)), array('title' => __('Slideshow Media RSS'), 'id' => 'slideshow'));
     parent::beforeRender();
   }

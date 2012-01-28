@@ -29,49 +29,49 @@ class NavigatorHelper extends AppHelper {
   }
 
   function getPageCount() {
-    if (isset($this->params['search'])) {
-      return $this->params['search']['pageCount'];
+    if (isset($this->request->params['search'])) {
+      return $this->request->params['search']['pageCount'];
     }
     return 0;
   }
 
   function getCurrentPage() {
-    if (isset($this->params['search']['page'])) {
-      return $this->params['search']['page'];
+    if (isset($this->request->params['search']['page'])) {
+      return $this->request->params['search']['page'];
     }
     return 0;
   }
 
   function hasPages() {
-    return (isset($this->params['search']) && $this->params['search']['pageCount'] > 1);
+    return (isset($this->request->params['search']) && $this->request->params['search']['pageCount'] > 1);
   }
 
   function hasPrev() {
-    if (isset($this->params['search']) && 
-      $this->params['search']['prevPage']) {
+    if (isset($this->request->params['search']) && 
+      $this->request->params['search']['prevPage']) {
       return true;
     }
     return false;
   }
 
   function prev() {
-    if (!isset($this->params['search']) || 
-      !$this->params['search']['prevPage']) {
+    if (!isset($this->request->params['search']) || 
+      !$this->request->params['search']['prevPage']) {
       return false;
     }
-    $prev = $this->params['search']['page'] - 1;
-    $crumbs = $this->params['crumbs'];
+    $prev = $this->request->params['search']['page'] - 1;
+    $crumbs = $this->request->params['crumbs'];
     $link = $this->Breadcrumb->crumbUrl($this->Breadcrumb->replace($crumbs, 'page', $prev));
     return $this->Html->link(__('prev'), $link, array('class' => 'prev'));
   }
 
   function numbers() {
-    if (!isset($this->params['search'])) {
+    if (!isset($this->request->params['search'])) {
       return;
     }
 
-    $params = $this->params['search'];
-    $crumbs = $this->params['crumbs'];
+    $params = $this->request->params['search'];
+    $crumbs = $this->request->params['crumbs'];
     $output = '';
     
     if ($params['pageCount'] > 1) {
@@ -97,72 +97,72 @@ class NavigatorHelper extends AppHelper {
   }
 
   function hasNext() {
-    if (isset($this->params['search']) && 
-      $this->params['search']['nextPage']) {
+    if (isset($this->request->params['search']) && 
+      $this->request->params['search']['nextPage']) {
       return true;
     }
     return false;
   }
 
   function next() {
-    if (!isset($this->params['search']) || 
-      !$this->params['search']['nextPage']) {
+    if (!isset($this->request->params['search']) || 
+      !$this->request->params['search']['nextPage']) {
       return false;
     }
-    $next = $this->params['search']['page'] + 1;
-    $crumbs = $this->params['crumbs'];
+    $next = $this->request->params['search']['page'] + 1;
+    $crumbs = $this->request->params['crumbs'];
     $link = $this->Breadcrumb->crumbUrl($this->Breadcrumb->replace($crumbs, 'page', $next));
     return $this->Html->link(__('next'), $link, array('class' => 'next'));
   }
 
   function hasPrevMedia() {
-    return !empty($this->params['search']['prevMedia']);
+    return !empty($this->request->params['search']['prevMedia']);
   }
 
   function prevMedia() {
-    if (!isset($this->params['search']) ||
-      !$this->params['search']['prevMedia']) {
+    if (!isset($this->request->params['search']) ||
+      !$this->request->params['search']['prevMedia']) {
       return;
     }
-    $params = $this->params['search'];
-    $crumbs = $this->params['crumbs'];
+    $params = $this->request->params['search'];
+    $crumbs = $this->request->params['crumbs'];
     $pos = $this->Search->getPos(1) - 1;
     $page = ceil($pos / $this->Search->getShow());
     $baseUri = '/images/view/'.$params['prevMedia'] . '/';
-    $crumbs = $this->params['crumbs'];
+    $crumbs = $this->request->params['crumbs'];
     $crumbParams = $this->Breadcrumb->params($this->Breadcrumb->replace($this->Breadcrumb->replace($crumbs, 'page', $page), 'pos', $pos));
     $link = $baseUri . $crumbParams;
     return $this->Html->link(__('prev'), $link, array('class' => 'prev'));
   }
 
   function up() {
-    if (!isset($this->params['search'])) {
+    if (!isset($this->request->params['search'])) {
       return;
     }
-    $params = $this->params['search'];
-    $link = $this->Breadcrumb->crumbUrl($this->params['crumbs'], false, array('pos'));
+    $params = $this->request->params['search'];
+    $link = $this->Breadcrumb->crumbUrl($this->request->params['crumbs'], false, array('pos'));
     $link .= '#media-'.$params['current'];
     return $this->Html->link(__('overview'), $link, array('class' => 'up'));
   }
 
   function hasNextMedia() {
-    return !empty($this->params['search']['nextMedia']);
+    return !empty($this->request->params['search']['nextMedia']);
   }
 
   function getNextMediaUrl() {
-    $params = $this->params['search'];
+    $params = $this->request->params['search'];
     $pos = $this->Search->getPos(1) + 1;
     $page = ceil($pos / $this->Search->getShow());
     $baseUri = '/images/view/'.$params['nextMedia'] . '/';
-    $crumbs = $this->params['crumbs'];
+    $crumbs = $this->request->params['crumbs'];
     $crumbParams = $this->Breadcrumb->params($this->Breadcrumb->replace($this->Breadcrumb->replace($crumbs, 'page', $page), 'pos', $pos));
     $link = $baseUri . $crumbParams;
     return $link;
   }
 
   function nextMedia() {
-    if (!isset($this->params['search']) || 
-      !$this->params['search']['nextMedia']) {
+    if (!isset($this->request->params['search']) || 
+      !$this->request->params['search']['nextMedia']) {
       return;
     }
     return $this->Html->link(__('next'), $this->getNextMediaUrl(), array('class' => 'next'));

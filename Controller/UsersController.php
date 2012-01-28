@@ -21,6 +21,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+App::uses('Folder', 'Utility');
+
 class UsersController extends AppController
 {
   var $components = array('RequestHandler', 'Cookie', 'Email', 'Captcha', 'Search');

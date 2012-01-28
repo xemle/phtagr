@@ -54,7 +54,12 @@ class MyFile extends AppModel
     } else {
       $path = Folder::slashTerm(dirname($filename));
       $file = basename($filename);
-      $size = filesize($filename);
+      if (is_readable($filename)) {
+        $size = filesize($filename);
+      } else {
+        $size = 0;
+        Logger::info("Could not read file: " . $filename);
+      }
       $type = $this->_getTypeFromFilename($filename);
     }
 
@@ -63,13 +68,16 @@ class MyFile extends AppModel
         'path' => $path,
         'file' => $file,
         'size' => $size,
-        'time' => date("Y-m-d H:i:s", filemtime($filename)),
+        'time' => date("Y-m-d H:i:s"),
         'flag' => $flag,
         'type' => $type,
         'user_id' => $userId,
         'media_id' => null
         )
       );
+    if (is_readable($filename)) {
+      $new['File']['time'] = date("Y-m-d H:i:s", filemtime($filename));
+    }
     $new = parent::create($new, true);
 
     return $new;

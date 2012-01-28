@@ -183,6 +183,30 @@ class SearchComponent extends Component
     }
   }
 
+  function decode($input) {
+    $out = '';
+    $input = (string)$input;
+    $len = strlen($input);
+    for ($i = 0; $i < $len; $i++) {
+      $c = substr($input, $i, 1);
+      if ($c == '=') {
+        if ($i + 2 >= $len) {
+          break;
+        }
+        $c1 = substr($input, $i + 1, 1);
+        $c2 = substr($input, $i + 2, 1);
+        $c = $this->_dechex($c1, $c2);
+        if ($c !== false) {
+          $out .= $c;
+        }
+        $i += 2;
+      } else {
+        $out .= $c;
+      }
+    }
+    return $out;
+  }
+
   function __call($name, $args) {
     if (!preg_match('/^(get|set|add|del|delete)(.*)$/', $name, $matches)) {
       $this->log("Undefined function $name");
@@ -453,7 +477,7 @@ class SearchComponent extends Component
       );
 
     if ($count == 0) {
-      $this->controller->params['search'] = $params;
+      $this->controller->request->params['search'] = $params;
       return array();
     }
     $params['pageCount'] = ceil($count / $this->getShow(12));
@@ -478,7 +502,7 @@ class SearchComponent extends Component
     }
     
     // Set data for search helper
-    $this->controller->params['search'] = $params;
+    $this->controller->request->params['search'] = $params;
 
     return $data;
   }
@@ -497,7 +521,7 @@ class SearchComponent extends Component
       'defaults' => $this->defaults,
       'data' => $this->getParams()
       );
-    $this->controller->params['search'] = $params;
+    $this->controller->request->params['search'] = $params;
   }
 
   function paginateMediaByCrumb($id, $crumbs) {
@@ -535,7 +559,7 @@ class SearchComponent extends Component
       } else {
         Logger::verbose("Deny access to media $id");
       }
-      $this->controller->params['search'] = $params;
+      $this->controller->request->params['search'] = $params;
       return array();
     }
     $this->controller->Media->setAccessFlags(&$data, $user);
@@ -589,7 +613,7 @@ class SearchComponent extends Component
     $params['pos'] = $this->getPos(1);
 
     // Set data for search helper
-    $this->controller->params['search'] = $params;
+    $this->controller->request->params['search'] = $params;
  
     return $data;
   }
