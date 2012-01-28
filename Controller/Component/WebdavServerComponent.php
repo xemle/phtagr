@@ -1036,7 +1036,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
     }
 
     if (isset($options["update"])) { // Lock Update
-      $lock = $this->controller->Lock->find('first' => array('conditions' => array('Lock.file_id' => $fileId, 'Lock.token' => $options['update'])));
+      $lock = $this->controller->Lock->find('first', array('conditions' => array('Lock.file_id' => $fileId, 'Lock.token' => $options['update'])));
       
       if ($lock) {
         $lock['Lock']['expires'] = date('Y-m-d H:i:s', $options['timeout']);
