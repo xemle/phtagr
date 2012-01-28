@@ -21,7 +21,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-class DigestAuthComponent extends Object
+class DigestAuthComponent extends Component
 {
   var $_authHdr = null;
   var $_authData = null;
