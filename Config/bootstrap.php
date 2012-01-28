@@ -1,48 +1,53 @@
 <?php
 /**
- * This file is loaded automatically by the app/webroot/index.php file after the core bootstrap.php
+ * This file is loaded automatically by the app/webroot/index.php file after core.php
  *
- * This is an application wide file to load any function that is not used within a class
- * define. You can also use this to include or require any files in your application.
+ * This file should load/create any application wide configuration settings, such as 
+ * Caching, Logging, loading additional configuration files.
  *
- * PHP versions 4 and 5
+ * You should also use this file to include any files that provide global functions/constants
+ * that your application uses.
+ *
+ * PHP 5
  *
  * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
- * Copyright 2005-2010, Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * Copyright 2005-2011, Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
  * Licensed under The MIT License
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright 2005-2010, Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * @copyright     Copyright 2005-2011, Cake Software Foundation, Inc. (http://cakefoundation.org)
  * @link          http://cakephp.org CakePHP(tm) Project
- * @package       cake
- * @subpackage    cake.app.config
+ * @package       app.Config
  * @since         CakePHP(tm) v 0.10.8.2117
  * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
 
+// Setup a 'default' cache configuration for use in the application.
+Cache::config('default', array('engine' => 'File'));
+
 /**
  * The settings below can be used to set additional paths to models, views and controllers.
- * This is related to Ticket #470 (https://trac.cakephp.org/ticket/470)
  *
  * App::build(array(
- *     'plugins' => array('/full/path/to/plugins/', '/next/full/path/to/plugins/'),
- *     'models' =>  array('/full/path/to/models/', '/next/full/path/to/models/'),
- *     'views' => array('/full/path/to/views/', '/next/full/path/to/views/'),
- *     'controllers' => array('/full/path/to/controllers/', '/next/full/path/to/controllers/'),
- *     'datasources' => array('/full/path/to/datasources/', '/next/full/path/to/datasources/'),
- *     'behaviors' => array('/full/path/to/behaviors/', '/next/full/path/to/behaviors/'),
- *     'components' => array('/full/path/to/components/', '/next/full/path/to/components/'),
- *     'helpers' => array('/full/path/to/helpers/', '/next/full/path/to/helpers/'),
- *     'vendors' => array('/full/path/to/vendors/', '/next/full/path/to/vendors/'),
- *     'shells' => array('/full/path/to/shells/', '/next/full/path/to/shells/'),
+ *     'Plugin' => array('/full/path/to/plugins/', '/next/full/path/to/plugins/'),
+ *     'Model' =>  array('/full/path/to/models/', '/next/full/path/to/models/'),
+ *     'View' => array('/full/path/to/views/', '/next/full/path/to/views/'),
+ *     'Controller' => array('/full/path/to/controllers/', '/next/full/path/to/controllers/'),
+ *     'Model/Datasource' => array('/full/path/to/datasources/', '/next/full/path/to/datasources/'),
+ *     'Model/Behavior' => array('/full/path/to/behaviors/', '/next/full/path/to/behaviors/'),
+ *     'Controller/Component' => array('/full/path/to/components/', '/next/full/path/to/components/'),
+ *     'View/Helper' => array('/full/path/to/helpers/', '/next/full/path/to/helpers/'),
+ *     'Vendor' => array('/full/path/to/vendors/', '/next/full/path/to/vendors/'),
+ *     'Console/Command' => array('/full/path/to/shells/', '/next/full/path/to/shells/'),
  *     'locales' => array('/full/path/to/locale/', '/next/full/path/to/locale/')
  * ));
  *
  */
 
 /**
- * As of 1.3, additional rules for the inflector are added below
+ * Custom Inflector rules, can be set to correctly pluralize or singularize table, model, controller names or whatever other
+ * string is passed to the inflection functions
  *
  * Inflector::rules('singular', array('rules' => array(), 'irregular' => array(), 'uninflected' => array()));
  * Inflector::rules('plural', array('rules' => array(), 'irregular' => array(), 'uninflected' => array()));
@@ -50,6 +55,30 @@
  */
 Inflector::rules('plural', array('uninflected' => array('[Bb]rowser')));
 Inflector::rules('singular', array('uninflected' => array('pos')));
+
+/**
+ * Plugins need to be loaded manually, you can either load them one by one or all of them in a single call
+ * Uncomment one of the lines below, as you need. make sure you read the documentation on CakePlugin to use more
+ * advanced ways of loading plugins
+ *
+ * CakePlugin::loadAll(); // Loads all plugins at once
+ * CakePlugin::load('DebugKit'); //Loads a single plugin named DebugKit
+ *
+ */
+
+/**
+ * User storage directory
+ */
+if (!defined('USER_DIR')) {
+  define('USER_DIR', APP . 'users' . DS);
+}
+
+/**
+ * Configuration directory
+ */
+if (!defined('CONFIGS')) {
+  define('CONFIGS', APP . 'Config' . DS);
+}
 
 define('ROLE_NOBODY', 0);
 define('ROLE_GUEST', 1);
@@ -124,11 +153,12 @@ define("LOCATION_SUBLOCATION", 0x02);
 define("LOCATION_STATE", 0x03);
 define("LOCATION_COUNTRY", 0x04);
 
-/** Add pear path within vendor path to the include_path */
+/** 
+ * Add pear path within vendor path to the include_path 
+ */
 if (function_exists('ini_set') && function_exists('ini_get')) {
   $path = ini_get('include_path');
   $vendorPearPath = APP . 'vendors' . DS . 'Pear' . DS;
   ini_set('include_path', $vendorPearPath . PATH_SEPARATOR . ini_get('include_path'));
 }
-//EOF
-?>
+
