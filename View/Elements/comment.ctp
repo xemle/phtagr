@@ -15,8 +15,8 @@
   if (!empty($comment['url'])) {
     $name = $this->Html->link($comment['name'], $comment['url']);
   }  
-  $this->Time = $this->Html->tag('span', $this->Time->timeAgoInWords($comment['date']), array('class' => 'date'));
-  __("%s said %s", $name, $this->Time);
+  $time = $this->Html->tag('span', $this->Time->timeAgoInWords($comment['date']), array('class' => 'date'));
+  __("%s said %s", $name, $time);
 ?>
 <?php
   if ($this->request->data['Media']['isOwner'] || $comment['user_id'] == $userId) {

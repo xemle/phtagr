@@ -103,7 +103,7 @@ class CommentsController extends AppController
       $this->Comment->create();
       $this->request->data['Comment']['media_id'] = $mediaId;
       $this->request->data['Comment']['date'] = date("Y-m-d H:i:s", time());
-      uses('Sanitize');
+      App::uses('Sanitize', 'Utility');
       $this->request->data['Comment']['text'] = Sanitize::html($this->request->data['Comment']['text']);
       if (($auth & COMMENT_AUTH_NAME) == 0) {
         $this->request->data['Comment']['user_id'] = $user['User']['id'];

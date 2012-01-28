@@ -108,7 +108,7 @@ class AppController extends Controller
     } else {
       $user = $this->getUser();
     }
-    $this->params['options'] = $this->Option->getOptions($user);
+    $this->request->params['options'] = $this->Option->getOptions($user);
     $this->set('currentUser', $user);
 
     if ($this->RequestHandler->isMobile()) {

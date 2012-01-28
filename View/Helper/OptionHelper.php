@@ -28,8 +28,8 @@ class OptionHelper extends AppHelper
 
   /** Intitialize the options */
   function beforeRender() {
-    if (isset($this->params['options'])) {
-      $this->options = $this->params['options'];
+    if (isset($this->request->params['options'])) {
+      $this->options = $this->request->params['options'];
     }
   }
 
