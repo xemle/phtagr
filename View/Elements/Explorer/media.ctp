@@ -1,6 +1,6 @@
 <h2><?php 
   if (!$this->Search->getUser() || $this->Search->getUser() != $this->Session->read('User.username')) {
-    __("%s by %s", h($media['Media']['name']), $this->Html->link($media['User']['username'], "/explorer/user/".$media['User']['username']));
+    echo __("%s by %s", h($media['Media']['name']), $this->Html->link($media['User']['username'], "/explorer/user/".$media['User']['username']));
   } else {
     echo h($media['Media']['name']);
   }
