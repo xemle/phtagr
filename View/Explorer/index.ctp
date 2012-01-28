@@ -1,9 +1,9 @@
-<?php $search->initialize(); ?>
+<?php $this->Search->initialize(); ?>
 
-<?php echo $this->element('explorer/menu'); ?>
+<?php echo $this->element('Explorer/menu'); ?>
 
-<?php echo $session->flash(); ?>
-<?php echo $breadcrumb->breadcrumb($crumbs); ?>
+<?php echo $this->Session->flash(); ?>
+<?php echo $this->Breadcrumb->breadcrumb($crumbs); ?>
 
 <?php 
   $script = <<<'JS'
@@ -31,8 +31,8 @@
             title: ':EDIT_TITLE',
             buttons: {
               ':SAVE': function() {
-                var $form = $('#form-meta-' + id);
-                $.post($form.attr('action'), $form.serialize(), function(data) {
+                var $this->Form = $('#form-meta-' + id);
+                $.post($this->Form.attr('action'), $this->Form.serialize(), function(data) {
                   $('#media-' + id).html(data);
                   $('#media-' + id).mediaAction();
                 });
@@ -58,8 +58,8 @@
             title: ':ACL_TITLE',
             buttons: {
               ':SAVE': function() {
-                var $form = $('#form-acl-' + id);
-                $.post($form.attr('action'), $form.serialize(), function(data) {
+                var $this->Form = $('#form-acl-' + id);
+                $.post($this->Form.attr('action'), $this->Form.serialize(), function(data) {
                   $('#media-' + id).html(data);
                   $('#media-' + id).mediaAction();
                 });
@@ -164,14 +164,14 @@
 JS;
   $vars = array(
     'BASE_URL' => Router::url('/', true), 
-    'EDIT_TITLE' => __("Edit Meta Data", true),
-    'ACL_TITLE' => __("Edit Access Rights", true),
-    'SAVE' => __("Update", true), 
-    'CANCEL' => __("Cancel", true));
+    'EDIT_TITLE' => __("Edit Meta Data"),
+    'ACL_TITLE' => __("Edit Access Rights"),
+    'SAVE' => __("Update"), 
+    'CANCEL' => __("Cancel"));
   foreach ($vars as $name => $value) {
     $script = preg_replace("/:$name/", $value, $script);
   }
-  echo $this->Javascript->link('/piclenslite/piclens_optimized', false);
+  echo $this->Html->script('/piclenslite/piclens_optimized');
   echo $this->Html->scriptBlock($script, array('inline' => false));
 ?>
 
@@ -179,14 +179,14 @@ JS;
 <?php
 $canWriteTag = count($this->data) ? max(Set::extract('/Media/canWriteTag', $this->data)) : 0;
 $index = 0;
-$pos = ($search->getPage(1)-1) * $search->getShow(12) + 1;
+$pos = ($this->Search->getPage(1)-1) * $this->Search->getShow(12) + 1;
 
 echo '<div class="row">';
 foreach ($this->data as $media) {
   $editable = $media['Media']['canWriteTag'] ? 'editable' : '';
   $cell = "cell" . ($index %4);
-  echo $html->tag('div', 
-    $this->element('explorer/media', array('media' => $media, 'index' => $index, 'pos' => $pos)),
+  echo $this->Html->tag('div', 
+    $this->element('Explorer/media', array('media' => $media, 'index' => $index, 'pos' => $pos)),
     array('class' => "p-explorer-media $editable $cell", 'id' => 'media-' . $media['Media']['id'], 'escape' => false));
   $index++;
   if ($index % 4 == 0) {
@@ -201,11 +201,11 @@ echo '<div class="clear"></div></div>';
 <?php 
   if ($canWriteTag): ?>
 <div class="p-navigator-pages"><div class="sub">
-<a id="select-all"><?php __('Select All'); ?></a>
-<a id="invert-selection"><?php __('Invert Selection'); ?></a>
+<a id="select-all"><?php echo __('Select All'); ?></a>
+<a id="invert-selection"><?php echo __('Invert Selection'); ?></a>
 </div></div>
 <?php endif; ?>
 
-<?php echo $navigator->pages() ?>
+<?php echo $this->Navigator->pages() ?>
 
 <div id="dialog"></div>

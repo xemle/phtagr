@@ -1,19 +1,19 @@
-<?php echo $session->flash(); ?>
+<?php echo $this->Session->flash(); ?>
 
-<?php echo $form->create('User', array('action' => 'register')); ?>
+<?php echo $this->Form->create('User', array('action' => 'register')); ?>
 <fieldset>
-<legend><?php __('Create Account'); ?></legend>
+<legend><?php echo __('Create Account'); ?></legend>
 <?php
-  echo $form->input('User.username', array('label' => __('Username', true)));
-  echo $form->input('User.password', array('label' => __('Password', true)));
-  echo $form->input('User.confirm', array('label' => __('Confirm', true), 'type' => 'password'));
-  echo $form->input('User.email', array('label' => __('Email', true)));
-  echo '<div class="input text"><label>&nbsp;</label><img src="'.$html->url('/users/captcha/verify.jpg').'" /></div>';
-  echo $form->input('Captcha.verification');
+  echo $this->Form->input('User.username', array('label' => __('Username')));
+  echo $this->Form->input('User.password', array('label' => __('Password')));
+  echo $this->Form->input('User.confirm', array('label' => __('Confirm'), 'type' => 'password'));
+  echo $this->Form->input('User.email', array('label' => __('Email')));
+  echo '<div class="input text"><label>&nbsp;</label><img src="'.$this->Html->url('/users/captcha/verify.jpg').'" /></div>';
+  echo $this->Form->input('Captcha.verification');
 ?>
 </fieldset>
 <?php 
-  echo $form->end(__('Sign Up', true)); 
+  echo $this->Form->end(__('Sign Up')); 
 
   $script = <<<'JS'
 (function($) {

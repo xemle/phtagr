@@ -3,45 +3,45 @@
   $action = $this->params['action'];
   $items = array();
   $items[] = array(
-    'text' => __('Home', true), 
+    'text' => __('Home'), 
     'link' => '/', 
     'type' => ($controller == 'home'?'current':''));
-  if ($session->check('User.id')) {
-    $userId = $session->read('User.id');
-    $role = $session->read('User.role');
+  if ($this->Session->check('User.id')) {
+    $userId = $this->Session->read('User.id');
+    $role = $this->Session->read('User.role');
     $myImages = false;
-    if (isset($search) && 
+    if (isset($this->Search) && 
       ($controller == 'explorer' || $controller == 'images') && 
-      $search->getUser() == $session->read('User.username')) {
+      $this->Search->getUser() == $this->Session->read('User.username')) {
       $myImages = true;
     }
     $items[] = array(
-      'text' => __('Explorer', true), 
+      'text' => __('Explorer'), 
       'link' => '/explorer', 
       'type' => ($controller == 'explorer' && !$myImages?'current':''));
 
     if ($role >= ROLE_GUEST) {
       $items[] = array('text' => 
-        __('My Photos', true), 
-        'link' => "/explorer/user/".$session->read('User.username'), 
+        __('My Photos'), 
+        'link' => "/explorer/user/".$this->Session->read('User.username'), 
         'type' => ($controller == 'explorer' && $myImages?'current':''));
     }
     if ($role >= ROLE_USER) {
       if (!$option->get('user.browser.full', 0)) {
         $items[] = array(
-          'text' => __('Upload', true), 
+          'text' => __('Upload'), 
           'link' => '/browser/quickupload', 
           'type' => ($controller == 'browser' && $action == 'quickupload'?'current':''));
       } else {
         $items[] = array(
-          'text' => __('My Files', true), 
+          'text' => __('My Files'), 
           'link' => '/browser', 
           'type' => ($controller == 'browser' && $action != 'quickupload'?'current':''));
       }
     }
   } else {
     $items[] = array(
-      'text' => __('Explorer', true), 
+      'text' => __('Explorer'), 
       'link' => '/explorer', 
       'type' => ($controller == 'explorer'?'current':''));
   }

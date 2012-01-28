@@ -8,7 +8,7 @@
 
 <p><?php echo __("You can set the file path of these exteranl programs here or set them later in the system preferences."); ?></p>
 
-<?php echo $this->Html->link(__("Skip these settings", true), array("action" => "finish"), array('class' => 'button')); ?>
+<?php echo $this->Html->link(__("Skip these settings"), array("action" => "finish"), array('class' => 'button')); ?>
 
 <?php if (count($missing)): ?>
 <div class="info">
@@ -30,7 +30,7 @@
   echo $this->Form->input('bin.flvtool2', array('label' => __("Path to %s", "flvtool2")));
 ?>
 </fieldset>
-<?php echo $this->Form->end(__('Save', true)); ?>
+<?php echo $this->Form->end(__('Save')); ?>
 <?php
   $script = <<<'JS'
 (function($) {

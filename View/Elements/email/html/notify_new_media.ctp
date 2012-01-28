@@ -1,6 +1,6 @@
-<p><?php printf(__("Hi %s!", true), $user['User']['username']); ?></p>
+<p><?php echo __("Hi %s!", $user['User']['username']); ?></p>
 
-<p><?php printf(__("New media available at %s", true), $html->link($url, $url)); ?>.</p>
+<p><?php echo __("New media available at %s", $this->Html->link($url, $url)); ?>.</p>
 
 <?php 
   $userToMedia = array();
@@ -13,11 +13,11 @@
   }
   
   foreach ($userToMedia as $user => $userMedia) {
-    echo "<p>" . sprintf(__("User %s published following media", true), $html->link($user, $url . '/explorer/user/' . $user)) . "</p>";
+    echo "<p>" . __("User %s published following media", $this->Html->link($user, $url . '/explorer/user/' . $user)) . "</p>";
     echo "<p>";
     foreach ($userMedia as $m) {
-      echo $html->link(
-        $html->tag('img', null, array(
+      echo $this->Html->link(
+        $this->Html->tag('img', null, array(
           'src' => 'cid:media-' . $m['Media']['id'] . '.jpg', 
           'alt' => $m['Media']['name'])), 
         $url . '/images/view/' . $m['Media']['id'] . '/sort:newest', array('escape' => false)) . "\n";
@@ -26,8 +26,8 @@
   }
 ?>
 
-<p><?php printf(__("See all new media at %s", true), $html->link('media explorer', $url . '/explorer/view/sort:newest')); ?></p>
+<p><?php echo __("See all new media at %s", $this->Html->link('media explorer', $url . '/explorer/view/sort:newest')); ?></p>
 <p></p>
-<p><?php __("Sincerly, your phTagr agent"); ?></p>
+<p><?php echo __("Sincerly, your phTagr agent"); ?></p>
 
-<p><i><?php __("PS: If you do not like to receive this notification again, please configure the notification interval in your user profile.") ?></i></p>
+<p><i><?php echo __("PS: If you do not like to receive this notification again, please configure the notification interval in your user profile.") ?></i></p>

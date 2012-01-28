@@ -26,7 +26,7 @@
 </ul>
 <?php endif; ?>
 
-<?php echo $this->Html->link(__('Retry', true), 'path', array('class' => 'button')); ?>
+<?php echo $this->Html->link(__('Retry'), 'path', array('class' => 'button')); ?>
 <?php
   $script = <<<'JS'
 (function($) {

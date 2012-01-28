@@ -1,20 +1,20 @@
-<?php echo $html->docType('xhtml-strict'); ?>
+<?php echo $this->Html->docType('xhtml-strict'); ?>
 <html xmlns="http://www.w3.org/1999/xhtml">
 
 <head>
 <title><?php echo $title_for_layout?></title>
 <?php 
-  echo $html->charset('UTF-8')."\n";
-  echo $html->meta('icon')."\n";
-  echo $html->css('phtagr')."\n";
-  echo $html->script(array('prototype', 'event-selectors', 'effects', 'controls', 'phtagr'))."\n";
+  echo $this->Html->charset('UTF-8')."\n";
+  echo $this->Html->meta('icon')."\n";
+  echo $this->Html->css('phtagr')."\n";
+  echo $this->Html->script(array('prototype', 'event-selectors', 'effects', 'controls', 'phtagr'))."\n";
   
   echo $scripts_for_layout; 
   echo $feeds_for_layout; 
 ?>
 
 <!--[if lte IE 7]>
-<?php echo $html->css('patches/patch_phtagr')."\n"; ?>
+<?php echo $this->Html->css('patches/patch_phtagr')."\n"; ?>
 <![endif]-->
 </head>
 
@@ -53,7 +53,7 @@
 <div id="col3">
 <div id="col3_content" class="clearfix">
 <div id="spinner" style="display: none; float: right; ">
-  <?php echo $html->image('spinner.gif'); ?>
+  <?php echo $this->Html->image('spinner.gif'); ?>
 </div>
 <div id="main_content">
 <?php echo $content_for_layout?>

@@ -1,17 +1,17 @@
-<h1><?php printf(__('Group: %s', true), $this->data['Group']['name']); ?></h1>
+<h1><?php echo __('Group: %s', $this->data['Group']['name']); ?></h1>
 
-<?php echo $session->flash() ?>
+<?php echo $this->Session->flash() ?>
 
-<?php echo $form->create(null, array('action' => "edit/{$this->data['Group']['name']}")); ?>
+<?php echo $this->Form->create(null, array('action' => "edit/{$this->data['Group']['name']}")); ?>
 
-<fieldset><legend><?php __('Edit Group'); ?></legend>
+<fieldset><legend><?php echo __('Edit Group'); ?></legend>
 <?php 
-  echo $form->hidden('Group.id');
-  echo $form->input('Group.name', array('label' => __('Name', true)));
-  echo $form->input('Group.description', array('label' => __('Description', true), 'type' => 'blob'));
-  echo $form->input('Group.is_hidden', array('label' => __('This group is hidden', true), 'type' => 'checkbox'));
-  echo $form->input('Group.is_moderated', array('label' => __('New group members require a confirmation by the moderator', true), 'type' => 'checkbox'));
-  echo $form->input('Group.is_shared', array('label' => __('The group can be used by other members', true), 'type' => 'checkbox'));
+  echo $this->Form->hidden('Group.id');
+  echo $this->Form->input('Group.name', array('label' => __('Name')));
+  echo $this->Form->input('Group.description', array('label' => __('Description'), 'type' => 'blob'));
+  echo $this->Form->input('Group.is_hidden', array('label' => __('This group is hidden'), 'type' => 'checkbox'));
+  echo $this->Form->input('Group.is_moderated', array('label' => __('New group members require a confirmation by the moderator'), 'type' => 'checkbox'));
+  echo $this->Form->input('Group.is_shared', array('label' => __('The group can be used by other members'), 'type' => 'checkbox'));
 ?>
 </fieldset>
-<?php echo $form->end(__('Save', true)); ?>
+<?php echo $this->Form->end(__('Save')); ?>

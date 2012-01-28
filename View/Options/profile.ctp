@@ -1,42 +1,42 @@
-<h1><?php __('Profile'); ?></h1>
+<h1><?php echo __('Profile'); ?></h1>
 
-<?php echo $session->flash(); ?>
+<?php echo $this->Session->flash(); ?>
 
-<?php echo $form->create(null, array('action' => 'profile')); ?>
-<fieldset><legend><?php __('General'); ?></legend>
+<?php echo $this->Form->create(null, array('action' => 'profile')); ?>
+<fieldset><legend><?php echo __('General'); ?></legend>
 <?php
-  echo $form->input('User.username', array('label' => __('Username', true)));
-  echo $form->input('User.firstname', array('label' => __('First name', true)));
-  echo $form->input('User.lastname', array('label' => __('Last name', true)));
-  echo $form->input('User.email', array('label' => __('Email', true)));
+  echo $this->Form->input('User.username', array('label' => __('Username')));
+  echo $this->Form->input('User.firstname', array('label' => __('First name')));
+  echo $this->Form->input('User.lastname', array('label' => __('Last name')));
+  echo $this->Form->input('User.email', array('label' => __('Email')));
 ?>
 </fieldset>
 
-<fieldset><legend><?php __('Password'); ?></legend>
+<fieldset><legend><?php echo __('Password'); ?></legend>
 <?php
-  echo $form->input('User.password', array('label' => __('Password', true)));
-  echo $form->input('User.confirm', array('type' => 'password', 'label' => __('Confirm', true)));
+  echo $this->Form->input('User.password', array('label' => __('Password')));
+  echo $this->Form->input('User.confirm', array('type' => 'password', 'label' => __('Confirm')));
 ?>
 </fieldset>
-<fieldset><legend><?php __('Others'); ?></legend>
+<fieldset><legend><?php echo __('Others'); ?></legend>
 <?php
-  echo $form->input('Option.user.browser.full', array('type' => 'checkbox', 'label' => __('Show advanced file browser', true)));
+  echo $this->Form->input('Option.user.browser.full', array('type' => 'checkbox', 'label' => __('Show advanced file browser')));
   $options = array(
-    1 => __("Private", true),
-    2 => __("Group members", true),
-    3 => __("Users", true),
-    4 => __("Public", true)
+    1 => __("Private"),
+    2 => __("Group members"),
+    3 => __("Users"),
+    4 => __("Public")
   );
-  echo $form->input('User.visible_level', array('type' => 'select', 'options' => $options, 'label' => __('Profile visibility', true)));
+  echo $this->Form->input('User.visible_level', array('type' => 'select', 'options' => $options, 'label' => __('Profile visibility')));
   $options = array(
-    0 => __("Never", true),
-    1800 => __("Every 30 minutes", true),
-    3600 => __("Every hour", true),
-    86400 => __("Every day", true),
-    604800 => __("Every week", true),
-    2592000 => __("Every month", true)
+    0 => __("Never"),
+    1800 => __("Every 30 minutes"),
+    3600 => __("Every hour"),
+    86400 => __("Every day"),
+    604800 => __("Every week"),
+    2592000 => __("Every month")
   );
-  echo $form->input('User.notify_interval', array('type' => 'select', 'options' => $options, 'label' => __('Send new media notifications', true)));
+  echo $this->Form->input('User.notify_interval', array('type' => 'select', 'options' => $options, 'label' => __('Send new media notifications')));
 ?>
 </fieldset>
-<?php echo $form->end(__('Save', true)); ?>
+<?php echo $this->Form->end(__('Save')); ?>

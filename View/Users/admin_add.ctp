@@ -1,14 +1,14 @@
-<h1><?php __('Add new User'); ?></h1>
+<h1><?php echo __('Add new User'); ?></h1>
 
-<?php echo $session->flash(); ?>
+<?php echo $this->Session->flash(); ?>
 
-<?php echo $form->create('User', array('action' => 'add')); ?>
-<fieldset><legend><?php __('Create new user'); ?></legend>
+<?php echo $this->Form->create('User', array('action' => 'add')); ?>
+<fieldset><legend><?php echo __('Create new user'); ?></legend>
 <?php
-  echo $form->input('User.username', array('label' => __('Username', true)));
-  echo $form->input('User.email', array('label' => __('Email', true)));
-  echo $form->input('User.password', array('label' => __('Password', true)));
-  echo $form->input('User.confirm', array('label' => __('Confirm', true), 'type' => 'password'));
+  echo $this->Form->input('User.username', array('label' => __('Username')));
+  echo $this->Form->input('User.email', array('label' => __('Email')));
+  echo $this->Form->input('User.password', array('label' => __('Password')));
+  echo $this->Form->input('User.confirm', array('label' => __('Confirm'), 'type' => 'password'));
 ?>
 </fieldset>
-<?php echo $form->end(__("Create", true)); ?>
+<?php echo $this->Form->end(__("Create")); ?>

@@ -1,4 +1,4 @@
-<?php echo $session->flash(); ?>
+<?php echo $this->Session->flash(); ?>
 
 <h1>Group Dashboard</h1>
 
@@ -6,7 +6,7 @@
 debug($this->data);
 
 ?>
-<?php echo $session->flash(); ?>
+<?php echo $this->Session->flash(); ?>
 
 <h1>Group Dashboard</h1>
 
@@ -14,7 +14,7 @@ debug($this->data);
 debug($this->data);
 
 ?>
-<?php echo $session->flash(); ?>
+<?php echo $this->Session->flash(); ?>
 
 <h1>Group Dashboard</h1>
 
@@ -22,7 +22,7 @@ debug($this->data);
 debug($this->data);
 
 ?>
-<?php echo $session->flash(); ?>
+<?php echo $this->Session->flash(); ?>
 
 <h1>Group Dashboard</h1>
 
@@ -30,7 +30,7 @@ debug($this->data);
 debug($this->data);
 
 ?>
-<?php echo $session->flash(); ?>
+<?php echo $this->Session->flash(); ?>
 
 <h1>Group Dashboard</h1>
 
@@ -38,7 +38,7 @@ debug($this->data);
 debug($this->data);
 
 ?>
-<?php echo $session->flash(); ?>
+<?php echo $this->Session->flash(); ?>
 
 <h1>Group Dashboard</h1>
 

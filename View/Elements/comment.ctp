@@ -1,10 +1,10 @@
 <?php 
-  $search->initialize();
-  $searchParams = $search->serialize(false, false, false, array('defaults' => array('pos' => 1)));
+  $this->Search->initialize();
+  $this->SearchParams = $this->Search->serialize(false, false, false, array('defaults' => array('pos' => 1)));
 ?>
 <div id="comments">
 <?php if (count($this->data['Comment'])): ?>
-<h3><?php echo __('Comments', true); ?></h3>
+<h3><?php echo __('Comments'); ?></h3>
 <?php $count = 0; ?>
 <?php foreach ($this->data['Comment'] as $key => $comment): ?>
 <?php if (!is_numeric($key)) continue; ?>
@@ -13,14 +13,14 @@
 <span class="from"><?php 
   $name = $comment['name'];
   if (!empty($comment['url'])) {
-    $name = $html->link($comment['name'], $comment['url']);
+    $name = $this->Html->link($comment['name'], $comment['url']);
   }  
-  $time = $html->tag('span', $this->Time->relativeTime($comment['date']), array('class' => 'date'));
-  printf(__("%s said %s", true), $name, $time);
+  $time = $this->Html->tag('span', $this->Time->relativeTime($comment['date']), array('class' => 'date'));
+  __("%s said %s", $name, $time);
 ?>
 <?php
   if ($this->data['Media']['isOwner'] || $comment['user_id'] == $userId) {
-    echo $html->link(__('(delete)', true), '/comments/delete/'.$comment['id'].'/'.$searchParams);
+    echo $this->Html->link(__('(delete)'), '/comments/delete/'.$comment['id'].'/'.$this->SearchParams);
   }
 ?>:
 </div><!-- comment meta -->
@@ -32,27 +32,27 @@
 <?php endforeach; /* comments */ ?>
 <?php endif; /* has comments */ ?>
 
-<h3><?php __("Add new Comment", true); ?></h3>
-<?php echo $form->create('Comment', array('action' => 'add/'.$searchParams, 'id' => 'comment-add')); ?>
+<h3><?php echo __("Add new Comment"); ?></h3>
+<?php echo $this->Form->create('Comment', array('action' => 'add/'.$this->SearchParams, 'id' => 'comment-add')); ?>
 <fieldset>
 <?php
-  echo $form->hidden('Media.id', array('value' => $this->data['Media']['id']));
+  echo $this->Form->hidden('Media.id', array('value' => $this->data['Media']['id']));
 ?>
 <?php 
   if (($commentAuth & COMMENT_AUTH_NAME) > 0) {
-    echo $form->input('Comment.name', array('label' => __('Name', true)));
-    echo $form->input('Comment.email', array('after' => '<span class="description">' . __('Will not be published', true) . '</span>'));
-    echo $form->input('Comment.url', array('after' => '<span class="description">' . __('Optional', true) . '</span>', 'required' => false));
+    echo $this->Form->input('Comment.name', array('label' => __('Name')));
+    echo $this->Form->input('Comment.email', array('after' => '<span class="description">' . __('Will not be published') . '</span>'));
+    echo $this->Form->input('Comment.url', array('after' => '<span class="description">' . __('Optional') . '</span>', 'required' => false));
   }
   if (($commentAuth & COMMENT_AUTH_CAPTCHA) > 0) {
-    echo '<div class="input text"><label>&nbsp;</label><img src="'.$html->url('/comments/captcha/verify.jpg').'" /></div>';
-    echo $form->input('Captcha.verification', array('label' => __('Verification', true)));
+    echo '<div class="input text"><label>&nbsp;</label><img src="'.$this->Html->url('/comments/captcha/verify.jpg').'" /></div>';
+    echo $this->Form->input('Captcha.verification', array('label' => __('Verification')));
   }
 ?>
 <?php
-  echo $form->input('Comment.text', array('label' => __('Comment', true)));
-  echo $form->input('Comment.notify', array('type' => 'checkbox', 'label' => __('Notify me on new comments', true), 'checked' => 'checked'));
+  echo $this->Form->input('Comment.text', array('label' => __('Comment')));
+  echo $this->Form->input('Comment.notify', array('type' => 'checkbox', 'label' => __('Notify me on new comments'), 'checked' => 'checked'));
 ?>
 </fieldset>
-<?php echo $form->end(__('Add Comment', true)); ?>
+<?php echo $this->Form->end(__('Add Comment')); ?>
 </div><!-- comments -->

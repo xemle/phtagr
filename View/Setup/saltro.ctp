@@ -13,7 +13,7 @@
 <pre>Configure::write('Security.salt', '<?php echo h($salt); ?>');</pre>
 
 <p></p>
-<?php echo $this->Html->link(__('Continue', true), 'saltro', array('class' => 'button')); ?>
+<?php echo $this->Html->link(__('Continue'), 'saltro', array('class' => 'button')); ?>
 <?php
   $script = <<<'JS'
 (function($) {

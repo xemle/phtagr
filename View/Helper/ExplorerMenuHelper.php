@@ -59,11 +59,11 @@ class ExplorerMenuHelper extends AppHelper
 
     $extra = " <div class=\"actionlist\" id=\"$id\">";
     $link = "javascript:startSlideshow('high');";
-    $icon = $this->Html->image('icons/star.png', array('alt' => 'high', 'title' => __("Show media in high quality (if available)", true)));
+    $icon = $this->Html->image('icons/star.png', array('alt' => 'high', 'title' => __("Show media in high quality (if available)")));
     $extra .= $this->Html->link($icon, $link, array('escape' => false));
     $extra .= "</div>";
 
-    $text = $this->Html->link(__('Start Slideshow', true), "javascript:startSlideshow('');", array('escape' => false));
+    $text = $this->Html->link(__('Start Slideshow'), "javascript:startSlideshow('');", array('escape' => false));
     $item = array(
       'text' => $text.$extra,
       'type' => 'multi',
@@ -122,37 +122,37 @@ class ExplorerMenuHelper extends AppHelper
 
   function _getOrderItem() {
     $link = $this->Search->getUri(false, array('sort' => 'date'), 'page');
-    $out = $this->Html->link(__("Order", true), $link);
+    $out = $this->Html->link(__("Order"), $link);
 
     $id = 'order-item';
     $out .= " <div class=\"actionlist\" id=\"$id\">";
     $crumbs = $this->Breadcrumb->filterCrumbs($this->params['crumbs']);
     
-    $icon = $this->Html->image('icons/date_previous.png', array('alt' => __('date asc', true), 'title' => __("Show oldest first", true)));
+    $icon = $this->Html->image('icons/date_previous.png', array('alt' => __('date asc', true), 'title' => __("Show oldest first")));
     $link = $this->Breadcrumb->crumbUrl($this->Breadcrumb->replace($crumbs, 'sort', '-date'));
     $out .= $this->Html->link($icon, $link, array('escape' => false));
     
-    $icon = $this->Html->image('icons/add.png', array('alt' => __('newest', true), 'title' => __("Show newest first", true)));
+    $icon = $this->Html->image('icons/add.png', array('alt' => __('newest', true), 'title' => __("Show newest first")));
     $link = $this->Breadcrumb->crumbUrl($this->Breadcrumb->replace($crumbs, 'sort', 'newest'));
     $out .= $this->Html->link($icon, $link, array('escape' => false));
     
-    $icon = $this->Html->image('icons/heart.png', array('alt' => __('pouplarity', true), 'title' => __("Show popular first", true)));
+    $icon = $this->Html->image('icons/heart.png', array('alt' => __('pouplarity', true), 'title' => __("Show popular first")));
     $link = $this->Breadcrumb->crumbUrl($this->Breadcrumb->replace($crumbs, 'sort', 'popularity'));
     $out .= $this->Html->link($icon, $link, array('escape' => false));
     
-    $icon = $this->Html->image('icons/images.png', array('alt' => __('random', true), 'title' => __("Show random order", true)));
+    $icon = $this->Html->image('icons/images.png', array('alt' => __('random', true), 'title' => __("Show random order")));
     $link = $this->Breadcrumb->crumbUrl($this->Breadcrumb->replace($crumbs, 'sort', 'random'));
     $out .= $this->Html->link($icon, $link, array('escape' => false));
     
-    $icon = $this->Html->image('icons/pencil.png', array('alt' => __('Changes', true), 'title' => __("Show changes first", true)));
+    $icon = $this->Html->image('icons/pencil.png', array('alt' => __('Changes', true), 'title' => __("Show changes first")));
     $link = $this->Breadcrumb->crumbUrl($this->Breadcrumb->replace($crumbs, 'sort', 'changes'));
     $out .= $this->Html->link($icon, $link, array('escape' => false));
     
-    $icon = $this->Html->image('icons/eye.png', array('alt' => __('Views', true), 'title' => __("Show last views first", true)));
+    $icon = $this->Html->image('icons/eye.png', array('alt' => __('Views', true), 'title' => __("Show last views first")));
     $link = $this->Breadcrumb->crumbUrl($this->Breadcrumb->replace($crumbs, 'sort', 'viewed'));
     $out .= $this->Html->link($icon, $link, array('escape' => false));
     
-    $icon = $this->Html->image('icons/folder_go.png', array('alt' => __('Name', true), 'title' => __("Order by name", true)));
+    $icon = $this->Html->image('icons/folder_go.png', array('alt' => __('Name', true), 'title' => __("Order by name")));
     $link = $this->Search->getUri(false, array('sort' => 'name'), 'page');
     $out .= $this->Html->link($icon, $link, array('escape' => false));
 
@@ -171,7 +171,7 @@ class ExplorerMenuHelper extends AppHelper
     $crumbs = $this->Breadcrumb->filterCrumbs($this->params['crumbs']);
 
     $link = $this->Breadcrumb->crumbUrl($this->Breadcrumb->replace($crumbs, 'show', 12));
-    $out = $this->Html->link(__("Pagesize", true), $link);
+    $out = $this->Html->link(__("Pagesize"), $link);
 
     $pos = $this->Search->getPage(1) * $this->Search->getShow(1);
     $sizes = array(6, 12, 24, 60, 120, 240);
@@ -204,30 +204,30 @@ class ExplorerMenuHelper extends AppHelper
     $this->_id = 0;
 
     $search = '/explorer/search';
-    $items[] = array('text' => $this->Html->link(__('Advanced Search', true), $search));
+    $items[] = array('text' => $this->Html->link(__('Advanced Search'), $search));
 
     $items[] = $this->_getSlideshowItem();
     $out .= $this->Piclens->slideshow();
 
     $subMenu = $this->_getAssociationSubMenu('tag');
     if ($subMenu !== false) {
-      $items[] = array('text' => __('Tags', true), 'type' => 'text', 'submenu' => array('items' => $subMenu));
+      $items[] = array('text' => __('Tags'), 'type' => 'text', 'submenu' => array('items' => $subMenu));
     }
 
     $subMenu = $this->_getAssociationSubMenu('category');
     if ($subMenu !== false) {
-      $items[] = array('text' => __('Categories', true), 'type' => 'text', 'submenu' => array('items' => $subMenu));
+      $items[] = array('text' => __('Categories'), 'type' => 'text', 'submenu' => array('items' => $subMenu));
     }
 
     $subMenu = $this->_getAssociationSubMenu('location');
     if ($subMenu !== false) {
-      $items[] = array('text' => __('Locations', true), 'type' => 'text', 'submenu' => array('items' => $subMenu));
+      $items[] = array('text' => __('Locations'), 'type' => 'text', 'submenu' => array('items' => $subMenu));
     }
 
     $subItems = array();
     $subItems[] = $this->_getOrderItem();
     $subItems[] = $this->_getPageItem();
-    $items[] = array('text' => __('Options', true), 'type' => 'text', 'submenu' => array('items' => $subItems));
+    $items[] = array('text' => __('Options'), 'type' => 'text', 'submenu' => array('items' => $subItems));
 
     $menu = array('items' => $items);
     return $out.$this->Menu->getMainMenu($menu);

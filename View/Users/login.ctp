@@ -2,21 +2,21 @@
 
 <?php echo $this->Form->create('User', array('action' => 'login', 'class' => 'login')); ?>
 <fieldset>
-<legend><?php __('Login'); ?></legend>
+<legend><?php echo __('Login'); ?></legend>
 <?php
-  echo $this->Form->input('User.username', array('label' => __('Username', true)));
-  echo $this->Form->input('User.password', array('label' => __('Password', true)));
+  echo $this->Form->input('User.username', array('label' => __('Username')));
+  echo $this->Form->input('User.password', array('label' => __('Password')));
 ?>
 </fieldset>
 <div class="submit">
 <?php 
   $signup = '';
   
-  echo $this->Form->submit(__('Login', true), array('div' => false));
+  echo $this->Form->submit(__('Login'), array('div' => false));
   if ($register) {
-    echo " ".$this->Html->link(__('Sign Up', true), 'register', array('class' => 'button'))." ";
+    echo " ".$this->Html->link(__('Sign Up'), 'register', array('class' => 'button'))." ";
   }
-  echo "<br/>".$this->Html->link(__('Forgot your password', true), 'password');
+  echo "<br/>".$this->Html->link(__('Forgot your password'), 'password');
 ?>
 </div>
 <?php 

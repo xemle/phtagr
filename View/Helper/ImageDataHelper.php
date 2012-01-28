@@ -293,16 +293,16 @@ class ImageDataHelper extends AppHelper {
     $t='';
     // Write access
     if (($acl & ACL_WRITE_MASK) == ACL_WRITE_META) {
-      $t .= $this->Html->image('icons/tag.png', array('alt' => 'm', 'title' => sprintf(__('%s can edit the meta data', true),  $titlePrefix)));
+      $t .= $this->Html->image('icons/tag.png', array('alt' => 'm', 'title' => __('%s can edit the meta data',  $titlePrefix)));
     } elseif (($acl & ACL_WRITE_MASK) == ACL_WRITE_TAG) {
-      $t .= $this->Html->image('icons/tag_blue.png', array('alt' => 't', 'title' => sprintf(__('%s can edit the tags', true),  $titlePrefix)));
+      $t .= $this->Html->image('icons/tag_blue.png', array('alt' => 't', 'title' => __('%s can edit the tags',  $titlePrefix)));
     }
 
     // Read access
     if (($acl & ACL_READ_MASK) == ACL_READ_ORIGINAL) {
-      $t .= $this->Html->image('icons/disk.png', array('alt' => 'o', 'title' => sprintf(__('%s can download this media', true),  $titlePrefix)));
+      $t .= $this->Html->image('icons/disk.png', array('alt' => 'o', 'title' => __('%s can download this media',  $titlePrefix)));
     } elseif (($acl & ACL_READ_MASK) == ACL_READ_PREVIEW) {
-      $t .= $this->Html->image('icons/picture.png', array('alt' => 'v', 'title' => sprintf(__('%s an view this media', true),  $titlePrefix)));
+      $t .= $this->Html->image('icons/picture.png', array('alt' => 'v', 'title' => __('%s an view this media',  $titlePrefix)));
     }
     if ($t == '') {
       $t='-';
@@ -312,20 +312,20 @@ class ImageDataHelper extends AppHelper {
 
   /** Returns an text repesentation of the acl */
   function _acl2text($data) {
-    $output = $this->Html->tag('span', __('Group', true), array('title' => __('Access for group members', true)));
+    $output = $this->Html->tag('span', __('Group', true), array('title' => __('Access for group members')));
     if (isset($data['Group']['name'])) {
       $name = $data['Group']['name'];
-      $output .= ' ('.$this->Html->link($name, $this->Search->getUri(array(), array('groups' => $data['Group']['name'])), array('title' => sprintf(__("This media belongs to the group '%s'", true), $name)))
-        . ' ' . $this->Html->link(__("View", true), "/groups/view/$name") . ')';
+      $output .= ' ('.$this->Html->link($name, $this->Search->getUri(array(), array('groups' => $data['Group']['name'])), array('title' => __("This media belongs to the group '%s'", $name)))
+        . ' ' . $this->Html->link(__("View"), "/groups/view/$name") . ')';
     }
     $output .= ': ';
-    $output .= $this->_acl2icon($data['Media']['gacl'], __('Group members', true)).' ';
+    $output .= $this->_acl2icon($data['Media']['gacl'], __('Group members')).' ';
 
-    $output .= $this->Html->tag('span', __('users:', true), array('title' => __('Access for users', true)));
-    $output .= $this->_acl2icon($data['Media']['uacl'], __('Users', true)).' ';
+    $output .= $this->Html->tag('span', __('users:', true), array('title' => __('Access for users')));
+    $output .= $this->_acl2icon($data['Media']['uacl'], __('Users')).' ';
 
-    $output .= $this->Html->tag('span', __('public:', true), array('title' => __('Access for the public', true)));
-    $output .= $this->_acl2icon($data['Media']['oacl'], __('The public', true));
+    $output .= $this->Html->tag('span', __('public:', true), array('title' => __('Access for the public')));
+    $output .= $this->_acl2icon($data['Media']['oacl'], __('The public'));
     return $output;
   }
 
@@ -338,39 +338,39 @@ class ImageDataHelper extends AppHelper {
     $output .= ' ';
 
     $output .= '<div style="display: none;" class="actionlist" id="'.$id.'">';
-    $icon = $this->Html->image('icons/date_previous.png', array('alt' => '<', 'title' => __("View media of previous dates", true)));
+    $icon = $this->Html->image('icons/date_previous.png', array('alt' => '<', 'title' => __("View media of previous dates")));
     $output .= $this->Html->link($icon, $this->getDateLink(&$data, 'to'), array('escape' => false));
     
     if ($this->Search->getFrom() && !$this->Search->getTo()) {
-      $icon = $this->Html->image('icons/date_interval.png', array('alt' => '<>', 'title' => __("View media of interval", true)));
+      $icon = $this->Html->image('icons/date_interval.png', array('alt' => '<>', 'title' => __("View media of interval")));
       $output .= $this->Html->link($icon, $this->getDateLink(&$data, 'addTo'), array('escape' => false));
     }
 
     if ($this->Search->getFrom() && $this->Search->getTo()) {
-      $icon = $this->Html->image('icons/date_interval_add_prev.png', array('alt' => '<>', 'title' => __("Set new end date of interval", true)));
+      $icon = $this->Html->image('icons/date_interval_add_prev.png', array('alt' => '<>', 'title' => __("Set new end date of interval")));
       $output .= $this->Html->link($icon, $this->getDateLink(&$data, 'addTo'), array('escape' => false));
     }
 
-    $icon = $this->Html->image('icons/calendar_view_day.png', array('alt' => 'd', 'title' => __("View media of this day", true)));
+    $icon = $this->Html->image('icons/calendar_view_day.png', array('alt' => 'd', 'title' => __("View media of this day")));
     $output .= $this->Html->link($icon, $this->getDateLink(&$data, '12h'), array('escape' => false));
 
-    $icon = $this->Html->image('icons/calendar_view_week.png', array('alt' => 'w', 'title' => __("View media of this week", true)));
+    $icon = $this->Html->image('icons/calendar_view_week.png', array('alt' => 'w', 'title' => __("View media of this week")));
     $output .= $this->Html->link($icon, $this->getDateLink(&$data, '3.5d'), array('escape' => false));
 
-    $icon = $this->Html->image('icons/calendar_view_month.png', array('alt' => 'm', 'title' => __("View media of this month", true)));
+    $icon = $this->Html->image('icons/calendar_view_month.png', array('alt' => 'm', 'title' => __("View media of this month")));
     $output .= $this->Html->link($icon, $this->getDateLink(&$data, '15d'), array('escape' => false));
 
     if ($this->Search->getTo() && !$this->Search->getFrom()) {
-      $icon = $this->Html->image('icons/date_interval.png', array('alt' => '<>', 'title' => __("View media of interval", true)));
+      $icon = $this->Html->image('icons/date_interval.png', array('alt' => '<>', 'title' => __("View media of interval")));
       $output .= $this->Html->link($icon, $this->getDateLink(&$data, 'addFrom'), array('escape' => false));
     }
 
     if ($this->Search->getTo() && $this->Search->getFrom()) {
-      $icon = $this->Html->image('icons/date_interval_add_next.png', array('alt' => '<>', 'title' => __("Set new start date for interval", true)));
+      $icon = $this->Html->image('icons/date_interval_add_next.png', array('alt' => '<>', 'title' => __("Set new start date for interval")));
       $output .= $this->Html->link($icon, $this->getDateLink(&$data, 'addFrom'), array('escape' => false));
     }
 
-    $icon = $this->Html->image('icons/date_next.png', array('alt' => '>', 'title' => __("View media of next dates", true)));
+    $icon = $this->Html->image('icons/date_next.png', array('alt' => '>', 'title' => __("View media of next dates")));
     $output .= $this->Html->link($icon, $this->getDateLink(&$data, 'from'), array('escape' => false));
     $output .= '</div></span>';
 
@@ -403,11 +403,11 @@ class ImageDataHelper extends AppHelper {
     $output = '';
     if (isset($data['Group']['name'])) {
       $name = $data['Group']['name'];
-      $output .= $this->Html->link($name, $this->Search->getUri(array(), array('groups' => $data['Group']['name'])), array('title' => sprintf(__("This media belongs to the group '%s'", true), $name)));
+      $output .= $this->Html->link($name, $this->Search->getUri(array(), array('groups' => $data['Group']['name'])), array('title' => __("This media belongs to the group '%s'", $name)));
       $output .= ' ';
-      $output .= '(' . $this->Html->link(__('View', true), "/groups/view/{$data['Group']['name']}") . ')';
+      $output .= '(' . $this->Html->link(__('View'), "/groups/view/{$data['Group']['name']}") . ')';
     } else {
-      $output .= __('No group assigned', true);
+      $output .= __('No group assigned');
     }
     return $this->Html->tag('div', $output, array('class' => 'actionList'));
   }
@@ -471,13 +471,13 @@ class ImageDataHelper extends AppHelper {
     $icons = array();
     if (isset($urls['user'])) {
       $output = $this->Html->link($value, $urls['user']);
-      $icons[] = $this->Html->link($this->getIcon('world', false, sprintf(__("Search global for %s", true), $value)), $urls['global'], array('escape' => false));
+      $icons[] = $this->Html->link($this->getIcon('world', false, __("Search global for %s", $value)), $urls['global'], array('escape' => false));
     } else {
       $output = $this->Html->link($value, $urls['global']);
     }
-    $icons[] = $this->Html->link($this->getIcon('add', false, sprintf(__("Include %s from search", true), $value)), $urls['add'], array('escape' => false));
+    $icons[] = $this->Html->link($this->getIcon('add', false, __("Include %s from search", $value)), $urls['add'], array('escape' => false));
     if ($withExclude) {
-      $icons[] = $this->Html->link($this->getIcon('delete', false, sprintf(__("Exclude %s from search", true), $value)), $urls['del'], array('escape' => false));
+      $icons[] = $this->Html->link($this->getIcon('delete', false, __("Exclude %s from search", $value)), $urls['del'], array('escape' => false));
     }
     return "<span class=\"tooltip-anchor\">" . $output . '<span class="tooltip-actions"><span class="sub">' . implode($icons) . '</span></span></span> ';
   }
@@ -505,13 +505,13 @@ class ImageDataHelper extends AppHelper {
     if ($userId) {
       $this->Search->setUser($userId);
     }
-    $cells[] = array(__("Date", true), $this->_metaDate(&$data));
+    $cells[] = array(__("Date"), $this->_metaDate(&$data));
 
     if (count($data['Tag'])) {
-      $cells[] = array(__('Tags', true), $this->_metaHabtm(&$data, 'Tag'));
+      $cells[] = array(__('Tags'), $this->_metaHabtm(&$data, 'Tag'));
     }
     if (count($data['Category'])) {
-      $cells[] = array(__('Categories', true), $this->_metaHabtm(&$data, 'Category'));
+      $cells[] = array(__('Categories'), $this->_metaHabtm(&$data, 'Category'));
     }
 
     $locations = array();
@@ -522,13 +522,13 @@ class ImageDataHelper extends AppHelper {
       $locations[] = $this->geoLocation(&$data);
     }
     if (count($locations)) {
-      $cells[] = array(__('Locations', true), implode(', ', $locations));
+      $cells[] = array(__('Locations'), implode(', ', $locations));
     }
 
     if ($data['Media']['isOwner'] || $this->Session->read('User.role') == ROLE_ADMIN) {
-      $cells[] = array(__('Access', true), $this->_metaAccessFull($data));
+      $cells[] = array(__('Access'), $this->_metaAccessFull($data));
     } elseif ($this->Session->read('User.role') >= ROLE_GUEST && !empty($data['Group']['name']) && !$data['Group']['is_hidden']) {
-      $cells[] = array(__('Group', true), $this->_metaAccessGroup($data));
+      $cells[] = array(__('Group'), $this->_metaAccessGroup($data));
     }
     
     // Action list 
@@ -539,7 +539,7 @@ class ImageDataHelper extends AppHelper {
 
     if ($data['Media']['canWriteTag']) {
       $output .= ' '.$this->Ajax->link(
-        $this->Html->image('icons/tag_blue_edit.png', array('alt' => __('Edit tags', true), 'title' => __('Edit tags', true))), 
+        $this->Html->image('icons/tag_blue_edit.png', array('alt' => __('Edit tags', true), 'title' => __('Edit tags'))), 
         '/explorer/editmeta/'.$mediaId, 
         array('update' => 'meta-'.$mediaId, 'escape' => false));
     }
@@ -547,7 +547,7 @@ class ImageDataHelper extends AppHelper {
       foreach ($data['File'] as $file) {
         $output .= ' '.$this->Html->link(
           $this->Html->image('icons/disk.png', 
-            array('alt' => $file['file'], 'title' => sprintf(__('Save file %s', true), $file['file']))), 
+            array('alt' => $file['file'], 'title' => __('Save file %s', $file['file']))), 
           '/media/file/'.$file['id'].'/'.$file['file'], array('escape' => false));
       }
     }
@@ -596,11 +596,11 @@ class ImageDataHelper extends AppHelper {
     //$this->log($data['Media']);
     //$this->log("level=$level, flag=$flag, mask=$mask");
     $acl = array(
-      ACL_LEVEL_KEEP => __('Keep', true),
-      ACL_LEVEL_PRIVATE => __('Me only', true),
-      ACL_LEVEL_GROUP => __('Group members', true),
-      ACL_LEVEL_USER => __('Users', true),
-      ACL_LEVEL_OTHER => __('Everyone', true));
+      ACL_LEVEL_KEEP => __('Keep'),
+      ACL_LEVEL_PRIVATE => __('Me only'),
+      ACL_LEVEL_GROUP => __('Group members'),
+      ACL_LEVEL_USER => __('Users'),
+      ACL_LEVEL_OTHER => __('Everyone'));
     $options = am($options, array('type' => 'select', 'options' => $acl, 'selected' => $level));
     //$this->log($options);
     return $this->Form->input($fieldName, $options);
@@ -614,16 +614,16 @@ class ImageDataHelper extends AppHelper {
     if (isset($media['Media']['isOwner']) && $media['Media']['isOwner']) {
       switch ($media['Media']['visibility']) {
         case ACL_LEVEL_OTHER: 
-          $icon = $this->Html->image('icons/world.png', array('title' => __('This media is public visible', true)));
+          $icon = $this->Html->image('icons/world.png', array('title' => __('This media is public visible')));
           break;
         case ACL_LEVEL_USER: 
-          $icon = $this->Html->image('icons/group.png', array('title' => __('This media is visible for users', true)));
+          $icon = $this->Html->image('icons/group.png', array('title' => __('This media is visible for users')));
           break;
         case ACL_LEVEL_GROUP: 
-          $icon = $this->Html->image('icons/user.png', array('title' => __('This media is visible for group members', true)));
+          $icon = $this->Html->image('icons/user.png', array('title' => __('This media is visible for group members')));
           break;
         default: 
-          $icon = $this->Html->image('icons/stop.png', array('title' => __('This media is private', true)));
+          $icon = $this->Html->image('icons/stop.png', array('title' => __('This media is private')));
           break;
       }
     }

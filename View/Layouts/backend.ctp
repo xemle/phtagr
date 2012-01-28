@@ -17,7 +17,7 @@
 <div id="page">
 
 <div id="header"><div class="sub">
-<?php echo $this->Html->link(__('Gallery', true), '/'); ?>
+<?php echo $this->Html->link(__('Gallery'), '/'); ?>
 </div></div>
 
 <div id="main">

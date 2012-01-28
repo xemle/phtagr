@@ -62,7 +62,7 @@ class NavigatorHelper extends AppHelper {
     $prev = $this->params['search']['page'] - 1;
     $crumbs = $this->params['crumbs'];
     $link = $this->Breadcrumb->crumbUrl($this->Breadcrumb->replace($crumbs, 'page', $prev));
-    return $this->Html->link(__('prev', true), $link, array('class' => 'prev'));
+    return $this->Html->link(__('prev'), $link, array('class' => 'prev'));
   }
 
   function numbers() {
@@ -112,7 +112,7 @@ class NavigatorHelper extends AppHelper {
     $next = $this->params['search']['page'] + 1;
     $crumbs = $this->params['crumbs'];
     $link = $this->Breadcrumb->crumbUrl($this->Breadcrumb->replace($crumbs, 'page', $next));
-    return $this->Html->link(__('next', true), $link, array('class' => 'next'));
+    return $this->Html->link(__('next'), $link, array('class' => 'next'));
   }
 
   function hasPrevMedia() {
@@ -132,7 +132,7 @@ class NavigatorHelper extends AppHelper {
     $crumbs = $this->params['crumbs'];
     $crumbParams = $this->Breadcrumb->params($this->Breadcrumb->replace($this->Breadcrumb->replace($crumbs, 'page', $page), 'pos', $pos));
     $link = $baseUri . $crumbParams;
-    return $this->Html->link(__('prev', true), $link, array('class' => 'prev'));
+    return $this->Html->link(__('prev'), $link, array('class' => 'prev'));
   }
 
   function up() {
@@ -142,7 +142,7 @@ class NavigatorHelper extends AppHelper {
     $params = $this->params['search'];
     $link = $this->Breadcrumb->crumbUrl($this->params['crumbs'], false, array('pos'));
     $link .= '#media-'.$params['current'];
-    return $this->Html->link(__('overview', true), $link, array('class' => 'up'));
+    return $this->Html->link(__('overview'), $link, array('class' => 'up'));
   }
 
   function hasNextMedia() {
@@ -165,7 +165,7 @@ class NavigatorHelper extends AppHelper {
       !$this->params['search']['nextMedia']) {
       return;
     }
-    return $this->Html->link(__('next', true), $this->getNextMediaUrl(), array('class' => 'next'));
+    return $this->Html->link(__('next'), $this->getNextMediaUrl(), array('class' => 'next'));
   }
 
   function pages() {

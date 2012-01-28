@@ -1,4 +1,4 @@
-<?php echo $session->flash(); ?>
+<?php echo $this->Session->flash(); ?>
 
 <div id="p-media-preview">
 <div class="image">
@@ -7,12 +7,12 @@
   if (($this->data['Media']['type'] & MEDIA_TYPE_VIDEO) > 0) {
     echo $flowplayer->video($this->data);
   } else {
-    //$size = $imageData->getimagesize($this->data, OUTPUT_SIZE_PREVIEW);
-    $size = $imageData->getimagesize($this->data, 960);
+    //$size = $this->ImageData->getimagesize($this->data, OUTPUT_SIZE_PREVIEW);
+    $size = $this->ImageData->getimagesize($this->data, 960);
     $src = Router::url("/media/preview/".$this->data['Media']['id']);
-    $img = $html->tag('img', null, array('src' => $src, 'width' => $size[0], 'height' => $size[1], 'alt' => $this->data['Media']['name']));
+    $img = $this->Html->tag('img', null, array('src' => $src, 'width' => $size[0], 'height' => $size[1], 'alt' => $this->data['Media']['name']));
     if ($navigator->hasNextMedia()) {
-      echo $html->link($img, $navigator->getNextMediaUrl(), array('escape' => false));
+      echo $this->Html->link($img, $navigator->getNextMediaUrl(), array('escape' => false));
     } else {
       echo $img;
     }
@@ -32,15 +32,15 @@
 
 <div id="image-tabs">
 <?php
-  $items = array(__("General", true), __("Media Details", true));
+  $items = array(__("General"), __("Media Details"));
   if ($map->hasApi() && $map->hasMediaGeo($this->data)) {
-    $items['map'] = __("Map", true);
+    $items['map'] = __("Map");
   }
   if ($this->data['Media']['canWriteTag']) {
-    $items['edit'] = __("Edit", true);
+    $items['edit'] = __("Edit");
   }
   if ($this->data['Media']['canWriteAcl']) {
-    $items['acl'] = __("Access Right", true);
+    $items['acl'] = __("Access Right");
   }
   echo $tab->menu($items);
 ?>
@@ -48,7 +48,7 @@
 <div class="meta">
 <div id="meta-<?php echo $this->data['Media']['id']; ?>">
 <table class="bare"> 
-  <?php echo $html->tableCells($imageData->metaTable(&$this->data)); ?>
+  <?php echo $this->Html->tableCells($this->ImageData->metaTable(&$this->data)); ?>
 </table>
 </div>
 </div><!-- meta -->
@@ -59,41 +59,41 @@
 <table class="bare"> 
 <?php 
   $cells = array();
-  $cells[] = array(__("User", true), $html->link($this->data['User']['username'], '/explorer/user/'.$this->data['User']['username']));
+  $cells[] = array(__("User"), $this->Html->link($this->data['User']['username'], '/explorer/user/'.$this->data['User']['username']));
   if ($this->data['Media']['isOwner']) {
     $files = array();
     foreach ($this->data['File'] as $file) {
-      $link = $imageData->getPathLink($file);
-      $files[] = $html->link($file['file'], $link).' ('.$number->toReadableSize($file['size']).')';
+      $link = $this->ImageData->getPathLink($file);
+      $files[] = $this->Html->link($file['file'], $link).' ('.$this->Number->toReadableSize($file['size']).')';
     }
-    $cells[] = array(__("File(s)", true), implode(', ', $files));
+    $cells[] = array(__("File(s)"), implode(', ', $files));
   }
-  $folders = $imageData->getFolderLinks($this->data);
+  $folders = $this->ImageData->getFolderLinks($this->data);
   if ($folders) {
-    $cells[] = array(__("Folder", true), implode(' / ', $folders));
+    $cells[] = array(__("Folder"), implode(' / ', $folders));
   }
-  $cells[] = array(__("View Count", true), $this->data['Media']['clicks']);
-  $cells[] = array(__("Created", true), $time->relativeTime($this->data['Media']['created']));
-  $cells[] = array(__("Last modified", true), $time->relativeTime($this->data['Media']['modified']));
-  $cells[] = array(__("Size", true), $this->data['Media']['width'].'px * '.$this->data['Media']['height'].'px');
+  $cells[] = array(__("View Count"), $this->data['Media']['clicks']);
+  $cells[] = array(__("Created"), $time->relativeTime($this->data['Media']['created']));
+  $cells[] = array(__("Last modified"), $time->relativeTime($this->data['Media']['modified']));
+  $cells[] = array(__("Size"), $this->data['Media']['width'].'px * '.$this->data['Media']['height'].'px');
 
   if ($this->data['Media']['model']) {
-    $cells[] = array(__("Model", true), $this->data['Media']['model']);
+    $cells[] = array(__("Model"), $this->data['Media']['model']);
   }
   if ($this->data['Media']['duration'] > 0) {
-    $cells[] = array(__("Duration", true), $this->data['Media']['duration'].'s');
+    $cells[] = array(__("Duration"), $this->data['Media']['duration'].'s');
   } else {
     if ($this->data['Media']['aperture'] > 0) {
-      $cells[] = array(__("Aperture", true), $this->data['Media']['aperture']);
+      $cells[] = array(__("Aperture"), $this->data['Media']['aperture']);
     }
     if ($this->data['Media']['shutter'] > 0) {
-      $cells[] = array(__("Shutter", true), $imageData->niceShutter($this->data['Media']['shutter']));
+      $cells[] = array(__("Shutter"), $this->ImageData->niceShutter($this->data['Media']['shutter']));
     }
     if ($this->data['Media']['iso'] > 0) {
-      $cells[] = array(__("ISO", true), $this->data['Media']['iso']);
+      $cells[] = array(__("ISO"), $this->data['Media']['iso']);
     }
   }
-  echo $html->tableCells($cells);
+  echo $this->Html->tableCells($cells);
 ?>
 </table>
 </div>
@@ -107,20 +107,20 @@
   }
   if ($this->data['Media']['canWriteTag']) {
     echo $tab->open('edit');
-    echo $form->create(null, array('url' => 'update/'.$this->data['Media']['id'].'/'.join('/', $crumbs), 'id' => 'edit'));
+    echo $this->Form->create(null, array('url' => 'update/'.$this->data['Media']['id'].'/'.join('/', $crumbs), 'id' => 'edit'));
     echo "<fieldset>";
     echo View::element('single_meta_form');
     echo "</fieldset>";
-    echo $form->end(__('Save', true));
+    echo $this->Form->end(__('Save'));
     echo $tab->close(); 
   }
   if ($this->data['Media']['canWriteAcl']) {
     echo $tab->open('acl');
-    echo $form->create(null, array('url' => 'updateAcl/'.$this->data['Media']['id'].'/'.join('/', $crumbs), 'id' => 'acl'));
+    echo $this->Form->create(null, array('url' => 'updateAcl/'.$this->data['Media']['id'].'/'.join('/', $crumbs), 'id' => 'acl'));
     echo "<fieldset>";
     echo View::element('single_acl_form');
     echo "</fieldset>";
-    echo $form->end(__('Save', true));
+    echo $this->Form->end(__('Save'));
     echo $tab->close(); 
   }
 ?>

@@ -1,12 +1,12 @@
-<?php echo $session->flash(); ?>
+<?php echo $this->Session->flash(); ?>
 
-<?php echo $form->create('User', array('action' => 'confirm')); ?>
+<?php echo $this->Form->create('User', array('action' => 'confirm')); ?>
 <fieldset>
-<legend><?php __('Account Confirmation'); ?></legend>
-<p><?php __('Please insert your confirmation key to finalize the account creation.'); ?></p>
+<legend><?php echo __('Account Confirmation'); ?></legend>
+<p><?php echo __('Please insert your confirmation key to finalize the account creation.'); ?></p>
 <?php
-  echo $form->input('User.key', array('label' => __('Key', true)));
+  echo $this->Form->input('User.key', array('label' => __('Key')));
 ?>
 </fieldset>
-<?php echo $form->end(__('Confirm', true)); ?>
+<?php echo $this->Form->end(__('Confirm')); ?>
 

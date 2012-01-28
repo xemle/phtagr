@@ -178,7 +178,7 @@ class BreadcrumbHelper extends AppHelper
     $form .= $this->Form->end();
 
     return $this->Html->tag('ul', 
-      $this->Html->tag('li', $this->Html->tag('span', __('Filter', true)), array('class' => 'p-breadcrumb-header', 'escape' => false))
+      $this->Html->tag('li', $this->Html->tag('span', __('Filter')), array('class' => 'p-breadcrumb-header', 'escape' => false))
         .implode("\n", $links)
         .$this->Html->tag('li', $form, array('class' => 'p-breadcrumb-input'), array('escape' => false)),
       array('class' => 'p-breadcrumb', 'escape' => false));

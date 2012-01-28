@@ -1,18 +1,18 @@
 <h1>Quick Search Results</h1>
-<?php echo $session->flash(); ?>
+<?php echo $this->Session->flash(); ?>
 
 
 <?php
-$search->initialize();
+$this->Search->initialize();
 $cell=0;
 
 if (!count($this->data)): ?>
 <div class="info">
-<?php printf(__("Sorry, nothing was found for %s", true), h($quicksearch)); ?>
+<?php echo __("Sorry, nothing was found for %s", h($quicksearch)); ?>
 </div>
 <?php else: ?>
 
-<h2><?php printf(__('Results of %s', true), h($quicksearch)); ?></h2>
+<h2><?php echo __('Results of %s', h($quicksearch)); ?></h2>
 <div class="minis" align="left">
 <script type="text/javascript">
   var mediaData = [];
@@ -20,7 +20,7 @@ if (!count($this->data)): ?>
 
 <?php 
   foreach($this->data as $media) {
-    echo $imageData->mediaLink($media, 'mini').' ';
+    echo $this->ImageData->mediaLink($media, 'mini').' ';
   }
 ?>
 </div>
@@ -28,33 +28,33 @@ if (!count($this->data)): ?>
 <?php
   $tags = Set::extract('/Tag/name', $this->data);
   if (count($tags)) {
-    echo '<p>' . __('See more results of tag', true) .  ': ';
+    echo '<p>' . __('See more results of tag') .  ': ';
     $tags = array_unique($tags);
     $links = array();
     foreach ($tags as $name) {
-      $links[] = $html->link($name, '/explorer/tag/'.$name);
+      $links[] = $this->Html->link($name, '/explorer/tag/'.$name);
     }
     echo implode(', ', $links) . '</p>';
   }
 
   $categories = Set::extract('/Category/name', $this->data);
   if (count($categories)) {
-    echo '<p>' . __('See more results of category', true) .  ': ';
+    echo '<p>' . __('See more results of category') .  ': ';
     $categories = array_unique($categories);
     $links = array();
     foreach ($categories as $name) {
-      $links[] = $html->link($name, '/explorer/category/'.$name);
+      $links[] = $this->Html->link($name, '/explorer/category/'.$name);
     }
     echo implode(', ', $links) . '</p>';
   }
 
   $locations = Set::extract('/Location/name', $this->data);
   if (count($locations)) {
-    echo '<p>' . __('See more results of location', true) .  ': ';
+    echo '<p>' . __('See more results of location') .  ': ';
     $locations = array_unique($locations);
     $links = array();
     foreach ($locations as $name) {
-      $links[] = $html->link($name, '/explorer/location/'.$name);
+      $links[] = $this->Html->link($name, '/explorer/location/'.$name);
     }
     echo implode(', ', $links) . '</p>';
   }

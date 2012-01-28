@@ -1,16 +1,16 @@
-<h1><?php __('Password Request'); ?></h1>
-<?php echo $session->flash(); ?>
+<h1><?php echo __('Password Request'); ?></h1>
+<?php echo $this->Session->flash(); ?>
 
-<p><?php __("Please insert your username and email address to request your lost password."); ?>
+<p><?php echo __("Please insert your username and email address to request your lost password."); ?>
 
-<?php echo $form->create('User', array('action' => 'password')); ?>
-<fieldset><legend><?php __('Account Data'); ?></legend>
+<?php echo $this->Form->create('User', array('action' => 'password')); ?>
+<fieldset><legend><?php echo __('Account Data'); ?></legend>
 <?php
-  echo $form->input('User.username', array('label' => __('Username', true)));
-  echo $form->input('User.email', array('label' => __('Email', true)));
+  echo $this->Form->input('User.username', array('label' => __('Username')));
+  echo $this->Form->input('User.email', array('label' => __('Email')));
 ?>
 </fieldset>
-<?php echo $form->end(__('Submit', true)); ?>
+<?php echo $this->Form->end(__('Submit')); ?>
 <?php 
   $script = <<<'JS'
 (function($) {

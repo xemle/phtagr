@@ -1,16 +1,16 @@
-<h1><?php __("Create Folder"); ?></h1>
+<h1><?php echo __("Create Folder"); ?></h1>
 
-<?php echo $session->flash(); ?>
+<?php echo $this->Session->flash(); ?>
 
-<p><?php printf(__("Location %s", true), $fileList->location($path)); ?></p>
+<p><?php echo __("Location %s", $fileList->location($path)); ?></p>
 
-<?php echo $form->create(false, array('action' => 'folder/'.$path)); ?>
+<?php echo $this->Form->create(false, array('action' => 'folder/'.$path)); ?>
 <fieldset>
-  <?php echo $form->input('Folder.name', array ('label' => __("Folder Name", true))); ?>
+  <?php echo $this->Form->input('Folder.name', array ('label' => __("Folder Name"))); ?>
 </fieldset>
 <?php 
-  echo $html->tag('ul', 
-    $html->tag('li', $form->submit(__('Create', true)), array('escape' => false)),
+  echo $this->Html->tag('ul', 
+    $this->Html->tag('li', $this->Form->submit(__('Create')), array('escape' => false)),
     array('class' => 'buttons', 'escape' => false));
-  echo $form->end();
+  echo $this->Form->end();
 ?>

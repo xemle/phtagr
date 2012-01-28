@@ -1,18 +1,18 @@
-<h1><?php __('Groups'); ?></h1>
+<h1><?php echo __('Groups'); ?></h1>
 
-<?php echo $session->flash(); ?>
+<?php echo $this->Session->flash(); ?>
 
 <?php if (!empty($this->data)): ?>
 <table class="default">
 <thead>
 <?php
   $headers = array(
-    __('Name', true), 
-    __('From User', true), 
-    __('Description', true), 
-    __('Members', true), 
-    __('Actions', true));
-  echo $html->tableHeaders($headers);
+    __('Name'), 
+    __('From User'), 
+    __('Description'), 
+    __('Members'), 
+    __('Actions'));
+  echo $this->Html->tableHeaders($headers);
 ?>
 </thead>
 
@@ -27,40 +27,40 @@
     $actions = array();
     if ($currentUser['User']['id'] != $group['Group']['user_id']) {
       if (!in_array($group['Group']['id'], $memberIds)) {
-        $actions[] = $html->link(
-          $html->image('icons/group_add.png', array('alt' => __('Subscribe', true), 'title' => __('Subscribe', true))),
+        $actions[] = $this->Html->link(
+          $this->Html->image('icons/group_add.png', array('alt' => __('Subscribe'), 'title' => __('Subscribe'))),
           "subscribe/{$group['Group']['name']}", array('escape' => false));
       } else {
-        $actions[] = $html->link(
-          $html->image('icons/group_delete.png', array('alt' => __('Unsubscribe', true), 'title' => __('Unsubscribe', true))),
+        $actions[] = $this->Html->link(
+          $this->Html->image('icons/group_delete.png', array('alt' => __('Unsubscribe'), 'title' => __('Unsubscribe'))),
           "unsubscribe/{$group['Group']['name']}", array('escape' => false));
       }
     }
 
     if (in_array($group['Group']['id'], $myGroupIds) || $isAdmin) {
-      $actions[] = $html->link(
-        $html->image('icons/pencil.png', array('alt' => __('Edit', true), 'title' => __('Edit', true))),
+      $actions[] = $this->Html->link(
+        $this->Html->image('icons/pencil.png', array('alt' => __('Edit'), 'title' => __('Edit'))),
         "edit/{$group['Group']['name']}", array('escape' => false));
-      $delConfirm = sprintf(__("Do you realy want to delete the group '%s'?", true), $group['Group']['name']);
-      $actions[] = $html->link(
-        $html->image('icons/delete.png', array('alt' => __('Delete', true), 'title' => __('Delete', true))),
+      $delConfirm = __("Do you realy want to delete the group '%s'?", $group['Group']['name']);
+      $actions[] = $this->Html->link(
+        $this->Html->image('icons/delete.png', array('alt' => __('Delete'), 'title' => __('Delete'))),
         'delete/'.$group['Group']['id'], array('escape' => false), $delConfirm);
     }
     $row = array(
-      $html->link($group['Group']['name'], "view/{$group['Group']['name']}", array('title' => $group['Group']['description'])),
-      $html->link($group['User']['username'], "/users/view/{$group['User']['username']}"),
+      $this->Html->link($group['Group']['name'], "view/{$group['Group']['name']}", array('title' => $group['Group']['description'])),
+      $this->Html->link($group['User']['username'], "/users/view/{$group['User']['username']}"),
       $text->truncate($group['Group']['description'], 30, array('ending' => '...', 'exact' => false, 'html' => false)),
       count($group['Member']),
-      $html->tag('div', implode(' ', $actions), array('class' => 'actionlist'))
+      $this->Html->tag('div', implode(' ', $actions), array('class' => 'actionlist'))
       );
     $cells[] = $row;
   }
-  echo $html->tableCells($cells, array('class' => 'odd'), array('class' => 'even'));
+  echo $this->Html->tableCells($cells, array('class' => 'odd'), array('class' => 'even'));
 ?>
 </tbody>
 </table>
 <?php else: ?>
 <div class="info">
-<?php __('Currently no image groups are assigned. At the one hand each image could be assigned to a specific group. On the other hand a guest can be member of a set of groups. The guest is than able to view the images from his groups.'); ?>
+<?php echo __('Currently no image groups are assigned. At the one hand each image could be assigned to a specific group. On the other hand a guest can be member of a set of groups. The guest is than able to view the images from his groups.'); ?>
 </div>
 <?php endif; ?>

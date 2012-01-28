@@ -7,7 +7,7 @@
 <p><?php echo __("Note:  In case you are using phTagr with external paths it is recommended to synchronize your images to store this important information within the media file.  After the synchronization these mata data could be read by other image programs or desktop search engines."); ?>
 
 <?php if ($this->data['action'] != 'run' && $this->data['unsynced'] > 0): ?>
-<p><?php echo __("You have %d unsynchronized media. Click %s to start the synchronization (this might take some time)", $this->data['unsynced'], $this->Html->link(__("sync", true), 'sync/run')); ?></p>
+<p><?php echo __("You have %d unsynchronized media. Click %s to start the synchronization (this might take some time)", $this->data['unsynced'], $this->Html->link(__("sync"), 'sync/run')); ?></p>
 <?php endif; ?>
 
 <?php if ($this->data['unsynced'] == 0): ?>

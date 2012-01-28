@@ -131,7 +131,7 @@ class MenuHelper extends AppHelper
   }
 
   function getMainMenu($data) {
-    $data = am(array('id' => 'submenu', 'title' => __('Main Menu', true), 'active' => false), $data);
+    $data = am(array('id' => 'submenu', 'title' => __('Main Menu'), 'active' => false), $data);
 
     // Get current url with action. If the default action 'index' is missing,
     // its adds it to the url

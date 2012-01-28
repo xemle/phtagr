@@ -1,14 +1,14 @@
-<h1><?php __('Sytem Settings'); ?></h1>
+<h1><?php echo __('Sytem Settings'); ?></h1>
 
-<?php echo $session->flash(); ?>
+<?php echo $this->Session->flash(); ?>
 
-<?php echo $form->create(null, array('action' => 'external')); ?>
-<fieldset><legend><?php __('External Programs'); ?></legend>
+<?php echo $this->Form->create(null, array('action' => 'external')); ?>
+<fieldset><legend><?php echo __('External Programs'); ?></legend>
 <?php
-  echo $form->input('bin.exiftool', array('label' => sprintf(__("Path to %s", true), "exiftool"))); 
-  echo $form->input('bin.convert', array('label' => sprintf(__("Path to %s", true), "convert"))); 
-  echo $form->input('bin.ffmpeg', array('label' => sprintf(__("Path to %s", true), "ffmpeg"))); 
-  echo $form->input('bin.flvtool2', array('label' => sprintf(__("Path to %s", true), "flvtool2"))); 
+  echo $this->Form->input('bin.exiftool', array('label' => __("Path to %s", "exiftool"))); 
+  echo $this->Form->input('bin.convert', array('label' => __("Path to %s", "convert"))); 
+  echo $this->Form->input('bin.ffmpeg', array('label' => __("Path to %s", "ffmpeg"))); 
+  echo $this->Form->input('bin.flvtool2', array('label' => __("Path to %s", "flvtool2"))); 
 ?>
 </fieldset>
-<?php echo $form->end(__('Save', true)); ?>
+<?php echo $this->Form->end(__('Save')); ?>

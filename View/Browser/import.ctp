@@ -1,5 +1,5 @@
-<h1><?php __("Browser"); ?></h1>
+<h1><?php echo __("Browser"); ?></h1>
 
-<?php echo $session->flash(); ?>
+<?php echo $this->Session->flash(); ?>
 
-<p><?php printf(__("View folder %s", true), $html->link($path, "index/$path")); ?></p>
+<p><?php echo __("View folder %s", $this->Html->link($path, "index/$path")); ?></p>

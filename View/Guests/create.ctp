@@ -1,15 +1,15 @@
-<h1><?php __('Guest Creation'); ?></h1>
+<h1><?php echo __('Guest Creation'); ?></h1>
 
-<?php echo $session->flash(); ?>
+<?php echo $this->Session->flash(); ?>
 
-<?php echo $form->create('Guest', array('action' => 'create')); ?>
+<?php echo $this->Form->create('Guest', array('action' => 'create')); ?>
 
-<fieldset><legend><?php __('Create new guest account'); ?></legend>
+<fieldset><legend><?php echo __('Create new guest account'); ?></legend>
 <?php
-  echo $form->input('Guest.username', array('label' => __('Username', true)));
-  echo $form->input('Guest.email', array('label' => __('Email', true)));
-  echo $form->input('Guest.password', array('label' => __('Password', true)));
-  echo $form->input('Guest.confirm', array('type' => 'password', 'label' => __('Confirm', true)));
+  echo $this->Form->input('Guest.username', array('label' => __('Username')));
+  echo $this->Form->input('Guest.email', array('label' => __('Email')));
+  echo $this->Form->input('Guest.password', array('label' => __('Password')));
+  echo $this->Form->input('Guest.confirm', array('type' => 'password', 'label' => __('Confirm')));
 ?>
 </fieldset>
-<?php echo $form->end(__('Create', true)); ?>
+<?php echo $this->Form->end(__('Create')); ?>

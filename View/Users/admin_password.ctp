@@ -1,13 +1,13 @@
-<h1><?php printf(__(" User: %s", true), $this->data['User']['username']); ?></h1>
+<h1><?php echo __(" User: %s", $this->data['User']['username']); ?></h1>
 
-<?php echo $session->flash(); ?>
+<?php echo $this->Session->flash(); ?>
 
-<?php echo $form->create(null, array('action' => 'password/'.$this->data['User']['id'])); ?>
+<?php echo $this->Form->create(null, array('action' => 'password/'.$this->data['User']['id'])); ?>
 <fieldset><legend>Password</legend>
 <?php
-  echo $form->input('User.password', array('label' => __('Password', true)));
-  echo $form->input('User.confirm', array('label' => __('Confirm', true), 'type' => 'password'));
+  echo $this->Form->input('User.password', array('label' => __('Password')));
+  echo $this->Form->input('User.confirm', array('label' => __('Confirm'), 'type' => 'password'));
 ?>
 </fieldset>
 
-<?php echo $form->end(__('Save', true)); ?>
+<?php echo $this->Form->end(__('Save')); ?>

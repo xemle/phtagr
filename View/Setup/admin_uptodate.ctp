@@ -6,4 +6,4 @@
 <?php echo __("Your database is up-to-date."); ?>
 </div>
 
-<?php echo $this->Html->link(__("Continue", true), '/');
+<?php echo $this->Html->link(__("Continue"), '/');

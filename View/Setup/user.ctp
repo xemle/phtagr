@@ -6,13 +6,13 @@
 
 <fieldset>
 <?php 
-  echo $this->Form->input('User.username', array('label' => __("Username", true))); 
-  echo $this->Form->input('User.password', array('label' => __("Password", true)));
-  echo $this->Form->input('User.confirm', array('label' => __("Confirm", true), 'type' => 'password'));
-  echo $this->Form->input('User.email', array('label' => __("Email", true)));
+  echo $this->Form->input('User.username', array('label' => __("Username"))); 
+  echo $this->Form->input('User.password', array('label' => __("Password")));
+  echo $this->Form->input('User.confirm', array('label' => __("Confirm"), 'type' => 'password'));
+  echo $this->Form->input('User.email', array('label' => __("Email")));
 ?>
 </fieldset>
-<?php echo $this->Form->end(__('Create', true)); ?>
+<?php echo $this->Form->end(__('Create')); ?>
 <?php
   $script = <<<'JS'
 (function($) {

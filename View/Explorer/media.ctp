@@ -4,53 +4,53 @@
   <link><?php echo Router::url('/', true); ?></link>
   <description>Media RSS of phTagr (<?php echo Router::url('/', true); ?>)</description>
 <?php 
-  $search->initialize(array('baseUri' => '/explorer/media', 'afterUri' => '/media.rss', 'defaults' => array('pos' => 1))); 
+  $this->Search->initialize(array('baseUri' => '/explorer/media', 'afterUri' => '/media.rss', 'defaults' => array('pos' => 1))); 
 ?>
 <?php
   $keyParam = '';
-  if ($session->check('Authentication.key')) {
-    $search->setKey($session->read('Authentication.key'));
-    $keyParam = '/key:' . $session->read('Authentication.key');
+  if ($this->Session->check('Authentication.key')) {
+    $this->Search->setKey($this->Session->read('Authentication.key'));
+    $keyParam = '/key:' . $this->Session->read('Authentication.key');
   }
   $quality = 'preview';
   if (isset($this->params['named']['quality']) && 
     $this->params['named']['quality'] == 'high') {
-    $search->setQuality('high');
+    $this->Search->setQuality('high');
     $quality = 'high';
   }
 ?>
-  <atom:link rel="self" href="<?php echo Router::url($search->getUri(), true); ?>" />
+  <atom:link rel="self" href="<?php echo Router::url($this->Search->getUri(), true); ?>" />
 <?php if ($navigator->hasPrev()): ?>
-  <atom:link rel="previous" href="<?php echo Router::url($search->getUri(false, array('page' => $search->getPage(1) - 1)), true); ?>" />
+  <atom:link rel="previous" href="<?php echo Router::url($this->Search->getUri(false, array('page' => $this->Search->getPage(1) - 1)), true); ?>" />
 <?php endif; ?>
 <?php if ($navigator->hasNext()): ?>
-  <atom:link rel="next" href="<?php echo Router::url($search->getUri(false, array('page' => $search->getPage(1) + 1)), true); ?>" />
+  <atom:link rel="next" href="<?php echo Router::url($this->Search->getUri(false, array('page' => $this->Search->getPage(1) + 1)), true); ?>" />
 <?php endif; ?>
 <?php 
-  $offset = $search->getShow() * ($search->getPage(1) - 1) + 1;
+  $offset = $this->Search->getShow() * ($this->Search->getPage(1) - 1) + 1;
   foreach ($this->data as $media): ?>
   <item>
     <title><?php echo $media['Media']['name']." by ".$media['User']['username']; ?></title>
     <link><?php 
       $url = "/images/view/{$media['Media']['id']}/";
-      echo Router::url($url . $search->serialize(false, array('pos' => $offset++), array('quality')), true); ?></link>
+      echo Router::url($url . $this->Search->serialize(false, array('pos' => $offset++), array('quality')), true); ?></link>
     <?php 
-      $thumbSize = $imageData->getimagesize($media, OUTPUT_SIZE_THUMB);
+      $thumbSize = $this->ImageData->getimagesize($media, OUTPUT_SIZE_THUMB);
       $thumbUrl = sprintf("/media/thumb/%d%s/%s", $media['Media']['id'], $keyParam, $media['Media']['name']);
 
       if ($media['Media']['canReadOriginal'] && $quality == 'high') {
         $contentUrl = sprintf("/media/high/%d%s/%s", $media['Media']['id'], $keyParam, $media['Media']['name']);
-        $previewSize = $imageData->getimagesize($media, OUTPUT_SIZE_HIGH);
+        $previewSize = $this->ImageData->getimagesize($media, OUTPUT_SIZE_HIGH);
       } else {
         $contentUrl = sprintf("/media/preview/%d%s/%s", $media['Media']['id'], $keyParam, $media['Media']['name']);
-        $previewSize = $imageData->getimagesize($media, OUTPUT_SIZE_PREVIEW);
+        $previewSize = $this->ImageData->getimagesize($media, OUTPUT_SIZE_PREVIEW);
       }
     ?><media:thumbnail url="<?php echo Router::url($thumbUrl, true); ?>" <?php echo $thumbSize[3]; ?> />
     <media:content url="<?php echo Router::url($contentUrl, true); ?>" <?php echo $previewSize[3]; ?> />
     <guid><?php echo Router::url("/images/view/{$media['Media']['id']}", true); ?></guid>
     <?php 
       if ($media['Media']['caption']) {
-        echo $html->tag('description', $media['Media']['caption']); 
+        echo $this->Html->tag('description', $media['Media']['caption']); 
       } else {
         echo "<description />\n";
       }

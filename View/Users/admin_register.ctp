@@ -1,9 +1,9 @@
-<h1><?php __('User Registration'); ?></h1>
-<?php echo $session->flash(); ?>
+<h1><?php echo __('User Registration'); ?></h1>
+<?php echo $this->Session->flash(); ?>
 
-<?php echo $form->create(null, array('action' => 'register')); ?>
-<fieldset><legend><?php __('Registration'); ?></legend>
-<?php echo $form->input('user.register.enable', array('label' => __('Allow anonymous registration', true), 'type' => 'checkbox')); ?>
-<?php echo $form->input('user.register.quota', array('label' => __('Initial quota limit', true), 'type' => 'text', 'value' => $number->toReadableSize($this->data['user']['register']['quota']))); ?>
+<?php echo $this->Form->create(null, array('action' => 'register')); ?>
+<fieldset><legend><?php echo __('Registration'); ?></legend>
+<?php echo $this->Form->input('user.register.enable', array('label' => __('Allow anonymous registration'), 'type' => 'checkbox')); ?>
+<?php echo $this->Form->input('user.register.quota', array('label' => __('Initial quota limit'), 'type' => 'text', 'value' => $this->Number->toReadableSize($this->data['user']['register']['quota']))); ?>
 </fieldset>
-<?php echo $form->end(__('Save', true)); ?>
+<?php echo $this->Form->end(__('Save')); ?>

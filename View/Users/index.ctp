@@ -1,21 +1,21 @@
 <h1><?php 
   __('Users'); 
   if ($isAdmin) {
-    echo ' ' . $html->link(__('Admin List', true), array('admin' => true, 'action' => 'index'));
+    echo ' ' . $this->Html->link(__('Admin List'), array('admin' => true, 'action' => 'index'));
   }
 ?></h1>
 
-<?php echo $session->flash(); ?>
+<?php echo $this->Session->flash(); ?>
 
 <?php if (!empty($this->data)): ?>
 <table class="default">
 <thead>
 <?php
   $headers = array(
-    __('Name', true),
-    __('Member Since', true)
+    __('Name'),
+    __('Member Since')
     );
-  echo $html->tableHeaders($headers);
+  echo $this->Html->tableHeaders($headers);
 ?>
 </thead>
 
@@ -25,15 +25,15 @@
 
   foreach($this->data as $user) {
     $row = array(
-      $html->link($user['User']['username'], "view/{$user['User']['username']}"),
+      $this->Html->link($user['User']['username'], "view/{$user['User']['username']}"),
       $time->relativeTime($user['User']['created']),
       );
     $cells[] = $row;
   }
-  echo $html->tableCells($cells, array('class' => 'odd'), array('class' => 'even'));
+  echo $this->Html->tableCells($cells, array('class' => 'odd'), array('class' => 'even'));
 ?>
 </tbody>
 </table>
 <?php else: ?>
-<p><?php __('User list is empty'); ?></p>
+<p><?php echo __('User list is empty'); ?></p>
 <?php endif; ?>

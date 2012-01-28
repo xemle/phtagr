@@ -27,7 +27,7 @@ class DATABASE_CONFIG {
 }
 ?&gt;</code></pre></p>
 
-<?php echo $this->Html->link(__('Continue', true), 'configro', array('class' => 'button')); ?>
+<?php echo $this->Html->link(__('Continue'), 'configro', array('class' => 'button')); ?>
 
 <?php
     $script = <<<'JS'

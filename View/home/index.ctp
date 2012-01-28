@@ -12,7 +12,7 @@
       array('class' => 'clip', 'escape' => false));
 
     $link = $this->Search->getUri(array('sort' => 'random'));
-    echo "<p>" . __("See more %s", $this->Html->link(__('random media...', true), $link))."</p>";
+    echo "<p>" . __("See more %s", $this->Html->link(__('random media...'), $link))."</p>";
   } 
 ?>
 </div>
@@ -34,7 +34,7 @@
   }
   echo $this->Html->tag('div', implode("\n", $links), array('class' => 'images', 'escape' => false));
   $link = $this->Search->getUri(array('sort' => 'newest'));
-  echo "<p>" . __("See %s", $this->Html->link(__('all new media...', true), $link))."</p>";
+  echo "<p>" . __("See %s", $this->Html->link(__('all new media...'), $link))."</p>";
 ?>
 </div>
 
