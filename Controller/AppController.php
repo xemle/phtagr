@@ -112,8 +112,8 @@ class AppController extends Controller
     $this->set('currentUser', $user);
 
     if ($this->RequestHandler->isMobile()) {
-      $this->view = "Theme";
-      $this->theme = "mobile";
+      $this->viewClass = "Theme";
+      $this->theme = "Mobile";
     }
   }
 

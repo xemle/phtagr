@@ -27,7 +27,7 @@
         'type' => ($controller == 'explorer' && $myImages?'current':''));
     }
     if ($role >= ROLE_USER) {
-      if (!$option->get('user.browser.full', 0)) {
+      if (!$this->Option->get('user.browser.full', 0)) {
         $items[] = array(
           'text' => __('Upload'), 
           'link' => '/browser/quickupload', 
@@ -46,5 +46,5 @@
       'type' => ($controller == 'explorer'?'current':''));
   }
 
-  echo $menu->getMainMenu(array('id' => false, 'title' => false, 'items' => $items));
+  echo $this->Menu->getMainMenu(array('id' => false, 'title' => false, 'items' => $items));
 ?>

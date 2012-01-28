@@ -1,13 +1,13 @@
-<?php echo $html->docType('xhtml-strict'); ?>
+<?php echo $this->Html->docType('xhtml-strict'); ?>
 <html xmlns="http://www.w3.org/1999/xhtml">
 
 <head>
 <title><?php echo $title_for_layout; ?></title>
 <meta name = "viewport" content = "initial-scale = 1.0">
 <?php 
-  echo $html->charset('UTF-8');
-  echo $html->meta('icon');
-  echo $html->css('mobile');
+  echo $this->Html->charset('UTF-8');
+  echo $this->Html->meta('icon');
+  echo $this->Html->css('mobile');
 ?>
 </head>
 
