@@ -83,6 +83,9 @@ class SearchComponent extends Component
     'sort' => 'default',
     );
 
+  /** List of chars to escape on setParam() */
+  var $escapeChars = '=,/';
+
   function initialize(&$controller) {
     $this->controller = &$controller;
     if (!$this->QueryBuilder->controller) {
@@ -181,6 +184,20 @@ class SearchComponent extends Component
       // handle single value
       unset($this->_data[$name]);
     }
+  }
+
+  function encode($input) {
+    $out = '';
+    $input = (string)$input;
+    $len = strlen($input);
+    for ($i = 0; $i < $len; $i++) {
+      $c = substr($input, $i, 1);
+      if (strpos($this->escapeChars, $c) !== false) {
+        $c = '=' . dechex(ord($c));
+      }
+      $out = $out . $c;
+    }
+    return $out;
   }
 
   function decode($input) {

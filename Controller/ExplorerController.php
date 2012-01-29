@@ -381,11 +381,11 @@ class ExplorerController extends AppController
       foreach ($values as $value) {
         $crumbs[] = "$param:$value";
       }
-      $crumbs = am($crumbs, $this->Search->urlToCrumbs($this->params['url']['url'], 5));
+      $crumbs = am($crumbs, $this->Search->urlToCrumbs($this->request->url, 5));
     } elseif ($param == 'folder') {
-      $folder = implode('/', array_slice($this->params['pass'], 2));
+      $folder = implode('/', array_slice($this->request->params['pass'], 2));
       $fsRoot = $this->User->getRootDir($user);
-      $fsFolder = implode(DS, array_slice($this->params['pass'], 2));
+      $fsFolder = implode(DS, array_slice($this->request->params['pass'], 2));
       $fsFolder = Folder::slashTerm(Folder::addPathElement($fsRoot, $fsFolder));
       if (is_dir($fsRoot) && is_dir($fsFolder)) {
         $crumbs[] = "folder:$folder";
@@ -395,14 +395,14 @@ class ExplorerController extends AppController
         $this->Session->setFlash(__("Invalid folder: %s", $folder));
       }
     } else {
-      $crumbs = am($crumbs, $this->Search->urlToCrumbs($this->params['url']['url'], 3));
+      $crumbs = am($crumbs, $this->Search->urlToCrumbs($this->request->url, 3));
     }
     $this->crumbs = $crumbs;
     $this->render('index');
   }
 
   function group($name) {
-    $this->crumbs = am(array('group:' . $name), $this->Search->urlToCrumbs($this->params['url']['url'], 3));
+    $this->crumbs = am(array('group:' . $name), $this->Search->urlToCrumbs($this->request->url, 3));
     $this->render('index');
   }
 
@@ -455,7 +455,7 @@ class ExplorerController extends AppController
     foreach($tags as $tag) {
       $crumbs[] = 'tag:' . $tag;
     }
-    $this->crumbs = am($crumbs, $this->Search->urlToCrumbs($this->params['url']['url'], 3));
+    $this->crumbs = am($crumbs, $this->Search->urlToCrumbs($this->request->url, 3));
     $this->render('index');
   }
 
@@ -465,7 +465,7 @@ class ExplorerController extends AppController
     foreach($categories as $category) {
       $crumbs[] = 'category:' . $category;
     }
-    $this->crumbs = am($crumbs, $this->Search->urlToCrumbs($this->params['url']['url'], 3));
+    $this->crumbs = am($crumbs, $this->Search->urlToCrumbs($this->request->url, 3));
     $this->render('index');
   }
 
@@ -475,13 +475,13 @@ class ExplorerController extends AppController
     foreach($locations as $location) {
       $crumbs[] = 'location:' . $location;
     }
-    $this->crumbs = am($crumbs, $this->Search->urlToCrumbs($this->params['url']['url'], 3));
+    $this->crumbs = am($crumbs, $this->Search->urlToCrumbs($this->request->url, 3));
     $this->render('index');
   }
 
  
   function edit() {
-    if (isset($this->request->data)) {
+    if (!empty($this->request->data)) {
       $ids = preg_split('/\s*,\s*/', $this->request->data['Media']['ids']);
       $ids = array_unique($ids);
       if (!count($ids)) {

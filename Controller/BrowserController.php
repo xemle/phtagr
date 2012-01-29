@@ -104,11 +104,11 @@ class BrowserController extends AppController
   /** @return Returns the path of the current request */
   function _getPathFromUrl($strip = 0, $len = false) {
     $strip = max(0, $strip);
-    if (count($this->params['pass']) - $strip - abs($len) > 0) {
+    if (count($this->request->params['pass']) - $strip - abs($len) > 0) {
       if ($len) {
-        $dirs = array_slice($this->params['pass'], $strip, $len);
+        $dirs = array_slice($this->request->params['pass'], $strip, $len);
       } else {
-        $dirs = array_slice($this->params['pass'], $strip);
+        $dirs = array_slice($this->request->params['pass'], $strip);
       }
       $path = '/'.implode('/', $dirs).'/';
     } else {

@@ -123,13 +123,13 @@ class AppController extends Controller
   }
 
   function _checkKey() {
-    if (!isset($this->params['named']['key'])) {
+    if (!isset($this->request->params['named']['key'])) {
       return false;
     }
 
     // fetch and delete key from passed parameters
-    $key = $this->params['named']['key'];
-    unset($this->params['named']['key']);
+    $key = $this->request->params['named']['key'];
+    unset($this->request->params['named']['key']);
 
     $data = $this->User->findByKey($key, array('User.id'));
     if ($data) {

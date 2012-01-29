@@ -41,7 +41,7 @@ class CommentsController extends AppController
     parent::beforeFilter();
 
     $params = array();
-    foreach ($this->params['named'] as $key => $value) {
+    foreach ($this->request->params['named'] as $key => $value) {
       $params[] = $key.':'.$value;
     }
     $this->namedArgs = implode('/', $params);

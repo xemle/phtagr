@@ -336,7 +336,7 @@ class UsersController extends AppController
     $this->requireRole(ROLE_SYSOP);
 
     $id = intval($id);
-    $dirs = $this->params['pass'];
+    $dirs = $this->request->params['pass'];
     unset($dirs[0]);
     $fsroot = implode(DS, $dirs);
     if (DS == '/') {

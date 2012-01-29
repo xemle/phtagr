@@ -46,7 +46,7 @@ class SetupController extends AppController {
     $this->core = CONFIGS.'core.php';
     $this->dbConfig = CONFIGS.'database.php';
     $this->paths = array(TMP, USER_DIR);
-    if (isset($this->params['admin']) && $this->params['admin'] && $this->__hasSysOp()) {
+    if (isset($this->request->params['admin']) && $this->request->params['admin'] && $this->__hasSysOp()) {
       parent::beforeFilter();
     } else {
       $this->layout = 'default';
