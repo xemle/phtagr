@@ -143,7 +143,6 @@ $.fn.resizeImage = function(size) {
   var $image = $(this);
   var w = $image.attr('width');
   var h = $image.attr('height');
-  alert('Math.min(4,5)=' + Math.min(4,5));
   if (0 >= Math.min(w, h) || size > Math.max(w, h)) {
     return;
   }
