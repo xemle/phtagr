@@ -143,6 +143,7 @@ $.fn.resizeImage = function(size) {
   var $image = $(this);
   var w = $image.attr('width');
   var h = $image.attr('height');
+  alert('Math.min(4,5)=' + Math.min(4,5));
   if (0 >= Math.min(w, h) || size > Math.max(w, h)) {
     return;
   }
@@ -160,8 +161,10 @@ $(document).ready(function() {
   $media = $('#p-media-preview');
   if ($media) {
     var top = $media.position().top;
-    var size = window.innerHeight - top - 10;
-    $media.find('img').resizeImageHeight(size);
+    var size = $(window).height() - top - 10;
+    if (size) {
+      $media.find('img').resizeImageHeight(size);
+    }
   }
   $("#image-tabs").tabs({
     show: function(event, ui) {
