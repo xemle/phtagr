@@ -245,13 +245,13 @@ class User extends AppModel
   }
 
   function canUpload($user, $size) {
-    $this->bindModel(array('hasMany' => array('Media')));
+    $this->bindModel(array('hasMany' => array('MyFile')));
     $userId = intval($user['User']['id']);
     if ($userId < 1) {
       return false;
     }
 
-    $current = $this->Media->countBytes($userId, false);
+    $current = $this->MyFile->countBytes($userId, false);
     $quota = $user['User']['quota'];
     if ($current + $size <= $quota) {
       return true;
