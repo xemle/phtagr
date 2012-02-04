@@ -87,7 +87,7 @@ class DigestAuthComponent extends Component
     $this->Session->write('auth.logins', $counter+1);
     
     Logger::trace("Add authentications header");
-    header('WWW-Authenticate: Digest realm="'.$this->realm.'",qop="auth",nonce="'.uniqid().'",opaque="'.$opaque.'",algorithm="MD5"');
+    $this->controller->response->header('WWW-Authenticate', 'Digest realm="'.$this->realm.'",qop="auth",nonce="'.uniqid().'",opaque="'.$opaque.'",algorithm="MD5"');
   }
 
   /** Request the client for authentication. The given authentication schema
@@ -98,6 +98,7 @@ class DigestAuthComponent extends Component
     } else {
       $this->__addDigestRequestHeader();
     }
+    $this->controller->response->statusCode(401);
     $this->controller->redirect(null, 401, true);
   }
 
@@ -257,7 +258,6 @@ class DigestAuthComponent extends Component
       Logger::warn("Session already started!");
     }
     $this->Session->id($sid);
-    $this->Session->start();
 
     if (!$this->Session->check('auth.nc')) {
       $this->Session->renew();
@@ -270,8 +270,9 @@ class DigestAuthComponent extends Component
   
     $snc=$this->Session->read('auth.nc');
     $nc=hexdec($this->_authData['nc']);
-    if ($snc==$nc)
+    if ($snc==$nc) {
       Logger::warn("Same request counter $snc is used!");
+    }
   
     // Check request counter
     if ($snc>$nc) {
