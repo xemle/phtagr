@@ -265,7 +265,7 @@ class AppController extends Controller
     if (is_array($componentName)) {
       $loaded = true;
       foreach ($componentName as $name) {
-        $loaded &= $this->loadComponent($name);
+        $loaded &= $this->loadComponent($name, &$parent);
       }
       return $loaded;
     }
