@@ -62,6 +62,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
     $this->controller = &$controller;
     // set current controller URL
     $this->setDavRoot($controller->webroot.$controller->name);
+    $this->controller->loadComponent(array('FileManager', 'FilterManager'), &$this);
     $this->FilterManager->initialize(&$controller);
   }
 
@@ -721,8 +722,9 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
     // save path
     $this->_putFsPath=$fspath;
     $fp=fopen($fspath, "w");
-    if ($fp===false)
+    if ($fp===false) {
       Logger::err("fopen('$fspath', 'w')===false");
+    }
 
     return $fp;
   }
