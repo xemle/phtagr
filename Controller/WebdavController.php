@@ -21,6 +21,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+/**
+ * Debug PUT with Netbeans and CURL:
+ *
+ * curl -c cookies.txt -b XDEBUG_SESSION=netbeans-xdebug --digest --user USER:PASS -T sample.jpg http://localhost/phtagr/webdav/sample.jpg
+ */
 class WebdavController extends AppController
 {
   var $components=array('RequestHandler', 'DigestAuth', 'FileCache');
