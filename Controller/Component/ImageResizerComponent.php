@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-if (!class_exists('phpThumb') && !App::import('Vendor', "phpthumb", true, array(), "phpthumb/phpthumb.class.php")) {
+if (!class_exists('phpThumb') && !App::import('Vendor', 'phpthumb', array('file' => 'phpthumb' .DS . 'phpthumb.class.php'))) {
   debug("Please install phpthumb properly");
 }
 

@@ -21,26 +21,29 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-App::import('Model', array('User', 'Media', 'MyFile'));
-App::import('Core', array('Controller', 'Router'));
-App::import('Controller', array('AppController'));
-App::import('Component', array('ImageEmail', 'Search', 'PreviewManager'));
-App::import('File', 'Logger', array('file' => APP . 'logger.php'));
+class NotifyShell extends AppShell {
 
-class AppControllerMock extends AppController {
   var $uses = array('User', 'Media', 'MyFile');
   var $components = array('ImageEmail', 'Search', 'PreviewManager');
-  var $user = null;
-  
-  function startup() {
-    $this->constructClasses();
-    $this->Component->_loadComponents(&$this);
-    $this->Component->initialize(&$this);
-    $this->PreviewManager->Media =& $this->Media;
-    $this->_configureEmail();
-  }
+	
+  var $verbose = false;
+  var $force = false;
+  var $dryrun = false;
+  var $noemail = false;
 
-  /** Configure email component on any SMTP configuration values in core.php */
+  function initialize() {
+		parent::initialize();
+    $this->url = Configure::read('Notification.url');
+    if (!$this->url) {
+      $this->out("Please configure Notification.url in core.php");
+      exit(1);
+    }
+		$this->_configureEmail();
+  }
+	
+  /** 
+	 * Configure email component on any SMTP configuration values in core.php 
+	 */
   function _configureEmail() {
     if (Configure::read('Mail.from')) {
       $this->ImageEmail->from = Configure::read('Mail.from');
@@ -61,50 +64,7 @@ class AppControllerMock extends AppController {
       $this->ImageEmail->delivery = 'smtp';
     }
   }
-  
-  function getUser() {
-    return $this->user;
-  }
-}
-
-class NotifyShell extends Shell {
-
-  var $Controller = null;
- 
-  var $verbose = false;
-  var $force = false;
-  var $dryrun = false;
-  var $noemail = false;
-
-  function initialize() {
-    if (function_exists('ini_set') && !ini_set('include_path', ROOT . DS . APP_DIR . DS . 'vendors' . DS . 'Pear' . DS . PATH_SEPARATOR . ini_get('include_path'))) {
-      $this->out("Could not set include_path");
-      exit(1);
-    }
-    $this->Controller =& new AppControllerMock();
-    $this->Controller->startup();
-    foreach($this->Controller->uses as $model) {
-      if (empty($this->Controller->{$model})) {
-        $this->out("Could not use model '$model'");
-        exit(1);
-      }  
-      $this->{$model} =& $this->Controller->{$model};
-    }
-    foreach($this->Controller->components as $component => $config) {
-      if (empty($this->Controller->{$component})) {
-        $this->out("Could not use component '$component'");
-        exit(1);
-      }  
-      $this->{$component} =& $this->Controller->{$component};
-    }
-
-    $this->url = Configure::read('Notification.url');
-    if (!$this->url) {
-      $this->out("Please configure Notification.url in core.php");
-      exit(1);
-    }
-  }
-
+	
   function startup() {
   }
 
@@ -183,7 +143,7 @@ class NotifyShell extends Shell {
         }
         continue;
       }
-      $this->Controller->user =& $user;
+      $this->mockUser($user);
 
       $this->Search->setShow(12);
       $this->Search->setSort('newest');

@@ -21,64 +21,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-App::import('Core', array('Controller'));
-App::import('Controller', array('AppController'));
-App::import('File', 'Logger', array('file' => APP . 'logger.php'));
+class SyncShell extends AppShell {
 
-class AppControllerMock extends AppController {
   var $uses = array('User', 'Option', 'MyFile', 'Media');
   var $components = array('FilterManager');
-  var $userMock = null;
   
-  function startup() {
-    $this->constructClasses();
-    $this->Component->_loadComponents(&$this);
-    $this->Component->initialize(&$this);
-  }
-
-  function checkAndBindComponents($obj) {
-    foreach($this->uses as $model) {
-      if (empty($this->{$model})) {
-        $this->out("Could not load model $model");
-        exit(1);
-      }  
-      $obj->{$model} =& $this->{$model};
-    }
-    foreach($this->components as $key => $component) {
-      if (!is_numeric($key)) {
-        $component = $key;
-      }
-      if (empty($this->{$component})) {
-        $this->out("Could not load component $component");
-        exit(1);
-      }  
-      $obj->{$component} =& $this->{$component};
-    }
-  }
-
-  function getUser() {
-    if (!$this->userMock) {
-      $this->userMock = $this->User->getNobody();
-      $this->userMock['User']['role'] = ROLE_ADMIN;
-    }
-    return $this->userMock;
-  }
-}
-
-class SyncShell extends Shell {
-
-  var $Controller = null;
- 
   var $verbose = false;
   var $chunkSize = 100;
-
-  function initialize() {
-    $this->Controller =& new AppControllerMock();
-    $this->Controller->startup();
-    $this->Controller->checkAndBindComponents(&$this);
-
-    $this->PreviewManager->Media = &$this->Media;
-  }
 
   function startup() {
   }

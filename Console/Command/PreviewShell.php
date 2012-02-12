@@ -21,64 +21,19 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-App::import('Core', array('Controller'));
-App::import('Controller', array('AppController'));
-App::import('File', 'Logger', array('file' => APP . 'logger.php'));
-
-class AppControllerMock extends AppController {
+class PreviewShell extends AppShell {
   var $uses = array('User', 'Option', 'MyFile', 'Media');
   var $components = array('Search', 'FileCache', 'PreviewManager');
-  var $user = null;
-  
-  function startup() {
-    $this->constructClasses();
-    $this->Component->_loadComponents(&$this);
-    $this->Component->initialize(&$this);
-  }
-
-  function checkAndBindComponents($obj) {
-    foreach($this->uses as $model) {
-      if (empty($this->{$model})) {
-        $this->out("Could not load model $model");
-        exit(1);
-      }  
-      $obj->{$model} =& $this->{$model};
-    }
-    foreach($this->components as $key => $component) {
-      if (!is_numeric($key)) {
-        $component = $key;
-      }
-      if (empty($this->{$component})) {
-        $this->out("Could not load component $component");
-        exit(1);
-      }  
-      $obj->{$component} =& $this->{$component};
-    }
-  }
-
-  function getUser() {
-    return $this->user;
-  }
-}
-
-class PreviewShell extends Shell {
-
-  var $Controller = null;
  
   var $verbose = false;
   var $chunkSize = 100;
   var $sizes = array('mini', 'thumb', 'preview', 'high');
 
   function initialize() {
-    $this->Controller =& new AppControllerMock();
-    $this->Controller->startup();
-    $this->Controller->checkAndBindComponents(&$this);
-
-    $shellAdmin = $this->User->getNobody();
-    $shellAdmin['User']['role'] = ROLE_ADMIN;
-    $this->Controller->user = $shellAdmin;
-
-    $this->PreviewManager->Media = &$this->Media;
+		parent::initialize();
+    $mockUser = $this->User->getNobody();
+		$mockUser['User']['role'] = ROLE_ADMIN;
+		$this->mockUser($mockUser);
   }
 
   function startup() {
@@ -120,7 +75,7 @@ class PreviewShell extends Shell {
   function generate() {
     $this->verbose = isset($this->params['verbose']) ? true : false;
 
-    $size = in_array($this->params['size'], $this->sizes) ? $this->params['size'] : 'thumb';
+    $size = (isset($this->params['size']) && in_array($this->params['size'], $this->sizes)) ? $this->params['size'] : 'thumb';
     $user = isset($this->params['user']) ? $this->params['user'] : false;
     $chunk = isset($this->params['start-chunk']) ? max(1, intval($this->params['start-chunk'])) : 1;
     $generateMax = isset($this->params['max']) ? $this->params['max'] : 100;

@@ -78,7 +78,7 @@ class QueryBuilderComponent extends Component
       if (is_numeric($data)) {
         return $data;
       } else {
-        return "'".$this->Sanitize->escape($data)."'";
+        return "'".Sanitize::escape($data)."'";
       }
     } else {
       $escaped = array();

@@ -158,7 +158,7 @@ define("LOCATION_COUNTRY", 0x04);
  */
 if (function_exists('ini_set') && function_exists('ini_get')) {
   $path = ini_get('include_path');
-  $vendorPearPath = APP . 'vendors' . DS . 'Pear' . DS;
+  $vendorPearPath = APP . 'Vendor' . DS . 'Pear' . DS;
   ini_set('include_path', $vendorPearPath . PATH_SEPARATOR . ini_get('include_path'));
 }
 
