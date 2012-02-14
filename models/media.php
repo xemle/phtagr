@@ -691,8 +691,8 @@ class Media extends AppModel
       Logger::debug("Invalid geo input: $geo");
       return;
     } elseif ($numbers[0] == "-") {
-      $data['Media']['latitude'] = null;
-      $data['Media']['longitude'] = null;
+      $data['Media']['latitude'] = '-';
+      $data['Media']['longitude'] = '-';
       return;
     } 
     // validate numbers
@@ -842,8 +842,11 @@ class Media extends AppModel
       foreach ($fields as $field) {
         if (empty($data['Media'][$field])) {
           continue;
+        } else if ($data['Media'][$field] == '-') {
+          $tmp['Media'][$field] = null;
+        } else {
+          $tmp['Media'][$field] = $data['Media'][$field];
         }
-        $tmp['Media'][$field] = $data['Media'][$field];
       }
     }
     if ($media['Media']['canWriteCaption']) {
