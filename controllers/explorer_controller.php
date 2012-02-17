@@ -515,6 +515,7 @@ class ExplorerController extends AppController
         foreach ($changedMedia as $media) {
           if (isset($media['Media']['orientation'])) {
             $this->FileCache->delete($media);
+            $this->FastFileResponder->excludeMedia($media);
             Logger::debug("Deleted previews of media {$media['Media']['id']}");
           }
         }
@@ -578,6 +579,7 @@ class ExplorerController extends AppController
         }
         if (isset($tmp['Media']['orientation'])) {
           $this->FileCache->delete($tmp);
+          $this->FastFileResponder->excludeMedia($tmp);
           Logger::debug("Deleted previews of media {$tmp['Media']['id']}");
         }
       }

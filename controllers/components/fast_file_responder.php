@@ -26,6 +26,7 @@ class FastFileResponderComponent extends Object {
   var $components = array('Session', 'FileCache');
   var $sessionKey = 'fastFile.items';
   var $expireOffset = 10; // seconds
+  var $excludeMediaIds = array();  
 
   function initialize(&$controller) {
     $this->controller = $controller;
@@ -33,7 +34,7 @@ class FastFileResponderComponent extends Object {
 
   function add($media, $name, $ext = 'jpg') {
     $file = $this->FileCache->getFilePath($media, $name);
-    if (!is_readable($file)) {
+    if (!is_readable($file) || in_array($media['Media']['id'], $this->excludeMediaIds)) {
       return false;
     }
     $key = $name . '-' . $media['Media']['id'];
@@ -47,6 +48,10 @@ class FastFileResponderComponent extends Object {
     foreach ($data as $media) {
       $this->add($media, $name, $ext);
     }
+  }
+
+  function excludeMedia($media) {
+    $this->excludeMediaIds[] = $media['Media']['id'];
   }
 }
 ?>

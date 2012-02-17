@@ -146,6 +146,7 @@ class ImagesController extends AppController
         }
         if (isset($tmp['Media']['orientation'])) {
           $this->FileCache->delete($tmp);
+          $this->FastFileResponder->excludeMedia($tmp);
           Logger::debug("Deleted previews of media {$tmp['Media']['id']}");
         }
       }
