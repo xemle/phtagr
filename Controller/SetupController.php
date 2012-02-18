@@ -413,6 +413,17 @@ class DATABASE_CONFIG {
     'prefix' => '{$this->request->data['db']['prefix']}',
     'encoding' => 'utf8'
   );
+ 
+  public \$test = array(
+    'datasource' => 'Database/Mysql',
+    'persistent' => true,
+    'host' => '{$this->request->data['db']['host']}',
+    'login' => '{$this->request->data['db']['login']}',
+    'password' => '{$this->request->data['db']['password']}',
+    'database' => '{$this->request->data['db']['database']}',
+    'prefix' => '{$this->request->data['db']['prefix']}test_',
+    'encoding' => 'utf8'
+  );
 }
 ";
       $file =& new File($this->dbConfig, true, 644);

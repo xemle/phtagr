@@ -13,19 +13,36 @@
 <p><pre><code>&lt;?php
 
 class DATABASE_CONFIG {
+
+  /** 
+   * Default database connection configuration 
+   */
   var $default = array(
-                  'driver' =&gt; 'mysql',
-                  'connect' =&gt; 'mysql_connect',
+                  'datasource' =&gt; 'Database/Mysql',
                   'persistent' =&gt; true,
                   'host' =&gt; 'localhost',
+                  'database' =&gt; 'phtagr',
                   'login' =&gt; 'phtagr',
                   'password' =&gt; 'phtagr',
+                  'prefix' =&gt; 'pt_',
+                  'encoding' =&gt; 'utf8'
+                 );
+
+  /** 
+   * Database connection configuration for test environment
+   */
+  var $test = array(
+                  'datasource' =&gt; 'Database/Mysql',
+                  'persistent' =&gt; true,
+                  'host' =&gt; 'localhost',
                   'database' =&gt; 'phtagr',
-                  'encoding' =&gt; 'utf8',
-                  'prefix' =&gt; ''
+                  'login' =&gt; 'phtagr',
+                  'password' =&gt; 'phtagr',
+                  'prefix' =&gt; 'pt_test_',
+                  'encoding' =&gt; 'utf8'
                  );
 }
-?&gt;</code></pre></p>
+</code></pre></p>
 
 <?php echo $this->Html->link(__('Continue'), 'configro', array('class' => 'button')); ?>
 
