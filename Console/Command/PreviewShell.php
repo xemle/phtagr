@@ -30,10 +30,10 @@ class PreviewShell extends AppShell {
   var $sizes = array('mini', 'thumb', 'preview', 'high');
 
   function initialize() {
-		parent::initialize();
+    parent::initialize();
     $mockUser = $this->User->getNobody();
-		$mockUser['User']['role'] = ROLE_ADMIN;
-		$this->mockUser($mockUser);
+    $mockUser['User']['role'] = ROLE_ADMIN;
+    $this->mockUser($mockUser);
   }
 
   function startup() {
@@ -91,7 +91,11 @@ class PreviewShell extends AppShell {
         $this->Search->setUser($user);
       }
       $data = $this->Search->paginate();
-      $chunkCount = $this->Controller->params['search']['pageCount'];
+      $chunkCount = $this->ControllerMock->params['search']['pageCount'];
+      if (count($data) == 0 || $chunkCount == 0) {
+        $this->out("No previews found. Exit.");
+        break;
+      }
       $this->verboseOut(sprintf("Page %d/%d (%.2f%%)", $chunk, $chunkCount, 100*$chunk/$chunkCount));
       //$this->verboseOut('found ' . implode(', ', Set::extract('/Media/id', $data)));
       foreach ($data as $media) {

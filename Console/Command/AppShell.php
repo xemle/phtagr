@@ -27,50 +27,50 @@ if (!class_exists('Logger')) {
 }
 
 class AppShell extends Shell {
-	var $uses = array();
-	var $components = array();
-	
-	var $Controller = null;
-	
-	function initialize() {
+  var $uses = array();
+  var $components = array();
+  
+  var $ControllerMock = null;
+  
+  function initialize() {
     if (function_exists('ini_set') && !ini_set('include_path', ROOT . DS . APP_DIR . DS . 'Vendor' . DS . 'Pear' . DS . PATH_SEPARATOR . ini_get('include_path'))) {
       $this->out("Could not set include_path");
       exit(1);
     }
-		parent::initialize();
-		$this->loadController();
-		$this->bindCompontents();
-	}
-	/**
-	 * Load ShellControllerMock with models and components
-	 */
-	function loadController() {
-    $this->Controller =& new ShellControllerMock();
-		$this->Controller->setRequest(new CakeRequest());
-    $this->Controller->response = new CakeResponse();
-		$this->Controller->uses = $this->uses;
-		$this->Controller->components = $this->components;
-    $this->Controller->constructClasses();
-    $this->Controller->startupProcess();
-	}
-	
+    parent::initialize();
+    $this->loadControllerMock();
+    $this->bindCompontents();
+  }
   /**
-	 * Bind controller's components to shell
-	 */
-	function bindCompontents() {
-    foreach($this->Controller->components as $key => $component) {
+   * Load ShellControllerMock with models and components
+   */
+  function loadControllerMock() {
+    $this->ControllerMock =& new ShellControllerMock();
+    $this->ControllerMock->setRequest(new CakeRequest());
+    $this->ControllerMock->response = new CakeResponse();
+    $this->ControllerMock->uses = $this->uses;
+    $this->ControllerMock->components = $this->components;
+    $this->ControllerMock->constructClasses();
+    $this->ControllerMock->startupProcess();
+  }
+  
+  /**
+   * Bind controller's components to shell
+   */
+  function bindCompontents() {
+    foreach($this->ControllerMock->components as $key => $component) {
       if (!is_numeric($key)) {
         $component = $key;
       }
-      if (empty($this->Controller->{$component})) {
+      if (empty($this->ControllerMock->{$component})) {
         $this->out("Could not load component $component");
         exit(1);
       }  
-      $this->{$component} = $this->Controller->{$component};
+      $this->{$component} = $this->ControllerMock->{$component};
     }
   }
-	
-	function mockUser($user) {
-		$this->Controller->mockUser($user);
-	}
+  
+  function mockUser($user) {
+    $this->ControllerMock->mockUser($user);
+  }
 }

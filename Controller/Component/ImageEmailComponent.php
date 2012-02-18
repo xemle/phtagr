@@ -21,7 +21,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-App::import('Component', 'Email');
+App::uses('Email', 'Component');
 
 class ImageEmailComponent extends EmailComponent {
   

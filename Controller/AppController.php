@@ -24,6 +24,7 @@
 if (!class_exists('Logger')) {
   App::import('File', 'Logger', array('file' => APP.'logger.php'));
 }
+App::uses('Controller', 'Controller');
 
 class AppController extends Controller
 {

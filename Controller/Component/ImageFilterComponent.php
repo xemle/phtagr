@@ -21,6 +21,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+
+App::uses('BaseFilter', 'Component');
+
 class ImageFilterComponent extends BaseFilterComponent {
   var $controller = null;
   var $components = array('Command');
