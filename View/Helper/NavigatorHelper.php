@@ -136,7 +136,7 @@ class NavigatorHelper extends AppHelper {
     $params = $this->request->params['search'];
     $link = $this->Breadcrumb->crumbUrl($this->request->params['crumbs'], false, array('pos'));
     $link .= '#media-'.$params['current'];
-    return $this->Html->link(__('overview'), $link, array('class' => 'up'));
+    return $this->Html->link(__('Explorer'), $link, array('class' => 'up'));
   }
 
   function hasNextMedia() {
