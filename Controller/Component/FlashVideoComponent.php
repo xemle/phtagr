@@ -15,7 +15,7 @@
  * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
 
-class FlashVideoComponent extends Object {
+class FlashVideoComponent extends Component {
 
   var $controller = null;
   var $components = array('FileCache', 'Command');

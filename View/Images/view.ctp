@@ -5,7 +5,7 @@
 <span></span>
 <?php 
   if (($this->request->data['Media']['type'] & MEDIA_TYPE_VIDEO) > 0) {
-    echo $flowplayer->video($this->request->data);
+    echo $this->Flowplayer->video($this->request->data);
   } else {
     //$size = $this->ImageData->getimagesize($this->request->data, OUTPUT_SIZE_PREVIEW);
     $size = $this->ImageData->getimagesize($this->request->data, 960);
