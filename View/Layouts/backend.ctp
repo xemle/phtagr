@@ -34,7 +34,7 @@
 </div><!-- main -->
 
 <div id="footer"><div class="sub">
-<p>&copy; 2006-2011 by <?php echo $this->Html->link("Gallery phTagr", 'http://www.phtagr.org'); ?></p>
+<p>&copy; 2006-2012 by <?php echo $this->Html->link("phTagr - Tag, Browse, and Share Your Photos", 'http://www.phtagr.org'); ?></p>
 </div></div>
 </body>
 </html>

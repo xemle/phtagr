@@ -22,7 +22,7 @@
 
 <div id="header"><div class="sub">
 <h1><?php echo $this->Option->get('general.title', 'phTagr.'); ?></h1>
-<span class="subtitle"><?php echo $this->Option->get('general.subtitle', 'Tag Your Photos Once And Find Them Forever'); ?></span>
+<span class="subtitle"><?php echo $this->Option->get('general.subtitle', 'Tag, Browse, and Share Your Photos'); ?></span>
 <?php echo $this->Menu->menu('top-menu'); ?>
 </div></div><!-- #header/sub -->
 
@@ -39,7 +39,7 @@
 </div></div><!-- #main/sub -->
 
 <div id="footer"><div class="sub">
-<p>&copy; 2006-2011 by <?php echo $this->Html->link("Open Source Web Gallery phTagr", 'http://www.phtagr.org'); ?></p>
+<p>&copy; 2006-2012 by <?php echo $this->Html->link("phTagr - Tag, Browse, and Share Your Photos", 'http://www.phtagr.org'); ?></p>
 </div></div><!-- #footer/sub -->
 
 </div></body><!-- #page -->
