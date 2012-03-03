@@ -1,24 +1,18 @@
 <?php
-/*
- * phtagr.
- * 
- * social photo gallery for your community.
- * 
- * Copyright (C) 2006-2010 Sebastian Felis, sebastian@phtagr.org
- * 
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; version 2 of the 
- * License.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+/**
+ * PHP versions 5
+ *
+ * phTagr : Tag, Browse, and Share Your Photos.
+ * Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ *
+ * Licensed under The GPL-2.0 License
+ * Redistributions of files must retain the above copyright notice.
+ *
+ * @copyright     Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * @link          http://www.phtagr.org phTagr
+ * @package       Phtagr
+ * @since         phTagr 2.2b3
+ * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
 
 class NotifyShell extends AppShell {
