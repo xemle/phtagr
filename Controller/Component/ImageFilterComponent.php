@@ -393,8 +393,8 @@ class ImageFilterComponent extends BaseFilterComponent {
     $args = $this->_createExportArguments($data, $media);
     if (!count($args)) {
       Logger::debug("File '$filename' has no metadata changes");
-      if (!$this->Media->deleteFlag($media, MEDIA_FLAG_DIRTY)) {
-        $this->controller->warn("Could not update image data of media {$media['Media']['id']}");
+      if (!$this->Media->deleteFlag(&$media, MEDIA_FLAG_DIRTY)) {
+        Logger::warn("Could not update image data of media {$media['Media']['id']}");
       }
       return true;
     }
@@ -423,7 +423,7 @@ class ImageFilterComponent extends BaseFilterComponent {
     }
     
     $this->controller->MyFile->update($file);
-    if (!$this->Media->deleteFlag($media, MEDIA_FLAG_DIRTY)) {
+    if (!$this->Media->deleteFlag(&$media, MEDIA_FLAG_DIRTY)) {
       $this->controller->warn("Could not update image data of media {$media['Media']['id']}");
     }
   }
