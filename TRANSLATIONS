@@ -13,4 +13,4 @@ Update POT file
 
 Run
 
-cakephp/lib/Cake/Console/cake i18n extract --exclude Vendor,tests,users,plugins,cakephp
+cakephp/lib/Cake/Console/cake i18n extract --exclude Vendor,Test,users,Plugin,plugins,webroot,cakephp
