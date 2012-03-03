@@ -1,19 +1,24 @@
 <?php
 
-App::import('Component', 'Logger');
 App::import('File', 'Search', array('file' => APP.'search.php'));
 
 class SearchTest extends CakeTestCase {
   var $Search;
 
-  function _init() {
+  public function setUp() {
+    parent::setUp();
     $this->Search = new Search();
 
     $this->Search->clear();
   }
 
+  public function tearDown() {
+    unset($this->Search);
+
+    parent::tearDown();
+  }
+
   function testParam() {
-    $this->_init();
     
     // get not existing values
     $result = $this->Search->getParam('notExists'); 
@@ -57,8 +62,6 @@ class SearchTest extends CakeTestCase {
   }
 
   function testSingle() {
-    $this->_init();
-
     // set and delete
     $this->Search->setPage(1);
     $result = $this->Search->getPage();
@@ -74,8 +77,6 @@ class SearchTest extends CakeTestCase {
   }
 
   function testMultiple() {
-    $this->_init();
-
     // add multiple tags
     
     $this->Search->addTag('tag1');

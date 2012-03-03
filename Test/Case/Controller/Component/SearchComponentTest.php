@@ -1,48 +1,27 @@
 <?php
-App::import('Core', array('Controller'));
-App::import('Component', array('Search'));
-App::import('File', 'Logger', array('file' => APP.'logger.php'));
-
-Mock::generatePartial('SearchComponent', 'NoStopSearch', array('_stop'));
-
-class SearchTestController extends Controller {
-  var $uses = null;
-
-  function __construct($params = array()) {
-    foreach ($params as $key => $val) {
-      $this->{$key} = $val;
-    }
-    parent::__construct();
-  }
-
-  function destination() {
-    $this->viewPath = 'posts';
-    $this->render('index');
-  }
-}
-
-class SearchComponentTest extends CakeTestCase {
-  var $Controller;
-  var $Search;
-
-  function setUp() {
-    $this->_init();
-  }
-
-  function tearDown() {
-    unset($this->Search);
-    unset($this->Controller);
-    if (!headers_sent()) {
-      header('Content-type: text/html'); //reset content type.
-    }
-  }
-
-  function _init() {
-    $this->Controller = new SearchTestController(array('components' => array('Search')));
-    $this->Controller->constructClasses();
-    $this->Search =& $this->Controller->Search;
-    $this->Search->initialize($this->Controller);
-
+/* Search Test cases generated on: 2012-02-18 18:56:45 : 1329587805*/
+App::uses('SearchComponent', 'Controller/Component');
+App::import('File', 'TestControllerMock', array('file' => dirname(dirname(__FILE__)) . DS . 'TestControllerMock.php'));
+/**
+ * SearchComponent Test Case
+ *
+ */
+class SearchComponentTestCase extends CakeTestCase {
+	var $controllerMock;
+	var $uses = array();
+	var $components = array('Search');
+	
+/**
+ * setUp method
+ *
+ * @return void
+ */
+	public function setUp() {
+		parent::setUp();
+		
+    $this->loadControllerMock();
+    $this->bindCompontents();
+		
     $this->Search->validate = array(
       'page' => 'numeric',
       'show' => array('rule' => array('inList', array(12, 24, 64))),
@@ -57,10 +36,53 @@ class SearchComponentTest extends CakeTestCase {
     $this->Search->disabled = array('user', 'world');
     $this->Search->defaults = array();
     $this->Search->clear();
+	}
+
+	/**
+   * Load ShellControllerMock with models and components
+   */
+  function loadControllerMock() {
+    $this->ControllerMock =& new TestControllerMock();
+    $this->ControllerMock->setRequest(new CakeRequest());
+    $this->ControllerMock->response = new CakeResponse();
+    $this->ControllerMock->uses = $this->uses;
+    $this->ControllerMock->components = $this->components;
+    $this->ControllerMock->constructClasses();
+    $this->ControllerMock->startupProcess();
+  }
+  
+  /**
+   * Bind controller's components to shell
+   */
+  function bindCompontents() {
+    foreach($this->ControllerMock->components as $key => $component) {
+      if (!is_numeric($key)) {
+        $component = $key;
+      }
+      if (empty($this->ControllerMock->{$component})) {
+        $this->out("Could not load component $component");
+        exit(1);
+      }  
+      $this->{$component} = $this->ControllerMock->{$component};
+    }
+  }
+  
+  function mockUser($user) {
+    $this->ControllerMock->mockUser($user);
   }
 
+/**
+ * tearDown method
+ *
+ * @return void
+ */
+	public function tearDown() {
+		unset($this->Search);
+
+		parent::tearDown();
+	}
+
   function testValidation() {
-    $this->_init();
 
     // simple rule, false test
     $this->Search->setPage('two');
@@ -120,4 +142,3 @@ class SearchComponentTest extends CakeTestCase {
   }
 
 }
-?>

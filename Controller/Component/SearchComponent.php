@@ -21,9 +21,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-if (!App::uses('Validation', 'Utility')) {
-  CakeLog::write('error', 'Could not load validation');
-}
+App::uses('Component', 'Controller');
+
+App::uses('Validation', 'Utility');
 if (!class_exists('Search')) {
   App::import('File', 'Search', array('file' => APP.'search.php'));
 }

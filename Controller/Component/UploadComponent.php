@@ -20,28 +20,24 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+App::uses('Component', 'Controller');
 
 class UploadComponent extends Component {
-  
+
   var $name = 'UploadComponent';
 
   var $controller = null;
 
   var $components = array('FileCache', 'FileManager');
-  
+
   var $_uploads = null;
 
   var $_errors = null;
 
-  /** Set true for test cases. This flag will disable the function
-   * is_uploaded_file() and move_uploaded_file(). Otherwise the upload test
-   * needs a special web test with ugly post data handling */
-  var $_testRun = false;
-
   function initialize(&$controller) {
     $this->controller = $controller;
   }
-  
+
   function clear() {
     $this->_uploads = null;
     $this->_errors = null;
@@ -76,7 +72,7 @@ class UploadComponent extends Component {
         $this->_addError($data['name'], 'uploadError', &$data);
         return array();
       // uploaded files
-      } elseif (is_uploaded_file($data['tmp_name']) || $this->_testRun) {
+      } elseif ($this->isUploadedFile($data['tmp_name'])) {
         extract($data);
         return array(compact('error', 'name', 'type', 'size', 'tmp_name'));
       } else {
@@ -116,8 +112,8 @@ class UploadComponent extends Component {
 
   /** Evaluates if upload data is true
     @return true if upload data is available. false otherwise */
-  function isUpload() {
-    if (count($this->getUploads())) {
+  function isUpload($data = null) {
+    if (count($this->getUploads($data))) {
       return true;
     } else {
       return false;
@@ -155,6 +151,14 @@ class UploadComponent extends Component {
     return array_sum(Set::extract('/size', $uploads));
   } 
 
+  function isUploadedFile($filename) {
+    return is_uploaded_file($filename);
+  }
+
+  function moveUploadedFile($filename, $dst) {
+    return move_uploaded_file($filename, $dst);
+  }
+
   /** Upload the data to a given directory
     @param path Destination directory
     @param options
@@ -188,12 +192,9 @@ class UploadComponent extends Component {
         continue;
       }
 
-      if (!$this->_testRun && !move_uploaded_file($upload['tmp_name'], $path . $filename)) {
+      if (!$this->moveUploadedFile($upload['tmp_name'], $path . $filename)) {
         $this->_addError($upload['name'], 'uploadMoveError', $upload);
         Logger::err("Could not write uploaded file");
-        continue;
-      } elseif ($this->_testRun && !rename($upload['tmp_name'], $path . $filename)) {
-        
         continue;
       }
 
