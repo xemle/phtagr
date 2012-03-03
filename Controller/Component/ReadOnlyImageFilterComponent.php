@@ -16,7 +16,7 @@
  */
 App::uses('BaseFilter', 'Component');
 
-class SimpleImageFilterComponent extends BaseFilterComponent {
+class ReadOnlyImageFilterComponent extends BaseFilterComponent {
   var $controller = null;
 
   function initialize(&$controller) {
