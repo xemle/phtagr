@@ -325,7 +325,7 @@ class FilterManagerComponent extends Component {
       }
       $filterMissing = false;
       Logger::trace("Call filter ".$filter->getName()." for $filename");
-      $success |= $filter->write($file, &$media);
+      $success = ($success && $filter->write($file, &$media));
     }      
     return $success && !$filterMissing;
   }

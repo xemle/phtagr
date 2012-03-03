@@ -24,7 +24,7 @@ class ReadOnlyImageFilterComponent extends BaseFilterComponent {
   }
 
   function getName() {
-    return "SimpleImage";
+    return "ReadOnlyImage";
   }
 
   function getExtensions() {
