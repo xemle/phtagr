@@ -390,7 +390,7 @@ class SearchComponent extends Component
    * @return Array of crumbs
    */
   function urlToCrumbs($url, $skip = 2) {
-    $encoded = array_splice(split('/', trim($url, '/')), $skip);
+    $encoded = array_splice(split('/', trim(urldecode($url), '/')), $skip);
     $crumbs = array();
     foreach ($encoded as $crumb) {
       if (!preg_match('/^(\w+):(.+)$/', $crumb, $matches)) {
