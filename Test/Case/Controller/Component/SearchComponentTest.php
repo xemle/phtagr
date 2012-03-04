@@ -1,7 +1,9 @@
 <?php
 /* Search Test cases generated on: 2012-02-18 18:56:45 : 1329587805*/
 App::uses('SearchComponent', 'Controller/Component');
-App::import('File', 'TestControllerMock', array('file' => dirname(dirname(__FILE__)) . DS . 'TestControllerMock.php'));
+if (!class_exists('TestControllerMock')) {
+  App::import('File', 'TestControllerMock', array('file' => dirname(dirname(__FILE__)) . DS . 'TestControllerMock.php'));
+}
 /**
  * SearchComponent Test Case
  *

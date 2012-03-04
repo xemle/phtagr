@@ -7,7 +7,7 @@ App::uses('CakeResponse', 'Network');
 App::uses('FileManagerComponent', 'Controller/Component');
 App::uses('AppModel', 'Model');
 App::uses('MyFile', 'Model');
-App::import('File', 'Logger', array('file' => APP . 'logger.php'));
+App::uses('Logger', 'Lib');
 App::uses('Folder', 'Utility');
 
 if (!defined('TEST_FILES')) {

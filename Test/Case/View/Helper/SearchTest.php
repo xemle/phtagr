@@ -1,17 +1,23 @@
 <?php
 
-App::import('Core', array('Helper', 'AppHelper', 'Controller', 'View'));
-App::import('Helper', array('Search'));
-App::import('File', 'Logger', array('file' => APP.'logger.php'));
+App::uses('View', 'View');
+App::uses('SearchHelper', 'View/Helper');
+App::uses('Logger', 'Lib');
  
 class SearchHelperTest extends CakeTestCase {
 
   function setUp() {
-    $this->Search = new SearchHelper();
-    $this->Search->params['search']['data'] = array();
-    $this->Search->params['search']['baseUri'] = '/explorer/query';
-    $this->Search->params['search']['afterUri'] = false;
-    $this->Search->params['search']['defaults'] = array(
+    parent::setUp();
+    
+    $controller = null;
+    $this->View = new View($controller);
+    $this->Search = new SearchHelper($this->View);
+    $request = new CakeRequest(null, false);
+    $this->Search->request =& $request;
+    $request->params['search']['data'] = array();
+    $request->params['search']['baseUri'] = '/explorer/query';
+    $request->params['search']['afterUri'] = false;
+    $request->params['search']['defaults'] = array(
       'show' => 12,
       'page' => 1,
       'pos' => false,
@@ -22,6 +28,8 @@ class SearchHelperTest extends CakeTestCase {
 
   function tearDown() {
     unset($this->Search);
+    
+    parent::tearDown();
   }
 
   function testConfig() {

@@ -15,9 +15,7 @@
  * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
 
-if (!class_exists('Logger')) {
-  App::import('File', 'Logger', array('file' => APP.'logger.php'));
-}
+App::uses('Logger', 'Lib');
 App::uses('Controller', 'Controller');
 
 class AppController extends Controller
