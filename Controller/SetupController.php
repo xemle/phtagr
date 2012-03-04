@@ -21,7 +21,7 @@ class SetupController extends AppController {
 
   //var $autoRender = false;
   var $components = array('UpgradeSchema');
-  var $uses = null;
+  var $uses = false;
   var $helpers = array('Form', 'Html');
   var $core = null; 
   var $dbConfig = null; 

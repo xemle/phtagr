@@ -80,7 +80,7 @@ class UpgradeSchemaComponent extends Component {
 
     $sources = $this->db->listSources();
     foreach ($tables as $table) {
-      $tableName = $this->db->fullTableName($table, false);
+      $tableName = $this->db->fullTableName($table, false, false);
       if (!in_array($tableName, $sources)) {
         Logger::warn("Missing table $tableName (from $table)");
         return false;
