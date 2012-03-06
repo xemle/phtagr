@@ -4,6 +4,10 @@
 
 <p><?php echo __("This step creates the configuration for the database connection. Please add your database connection settings here."); ?></p>
 
+<?php
+  // suppress missing database warnings
+  Configure::write('debug', 0);
+?>
 <?php echo $this->Form->create(null, array('action' => 'config')); ?>
 
 <fieldset><legend><?php echo __("Database"); ?></legend>
