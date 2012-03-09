@@ -17,12 +17,12 @@
 </fieldset>
 <?php echo $this->Form->end(__('Continue')); ?>
 <?php
-$script = <<<'JS'
+$script = <<<SCRIPT
 (function($) {
   $(document).ready(function() {
     $(':submit').button();
   });
 })(jQuery);
-JS;
+SCRIPT;
 echo $this->Html->scriptBlock($script, array('inline' => false));
 ?>

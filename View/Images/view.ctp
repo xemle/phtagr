@@ -127,22 +127,25 @@
 </div><!-- tabs -->
 
 <?php 
-  $script = <<<'JS'
+  $mediaId = $this->request->data['Media']['id'];
+  $lat = $this->request->data['Media']['latitude'] ? $this->request->data['Media']['latitude'] : 0;
+  $long = $this->request->data['Media']['longitude'] ? $this->request->data['Media']['longitude'] : 0;
+  $script = <<<SCRIPT
 (function($) {
 $.fn.resizeImageHeight = function(size) {
-  var $image = $(this);
-  var w = $image.attr('width');
-  var h = $image.attr('height');
+  var image = $(this);
+  var w = image.attr('width');
+  var h = image.attr('height');
   if (0 >= Math.min(w, h) || size > h) {
     return;
   }
-  $image.attr('width', size * (w / h));
-  $image.attr('height', size); 
+  image.attr('width', size * (w / h));
+  image.attr('height', size); 
 };
 $.fn.resizeImage = function(size) {
-  var $image = $(this);
-  var w = $image.attr('width');
-  var h = $image.attr('height');
+  var image = $(this);
+  var w = image.attr('width');
+  var h = image.attr('height');
   if (0 >= Math.min(w, h) || size > Math.max(w, h)) {
     return;
   }
@@ -153,22 +156,22 @@ $.fn.resizeImage = function(size) {
     w = size * (w / h);
     h = size;
   }
-  $image.attr('width', w);
-  $image.attr('height', h); 
+  image.attr('width', w);
+  image.attr('height', h); 
 };
 $(document).ready(function() {
-  $media = $('#p-media-preview');
-  if ($media) {
-    var top = $media.position().top;
+  media = $('#p-media-preview');
+  if (media) {
+    var top = media.position().top;
     var size = window.innerHeight - top - 10;
-    $media.find('img').resizeImageHeight(size);
+    media.find('img').resizeImageHeight(size);
   }
   $("#image-tabs").tabs({
     show: function(event, ui) {
       if (ui.panel.id == 'tab-map') {
         if ($('#map').children().length == 0) {
           $('#mapbox').show();
-          loadMap(:ID, :LATITUDE, :LONGITUDE); 
+          loadMap($mediaId, $lat, $long); 
         }
       }
       return true;
@@ -179,14 +182,7 @@ $(document).ready(function() {
   $("#acl :submit").button();
 });
 })(jQuery);
-JS;
-  $vars = array(
-    'ID' => $this->request->data['Media']['id'],
-    'LATITUDE' => ($this->request->data['Media']['latitude'] ? $this->request->data['Media']['latitude'] : 0),
-    'LONGITUDE' => ($this->request->data['Media']['longitude'] ? $this->request->data['Media']['longitude'] : 0));
-  foreach ($vars as $name => $value) {
-    $script = preg_replace("/:$name/", $value, $script);
-  }
+SCRIPT;
   echo $this->Html->scriptBlock($script, array('inline' => false));
 ?>
 

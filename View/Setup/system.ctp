@@ -32,14 +32,14 @@
 </fieldset>
 <?php echo $this->Form->end(__('Save')); ?>
 <?php
-  $script = <<<'JS'
+  $script = <<<SCRIPT
 (function($) {
   $(document).ready(function() {
     $(':submit').button();
     $('.button').button();
   });
 })(jQuery);
-JS;
+SCRIPT;
   echo $this->Html->scriptBlock($script, array('inline' => false));
 ?>
 

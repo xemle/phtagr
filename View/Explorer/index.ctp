@@ -6,39 +6,44 @@
 <?php echo $this->Breadcrumb->breadcrumb($crumbs); ?>
 
 <?php 
-  $script = <<<'JS'
+  $baseUrl = Router::url('/', true);
+  $editTitleText = __("Edit Meta Data");
+  $aclTitleText = __("Edit Access Rights");
+  $saveText = __("Update"); 
+  $cancelText = __("Cancel");
+  $script = <<<SCRIPT
 (function($) {
   $(document).ready(function() {
     $.fn.tooltipAction = function() {
       $(this).each(function() {
-        var $tooltip = $(this);
+        var tooltip = $(this);
         $(this).parent().delayedHover(function() {
-          $tooltip.show('fast');
+          tooltip.show('fast');
         }, function() {
-          $tooltip.hide();
+          tooltip.hide();
         }, 350);
       });
     };
     $.fn.updateMeta = function(id, crumbs) {
-      var $dialog = $('#dialog');
-      $.ajax(':BASE_URLexplorer/editmeta/' + id + '/' + crumbs, {
+      var dialog = $('#dialog');
+      $.ajax('{$baseUrl}explorer/editmeta/' + id + '/' + crumbs, {
         success: function(data, xhr, status) {
-          $dialog.children().remove();
-          $dialog.append(data);
-          $dialog.dialog({
+          dialog.children().remove();
+          dialog.append(data);
+          dialog.dialog({
             modal: true, 
             width: 520,
-            title: ':EDIT_TITLE',
+            title: '$editTitleText',
             buttons: {
-              ':SAVE': function() {
-                var $form = $('#form-meta-' + id);
-                $.post($form.attr('action'), $form.serialize(), function(data) {
+              '$saveText': function() {
+                var form = $('#form-meta-' + id);
+                $.post(form.attr('action'), form.serialize(), function(data) {
                   $('#media-' + id).html(data);
                   $('#media-' + id).mediaAction();
                 });
                 $(this).dialog("close");
               },
-              ':CANCEL': function() {
+              '$cancelText': function() {
                 $(this).dialog("close");
               }
             }
@@ -47,30 +52,30 @@
       });
     };
     $.fn.updateAcl = function(id, crumbs) {
-      var $dialog = $('#dialog');
-      $.ajax(':BASE_URLexplorer/editacl/' + id + '/' + crumbs, {
+      var dialog = $('#dialog');
+      $.ajax('{$baseUrl}explorer/editacl/' + id + '/' + crumbs, {
         success: function(data, xhr, status) {
-          $dialog.children().remove();
-          $dialog.append(data);
-          $dialog.dialog({
+          dialog.children().remove();
+          dialog.append(data);
+          dialog.dialog({
             modal: true, 
             width: 520,
-            title: ':ACL_TITLE',
+            title: '$aclTitleText',
             buttons: {
-              ':SAVE': function() {
-                var $form = $('#form-acl-' + id);
-                $.post($form.attr('action'), $form.serialize(), function(data) {
+              '$saveText': function() {
+                var form = $('#form-acl-' + id);
+                $.post(form.attr('action'), form.serialize(), function(data) {
                   $('#media-' + id).html(data);
                   $('#media-' + id).mediaAction();
                 });
                 $(this).dialog("close");
               },
-              ':CANCEL': function() {
+              '$cancelText': function() {
                 $(this).dialog("close");
               }
             }
           });
-          $dialog.find('.radioSet').buttonset();
+          dialog.find('.radioSet').buttonset();
         }
       });
     };
@@ -111,19 +116,19 @@
     });
 
     $.fn.activateExplorerMenu = function(id, target) {
-      $item = $(id);
-      $target = $(target);
-      if (!$item || !$target) {
+      item = $(id);
+      target = $(target);
+      if (!item || !target) {
         return;
       }
-      $item.siblings('.active').removeClass('active');
-      if ($item.hasClass('active')) {
-        $item.removeClass('active');
-        $target.removeClass('active').hide();
+      item.siblings('.active').removeClass('active');
+      if (item.hasClass('active')) {
+        item.removeClass('active');
+        target.removeClass('active').hide();
       } else {
         $('#p-explorer-menu-content .active').removeClass('active').hide();
-        $item.addClass('active');
-        $target.addClass('active').slideDown('fast');
+        item.addClass('active');
+        target.addClass('active').slideDown('fast');
       }
     };
     $('#p-explorer-all-meta').hide();
@@ -161,16 +166,7 @@
     $(this).placeExplorerMenu();
   }); 
 })(jQuery);
-JS;
-  $vars = array(
-    'BASE_URL' => Router::url('/', true), 
-    'EDIT_TITLE' => __("Edit Meta Data"),
-    'ACL_TITLE' => __("Edit Access Rights"),
-    'SAVE' => __("Update"), 
-    'CANCEL' => __("Cancel"));
-  foreach ($vars as $name => $value) {
-    $script = preg_replace("/:$name/", $value, $script);
-  }
+SCRIPT;
   echo $this->Html->script('/piclenslite/piclens_optimized');
   echo $this->Html->scriptBlock($script, array('inline' => false));
 ?>

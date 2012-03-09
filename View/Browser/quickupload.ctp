@@ -32,13 +32,13 @@
 
 <?php echo $this->Form->end(__("Upload")); ?>
 <?php 
-    $script = <<<'JS'
+    $script = <<<SCRIPT
 (function($) {
   $(document).ready(function() {
     $('input[type=submit]').button();
   });
 })(jQuery);
-JS;
+SCRIPT;
   echo $this->Html->scriptBlock($script, array('inline' => false));
 ?>
 <p><?php echo __("You can upload maximal %s and %s at once. ZIP archives are extracted automatically.", $this->Number->toReadableSize($free), $this->Number->toReadableSize($max)); ?></p>

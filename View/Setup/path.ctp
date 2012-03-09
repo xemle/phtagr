@@ -28,12 +28,12 @@
 
 <?php echo $this->Html->link(__('Retry'), 'path', array('class' => 'button')); ?>
 <?php
-  $script = <<<'JS'
+  $script = <<<SCRIPT
 (function($) {
   $(document).ready(function() {
     $('.button').button();
   });
 })(jQuery);
-JS;
+SCRIPT;
   echo $this->Html->scriptBlock($script, array('inline' => false));
 ?>

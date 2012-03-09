@@ -47,12 +47,12 @@ class DATABASE_CONFIG {
 <?php echo $this->Html->link(__('Continue'), 'configro', array('class' => 'button')); ?>
 
 <?php
-    $script = <<<'JS'
+    $script = <<<SCRIPT
 (function($) {
   $(document).ready(function() {
     $('.button').button();
   });
 })(jQuery);
-JS;
+SCRIPT;
   echo $this->Html->scriptBlock($script, array('inline' => false));
 ?>

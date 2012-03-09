@@ -15,13 +15,13 @@
 <?php 
   echo $this->Form->end(__('Sign Up')); 
 
-  $script = <<<'JS'
+  $script = <<<SCRIPT
 (function($) {
   $(document).ready(function() {
     $(':submit').button();
     $('.message').addClass("ui-widget ui-corner-all ui-state-highlight");
   }); 
 })(jQuery);
-JS;
+SCRIPT;
   echo $this->Html->scriptBlock($script, array('inline' => false));
 ?>
