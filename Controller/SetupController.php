@@ -400,22 +400,22 @@ class DATABASE_CONFIG {
   public \$default = array(
     'datasource' => 'Database/Mysql',
     'persistent' => true,
-    'host' => '{$this->request->data['db']['host']}',
-    'login' => '{$this->request->data['db']['login']}',
-    'password' => '{$this->request->data['db']['password']}',
-    'database' => '{$this->request->data['db']['database']}',
-    'prefix' => '{$this->request->data['db']['prefix']}',
+    'host' => '{$this->request->data['host']}',
+    'login' => '{$this->request->data['login']}',
+    'password' => '{$this->request->data['password']}',
+    'database' => '{$this->request->data['database']}',
+    'prefix' => '{$this->request->data['prefix']}',
     'encoding' => 'utf8'
   );
  
   public \$test = array(
     'datasource' => 'Database/Mysql',
     'persistent' => true,
-    'host' => '{$this->request->data['db']['host']}',
-    'login' => '{$this->request->data['db']['login']}',
-    'password' => '{$this->request->data['db']['password']}',
-    'database' => '{$this->request->data['db']['database']}',
-    'prefix' => '{$this->request->data['db']['prefix']}test_',
+    'host' => '{$this->request->data['host']}',
+    'login' => '{$this->request->data['login']}',
+    'password' => '{$this->request->data['password']}',
+    'database' => '{$this->request->data['database']}',
+    'prefix' => '{$this->request->data['prefix']}test_',
     'encoding' => 'utf8'
   );
 }
@@ -430,15 +430,15 @@ class DATABASE_CONFIG {
         $this->Session->setFlash(__("Could not write database configuration file"));
       }
       $file->close();
-      unset($this->request->data['db']['password']);
+      unset($this->request->data['password']);
       $this->Session->write('configData', $this->request->data);
     } else {
       if ($this->Session->check('configData')) {
         $this->request->data = $this->Session->read('configData');
       } else {
-        $this->request->data('db.host', 'localhost');
-        $this->request->data('db.database', 'phtagr');
-        $this->request->data('db.login', 'phtagr');
+        $this->request->data('host', 'localhost');
+        $this->request->data('database', 'phtagr');
+        $this->request->data('login', 'phtagr');
       }
     }
     Logger::info("Request database configuration");
