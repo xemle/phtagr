@@ -62,11 +62,7 @@ class FastFileResponder {
 
   /** Extracts the item key from the url and returns it. Returns false if no
    * key could be found */
-  function getItemKey() {
-    if (!isset($_GET['url'])) {
-      return false;
-    }
-    $url = $_GET['url'];
+  function getItemKey($url) {
     if (!preg_match('/media\/(\w+)\/(\d+)/', $url, $matches)) {
       return false;
     }
@@ -74,8 +70,8 @@ class FastFileResponder {
   }
 
   /** Returns the file of the media request */
-  function getFilename() {
-    $key = $this->getItemKey();
+  function getFilename($url) {
+    $key = $this->getItemKey($url);
     if (!$key || !isset($this->items[$key])) {
       return false;
     }
@@ -130,14 +126,14 @@ class FastFileResponder {
   }
 
   /** Evaluates if a valid cache file exists */
-  function exists() {
-    return $this->getFilename() != false;
+  function exists($url) {
+    return $this->getFilename($url) != false;
   }
  
   /** Sends the cache file if it exists and exit. If it returns an error
     * occured */
-  function send() {
-    $filename = $this->getFilename();
+  function send($url) {
+    $filename = $this->getFilename($url);
     if (!$filename) {
       return false;
     }

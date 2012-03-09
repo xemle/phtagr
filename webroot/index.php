@@ -82,12 +82,18 @@
 /**
  * Fast media delivery without CakePHP 
  */
-	if (isset($_GET['url']) && preg_match('/media\/\w+\/\d+/', $_GET['url'])) {
+	$url == '';
+	if (isset($_GET['url'])) {
+		$url = $_GET['url'];
+	} else {
+		$url = array_shift(array_keys($_GET));
+	}
+	if ($url && preg_match('/media\/\w+\/\d+/', $url)) {
 		require APP . DS . 'fast_file_responder.php';
 
 		$fileResponder = new FastFileResponder();
-		if ($fileResponder->exists()) {
-			$fileResponder->send();
+		if ($fileResponder->exists($url)) {
+			$fileResponder->send($url);
 		} else {
 			$fileResponder->close();
 			unset($fileResponder);
