@@ -95,7 +95,7 @@ class MyFile extends AppModel
    * the media if the file is required by the media */
   function beforeDelete($cascade = true) {
     $this->set($this->findById($this->id));
-    if (!$this->hasFlag(null, FILE_FLAG_EXTERNAL)) {
+    if (!$this->hasFlag(&$this->data, FILE_FLAG_EXTERNAL)) {
       $filename = $this->getFilename();
       if (!@unlink($filename)) {
         Logger::err("Could not delete internal file $filename");
@@ -114,7 +114,7 @@ class MyFile extends AppModel
 
   /** If the media depends on the file the function deletes the media */
   function afterDelete() {
-    if ($this->hasFlag(null, FILE_FLAG_DEPENDENT) && 
+    if ($this->hasFlag(&$this->data, FILE_FLAG_DEPENDENT) && 
       $this->hasMedia()) {
       Logger::verbose("Delete media {$this->data['Media']['id']} from dependent file {$this->data['File']['id']}");
       $this->Media->delete($this->data['File']['media_id']);
@@ -245,7 +245,7 @@ class MyFile extends AppModel
     $this->updateAll(array('media_id' => null, 'readed' => null), array('id' => $ids));
 
     foreach ($files as $file) {
-      if ($this->hasFlag($file, FILE_FLAG_EXTERNAL)) {
+      if ($this->hasFlag(&$file, FILE_FLAG_EXTERNAL)) {
         Logger::debug("Delete external file {$file['File']['id']} from database");
         $this->delete($file['File']['id']);
       } 

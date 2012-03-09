@@ -85,7 +85,7 @@ class FlagBehavior extends ModelBehavior
       $data = $data[$model->alias];
     }
     if (!isset($data['flag'])) {
-      Logger::err("Precondition failed");
+      Logger::err("Precondition failed! Model {$model->alias} has no flag field.");
       return false;
     }
 
