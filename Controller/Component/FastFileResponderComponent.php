@@ -24,6 +24,19 @@ class FastFileResponderComponent extends Component {
 
   function initialize(&$controller) {
     $this->controller = $controller;
+    $this->removeExpiredItems();
+  }
+
+  function removeExpiredItems() {
+    $now = time();
+    $validItems = array();
+    $files = (array) $this->Session->read($this->sessionKey);
+    foreach ($files as $key => $values) {
+      if ($values['expires'] > $now) {
+        $validItems[$key] = $values;
+      }
+    }
+    $this->Session->write($this->sessionKey, $validItems);
   }
 
   function add($media, $name, $ext = 'jpg') {
