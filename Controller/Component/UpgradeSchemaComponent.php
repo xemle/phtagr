@@ -36,7 +36,12 @@ class UpgradeSchemaComponent extends Component {
     }
 
     App::uses('ConnectionManager', 'Model');
-    $this->db =& ConnectionManager::getDataSource('default');
+    try {
+      $this->db =& ConnectionManager::getDataSource('default');
+    } catch (Exception $e) {
+      $this->db = null;
+      return false;
+    }
     if (!$this->db) {
       Logger::err("Could not create database source");
       return false;

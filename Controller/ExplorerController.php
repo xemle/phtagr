@@ -640,7 +640,6 @@ class ExplorerController extends AppController
       $this->redirect(null, '404');
     }
     $id = intval($id);
-    $this->layout='bare';
     if (isset($this->request->data)) {
       // Call find() instead of read(). read() populates resultes to the model,
       // which causes problems at save()

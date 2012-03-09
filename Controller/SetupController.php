@@ -273,7 +273,7 @@ class SetupController extends AppController {
     $this->Session->write('setup', true);
     Logger::info("Start Setup of phTagr!");
 
-		if (!$this->__hasSalt()) {
+    if (!$this->__hasSalt()) {
       $this->redirect('salt');
     }
   }
