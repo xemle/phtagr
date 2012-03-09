@@ -123,7 +123,7 @@ class Search extends Object
 
   function __call($name, $args) {
     if (!preg_match('/^(get|set|add|del|delete)(.*)$/', $name, $matches)) {
-      $this->log("Undefined function $name");
+      $this->log("Search: Undefined function $name");
       return;
     }
     $name = Inflector::underscore($matches[2]);

@@ -59,7 +59,15 @@ class SearchHelper extends Search {
     $this->config = am($this->config, $config);
   }
 
-  /** Add parameter to the data array
+  function __call($name, $args) {
+    if (preg_match('/^(get|set|add|del|delete)(.*)$/', $name)) {
+      return parent::__call($name, $args);
+    } else {
+      return;
+    }
+  }
+  
+/** Add parameter to the data array
     @param data Reference of data array
     @param add Add values */
   function _addParams(&$data, $add = false) {
