@@ -32,7 +32,7 @@ class Option extends AppModel {
       $name = $default[$this->name]['name'];
       if (strlen($name) > 2 && substr($name, -2) == '[]') {
         $options[] = $default[$this->name];
-      } else if ($ownOptions && !in_array($name, $ownOptions)) {
+      } else if (!$ownOptions || !in_array($name, $ownOptions)) {
         $options[] = $default[$this->name];
       }
     }

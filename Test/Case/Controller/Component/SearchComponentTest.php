@@ -27,8 +27,10 @@ class SearchComponentTestCase extends CakeTestCase {
 	var $controllerMock;
 	var $uses = array();
 	var $components = array('Search');
-	
-/**
+
+	public $fixtures = array('app.option', 'app.user', 'app.group', 'app.groups_user', 'app.guest');
+
+  /**
  * setUp method
  *
  * @return void
