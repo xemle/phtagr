@@ -41,7 +41,7 @@ class CommandComponent extends Component {
 
   function run($bin, $args) {
     if (!is_executable($bin)) {
-      Logger::err("Invalid program $bin");
+      Logger::err("Command is not exectuable: '$bin'");
       return 1;
     }
     if (is_array($args)) {

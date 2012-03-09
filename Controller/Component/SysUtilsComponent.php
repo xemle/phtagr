@@ -15,7 +15,7 @@
  * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
 
-class SysUtilsComponent extends Object {
+class SysUtilsComponent extends Component {
 
   var $controller = null;
 
