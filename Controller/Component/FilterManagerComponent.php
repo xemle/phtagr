@@ -233,7 +233,10 @@ class FilterManagerComponent extends Component {
       if (!isset($extStack[$ext])) {
         continue;
       }
-      foreach ($extStack[$ext] as $file) {
+      // sort files by name
+      $files = $extStack[$ext];
+      sort($files);
+      foreach ($files as $file) {
         $result[$file] = $this->read($file);
       }
     }
