@@ -27,44 +27,47 @@ class FlagBehavior extends ModelBehavior
     if (!$data) {
       $data = $model->data;
     }
-    if (isset($data[$model->alias])) {
-      $data =& $data[$model->alias];
+    
+    $modelData = $data;
+    if (isset($modelData[$model->alias])) {
+      $modelData = $modelData[$model->alias];
     }
-
-    if (!isset($data['id']) || !isset($data['flag'])) {
+    if (!isset($modelData['id']) || !isset($modelData['flag'])) {
       Logger::err("Precondition failed");
       return false;
     }
 
-    if ($data['flag'] & $flag) {
+    if ($modelData['flag'] & $flag) {
       return true;
     }
-    $data['flag'] |= $flag;
-    if (!$model->save($data, true, array('flag'))) {
+    
+    $modelData['flag'] |= $flag;
+    if (!$model->save($modelData, true, array('flag'))) {
       Logger::err("Could not update flag");
       return false;
     }
     return true;
   }
 
-  function deleteFlag(&$model, &$data, $flag) {
+  function deleteFlag(&$model, $data, $flag) {
     if (!$data) {
       $data = $model->data;
     }
     
-    if (isset($data[$model->alias])) {
-      $data =& $data[$model->alias];
+    $modelData = $data;
+    if (isset($modelData[$model->alias])) {
+      $modelData = $modelData[$model->alias];
     }
-    if (!isset($data['id']) || !isset($data['flag'])) {
+    if (!isset($modelData['id']) || !isset($modelData['flag'])) {
       Logger::err("Precondition failed");
       return false;
     }
 
-    if ($data['flag'] & $flag == 0) {
+    if ($modelData['flag'] & $flag == 0) {
       return true;
     }
-    $data['flag'] ^= $flag;
-    if (!$model->save($data, true, array('flag'))) {
+    $modelData['flag'] ^= $flag;
+    if (!$model->save($modelData, true, array('flag'))) {
       Logger::err("Could not update flag");
       return false;
     }
@@ -76,20 +79,21 @@ class FlagBehavior extends ModelBehavior
     return $this->deleteFlag($model, $data, $flag);
   }
 
-  function hasFlag(&$model, &$data, $flag) {
+  function hasFlag(&$model, $data, $flag) {
     if (!$data) {
       $data = $model->data;
     }
     
-    if (isset($data[$model->alias])) {
-      $data = $data[$model->alias];
+    $modelData = $data;
+    if (isset($modelData[$model->alias])) {
+      $modelData = $modelData[$model->alias];
     }
-    if (!isset($data['flag'])) {
+    if (!isset($modelData['flag'])) {
       Logger::err("Precondition failed! Model {$model->alias} has no flag field.");
       return false;
     }
 
-    if (($data['flag'] & $flag) > 0) {
+    if (($modelData['flag'] & $flag) > 0) {
       return true;
     } else {
       return false;

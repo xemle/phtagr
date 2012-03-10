@@ -16,6 +16,7 @@
  */
 
 App::uses('Sanitize', 'Utility');
+App::uses('Folder', 'Utility');
 
 class MyFile extends AppModel
 {
