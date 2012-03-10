@@ -27,34 +27,37 @@ class TypeBehavior extends ModelBehavior
     if (!$data) {
       $data =& $model->data;
     }
-    if (isset($data[$model->alias])) {
-      $data = $data[$model->alias];
+    
+    $modelData = $data;
+    if (isset($modelData[$model->alias])) {
+      $modelData = $modelData[$model->alias];
     }
-    if (!isset($data['type'])) {
+    if (!isset($modelData['type'])) {
       Logger::err("Precondition failed");
       Logger::debug($data);
       return null;
     }
 
-    return $data['type'] == $type ? true : false;
+    return $modelData['type'] == $type ? true : false;
   }
 
   function setType(&$model, $data, $type) {
     if (!$data) {
       $data =& $model->data;
     }
-    if (isset($data[$model->alias])) {
-      $data =& $data[$model->alias];
+    $modelData = $data;
+    if (isset($modelData[$model->alias])) {
+      $modelData = $modelData[$model->alias];
     }
 
-    if (!isset($data['id'])) {
+    if (!isset($modelData['id'])) {
       Logger::err("Precondition failed");
       return null;
     }
 
-    $data['type'] = $type;
-    if (!$model->save($data, true, array('type'))) {
-      Logger::err("Could not update type of model {$model->alias} {$data['id']} to type {$type}");
+    $modelData['type'] = $type;
+    if (!$model->save($modelData, true, array('type'))) {
+      Logger::err("Could not update type of model {$model->alias} {$modelData['id']} to type {$modelData}");
     }
   }
 
@@ -62,16 +65,17 @@ class TypeBehavior extends ModelBehavior
     if (!$data) {
       $data =& $model->data;
     }
-    if (isset($data[$model->alias])) {
-      $data =& $data[$model->alias];
+    $modelData = $data;
+    if (isset($modelData[$model->alias])) {
+      $modelData = $modelData[$model->alias];
     }
 
-    if (!isset($data['type'])) {
+    if (!isset($modelData['type'])) {
       Logger::err("Precondition failed");
       return null;
     }
 
-    return $data['type'];
+    return $modelData['type'];
   }
 }
 ?>
