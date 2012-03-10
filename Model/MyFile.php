@@ -15,6 +15,8 @@
  * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
 
+App::uses('Sanitize', 'Utility');
+
 class MyFile extends AppModel
 {
   var $alias = 'File';
@@ -263,16 +265,13 @@ class MyFile extends AppModel
       return false;
     }
 
-    uses('sanitize');
-    $sanitize = new Sanitize();
-
     $conditions = array();
     if (is_dir($filename)) {
-      $sqlPath = $sanitize->escape(Folder::slashTerm($filename));
+      $sqlPath = Sanitize::escape(Folder::slashTerm($filename));
       $conditions[] = "File.path LIKE '$sqlPath%'";
     } else {
-      $sqlPath = $sanitize->escape(Folder::slashTerm(dirname($filename)));
-      $sqlFile = $sanitize->escape(basename($filename));
+      $sqlPath = Sanitize::escape(Folder::slashTerm(dirname($filename)));
+      $sqlFile = Sanitize::escape(basename($filename));
       $conditions[] = "File.path = '$sqlPath'";
       $conditions[] = "File.file = '$sqlFile'";
     }
@@ -414,9 +413,8 @@ class MyFile extends AppModel
     $dst = Folder::slashTerm($dst);
 
     uses('sanitize');
-    $sanitize = new Sanitize();
-    $sqlSrc = $sanitize->escape($src);
-    $sqlDst = $sanitize->escape($dst);
+    $sqlSrc = Sanitize::escape($src);
+    $sqlDst = Sanitize::escape($dst);
 
     $sql = "UPDATE ".$this->tablePrefix.$this->table." AS File ".
            "SET path=REPLACE(path,'$sqlSrc','$sqlDst') ".
@@ -434,9 +432,7 @@ class MyFile extends AppModel
     if (!is_dir($path)) {
       return $this->delete($this->findByFilename($path));
     }
-    uses('sanitize');
-    $sanitize = new Sanitize();
-    $sqlPath = $sanitize->escape(Folder::slashTerm($path));
+    $sqlPath = Sanitize::escape(Folder::slashTerm($path));
     $files = $this->deleteAll("File.path LIKE '$sqlPath%'", true, true);
     if ($deleteFolder) {
       $folder = new Folder();

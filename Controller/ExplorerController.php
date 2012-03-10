@@ -15,6 +15,8 @@
  * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
 
+App::uses('Sanitize', 'Utility');
+
 class ExplorerController extends AppController
 {
   var $components = array('RequestHandler', 'FilterManager', 'Search', 'QueryBuilder', 'FastFileResponder', 'Feed', 'FileCache');
@@ -158,9 +160,7 @@ class ExplorerController extends AppController
     if (strlen($needle) < 2) {
       return;
     }
-    App::import('Sanitize');
-    $sanitize = new Sanitize();
-    $sqlNeedle = $sanitize->escape($needle) . '%';
+    $sqlNeedle = Sanitize::escape($needle) . '%';
 
     $tags = Set::extract('/Tag/name', $this->Media->Tag->find(
       'all', array('conditions' => array("Tag.name like" => $sqlNeedle), 'recursive' => 0, 'limit' => 10

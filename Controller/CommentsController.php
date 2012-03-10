@@ -15,6 +15,8 @@
  * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
 
+App::uses('Sanitize', 'Utility');
+
 class CommentsController extends AppController 
 {
   var $name = 'Comments';
@@ -97,7 +99,6 @@ class CommentsController extends AppController
       $this->Comment->create();
       $this->request->data['Comment']['media_id'] = $mediaId;
       $this->request->data['Comment']['date'] = date("Y-m-d H:i:s", time());
-      App::uses('Sanitize', 'Utility');
       $this->request->data['Comment']['text'] = Sanitize::html($this->request->data['Comment']['text']);
       if (($auth & COMMENT_AUTH_NAME) == 0) {
         $this->request->data['Comment']['user_id'] = $user['User']['id'];

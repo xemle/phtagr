@@ -14,6 +14,9 @@
  * @since         phTagr 2.2b3
  * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
+
+App::uses('Sanitize', 'Utility');
+
 class GuestsController extends AppController {
   var $name = 'Guests';
   var $uses = array('Group', 'User', 'Guest');
@@ -44,9 +47,7 @@ class GuestsController extends AppController {
       $this->redirect(null, '404');
     } 
     $userId = $this->getUserId();
-    uses('sanitize');
-    $sanitize = new Sanitize();
-    $escName = $sanitize->escape($this->request->data['Group']['name']);
+    $escName = Sanitize::escape($this->request->data['Group']['name']);
     $groups = $this->Group->find('all', array('conditions' => "Group.user_id = $userId AND Group.name LIKE '%$escName%'"));
     $this->request->data = $groups;
     $this->layout = "bare";

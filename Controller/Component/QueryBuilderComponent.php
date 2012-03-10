@@ -48,7 +48,6 @@ class QueryBuilderComponent extends Component
 
   function initialize(&$controller) {
     $this->controller = &$controller;
-    $this->Sanitize = new Sanitize();
   }
 
   /** Get array value if exist or default value

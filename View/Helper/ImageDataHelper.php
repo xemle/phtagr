@@ -15,18 +15,13 @@
  * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
     
-App::uses('Sanitize', 'Utility');
-
 class ImageDataHelper extends AppHelper {
 
   var $helpers = array('Session', 'Html', 'Form', 'Search', 'Option', 'Breadcrumb');
 
-  var $Sanitize = null;
-
   function beforeRender() {
     $this->Search->initialize();
     $this->Option->beforeRender();
-    $this->Sanitize =& new Sanitize();
   }
 
   /** Returns the rotated size of the media
