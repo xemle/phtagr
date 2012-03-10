@@ -25,6 +25,18 @@ class ExplorerController extends AppController
 
   var $crumbs = array();
 
+  public function implementedEvents() {
+    $events = parent::implementedEvents();
+    if (isset($events['Controller.beforeRender'])) {
+      if (!is_array($events['Controller.beforeRender'])) {
+        $values = array('callable' => $events['Controller.beforeRender']);
+        $events['Controller.beforeRender'] = $values;
+      }
+      $events['Controller.beforeRender']['priority'] = 9;
+    }
+    return $events;
+  }
+
   function beforeFilter() {
     if ($this->action == 'points' && 
       Configure::read('Security.level') === 'high') {
