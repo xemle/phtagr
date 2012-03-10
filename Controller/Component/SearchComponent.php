@@ -194,6 +194,29 @@ class SearchComponent extends Component
     return $out;
   }
 
+  function _c2h($c) {
+    $d = ord($c);
+    if ($d >= 48 && $d <= 57) {
+      return $d - 48;
+    } elseif ($d >= 65 && $d <= 70) {
+      return $d - 55;
+    } elseif ($d >= 97 && $d <= 102) {
+      return $d - 87;
+    } else {
+      return false;
+    }
+  }
+
+  function _dechex($c1, $c2) {
+    $d1 = $this->_c2h($c1);
+    $d2 = $this->_c2h($c2);
+    if ($d1 === false || $d2 === false) {
+      return false;
+    } else {
+      return chr($d1 * 16 + $d2);
+    }
+  }
+
   function decode($input) {
     $out = '';
     $input = (string)$input;
