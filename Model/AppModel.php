@@ -141,23 +141,12 @@ class AppModel extends Model
   }
 
   function unbindAll($params = array()) {
-    foreach($this->__associations as $assosiation) {
-      if(!empty($this->{$assosiation})) {
-        $this->__backAssociation[$assosiation] = $this->{$assosiation};
-        if(isset($params[$assosiation])) {
-          foreach($this->{$assosiation} as $model => $detail) {
-            if(!in_array($model,$params[$assosiation])) {
-              $this->__backAssociation = array_merge($this->__backAssociation, $this->{$assosiation});
-              unset($this->{$assosiation}[$model]);
-            }
-          }
-        } else {
-          $this->__backAssociation = array_merge($this->__backAssociation, $this->{$assosiation});
-          $this->{$assosiation} = array();
-          //$this->log("Unbind assosiation: $assosiation");
-        }
-      }
-    }
+    $bindings = array(
+        'belongsTo' => array_keys($this->belongsTo),
+        'hasOne' => array_keys($this->hasOne),
+        'hasMany' => array_keys($this->hasMany),
+        'hasAndBelongsToMany' => array_keys($this->hasAndBelongsToMany));
+    $this->unbindModel($bindings);
     return true;
   } 
 

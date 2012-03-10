@@ -33,26 +33,28 @@ class CacheBehavior extends ModelBehavior
     if (!$data) {
       $data =& $model->data;
     }
-    if (isset($data[$model->alias])) {
-      $data = $data[$model->alias];
+    
+    $modelData = $data;
+    if (isset($modelData[$model->alias])) {
+      $modelData = $modelData[$model->alias];
     }
-    if (!isset($data['user_id']) || !isset($data['id'])) {
+    if (!isset($modelData['user_id']) || !isset($modelData['id'])) {
       Logger::err("Precondition failed");
       return false;
     }
     
-    $cacheDir = USER_DIR.$data['user_id'].DS.'cache'.DS;
-    $cacheDir .= sprintf("%04d", ($data['id'] / 1000)).DS;
+    $cacheDir = USER_DIR.$modelData['user_id'].DS.'cache'.DS;
+    $cacheDir .= sprintf("%04d", ($modelData['id'] / 1000)).DS;
     if (!is_dir($cacheDir)) {
       return true;
     }
 
     // catch all cache files and delete them
-    $pattern = sprintf("%07d-.*", $data['id']);
+    $pattern = sprintf("%07d-.*", $modelData['id']);
     $folder =& new Folder($cacheDir);
     $files = $folder->find($pattern);
     if (!$files) {
-      Logger::trace("No cache files found for media {$data['id']}");
+      Logger::trace("No cache files found for media {$modelData['id']}");
     } else {
       foreach ($files as $file) {
         if (!@unlink($folder->addPathElement($cacheDir, $file))) {
@@ -61,7 +63,7 @@ class CacheBehavior extends ModelBehavior
           Logger::trace("Deleted cache file '$file'");
         }
       }
-      Logger::debug("Deleted cache files of media {$data['id']}");
+      Logger::debug("Deleted cache files of media {$modelData['id']}");
     }
     return true;
   }
