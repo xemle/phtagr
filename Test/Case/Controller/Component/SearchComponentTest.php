@@ -160,4 +160,14 @@ class SearchComponentTestCase extends CakeTestCase {
     $this->assertEqual($result, "rule it");
   }
 
+  function testDecode() {
+    $decoded = $this->Search->decode("folder:2012=2f2012-03-10");
+    $this->assertEqual($decoded, "folder:2012/2012-03-10");
+  }
+
+  function testEncode() {
+    $encoded = $this->Search->encode("folder:2012/2012-03-10");
+    $this->assertEqual($encoded, "folder:2012=2f2012-03-10");
+  }
+
 }
