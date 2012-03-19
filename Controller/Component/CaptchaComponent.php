@@ -1,5 +1,6 @@
 <?php 
-App::uses('vendor', 'kcaptcha');
+App::import('Vendor', 'kcaptcha/kcaptcha');
+
 class CaptchaComponent extends Component
 {
   function initialize(&$controller) {

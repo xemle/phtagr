@@ -14,16 +14,18 @@
  * @since         phTagr 2.2b3
  * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
+App::uses('CakeEmail', 'Network/Email');
 
 class NotifyShell extends AppShell {
 
   var $uses = array('User', 'Media', 'MyFile');
-  var $components = array('ImageEmail', 'Search', 'PreviewManager');
+  var $components = array('Search', 'PreviewManager');
 	
   var $verbose = false;
   var $force = false;
   var $dryrun = false;
   var $noemail = false;
+  var $Email = null;
 
   function initialize() {
 		parent::initialize();
@@ -32,31 +34,7 @@ class NotifyShell extends AppShell {
       $this->out("Please configure Notification.url in core.php");
       exit(1);
     }
-		$this->_configureEmail();
-  }
-	
-  /** 
-	 * Configure email component on any SMTP configuration values in core.php 
-	 */
-  function _configureEmail() {
-    if (Configure::read('Mail.from')) {
-      $this->ImageEmail->from = Configure::read('Mail.from');
-    } else {
-      $this->ImageEmail->from = "phTagr <noreply@phtagr.org>";
-    }
-    if (Configure::read('Mail.replyTo')) {
-      $this->ImageEmail->replyTo = Configure::read('Mail.replyTo');
-    }
-    $names = array('host', 'port', 'username', 'password');
-    foreach($names as $name) {
-      $value = Configure::read("Smtp.$name");
-      if ($value) {
-        $this->ImageEmail->smtpOptions[$name] = $value;
-      }
-    }
-    if (!empty($this->ImageEmail->smtpOptions['host'])) {
-      $this->ImageEmail->delivery = 'smtp';
-    }
+    $this->Email = new CakeEmail('default');
   }
 	
   function startup() {
@@ -76,30 +54,27 @@ class NotifyShell extends AppShell {
   }
 
   function _buildImages($media) {
-    $this->ImageEmail->images = array();
+    $attachments = array();
     foreach ($media as $m) {
-      $file = $this->Controller->PreviewManager->getPreview($m, 'mini');
+      $file = $this->PreviewManager->getPreview($m, 'mini');
       if (!$file) {
         Logger::err("Could not create preview for media {$m['Media']['id']}");
         continue;
       }
-      $attachment = array('file' => $file, 'id' => 'media-' . $m['Media']['id'] . '.jpg', 'mime' => 'image/jpeg');
-      $this->ImageEmail->images[] = $attachment;
+      $filename = 'media-' . $m['Media']['id'] . '.jpg';
+      $attachments[$filename] = array('file' => $file, 'contentId' => 'media-' . $m['Media']['id'] . '.jpg', 'mimetype' => 'image/jpg');
     }
+    $this->Email->attachments($attachments);
   }
 
   function _sendNotifaction($user, $media) {
-    $this->ImageEmail->to = $user['User']['email'];
-    $this->ImageEmail->subject = "New media are available";
-    $this->ImageEmail->template = 'notify_new_media';
-    $this->ImageEmail->sendAs = 'both';
-
-    $this->Controller->set('user', $user);
-    $this->Controller->set('media', $media);
-    $this->Controller->set('url', $this->url);
     $this->_buildImages($media);
-
-    if (!$this->ImageEmail->send()) {
+    $this->Email->viewVars(array('user' => $user, 'media' => $media, 'url' => $this->url));
+    $this->Email->template("notify_new_media", "default")
+            ->to($user['User']['email'])
+            ->subject("New media are available")
+            ->emailFormat("both");
+    if (!$this->Email->send()) {
       $this->out("Could not send new media notification email to {$user['User']['email']}");
       Logger::err("Could not send new media notification email to {$user['User']['email']}");
     } else {

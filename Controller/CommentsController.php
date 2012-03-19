@@ -16,13 +16,14 @@
  */
 
 App::uses('Sanitize', 'Utility');
+App::uses('CakeEmail', 'Network/Email');
 
 class CommentsController extends AppController 
 {
   var $name = 'Comments';
   var $uses = array('Comment', 'Media', 'Tag');
   var $helpers = array('Html', 'Time', 'Text', 'Form', 'Rss', 'Paginator');
-  var $components = array('Captcha', 'Email');
+  var $components = array('Captcha');
 
   var $paginate = array (
     'fields' => array ('Comment.id', 'Comment.name', 'Comment.date', 'Comment.text', 'Media.id', 'Media.name' ),
@@ -127,6 +128,10 @@ class CommentsController extends AppController
     }
   }
 
+  function _createEmail() {
+    return new CakeEmail('default'); 
+  }
+
   function _sendEmail($commentId) {
     $comment = $this->Comment->findById($commentId);
     if (!$comment) {
@@ -138,23 +143,17 @@ class CommentsController extends AppController
       Logger::err("Could not find user '{$comment['Media']['user_id']}'");
       return;
     }
-    $email = $user['User']['email'];
-    
-    $this->Email->to = sprintf("%s %s <%s>",
-      $user['User']['firstname'],
-      $user['User']['lastname'],
-      $user['User']['email']);
+    $email = $this->_createEmail();
+    $email->template('comment')
+      ->to(array($user['User']['email'] => $user['User']['firstname'] . ' ' . $user['User']['lastname']))
+      ->subject('[phtagr] Comment: '.$comment['Media']['name'])
+      ->viewVars(array('user' => $user, 'data' => $comment));
 
-    $this->Email->subject = '[phtagr] Comment: '.$comment['Media']['name'];
-
-    $this->Email->template = 'comment';
-    $this->set('user', $user);
-    $this->set('data', $comment);
-
-    if (!$this->Email->send()) {
-      Logger::warn("Could not send notification mail for new comment");
-    } else {
+    try {
+      $email->send();
       Logger::info("Notification mail for new comment send to {$user['User']['email']}");
+    } catch (Exception $e) {
+      Logger::warn("Could not send notification mail for new comment");
     }
   }
 
@@ -196,18 +195,20 @@ class CommentsController extends AppController
 
     $emails = array_unique($emails);
     $to = array_pop($emails);
-    $this->Email->to = $to;
-    $this->Email->bcc = $emails;
 
-    $this->Email->subject = '[phtagr] Comment notification: '.$media['Media']['name'];
+    $email = $this->_createEmail();
+    $email->template('commentnotify')
+      ->to($to)
+      ->bcc($emails)
+      ->subject('[phtagr] Comment notification: '.$media['Media']['name'])
+      ->viewVars(array('data', $comment));
 
-    $this->Email->template = 'commentnotify';
-    $this->set('data', $comment);
     Logger::debug($comment);
-    if (!$this->Email->send()) {
+    try {
+      $email->send();
+      Logger::info("Send comment update notification to: $to, bbc to: " . implode(', ', $emails));
+    } catch (Exception $e) {
       Logger::warn("Could not send comment update notification mail for new comment");
-    } else {
-      Logger::info("Send comment update notification to: $to, bbc to: ".implode(', ', $emails));
     }
   }
 

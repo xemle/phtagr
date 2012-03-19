@@ -14,10 +14,12 @@
  * @since         phTagr 2.2b3
  * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
+App::uses('CakeEmail', 'Network/Email');
+
 class GroupsController extends AppController {
   var $name = 'Groups';
   var $uses = array('Group', 'User', 'Media');
-  var $components = array('RequestHandler', 'Security', 'Email', 'Search');
+  var $components = array('RequestHandler', 'Security', 'Search');
   var $helpers = array('Form', 'ImageData', 'Text');
   var $subMenu = false;
 
@@ -88,82 +90,84 @@ class GroupsController extends AppController {
     }
   }
 
+  function _createEmail() {
+    return new CakeEmail('default');
+  }
+
   function _sendSubscribtionRequest($group) {
-    $this->Email->to = sprintf("%s <%s>", $group['User']['username'], $group['User']['email']);
     $user = $this->getUser();
 
-    $this->Email->subject = "Group {$group['Group']['name']}: Subscription request for user {$user['User']['username']}";
+    $email = $this->_createEmail();
+    $email->template('group_subscribtion_request')
+      ->to(array($group['User']['email'] => $group['User']['username']))
+      ->subject("Group {$group['Group']['name']}: Subscription request for user {$user['User']['username']}")
+      ->viewVars(array('group' => $group, 'user' => $user));
 
-    $this->Email->template = 'group_subscribtion_request';
-    $this->set('group', $group);
-    $this->set('user', $user);
-
-    if (!$this->Email->send()) {
+    try {
+      $email->send();
+      Logger::info("Sent group subscribe request of user {$user['User']['username']} for group {$group['Group']['name']} to {$group['User']['username']}");
+      $this->Session->setFlash(__("Group subscription request was sent to the group owner"));
+      return true;
+    } catch (Exception $e) {
       Logger::err(sprintf("Could not send group subscription request to {$group['User']['username']} <{$group['User']['email']}>"));
-      if ($this->Email->smtpError) {
-        Logger::err($this->Email->smtpError);
-      }
       $this->Session->setFlash(__('Mail could not be sent'));
       return false;
     }
-    Logger::info("Sent group subscribe request of user {$user['User']['username']} for group {$group['Group']['name']} to {$group['User']['username']}");
-    $this->Session->setFlash(__("Group subscription request was sent to the group owner"));
-    return true;
   }
 
   function _sendConfirmation($group, $user) {
-    $this->Email->to = sprintf("%s <%s>", $user['User']['username'], $user['User']['email']);
-    $this->Email->subject = "Group {$group['Group']['name']}: Your subscription was accepted";
-    $this->Email->template = 'group_confirmation';
+    $email = $this->_createEmail();
+    $email->template('group_confirmation')  
+      ->to(array($user['User']['email'] => $user['User']['username']))
+      ->subject("Group {$group['Group']['name']}: Your subscription was accepted")
+      ->viewVars(array('group' => $group, 'user' => $user));
 
-    $this->set('group', $group);
-    $this->set('user', $user);
-
-    if (!$this->Email->send()) {
+    try {
+      $email->send();
+      Logger::info("Sent group confirmation to user {$user['User']['username']} for group {$group['Group']['name']}");
+      return true;
+    } catch (Exception $e) {
       Logger::err(sprintf("Could not send group confirmation to {$user['User']['username']} <{$user['User']['email']}>"));
-      if ($this->Email->smtpError) {
-        Logger::err($this->Email->smtpError);
-      }
       return false;
     }
-    Logger::info("Sent group confirmation to user {$user['User']['username']} for group {$group['Group']['name']}");
-    return true;
   }
 
   function _sendSubscribtion($group) {
-    $this->Email->to = sprintf("%s <%s>", $group['User']['username'], $group['User']['email']);
     $user = $this->getUser();
 
-    $this->Email->subject = "Group {$group['Group']['name']}: Subscription request for user {$user['User']['username']}";
+    $email = $this->_createEmail();
+    $email->template('group_subscribtion')  
+      ->to(array($group['User']['email'] => $group['User']['username']))
+      ->subject("Group {$group['Group']['name']}: Subscription request for user {$user['User']['username']}")
+      ->viewVars(array('group' => $group, 'user' => $user));
 
-    $this->Email->template = 'group_subscribtion';
-    $this->set('group', $group);
-    $this->set('user', $user);
-
-    if (!$this->Email->send()) {
+    try {
+      $email->send();
+      Logger::info("Sent new group subscribtion of user {$user['User']['username']} for group {$group['Group']['name']} to {$group['User']['username']}");
+      return true;
+    } catch (Exception $e) {
       Logger::err(sprintf("Could not send new group subscription to {$group['User']['username']} <{$group['User']['email']}>"));
       return false;
     }
-    Logger::info("Sent new group subscribtion of user {$user['User']['username']} for group {$group['Group']['name']} to {$group['User']['username']}");
-    return true;
   }
 
   function _sendUnsubscribtion($group) {
-    $this->Email->to = sprintf("%s <%s>", $group['User']['username'], $group['User']['email']);
     $user = $this->getUser();
 
-    $this->Email->subject = "Group {$group['Group']['name']}: Subscription request for user {$user['User']['username']}";
+    $email = $this->_createEmail();
+    $email->template('group_unsubscribtion')  
+      ->to(array($group['User']['email'] => $group['User']['username']))
+      ->subject("Group {$group['Group']['name']}: Subscription request for user {$user['User']['username']}")
+      ->viewVars(array('group' => $group, 'user' => $user));
 
-    $this->Email->template = 'group_unsubscribtion';
-    $this->set('group', $group);
-    $this->set('user', $user);
-
-    if (!$this->Email->send()) {
+    try {
+      $email->send();
+      Logger::info("Sent new group subscribtion of user {$user['User']['username']} for group {$group['Group']['name']} to {$group['User']['username']}");
+      return true;
+    } catch (Exception $e) {
       Logger::err(sprintf("Could not send new group subscription to {$group['User']['username']} <{$group['User']['email']}>"));
       return false;
     }
-    Logger::info("Sent new group subscribtion of user {$user['User']['username']} for group {$group['Group']['name']} to {$group['User']['username']}");
-    return true;
   }
 
   function subscribe($name) {

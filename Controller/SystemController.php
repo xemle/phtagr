@@ -17,7 +17,7 @@
 class SystemController extends AppController {
 
   var $name = 'System';
-  var $helpers = array('Form');
+  var $helpers = array('Form', 'Number');
   var $uses = array('Media', 'Option');
   var $subMenu = array();
 
@@ -27,6 +27,7 @@ class SystemController extends AppController {
 
     $this->subMenu = array(
       'index' => __("General"),
+      'register' => __("User Registration"),
       'external' => __("External Programs"),
       'map' => __("Map Settings"),
       'upgrade' => __("Database Upgrade"),
@@ -44,6 +45,46 @@ class SystemController extends AppController {
     $this->Option->setValue($path, $value, $userId);
   }
 
+  function __fromReadableSize($readable) {
+    if (is_float($readable) || is_numeric($readable)) {
+      return $readable;
+    } elseif (preg_match_all('/^\s*(0|[1-9][0-9]*)(\.[0-9]+)?\s*([KkMmGg][Bb]?)?\s*$/', $readable, $matches, PREG_SET_ORDER)) {
+      $matches = $matches[0];
+      $size = (float)$matches[1];
+      if (is_numeric($matches[2])) {
+        $size += $matches[2];
+      }
+      if (is_string($matches[3])) {
+        switch ($matches[3][0]) {
+          case 'k':
+          case 'K':
+            $size = $size * 1024;
+            break;
+          case 'm':
+          case 'M':
+            $size = $size * 1024 * 1024;
+            break;
+          case 'g':
+          case 'G':
+            $size = $size * 1024 * 1024 * 1024;
+            break;
+          case 'T':
+            $size = $size * 1024 * 1024 * 1024 * 1024;
+            break;
+          default:
+            Logger::err("Unknown unit {$matches[3]}");
+        }
+      }
+      if ($size < 0) {
+        Logger::err("Size is negtive: $size");
+        return 0;
+      }
+      return $size;
+    } else {
+      return 0;
+    }
+  }
+
   function index() {
     if (isset($this->request->data)) {
       $this->_set(0, 'general.title', $this->request->data);
@@ -51,6 +92,28 @@ class SystemController extends AppController {
     }
     $this->request->data = $this->Option->getTree(0);
   }
+
+  function register() {
+    if (!empty($this->request->data)) {
+      if ($this->request->data['user']['register']['enable']) {
+        $this->Option->setValue('user.register.enable', 1, 0);
+      } else {
+        $this->Option->setValue('user.register.enable', 0, 0);
+      }
+      $quota = $this->__fromReadableSize($this->request->data['user']['register']['quota']);
+      $this->Option->setValue('user.register.quota', $quota, 0); 
+      $this->Session->setFlash(__("Options saved!"));
+    }
+    $this->request->data = $this->Option->getTree($this->getUserId());
+
+    // add default values
+    if (!isset($this->request->data['user']['register']['enable'])) {
+      $this->request->data['user']['register']['enable'] = 0;
+    }
+    if (!isset($this->request->data['user']['register']['quota'])) {
+      $this->request->data['user']['register']['quota'] = (float)100*1024*1024;
+    }
+  } 
 
   function external() {
     if (!empty($this->request->data)) {

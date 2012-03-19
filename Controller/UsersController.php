@@ -16,10 +16,11 @@
  */
 
 App::uses('Folder', 'Utility');
+App::uses('CakeEmail', 'Network/Email');
 
 class UsersController extends AppController
 {
-  var $components = array('RequestHandler', 'Cookie', 'Email', 'Captcha', 'Search');
+  var $components = array('RequestHandler', 'Cookie', 'Captcha', 'Search');
   var $uses = array('Option', 'Media', 'MyFile'); 
   var $helpers = array('Form', 'Number', 'Time', 'Text', 'ImageData');
   var $paginate = array('limit' => 10, 'order' => array('User.username' => 'asc')); 
@@ -33,7 +34,6 @@ class UsersController extends AppController
     if ($this->hasRole(ROLE_SYSOP)) {
       $this->subMenu = am($this->subMenu, array(
         array('action' => 'add', 'title' => __("Add User"), 'admin' => true),
-        array('action' => 'register', 'title' => __("Registration"), 'admin' => true),
         ));
     }
     $this->layout = 'backend';
@@ -344,32 +344,13 @@ class UsersController extends AppController
     $this->redirect("path/$id");
   }
 
-  function admin_register() {
-    $this->requireRole(ROLE_SYSOP, array('loginRedirect' => '/admin/users'));
-
-    if (!empty($this->request->data)) {
-      if ($this->request->data['user']['register']['enable']) {
-        $this->Option->setValue('user.register.enable', 1, 0);
-      } else {
-        $this->Option->setValue('user.register.enable', 0, 0);
-      }
-      $quota = $this->__fromReadableSize($this->request->data['user']['register']['quota']);
-      $this->Option->setValue('user.register.quota', $quota, 0); 
-      $this->Session->setFlash(__("Options saved!"));
-    }
-    $this->request->data = $this->Option->getTree($this->getUserId());
-
-    // add default values
-    if (!isset($this->request->data['user']['register']['enable'])) {
-      $this->request->data['user']['register']['enable'] = 0;
-    }
-    if (!isset($this->request->data['user']['register']['quota'])) {
-      $this->request->data['user']['register']['quota'] = (float)100*1024*1024;
-    }
-    
-  } 
+  function _createEmail() {
+    return new CakeEmail('default');
+  }
  
-  /** Password recovery */
+  /** 
+   * Password recovery 
+   */
   function password() {
     if (!empty($this->request->data)) {
       $user = $this->User->find('first', array('conditions' => array(
@@ -380,24 +361,22 @@ class UsersController extends AppController
         Logger::warn(sprintf("No user '%s' with email %s was found",
             $this->request->data['User']['username'], $this->request->data['User']['email']));
       } else {
-        $this->Email->to = sprintf("%s %s <%s>", 
-            $user['User']['firstname'],
-            $user['User']['lastname'],
-            $user['User']['email']);
-  
-        $this->Email->subject = 'Password Request';
-
-        $this->Email->template = 'password';
         $user = $this->User->decrypt(&$user);
-        $this->set('user', $user);
 
-        if ($this->Email->send()) {
+        $email = $this->_createEmail();
+        $email->template('password')
+          ->to(array($user['User']['email'] => $user['User']['username']))
+          ->subject('Password Request')
+          ->viewVars(array('user' => $user));
+
+        try {
+          $email->send();
           Logger::info(sprintf("Sent password mail to user '%s' (id %d) with address %s",
             $user['User']['username'], 
             $user['User']['id'],
             $user['User']['email']));
           $this->Session->setFlash(__('Mail was sent!'));
-        } else {
+        } catch (Exception $e) {
           Logger::err(sprintf("Could not send password mail to user '%s' (id %d) with address '%s'",
             $user['User']['username'],
             $user['User']['id'],
@@ -426,7 +405,7 @@ class UsersController extends AppController
         Logger::info("Username already exists: {$this->request->data['User']['username']}");
       } else {
         $user = $this->User->create($this->request->data);
-        if ($this->User->save($user['User'], true, array('id', 'username', 'password', 'email'))) {
+        if ($this->User->save($user['User'], true, array('username', 'password', 'email'))) {
           Logger::info("New user {$this->request->data['User']['username']} was created");
           $this->_initRegisteredUser($this->User->getLastInsertID());
         } else {
@@ -463,12 +442,18 @@ class UsersController extends AppController
       Logger::err("Could not init user $newUserId");
       return false;
     }
+
     // set confirmation key
     $key = md5($newUserId.':'.$user['User']['username'].':'.$user['User']['password'].':'.$user['User']['expires']);
     $this->Option->setValue('user.register.key', $key, $newUserId);
     // send confimation email
     if (!$this->_sendConfirmationEmail($user, $key)) {
       $this->Session->setFlash(__("Could not send the confirmation email. Please contact the admin."));
+      if (!$this->User->delete($user['User']['id'])) {
+        Logger::err("Could not delete user {$user['User']['id']} due email error");
+      } else {
+        Logger::info("Delete user {$user['User']['id']} due email error");
+      }
       return false;
     }
     $this->Session->setFlash(__("A confirmation email was sent to your email address"));
@@ -497,8 +482,10 @@ class UsersController extends AppController
     }
   }
 
-  /** Verifies the confirmation key and activates the new user account 
-    @param key Account confirmation key */
+  /** 
+   * Verifies the confirmation key and activates the new user account 
+   * @param key Account confirmation key 
+   */
   function _checkConfirmation($key) {
     // check key. Option [belongsTo] User: The user is bound to option
     $user = $this->Option->find('first', array('conditions' => array("Option.value" => $key)));
@@ -532,6 +519,7 @@ class UsersController extends AppController
       Logger::err("Could not update expires of user {$user['User']['id']}");
       return false;
     }
+
     // send email to user and notify the sysops
     $this->_sendNewAccountEmail($user);
     $this->_sendNewAccountNotifiactionEmail($user);
@@ -544,70 +532,81 @@ class UsersController extends AppController
     $this->redirect('/options/profile');
   }
 
-  /** Send the confirmation email to the new user
-    @param user User model data
-    @param key Confirmation key to activate the account */
+  /** 
+   * Send the confirmation email to the new user
+   * @param user User model data
+   * @param key Confirmation key to activate the account 
+   */
   function _sendConfirmationEmail($user, $key) {
-    $this->Email->to = $user['User']['email'];
+    $email = $this->_createEmail();
+    $email->template('new_account_confirmation', 'default')
+      ->to(array($user['User']['email'] => $user['User']['username']))
+      ->subject('[phtagr] Account confirmation: '.$user['User']['username'])
+      ->viewVars(array('user' => $user, 'key' => $key));
 
-    $this->Email->subject = '[phtagr] Account confirmation: '.$user['User']['username'];
-
-    $this->Email->template = 'new_account_confirmation';
-    $this->set('user', $user);
-    $this->set('key', $key);
-
-    if (!$this->Email->send()) {
-      Logger::err("Could not send account confirmation mail to {$user['User']['email']} for new user {$user['User']['username']}");
-      return false;
-    } else {
+    try {
+      $email->send();
       Logger::info("Account confirmation mail send to {$user['User']['email']} for new user {$user['User']['username']}");
       return true;
+    } catch (Exception $e) {
+      Logger::err("Could not send account confirmation mail to {$user['User']['email']} for new user {$user['User']['username']}");
+      return false;
     }
   }
 
-  /** Send an email for the new account to the new user 
-    @param user User model data */
+  /** 
+   * Send an email for the new account to the new user 
+   * @param user User model data 
+   */
   function _sendNewAccountEmail($user) {
-    $this->Email->to = $user['User']['email'];
+    $email = $this->_createEmail();
+    $email->template('new_account')
+      ->to($user['User']['email'])
+      ->subject('[phtagr] Welcome '.$user['User']['username'])
+      ->viewVars(array('user' => $user));
 
-    $this->Email->subject = '[phtagr] Welcome '.$user['User']['username'];
-
-    $this->Email->template = 'new_account';
-    $this->set('user', $user);
-
-    if (!$this->Email->send()) {
+    try { 
+      $email->send();
+      Logger::info("New account mail send to {$user['User']['email']} for new user {$user['User']['username']}");
+      return true;
+    } catch (Exception $e) {
       Logger::err("Could not send new account mail to {$user['User']['email']} for new user {$user['User']['username']}");
       return false;
     }
-    Logger::info("New account mail send to {$user['User']['email']} for new user {$user['User']['username']}");
-    return true;
   }
 
-  /** Send a notification email to all system operators (and admins) of the new
+  /** 
+   * Send a notification email to all system operators (and admins) of the new
    * account
-    @param user User model data (of the new user) */
+   * @param user User model data (of the new user) 
+   */
   function _sendNewAccountNotifiactionEmail($user) {
     $sysOps = $this->User->find('all', array('conditions' => "User.role >= ".ROLE_SYSOP));
     if (!$sysOps) {
       Logger::err("Could not find system operators");
       return false;
     }
-    $emails = Set::combine($sysOps, '{n}.User.id', array('{0} <{1}>', '{n}.User.username', '{n}.User.email'));
+    $sysOpsNames = Set::extract('/User/username', $sysOps);
+    $first = array_pop($sysOps);
+    $to = array($first['User']['email'] => $first['User']['username']);
 
-    $this->Email->to = array_pop($emails);
-    $this->Email->bcc = $emails;
+    $email = $this->_createEmail();
+    $email->template('new_account_notification')
+      ->to($to)
+      ->subject('[phtagr] New account notification: '.$user['User']['username'])
+      ->viewVars(array('user' => $user));
+    foreach ($sysOps as $sysOp) {
+      $email->cc($sysOp['User']['email'], $sysOp['User']['username']);
+    }
 
-    $this->Email->subject = '[phtagr] New account notification: '.$user['User']['username'];
-
-    $this->Email->template = 'new_account_notification';
-    $this->set('user', $user);
-
-    if (!$this->Email->send()) {
-      Logger::err("Could not send new account notification email to system operators ".implode(', ', Set::combine($sysOps, '{n}.User.id', '{n}.User.username')));
+    try {
+      $email->send();
+      Logger::info("New account notification email send to system operators " . implode(', ', $sysOpsNames));
+      return true;
+    } catch (Exception $e) {
+      Logger::err("Could not send new account notification email to system operators ".implode(', ', $sysOpsNames));
       return false;
     } 
-    Logger::info("New account notification email send to system operators ".implode(', ', Set::combine($sysOps, '{n}.User.id', '{n}.User.username')));
-    return true;
   }
 
 }
