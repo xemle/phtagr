@@ -315,12 +315,12 @@ class Media extends AppModel
     if (!isset($this->hasAndBelongsToMany[$model]['cacheQuery'])) {
       $db =& ConnectionManager::getDataSource($this->useDbConfig);
 
-      $table = $db->fullTableName($this->{$model}->table, false);
+      $table = $db->fullTableName($this->{$model}->table, false, false);
       $alias = $this->{$model}->alias;
       $key = $this->{$model}->primaryKey;
 
       $joinTable = $this->hasAndBelongsToMany[$model]['joinTable'];
-      $joinTable = $db->fullTableName($joinTable, false);
+      $joinTable = $db->fullTableName($joinTable, false, false);
       $joinAlias = $this->hasAndBelongsToMany[$model]['with'];
       $foreignKey = $this->hasAndBelongsToMany[$model]['foreignKey'];
       $associationForeignKey = $this->hasAndBelongsToMany[$model]['associationForeignKey'];
@@ -355,7 +355,7 @@ class Media extends AppModel
     $db =& ConnectionManager::getDataSource($this->useDbConfig);
 
     if (!isset($this->belongsTo[$model]['cacheQuery'])) {
-      $table = $db->fullTableName($this->{$model}->table, false);
+      $table = $db->fullTableName($this->{$model}->table, false, false);
       $alias = $this->{$model}->alias;
       $key = $this->{$model}->primaryKey;
       $tp = $this->tablePrefix;
@@ -385,7 +385,7 @@ class Media extends AppModel
 
     if (!isset($this->hasMany[$model]['cacheQuery'])) {
       $config = $this->hasMany[$model];
-      $table = $db->fullTableName($this->{$model}->table, false);
+      $table = $db->fullTableName($this->{$model}->table, false, false);
       $alias = $this->{$model}->alias;
       $key = $config['foreignKey'];
       $tp = $this->tablePrefix;
@@ -414,7 +414,7 @@ class Media extends AppModel
     @return Return the image Array as find */
   function optimizedRead($id) {
     $db =& ConnectionManager::getDataSource($this->useDbConfig);
-    $myTable = $db->fullTableName($this->table, false);
+    $myTable = $db->fullTableName($this->table, false, false);
     $sql = "SELECT Media.* FROM `$myTable` AS Media WHERE Media.id = $id";
     $result = $this->query($sql);
     if (!$result)
@@ -596,13 +596,13 @@ class Media extends AppModel
   function _deleteHasAndBelongsToManyFromUser($userId) {
     $db =& ConnectionManager::getDataSource($this->useDbConfig);
 
-    $table = $db->fullTableName($this->table, false);
+    $table = $db->fullTableName($this->table, false, false);
     $alias = $this->alias;
     $key = $this->primaryKey;
 
     Logger::info("Delete HasAndBelongsToMany Media association of user '$userId'");
     foreach ($this->hasAndBelongsToMany as $model => $data) {
-      $joinTable = $db->fullTableName($data['joinTable'], false);
+      $joinTable = $db->fullTableName($data['joinTable'], false, false);
       $joinAlias = $data['with'];
       $foreignKey = $data['foreignKey'];
       $sql = "DELETE FROM `$joinAlias`".
@@ -616,7 +616,7 @@ class Media extends AppModel
   function _deleteHasManyFromUser($userId) {
     $db =& ConnectionManager::getDataSource($this->useDbConfig);
 
-    $table = $db->fullTableName($this->table, false);
+    $table = $db->fullTableName($this->table, false, false);
     $alias = $this->alias;
     $key = $this->primaryKey;
 
@@ -625,7 +625,7 @@ class Media extends AppModel
       if (!isset($data['dependent']) || !$data['dependent']) {
         continue;
       }
-      $manyTable = $db->fullTableName($this->{$model}->table, false);
+      $manyTable = $db->fullTableName($this->{$model}->table, false, false);
       $foreignKey = $data['foreignKey'];
       $sql = "DELETE FROM `$model`".
              " USING `$manyTable` AS `$model`, `$table` AS `$alias`".
