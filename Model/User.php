@@ -48,7 +48,7 @@ class User extends AppModel
       'rule' => array('email'),
       'message' => 'Email address is not valid'),
     'notify_interval' => array(
-      'rule' => array('inList', array(0, 1800, 3600, 86400, 604800, 2592000)),
+      'rule' => array('inList', array('0', '1800', '3600', '86400', '604800', '2592000')),
       'message' => 'Invalid notification interval')
     );
  
