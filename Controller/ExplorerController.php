@@ -715,12 +715,7 @@ class ExplorerController extends AppController
     if (Configure::read('debug') > 1) {
       Configure::write('debug', 1);
     }
-    $this->set(
-        'channel', array('title' => "New Images",
-        'link' => "/explorer/rss",
-        'description' => "Recently Published Images" )
-      );
-    $this->request->data = $this->Search->paginateByCrumbs($this->crumbs);
+    $this->set('data', $this->Search->paginateByCrumbs($this->crumbs));
   }
 
   function media() {

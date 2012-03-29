@@ -1,13 +1,15 @@
 <?php
+$this->set('channelData', array(
+    'title' => __("Most Recent Comments"),
+    'link' => $this->Html->url('/comments', true),
+    'description' => __("Most recent comments at %s", $this->Html->url('/', true)),
+    'language' => 'en-us'));
 
-/** Callback frunction for rss items */
-function getItem($data) {
-  return array('title' => $data['Comment']['name'].' says on '.$data['Media']['name'],
-    'link' => '/images/view/'.$data['Media']['id'].'/'.$data['Media']['file'],
-    'guid' => Router::url($data['Media']['id'].'-'.$data['Comment']['id'], true),
-    'description' => $data['Comment']['text'],
-    'pubDate' => $data['Comment']['created']);
+foreach ($data as $comment) {
+  echo $this->Rss->item(array(), array(
+    'title' => $comment['Comment']['name'].' says on '.$comment['Media']['name'],
+    'link' => '/images/view/'.$comment['Media']['id'],
+    'guid' => Router::url($comment['Media']['id'].'-'.$comment['Comment']['id'], true),
+    'description' => $comment['Comment']['text'],
+    'pubDate' => $comment['Comment']['created']));
 }
-
-echo $rss->items($this->request->data, 'getItem');
-?>

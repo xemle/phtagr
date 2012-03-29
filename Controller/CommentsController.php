@@ -245,17 +245,11 @@ class CommentsController extends AppController
   function rss() {
     $this->layoutPath = 'rss';
     $conditions = $this->Media->buildAclConditions($this->getUser());
-    $this->request->data = $this->Comment->find('all', array('conditions' => $conditions, 'order' => 'Comment.date DESC', 'limit' => 20));
+    $this->set('data', $this->Comment->find('all', array('conditions' => $conditions, 'order' => 'Comment.date DESC', 'limit' => 20)));
 
     if (Configure::read('debug') > 1) {
       Configure::write('debug', 1);
     }
-    $this->set(
-      'channel', array(
-        'title' => "New Comments",
-        'link' => "/comments/rss",
-        'description' => "Recently Published Comments" )
-      );
   }
 }
 ?>

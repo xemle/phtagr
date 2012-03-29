@@ -1,13 +1,16 @@
 <?php
+$this->set('channelData', array(
+    'title' => __("Most Recent Media"),
+    'link' => $this->Html->url('/explorer', true),
+    'description' => __("Most recent media of %s", $this->Html->url('/', true)),
+    'language' => 'en-us'));
 
-/** Callback frunction for rss items */
-function getItem($data) {
-  return array('title' => $data['Media']['name'],
-    'link' => '/images/view/'.$data['Media']['id'],
-    'guid' => $data['Media']['id'],
-    'description' => $data['Media']['caption'],
-    'pubDate' => $data['Media']['created']);
+foreach ($data as $media) {
+  echo $this->Rss->item(array(), array(
+        'title' => $media['Media']['name'],
+        'link' => '/images/view/' . $media['Media']['id'],
+        'guid' => array('url' => $this->Html->url('/images/view/' . $media['Media']['id'], true), 'isPermaLink' => 'true'),
+        'description' => $media['Media']['caption'],
+        'pubDate' => $media['Media']['created']
+    ));
 }
-
-echo $rss->items($this->request->data, 'getItem');
-?>
