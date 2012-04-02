@@ -29,7 +29,7 @@ class UserTestCase extends CakeTestCase {
    *
    * @var array
    */
-	public $fixtures = array('app.user', 'app.group', 'app.groups_user', 'app.option', 'app.guest');
+  public $fixtures = array('app.file', 'app.media', 'app.user', 'app.group', 'app.groups_user', 'app.option', 'app.guest', 'app.comment', 'app.my_file', 'app.tag', 'app.media_tag', 'app.category', 'app.categories_media', 'app.location', 'app.locations_media');
 
   /**
    * setUp method
@@ -56,10 +56,10 @@ class UserTestCase extends CakeTestCase {
   }
 
   public function testDefaultOptions() {
-    // test only default 
+    // test only default
     $this->Option->save($this->Option->create(array('user_id' => 0, 'name' => 'bin.exiftool', 'value' => '/usr/bin/exiftool')));
     $this->User->save($this->User->create(array('username' => 'xemle')));
-    $user = $this->User->findById($this->User->lastInsertID);
+    $user = $this->User->findById($this->User->getLastInsertID());
     $this->assertSame(1, count($user['Option']));
 
     // test overwrite of default values
