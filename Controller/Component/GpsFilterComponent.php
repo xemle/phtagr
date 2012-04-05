@@ -23,7 +23,7 @@ class GpsFilterComponent extends BaseFilterComponent {
   var $components = array('Nmea', 'Gpx');
   var $points = array();
   var $times = array();
-  var $minInterval = 600;
+  var $range = 600;
   var $utcZone = null;
 
   function initialize(&$controller) {
@@ -49,16 +49,20 @@ class GpsFilterComponent extends BaseFilterComponent {
    * @param options
    *  - offset Time offset in seconds
    *  - overwrite Overwrite GPS
-   *  - minInterval Threshold in seconds which media get a GPS point
+   *  - range Threshold in seconds which media get a GPS point
    * @return The image data array or False on error 
    */
   function read($file, &$media, $options = array()) {
+    $offset = $this->controller->getOption('filter.gps.offset', 0) * 60;
+    $overwrite = $this->controller->getOption('filter.gps.overwrite', 0);
+    $range = $this->controller->getOption('filter.gps.range', 10) * 60;
+
     $options = am(array(
-          'offset' => 120*60,
-          'overwrite' => true,
-          'minInterval' => 600),
+          'offset' => $offset,
+          'overwrite' => $overwrite,
+          'range' => $range),
           $options);
-    $this->minInterval = $options['minInterval'];
+    $this->range = $options['range'];
     //Logger::trace($options);
 
     $filename = $this->controller->MyFile->getFilename($file);
@@ -81,14 +85,15 @@ class GpsFilterComponent extends BaseFilterComponent {
     // fetch [first, last] positions
     $userId = $this->controller->getUserId();
     list($start, $end) = $this->getTimeInterval();
+    $startDate = gmdate("Y-m-d H:i:s", $start);
+    $endDate = gmdate("Y-m-d H:i:s", $end);
     //Logger::trace("start: ".date("'Y-m-d H:i:sZ'", $start)." end: ".date("'Y-m-d H:i:sZ'", $end));
 
     
     // Calculate only with UTC time stamps
     $conditions = array(
       'Media.user_id' => $userId,
-      'Media.date >= '.gmdate("'Y-m-d H:i:s'", $start).' AND '.
-      'Media.date <= '.gmdate("'Y-m-d H:i:s'", $end));
+      "Media.date >= '$startDate' AND Media.date <= '$endDate'");
     if (!$options['overwrite']) {
       $conditions['Media.latitude'] = null;
       $conditions['Media.longitude'] = null;
@@ -97,10 +102,11 @@ class GpsFilterComponent extends BaseFilterComponent {
     $this->controller->Media->unbindAll();
     $mediaSet = $this->controller->Media->find('all', array('conditions' => $conditions));
     if (!count($mediaSet)) {
-      Logger::info("No images found for GPS interval");
+      Logger::info("No images found for GPS interval $startDate to $endDate");
       return false;
     }
     // fetch images of same user, no gps, range
+    $updated = 0;
     foreach ($mediaSet as $media) {
       $utc = new DateTime($media['Media']['date'], $this->utcZone);
       $time = $utc->format('U');
@@ -111,7 +117,6 @@ class GpsFilterComponent extends BaseFilterComponent {
         Logger::debug("No GPS position found for image {$media['Media']['id']}");
         continue;
       }
-
       $media['Media']['latitude'] = $position['latitude'];
       $media['Media']['longitude'] = $position['longitude'];
       $media['Media']['flag'] |= MEDIA_FLAG_DIRTY;
@@ -120,7 +125,9 @@ class GpsFilterComponent extends BaseFilterComponent {
       } else {
         Logger::warn("Could not update GPS position of image {$media['Media']['id']}");
       }
+      $updated++;
     }
+    Logger::info("Updated $updated of " . count($mediaSet) . " media for interval $startDate to $endDate");
     return 1;
   }
 
@@ -163,8 +170,8 @@ class GpsFilterComponent extends BaseFilterComponent {
    */
   function _containsDate($time) {
     if (count($this->times) > 0 &&
-      $time >= $this->times[0] - $this->minInterval &&
-      $time <= $this->times[count($this->times)-1] + $this->minInterval) {
+      $time >= $this->times[0] - $this->range &&
+      $time <= $this->times[count($this->times)-1] + $this->range) {
       return true;
     }
     return false;
@@ -209,7 +216,7 @@ class GpsFilterComponent extends BaseFilterComponent {
     }
     $xSec = $x['time'];
     $ySec = $y['time'];
-    $min = $this->minInterval;
+    $min = $this->range;
 
     // time is within the interval
     if ($time < $xSec-$min || $time > $ySec+$min) {
@@ -305,8 +312,8 @@ class GpsFilterComponent extends BaseFilterComponent {
       return array(0, 0);
     }
     return array(
-      $this->times[0]-$this->minInterval,
-      $this->times[count($this->times)-1]+$this->minInterval);
+      $this->times[0]-$this->range,
+      $this->times[count($this->times)-1]+$this->range);
   }
 }
 

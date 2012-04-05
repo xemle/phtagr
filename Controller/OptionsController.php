@@ -26,6 +26,7 @@ class OptionsController extends AppController {
       'acl' => __("Default Rights"),
       'profile' => __("Profile"),
       'rss' => __("RSS Feeds"),
+      'import' => __("Import Options"),
       );
     parent::beforeFilter();
 
@@ -33,6 +34,7 @@ class OptionsController extends AppController {
   }
   
   function beforeRender() {
+    $this->requireRole(ROLE_USER);
     $this->layout = 'backend';
     parent::beforeRender();
   }
@@ -47,8 +49,6 @@ class OptionsController extends AppController {
   }
 
   function acl() {
-    $this->requireRole(ROLE_USER);
-
     $userId = $this->getUserId();
     if (!empty($this->request->data)) {
       // TODO check valid acl
@@ -86,8 +86,6 @@ class OptionsController extends AppController {
   }
 
   function profile() {
-    $this->requireRole(ROLE_USER);
-
     $userId = $this->getUserId();
     if (!empty($this->request->data)) {
       $this->User->id = $userId;
@@ -107,8 +105,6 @@ class OptionsController extends AppController {
   }
 
   function rss($action = null) {
-    $this->requireRole(ROLE_USER);
-
     $userId = $this->getUserId();
     $user = $this->User->findById($userId);
     if ($action == 'renew' || empty($user['User']['key'])) {
@@ -122,5 +118,24 @@ class OptionsController extends AppController {
     $this->request->data = $this->User->findById($userId);
   }
 
+  function import() {
+    $userId = $this->getUserId();
+    if (!empty($this->request->data)) {
+      $offset = intval(Set::extract('filter.gps.offset', $this->request->data));
+      $offset = min(720, max(-720, $offset));
+      $this->Option->setValue('filter.gps.offset', $offset, $userId);
+      
+      $check = Set::extract('filter.gps.overwrite', $this->request->data);
+      $check = $check ? 1 : 0;
+      $this->Option->setValue('filter.gps.overwrite', $check, $userId);
+      
+      $range = intval(Set::extract('filter.gps.range', $this->request->data));
+      $range = max(0, min(60, $range));
+      $this->Option->setValue('filter.gps.range', $range, $userId);
+    }
+    $tree = $this->Option->getTree($userId);
+    $this->Option->addDefaultAclTree(&$tree);
+    $this->request->data = $tree;
+  }
 }
 ?>
