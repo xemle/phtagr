@@ -15,6 +15,11 @@
  * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
 
+/**
+ * Reads NMEA GPS data log
+ * 
+ * @see http://aprs.gids.nl/nmea for details
+ */
 class NmeaComponent extends Component {
 
   var $controller;
@@ -66,21 +71,48 @@ class NmeaComponent extends Component {
   }
 
   /**
-   * Create epoch time from gps data
+   * Create UTC date from gps data
    *
    * @param String $date in format mmDDYY
    * @param String $time Time in format HHMMSS
-   * @return int Time in seconds
+   * @return String Date in ISO8601 format YYYY-mm-DDTHH:MM:SSZ
    */
-  function _getTime($date, $time) {
-    $result = substr($time, 0, 2)*3600+substr($time, 2, 2)*60+substr($time, 4, 2);
-    $result = $time + mktime(0, 0, 0, substr($date, 2, 2), substr($date, 0, 2), 2000+substr($date, 4, 2));
+  function _getIso8601Date($date, $time) {
+    // Split 2-digit year to year 1970 - 2069
+    $year = intval(substr($date, 4, 2));
+    if ($year >= 70) {
+      $year += 1900;
+    } else {
+      $year += 2000;
+    }
+    $result = $year . '-' . substr($date, 2, 2) . '-' . substr($date, 0, 2) . 'T';
+    $result .= substr($time, 0, 2) . ':' . substr($time, 2, 2) . ':' . substr($time, 4) . 'Z';
     return $result;
   }
 
   /**
    * Read NMEA GPGGA data line
    *
+   * From http://aprs.gids.nl/nmea
+   * 
+   * eg3. $GPGGA,hhmmss.ss,llll.ll,a,yyyyy.yy,a,x,xx,x.x,x.x,M,x.x,M,x.x,xxxx*hh
+   * 1    = UTC of Position
+   * 2    = Latitude
+   * 3    = N or S
+   * 4    = Longitude
+   * 5    = E or W
+   * 6    = GPS quality indicator (0=invalid; 1=GPS fix; 2=Diff. GPS fix)
+   * 7    = Number of satellites in use [not those in view]
+   * 8    = Horizontal dilution of position
+   * 9    = Antenna altitude above/below mean sea level (geoid)
+   * 10   = Meters  (Antenna height unit)
+   * 11   = Geoidal separation (Diff. between WGS-84 earth ellipsoid and
+   *        mean sea level.  -=geoid is below WGS-84 ellipsoid)
+   * 12   = Meters  (Units of geoidal separation)
+   * 13   = Age in seconds since last update from diff. reference station
+   * 14   = Diff. reference station ID#
+   * 15   = Checksum
+   * 
    * @param String $line
    * @param Int $offset
    * @return Array Gps point
@@ -112,8 +144,8 @@ class NmeaComponent extends Component {
     $point = array(
               'latitude' => $latitude,
               'longitude' => $longitude,
-              'altitude' => $altitude,
-              'satelites' => $satelites,
+              'altitude' => floatval($altitude),
+              'satelites' => intval($satelites),
             );
     $this->gga[$parts[1]] = $point;
     return false;
@@ -122,6 +154,22 @@ class NmeaComponent extends Component {
   /**
    * Read NMEA GPRMC data line
    *
+   * From http://aprs.gids.nl/nmea
+   * 
+   * eg4. $GPRMC,hhmmss.ss,A,llll.ll,a,yyyyy.yy,a,x.x,x.x,ddmmyy,x.x,a*hh
+   * 1    = UTC of position fix
+   * 2    = Data status (V=navigation receiver warning)
+   * 3    = Latitude of fix
+   * 4    = N or S
+   * 5    = Longitude of fix
+   * 6    = E or W
+   * 7    = Speed over ground in knots
+   * 8    = Track made good in degrees True
+   * 9    = UT date
+   * 10   = Magnetic variation degrees (Easterly var. subtracts from true course)
+   * 11   = E or W
+   * 12   = Checksum
+   * 
    * @param String $line
    * @return Array
    */
@@ -147,11 +195,11 @@ class NmeaComponent extends Component {
     $longitude = $this->_toDegree($longitude);
     $latitude = $this->_toDegree($latitude);
 
-    $time = $this->_getTime($parts[9], $parts[1]);
+    $date = $this->_getIso8601Date($parts[9], $parts[1]);
     $point = array(
               'latitude' => $latitude,
               'longitude' => $longitude,
-              'time' => $time,
+              'date' => $date,
             );
 
     // Merge GGA info with altitude via timestamp info
