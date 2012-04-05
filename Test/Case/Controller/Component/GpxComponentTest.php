@@ -55,5 +55,20 @@ class GpxComponentTestCase extends CakeTestCase {
     $filename = dirname(dirname(dirname(dirname(__FILE__)))) . DS . 'Resources' . DS . 'example.gpx';
     $points = $this->Gpx->readFile($filename);
     $this->assertEqual(count($points), 7);
+    $first = array(
+            'latitude' => 46.57608333,
+            'longitude' => 8.89241667,
+            'date' => '2007-10-14T10:09:57Z',
+            'altitude' => 2376
+        );
+
+    $last = array(   
+            'latitude' => 46.57661111,
+            'longitude' => 8.89344444,
+            'date' => '2007-10-14T10:14:08Z',
+            'altitude' => 2376
+        );
+    $this->assertEqual($points[0], $first);
+    $this->assertEqual($points[6], $last);
   }
 }

@@ -55,5 +55,22 @@ class NmeaComponentTestCase extends CakeTestCase {
     $filename = dirname(dirname(dirname(dirname(__FILE__)))) . DS . 'Resources' . DS . 'example.log';
     $points = $this->Nmea->readFile($filename);
     $this->assertEqual(count($points), 2);
+    $expected = array(
+        0 => array(
+            'latitude' => 49.007406666667,
+            'longitude' => 8.4287933333333,
+            'altitude' => 23.8,
+            'satelites' => 4,
+            'date' => '2011-08-08T18:46:37Z',
+        ),
+        1 => array(
+            'latitude' => 49.007451666667,
+            'longitude' => 8.4290533333333,
+            'altitude' => 76.3,
+            'satelites' => 4,
+            'date' => '2011-08-08T18:46:52Z'
+        )
+    );
+    $this->assertEquals($points, $expected);
   }
 }

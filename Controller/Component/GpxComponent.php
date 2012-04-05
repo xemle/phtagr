@@ -53,12 +53,11 @@ class GpxComponent extends Component {
     if (!$timeNode) {
       return false;
     }
-    $time = strtotime($timeNode->nodeValue);
     $altitude = $this->_getChildByName($point, 'ele');
     $point = array(
         'latitude' => $lat,
         'longitude' => $long,
-        'time' => $time);
+        'date' => $timeNode->nodeValue);
     if ($altitude) {
       $point['altitude'] = $altitude->nodeValue;
     }
@@ -91,6 +90,7 @@ class GpxComponent extends Component {
       }
     }
 
+    Logger::info("Read $filename with " . count($points) . " track points");
     return $points;
   }
 
