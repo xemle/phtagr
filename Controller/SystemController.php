@@ -31,7 +31,8 @@ class SystemController extends AppController {
       'external' => __("External Programs"),
       'map' => __("Map Settings"),
       'upgrade' => __("Database Upgrade"),
-      'deleteUnusedMetaData' => __("Delete Unused Metadata")
+      'deleteUnusedMetaData' => __("Delete Unused Metadata"),
+      'view' => __("Overview")
       );
   }
 
@@ -200,6 +201,41 @@ class SystemController extends AppController {
     $unusedLocationCount = count($this->Media->Location->findAllUnused());
 
     $this->request->data = compact('unusedTagCount', 'unusedCategoryCount', 'unusedLocationCount');
+  }
+
+  function view() {
+    $data = array();
+    $data['users'] = $this->User->find('count', array('conditions' => array('User.role >=' => ROLE_USER)));
+    $data['guests'] = $this->User->find('count', array('conditions' => array('User.role =' => ROLE_GUEST)));
+    $data['groups'] = $this->User->Group->find('count');
+    $data['files'] = $this->Media->File->find('count');
+    $data['files.external'] = $this->Media->File->find('count', array('conditions' => array('File.flag & ' . FILE_FLAG_EXTERNAL. ' > 0')));
+    $bytes = $this->Media->File->find('all', array(
+      'fields' => 'SUM(File.size) AS Bytes'));
+    $data['file.size'] = floatval($bytes[0][0]['Bytes']);
+    $bytes = $this->Media->File->find('all', array(
+      'conditions' => array("File.flag & ".FILE_FLAG_EXTERNAL." > 0"), 
+      'fields' => 'SUM(File.size) AS Bytes'));
+    $data['file.size.external'] = floatval($bytes[0][0]['Bytes']);
+    $bytes = $this->Media->File->find('all', array(
+      'conditions' => array("File.flag & ".FILE_FLAG_EXTERNAL." = 0"), 
+      'fields' => 'SUM(File.size) AS Bytes'));
+    $data['file.size.internal'] = floatval($bytes[0][0]['Bytes']);
+    $data['media'] = $this->Media->find('count');
+    $data['media.images'] = $this->Media->find('count', array(
+      'conditions' => array('Media.type & ' . MEDIA_TYPE_IMAGE . ' > 0')));
+    $data['media.videos'] = $this->Media->find('count', array(
+      'conditions' => array('Media.type & ' . MEDIA_TYPE_VIDEO . ' > 0')));
+    $result = $this->Media->find('all', array(
+      'conditions' => array('Media.type & ' . MEDIA_TYPE_VIDEO . ' > 0', 'Media.duration > 0'),
+      'fields' => 'SUM(Media.duration) AS Duration'));
+    Logger::debug($result);
+    $data['media.video.length'] = floatval($result[0][0]['Duration']);
+    $data['comments'] = $this->Media->Comment->find('count');
+    $data['tags'] = $this->Media->Tag->find('count');
+    $data['categories'] = $this->Media->Category->find('count');
+    $data['locations'] = $this->Media->Location->find('count');
+    $this->set('data', $data);
   }
 }
 ?>

@@ -32,6 +32,7 @@ class BrowserController extends AppController
       'import' => __("Import Files"),
       'upload' => __("Upload"),
       'sync' => __("Meta Data Sync"),
+      'view' => __("Overview"),
       );
 
     $this->requireRole(ROLE_USER, array('redirect' => '/'));
