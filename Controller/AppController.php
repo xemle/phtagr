@@ -254,6 +254,10 @@ class AppController extends Controller
       return false;
     }
     $parent->{$componentName} = $component;
+    // Load components recusivly
+    if (is_array($component->components)) {
+      $this->loadComponent($component->components, &$component);
+    }
     $component->initialize(&$this);
 
     return true;
