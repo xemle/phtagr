@@ -23,10 +23,10 @@ class OptionsController extends AppController {
 
   function beforeFilter() {
     $this->subMenu = array(
-      'acl' => __("Default Rights"),
       'profile' => __("Profile"),
-      'rss' => __("RSS Feeds"),
+      'password' => __("Password"),
       'import' => __("Import Options"),
+      'rss' => __("RSS Feeds"),
       );
     parent::beforeFilter();
 
@@ -48,59 +48,34 @@ class OptionsController extends AppController {
     // dummy
   }
 
-  function acl() {
-    $userId = $this->getUserId();
-    if (!empty($this->request->data)) {
-      // TODO check valid acl
-      $this->_set($userId, 'acl.group', $this->request->data);
-
-      // check values
-      if ($this->request->data['acl']['write']['meta'] > $this->request->data['acl']['write']['tag']) {
-        $this->request->data['acl']['write']['meta'] = $this->request->data['acl']['write']['tag'];
-      }
-      if ($this->request->data['acl']['read']['original'] > $this->request->data['acl']['read']['preview']) {
-        $this->request->data['acl']['read']['original'] = $this->request->data['acl']['read']['preview'];
-      }
-
-      $this->_set($userId, 'acl.write.tag', $this->request->data);
-      $this->_set($userId, 'acl.write.meta', $this->request->data);
-
-      $this->_set($userId, 'acl.read.original', $this->request->data);
-      $this->_set($userId, 'acl.read.preview', $this->request->data);
-
-      $this->Session->setFlash(__("Settings saved"));
-    }
-    $tree = $this->Option->getTree($userId);
-    $this->Option->addDefaultAclTree(&$tree);
-    $this->request->data = $tree;
-
-    $this->set('userId', $userId);
-    $groups = $this->Group->find('all', array('conditions' => "Group.user_id = $userId", 'order' => array('Group.name' => 'ASC')));
-    if ($groups) {
-      $groups = Set::combine($groups, '{n}.Group.id', '{n}.Group.name');
-    } else {
-      $groups = array();
-    }
-    $groups[-1] = __('[No Group]');
-    $this->set('groups', $groups);
-  }
-
   function profile() {
     $userId = $this->getUserId();
     if (!empty($this->request->data)) {
       $this->User->id = $userId;
-      if (!$this->User->save($this->request->data['User'], true, array('username', 'firstname', 'lastname', 'password', 'email', 'visible_level', 'notify_interval'))) {
+      if (!$this->User->save($this->request->data['User'], true, array('username', 'firstname', 'lastname', 'email', 'visible_level', 'notify_interval'))) {
         Logger::err("Could not update user profile");
         $this->Session->setFlash(__("Could not save profile!"));
       } else {
         Logger::info("User $userId profile updated");
         $this->Session->setFlash(__("Profile saved"));
       }
-      $browser = Set::extract("/Option/user/browser/full", $this->request->data);
-      $this->Option->setValue('user.browser.full', $browser[0], $userId);
     }
     $this->request->data = $this->User->findById($userId);
-    $this->request->data['Option'] = $this->Option->getTree($userId);
+  }
+
+  function password() {
+    $userId = $this->getUserId();
+    if (!empty($this->request->data)) {
+      $this->User->id = $userId;
+      if (!$this->User->save($this->request->data['User'], true, array('password'))) {
+        Logger::err("Could not update user profile");
+        $this->Session->setFlash(__("Could not save profile!"));
+      } else {
+        Logger::info("User $userId profile updated");
+        $this->Session->setFlash(__("Profile saved"));
+      }
+    }
+    $this->request->data = $this->User->findById($userId);
     unset($this->request->data['User']['password']);
   }
 
@@ -121,6 +96,22 @@ class OptionsController extends AppController {
   function import() {
     $userId = $this->getUserId();
     if (!empty($this->request->data)) {
+      $this->_set($userId, 'acl.group', $this->request->data);
+
+      // check values
+      if ($this->request->data['acl']['write']['meta'] > $this->request->data['acl']['write']['tag']) {
+        $this->request->data['acl']['write']['meta'] = $this->request->data['acl']['write']['tag'];
+      }
+      if ($this->request->data['acl']['read']['original'] > $this->request->data['acl']['read']['preview']) {
+        $this->request->data['acl']['read']['original'] = $this->request->data['acl']['read']['preview'];
+      }
+
+      $this->_set($userId, 'acl.write.tag', $this->request->data);
+      $this->_set($userId, 'acl.write.meta', $this->request->data);
+
+      $this->_set($userId, 'acl.read.original', $this->request->data);
+      $this->_set($userId, 'acl.read.preview', $this->request->data);
+
       $offset = intval(Set::extract('filter.gps.offset', $this->request->data));
       $offset = min(720, max(-720, $offset));
       $this->Option->setValue('filter.gps.offset', $offset, $userId);
@@ -132,10 +123,22 @@ class OptionsController extends AppController {
       $range = intval(Set::extract('filter.gps.range', $this->request->data));
       $range = max(0, min(60, $range));
       $this->Option->setValue('filter.gps.range', $range, $userId);
+
+      $this->Session->setFlash(__("Settings saved"));
     }
     $tree = $this->Option->getTree($userId);
     $this->Option->addDefaultAclTree(&$tree);
     $this->request->data = $tree;
+
+    $this->set('userId', $userId);
+    $groups = $this->Group->find('all', array('conditions' => "Group.user_id = $userId", 'order' => array('Group.name' => 'ASC')));
+    if ($groups) {
+      $groups = Set::combine($groups, '{n}.Group.id', '{n}.Group.name');
+    } else {
+      $groups = array();
+    }
+    $groups[-1] = __('[No Group]');
+    $this->set('groups', $groups);
   }
 }
 ?>

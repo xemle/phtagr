@@ -12,15 +12,8 @@
 ?>
 </fieldset>
 
-<fieldset><legend><?php echo __('Password'); ?></legend>
-<?php
-  echo $this->Form->input('User.password', array('label' => __('Password')));
-  echo $this->Form->input('User.confirm', array('type' => 'password', 'label' => __('Confirm')));
-?>
-</fieldset>
 <fieldset><legend><?php echo __('Others'); ?></legend>
 <?php
-  echo $this->Form->input('Option.user.browser.full', array('type' => 'checkbox', 'label' => __('Show advanced file browser')));
   $options = array(
     1 => __("Private"),
     2 => __("Group members"),
