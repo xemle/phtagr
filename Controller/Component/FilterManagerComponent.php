@@ -36,7 +36,7 @@ class FilterManagerComponent extends Component {
     'ext' => array() */
   var $config = array();
 
-  var $errors = 0;
+  var $errors = array();
 
   function initialize(&$controller) {
     $this->controller =& $controller;

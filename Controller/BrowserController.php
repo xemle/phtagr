@@ -350,7 +350,10 @@ class BrowserController extends AppController
       // clear file cache 
       @clearstatcache();
       $start = $now = microtime(true);
-      $executionTime = ini_get('max_execution_time') - 5;
+      $executionTime = intval(ini_get('max_execution_time'));
+      if ($executionTime !== 0) {
+        $executionTime -= 5;
+      } 
 
       while (count($results)) {
         foreach ($results as $media) {
@@ -363,12 +366,12 @@ class BrowserController extends AppController
           }
 
           $now = microtime(true);
-          if ($now - $start > $executionTime) {
+          if ($executionTime > 0 && $now - $start > $executionTime) {
             break;
           }
           $modified = $media['Media']['modified'];
         }
-        if ($now - $start > $executionTime) {
+        if ($executionTime > 0 && $now - $start > $executionTime) {
           break;
         }
         // ensure we query not already called media (which might be unsynced due

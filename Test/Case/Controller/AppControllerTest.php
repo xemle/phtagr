@@ -92,7 +92,7 @@ class AppControllerTest extends ControllerTestCase {
   }
 
   /**
-   * Test recursive load of components
+   * Test recursive load and initialization of components
    */
   public function testLoadComponent() {
     $controller = new LoadComponentController(new CakeRequest(), new CakeResponse());

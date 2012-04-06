@@ -15,15 +15,30 @@
  * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
 
+App::uses('Option', 'Model');
+App::uses('User', 'Model');
+
 App::uses('Router', 'Routing');
 App::uses('Controller', 'Controller');
 App::uses('AppController', 'Controller');
-App::uses('ComponentCollection', 'Controller');
-App::uses('BaseFilterComponent', 'Controller/Component');
-App::uses('GpsFilterComponent', 'Controller/Component');
 App::uses('Logger', 'Lib');
+App::uses('Folder', 'Utility');
 
-class TestController extends AppController {
+if (!defined('RESOURCES')) {
+  define('RESOURCES', TESTS . 'Resources' . DS);
+}
+if (!defined('TEST_FILES')) {
+  define('TEST_FILES', TMP);
+}
+if (!defined('TEST_FILES_TMP')) {
+  define('TEST_FILES_TMP', TEST_FILES . 'write.test.tmp' . DS);
+}
+
+if (!is_writeable(TEST_FILES)) {
+  trigger_error(__('Test file directory %s must be writeable', TEST_FILES), E_USER_ERROR);
+}
+
+class TestReadController extends AppController {
 	
 	var $uses = array('Media', 'MyFile', 'User', 'Option');
   
@@ -48,6 +63,8 @@ class MediaReadTestCase extends CakeTestCase {
   var $Option;
   var $userId;
 	
+  var $Folder;
+  
   /**
    * Fixtures
    *
@@ -65,18 +82,32 @@ class MediaReadTestCase extends CakeTestCase {
  */
 	public function setUp() {
 		parent::setUp();
-		$CakeRequest = new CakeRequest();
+    $this->Folder = new Folder();
+    
+    $this->User = ClassRegistry::init('User');
+    $this->User->save($this->User->create(array('username' => 'admin', 'role' => ROLE_ADMIN)));
+    $this->userId = $this->User->getLastInsertID();
+
+    $this->Option = ClassRegistry::init('Option');
+    if (file_exists('/usr/bin/ffmpeg')) {
+      $this->Option->setValue('bin.ffmpeg', '/usr/bin/ffmpeg', 0);
+    }
+    if (file_exists('/usr/bin/exiftool')) {
+      $this->Option->setValue('bin.exiftool', '/usr/bin/exiftool', 0);
+    }
+    if (file_exists('/usr/bin/convert')) {
+      $this->Option->setValue('bin.convert', '/usr/bin/convert', 0);
+    }
+
+    $CakeRequest = new CakeRequest();
 		$CakeResponse = new CakeResponse();
-		$this->Controller = new TestController($CakeRequest, $CakeResponse);
+		$this->Controller = new TestReadController($CakeRequest, $CakeResponse);
 		$this->Controller->constructClasses();
 		$this->Controller->startupProcess();
     $this->Media =& $this->Controller->Media;
     $this->MyFile = & $this->Controller->MyFile;
-    $this->Option = & $this->Controller->Option;
-    $this->User =& $this->Controller->User;
-
-    $this->User->save($this->User->create(array('username' => 'admin', 'role' => ROLE_ADMIN)));
-    $this->userId = $this->User->getLastInsertID();
+    
+    $this->Folder->create(TEST_FILES_TMP);
   }
 
 /**
@@ -85,8 +116,12 @@ class MediaReadTestCase extends CakeTestCase {
  * @return void
  */
 	public function tearDown() {
-		unset($this->Controller);
+    $this->Folder->delete(TEST_FILES_TMP);
 
+    unset($this->Controller);
+    unset($this->Media);
+    unset($this->User);
+    unset($this->Folder);
 		parent::tearDown();
 	}
 
@@ -112,7 +147,7 @@ class MediaReadTestCase extends CakeTestCase {
  * @return void
  */
 	public function testRead() {
-		$filename = dirname(dirname(__FILE__)) . DS . 'Resources' . DS . 'example.gpx';
+		$filename = RESOURCES . 'example.gpx';
 		$result = $this->Controller->FilterManager->read($filename);
 		$this->assertEqual($result, false);
 	}
@@ -122,7 +157,7 @@ class MediaReadTestCase extends CakeTestCase {
     $this->Option->setValue('filter.gps.offset', 120, $this->userId);
     $this->Media->save($this->Media->create(array('user_id' => $this->userId, 'date' => '2007-10-14T12:12:39')));
     $mediaId = $this->Media->getLastInsertID();
-		$filename = dirname(dirname(__FILE__)) . DS . 'Resources' . DS . 'example.gpx';
+		$filename = RESOURCES . 'example.gpx';
     $result = $this->Controller->FilterManager->read($filename);
 		$this->assertEqual($result, 1);
     $media = $this->Media->findById($mediaId);
@@ -135,7 +170,7 @@ class MediaReadTestCase extends CakeTestCase {
     $this->Option->setValue('filter.gps.offset', -120, $this->userId);
     $this->Media->save($this->Media->create(array('user_id' => $this->userId, 'date' => '2011-08-08T16:46:37')));
     $mediaId = $this->Media->getLastInsertID();
-    $filename = dirname(dirname(__FILE__)) . DS . 'Resources' . DS . 'example.log';
+    $filename = RESOURCES . 'example.log';
     $result = $this->Controller->FilterManager->read($filename);
     $this->assertEqual($result, 1);
     $media = $this->Media->findById($mediaId);
@@ -151,7 +186,7 @@ class MediaReadTestCase extends CakeTestCase {
     $this->assertEqual($media['Media']['latitude'], 34.232);
     $this->assertEqual($media['Media']['longitude'], -23.423);
 
-    $filename = dirname(dirname(__FILE__)) . DS . 'Resources' . DS . 'example.gpx';
+    $filename = RESOURCES . 'example.gpx';
     $result = $this->Controller->FilterManager->read($filename);
     $this->assertEqual($result, 1);
     $media = $this->Media->findById($mediaId);
@@ -164,7 +199,7 @@ class MediaReadTestCase extends CakeTestCase {
     $mediaId = $this->Media->getLastInsertID();
     $media = $this->Media->findById($mediaId);
 
-    $filename = dirname(dirname(__FILE__)) . DS . 'Resources' . DS . 'example.gpx';
+    $filename = RESOURCES . 'example.gpx';
     $this->Option->setValue('filter.gps.range', 0, $this->userId);
 
     // Time 09:59:57 does not fit. GPS log starts at 10:09:57
@@ -183,4 +218,21 @@ class MediaReadTestCase extends CakeTestCase {
     $this->assertEqual($media['Media']['longitude'], 8.89242);
   }
 
+  public function testVideoRead() {
+    copy(RESOURCES . 'MVI_7620.OGG', TEST_FILES_TMP . 'MVI_7620.OGG');    
+    copy(RESOURCES . 'MVI_7620.THM', TEST_FILES_TMP . 'MVI_7620.THM');
+    copy(RESOURCES . 'example.gpx', TEST_FILES_TMP . 'example.gpx');
+    
+    $this->Controller->FilterManager->readFiles(TEST_FILES_TMP);
+    $count = $this->Media->find('count');
+    $this->assertEqual($count, 1);
+    
+    $media = $this->Media->find('first');
+    $keywords = Set::extract('/Tag/name', $media);
+    $this->assertEqual($keywords, array('thailand'));
+    
+    $this->assertEqual($media['Media']['date'], '2007-10-14 10:09:57');
+    $this->assertEqual($media['Media']['latitude'], 46.5761);
+    $this->assertEqual($media['Media']['longitude'], 8.89242);
+  }
 }

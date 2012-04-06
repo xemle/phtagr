@@ -32,7 +32,7 @@ class VideoFilterComponent extends BaseFilterComponent {
 
   function _getVideoExtensions() {
     if ($this->controller->getOption('bin.exiftool') || $this->controller->getOption('bin.ffmpeg')) {
-      return array('avi', 'mov', 'mpeg', 'mpg', 'mts', 'mp4', 'flv');
+      return array('avi', 'mov', 'mpeg', 'mpg', 'mts', 'mp4', 'flv', 'ogg');
     } else {
       return array('flv');
     }
@@ -141,13 +141,7 @@ class VideoFilterComponent extends BaseFilterComponent {
       $isNew = true;
     }
 
-    if ($this->controller->getOption('bin.exiftool')) {
-      $media = $this->_readExiftool(&$media, $filename);
-    } elseif ($this->controller->getOption('bin.ffmpeg')) {
-      $media = $this->_readFfmpeg(&$media, $filename);
-    } else {
-      $media = $this->_readGetId3(&$media, $filename);
-    }
+    $media = $this->_readVideoFormat(&$media, $filename);
     if (!$media || !$this->controller->Media->save($media)) {
       $this->FilterManager->addError($filename, "MediaSaveError");
       Logger::err("Could not save media");
@@ -164,7 +158,7 @@ class VideoFilterComponent extends BaseFilterComponent {
         return false;
       }
       $media = $this->controller->Media->findById($mediaId);
-    }
+    } 
 
     $this->controller->MyFile->updateReaded($file);
     $this->controller->MyFile->setFlag($file, FILE_FLAG_DEPENDENT);
@@ -172,9 +166,28 @@ class VideoFilterComponent extends BaseFilterComponent {
     return $this->controller->Media->findById($mediaId);
   }
 
-  function _readExiftool(&$media, $filename) {
-    $data =& $media['Media'];
-
+  function _readVideoFormat(&$media, $filename) {
+    if ($this->controller->getOption('bin.exiftool')) {
+      $result = $this->_readExiftool($filename);
+    }
+    if (!$result || $this->controller->getOption('bin.ffmpeg')) {
+      $result = $this->_readFfmpeg($filename);
+    }
+    if (!$result) {
+      $result = $this->_readGetId3($filename);
+    }
+    if (!$result || !isset($result['width']) || !isset($result['height']) || !isset($result['duration'])) {
+      $this->FilterManager->addError($filename, "UnknownVideoFormatError");
+      Logger::err("Could extract video format");
+      return false;
+    }
+    $media['Media']['width'] = $result['width'];
+    $media['Media']['height'] = $result['height'];
+    $media['Media']['duration'] = $result['duration'];
+    return $media;
+  }
+  
+  function _readExiftool($filename) {
     $bin = $this->controller->getOption('bin.exiftool', 'exiftool');
     $this->Command->redirectError = true;
     $result = $this->Command->run($bin, array('-n', '-S', $filename));
@@ -186,33 +199,34 @@ class VideoFilterComponent extends BaseFilterComponent {
     } elseif (!count($output)) {
       Logger::err("Command returned no output!");
       return false;
-    } else {
-      foreach ($output as $line) {
-        if (!preg_match('/^(\w+): (.*)$/', $line, $m)) {
-          Logger::warn('Could not parse line: '.$line);
-          continue;
-        }
-        if ($m[1] == 'ImageWidth') {
-          $data['width'] = intval($m[2]);
-          Logger::trace("Extract video width of '$filename': ".$data['width']);
-        } else if ($m[1] == 'ImageHeight') {
-          $data['height'] = intval($m[2]);
-          Logger::trace("Extract video height of '$filename': ".$data['height']);
-        } else if ($m[1] == 'Duration') {
-          $data['duration'] = ceil(intval($m[2]));
-          Logger::trace("Extract duration of '$filename': ".$data['duration']."s");
-        }
-      } 
-      if (!$data['width'] || !$data['height'] || !$data['duration']) {
-        Logger::warn("Could not extract width, height, or durration from '$filename'. Width is {$data['width']}, height is {$data['height']}, duration is {$data['duration']}");
+    } 
+
+    $result = array();
+    foreach ($output as $line) {
+      if (!preg_match('/^(\w+): (.*)$/', $line, $m)) {
+        Logger::warn('Could not parse line: '.$line);
+        continue;
       }
+      if ($m[1] == 'ImageWidth') {
+        $result['width'] = intval($m[2]);
+        Logger::trace("Extract video width of '$filename': ".$data['width']);
+      } else if ($m[1] == 'ImageHeight') {
+        $result['height'] = intval($m[2]);
+        Logger::trace("Extract video height of '$filename': ".$data['height']);
+      } else if ($m[1] == 'Duration') {
+        $result['duration'] = ceil(intval($m[2]));
+        Logger::trace("Extract duration of '$filename': ".$data['duration']."s");
+      }
+    } 
+    if (count($result) != 3) {
+      Logger::warn("Could not extract width, height, or durration from '$filename'");
+      Logger::warn($result);
+      return false;
     }
-    return $media;
+    return $result;
   }
 
-  function _readFfmpeg(&$media, $filename) {
-    $data =& $media['Media'];
-
+  function _readFfmpeg($filename) {
     $bin = $this->controller->getOption('bin.ffmpeg', 'ffmpeg');
     $this->Command->redirectError = true;
     $result = $this->Command->run($bin, array('-i' => $filename, '-t', 0.0));
@@ -224,30 +238,35 @@ class VideoFilterComponent extends BaseFilterComponent {
     } elseif (!count($output)) {
       Logger::err("Command returned no output!");
       return false;
-    } else {
-      Logger::trace($output);
+    }
+    Logger::trace($output);
 
-      foreach ($output as $line) {
-        $words = preg_split("/[\s,]+/", trim($line));
-        if (count($words) >= 2 && $words[0] == "Duration:") {
-          $times = preg_split("/:/", $words[1]);
-          $time = $times[0] * 3600 + $times[1] * 60 + intval($times[2]);
-          $data['duration'] = $time;
-          Logger::trace("Extract duration of '$filename': $time");
-        } elseif (count($words) >= 6 && $words[2] == "Video:") {
-          $words = preg_split("/,+/", trim($line));
-          $data = preg_split("/\s+/", trim($words[2]));
-          list($width, $height) = split("x", trim($data[0]));
-          $data['width'] = $width;
-          $data['height'] = $height;
-          Logger::trace("Extract video size of '$filename': $width x $height");
-        }
+    $result = array();
+    foreach ($output as $line) {
+      $words = preg_split("/[\s,]+/", trim($line));
+      if (count($words) >= 2 && $words[0] == "Duration:") {
+        $times = preg_split("/:/", $words[1]);
+        $time = $times[0] * 3600 + $times[1] * 60 + intval($times[2]);
+        $result['duration'] = $time;
+        Logger::trace("Extract duration of '$filename': $time");
+      } elseif (count($words) >= 6 && $words[2] == "Video:") {
+        $words = preg_split("/,+/", trim($line));
+        $size = preg_split("/\s+/", trim($words[2]));
+        list($width, $height) = split("x", trim($size[0]));
+        $result['width'] = $width;
+        $result['height'] = $height;
+        Logger::trace("Extract video size of '$filename': $width x $height");
       }
     }
-    return $media;
+    if (count($result) != 3) {
+      Logger::warn("Could not extract width, height, or durration from '$filename'");
+      Logger::warn($result);
+      return false;
+    }
+    return $result;
   }
 
-  function _readGetId3(&$media, $filename) {
+  function _readGetId3($filename) {
     App::import('vendor', 'getid3/getid3');
     $getId3 = new getId3();
     // disable not required modules
@@ -263,11 +282,12 @@ class VideoFilterComponent extends BaseFilterComponent {
       return false;
     }
 
-    $media['Media']['duration'] = $data['meta']['onMetaData']['duration'];
-    $media['Media']['width'] = $data['meta']['onMetaData']['width'];
-    $media['Media']['height'] = $data['meta']['onMetaData']['height'];
+    $result = array();
+    $result['duration'] = $data['meta']['onMetaData']['duration'];
+    $result['width'] = $data['meta']['onMetaData']['width'];
+    $result['height'] = $data['meta']['onMetaData']['height'];
     
-    return $media;    
+    return $result;    
   }
 
   // Check for video thumb

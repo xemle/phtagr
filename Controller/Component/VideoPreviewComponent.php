@@ -32,8 +32,10 @@ class VideoPreviewComponent extends Component {
     @param video File model data of the video
     @param insertIfMissing If true, adds the thumb file to the database. Default is true
     @return Filename of the thumb file. False if no thumb file was found */
-  function _findThumb($video, $insertIfMissing = true) {
-    $videoFilename = $this->controller->MyFile->getFilename($video);
+  function _findThumb($videoFilename, $insertIfMissing = true) {
+    if (!file_exists($videoFilename)) {
+      throw new Exception("Video file does not exists: $videoFilename");
+    }
     $path = dirname($videoFilename);
     $folder =& new Folder($path);
     $pattern = basename($videoFilename);
@@ -153,7 +155,7 @@ class VideoPreviewComponent extends Component {
         return false;
       }
       $videoFile = $this->controller->MyFile->getFilename($video);
-      $thumbFilename = $this->_findThumb($video);
+      $thumbFilename = $this->_findThumb($videoFile);
       if ($thumbFilename) {
         return $thumbFilename;
       } elseif (!$thumbFilename && is_writeable(dirname($videoFile))) {

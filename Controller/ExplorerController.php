@@ -579,7 +579,6 @@ class ExplorerController extends AppController
         $tmp = $this->Media->editSingle(&$media, &$this->request->data);
         if (!$this->Media->save($tmp)) {
           Logger::warn("Could not save media");
-          Logger::debug($tmp);
         } else {
           Logger::info("Updated meta of media {$tmp['Media']['id']}");
         }

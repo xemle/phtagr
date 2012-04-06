@@ -147,7 +147,7 @@ class ImageFilterComponent extends BaseFilterComponent {
       Logger::err("$bin could not be found!");
       return false;
     } elseif ($result != 0) {
-      Logger::err("$bin returned with error: $result (command: \"$command\")");
+      Logger::err("$bin returned with error: $result (command: '{$this->Command->lastCommand}')");
       return false;
     }
 
@@ -244,12 +244,12 @@ class ImageFilterComponent extends BaseFilterComponent {
    
     // Associations to meta data: Tags, Categories, Locations
     $keywords = $this->_extract($data, 'Keywords');
-    $ids = $this->controller->Tag->createIdListFromText($keywords, 'name', true);
+    $ids = $this->controller->Media->Tag->createIdListFromText($keywords, 'name', true);
     if (count($ids) > 0)
       $media['Tag']['Tag'] = am($ids, set::extract($media, 'Tag.{n}.id'));
     
     $categories = $this->_extract($data, 'SupplementalCategories');
-    $ids = $this->controller->Category->createIdListFromText($categories, 'name', true);
+    $ids = $this->controller->Media->Category->createIdListFromText($categories, 'name', true);
     if (count($ids) > 0)
       $media['Category']['Category'] = am($ids, set::extract($media, 'Category.{n}.id'));
   
@@ -260,7 +260,7 @@ class ImageFilterComponent extends BaseFilterComponent {
       if ($value)
         $items[] = array('name' => $value, 'type' => $type);
     }
-    $ids = $this->controller->Location->createIdList($items, true);
+    $ids = $this->controller->Media->Location->createIdList($items, true);
     if (count($ids) > 0)
       $media['Location']['Location'] = am($ids,  set::extract($media, 'Location.{n}.id'));
 
