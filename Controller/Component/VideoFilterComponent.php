@@ -209,13 +209,13 @@ class VideoFilterComponent extends BaseFilterComponent {
       }
       if ($m[1] == 'ImageWidth') {
         $result['width'] = intval($m[2]);
-        Logger::trace("Extract video width of '$filename': ".$data['width']);
+        Logger::trace("Extract video width of '$filename': ". $result['width']);
       } else if ($m[1] == 'ImageHeight') {
         $result['height'] = intval($m[2]);
-        Logger::trace("Extract video height of '$filename': ".$data['height']);
+        Logger::trace("Extract video height of '$filename': ". $result['height']);
       } else if ($m[1] == 'Duration') {
         $result['duration'] = ceil(intval($m[2]));
-        Logger::trace("Extract duration of '$filename': ".$data['duration']."s");
+        Logger::trace("Extract duration of '$filename': ". $result['duration']."s");
       }
     } 
     if (count($result) != 3) {
