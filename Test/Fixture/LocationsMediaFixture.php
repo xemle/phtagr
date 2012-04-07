@@ -20,12 +20,11 @@
  *
  */
 class LocationsMediaFixture extends CakeTestFixture {
-/**
- * Import
- *
- * @var array
- */
-	public $import = array('model' => 'LocationsMedia');
+
+	public $fields = array(
+			'location_id' => array('type' => 'integer', 'null' => false),
+			'media_id' => array('type' => 'integer', 'null' => false)
+	);
 
 
 /**

@@ -20,13 +20,11 @@
  *
  */
 class MediaTagFixture extends CakeTestFixture {
-/**
- * Import
- *
- * @var array
- */
-	public $import = array('model' => 'MediaTag');
 
+	public $fields = array(
+			'media_id' => array('type' => 'integer', 'null' => false),
+			'tag_id' => array('type' => 'integer', 'null' => false)
+	);
 
 /**
  * Records

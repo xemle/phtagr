@@ -20,12 +20,11 @@
  *
  */
 class CategoriesMediaFixture extends CakeTestFixture {
-/**
- * Import
- *
- * @var array
- */
-	public $import = array('model' => 'CategoriesMedia');
+	
+	public $fields = array(
+			'category_id' => array('type' => 'integer', 'null' => false),
+			'media_id' => array('type' => 'integer', 'null' => false)
+	);
 
 
 /**
