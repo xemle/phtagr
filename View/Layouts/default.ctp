@@ -28,6 +28,15 @@
 
 <div id="main-menu"><div class="sub">
 <?php echo $this->Menu->menu('main-menu'); ?>
+<div id="quicksearch">
+<?php 
+  echo $this->Form->create(false, array('url' => array('controller' => 'explorer', 'action' => 'quicksearch')));
+  echo $this->Form->input('Media.quicksearch', array('label' => false, 'div' => 'inputWrap', 'placeholder' => __("Search...")));
+  echo $this->Form->submit(__('Go'), array('div' => 'submitWrap'));
+  echo $this->Form->end();
+?>
+</div>
+<div class="clear" ></div>
 </div></div><!-- #main-menu/sub -->
 
 <div id="main"><div class="sub">

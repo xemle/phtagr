@@ -47,15 +47,14 @@
             color: white
 
 #main-menu 
-  width: 100%
   background-color:darken($headerBackgroundColor, 30%)
   > .sub
     width: 950px;
     display: block
     margin: 0 auto
-    > ul
-      > li 
-        display: inline-block
+    > ul li 
+        display: block
+        float: left
         > a
           background-color: lighten(black, 20%)
           +border-radius(5px)
@@ -69,6 +68,38 @@
           &:hover
             background-color: lighten(black, 40%)
             color: white
+    #quicksearch
+      display: block;
+      float: right;
+      .inputWrap, .submitWrap
+        display: block
+        float: left
+        overflow: hidden
+        height: 24px
+        margin: 5px 0
+        background-color: lighten(black, 20%)
+        input
+          border: none
+          background-color: lighten(black, 20%)
+          padding: 5px
+      .inputWrap
+        +border-left-radius(5px)
+        input
+          border: none
+          background-color: lighten(black, 20%)
+      .submitWrap
+        +border-right-radius(5px)
+        &:hover
+          background-color: lighten(black, 40%)
+          color: white
+          cursor: pointer
+          input
+            background-color: lighten(black, 40%)
+            cursor: pointer
+      .clear
+        clear: both
+  .clear
+    clear: both
 
 #main
   +container
