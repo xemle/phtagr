@@ -17,29 +17,28 @@ $nav-button-padding = 100px
     background-color: white
     > div
       > .sub
-        color: white
-        display: block
         +opacity(0.0)
-        background-color: black
-        padding: 10px
-        border: 1px solid black
         a
           color: white
+          display: block
+          background-color: black
+          padding: 10px
+          border: 1px solid black
           font-size: 15pt
       &:hover > .sub
-        display: block
         +opacity(0.5)
-        &:hover
-          +opacity(2)
-          background-color: lighten(black, 20%)
-          border: 1px solid lighten(black, 20%)
+        &:hover 
+          +opacity(1.0)
+          a
+            background-color: lighten(black, 20%)
+            border: 1px solid lighten(black, 20%)
     > .prev
       position: absolute
       top: 70px
       left: 0
       padding-right: $nav-button-padding
       height: 100%;
-      > .sub
+      > .sub a
         +border-right-radius(15px)
     > .up
       padding: 0
@@ -47,7 +46,7 @@ $nav-button-padding = 100px
       position: absolute
       top: 0
       width: 100%
-      > .sub
+      > .sub a
         text-align: center
         display: block
         width: 120px
@@ -59,7 +58,7 @@ $nav-button-padding = 100px
       right: 0
       height: 100%
       padding-left: $nav-button-padding
-      > .sub
+      > .sub a
         +border-left-radius(15px)
 
 #image-tabs

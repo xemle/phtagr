@@ -55,18 +55,19 @@
     margin: 0 auto
     > ul
       > li 
-        margin: 5px
-        margin-left: 0
-        padding: 5px 15px
-        background-color: lighten(black, 20%)
         display: inline-block
-        +border-radius(5px)
-        > a, &:active, &:visited
-          color: lighten(black, 60%)
-          +text-shadow(black, 1px, 0px, 0)
-        &:hover
-          background-color: lighten(black, 40%)
-          > a
+        > a
+          background-color: lighten(black, 20%)
+          +border-radius(5px)
+          display: block
+          margin: 5px
+          margin-left: 0
+          padding: 5px 15px
+          &:active, &:visited
+            color: lighten(black, 60%)
+            +text-shadow(black, 1px, 0px, 0)
+          &:hover
+            background-color: lighten(black, 40%)
             color: white
 
 #main
