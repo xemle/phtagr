@@ -18,15 +18,33 @@ class AutocompleteHelper extends AppHelper
 {
   var $helpers = array('Html', 'Form', 'Js');
 
-  function autoComplete($fieldId, $url, $options = array()) {
-    $names = explode('.', $fieldId);
+  function _getInputId($input) {
+    $names = explode('.', $input);
     foreach ($names as $i => $name) {
       $names[$i] = Inflector::camelize($name);
     }
-    $id = ':input[id=' . implode('', $names) . ']';
+    return implode('', $names);
+  }
+
+  /**
+   * Use phtagr's autocomplete for cake
+   *
+   * @param input Input field
+   * @param url Autocomplete url
+   * @param options
+   *  - targetField - Field if input and autocomplete field differs
+   *  - split - Set true for comma separated autocomplete
+   */
+  function autoComplete($input, $url, $options = array()) {
+    $targetField = $input;
+    if (isset($options['targetField'])) {
+      $targetField = $options['targetField'];
+      unset($options['targetField']);
+    }
+    $inputId = $this->_getInputId($input);
     $jsOptions = $this->Js->object($options);
     $out = "(function($) {
-$('$id').cakeAutoComplete('$fieldId', '" . Router::url($url) . "', $jsOptions);
+$(':input[id=$inputId]').cakeAutoComplete('$targetField', '" . Router::url($url) . "', $jsOptions);
 })(jQuery)";
     return $this->Html->scriptBlock($out);
   }
