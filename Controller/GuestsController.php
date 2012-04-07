@@ -86,7 +86,7 @@ class GuestsController extends AppController {
     if (!empty($this->request->data)) {
       $this->Guest->id = $guestId;
       $this->Guest->set($this->request->data);
-      if ($this->Guest->save(null, true, array('username', 'password', 'email', 'expires', 'quota'))) {
+      if ($this->Guest->save(null, true, array('username', 'password', 'email', 'expires', 'quota', 'notify_interval'))) {
         $this->Session->setFlash(__("Guest data were saved"));
         $auth = max(0, min(3, $this->request->data['Comment']['auth']));
         $this->Option->setValue('comment.auth', $auth, $guestId);

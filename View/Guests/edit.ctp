@@ -28,6 +28,20 @@
   echo $this->Form->label(null, __('Authentication'));
   echo $this->Form->select('Comment.auth', $options, array('empty' => false, 'value' => $select));
   echo '</div>';
+
+?>
+</fieldset>
+<fieldset><legend><?php echo __('Email Notification'); ?></legend>
+<?
+  $options = array(
+    0 => __("Never"),
+    1800 => __("Every 30 minutes"),
+    3600 => __("Every hour"),
+    86400 => __("Every day"),
+    604800 => __("Every week"),
+    2592000 => __("Every month")
+  );
+  echo $this->Form->input('Guest.notify_interval', array('type' => 'select', 'options' => $options, 'label' => __('Send new media notifications')));
 ?>
 </fieldset>
 <?php echo $this->Form->submit(__('Save')); ?>
