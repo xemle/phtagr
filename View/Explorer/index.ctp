@@ -116,8 +116,8 @@
     });
 
     $.fn.activateExplorerMenu = function(id, target) {
-      item = $(id);
-      target = $(target);
+      var item = $(id);
+      var target = $(target);
       if (!item || !target) {
         return;
       }
