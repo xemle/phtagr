@@ -20,14 +20,14 @@ class Media extends AppModel
   var $name = 'Media';
 
   var $belongsTo = array(
-    'User' => array(),
-    'Group' => array());
+    'User' => array());
   
   var $hasMany = array(
     'Comment' => array('dependent' => true),
     'File' => array('className' => 'MyFile'));
 
   var $hasAndBelongsToMany = array(
+    'Group' => array(),
     'Tag' => array(),
     'Category' => array(),
     'Location' => array('order' => 'Location.type'));

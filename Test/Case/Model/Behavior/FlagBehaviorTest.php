@@ -29,7 +29,7 @@ class FlagBehaviorTestCase extends CakeTestCase {
  *
  * @var array
  */
-	public $fixtures = array('app.user', 'app.group', 'app.groups_user', 'app.option', 'app.guest', 'app.media', 'app.file');
+	public $fixtures = array('app.user', 'app.group', 'app.groups_media', 'app.groups_user', 'app.option', 'app.guest', 'app.media', 'app.file');
 
   /**
  * setUp method

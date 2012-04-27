@@ -28,7 +28,7 @@ class SearchComponentTestCase extends CakeTestCase {
 	var $uses = array();
 	var $components = array('Search');
 
-	public $fixtures = array('app.option', 'app.user', 'app.group', 'app.groups_user', 'app.guest');
+	public $fixtures = array('app.option', 'app.user', 'app.group', 'app.groups_media', 'app.groups_user', 'app.guest');
 
   /**
  * setUp method

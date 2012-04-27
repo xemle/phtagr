@@ -6,5 +6,7 @@ $map = array(
 		'002-fix-unzip-path' => 'Md506e1993bdc0017e4f11fd8e3210ec7'),
 	3 => array(
 		'003-drop-habtm-primary-keys' => 'Mc15b41fcc828e7dbb7b8e3fd541d79d6'),
+	4 => array(
+		'004-multiple-access-groups' => 'M57acac5f420bd77f6d55a446199ccab6'),
 );
 ?>
