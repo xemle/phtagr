@@ -591,8 +591,11 @@ class Media extends AppModel
     return $data;
   }
 
-  /** Deletes all HABTM association from images of a given user like Tag, Categories 
-    @param userId User ID */
+  /** 
+   * Deletes all HABTM association from images of a given user like Tag, Categories 
+   * 
+   * @param userId User ID 
+   */
   function _deleteHasAndBelongsToManyFromUser($userId) {
     $db =& ConnectionManager::getDataSource($this->useDbConfig);
 
@@ -746,7 +749,7 @@ class Media extends AppModel
     * @param data Update data
     */
   function updateAcl(&$target, &$media, &$data) {
-    $fields = array('gacl', 'uacl', 'oacl', 'group_id');
+    $fields = array('gacl', 'uacl', 'oacl');
     // copy acl fields to target
     foreach ($fields as $field) {
       $target['Media'][$field] = $media['Media'][$field];
@@ -766,10 +769,6 @@ class Media extends AppModel
       $this->setAcl(&$target, ACL_READ_PREVIEW, ACL_READ_MASK, $data['Media']['readPreview']); 
     }
 
-    // Set group
-    if (!empty($data['Media']['group_id'])) {
-      $target['Media']['group_id'] = $data['Media']['group_id'];
-    }
     // Remove unchanged values
     foreach ($fields as $field) {
       if ($target['Media'][$field] == $media['Media'][$field]) {
@@ -782,20 +781,25 @@ class Media extends AppModel
    * Prepare the input data for edit
    * 
    * @param type $data User input data
+   * @param type $user Current user
    * @return array Array of add and removals
    */
-  function prepareMultiEditData(&$data) {
+  function prepareMultiEditData(&$data, &$user) {
     $tmp = array();
     if (!empty($data['Media']['geo'])) {
       $this->splitGeo(&$data, $data['Media']['geo']);
     }
-    $fields = array('name', 'description', 'date', 'latitude', 'longitude', 'rotation', 'readPreview', 'readOriginal', 'writeTag', 'writeMeta', 'group_id');
+    $fields = array('name', 'description', 'date', 'latitude', 'longitude', 'rotation', 'readPreview', 'readOriginal', 'writeTag', 'writeMeta');
     foreach ($fields as $field) {
       if (!empty($data['Media'][$field])) {
         $tmp['Media'][$field] = $data['Media'][$field];
       }
     }
       
+    $group = $this->Group->prepareMultiEditData(&$data, &$user);
+    if ($group) {
+      $tmp['Group'] = $group['Group'];
+    }
     $tag = $this->Tag->prepareMultiEditData(&$data);
     if ($tag) {
       $tmp['Tag'] = $tag['Tag'];
@@ -860,6 +864,10 @@ class Media extends AppModel
       $tmp['Media']['flag'] = ($media['Media']['flag'] | MEDIA_FLAG_DIRTY);
     }
     if ($media['Media']['canWriteAcl']) {
+      $groups = $this->Group->editMetaMulti(&$media, &$data);
+      if ($groups) {
+        $tmp['Group'] = $groups['Group'];
+      }
       $this->updateAcl(&$tmp, &$media, &$data);
     }
     if (count($tmp) == 1 && count($tmp['Media']) == 2) {
@@ -917,6 +925,10 @@ class Media extends AppModel
       $tmp['Media']['flag'] = ($media['Media']['flag'] | MEDIA_FLAG_DIRTY);
     }
     if ($media['Media']['canWriteAcl']) {
+      $groups = $this->Tag->editMetaSingle(&$media, &$data);
+      if (isset($groups['Group'])) {
+        $tmp['Group'] = $groups['Group'];
+      }
       $this->updateAcl(&$tmp, &$media, &$data);
     }
     // Unchanged data

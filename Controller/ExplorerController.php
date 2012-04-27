@@ -495,8 +495,7 @@ class ExplorerController extends AppController
       }
 
       $user = $this->getUser();
-      $this->Media->prepareGroupData(&$this->request->data, &$user);
-      $editData = $this->Media->prepareMultiEditData(&$this->request->data);
+      $editData = $this->Media->prepareMultiEditData(&$this->request->data, &$user);
       
       $allMedia = $this->Media->find('all', array('conditions' => array('Media.id' => $ids)));
       $changedMedia = array();

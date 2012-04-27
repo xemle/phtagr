@@ -23,6 +23,8 @@ class Group extends AppModel
 
   var $hasAndBelongsToMany = array('Member' => array('className' => 'User'));
 
+  var $actsAs = array('WordList');
+
   function isNameUnique($group) {
     $conditions = array('name' => $group['Group']['name']);
     if (isset($group['Group']['id'])) {
@@ -32,9 +34,85 @@ class Group extends AppModel
     return !$this->hasAny($conditions);
   }
   
-  /** Return all groups which could be assigned to the media 
-    @param user Current user model data
-    @return Array of group model data */
+  /**
+   * Prepare multi edit data for groups
+   * 
+   * @param type $data User input data
+   * @param type $user Current user
+   * @return type 
+   */
+  function prepareMultiEditData(&$data, &$user) {
+    $names = $data['Group']['names'];
+    $words = $this->splitWords($names);
+    if (!count($words)) {
+      return false;
+    }
+    $addWords = $this->removeNegatedWords($words);
+    $deleteWords = $this->getNegatedWords($words);
+
+    $addGroups = $this->findAllByField($addWords, false);
+    $deleteGroups = $this->findAllByField($deleteWords, false);
+    
+    // Remove invalid group additions for non admins
+    if ($user['User']['role'] < ROLE_ADMIN) {
+      $validGroupIds = Set::extract('/Group/id', $this->getGroupsForMedia($user));
+      foreach ($addGroups as $i => $group) {
+        if (!in_array($group['Group']['id'], $validGroupIds)) {
+          unset($addGroups[$i]);
+        }
+      }
+    }
+    
+    if (count($addGroups) || count($deleteGroups)) {
+      return array('Group' => array('addGroup' => Set::extract("/Group/id", $addGroups), 'deleteGroup' => Set::extract("/Group/id", $deleteGroups)));
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * Add and delete groups according to the given data
+   * 
+   * @param type $media
+   * @param type $data
+   * @return type 
+   */
+  function editMetaMulti(&$media, &$data) {
+    if (empty($data['Group'])) {
+      return false;
+    }
+    $oldIds = Set::extract('/Group/id', $media);
+    $ids = am($oldIds, $data['Group']['addGroup']);
+    $ids = array_unique(array_diff($ids, $data['Group']['deleteGroup']));
+    if (array_diff($ids, $oldIds) || array_diff($oldIds, $ids)) {
+      return array('Group' => array('Group' => $ids));
+    } else {
+      return false;
+    }
+  }
+  
+  function editMetaSingle(&$media, &$data) {
+    if (!isset($data['Group']['names'])) {
+      return false;
+    }
+    $words = $this->splitWords($data['Group']['names'], false);
+    $words = $this->removeNegatedWords($words);
+    $tags = $this->findAllByField($words, false);
+    $ids = array_unique(Set::extract("/Group/id", $tags));
+    $oldIds = Set::extract("/Group/id", $media);
+    if (count(array_diff($oldIds, $ids)) || count(array_diff($ids, $oldIds))) {
+      return array('Group' => array('Group' => $ids));
+    } else {
+      return false;
+    }
+  }
+  
+  /** 
+   * Return all groups which could be assigned to the media 
+   * 
+   * @param user Current user model data
+   * @return Array of group model data 
+   */
   function getGroupsForMedia($user) {
     if ($user['User']['role'] >= ROLE_ADMIN) {
       return $this->find('all', array('recursive' => -1));

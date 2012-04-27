@@ -21,12 +21,15 @@ class Tag extends AppModel
   var $actsAs = array('WordList');
   
   /**
-   * Prepare multi ediet data for tags
+   * Prepare multi edit data for tags
    * 
    * @param type $data
    * @return type 
    */
   function prepareMultiEditData(&$data) {
+    if (empty($data['Tag']['names'])) {
+       return false;
+    }
     $names = $data['Tag']['names'];
     $words = $this->splitWords($names);
     if (!count($words)) {

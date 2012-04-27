@@ -43,6 +43,9 @@ class Category extends AppModel
    * @return type 
    */
   function prepareMultiEditData(&$data) {
+    if (empty($data['Category']['names'])) {
+       return false;
+    }
     $names = $data['Category']['names'];
     $words = $this->splitWords($names);
     if (!count($words)) {
