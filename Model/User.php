@@ -254,32 +254,41 @@ class User extends AppModel
     return false;
   }
   
-  /** Selects visible users for users profile 
-    @param user Current user
-    @param username Username to select. 
-    @return Array of users model data. If username is set only one user model data */
-  function findVisibleUsers($user, $username = false) {
+  /** 
+   * Selects visible users for users profile 
+   *
+   * @param user Current user
+   * @param username Username to select.
+   * @param boolean like If true search for similar 
+   * @return Array of users model data. If username is set only one user model data 
+   */
+  function findVisibleUsers($user, $username = false, $like = false) {
     $conditions = array();
     $findType = 'all';
     $resusive = -1;
     if ($username) {
-      $conditions['User.username'] = $username;
-      $findType = 'first';
+      if ($like) {
+        $conditions['User.username like'] = Sanitize::escape($username) . '%';
+      } else {
+        $conditions['User.username'] = $username;
+        $findType = 'first';
+      }
       $recursive = 2;
     }
     $joins = array();
     if ($user['User']['role'] < ROLE_ADMIN) {
       if ($user['User']['role'] < ROLE_GUEST) {
-        $conditions['User.visible_level'] = 4;
+        $conditions['User.visible_level'] = PROFILE_LEVEL_PUBLIC;
       } else {
         $groupIds = Set::extract('/Member/id', $user);
-        $conditions['OR'] = array(
-          'User.visible_level >=' => 3,
-          'AND' => array(
-            'User.visible_level' => 2,
+        $groupIds = am($groupIds, Set::extract('/Group/id', $user));
+        $conditions['OR'] = array('User.visible_level >=' => PROFILE_LEVEL_USER);
+        if (count($groupIds)) {
+          $conditions['OR']['AND'] = array(
+            'User.visible_level' => PROFILE_LEVEL_GROUP,
             'MemberUser.group_id' => $groupIds
-          )
-        );
+          );
+        }
         $prefix = $this->tablePrefix;
         $joins[] = "LEFT JOIN `{$prefix}groups_users` AS `MemberUser` ON `MemberUser`.`user_id` = `User`.`id`";
       }

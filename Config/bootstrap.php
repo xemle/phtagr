@@ -81,10 +81,15 @@ if (!defined('CONFIGS')) {
 }
 
 define('ROLE_NOBODY', 0);
-define('ROLE_GUEST', 1);
-define('ROLE_USER', 2);
-define('ROLE_SYSOP', 3);
-define('ROLE_ADMIN', 4);
+define('ROLE_GUEST',  1);
+define('ROLE_USER',   2);
+define('ROLE_SYSOP',  3);
+define('ROLE_ADMIN',  4);
+
+define('PROFILE_LEVEL_PRIVATE', 1);
+define('PROFILE_LEVEL_GROUP',   2);
+define('PROFILE_LEVEL_USER',    3);
+define('PROFILE_LEVEL_PUBLIC',  4);
 
 define('OUTPUT_TYPE_MINI', 1);
 define('OUTPUT_TYPE_THUMB', 2);

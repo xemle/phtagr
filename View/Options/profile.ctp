@@ -15,10 +15,10 @@
 <fieldset><legend><?php echo __('Others'); ?></legend>
 <?php
   $options = array(
-    1 => __("Private"),
-    2 => __("Group members"),
-    3 => __("Users"),
-    4 => __("Public")
+    PROFILE_LEVEL_PRIVATE => __("Private"),
+    PROFILE_LEVEL_GROUP => __("Group members"),
+    PROFILE_LEVEL_USER => __("Users"),
+    PROFILE_LEVEL_PUBLIC => __("Public")
   );
   echo $this->Form->input('User.visible_level', array('type' => 'select', 'options' => $options, 'label' => __('Profile visibility')));
   $options = array(

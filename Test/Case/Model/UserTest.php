@@ -17,6 +17,7 @@
  */
 App::uses('User', 'Model');
 App::uses('Option', 'Model');
+App::uses('Group', 'Model');
 
 /**
  * Media Test Case
@@ -41,6 +42,7 @@ class UserTestCase extends CakeTestCase {
 
     $this->User = ClassRegistry::init('User');
     $this->Option = ClassRegistry::init('Option');
+    $this->Group = ClassRegistry::init('Group');
   }
 
   /**
@@ -51,6 +53,7 @@ class UserTestCase extends CakeTestCase {
   public function tearDown() {
     unset($this->User);
     unset($this->Option);
+    unset($this->Group);
 
     parent::tearDown();
   }
@@ -85,4 +88,37 @@ class UserTestCase extends CakeTestCase {
     $this->assertSame($expected, $result);
   }
 
+  public function testFindVisibleUsers() {
+    $this->User->save($this->User->create(array('username' => 'admin', 'role' => ROLE_ADMIN, 'visible_level' => PROFILE_LEVEL_USER)));
+    $admin = $this->User->findById($this->User->getLastInsertID());
+    $this->User->save($this->User->create(array('username' => 'sysop', 'role' => ROLE_SYSOP, 'visible_level' => PROFILE_LEVEL_PUBLIC)));
+    $sysop = $this->User->findById($this->User->getLastInsertID());
+    $this->User->save($this->User->create(array('username' => 'userA', 'role' => ROLE_USER, 'visible_level' => PROFILE_LEVEL_GROUP)));
+    $userA = $this->User->findById($this->User->getLastInsertID());
+    $this->User->save($this->User->create(array('username' => 'userB', 'role' => ROLE_USER, 'visible_level' => PROFILE_LEVEL_PRIVATE)));
+    $userB = $this->User->findById($this->User->getLastInsertID());
+
+    // sysop creates group 'friends' with 'UserA'
+    $this->Group->save($this->Group->create(array('name' => 'friends', 'user_id' => $sysop['User']['id'])));
+    $group = $this->Group->findById($this->Group->getLastInsertID());
+    $this->Group->subscribe($group, $userA['User']['id']);
+    $sysop = $this->User->findById($sysop['User']['id']);
+    
+    // Test all users for admin
+    $users = $this->User->findVisibleUsers($admin);
+    $this->assertEqual(array('admin', 'sysop', 'userA', 'userB'), Set::extract('/User/username', $users));
+    // Test explicit username
+    $users = $this->User->findVisibleUsers($admin, 'userA');
+    $this->assertEqual(array('userA'), Set::extract('/User/username', $users));
+    // Test like usernames
+    $users = $this->User->findVisibleUsers($admin, 'user', true);
+    $this->assertEqual(array('userA', 'userB'), Set::extract('/User/username', $users));
+    
+    // Test group visibility. userA is in group of sysop
+    $users = $this->User->findVisibleUsers($sysop);
+    $this->assertEqual(array('admin', 'sysop', 'userA'), Set::extract('/User/username', $users));
+    // userB is not in any group. Sees only public and user level
+    $users = $this->User->findVisibleUsers($userB);
+    $this->assertEqual(array('admin', 'sysop'), Set::extract('/User/username', $users));
+  }
 }
