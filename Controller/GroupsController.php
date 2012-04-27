@@ -20,7 +20,7 @@ class GroupsController extends AppController {
   var $name = 'Groups';
   var $uses = array('Group', 'User', 'Media');
   var $components = array('RequestHandler', 'Security', 'Search');
-  var $helpers = array('Form', 'ImageData', 'Text');
+  var $helpers = array('Form', 'ImageData', 'Text', 'Autocomplete');
   var $subMenu = false;
 
   function beforeFilter() {
@@ -31,21 +31,19 @@ class GroupsController extends AppController {
       );
     $this->requireRole(ROLE_USER);
     $this->Security->blackHoleCallback = 'fail';
-    $this->Security->requirePost = array('addMember');
-    if ($this->action == 'addMember') {
+    $this->Security->requirePost = array('addMember', 'autocomplete');
+    if ($this->action == 'addMember' || $this->action == 'autocomplete') {
       $this->Security->validatePost = false;
+      $this->Security->csrfCheck = false;
+      $this->Security->disabledFields = array('User.username', 'Member.new');
     }
-  }
-
-  function beforeRender() {
     $this->layout = 'backend';
-    parent::beforeRender();
   }
 
-  function fail() {
-    Logger::err("The security component denied the form input");
+  function fail($type) {
+    Logger::err("The security component denied action {$this->action}. Reason: $type");
     Logger::debug($this->request->data);
-    $this->redirect('index');
+    $this->redirect(null, '404');
   }
 
   function index() {
@@ -55,6 +53,17 @@ class GroupsController extends AppController {
     } else {
       $this->request->data = $this->Group->find('all', array('conditions' => (array('OR' => array('User.id' => $userId, 'Group.is_hidden' => false))), 'order' => 'Group.name'));
     }
+  }
+
+	function autocomplete() {
+    if (!$this->RequestHandler->isAjax() || !$this->RequestHandler->isPost()) {
+      Logger::debug("Decline wrong ajax request");
+      $this->redirect(null, '404');
+    } 
+    $user = $this->getUser();
+    $users = $this->User->findVisibleUsers($user, $this->request->data['User']['username'], true);
+    $this->request->data = $users;
+    $this->layout = "xml";
   }
 
   function view($name) {

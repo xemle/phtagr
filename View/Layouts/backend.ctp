@@ -7,6 +7,12 @@
   echo $this->Html->charset('UTF-8')."\n";
   echo $this->Html->meta('icon')."\n";
   echo $this->Html->css('backend')."\n";
+  echo $this->Html->script('jquery-1.5.1.min');
+  // jquery ui
+  echo $this->Html->css('custom-phtagr/jquery-ui-1.8.14.custom');
+  echo $this->Html->script('jquery-ui-1.8.14.custom.min');
+
+  echo $this->Html->script('jquery-phtagr');
   echo $this->Html->script('phtagr');
   echo $scripts_for_layout; 
 ?>

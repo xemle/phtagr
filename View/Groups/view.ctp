@@ -86,12 +86,11 @@
   if ($this->request->data['Group']['is_admin']) {
     echo $this->Form->create('Group', array('action' => 'addMember'));
     echo "<fieldset><legend>" . __("Add user") . "</legend>";
+    $this->Form->unlockField('Member.new');
     echo $this->Form->input('Member.new', array('label' => __("Username"), 'secure' => false));
+    echo $this->Autocomplete->autoComplete('Member.new', '/groups/autocomplete', array('targetField' => 'User.username'));
     echo "</fieldset>";
-    echo $this->Html->tag('ul', 
-      $this->Html->tag('li', $this->Form->submit(__('Add')), array('escape' => false)),
-      array('class' => 'buttons', 'escape' => false));
-    echo $this->Form->end();
+    echo $this->Form->end(__('Add'));
   } else {
     $userId = $this->Session->read('User.id');
     $memberIds = Set::extract('/Member/id', $this->request->data);
