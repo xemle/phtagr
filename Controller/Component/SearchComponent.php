@@ -586,7 +586,7 @@ class SearchComponent extends Component
 
     $data = $this->controller->Media->findById($id);
     $user = $this->controller->getUser();
-    $access = $this->controller->Media->checkAccess(&$data, $user, ACL_READ_PREVIEW, ACL_READ_MASK);
+    $access = $this->controller->Media->canRead(&$data, &$user);
     if ($count == 0 || !$data || !$access) {
       if (!$data) {
         Logger::info("Media $id not found");

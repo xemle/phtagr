@@ -160,15 +160,32 @@ class Media extends AppModel
     return null;
   }
 
-  /** Returns true if current user is allowed of the current flag
-    @param data Current Media array
-    @param user Current User array
-    @param flag Flag bit which should be checkt
-    @param mask Bitmask for the flag which should be checkt
-    @param groups Array of user's group. If groups is null, it will be created
-    by the user's data.
-    @return True is user is allowed, False otherwise */
-  function checkAccess(&$data, &$user, $flag, $mask, &$groups=null) {
+  function canRead(&$media, &$user) {
+    return $this->checkAccess(&$media, &$user, ACL_READ_PREVIEW, ACL_READ_MASK);
+  }
+  
+  function canReadOriginal(&$media, &$user) {
+    return $this->checkAccess(&$media, &$user, ACL_READ_ORIGINAL, ACL_READ_MASK);
+  }
+
+  function canWriteAcl(&$media, &$user) {
+    return ($media['Media']['user_id'] == $user['User']['id'] ||
+            $user['User']['role'] >= ROLE_ADMIN);
+  }
+  
+  
+  /** 
+   * Returns true if current user is allowed of the current flag
+   * 
+   * @param data Current Media array
+   * @param user Current User array
+   * @param flag Flag bit which should be checkt
+   * @param mask Bitmask for the flag which should be checkt
+   * @param memberIds Array of user's group ids. If groups is null, it will be created
+   * by the user's data.
+   * @return True is user is allowed, False otherwise 
+   */
+  function checkAccess(&$data, &$user, $flag, $mask, &$memberIds = array()) {
     if (!$data || !$user || !isset($data['Media']) || !isset($user['User'])) {
       Logger::err("precondition failed");
       return false;
@@ -183,18 +200,23 @@ class Media extends AppModel
       ($data['Media']['uacl'] & $mask) >= $flag)
       return true;
 
-    // check for group members
-    if ($groups === null)
-      $groups = Set::extract($user, 'Member.{n}.id');
+    // check for group members ids
+    if ($memberIds === null) {
+      $memberIds = Set::extract('/Member/id', $user);
+    }
+    $groupIds = Set::extract('/Group/id', $data);
+    $match = array_intersect($groupIds, $memberIds);
     if ($user['User']['role'] >= ROLE_GUEST &&
       ($data['Media']['gacl'] & $mask) >= $flag &&
-      in_array($data['Media']['group_id'], $groups))
+      count($match) > 0) {
       return true;
+    }
 
     // Media owner and admin check
     if ($user['User']['id'] == $data['Media']['user_id'] ||
-      $user['User']['role'] == ROLE_ADMIN)
+      $user['User']['role'] == ROLE_ADMIN) {
       return true;
+    }
 
     return false;
   }
@@ -204,8 +226,9 @@ class Media extends AppModel
     @param user User array
     @return $data of Media data with the access flags */
   function setAccessFlags(&$data, $user) {
-    if (!isset($data)) 
+    if (!isset($data)) { 
       return $data;
+    }
 
     // at least dummy user
     $user = am(array('User' => array('id' => -1, 'role' => ROLE_NOBODY), 'Member' => array()), $user);
@@ -215,15 +238,15 @@ class Media extends AppModel
     $uacl = $data['Media']['uacl'];
     $gacl = $data['Media']['gacl'];
     
-    $groups = Set::extract($user, 'Member.{n}.id');
+    $memberIds = Set::extract('/Member/id', $user);
 
-    $data['Media']['canWriteTag'] = $this->checkAccess(&$data, &$user, ACL_WRITE_TAG, ACL_WRITE_MASK, &$groups);    
-    $data['Media']['canWriteMeta'] = $this->checkAccess(&$data, &$user, ACL_WRITE_META, ACL_WRITE_MASK, &$groups);    
-    $data['Media']['canWriteCaption'] = $this->checkAccess(&$data, &$user, ACL_WRITE_CAPTION, ACL_WRITE_MASK, &$groups);    
+    $data['Media']['canWriteTag'] = $this->checkAccess(&$data, &$user, ACL_WRITE_TAG, ACL_WRITE_MASK, &$memberIds);    
+    $data['Media']['canWriteMeta'] = $this->checkAccess(&$data, &$user, ACL_WRITE_META, ACL_WRITE_MASK, &$memberIds);    
+    $data['Media']['canWriteCaption'] = $this->checkAccess(&$data, &$user, ACL_WRITE_CAPTION, ACL_WRITE_MASK, &$memberIds);    
 
-    $data['Media']['canReadPreview'] = $this->checkAccess(&$data, &$user, ACL_READ_PREVIEW, ACL_READ_MASK, &$groups);    
-    $data['Media']['canReadHigh'] = $this->checkAccess(&$data, &$user, ACL_READ_HIGH, ACL_READ_MASK, &$groups);    
-    $data['Media']['canReadOriginal'] = $this->checkAccess(&$data, &$user, ACL_READ_ORIGINAL, ACL_READ_MASK, &$groups);    
+    $data['Media']['canReadPreview'] = $this->checkAccess(&$data, &$user, ACL_READ_PREVIEW, ACL_READ_MASK, &$memberIds);    
+    $data['Media']['canReadHigh'] = $this->checkAccess(&$data, &$user, ACL_READ_HIGH, ACL_READ_MASK, &$memberIds);    
+    $data['Media']['canReadOriginal'] = $this->checkAccess(&$data, &$user, ACL_READ_ORIGINAL, ACL_READ_MASK, &$memberIds);    
     if (($data['Media']['oacl'] & ACL_READ_PREVIEW) > 0) {
       $data['Media']['visibility'] = ACL_LEVEL_OTHER;
     } elseif (($data['Media']['uacl'] & ACL_READ_PREVIEW) > 0) {
@@ -235,7 +258,7 @@ class Media extends AppModel
     }
 
     $data['Media']['isOwner'] = ($data['Media']['user_id'] == $user['User']['id']) ? true : false;
-    $data['Media']['canWriteAcl'] = $this->checkAccess(&$data, &$user, 1, 0, &$groups);    
+    $data['Media']['canWriteAcl'] = $this->checkAccess(&$data, &$user, 1, 0, &$memberIds);    
     $data['Media']['isDirty'] = (($data['Media']['flag'] & MEDIA_FLAG_DIRTY) > 0) ? true : false;
 
     return $data;
@@ -493,33 +516,6 @@ class Media extends AppModel
       }
     }
     return $conditions;
-  }
-
-  /** Checks if a user can read the original file 
-    @param user Array of User model
-    @param filename Filename of the file to be checked 
-    @param flag Reading image flag which must match the condition 
-    @return True if user can read the filename */
-  function canRead($filename, $user, $flag = ACL_READ_ORIGINAL) {
-    if (!file_exists($filename)) {
-      Logger::debug("Filename does not exists: $filename");
-      return false;
-    }
-
-    $db =& ConnectionManager::getDataSource($this->useDbConfig);
-    $conditions = array();
-    if (is_dir($filename)) {
-      $path = $db->value(Folder::slashTerm($filename).'%');
-      $conditions[] = "Media.path LIKE $path";
-    } else {
-      $path = $db->value(Folder::slashTerm(dirname($filename)));
-      $file = $db->value(basename($filename));
-      $conditions[] = "Media.path=$path AND Media.file=$file";
-    }
-    $acl = $this->buildAclConditions($user, 0, $flag);
-    $conditions = am($conditions, $acl);
-
-    return $this->hasAny($conditions);
   }
 
   function updateRanking($data) {

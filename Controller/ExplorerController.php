@@ -630,7 +630,7 @@ class ExplorerController extends AppController
     $this->Media->setAccessFlags(&$media, $user);
     $this->request->data = $media;
     $this->layout='bare';
-    if ($this->Media->checkAccess(&$media, &$user, 1, 0)) {
+    if ($this->Media->canWriteAcl(&$media, &$user)) {
       $groups = $this->Group->getGroupsForMedia($user);
       $groups = Set::combine($groups, '{n}.Group.id', '{n}.Group.name');
       asort($groups);
@@ -656,7 +656,7 @@ class ExplorerController extends AppController
       $user = $this->getUser();
       $userId = $user['User']['id'];
       $this->Search->setUser($user['User']['username']); // Triggers acl descriptions
-      if (!$this->Media->checkAccess(&$media, &$user, 1, 0)) {
+      if (!$this->Media->canWriteAcl(&$media, &$user)) {
         Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change ACL of image ".$id);
       } else {
         $this->Media->prepareGroupData(&$this->request->data, &$user);

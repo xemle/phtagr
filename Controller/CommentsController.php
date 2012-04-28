@@ -91,7 +91,7 @@ class CommentsController extends AppController
         Logger::info("Media $mediaId not found");
         $this->redirect("/explorer");
       }
-      if (!$this->Media->checkAccess($media, $user, ACL_READ_PREVIEW, ACL_READ_MASK)) {
+      if (!$this->Media->canRead(&$media, &$user)) {
         $this->Session->setFlash("Media not found");
         Logger::info("Comments denied to media $mediaId");
         $this->redirect("/explorer");

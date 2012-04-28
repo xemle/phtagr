@@ -131,7 +131,7 @@ class ImagesController extends AppController
         Logger::warn("User '{$username}' ({$user['User']['id']}) has no previleges to change tags of image ".$id);
       } else {
         //$this->_checkAndSetGroupId();
-        $tmp = $this->Media->editSingle(&$media, &$this->request->data);
+        $tmp = $this->Media->editSingle(&$media, &$this->request->data, &$user);
         if (!$this->Media->save($tmp)) {
           Logger::warn("Could not save media");
           Logger::debug($tmp);
