@@ -301,14 +301,7 @@ class ImageDataHelper extends AppHelper {
 
   /** Returns an text repesentation of the acl */
   function _acl2text($data) {
-    $output = $this->Html->tag('span', __('Group', true), array('title' => __('Access for group members')));
-    if (isset($data['Group']['name'])) {
-      $name = $data['Group']['name'];
-      $output .= ' ('.$this->Html->link($name, $this->Search->getUri(array(), array('groups' => $data['Group']['name'])), array('title' => __("This media belongs to the group '%s'", $name)))
-        . ' ' . $this->Html->link(__("View"), "/groups/view/$name") . ')';
-    }
-    $output .= ': ';
-    $output .= $this->_acl2icon($data['Media']['gacl'], __('Group members')).' ';
+    $output = $this->_acl2icon($data['Media']['gacl'], __('Group members')).' ';
 
     $output .= $this->Html->tag('span', __('users:', true), array('title' => __('Access for users')));
     $output .= $this->_acl2icon($data['Media']['uacl'], __('Users')).' ';
@@ -390,11 +383,14 @@ class ImageDataHelper extends AppHelper {
 
   function _metaAccessGroup($data) {
     $output = '';
-    if (isset($data['Group']['name'])) {
-      $name = $data['Group']['name'];
-      $output .= $this->Html->link($name, $this->Search->getUri(array(), array('groups' => $data['Group']['name'])), array('title' => __("This media belongs to the group '%s'", $name)));
-      $output .= ' ';
-      $output .= '(' . $this->Html->link(__('View'), "/groups/view/{$data['Group']['name']}") . ')';
+    if (count($data['Group'])) {
+      $groupNames = Set::extract('/Group/name', $data);
+      sort($groupNames);
+      foreach ($groupNames as $name) {
+        $output .= $this->Html->link($name, $this->Search->getUri(array(), array('groups' => $name)), array('title' => __("This media belongs to the group '%s'", $name)));
+        $output .= ' ';
+        $output .= '(' . $this->Html->link(__('View'), "/groups/view/{$name}") . ') ';
+      }
     } else {
       $output .= __('No group assigned');
     }
@@ -514,10 +510,9 @@ class ImageDataHelper extends AppHelper {
       $cells[] = array(__('Locations'), implode(', ', $locations));
     }
 
-    if ($data['Media']['isOwner'] || $this->Session->read('User.role') == ROLE_ADMIN) {
+    if ($data['Media']['isOwner'] || $data['Media']['canWriteAcl']) {
+      $cells[] = array(__('Groups'), $this->_metaAccessGroup($data));
       $cells[] = array(__('Access'), $this->_metaAccessFull($data));
-    } elseif ($this->Session->read('User.role') >= ROLE_GUEST && !empty($data['Group']['name']) && !$data['Group']['is_hidden']) {
-      $cells[] = array(__('Group'), $this->_metaAccessGroup($data));
     }
     
     // Action list 
@@ -526,22 +521,6 @@ class ImageDataHelper extends AppHelper {
       $output = $this->Form->checkbox('selected][', array('value' => $mediaId, 'id' => 'select-'.$mediaId, 'onclick' => "selectMedia($mediaId);"));
     }
 
-    /*
-    if ($data['Media']['canWriteTag']) {
-      $output .= ' '.$this->Ajax->link(
-        $this->Html->image('icons/tag_blue_edit.png', array('alt' => __('Edit tags', true), 'title' => __('Edit tags'))), 
-        '/explorer/editmeta/'.$mediaId, 
-        array('update' => 'meta-'.$mediaId, 'escape' => false));
-    }
-    if ($data['Media']['canReadOriginal']) {
-      foreach ($data['File'] as $file) {
-        $output .= ' '.$this->Html->link(
-          $this->Html->image('icons/disk.png', 
-            array('alt' => $file['file'], 'title' => __('Save file %s', $file['file']))), 
-          '/media/file/'.$file['id'].'/'.$file['file'], array('escape' => false));
-      }
-    }
-    */
     return $cells;
   }
 

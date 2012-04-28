@@ -123,14 +123,13 @@ class ImagesController extends AppController
     if (!empty($this->request->data)) {
       $user = $this->getUser();
       $media = $this->Media->findById($id);
-      $this->Media->setAccessFlags(&$media, $user);
       if (!$media) {
         Logger::warn("Invalid media id: $id");
         $this->redirect(null, '404');
-      } elseif (!$media['Media']['canWriteTag']) {
+      } elseif (!$this->Media->canWrite(&$media, &$user)) {
         Logger::warn("User '{$username}' ({$user['User']['id']}) has no previleges to change tags of image ".$id);
       } else {
-        //$this->_checkAndSetGroupId();
+        $this->Media->setAccessFlags(&$media, &$user);
         $tmp = $this->Media->editSingle(&$media, &$this->request->data, &$user);
         if (!$this->Media->save($tmp)) {
           Logger::warn("Could not save media");
@@ -156,18 +155,22 @@ class ImagesController extends AppController
     if (!empty($this->request->data)) {
       $user = $this->getUser();
       $media = $this->Media->findById($id);
-      $this->Media->setAccessFlags(&$media, $user);
       if (!$media) {
         Logger::warn("Invalid media id: $id");
         $this->redirect(null, '404');
-      } elseif (!$media['Media']['canWriteAcl']) {
+      } elseif (!$this->Media->canWriteAcl(&$media, &$user)) {
         Logger::warn("User '{$username}' ({$user['User']['id']}) has no previleges to change tags of image ".$id);
       } else {
-        $this->Media->prepareGroupData(&$this->request->data, &$user);
-        $tmp = array('Media' => array('id' => $id));
-        $this->Media->updateAcl(&$tmp, &$media, &$this->request->data);
-        $this->Media->save($tmp, true);
-        Logger::info("Changed acl of media $id");
+        $this->Media->setAccessFlags(&$media, $user);
+        $tmp = $this->Media->editSingle(&$media, &$this->request->data, &$user);
+        if ($tmp) {
+          if ($this->Media->save($tmp, true)) {
+            Logger::info("Changed acl of media $id");
+          } else {
+            Logger::err("Could not update acl of media {$media['Media']['id']}");
+            Logger::debug($tmp);
+          }
+        }
       }
     }
  

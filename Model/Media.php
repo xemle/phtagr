@@ -168,11 +168,14 @@ class Media extends AppModel
     return $this->checkAccess(&$media, &$user, ACL_READ_ORIGINAL, ACL_READ_MASK);
   }
 
+  function canWrite(&$media, &$user) {
+    return $this->checkAccess(&$media, &$user, ACL_WRITE_TAG, ACL_WRITE_MASK);
+  }
+
   function canWriteAcl(&$media, &$user) {
     return ($media['Media']['user_id'] == $user['User']['id'] ||
             $user['User']['role'] >= ROLE_ADMIN);
   }
-  
   
   /** 
    * Returns true if current user is allowed of the current flag
@@ -221,10 +224,13 @@ class Media extends AppModel
     return false;
   }
 
-  /** Set the access flags of write and read options according to the current user
-    @param data Reference of the Media array 
-    @param user User array
-    @return $data of Media data with the access flags */
+  /** 
+   * Set the access flags of write and read options according to the current user
+   * 
+   * @param data Reference of the Media array 
+   * @param user User array
+   * @return $data of Media data with the access flags 
+   */
   function setAccessFlags(&$data, $user) {
     if (!isset($data)) { 
       return $data;

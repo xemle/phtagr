@@ -156,7 +156,8 @@
     $this->Html->tag('label', __("Who can edit all meta data?")).
     $this->Html->tag('div', $this->Form->radio('Media.writeMeta', $aclSelect, array('legend' => false, 'value' => ACL_LEVEL_KEEP)), array('escape' => false, 'class' => 'radioSet')), 
     array('escape' => false, 'class' => 'input radio'));
-  echo $this->Form->input('Group.id', array('type' => 'select', 'options' => $groups, 'selected' => 0, 'label' => __("Default image group?")));
+  echo $this->Form->input('Group.names', array('value' => '', 'label' => __("Media access group")));
+  echo $this->Autocomplete->autoComplete('Group.names', '/explorer/autocomplete/group', array('split' => true));
 ?>
 </fieldset>
 <?php echo $this->Form->submit(__('Apply')); ?>

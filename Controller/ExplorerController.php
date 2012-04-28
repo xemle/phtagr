@@ -84,8 +84,8 @@ class ExplorerController extends AppController
   }
 
   function autocomplete($type) {
-    if (in_array($type, array('tag', 'category', 'city', 'sublocation', 'state', 'country'))) {
-      if ($type == 'tag' || $type == 'category') {
+    if (in_array($type, array('tag', 'category', 'city', 'sublocation', 'state', 'country', 'group'))) {
+      if ($type == 'tag' || $type == 'category' || $type == 'group') {
         $field = Inflector::camelize($type);
         $value = $this->request->data[$field]['names'];
       } else {
@@ -286,7 +286,7 @@ class ExplorerController extends AppController
         break;
       case 'group':
         $data = $this->Media->Group->find('all', array(
-          'conditions' => array('name LIKE' => $value.'%'),
+          'conditions' => array('name LIKE' => $normalized.'%'),
           'limit' => 10
           ));
         $result = Set::extract('/Group/name', $data);
@@ -542,11 +542,11 @@ class ExplorerController extends AppController
     $id = intval($id);
     $user = $this->getUser();
     $media = $this->Media->findById($id);
-    $this->Media->setAccessFlags(&$media, $user);
-    if (!$media['Media']['canWriteTag']) {
+    if (!$this->Media->canWrite(&$media, &$user)) {
       Logger::warn("User is not allowed to edit media {$media['Media']['id']}");
       $this->redirect(null, '403');
     }
+    $this->Media->setAccessFlags(&$media, $user);
     $this->request->data = $media;
     $this->layout='bare';
     $this->render('editmeta');
@@ -567,13 +567,13 @@ class ExplorerController extends AppController
     $username = $user['User']['username'];
     if (isset($this->request->data)) {
       $media = $this->Media->findById($id);
-      $this->Media->setAccessFlags(&$media, $user);
       if (!$media) {
         Logger::warn("Invalid media id: $id");
         $this->redirect(null, '404');
-      } elseif (!$media['Media']['canWriteTag'] && !$media['Media']['canWriteAcl']) {
+      } elseif (!$this->Media->canWrite(&$media, &$user)) {
         Logger::warn("User '{$username}' ({$user['User']['id']}) has no previleges to change tags of image ".$id);
       } else {
+        $this->Media->setAccessFlags(&$media, $user);
         $tmp = $this->Media->editSingle(&$media, &$this->request->data, &$user);
         if (!$this->Media->save($tmp)) {
           Logger::warn("Could not save media");
@@ -593,7 +593,6 @@ class ExplorerController extends AppController
     $this->Search->parseArgs();
     $this->Search->setUser($user['User']['username']);
     $this->Search->setHelperData();
-    Logger::debug($this->Search->getParams());
     Configure::write('debug', 0);
     $this->render('updatemeta');
   }
@@ -627,19 +626,13 @@ class ExplorerController extends AppController
     $id = intval($id);
     $user = $this->getUser();
     $media = $this->Media->findById($id);
+    if (!$this->Media->canWriteAcl(&$media, &$user)) {
+      Logger::warn("User is not allowed to edit acl of media {$media['Media']['id']}");
+      $this->redirect('400');
+    }
     $this->Media->setAccessFlags(&$media, $user);
     $this->request->data = $media;
     $this->layout='bare';
-    if ($this->Media->canWriteAcl(&$media, &$user)) {
-      $groups = $this->Group->getGroupsForMedia($user);
-      $groups = Set::combine($groups, '{n}.Group.id', '{n}.Group.name');
-      asort($groups);
-      $groups[-1] = __('[No Group]');
-      $this->set('groups', $groups);
-    } else {
-      Logger::warn("User {$user['User']['username']} ({$user['User']['id']}) has no previleges to change ACL of image ".$id);
-      $this->render('updatemeta');
-    }
     //Configure::write('debug', 0);
   }
 
@@ -659,11 +652,16 @@ class ExplorerController extends AppController
       if (!$this->Media->canWriteAcl(&$media, &$user)) {
         Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change ACL of image ".$id);
       } else {
-        $this->Media->prepareGroupData(&$this->request->data, &$user);
-        $tmp = array('Media' => array('id' => $id));
-        $this->Media->updateAcl(&$tmp, &$media, &$this->request->data);
-        $this->Media->save($tmp, true);
-        Logger::info("Changed acl of media $id");
+        $this->Media->setAccessFlags(&$media, &$user);
+        $tmp = $this->Media->editSingle(&$media, &$this->request->data, &$user);
+        if ($tmp) {
+          if ($this->Media->save($tmp, true)) {
+            Logger::info("Changed acl of media $id");
+          } else {
+            Logger::err("Could not update acl of media {$media['Media']['id']}");
+            Logger::debug($tmp);
+          }
+        }
       }
     }
     $media = $this->Media->findById($id);
