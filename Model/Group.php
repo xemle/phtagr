@@ -91,14 +91,18 @@ class Group extends AppModel
     }
   }
   
-  function editMetaSingle(&$media, &$data) {
+  function editMetaSingle(&$media, &$data, &$user) {
     if (!isset($data['Group']['names'])) {
       return false;
     }
     $words = $this->splitWords($data['Group']['names'], false);
     $words = $this->removeNegatedWords($words);
-    $tags = $this->findAllByField($words, false);
-    $ids = array_unique(Set::extract("/Group/id", $tags));
+    $groups = $this->findAllByField($words, false);
+    $ids = Set::extract('/Group/id', $groups);
+    if ($user['User']['role'] < ROLE_ADMIN) {
+      $validGroupIds = Set::extract('/Group/id', $this->getGroupsForMedia($user));
+      $ids = array_intersect($ids, $validGroupIds);
+    }
     $oldIds = Set::extract("/Group/id", $media);
     if (count(array_diff($oldIds, $ids)) || count(array_diff($ids, $oldIds))) {
       return array('Group' => array('Group' => $ids));

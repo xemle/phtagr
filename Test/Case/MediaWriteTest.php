@@ -143,9 +143,10 @@ class MediaWriteTestCase extends CakeTestCase {
     $this->Controller->FilterManager->read($filename);
     $media = $this->Media->find('first');
     $this->assertNotEqual($media, false);
-    $this->Media->setAccessFlags(&$media, $this->Controller->getUser());
+    $user = $this->Controller->getUser();
+    $this->Media->setAccessFlags(&$media, &$user);
     $data = array('Tag' => array('names' => 'thailand'));
-    $tmp = $this->Media->editSingle(&$media, &$data);
+    $tmp = $this->Media->editSingle(&$media, &$data, &$user);
     $this->Media->save($tmp);
     
     $media = $this->Media->findById($media['Media']['id']);

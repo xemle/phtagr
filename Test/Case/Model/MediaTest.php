@@ -156,4 +156,79 @@ class MediaTestCase extends CakeTestCase {
     $this->Media->setAccessFlags(&$media, &$user);
     $this->assertEqual(array('group2', 'group 3'), Set::extract('/Group/name', $media));
   }
+
+  /** 
+   * Test Media->editMulti for group
+   */
+  public function testEditSingleGroups() {
+    $this->User->save($this->User->create(array('username' => 'admin', 'role' => ROLE_ADMIN)));
+    $admin = $this->User->findById($this->User->getLastInsertID());
+    $this->User->save($this->User->create(array('username' => 'user', 'role' => ROLE_USER)));
+    $user = $this->User->findById($this->User->getLastInsertID());
+    
+    $this->Group->save($this->Group->create(array('name' => 'group1', 'user_id' => $admin['User']['id'])));
+    $group1 = $this->Group->findById($this->Group->getLastInsertID());
+    // user 'user' is member of 'group2'
+    $this->Group->save($this->Group->create(array('name' => 'group2', 'user_id' => $admin['User']['id'], 'is_shared' => '1')));
+    $group2 = $this->Group->findById($this->Group->getLastInsertID());
+    $this->Group->subscribe($group2, $user['User']['id']);
+    // Group3 belongs to user 'user'
+    $this->Group->save($this->Group->create(array('name' => 'group 3', 'user_id' => $user['User']['id'])));
+    $group3 = $this->Group->findById($this->Group->getLastInsertID());
+    
+    // reload users
+    $admin = $this->User->findById($admin['User']['id']);
+    $user = $this->User->findById($user['User']['id']);
+    
+    $this->Media->save($this->Media->create(array('name' => 'IMG_1234.JPG', 'user_id' => $admin['User']['id'])));
+    $media = $this->Media->findById($this->Media->getLastInsertID());
+    $this->Media->setAccessFlags(&$media, &$admin);
+    
+    $requestData = array('Group' => array('names' => 'group1'));
+    $tmp = $this->Media->editSingle(&$media, &$requestData, &$admin);
+    $this->Media->save($tmp);
+    $media = $this->Media->findById($media['Media']['id']);
+    $this->Media->setAccessFlags(&$media, &$admin);
+    $this->assertEqual(array('group1'), Set::extract('/Group/name', $media));
+    
+    $requestData = array('Group' => array('names' => ' group2 , -group1'));
+    $tmp = $this->Media->editSingle(&$media, &$requestData, &$admin);
+    $this->Media->save($tmp);
+    $media = $this->Media->findById($media['Media']['id']);
+    $this->Media->setAccessFlags(&$media, &$admin);
+    $this->assertEqual(array('group2'), Set::extract('/Group/name', $media));
+    
+    // Admin can use every group
+    $requestData = array('Group' => array('names' => ' group 3 , group1'));
+    $tmp = $this->Media->editSingle(&$media, &$requestData, &$admin);
+    $this->Media->save($tmp);
+    $media = $this->Media->findById($media['Media']['id']);
+    $this->assertEqual(array('group1', 'group 3'), Set::extract('/Group/name', $media));
+
+    // Test group set for user
+    $this->Media->save($this->Media->create(array('name' => 'IMG_2345.JPG', 'user_id' => $user['User']['id'])));
+    $media = $this->Media->findById($this->Media->getLastInsertID());
+    $this->Media->setAccessFlags(&$media, &$user);
+    
+    $requestData = array('Group' => array('names' => ' group 3 , group1'));
+    $tmp = $this->Media->editSingle(&$media, &$requestData, &$user);
+    $this->Media->save($tmp);
+    $media = $this->Media->findById($media['Media']['id']);
+    $this->Media->setAccessFlags(&$media, &$user);
+    $this->assertEqual(array('group 3'), Set::extract('/Group/name', $media));
+    
+    $requestData = array('Group' => array('names' => ' group2 , -group 3'));
+    $tmp = $this->Media->editSingle(&$media, &$requestData, &$user);
+    $this->Media->save($tmp);
+    $media = $this->Media->findById($media['Media']['id']);
+    $this->Media->setAccessFlags(&$media, &$user);
+    $this->assertEqual(array('group2'), Set::extract('/Group/name', $media));
+    
+    $requestData = array('Group' => array('names' => 'group 3, fake Group'));
+    $tmp = $this->Media->editSingle(&$media, &$requestData, &$user);
+    $this->Media->save($tmp);
+    $media = $this->Media->findById($media['Media']['id']);
+    $this->Media->setAccessFlags(&$media, &$user);
+    $this->assertEqual(array('group 3'), Set::extract('/Group/name', $media));
+  }
 }

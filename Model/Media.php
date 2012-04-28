@@ -453,15 +453,10 @@ class Media extends AppModel
       if ($user['User']['role'] >= ROLE_USER) {
         $conditions[] = "Media.user_id = $userId";
       } elseif ($user['User']['role'] == ROLE_GUEST) {
-        if (count($user['Member'])) {
-          $groupIds = Set::extract($user, 'Member.{n}.id');
-          if (count($groupIds) > 1) {
-            $conditions[] = "Media.group_id in ( ".implode(", ", $groupIds)." )";
-            $conditions[] = "Media.gacl >= $level";
-          } elseif (count($groupIds) == 1) {
-            $conditions[] = "Media.group_id = {$groupIds[0]}";
-            $conditions[] = "Media.gacl >= $level";
-          }
+        $groupIds = Set::extract('/Member/id', $user);
+        if (count($groupIds)) {
+          $conditions[] = "Group.id in ( ".implode(", ", $groupIds)." )";
+          $conditions[] = "Media.gacl >= $level";
         } else {
           // no images
           $conditions[] = "1 = 0";
@@ -478,12 +473,9 @@ class Media extends AppModel
         $acl = "(";
         // All images of group on Guests and Users
         if ($user['User']['role'] >= ROLE_GUEST && count($user['Member'])) {
-          $groupIds = Set::extract($user, 'Member.{n}.id');
-          if (count($groupIds) > 1) {
-            $acl .= " ( Media.group_id in ( ".implode(", ", $groupIds)." )";
-            $acl .= " AND Media.gacl >= $level ) OR";
-          } elseif (count($groupIds) == 1) {
-            $acl .= " ( Media.group_id = {$groupIds[0]}";
+          $groupIds = Set::extract('/Member/id', $user);
+          if (count($groupIds)) {
+            $acl .= " ( Group.id in ( ".implode(", ", $groupIds)." )";
             $acl .= " AND Media.gacl >= $level ) OR";
           }
         }
@@ -881,9 +873,10 @@ class Media extends AppModel
    * 
    * @param type $media Media model data array
    * @param type $data Input data array
+   * @param type $user Current user
    * @return type 
    */
-  function editSingle(&$media, &$data) {
+  function editSingle(&$media, &$data, &$user) {
     $tmp = array('Media' => array('id' => $media['Media']['id'], 'user_id' => $media['Media']['user_id']));
     if ($media['Media']['canWriteTag']) {
       $tag = $this->Tag->editMetaSingle(&$media, &$data);
@@ -925,7 +918,7 @@ class Media extends AppModel
       $tmp['Media']['flag'] = ($media['Media']['flag'] | MEDIA_FLAG_DIRTY);
     }
     if ($media['Media']['canWriteAcl']) {
-      $groups = $this->Tag->editMetaSingle(&$media, &$data);
+      $groups = $this->Group->editMetaSingle(&$media, &$data, &$user);
       if (isset($groups['Group'])) {
         $tmp['Group'] = $groups['Group'];
       }
