@@ -84,10 +84,12 @@ class ExplorerController extends AppController
   }
 
   function autocomplete($type) {
-    if (in_array($type, array('tag', 'category', 'city', 'sublocation', 'state', 'country', 'group'))) {
-      if ($type == 'tag' || $type == 'category' || $type == 'group') {
+    if (in_array($type, array('tag', 'category', 'city', 'sublocation', 'state', 'country', 'aclgroup'))) {
+      if ($type == 'tag' || $type == 'category') {
         $field = Inflector::camelize($type);
         $value = $this->request->data[$field]['names'];
+      } else if ($type == 'aclgroup') {
+        $value = $this->request->data['Group']['names'];
       } else {
         $value = $this->request->data['Location'][$type];
       }
@@ -289,6 +291,19 @@ class ExplorerController extends AppController
           'conditions' => array('name LIKE' => $normalized.'%'),
           'limit' => 10
           ));
+        $result = Set::extract('/Group/name', $data);
+        break;
+      case 'aclgroup':
+        $user = $this->getUser();
+        $groups = $this->Group->getGroupsForMedia(&$user);
+        $data = array();
+        $len = strlen($normalized);
+        $normalized = strtolower($normalized);
+        foreach ($groups as $group) {
+          if (strtolower(substr($group['Group']['name'], 0, $len)) == $normalized) {
+            $data[] = $group;
+          }
+        }
         $result = Set::extract('/Group/name', $data);
         break;
       case 'user':

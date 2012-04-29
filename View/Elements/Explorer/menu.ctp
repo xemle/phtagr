@@ -157,7 +157,7 @@
     $this->Html->tag('div', $this->Form->radio('Media.writeMeta', $aclSelect, array('legend' => false, 'value' => ACL_LEVEL_KEEP)), array('escape' => false, 'class' => 'radioSet')), 
     array('escape' => false, 'class' => 'input radio'));
   echo $this->Form->input('Group.names', array('value' => '', 'label' => __("Media access group")));
-  echo $this->Autocomplete->autoComplete('Group.names', '/explorer/autocomplete/group', array('split' => true));
+  echo $this->Autocomplete->autoComplete('Group.names', '/explorer/autocomplete/aclgroup', array('split' => true));
 ?>
 </fieldset>
 <?php echo $this->Form->submit(__('Apply')); ?>

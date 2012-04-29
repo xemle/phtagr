@@ -6,5 +6,5 @@
   $groupNames = Set::extract('/Group/name', $this->request->data);
   sort($groupNames);
   echo $this->Form->input('Group.names', array('value' => join(', ', $groupNames), 'label' => __('Groups')));
-  echo $this->Autocomplete->autoComplete('Group.names', '/explorer/autocomplete/group', array('split' => true));
+  echo $this->Autocomplete->autoComplete('Group.names', '/explorer/autocomplete/aclgroup', array('split' => true));
 ?>
