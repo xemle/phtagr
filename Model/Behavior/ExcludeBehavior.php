@@ -27,12 +27,14 @@ class ExcludeBehavior extends ModelBehavior {
     $this->settings[$Model->alias] = array_merge($this->settings[$Model->alias], $settings);
   }
 
-  /** Finds the model binding type between to models
-    @param Model current model object
-    @param name Name of binding
-    @result Type of the binding to the current model. Return value is one of
-    'hasOne', 'belongsTo', 'hasMany', 'hasAndBelongsToMany', or false on error.
-*/
+  /** 
+   * Finds the model binding type between to models
+   * 
+   * @param Model current model object
+   * @param name Name of binding
+   * @result Type of the binding to the current model. Return value is one of
+   * 'hasOne', 'belongsTo', 'hasMany', 'hasAndBelongsToMany', or false on error.
+   */
   function _findBindingType(&$Model, $name) {
     if (isset($Model->hasAndBelongsToMany[$name])) {
       return 'hasAndBelongsToMany';
@@ -46,11 +48,35 @@ class ExcludeBehavior extends ModelBehavior {
     return false;
   }
 
-  /** Build SQL joins for hasAndBelongsToMany relations
-    @param Model current model object
-    @param query query array
-    @param joinConditions Join conditions for HABTM bindings
-    @param joinType Type of SQL join (INNER, LEFT, RIGHT) */
+  /**
+   * Rename 'Group' alias to 'Groub' alias. This is required because
+   * Cake does not escape the Group word.
+   * 
+   * @param array $conditions
+   * @return array 
+   */
+  function renameGroupAlias($conditions) {
+    $result = array();
+    foreach ($conditions as $key => $condition) {
+      if ($key === 'OR' || $key === 'AND') {
+        $result[$key] = $this->escapeModelFields($condition);
+      } else if (preg_match('/^Group\.(.*)$/', $condition, $m)) {
+        $result[$key] = "Groub.{$m[1]}";
+      } else {
+        $result[$key] = $condition;
+      }
+    }
+    return $result;
+  }
+  
+  /** 
+   * Build SQL joins for hasAndBelongsToMany relations
+   * 
+   * @param Model current model object
+   * @param query query array
+   * @param joinConditions Join conditions for HABTM bindings
+   * @param joinType Type of SQL join (INNER, LEFT, RIGHT) 
+   */
   function _buildHasAndBelongsToManyJoins(&$Model, &$query, $joinConditions, $options = array()) {
     $options = am(array('type' => false, 'count' => true), $options);
 
@@ -65,6 +91,10 @@ class ExcludeBehavior extends ModelBehavior {
       extract($config);
 
       $alias = $Model->{$name}->alias;
+      if ($alias == 'Group') {
+        $alias = 'Groub';
+        $queryConditions = $this->renameGroupAlias($queryConditions);
+      }
       $table = $Model->{$name}->tablePrefix.$Model->{$name}->table;
 
       $join = "{$options['type']} JOIN ( SELECT $with.$foreignKey";
@@ -88,11 +118,14 @@ class ExcludeBehavior extends ModelBehavior {
     //Logger::debug($query);
   }
 
-  /** Build SQL joins for hasMany relations
-    @param Model current model object
-    @param query current query array
-    @param joinConditions Conditions
-    @param options Options */
+  /** 
+   * Build SQL joins for hasMany relations
+   * 
+   * @param Model current model object
+   * @param query current query array
+   * @param joinConditions Conditions
+   * @param options Options 
+   */
   function _buildHasManyJoins(&$Model, &$query, &$joinConditions, $options = array()) {
     $options = am(array('type' => false, 'count' => true), $options);
     $options['type'] = strtoupper($options['type']);
@@ -105,6 +138,10 @@ class ExcludeBehavior extends ModelBehavior {
       //Logger::trace($config);
 
       $alias = $Model->{$name}->alias;
+      if ($alias == 'Group') {
+        $alias = 'Groub';
+        $queryConditions = $this->renameGroupAlias($queryConditions);
+      }
       $table = $Model->{$name}->tablePrefix.$Model->{$name}->table;
       $foreignKey = $config['foreignKey'];
 
@@ -128,11 +165,13 @@ class ExcludeBehavior extends ModelBehavior {
   }
 
   /**
-    Extracts conditions for hasAndBelongsToMany and hasMany relations and build
-    joins for these relations.
-    @param Model current model object
-    @param query query array
-    @param options Join options*/
+   * Extracts conditions for hasAndBelongsToMany and hasMany relations and build
+   * joins for these relations.
+   * 
+   * @param Model current model object
+   * @param query query array
+   * @param options Join options
+   */
   function _buildJoins(&$Model, &$query, $options = array()) {
     $joinConditions = array();
     if (empty($query['conditions'])) {
@@ -182,10 +221,13 @@ class ExcludeBehavior extends ModelBehavior {
     return $query;
   }
 
-  /** Build the exclusion statement of a query array
-    @param Model current model object
-    @param query query array
-    @return SQL exclusion condition */
+  /** 
+   * Build the exclusion statement of a query array
+   * 
+   * @param Model current model object
+   * @param query query array
+   * @return SQL exclusion condition 
+   */
   function _buildExclusion(&$Model, $query) {
     $query = am(array('joins' => array()), $query);
     //Logger::debug($query);

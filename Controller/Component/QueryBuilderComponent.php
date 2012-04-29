@@ -33,7 +33,7 @@ class QueryBuilderComponent extends Component
     'exclude_user' => array('field' => 'Media.user_id', 'operand' => '!='),
     'folder' => true, // calls buildFolder
     'from' => array('field' => 'Media.date', 'operand' => '>='),
-    'groups' => 'Group.name',
+    'groups' => array('custom' => 'buildHabtm'),
     'locations' => array('custom' => 'buildHabtm'),
     'media' => 'Media.id',
     'name' => 'Media.name',
