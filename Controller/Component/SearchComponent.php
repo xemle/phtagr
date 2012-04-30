@@ -81,7 +81,7 @@ class SearchComponent extends Component
   var $escapeChars = '=,/';
 
   function initialize(&$controller) {
-    $this->controller = &$controller;
+    $this->controller =& $controller;
     if (!$this->QueryBuilder->controller) {
       $this->QueryBuilder->initialize(&$controller);
     }
@@ -496,6 +496,7 @@ class SearchComponent extends Component
     $tmp = $query;
     unset($query['limit']);
     unset($query['page']);
+    $this->controller->Media->bindModel(array('hasMany' => array('GroupsMedia' => array())));
     $count = $this->controller->Media->find('count', $query);
     $query = $tmp;
 
@@ -529,6 +530,7 @@ class SearchComponent extends Component
     $params['page'] = $this->getPage();
 
     // get all media and set access flags
+    $this->controller->Media->bindModel(array('hasMany' => array('GroupsMedia' => array())));
     $data = $this->controller->Media->find('all', $query);
     $user = $this->controller->getUser();
     for ($i = 0; $i < count($data); $i++) {

@@ -20,13 +20,11 @@
  *
  */
 class GroupsUserFixture extends CakeTestFixture {
-/**
- * Import
- *
- * @var array
- */
-	public $import = array('model' => 'GroupsUser');
 
+  public $fields = array(
+			'group_id' => array('type' => 'integer', 'null' => false),
+			'user_id' => array('type' => 'integer', 'null' => false)
+	);
 
 /**
  * Records

@@ -47,7 +47,7 @@ class QueryBuilderComponent extends Component
     );
 
   function initialize(&$controller) {
-    $this->controller = &$controller;
+    $this->controller =& $controller;
   }
 
   /** 
@@ -183,6 +183,7 @@ class QueryBuilderComponent extends Component
   function buildConditions($data) {
     $query = array('conditions' => array());
     if (!count($data)) {
+      $this->_buildAccessConditions(&$data, &$query);
       return $query;
     }
     foreach ($this->rules as $name => $rule) {
@@ -377,8 +378,15 @@ class QueryBuilderComponent extends Component
         $query['conditions'][] = '1 = 0';
       }
     }
-    $acl = $this->controller->Media->buildAclConditions($user, $userId);
-    $query['conditions'] = am($query['conditions'], $acl);
+    $aclQuery = $this->controller->Media->buildAclQuery($user, $userId);
+    // merge acl query
+    foreach ($aclQuery as $key => $values) {
+      if (!isset($query[$key])) {
+        $query[$key] = $values;
+      } else {
+        $query[$key] = am($query[$key], $aclQuery[$key]);
+      }
+    }
   }
 
   function buildFolder(&$data, &$query, $value) {

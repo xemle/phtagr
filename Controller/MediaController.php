@@ -98,9 +98,10 @@ class MediaController extends AppController
       default:
         $flag = ACL_READ_PREVIEW; break;
     }
-    $conditions = $this->Media->buildAclConditions($user, 0, $flag);
-    $conditions[] = 'Media.id = ' . $id;
-    $media = $this->Media->find('first', array('conditions' => $conditions));
+    $query = $this->Media->buildAclQuery($user, 0, $flag);
+    $query['conditions']['Media.id'] = $id;
+    $this->Media->bindModel(array('hasMany' => array('GroupsMedia' => array())));
+    $media = $this->Media->find('first', $query);
     if (!$media) {
       Logger::verbose("Media not found or access denied for media $id");
       $this->redirect(null, 403);

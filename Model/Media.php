@@ -491,26 +491,44 @@ class Media extends AppModel
     return $image;
   }
  
+  /**
+   * Build join for ACL condition
+   */
+  function buildAclJoin() {
+    $this->bindModel(array('hasMany' => array('GroupsMedia' => array())));
+    $config = $this->hasMany['GroupsMedia'];
+    $table = $this->GroupsMedia->table;
+    $alias = $this->GroupsMedia->alias;
+    $foreignKey = $config['foreignKey'];
+    $join = "LEFT JOIN `{$this->tablePrefix}${table}` AS `$alias` "
+      ."ON `{$this->alias}`.`{$this->primaryKey}` = `$alias`.`{$foreignKey}`";
+    return $join;
+  }
+  
   /** 
+   * Build ACL query for media. 
+   * 
    * @param user Current user
    * @param userId User id of own user or foreign user. If user id is equal with
    * the id of the current user, the user is treated as 'My Medias'. Otherwise
    * the default acl will apply 
    * @param level Level of ACL which image must be have. Default is ACL_READ_PREVIEW.
-   * @return returns asscess conditions which considers the access to the media 
+   * @return returns ACL query
    */
-  function buildAclConditions($user, $userId = 0, $level = ACL_READ_PREVIEW) {
+  function buildAclQuery($user, $userId = 0, $level = ACL_READ_PREVIEW) {
     $level = intval($level);
     $conditions = array();
+    $joins = array();
     if ($userId > 0 && $user['User']['id'] == $userId) {
       // My Medias
       if ($user['User']['role'] >= ROLE_USER) {
-        $conditions[] = "Media.user_id = $userId";
+        $conditions['Media.user_id'] = $userId;
       } elseif ($user['User']['role'] == ROLE_GUEST) {
         $groupIds = Set::extract('/Member/id', $user);
         if (count($groupIds)) {
-          $conditions[] = "Group.id in ( ".implode(", ", $groupIds)." )";
-          $conditions[] = "Media.gacl >= $level";
+          $conditions['Group.id'] = $groupIds;
+          $conditions['Media.gacl >='] = $level;
+          $joins[] = $this->buildAclJoin();
         } else {
           // no images
           $conditions[] = "1 = 0";
@@ -519,34 +537,40 @@ class Media extends AppModel
     } else {
       // Another user, if set
       if ($userId > 0) {
-        $conditions[] = "Media.user_id = $userId";
+        $conditions['Media.user_id'] = $userId;
       }
 
       // General ACL
       if ($user['User']['role'] < ROLE_ADMIN) {
-        $acl = "(";
+        $acl = array();
         // All images of group on Guests and Users
         if ($user['User']['role'] >= ROLE_GUEST && count($user['Member'])) {
           $groupIds = Set::extract('/Member/id', $user);
           if (count($groupIds)) {
-            $acl .= " ( Group.id in ( ".implode(", ", $groupIds)." )";
-            $acl .= " AND Media.gacl >= $level ) OR";
+            $acl['AND'] = array(
+              'GroupsMedia.group_id' => $groupIds,
+              'Media.gacl >=' => $level);
+            $joins[] = $this->buildAclJoin();
           }
         }
         if ($user['User']['role'] >= ROLE_USER) {
           // Own image
           if ($userId == 0) {
-            $acl .= " Media.user_id = {$user['User']['id']} OR";
+            $acl['Media.user_id'] = $user['User']['id'];
           }
           // Other users
-          $acl .= " Media.uacl >= $level OR";
+          $acl['Media.uacl >='] = $level;
         }
         // Public 
-        $acl .= " Media.oacl >= $level )";
-        $conditions[] = $acl;
+        $acl['Media.oacl >='] = $level;
+        if (count($acl) == 1) {
+          $conditions = am($conditions, $acl);
+        } else {
+          $conditions['OR'] = $acl;
+        }
       }
     }
-    return $conditions;
+    return array('joins' => $joins, 'conditions' => $conditions);
   }
 
   function updateRanking($data) {
@@ -587,13 +611,15 @@ class Media extends AppModel
     $foreignKey = $config['foreignKey'];
     $associationForeignKey = $config['associationForeignKey'];
 
-    $acl = $this->buildAclConditions($user);
-    if ($acl) {
-      $aclWhere = ' AND '.implode(' AND ', $acl);
+    $query = $this->buildAclQuery($user);
+    if ($query['conditions']) {
+      $aclWhere = ' AND '.implode(' AND ', $query['conditions']);
     } else {
       $aclWhere = '';
     }
-    $sql="SELECT `$alias`.`name`,COUNT(`$alias`.`name`) AS hits".
+    $fields = am(array('`$alias`.`name`', 'COUNT(`$alias`.`name`) AS hits'), $query['fields']);
+    $joins = array();
+    $sql="SELECT ".join(',', $fields).
          " FROM `$table` AS `$alias`,".
          "  `$joinTable` AS `$joinAlias`,".
          "  `$myTable` AS `{$this->alias}`".

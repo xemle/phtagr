@@ -87,7 +87,7 @@ class SearchComponentTestCase extends CakeTestCase {
         $this->out("Could not load component $component");
         exit(1);
       }  
-      $this->{$component} = $this->ControllerMock->{$component};
+      $this->{$component} =& $this->ControllerMock->{$component};
     }
   }
 
@@ -238,4 +238,62 @@ class SearchComponentTestCase extends CakeTestCase {
     $this->assertEqual(array('IMG_1234.JPG'), Set::extract('/Media/name', $result));
   } 
   
+  function testAccessForUserRole() {
+    $this->User->save($this->User->create(array('username' => 'userA', 'role' => ROLE_USER)));
+    $userA = $this->User->findById($this->User->getLastInsertID());
+    $this->User->save($this->User->create(array('username' => 'userB', 'role' => ROLE_USER)));
+    $userB = $this->User->findById($this->User->getLastInsertID());
+    $this->User->save($this->User->create(array('username' => 'userC', 'role' => ROLE_USER)));
+    $userC = $this->User->findById($this->User->getLastInsertID());
+    // user 'userB' has guest 'guestA'
+    $this->User->save($this->User->create(array('username' => 'guestA', 'role' => ROLE_GUEST, 'creator_id' => $userB['User']['id'])));
+    $guestA = $this->User->findById($this->User->getLastInsertID());
+    $this->User->save($this->User->create(array('username' => 'nobody', 'role' => ROLE_NOBODY)));
+    $userNone = $this->User->findById($this->User->getLastInsertID());
+    
+    // 'userA' has group 'aGroup'. 'userB' and 'guestA' are member of 'aGroup'
+    $this->Group->save($this->Group->create(array('name' => 'aGroup', 'user_id' => $userA['User']['id'])));
+    $group = $this->Group->findById($this->Group->getLastInsertID());
+    $this->Group->subscribe($group, $userB['User']['id']);
+    $group = $this->Group->findById($group['Group']['id']);
+    $this->Group->subscribe($group, $guestA['User']['id']);
+    // Reload users to refresh model data of groups
+    $userA = $this->User->findById($userA['User']['id']);
+    $userB = $this->User->findById($userB['User']['id']);
+    $guestA = $this->User->findById($guestA['User']['id']);
+    
+    // media1 is public
+    $this->Media->save($this->Media->create(array('name' => 'IMG_1234.JPG', 'user_id' => $userA['User']['id'], 'gacl' => 97, 'uacl' => 97, 'oacl' => 97)));
+    $media1 = $this->Media->findById($this->Media->getLastInsertID());
+    // media2 is visible by users
+    $this->Media->save($this->Media->create(array('name' => 'IMG_2345.JPG', 'user_id' => $userA['User']['id'], 'gacl' => 97, 'uacl' => 97)));
+    $media2 = $this->Media->findById($this->Media->getLastInsertID());
+    // media3 is visible by group members of 'aGroup'
+    $this->Media->save($this->Media->create(array('name' => 'IMG_3456.JPG', 'user_id' => $userA['User']['id'], 'gacl' => 97)));
+    $media3 = $this->Media->findById($this->Media->getLastInsertID());
+    $this->Media->save(array('Media' => array('id' => $media3['Media']['id']), 'Group' => array('Group' => array($group['Group']['id']))));
+    // media4 is private
+    $this->Media->save($this->Media->create(array('name' => 'IMG_4567.JPG', 'user_id' => $userA['User']['id'])));
+    $media4 = $this->Media->findById($this->Media->getLastInsertID());
+    
+    $this->mockUser($userNone);
+    $result = $this->Search->paginate();
+    $this->assertEqual(array('IMG_1234.JPG'), Set::extract('/Media/name', $result));
+
+    $this->mockUser($userC);
+    $result = $this->Search->paginate();
+    $this->assertEqual(array('IMG_1234.JPG', 'IMG_2345.JPG'), Set::extract('/Media/name', $result));
+
+    $this->mockUser($userB);
+    $result = $this->Search->paginate();
+    $this->assertEqual(array('IMG_1234.JPG', 'IMG_2345.JPG', 'IMG_3456.JPG'), Set::extract('/Media/name', $result));
+
+    $this->mockUser($guestA);
+    $result = $this->Search->paginate();
+    $this->assertEqual(array('IMG_1234.JPG', 'IMG_3456.JPG'), Set::extract('/Media/name', $result));
+
+    $this->mockUser($userA);
+    $result = $this->Search->paginate();
+    $this->assertEqual(array('IMG_1234.JPG', 'IMG_2345.JPG', 'IMG_3456.JPG', 'IMG_4567.JPG'), Set::extract('/Media/name', $result));
+  } 
 }

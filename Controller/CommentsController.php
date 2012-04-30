@@ -244,8 +244,10 @@ class CommentsController extends AppController
 
   function rss() {
     $this->layoutPath = 'rss';
-    $conditions = $this->Media->buildAclConditions($this->getUser());
-    $this->set('data', $this->Comment->find('all', array('conditions' => $conditions, 'order' => 'Comment.date DESC', 'limit' => 20)));
+    $aclQuery = $this->Media->buildAclQuery($this->getUser());
+    $query = am(array('order' => 'Comment.date DESC', 'limit' => 20), $aclQuery);
+    $this->Media->bindModel(array('hasMany' => array('GroupsMedia' => array())));
+    $this->set('data', $this->Comment->find('all', $query));
 
     if (Configure::read('debug') > 1) {
       Configure::write('debug', 1);
