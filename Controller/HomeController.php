@@ -71,6 +71,7 @@ class HomeController extends AppController
     $this->set('cloudCategories', $this->Media->cloud($user, 'Category', 50));
 
     $query = am(array('order' => 'Comment.date DESC', 'limit' => 4), $this->Media->buildAclQuery($this->getUser()));
+    $this->Media->bindModel(array('hasMany' => array('GroupsMedia' => array())));
     $comments = $this->Comment->find('all', $query);
     $this->FastFileResponder->addAll($comments, 'mini');
     $this->set('comments', $comments);

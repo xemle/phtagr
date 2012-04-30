@@ -45,7 +45,8 @@ class CommentsController extends AppController
   }
 
   function index() {
-    $data = $this->paginate('Comment', $this->Media->buildAclConditions($this->getUser()));
+    $this->Comment->currentUser =& $this->getUser();
+    $data = $this->paginate('Comment');
     $this->set('comments', $data);
   }
 

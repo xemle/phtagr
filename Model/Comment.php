@@ -8,6 +8,8 @@ class Comment extends AppModel {
       'Media' => array(),
       'User' => array()
   );
+  
+  var $currentUser = array();
 
   var $validate = array(
     'name' => array('rule' => 'notEmpty', 'message' => 'Name is missing'),
@@ -26,5 +28,44 @@ class Comment extends AppModel {
     }
     return true;
   }
+  
+  public function paginate($conditions, $fields, $order, $limit, $page = 1, $recursive = null, $extra = array()) {
+    $query = am(array(
+        'conditions' => $conditions,
+        'order' => $order,
+        'limit' => $limit,
+        'page' => $page,
+        'recursive' => $recursive), $extra);
+    $aclQuery = $this->Media->buildAclQuery($this->currentUser);
+    if (count($aclQuery['joins'])) {
+      $joinConditions = "`{$this->alias}`.`media_id` = `{$this->Media->alias}`.`{$this->Media->primaryKey}`";
+      $join = array(
+          'table' => $this->Media,
+          'alias' => $this->Media->alias,
+          'type' => 'LEFT',
+          'conditions' => $joinConditions
+      );
+      $aclQuery['joins'] = am(array($join), $aclQuery['joins']);
+    }
+    return $this->find('all', am($query, $aclQuery));
+  }
+
+  public function paginateCount($conditions = null, $recursive = 0, $extra = array()) {
+    $query = am(array(
+        'conditions' => $conditions,
+        'recursive' => $recursive), $extra);
+    $aclQuery = $this->Media->buildAclQuery($this->currentUser);
+    if (count($aclQuery['joins'])) {
+      $joinConditions = "`{$this->alias}`.`media_id` = `{$this->Media->alias}`.`{$this->Media->primaryKey}`";
+      $join = array(
+          'table' => $this->Media,
+          'alias' => $this->Media->alias,
+          'type' => 'LEFT',
+          'conditions' => $joinConditions
+      );
+      $aclQuery['joins'] = am(array($join), $aclQuery['joins']);
+    }
+    return $this->find('count', am($query, $aclQuery));
+  }  
 }
 ?>

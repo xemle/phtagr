@@ -48,7 +48,7 @@ class ExplorerControllerTest extends ControllerTestCase {
    */
   public function tearDown() {
     unset($this->Media);
-    unset($this->MyFile);
+    unset($this->User);
 
     parent::tearDown();
   }
