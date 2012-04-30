@@ -497,11 +497,14 @@ class Media extends AppModel
   function buildAclJoin() {
     $this->bindModel(array('hasMany' => array('GroupsMedia' => array())));
     $config = $this->hasMany['GroupsMedia'];
-    $table = $this->GroupsMedia->table;
     $alias = $this->GroupsMedia->alias;
     $foreignKey = $config['foreignKey'];
-    $join = "LEFT JOIN `{$this->tablePrefix}${table}` AS `$alias` "
-      ."ON `{$this->alias}`.`{$this->primaryKey}` = `$alias`.`{$foreignKey}`";
+    $join = array(
+        'table' => $this->GroupsMedia,
+        'alias' => $alias,
+        'type' => 'LEFT',
+        'conditions' => array("`{$this->alias}`.`{$this->primaryKey}` = `$alias`.`{$foreignKey}`")
+        );
     return $join;
   }
   
