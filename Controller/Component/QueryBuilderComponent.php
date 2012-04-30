@@ -22,10 +22,10 @@ class QueryBuilderComponent extends Component
   var $controller = null;
 
   /**
-    'name' => 'Model.field' // map condition to 'Model.field = value'
-    'name' => array('rule' => 'special rule name') 
-    'name' => array('field' => 'Model.field', 'operand' => 'condition operand')
-  */
+   * 'name' => 'Model.field' // map condition to 'Model.field = value'
+   * 'name' => array('rule' => 'special rule name') 
+   * 'name' => array('field' => 'Model.field', 'operand' => 'condition operand')
+   */
   var $rules = array(
     'categories' => array('custom' => 'buildHabtm'),
     'created_from' => array('field' => 'Media.created', 'operand' => '>='),
@@ -50,11 +50,14 @@ class QueryBuilderComponent extends Component
     $this->controller = &$controller;
   }
 
-  /** Get array value if exist or default value
-    @param data Data array
-    @param name Key of data
-    @param default Default value
-    @return data value or default */
+  /** 
+   * Get array value if exist or default value
+   * 
+   * @param data Data array
+   * @param name Key of data
+   * @param default Default value
+   * @return data value or default 
+   */
   function _getParam(&$data, $name, $default = null) {
     if (!isset($data[$name])) {
       return $default;
@@ -63,9 +66,12 @@ class QueryBuilderComponent extends Component
     }
   }
 
-  /** Sanitize the data by escaping the value
-    @param Data as single value or array
-    @return Sanitized data */
+  /** 
+   * Sanitize the data by escaping the value
+   * 
+   * @param Data as single value or array
+   * @return Sanitized data 
+   */
   function _sanitizeData($data) {
     if (!is_array($data)) {
       if (is_numeric($data)) {
@@ -82,14 +88,17 @@ class QueryBuilderComponent extends Component
     }
   }
 
-  /** Build a single condition by field, value, and the operand and sanitze the
-    value(s)
-    @param field Field name
-    @param value Value as single value or array
-    @param Options Optional options
-      - operand: Default is '='
-      - mapping: Array of value mapping
-    @return Sanitized condition */
+  /** 
+   * Build a single condition by field, value, and the operand and sanitze the
+   * value(s)
+   * 
+   * @param field Field name
+   * @param value Value as single value or array
+   * @param Options Optional options
+   *   - operand: Default is '='
+   *   - mapping: Array of value mapping
+   * @return Sanitized condition 
+   */
   function _buildCondition($field, $value, $options = false) {
     if (is_string($options)) {
       $o['operand'] = $options;
@@ -125,11 +134,14 @@ class QueryBuilderComponent extends Component
     return $condition; 
   }
 
-  /** Extract exclusion parameters. A exclustion is a value which starts with a
-    minus sign ('-')
-    @param data Parameter data
-    @param skip Parameter list which are not evaluated and skiped
-    @return exclusions parameter */
+  /** 
+   * Extract exclusion parameters. A exclustion is a value which starts with a
+   * minus sign ('-')
+   * 
+   * @param data Parameter data
+   * @param skip Parameter list which are not evaluated and skiped
+   * @return exclusions parameter 
+   */
   function _extractExclusions(&$data, $skip = array('sort', 'north', 'south', 'west', 'east')) {
     $exclusions = array();
     if (!count($data)) {
@@ -294,10 +306,11 @@ class QueryBuilderComponent extends Component
   }
 
   /**
-    @param data Search parameters array
-    @param SQL array
-    @param name Parameter name
-    @param value Parameter value */
+   * @param data Search parameters array
+   * @param SQL array
+   * @param name Parameter name
+   * @param value Parameter value 
+   */
   function buildHabtm(&$data, &$query, $name, $value) {
     if (count($data[$name]) == 0) {
       return;
