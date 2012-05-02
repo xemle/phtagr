@@ -25,7 +25,7 @@ if (!class_exists('TestControllerMock')) {
  */
 class SearchComponentTestCase extends CakeTestCase {
 	var $controllerMock;
-	var $uses = array('User', 'Group', 'Media');
+	var $uses = array('User', 'Group', 'Media', 'Tag', 'Category');
 	var $components = array('Search');
 
 	public $fixtures = array('app.file', 'app.media', 'app.user', 'app.group', 'app.groups_media', 
@@ -46,6 +46,10 @@ class SearchComponentTestCase extends CakeTestCase {
     $this->bindCompontents();
 		
     $this->Search->validate = array(
+      'categories' => array(
+        'wordRule' => array('rule' => array('custom', '/^[-]?\w+$/')),
+        'minRule' => array('rule' => array('minLength', 3))
+        ),
       'groups' => 'notEmpty',
       'page' => 'numeric',
       'show' => array('rule' => array('inList', array(12, 24, 64))),
@@ -53,6 +57,7 @@ class SearchComponentTestCase extends CakeTestCase {
         'wordRule' => array('rule' => array('custom', '/^[-]?\w+$/')),
         'minRule' => array('rule' => array('minLength', 3))
         ),
+      'tag_op' => array('rule' => array('inList', array('AND', 'OR'))),
       'user' => 'alphaNumeric', // disabled 
       'visibility', // no validation
       'world' // no validation but disabled
@@ -295,5 +300,81 @@ class SearchComponentTestCase extends CakeTestCase {
     $this->mockUser($userA);
     $result = $this->Search->paginate();
     $this->assertEqual(array('IMG_1234.JPG', 'IMG_2345.JPG', 'IMG_3456.JPG', 'IMG_4567.JPG'), Set::extract('/Media/name', $result));
-  } 
+  }
+  
+  public function testExclusion() {
+    $userA = $this->User->save($this->User->create(array('username' => 'userA', 'role' => ROLE_USER)));
+    $userB = $this->User->save($this->User->create(array('username' => 'userB', 'role' => ROLE_USER)));
+    
+    // 'userA' has group 'aGroup'. 'userB' and 'guestA' are member of 'aGroup'
+    $group = $this->Group->save($this->Group->create(array('name' => 'aGroup', 'user_id' => $userA['User']['id'])));
+    $this->Group->subscribe($group, $userB['User']['id']);
+    // Reload users to refresh model data of groups
+    $userA = $this->User->findById($userA['User']['id']);
+    $userB = $this->User->findById($userB['User']['id']);
+    
+    // media1 is public
+    $media1 = $this->Media->save($this->Media->create(array('name' => 'IMG_1234.JPG', 'user_id' => $userA['User']['id'], 'gacl' => 97, 'uacl' => 97, 'oacl' => 97)));
+    // media2 is visible by users
+    $this->Media->save($this->Media->create(array('name' => 'IMG_2345.JPG', 'user_id' => $userA['User']['id'], 'gacl' => 97, 'uacl' => 97)));
+    $media2 = $this->Media->findById($this->Media->getLastInsertID());
+    // media3 is visible by group members of 'aGroup'
+    $media3 = $this->Media->save($this->Media->create(array('name' => 'IMG_3456.JPG', 'user_id' => $userA['User']['id'], 'gacl' => 97)));
+    $this->Media->save(array('Media' => array('id' => $media3['Media']['id']), 'Group' => array('Group' => array($group['Group']['id']))));
+    // media4 is private
+    $media4 = $this->Media->save($this->Media->create(array('name' => 'IMG_4567.JPG', 'user_id' => $userA['User']['id'])));
+    
+    $skyTag = $this->Tag->save($this->Tag->create(array('name' => 'sky')));
+    $vacationTag = $this->Tag->save($this->Tag->create(array('name' => 'vacation')));
+    $natureTag = $this->Tag->save($this->Tag->create(array('name' => 'nature')));
+
+    $familyCategory = $this->Category->save($this->Category->create(array('name' => 'family')));
+    $friendsCategory = $this->Category->save($this->Category->create(array('name' => 'friends')));
+    
+    // media1: Tags: sky, vacation. Category: family
+    $this->Media->save(array(
+        'Media' => array('id' => $media1['Media']['id']), 
+        'Tag' => array('Tag' => array($skyTag['Tag']['id'], $vacationTag['Tag']['id'])),
+        'Category' => array('Category' => array($familyCategory['Category']['id'])),
+        ));
+    // media2: Tags: sky, vacation, nature. Category: family, friends
+    $this->Media->save(array(
+        'Media' => array('id' => $media2['Media']['id']), 
+        'Tag' => array('Tag' => array($skyTag['Tag']['id'], $vacationTag['Tag']['id'], $natureTag['Tag']['id'])),
+        'Category' => array('Category' => array($familyCategory['Category']['id'], $friendsCategory['Category']['id'])),
+        ));
+    // media3: Tags: vacation, nature. Category: 
+    $this->Media->save(array(
+        'Media' => array('id' => $media3['Media']['id']), 
+        'Tag' => array('Tag' => array($vacationTag['Tag']['id'], $natureTag['Tag']['id']))
+        ));
+    // media4: Tags: vacation. Category: friends
+    $this->Media->save(array(
+        'Media' => array('id' => $media4['Media']['id']), 
+        'Tag' => array('Tag' => array($vacationTag['Tag']['id'])),
+        'Category' => array('Category' => array($friendsCategory['Category']['id'])),
+        ));
+    
+    $this->mockUser($userB);
+    $this->Search->addTag('-nature');
+    $this->Search->addCategory('family');
+    $result = $this->Search->paginate();
+    $this->assertEqual(array('IMG_1234.JPG'), Set::extract('/Media/name', $result));
+    $this->mockUser($userA);
+    $result = $this->Search->paginate();
+    $this->assertEqual(array('IMG_1234.JPG'), Set::extract('/Media/name', $result));
+
+    // test with tag OR Operand
+    $this->mockUser($userB);
+    $this->Search->clear();
+    $this->Search->addTag('sky');
+    $this->Search->addTag('nature');
+    $this->Search->setTagOp('OR');
+    $this->Search->addCategory('-friends');
+    $result = $this->Search->paginate();
+    $this->assertEqual(array('IMG_1234.JPG', 'IMG_3456.JPG'), Set::extract('/Media/name', $result));
+    $this->mockUser($userA);
+    $result = $this->Search->paginate();
+    $this->assertEqual(array('IMG_1234.JPG', 'IMG_3456.JPG'), Set::extract('/Media/name', $result));
+  }
 }
