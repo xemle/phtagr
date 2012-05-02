@@ -70,9 +70,8 @@ class HomeController extends AppController
     $this->set('cloudTags', $this->Media->cloud($user, 'Tag', 50));
     $this->set('cloudCategories', $this->Media->cloud($user, 'Category', 50));
 
-    $query = am(array('order' => 'Comment.date DESC', 'limit' => 4), $this->Media->buildAclQuery($this->getUser()));
-    $this->Media->bindModel(array('hasMany' => array('GroupsMedia' => array())));
-    $comments = $this->Comment->find('all', $query);
+    $this->Comment->currentUser =& $this->getUser();
+    $comments = $this->Comment->paginate(array(), array(), 'Comment.date DESC', 4);
     $this->FastFileResponder->addAll($comments, 'mini');
     $this->set('comments', $comments);
   }

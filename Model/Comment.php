@@ -31,6 +31,7 @@ class Comment extends AppModel {
   
   public function paginate($conditions, $fields, $order, $limit, $page = 1, $recursive = null, $extra = array()) {
     $query = am(array(
+        'fields' => $fields,
         'conditions' => $conditions,
         'order' => $order,
         'limit' => $limit,
