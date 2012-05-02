@@ -292,7 +292,7 @@ class GroupsController extends AppController {
     if ($this->getUserRole() < ROLE_ADMIN) {
       $conditions['Group.user_id'] = $this->getUserId();
     }
-    $this->request->data = $this->Group->find('all', array('conditions' => $conditions));
+    $this->request->data = $this->Group->find('first', array('conditions' => $conditions));
     if (!$this->request->data) {
       $this->Session->setFlash(__("Could not find group"));
       $this->redirect("index");
