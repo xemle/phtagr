@@ -17,6 +17,8 @@
 
 App::uses('Option', 'Model');
 App::uses('User', 'Model');
+App::uses('Group', 'Model');
+App::uses('Media', 'Model');
 
 App::uses('Router', 'Routing');
 App::uses('Controller', 'Controller');
@@ -41,13 +43,13 @@ if (!is_writeable(TEST_FILES)) {
 class TestReadController extends AppController {
 	
 	var $uses = array('Media', 'MyFile', 'User', 'Option');
-  
+
 	var $components = array('FileManager', 'FilterManager');
 	
 	function getUser() {
     return $this->User->find('first');
 	}
-  
+
 }
 
 /**
@@ -57,22 +59,22 @@ class TestReadController extends AppController {
 class MediaReadTestCase extends CakeTestCase {
 
 	var $controller;
-  
+
   var $User;
   var $Media;
   var $Option;
   var $userId;
 	
   var $Folder;
-  
+
   /**
    * Fixtures
    *
    * @var array
    */
-	public $fixtures = array('app.file', 'app.media', 'app.user', 'app.group', 'app.groups_media', 
-      'app.groups_user', 'app.option', 'app.guest', 'app.comment', 'app.my_file', 
-      'app.tag', 'app.media_tag', 'app.category', 'app.categories_media', 
+	public $fixtures = array('app.file', 'app.media', 'app.user', 'app.group', 'app.groups_media',
+      'app.groups_user', 'app.option', 'app.guest', 'app.comment', 'app.my_file',
+      'app.tag', 'app.media_tag', 'app.category', 'app.categories_media',
       'app.location', 'app.locations_media', 'app.comment');
 
 /**
@@ -83,10 +85,12 @@ class MediaReadTestCase extends CakeTestCase {
 	public function setUp() {
 		parent::setUp();
     $this->Folder = new Folder();
-    
+
     $this->User = ClassRegistry::init('User');
     $this->User->save($this->User->create(array('username' => 'admin', 'role' => ROLE_ADMIN)));
     $this->userId = $this->User->getLastInsertID();
+
+    $this->Group = ClassRegistry::init('Group');
 
     $this->Option = ClassRegistry::init('Option');
     if (file_exists('/usr/bin/ffmpeg')) {
@@ -106,7 +110,7 @@ class MediaReadTestCase extends CakeTestCase {
 		$this->Controller->startupProcess();
     $this->Media =& $this->Controller->Media;
     $this->MyFile = & $this->Controller->MyFile;
-    
+
     $this->Folder->create(TEST_FILES_TMP);
   }
 
@@ -120,6 +124,8 @@ class MediaReadTestCase extends CakeTestCase {
 
     unset($this->Controller);
     unset($this->Media);
+    unset($this->Option);
+    unset($this->Group);
     unset($this->User);
     unset($this->Folder);
 		parent::tearDown();
@@ -140,7 +146,7 @@ class MediaReadTestCase extends CakeTestCase {
     $s2 = $utc->format('Y-m-d H:i:s');
     $this->assertEqual($s2, '1970-01-01 00:00:00');
   }
-  
+
 /**
  * testReadFile method
  *
@@ -151,7 +157,27 @@ class MediaReadTestCase extends CakeTestCase {
 		$result = $this->Controller->FilterManager->read($filename);
 		$this->assertEqual($result, false);
 	}
-  
+
+  public function testReadWithDefaultRights() {
+    $user = $this->User->find('first');
+    $group = $this->Group->save($this->Group->create(array('name' => 'Group1', 'user_id' => $user['User']['id'])));
+    $this->Option->setValue('acl.write.tag', ACL_LEVEL_OTHER, $user['User']['id']);
+    $this->Option->setValue('acl.write.meta', ACL_LEVEL_USER, $user['User']['id']);
+    $this->Option->setValue('acl.read.preview', ACL_LEVEL_OTHER, $user['User']['id']);
+    $this->Option->setValue('acl.read.original', ACL_LEVEL_GROUP, $user['User']['id']);
+    $this->Option->setValue('acl.group', $group['Group']['id'], $user['User']['id']);
+
+    $filename = TEST_FILES_TMP . 'IMG_4145.JPG';
+    copy(RESOURCES . 'IMG_4145.JPG', $filename);
+    $this->Controller->FilterManager->read($filename);
+    $media = $this->Media->find('first');
+
+    $this->assertEqual($media['Media']['gacl'], ACL_READ_ORIGINAL | ACL_WRITE_META);
+    $this->assertEqual($media['Media']['uacl'], ACL_READ_PREVIEW | ACL_WRITE_META);
+    $this->assertEqual($media['Media']['oacl'], ACL_READ_PREVIEW | ACL_WRITE_TAG);
+    $this->assertEqual(Set::extract('/Group/name', $media), array('Group1'));
+  }
+
   public function testGpx() {
     // 2 hour time shift
     $this->Option->setValue('filter.gps.offset', 120, $this->userId);
@@ -219,18 +245,18 @@ class MediaReadTestCase extends CakeTestCase {
   }
 
   public function testVideoRead() {
-    copy(RESOURCES . 'MVI_7620.OGG', TEST_FILES_TMP . 'MVI_7620.OGG');    
+    copy(RESOURCES . 'MVI_7620.OGG', TEST_FILES_TMP . 'MVI_7620.OGG');
     copy(RESOURCES . 'MVI_7620.THM', TEST_FILES_TMP . 'MVI_7620.THM');
     copy(RESOURCES . 'example.gpx', TEST_FILES_TMP . 'example.gpx');
-    
+
     $this->Controller->FilterManager->readFiles(TEST_FILES_TMP);
     $count = $this->Media->find('count');
     $this->assertEqual($count, 1);
-    
+
     $media = $this->Media->find('first');
     $keywords = Set::extract('/Tag/name', $media);
     $this->assertEqual($keywords, array('thailand'));
-    
+
     $this->assertEqual($media['Media']['date'], '2007-10-14 10:09:57');
     $this->assertEqual($media['Media']['latitude'], 46.5761);
     $this->assertEqual($media['Media']['longitude'], 8.89242);

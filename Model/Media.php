@@ -127,10 +127,10 @@ class Media extends AppModel
     // Access control values
     $acl = $this->User->Option->getDefaultAcl($user);
     $data['Media']['user_id'] = $user['User']['id'];
-    $data['Media']['group_id'] = $acl['groupId'];
     $data['Media']['gacl'] = $acl['gacl'];
     $data['Media']['uacl'] = $acl['uacl'];
     $data['Media']['oacl'] = $acl['oacl'];
+    $data['Group']['Group'] = array($acl['groupId']);
     return $data;
   }
 
