@@ -196,7 +196,32 @@ class SearchComponentTestCase extends CakeTestCase {
     $this->assertEqual($encoded, "folder:2012=2f2012-03-10");
   }
 
-  function testGroupSearch() {
+  /**
+   * Test group search with correct acl sql query
+   */
+  function testGroupSearchWithGroupAcl() {
+    $admin = $this->User->save($this->User->create(array('username' => 'admin', 'role' => ROLE_ADMIN)));
+    $user1 = $this->User->save($this->User->create(array('username' => 'admin', 'role' => ROLE_USER)));
+    
+    // 'group1' from 'admin' has 'user1' as member
+    $group1 = $this->Group->save($this->Group->create(array('name' => 'Group1', 'user_id' => $admin['User']['id'])));
+    $group2 = $this->Group->save($this->Group->create(array('name' => 'Group2', 'user_id' => $user1['User']['id'])));
+    $this->Group->subscribe($group1, $user1['User']['id']);
+    $user1 = $this->User->findById($user1['User']['id']);
+    
+    // media1 belongs to group2
+    $media1 = $this->Media->save($this->Media->create(array('name' => 'IMG_1234.JPG', 'user_id' => $user1['User']['id'], 'gacl' => 97)));
+    $this->Media->save(array('Media' => array('id' => $media1['Media']['id']), 'Group' => array('Group' => array($group2['Group']['id']))));
+    
+    // 
+    $this->mockUser($user1);
+    $this->Search->addGroup('Group2');
+    $this->Search->setShow(6);
+    $result = $this->Search->paginate();
+    $this->assertEqual(array('IMG_1234.JPG'), Set::extract('/Media/name', $result));
+  } 
+
+  function testMultipleGroupSearch() {
     $this->User->save($this->User->create(array('username' => 'admin', 'role' => ROLE_ADMIN)));
     $admin = $this->User->findById($this->User->getLastInsertID());
     
