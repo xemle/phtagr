@@ -494,10 +494,9 @@ class Media extends AppModel
   /**
    * Build join for ACL condition
    */
-  function buildAclJoin() {
-    $this->bindModel(array('hasMany' => array('GroupsMedia' => array())));
-    $config = $this->hasMany['GroupsMedia'];
-    $alias = $this->GroupsMedia->alias;
+  function buildAclJoin($alias) {
+    $this->bindModel(array('hasMany' => array($alias => array('className' => 'GroupsMedia'))));
+    $config = $this->hasMany[$alias];
     $foreignKey = $config['foreignKey'];
     $join = array(
         'table' => $this->GroupsMedia,
@@ -529,9 +528,9 @@ class Media extends AppModel
       } elseif ($user['User']['role'] == ROLE_GUEST) {
         $groupIds = Set::extract('/Member/id', $user);
         if (count($groupIds)) {
-          $conditions['Group.id'] = $groupIds;
+          $conditions['AclGroups.id'] = $groupIds;
           $conditions['Media.gacl >='] = $level;
-          $joins[] = $this->buildAclJoin();
+          $joins[] = $this->buildAclJoin('AclGroups');
         } else {
           // no images
           $conditions[] = "1 = 0";
@@ -551,9 +550,9 @@ class Media extends AppModel
           $groupIds = Set::extract('/Member/id', $user);
           if (count($groupIds)) {
             $acl['AND'] = array(
-              'GroupsMedia.group_id' => $groupIds,
+              'AclGroups.group_id' => $groupIds,
               'Media.gacl >=' => $level);
-            $joins[] = $this->buildAclJoin();
+            $joins[] = $this->buildAclJoin('AclGroups');
           }
         }
         if ($user['User']['role'] >= ROLE_USER) {
