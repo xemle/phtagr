@@ -597,6 +597,14 @@ class Media extends AppModel
     }
   }
 
+  /**
+   * Create tag cloud of HABTM model assoziation
+   * 
+   * @param array $user Current User
+   * @param string $assoc HABTM model assoziation
+   * @param int $num Maximum tags
+   * @return array Map from name to hits
+   */
   function cloud($user, $assoc = 'Tag', $num = 50) {
     if (!isset($this->hasAndBelongsToMany[$assoc])) {
       return array();
@@ -614,25 +622,23 @@ class Media extends AppModel
     $foreignKey = $config['foreignKey'];
     $associationForeignKey = $config['associationForeignKey'];
 
-    $query = $this->buildAclQuery($user);
-    if ($query['conditions']) {
-      $aclWhere = ' AND '.implode(' AND ', $query['conditions']);
-    } else {
-      $aclWhere = '';
-    }
-    $fields = am(array('`$alias`.`name`', 'COUNT(`$alias`.`name`) AS hits'), $query['fields']);
-    $joins = array();
-    $sql="SELECT ".join(',', $fields).
-         " FROM `$table` AS `$alias`,".
-         "  `$joinTable` AS `$joinAlias`,".
-         "  `$myTable` AS `{$this->alias}`".
-         " WHERE `$alias`.`$key` = `$joinAlias`.`$associationForeignKey`".
-         "   AND `$joinAlias`.`$foreignKey` = `{$this->alias}`.`{$this->primaryKey}`".
-         $aclWhere.
-         " GROUP BY `$alias`.`name` ".
-         " ORDER BY hits DESC LIMIT 0,".intval($num);
-
-    $data = $this->query($sql);
+    $aclQuery = $this->buildAclQuery($user);
+    $fields = array("`$alias`.`name`", "COUNT(`$alias`.`name`) AS hits");
+    $joins = am(array(
+        "JOIN `$joinTable` AS `$joinAlias` ON `$alias`.`$key` = `$joinAlias`.`$associationForeignKey`",
+        "JOIN `$myTable` AS `{$this->alias}` ON `$joinAlias`.`$foreignKey` = `{$this->alias}`.`{$this->primaryKey}`"
+        ), $aclQuery['joins']);
+    $conditions = $aclQuery['conditions'];
+    $query = array(
+        'fields' => $fields,
+        'joins' => $joins,
+        'conditions' => $conditions,
+        'group' => "`$alias`.`name`",
+        'order' => "hits DESC",
+        'limit' => $num,
+        'page' => 0
+    );
+    $data = $this->{$assoc}->find('all', $query);
     if (count($data)) {
       $data = Set::combine($data, "{n}.$assoc.name", "{n}.0.hits");
     }

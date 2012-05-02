@@ -16,6 +16,7 @@
  */
 
 App::uses('Media', 'Model');
+App::uses('Tag', 'Model');
 App::uses('Group', 'Model');
 App::uses('User', 'Model');
 
@@ -43,6 +44,7 @@ class MediaTestCase extends CakeTestCase {
 		parent::setUp();
 
 		$this->Media = ClassRegistry::init('Media');
+		$this->Tag = ClassRegistry::init('Tag');
 		$this->Group = ClassRegistry::init('Group');
 		$this->User = ClassRegistry::init('User');
 	}
@@ -54,6 +56,7 @@ class MediaTestCase extends CakeTestCase {
  */
 	public function tearDown() {
 		unset($this->Media);
+		unset($this->Tag);
 		unset($this->Group);
 		unset($this->User);
 
@@ -394,5 +397,57 @@ class MediaTestCase extends CakeTestCase {
     $media = $this->Media->findById($media['Media']['id']);
     $this->Media->setAccessFlags(&$media, &$user);
     $this->assertEqual(array('group 3'), Set::extract('/Group/name', $media));
+  }
+  
+  public function testCloud() {
+    $userA = $this->User->save($this->User->create(array('username' => 'userA', 'role' => ROLE_USER)));
+    $userB = $this->User->save($this->User->create(array('username' => 'userB', 'role' => ROLE_USER)));
+    $userC = $this->User->save($this->User->create(array('username' => 'userC', 'role' => ROLE_USER)));
+    // user 'userB' has guest 'guestA'
+    $guestA = $this->User->save($this->User->create(array('username' => 'guestA', 'role' => ROLE_GUEST, 'creator_id' => $userB['User']['id'])));
+    $userNone = $this->User->save($this->User->create(array('username' => 'nobody', 'role' => ROLE_NOBODY)));
+    
+    // 'userA' has group 'aGroup'. 'userB' and 'guestA' are member of 'aGroup'
+    $group = $this->Group->save($this->Group->create(array('name' => 'aGroup', 'user_id' => $userA['User']['id'])));
+    $group = $this->Group->findById($this->Group->getLastInsertID());
+    $this->Group->subscribe($group, $userB['User']['id']);
+    $group = $this->Group->findById($group['Group']['id']);
+    $this->Group->subscribe($group, $guestA['User']['id']);
+    // Reload users to refresh model data of groups
+    $userA = $this->User->findById($userA['User']['id']);
+    $userB = $this->User->findById($userB['User']['id']);
+    $userC = $this->User->findById($userC['User']['id']);
+    $guestA = $this->User->findById($guestA['User']['id']);
+    $userNone = $this->User->findById($userNone['User']['id']);
+    
+    // media1 is public
+    $media1 = $this->Media->save($this->Media->create(array('name' => 'IMG_1234.JPG', 'user_id' => $userA['User']['id'], 'gacl' => 97, 'uacl' => 97, 'oacl' => 97)));
+    // media2 is visible by users
+    $media2 = $this->Media->save($this->Media->create(array('name' => 'IMG_2345.JPG', 'user_id' => $userA['User']['id'], 'gacl' => 97, 'uacl' => 97)));
+    // media3 is visible by group members of 'aGroup'
+    $media3 = $this->Media->save($this->Media->create(array('name' => 'IMG_3456.JPG', 'user_id' => $userA['User']['id'], 'gacl' => 97)));
+    $this->Media->save(array('Media' => array('id' => $media3['Media']['id']), 'Group' => array('Group' => array($group['Group']['id']))));
+    // media4 is private
+    $media4 = $this->Media->save($this->Media->create(array('name' => 'IMG_4567.JPG', 'user_id' => $userA['User']['id'])));
+    
+    $skyTag = $this->Tag->save($this->Tag->create(array('name' => 'sky')));
+    $vacationTag = $this->Tag->save($this->Tag->create(array('name' => 'vacation')));
+    $natureTag = $this->Tag->save($this->Tag->create(array('name' => 'nature')));
+    
+    $this->Media->save(array('Media' => array('id' => $media1['Media']['id']), 'Tag' => array('Tag' => array($skyTag['Tag']['id'], $vacationTag['Tag']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media2['Media']['id']), 'Tag' => array('Tag' => array($skyTag['Tag']['id'], $vacationTag['Tag']['id'], $natureTag['Tag']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media3['Media']['id']), 'Tag' => array('Tag' => array($vacationTag['Tag']['id'], $natureTag['Tag']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media4['Media']['id']), 'Tag' => array('Tag' => array($vacationTag['Tag']['id']))));
+    
+    $result = $this->Media->cloud($userA, 'Tag');
+    $this->assertEqual($result, array('vacation' => 4, 'sky' => 2, 'nature' => 2));
+    $result = $this->Media->cloud($userB, 'Tag');
+    $this->assertEqual($result, array('vacation' => 3, 'sky' => 2, 'nature' => 2));
+    $result = $this->Media->cloud($userC, 'Tag');
+    $this->assertEqual($result, array('vacation' => 2, 'sky' => 2, 'nature' => 1));
+    $result = $this->Media->cloud($guestA, 'Tag');
+    $this->assertEqual($result, array('vacation' => 2, 'sky' => 1, 'nature' => 1));
+    $result = $this->Media->cloud($userNone, 'Tag');
+    $this->assertEqual($result, array('vacation' => 1, 'sky' => 1));
   }
 }
