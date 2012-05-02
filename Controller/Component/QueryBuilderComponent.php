@@ -183,7 +183,6 @@ class QueryBuilderComponent extends Component
   function buildConditions($data) {
     $query = array('conditions' => array());
     if (!count($data)) {
-      $this->_buildAccessConditions(&$data, &$query);
       return $query;
     }
     foreach ($this->rules as $name => $rule) {
@@ -218,7 +217,6 @@ class QueryBuilderComponent extends Component
         }
       }
     }
-    $this->_buildAccessConditions(&$data, &$query);
 
     // paging, offsets and limit
     if (!empty($data['pos'])) { 
@@ -243,6 +241,7 @@ class QueryBuilderComponent extends Component
       $exclude['operand'] = 'OR';
       $query['conditions']['exclude'] = $this->buildConditions($exclude);
     }
+    $this->_buildAccessConditions(&$data, &$query);
     return $query;
   }
 
