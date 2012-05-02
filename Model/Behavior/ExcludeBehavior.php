@@ -186,7 +186,7 @@ class ExcludeBehavior extends ModelBehavior {
     foreach ($conditions as $key => $condition) {
       // we expect only full conditions
       if (!is_string($condition)) {
-        return false;
+        continue;
       }
       // Match 'Model.field'
       if (!preg_match('/^(\w+)\./', $condition, $matches)) {
