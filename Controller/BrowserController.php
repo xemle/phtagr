@@ -55,13 +55,16 @@ class BrowserController extends AppController
     parent::beforeRender();
   }
 
-  /** Add a root to the chroot aliases 
-  @param root New root directory. The directory separator will be added to the
-  root, if the root does not end with the directory separator, 
-  @param alias Alias name for the root directory. This must start with an
-  character, followed by a character, number, or special characters ('-', '_',
-  '.')
-  @return True on success. False otherwise */
+  /**
+   * Add a root to the chroot aliases
+   *
+   * @param root New root directory. The directory separator will be added to the
+   * root, if the root does not end with the directory separator,
+   * @param alias Alias name for the root directory. This must start with an
+   * character, followed by a character, number, or special characters ('-', '_',
+   * '.')
+   * @return True on success. False otherwise
+   */
   function _addFsRoot($root, $alias = null) {
     if (!$root) {
       Logger::warn("Invalid directory. Input is empty");
@@ -96,7 +99,9 @@ class BrowserController extends AppController
     return true;
   }
 
-  /** @return Returns the path of the current request */
+  /**
+   * @return Returns the path of the current request
+   */
   function _getPathFromUrl($strip = 0, $len = false) {
     $strip = max(0, $strip);
     if (count($this->request->params['pass']) - $strip - abs($len) > 0) {
@@ -112,17 +117,20 @@ class BrowserController extends AppController
     return $path;
   }
 
-  /** Returns the canonicalized path 
-    @param path
-    @return canonicalized path */
+  /**
+   * Returns the canonicalized path
+   *
+   * @param path
+   * @return canonicalized path
+   */
   function _canonicalPath($path) {
     $paths = explode('/', $path);
     $canonical = array();
-    foreach ($paths as $p) { 
+    foreach ($paths as $p) {
       if ($p === '' || $p == '.') {
         continue;
       }
-      if ($p == '..') { 
+      if ($p == '..') {
         array_pop($canonical);
         continue;
       }
@@ -131,14 +139,16 @@ class BrowserController extends AppController
     return implode('/', $canonical);
   }
 
-  /** Returns the filesystem path to the relative path. If multiple filesystem
+  /**
+   * Returns the filesystem path to the relative path. If multiple filesystem
    * roots are available, the highest directory is handled as alias of the
    * filesystem root.
-    @param path Relative path
-    @return Filesystem path of filename. If filesystem root could not be
-    resolved it returns false 
-    @note At lease one filesystem root must be defined
-    */
+   *
+   * @param path Relative path
+   * @return Filesystem path of filename. If filesystem root could not be
+   * resolved it returns false
+   * @note At lease one filesystem root must be defined
+   */
   function _getFsPath($path) {
     $path = $this->_canonicalPath($path);
     $dirs = explode('/', $path);
@@ -163,9 +173,12 @@ class BrowserController extends AppController
     return $fspath;
   }
 
-  /** Read path from database and filesystem and returns array of files
-    @param fsPath Filesystem path
-    @return Array of files or false on error */
+  /**
+   * Read path from database and filesystem and returns array of files
+   *
+   * @param fsPath Filesystem path
+   * @return Array of files or false on error
+   */
   function _readPath($fsPath) {
     if (!$fsPath || !is_dir($fsPath)) {
       Logger::err("Invalid path $fsPath");
@@ -187,12 +200,12 @@ class BrowserController extends AppController
     foreach($diffFiles as $file) {
       $dbFiles[] = $this->MyFile->createFromFile($fsPath.$file, $userId);
     }
-    // cut 'File' array index 
+    // cut 'File' array index
     $files = array();
     foreach($dbFiles as $file) {
       $files[] = $file['File'];
     }
-    
+
     $dirs = array();
     foreach($fsDirs as $dir) {
       $file = $this->MyFile->createFromFile($fsPath.$dir, $userId);
@@ -208,7 +221,7 @@ class BrowserController extends AppController
       Logger::info("User cannot read $filename");
       $this->redirect(null, 404);
     }
-    
+
     // Update metadata on dirty file
     $file = $this->MyFile->findByFilename($filename);
     if ($file && $this->Media->hasFlag($file, MEDIA_FLAG_DIRTY)) {
@@ -217,7 +230,7 @@ class BrowserController extends AppController
     }
 
     $options = $this->MyFile->getMediaViewOptions($filename);
-    $options['download'] = true; 
+    $options['download'] = true;
     $this->set($options);
     $this->view = 'Media';
   }
@@ -250,7 +263,7 @@ class BrowserController extends AppController
       $files = array();
       $isExternal = true;
     }
-    
+
     $this->set('path', $path);
     $this->set('dirs', $dirs);
     $this->set('files', $files);
@@ -281,7 +294,7 @@ class BrowserController extends AppController
         $toRead[] = $fsPath;
       }
     }
-    
+
     $this->FilterManager->clearErrors();
     $readed = $this->FilterManager->readFiles($toRead);
     $errorCount = count($this->FilterManager->errors);
@@ -335,9 +348,11 @@ class BrowserController extends AppController
     $this->redirect('index/'.$path);
   }
 
-  /** Synchronize the meta data of the media with its file(s). All media with
+  /**
+   * Synchronize the meta data of the media with its file(s). All media with
    * the MEDIA_FLAG_DIRTY are synced or shortly before the maximum execution
-   * time is exceed. */
+   * time is exceed.
+   */
   function sync($action = false) {
     $userId = $this->getUserId();
     $data = array('action' => $action, 'synced' => array(), 'errors' => array(), 'unsynced' => 0);
@@ -348,13 +363,13 @@ class BrowserController extends AppController
       $query = array('conditions' => $conditions, 'limit' => 10, 'order' => 'Media.modified ASC');
       $results = $this->Media->find('all', $query);
 
-      // clear file cache 
+      // clear file cache
       @clearstatcache();
       $start = $now = microtime(true);
       $executionTime = intval(ini_get('max_execution_time'));
       if ($executionTime !== 0) {
         $executionTime -= 5;
-      } 
+      }
 
       while (count($results)) {
         foreach ($results as $media) {
@@ -440,7 +455,7 @@ class BrowserController extends AppController
         $this->redirect('folder/'.$path);
       }
     }
-    
+
     $this->set('path', $path);
   }
 
@@ -481,8 +496,8 @@ class BrowserController extends AppController
         }
       }
     }
-    
-    return $result;    
+
+    return $result;
   }
 
   function __fromReadableSize($readable) {
@@ -542,7 +557,9 @@ class BrowserController extends AppController
     return $max;
   }
 
-  /** Set quota information for the view */
+  /**
+   * Set quota information for the view
+   */
   function _setQuotaForView() {
     // Fetch quota and free bytes
     $user = $this->getUser();
@@ -584,7 +601,7 @@ class BrowserController extends AppController
             $files = am($files, $extracted);
           }
         }
-      }  
+      }
       if ($extractedCount) {
         $this->Session->setFlash(__("Uploaded %d and %d extraced file(s)", $fileCount, $extractedCount));
       } else {
@@ -593,7 +610,7 @@ class BrowserController extends AppController
     }
     $this->set('path', $path);
     $this->_setQuotaForView();
-  } 
+  }
 
   function _getDailyUploadDir() {
     $root = $this->User->getRootDir($this->getUser());
@@ -621,7 +638,7 @@ class BrowserController extends AppController
         $this->redirect($this->action);
       }
 
-      $dst = $this->_getDailyUploadDir();     
+      $dst = $this->_getDailyUploadDir();
       if (!$dst) {
         $this->redirect($this->action);
       }
@@ -636,7 +653,7 @@ class BrowserController extends AppController
       if (!$files) {
         $this->Session->setFlash(__("No files uploaded"));
         $this->redirect($this->action);
-      } else { 
+      } else {
         $toRead = array();
       }
       $this->FilterManager->clearErrors();

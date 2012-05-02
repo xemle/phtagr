@@ -24,15 +24,17 @@ class FilterManagerComponent extends Component {
   var $controller = null;
   var $components = array('FileManager');
 
-  /** List of extensions
-    'extensions' => filter
-  */
+  /**
+   * List of extensions
+   * 'extensions' => filter
+   */
   var $extensions = null;
-  /** List of Filters 
-    'name' => 'filter'
-    */
+  /**
+   * List of Filters
+   * 'name' => 'filter'
+   */
   var $filters = array();
-  /** config of different extensions 
+  /** config of different extensions
     'ext' => array() */
   var $config = array();
 
@@ -47,8 +49,9 @@ class FilterManagerComponent extends Component {
     $this->loadFilter(array('ImageFilter', 'ReadOnlyImageFilter', 'VideoFilter', 'GpsFilter'));
   }
 
-  /** Reads a component and checks required functions 
-    */
+  /**
+   * Reads a component and checks required functions
+   */
   function loadFilter($name) {
     if (is_array($name)) {
       foreach($name as $n) {
@@ -108,8 +111,10 @@ class FilterManagerComponent extends Component {
     return $filter;
   }
 
-  /** checks the filter for required functions
-    init(), getExtensions(), read(), write() */
+  /**
+   * checks the filter for required functions
+   * init(), getExtensions(), read(), write()
+   */
   function _validateFilter($filter, $name) {
     $methods = array('init', 'getExtensions', 'read', 'write');
     $missing = array();
@@ -125,9 +130,12 @@ class FilterManagerComponent extends Component {
     return true;
   }
 
-  /** Evaluate if a filename is supported by a filter
-    @param filename Filename
-    @return True if filename is supported. False otherwise */
+  /**
+   * Evaluate if a filename is supported by a filter
+   *
+   * @param filename Filename
+   * @return True if filename is supported. False otherwise
+   */
   function isSupported($filename) {
     $ext = strtolower(substr($filename, strrpos($filename, '.') + 1));
     if (isset($this->extensions[$ext])) {
@@ -137,9 +145,12 @@ class FilterManagerComponent extends Component {
     }
   }
 
-  /** Returns a filter by filename
-    @param filename Filename
-    @result Filter which handles the file */
+  /**
+   * Returns a filter by filename
+   *
+   * @param filename Filename
+   * @result Filter which handles the file
+   */
   function getFilterByExtension($filename) {
     $ext = strtolower(substr($filename, strrpos($filename, '.') + 1));
     if (isset($this->extensions[$ext])) {
@@ -150,14 +161,19 @@ class FilterManagerComponent extends Component {
     return null;
   }
 
-  /** Returns a list of supported file extensions as array
-    @return Array of supported file extensions */
+  /**
+   * Returns a list of supported file extensions as array
+   *
+   * @return Array of supported file extensions
+   */
   function getExtensions() {
     return array_keys($this->extensions);
   }
 
-  /** Sort files by their extensions and map them to an array where the
-   * extension is the array key */
+  /**
+   * Sort files by their extensions and map them to an array where the
+   * extension is the array key
+   */
   function _sortFilesByExtension($files) {
     $mapping = array();
     foreach ($files as $file) {
@@ -168,10 +184,12 @@ class FilterManagerComponent extends Component {
     return $mapping;
   }
 
-  /** Return all supported extensions sorted by their priority */
+  /**
+   * Return all supported extensions sorted by their priority
+   */
   function _getExtensionsByPriority() {
     $exts = $this->getExtensions();
-    
+
     $order = array();
     foreach ($exts as $ext) {
       $order[$ext] = $this->config[$ext]['priority'];
@@ -180,10 +198,13 @@ class FilterManagerComponent extends Component {
     return array_keys($order);
   }
 
-  /** Read all supported files of a directory
-    @param path Path of the directory to read
-    @result array of files to read 
-    @todo Add recursive read */
+  /**
+   * Read all supported files of a directory
+   *
+   * @param path Path of the directory to read
+   * @return array of files to read
+   * @todo Add recursive read
+   */
   function _readPath($path) {
     if (!is_dir($path) || !is_readable($path)) {
       return array();
@@ -204,10 +225,13 @@ class FilterManagerComponent extends Component {
     return $files;
   }
 
-  /** Read a file or files or directories 
-    @param single file or array of files and/or directories 
-    @result Array of readed files. filename => Media model data (result of
-    FilterManager->read()) */
+  /**
+   * Read a file or files or directories
+   *
+   * @param single file or array of files and/or directories
+   * @return Array of readed files. filename => Media model data (result of
+   * FilterManager->read())
+   */
   function readFiles($files) {
     $stack = array();
     if (!is_array($files)) {
@@ -216,7 +240,7 @@ class FilterManagerComponent extends Component {
 
     foreach ($files as $file) {
       if (is_dir($file)) {
-        $stack = am($stack, $this->_readPath($file));        
+        $stack = am($stack, $this->_readPath($file));
       } else {
         if (is_readable($file)) {
           $stack[] = $file;
@@ -243,22 +267,30 @@ class FilterManagerComponent extends Component {
     return $result;
   }
 
-  /** Adds an error for a file
-    @param filename Current filename
-    @param error Error code
-    @param msg Optiona error message or longer description
-    @param data Optional error data */
+  /**
+   * Adds an error for a file
+   *
+   * @param filename Current filename
+   * @param error Error code
+   * @param msg Optiona error message or longer description
+   * @param data Optional error data
+   */
   function addError($filename, $error, $msg = '', $data = false) {
     $this->errors[$filename] = array('error' => $error, 'msg' => $msg, 'data' => $data);
   }
 
-  /** Clears the error array */
+  /**
+   * Clears the error array
+   */
   function clearErrors() {
     $this->errors = array();
   }
 
-  /** Import a file to the database
-    @param filename Filename of the single file */
+  /**
+   * Import a file to the database
+   *
+   * @param filename Filename of the single file
+   */
   function read($filename) {
     if (!is_readable($filename)) {
       Logger::err("Could not read file $filename");
@@ -308,7 +340,9 @@ class FilterManagerComponent extends Component {
     return $result;
   }
 
-  /** Export database to file */
+  /**
+   * Export database to file
+   */
   function write(&$media) {
     if (!count($media['File'])) {
       Logger::warn("No files found for media {$media['Media']['id']}");
@@ -323,13 +357,13 @@ class FilterManagerComponent extends Component {
       $filter = $this->getFilterByExtension($filename);
       if (!$filter) {
         Logger::verbose("Could not find a filter for $filename");
-        $filterMissing = true;  
+        $filterMissing = true;
         continue;
       }
       $filterMissing = false;
       Logger::trace("Call filter ".$filter->getName()." for $filename");
       $success = ($success && $filter->write($file, &$media));
-    }      
+    }
     return $success && !$filterMissing;
   }
 

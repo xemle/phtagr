@@ -23,7 +23,7 @@ class ImageFilterComponent extends BaseFilterComponent {
   var $components = array('Command');
 
   var $locationMap = array(
-                        LOCATION_CITY => 'City', 
+                        LOCATION_CITY => 'City',
                         LOCATION_SUBLOCATION => 'Sub-location',
                         LOCATION_STATE => 'Province-State',
                         LOCATION_COUNTRY => 'Country-PrimaryLocationName');
@@ -36,12 +36,15 @@ class ImageFilterComponent extends BaseFilterComponent {
     return array('jpeg', 'jpg');
   }
 
-  /** Read the meta data from the file 
+  /**
+   * Read the meta data from the file
+   *
    * @param file File model data
    * @param media Reference of Media model data
    * @param options Options
    *  - noSave if set dont save model data
-   * @return The image data array or False on error */
+   * @return The image data array or False on error
+   */
   function read($file, &$media, $options = array()) {
     $options = am(array('noSave' => false), $options);
     $filename = $this->MyFile->getFilename($file);
@@ -68,7 +71,7 @@ class ImageFilterComponent extends BaseFilterComponent {
         $user = $this->controller->getUser();
       }
       $media = $this->controller->Media->addDefaultAcl(&$media, &$user);
-      
+
       $isNew = true;
     };
 
@@ -95,7 +98,7 @@ class ImageFilterComponent extends BaseFilterComponent {
       Logger::trace($media);
       $this->FilterManager->addError($filename, 'MediaSaveError');
       return false;
-    } 
+    }
     if ($isNew) {
       $mediaId = $this->Media->getLastInsertID();
       if (!$this->controller->MyFile->setMedia($file, $mediaId)) {
@@ -114,8 +117,11 @@ class ImageFilterComponent extends BaseFilterComponent {
     return $media;
   }
 
-  /** Clear image metadata from a file
-    @param filename Filename to file to clean */
+  /**
+   * Clear image metadata from a file
+   *
+   * @param filename Filename to file to clean
+   */
   function clearMetaData($filename) {
     if (!file_exists($filename)) {
       Logger::err("Filename '$filename' does not exists");
@@ -132,9 +138,12 @@ class ImageFilterComponent extends BaseFilterComponent {
     Logger::debug("Cleaned meta data of '$filename'");
   }
 
-  /** Read the meta data viea exiftool from a file
-    * @param filename Filename to read 
-    * @result Array of metadata or false on error */
+  /**
+   * Read the meta data viea exiftool from a file
+   *
+   * @param filename Filename to read
+   * @result Array of metadata or false on error
+   */
   function _readMetaData($filename) {
     if (!$this->controller->getOption('bin.exiftool')) {
       return false;
@@ -159,10 +168,13 @@ class ImageFilterComponent extends BaseFilterComponent {
     return $data;
   }
 
-  /** Extracts the date of the file. It extracts the date of IPTC and EXIF.
-   * IPTC has the priority. 
-    @param data Meta data 
-    @return Date of the meta data or now if not data information was found */
+  /**
+   * Extracts the date of the file. It extracts the date of IPTC and EXIF.
+   * IPTC has the priority.
+   *
+   * @param data Meta data
+   * @return Date of the meta data or now if not data information was found
+   */
   function _extractMediaDateGetId3($data) {
     // IPTC date
     $dateIptc = $this->_extract($data, 'iptc/IPTCApplication/DateCreated/0', null);
@@ -181,10 +193,13 @@ class ImageFilterComponent extends BaseFilterComponent {
     return $this->_extract($data, 'jpg/exif/EXIF/DateTimeOriginal', date('Y-m-d H:i:s', time()));
   }
 
-  /** Extracts the date of the file. It extracts the date of IPTC and EXIF.
-   * IPTC has the priority. 
-    @param data Meta data 
-    @return Date of the meta data or now if not data information was found */
+  /**
+   * Extracts the date of the file. It extracts the date of IPTC and EXIF.
+   * IPTC has the priority.
+   *
+   * @param data Meta data
+   * @return Date of the meta data or now if not data information was found
+   */
   function _extractMediaDate($data) {
     // IPTC date
     $dateIptc = $this->_extract($data, 'DateCreated', null);
@@ -201,9 +216,11 @@ class ImageFilterComponent extends BaseFilterComponent {
     return $this->_extract($data, 'DateTimeOriginal', date('Y-m-d H:i:s', time()));
   }
 
-  /** Extract the image data from the exif tool array and save it as Media
-   * @param data Data array from exif tool array 
-   * @return Array of the the image data array as image model data 
+  /**
+   * Extract the image data from the exif tool array and save it as Media
+   *
+   * @param data Data array from exif tool array
+   * @return Array of the the image data array as image model data
    */
   function _extractImageData($media, $data) {
     $user = $this->controller->getUser();
@@ -238,21 +255,21 @@ class ImageFilterComponent extends BaseFilterComponent {
       if ($longitudeRef == 'W' && $longitude > 0) {
         $longitude *= -1;
       }
-      $v['latitude'] = $latitude; 
-      $v['longitude'] = $longitude; 
+      $v['latitude'] = $latitude;
+      $v['longitude'] = $longitude;
     }
-   
+
     // Associations to meta data: Tags, Categories, Locations
     $keywords = $this->_extract($data, 'Keywords');
     $ids = $this->controller->Media->Tag->createIdListFromText($keywords, 'name', true);
     if (count($ids) > 0)
       $media['Tag']['Tag'] = am($ids, set::extract($media, 'Tag.{n}.id'));
-    
+
     $categories = $this->_extract($data, 'SupplementalCategories');
     $ids = $this->controller->Media->Category->createIdListFromText($categories, 'name', true);
     if (count($ids) > 0)
       $media['Category']['Category'] = am($ids, set::extract($media, 'Category.{n}.id'));
-  
+
     // City, Sub-location, Province-State, Country-PrimaryLocationName
     $items = array();
     foreach ($this->locationMap as $type => $name) {
@@ -282,8 +299,8 @@ class ImageFilterComponent extends BaseFilterComponent {
 
     $d = $this->_compute($values[0]);
     $m = $this->_compute($values[1]);
-    $s = $this->_compute($values[2]); 
-      
+    $s = $this->_compute($values[2]);
+
     $v = floatVal($d + ($m / 60) + ($s / 3600));
     return $v;
   }
@@ -297,9 +314,11 @@ class ImageFilterComponent extends BaseFilterComponent {
     return $v;
   }
 
-  /** Extract the image data from the exif tool array and save it as Media
-   * @param data Data array from exif tool array 
-   * @return Array of the the image data array as image model data 
+  /**
+   * Extract the image data from the exif tool array and save it as Media
+   *
+   * @param data Data array from exif tool array
+   * @return Array of the the image data array as image model data
    */
   function _extractImageDataGetId3($media, $data) {
     $user = $this->controller->getUser();
@@ -334,21 +353,21 @@ class ImageFilterComponent extends BaseFilterComponent {
       if ($longitudeRef == 'W' && $longitude > 0) {
         $longitude *= -1;
       }
-      $v['latitude'] = $latitude; 
-      $v['longitude'] = $longitude; 
+      $v['latitude'] = $latitude;
+      $v['longitude'] = $longitude;
     }
-   
+
     // Associations to meta data: Tags, Categories, Locations
     $keywords = $this->_extract($data, 'iptc/IPTCApplication/Keywords', array());
     $ids = $this->controller->Tag->createIdListFromText(implode(',', $keywords), 'name', true);
     if (count($ids) > 0)
       $media['Tag']['Tag'] = am($ids, set::extract($media, 'Tag.{n}.id'));
-    
+
     $categories = $this->_extract($data, 'iptc/IPTCApplication/SupplementalCategories', array());
     $ids = $this->controller->Category->createIdListFromText(implode(',', $categories), 'name', true);
     if (count($ids) > 0)
       $media['Category']['Category'] = am($ids, set::extract($media, 'Category.{n}.id'));
-  
+
     // City, Sub-location, Province-State, Country-PrimaryLocationName
     $items = array();
     foreach ($this->locationMap as $type => $name) {
@@ -363,11 +382,14 @@ class ImageFilterComponent extends BaseFilterComponent {
     return $media;
   }
 
-  /** Write the meta data to an image file 
+  /**
+   * Write the meta data to an image file
+   *
    * @param file File model data
    * @param media Media model data
    * @param options Array of options
-   * @return False on error */
+   * @return False on error
+   */
   function write($file, $media = null, $options = array()) {
     if (!$file || !$media) {
       Logger::err("File or media is empty");
@@ -376,7 +398,7 @@ class ImageFilterComponent extends BaseFilterComponent {
     if (!$this->controller->getOption('bin.exiftool')) {
       Logger::err("Exiftool is not defined. Abored writing of meta data");
       return false;
-    } 
+    }
     $filename = $this->controller->MyFile->getFilename($file);
     if (!file_exists($filename) || !is_writeable(dirname($filename)) || !is_writeable($filename)) {
       $id = isset($media['Media']['id']) ? $media['Media']['id'] : 0;
@@ -421,19 +443,22 @@ class ImageFilterComponent extends BaseFilterComponent {
       rename($tmp, $filename);
       @unlink($tmp2);
     }
-    
+
     $this->controller->MyFile->update($file);
     if (!$this->Media->deleteFlag(&$media, MEDIA_FLAG_DIRTY)) {
       $this->controller->warn("Could not update image data of media {$media['Media']['id']}");
     }
   }
 
-  /** Creates the export arguments for date for IPTC if date information of the
+  /**
+   * Creates the export arguments for date for IPTC if date information of the
    * file differs from the database entry
-    @param data Meta data of the file
-    @param image Model data of the current image
-    @return export arguments or an empty string 
-    @note IPTC dates are set in the default timezone */
+   *
+   * @param data Meta data of the file
+   * @param image Model data of the current image
+   * @return export arguments or an empty string
+   * @note IPTC dates are set in the default timezone
+   */
   function _createExportDate($data, $media) {
     // Remove IPTC data and time if database date is not set
     $args = array();
@@ -522,13 +547,13 @@ class ImageFilterComponent extends BaseFilterComponent {
   }
 
   /**
-    * Create generic export argument
-    *
-    * @param data Exif data
-    * @param exifParam Exif parameter
-    * @param currentValue Current value
-    * @return Array of export arguments
-    */
+   * Create generic export argument
+   *
+   * @param data Exif data
+   * @param exifParam Exif parameter
+   * @param currentValue Current value
+   * @return Array of export arguments
+   */
   function _createExportArgument(&$data, $exifParam, $currentValue) {
     $args = array();
     $fileValue = $this->_extract($data, $exifParam);
@@ -538,15 +563,18 @@ class ImageFilterComponent extends BaseFilterComponent {
     return $args;
   }
 
-  /** Create arguments to export the metadata from the database to the file.
-    * @param data metadata from the file (Exiftool information)
-    * @param image Media data array */
+  /**
+   * Create arguments to export the metadata from the database to the file.
+   *
+   * @param data metadata from the file (Exiftool information)
+   * @param image Media data array
+   */
   function _createExportArguments($data, $media) {
     $args = array();
 
     $args = am($args, $this->_createExportDate($data, $media));
     $args = am($args, $this->_createExportGps($data, $media));
-    
+
     $args = am($args, $this->_createExportArgument(&$data, 'Orientation', $media['Media']['orientation']));
     $args = am($args, $this->_createExportArgument(&$data, 'Comment', $media['Media']['caption']));
 
@@ -611,13 +639,16 @@ class ImageFilterComponent extends BaseFilterComponent {
     return $args;
   }
 
-  /** Search for an given hash values by a key. If the key does not exists,
+  /**
+   * Search for an given hash values by a key. If the key does not exists,
    * return the default value
+   *
    * @param data Hash array
    * @param key Path or key of the hash value
    * @param default Default Value which will be return, if the key does not
    *        exists. Default value is null.
-   * @return The hash value or the default value, id hash key is not set */
+   * @return The hash value or the default value, id hash key is not set
+   */
   function _extract($data, $key, $default = null) {
     $paths = explode('/', trim($key, '/'));
     $result =& $data;
@@ -630,9 +661,11 @@ class ImageFilterComponent extends BaseFilterComponent {
     return $result;
   }
 
-  /** Generates a unique temporary filename
-    * @param filename Current filename
-    */
+  /**
+   * Generates a unique temporary filename
+   *
+   * @param filename Current filename
+   */
   function _getTempFilename($filename) {
     // create temporary file
     $tmp = "$filename.tmp";
@@ -643,7 +676,7 @@ class ImageFilterComponent extends BaseFilterComponent {
     }
     return $tmp;
   }
-  
+
   function _readMetaDataGetId3($filename) {
     App::import('vendor', 'getid3/getid3');
     $getId3 = new getId3();

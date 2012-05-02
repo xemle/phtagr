@@ -39,9 +39,12 @@ class Option extends AppModel {
     return $options;
   }
 
-  /** Returns the user options as array
-    @param user User model data
-    @return Array of options */
+  /**
+   * Returns the user options as array
+   *
+   * @param user User model data
+   * @return Array of options
+   */
   function getOptions($user) {
     $options = array();
     if (!isset($user['Option'])) {
@@ -93,7 +96,7 @@ class Option extends AppModel {
       $paths = explode('.', $option['name']);
       for($i=0; $i<count($paths); $i++) {
         $path=$paths[$i];
-          
+
         if (strlen($path)>2 && substr($path, -2) == '[]') {
           $path = substr($path, 0, strlen($path)-2);
           $isArray = true;
@@ -110,12 +113,15 @@ class Option extends AppModel {
     }
     return $tree;
   }
- 
-  /** Returns the value of a option model data
-    @param data Model data
-    @param name Name of option
-    @param default Default value, if value is not found 
-    @return Value of the option */
+
+  /**
+   * Returns the value of a option model data
+   *
+   * @param data Model data
+   * @param name Name of option
+   * @param default Default value, if value is not found
+   * @return Value of the option
+   */
   function _getModelValue($data, $name, $default = null) {
     if (!isset($data['Option'])) {
       return $default;
@@ -143,12 +149,15 @@ class Option extends AppModel {
     return $default;
   }
 
-  /** Returns the value of a given path from the data
-    @param data Option tree data or model data
-    @param path Path of the data to extract
-    @param default Default value, if the path does not exists
-    @return Extracted option (or default value)
-    @see _getModelValue */
+  /**
+   * Returns the value of a given path from the data
+   *
+   * @param data Option tree data or model data
+   * @param path Path of the data to extract
+   * @param default Default value, if the path does not exists
+   * @return Extracted option (or default value)
+   * @see _getModelValue
+   */
   function getValue($data, $path, $default = null) {
     if (isset($data['Option'])) {
       return $this->_getModelValue($data, $path, $default);
@@ -159,7 +168,7 @@ class Option extends AppModel {
     }
     return $default;
   }
- 
+
   function setValue($name, $value, $userId = null) {
     if (strlen($name) > 1 && substr($name, -2) == '[]') {
       return $this->addValue($name, $value, $userId);
@@ -206,13 +215,16 @@ class Option extends AppModel {
     $this->deleteAll(array('AND' => $conditions));
   }
 
-  /** Increase the ACL level. It checks the current flag and increases the ACL
+  /**
+   * Increase the ACL level. It checks the current flag and increases the ACL
    * level of lower ACL levels (first level is ACL_LEVEL_GROUP, second level is
    * ACL_LEVEL_USER and the third level is ACL_LEVEL_OTHER).
-    @param data Array of image data
-    @param flag Threshold flag which indicates the upper inclusive bound
-    @param mask Bit mask of flag 
-    @param level Highes ACL level which should be increased */
+   *
+   * @param data Array of image data
+   * @param flag Threshold flag which indicates the upper inclusive bound
+   * @param mask Bit mask of flag
+   * @param level Highes ACL level which should be increased
+   */
   function _increaseAcl(&$data, $flag, $mask, $level) {
     //Logger::debug("Increase: {$data['gacl']},{$data['uacl']},{$data['oacl']}: $flag/$mask ($level)");
     if ($level>ACL_LEVEL_OTHER)
@@ -226,15 +238,18 @@ class Option extends AppModel {
     //Logger::debug("Increase (result): {$data['gacl']},{$data['uacl']},{$data['oacl']}: $flag/$mask ($level)");
   }
 
-  /** Decrease the ACL level. Decreases the ACL level of higher ACL levels
+  /**
+   * Decrease the ACL level. Decreases the ACL level of higher ACL levels
    * according to the current flag (first level is ACL_LEVEL_GROUP, second level
    * is ACL_LEVEL_USER and the third level is ACL_LEVEL_OTHER). The decreased ACL
    * value is the ACL value of the higher levels which is less than the current
-   * threshold or it is zero if no lower ACL value is available. 
-    @param data Array of image data
-    @param flag Threshold flag which indicates the upper exlusive bound
-    @param mask Bit mask of flag
-    @param level Lower ACL level which should be downgraded */
+   * threshold or it is zero if no lower ACL value is available.
+   *
+   * @param data Array of image data
+   * @param flag Threshold flag which indicates the upper exlusive bound
+   * @param mask Bit mask of flag
+   * @param level Lower ACL level which should be downgraded
+   */
   function _decreaseAcl(&$data, $flag, $mask, $level) {
     //Logger::debug("Decrease: {$data['gacl']},{$data['uacl']},{$data['oacl']}: $flag/$mask ($level)");
     if ($level<ACL_LEVEL_GROUP)
@@ -243,7 +258,7 @@ class Option extends AppModel {
     for ($l=ACL_LEVEL_OTHER; $l>=$level; $l--) {
       $name = $this->_aclMap[$l];
       // Evaluate the available ACL value which is lower than the threshold
-      if ($l==ACL_LEVEL_OTHER) 
+      if ($l==ACL_LEVEL_OTHER)
         $lower = 0;
       else {
         $next = $this->_aclMap[$l+1];
@@ -293,7 +308,7 @@ class Option extends AppModel {
 
   function getDefaultAcl($data) {
     $tree = $this->buildTree($data);
-    
+
     // default values
     $acl = array(
         'groupId' => $this->getValue($tree, 'acl.group', -1),
@@ -309,7 +324,7 @@ class Option extends AppModel {
     $this->setAcl(&$acl, ACL_READ_ORIGINAL, ACL_READ_MASK, $this->getValue($tree, 'acl.read.original', ACL_LEVEL_GROUP));
 
     return $acl;
-  }  
+  }
 
 }
 ?>
