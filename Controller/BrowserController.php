@@ -185,7 +185,7 @@ class BrowserController extends AppController
     // add missing files
     $diffFiles = array_diff($fsFiles, $dbFileNames);
     foreach($diffFiles as $file) {
-      $dbFiles[] = $this->MyFile->create($fsPath.$file, $userId);
+      $dbFiles[] = $this->MyFile->createFromFile($fsPath.$file, $userId);
     }
     // cut 'File' array index 
     $files = array();
@@ -195,7 +195,7 @@ class BrowserController extends AppController
     
     $dirs = array();
     foreach($fsDirs as $dir) {
-      $file = $this->MyFile->create($fsPath.$dir, $userId);
+      $file = $this->MyFile->createFromFile($fsPath.$dir, $userId);
       $dirs[] = $file['File'];
     }
 

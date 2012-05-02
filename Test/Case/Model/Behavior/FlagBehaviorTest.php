@@ -60,7 +60,7 @@ class FlagBehaviorTestCase extends CakeTestCase {
  * @return void
  */
 	public function testSetFlag() {
-    $this->File->save($this->File->create(__FILE__, 1));
+    $this->File->save($this->File->createFromFile(__FILE__, 1));
     $fileId = $this->File->getLastInsertID();
     $file = $this->File->findById($fileId);
     $this->assertEqual(0, $file['File']['flag']);
@@ -81,7 +81,7 @@ class FlagBehaviorTestCase extends CakeTestCase {
  * @return void
  */
 	public function testDeleteFlag() {
-    $this->File->save($this->File->create(__FILE__, 1));
+    $this->File->save($this->File->createFromFile(__FILE__, 1));
     $fileId = $this->File->getLastInsertID();
     $file = $this->File->findById($fileId);
     $this->assertEqual(0, $file['File']['flag']);
@@ -107,7 +107,7 @@ class FlagBehaviorTestCase extends CakeTestCase {
  * @return void
  */
 	public function testHasFlag() {
-    $this->File->save($this->File->create(__FILE__, 1));
+    $this->File->save($this->File->createFromFile(__FILE__, 1));
     $fileId = $this->File->getLastInsertID();
     $file = $this->File->findById($fileId);
     $this->assertEqual(0, $file['File']['flag']);

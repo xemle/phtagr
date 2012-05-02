@@ -44,7 +44,7 @@ class MyFile extends AppModel
    * @param optional file flag
    * @return model data 
    */
-  function create($filename, $userId, $flag = 0) {
+  function createFromFile($filename, $userId, $flag = 0) {
     if (is_dir($filename)) {
       $flag |= FILE_FLAG_DIRECTORY;
       $path = Folder::slashTerm($filename);
@@ -78,9 +78,7 @@ class MyFile extends AppModel
     if (is_readable($filename)) {
       $new['File']['time'] = date("Y-m-d H:i:s", filemtime($filename));
     }
-    $new = parent::create($new, true);
-
-    return $new;
+    return $this->create($new, true);
   }
 
   /** 

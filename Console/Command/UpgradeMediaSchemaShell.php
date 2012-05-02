@@ -110,7 +110,7 @@ class UpgradeMediaSchemaShell extends Shell {
       return;
     }
     $filename = $file['File']['path'].$found[0];
-    $thumb = $this->MyFile->create($filename, $media['Media']['user_id']);
+    $thumb = $this->MyFile->createFromFile($filename, $media['Media']['user_id']);
     $thumb['File']['media_id'] = $media['Media']['id'];
     $thumb['File']['readed'] = date("Y-m-d H:i:s", filemtime($filename));
     if (!$this->MyFile->save($thumb)) {
@@ -156,7 +156,7 @@ class UpgradeMediaSchemaShell extends Shell {
         $this->error("Missing media {$media['Media']['id']}", "User abort");
       }
     }
-    $file = $this->MyFile->create($filename, $media['Media']['user_id']);
+    $file = $this->MyFile->createFromFile($filename, $media['Media']['user_id']);
     $file['File']['media_id'] = $media['Media']['id'];
     $file['File']['readed'] = date("Y-m-d H:i:s", filemtime($filename));
     if (!$this->MyFile->save($file)) {

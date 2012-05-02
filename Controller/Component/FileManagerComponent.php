@@ -60,7 +60,7 @@ class FileManagerComponent extends Component {
     if ($this->isExternal($filename)) {
       $flag |= FILE_FLAG_EXTERNAL;
     }
-    $file = $this->controller->MyFile->create($filename, $userId, $flag);
+    $file = $this->controller->MyFile->createFromFile($filename, $userId, $flag);
 
     if ($this->controller->MyFile->save($file)) {
       $id = $this->controller->MyFile->getLastInsertID();
