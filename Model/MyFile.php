@@ -289,30 +289,36 @@ class MyFile extends AppModel
       return false;
     }
 
+    $fields = array('File.id');
     $conditions = array();
-    $joins = array();
     if (is_dir($filename)) {
       $sqlPath = Sanitize::escape(Folder::slashTerm($filename));
-      $conditions['File.path LIKE'] = '$sqlPath%';
+      $conditions['File.path LIKE'] = "$sqlPath%";
     } else {
       $sqlPath = Sanitize::escape(Folder::slashTerm(dirname($filename)));
       $sqlFile = Sanitize::escape(basename($filename));
-      $conditions['File.path'] = '$sqlPath';
-      $conditions['File.file'] = '$sqlFile';
+      $conditions['File.path'] = $sqlPath;
+      $conditions['File.file'] = $sqlFile;
     }
 
+    $config = $this->belongsTo['Media'];
+    $join = array(
+        'table' => $this->Media,
+        'alias' => $this->Media->alias,
+        'type' => '',
+        'conditions' => "`{$this->alias}.`{$config['foreignKey']}` = `{$this->Media->alias}`.`{$this->Media->primaryKey}`"
+      );
+    $joins[] = $join;
     $aclQuery = $this->Media->buildAclQuery($user, 0, $flag);
-    $joins = $aclQuery['joins'];
-    if ($aclQuery['conditions']) {
-      $conditions['OR'] = am(array('File.user_id' => $user['User']['id']), $aclQuery['conditions']);
-    } else {
-      $conditions['File.user_id'] = $user['User']['id'];
+    if ($aclQuery['joins']) {
+      $joins = am($joins, $aclQuery['joins']);
     }
-
-    $fields = am(array('File.id'), $aclQuery['fields']);
-    $this->Media->bindModel(array('hasMany' => array('GroupsMedia' => array())));
-    $result = $this->find('first', array('fields' => 'File.id', 'conditions' => $conditions, 'joins' => $joins));
-    if ($result) {
+    $conditions = am($conditions, $aclQuery['conditions']);
+    $query = array('fields' => $fields, 'joins' => $joins, 'conditions' => $conditions);
+    // fix for correct join order
+    $this->unbindModel(array('belongsTo' => array('Media')));
+    $result = $this->find('first', $query);
+    if (isset($result['File']['id'])) {
       return true;
     } else {
       return false;
