@@ -51,8 +51,11 @@ class SetupController extends AppController {
   function beforeRender() {
   }
 
-  /** Initialize the database schema and data source
-    @return True if the database source could be loaded */
+  /** 
+   * Initialize the database schema and data source
+   *
+   * @return True if the database source could be loaded 
+   */
   function __initDataSource() {
     if (isset($this->checks['initDataSource'])) {
       return $this->checks['initDataSource'];
@@ -67,9 +70,12 @@ class SetupController extends AppController {
     return $this->checks['initDataSource'];
   }
 
-  /** Load models of given array
-    @param models array of models 
-    @return true on success */
+  /**
+   * Load models of given array
+   *
+   * @param models array of models 
+   * @return true on success 
+   */
   function __loadModel($models) {
     if (!$this->UpgradeSchema->isConnected()) {
       Logger::warn("Not connected");
@@ -128,7 +134,9 @@ class SetupController extends AppController {
     }
   }
 
-  /** Checks for required writable paths */
+  /** 
+   * Checks for required writable paths 
+   */
   function __hasPaths() {
     if (isset($this->checks['hasPaths'])) {
       return $this->checks['hasPaths'];
@@ -160,7 +168,9 @@ class SetupController extends AppController {
     return $this->checks['hasConfig'];
   }
 
-  /** Checks the database connection */
+  /** 
+   * Checks the database connection 
+   */
   function __hasConnection() {
     if (isset($this->checks['hasConnection'])) {
       return $this->checks['hasConnection'];
@@ -181,9 +191,12 @@ class SetupController extends AppController {
     return $this->checks['hasConnection'];
   }
 
-  /** Checks for existing tables
-    @param tables. Array of tables names. Default array('users')
-    @return True if all given tables exists */
+  /** 
+   * Checks for existing tables
+   *
+   * @param tables. Array of tables names. Default array('users')
+   * @return True if all given tables exists 
+   */
   function __hasTables($tables = array('users')) {
     if (isset($this->checks['hasTables'])) {
       return $this->checks['hasTables'];
@@ -205,7 +218,9 @@ class SetupController extends AppController {
     }
   }
 
-  /** Check for administration account */
+  /** 
+   * Check for administration account 
+   */
   function __hasSysOp() {
     if (isset($this->checks['hasSysOp'])) {
       return $this->checks['hasSysOp'];
@@ -258,12 +273,14 @@ class SetupController extends AppController {
     return parent::getUser();
   }
 
-  /** Setup entry. Dispatches preparation, installation or upgrade */
+  /** 
+   * Setup entry. Dispatches preparation, installation or upgrade 
+   */
   function index() {
     if ($this->__hasSysOp()) {
       if ($this->hasRole(ROLE_SYSOP)) {
         Logger::verbose("Redirect to upgrade");
-        $this->redirect('/admin/setup/upgrade');
+        $this->redirect('/system/upgrade');
       } else {
         Logger::warn("Setup is disabled. phTagr is already configured!");
         $this->Session->write('loginRedirect', '/setup');
@@ -638,8 +655,11 @@ class DATABASE_CONFIG {
     }
   }
 
-  /** Load Migration plugin
-    @return True on success */
+  /** 
+   * Load Migration plugin
+   *
+   * @return True on success 
+   */
   function __loadMigration() {
     if (!empty($this->Migration)) {
       return true;
@@ -658,60 +678,5 @@ class DATABASE_CONFIG {
     return true;
   }
 
-  function _initMigration() {
-    if (!$this->__loadMigration()) {
-      Logger::err("Cannot init migration");
-      return false;
-    }
-
-    $version = $this->Migration->getVersion('app');
-    if ($version == 0) {
-      $this->Migration->setVersion(1, 'app');
-      Logger::info('Init database migration to version 1');
-    }
-    return true;
-  }
-
-  function _requiresUpgrade() {
-    if (!$this->_initMigration()) {
-      Logger::err("Cannot get migration");
-      return true;
-    }
-    $currentVersion = $this->Migration->getVersion('app');
-    $migrationVersion = max(array_keys($this->Migration->getMapping('app')));
-    if ($currentVersion < $migrationVersion) {
-      return true;
-    }
-    return false;
-  }
-
-  function admin_upgrade($action = null) {
-    if (!$this->__hasSysOp()) {
-      $this->redirect('/setup');
-    }
-    $this->requireRole(ROLE_SYSOP);
-
-    if (!$this->_initMigration()) {
-      Logger::err("Cannot init migration data");
-      $this->Session->setFlash(__("Cannot initialize database migration data"));
-      return false;
-    }
-    
-    if (!$this->_requiresUpgrade()) {
-      $this->redirect('uptodate');
-    }
-    $errors = false;
-    if ($action == 'run') {
-    }
-    $this->set('errors', $errors);
-  }
-
-  function admin_uptodate() {
-    if (!$this->__hasSysOp()) {
-      $this->redirect('/setup');
-    }
-    $this->requireRole(ROLE_SYSOP);
-
-  }
 }
 ?>
