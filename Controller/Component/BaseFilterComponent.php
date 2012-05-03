@@ -45,7 +45,7 @@ class BaseFilterComponent extends Component {
   function getExtensions() {
     return false;
   }
-  
+
   function read($file, $media = false, $options = array()) {
     return false;
   }

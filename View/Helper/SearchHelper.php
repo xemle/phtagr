@@ -21,7 +21,7 @@ if (!class_exists('Search')) {
 
 class SearchHelper extends Search {
 
-  var $helpers = array('Html'); 
+  var $helpers = array('Html');
 
   var $config = array(
     'baseUri' => '/explorer/query',
@@ -66,7 +66,7 @@ class SearchHelper extends Search {
       return;
     }
   }
-  
+
 /** Add parameter to the data array
     @param data Reference of data array
     @param add Add values */
@@ -136,7 +136,7 @@ class SearchHelper extends Search {
   /** Serialize the search
     @param data Search data. If false use current search. Default is false.
     @param add Array of parameters to add
-    @param del Array of parameters to delete 
+    @param del Array of parameters to delete
     @param options
       - defaults: Array of default values
     @result Serialized search as part of the URL */
@@ -185,15 +185,15 @@ class SearchHelper extends Search {
           // no default or disabled value
           $params[] = $name.':'.$this->encode($values);
         }
-      } 
+      }
     }
     return implode('/', $params);
   }
 
-  /** 
+  /**
     @param data Search data. If false use current search. Default is false.
     @param add Array of parameters to add
-    @param del Array of parameters to delete 
+    @param del Array of parameters to delete
     @return uri of current query */
   function getUri($data = false, $add = false, $del = false, $options = array()) {
     $serial = $this->serialize($data, $add, $del, $options);

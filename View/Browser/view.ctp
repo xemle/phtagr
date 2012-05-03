@@ -14,7 +14,7 @@
     $cells[] = array(__('Bytes total (with external sources)'), sprintf("%s (%s)", $this->Number->toReadableSize($files['bytes']), $this->Number->toReadableSize($files['bytesAll'])));
   } else {
     $cells[] = array(__('Bytes total'), $this->Number->toReadableSize($files['bytes']));
-  } 
+  }
   if ($files['quota']) {
     $cells[] = array(__('Quota (free)'), sprintf("%s (%s)", $this->Number->toReadableSize($files['quota']), $this->Number->toReadableSize($files['free'])));
   }

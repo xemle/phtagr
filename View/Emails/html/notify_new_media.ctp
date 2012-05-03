@@ -2,7 +2,7 @@
 
 <p><?php echo __("New media available at %s", $this->Html->link($url, $url)); ?>.</p>
 
-<?php 
+<?php
   $userToMedia = array();
   foreach ($media as $m) {
     $username = $m['User']['username'];
@@ -11,15 +11,15 @@
     }
     $userToMedia[$username][] = $m;
   }
-  
+
   foreach ($userToMedia as $user => $userMedia) {
     echo "<p>" . __("User %s published following media", $this->Html->link($user, $url . '/explorer/user/' . $user)) . "</p>";
     echo "<p>";
     foreach ($userMedia as $m) {
       echo $this->Html->link(
         $this->Html->tag('img', null, array(
-          'src' => 'cid:media-' . $m['Media']['id'] . '.jpg', 
-          'alt' => $m['Media']['name'])), 
+          'src' => 'cid:media-' . $m['Media']['id'] . '.jpg',
+          'alt' => $m['Media']['name'])),
         $url . '/images/view/' . $m['Media']['id'] . '/sort:newest', array('escape' => false)) . "\n";
     }
     echo "</p>";

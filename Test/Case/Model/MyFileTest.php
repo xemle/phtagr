@@ -30,9 +30,9 @@ class MyFileTestCase extends CakeTestCase {
  *
  * @var array
  */
-	public $fixtures = array('app.file', 'app.media', 'app.user', 'app.group', 'app.groups_media', 
-      'app.groups_user', 'app.option', 'app.guest', 'app.comment', 'app.my_file', 
-      'app.tag', 'app.media_tag', 'app.category', 'app.categories_media', 
+	public $fixtures = array('app.file', 'app.media', 'app.user', 'app.group', 'app.groups_media',
+      'app.groups_user', 'app.option', 'app.guest', 'app.comment', 'app.my_file',
+      'app.tag', 'app.media_tag', 'app.category', 'app.categories_media',
       'app.location', 'app.locations_media', 'app.comment');
 
 /**
@@ -70,7 +70,7 @@ class MyFileTestCase extends CakeTestCase {
     // user 'userB' has guest 'guestA'
     $guestA = $this->User->save($this->User->create(array('username' => 'guestA', 'role' => ROLE_GUEST, 'creator_id' => $userB['User']['id'])));
     $userNone = $this->User->save($this->User->create(array('username' => 'nobody', 'role' => ROLE_NOBODY)));
-    
+
     // 'userA' has group 'aGroup'. 'userB' and 'guestA' are member of 'aGroup'
     $group = $this->Group->save($this->Group->create(array('name' => 'aGroup', 'user_id' => $userA['User']['id'])));
     $group = $this->Group->findById($this->Group->getLastInsertID());
@@ -83,7 +83,7 @@ class MyFileTestCase extends CakeTestCase {
     $userC = $this->User->findById($userC['User']['id']);
     $guestA = $this->User->findById($guestA['User']['id']);
     $userNone = $this->User->findById($userNone['User']['id']);
-    
+
     $base = TMP . 'test' . DS . '2012-05-02' . DS;
     $folder = new Folder();
     $folder->create($base);
@@ -95,7 +95,7 @@ class MyFileTestCase extends CakeTestCase {
     $file3->append('');
     $file4 = new File($base . 'IMG_4567.JPG');
     $file4->append('');
-    
+
     // media1 is public
     $media1 = $this->Media->save($this->Media->create(array('name' => 'IMG_1234.JPG', 'user_id' => $userA['User']['id'], 'gacl' => 97, 'uacl' => 97, 'oacl' => 97)));
     $file1 = $this->MyFile->save($this->MyFile->create(array('path' => $base, 'file' => $file1->name, 'media_id' => $media1['Media']['id'])));
@@ -109,13 +109,13 @@ class MyFileTestCase extends CakeTestCase {
     // media4 is private
     $media4 = $this->Media->save($this->Media->create(array('name' => 'IMG_4567.JPG', 'user_id' => $userA['User']['id'])));
     $file4 = $this->MyFile->save($this->MyFile->create(array('path' => $base, 'file' => $file4->name, 'media_id' => $media4['Media']['id'])));
-    
+
     $this->assertEqual($this->MyFile->canRead($base.'IMG_1234.JPG', $userB), true);
     $this->assertEqual($this->MyFile->canRead($base.'IMG_2345.JPG', $userB), true);
     $this->assertEqual($this->MyFile->canRead($base.'IMG_3456.JPG', $userB), true);
     $this->assertEqual($this->MyFile->canRead($base.'IMG_4567.JPG', $userB), false);
     $this->assertEqual($this->MyFile->canRead($base, $userB), true);
-    
+
     $this->assertEqual($this->MyFile->canRead($base, $userNone), true);
     $this->Media->save(array('id' => $media1['Media']['id'], 'oacl' => 0));
     $this->assertEqual($this->MyFile->canRead($base, $userNone), false);

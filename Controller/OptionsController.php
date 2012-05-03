@@ -32,7 +32,7 @@ class OptionsController extends AppController {
 
     $this->requireRole(ROLE_GUEST, array('redirect' => '/'));
   }
-  
+
   function beforeRender() {
     $this->requireRole(ROLE_USER);
     $this->layout = 'backend';
@@ -115,11 +115,11 @@ class OptionsController extends AppController {
       $offset = intval(Set::extract('filter.gps.offset', $this->request->data));
       $offset = min(720, max(-720, $offset));
       $this->Option->setValue('filter.gps.offset', $offset, $userId);
-      
+
       $check = Set::extract('filter.gps.overwrite', $this->request->data);
       $check = $check ? 1 : 0;
       $this->Option->setValue('filter.gps.overwrite', $check, $userId);
-      
+
       $range = intval(Set::extract('filter.gps.range', $this->request->data));
       $range = max(0, min(60, $range));
       $this->Option->setValue('filter.gps.range', $range, $userId);

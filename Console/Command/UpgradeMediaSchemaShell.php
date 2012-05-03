@@ -48,7 +48,7 @@ class UpgradeMediaSchemaShell extends Shell {
     return $this->UpgradeSchema->db->config['prefix'].$name;
   }
 
-  /** Renames a table 
+  /** Renames a table
     @param old Old table name
     @param new New table name */
   function _renameTable($old, $new) {
@@ -56,7 +56,7 @@ class UpgradeMediaSchemaShell extends Shell {
     $this->_execute($sql);
   }
 
-  /** Renames a column 
+  /** Renames a column
     @param old Old column name
     @param new New column name */
   function _renameColumn($table, $old, $new) {
@@ -93,11 +93,11 @@ class UpgradeMediaSchemaShell extends Shell {
     $this->_renameColumn('categories_media', 'image_id', 'media_id');
     $this->_renameColumn('locations_media', 'image_id', 'media_id');
     $this->_renameColumn('media_tags', 'image_id', 'media_id');
-    
+
     // no rename for properties and locks to ensure data migration
   }
 
-  /** Finds an external video thumb and adds it to the table 
+  /** Finds an external video thumb and adds it to the table
     @param media Media model data
     @param file File model data */
   function _addVideoThumb($media, $file) {
@@ -120,8 +120,8 @@ class UpgradeMediaSchemaShell extends Shell {
     }
   }
 
-  /** Migrate a single media 
-    @param media Media model data 
+  /** Migrate a single media
+    @param media Media model data
     @return True on success. False on errors */
   function _migrateMedia($media) {
     // create file model
@@ -133,7 +133,7 @@ class UpgradeMediaSchemaShell extends Shell {
         $this->out("Auto delete not existing media file {$media['Media']['id']}: $filename");
         $this->Media->delete($media['Media']['id']);
         return false;
-      } 
+      }
       $a = false;
       while (!in_array($a, array("d", "s", "r", "a", "c"))) {
         $a = $this->in("Could not find media {$media['Media']['id']}: $filename!\n[d]elete, [s]kip, [r]etry, delete [a]ll, [c]ancel", array("d", "s", "r", "a", "c"), "d");
@@ -163,7 +163,7 @@ class UpgradeMediaSchemaShell extends Shell {
       Logger::debug("Cannot migrate data from media {$media['Media']['id']}");
       Logger::warn($file);
       return false;
-    } 
+    }
 
     // migrate properties and locks
     $fileId = $this->MyFile->getLastInsertId();

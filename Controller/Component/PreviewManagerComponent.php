@@ -68,11 +68,11 @@ class PreviewManagerComponent extends Component {
     if ($type != MEDIA_TYPE_IMAGE && $type != MEDIA_TYPE_VIDEO) {
       Logger::err("Media type not supported: {$this->controller->Media->getType($media)}");
       return false;
-    } 
+    }
     if ($type == MEDIA_TYPE_VIDEO) {
       $this->controller->loadComponent('VideoPreview', &$this);
       return $this->VideoPreview->getPreviewFilename($media);
-    } 
+    }
     $file = $this->controller->Media->getFile($media, FILE_TYPE_IMAGE, false);
     if (!$file) {
       Logger::err("No files are attached to media {$media['Media']['id']}");
@@ -107,7 +107,7 @@ class PreviewManagerComponent extends Component {
       Logger::err("Could not get cache file path for media {$this->controller->Media->toString($media)}");
       return false;
     }
-    
+
     if (file_exists($dst) && !$config['force']) {
       if (is_readable($dst)) {
         return $dst;

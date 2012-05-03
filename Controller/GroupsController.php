@@ -59,7 +59,7 @@ class GroupsController extends AppController {
     if (!$this->RequestHandler->isAjax() || !$this->RequestHandler->isPost()) {
       Logger::debug("Decline wrong ajax request");
       $this->redirect(null, '404');
-    } 
+    }
     $user = $this->getUser();
     $users = $this->User->findVisibleUsers($user, $this->request->data['User']['username'], true);
     $this->request->data = $users;
@@ -77,7 +77,7 @@ class GroupsController extends AppController {
 
     $this->Search->addGroup($name);
     $this->Search->setShow(6);
-    $this->set('media', $this->Search->paginate());   
+    $this->set('media', $this->Search->paginate());
   }
 
   function create() {
@@ -126,7 +126,7 @@ class GroupsController extends AppController {
 
   function _sendConfirmation($group, $user) {
     $email = $this->_createEmail();
-    $email->template('group_confirmation')  
+    $email->template('group_confirmation')
       ->to(array($user['User']['email'] => $user['User']['username']))
       ->subject("Group {$group['Group']['name']}: Your subscription was accepted")
       ->viewVars(array('group' => $group, 'user' => $user));
@@ -145,7 +145,7 @@ class GroupsController extends AppController {
     $user = $this->getUser();
 
     $email = $this->_createEmail();
-    $email->template('group_subscribtion')  
+    $email->template('group_subscribtion')
       ->to(array($group['User']['email'] => $group['User']['username']))
       ->subject("Group {$group['Group']['name']}: Subscription request for user {$user['User']['username']}")
       ->viewVars(array('group' => $group, 'user' => $user));
@@ -164,7 +164,7 @@ class GroupsController extends AppController {
     $user = $this->getUser();
 
     $email = $this->_createEmail();
-    $email->template('group_unsubscribtion')  
+    $email->template('group_unsubscribtion')
       ->to(array($group['User']['email'] => $group['User']['username']))
       ->subject("Group {$group['Group']['name']}: Subscription request for user {$user['User']['username']}")
       ->viewVars(array('group' => $group, 'user' => $user));
@@ -300,7 +300,7 @@ class GroupsController extends AppController {
   }
 
   /**
-    @todo Reset all group information of image 
+    @todo Reset all group information of image
     @todo Check for permission! */
   function delete($groupId) {
     $userId = $this->getUserId();

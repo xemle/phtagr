@@ -4,7 +4,7 @@
 <?php echo __("New media available at %s", $this->Html->link($url, $url)); ?>
 
 
-<?php 
+<?php
   $userToMedia = array();
   foreach ($media as $m) {
     $username = $m['User']['username'];
@@ -13,7 +13,7 @@
     }
     $userToMedia[$username][] = $m;
   }
-  
+
   foreach ($userToMedia as $user => $userMedia) {
     echo __("User %s published following media", $user) . "\r\n";
     foreach ($userMedia as $m) {

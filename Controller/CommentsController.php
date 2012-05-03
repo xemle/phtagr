@@ -18,7 +18,7 @@
 App::uses('Sanitize', 'Utility');
 App::uses('CakeEmail', 'Network/Email');
 
-class CommentsController extends AppController 
+class CommentsController extends AppController
 {
   var $name = 'Comments';
   var $uses = array('Comment', 'Media', 'Tag');
@@ -81,7 +81,7 @@ class CommentsController extends AppController
         $this->Session->delete('captcha');
         $this->Session->write('Comment.data', $this->request->data);
         $this->Session->write('Comment.validationErrors', $this->Comment->validationErrors);
-        $this->redirect("/images/view/$mediaId/{$this->namedArgs}"); 
+        $this->redirect("/images/view/$mediaId/{$this->namedArgs}");
       }
       $this->Session->delete('captcha');
 
@@ -130,7 +130,7 @@ class CommentsController extends AppController
   }
 
   function _createEmail() {
-    return new CakeEmail('default'); 
+    return new CakeEmail('default');
   }
 
   function _sendEmail($commentId) {
@@ -170,7 +170,7 @@ class CommentsController extends AppController
       Logger::err("Could not find media $mediaId");
       return;
     }
-    $comment = $this->Comment->findById($commentId); 
+    $comment = $this->Comment->findById($commentId);
     if (!$comment || $comment['Comment']['media_id'] != $mediaId) {
       Logger::err("Could not find comment $commentId");
       return;
@@ -182,7 +182,7 @@ class CommentsController extends AppController
     $emails = array();
     foreach($media['Comment'] as $c) {
       // not media owner, disabled notify, current comment
-      if ($c['user_id'] == $media['Media']['user_id'] || 
+      if ($c['user_id'] == $media['Media']['user_id'] ||
         !$c['notify'] ||
         $c['id'] == $commentId) {
         continue;
@@ -240,7 +240,7 @@ class CommentsController extends AppController
   }
 
   function captcha() {
-    $this->Captcha->render(); 
+    $this->Captcha->render();
   }
 
   function rss() {

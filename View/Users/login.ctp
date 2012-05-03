@@ -9,9 +9,9 @@
 ?>
 </fieldset>
 <div class="submit">
-<?php 
+<?php
   $signup = '';
-  
+
   echo $this->Form->submit(__('Login'), array('div' => false));
   if ($register) {
     echo " ".$this->Html->link(__('Sign Up'), 'register', array('class' => 'button'))." ";
@@ -19,7 +19,7 @@
   echo "<br/>".$this->Html->link(__('Forgot your password'), 'password');
 ?>
 </div>
-<?php 
+<?php
   echo $this->Form->end();
   $script = <<<SCRIPT
 (function($) {

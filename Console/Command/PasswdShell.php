@@ -63,7 +63,7 @@ class PasswdShell extends Shell {
     else
       $user = $this->User->findByUsername($userIdOrName);
 
-    if (!$user) 
+    if (!$user)
       $this->error("Unknown user", "Could not find user with id or username '$userIdOrName'");
 
     $password = $this->in("Enter new password for '{$user['User']['username']}':");

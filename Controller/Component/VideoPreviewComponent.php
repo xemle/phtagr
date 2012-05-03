@@ -28,12 +28,12 @@ class VideoPreviewComponent extends Component {
     }
   }
 
-  /** 
-   * Finds the video thumb of a video 
-   * 
+  /**
+   * Finds the video thumb of a video
+   *
    * @param video File model data of the video
    * @param insertIfMissing If true, adds the thumb file to the database. Default is true
-   * @return Filename of the thumb file. False if no thumb file was found 
+   * @return Filename of the thumb file. False if no thumb file was found
    */
   function _findThumb($video, $insertIfMissing = true) {
     $videoFilename = $this->controller->MyFile->getFilename($video);
@@ -50,7 +50,7 @@ class VideoPreviewComponent extends Component {
       $thumb = $this->controller->MyFile->findByFilename($thumbFilename);
       if (!$thumb && $insertIfMissing) {
         $thumbId = $this->FileManager->add($thumbFilename, $video['File']['user_id']);
-        Logger::verbose("Add missing video thumb $thumbFilename to database: $thumbId"); 
+        Logger::verbose("Add missing video thumb $thumbFilename to database: $thumbId");
         $thumb = $this->controller->MyFile->findById($thumbId);
       }
       if (!$thumb) {
@@ -60,14 +60,14 @@ class VideoPreviewComponent extends Component {
       if ($insertIfMissing &&
         $thumb['File']['media_id'] != $video['File']['media_id'] &&
         $this->controller->MyFile->setMedia($thumb, $video['File']['media_id'])) {
-        Logger::verbose("Link video thumb {$thumb['File']['id']} to media {$video['File']['media_id']}"); 
+        Logger::verbose("Link video thumb {$thumb['File']['id']} to media {$video['File']['media_id']}");
       }
       return $thumbFilename;
-    } 
+    }
     return false;
   }
 
-  /** Creates a video preview image using ffmpeg 
+  /** Creates a video preview image using ffmpeg
     @param video File model data of a video
     @param thumbFilename Optional filename of the thumbnail image file
     @return Filename of the video thumbnail. False on failure */
@@ -103,16 +103,16 @@ class VideoPreviewComponent extends Component {
       sem_acquire($this->_semaphoreId);
     }
     $result = $this->Command->run($bin, array(
-      '-i' => $videoFilename, 
-      '-vframes' => 1, 
-      '-f' => 'mjpeg', 
+      '-i' => $videoFilename,
+      '-vframes' => 1,
+      '-f' => 'mjpeg',
       '-y', $thumbFilename));
     if ($this->_semaphoreId) {
       sem_release($this->_semaphoreId);
     }
     if ($result != 0) {
       Logger::err("Command '$bin' returned unexcpected $result");
-      return false;  
+      return false;
     } else {
       Logger::info("Created video thumbnail of '$videoFilename'");
       if ($isNew) {
@@ -132,7 +132,7 @@ class VideoPreviewComponent extends Component {
     return $thumbFilename;
   }
 
-  /** Gets the thumbnail filename of the a video. If it not exists, build it 
+  /** Gets the thumbnail filename of the a video. If it not exists, build it
     @param image Media model data
     @param options Array of options. Set 'create' to false to disable automaitc
     thumbnail creations. Default is true. Set 'noCache' to true to disable
@@ -144,7 +144,7 @@ class VideoPreviewComponent extends Component {
     if ($thumb) {
       return $this->controller->MyFile->getFilename($thumb);
     }
-  
+
     if (!$options['noCache']) {
       $cache = $this->getPreviewFilenameCache($media);
       if (file_exists($cache)) {

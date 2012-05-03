@@ -12,7 +12,7 @@
 
 <?php if (count($missing)): ?>
 <div class="info">
-<?php echo __("Following programs could not be found: %s.", implode(', ', $missing)); ?> 
+<?php echo __("Following programs could not be found: %s.", implode(', ', $missing)); ?>
 </div>
 <?php endif; ?>
 <?php if (isset($mp3Support) && !$mp3Support): ?>
@@ -23,7 +23,7 @@
 
 <?php echo $this->Form->create(null, array('action' => 'system')); ?>
 <fieldset>
-<?php 
+<?php
   echo $this->Form->input('bin.exiftool', array('label' => __("Path to %s", "exiftool")));
   echo $this->Form->input('bin.convert', array('label' => __("Path to %s", "convert")));
   echo $this->Form->input('bin.ffmpeg', array('label' => __("Path to %s", "ffmpeg")));

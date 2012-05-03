@@ -26,7 +26,7 @@
     array(__('Categories'), $data['categories']),
     array(__('Locations'), $data['locations']),
   );
-    
+
   echo $this->Html->tableCells($cells);
 ?>
 </tbody>

@@ -18,12 +18,12 @@
 App::uses('View', 'View');
 App::uses('SearchHelper', 'View/Helper');
 App::uses('Logger', 'Lib');
- 
+
 class SearchHelperTest extends CakeTestCase {
 
   function setUp() {
     parent::setUp();
-    
+
     $controller = null;
     $this->View = new View($controller);
     $this->Search = new SearchHelper($this->View);
@@ -43,12 +43,12 @@ class SearchHelperTest extends CakeTestCase {
 
   function tearDown() {
     unset($this->Search);
-    
+
     parent::tearDown();
   }
 
   function testConfig() {
-    // initial test 
+    // initial test
     $expected = array(
       'baseUri' => '/explorer/query',
       'afterUri' => false,
@@ -60,10 +60,10 @@ class SearchHelperTest extends CakeTestCase {
         )
       );
     $this->assertEqual($this->Search->config, $expected);
-    
+
     // override baseUri and afterUri
     $this->Search->initialize(array(
-      'baseUri' => '/explorer/media', 
+      'baseUri' => '/explorer/media',
       'afterUri' => '/media.rss'
       ));
     $expected2 = array(
@@ -184,17 +184,17 @@ class SearchHelperTest extends CakeTestCase {
     // disabled default
     $result = $this->Search->serialize(false, array('pos' => 2));
     $this->assertEqual($result, 'tags:tag1,tag2');
- 
+
     $result = $this->Search->serialize(array('pos' => 2));
     $this->assertEqual($result, '');
-    
+
     // enable disable default value
     $result = $this->Search->serialize(false, array('pos' => 2), false, array('defaults' => array('pos' => true)));
     $this->assertEqual($result, 'pos:2/tags:tag1,tag2');
- 
+
     $result = $this->Search->serialize(false, array('show' => 12), false, array('defaults' => array('show' => true)));
     $this->assertEqual($result, 'show:12/tags:tag1,tag2');
- 
+
     // array default
     $result = $this->Search->serialize(false, false, false, array('defaults' => array('tags' => 'tag1')));
     $this->assertEqual($result, 'tags:tag2');
@@ -202,11 +202,11 @@ class SearchHelperTest extends CakeTestCase {
     $data = array('tags' => array('tag2'), 'page' => 12, 'pos' => 1);
     $result = $this->Search->serialize($data, false, false, array('defaults' => array('page' => '12', 'pos' => 1)));
     $this->assertEqual($result, 'tags:tag2');
-    
+
     $data = array('tagOp' => 'AND', 'tags' => array('tag1', 'tag2'));
     $result = $this->Search->serialize($data, false, false, array('defaults' => array('tagOp' => 'OR')));
     $this->assertEqual($result, 'tagOp:AND/tags:tag1,tag2');
-    
+
     // disabled array default
     $data = array('tags' => array('tag1', 'tag2'));
     $result = $this->Search->serialize($data, false, false, array('defaults' => array('tags' => false)));
@@ -222,13 +222,13 @@ class SearchHelperTest extends CakeTestCase {
 
     $result = $this->Search->getUri(false, false, false, array('baseUri' => '/image/view/1'));
     $this->assertEqual($result, '/image/view/1');
-  
+
     $result = $this->Search->getUri(false, array('pos' => 2), false, array('baseUri' => '/image/view/1', 'defaults' => array('pos' => true)));
     $this->assertEqual($result, '/image/view/1/pos:2');
-  
+
     $result = $this->Search->getUri(array('tags' => array('tag1', 'tag2')));
-    $this->assertEqual($result, '/explorer/query/tags:tag1,tag2');    
-  
+    $this->assertEqual($result, '/explorer/query/tags:tag1,tag2');
+
     $result = $this->Search->getUri(array('tags' => array('tag1', 'tag2')), false, false, array('baseUri' => '/image/view/1'));
     $this->assertEqual($result, '/image/view/1/tags:tag1,tag2');
 
@@ -251,7 +251,7 @@ class SearchHelperTest extends CakeTestCase {
     $this->Search->delPos();
     $this->Search->delPage();
     $this->Search->config['defaults']['pos'] = false;
-   
+
     // afterUri tests
     $result = $this->Search->getUri(false, false, false, array('afterUri' => '/media.rss'));
     $this->assertEqual($result, '/explorer/query/media.rss');

@@ -50,7 +50,7 @@ class FileCacheComponent extends Component {
       } else {
         Logger::debug("Cache dir '$cacheDir' created");
       }
-    } 
+    }
     if (!is_writeable($cacheDir)) {
       Logger::err("Cache directory '$cacheDir' is not writeable");
       return false;
@@ -71,7 +71,7 @@ class FileCacheComponent extends Component {
     return $prefix . $alias . "." . $ext;
   }
 
-  /** Returns the full path of the cache file 
+  /** Returns the full path of the cache file
     @param media Media model data
     @param alias Alias for cache file
     @param ext (Optional) file extension. Default is 'jpg'

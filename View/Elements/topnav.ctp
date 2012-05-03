@@ -1,4 +1,4 @@
-<?php 
+<?php
   if ($this->Session->check('User.id')) {
     $userId = $this->Session->read('User.id');
     $role = $this->Session->read('User.role');
@@ -18,7 +18,7 @@
   }
 
   echo "\n<div class=\"searchBox\" ><div class=\"searchBoxSub\" >";
-  echo $this->Form->create(null, array('url' => '/explorer/quicksearch')); 
+  echo $this->Form->create(null, array('url' => '/explorer/quicksearch'));
   echo $this->Form->input('Media.quicksearch', array ('label' => false, 'div' => false));
   $icon = Router::url("/img/icons/zoom.png");
   echo "<input type=\"image\" src=\"$icon\" width=\"16\" height=\"16\" id=\"go\" alt=\"Search\" title=\"Search\" />";

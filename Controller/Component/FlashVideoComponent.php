@@ -20,11 +20,11 @@ class FlashVideoComponent extends Component {
   var $controller = null;
   var $components = array('FileCache', 'Command');
   var $config = array(
-    'size' => OUTPUT_SIZE_VIDEO, 
+    'size' => OUTPUT_SIZE_VIDEO,
     'bitrate' => OUTPUT_BITRATE_VIDEO,
     'framerate' => 30
     );
-  var $_semaphoreId = false;  
+  var $_semaphoreId = false;
 
   function initialize(&$controller) {
     $this->controller =& $controller;
@@ -49,7 +49,7 @@ class FlashVideoComponent extends Component {
     return $width . 'x' . $height;
   }
 
-  /** Evaluates if the media is a flash movie 
+  /** Evaluates if the media is a flash movie
     @param media Current media
     @param file Video file of the media
     @return True if current media is a flash movie */
@@ -90,7 +90,7 @@ class FlashVideoComponent extends Component {
       Logger::err("Could not create preview file {$flashFilename}");
       return false;
     }
- 
+
     return $flashFilename;
   }
 

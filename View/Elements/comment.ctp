@@ -1,4 +1,4 @@
-<?php 
+<?php
   $this->Search->initialize();
   $this->SearchParams = $this->Search->serialize(false, false, false, array('defaults' => array('pos' => 1)));
 ?>
@@ -10,11 +10,11 @@
 <?php if (!is_numeric($key)) continue; ?>
 <div class="comment <?php echo ($count++%2)?'even':'odd'; ?>">
 <div class="meta">
-<span class="from"><?php 
+<span class="from"><?php
   $name = $comment['name'];
   if (!empty($comment['url'])) {
     $name = $this->Html->link($comment['name'], $comment['url']);
-  }  
+  }
   $time = $this->Html->tag('span', $this->Time->timeAgoInWords($comment['date']), array('class' => 'date'));
   __("%s said %s", $name, $time);
 ?>
@@ -38,7 +38,7 @@
 <?php
   echo $this->Form->hidden('Media.id', array('value' => $this->request->data['Media']['id']));
 ?>
-<?php 
+<?php
   if (($commentAuth & COMMENT_AUTH_NAME) > 0) {
     echo $this->Form->input('Comment.name', array('label' => __('Name')));
     echo $this->Form->input('Comment.email', array('after' => '<span class="description">' . __('Will not be published') . '</span>'));

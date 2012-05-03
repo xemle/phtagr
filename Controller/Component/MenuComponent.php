@@ -46,14 +46,14 @@ class MenuComponent extends Component {
     if ($this->controller->hasRole(ROLE_SYSOP)) {
       $controllers['system'] = __("System");
     }
- 
+
     foreach ($controllers as $ctrl => $text) {
       $options = array('id' => 'item-' . $ctrl);
       if (strtolower($this->controller->name) == $ctrl) {
         $options['active'] = true;
       }
       $this->addItem($text, array('controller' => $ctrl, 'admin' => false, 'action' => 'index'), $options);
-    } 
+    }
   }
 
   function &getData(&$data, $key) {
@@ -85,7 +85,7 @@ class MenuComponent extends Component {
     $this->controller->set('menus_for_layout', $this->menus);
   }
 
-  /** Set the current menu 
+  /** Set the current menu
     @param name Menu name */
   function setCurrentMenu($name) {
     $this->currentMenu = $name;
@@ -94,7 +94,7 @@ class MenuComponent extends Component {
     }
   }
 
-  /** Add menu item 
+  /** Add menu item
     @param title Menu title
     @param url Menu url
     @param options e.g. html link class options */
@@ -133,14 +133,14 @@ class MenuComponent extends Component {
     } else {
       $menu =& $this->menus[$menuName];
     }
-    return $this->_findItem($id, &$menu);    
-  } 
+    return $this->_findItem($id, &$menu);
+  }
 
-  /** Set menu option for current menu 
+  /** Set menu option for current menu
     @param name Option name
     @param value Option value */
   function setOption($name, $value) {
-    $this->menus[$this->currentMenu]['options'][$name] = $value; 
+    $this->menus[$this->currentMenu]['options'][$name] = $value;
   }
 }
 ?>

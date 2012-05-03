@@ -5,7 +5,7 @@
 <h2><?php echo __('Member List'); ?></h2>
 <table class="default">
 <thead>
-<?php 
+<?php
   $headers = array(
     __('Member'),
     );
@@ -17,15 +17,15 @@
 </thead>
 
 <tbody>
-<?php 
+<?php
   $cells = array();
   foreach ($this->request->data['Member'] as $member) {
     $actions = array();
     if ($this->request->data['Group']['is_admin']) {
       $actions[] = $this->Html->link(
-        $this->Html->image('icons/delete.png', 
+        $this->Html->image('icons/delete.png',
           array(
-            'alt' => __('Delete'), 
+            'alt' => __('Delete'),
             'title' => __("Unsubscribe '%s'", $member['username'])
           )
         ), "deleteMember/{$this->request->data['Group']['name']}/{$member['username']}", array('escape' => false));
@@ -39,6 +39,6 @@
     $cells[] = $row;
   }
   echo $this->Html->tableCells($cells, array('class' => 'odd'), array('class' => 'even'));
-?> 
+?>
 </tbody>
 </table>

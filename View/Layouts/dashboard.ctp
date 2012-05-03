@@ -3,14 +3,14 @@
 
 <head>
 <title><?php echo $title_for_layout?></title>
-<?php 
+<?php
   echo $this->Html->charset('UTF-8')."\n";
   echo $this->Html->meta('icon')."\n";
   echo $this->Html->css('phtagr')."\n";
   echo $this->Html->script(array('prototype', 'event-selectors', 'effects', 'controls', 'phtagr'))."\n";
-  
-  echo $scripts_for_layout; 
-  echo $feeds_for_layout; 
+
+  echo $scripts_for_layout;
+  echo $feeds_for_layout;
 ?>
 
 <!--[if lte IE 7]>

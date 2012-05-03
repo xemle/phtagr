@@ -6,22 +6,22 @@
 
 <p><?php echo __("Location %s", $this->FileList->location($path)); ?>
 <?php if ($isInternal) {
-  echo __(" (%s or %s here)", 
+  echo __(" (%s or %s here)",
     $this->Html->link(__("Upload files"), 'upload/'.$path),
     $this->Html->link(__("create folder"), 'folder/'.$path));
-  } ?>. 
+  } ?>.
 
 <?php echo $this->FileList->table($path, $dirs, $files, array('isInternal' => $isInternal)); ?>
 
 <p><?php echo __("Location %s", $this->FileList->location($path)); ?>
 <?php if ($isInternal) {
-  echo __(" (%s or %s here)", 
+  echo __(" (%s or %s here)",
     $this->Html->link(__("Upload files"), 'upload/'.$path),
     $this->Html->link(__("create folder"), 'folder/'.$path));
-  } ?>. 
+  } ?>.
 </p>
 
-<?php 
+<?php
   echo $this->Form->submit(__('Import'));
   echo $this->Form->end();
 ?>

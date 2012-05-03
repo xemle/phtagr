@@ -8,7 +8,7 @@ class Comment extends AppModel {
       'Media' => array(),
       'User' => array()
   );
-  
+
   var $currentUser = array();
 
   var $validate = array(
@@ -28,7 +28,7 @@ class Comment extends AppModel {
     }
     return true;
   }
-  
+
   public function paginate($conditions, $fields, $order, $limit, $page = 1, $recursive = null, $extra = array()) {
     $query = am(array(
         'fields' => $fields,
@@ -67,6 +67,6 @@ class Comment extends AppModel {
       $aclQuery['joins'] = am(array($join), $aclQuery['joins']);
     }
     return $this->find('count', am($query, $aclQuery));
-  }  
+  }
 }
 ?>

@@ -103,7 +103,7 @@ class UserTestCase extends CakeTestCase {
     $group = $this->Group->findById($this->Group->getLastInsertID());
     $this->Group->subscribe($group, $userA['User']['id']);
     $sysop = $this->User->findById($sysop['User']['id']);
-    
+
     // Test all users for admin
     $users = $this->User->findVisibleUsers($admin);
     $this->assertEqual(array('admin', 'sysop', 'userA', 'userB'), Set::extract('/User/username', $users));
@@ -113,7 +113,7 @@ class UserTestCase extends CakeTestCase {
     // Test like usernames
     $users = $this->User->findVisibleUsers($admin, 'user', true);
     $this->assertEqual(array('userA', 'userB'), Set::extract('/User/username', $users));
-    
+
     // Test group visibility. userA is in group of sysop
     $users = $this->User->findVisibleUsers($sysop);
     $this->assertEqual(array('admin', 'sysop', 'userA'), Set::extract('/User/username', $users));

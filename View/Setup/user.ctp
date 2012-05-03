@@ -5,8 +5,8 @@
 <?php echo $this->Form->create(null, array('action' => 'user')); ?>
 
 <fieldset>
-<?php 
-  echo $this->Form->input('User.username', array('label' => __("Username"))); 
+<?php
+  echo $this->Form->input('User.username', array('label' => __("Username")));
   echo $this->Form->input('User.password', array('label' => __("Password")));
   echo $this->Form->input('User.confirm', array('label' => __("Confirm"), 'type' => 'password'));
   echo $this->Form->input('User.email', array('label' => __("Email")));

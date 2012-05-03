@@ -50,7 +50,7 @@ class FlagBehaviorTestCase extends CakeTestCase {
 	public function tearDown() {
 		unset($this->Flag);
     unset($this->File);
-    
+
     parent::tearDown();
 	}
 

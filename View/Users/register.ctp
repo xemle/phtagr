@@ -12,15 +12,15 @@
   echo $this->Form->input('Captcha.verification');
 ?>
 </fieldset>
-<?php 
-  echo $this->Form->end(__('Sign Up')); 
+<?php
+  echo $this->Form->end(__('Sign Up'));
 
   $script = <<<SCRIPT
 (function($) {
   $(document).ready(function() {
     $(':submit').button();
     $('.message').addClass("ui-widget ui-corner-all ui-state-highlight");
-  }); 
+  });
 })(jQuery);
 SCRIPT;
   echo $this->Html->scriptBlock($script, array('inline' => false));

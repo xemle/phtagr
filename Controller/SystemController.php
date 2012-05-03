@@ -102,7 +102,7 @@ class SystemController extends AppController {
         $this->Option->setValue('user.register.enable', 0, 0);
       }
       $quota = $this->__fromReadableSize($this->request->data['user']['register']['quota']);
-      $this->Option->setValue('user.register.quota', $quota, 0); 
+      $this->Option->setValue('user.register.quota', $quota, 0);
       $this->Session->setFlash(__("Options saved!"));
     }
     $this->request->data = $this->Option->getTree($this->getUserId());
@@ -114,7 +114,7 @@ class SystemController extends AppController {
     if (!isset($this->request->data['user']['register']['quota'])) {
       $this->request->data['user']['register']['quota'] = (float)100*1024*1024;
     }
-  } 
+  }
 
   function external() {
     if (!empty($this->request->data)) {
@@ -141,7 +141,7 @@ class SystemController extends AppController {
     $tree = $this->Option->getTree(0);
     $this->request->data = $tree;
   }
-  
+
   /** Database upgrade via the Migraions plugin */
   function upgrade($action = '') {
     CakePlugin::load('Migrations');
@@ -214,11 +214,11 @@ class SystemController extends AppController {
       'fields' => 'SUM(File.size) AS Bytes'));
     $data['file.size'] = floatval($bytes[0][0]['Bytes']);
     $bytes = $this->Media->File->find('all', array(
-      'conditions' => array("File.flag & ".FILE_FLAG_EXTERNAL." > 0"), 
+      'conditions' => array("File.flag & ".FILE_FLAG_EXTERNAL." > 0"),
       'fields' => 'SUM(File.size) AS Bytes'));
     $data['file.size.external'] = floatval($bytes[0][0]['Bytes']);
     $bytes = $this->Media->File->find('all', array(
-      'conditions' => array("File.flag & ".FILE_FLAG_EXTERNAL." = 0"), 
+      'conditions' => array("File.flag & ".FILE_FLAG_EXTERNAL." = 0"),
       'fields' => 'SUM(File.size) AS Bytes'));
     $data['file.size.internal'] = floatval($bytes[0][0]['Bytes']);
     $data['media'] = $this->Media->find('count');

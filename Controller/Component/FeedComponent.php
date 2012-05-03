@@ -16,9 +16,9 @@
  */
 
 class FeedComponent extends Component {
-  
+
   var $name = 'FeedComponent';
-  
+
   var $controller = null;
 
   var $_feeds = array();
@@ -31,7 +31,7 @@ class FeedComponent extends Component {
   function initialize(&$controller) {
     $this->controller = $controller;
   }
-  
+
   /** Set feeds output for layout */
   function beforeRender() {
     App::uses('HtmlHelper', 'View/Helper');
@@ -70,7 +70,7 @@ class FeedComponent extends Component {
       $this->_feeds[] = am(array('type' => $type, 'url' => $url), $options);
     } else {
       $this->_feeds[$url] = am(array('type' => $type), $options);
-    } 
+    }
   }
 }
 ?>

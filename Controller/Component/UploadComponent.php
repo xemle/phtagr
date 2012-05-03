@@ -44,7 +44,7 @@ class UploadComponent extends Component {
   function _addError($file, $msg, $data = null) {
     if ($this->_errors === null) {
       $this->_errors = array();
-    } 
+    }
     $this->_errors[$file] = array('msg' => $msg);
     if ($data) {
       $this->_errors[$file]['data'] = $data;
@@ -79,8 +79,8 @@ class UploadComponent extends Component {
         $result = am($result, $this->_extractUploads(&$d));
       }
       return $result;
-    } 
-  } 
+    }
+  }
 
   /** Returns the upload data
     @param data Upload data. If null the controler's default data is used
@@ -143,7 +143,7 @@ class UploadComponent extends Component {
       return 0;
     }
     return array_sum(Set::extract('/size', $uploads));
-  } 
+  }
 
   function isUploadedFile($filename) {
     return is_uploaded_file($filename);

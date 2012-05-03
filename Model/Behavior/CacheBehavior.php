@@ -17,7 +17,7 @@
 
 /** Cache File behavior for media
   @see CacheFileComponent */
-class CacheBehavior extends ModelBehavior 
+class CacheBehavior extends ModelBehavior
 {
   var $config = array();
 
@@ -27,13 +27,13 @@ class CacheBehavior extends ModelBehavior
 
   /** Deletes all cache files of a given media
     @param model Reference of model
-    @param data Model data 
+    @param data Model data
     @return True on success */
   function deleteCache(&$model, &$data = null) {
     if (!$data) {
       $data =& $model->data;
     }
-    
+
     $modelData = $data;
     if (isset($modelData[$model->alias])) {
       $modelData = $modelData[$model->alias];
@@ -42,7 +42,7 @@ class CacheBehavior extends ModelBehavior
       Logger::err("Precondition failed");
       return false;
     }
-    
+
     $cacheDir = USER_DIR.$modelData['user_id'].DS.'cache'.DS;
     $cacheDir .= sprintf("%04d", ($modelData['id'] / 1000)).DS;
     if (!is_dir($cacheDir)) {

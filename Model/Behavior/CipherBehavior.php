@@ -17,22 +17,22 @@
 
 require_once("Crypt/Blowfish.php");
 
-class CipherBehavior extends ModelBehavior 
+class CipherBehavior extends ModelBehavior
 {
   /** Default values of behavior.
     @key Symetric key. Default is value of 'Security.salt' configuration.
     @cipher Columns to cipher. Default is 'password'.
     @prefix Prefix of ciphered values. Default is '$E$'.
     @saltLen Length of salt as prefix and suffix. The salt ensures differend
-    outputs for the same input. Default is 4. 
+    outputs for the same input. Default is 4.
     @padding Padding of ciphered value. Default is 4.
-    @autoDecrypt Decrypt ciphered value automatically. Default is false. 
+    @autoDecrypt Decrypt ciphered value automatically. Default is false.
     @noEncypt Disables encryption if true. Usefull for revert the encryption. */
   var $default = array(
-                    'cipher' => 'password', 
-                    'prefix' => '$E$', 
-                    'saltLen' => 4, 
-                    'padding' => 4, 
+                    'cipher' => 'password',
+                    'prefix' => '$E$',
+                    'saltLen' => 4,
+                    'padding' => 4,
                     'autoDecrypt' => false,
                     'noEncypt' => false
                   );
@@ -72,7 +72,7 @@ class CipherBehavior extends ModelBehavior
     }
   }
 
-  /** Model hook to encrypt model data 
+  /** Model hook to encrypt model data
     @param model Current model */
   function beforeSave(&$model) {
     if (isset($this->config[$model->name]) && !$this->config[$model->name]['noEncypt']) {
@@ -85,7 +85,7 @@ class CipherBehavior extends ModelBehavior
       $prefix = $this->config[$model->name]['prefix'];
       $prefixLen = strlen($prefix);
       foreach ($cipher as $column) {
-        if (!empty($model->data[$model->name][$column]) && 
+        if (!empty($model->data[$model->name][$column]) &&
           substr($model->data[$model->name][$column], 0, $prefixLen) != $prefix) {
           $encrypt = $this->_encryptValue($model->data[$model->name][$column], $this->config[$model->name]);
           if ($encrypt) {
@@ -96,7 +96,7 @@ class CipherBehavior extends ModelBehavior
         }
       }
     }
-  
+
     return true;
   }
 
@@ -105,7 +105,7 @@ class CipherBehavior extends ModelBehavior
   function afterFind(&$model, $result, $primary = false) {
     if (!$result || !isset($this->config[$model->name]['cipher']))
       return $result;
-    
+
     if ($primary && $this->config[$model->name]['autoDecrypt']) {
       // check for single of multiple model
       $keys = array_keys($result);
@@ -122,7 +122,7 @@ class CipherBehavior extends ModelBehavior
 
   /** Decrypt model value
     @param model Current model
-    @param data Current model data. If null, the Model::data is used 
+    @param data Current model data. If null, the Model::data is used
     @return Deciphered model data */
   function decrypt(&$model, &$data = null) {
     $this->log(print_r($data, true));
@@ -138,7 +138,7 @@ class CipherBehavior extends ModelBehavior
       $prefix = $this->config[$model->name]['prefix'];
       $prefixLen = strlen($prefix);
       foreach ($cipher as $column) {
-        if (!empty($data[$model->name][$column]) && 
+        if (!empty($data[$model->name][$column]) &&
           substr($data[$model->name][$column], 0, $prefixLen) == $prefix) {
           $decrypt = $this->_decryptValue($data[$model->name][$column], $this->config[$model->name]);
           if ($decrypt) {
@@ -184,7 +184,7 @@ class CipherBehavior extends ModelBehavior
     @param value Value to envelope
     @param salt Salt which builds the prefix and suffix of the envelope
     @param padding Alignment size. Default is 4
-    @return Envelope with salt 
+    @return Envelope with salt
     @see _unpackValue() */
   function _packValue($value, $salt, $padding = 4) {
     $l = strlen($value) + 2 * strlen($salt);
@@ -198,7 +198,7 @@ class CipherBehavior extends ModelBehavior
 
   /** Unpacks an envelope and returns the packed value
     @param envelope
-    @return Value or false on an error 
+    @return Value or false on an error
     @see _packValue() */
   function _unpackValue($envelope, $saltLen) {
     $l = strlen($envelope);
@@ -220,11 +220,11 @@ class CipherBehavior extends ModelBehavior
   }
 
   /** Encrpytes a value using the blowfish cipher. As key the Security.salt
-    * value is used 
+    * value is used
     @param value Value to cipher
     @return Return of the chiphered value in base64 encoding. To distinguish
     ciphed value, the ciphed value has a prefix of '$E$' i
-    @see _decryptValue(), _packValue(), _generateSalt() */  
+    @see _decryptValue(), _packValue(), _generateSalt() */
   function _encryptValue($value, $config) {
     extract($config);
     $bf = new Crypt_Blowfish($key);

@@ -58,7 +58,7 @@ class CommentControllerTest extends ControllerTestCase {
 
     parent::tearDown();
   }
-  
+
   public function testCommentAccess() {
     $this->User->save($this->User->create(array('username' => 'userA', 'role' => ROLE_USER)));
     $userA = $this->User->findById($this->User->getLastInsertID());
@@ -71,7 +71,7 @@ class CommentControllerTest extends ControllerTestCase {
     $guestA = $this->User->findById($this->User->getLastInsertID());
     $this->User->save($this->User->create(array('username' => 'nobody', 'role' => ROLE_NOBODY)));
     $userNone = $this->User->findById($this->User->getLastInsertID());
-    
+
     // 'userA' has group 'aGroup'. 'userB' and 'guestA' are member of 'aGroup'
     $this->Group->save($this->Group->create(array('name' => 'aGroup', 'user_id' => $userA['User']['id'])));
     $group = $this->Group->findById($this->Group->getLastInsertID());
@@ -82,7 +82,7 @@ class CommentControllerTest extends ControllerTestCase {
     $userA = $this->User->findById($userA['User']['id']);
     $userB = $this->User->findById($userB['User']['id']);
     $guestA = $this->User->findById($guestA['User']['id']);
-    
+
     // media1 is public
     $this->Media->save($this->Media->create(array('name' => 'IMG_1234.JPG', 'user_id' => $userA['User']['id'], 'gacl' => 97, 'uacl' => 97, 'oacl' => 97)));
     $media1 = $this->Media->findById($this->Media->getLastInsertID());
@@ -96,7 +96,7 @@ class CommentControllerTest extends ControllerTestCase {
     // media4 is private
     $this->Media->save($this->Media->create(array('name' => 'IMG_4567.JPG', 'user_id' => $userA['User']['id'])));
     $media4 = $this->Media->findById($this->Media->getLastInsertID());
-    
+
     $this->Comment->save($this->Comment->create(array('text' => 'Ipsum Lorem', 'media_id' => $media1['Media']['id'])));
     $this->Comment->save($this->Comment->create(array('text' => 'Ipsum Lorem', 'media_id' => $media2['Media']['id'])));
     $this->Comment->save($this->Comment->create(array('text' => 'Ipsum Lorem', 'media_id' => $media3['Media']['id'])));

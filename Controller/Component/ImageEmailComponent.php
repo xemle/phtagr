@@ -18,7 +18,7 @@
 App::uses('Email', 'Component');
 
 class ImageEmailComponent extends EmailComponent {
-  
+
   /** List of embedded images */
   var $images = array();
 
@@ -161,7 +161,7 @@ class ImageEmailComponent extends EmailComponent {
       }
       $msg[] = 'Content-Disposition: attachment; filename="' . basename($filename) . '"';
       $msg[] = '';
-      $msg = array_merge($msg, explode("\r\n", $data)); 
+      $msg = array_merge($msg, explode("\r\n", $data));
       $msg[] = '';
     }
     //Logger::debug($msg);

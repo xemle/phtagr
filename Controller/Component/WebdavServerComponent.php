@@ -18,7 +18,7 @@
 require_once "HTTP/WebDAV/Server.php";
 
 /**
- * WebdavServer 
+ * WebdavServer
  *
  * based on Filesystem.php from Hartmut Holzgraefe <hartmut@php.net>
  *
@@ -77,16 +77,16 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
     return true;
   }
 
-  /** Returns the canonicalized path 
+  /** Returns the canonicalized path
     @param path
     @return canonicalized path */
   function canonicalpath($path) {
     $paths=explode('/', $path);
     $result=array();
     for ($i=0; $i<sizeof($paths); $i++) {
-      if ($paths[$i]==='' || $paths[$i]=='.') 
+      if ($paths[$i]==='' || $paths[$i]=='.')
         continue;
-      if ($paths[$i]=='..') { 
+      if ($paths[$i]=='..') {
         array_pop($result);
         continue;
       }
@@ -95,7 +95,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
     return '/'.implode('/', $result);
   }
 
-  /** Returns the relative WebDAV path to the current WebDAV path 
+  /** Returns the relative WebDAV path to the current WebDAV path
     @param path webdav path
     @return relative WebDAV path */
   function getRelativeDavpath($path) {
@@ -134,13 +134,13 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
     $this->_realm=$realm;
   }
 
-  /** Set string for server identification 
+  /** Set string for server identification
     @param text Text of server identification */
   function setPoweredBy($text) {
     $this->dav_powered_by=$text;
   }
 
-  /** Reads all files of a given path and build an file cache 
+  /** Reads all files of a given path and build an file cache
     @param path System path to read */
   function _buildFileCache($path) {
     if (isset($this->_fileCache[$path]) || !is_dir($path)) {
@@ -156,7 +156,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
     // Bind only required models
     $this->controller->MyFile->unbindAll();
     $this->controller->MyFile->bindModel(array('hasMany' => array(
-      'Property' => array('foreignKey' => 'file_id'), 
+      'Property' => array('foreignKey' => 'file_id'),
       'Lock' => array('foreignKey' => 'file_id')
       )));
     $files = $this->controller->MyFile->find('all', array('conditions' => array('path' => $path)));
@@ -192,7 +192,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
     }
   }
 
-  /** Encodes the paths of an url. E.g '/space test/' becomes '/space%20test/' 
+  /** Encodes the paths of an url. E.g '/space test/' becomes '/space%20test/'
     @param path Path
     @return Escaped path
     @note Requires PHP 5 (uses references in foreach statement) */
@@ -220,9 +220,9 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
 
     if (strpos($base, $this->_davRoot) !== 0) {
       Logger::warn("Request '$base' does not match DAV root '{$this->_davRoot}'. Reset request to '/'");
-      $this->_SERVER['PATH_INFO'] = '/'; 
+      $this->_SERVER['PATH_INFO'] = '/';
     } else {
-      $this->_SERVER['PATH_INFO'] = substr($base, strlen($this->_davRoot)); 
+      $this->_SERVER['PATH_INFO'] = substr($base, strlen($this->_davRoot));
     }
     $this->_SERVER['SCRIPT_NAME'] = $this->_davRoot;
 
@@ -245,7 +245,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
 
   /** Checks if the path could be read by the user
     @param path System directory or filename
-    @return True if user is authorized to read directory. False otherwise 
+    @return True if user is authorized to read directory. False otherwise
     @todo This function must be implemented */
   function _canRead($fspath) {
     if ($this->controller->getUserRole() >= ROLE_USER) {
@@ -271,7 +271,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
     // get absolute fs path to requested resource
     $fspath=$this->getFsPath($options["path"]);
     Logger::debug("PROFIND: '$fspath' ({$options["path"]})");
-      
+
     // sanity check
     if (!file_exists($fspath)) {
       Logger::err("File '$fspath' does not exists");
@@ -291,23 +291,23 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
 
     // information for contained resources requested?
     if (!empty($options["depth"])) { // TODO check for is_dir() first?
-        
+
       // make sure path ends with '/'
       $options["path"]=$this->_slashify($options["path"]);
 
       // try to open directory
       $handle=@opendir($fspath);
-      Logger::debug("Read directory '$fspath'"); 
+      Logger::debug("Read directory '$fspath'");
       if ($handle) {
         $fspath=Folder::slashTerm($fspath);
         // ok, now get all its contents
         while ($filename=readdir($handle)) {
-          if ($filename == "." || $filename == "..") 
+          if ($filename == "." || $filename == "..")
             continue;
           // @todo Improve the read check if user is a guest. Query files from
           // the database instead
           if (!$this->_canRead($fspath.$filename)) {
-            continue; 
+            continue;
           }
           $files["files"][]=$this->fileinfo($options["path"].$filename);
         }
@@ -317,8 +317,8 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
 
     // ok, all done
     return true;
-  } 
-    
+  }
+
   /**
    * Get properties for a single file/resource
    *
@@ -333,13 +333,13 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
     // create result array
     $info=array();
     // TODO remove slash append code when base clase is able to do it itself
-    $info["path"] =is_dir($fspath) ? $this->_slashify($path) : $path; 
+    $info["path"] =is_dir($fspath) ? $this->_slashify($path) : $path;
     $info["path"] =$this->pathRawurlencode($info["path"]);
     $info["props"]=array();
-      
+
     // no special beautified displayname here ...
     $info["props"][]=$this->mkprop("displayname", strtoupper($path));
-      
+
     // creation and modification time
     $info["props"][]=$this->mkprop("creationdate",  filectime($fspath));
     $info["props"][]=$this->mkprop("getlastmodified", filemtime($fspath));
@@ -348,7 +348,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
     if (is_dir($fspath)) {
       // directory (WebDAV collection)
       $info["props"][]=$this->mkprop("resourcetype", "collection");
-      $info["props"][]=$this->mkprop("getcontenttype", "httpd/unix-directory");       
+      $info["props"][]=$this->mkprop("getcontenttype", "httpd/unix-directory");
     } else {
       // plain file (WebDAV resource)
       $info["props"][]=$this->mkprop("resourcetype", "");
@@ -356,7 +356,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
         $info["props"][]=$this->mkprop("getcontenttype", $this->_mimetype($fspath));
       } else {
         $info["props"][]=$this->mkprop("getcontenttype", "application/x-non-readable");
-      }         
+      }
       $info["props"][]=$this->mkprop("getcontentlength", filesize($fspath));
     }
 
@@ -365,8 +365,8 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
     if ($file) {
       foreach($file['Property'] as $property) {
         $info['props'][]=$this->mkprop(
-          $property['ns'], 
-          $property['name'], 
+          $property['ns'],
+          $property['name'],
           $property['value']);
         Logger::trace("Add property: {$property['ns']}:{$property['name']}={$property['value']}");
       }
@@ -379,7 +379,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
   /**
    * detect if a given program is found in the search PATH
    *
-   * helper function used by _mimetype() to detect if the 
+   * helper function used by _mimetype() to detect if the
    * external 'file' utility is available
    *
    * @param  string  program name
@@ -391,7 +391,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
     if ($path === false) {
       $path=getenv("PATH");
     }
-      
+
     // check method depends on operating system
     if (!strncmp(PHP_OS, "WIN", 3)) {
       // on Windows an appropriate COM or EXE file needs to exist
@@ -402,7 +402,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
       $exts=array("");
       $check_fn="is_executable";
     }
-      
+
     // now check the directories in the path for the program
     foreach (explode(PATH_SEPARATOR, $path) as $dir) {
       // skip invalid path entries
@@ -427,41 +427,41 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
   function _mimetype($fspath) {
     if (@is_dir($fspath)) {
       // directories are easy
-      return "httpd/unix-directory"; 
+      return "httpd/unix-directory";
     } else if (function_exists("mime_content_type")) {
       // use mime magic extension if available
       $mimeType=mime_content_type($fspath);
     } else if ($this->_canExecute("file")) {
-      // it looks like we have a 'file' command, 
+      // it looks like we have a 'file' command,
       // lets see it it does have mime support
       $fp =popen("file -i '$fspath' 2>/dev/null", "r");
       $reply=fgets($fp);
       pclose($fp);
-        
+
       // popen will not return an error if the binary was not found
       // and find may not have mime support using "-i"
-      // so we test the format of the returned string 
-        
+      // so we test the format of the returned string
+
       // the reply begins with the requested filename
-      if (!strncmp($reply, "$fspath: ", strlen($fspath)+2)) {           
+      if (!strncmp($reply, "$fspath: ", strlen($fspath)+2)) {
         $reply=substr($reply, strlen($fspath)+2);
         // followed by the mime type (maybe including options)
         if (preg_match('|^[[:alnum:]_-]+/[[:alnum:]_-]+;?.*|', $reply, $matches)) {
           $mimeType=$matches[0];
         }
       }
-    } 
-      
+    }
+
     if (empty($mimeType)) {
       // Fallback solution: try to guess the type by the file extension
       // TODO: add more ...
-      // TODO: it has been suggested to delegate mimetype detection 
+      // TODO: it has been suggested to delegate mimetype detection
       //     to apache but this has at least three issues:
       //     - works only with apache
       //     - needs file to be within the document tree
-      //     - requires apache mod_magic 
+      //     - requires apache mod_magic
       // TODO: can we use the registry for this on Windows?
-      //     OTOH if the server is Windos the clients are likely to 
+      //     OTOH if the server is Windos the clients are likely to
       //     be Windows, too, and tend do ignore the Content-Type
       //     anyway (overriding it with information taken from
       //     the registry)
@@ -476,18 +476,18 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
       case ".jpg":
         $mimeType="image/jpeg";
         break;
-      default: 
+      default:
         $mimeType="application/octet-stream";
         break;
       }
     }
-      
+
     return $mimeType;
   }
 
   /**
    * GET method handler
-   * 
+   *
    * @param  array  parameter passing array
    * @return bool   true on success
    */
@@ -497,7 +497,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
     Logger::debug("GET: '$fspath' ({$options["path"]})");
 
     // sanity check
-    if (!file_exists($fspath)) { 
+    if (!file_exists($fspath)) {
       Logger::warn("Content '$fspath' does not exists");
       return false;
     }
@@ -511,7 +511,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
     if (is_dir($fspath)) {
       return $this->GetDir($fspath, $options);
     }
- 
+
     // Update metadata on dirty file
     $file = $this->controller->MyFile->findByFilename($fspath);
     if ($file && $this->controller->Media->hasFlag($file, MEDIA_FLAG_DIRTY)) {
@@ -520,23 +520,23 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
     }
 
     // detect resource type
-    $options['mimetype']=$this->_mimetype($fspath); 
-        
+    $options['mimetype']=$this->_mimetype($fspath);
+
     // detect modification time
     // see rfc2518, section 13.7
     // some clients seem to treat this as a reverse rule
     // requiering a Last-Modified header if the getlastmodified header was set
     $options['mtime']=filemtime($fspath);
-      
+
     // detect resource size
     $options['size']=filesize($fspath);
-      
+
     // Clean the open obstack which was open in the controller
     @ob_end_clean();
 
     // no need to check result here, it is handled by the base class
     $options['stream']=fopen($fspath, "r");
-    
+
     return true;
   }
 
@@ -556,7 +556,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
 
     $baseUri=@$this->_SERVER["HTTPS"]==="on"?"https:":"http:";
     $baseUri.="//".$_SERVER['HTTP_HOST'].$this->_davRoot;
-    
+
     //Logger::trace("baseUri=".$baseUri);
 
     if ($path != $options["path"]) {
@@ -572,18 +572,18 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
     }
 
     echo "<html><head><title>Index of ".htmlspecialchars($options['path'])."</title></head>\n";
-      
+
     echo "<h1>Index of ".htmlspecialchars($options['path'])."</h1>\n";
-      
+
     echo "<pre>";
     printf($format, "Size", "Last modified", "Filename");
     echo "<hr>";
 
     // Current directory
     $link=$this->_unslashify($baseUri.$this->pathRawurlencode($path));
-    printf($format, 
+    printf($format,
       number_format(filesize($fspath)),
-      strftime("%Y-%m-%d %H:%M:%S", filemtime($fspath)), 
+      strftime("%Y-%m-%d %H:%M:%S", filemtime($fspath)),
       "<a href='$link'>.</a>");
 
     // Upper directory
@@ -595,21 +595,21 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
       $parentPath='/'.implode('/', $paths);
 
       $link=$this->_unslashify($baseUri.$this->pathRawurlencode($parentPath));
-      printf($format, 
+      printf($format,
         number_format(filesize($parentFsPath)),
-        strftime("%Y-%m-%d %H:%M:%S", filemtime($parentFsPath)), 
+        strftime("%Y-%m-%d %H:%M:%S", filemtime($parentFsPath)),
         "<a href='$link'>..</a>");
     }
 
     $dirs=array();
     $files=array();
     while ($filename=readdir($handle)) {
-      if ($filename == "." || $filename == "..") 
+      if ($filename == "." || $filename == "..")
         continue;
 
       if (is_dir($fspath.'/'.$filename))
         array_push($dirs, $filename);
-      else 
+      else
         array_push($files, $filename);
     }
     asort($dirs);
@@ -624,9 +624,9 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
 
       $name  =htmlspecialchars($this->_unslashify($filename));
       $link=$baseUri.$this->pathRawurlencode($path.$name);
-      printf($format, 
+      printf($format,
         number_format(filesize($fullpath)),
-        strftime("%Y-%m-%d %H:%M:%S", filemtime($fullpath)), 
+        strftime("%Y-%m-%d %H:%M:%S", filemtime($fullpath)),
         "<a href='$link'>$name</a>");
     }
     echo "</pre>";
@@ -654,7 +654,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
       Logger::err("Could not determine fspath=$fspath");
       return false;
     }
-   
+
     $file = $this->controller->MyFile->findByFilename($fspath);
     if ($file) {
       $this->controller->MyFile->update(&$file);
@@ -675,7 +675,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
 
   /**
    * PUT method handler
-   * 
+   *
    * @param  array  parameter passing array
    * @return bool   true on success
    */
@@ -729,7 +729,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
    * @param  array  general parameter passing array
    * @return bool   true on success
    */
-  function MKCOL($options) {       
+  function MKCOL($options) {
     if ($this->controller->getUserRole() <= ROLE_GUEST) {
       Logger::warn("MKCOL: Denied for guests");
       return "403 Forbidden";
@@ -754,15 +754,15 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
     if (!empty($this->_SERVER["CONTENT_LENGTH"])) { // no body parsing yet
       return "415 Unsupported media type";
     }
-      
+
     if (!@mkdir($fspath, 0775)) {
       Logger::err("Could not create directory '$fspath'");
-      return "403 Forbidden";         
+      return "403 Forbidden";
     }
 
     return ("201 Created");
   }
-    
+
   /**
    * DELETE method handler
    *
@@ -780,7 +780,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
       Logger::err("DELETE failed. file '$fspath' does not exists");
       return "404 Not found";
     }
-        
+
     Logger::info("blub");
     if ($this->FileManager->delete($fspath)) {
       Logger::info("Delete '$fspath' ({$options['path']})");
@@ -859,7 +859,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
         $stat=$this->DELETE(array("path" => $options["dest"]));
         if (($stat{0} != "2") && (substr($stat, 0, 3) != "404")) {
           Logger::err("Could not delete existing file '{$options["dest"]}");
-          return $stat; 
+          return $stat;
         }
         Logger::info("Delete existing file '{$options["dest"]}' for overwriting");
         @clearstatcache();
@@ -877,17 +877,17 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
 
     if ($del) {
       // move file(s)
-      if (!is_dir($source)) { 
+      if (!is_dir($source)) {
         if (!$this->FileManager->move($source, $dest)) {
           Logger::warn("Could not update file in database from file '$source' to '$dest'");
           return "500 Internal server error";
-        } 
+        }
         Logger::info("Renamed file from '$source' to '$dest'");
       } elseif (is_dir($dest) || !file_exists($dest)) {
         if (!$this->FileManager->move($source, $dest)) {
           Logger::err("Could not update file in database from directory '$source' to directory '$dest'");
           return "500 Internal server error";
-        } 
+        }
         Logger::info("Renamed directory from '$source' to '$dest'");
       } else {
         Logger::err("Move from directory '$source' to file '$dest' not allowed!");
@@ -897,7 +897,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
       if (!$this->FileManager->copy($source, $dest)) {
         return "500 Internal server error";
       }
-      /* 
+      /*
       if (is_dir($source)) {
         $folder =& new Folder($source);
         list($dirs, $files) = $folder->tree($source);
@@ -923,7 +923,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
       $user = $this->controller->getUser();
       foreach ($files as $file) {
         $destfile=str_replace($source, $dest, $file);
-          
+
         if (!@copy($file, $destfile)) {
           Logger::err("Could not copy file '$file' to '$destfile'");
           return "409 Conflict";
@@ -950,7 +950,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
         */
     }
 
-    return ($new && !$existingCol) ? "201 Created" : "204 No Content";     
+    return ($new && !$existingCol) ? "201 Created" : "204 No Content";
   }
 
   /**
@@ -978,9 +978,9 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
         if (isset($prop["val"])) {
           if (!$property) {
             $property = array('Property' => array(
-              'file_id' => $fileId, 
-              'name' => $prop['name'], 
-              'ns' => $prop['ns'], 
+              'file_id' => $fileId,
+              'name' => $prop['name'],
+              'ns' => $prop['ns'],
               'value' => $prop['val']));
             Logger::debug("Create new property for file $fileId: {$prop['ns']}:{$prop['name']}='{$prop['val']}'");
             $property = $this->controller->Property->create($property);
@@ -994,11 +994,11 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
           }
         } elseif ($property) {
           Logger::debug("Delete property of file $fileId: {$prop['ns']}:{$prop['name']}");
-          $this->controller->Property->delete($property['Property']['id']); 
-        }     
+          $this->controller->Property->delete($property['Property']['id']);
+        }
       }
     }
-            
+
     return "";
   }
 
@@ -1033,7 +1033,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
 
     if (isset($options["update"])) { // Lock Update
       $lock = $this->controller->Lock->find('first', array('conditions' => array('Lock.file_id' => $fileId, 'Lock.token' => $options['update'])));
-      
+
       if ($lock) {
         $lock['Lock']['expires'] = date('Y-m-d H:i:s', $options['timeout']);
         $this->controller->Lock->save($lock);
@@ -1049,7 +1049,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
         return false;
       }
     }
-      
+
     $lock = array('Lock' => array(
       'token' => $options['locktoken'],
       'file_id' => $fileId,
@@ -1102,9 +1102,9 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
   function checkLock($path) {
     //Logger::debug("checkLock: ".$path);
     $result=false;
-      
+
     $res=false;
-   
+
     $path = urldecode($path);
     $fspath = $this->getFsPath($path);
     $file = $this->_getFile($fspath);

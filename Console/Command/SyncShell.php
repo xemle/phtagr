@@ -19,7 +19,7 @@ class SyncShell extends AppShell {
 
   var $uses = array('User', 'Option', 'MyFile', 'Media');
   var $components = array('FilterManager');
-  
+
   var $verbose = false;
   var $chunkSize = 100;
 
@@ -73,8 +73,8 @@ class SyncShell extends AppShell {
     $this->verboseOut(sprintf("%d media are unsynced", $count));
     while (true) {
       $data = $this->Media->find('all', array(
-        'conditions' => $conditions, 
-        'limit' => 10, 
+        'conditions' => $conditions,
+        'limit' => 10,
         'order' => 'Media.modified ASC'));
       foreach ($data as $media) {
         $conditions['Media.modified >'] = $media['Media']['modified'];
@@ -87,7 +87,7 @@ class SyncShell extends AppShell {
         if ($syncMax > 0 && $synced >= $syncMax) {
           break;
         }
-        $synced++; 
+        $synced++;
       }
       if (($syncMax > 0 && $synced >= $syncMax) || count($data) == 0) {
         // fix counting which started by zero

@@ -14,8 +14,8 @@
 
 class DATABASE_CONFIG {
 
-  /** 
-   * Default database connection configuration 
+  /**
+   * Default database connection configuration
    */
   var $default = array(
                   'datasource' =&gt; 'Database/Mysql',
@@ -28,7 +28,7 @@ class DATABASE_CONFIG {
                   'encoding' =&gt; 'utf8'
                  );
 
-  /** 
+  /**
    * Database connection configuration for test environment
    */
   var $test = array(

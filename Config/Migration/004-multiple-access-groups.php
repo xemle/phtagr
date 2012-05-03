@@ -3,7 +3,7 @@ class M57acac5f420bd77f6d55a446199ccab6 extends CakeMigration {
 
   private $Media = null;
   private $Group = null;
-  
+
 /**
  * Migration description
  *
@@ -61,18 +61,18 @@ class M57acac5f420bd77f6d55a446199ccab6 extends CakeMigration {
     App::import('Model', 'Group');
     $this->Media = ClassRegistry::init('Media');
     $this->Group = ClassRegistry::init('Group');
-    // bind Media to Group as HABTM 
+    // bind Media to Group as HABTM
     $this->Group->bindModel(array('hasAndBelongsToMany' => array('Media' => array())), false);
 
     $groups = $this->Group->find('all', array(
-      'fields' => array('id'), 
+      'fields' => array('id'),
       'recursive' => -1));
     $groupCount = count($groups);
     if (!$groupCount) {
       Logger::info("No groups to migrate");
       return true;
     }
-    
+
     Logger::info("Found $groupCount groups to migrate");
     $migrated = 0;
     foreach ($groups as $group) {
@@ -86,14 +86,14 @@ class M57acac5f420bd77f6d55a446199ccab6 extends CakeMigration {
 
   /**
    * Migrate all media of a single group
-   * 
+   *
    * @param type $group
-   * @return type 
+   * @return type
    */
   private function migrateGroup($group) {
     $data = $this->Media->find('all', array(
-      'conditions' => array('Media.group_id' => $group['Group']['id']), 
-      'fields' => array('id'), 
+      'conditions' => array('Media.group_id' => $group['Group']['id']),
+      'fields' => array('id'),
       'recursive' => -1));
     if (!count($data)) {
       return 0;
@@ -101,7 +101,7 @@ class M57acac5f420bd77f6d55a446199ccab6 extends CakeMigration {
     $mediaIds = Set::extract('/Media/id', $data);
     $this->Group->create();
     if (!$this->Group->save(array(
-        'Group' => array('id' => $group['Group']['id']), 
+        'Group' => array('id' => $group['Group']['id']),
         'Media' => array('Media' => $mediaIds)))) {
       throw new Exception("Could not migrate media of group {$group['Group']['id']}");
     }

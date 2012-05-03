@@ -23,9 +23,9 @@ if (!class_exists('Logger')) {
 class AppShell extends Shell {
   var $uses = array();
   var $components = array();
-  
+
   var $ControllerMock = null;
-  
+
   function initialize() {
     if (function_exists('ini_set') && !ini_set('include_path', ROOT . DS . APP_DIR . DS . 'Vendor' . DS . 'Pear' . DS . PATH_SEPARATOR . ini_get('include_path'))) {
       $this->out("Could not set include_path");
@@ -47,7 +47,7 @@ class AppShell extends Shell {
     $this->ControllerMock->constructClasses();
     $this->ControllerMock->startupProcess();
   }
-  
+
   /**
    * Bind controller's components to shell
    */
@@ -59,11 +59,11 @@ class AppShell extends Shell {
       if (empty($this->ControllerMock->{$component})) {
         $this->out("Could not load component $component");
         exit(1);
-      }  
+      }
       $this->{$component} = $this->ControllerMock->{$component};
     }
   }
-  
+
   function mockUser($user) {
     $this->ControllerMock->mockUser($user);
   }

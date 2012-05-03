@@ -19,7 +19,7 @@
  * CakePHP. It checks the session and the URL and returns a valid file */
 class FastFileResponder {
   /** Should be same as in app/config/core.php Session.cookie */
-  var $sessionCookie = 'CAKEPHP'; 
+  var $sessionCookie = 'CAKEPHP';
   var $sessionKey = 'fastFile';
   var $items = array();
 
@@ -52,7 +52,7 @@ class FastFileResponder {
       }
     }
   }
-  
+
   /** Simple log function for debug purpos */
   function log($msg) {
     $h = @fopen(dirname(__FILE__) . DS . 'fast_file_responder.log', 'a');
@@ -129,7 +129,7 @@ class FastFileResponder {
   function exists($url) {
     return $this->getFilename($url) != false;
   }
- 
+
   /** Sends the cache file if it exists and exit. If it returns an error
     * occured */
   function send($url) {
@@ -139,7 +139,7 @@ class FastFileResponder {
     }
     $this->checkClientCache($filename);
     $this->sendResponseHeaders($filename);
- 
+
     $chunkSize = 1024;
     $buffer = '';
     $handle = fopen($filename, 'rb');
@@ -151,7 +151,7 @@ class FastFileResponder {
     //$this->log("File send: $filename");
     exit(0);
   }
- 
+
   /** Closes the session */
   function close() {
     session_write_close();

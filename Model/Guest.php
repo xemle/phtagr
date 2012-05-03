@@ -28,7 +28,7 @@ class Guest extends AppModel
                   'Option' => array('dependent' => true),
                   );
 
-  var $hasAndBelongsToMany = array( 
+  var $hasAndBelongsToMany = array(
                   'Member' => array(
                       'className' => 'Group'
                     )
@@ -54,9 +54,9 @@ class Guest extends AppModel
   }
 
   function beforeValidate() {
-    if (isset($this->data['Guest']['password']) && 
+    if (isset($this->data['Guest']['password']) &&
       isset($this->data['Guest']['confirm'])) {
-      if (empty($this->data['Guest']['password']) && 
+      if (empty($this->data['Guest']['password']) &&
         empty($this->data['Guest']['confirm'])) {
         // both are empty - clear it
         unset($this->data['Guest']['confirm']);

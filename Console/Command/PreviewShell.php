@@ -18,7 +18,7 @@
 class PreviewShell extends AppShell {
   var $uses = array('User', 'Option', 'MyFile', 'Media');
   var $components = array('Search', 'FileCache', 'PreviewManager');
- 
+
   var $verbose = false;
   var $chunkSize = 100;
   var $sizes = array('mini', 'thumb', 'preview', 'high');
@@ -108,7 +108,7 @@ class PreviewShell extends AppShell {
         if ($generateMax > 0 && $generated >= $generateMax) {
           break;
         }
-        $generated++; 
+        $generated++;
       }
       if ($generateMax > 0 && $generated >= $generateMax) {
         $this->out("Generated $generated previews. Exit.");

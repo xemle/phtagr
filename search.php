@@ -28,13 +28,13 @@ class Search extends Object
     $this->_data = array();
   }
 
-  /** Returns all parameters 
+  /** Returns all parameters
     @return Parameter array */
   function getParams() {
     return $this->_data;
   }
 
-  /** Set all parameters 
+  /** Set all parameters
     @param data Parameter array
     @note The parameters are not validated! */
   function setParams($data = array()) {
@@ -47,8 +47,8 @@ class Search extends Object
     return true;
   }
 
-  /** Returns parameter 
-    @param name Name of parameter 
+  /** Returns parameter
+    @param name Name of parameter
     @param default Default value, if the parameter does not exists. Default
     value is null */
   function getParam($name, $default = null) {
@@ -59,7 +59,7 @@ class Search extends Object
     }
   }
 
-  /** Set a singular parameter 
+  /** Set a singular parameter
     @param name Parameter name
     @param value Parameter value
     @param validate Optional parameter to validate the parameter. Default is
@@ -75,7 +75,7 @@ class Search extends Object
   }
 
   /** Add a parameter to an array.
-    @param name Parameter name. 
+    @param name Parameter name.
     @param value Parameter value (which will be pluralized)
     @param validate Optional parameter to validate the parameter. Default is
     true
@@ -88,7 +88,7 @@ class Search extends Object
       }
       return;
     }
-    
+
     if ((!isset($this->_data[$name]) || !in_array($value, $this->_data[$name])) &&
       ($validate === false || $this->validate($name, $value))) {
       $this->_data[$name][] = $value;
@@ -99,7 +99,7 @@ class Search extends Object
     if (!isset($this->_data[$name])) {
       return;
     }
-    
+
     if (!empty($value)) {
       if (is_array($value)) {
         foreach ($value as $v) {
@@ -202,7 +202,7 @@ class Search extends Object
       return chr($d1 * 16 + $d2);
     }
   }
-    
+
   function decode($input) {
     $out = '';
     $input = (string)$input;

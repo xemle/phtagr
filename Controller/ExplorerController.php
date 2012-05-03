@@ -38,7 +38,7 @@ class ExplorerController extends AppController
   }
 
   function beforeFilter() {
-    if ($this->action == 'points' && 
+    if ($this->action == 'points' &&
       Configure::read('Security.level') === 'high') {
       Configure::write('Security.level', 'medium');
     }
@@ -96,17 +96,17 @@ class ExplorerController extends AppController
       $this->request->data = $this->_getAssociation($type, $value);
     } elseif ($type == 'crumb') {
       $queryMap = array(
-        'category' => '_getAssociation', 
+        'category' => '_getAssociation',
         'category_op' => array('OR', 'AND'),
         'from' => 'true',
-        'group' => '_getAssociation', 
-        'location' => '_getAssociation', 
-        'location_op' => array('OR', 'AND'), 
-        'operand' => array('OR', 'AND'), 
+        'group' => '_getAssociation',
+        'location' => '_getAssociation',
+        'location_op' => array('OR', 'AND'),
+        'operand' => array('OR', 'AND'),
         'show' => array(2, 6, 12, 24, 60, 120, 240),
-        'sort' => array('changes', 'date', '-date', 'name', 'newest', 'popularity', 'random', 'viewed'), 
-        'tag' => '_getAssociation', 
-        'tag_op' => array('OR', 'AND'), 
+        'sort' => array('changes', 'date', '-date', 'name', 'newest', 'popularity', 'random', 'viewed'),
+        'tag' => '_getAssociation',
+        'tag_op' => array('OR', 'AND'),
         'type' => array('image', 'video'),
         'to' => 'true',
         'user' => '_getAssociation'
@@ -239,7 +239,7 @@ class ExplorerController extends AppController
     switch ($type) {
       case 'tag':
         $data = $this->Media->Tag->find('all', array(
-          'conditions' => array('name LIKE' => $normalized.'%'), 
+          'conditions' => array('name LIKE' => $normalized.'%'),
           'limit' => 10
           ));
         $result = Set::extract('/Tag/name', $data);
@@ -331,7 +331,7 @@ class ExplorerController extends AppController
   function quicksearch($quicksearch = false) {
     if (!empty($this->request->data) && isset($this->request->data['Media']['quicksearch'])) {
       $quicksearch = $this->request->data['Media']['quicksearch'];
-    } 
+    }
 
     if ($quicksearch) {
       $this->request->data = $this->Search->quicksearch($quicksearch, 6);
@@ -370,9 +370,9 @@ class ExplorerController extends AppController
 
         $this->Search->setUser($this->request->data['User']['username']);
         $this->Search->addGroup($this->request->data['Group']['name']);
-      } 
+      }
       $this->crumbs = $this->Search->convertToCrumbs();
-    } 
+    }
     $this->render('index');
   }
 
@@ -500,7 +500,7 @@ class ExplorerController extends AppController
     $this->render('index');
   }
 
- 
+
   function edit() {
     if (!empty($this->request->data)) {
       $ids = preg_split('/\s*,\s*/', $this->request->data['Media']['ids']);
@@ -511,7 +511,7 @@ class ExplorerController extends AppController
 
       $user = $this->getUser();
       $editData = $this->Media->prepareMultiEditData(&$this->request->data, &$user);
-      
+
       $allMedia = $this->Media->find('all', array('conditions' => array('Media.id' => $ids)));
       $changedMedia = array();
       foreach ($allMedia as $media) {
@@ -545,7 +545,7 @@ class ExplorerController extends AppController
     $this->redirect('view/' . implode('/', $this->Search->encodeCrumbs($this->crumbs)));
   }
 
-  /** 
+  /**
     * @todo Check for edit permissions
     * @todo Check and handle non-ajax request
     */
@@ -569,7 +569,7 @@ class ExplorerController extends AppController
   }
 
   /**
-   * @todo Check and handle non-ajax request 
+   * @todo Check and handle non-ajax request
    */
   function savemeta($id) {
     if (!$this->RequestHandler->isAjax()) {
@@ -612,9 +612,9 @@ class ExplorerController extends AppController
     $this->render('updatemeta');
   }
 
-  /** 
+  /**
    * @todo check for save permissions
-   * @todo Check and handle non-ajax request 
+   * @todo Check and handle non-ajax request
    */
   function updatemeta($id) {
     if (!$this->RequestHandler->isAjax()) {

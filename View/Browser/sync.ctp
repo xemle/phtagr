@@ -19,10 +19,10 @@
 <?php endif; ?>
 
 <?php if ($this->request->data['action'] == 'run'): ?>
-<p><?php 
+<p><?php
   echo __("Synchronized %d media.", count($this->request->data['synced']));
   if ($this->request->data['unsynced']) {
-    echo __(" %d media remains unsynced. Click %s to synchronize again", $this->request->data['unsynced'], $this->Html->link(__('sync'), 'sync/run')); 
+    echo __(" %d media remains unsynced. Click %s to synchronize again", $this->request->data['unsynced'], $this->Html->link(__('sync'), 'sync/run'));
   }
 ?></p>
 <?php endif; ?>

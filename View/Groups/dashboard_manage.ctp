@@ -11,7 +11,7 @@ echo $this->Html->tableHeaders($headers);
 </thead>
 <tbody>
 
-<?php 
+<?php
 $allgroup_names = Set::extract('/Member/name', $this->request->data);
 sort($allgroup_names);
 $cells = array();
@@ -43,7 +43,7 @@ echo $this->Html->tableHeaders($headers);
 </thead>
 <tbody>
 
-<?php 
+<?php
 $allgroup_names = Set::extract('/Member/name', $this->request->data);
 sort($allgroup_names);
 $cells = array();
@@ -75,7 +75,7 @@ echo $this->Html->tableHeaders($headers);
 </thead>
 <tbody>
 
-<?php 
+<?php
 $allgroup_names = Set::extract('/Member/name', $this->request->data);
 sort($allgroup_names);
 $cells = array();
@@ -107,7 +107,7 @@ echo $this->Html->tableHeaders($headers);
 </thead>
 <tbody>
 
-<?php 
+<?php
 $allgroup_names = Set::extract('/Member/name', $this->request->data);
 sort($allgroup_names);
 $cells = array();
@@ -139,7 +139,7 @@ echo $this->Html->tableHeaders($headers);
 </thead>
 <tbody>
 
-<?php 
+<?php
 $allgroup_names = Set::extract('/Member/name', $this->request->data);
 sort($allgroup_names);
 $cells = array();
@@ -171,7 +171,7 @@ echo $this->Html->tableHeaders($headers);
 </thead>
 <tbody>
 
-<?php 
+<?php
 $allgroup_names = Set::extract('/Member/name', $this->request->data);
 sort($allgroup_names);
 $cells = array();

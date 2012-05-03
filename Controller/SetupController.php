@@ -23,8 +23,8 @@ class SetupController extends AppController {
   var $components = array('UpgradeSchema');
   var $uses = false;
   var $helpers = array('Form', 'Html');
-  var $core = null; 
-  var $dbConfig = null; 
+  var $core = null;
+  var $dbConfig = null;
   var $paths = array();
   var $User = null;
   var $Option = null;
@@ -51,10 +51,10 @@ class SetupController extends AppController {
   function beforeRender() {
   }
 
-  /** 
+  /**
    * Initialize the database schema and data source
    *
-   * @return True if the database source could be loaded 
+   * @return True if the database source could be loaded
    */
   function __initDataSource() {
     if (isset($this->checks['initDataSource'])) {
@@ -73,8 +73,8 @@ class SetupController extends AppController {
   /**
    * Load models of given array
    *
-   * @param models array of models 
-   * @return true on success 
+   * @param models array of models
+   * @return true on success
    */
   function __loadModel($models) {
     if (!$this->UpgradeSchema->isConnected()) {
@@ -134,8 +134,8 @@ class SetupController extends AppController {
     }
   }
 
-  /** 
-   * Checks for required writable paths 
+  /**
+   * Checks for required writable paths
    */
   function __hasPaths() {
     if (isset($this->checks['hasPaths'])) {
@@ -168,8 +168,8 @@ class SetupController extends AppController {
     return $this->checks['hasConfig'];
   }
 
-  /** 
-   * Checks the database connection 
+  /**
+   * Checks the database connection
    */
   function __hasConnection() {
     if (isset($this->checks['hasConnection'])) {
@@ -191,11 +191,11 @@ class SetupController extends AppController {
     return $this->checks['hasConnection'];
   }
 
-  /** 
+  /**
    * Checks for existing tables
    *
    * @param tables. Array of tables names. Default array('users')
-   * @return True if all given tables exists 
+   * @return True if all given tables exists
    */
   function __hasTables($tables = array('users')) {
     if (isset($this->checks['hasTables'])) {
@@ -218,8 +218,8 @@ class SetupController extends AppController {
     }
   }
 
-  /** 
-   * Check for administration account 
+  /**
+   * Check for administration account
    */
   function __hasSysOp() {
     if (isset($this->checks['hasSysOp'])) {
@@ -273,8 +273,8 @@ class SetupController extends AppController {
     return parent::getUser();
   }
 
-  /** 
-   * Setup entry. Dispatches preparation, installation or upgrade 
+  /**
+   * Setup entry. Dispatches preparation, installation or upgrade
    */
   function index() {
     if ($this->__hasSysOp()) {
@@ -286,7 +286,7 @@ class SetupController extends AppController {
         $this->Session->write('loginRedirect', '/setup');
         $this->redirect('/users/login');
       }
-    } 
+    }
     $this->Session->write('setup', true);
     Logger::info("Start Setup of phTagr!");
 
@@ -295,7 +295,7 @@ class SetupController extends AppController {
     }
   }
 
-  /** Generate a random salt string 
+  /** Generate a random salt string
     @return Random salt string */
   function __generateSalt() {
     $chars  = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -347,7 +347,7 @@ class SetupController extends AppController {
 
     if (is_writeable(dirname($this->core)) && is_writeable($this->core)) {
       $this->redirect('salt');
-    } 
+    }
 
     $oldSalt = Configure::read('Security.salt');
 
@@ -406,14 +406,14 @@ class SetupController extends AppController {
     $this->Session->delete('configError');
 
     if (!empty($this->request->data)) {
-      $output = "<?php 
-/** 
+      $output = "<?php
+/**
  * Automatic generated database configuration file by phTagr setup
  *
  * Creation date: ".date("Y-m-d H:i:s")."
  */
 class DATABASE_CONFIG {
-              
+
   public \$default = array(
     'datasource' => 'Database/Mysql',
     'persistent' => true,
@@ -424,7 +424,7 @@ class DATABASE_CONFIG {
     'prefix' => '{$this->request->data['prefix']}',
     'encoding' => 'utf8'
   );
- 
+
   public \$test = array(
     'datasource' => 'Database/Mysql',
     'persistent' => true,
@@ -503,7 +503,7 @@ class DATABASE_CONFIG {
         $this->Session->setFlash(__('Could not initialize database'));
         Logger::error("Initial database migration failed");
         return;
-      } 
+      }
       Logger::info("Successful database migration to verion " . $this->Migration->getVersion('app'));
       $this->Session->setFlash(__("All required tables are created"));
       $this->redirect('user');
@@ -548,7 +548,7 @@ class DATABASE_CONFIG {
     }
     Logger::info("Request account data for the admin");
   }
-  
+
   function __findCommand($command) {
     $paths = array('/usr/local/bin/', '/usr/bin/');
     foreach ($paths as $path) {
@@ -609,7 +609,7 @@ class DATABASE_CONFIG {
           $this->Option->setValue('bin.'.$command, $bin, 0);
           Logger::debug("Write 'bin.$command'='$bin'");
         } else {
-          $missing[] = $command;    
+          $missing[] = $command;
           Logger::err("Command for '$command': '$bin' is missing or not executeable!");
         }
       }
@@ -628,7 +628,7 @@ class DATABASE_CONFIG {
     }
     $this->set('missing', $missing);
   }
-  
+
   function finish() {
     if (!$this->__hasSysOp()) {
       $this->redirect('user');
@@ -655,10 +655,10 @@ class DATABASE_CONFIG {
     }
   }
 
-  /** 
+  /**
    * Load Migration plugin
    *
-   * @return True on success 
+   * @return True on success
    */
   function __loadMigration() {
     if (!empty($this->Migration)) {
@@ -669,7 +669,7 @@ class DATABASE_CONFIG {
       Logger::err("Could not import Migrations plugin");
       return false;
     }
-    $this->Migration = new MigrationVersion(array('connection' => 'default')); 
+    $this->Migration = new MigrationVersion(array('connection' => 'default'));
     if (empty($this->Migration)) {
       Logger::err("Could not load class Migrations.MigrationVersion");
       return false;

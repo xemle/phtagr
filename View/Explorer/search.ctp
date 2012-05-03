@@ -2,7 +2,7 @@
 
 <?php echo $this->Form->create(null, array('action' => 'query')); ?>
 <fieldset><legend><?php echo __('Metadata'); ?></legend>
-<?php 
+<?php
   echo $this->Form->input('Media.tags', array('label' => __('Tags'), 'after' => '<span class="hint">' . __('E.g. includeTag, -excludeTag') . '</span>'));
   echo $this->Form->input('Media.categories', array('label' => __('Categories')));
   echo $this->Form->input('Media.locations', array('label' => __('Locations')));
@@ -12,7 +12,7 @@
 ?>
 </fieldset>
 <fieldset><legend><?php echo __('Options'); ?></legend>
-<?php 
+<?php
   $pages = array(6 => 6, 12 => 12, 24 => 24, 60 => 60, 120 => 120, 240 => 240);
   echo $this->Form->input('Option.show', array('type' => 'select', 'options' => $pages, 'selected' => 12, 'label' => __('Page size')));
 

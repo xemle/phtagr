@@ -14,7 +14,7 @@
  * @since         phTagr 2.2b3
  * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
-    
+
 class ImageDataHelper extends AppHelper {
 
   var $helpers = array('Session', 'Html', 'Form', 'Search', 'Option', 'Breadcrumb');
@@ -61,7 +61,7 @@ class ImageDataHelper extends AppHelper {
     return array($width, $height);
   }
 
-  /** Get resized size with maximum width 
+  /** Get resized size with maximum width
     @return array of width and height */
   function resizeWidth($width, $height, $size) {
     if ($width > $size) {
@@ -76,7 +76,7 @@ class ImageDataHelper extends AppHelper {
     @param media Media model data
     @param options New size given as single value. Numeric value of maximum
     width or height. Possible text values: 'mini', 'thumb', 'preview',
-    'original'.  If false than it returns the media size. If options is an 
+    'original'.  If false than it returns the media size. If options is an
     array following options are supported
       - height - Maximum height
       - width - Maximum width
@@ -91,7 +91,7 @@ class ImageDataHelper extends AppHelper {
     if (!is_array($options)) {
       $options = array('size' => $options);
     }
-    $options = am(array('size' => false, 'width' => false, 'height' => false, 'square' => false), $options); 
+    $options = am(array('size' => false, 'width' => false, 'height' => false, 'square' => false), $options);
     $size = $options['size'];
 
     if ($size && !is_numeric($size) && !in_array($size, array('mini', 'thumb', 'preview', 'original'))) {
@@ -100,7 +100,7 @@ class ImageDataHelper extends AppHelper {
     }
 
     $map = array(
-      'mini' => OUTPUT_SIZE_MINI, 
+      'mini' => OUTPUT_SIZE_MINI,
       'thumb' => OUTPUT_SIZE_THUMB,
       'preview' => OUTPUT_SIZE_PREVIEW,
       'original' => false
@@ -135,13 +135,13 @@ class ImageDataHelper extends AppHelper {
 
     return $result;
   }
-  
+
   /** Creates an media source as HTML img tag
     @param media Media model data
     @param options Media size or option array. Options are
       type - Type of the media. String values: 'mini', 'thumb', 'preview', 'original'
       size - Size of the media - optional.
-      param - Extra url parameter 
+      param - Extra url parameter
     @return HTML link with media image */
   function mediaImage($media, $options) {
     if (!isset($media['Media']['id'])) {
@@ -184,7 +184,7 @@ class ImageDataHelper extends AppHelper {
     @param options Media size or option array. Options are
       type - Type of the media. String values: 'mini', 'thumb', 'preview', 'original'
       size - Size of the media - optional.
-      params - Extra url parameter 
+      params - Extra url parameter
       div - Wrapped div arround the link with the class given in the div options
       before - (Optional) Text before image link
       after - (Optional) Text after image link
@@ -218,8 +218,8 @@ class ImageDataHelper extends AppHelper {
     @param option
       - from: All media after given media
       - to: All media before given media
-      - offset: given in hours (3h), days (3.5d) or months (6m) 
-      - interval: Set interval where 
+      - offset: given in hours (3h), days (3.5d) or months (6m)
+      - interval: Set interval where
     @return Link of the date search */
   function getDateLink(&$media, $option = false) {
     $date = $media['Media']['date'];
@@ -258,7 +258,7 @@ class ImageDataHelper extends AppHelper {
     } else {
       $offset = (integer)$option;
     }
-    
+
     if ($offset) {
       $from = date('Y-m-d H:i:s', strtotime($date) - $offset);
       $to = date('Y-m-d H:i:s', strtotime($date) + $offset);
@@ -322,7 +322,7 @@ class ImageDataHelper extends AppHelper {
     $output .= '<div style="display: none;" class="actionlist" id="'.$id.'">';
     $icon = $this->Html->image('icons/date_previous.png', array('alt' => '<', 'title' => __("View media of previous dates")));
     $output .= $this->Html->link($icon, $this->getDateLink(&$data, 'to'), array('escape' => false));
-    
+
     if ($this->Search->getFrom() && !$this->Search->getTo()) {
       $icon = $this->Html->image('icons/date_interval.png', array('alt' => '<>', 'title' => __("View media of interval")));
       $output .= $this->Html->link($icon, $this->getDateLink(&$data, 'addTo'), array('escape' => false));
@@ -415,8 +415,8 @@ class ImageDataHelper extends AppHelper {
     }
     return sprintf("%.2f%s/%.2f%s", $lat, $latSuffix, $long, $longSuffix);
   }
-  
-  /** Creates a link list of names with urlBase and name 
+
+  /** Creates a link list of names with urlBase and name
     @param urlBase Base URL which is combinded with each name item
     @param names Names names of links
     */
@@ -473,18 +473,18 @@ class ImageDataHelper extends AppHelper {
     }
     if (!$title) {
       $title = $alt;
-    } 
+    }
     return $this->Html->image("icons/$name.png", array('alt' => $alt, 'title' => $title));
   }
 
   function metaTable($data, $withMap = false) {
     $cells= array();
-    if (!$data) 
+    if (!$data)
       return $cells;
 
     $mediaId = $data['Media']['id'];
 
-    //Logger::debug($this->Search->_data); 
+    //Logger::debug($this->Search->_data);
     //Logger::debug("HUHU");
     $userId = $this->Search->getUser();
     if ($userId) {
@@ -514,8 +514,8 @@ class ImageDataHelper extends AppHelper {
       $cells[] = array(__('Groups'), $this->_metaAccessGroup($data));
       $cells[] = array(__('Access'), $this->_metaAccessFull($data));
     }
-    
-    // Action list 
+
+    // Action list
     $output = '';
     if ($data['Media']['canWriteTag']) {
       $output = $this->Form->checkbox('selected][', array('value' => $mediaId, 'id' => 'select-'.$mediaId, 'onclick' => "selectMedia($mediaId);"));
@@ -574,25 +574,25 @@ class ImageDataHelper extends AppHelper {
     $options = am($options, array('type' => 'select', 'options' => $acl, 'selected' => $level));
     //$this->log($options);
     return $this->Form->input($fieldName, $options);
-  }  
+  }
 
-  /** Returns the visibility icon for the own media 
-    @params media Media model data 
+  /** Returns the visibility icon for the own media
+    @params media Media model data
     @return Html output for the icon or false */
   function getVisibilityIcon(&$media) {
     $icon = false;
     if (isset($media['Media']['isOwner']) && $media['Media']['isOwner']) {
       switch ($media['Media']['visibility']) {
-        case ACL_LEVEL_OTHER: 
+        case ACL_LEVEL_OTHER:
           $icon = $this->Html->image('icons/world.png', array('title' => __('This media is public visible')));
           break;
-        case ACL_LEVEL_USER: 
+        case ACL_LEVEL_USER:
           $icon = $this->Html->image('icons/group.png', array('title' => __('This media is visible for users')));
           break;
-        case ACL_LEVEL_GROUP: 
+        case ACL_LEVEL_GROUP:
           $icon = $this->Html->image('icons/user.png', array('title' => __('This media is visible for group members')));
           break;
-        default: 
+        default:
           $icon = $this->Html->image('icons/stop.png', array('title' => __('This media is private')));
           break;
       }
@@ -672,7 +672,7 @@ class ImageDataHelper extends AppHelper {
     return trim($folder, '/');
   }
 
-  /** Returns the folder link of the media 
+  /** Returns the folder link of the media
     @param media Media model data
     @return Link string for user's folder of the media for the explorer */
   function getFolderLinks($media) {

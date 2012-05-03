@@ -18,7 +18,7 @@ class CloudHelper extends AppHelper
 {
   var $helpers = array('Html');
 
-  /** Prints a tag cloud 
+  /** Prints a tag cloud
     @param data Cloud data
     @param urlPrefix Prefix of URL
     @return Cloud html */

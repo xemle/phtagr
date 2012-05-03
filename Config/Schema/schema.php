@@ -1,4 +1,4 @@
-<?php 
+<?php
 /* SVN FILE: $Id$ */
 /* Phtagr schema generated on: 2011-01-01 21:01:59 : 1293912239*/
 class PhtagrSchema extends CakeSchema {

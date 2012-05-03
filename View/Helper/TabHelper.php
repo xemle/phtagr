@@ -26,7 +26,7 @@ class TabHelper extends AppHelper
       }
       $item = am(array('name' => false, 'id' => "$prefix-$id"), $item);
       $attributes = array('escape' => false);
-      $out .= $this->Html->tag('li', 
+      $out .= $this->Html->tag('li',
         $this->Html->link($item['name'], '#' . $item['id']), $attributes);
     }
     $out .= "</ul>\n";
@@ -37,7 +37,7 @@ class TabHelper extends AppHelper
     $out = "<div id=\"$prefix-$id\">";
     return $out;
   }
-  
+
   function close() {
     $out = "</div>\n";
     return $out;

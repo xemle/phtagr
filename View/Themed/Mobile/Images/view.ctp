@@ -7,7 +7,7 @@ echo $this->Navigator->prevMedia().' '.$this->Navigator->up().' '.$this->Navigat
 ?>
 </div></div>
 
-<?php 
+<?php
   if (($this->data['Media']['type'] & MEDIA_TYPE_VIDEO) > 0) {
     echo $flowplayer->video($this->data);
   } else {
@@ -16,7 +16,7 @@ echo $this->Navigator->prevMedia().' '.$this->Navigator->up().' '.$this->Navigat
       'src' => Router::url("/media/preview/" . $this->data['Media']['id']),
       'alt' => $this->data['Media']['name'],
       'style' => "width: 100%; max-width: {$size[0]}px")
-      );  
+      );
   }
 
   $media = $this->data;

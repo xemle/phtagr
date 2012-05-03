@@ -16,7 +16,7 @@
 }
 ?>
 <?php echo $this->Form->create(null, array('action' => 'search')); ?>
-<?php 
+<?php
   echo $this->Form->input('Group.searchquery', array('label' => __('Find Group:')));
 ?>
 <?php echo $this->Form->end(__('Search')); ?>
@@ -44,7 +44,7 @@ debug($this->request->data);
 }
 ?>
 <?php echo $this->Form->create(null, array('action' => 'search')); ?>
-<?php 
+<?php
   echo $this->Form->input('Group.searchquery', array('label' => __('Find Group:')));
 ?>
 <?php echo $this->Form->end(__('Search')); ?>
@@ -72,7 +72,7 @@ debug($this->request->data);
 }
 ?>
 <?php echo $this->Form->create(null, array('action' => 'search')); ?>
-<?php 
+<?php
   echo $this->Form->input('Group.searchquery', array('label' => __('Find Group:')));
 ?>
 <?php echo $this->Form->end(__('Search')); ?>
@@ -100,7 +100,7 @@ debug($this->request->data);
 }
 ?>
 <?php echo $this->Form->create(null, array('action' => 'search')); ?>
-<?php 
+<?php
   echo $this->Form->input('Group.searchquery', array('label' => __('Find Group:')));
 ?>
 <?php echo $this->Form->end(__('Search')); ?>
@@ -128,7 +128,7 @@ debug($this->request->data);
 }
 ?>
 <?php echo $this->Form->create(null, array('action' => 'search')); ?>
-<?php 
+<?php
   echo $this->Form->input('Group.searchquery', array('label' => __('Find Group:')));
 ?>
 <?php echo $this->Form->end(__('Search')); ?>
@@ -156,7 +156,7 @@ debug($this->request->data);
 }
 ?>
 <?php echo $this->Form->create(null, array('action' => 'search')); ?>
-<?php 
+<?php
   echo $this->Form->input('Group.searchquery', array('label' => __('Find Group:')));
 ?>
 <?php echo $this->Form->end(__('Search')); ?>

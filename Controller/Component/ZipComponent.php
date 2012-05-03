@@ -18,7 +18,7 @@
 App::uses('Folder', 'Utility');
 
 class ZipComponent extends Component {
-  
+
   var $name = 'ZipComponent';
   var $controller = null;
   var $components = array('FileManager');
@@ -129,7 +129,7 @@ class ZipComponent extends Component {
     return $newFiles;
   }
 
-  /** Exract file from zip file 
+  /** Exract file from zip file
     @param file Array of file stat
     @param dst Destination of file
     @result filename on success */

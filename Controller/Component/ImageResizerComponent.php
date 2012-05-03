@@ -23,7 +23,7 @@ class ImageResizerComponent extends Component {
   var $controller = null;
   var $components = array('Command');
   var $_semaphoreId = false;
- 
+
   function initialize(&$controller) {
     $this->controller =& $controller;
     // allow only to converts at the same time to reduce system load
@@ -32,7 +32,7 @@ class ImageResizerComponent extends Component {
     }
   }
 
-  /** Resize an image 
+  /** Resize an image
     @param src Source image filename
     @param dst Destination image filename
     @param options Options
@@ -70,7 +70,7 @@ class ImageResizerComponent extends Component {
     $phpThumb->w = $options['size'];
     $phpThumb->h = $options['size'];
     $phpThumb->q = $options['quality'];
-    $phpThumb->ra = $options['rotation']; 
+    $phpThumb->ra = $options['rotation'];
 
     $phpThumb->config_imagemagick_path = $this->controller->getOption('bin.convert', 'convert');
     $phpThumb->config_prefer_imagemagick = true;
@@ -84,7 +84,7 @@ class ImageResizerComponent extends Component {
     $phpThumb->config_cache_directory = dirname($dst);
     $phpThumb->config_cache_disable_warning = false;
     $phpThumb->cache_filename = $dst;
-    
+
     if ($options['square'] && $options['height'] > 0) {
       $this->_getSquareOption(&$phpThumb, &$options);
     }
@@ -107,7 +107,7 @@ class ImageResizerComponent extends Component {
       Logger::err($phpThumb->debugmessages);
       die('Failed: '.$phpThumb->error);
     }
-    
+
     if ($options['clearMetaData']) {
       $this->clearMetaData($dst);
     }
@@ -144,8 +144,8 @@ class ImageResizerComponent extends Component {
     $phpThumb->w = $size;
     $phpThumb->h = $size;
 
-    //Logger::debug(sprintf("square: %dx%d %dx%d", 
-    //  $phpThumb->sx, $phpThumb->sy, 
+    //Logger::debug(sprintf("square: %dx%d %dx%d",
+    //  $phpThumb->sx, $phpThumb->sy,
     //  $phpThumb->sw, $phpThumb->sh));
   }
 

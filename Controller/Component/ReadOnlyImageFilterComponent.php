@@ -31,7 +31,7 @@ class ReadOnlyImageFilterComponent extends BaseFilterComponent {
     return array('bmp', 'gif', 'png', 'psd', 'tif', 'tiff');
   }
 
-  /** Read the meta data from the file 
+  /** Read the meta data from the file
    * @param file File model data
    * @param media Reference of Media model data
    * @param options Options
@@ -52,7 +52,7 @@ class ReadOnlyImageFilterComponent extends BaseFilterComponent {
         $user = $this->controller->getUser();
       }
       $media = $this->controller->Media->addDefaultAcl(&$media, &$user);
-      
+
       $isNew = true;
     };
 
@@ -78,7 +78,7 @@ class ReadOnlyImageFilterComponent extends BaseFilterComponent {
       Logger::trace($media);
       $this->FilterManager->addError($filename, 'MediaSaveError');
       return false;
-    } 
+    }
     if ($isNew) {
       $mediaId = $this->controller->Media->getLastInsertID();
       if (!$this->controller->MyFile->setMedia($file, $mediaId)) {
@@ -97,7 +97,7 @@ class ReadOnlyImageFilterComponent extends BaseFilterComponent {
     return $media;
   }
 
-  /** Write the meta data to an image file 
+  /** Write the meta data to an image file
    * @param file File model data
    * @param media Media model data
    * @param options Array of options

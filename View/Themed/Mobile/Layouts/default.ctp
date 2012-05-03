@@ -4,7 +4,7 @@
 <head>
 <title><?php echo $title_for_layout; ?></title>
 <meta name = "viewport" content = "initial-scale = 1.0">
-<?php 
+<?php
   echo $this->Html->charset('UTF-8');
   echo $this->Html->meta('icon');
   echo $this->Html->css('mobile');

@@ -15,9 +15,9 @@
  * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
 
-class SimilarBehavior extends ModelBehavior 
+class SimilarBehavior extends ModelBehavior
 {
-  /** Breaks a text into tokens of given length 
+  /** Breaks a text into tokens of given length
     * @param text Text to tokenize
     * @param tokenLen Length of each token
     * @result Array of tokens */
@@ -60,7 +60,7 @@ class SimilarBehavior extends ModelBehavior
     }
     $tokenLen = strlen(key($searchTokens));
     $textTokens = $this->_tokenizeAndCount($text, $tokenLen);
-    
+
     $matches = 0;
     foreach ($searchTokens as $token => $count) {
       if (isset($textTokens[$token])) {
@@ -75,8 +75,8 @@ class SimilarBehavior extends ModelBehavior
     * terms (string length greater as 6) tokens of 3 and 5 are used.
     *
     * @param Model Current model
-    * @param searchTerm search term (string with length between 3 and 32 
-    * @param field Field name to search 
+    * @param searchTerm search term (string with length between 3 and 32
+    * @param field Field name to search
     * @return array of model data, ordered by relevance. Highest first. */
   function similar(&$Model, $searchTerm, $field = 'name') {
     // Comparison is expensive. So cut long search terms
@@ -87,7 +87,7 @@ class SimilarBehavior extends ModelBehavior
     if (strlen($searchTerm) < 3) {
       return $all;
     }
-    
+
     $searchTerm = strtolower(trim($searchTerm));
     if (strlen($searchTerm) > 6) {
       $searchTokensA = $this->_tokenizeAndCount($searchTerm, 5);

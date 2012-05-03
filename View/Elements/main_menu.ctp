@@ -1,4 +1,4 @@
-<?php 
+<?php
   $controller = $this->params['controller'];
   if ($controller == 'explorer' || $controller == 'images') {
     $paginateActions = array('category', 'date', 'edit', 'group', 'index', 'location', 'query', 'tag', 'user', 'view');

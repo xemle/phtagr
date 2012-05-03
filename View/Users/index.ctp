@@ -1,5 +1,5 @@
-<h1><?php 
-  __('Users'); 
+<h1><?php
+  __('Users');
   if ($isAdmin) {
     echo ' ' . $this->Html->link(__('Admin List'), array('admin' => true, 'action' => 'index'));
   }

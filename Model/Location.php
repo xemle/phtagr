@@ -22,12 +22,12 @@ class Location extends AppModel
   var $types = array(
                 LOCATION_ANY => 'any',
                 LOCATION_CITY => 'city',
-                LOCATION_SUBLOCATION => 'sublocation', 
+                LOCATION_SUBLOCATION => 'sublocation',
                 LOCATION_STATE => 'state',
-                LOCATION_COUNTRY => 'country'); 
+                LOCATION_COUNTRY => 'country');
   var $actsAs = array('WordList');
-  
-  /** 
+
+  /**
     @param name Location name. Valid values are: city, sublocation, state, country, and any.
     @return Returns the type value of a given location string */
   function nameToType($name) {
@@ -44,7 +44,7 @@ class Location extends AppModel
   function typeToName($type) {
     if (isset($this->types[$type]))
       return $this->types[$type];
-    else 
+    else
       return $this->types[LOCATION_ANY];
   }
 
@@ -85,7 +85,7 @@ class Location extends AppModel
       $name = trim($data['Location'][$locationName]);
       if (!$name || $name == '-') {
         continue;
-      }        
+      }
       $location = array('name' => $name, 'type' => $type);
       $found = $this->find('first', array('conditions' => $location));
       if (!$found) {
@@ -110,7 +110,7 @@ class Location extends AppModel
       return false;
     }
   }
-  
+
   function prepareMultiEditData(&$data) {
     $tmp = array();
     foreach ($this->types as $type => $locationName) {
@@ -128,7 +128,7 @@ class Location extends AppModel
           continue;
         }
         $isDelete = true;
-      }        
+      }
       if (!$name) {
         continue;
       }
@@ -151,14 +151,14 @@ class Location extends AppModel
       }
       $tmp['Location'][$key] = $location['Location']['id'];
     }
-    
+
     if (count($tmp)) {
       return $tmp;
     } else {
       return false;
     }
   }
-  
+
   function editMetaMulti(&$media, &$data) {
     if (empty($data['Location'])) {
       return false;
@@ -179,16 +179,16 @@ class Location extends AppModel
       if (!empty($data['Location'][$deleteKey])) {
         if ($locationId && $data['Location'][$deleteKey] > 0 && $locationId != $data['Location'][$deleteKey]) {
           // delete id does not match current id
-          $ids[] = $locationId; 
+          $ids[] = $locationId;
         }
-      } elseif (!empty($data['Location'][$addKey])) { 
+      } elseif (!empty($data['Location'][$addKey])) {
         // overwrite new location
         $ids[] = $data['Location'][$addKey];
       } elseif ($locationId) {
         $ids[] = $locationId;
       }
     }
-    
+
     $ids = array_unique($ids);
     $oldIds = Set::extract("/Location/id", $media);
     if (array_diff($ids, $oldIds) || array_diff($oldIds, $ids)) {

@@ -92,7 +92,7 @@
  *          http://bugs.php.net/bug.php?id=44564
  */
 //setlocale(LC_CTYPE, "UTF8", "en_US.UTF-8");
- 
+
 /**
  * To configure CakePHP *not* to use mod_rewrite and to
  * use CakePHP pretty URLs, remove these .htaccess
@@ -267,7 +267,7 @@
 
 /**
  * Configure your URL for email notification of new media for the shell task
- * notify. Run 
+ * notify. Run
  */
 	//Configure::write('Notification.url', 'http://demo.phtagr.org');
 

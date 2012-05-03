@@ -1,6 +1,6 @@
 Hello
 
-A new comment on <?php echo $data['Media']['name']; ?> was submitted. 
+A new comment on <?php echo $data['Media']['name']; ?> was submitted.
 
 From: <?php echo $data['Comment']['name']."\n"; ?>
 Date: <?php echo $data['Comment']['date']."\n"; ?>

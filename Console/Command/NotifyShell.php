@@ -104,7 +104,7 @@ class NotifyShell extends AppShell {
           $this->out("Skip disabled user {$user['User']['username']}");
         }
         continue;
-      } 
+      }
       $nextNotify = strtotime($user['User']['last_notify']) + $user['User']['notify_interval'];
       if ($nextNotify > $now && !$this->force) {
         if ($this->verbose) {
@@ -118,7 +118,7 @@ class NotifyShell extends AppShell {
       $this->Search->setSort('newest');
       $this->Search->setExcludeUser($user['User']['id']);
       $this->Search->setCreatedFrom($user['User']['last_notify']);
-      
+
       $media = $this->Search->paginate();
       if ($this->verbose) {
         $this->out(sprintf("Found %d new media for user %s", count($media), $user['User']['username']));

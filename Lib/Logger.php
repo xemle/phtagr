@@ -64,7 +64,7 @@ class Logger extends Object {
     }
   }
 
-  /** Sets the new log threshold 
+  /** Sets the new log threshold
     @param level new log threshold */
   function setLevel($level) {
     if ($level >= L_FATAL && $level <= L_TRACE) {
@@ -77,7 +77,7 @@ class Logger extends Object {
     return $this->_level;
   }
 
-  /** Enables the logger. By default, the loger is disabled 
+  /** Enables the logger. By default, the loger is disabled
     @return True, if the logger could be enabled  */
   function enable() {
     //global $db;
@@ -88,7 +88,7 @@ class Logger extends Object {
     if ($this->_type == LOG_FILE && !$this->_openFile()) {
       return false;
     }
-    if ($this->_type==LOG_SESSION) { 
+    if ($this->_type==LOG_SESSION) {
       if (!isset($_SESSION)) {
         return false;
       }
@@ -118,7 +118,7 @@ class Logger extends Object {
 
   /** Sets a new logger backend
     @param type logging backend type
-    @param filename Filename if backend type is LOG_FILE 
+    @param filename Filename if backend type is LOG_FILE
     @note If the logger is enabled, it will be disabled and enabled again to
   invoke backend finalizations and initialisations */
   function setType($type, $filename = false) {
@@ -165,16 +165,16 @@ class Logger extends Object {
   function getLines() {
     if ($this->_type == LOG_HTML) {
       return $this->_lines;
-    } 
+    }
     return false;
   }
 
   /** Generates the log message and dispatch the logs to the backends.
     @param level Log level. If the level lower than the current threshold (but no
-    error or fatal error), the function returns immediately 
+    error or fatal error), the function returns immediately
     @param msg Log message */
   function _write($level, $msg) {
-    if (!$this->_enabled || 
+    if (!$this->_enabled ||
       ($level < $this->_level && $level >= 0))
       return;
 
@@ -322,7 +322,7 @@ class Logger extends Object {
     $_this = self::getInstance();
     $_this->_write($level, $msg);
   }
-  
+
   function bt() {
     $steps = @debug_backtrace();
     array_pop($steps);

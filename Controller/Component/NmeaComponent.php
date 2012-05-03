@@ -17,7 +17,7 @@
 
 /**
  * Reads NMEA GPS data log
- * 
+ *
  * @see http://aprs.gids.nl/nmea for details
  */
 class NmeaComponent extends Component {
@@ -94,7 +94,7 @@ class NmeaComponent extends Component {
    * Read NMEA GPGGA data line
    *
    * From http://aprs.gids.nl/nmea
-   * 
+   *
    * eg3. $GPGGA,hhmmss.ss,llll.ll,a,yyyyy.yy,a,x,xx,x.x,x.x,M,x.x,M,x.x,xxxx*hh
    * 1    = UTC of Position
    * 2    = Latitude
@@ -112,7 +112,7 @@ class NmeaComponent extends Component {
    * 13   = Age in seconds since last update from diff. reference station
    * 14   = Diff. reference station ID#
    * 15   = Checksum
-   * 
+   *
    * @param String $line
    * @param Int $offset
    * @return Array Gps point
@@ -155,7 +155,7 @@ class NmeaComponent extends Component {
    * Read NMEA GPRMC data line
    *
    * From http://aprs.gids.nl/nmea
-   * 
+   *
    * eg4. $GPRMC,hhmmss.ss,A,llll.ll,a,yyyyy.yy,a,x.x,x.x,ddmmyy,x.x,a*hh
    * 1    = UTC of position fix
    * 2    = Data status (V=navigation receiver warning)
@@ -169,7 +169,7 @@ class NmeaComponent extends Component {
    * 10   = Magnetic variation degrees (Easterly var. subtracts from true course)
    * 11   = E or W
    * 12   = Checksum
-   * 
+   *
    * @param String $line
    * @return Array
    */

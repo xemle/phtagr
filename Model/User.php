@@ -29,7 +29,7 @@ class User extends AppModel
 
   var $hasAndBelongsToMany = array(
                   'Member' => array(
-                      'className' => 'Group', 
+                      'className' => 'Group',
                       'dependent' => true
                     )
                   );
@@ -51,7 +51,7 @@ class User extends AppModel
       'rule' => array('inList', array('0', '1800', '3600', '86400', '604800', '2592000')),
       'message' => 'Invalid notification interval')
     );
- 
+
   function afterFind($result, $primary = false) {
     if ($primary && isset($result[0]['Option'])) {
       $result[0]['Option'] = $this->Option->addDefaults($result[0]['Option']);
@@ -97,9 +97,9 @@ class User extends AppModel
   }
 
   function beforeValidate() {
-    if (isset($this->data['User']['password']) && 
+    if (isset($this->data['User']['password']) &&
       isset($this->data['User']['confirm'])) {
-      if (empty($this->data['User']['password']) && 
+      if (empty($this->data['User']['password']) &&
         empty($this->data['User']['confirm'])) {
         // both are empty - clear it
         unset($this->data['User']['confirm']);
@@ -136,7 +136,7 @@ class User extends AppModel
     if (empty($this->data['User']['expires'])) {
       $this->data['User']['expires'] = null;
     }
-    
+
     return true;
   }
 
@@ -174,9 +174,9 @@ class User extends AppModel
   function getNobody() {
     $nobody = array(
         'User' => array(
-            'id' => -1, 
-            'username' => '', 
-            'role' => ROLE_NOBODY), 
+            'id' => -1,
+            'username' => '',
+            'role' => ROLE_NOBODY),
         'Member' => array(),
         'Option' => $this->Option->addDefaults(array()));
     return $nobody;
@@ -230,7 +230,7 @@ class User extends AppModel
     }
     return $rootDir;
   }
-  
+
   function allowWebdav($user) {
     if (isset($user['User']['quota']) && $user['User']['quota'] > 0) {
       return true;
@@ -253,14 +253,14 @@ class User extends AppModel
 
     return false;
   }
-  
-  /** 
-   * Selects visible users for users profile 
+
+  /**
+   * Selects visible users for users profile
    *
    * @param user Current user
    * @param username Username to select.
-   * @param boolean like If true search for similar 
-   * @return Array of users model data. If username is set only one user model data 
+   * @param boolean like If true search for similar
+   * @return Array of users model data. If username is set only one user model data
    */
   function findVisibleUsers($user, $username = false, $like = false) {
     $conditions = array();

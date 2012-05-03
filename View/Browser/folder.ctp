@@ -8,8 +8,8 @@
 <fieldset>
   <?php echo $this->Form->input('Folder.name', array ('label' => __("Folder Name"))); ?>
 </fieldset>
-<?php 
-  echo $this->Html->tag('ul', 
+<?php
+  echo $this->Html->tag('ul',
     $this->Html->tag('li', $this->Form->submit(__('Create')), array('escape' => false)),
     array('class' => 'buttons', 'escape' => false));
   echo $this->Form->end();

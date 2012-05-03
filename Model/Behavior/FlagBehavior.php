@@ -15,7 +15,7 @@
  * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
 
-class FlagBehavior extends ModelBehavior 
+class FlagBehavior extends ModelBehavior
 {
   var $config = array();
 
@@ -27,7 +27,7 @@ class FlagBehavior extends ModelBehavior
     if (!$data) {
       $data = $model->data;
     }
-    
+
     $modelData = $data;
     if (isset($modelData[$model->alias])) {
       $modelData = $modelData[$model->alias];
@@ -40,7 +40,7 @@ class FlagBehavior extends ModelBehavior
     if ($modelData['flag'] & $flag) {
       return true;
     }
-    
+
     $modelData['flag'] |= $flag;
     if (!$model->save($modelData, true, array('flag'))) {
       Logger::err("Could not update flag");
@@ -53,7 +53,7 @@ class FlagBehavior extends ModelBehavior
     if (!$data) {
       $data = $model->data;
     }
-    
+
     $modelData = $data;
     if (isset($modelData[$model->alias])) {
       $modelData = $modelData[$model->alias];
@@ -83,7 +83,7 @@ class FlagBehavior extends ModelBehavior
     if (!$data) {
       $data = $model->data;
     }
-    
+
     $modelData = $data;
     if (isset($modelData[$model->alias])) {
       $modelData = $modelData[$model->alias];

@@ -5,7 +5,7 @@
 <?php echo $this->Form->create(null, array('action' => "edit/{$this->request->data['Group']['name']}")); ?>
 
 <fieldset><legend><?php echo __('Edit Group'); ?></legend>
-<?php 
+<?php
   echo $this->Form->hidden('Group.id');
   echo $this->Form->input('Group.name', array('label' => __('Name')));
   echo $this->Form->input('Group.description', array('label' => __('Description'), 'type' => 'textarea'));

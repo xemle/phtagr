@@ -41,16 +41,16 @@ class GpsFilterComponent extends BaseFilterComponent {
         'gpx' => array('priority' => 3));
   }
 
-  /** 
+  /**
    * Read the meta data from the file
-   * 
+   *
    * @param file File data model
    * @param media Media data model
    * @param options
    *  - offset Time offset in seconds
    *  - overwrite Overwrite GPS
    *  - range Threshold in seconds which media get a GPS point
-   * @return The image data array or False on error 
+   * @return The image data array or False on error
    */
   function read($file, &$media, $options = array()) {
     $offset = $this->controller->getOption('filter.gps.offset', 0) * 60;
@@ -89,7 +89,7 @@ class GpsFilterComponent extends BaseFilterComponent {
     $endDate = gmdate("Y-m-d H:i:s", $end);
     //Logger::trace("start: ".date("'Y-m-d H:i:sZ'", $start)." end: ".date("'Y-m-d H:i:sZ'", $end));
 
-    
+
     // Calculate only with UTC time stamps
     $conditions = array(
       'Media.user_id' => $userId,

@@ -21,9 +21,9 @@ App::uses('CakeEmail', 'Network/Email');
 class UsersController extends AppController
 {
   var $components = array('RequestHandler', 'Cookie', 'Captcha', 'Search');
-  var $uses = array('Option', 'Media', 'MyFile'); 
+  var $uses = array('Option', 'Media', 'MyFile');
   var $helpers = array('Form', 'Number', 'Time', 'Text', 'ImageData');
-  var $paginate = array('limit' => 10, 'order' => array('User.username' => 'asc')); 
+  var $paginate = array('limit' => 10, 'order' => array('User.username' => 'asc'));
   var $subMenu = false;
 
   function beforeFilter() {
@@ -119,7 +119,7 @@ class UsersController extends AppController
     if (empty($this->request->data['User']['username']) xor empty($this->request->data['User']['password'])) {
       Logger::warn("Authentication failed: Username or password are not set");
       $this->Session->setFlash(__("Please enter username and password!"));
-      $this->request->data = null; 
+      $this->request->data = null;
     }
 
     if (!empty($this->request->data)) {
@@ -173,7 +173,7 @@ class UsersController extends AppController
 
     $this->Cookie->name = 'phTagr';
     $this->Cookie->destroy();
- 
+
     $this->redirect('/');
   }
 
@@ -199,7 +199,7 @@ class UsersController extends AppController
     }
     return true;
   }
-  
+
   /** Add 3rd level menu for user edit for admin */
   function _addAdminEditMenu($userId) {
     $subActions = array(
@@ -210,7 +210,7 @@ class UsersController extends AppController
       $subItems[] = array('url' => array('admin' => true, 'action' => $action, $userId), 'title' => $title, 'active' => ('admin_'.$action == $this->action));
     }
     Logger::debug($this->action);
-    $this->subMenu[] = $subItems; 
+    $this->subMenu[] = $subItems;
   }
 
   function admin_edit($id) {
@@ -289,7 +289,7 @@ class UsersController extends AppController
     $this->set('fsroots', $this->Option->buildTree($this->request->data, 'path.fsroot'));
     $this->_addAdminEditMenu($id);
   }
- 
+
   function admin_add() {
     $this->requireRole(ROLE_SYSOP, array('loginRedirect' => '/admin/users'));
 
@@ -308,8 +308,8 @@ class UsersController extends AppController
         }
       }
     }
-  } 
-  
+  }
+
   function admin_del($id) {
     $this->requireRole(ROLE_SYSOP, array('loginRedirect' => '/admin/users'));
 
@@ -337,7 +337,7 @@ class UsersController extends AppController
       $fsroot = '/'.$fsroot;
     }
     $fsroot = Folder::slashTerm($fsroot);
-    
+
     $this->Option->delValue('path.fsroot[]', $fsroot, $id);
     Logger::info("Deleted external directory '$fsroot' from user $id");
     $this->Session->setFlash(__("Deleted external directory '%s'", $fsroot));
@@ -347,14 +347,14 @@ class UsersController extends AppController
   function _createEmail() {
     return new CakeEmail('default');
   }
- 
-  /** 
-   * Password recovery 
+
+  /**
+   * Password recovery
    */
   function password() {
     if (!empty($this->request->data)) {
       $user = $this->User->find('first', array('conditions' => array(
-          'username' => $this->request->data['User']['username'], 
+          'username' => $this->request->data['User']['username'],
           'email' => $this->request->data['User']['email'])));
       if (empty($user)) {
         $this->Session->setFlash(__('No user with this email was found'));
@@ -372,7 +372,7 @@ class UsersController extends AppController
         try {
           $email->send();
           Logger::info(sprintf("Sent password mail to user '%s' (id %d) with address %s",
-            $user['User']['username'], 
+            $user['User']['username'],
             $user['User']['id'],
             $user['User']['email']));
           $this->Session->setFlash(__('Mail was sent!'));
@@ -472,8 +472,8 @@ class UsersController extends AppController
       // check user input
       if (empty($this->request->data['User']['key'])) {
         $this->Session->setFlash(__("Please enter the confirmation key"));
-      } else { 
-        $key = $this->request->data['User']['key']; 
+      } else {
+        $key = $this->request->data['User']['key'];
       }
     }
 
@@ -482,9 +482,9 @@ class UsersController extends AppController
     }
   }
 
-  /** 
-   * Verifies the confirmation key and activates the new user account 
-   * @param key Account confirmation key 
+  /**
+   * Verifies the confirmation key and activates the new user account
+   * @param key Account confirmation key
    */
   function _checkConfirmation($key) {
     // check key. Option [belongsTo] User: The user is bound to option
@@ -493,14 +493,14 @@ class UsersController extends AppController
       Logger::trace("Could not find confirmation key");
       $this->Session->setFlash(__("Could not find confirmation key"));
       return false;
-    } 
+    }
 
     if (!isset($user['User']['id'])) {
       Logger::err("Could not find the user for register confirmation");
       $this->Session->setFlash(__("Internal error occured"));
       return false;
     }
-    
+
     // check expiration (14 days+1h). After this time, the account will be
     // deleted
     $now = time();
@@ -527,15 +527,15 @@ class UsersController extends AppController
     // delete confirmation key
     $this->Option->delete($user['Option']['id']);
 
-    // login the user automatically 
+    // login the user automatically
     $this->User->writeSession($user, &$this->Session);
     $this->redirect('/options/profile');
   }
 
-  /** 
+  /**
    * Send the confirmation email to the new user
    * @param user User model data
-   * @param key Confirmation key to activate the account 
+   * @param key Confirmation key to activate the account
    */
   function _sendConfirmationEmail($user, $key) {
     $email = $this->_createEmail();
@@ -554,9 +554,9 @@ class UsersController extends AppController
     }
   }
 
-  /** 
-   * Send an email for the new account to the new user 
-   * @param user User model data 
+  /**
+   * Send an email for the new account to the new user
+   * @param user User model data
    */
   function _sendNewAccountEmail($user) {
     $email = $this->_createEmail();
@@ -565,7 +565,7 @@ class UsersController extends AppController
       ->subject('[phtagr] Welcome '.$user['User']['username'])
       ->viewVars(array('user' => $user));
 
-    try { 
+    try {
       $email->send();
       Logger::info("New account mail send to {$user['User']['email']} for new user {$user['User']['username']}");
       return true;
@@ -575,10 +575,10 @@ class UsersController extends AppController
     }
   }
 
-  /** 
+  /**
    * Send a notification email to all system operators (and admins) of the new
    * account
-   * @param user User model data (of the new user) 
+   * @param user User model data (of the new user)
    */
   function _sendNewAccountNotifiactionEmail($user) {
     $sysOps = $this->User->find('all', array('conditions' => "User.role >= ".ROLE_SYSOP));
@@ -606,7 +606,7 @@ class UsersController extends AppController
     } catch (Exception $e) {
       Logger::err("Could not send new account notification email to system operators ".implode(', ', $sysOpsNames));
       return false;
-    } 
+    }
   }
 
 }

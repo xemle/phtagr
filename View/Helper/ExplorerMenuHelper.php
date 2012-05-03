@@ -121,31 +121,31 @@ class ExplorerMenuHelper extends AppHelper
     $id = 'order-item';
     $out .= " <div class=\"actionlist\" id=\"$id\">";
     $crumbs = $this->Breadcrumb->filterCrumbs($this->params['crumbs']);
-    
+
     $icon = $this->Html->image('icons/date_previous.png', array('alt' => __('date asc', true), 'title' => __("Show oldest first")));
     $link = $this->Breadcrumb->crumbUrl($this->Breadcrumb->replace($crumbs, 'sort', '-date'));
     $out .= $this->Html->link($icon, $link, array('escape' => false));
-    
+
     $icon = $this->Html->image('icons/add.png', array('alt' => __('newest', true), 'title' => __("Show newest first")));
     $link = $this->Breadcrumb->crumbUrl($this->Breadcrumb->replace($crumbs, 'sort', 'newest'));
     $out .= $this->Html->link($icon, $link, array('escape' => false));
-    
+
     $icon = $this->Html->image('icons/heart.png', array('alt' => __('pouplarity', true), 'title' => __("Show popular first")));
     $link = $this->Breadcrumb->crumbUrl($this->Breadcrumb->replace($crumbs, 'sort', 'popularity'));
     $out .= $this->Html->link($icon, $link, array('escape' => false));
-    
+
     $icon = $this->Html->image('icons/images.png', array('alt' => __('random', true), 'title' => __("Show random order")));
     $link = $this->Breadcrumb->crumbUrl($this->Breadcrumb->replace($crumbs, 'sort', 'random'));
     $out .= $this->Html->link($icon, $link, array('escape' => false));
-    
+
     $icon = $this->Html->image('icons/pencil.png', array('alt' => __('Changes', true), 'title' => __("Show changes first")));
     $link = $this->Breadcrumb->crumbUrl($this->Breadcrumb->replace($crumbs, 'sort', 'changes'));
     $out .= $this->Html->link($icon, $link, array('escape' => false));
-    
+
     $icon = $this->Html->image('icons/eye.png', array('alt' => __('Views', true), 'title' => __("Show last views first")));
     $link = $this->Breadcrumb->crumbUrl($this->Breadcrumb->replace($crumbs, 'sort', 'viewed'));
     $out .= $this->Html->link($icon, $link, array('escape' => false));
-    
+
     $icon = $this->Html->image('icons/folder_go.png', array('alt' => __('Name', true), 'title' => __("Order by name")));
     $link = $this->Search->getUri(false, array('sort' => 'name'), 'page');
     $out .= $this->Html->link($icon, $link, array('escape' => false));

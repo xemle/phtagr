@@ -52,7 +52,7 @@ class RelatedBehaviorTestCase extends CakeTestCase {
 	public function tearDown() {
     unset($this->Media);
     unset($this->Tag);
-    
+
     parent::tearDown();
 	}
 
@@ -79,7 +79,7 @@ class RelatedBehaviorTestCase extends CakeTestCase {
 		$this->Media->create();
     $media3 = array('Media' => array('name' => 'IMG_3456.JPG'), 'Tag' => array('Tag' => array($colorId, $animalId)));
     $this->Media->save($media3);
-   
+
     $tag = $this->Media->Tag->findByName('color');
     $this->Media->Tag->bindModel(array('hasAndBelongsToMany' => array('Media')));
     $this->Media->Tag->Behaviors->load('Related', array('relatedHabtm' => 'Media', 'fields' => array('id', 'name')));

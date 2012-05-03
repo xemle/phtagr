@@ -30,16 +30,16 @@ class Group extends AppModel
     if (isset($group['Group']['id'])) {
       $conditions['id !='] = $group['Group']['id'];
     }
-     
+
     return !$this->hasAny($conditions);
   }
-  
+
   /**
    * Prepare multi edit data for groups
-   * 
+   *
    * @param type $data User input data
    * @param type $user Current user
-   * @return type 
+   * @return type
    */
   function prepareMultiEditData(&$data, &$user) {
     $names = $data['Group']['names'];
@@ -52,7 +52,7 @@ class Group extends AppModel
 
     $addGroups = $this->findAllByField($addWords, false);
     $deleteGroups = $this->findAllByField($deleteWords, false);
-    
+
     // Remove invalid group additions for non admins
     if ($user['User']['role'] < ROLE_ADMIN) {
       $validGroupIds = Set::extract('/Group/id', $this->getGroupsForMedia($user));
@@ -62,7 +62,7 @@ class Group extends AppModel
         }
       }
     }
-    
+
     if (count($addGroups) || count($deleteGroups)) {
       return array('Group' => array('addGroup' => Set::extract("/Group/id", $addGroups), 'deleteGroup' => Set::extract("/Group/id", $deleteGroups)));
     } else {
@@ -72,10 +72,10 @@ class Group extends AppModel
 
   /**
    * Add and delete groups according to the given data
-   * 
+   *
    * @param type $media
    * @param type $data
-   * @return type 
+   * @return type
    */
   function editMetaMulti(&$media, &$data) {
     if (empty($data['Group'])) {
@@ -90,7 +90,7 @@ class Group extends AppModel
       return false;
     }
   }
-  
+
   function editMetaSingle(&$media, &$data, &$user) {
     if (!isset($data['Group']['names'])) {
       return false;
@@ -110,12 +110,12 @@ class Group extends AppModel
       return false;
     }
   }
-  
-  /** 
-   * Return all groups which could be assigned to the media 
-   * 
+
+  /**
+   * Return all groups which could be assigned to the media
+   *
    * @param user Current user model data
-   * @return Array of group model data 
+   * @return Array of group model data
    */
   function getGroupsForMedia($user) {
     if ($user['User']['role'] >= ROLE_ADMIN) {

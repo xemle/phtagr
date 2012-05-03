@@ -23,11 +23,11 @@ class AppController extends Controller
   var $helpers = array('Html', 'Js', 'Form', 'Session', 'Menu', 'Option');
   var $components = array('Session', 'Cookie', 'Feed', 'RequestHandler', 'Menu');
   var $uses = array('User', 'Option');
-  
+
   var $_nobody = null;
   var $_user = null;
 
-  /** Calls _checkSession() to check the credentials of the user 
+  /** Calls _checkSession() to check the credentials of the user
     @see _checkSession() */
   function beforeFilter() {
     parent::beforeFilter();
@@ -35,11 +35,11 @@ class AppController extends Controller
     $this->Feed->add('/explorer/rss', array('title' => __('Recent photos')));
     $this->Feed->add('/explorer/media', array('title' =>  __('Media RSS of recent photos'), 'id' => 'gallery'));
     $this->Feed->add('/comment/rss', array('title' => __('Recent comments')));
-    
+
     $this->_setMainMenu();
     $this->_setTopMenu();
   }
-  
+
   function _setMainMenu() {
     $this->Menu->setCurrentMenu('main-menu');
     $this->Menu->addItem(__('Home'), "/");
@@ -109,7 +109,7 @@ class AppController extends Controller
   }
 
   /** Checks a cookie for a valid user id. If a id found, the user is load to
-   * the session 
+   * the session
    * @todo Check expired user */
   function _checkSession() {
     //$this->Session->activate();
@@ -155,7 +155,7 @@ class AppController extends Controller
 
   /** Checks the session for valid user. If no user is found, it checks for a
    * valid cookie
-   * @return True if the correct session correspond to an user */ 
+   * @return True if the correct session correspond to an user */
   function _checkUser() {
     if (!$this->_checkSession()) {
       return false;
@@ -174,7 +174,7 @@ class AppController extends Controller
     $this->_user = $user;
     return true;
   }
- 
+
   function getUser() {
     if (!$this->_checkUser() || !$this->_user) {
       if (!$this->_nobody && isset($this->User)) {
@@ -191,7 +191,7 @@ class AppController extends Controller
     $user =& $this->getUser();
     return $user['User']['role'];
   }
-  
+
   function getUserId() {
     $user =& $this->getUser();
     return $user['User']['id'];
@@ -206,9 +206,9 @@ class AppController extends Controller
 
   function requireRole($requiredRole=ROLE_NOBODY, $options = null) {
     $options = am(array(
-      'redirect' => '/users/login', 
-      'loginRedirect' => false, 
-      'flash' => false), 
+      'redirect' => '/users/login',
+      'loginRedirect' => false,
+      'flash' => false),
       $options);
     if (!$this->hasRole($requiredRole)) {
       if ($options['loginRedirect']) {
@@ -222,7 +222,7 @@ class AppController extends Controller
     }
     return true;
   }
-  
+
   function getOption($name, $default=null) {
     $user = $this->getUser();
     return $this->Option->getValue($user, $name, $default);
@@ -238,7 +238,7 @@ class AppController extends Controller
       }
       return $loaded;
     }
-    
+
     if (!$parent) {
       $parent = &$this;
     }
@@ -262,6 +262,6 @@ class AppController extends Controller
 
     return true;
   }
- 
+
 }
 ?>

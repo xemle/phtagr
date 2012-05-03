@@ -18,7 +18,7 @@
 class BreadcrumbHelper extends AppHelper
 {
   var $helpers = array('Html', 'Form', 'Autocomplete', 'Search');
-  
+
   /** Return breadcrumb params for building urls
     @param crumbs Current breadcrumb stack
     @param crumb Optional additional crumb
@@ -43,7 +43,7 @@ class BreadcrumbHelper extends AppHelper
 
   /** Evaluates if crumbs contains a crumb with the given name
     @param crumbs Array of crumbs
-    @param name Crumb name to search 
+    @param name Crumb name to search
     @reseult True if the crumb is found */
   function hasCrumb($crumbs, $name, $value = false, $exactMatch = false) {
     foreach ($crumbs as $crumb) {
@@ -54,8 +54,8 @@ class BreadcrumbHelper extends AppHelper
         continue;
       }
       Logger::debug($matches);
-      if ($value === false || 
-        $exactMatch && $value == $matches[3] || 
+      if ($value === false ||
+        $exactMatch && $value == $matches[3] ||
         !$exactMatch && $value == $matches[2]) {
         return true;
       }
@@ -113,7 +113,7 @@ class BreadcrumbHelper extends AppHelper
     return $replace;
   }
 
-  /** Filter crumbs by excluded types 
+  /** Filter crumbs by excluded types
     @param crumbs Current breadcrumb stack
     @param exclude Array of excluded types. Default it excludes type of show, pos, and page
     @return Filtered crumbs */
@@ -132,7 +132,7 @@ class BreadcrumbHelper extends AppHelper
     return $filter;
   }
 
-  /** Create breadcrumb html list 
+  /** Create breadcrumb html list
     @param crumbs Current breadcrumb stack */
   function breadcrumb($crumbs) {
     $links = array();
@@ -154,9 +154,9 @@ class BreadcrumbHelper extends AppHelper
         $options['class'] = 'p-breadcrumb-exclude';
       }
       $removeOptions = array('class' => 'p-breadcrumb-remove', 'escape' => false);
-      $links[] = $this->Html->tag('li', 
+      $links[] = $this->Html->tag('li',
         $this->Html->tag('span', "$name:", array('class' => 'p-breadcrumb-type'))
-        .$this->Html->link($value, $this->crumbUrl(array_slice($crumbs, 0, $key + 1)), $options) 
+        .$this->Html->link($value, $this->crumbUrl(array_slice($crumbs, 0, $key + 1)), $options)
         .$this->Html->link($this->Html->tag('span', '[x]'), $this->crumbUrl($remove), $removeOptions),
         array('class' => 'p-breadcrumb-crumb'));
     }
@@ -164,14 +164,14 @@ class BreadcrumbHelper extends AppHelper
     $form = $this->Form->create(null, array('action' => 'view'));
     $form .= "<div>";
     $form .= $this->Form->hidden('Breadcrumb.current', array('value' => implode('/', $crumbs), 'div' => false));
-    //$form .= $this->Ajax->autoComplete('breadcrumb.input', 'autocomplete/crumb'); 
+    //$form .= $this->Ajax->autoComplete('breadcrumb.input', 'autocomplete/crumb');
     $form .= $this->Form->input('Breadcrumb.input', array('div' => false, 'label' => false));
-    $form .= $this->Autocomplete->autoComplete('Breadcrumb.input', 'autocomplete/crumb', array('submitOnEnter' => true)); 
+    $form .= $this->Autocomplete->autoComplete('Breadcrumb.input', 'autocomplete/crumb', array('submitOnEnter' => true));
     $form .= $this->Form->submit('add', array('div' => false));
     $form .= "</div>";
     $form .= $this->Form->end();
 
-    return $this->Html->tag('ul', 
+    return $this->Html->tag('ul',
       $this->Html->tag('li', $this->Html->tag('span', __('Filter')), array('class' => 'p-breadcrumb-header', 'escape' => false))
         .implode("\n", $links)
         .$this->Html->tag('li', $form, array('class' => 'p-breadcrumb-input'), array('escape' => false)),

@@ -36,13 +36,13 @@ class MyFile extends AppModel
 
   var $actsAs = array('Type', 'Flag');
 
-  /** 
+  /**
    * Creates a model data for a file
-   * 
+   *
    * @param filename Filename
    * @param userId user Id (required)
    * @param optional file flag
-   * @return model data 
+   * @return model data
    */
   function createFromFile($filename, $userId, $flag = 0) {
     if (is_dir($filename)) {
@@ -81,12 +81,12 @@ class MyFile extends AppModel
     return $this->create($new, true);
   }
 
-  /** 
+  /**
    * Returns the file type of a filename
-   * 
+   *
    * @param filename Filename of the file
    * @return Type of the file. If the type is not known it returns
-   * FILE_TYPE_UNKNOWN 
+   * FILE_TYPE_UNKNOWN
    */
   function _getTypeFromFilename($filename) {
     $ext = strtolower(substr($filename, strrpos($filename, '.') + 1));
@@ -98,9 +98,9 @@ class MyFile extends AppModel
     return FILE_TYPE_UNKNOWN;
   }
 
-  /** 
+  /**
    * Deletes the linked file (if the file is not external) and also deletes
-   * the media if the file is required by the media 
+   * the media if the file is required by the media
    */
   function beforeDelete($cascade = true) {
     $this->set($this->findById($this->id));
@@ -115,27 +115,27 @@ class MyFile extends AppModel
     // prepare associations for deletion
     $this->bindModel(array(
       'hasMany' => array(
-        'Property' => array('foreignKey' => 'file_id', 'dependent' => true), 
+        'Property' => array('foreignKey' => 'file_id', 'dependent' => true),
         'Lock' => array('foreignKey' => 'file_id', 'dependent' => true)
       )));
     return true;
   }
 
-  /** 
-   * If the media depends on the file the function deletes the media 
+  /**
+   * If the media depends on the file the function deletes the media
    */
   function afterDelete() {
-    if ($this->hasFlag(&$this->data, FILE_FLAG_DEPENDENT) && 
+    if ($this->hasFlag(&$this->data, FILE_FLAG_DEPENDENT) &&
       $this->hasMedia()) {
       Logger::verbose("Delete media {$this->data['Media']['id']} from dependent file {$this->data['File']['id']}");
       $this->Media->delete($this->data['File']['media_id']);
     }
   }
 
-  /** 
-   * Search for an image by filename 
-   * 
-   * @param filename Filename of the current image 
+  /**
+   * Search for an image by filename
+   *
+   * @param filename Filename of the current image
    */
   function findByFilename($filename) {
     $file = basename($filename);
@@ -144,12 +144,12 @@ class MyFile extends AppModel
     return $this->find('first', array('conditions' => array("path" => $path, "file" => $file)));
   }
 
-  /** 
+  /**
    * Checks if a file exists already in the database.
-   * 
+   *
    * @param filename Filename of image
    * @return Returns the ID if filename is already in the database, otherwise it
-   * returns false. 
+   * returns false.
    */
   function fileExists($filename) {
     $file = $this->findByFilename($filename);
@@ -160,12 +160,12 @@ class MyFile extends AppModel
     }
   }
 
-  /** 
+  /**
    * Returns the filename of the model
-   * 
+   *
    * @param data Optional model data. If data is null, the current model data is
-   * used 
-   * @result Filename of the model 
+   * used
+   * @result Filename of the model
    */
   function getFilename($data = null) {
     if (!$data) {
@@ -175,11 +175,11 @@ class MyFile extends AppModel
     if (isset($data['File'])) {
       $data = $data['File'];
     }
-    if (!isset($data['path']) || 
+    if (!isset($data['path']) ||
       !isset($data['file'])) {
       return false;
     }
-    
+
     return $data['path'].$data['file'];
   }
 
@@ -208,7 +208,7 @@ class MyFile extends AppModel
     if (isset($data['media_id']) && $data['media_id'] > 0) {
       return true;
     }
-    
+
     return false;
   }
 
@@ -233,13 +233,13 @@ class MyFile extends AppModel
     return true;
   }
 
-  /** 
+  /**
    * Unlink the media from the file and delete external file if required
-   * 
+   *
    * @param data Media ID or file model data. If the media ID is given, all
    * files are unlinked from the media. If the file model data is given, only
-   * the media of this single file is unlinked 
-   * @param fileId Optional file id 
+   * the media of this single file is unlinked
+   * @param fileId Optional file id
    */
   function unlinkMedia($data, $fileId = false) {
     if (is_numeric($data)) {
@@ -262,7 +262,7 @@ class MyFile extends AppModel
       Logger::debug("No files found to unlink media");
       return true;
     }
-    
+
     $ids = Set::extract('/File/id', $files);
     Logger::debug("Unlink media of files ".implode(', ', $ids));
     $this->updateAll(array('media_id' => null, 'readed' => null), array('id' => $ids));
@@ -271,17 +271,17 @@ class MyFile extends AppModel
       if ($this->hasFlag(&$file, FILE_FLAG_EXTERNAL)) {
         Logger::debug("Delete external file {$file['File']['id']} from database");
         $this->delete($file['File']['id']);
-      } 
+      }
     }
   }
 
-  /** 
-   * Checks if a user can read the original file 
-   * 
+  /**
+   * Checks if a user can read the original file
+   *
    * @param user Array of User model
-   * @param filename Filename of the file to be checked 
-   * @param flag Reading image flag which must match the condition 
-   * @return True if user can read the filename 
+   * @param filename Filename of the file to be checked
+   * @param flag Reading image flag which must match the condition
+   * @return True if user can read the filename
    */
   function canRead($filename, $user, $flag = ACL_READ_ORIGINAL) {
     if (!file_exists($filename)) {
@@ -325,12 +325,12 @@ class MyFile extends AppModel
     }
   }
 
-  /** 
+  /**
    * Count used bytes of a user
-   * 
+   *
    * @param userId User id
    * @param includeExternal Set true to include also external files. Default is
-   * false 
+   * false
    */
   function countBytes($userId, $includeExternal = false) {
     $userId = intval($userId);
@@ -342,16 +342,16 @@ class MyFile extends AppModel
     return intval($result[0][0]['bytes']);
   }
 
-  /** 
-   * Updates the file size and time to the model data 
-   * 
-   * @param data Optional model data 
+  /**
+   * Updates the file size and time to the model data
+   *
+   * @param data Optional model data
    */
   function update($data = null) {
     if (!$data) {
       $data = $this->data;
     }
-    
+
     if (isset($data['File']['id'])) {
       $this->set($this->findById($data['File']['id']));
       $filename = $this->getFilename();
@@ -414,10 +414,10 @@ class MyFile extends AppModel
     }
     return true;
   }
-  
-  /** 
-   * Move or rename a directory to another destination 
-   * 
+
+  /**
+   * Move or rename a directory to another destination
+   *
    * @param src Source directory
    * @param dst Destination directory or empty filename
    */
@@ -427,7 +427,7 @@ class MyFile extends AppModel
       return false;
     }
     // Allow dir and writeable parent dir
-    if ((file_exists($dst) && !is_dir($dst)) || 
+    if ((file_exists($dst) && !is_dir($dst)) ||
       (!file_exists($dst) && !is_writeable(dirname($dst)))) {
       Logger::err("Invalid destination '$dst'");
       return false;
@@ -471,11 +471,11 @@ class MyFile extends AppModel
     return true;
   }
 
-  /** 
+  /**
    * Get options for Media View of a file
-   * 
+   *
    * @param filename Filename of the media
-   * @return Array of Media Option for the view. 
+   * @return Array of Media Option for the view.
    */
   function getMediaViewOptions($filename) {
     $path = substr($filename, 0, strrpos($filename, DS) + 1);

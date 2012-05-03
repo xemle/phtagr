@@ -21,7 +21,7 @@ App::uses('Component', 'Controller');
 class ComponentAComponent extends Component {
   var $controller = null;
   var $components = array();
-  
+
   function initialize(Controller $controller) {
     parent::initialize($controller);
     $this->controller =& $controller;
@@ -53,9 +53,9 @@ class ComponentCComponent extends Component {
 }
 
 class LoadComponentController extends AppController {
-  
+
   var $components = array('ComponentA');
-  
+
   function __construct($request = null, $response = null) {
     parent::__construct($request, $response);
   }
@@ -98,7 +98,7 @@ class AppControllerTest extends ControllerTestCase {
     $controller = new LoadComponentController(new CakeRequest(), new CakeResponse());
 		$controller->constructClasses();
     $controller->startupProcess();
-    
+
     $this->assertNotEqual($controller->ComponentA, null);
     $this->assertNotEqual($controller->ComponentA->ComponentB, null);
     $this->assertNotEqual($controller->ComponentA->ComponentB->ComponentC, null);

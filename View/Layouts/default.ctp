@@ -3,7 +3,7 @@
 
 <head>
 <title><?php echo $title_for_layout?></title>
-<?php 
+<?php
   echo $this->Html->charset('UTF-8')."\n";
   echo $this->Html->meta('icon')."\n";
   echo $this->Html->css('default')."\n";
@@ -13,7 +13,7 @@
   echo $this->Html->script('jquery-ui-1.8.14.custom.min');
 
   echo $this->Html->script('jquery-phtagr');
-  echo $scripts_for_layout; 
+  echo $scripts_for_layout;
   echo $feeds_for_layout;
 ?>
 </head>
@@ -29,7 +29,7 @@
 <div id="main-menu"><div class="sub">
 <?php echo $this->Menu->menu('main-menu'); ?>
 <div id="quicksearch">
-<?php 
+<?php
   echo $this->Form->create(false, array('url' => array('controller' => 'explorer', 'action' => 'quicksearch')));
   echo $this->Form->input('Media.quicksearch', array('label' => false, 'div' => 'inputWrap', 'placeholder' => __("Search...")));
   echo $this->Form->submit(__('Go'), array('div' => 'submitWrap'));

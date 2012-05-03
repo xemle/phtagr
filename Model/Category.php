@@ -19,7 +19,7 @@ class Category extends AppModel
 {
   var $name = 'Category';
   var $actsAs = array('WordList');
-  
+
   function editMetaSingle(&$media, &$data) {
     if (!isset($data['Category']['names'])) {
       return false;
@@ -38,9 +38,9 @@ class Category extends AppModel
 
   /**
    * Prepare multi edit data for categories
-   * 
+   *
    * @param type $data
-   * @return type 
+   * @return type
    */
   function prepareMultiEditData(&$data) {
     if (empty($data['Category']['names'])) {
@@ -56,20 +56,20 @@ class Category extends AppModel
 
     $addCategories = $this->findAllByField($addWords);
     $deleteCategories = $this->findAllByField($deleteWords, false);
-    
+
     if (count($addCategories) || count($deleteCategories)) {
       return array('Category' => array('addCategory' => Set::extract("/Category/id", $addCategories), 'deleteCategory' => Set::extract("/Category/id", $deleteCategories)));
     } else {
       return false;
     }
   }
-  
+
   /**
    * Add and delete categories according to the given data
-   * 
+   *
    * @param type $media
    * @param type $data
-   * @return type 
+   * @return type
    */
   function editMetaMulti(&$media, &$data) {
     if (empty($data['Category'])) {

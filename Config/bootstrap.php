@@ -2,7 +2,7 @@
 /**
  * This file is loaded automatically by the app/webroot/index.php file after core.php
  *
- * This file should load/create any application wide configuration settings, such as 
+ * This file should load/create any application wide configuration settings, such as
  * Caching, Logging, loading additional configuration files.
  *
  * You should also use this file to include any files that provide global functions/constants
@@ -158,8 +158,8 @@ define("LOCATION_SUBLOCATION", 0x02);
 define("LOCATION_STATE", 0x03);
 define("LOCATION_COUNTRY", 0x04);
 
-/** 
- * Add pear path within vendor path to the include_path 
+/**
+ * Add pear path within vendor path to the include_path
  */
 if (function_exists('ini_set') && function_exists('ini_get')) {
   $path = ini_get('include_path');

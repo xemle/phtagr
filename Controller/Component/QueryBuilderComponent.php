@@ -23,7 +23,7 @@ class QueryBuilderComponent extends Component
 
   /**
    * 'name' => 'Model.field' // map condition to 'Model.field = value'
-   * 'name' => array('rule' => 'special rule name') 
+   * 'name' => array('rule' => 'special rule name')
    * 'name' => array('field' => 'Model.field', 'operand' => 'condition operand')
    */
   var $rules = array(
@@ -50,13 +50,13 @@ class QueryBuilderComponent extends Component
     $this->controller =& $controller;
   }
 
-  /** 
+  /**
    * Get array value if exist or default value
-   * 
+   *
    * @param data Data array
    * @param name Key of data
    * @param default Default value
-   * @return data value or default 
+   * @return data value or default
    */
   function _getParam(&$data, $name, $default = null) {
     if (!isset($data[$name])) {
@@ -66,11 +66,11 @@ class QueryBuilderComponent extends Component
     }
   }
 
-  /** 
+  /**
    * Sanitize the data by escaping the value
-   * 
+   *
    * @param Data as single value or array
-   * @return Sanitized data 
+   * @return Sanitized data
    */
   function _sanitizeData($data) {
     if (!is_array($data)) {
@@ -88,16 +88,16 @@ class QueryBuilderComponent extends Component
     }
   }
 
-  /** 
+  /**
    * Build a single condition by field, value, and the operand and sanitze the
    * value(s)
-   * 
+   *
    * @param field Field name
    * @param value Value as single value or array
    * @param Options Optional options
    *   - operand: Default is '='
    *   - mapping: Array of value mapping
-   * @return Sanitized condition 
+   * @return Sanitized condition
    */
   function _buildCondition($field, $value, $options = false) {
     if (is_string($options)) {
@@ -111,7 +111,7 @@ class QueryBuilderComponent extends Component
       Logger::err("Illigal operand '$operand'. Set it to '='");
       $operand = '=';
     }
-    
+
     if (isset($mapping) && !is_array($value) && isset($mapping[$value])) {
       $value = $mapping[$value];
     }
@@ -130,17 +130,17 @@ class QueryBuilderComponent extends Component
         sort($value);
         $condition .= " $operand (" . implode(', ', $this->_sanitizeData($value)) . ')';
       }
-    } 
-    return $condition; 
+    }
+    return $condition;
   }
 
-  /** 
+  /**
    * Extract exclusion parameters. A exclustion is a value which starts with a
    * minus sign ('-')
-   * 
+   *
    * @param data Parameter data
    * @param skip Parameter list which are not evaluated and skiped
-   * @return exclusions parameter 
+   * @return exclusions parameter
    */
   function _extractExclusions(&$data, $skip = array('sort', 'north', 'south', 'west', 'east')) {
     $exclusions = array();
@@ -196,7 +196,7 @@ class QueryBuilderComponent extends Component
         call_user_method($method, &$this, &$data, &$query, $value);
         continue;
       }
-      
+
       if (!is_array($rule)) {
         $query['conditions'][] = $this->_buildCondition($rule, $value);
       } else {
@@ -219,7 +219,7 @@ class QueryBuilderComponent extends Component
     }
 
     // paging, offsets and limit
-    if (!empty($data['pos'])) { 
+    if (!empty($data['pos'])) {
       $query['offset'] = $data['pos'];
     } elseif (isset($data['show']) && isset($data['page'])) {
       $query['page'] = $data['page'];
@@ -233,7 +233,7 @@ class QueryBuilderComponent extends Component
     }
     return $query;
   }
-  
+
   function build($data) {
     $exclude = $this->_extractExclusions(&$data);
     $query = $this->buildConditions(&$data);
@@ -274,31 +274,31 @@ class QueryBuilderComponent extends Component
     } else {
       switch ($data['sort']) {
         case 'date':
-          $query['order'][] = 'Media.date DESC'; 
+          $query['order'][] = 'Media.date DESC';
           break;
         case '-date':
-          $query['order'][] = 'Media.date ASC'; 
+          $query['order'][] = 'Media.date ASC';
           break;
         case 'newest':
-          $query['order'][] = 'Media.created DESC'; 
+          $query['order'][] = 'Media.created DESC';
           break;
         case 'changes':
-          $query['order'][] = 'Media.modified DESC'; 
+          $query['order'][] = 'Media.modified DESC';
           break;
         case 'viewed':
-          $query['order'][] = 'Media.lastview DESC'; 
+          $query['order'][] = 'Media.lastview DESC';
           break;
         case 'popularity':
-          $query['order'][] = 'Media.ranking DESC'; 
+          $query['order'][] = 'Media.ranking DESC';
           break;
         case 'random':
-          $query['order'][] = 'RAND()'; 
+          $query['order'][] = 'RAND()';
           break;
         case 'name':
-          $query['order'][] = 'Media.name'; 
+          $query['order'][] = 'Media.name';
           break;
         case '-name':
-          $query['order'][] = 'Media.name DESC'; 
+          $query['order'][] = 'Media.name DESC';
           break;
         default:
           Logger::err("Unknown sort value: {$data['sort']}");
@@ -310,7 +310,7 @@ class QueryBuilderComponent extends Component
    * @param data Search parameters array
    * @param SQL array
    * @param name Parameter name
-   * @param value Parameter value 
+   * @param value Parameter value
    */
   function buildHabtm(&$data, &$query, $name, $value) {
     if (count($data[$name]) == 0) {
@@ -403,7 +403,7 @@ class QueryBuilderComponent extends Component
     } else {
       $userId = $this->controller->getUserId();
     }
-    $uploadPath = USER_DIR . $userId . DS . 'files' . DS . $value . '%'; 
+    $uploadPath = USER_DIR . $userId . DS . 'files' . DS . $value . '%';
     $query['conditions'][] = $this->_buildCondition("File.path", $uploadPath, array('operand' => 'LIKE'));
     $query['conditions'][] = "FileCount > 0";
     $query['_counts'][] = "FileCount";

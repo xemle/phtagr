@@ -45,7 +45,7 @@ class GuestsController extends AppController {
   function autocomplete() {
     if (!$this->RequestHandler->isAjax() || !$this->RequestHandler->isPost()) {
       $this->redirect(null, '404');
-    } 
+    }
     $userId = $this->getUserId();
     $escName = Sanitize::escape($this->request->data['Group']['name']);
     $groups = $this->Group->find('all', array('conditions' => "Group.user_id = $userId AND Group.name LIKE '%$escName%'"));
@@ -76,7 +76,7 @@ class GuestsController extends AppController {
   function edit($guestId) {
     $guestId = intval($guestId);
     $userId = $this->getUserId();
-    
+
     if (!$this->Guest->hasAny(array('id' => $guestId, 'creator_id' => $userId))) {
       $this->Session->setFlash(__("Sorry. Could not find requested guest"));
       Logger::debug("Sorry. Could not find requested guest '$guestId' of user '$userId'");

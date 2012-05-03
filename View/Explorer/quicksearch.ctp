@@ -18,7 +18,7 @@ if (!count($this->request->data)): ?>
   var mediaData = [];
 </script>
 
-<?php 
+<?php
   foreach($this->request->data as $media) {
     echo $this->ImageData->mediaLink($media, 'mini').' ';
   }

@@ -18,7 +18,7 @@
 class UpgradeSchemaComponent extends Component {
 
   var $controller = null;
-  var $dbConfig = null; 
+  var $dbConfig = null;
   var $db = null;
   var $cakeSchema = null;
   var $schema = null;
@@ -93,7 +93,7 @@ class UpgradeSchemaComponent extends Component {
     }
     return true;
   }
-  
+
   function requireUpgrade() {
     $missingTables = $this->_getMissingTables($this->schema);
     if ($missingTables) {

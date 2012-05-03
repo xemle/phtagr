@@ -36,7 +36,7 @@ class MediaController extends AppController
     }
     parent::beforeFilter();
   }
-  
+
   function beforeRender() {
     parent::beforeRender();
     $this->viewClass = 'Media';
@@ -83,7 +83,7 @@ class MediaController extends AppController
     //header('Cache-Control: max-age=0');
   }
 
-  /** Fetch media and checks access 
+  /** Fetch media and checks access
     @param id Media id
     @param type Preview type
     @return Media model data. If no media is found or access is denied it
@@ -106,7 +106,7 @@ class MediaController extends AppController
       Logger::verbose("Media not found or access denied for media $id");
       $this->redirect(null, 403);
     }
-    
+
     return $media;
   }
 
@@ -128,16 +128,16 @@ class MediaController extends AppController
     $media = $this->_getMedia($id, 'preview');
     $this->loadComponent('FlashVideo');
     $config = array(
-      'size' => OUTPUT_SIZE_VIDEO, 
+      'size' => OUTPUT_SIZE_VIDEO,
       'bitrate' => OUTPUT_BITRATE_VIDEO
       );
     $flashFilename = $this->FlashVideo->create($media, $config);
 
-    if (!is_file($flashFilename)) { 
+    if (!is_file($flashFilename)) {
       Logger::err("Could not create preview file {$flashFilename}");
       $this->redirect(null, 500);
     }
- 
+
     return $flashFilename;
   }
 
@@ -187,7 +187,7 @@ class MediaController extends AppController
       $this->FilterManager->write($media);
     }
     Logger::info("Request of media {$file['Media']['id']}: file $id '{$file['File']['file']}'");
-    $filename = $this->MyFile->getFilename($file);  
+    $filename = $this->MyFile->getFilename($file);
 
     $mediaOptions = $this->MyFile->getMediaViewOptions($filename);
     $mediaOptions['download'] = true;

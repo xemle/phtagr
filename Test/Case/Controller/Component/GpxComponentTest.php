@@ -62,7 +62,7 @@ class GpxComponentTestCase extends CakeTestCase {
             'altitude' => 2376
         );
 
-    $last = array(   
+    $last = array(
             'latitude' => 46.57661111,
             'longitude' => 8.89344444,
             'date' => '2007-10-14T10:14:08Z',

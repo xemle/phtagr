@@ -16,7 +16,7 @@
  */
 
 class NavigatorHelper extends AppHelper {
-  var $helpers = array('Html', 'Search', 'Breadcrumb'); 
+  var $helpers = array('Html', 'Search', 'Breadcrumb');
 
   function beforeRender() {
     $this->Search->initialize();
@@ -41,7 +41,7 @@ class NavigatorHelper extends AppHelper {
   }
 
   function hasPrev() {
-    if (isset($this->request->params['search']) && 
+    if (isset($this->request->params['search']) &&
       $this->request->params['search']['prevPage']) {
       return true;
     }
@@ -49,7 +49,7 @@ class NavigatorHelper extends AppHelper {
   }
 
   function prev() {
-    if (!isset($this->request->params['search']) || 
+    if (!isset($this->request->params['search']) ||
       !$this->request->params['search']['prevPage']) {
       return false;
     }
@@ -67,7 +67,7 @@ class NavigatorHelper extends AppHelper {
     $params = $this->request->params['search'];
     $crumbs = $this->request->params['crumbs'];
     $output = '';
-    
+
     if ($params['pageCount'] > 1) {
       $count = $params['pageCount'];
       $current = $params['page'];
@@ -91,7 +91,7 @@ class NavigatorHelper extends AppHelper {
   }
 
   function hasNext() {
-    if (isset($this->request->params['search']) && 
+    if (isset($this->request->params['search']) &&
       $this->request->params['search']['nextPage']) {
       return true;
     }
@@ -99,7 +99,7 @@ class NavigatorHelper extends AppHelper {
   }
 
   function next() {
-    if (!isset($this->request->params['search']) || 
+    if (!isset($this->request->params['search']) ||
       !$this->request->params['search']['nextPage']) {
       return false;
     }
@@ -155,7 +155,7 @@ class NavigatorHelper extends AppHelper {
   }
 
   function nextMedia() {
-    if (!isset($this->request->params['search']) || 
+    if (!isset($this->request->params['search']) ||
       !$this->request->params['search']['nextMedia']) {
       return;
     }
@@ -166,8 +166,8 @@ class NavigatorHelper extends AppHelper {
     if (!$this->hasPages()) {
       return;
     }
-    $out = $this->Html->tag('div', 
-      $this->Html->tag('div', 
+    $out = $this->Html->tag('div',
+      $this->Html->tag('div',
         $this->prev() . ' ' . $this->numbers() . ' ' . $this->next(),
         array('class' => 'sub', 'escape' => false)),
       array('class' => 'p-navigator-pages', 'escape' => false));

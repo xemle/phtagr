@@ -16,8 +16,8 @@
   <?php echo $this->Form->input('File.extract', array('label' => __('Extract ZIP archive'), 'checked' => true, 'type' => 'checkbox')); ?>
 </fieldset>
 
-<?php 
-  echo $this->Html->tag('ul', 
+<?php
+  echo $this->Html->tag('ul',
     $this->Html->tag('li', $this->Form->submit(__('Upload')), array('escape' => false)),
     array('class' => 'buttons', 'escape' => false));
   echo $this->Form->end();

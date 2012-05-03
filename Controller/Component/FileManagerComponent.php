@@ -32,7 +32,7 @@ class FileManagerComponent extends Component {
     $this->User = $controller->User;
   }
 
-  /** Add a file to the database 
+  /** Add a file to the database
     @param filename Filename to add
     @param user Optional user. User model data or user Id.
     @return File id or false on error */
@@ -44,11 +44,11 @@ class FileManagerComponent extends Component {
     } else {
       if (!isset($user['User']['id'])) {
         Logger::err('Unexcpected user data array. Use current user.');
-        Logger::debug($user); 
+        Logger::debug($user);
         $userId = $this->controller->getUserId();
       } else {
         $userId = $user['User']['id'];
-      } 
+      }
     }
 
     $id = $this->controller->MyFile->fileExists($filename);
@@ -74,7 +74,7 @@ class FileManagerComponent extends Component {
   }
 
   /** Delete a file
-    @param file File ID, filename or file model data 
+    @param file File ID, filename or file model data
     @return True on success */
   function delete($file) {
     if (is_string($file)) {
@@ -100,7 +100,7 @@ class FileManagerComponent extends Component {
 
   /** Delete a file (Alias of delete()) */
   function del($file) {
-    return $this->delete($file); 
+    return $this->delete($file);
   }
 
   /** Returns the internal directory of a user
@@ -123,7 +123,7 @@ class FileManagerComponent extends Component {
     return Folder::slashTerm($userDir);
   }
 
-  /** Evaluates if a filename is external or internal 
+  /** Evaluates if a filename is external or internal
     @param filename Filename
     @param user Optional user
     @return True if filename is external */
@@ -146,7 +146,7 @@ class FileManagerComponent extends Component {
     if (!$user) {
       $user = $this->controller->getUser();
     }
-    
+
   }
 
   /** Checks if the user can write to his user directory
@@ -192,7 +192,7 @@ class FileManagerComponent extends Component {
     $user = $this->controller->getUser();
     foreach ($files as $file) {
       $dstFile = str_replace($src, $dst, $file);
-        
+
       if (!@copy($file, $dstFile)) {
         Logger::err("Could not copy file '$file' to '$dstFile'");
         //return "409 Conflict";
@@ -240,7 +240,7 @@ class FileManagerComponent extends Component {
   /** Creates a unique filename within a path and a filename. The new filename
    * has the pattern of name.unique-number.extension
     @param path Path for the filename
-    @param filename Filename 
+    @param filename Filename
     @return unique filename */
   function createUniqueFilename($path, $filename) {
     $path = Folder::slashTerm($path);

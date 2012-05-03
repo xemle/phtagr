@@ -1,4 +1,4 @@
-<?php 
+<?php
 App::import('Vendor', 'kcaptcha/kcaptcha');
 
 class CaptchaComponent extends Component

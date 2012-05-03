@@ -3,7 +3,7 @@
 <div id="p-media-preview">
 <div class="image">
 <span></span>
-<?php 
+<?php
   if (($this->request->data['Media']['type'] & MEDIA_TYPE_VIDEO) > 0) {
     echo $this->Flowplayer->video($this->request->data);
   } else {
@@ -47,7 +47,7 @@
 <?php echo $this->Tab->open(0); ?>
 <div class="meta">
 <div id="meta-<?php echo $this->request->data['Media']['id']; ?>">
-<table class="bare"> 
+<table class="bare">
   <?php echo $this->Html->tableCells($this->ImageData->metaTable(&$this->request->data)); ?>
 </table>
 </div>
@@ -56,8 +56,8 @@
 
 <?php echo $this->Tab->open(1); ?>
 <div class="meta">
-<table class="bare"> 
-<?php 
+<table class="bare">
+<?php
   $cells = array();
   $cells[] = array(__("User"), $this->Html->link($this->request->data['User']['username'], '/explorer/user/'.$this->request->data['User']['username']));
   if ($this->request->data['Media']['isOwner']) {
@@ -98,12 +98,12 @@
 </table>
 </div>
 <?php echo $this->Tab->close(); ?>
-<?php 
+<?php
   if ($this->Map->hasApi() && $this->Map->hasMediaGeo($this->request->data)) {
     echo $this->Tab->open('map');
     echo $this->Map->container();
     echo $this->Map->script();
-    echo $this->Tab->close(); 
+    echo $this->Tab->close();
   }
   if ($this->request->data['Media']['canWriteTag']) {
     echo $this->Tab->open('edit');
@@ -112,7 +112,7 @@
     echo View::element('single_meta_form');
     echo "</fieldset>";
     echo $this->Form->end(__('Save'));
-    echo $this->Tab->close(); 
+    echo $this->Tab->close();
   }
   if ($this->request->data['Media']['canWriteAcl']) {
     echo $this->Tab->open('acl');
@@ -121,12 +121,12 @@
     echo View::element('single_acl_form');
     echo "</fieldset>";
     echo $this->Form->end(__('Save'));
-    echo $this->Tab->close(); 
+    echo $this->Tab->close();
   }
 ?>
 </div><!-- tabs -->
 
-<?php 
+<?php
   $mediaId = $this->request->data['Media']['id'];
   $lat = $this->request->data['Media']['latitude'] ? $this->request->data['Media']['latitude'] : 0;
   $long = $this->request->data['Media']['longitude'] ? $this->request->data['Media']['longitude'] : 0;
@@ -140,7 +140,7 @@ $.fn.resizeImageHeight = function(size) {
     return;
   }
   image.attr('width', size * (w / h));
-  image.attr('height', size); 
+  image.attr('height', size);
 };
 $.fn.resizeImage = function(size) {
   var image = $(this);
@@ -157,7 +157,7 @@ $.fn.resizeImage = function(size) {
     h = size;
   }
   image.attr('width', w);
-  image.attr('height', h); 
+  image.attr('height', h);
 };
 $(document).ready(function() {
   media = $('#p-media-preview');
@@ -171,7 +171,7 @@ $(document).ready(function() {
       if (ui.panel.id == 'tab-map') {
         if ($('#map').children().length == 0) {
           $('#mapbox').show();
-          loadMap($mediaId, $lat, $long); 
+          loadMap($mediaId, $lat, $long);
         }
       }
       return true;

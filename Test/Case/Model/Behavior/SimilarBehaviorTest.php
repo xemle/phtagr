@@ -51,7 +51,7 @@ class SimilarBehaviorTestCase extends CakeTestCase {
 	public function tearDown() {
 		unset($this->Similar);
     unset($this->Tag);
-    
+
     parent::tearDown();
 	}
 

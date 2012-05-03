@@ -19,12 +19,12 @@ class Tag extends AppModel
 {
   var $name = 'Tag';
   var $actsAs = array('WordList');
-  
+
   /**
    * Prepare multi edit data for tags
-   * 
+   *
    * @param type $data
-   * @return type 
+   * @return type
    */
   function prepareMultiEditData(&$data) {
     if (empty($data['Tag']['names'])) {
@@ -40,20 +40,20 @@ class Tag extends AppModel
 
     $addTags = $this->findAllByField($addWords);
     $deleteTags = $this->findAllByField($deleteWords, false);
-    
+
     if (count($addTags) || count($deleteTags)) {
       return array('Tag' => array('addTag' => Set::extract("/Tag/id", $addTags), 'deleteTag' => Set::extract("/Tag/id", $deleteTags)));
     } else {
       return false;
     }
   }
-  
+
   /**
    * Add and delete tags according to the given data
-   * 
+   *
    * @param type $media
    * @param type $data
-   * @return type 
+   * @return type
    */
   function editMetaMulti(&$media, &$data) {
     if (empty($data['Tag'])) {
@@ -68,7 +68,7 @@ class Tag extends AppModel
       return false;
     }
   }
-  
+
   function editMetaSingle(&$media, &$data) {
     if (!isset($data['Tag']['names'])) {
       return false;

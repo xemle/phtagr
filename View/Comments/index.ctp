@@ -11,12 +11,12 @@
 <?php foreach ($comments as $comment): ?>
 <div class="comment <?php echo ($count++%2)?'even':'odd'; ?>">
 <div class="meta">
-<span class="from"><?php echo $comment['Comment']['name'] ?></span> said 
+<span class="from"><?php echo $comment['Comment']['name'] ?></span> said
 <span class="date"><?php echo $this->Time->timeAgoInWords($comment['Comment']['date']); ?></span>
 </div><!-- comment meta -->
 
 <div class="text">
-<?php 
+<?php
   $img = '<img src="'.Router::url('/media/mini/'.$comment['Media']['id'].'/'.$comment['Media']['name']).'" />';
   $link = '/images/view/'.$comment['Media']['id'];
   echo '<div class="image">'.$this->Html->link($img, $link, array('escape' => false)).'</div>';?>

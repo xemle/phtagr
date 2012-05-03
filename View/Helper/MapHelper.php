@@ -65,7 +65,7 @@ var map = null;
 var loadMap = function(id, latitude, longitude) {
   if (undefined == map) {
 
-    var options = { 
+    var options = {
       url: '$url'
       };
 

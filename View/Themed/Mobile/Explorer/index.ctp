@@ -8,8 +8,8 @@
 </div></div>
 <?php endif; ?>
 
-<?php 
-  $pos = ($this->Search->getPage(1)-1) * $this->Search->getShow(12) + 1; 
+<?php
+  $pos = ($this->Search->getPage(1)-1) * $this->Search->getShow(12) + 1;
 ?>
 <?php foreach($this->data as $media): ?>
 <h3><?php echo $media['Media']['name']; ?></h3>

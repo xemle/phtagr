@@ -78,7 +78,7 @@ class MenuHelper extends AppHelper
       $item = am(array('type' => false, 'text' => false, 'link' => false), $item);
       if (!$item['text']) {
         // Trigger error
-        continue; 
+        continue;
       }
 
       if ($item['link'] == 'false' && $item['type'] == false) {
@@ -86,11 +86,11 @@ class MenuHelper extends AppHelper
       }
 
       $out .= "<li";
-      $attrs = array(); 
+      $attrs = array();
       if ($item['type'] == 'current') {
         $attrs['id'] = 'current';
         //$item['link'] = false;
-      } elseif ($item['type'] == 'active' || 
+      } elseif ($item['type'] == 'active' ||
         ($item['link'] && Router::url($item['link']) == $this->_url)) {
         $attrs['id'] = 'active';
         $item['link'] = false;
@@ -108,13 +108,13 @@ class MenuHelper extends AppHelper
       $out .= ">";
 
       if ($item['link']) {
-        $out .= $this->Html->link($item['text'], $item['link']); 
+        $out .= $this->Html->link($item['text'], $item['link']);
       } elseif ($item['type'] == 'text') {
         $out .= "<span>".$item['text']."</span>";
       } else {
         $out .= $item['text'];
       }
-      
+
       if(isset($item['submenu']))
         $out .= $this->_getMenu($item['submenu']);
 
@@ -130,7 +130,7 @@ class MenuHelper extends AppHelper
     // Get current url with action. If the default action 'index' is missing,
     // its adds it to the url
     $this->_url = $this->here;
-    if (strpos($this->_url, 'index') === false && 
+    if (strpos($this->_url, 'index') === false &&
       strpos($this->action, 'index') !== false) {
       if ($this->_url[strlen($this->_url)-1] != '/')
         $this->_url .= '/';
@@ -139,7 +139,7 @@ class MenuHelper extends AppHelper
 
     return $this->output($this->_getMenu($data));
   }
-  
+
   function _excludeKeys($data, $excluds = array('title', 'url', 'parent')) {
     $filtered = array();
     foreach ($data as $key => $value) {
@@ -165,13 +165,13 @@ class MenuHelper extends AppHelper
       $linkOptions = array();
       if (isset($attrs['active']) && $attrs['active']) {
         $linkOptions['class'] = 'active';
-      } 
+      }
       if (isset($item['url']) && $item['url'] === false) {
         $item = $item['title'];
       } else {
         if (!isset($item['url'])) {
           $item['url'] = array('controller' => $item['controller'], 'action' => $item['action'], 'admin' => $item['admin']);
-        } 
+        }
         $item = $this->Html->link($item['title'], $item['url'], $linkOptions);
       }
       $items[] = $this->Html->tag('li', $item . $submenu, $attrs);

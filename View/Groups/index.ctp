@@ -7,10 +7,10 @@
 <thead>
 <?php
   $headers = array(
-    __('Name'), 
-    __('From User'), 
-    __('Description'), 
-    __('Members'), 
+    __('Name'),
+    __('From User'),
+    __('Description'),
+    __('Members'),
     __('Actions'));
   echo $this->Html->tableHeaders($headers);
 ?>

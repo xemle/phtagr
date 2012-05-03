@@ -20,7 +20,7 @@ App::uses('Model', 'Model');
 class AppModel extends Model
 {
   /** Create an id list of specifc items
-   @param items Array of items with partial row information like the following. 
+   @param items Array of items with partial row information like the following.
 
   \code
   Array
@@ -43,7 +43,7 @@ class AppModel extends Model
   function createIdList($items, $create=false) {
     $ids = array();
 
-    if (empty($items)) 
+    if (empty($items))
       return $ids;
 
     foreach ($items as $item) {
@@ -128,7 +128,7 @@ class AppModel extends Model
   /** This function creates the input array for a single column.
     @param values Text
     @param name Name of the name. Default is 'name'.
-    @param create If true, items are created if not exists. 
+    @param create If true, items are created if not exists.
     @return Array of ids
     @see createIdList */
   function createIdListFromText($text, $name='name', $create=false) {
@@ -148,14 +148,14 @@ class AppModel extends Model
         'hasAndBelongsToMany' => array_keys($this->hasAndBelongsToMany));
     $this->unbindModel($bindings);
     return true;
-  } 
+  }
 
   /** Convert the return code and the message to an array
     @param code Return code (Inspired by HTML return codes)
       - 100 Continue
       - 200 OK
       - 201 Created
-      - 202 Accepted 
+      - 202 Accepted
       - 204 No Content
       - 205 Reset Content
       - 300 Multiple Choices
@@ -188,7 +188,7 @@ class AppModel extends Model
   /** Helper function for HABTM relations via a small dummy model data
     @param id Current Id of this model
     @param habtmName Alias name of HABTM relation
-    @param habtmIds Array of Ids for HABTM relation 
+    @param habtmIds Array of Ids for HABTM relation
     @return Returns the save result */
   function saveHabtm($id, $habtmName, $habtmIds) {
     $dummy = array(

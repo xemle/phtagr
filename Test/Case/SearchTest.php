@@ -34,45 +34,45 @@ class SearchTest extends CakeTestCase {
   }
 
   function testParam() {
-    
+
     // get not existing values
-    $result = $this->Search->getParam('notExists'); 
+    $result = $this->Search->getParam('notExists');
     $this->assertEqual($result, null);
-    
-    // get default value of not existing value 
-    $result = $this->Search->getParam('notExists', 'default'); 
+
+    // get default value of not existing value
+    $result = $this->Search->getParam('notExists', 'default');
     $this->assertEqual($result, 'default');
 
     // set and get
     $this->Search->setParam('page', 2);
-    $result = $this->Search->getParam('page'); 
+    $result = $this->Search->getParam('page');
     $this->assertEqual($result, 2);
 
     // delete
     $this->Search->delParam('page');
-    $result = $this->Search->getParam('page'); 
+    $result = $this->Search->getParam('page');
     $this->assertEqual($result, null);
-    
+
     // add single value
     $this->Search->addParam('tag', 'tag1');
-    $result = $this->Search->getParam('tag'); 
+    $result = $this->Search->getParam('tag');
     $this->assertEqual($result, null);
-    $result = $this->Search->getParam('tags'); 
+    $result = $this->Search->getParam('tags');
     $this->assertEqual($result, array('tag1'));
 
     // add array
     $this->Search->addParam('tag', array('tag2', 'tag3'));
-    $result = $this->Search->getParam('tags'); 
+    $result = $this->Search->getParam('tags');
     $this->assertEqual($result, array('tag1', 'tag2', 'tag3'));
 
     // delete singel value from array
     $this->Search->delParam('tags', 'tag2');
-    $result = $this->Search->getParam('tags'); 
+    $result = $this->Search->getParam('tags');
     $this->assertEqual($result, array('tag1', 2 => 'tag3'));
 
     // delete array
     $this->Search->delParam('tags');
-    $result = $this->Search->getParam('tags'); 
+    $result = $this->Search->getParam('tags');
     $this->assertEqual($result, null);
   }
 
@@ -93,36 +93,36 @@ class SearchTest extends CakeTestCase {
 
   function testMultiple() {
     // add multiple tags
-    
+
     $this->Search->addTag('tag1');
     $result = $this->Search->getTags();
-    $this->assertEqual($result, array('tag1'));    
+    $this->assertEqual($result, array('tag1'));
 
     $this->Search->addTag('tag2');
     $result = $this->Search->getTags();
-    $this->assertEqual($result, array('tag1', 'tag2'));    
+    $this->assertEqual($result, array('tag1', 'tag2'));
 
     $this->Search->delTag('tag1');
     $result = $this->Search->getTags();
-    $this->assertEqual($result, array(1 => 'tag2'));    
+    $this->assertEqual($result, array(1 => 'tag2'));
 
     // delete non existsing value
     $this->Search->delTag('tag3');
     $result = $this->Search->getTags();
-    $this->assertEqual($result, array(1 => 'tag2'));    
+    $this->assertEqual($result, array(1 => 'tag2'));
 
     $this->Search->delTag('tag2');
     $result = $this->Search->getTags();
-    $this->assertEqual($result, null);    
+    $this->assertEqual($result, null);
 
     // add and delete multiple
     $this->Search->addTag(array('-tag1', 'tag2', 'tag3'));
     $result = $this->Search->getTags();
-    $this->assertEqual($result, array('-tag1', 'tag2', 'tag3'));    
+    $this->assertEqual($result, array('-tag1', 'tag2', 'tag3'));
 
     $this->Search->delTag(array('-tag1', 'tag2'));
     $result = $this->Search->getTags();
-    $this->assertEqual($result, array(2 => 'tag3'));    
+    $this->assertEqual($result, array(2 => 'tag3'));
   }
 
   function testEncode() {

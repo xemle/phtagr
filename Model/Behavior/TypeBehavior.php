@@ -15,7 +15,7 @@
  * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
 
-class TypeBehavior extends ModelBehavior 
+class TypeBehavior extends ModelBehavior
 {
   var $config = array();
 
@@ -27,7 +27,7 @@ class TypeBehavior extends ModelBehavior
     if (!$data) {
       $data =& $model->data;
     }
-    
+
     $modelData = $data;
     if (isset($modelData[$model->alias])) {
       $modelData = $modelData[$model->alias];

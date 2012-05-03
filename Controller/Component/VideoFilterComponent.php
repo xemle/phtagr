@@ -42,7 +42,7 @@ class VideoFilterComponent extends BaseFilterComponent {
     return am($this->_getVideoExtensions(), array('thm' => array('priority' => 5)));
   }
 
-  /** Finds the video thumb of a video 
+  /** Finds the video thumb of a video
     @param video File model data of the video
     @param insertIfMissing If true, adds the thumb file to the database. Default is true
     @return Filename of the thumb file. False if no thumb file was found */
@@ -64,10 +64,10 @@ class VideoFilterComponent extends BaseFilterComponent {
           return $video;
         }
       }
-    } 
+    }
     return false;
   }
-  
+
   function _readThumb($file, &$media) {
     $filename = $this->controller->MyFile->getFilename($file);
     if (!$media) {
@@ -102,14 +102,14 @@ class VideoFilterComponent extends BaseFilterComponent {
       $this->FilterManager->addError($filename, "MediaSaveError");
       Logger::err("Could not save media");
       return false;
-    } 
+    }
     $this->controller->MyFile->setMedia($file, $media['Media']['id']);
     $this->controller->MyFile->updateReaded($file);
     Logger::verbose("Updated media from thumb file");
     return $this->controller->Media->findById($media['Media']['id']);
   }
 
-  /** Read the video data from the file 
+  /** Read the video data from the file
    * @param image Media model data
    * @return True, false on error */
   function read(&$file, &$media, $options = array()) {
@@ -147,7 +147,7 @@ class VideoFilterComponent extends BaseFilterComponent {
       Logger::err("Could not save media");
       return false;
     }
-     
+
     $mediaId = $media['Media']['id'];
     if ($isNew || !$this->controller->MyFile->hasMedia($file)) {
       $mediaId = $isNew ? $this->controller->Media->getLastInsertID() : $data['id'];
@@ -158,7 +158,7 @@ class VideoFilterComponent extends BaseFilterComponent {
         return false;
       }
       $media = $this->controller->Media->findById($mediaId);
-    } 
+    }
 
     $this->controller->MyFile->updateReaded($file);
     $this->controller->MyFile->setFlag($file, FILE_FLAG_DEPENDENT);
@@ -186,20 +186,20 @@ class VideoFilterComponent extends BaseFilterComponent {
     $media['Media']['duration'] = $result['duration'];
     return $media;
   }
-  
+
   function _readExiftool($filename) {
     $bin = $this->controller->getOption('bin.exiftool', 'exiftool');
     $this->Command->redirectError = true;
     $result = $this->Command->run($bin, array('-n', '-S', $filename));
     $output = $this->Command->output;
- 
+
     if ($result != 0) {
       Logger::err("Command '$bin' returned unexcpected $result");
       return false;
     } elseif (!count($output)) {
       Logger::err("Command returned no output!");
       return false;
-    } 
+    }
 
     $result = array();
     foreach ($output as $line) {
@@ -217,7 +217,7 @@ class VideoFilterComponent extends BaseFilterComponent {
         $result['duration'] = ceil(intval($m[2]));
         Logger::trace("Extract duration of '$filename': ". $result['duration']."s");
       }
-    } 
+    }
     if (count($result) != 3) {
       Logger::warn("Could not extract width, height, or durration from '$filename'");
       Logger::warn($result);
@@ -231,7 +231,7 @@ class VideoFilterComponent extends BaseFilterComponent {
     $this->Command->redirectError = true;
     $result = $this->Command->run($bin, array('-i' => $filename, '-t', 0.0));
     $output = $this->Command->output;
- 
+
     if ($result != 1) {
       Logger::err("Command '$bin' returned unexcpected $result");
       return false;
@@ -286,8 +286,8 @@ class VideoFilterComponent extends BaseFilterComponent {
     $result['duration'] = $data['meta']['onMetaData']['duration'];
     $result['width'] = $data['meta']['onMetaData']['width'];
     $result['height'] = $data['meta']['onMetaData']['height'];
-    
-    return $result;    
+
+    return $result;
   }
 
   // Check for video thumb

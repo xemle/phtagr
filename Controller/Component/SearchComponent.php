@@ -27,7 +27,7 @@ class SearchComponent extends Component
   var $components = array('QueryBuilder');
 
   var $controller = null;
-  
+
   var $_data;
 
   /** Parameter validation array
@@ -93,21 +93,21 @@ class SearchComponent extends Component
     $this->_data = $this->defaults;
   }
 
-  /** Returns all parameters 
+  /** Returns all parameters
     @return Parameter array */
   function getParams() {
     return $this->_data;
   }
 
-  /** Set all parameters 
+  /** Set all parameters
     @param data Parameter array
     @note The parameters are not validated! */
   function setParams($data = array()) {
     $this->_data = $data;
   }
 
-  /** Returns parameter 
-    @param name Name of parameter 
+  /** Returns parameter
+    @param name Name of parameter
     @param default Default value, if the parameter does not exists. Default
     value is null */
   function getParam($name, $default = null) {
@@ -118,7 +118,7 @@ class SearchComponent extends Component
     }
   }
 
-  /** Set a singular parameter 
+  /** Set a singular parameter
     @param name Parameter name
     @param value Parameter value
     @param validate Optional parameter to validate the parameter. Default is
@@ -134,7 +134,7 @@ class SearchComponent extends Component
   }
 
   /** Add a parameter to an array.
-    @param name Parameter name. 
+    @param name Parameter name.
     @param value Parameter value (which will be pluralized)
     @param validate Optional parameter to validate the parameter. Default is
     true
@@ -147,7 +147,7 @@ class SearchComponent extends Component
       }
       return;
     }
-    
+
     if ((!isset($this->_data[$name]) || !in_array($value, $this->_data[$name])) &&
       ($validate === false || $this->validate($name, $value))) {
       $this->_data[$name][] = $value;
@@ -158,7 +158,7 @@ class SearchComponent extends Component
     if (!isset($this->_data[$name])) {
       return;
     }
-    
+
     if (!empty($value)) {
       if (is_array($value)) {
         foreach ($value as $v) {
@@ -295,9 +295,9 @@ class SearchComponent extends Component
       Logger::verbose("Parameter value of '$name' is empty!");
       return false;
     }
-    if (!isset($this->validate[$name])) { 
+    if (!isset($this->validate[$name])) {
       // check for parameter without validation
-      $key = array_search($name, $this->validate); 
+      $key = array_search($name, $this->validate);
       if ($key !== false && is_numeric($key)) {
         if (in_array($name, $this->disabled)) {
           Logger::verbose("Parameter '$name' is disabled");
@@ -308,7 +308,7 @@ class SearchComponent extends Component
       }
       Logger::verbose("Parameter '$name' does not exists");
       return false;
-    } 
+    }
     if (in_array($name, $this->disabled)) {
       Logger::verbose("Parameter '$name' is disabled");
       return false;
@@ -330,7 +330,7 @@ class SearchComponent extends Component
     return $result;
   }
 
-  /** Dispatch the rule 
+  /** Dispatch the rule
     @param ruleSet Rule name or single rule array
     @param check Value to check
     @result True on successful validation */
@@ -407,7 +407,7 @@ class SearchComponent extends Component
   }
 
   /** Convert an URL to decoded crumbs
-   * 
+   *
    * @param $url Current URL
    * @param $skip Skip parts splited by slash '/'
    * @return Array of crumbs
@@ -424,9 +424,9 @@ class SearchComponent extends Component
     }
     return $crumbs;
   }
-  
+
   /** Encode crumbs for an final URL string
-   * 
+   *
    * @param $crumbs Array of crumbs
    * @return Array of encoded crumbs for an URL
    */
@@ -440,7 +440,7 @@ class SearchComponent extends Component
     }
     return $escaped;
   }
-  
+
   /** Convert the current search parameter to breadcrump stack
     @return Array of crumbs */
   function convertToCrumbs() {
@@ -492,7 +492,7 @@ class SearchComponent extends Component
   }
 
   function paginate() {
-    $query = $this->QueryBuilder->build($this->getParams()); 
+    $query = $this->QueryBuilder->build($this->getParams());
     $tmp = $query;
     unset($query['limit']);
     unset($query['page']);
@@ -500,9 +500,9 @@ class SearchComponent extends Component
     $query = $tmp;
 
     $params = array(
-      'pageCount' => 0, 
-      'current' => 0, 
-      'nextPage' => false, 
+      'pageCount' => 0,
+      'current' => 0,
+      'nextPage' => false,
       'prevPage' => false,
       'baseUri' => $this->baseUri,
       'afterUri' => false,
@@ -535,21 +535,21 @@ class SearchComponent extends Component
     for ($i = 0; $i < count($data); $i++) {
       $this->controller->Media->setAccessFlags(&$data[$i], $user);
     }
-    
+
     // Set data for search helper
     $this->controller->request->params['search'] = $params;
 
     return $data;
   }
 
-  /** 
-    Sets the data for the search helper 
+  /**
+    Sets the data for the search helper
     */
   function setHelperData() {
     $params = array(
-      'pageCount' => 0, 
-      'current' => 0, 
-      'nextPage' => false, 
+      'pageCount' => 0,
+      'current' => 0,
+      'nextPage' => false,
       'prevPage' => false,
       'baseUri' => $this->baseUri,
       'afterUri' => false,
@@ -569,16 +569,16 @@ class SearchComponent extends Component
   }
 
   function paginateMedia($id) {
-    $query = $this->QueryBuilder->build($this->getParams()); 
+    $query = $this->QueryBuilder->build($this->getParams());
     unset($query['limit']);
     unset($query['offset']);
     $count = $this->controller->Media->find('count', $query);
 
     $params = array(
-      'pos' => 0, 
+      'pos' => 0,
       'current' => false,
       'prevMedia' => false,
-      'nextMedia' => false, 
+      'nextMedia' => false,
       'afterUri' => false,
       'baseUri' => $this->baseUri,
       'defaults' => $this->defaults,
@@ -638,10 +638,10 @@ class SearchComponent extends Component
       $ids = Set::extract('/Media/id', $result);
       if ($mediaOffset == 1) {
         $params['prevMedia'] = $ids[0];
-      } 
+      }
       if (isset($ids[$mediaOffset + 1])) {
         $params['nextMedia'] = $ids[$mediaOffset + 1];
-      } 
+      }
     }
 
     $params['current'] = $id;
@@ -649,7 +649,7 @@ class SearchComponent extends Component
 
     // Set data for search helper
     $this->controller->request->params['search'] = $params;
- 
+
     return $data;
   }
 
@@ -671,6 +671,6 @@ class SearchComponent extends Component
     $this->setShow($show);
 
     return $this->paginate();
-  }    
+  }
 }
 ?>

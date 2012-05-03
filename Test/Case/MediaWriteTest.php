@@ -60,7 +60,7 @@ class MediaWriteTestCase extends CakeTestCase {
   var $Media;
   var $Option;
   var $userId;
-  
+
   var $Folder;
 
   /**
@@ -105,7 +105,7 @@ class MediaWriteTestCase extends CakeTestCase {
     $this->Media = & $this->Controller->Media;
     $this->MyFile = & $this->Controller->MyFile;
 
-    
+
     $this->Folder->create(TEST_FILES_TMP);
   }
 
@@ -134,11 +134,11 @@ class MediaWriteTestCase extends CakeTestCase {
     copy($src, $dst);
     return $dst;
   }
-  
+
   function testThumbnailCreation() {
     $filename = TEST_FILES_TMP . 'MVI_7620.OGG';
     copy(RESOURCES . 'MVI_7620.OGG', $filename);
-    
+
     // Insert video and add tag 'thailand'
     $this->Controller->FilterManager->read($filename);
     $media = $this->Media->find('first');
@@ -148,10 +148,10 @@ class MediaWriteTestCase extends CakeTestCase {
     $data = array('Tag' => array('names' => 'thailand'));
     $tmp = $this->Media->editSingle(&$media, &$data, &$user);
     $this->Media->save($tmp);
-    
+
     $media = $this->Media->findById($media['Media']['id']);
     $this->Controller->FilterManager->write(&$media);
-    
+
     $thumb = TEST_FILES_TMP . 'MVI_7620.thm';
     $this->assertEqual(file_exists($thumb), true);
   }

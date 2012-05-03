@@ -27,7 +27,7 @@ class FileListHelper extends AppHelper
     switch ($type) {
       case FILE_TYPE_DIRECTORY: $icon = 'folder'; break;
       case FILE_TYPE_IMAGE: $icon = 'picture'; break;
-      case FILE_TYPE_VIDEOTHUMB: 
+      case FILE_TYPE_VIDEOTHUMB:
       case FILE_TYPE_VIDEO: $icon = 'film'; break;
       case FILE_TYPE_GPS: $icon = 'map'; break;
       case FILE_TYPE_TEXT: break;
@@ -37,7 +37,7 @@ class FileListHelper extends AppHelper
     }
     if ($icon) {
       return $this->Html->image("icons/$icon.png");
-    } 
+    }
     return false;
   }
 

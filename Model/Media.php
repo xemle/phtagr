@@ -213,9 +213,9 @@ class Media extends AppModel
       $userGroupIds = Set::extract('/Group/id', $user);
       $userGroupIds = am($userGroupIds, Set::extract('/Member/id', $user));
     }
-    $mediaGroupIds = Set::extract('/Group/id', $data); 
+    $mediaGroupIds = Set::extract('/Group/id', $data);
     // user groups and media groups must match to gain access via common group
-    $match = array_intersect($mediaGroupIds, $userGroupIds); 
+    $match = array_intersect($mediaGroupIds, $userGroupIds);
     if ($user['User']['role'] >= ROLE_GUEST &&
       ($data['Media']['gacl'] & $mask) >= $flag &&
       count($match) > 0) {

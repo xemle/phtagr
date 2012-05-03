@@ -5,7 +5,7 @@
 <p><?php echo __("Your database requires an update from version $currentVersion to $maxVersion! Please click %s to run to upgrade.", $this->Html->link(__("here"), 'upgrade/run')); ?></p>
 <p><?php echo __("Following database migrations will be done:"); ?>
 <ul>
-<?php 
+<?php
   foreach ($newMappingNames as $name) {
     echo $this->Html->tag('li', $name);
   }

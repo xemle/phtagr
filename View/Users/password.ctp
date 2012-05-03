@@ -11,12 +11,12 @@
 ?>
 </fieldset>
 <?php echo $this->Form->end(__('Submit')); ?>
-<?php 
+<?php
   $script = <<<SCRIPT
 (function($) {
   $(document).ready(function() {
     $(':submit').button();
-  }); 
+  });
 })(jQuery);
 SCRIPT;
   echo $this->Html->scriptBlock($script, array('inline' => false));

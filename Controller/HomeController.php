@@ -23,7 +23,7 @@ class HomeController extends AppController
   /** Don't load models for setup check */
   var $uses = null;
 
-  /** Check database configuration and connection. If missing redirect to 
+  /** Check database configuration and connection. If missing redirect to
    * the setup. */
   function beforeFilter() {
     if (!file_exists(CONFIGS . 'database.php')) {
@@ -35,7 +35,7 @@ class HomeController extends AppController
     if (!$db->enabled()) {
       $this->redirect('/setup');
     }
-    
+
     // Database connection is OK. Load components and models
     $this->uses = array('Media', 'Tag', 'Category', 'Comment');
     $this->constructClasses();
@@ -49,7 +49,7 @@ class HomeController extends AppController
     $this->Search->setSort('newest');
     $this->Search->setShow(50);
     $newest = $this->Search->paginate();
-    // generate tossed index to variy the media 
+    // generate tossed index to variy the media
     srand(time());
     while (count($newest) > 32) {
       $rnd = rand(0, 50);

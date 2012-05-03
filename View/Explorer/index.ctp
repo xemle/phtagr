@@ -5,11 +5,11 @@
 <?php echo $this->Session->flash(); ?>
 <?php echo $this->Breadcrumb->breadcrumb($crumbs); ?>
 
-<?php 
+<?php
   $baseUrl = Router::url('/', true);
   $editTitleText = __("Edit Meta Data");
   $aclTitleText = __("Edit Access Rights");
-  $saveText = __("Update"); 
+  $saveText = __("Update");
   $cancelText = __("Cancel");
   $script = <<<SCRIPT
 (function($) {
@@ -31,7 +31,7 @@
           dialog.children().remove();
           dialog.append(data);
           dialog.dialog({
-            modal: true, 
+            modal: true,
             width: 520,
             title: '$editTitleText',
             buttons: {
@@ -58,7 +58,7 @@
           dialog.children().remove();
           dialog.append(data);
           dialog.dialog({
-            modal: true, 
+            modal: true,
             width: 520,
             title: '$aclTitleText',
             buttons: {
@@ -164,7 +164,7 @@
   });
   $(window).load(function() {
     $(this).placeExplorerMenu();
-  }); 
+  });
 })(jQuery);
 SCRIPT;
   echo $this->Html->script('/piclenslite/piclens_optimized');
@@ -181,7 +181,7 @@ echo '<div class="row">';
 foreach ($this->request->data as $media) {
   $editable = $media['Media']['canWriteTag'] ? 'editable' : '';
   $cell = "cell" . ($index %4);
-  echo $this->Html->tag('div', 
+  echo $this->Html->tag('div',
     $this->element('Explorer/media', array('media' => $media, 'index' => $index, 'pos' => $pos)),
     array('class' => "p-explorer-media $editable $cell", 'id' => 'media-' . $media['Media']['id'], 'escape' => false));
   $index++;
@@ -194,7 +194,7 @@ echo '<div class="clear"></div></div>';
 ?>
 </div><!-- cells -->
 
-<?php 
+<?php
   if ($canWriteTag): ?>
 <div class="p-navigator-pages"><div class="sub">
 <a id="select-all"><?php echo __('Select All'); ?></a>

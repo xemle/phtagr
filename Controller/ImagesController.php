@@ -62,7 +62,7 @@ class ImagesController extends AppController
       Logger::warn("Precondition failed");
       return;
     }
-    if (!$this->Session->check('Session.requestCount') || 
+    if (!$this->Session->check('Session.requestCount') ||
       $this->Session->read('Session.requestCount') <= 1) {
       Logger::verbose("No session found or request counter to low");
       return;
@@ -173,7 +173,7 @@ class ImagesController extends AppController
         }
       }
     }
- 
+
     $url = 'view/' . $id;
     if (count($this->crumbs)) {
       $url .= '/' . join('/', $this->crumbs);

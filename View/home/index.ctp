@@ -1,19 +1,19 @@
 <div id="random-media">
 <h3><?php echo __("Random Media"); ?></h3>
-<?php 
+<?php
   if (count($randomMedia)) {
     $media = $randomMedia[0];
     $params = '/'.$this->Search->serialize(array('sort' => 'random'));
 
     $cite = "<cite>" . __("%s by %s", h($media['Media']['name']), $this->Html->link($media['User']['username'], '/explorer/user/' . $media['User']['username'])) . "</cite>";
 
-    echo $this->Html->tag('div', 
+    echo $this->Html->tag('div',
       $this->ImageData->mediaLink($media, array('type' => 'preview', 'params' => $params, 'width' => 470)).$cite,
       array('class' => 'clip', 'escape' => false));
 
     $link = $this->Search->getUri(array('sort' => 'random'));
     echo "<p>" . __("See more %s", $this->Html->link(__('random media...'), $link))."</p>";
-  } 
+  }
 ?>
 </div>
 
@@ -47,7 +47,7 @@
 <div class="comment <?php echo ($count++ % 2) ? 'even' : 'odd'; ?>">
 <?php echo $this->ImageData->mediaLink($comment, array('type' => 'mini', 'div' => 'image')); ?>
 <div class="meta">
-<span class="from"><?php echo $comment['Comment']['name'] ?></span> said 
+<span class="from"><?php echo $comment['Comment']['name'] ?></span> said
 <span class="date"><?php echo $this->Time->timeAgoInWords($comment['Comment']['date']); ?>:</span>
 </div><!-- comment meta -->
 
@@ -58,7 +58,7 @@
 <?php endforeach; /* comments */ ?>
 </div><!-- comments -->
 <p><?php echo $this->Html->link(__("Older comments..."), "/comments", array('escape' => false));?></p>
-<?php endif; ?>    
+<?php endif; ?>
 </div>
 
 <div id="tag-cloud">

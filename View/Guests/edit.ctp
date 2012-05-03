@@ -21,7 +21,7 @@
   $options = array(
     0 => __('None'),
     1 => __('Name'),
-    3 => __('Name and captcha') 
+    3 => __('Name and captcha')
     );
   $select = $this->request->data['Comment']['auth'];
   echo '<div class="input select">';
@@ -57,18 +57,18 @@
     __('Actions')
   );
   echo $this->Html->tableHeaders($headers);
-?>  
+?>
 </thead>
 
 <tbody>
-<?php 
+<?php
   $cells = array();
   foreach($this->request->data['Member'] as $group) {
     $delConfirm = __("Do you really want to delete the group '%s' from this guest '%s'?", $group['name'], $this->request->data['Guest']['username']);
     $cells[] = array(
       $this->Html->link($group['name'], '/groups/view/'.$group['name']),
-      $this->Html->link( 
-        $this->Html->image('icons/delete.png', array('alt' => 'Delete', 'title' => 'Delete')), 
+      $this->Html->link(
+        $this->Html->image('icons/delete.png', array('alt' => 'Delete', 'title' => 'Delete')),
         '/guests/deleteGroup/'.$this->request->data['Guest']['id'].'/'.$group['id'], array('escape' => false), $delConfirm)
     );
   }

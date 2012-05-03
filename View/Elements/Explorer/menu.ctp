@@ -88,13 +88,13 @@
   echo implode(' ', $links);
 ?></p>
 </div><!-- all meta -->
-<?php 
+<?php
   $url = $this->Breadcrumb->params($crumbs);
   echo $this->Form->create(null, array('id' => 'explorer', 'action' => 'edit/'.$url, 'class' => 'explorer-menu'));
 ?>
 <div id="p-explorer-edit-meta">
 <fieldset><legend><?php echo __("Metadata"); ?></legend>
-<?php 
+<?php
   echo $this->Form->hidden('Media.ids', array('id' => 'MediaIds'));
   if ($canWriteTag) {
     echo $this->Form->input('Tag.names', array('label' => __('Tags'), 'after' => $this->Html->tag('div', __('E.g. newtag, -oldtag'), array('class' => 'description'))));
@@ -142,19 +142,19 @@
     ACL_LEVEL_KEEP => __('Keep'));
   echo $this->Html->tag('div',
     $this->Html->tag('label', __("Who can view the image")).
-    $this->Html->tag('div', $this->Form->radio('Media.readPreview', $aclSelect, array('legend' => false, 'value' => ACL_LEVEL_KEEP)), array('escape' => false, 'class' => 'radioSet')), 
+    $this->Html->tag('div', $this->Form->radio('Media.readPreview', $aclSelect, array('legend' => false, 'value' => ACL_LEVEL_KEEP)), array('escape' => false, 'class' => 'radioSet')),
     array('escape' => false, 'class' => 'input radio'));
   echo $this->Html->tag('div',
     $this->Html->tag('label', __("Who can download the image?")).
-    $this->Html->tag('div', $this->Form->radio('Media.readOriginal', $aclSelect, array('legend' => false, 'value' => ACL_LEVEL_KEEP)), array('escape' => false, 'class' => 'radioSet')), 
+    $this->Html->tag('div', $this->Form->radio('Media.readOriginal', $aclSelect, array('legend' => false, 'value' => ACL_LEVEL_KEEP)), array('escape' => false, 'class' => 'radioSet')),
     array('escape' => false, 'class' => 'input radio'));
   echo $this->Html->tag('div',
     $this->Html->tag('label', __("Who can add tags?")).
-    $this->Html->tag('div', $this->Form->radio('Media.writeTag', $aclSelect, array('legend' => false, 'value' => ACL_LEVEL_KEEP)), array('escape' => false, 'class' => 'radioSet')), 
+    $this->Html->tag('div', $this->Form->radio('Media.writeTag', $aclSelect, array('legend' => false, 'value' => ACL_LEVEL_KEEP)), array('escape' => false, 'class' => 'radioSet')),
     array('escape' => false, 'class' => 'input radio'));
   echo $this->Html->tag('div',
     $this->Html->tag('label', __("Who can edit all meta data?")).
-    $this->Html->tag('div', $this->Form->radio('Media.writeMeta', $aclSelect, array('legend' => false, 'value' => ACL_LEVEL_KEEP)), array('escape' => false, 'class' => 'radioSet')), 
+    $this->Html->tag('div', $this->Form->radio('Media.writeMeta', $aclSelect, array('legend' => false, 'value' => ACL_LEVEL_KEEP)), array('escape' => false, 'class' => 'radioSet')),
     array('escape' => false, 'class' => 'input radio'));
   echo $this->Form->input('Group.names', array('value' => '', 'label' => __("Media access group")));
   echo $this->Autocomplete->autoComplete('Group.names', '/explorer/autocomplete/aclgroup', array('split' => true));

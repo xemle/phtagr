@@ -26,7 +26,7 @@ class DigestAuthComponent extends Component
   var $realm = 'phtagr/webdav';
   var $controller = null;
   var $components = array('Session');
-  
+
   function initialize(&$controller) {
     $this->controller = $controller;
   }
@@ -42,7 +42,7 @@ class DigestAuthComponent extends Component
       $this->_authData['domain']=$matches[1];
       $this->_authData['winusername']=$matches[2];
       $username=$this->_authData['winusername'];
-    } else { 
+    } else {
       $username=$this->_authData['username'];
     }
     return $username;
@@ -60,7 +60,7 @@ class DigestAuthComponent extends Component
     Logger::trace("Add basic authentications header");
     header('WWW-Authenticate: Basic realm="'.$this->realm.'"');
   }
-  
+
   /** Add authentication header to the response. The session keeps a login
    * counter. If more than 3 logins where done, it denies the access by omitting
    * the authentication header */
@@ -73,13 +73,13 @@ class DigestAuthComponent extends Component
     }
     $opaque = $this->Session->id();
     $counter = $this->Session->read('auth.logins');
-  
+
     if ($counter>3) {
       Logger::err('login countes exceeded');
       $this->decline();
     }
     $this->Session->write('auth.logins', $counter+1);
-    
+
     Logger::trace("Add authentications header");
     $this->controller->response->header('WWW-Authenticate', 'Digest realm="'.$this->realm.'",qop="auth",nonce="'.uniqid().'",opaque="'.$opaque.'",algorithm="MD5"');
   }
@@ -125,7 +125,7 @@ class DigestAuthComponent extends Component
     $this->_authHdr = $hdr;
     return $hdr;
   }
-  
+
   function __getAuthSchema() {
     $words = preg_split("/[\s]+/", $this->_authHdr);
     if (!$words) {
@@ -196,13 +196,13 @@ class DigestAuthComponent extends Component
     $this->__writeUserData($user);
   }
 
-  /** Parse the http authorization header and checks for all required fields. 
+  /** Parse the http authorization header and checks for all required fields.
     */
   function __checkDigestHeader() {
     // protect against missing data
     $requiredParts=array('nonce'=>1, 'nc'=>1, 'cnonce'=>1, 'qop'=>1, 'username'=>1, 'uri'=>1, 'response'=>1, 'opaque'=>1);
     $data=array();
-  
+
     preg_match_all('/(\w+)=(([\'"])([^"\']+)\3|(\w+))/', $this->_authHdr, $matches, PREG_SET_ORDER);
 
     foreach ($matches as $match) {
@@ -212,13 +212,13 @@ class DigestAuthComponent extends Component
       $data[$name]=$value;
       unset($requiredParts[$name]);
     }
-  
+
     if ($requiredParts) {
       Logger::warn("Missing authorization part(s): ".implode(", ", array_keys($requiredParts)));
       Logger::info("Authorization header is: ".$this->_authHdr);
       $this->requestAuthentication();
     }
-  
+
     $this->_authData = $data;
   }
 
@@ -261,13 +261,13 @@ class DigestAuthComponent extends Component
       //Logger::trace($_SESSION);
       $this->requestAuthentication();
     }
-  
+
     $snc=$this->Session->read('auth.nc');
     $nc=hexdec($this->_authData['nc']);
     if ($snc==$nc) {
       Logger::warn("Same request counter $snc is used!");
     }
-  
+
     // Check request counter
     if ($snc>$nc) {
       Logger::err("Reused request counter. Current count is {$snc}. Request counter is $nc");
@@ -279,7 +279,7 @@ class DigestAuthComponent extends Component
   }
 
   function __checkDigestUser() {
-    $username = $this->__fixWindowsUsername();  
+    $username = $this->__fixWindowsUsername();
     $user = $this->controller->User->findByUsername($username);
     if ($user === false) {
       Logger::err("Unknown username '$username'");
@@ -306,8 +306,8 @@ class DigestAuthComponent extends Component
   /** Authenticate a user by HTTP Authentication as described in RFC 2617
     @param required If true an authentication is required. If the
     authentication is optional, set this to false and the return value is true
-    if the authentication was successful. . 
-    @return True if the authentication was successful. 
+    if the authentication was successful. .
+    @return True if the authentication was successful.
     true, the authentication is force and will redirect the request with
     authentication information. In this case, the function will not return on
     unsuccessful authentication. */
@@ -343,7 +343,7 @@ class DigestAuthComponent extends Component
         $this->__checkBasicHeader();
         $this->__checkBasicUser();
         break;
-      default: 
+      default:
         Logger::err("Authentication schema '$schema' NIY");
         $this->decline();
         break;

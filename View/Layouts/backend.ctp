@@ -3,7 +3,7 @@
 
 <head>
 <title><?php echo $title_for_layout?></title>
-<?php 
+<?php
   echo $this->Html->charset('UTF-8')."\n";
   echo $this->Html->meta('icon')."\n";
   echo $this->Html->css('backend')."\n";
@@ -14,7 +14,7 @@
 
   echo $this->Html->script('jquery-phtagr');
   echo $this->Html->script('phtagr');
-  echo $scripts_for_layout; 
+  echo $scripts_for_layout;
 ?>
 
 </head>

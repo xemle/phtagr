@@ -6,11 +6,11 @@
 <h2><?php echo __("Your uploaded media"); ?></h2>
 
 <p><?php $count = 1; foreach ($imports as $media): ?>
-<?php 
-  echo $this->ImageData->mediaLink($media, 'mini') . ' '; 
+<?php
+  echo $this->ImageData->mediaLink($media, 'mini') . ' ';
   if ($count >= 6) {
     break;
-  }; 
+  };
   $count++;
 ?>
 <?php endforeach; ?></p>
@@ -31,7 +31,7 @@
 </fieldset>
 
 <?php echo $this->Form->end(__("Upload")); ?>
-<?php 
+<?php
     $script = <<<SCRIPT
 (function($) {
   $(document).ready(function() {

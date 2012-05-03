@@ -15,7 +15,7 @@
  * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
 
-class WordListBehavior extends ModelBehavior 
+class WordListBehavior extends ModelBehavior
 {
   var $config = array();
 
@@ -23,7 +23,7 @@ class WordListBehavior extends ModelBehavior
     $default = array('field' => 'name');
     $this->config[$Model->alias] = am($config, $default);
   }
-  
+
   function findAllByField(&$Model, $values, $createMissing = true) {
     $config = $this->config[$Model->alias];
     $field = $config['field'];
@@ -48,10 +48,10 @@ class WordListBehavior extends ModelBehavior
     }
     return $data;
   }
-  
-  /** 
+
+  /**
    * Split input into words sparated by comma
-   * 
+   *
    * @param type $input Text input
    * @param type $withRemovals Include words with leading minus
    * @return type Array of words
@@ -68,13 +68,13 @@ class WordListBehavior extends ModelBehavior
     }
     return $names;
   }
-  
+
   /**
    * Remove words which are negated
-   * 
+   *
    * @param type $Model Current model
    * @param type $words Array of words
-   * @return array Remaining non negated words 
+   * @return array Remaining non negated words
    */
   function removeNegatedWords(&$Model, $words) {
     $result = array();
@@ -88,13 +88,13 @@ class WordListBehavior extends ModelBehavior
     }
     return $result;
   }
-  
+
   /**
-   * Collects all negated words and returns them. 
-   * 
+   * Collects all negated words and returns them.
+   *
    * @param type $Model Current model
    * @param type $words Array of words
-   * @return array Array of negated words 
+   * @return array Array of negated words
    */
   function getNegatedWords(&$Model, $words) {
     $result = array();
@@ -111,13 +111,13 @@ class WordListBehavior extends ModelBehavior
     }
     return $result;
   }
-  
+
   /**
    * Normalize worlds and remove negation sign of words.
-   * 
+   *
    * @param type $Model Current Model
    * @param type $words Array of words
-   * @return array 
+   * @return array
    */
   function normalizeWords(&$Model, $words) {
     $result = array();
