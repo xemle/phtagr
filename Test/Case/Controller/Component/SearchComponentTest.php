@@ -28,9 +28,9 @@ class SearchComponentTestCase extends CakeTestCase {
 	var $uses = array('User', 'Group', 'Media', 'Tag', 'Category');
 	var $components = array('Search');
 
-	public $fixtures = array('app.file', 'app.media', 'app.user', 'app.group', 'app.groups_media', 
-      'app.groups_user', 'app.option', 'app.guest', 'app.comment', 'app.my_file', 
-      'app.tag', 'app.media_tag', 'app.category', 'app.categories_media', 
+	public $fixtures = array('app.file', 'app.media', 'app.user', 'app.group', 'app.groups_media',
+      'app.groups_user', 'app.option', 'app.guest', 'app.comment', 'app.my_file',
+      'app.tag', 'app.media_tag', 'app.category', 'app.categories_media',
       'app.location', 'app.locations_media', 'app.comment');
 
   /**
@@ -53,12 +53,13 @@ class SearchComponentTestCase extends CakeTestCase {
       'groups' => 'notEmpty',
       'page' => 'numeric',
       'show' => array('rule' => array('inList', array(12, 24, 64))),
+      'sort' => array('rule' => array('inList', array('date', '-date', 'newest', 'changes', 'viewed', 'popularity', 'random', 'name'))),
       'tags' => array(
         'wordRule' => array('rule' => array('custom', '/^[-]?\w+$/')),
         'minRule' => array('rule' => array('minLength', 3))
         ),
       'tag_op' => array('rule' => array('inList', array('AND', 'OR'))),
-      'user' => 'alphaNumeric', // disabled 
+      'user' => 'alphaNumeric', // disabled
       'visibility', // no validation
       'world' // no validation but disabled
       );
@@ -79,7 +80,7 @@ class SearchComponentTestCase extends CakeTestCase {
     $this->ControllerMock->constructClasses();
     $this->ControllerMock->startupProcess();
   }
-  
+
   /**
    * Bind controller's components to shell
    */
@@ -91,7 +92,7 @@ class SearchComponentTestCase extends CakeTestCase {
       if (empty($this->ControllerMock->{$component})) {
         $this->out("Could not load component $component");
         exit(1);
-      }  
+      }
       $this->{$component} =& $this->ControllerMock->{$component};
     }
   }
@@ -107,11 +108,11 @@ class SearchComponentTestCase extends CakeTestCase {
       if (empty($this->ControllerMock->{$model})) {
         $this->out("Could not load model $model");
         exit(1);
-      }  
+      }
       $this->{$model} =& $this->ControllerMock->{$model};
     }
   }
-  
+
   function mockUser($user) {
     $this->ControllerMock->mockUser($user);
   }
@@ -174,12 +175,12 @@ class SearchComponentTestCase extends CakeTestCase {
     $this->Search->setVisibility("no validation");
     $result = $this->Search->getVisibility();
     $this->assertEqual($result, "no validation");
-    
+
     // disabled parameter without validation
     $this->Search->setWorld("rule it");
     $result = $this->Search->getWorld();
     $this->assertEqual($result, null);
-    
+
     // disabled parameter with disabled validation
     $this->Search->setWorld("rule it", false);
     $result = $this->Search->getWorld();
@@ -202,34 +203,34 @@ class SearchComponentTestCase extends CakeTestCase {
   function testGroupSearchWithGroupAcl() {
     $admin = $this->User->save($this->User->create(array('username' => 'admin', 'role' => ROLE_ADMIN)));
     $user1 = $this->User->save($this->User->create(array('username' => 'admin', 'role' => ROLE_USER)));
-    
+
     // 'group1' from 'admin' has 'user1' as member
     $group1 = $this->Group->save($this->Group->create(array('name' => 'Group1', 'user_id' => $admin['User']['id'])));
     $group2 = $this->Group->save($this->Group->create(array('name' => 'Group2', 'user_id' => $user1['User']['id'])));
     $this->Group->subscribe($group1, $user1['User']['id']);
     $user1 = $this->User->findById($user1['User']['id']);
-    
+
     // media1 belongs to group2
     $media1 = $this->Media->save($this->Media->create(array('name' => 'IMG_1234.JPG', 'user_id' => $user1['User']['id'], 'gacl' => 97)));
     $this->Media->save(array('Media' => array('id' => $media1['Media']['id']), 'Group' => array('Group' => array($group2['Group']['id']))));
-    
-    // 
+
+    //
     $this->mockUser($user1);
     $this->Search->addGroup('Group2');
     $this->Search->setShow(6);
     $result = $this->Search->paginate();
     $this->assertEqual(array('IMG_1234.JPG'), Set::extract('/Media/name', $result));
-  } 
+  }
 
   function testMultipleGroupSearch() {
     $this->User->save($this->User->create(array('username' => 'admin', 'role' => ROLE_ADMIN)));
     $admin = $this->User->findById($this->User->getLastInsertID());
-    
+
     $this->Group->save($this->Group->create(array('name' => 'Group1', 'user_id' => $admin['User']['id'])));
     $group1 = $this->Group->findById($this->Group->getLastInsertID());
     $this->Group->save($this->Group->create(array('name' => 'Group2', 'user_id' => $admin['User']['id'])));
     $group2 = $this->Group->findById($this->Group->getLastInsertID());
-    
+
     // media1 belongs to group1 and group2
     $this->Media->save($this->Media->create(array('name' => 'IMG_1234.JPG', 'user_id' => $admin['User']['id'], 'gacl' => 97)));
     $media1 = $this->Media->findById($this->Media->getLastInsertID());
@@ -241,9 +242,9 @@ class SearchComponentTestCase extends CakeTestCase {
     // media2 belongs to no
     $this->Media->save($this->Media->create(array('name' => 'IMG_3456.JPG', 'user_id' => $admin['User']['id'])));
     $media2 = $this->Media->findById($this->Media->getLastInsertID());
-    
+
     $this->mockUser($admin);
-    
+
     // Test inclusion of 'Group2'
     $this->Search->addGroup('Group2');
     $result = $this->Search->paginate();
@@ -266,8 +267,8 @@ class SearchComponentTestCase extends CakeTestCase {
     $this->Search->addGroup('Group2');
     $result = $this->Search->paginate();
     $this->assertEqual(array('IMG_1234.JPG'), Set::extract('/Media/name', $result));
-  } 
-  
+  }
+
   function testAccessForUserRole() {
     $this->User->save($this->User->create(array('username' => 'userA', 'role' => ROLE_USER)));
     $userA = $this->User->findById($this->User->getLastInsertID());
@@ -280,7 +281,7 @@ class SearchComponentTestCase extends CakeTestCase {
     $guestA = $this->User->findById($this->User->getLastInsertID());
     $this->User->save($this->User->create(array('username' => 'nobody', 'role' => ROLE_NOBODY)));
     $userNone = $this->User->findById($this->User->getLastInsertID());
-    
+
     // 'userA' has group 'aGroup'. 'userB' and 'guestA' are member of 'aGroup'
     $this->Group->save($this->Group->create(array('name' => 'aGroup', 'user_id' => $userA['User']['id'])));
     $group = $this->Group->findById($this->Group->getLastInsertID());
@@ -291,7 +292,7 @@ class SearchComponentTestCase extends CakeTestCase {
     $userA = $this->User->findById($userA['User']['id']);
     $userB = $this->User->findById($userB['User']['id']);
     $guestA = $this->User->findById($guestA['User']['id']);
-    
+
     // media1 is public
     $this->Media->save($this->Media->create(array('name' => 'IMG_1234.JPG', 'user_id' => $userA['User']['id'], 'gacl' => 97, 'uacl' => 97, 'oacl' => 97)));
     $media1 = $this->Media->findById($this->Media->getLastInsertID());
@@ -305,7 +306,7 @@ class SearchComponentTestCase extends CakeTestCase {
     // media4 is private
     $this->Media->save($this->Media->create(array('name' => 'IMG_4567.JPG', 'user_id' => $userA['User']['id'])));
     $media4 = $this->Media->findById($this->Media->getLastInsertID());
-    
+
     $this->mockUser($userNone);
     $result = $this->Search->paginate();
     $this->assertEqual(array('IMG_1234.JPG'), Set::extract('/Media/name', $result));
@@ -326,18 +327,80 @@ class SearchComponentTestCase extends CakeTestCase {
     $result = $this->Search->paginate();
     $this->assertEqual(array('IMG_1234.JPG', 'IMG_2345.JPG', 'IMG_3456.JPG', 'IMG_4567.JPG'), Set::extract('/Media/name', $result));
   }
-  
+
+  /**
+   * Test if a userA can see images of other userB through userA's shared group
+   */
+  public function testMediaAccessThroughOwnSharedGroup() {
+    $userA = $this->User->save($this->User->create(array('username' => 'userA', 'role' => ROLE_USER)));
+    $userB = $this->User->save($this->User->create(array('username' => 'userB', 'role' => ROLE_USER)));
+
+    $groupA = $this->Group->save($this->Group->create(array('name' => 'GroupA', 'user_id' => $userA['User']['id'], 'isShared' => 1)));
+    $this->Group->subscribe($groupA, $userB['User']['id']);
+
+    $userA = $this->User->findById($userA['User']['id']);
+    $userB = $this->User->findById($userB['User']['id']);
+
+    $media1 = $this->Media->save($this->Media->create(array('name' => 'IMG_1234.JPG', 'user_id' => $userB['User']['id'], 'gacl' => 97)));
+    $this->Media->save(array('Media' => array('id' => $media1['Media']['id']), 'Group' => array('Group' => array($groupA['Group']['id']))));
+    $media2 = $this->Media->save($this->Media->create(array('name' => 'IMG_2345.JPG', 'user_id' => $userB['User']['id'], 'gacl' => 97)));
+    $this->Media->save(array('Media' => array('id' => $media2['Media']['id']), 'Group' => array('Group' => array($groupA['Group']['id']))));
+
+    $this->mockUser($userA);
+    $this->Search->addSort('newest');
+    $result = $this->Search->paginate();
+    $this->assertEqual(Set::extract('/Media/name', $result), array('IMG_1234.JPG', 'IMG_2345.JPG'));
+  }
+
+  /**
+   * Test if a userA can paginate a single images of other userB through userA's shared group
+   */
+  public function testSingeMediaPaginationWithSharedGroup() {
+    $userA = $this->User->save($this->User->create(array('username' => 'userA', 'role' => ROLE_USER)));
+    $userB = $this->User->save($this->User->create(array('username' => 'userB', 'role' => ROLE_USER)));
+
+    $groupA = $this->Group->save($this->Group->create(array('name' => 'GroupA', 'user_id' => $userA['User']['id'], 'isShared' => 1)));
+    $this->Group->subscribe($groupA, $userB['User']['id']);
+
+    $userA = $this->User->findById($userA['User']['id']);
+    $userB = $this->User->findById($userB['User']['id']);
+
+    $media1 = $this->Media->save($this->Media->create(array('name' => 'IMG_1234.JPG', 'user_id' => $userB['User']['id'], 'gacl' => 97)));
+    $this->Media->save(array('Media' => array('id' => $media1['Media']['id']), 'Group' => array('Group' => array($groupA['Group']['id']))));
+    $media2 = $this->Media->save($this->Media->create(array('name' => 'IMG_2345.JPG', 'user_id' => $userB['User']['id'], 'gacl' => 97)));
+    $this->Media->save(array('Media' => array('id' => $media2['Media']['id']), 'Group' => array('Group' => array($groupA['Group']['id']))));
+
+    $this->mockUser($userA);
+    $result = $this->Search->paginateMediaByCrumb($media1['Media']['id'], array('sort:newest'));
+    $this->assertEqual($result['Media']['name'], 'IMG_1234.JPG');
+    // Check ACL
+    $this->assertEqual($result['Media']['canWriteTag'], 1);
+    $this->assertEqual($result['Media']['canWriteMeta'], 0);
+    $this->assertEqual($result['Media']['canWriteCaption'], 0);
+    $this->assertEqual($result['Media']['canWriteAcl'], 0);
+    $this->assertEqual($result['Media']['canReadPreview'], 1);
+    $this->assertEqual($result['Media']['canReadHigh'], 1);
+    $this->assertEqual($result['Media']['canReadOriginal'], 1);
+    $this->assertEqual($result['Media']['visibility'], ACL_LEVEL_GROUP);
+    $this->assertEqual($result['Media']['isOwner'], 0);
+
+    $search = $this->ControllerMock->request->params['search'];
+    $this->assertEqual($search['prevMedia'], false);
+    $this->assertEqual($search['nextMedia'], $media2['Media']['id']);
+    $this->assertEqual($search['data'], array('sort' => 'newest'));
+  }
+
   public function testExclusion() {
     $userA = $this->User->save($this->User->create(array('username' => 'userA', 'role' => ROLE_USER)));
     $userB = $this->User->save($this->User->create(array('username' => 'userB', 'role' => ROLE_USER)));
-    
+
     // 'userA' has group 'aGroup'. 'userB' and 'guestA' are member of 'aGroup'
     $group = $this->Group->save($this->Group->create(array('name' => 'aGroup', 'user_id' => $userA['User']['id'])));
     $this->Group->subscribe($group, $userB['User']['id']);
     // Reload users to refresh model data of groups
     $userA = $this->User->findById($userA['User']['id']);
     $userB = $this->User->findById($userB['User']['id']);
-    
+
     // media1 is public
     $media1 = $this->Media->save($this->Media->create(array('name' => 'IMG_1234.JPG', 'user_id' => $userA['User']['id'], 'gacl' => 97, 'uacl' => 97, 'oacl' => 97)));
     // media2 is visible by users
@@ -348,38 +411,38 @@ class SearchComponentTestCase extends CakeTestCase {
     $this->Media->save(array('Media' => array('id' => $media3['Media']['id']), 'Group' => array('Group' => array($group['Group']['id']))));
     // media4 is private
     $media4 = $this->Media->save($this->Media->create(array('name' => 'IMG_4567.JPG', 'user_id' => $userA['User']['id'])));
-    
+
     $skyTag = $this->Tag->save($this->Tag->create(array('name' => 'sky')));
     $vacationTag = $this->Tag->save($this->Tag->create(array('name' => 'vacation')));
     $natureTag = $this->Tag->save($this->Tag->create(array('name' => 'nature')));
 
     $familyCategory = $this->Category->save($this->Category->create(array('name' => 'family')));
     $friendsCategory = $this->Category->save($this->Category->create(array('name' => 'friends')));
-    
+
     // media1: Tags: sky, vacation. Category: family
     $this->Media->save(array(
-        'Media' => array('id' => $media1['Media']['id']), 
+        'Media' => array('id' => $media1['Media']['id']),
         'Tag' => array('Tag' => array($skyTag['Tag']['id'], $vacationTag['Tag']['id'])),
         'Category' => array('Category' => array($familyCategory['Category']['id'])),
         ));
     // media2: Tags: sky, vacation, nature. Category: family, friends
     $this->Media->save(array(
-        'Media' => array('id' => $media2['Media']['id']), 
+        'Media' => array('id' => $media2['Media']['id']),
         'Tag' => array('Tag' => array($skyTag['Tag']['id'], $vacationTag['Tag']['id'], $natureTag['Tag']['id'])),
         'Category' => array('Category' => array($familyCategory['Category']['id'], $friendsCategory['Category']['id'])),
         ));
-    // media3: Tags: vacation, nature. Category: 
+    // media3: Tags: vacation, nature. Category:
     $this->Media->save(array(
-        'Media' => array('id' => $media3['Media']['id']), 
+        'Media' => array('id' => $media3['Media']['id']),
         'Tag' => array('Tag' => array($vacationTag['Tag']['id'], $natureTag['Tag']['id']))
         ));
     // media4: Tags: vacation. Category: friends
     $this->Media->save(array(
-        'Media' => array('id' => $media4['Media']['id']), 
+        'Media' => array('id' => $media4['Media']['id']),
         'Tag' => array('Tag' => array($vacationTag['Tag']['id'])),
         'Category' => array('Category' => array($friendsCategory['Category']['id'])),
         ));
-    
+
     $this->mockUser($userB);
     $this->Search->addTag('-nature');
     $this->Search->addCategory('family');

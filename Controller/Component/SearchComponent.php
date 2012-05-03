@@ -496,7 +496,6 @@ class SearchComponent extends Component
     $tmp = $query;
     unset($query['limit']);
     unset($query['page']);
-    $this->controller->Media->bindModel(array('hasMany' => array('GroupsMedia' => array())));
     $count = $this->controller->Media->find('count', $query);
     $query = $tmp;
 
