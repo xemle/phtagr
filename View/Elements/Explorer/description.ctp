@@ -16,10 +16,22 @@
       __("Locations").' '.implode(', ', $this->ImageData->linkList('/explorer/location', Set::extract('/Location/name', $media))),
       array('class' => 'location list', 'escape' => false));
   }
-  if ($this->Search->getUser() == $currentUser['User']['username'] && !empty($media['Group']['name'])) {
-    echo $this->Html->tag('p',
-      __("Group").' '.implode(', ', $this->ImageData->linkList('/explorer/group', Set::extract('/Group/name', $media))),
-      array('class' => 'group list', 'escape' => false));
+  if ($currentUser['User']['role'] > ROLE_NOBODY) {
+    $groups = array();
+    $userGroupIds = Set::extract('/Group/id', $currentUser);
+    $userGroupIds = am(Set::extract('/Member/id', $currentUser));
+    foreach ($media['Group'] as $group) {
+      if ($media['User']['id'] == $currentUser['User']['id'] ||
+        in_array($group['id'], $userGroupIds) ||
+        !$group['isHidden']) {
+        $groups[] = $group;
+      }
+    }
+    if (count($groups)) {
+      echo $this->Html->tag('p',
+        __("Groups").' '.implode(', ', $this->ImageData->linkList('/explorer/group', Set::extract('/name', $groups))),
+        array('class' => 'group list', 'escape' => false));
+    }
   }
   if ($this->Search->getUser() == $currentUser['User']['username'] && $currentUser['User']['role'] >= ROLE_USER) {
     echo $this->Html->tag('p',
