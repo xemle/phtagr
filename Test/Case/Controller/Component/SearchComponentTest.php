@@ -52,7 +52,7 @@ class SearchComponentTestCase extends CakeTestCase {
         ),
       'groups' => 'notEmpty',
       'page' => 'numeric',
-      'show' => array('rule' => array('inList', array(12, 24, 64))),
+      'show' => array('rule' => array('inList', array(2, 12, 24, 64))),
       'sort' => array('rule' => array('inList', array('date', '-date', 'newest', 'changes', 'viewed', 'popularity', 'random', 'name'))),
       'tags' => array(
         'wordRule' => array('rule' => array('custom', '/^[-]?\w+$/')),
@@ -366,17 +366,19 @@ class SearchComponentTestCase extends CakeTestCase {
     $userA = $this->User->findById($userA['User']['id']);
     $this->mockUser($userA);
     $this->Search->addGroup('GroupA');
+    $this->Search->setShow(2);
     $result = $this->Search->paginate();
     $this->assertEqual(Set::extract('/Media/name', $result), array('IMG_1234.JPG'));
 
-    // Check for correct count.
-    $query = $this->Search->QueryBuilder->build($this->Search->getParams());
-    unset($query['limit']);
-    unset($query['page']);
-    $count = $this->Media->find('count', $query);
-    // Ignore - Result is 3 but should be 1
-    // Query: SELECT count(*) FROM `phtagr`.`pt_test_media` AS `Media` LEFT JOIN `phtagr`.`pt_test_groups_media` AS `AclGroups` ON (`Media`.`id` = `AclGroups`.`media_id`) LEFT JOIN ( SELECT GroupsMedia.media_id, COUNT(GroupsMedia.media_id) AS GroupCount FROM pt_test_groups_media AS GroupsMedia, pt_test_groups AS Groub WHERE GroupsMedia.group_id = Groub.id AND ( Groub.name = 'GroupA' ) GROUP BY GroupsMedia.media_id ) AS GroupsMedia ON Media.id = GroupsMedia.media_id LEFT JOIN `phtagr`.`pt_test_users` AS `User` ON (`Media`.`user_id` = `User`.`id`)  WHERE GroupCount >= 1 AND ((((`AclGroups`.`group_id` IN (1, 2)) AND (`Media`.`gacl` >= 32))) OR (`Media`.`user_id` = 1) OR (`Media`.`uacl` >= 32) OR (`Media`.`oacl` >= 32)) group by Media.id;
-    //$this->assertEqual($count, 1);
+    // Check if 3 assigned groups do not cause wrong page count
+    $search = $this->ControllerMock->request->params['search'];
+    $this->assertEqual($search['pageCount'], 1);
+
+    $result = $this->Search->paginateMedia($media1['Media']['id']);
+    $this->assertEqual($result['Media']['id'], $media1['Media']['id']);
+    $search = $this->ControllerMock->request->params['search'];
+    $this->assertEqual($search['prevMedia'], false);
+    $this->assertEqual($search['nextMedia'], false);
   }
 
   /**

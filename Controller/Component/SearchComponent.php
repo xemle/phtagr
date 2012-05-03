@@ -537,6 +537,8 @@ class SearchComponent extends Component
     $tmp = $query;
     unset($query['limit']);
     unset($query['page']);
+    // Ensure only unique Media ids are counted
+    $query['fields'] = 'DISTINCT Media.id';
     $count = $this->controller->Media->find('count', $query);
     $query = $tmp;
 
@@ -555,7 +557,7 @@ class SearchComponent extends Component
       $this->controller->request->params['search'] = $params;
       return array();
     }
-    $params['pageCount'] = ceil($count / $this->getShow(12));
+    $params['pageCount'] = intval(ceil($count / $this->getShow(12)));
     if ($this->getPage() > $params['pageCount']) {
       $this->setPage($params['pageCount']);
       $params['data'] = $this->getParams();
@@ -611,10 +613,13 @@ class SearchComponent extends Component
 
   function paginateMedia($id) {
     $query = $this->QueryBuilder->build($this->getParams());
+    $tmp = $query;
     unset($query['limit']);
     unset($query['offset']);
+    // Ensure only unique Media ids are counted
+    //$query['fields'] = 'DISTINCT Media.id';
     $count = $this->controller->Media->find('count', $query);
-
+    $query = $tmp;
     $params = array(
       'pos' => 0,
       'current' => false,
