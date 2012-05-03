@@ -1,9 +1,9 @@
-<?php 
-  $this->Search->initialize(); 
+<?php
+  $this->Search->initialize();
   echo $this->element('Explorer/date', array('media' => $media));
   if (count($media['Tag'])) {
-    echo $this->Html->tag('p', 
-      __("Tags").' '.implode(', ', $this->ImageData->linkList('/explorer/tag', Set::extract('/Tag/name', $media))), 
+    echo $this->Html->tag('p',
+      __("Tags").' '.implode(', ', $this->ImageData->linkList('/explorer/tag', Set::extract('/Tag/name', $media))),
       array('class' => 'tag list', 'escape' => false));
   }
   if (count($media['Category'])) {
