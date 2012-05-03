@@ -11,9 +11,18 @@
       __("Categories").' '.implode(', ', $this->ImageData->linkList('/explorer/category', Set::extract('/Category/name', $media))),
       array('class' => 'category list', 'escape' => false));
   }
-  if (count($media['Location'])) {
+  if (count($media['Location'] || ($media['Media']['latitude'] && $media['Media']['longitude']))) {
+    $links = $this->ImageData->linkList('/explorer/location', Set::extract('/Location/name', $media));
+    if ($media['Media']['latitude'] && $media['Media']['longitude']) {
+      $geo = sprintf('%.2f', abs($media['Media']['latitude']));
+      $geo .= $media['Media']['latitude'] >= 0 ? 'N/' : 'S/';
+      $geo .= sprintf('%.2f', abs($media['Media']['longitude']));
+      $geo .= $media['Media']['longitude'] >= 0 ? 'E' : 'W';
+      $links[] = $geo;
+    }
+
     echo $this->Html->tag('p',
-      __("Locations").' '.implode(', ', $this->ImageData->linkList('/explorer/location', Set::extract('/Location/name', $media))),
+      __("Locations").' '.implode(', ', $links),
       array('class' => 'location list', 'escape' => false));
   }
   if ($currentUser['User']['role'] > ROLE_NOBODY) {
