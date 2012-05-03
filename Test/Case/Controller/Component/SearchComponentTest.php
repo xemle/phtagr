@@ -40,11 +40,11 @@ class SearchComponentTestCase extends CakeTestCase {
  */
 	public function setUp() {
 		parent::setUp();
-		
+
     $this->loadControllerMock();
     $this->bindModels();
     $this->bindCompontents();
-		
+
     $this->Search->validate = array(
       'categories' => array(
         'wordRule' => array('rule' => array('custom', '/^[-]?\w+$/')),

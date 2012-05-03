@@ -30,8 +30,11 @@ class SearchComponent extends Component
 
   var $_data;
 
-  /** Parameter validation array
-    @see http://book.cakephp.org/view/125/Data-Validation */
+  /**
+   * Parameter validation array
+   *
+   * @see http://book.cakephp.org/view/125/Data-Validation
+   */
   var $validate = array(
     'categories' => array('rule' => array('maxLength', 30)),
     'category_op' => array('rule' => array('inList', array('AND', 'OR'))),
@@ -63,13 +66,19 @@ class SearchComponent extends Component
     'visibility' => array('rule' => array('inList', array('private', 'group', 'user', 'public'))),
     );
 
-  /** Array of disabled parameter names */
+  /**
+   * Array of disabled parameter names
+   */
   var $disabled = array();
 
-  /** Base URL for search helper */
+  /**
+   * Base URL for search helper
+   */
   var $baseUri = '/explorer/query';
 
-  /** Default values */
+  /**
+   * Default values
+   */
   var $defaults = array(
     'page' => '1',
     'pos' => false,
@@ -77,7 +86,9 @@ class SearchComponent extends Component
     'sort' => 'default',
     );
 
-  /** List of chars to escape on setParam() */
+  /**
+   * List of chars to escape on setParam()
+   */
   var $escapeChars = '=,/';
 
   function initialize(&$controller) {
@@ -93,23 +104,32 @@ class SearchComponent extends Component
     $this->_data = $this->defaults;
   }
 
-  /** Returns all parameters
-    @return Parameter array */
+  /**
+   * Returns all parameters
+   *
+   * @return Parameter array
+   */
   function getParams() {
     return $this->_data;
   }
 
-  /** Set all parameters
-    @param data Parameter array
-    @note The parameters are not validated! */
+  /**
+   * Set all parameters
+   *
+   * @param data Parameter array
+   * @note The parameters are not validated!
+   */
   function setParams($data = array()) {
     $this->_data = $data;
   }
 
-  /** Returns parameter
-    @param name Name of parameter
-    @param default Default value, if the parameter does not exists. Default
-    value is null */
+  /**
+   * Returns parameter
+   *
+   * @param name Name of parameter
+   * @param default Default value, if the parameter does not exists. Default
+   * value is null
+   */
   function getParam($name, $default = null) {
     if (!empty($this->_data[$name])) {
       return $this->_data[$name];
@@ -118,12 +138,15 @@ class SearchComponent extends Component
     }
   }
 
-  /** Set a singular parameter
-    @param name Parameter name
-    @param value Parameter value
-    @param validate Optional parameter to validate the parameter. Default is
-    true
-    @return True on success */
+  /**
+   * Set a singular parameter
+   *
+   * @param name Parameter name
+   * @param value Parameter value
+   * @param validate Optional parameter to validate the parameter. Default is
+   * true
+   * @return True on success
+   */
   function setParam($name, $value, $validate = true) {
     if ($validate === false || $this->validate($name, $value)) {
       $this->_data[$name] = $value;
@@ -133,12 +156,15 @@ class SearchComponent extends Component
     }
   }
 
-  /** Add a parameter to an array.
-    @param name Parameter name.
-    @param value Parameter value (which will be pluralized)
-    @param validate Optional parameter to validate the parameter. Default is
-    true
-    @note The name will be pluralized. */
+  /**
+   * Add a parameter to an array.
+   *
+   * @param name Parameter name.
+   * @param value Parameter value (which will be pluralized)
+   * @param validate Optional parameter to validate the parameter. Default is
+   * true
+   * @note The name will be pluralized.
+   */
   function addParam($name, $value, $validate = true) {
     $name = Inflector::pluralize($name);
     if (is_array($value)) {
@@ -286,10 +312,13 @@ class SearchComponent extends Component
     }
   }
 
-  /** Validates the parameter value
-    @param name Parameter name
-    @param value Parameter value
-    @result True on success validation */
+  /**
+   * Validates the parameter value
+   *
+   * @param name Parameter name
+   * @param value Parameter value
+   * @result True on success validation
+   */
   function validate($name, $value) {
     if (!$value && $value !== 0) {
       Logger::verbose("Parameter value of '$name' is empty!");
@@ -330,10 +359,13 @@ class SearchComponent extends Component
     return $result;
   }
 
-  /** Dispatch the rule
-    @param ruleSet Rule name or single rule array
-    @param check Value to check
-    @result True on successful validation */
+  /**
+   * Dispatch the rule
+   *
+   * @param ruleSet Rule name or single rule array
+   * @param check Value to check
+   * @result True on successful validation
+   */
   function _dispatchRule($ruleSet, $check) {
     if (!is_array($ruleSet)) {
       $rule = $ruleSet;
@@ -368,7 +400,9 @@ class SearchComponent extends Component
     return $result;
   }
 
-  /** Set the disabled search fields according to the user role */
+  /**
+   * Set the disabled search fields according to the user role
+   */
   function _setDisabledFields() {
     // disable search parameter after role
     $role = $this->controller->getUserRole();
@@ -389,7 +423,9 @@ class SearchComponent extends Component
     $this->disabled = $disabled;
   }
 
-  /** parse all parameters given in the URL and adds them to the search */
+  /**
+   * parse all parameters given in the URL and adds them to the search
+   */
   function parseArgs() {
     $this->_setDisabledFields();
     foreach($this->controller->passedArgs as $name => $value) {
@@ -406,7 +442,8 @@ class SearchComponent extends Component
     }
   }
 
-  /** Convert an URL to decoded crumbs
+  /**
+   * Convert an URL to decoded crumbs
    *
    * @param $url Current URL
    * @param $skip Skip parts splited by slash '/'
@@ -425,7 +462,8 @@ class SearchComponent extends Component
     return $crumbs;
   }
 
-  /** Encode crumbs for an final URL string
+  /**
+   * Encode crumbs for an final URL string
    *
    * @param $crumbs Array of crumbs
    * @return Array of encoded crumbs for an URL
@@ -441,8 +479,11 @@ class SearchComponent extends Component
     return $escaped;
   }
 
-  /** Convert the current search parameter to breadcrump stack
-    @return Array of crumbs */
+  /**
+   * Convert the current search parameter to breadcrump stack
+   *
+   * @return Array of crumbs
+   */
   function convertToCrumbs() {
     $params = $this->getParams();
     $crumbs = array();
@@ -543,8 +584,8 @@ class SearchComponent extends Component
   }
 
   /**
-    Sets the data for the search helper
-    */
+   * Sets the data for the search helper
+   */
   function setHelperData() {
     $params = array(
       'pageCount' => 0,
