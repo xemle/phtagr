@@ -242,6 +242,7 @@ class QueryBuilderComponent extends Component
       $query['conditions']['exclude'] = $this->buildConditions($exclude);
     }
     $this->_buildAccessConditions(&$data, &$query);
+    $query['group'] = 'Media.id';
     return $query;
   }
 
