@@ -32,7 +32,7 @@
     foreach ($media['Group'] as $group) {
       if ($media['User']['id'] == $currentUser['User']['id'] ||
         in_array($group['id'], $userGroupIds) ||
-        !$group['isHidden']) {
+        !$group['is_hidden']) {
         $groups[] = $group;
       }
     }
