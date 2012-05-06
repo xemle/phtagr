@@ -539,6 +539,7 @@ class SearchComponent extends Component
     unset($query['page']);
     // Ensure only unique Media ids are counted
     $query['fields'] = 'DISTINCT Media.id';
+    $query['recursive'] = -1;
     $count = $this->controller->Media->find('count', $query);
     $query = $tmp;
 
@@ -617,7 +618,8 @@ class SearchComponent extends Component
     unset($query['limit']);
     unset($query['offset']);
     // Ensure only unique Media ids are counted
-    //$query['fields'] = 'DISTINCT Media.id';
+    $query['fields'] = 'DISTINCT Media.id';
+    $query['recursive'] = -1;
     $count = $this->controller->Media->find('count', $query);
     $query = $tmp;
     $params = array(
