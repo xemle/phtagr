@@ -530,7 +530,7 @@ class Media extends AppModel
       } elseif ($user['User']['role'] == ROLE_GUEST) {
         $groupIds = Set::extract('/Member/id', $user);
         if (count($groupIds)) {
-          $conditions['AclGroups.id'] = $groupIds;
+          $conditions['AclGroups.group_id'] = $groupIds;
           $conditions['Media.gacl >='] = $level;
           $joins[] = $this->buildAclJoin('AclGroups');
         } else {
