@@ -15,7 +15,7 @@
 <h3><?php echo $media['Media']['name']; ?></h3>
 <?php
   $date = $this->Html->link(
-    $this->Time->relativeTime($media['Media']['date']),
+    $this->Time->timeAgoInWords($media['Media']['date']),
     '/explorer/date/' . date("Y/m/d", strtotime($media['Media']['date']))
     );
   echo '<p>by ' . $this->Html->link($media['User']['username'], "/explorer/user/".$media['User']['username']) . ' ' . $date . '</p>';
