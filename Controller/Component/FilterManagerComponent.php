@@ -272,7 +272,7 @@ class FilterManagerComponent extends Component {
    *
    * @param filename Current filename
    * @param error Error code
-   * @param msg Optiona error message or longer description
+   * @param msg Optional error message or longer description
    * @param data Optional error data
    */
   function addError($filename, $error, $msg = '', $data = false) {
@@ -284,6 +284,15 @@ class FilterManagerComponent extends Component {
    */
   function clearErrors() {
     $this->errors = array();
+  }
+
+  /**
+   * Returns array of all errors
+   *
+   * @return Array filename to error array
+   */
+  function getErrors() {
+    return $this->errors;
   }
 
   /**
@@ -354,10 +363,23 @@ class FilterManagerComponent extends Component {
     foreach ($media['File'] as $file) {
       $file = $this->controller->MyFile->findById($file['id']);
       $filename = $this->controller->MyFile->getFilename($file);
+      if (!file_exists($filename)) {
+        Logger::err("File of media {$media['Media']['id']} does not exist: $filename");
+        $this->addError($filename, 'FileNotFound');
+        $success = false;
+        continue;
+      }
       $filter = $this->getFilterByExtension($filename);
       if (!$filter) {
         Logger::verbose("Could not find a filter for $filename");
+        $this->addError($filename, 'FilterNotFound');
         $filterMissing = true;
+        continue;
+      }
+      if (!is_writable(dirname($filename))) {
+        Logger::err("Directory of file of media {$media['Media']['id']} is not writeable: $filename");
+        $this->addError($filename, 'DirectoryNotWritable');
+        $success = false;
         continue;
       }
       $filterMissing = false;

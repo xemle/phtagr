@@ -31,12 +31,15 @@ class ReadOnlyImageFilterComponent extends BaseFilterComponent {
     return array('bmp', 'gif', 'png', 'psd', 'tif', 'tiff');
   }
 
-  /** Read the meta data from the file
+  /**
+   * Read the meta data from the file
+   *
    * @param file File model data
    * @param media Reference of Media model data
    * @param options Options
    *  - noSave if set dont save model data
-   * @return The image data array or False on error */
+   * @return The image data array or False on error
+   */
   function read($file, &$media, $options = array()) {
     $options = am(array('noSave' => false), $options);
     $filename = $this->controller->MyFile->getFilename($file);
@@ -97,13 +100,18 @@ class ReadOnlyImageFilterComponent extends BaseFilterComponent {
     return $media;
   }
 
-  /** Write the meta data to an image file
+  /**
+   * Write the meta data to an image file
+   *
    * @param file File model data
    * @param media Media model data
    * @param options Array of options
-   * @return False on error */
+   * @return False on error
+   */
   function write($file, $media = null, $options = array()) {
     Logger::warn("Write action is not supported for {$file['File']['file']}");
+    $filename = $this->controller->MyFile->getFilename($file);
+    $this->FilterManager->addError($filename, 'MetaDataWriteNotSupported');
     return false;
   }
 

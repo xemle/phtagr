@@ -359,8 +359,9 @@ class BrowserController extends AppController
 
     $conditions = array('Media.user_id' => $userId, 'Media.flag & '.MEDIA_FLAG_DIRTY.' > 0');
     $data['unsynced'] = $this->Media->find('count', array('conditions' => $conditions));
+    $data['errors'] = false;
     if ($action == 'run') {
-      $query = array('conditions' => $conditions, 'limit' => 10, 'order' => 'Media.modified ASC');
+      $query = array('conditions' => $conditions, 'limit' => 10, 'order' => 'Media.id ASC');
       $results = $this->Media->find('all', $query);
 
       // clear file cache
@@ -371,6 +372,7 @@ class BrowserController extends AppController
         $executionTime -= 5;
       }
 
+      $this->FilterManager->clearErrors();
       while (count($results)) {
         foreach ($results as $media) {
           if (!$this->FilterManager->write($media)) {
@@ -380,22 +382,23 @@ class BrowserController extends AppController
             Logger::verbose("Synced meta data of media {$media['Media']['name']} ({$media['Media']['id']})");
             $data['synced'][] = $media;
           }
+          $lastId = $media['Media']['id'];
 
           $now = microtime(true);
           if ($executionTime > 0 && $now - $start > $executionTime) {
             break;
           }
-          $modified = $media['Media']['modified'];
         }
         if ($executionTime > 0 && $now - $start > $executionTime) {
           break;
         }
         // ensure we query not already called media (which might be unsynced due
         // an error)
-        $query['conditions']['Media.modified >'] = $modified;
+        $query['conditions']['Media.id >'] = $lastId;
         $results = $this->Media->find('all', $query);
       }
       $data['unsynced'] = $this->Media->find('count', array('conditions' => $conditions));
+      $data['errors'] = $this->FilterManager->getErrors();
     }
     $this->request->data = $data;
   }
