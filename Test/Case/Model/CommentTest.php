@@ -63,6 +63,10 @@ class CommentTestCase extends CakeTestCase {
 		parent::tearDown();
 	}
 
+  /**
+   * Test comment pagination if a user has access via multiple groups
+   * to a media. A comment should be counted only once.
+   */
   public function testPaginateWithMultipleGroups() {
     $userA = $this->User->save($this->User->create(array('username' => 'userA', 'role' => ROLE_USER)));
     $userB = $this->User->save($this->User->create(array('username' => 'userB', 'role' => ROLE_USER)));

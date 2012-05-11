@@ -87,15 +87,9 @@ class MediaWriteTestCase extends CakeTestCase {
     $this->userId = $this->User->getLastInsertID();
 
     $this->Option = ClassRegistry::init('Option');
-    if (file_exists('/usr/bin/ffmpeg')) {
-      $this->Option->setValue('bin.ffmpeg', '/usr/bin/ffmpeg', 0);
-    }
-    if (file_exists('/usr/bin/exiftool')) {
-      $this->Option->setValue('bin.exiftool', '/usr/bin/exiftool', 0);
-    }
-    if (file_exists('/usr/bin/convert')) {
-      $this->Option->setValue('bin.convert', '/usr/bin/convert', 0);
-    }
+    $this->Option->setValue('bin.ffmpeg', $this->findExecutable('ffmpeg'), 0);
+    $this->Option->setValue('bin.exiftool', $this->findExecutable('exiftool'), 0);
+    $this->Option->setValue('bin.convert', $this->findExecutable('convert'), 0);
 
     $CakeRequest = new CakeRequest();
     $CakeResponse = new CakeResponse();
@@ -107,6 +101,25 @@ class MediaWriteTestCase extends CakeTestCase {
 
 
     $this->Folder->create(TEST_FILES_TMP);
+  }
+
+  private function findExecutable($command) {
+    if (DS != '/') {
+      throw new Exception("Non Unix OS are not supported yet");
+    }
+    $paths = array('/usr/local/bin/', '/usr/bin/');
+    foreach ($paths as $path) {
+      if (file_exists($path . $command)) {
+        return $path . $command;
+      }
+    }
+    $result = array();
+    exec('which ' . $command, &$result);
+    if ($result) {
+      return $result[0];
+    } else {
+      return false;
+    }
   }
 
   /**
@@ -135,6 +148,37 @@ class MediaWriteTestCase extends CakeTestCase {
     return $dst;
   }
 
+  /**
+   * Extract metadata of a file via exiftool
+   *
+   * @param String $filename
+   * @return Array Key to value hash map
+   */
+  private function extractMeta($filename) {
+    $option = $this->User->Option->findByName('bin.exiftool');
+    if (!$option) {
+      return array();
+    }
+    $cmd = $option['Option']['value'];
+    $cmd .= ' ' . escapeshellarg('-n');
+    $cmd .= ' ' . escapeshellarg('-S');
+    $cmd .= ' ' . escapeshellarg($filename);
+    $result = array();
+    $exitCode = 0;
+    exec($cmd, &$result, &$exitcode);
+    if (!$result) {
+      return array();
+    }
+
+    $values = array();
+    foreach ($result as $line) {
+      if (preg_match('/(\w+):\s(.*)/', $line, $m)) {
+        $values[$m[1]] = $m[2];
+      }
+    }
+    return $values;
+  }
+
   function testThumbnailCreation() {
     $filename = TEST_FILES_TMP . 'MVI_7620.OGG';
     copy(RESOURCES . 'MVI_7620.OGG', $filename);
@@ -150,9 +194,12 @@ class MediaWriteTestCase extends CakeTestCase {
     $this->Media->save($tmp);
 
     $media = $this->Media->findById($media['Media']['id']);
-    $this->Controller->FilterManager->write(&$media);
+    $result = $this->Controller->FilterManager->write(&$media);
+    $this->assertEqual($result, true);
 
     $thumb = TEST_FILES_TMP . 'MVI_7620.thm';
     $this->assertEqual(file_exists($thumb), true);
+    $values = $this->extractMeta($thumb);
+    $this->assertEqual($values['Keywords'], 'thailand');
   }
 }
