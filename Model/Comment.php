@@ -36,7 +36,8 @@ class Comment extends AppModel {
         'order' => $order,
         'limit' => $limit,
         'page' => $page,
-        'recursive' => $recursive), $extra);
+        'recursive' => $recursive,
+        'group' => 'Comment.id'), $extra);
     $aclQuery = $this->Media->buildAclQuery($this->currentUser);
     if (count($aclQuery['joins'])) {
       $joinConditions = "`{$this->alias}`.`media_id` = `{$this->Media->alias}`.`{$this->Media->primaryKey}`";
@@ -53,6 +54,7 @@ class Comment extends AppModel {
 
   public function paginateCount($conditions = null, $recursive = 0, $extra = array()) {
     $query = am(array(
+        'fields' => 'DISTINCT Comment.id',
         'conditions' => $conditions,
         'recursive' => $recursive), $extra);
     $aclQuery = $this->Media->buildAclQuery($this->currentUser);
