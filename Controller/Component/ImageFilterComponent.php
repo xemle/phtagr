@@ -426,6 +426,7 @@ class ImageFilterComponent extends BaseFilterComponent {
     $args['-o'] = $tmp;
     $args[] = $filename;
     $result = $this->Command->run($bin, $args);
+    clearstatcache(true, $tmp);
 
     if ($result != 0 || !file_exists($tmp)) {
       Logger::err("$bin returns with error: $result");
@@ -448,6 +449,7 @@ class ImageFilterComponent extends BaseFilterComponent {
     if (!$this->Media->deleteFlag(&$media, MEDIA_FLAG_DIRTY)) {
       $this->controller->warn("Could not update image data of media {$media['Media']['id']}");
     }
+    return true;
   }
 
   /**
