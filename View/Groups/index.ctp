@@ -59,6 +59,11 @@
 </table>
 <?php else: ?>
 <div class="info">
-<?php echo __('Currently no image groups are assigned. At the one hand each image could be assigned to a specific group. On the other hand a guest can be member of a set of groups. The guest is than able to view the images from his groups.'); ?>
+<?php 
+  echo __('You have currently no media groups created.'); 
+?>
 </div>
+<p><?php
+  echo $this->Html->link(__('Create Group'), array('controller' => 'groups', 'action' => 'create'), array('class' => 'button')); 
+?></p>
 <?php endif; ?>
