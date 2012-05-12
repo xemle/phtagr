@@ -422,7 +422,7 @@ class QueryBuilderComponent extends Component
         } else {
           $userId = -1;
         }
-      } else {
+      } else if ($data['user'] != $me['User']['username']) {
         // Deny invalid user parameter
         $query['conditions'][] = "1 = 0";
         return;

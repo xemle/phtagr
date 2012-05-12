@@ -529,6 +529,20 @@ class SearchComponentTestCase extends CakeTestCase {
     $result = $this->Search->paginate();
     $this->assertEqual(Set::extract('/Media/name', $result), array('IMG_1234.JPG'));
 
+    $this->Search->setUser('user');
+    $this->Search->setVisibility('public');
+    $result = $this->Search->paginate();
+    $this->assertEqual(Set::extract('/Media/name', $result), array('IMG_1231.JPG'));
+    $this->Search->setVisibility('user');
+    $result = $this->Search->paginate();
+    $this->assertEqual(Set::extract('/Media/name', $result), array('IMG_1232.JPG'));
+    $this->Search->setVisibility('group');
+    $result = $this->Search->paginate();
+    $this->assertEqual(Set::extract('/Media/name', $result), array('IMG_1233.JPG'));
+    $this->Search->setVisibility('private');
+    $result = $this->Search->paginate();
+    $this->assertEqual(Set::extract('/Media/name', $result), array('IMG_1234.JPG'));
+
     // Add test for admin user who is allowed to query other
     $this->mockUser($admin);
     $this->Search->setUser('user');
@@ -560,6 +574,38 @@ class SearchComponentTestCase extends CakeTestCase {
     $this->Search->setVisibility('private');
     $result = $this->Search->paginate();
     $this->assertEqual(count($result), 0);
+  }
+
+  /**
+   * Test visibility parameter to check access rights
+   */
+  public function testVisibilityForAdmin() {
+    $admin = $this->User->save($this->User->create(array('username' => 'admin', 'role' => ROLE_ADMIN)));
+
+    $media1 = $this->Media->save($this->Media->create(array('name' => 'IMG_1231.JPG', 'user_id' => $admin['User']['id'], 'gacl' => ACL_READ_PREVIEW, 'uacl' => ACL_READ_PREVIEW, 'oacl' => ACL_READ_PREVIEW)));
+    $media2 = $this->Media->save($this->Media->create(array('name' => 'IMG_1232.JPG', 'user_id' => $admin['User']['id'], 'gacl' => ACL_READ_PREVIEW, 'uacl' => ACL_READ_PREVIEW)));
+    $media3 = $this->Media->save($this->Media->create(array('name' => 'IMG_1233.JPG', 'user_id' => $admin['User']['id'], 'gacl' => ACL_READ_PREVIEW)));
+    $media4 = $this->Media->save($this->Media->create(array('name' => 'IMG_1234.JPG', 'user_id' => $admin['User']['id'])));
+
+    $admin = $this->User->findById($admin['User']['id']);
+
+    // Allow 'user' parameter
+    $this->Search->disabled = array();
+
+    $this->mockUser($admin);
+    $this->Search->setUser('admin');
+    $this->Search->setVisibility('public');
+    $result = $this->Search->paginate();
+    $this->assertEqual(Set::extract('/Media/name', $result), array('IMG_1231.JPG'));
+    $this->Search->setVisibility('user');
+    $result = $this->Search->paginate();
+    $this->assertEqual(Set::extract('/Media/name', $result), array('IMG_1232.JPG'));
+    $this->Search->setVisibility('group');
+    $result = $this->Search->paginate();
+    $this->assertEqual(Set::extract('/Media/name', $result), array('IMG_1233.JPG'));
+    $this->Search->setVisibility('private');
+    $result = $this->Search->paginate();
+    $this->assertEqual(Set::extract('/Media/name', $result), array('IMG_1234.JPG'));
   }
 
   /**
