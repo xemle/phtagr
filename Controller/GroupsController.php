@@ -26,7 +26,9 @@ class GroupsController extends AppController {
   function beforeFilter() {
     parent::beforeFilter();
     $this->subMenu = array(
-      'index' => __("List Group"),
+      'index' => __("My Groups"),
+      'members' => __("My Memberships"),
+      'all' => __("All Groups"),
       'create' => __("Create Group"),
       );
     $this->requireRole(ROLE_USER);
@@ -47,6 +49,22 @@ class GroupsController extends AppController {
   }
 
   function index() {
+    $userId = $this->getUserId();
+    if ($this->hasRole(ROLE_ADMIN)) {
+      $this->request->data = $this->Group->find('all', array('order' => 'Group.name'));
+    } else {
+      $this->request->data = $this->Group->find('all', array('conditions' => array('User.id' => $userId), 'order' => 'Group.name'));
+    }
+  }
+
+  function members() {
+    $userId = $this->getUserId();
+    $this->Group->bindModel(array('hasOne' => array('GroupsUser' => array())));
+    $this->request->data = $this->Group->find('all', array('conditions' => array('GroupsUser.user_id' => $userId)));
+    Logger::debug($this->request->data);
+  }
+
+  function all() {
     $userId = $this->getUserId();
     if ($this->hasRole(ROLE_ADMIN)) {
       $this->request->data = $this->Group->find('all', array('order' => 'Group.name'));

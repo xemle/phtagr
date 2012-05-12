@@ -8,6 +8,7 @@
 <?php
   $headers = array(
     __('Name'),
+    __('From User'),
     __('Description'),
     __('Members'),
     __('Actions'));
@@ -47,6 +48,7 @@
     }
     $row = array(
       $this->Html->link($group['Group']['name'], "view/{$group['Group']['name']}", array('title' => $group['Group']['description'])),
+      $this->Html->link($group['User']['username'], "/users/view/{$group['User']['username']}"),
       $this->Text->truncate($group['Group']['description'], 30, array('ending' => '...', 'exact' => false, 'html' => false)),
       count($group['Member']),
       $this->Html->tag('div', implode(' ', $actions), array('class' => 'actionlist'))
