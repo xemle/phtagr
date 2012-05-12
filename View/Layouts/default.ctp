@@ -21,7 +21,7 @@
 <body><div id="page">
 
 <div id="header"><div class="sub">
-<h1><?php echo $this->Option->get('general.title', 'phTagr.'); ?></h1>
+<h1><?php echo $this->Html->link($this->Option->get('general.title', 'phTagr.'), '/'); ?></h1>
 <span class="subtitle"><?php echo $this->Option->get('general.subtitle', 'Tag, Browse, and Share Your Photos'); ?></span>
 <?php echo $this->Menu->menu('top-menu'); ?>
 </div></div><!-- #header/sub -->
