@@ -413,17 +413,23 @@ class QueryBuilderComponent extends Component
     // allow only admins to query others visibility, otherwise query only media
     // of the current user
     $me = $this->controller->getUser();
-    if (isset($data['user']) && $data['user'] != $me['User']['username'] && $me['User']['role'] == ROLE_ADMIN) {
-      $user = $this->controller->User->findByUsername($data['user']);
-      if ($user && $user['User']['role'] >= ROLE_USER) {
-        $userId = $user['User']['id'];
+    $userId = $this->controller->getUserId();
+    if (isset($data['user'])) {
+      if ($data['user'] != $me['User']['username'] && $me['User']['role'] == ROLE_ADMIN) {
+        $user = $this->controller->User->findByUsername($data['user']);
+        if ($user && $user['User']['role'] >= ROLE_USER) {
+          $userId = $user['User']['id'];
+        } else {
+          $userId = -1;
+        }
       } else {
-        $userId = -1;
+        // Deny invalid user parameter
+        $query['conditions'][] = "1 = 0";
+        return;
       }
-    } else {
-      $userId = $this->controller->getUserId();
     }
-    $query['conditions'][] = $this->_buildCondition("User.id", $userId);
+
+    $query['conditions'][] = $this->_buildCondition("Media.user_id", $userId);
 
     // setup visibility level
     switch ($value) {

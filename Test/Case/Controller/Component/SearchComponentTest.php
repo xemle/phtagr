@@ -494,4 +494,104 @@ class SearchComponentTestCase extends CakeTestCase {
     $result = $this->Search->paginate();
     $this->assertEqual(array('IMG_1234.JPG', 'IMG_3456.JPG'), Set::extract('/Media/name', $result));
   }
+
+  /**
+   * Test visibility parameter to check access rights
+   */
+  public function testVisibility() {
+    $admin = $this->User->save($this->User->create(array('username' => 'admin', 'role' => ROLE_ADMIN)));
+    $user = $this->User->save($this->User->create(array('username' => 'user', 'role' => ROLE_USER)));
+    $other = $this->User->save($this->User->create(array('username' => 'other', 'role' => ROLE_USER)));
+
+    $media1 = $this->Media->save($this->Media->create(array('name' => 'IMG_1231.JPG', 'user_id' => $user['User']['id'], 'gacl' => ACL_READ_PREVIEW, 'uacl' => ACL_READ_PREVIEW, 'oacl' => ACL_READ_PREVIEW)));
+    $media2 = $this->Media->save($this->Media->create(array('name' => 'IMG_1232.JPG', 'user_id' => $user['User']['id'], 'gacl' => ACL_READ_PREVIEW, 'uacl' => ACL_READ_PREVIEW)));
+    $media3 = $this->Media->save($this->Media->create(array('name' => 'IMG_1233.JPG', 'user_id' => $user['User']['id'], 'gacl' => ACL_READ_PREVIEW)));
+    $media4 = $this->Media->save($this->Media->create(array('name' => 'IMG_1234.JPG', 'user_id' => $user['User']['id'])));
+
+    $admin = $this->User->findById($admin['User']['id']);
+    $user = $this->User->findById($user['User']['id']);
+    $other = $this->User->findById($other['User']['id']);
+
+    // Allow 'user' parameter
+    $this->Search->disabled = array();
+
+    $this->mockUser($user);
+    $this->Search->setVisibility('public');
+    $result = $this->Search->paginate();
+    $this->assertEqual(Set::extract('/Media/name', $result), array('IMG_1231.JPG'));
+    $this->Search->setVisibility('user');
+    $result = $this->Search->paginate();
+    $this->assertEqual(Set::extract('/Media/name', $result), array('IMG_1232.JPG'));
+    $this->Search->setVisibility('group');
+    $result = $this->Search->paginate();
+    $this->assertEqual(Set::extract('/Media/name', $result), array('IMG_1233.JPG'));
+    $this->Search->setVisibility('private');
+    $result = $this->Search->paginate();
+    $this->assertEqual(Set::extract('/Media/name', $result), array('IMG_1234.JPG'));
+
+    // Add test for admin user who is allowed to query other
+    $this->mockUser($admin);
+    $this->Search->setUser('user');
+    $this->Search->setVisibility('public');
+    $result = $this->Search->paginate();
+    $this->assertEqual(Set::extract('/Media/name', $result), array('IMG_1231.JPG'));
+    $this->Search->setVisibility('user');
+    $result = $this->Search->paginate();
+    $this->assertEqual(Set::extract('/Media/name', $result), array('IMG_1232.JPG'));
+    $this->Search->setVisibility('group');
+    $result = $this->Search->paginate();
+    $this->assertEqual(Set::extract('/Media/name', $result), array('IMG_1233.JPG'));
+    $this->Search->setVisibility('private');
+    $result = $this->Search->paginate();
+    $this->assertEqual(Set::extract('/Media/name', $result), array('IMG_1234.JPG'));
+
+    // Test for other user which query is denied
+    $this->mockUser($other);
+    $this->Search->setUser('user');
+    $this->Search->setVisibility('public');
+    $result = $this->Search->paginate();
+    $this->assertEqual(count($result), 0);
+    $this->Search->setVisibility('user');
+    $result = $this->Search->paginate();
+    $this->assertEqual(count($result), 0);
+    $this->Search->setVisibility('group');
+    $result = $this->Search->paginate();
+    $this->assertEqual(count($result), 0);
+    $this->Search->setVisibility('private');
+    $result = $this->Search->paginate();
+    $this->assertEqual(count($result), 0);
+  }
+
+  /**
+   * Test visibility parameter to check access rights with group restriction
+   */
+  public function testVisibilityWithGroups() {
+    $user = $this->User->save($this->User->create(array('username' => 'user', 'role' => ROLE_USER)));
+
+    $group = $this->Group->save($this->Group->create(array('name' => 'aGroup', 'user_id' => $user['User']['id'])));
+    $media1 = $this->Media->save($this->Media->create(array('name' => 'IMG_1231.JPG', 'user_id' => $user['User']['id'], 'gacl' => ACL_READ_PREVIEW)));
+    $media2 = $this->Media->save($this->Media->create(array('name' => 'IMG_1232.JPG', 'user_id' => $user['User']['id'], 'gacl' => ACL_READ_PREVIEW)));
+    $this->Media->save(array('Media' => array('id' => $media1['Media']['id']), 'Group' => array('Group' => array($group['Group']['id']))));
+
+    $user = $this->User->findById($user['User']['id']);
+
+    // Allow 'user' parameter
+    $this->Search->disabled = array();
+
+    $this->mockUser($user);
+    // Without group restriction
+    $this->Search->setVisibility('group');
+    $result = $this->Search->paginate();
+    $this->assertEqual(Set::extract('/Media/name', $result), array('IMG_1231.JPG', 'IMG_1232.JPG'));
+    // Group inclusion
+    $this->Search->addGroup('aGroup');
+    $result = $this->Search->paginate();
+    $this->assertEqual(Set::extract('/Media/name', $result), array('IMG_1231.JPG'));
+    // Group exclusion
+    $this->Search->delGroup('aGroup');
+    $this->Search->addGroup('-aGroup');
+    $result = $this->Search->paginate();
+    $this->assertEqual(Set::extract('/Media/name', $result), array('IMG_1232.JPG'));
+  }
+
 }
