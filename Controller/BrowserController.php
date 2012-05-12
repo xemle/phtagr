@@ -359,7 +359,6 @@ class BrowserController extends AppController
 
     $conditions = array('Media.user_id' => $userId, 'Media.flag & '.MEDIA_FLAG_DIRTY.' > 0');
     $data['unsynced'] = $this->Media->find('count', array('conditions' => $conditions));
-    $data['errors'] = false;
     if ($action == 'run') {
       $query = array('conditions' => $conditions, 'limit' => 10, 'order' => 'Media.id ASC');
       $results = $this->Media->find('all', $query);
