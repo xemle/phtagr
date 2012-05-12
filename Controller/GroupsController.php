@@ -50,11 +50,7 @@ class GroupsController extends AppController {
 
   function index() {
     $userId = $this->getUserId();
-    if ($this->hasRole(ROLE_ADMIN)) {
-      $this->request->data = $this->Group->find('all', array('order' => 'Group.name'));
-    } else {
-      $this->request->data = $this->Group->find('all', array('conditions' => array('User.id' => $userId), 'order' => 'Group.name'));
-    }
+    $this->request->data = $this->Group->find('all', array('conditions' => array('User.id' => $userId), 'order' => 'Group.name'));
   }
 
   function members() {
@@ -321,8 +317,11 @@ class GroupsController extends AppController {
     @todo Reset all group information of image
     @todo Check for permission! */
   function delete($groupId) {
-    $userId = $this->getUserId();
-    $group = $this->Group->find('first', array('conditions' => array('Group.id' => $groupId, 'Group.user_id' => $userId)));
+    $conditions = array('Group.id' => $groupId);
+    if ($this->getUserRole() < ROLE_ADMIN) {
+      $conditions['Group.user_id'] = $this->getUserId();
+    }
+    $group = $this->Group->find('first', array('conditions' => $conditions));
     if ($group) {
       $this->Group->delete($groupId);
       $user = $this->getUser();
