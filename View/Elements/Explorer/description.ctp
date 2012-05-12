@@ -11,7 +11,7 @@
       __("Categories").' '.implode(', ', $this->ImageData->linkList('/explorer/category', Set::extract('/Category/name', $media))),
       array('class' => 'category list', 'escape' => false));
   }
-  if (count($media['Location'] || ($media['Media']['latitude'] && $media['Media']['longitude']))) {
+  if (count($media['Location']) || ($media['Media']['latitude'] && $media['Media']['longitude'])) {
     $links = $this->ImageData->linkList('/explorer/location', Set::extract('/Location/name', $media));
     if ($media['Media']['latitude'] && $media['Media']['longitude']) {
       $geo = sprintf('%.2f', abs($media['Media']['latitude']));
