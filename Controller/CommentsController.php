@@ -26,7 +26,7 @@ class CommentsController extends AppController
   var $components = array('Captcha');
 
   var $paginate = array (
-    'fields' => array ('Comment.id', 'Comment.name', 'Comment.date', 'Comment.text', 'Media.id', 'Media.name' ),
+    'fields' => array ('Comment.id', 'Comment.created', 'Comment.name', 'Comment.date', 'Comment.text', 'Media.id', 'Media.name' ),
     'limit' => 10,
     'order' => array (
       'Comment.date' => 'desc'
@@ -245,10 +245,9 @@ class CommentsController extends AppController
 
   function rss() {
     $this->layoutPath = 'rss';
-    $aclQuery = $this->Media->buildAclQuery($this->getUser());
-    $query = am(array('order' => 'Comment.date DESC', 'limit' => 20), $aclQuery);
-    $this->Media->bindModel(array('hasMany' => array('GroupsMedia' => array())));
-    $this->set('data', $this->Comment->find('all', $query));
+    $this->Comment->currentUser =& $this->getUser();
+    $data = $this->paginate('Comment');
+    $this->set('data', $data);
 
     if (Configure::read('debug') > 1) {
       Configure::write('debug', 1);

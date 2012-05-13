@@ -1,4 +1,7 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/" >
+<?php
+  $this->response->type('application/rss+xml');
+  echo "<?xml version='1.0' encoding='UTF-8'?>"."\n";
+?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/" >
 <channel>
   <title><?php echo $_SERVER['SERVER_NAME']; ?> Media RSS</title>
   <link><?php echo Router::url('/', true); ?></link>

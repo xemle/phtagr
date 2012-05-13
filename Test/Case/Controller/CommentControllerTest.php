@@ -132,4 +132,20 @@ class CommentControllerTest extends ControllerTestCase {
     $vars = $this->testAction('/comments/index', array('return' => 'vars'));
     $this->assertEqual(array('IMG_1234.JPG', 'IMG_2345.JPG', 'IMG_3456.JPG', 'IMG_4567.JPG'), Set::extract('/Media/name', $vars['comments']));
   }
+
+  public function testRss() {
+    $user = $this->User->save($this->User->create(array('username' => 'user', 'role' => ROLE_USER)));
+    $user = $this->User->findById($user['User']['id']);
+    $media = $this->Media->save($this->Media->create(array('name' => 'IMG_1234.JPG', 'user_id' => $user['User']['id'], 'gacl' => ACL_READ_PREVIEW, 'uacl' => ACL_READ_PREVIEW, 'oacl' => ACL_READ_PREVIEW)));
+    $this->Comment->save($this->Comment->create(array('text' => 'Ipsum Lorem', 'media_id' => $media['Media']['id'])));
+
+    $Comments = $this->generate('Comments', array('methods' => array('getUser')));
+    $Comments->expects($this->any())->method('getUser')->will($this->returnValue($user));
+
+    $contents = $this->testAction('/comments/rss', array('return' => 'contents'));
+    $this->assertEqual($Comments->response->type(), 'application/rss+xml');
+    $arrayContent = Xml::toArray(Xml::build($contents));
+    $descriptions = Set::extract('/rss/channel/item/description', $arrayContent);
+    $this->assertEqual($descriptions, array('Ipsum Lorem'));
+  }
 }

@@ -56,7 +56,49 @@ class ExplorerControllerTest extends ControllerTestCase {
   public function testPoints() {
     $this->Media->save($this->Media->create(array('oacl' => ACL_READ_HIGH, 'latitude' => 48.342, 'longitude' => -8.858)));
     $mediaId = $this->Media->getLastInsertId();
+    $Explorer = $this->generate('Explorer');
     $result = $this->testAction('/explorer/points/49/48/-9/-8', array('return' => 'contents'));
+    $this->assertEqual($Explorer->response->type(), 'application/xml');
     $this->assertRegExp('/<marker id="' . $mediaId . '"/', $result);
+  }
+
+  public function testRss() {
+    $user = $this->User->save($this->User->create(array('username' => 'user', 'role' => ROLE_USER)));
+    $user = $this->User->findById($user['User']['id']);
+    $media = $this->Media->save($this->Media->create(array('name' => 'IMG_1234.JPG', 'user_id' => $user['User']['id'], 'gacl' => ACL_READ_PREVIEW, 'uacl' => ACL_READ_PREVIEW, 'oacl' => ACL_READ_PREVIEW)));
+
+    $Explorer = $this->generate('Explorer', array('methods' => array('getUser')));
+    $Explorer->expects($this->any())->method('getUser')->will($this->returnValue($user));
+
+    $contents = $this->testAction('/explorer/rss', array('return' => 'contents'));
+    $this->assertEqual($Explorer->response->type(), 'application/rss+xml');
+    $arrayContent = Xml::toArray(Xml::build($contents));
+    $titles = Set::extract('/rss/channel/item/title', $arrayContent);
+    $this->assertEqual($titles, array('IMG_1234.JPG'));
+  }
+
+  public function testMediaRss() {
+    $user = $this->User->save($this->User->create(array('username' => 'user', 'role' => ROLE_USER)));
+    $user = $this->User->findById($user['User']['id']);
+    $media = $this->Media->save($this->Media->create(array('name' => 'IMG_1234.JPG', 'user_id' => $user['User']['id'], 'gacl' => ACL_READ_PREVIEW, 'uacl' => ACL_READ_PREVIEW, 'oacl' => ACL_READ_PREVIEW)));
+
+    $Explorer = $this->generate('Explorer', array('methods' => array('getUser')));
+    $Explorer->expects($this->any())->method('getUser')->will($this->returnValue($user));
+
+    $contents = $this->testAction('/explorer/media', array('return' => 'contents'));
+    $this->assertEqual($Explorer->response->type(), 'application/rss+xml');
+    $arrayContent = Xml::toArray(Xml::build($contents));
+    $titles = Set::extract('/rss/channel/item/title', $arrayContent);
+    $this->assertEqual($titles, array($media['Media']['name'] . ' by ' . $user['User']['username']));
+    // Test media content
+    $contentUrl = Set::extract('/rss/channel/item/media:content/@url', $arrayContent);
+    $this->assertEqual(count($contentUrl), 1);
+    $expected = '/media/preview/' . $media['Media']['id'] . '/' . $media['Media']['name'];
+    $this->assertEqual(strpos($contentUrl[0], $expected) > 0, true);
+    // Test media thumbnail
+    $contentUrl = Set::extract('/rss/channel/item/media:thumbnail/@url', $arrayContent);
+    $this->assertEqual(count($contentUrl), 1);
+    $expected = '/media/thumb/' . $media['Media']['id'] . '/' . $media['Media']['name'];
+    $this->assertEqual(strpos($contentUrl[0], $expected) > 0, true);
   }
 }

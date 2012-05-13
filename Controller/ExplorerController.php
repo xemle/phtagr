@@ -729,7 +729,7 @@ class ExplorerController extends AppController
   }
 
   function media() {
-    $this->layout = 'xml';
+    $this->layout = 'bare';
     if (Configure::read('debug') > 1) {
       Configure::write('debug', 1);
     }
