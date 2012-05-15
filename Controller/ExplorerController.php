@@ -329,8 +329,8 @@ class ExplorerController extends AppController
   }
 
   function quicksearch($quicksearch = false) {
-    if (!empty($this->request->data) && isset($this->request->data['Media']['quicksearch'])) {
-      $quicksearch = $this->request->data['Media']['quicksearch'];
+    if (!empty($this->request->data) && isset($this->request->data['quicksearch'])) {
+      $quicksearch = $this->request->data['quicksearch'];
     }
 
     if ($quicksearch) {

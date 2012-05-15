@@ -31,7 +31,7 @@
 <div id="quicksearch">
 <?php
   echo $this->Form->create(false, array('url' => array('controller' => 'explorer', 'action' => 'quicksearch')));
-  echo $this->Form->input('Media.quicksearch', array('label' => false, 'div' => 'inputWrap', 'placeholder' => __("Search...")));
+  echo $this->Form->input('quicksearch', array('label' => false, 'div' => 'inputWrap', 'placeholder' => __("Search...")));
   echo $this->Form->submit(__('Go'), array('div' => 'submitWrap'));
   echo $this->Form->end();
 ?>
