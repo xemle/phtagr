@@ -158,11 +158,14 @@ class CommentsController extends AppController
     }
   }
 
-  /** Send email notifications to previous commentator which enables the mail
+  /**
+   * Send email notifications to previous commentator which enables the mail
    * notification. It collects all emails of previous commentators who accepted
    * a notification mail
-    @param mediaId Current media id
-    @param commentId Id of the new comment */
+   *
+   * @param mediaId Current media id
+   * @param commentId Id of the new comment
+   */
   function _sendNotifies($mediaId, $commentId) {
     $this->Media->bindModel(array('hasMany' => array('Comment')));
     $media = $this->Media->findById($mediaId);
@@ -202,7 +205,7 @@ class CommentsController extends AppController
       ->to($to)
       ->bcc($emails)
       ->subject('[phtagr] Comment notification: '.$media['Media']['name'])
-      ->viewVars(array('data', $comment));
+      ->viewVars(array('data' => $comment));
 
     Logger::debug($comment);
     try {
