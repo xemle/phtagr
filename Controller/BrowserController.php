@@ -277,6 +277,11 @@ class BrowserController extends AppController
       $this->redirect('index/'.$path);
     }
 
+    $recursive = (bool) $this->request->data['Browser']['recursive'];
+    if (isset($this->request->data['unlink'])) {
+      $this->_unlinkSelected($path, $this->request->data['Browser']['import'], $recursive);
+      return;
+    }
     // Get dir and imports
     $dirs = array();
     $files = array();
@@ -296,7 +301,6 @@ class BrowserController extends AppController
     }
 
     $this->FilterManager->clearErrors();
-    $recursive = (bool) $this->request->data['Browser']['recursive'];
     $readed = $this->FilterManager->readFiles($toRead, $recursive);
     $errorCount = count($this->FilterManager->errors);
 
@@ -325,6 +329,66 @@ class BrowserController extends AppController
       $this->Media->unlinkFile($file['File']['media_id'], $file['File']['id']);
     }
     $this->redirect('index/'.$this->_getPathFromUrl(0, -1));
+  }
+
+  /**
+   * Find Media files of path
+   *
+   * @param type $path Relative path
+   * @param type $files Array of filenames or directory names
+   * @param type $recursive Find media files recursivly if true
+   * @return type Array of File model data
+   */
+  function _findMediaFiles($path, $files, $recursive) {
+    $fsPath = $this->_getFsPath($path);
+    $fsPath = Folder::slashTerm($fsPath);
+    if (!is_dir($fsPath)) {
+      return array();
+    }
+    $result = array();
+    $filesHere = $this->MyFile->find('all', array('conditions' => array('path' => $fsPath)));
+    foreach ($files as $file) {
+      if (!$file) {
+        continue;
+      }
+      $filename = $fsPath . $file;
+      if (is_dir($filename)) {
+        $filename = Folder::slashTerm($filename);
+        if ($recursive) {
+          $result = am($result, $this->MyFile->find('all', array('conditions' => array('path LIKE' => $filename . '%'))));
+        } else {
+          $result = am($result, $this->MyFile->find('all', array('conditions' => array('path' => $filename))));
+        }
+      } else if (file_exists($filename)) {
+        // Fetch from current directory
+        foreach ($filesHere as $f) {
+          if ($f['File']['file'] == $file) {
+            $result[] = $f;
+          }
+        }
+      }
+    }
+    return $result;
+  }
+
+  /**
+   * Unlink media of selected files
+   *
+   * @param type $path Relative path of view
+   * @param type $files List of selected files or directories
+   * @param type $recursive True is unlinking should be act recursive
+   */
+  function _unlinkselected($path, $files, $recursive) {
+    $unlinkedCount=0;
+    $mediaFiles = $this->_findMediaFiles($path, $files, $recursive);
+    foreach ($mediaFiles as $file) {
+      $this->Media->unlinkFile($file, $file['File']['id']);
+      $unlinkedCount ++;
+    }
+
+    $this->Session->setFlash(__("Unlinked %d files.", $unlinkedCount));
+
+    $this->redirect('index/'.$path);
   }
 
   function delete() {

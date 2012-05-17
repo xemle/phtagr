@@ -23,6 +23,9 @@
 
 <?php
   echo $this->Form->input('Browser.recursive', array('type' => 'checkbox', 'label' => __('Recursive')));
-  echo $this->Form->submit(__('Import'));
+  echo $this->Html->tag('div',
+    $this->Form->submit(__('Import'), array('div' => false, 'name' => 'import', 'value' => 'import'))
+    . $this->Form->submit(__('Unlink'), array('div' => false, 'name' => 'unlink', 'value' => 'unlink')),
+    array('class' => 'submit-list'));
   echo $this->Form->end();
 ?>
