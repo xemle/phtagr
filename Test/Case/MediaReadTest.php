@@ -93,15 +93,9 @@ class MediaReadTestCase extends CakeTestCase {
     $this->Group = ClassRegistry::init('Group');
 
     $this->Option = ClassRegistry::init('Option');
-    if (file_exists('/usr/bin/ffmpeg')) {
-      $this->Option->setValue('bin.ffmpeg', '/usr/bin/ffmpeg', 0);
-    }
-    if (file_exists('/usr/bin/exiftool')) {
-      $this->Option->setValue('bin.exiftool', '/usr/bin/exiftool', 0);
-    }
-    if (file_exists('/usr/bin/convert')) {
-      $this->Option->setValue('bin.convert', '/usr/bin/convert', 0);
-    }
+    $this->Option->setValue('bin.ffmpeg', $this->findExecutable('ffmpeg'), 0);
+    $this->Option->setValue('bin.exiftool', $this->findExecutable('exiftool'), 0);
+    $this->Option->setValue('bin.convert', $this->findExecutable('convert'), 0);
 
     $CakeRequest = new CakeRequest();
 		$CakeResponse = new CakeResponse();
@@ -130,6 +124,25 @@ class MediaReadTestCase extends CakeTestCase {
     unset($this->Folder);
 		parent::tearDown();
 	}
+
+  private function findExecutable($command) {
+    if (DS != '/') {
+      throw new Exception("Non Unix OS are not supported yet");
+    }
+    $paths = array('/usr/local/bin/', '/usr/bin/');
+    foreach ($paths as $path) {
+      if (file_exists($path . $command)) {
+        return $path . $command;
+      }
+    }
+    $result = array();
+    exec('which ' . $command, &$result);
+    if ($result) {
+      return $result[0];
+    } else {
+      return false;
+    }
+  }
 
   public function testTimeZones() {
     $s = '1970-01-01T00:00:00Z';
@@ -249,7 +262,7 @@ class MediaReadTestCase extends CakeTestCase {
     copy(RESOURCES . 'MVI_7620.THM', TEST_FILES_TMP . 'MVI_7620.THM');
     copy(RESOURCES . 'example.gpx', TEST_FILES_TMP . 'example.gpx');
 
-    $this->Controller->FilterManager->readFiles(TEST_FILES_TMP);
+    $this->Controller->FilterManager->readFiles(TEST_FILES_TMP, false);
     $count = $this->Media->find('count');
     $this->assertEqual($count, 1);
 
@@ -261,4 +274,5 @@ class MediaReadTestCase extends CakeTestCase {
     $this->assertEqual($media['Media']['latitude'], 46.5761);
     $this->assertEqual($media['Media']['longitude'], 8.89242);
   }
+
 }

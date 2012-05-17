@@ -296,7 +296,8 @@ class BrowserController extends AppController
     }
 
     $this->FilterManager->clearErrors();
-    $readed = $this->FilterManager->readFiles($toRead);
+    $recursive = (bool) $this->request->data['Browser']['recursive'];
+    $readed = $this->FilterManager->readFiles($toRead, $recursive);
     $errorCount = count($this->FilterManager->errors);
 
     $readCount = 0;
@@ -442,9 +443,9 @@ class BrowserController extends AppController
       $this->redirect("index/".$path);
     }
 
-    if (!empty($this->request->data['Folder']['name'])) {
+    if (!empty($this->request->data['name'])) {
       $folder = new Folder($fsPath);
-      $name = $this->request->data['Folder']['name'];
+      $name = $this->request->data['name'];
 
       $newFolder = Folder::slashTerm($fsPath).$name;
       if ($folder->create($newFolder)) {
@@ -659,7 +660,7 @@ class BrowserController extends AppController
         $toRead = array();
       }
       $this->FilterManager->clearErrors();
-      $readed = $this->FilterManager->readFiles($files);
+      $readed = $this->FilterManager->readFiles($files, false);
       $errors = $this->FilterManager->errors;
       $this->Session->setFlash(__("Uploaded %d files with %d errors.", count($readed), count($errors)));
       $this->set('imports', $readed);

@@ -202,10 +202,11 @@ class FilterManagerComponent extends Component {
    * Read all supported files of a directory
    *
    * @param path Path of the directory to read
+   * @param recursive Read files recursivly
    * @return array of files to read
    * @todo Add recursive read
    */
-  function _readPath($path) {
+  function _readPath($path, $recursive) {
     if (!is_dir($path) || !is_readable($path)) {
       return array();
     }
@@ -214,10 +215,16 @@ class FilterManagerComponent extends Component {
     $folder =& new Folder($path);
     $extensions = $this->getExtensions();
     $pattern = ".*\.(".implode('|', $this->getExtensions()).")";
-    $found = $folder->find($pattern);
+    if ($recursive) {
+      $found = $folder->findRecursive($pattern, true);
+    } else {
+      $found = $folder->find($pattern, true);
+    }
 
     foreach ($found as $file) {
-      $file = Folder::addPathElement($path, $file);
+      if (!$recursive) {
+        $file = Folder::addPathElement($path, $file);
+      }
       if (is_readable($file)) {
         $files[] = $file;
       }
@@ -229,10 +236,11 @@ class FilterManagerComponent extends Component {
    * Read a file or files or directories
    *
    * @param single file or array of files and/or directories
+   * @param recursive True if read directory recursivly
    * @return Array of readed files. filename => Media model data (result of
    * FilterManager->read())
    */
-  function readFiles($files) {
+  function readFiles($files, $recursive) {
     $stack = array();
     if (!is_array($files)) {
       $files = array($files);
@@ -240,7 +248,7 @@ class FilterManagerComponent extends Component {
 
     foreach ($files as $file) {
       if (is_dir($file)) {
-        $stack = am($stack, $this->_readPath($file));
+        $stack = am($stack, $this->_readPath($file, $recursive));
       } else {
         if (is_readable($file)) {
           $stack[] = $file;

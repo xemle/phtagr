@@ -22,6 +22,7 @@
 </p>
 
 <?php
+  echo $this->Form->input('Browser.recursive', array('type' => 'checkbox', 'label' => __('Recursive')));
   echo $this->Form->submit(__('Import'));
   echo $this->Form->end();
 ?>
