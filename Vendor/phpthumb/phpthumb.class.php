@@ -1319,6 +1319,13 @@ class phpthumb {
 					}
 				}
 
+				// Set output format to true color
+				if ($this->ImageMagickSwitchAvailable('colorspace')) {
+					$commandline .= ' -colorspace RGB';
+				}
+				if ($this->ImageMagickSwitchAvailable('type')) {
+					$commandline .= ' -type TrueColor';
+				}
 
 				if (!is_null($this->dpi) && $this->ImageMagickSwitchAvailable('density')) {
 					// for raster source formats only (WMF, PDF, etc)
