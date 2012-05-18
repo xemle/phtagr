@@ -143,6 +143,10 @@
     $('#p-explorer-button-access').click(function() {
       $(this).activateExplorerMenu('#p-explorer-button-access', '#p-explorer-edit-access');
     });
+    $('#p-explorer-more').hide();
+    $('#p-explorer-button-more').click(function() {
+      $(this).activateExplorerMenu('#p-explorer-button-more', '#p-explorer-more');
+    });
     $('#p-explorer-button-slideshow').click(function() {
       var feed = $('#slideshow').attr('href');
       feed += "/quality:high";
@@ -159,6 +163,32 @@
       $(this).placeExplorerMenu();
     });
     $('#p-explorer-menu-space').css('height', ($('#p-explorer-menu').height()) + 3 + 'px');
+    /**
+     * Triggers a zip download via a fake form submition
+     */
+    $.fn.triggerZipDownload = function(url, mediaIds) {
+      if (!mediaIds.length) {
+        return;
+      }
+      var input = '<input type="hidden" name="data[Media][ids]" value="' + mediaIds + '"/>';
+      var fakeForm = '<form action="' + url + '" method="post">' + input + '</form>';
+      $(fakeForm).appendTo('body').submit().remove();
+    };
+    $('#p-explorer-download-original').click(function() {
+      var url = '{$baseUrl}media/zip/original';
+      var mediaIds = $('#MediaIds').val();
+      $(this).triggerZipDownload(url, mediaIds);
+    });
+    $('#p-explorer-download-high').click(function() {
+      var url = '{$baseUrl}media/zip/high';
+      var mediaIds = $('#MediaIds').val();
+      $(this).triggerZipDownload(url, mediaIds);
+    });
+    $('#p-explorer-download-preview').click(function() {
+      var url = '{$baseUrl}media/zip/preview';
+      var mediaIds = $('#MediaIds').val();
+      $(this).triggerZipDownload(url, mediaIds);
+    });
     $('.tooltip-actions').tooltipAction();
     $('.radioSet').buttonset();
   });

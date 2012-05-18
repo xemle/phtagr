@@ -16,6 +16,7 @@
   <li id="p-explorer-button-access"><a><?php echo __("Edit Access Rights"); ?></a></li>
   <?php endif; // canWriteAcl ?>
   <?php endif; // canWriteTag ?>
+  <li id="p-explorer-button-more"><a><?php echo __("More"); ?></a></li>
   <li id="p-explorer-button-slideshow"><a><?php echo __("Slideshow"); ?></a></li>
 </ul>
 <div class="pages">
@@ -164,6 +165,14 @@
 </div>
 <?php endif; // canWriteAcl==true ?>
 <?php echo $this->Form->end(); ?>
+<div id="p-explorer-more">
+<p><?php
+  echo __('Download:') . ' ';
+  echo $this->Html->link(__("Original"), '#', array('id' => 'p-explorer-download-original'));
+  echo ' '.$this->Html->link(__("High Resolution"), '#', array('id' => 'p-explorer-download-high'));
+  echo ' '.$this->Html->link(__("Preview Resolution"), '#', array('id' => 'p-explorer-download-preview'));
+?></p>
+</div>
 </div>
 </div><!-- explorer menu -->
 <div id="p-explorer-menu-space"></div>

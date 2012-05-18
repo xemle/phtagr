@@ -158,6 +158,10 @@ define("LOCATION_SUBLOCATION", 0x02);
 define("LOCATION_STATE", 0x03);
 define("LOCATION_COUNTRY", 0x04);
 
+define("BULK_DOWNLOAD_FILE_COUNT_ANONYMOUS", 12);
+define("BULK_DOWNLOAD_FILE_COUNT_USER", 240);
+define("BULK_DOWNLOAD_TOTAL_MB_LIMIT", 250);
+
 /**
  * Add pear path within vendor path to the include_path
  */

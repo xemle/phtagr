@@ -42,9 +42,12 @@ class MediaController extends AppController
     $this->viewClass = 'Media';
   }
 
-  /** Fetch the request headers. Getting headers sent by the client. Convert
+  /**
+   * Fetch the request headers. Getting headers sent by the client. Convert
    * header to lower case since it is case insensitive.
-    @return Array of request header */
+   *
+   * @return Array of request header
+   */
   function _getRequestHeaders() {
     $headers = array();
     if (function_exists('apache_request_headers')) {
@@ -63,10 +66,12 @@ class MediaController extends AppController
     return $headers;
   }
 
-  /** Checking if the client is validating his cache and the cache file is the
-    * concurrent one. If clients file is OK, it will respond '304 Not Modified'
-    * @param filename filename of cache file
-    */
+  /**
+   * Checking if the client is validating his cache and the cache file is the
+   * concurrent one. If clients file is OK, it will respond '304 Not Modified'
+   *
+   * @param filename filename of cache file
+   */
   function _handleClientCache($filename) {
     $cacheTime = filemtime($filename);
     $headers = $this->_getRequestHeaders();
@@ -83,11 +88,14 @@ class MediaController extends AppController
     //header('Cache-Control: max-age=0');
   }
 
-  /** Fetch media and checks access
-    @param id Media id
-    @param type Preview type
-    @return Media model data. If no media is found or access is denied it
-    responses 404 */
+  /**
+   * Fetch media and checks access
+   *
+   * @param id Media id
+   * @param type Preview type
+   * @return Media model data. If no media is found or access is denied it
+   * responses 404
+   */
   function _getMedia($id, $type = 'preview') {
     $user = $this->getUser();
     switch ($type) {
@@ -193,6 +201,127 @@ class MediaController extends AppController
     $mediaOptions['download'] = true;
     $this->viewClass = 'Media';
     $this->set($mediaOptions);
+  }
+
+  /**
+   * Extract media files by requested format
+   *
+   * @param media Media model data
+   * @param format File format
+   * @return array of file information (name, filename, size)
+   */
+  function _getMediaFiles($media, $format) {
+    $files = array();
+    if (!count($media['File'])) {
+      return $files;
+    }
+    if ($format == 'original') {
+      // Write meta data if dirty
+      if ($this->Media->hasFlag(&$media, MEDIA_FLAG_DIRTY)) {
+        $this->loadComponent('FilterManager');
+        if ($this->FilterManager->write(&$media)) {
+          // reload written media
+          $media = $this->Media->findById($media['Media']['id']);
+        }
+      }
+      foreach ($media['File'] as $file) {
+        $filename = $this->Media->File->getFilename($file);
+        if (!is_readable($filename)) {
+          continue;
+        }
+        $files[] = array('name' => $file['file'], 'filename' => $filename, 'size' => filesize($filename));
+      }
+    } else if (in_array($format, array('mini', 'thumb', 'preview', 'high', 'hd'))) {
+      $filename = false;
+      $mediaType = $this->Media->getType($media);
+      if ($mediaType == MEDIA_TYPE_VIDEO) {
+        $filename = $this->_createFlashVideo($media['Media']['id']);
+        if (is_readable($filename)) {
+          $video = $this->Media->getFile($media, FILE_TYPE_VIDEO);
+          $name = substr($video['File']['file'], 0, strrpos($video['File']['file'], '.')) . '.flv';
+          $files[] = array('name' => $format . '/' . $name, 'filename' => $filename, 'size' => filesize($filename));
+        }
+      } else if ($mediaType != MEDIA_TYPE_IMAGE) {
+        Logger::warn("Media type $mediaType for {$media['Media']['id']} is not suppored yet");
+      } else {
+        $filename = $this->PreviewManager->getPreview($media, $format);
+        if (is_readable($filename)) {
+          $name = $media['File'][0]['file'];
+          $files[] = array('name' => $format . '/' . $name, 'filename' => $filename, 'size' => filesize($filename));
+        }
+      }
+    }
+    return $files;
+  }
+
+  /**
+   * Create a zip file and streams the zip file directly to the client
+   *
+   * @param name Name of the zip file
+   * @param files Array of files
+   */
+  function _createZipFile($name, $files) {
+    App::import('Vendor', 'ZipStream/ZipStream');
+
+    ini_set('memory_limit', '51002M');
+    ini_set('max_execution_time', 120);
+
+    $zip = new ZipStream($name);
+    $zip->setComment("phTagr Download Zip File\nSee http://www.phtagr.org\nCreated on " . date('Y-m-d H:i:s'));
+
+    foreach ($files as $file) {
+      $zip->addLargeFile($file['filename'], $file['name']);
+    }
+
+    $zip->finalize();
+    $this->redirect(null, 200, true);
+  }
+
+  function zip($format) {
+    if (!preg_match('/^\d+(,\d+)*$/', $this->request->data['Media']['ids'])) {
+      Logger::warn("Invalid id input: " . $this->request->data['Media']['ids']);
+      $this->redirect(null, 412, true);
+    } else if (!in_array($format, array('mini', 'thumb', 'preview', 'high', 'hd', 'original'))) {
+      Logger::warn("Invalid format: $format");
+      $this->redirect(null, 412, true);
+    }
+    $ids = preg_split('/\s*,\s*/', trim($this->request->data['Media']['ids']));
+    $ids = array_unique($ids);
+    if ($this->hasRole(ROLE_GUEST) && count($ids) > BULK_DOWNLOAD_FILE_COUNT_USER) {
+      Logger::warn("Download of more than 240 media is not allowed");
+      $this->redirect(null, 412, true);
+    } else if (count($ids) > BULK_DOWNLOAD_FILE_COUNT_ANONYMOUS) {
+      Logger::warn("Download of more than 12 media is not allowed for anonymous visitors");
+      $this->redirect(null, 412, true);
+    }
+
+    $user = $this->getUser();
+    $allMedia = $this->Media->find('all', array('conditions' => array('Media.id' => $ids)));
+    $files = array();
+    foreach ($allMedia as $media) {
+      $this->Media->setAccessFlags(&$media, &$user);
+      if (!$media['Media']['canReadPreview']) {
+        continue;
+      }
+      $fileFormat = $format;
+      // Downgrade size if original is not allowed
+      if ($fileFormat == 'original' && !$media['Media']['canReadOriginal']) {
+        $fileFormat = 'high';
+      }
+      $files = am($files, $this->_getMediaFiles(&$media, $fileFormat));
+    }
+    if (!count($files)) {
+      Logger::warn("No files for download");
+      $this->redirect(null, 404, true);
+    }
+    $sizes = Set::extract('/size', $files);
+    if (array_sum($sizes) > BULK_DOWNLOAD_TOTAL_MB_LIMIT * 1024 * 1024) {
+      Logger::warn("Download of not more than " . BULK_DOWNLOAD_TOTAL_MB_LIMIT . " MB is not allowed");
+      $this->redirect(null, 403, true);
+    }
+
+    $zipName = 'phtagr-' . date('Y-m-d_H-i-s') . '.zip';
+    $this->_createZipFile($zipName, $files);
   }
 }
 ?>
