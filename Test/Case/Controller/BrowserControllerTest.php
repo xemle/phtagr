@@ -126,6 +126,8 @@ class BrowserControllerTest extends ControllerTestCase {
     $this->assertEqual(count($media), 3);
 
     $data = array('unlink' => 'unlink', 'Browser' => array('import' => array('IMG_4145.JPG', 'subdir'), 'recursive' => 1));
+    $Browser = $this->generate('Browser', array('methods' => array('getUser')));
+    $Browser->expects($this->any())->method('getUser')->will($this->returnValue($user));
     $this->testAction('/browser/import/' . basename(TEST_FILES_TMP), array('data' => $data));
     $media = $this->Media->find('all');
     $this->assertEqual(count($media), 0);
