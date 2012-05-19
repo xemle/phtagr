@@ -224,13 +224,10 @@ echo '<div class="clear"></div></div>';
 ?>
 </div><!-- cells -->
 
-<?php
-  if ($canWriteTag): ?>
 <div class="p-navigator-pages"><div class="sub">
 <a id="select-all"><?php echo __('Select All'); ?></a>
 <a id="invert-selection"><?php echo __('Invert Selection'); ?></a>
 </div></div>
-<?php endif; ?>
 
 <?php echo $this->Navigator->pages() ?>
 

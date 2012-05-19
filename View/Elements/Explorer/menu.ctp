@@ -168,9 +168,9 @@
 <div id="p-explorer-more">
 <p><?php
   echo __('Download:') . ' ';
-  echo $this->Html->link(__("Original"), '#', array('id' => 'p-explorer-download-original'));
-  echo ' '.$this->Html->link(__("High Resolution"), '#', array('id' => 'p-explorer-download-high'));
-  echo ' '.$this->Html->link(__("Preview Resolution"), '#', array('id' => 'p-explorer-download-preview'));
+  echo $this->Html->link(__("Original"), 'javascript:void', array('id' => 'p-explorer-download-original', 'title' => __('Download original files from selected media')));
+  echo ' '.$this->Html->link(__("High Resolution"), 'javascript:void', array('id' => 'p-explorer-download-high', 'title' => __('Download high resolution files from selected media')));
+  echo ' '.$this->Html->link(__("Preview Resolution"), 'javascript:void', array('id' => 'p-explorer-download-preview', 'title' => __('Download preview files from selected media')));
 ?></p>
 </div>
 </div>

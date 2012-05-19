@@ -278,6 +278,12 @@ class MediaController extends AppController
   }
 
   function zip($format) {
+    if (empty($this->request->data)) {
+      $this->redirect(null, 404, true);
+    }
+    if (!isset($this->request->data['Media']['ids'])) {
+      $this->redirect(null, 404, true);
+    }
     if (!preg_match('/^\d+(,\d+)*$/', $this->request->data['Media']['ids'])) {
       Logger::warn("Invalid id input: " . $this->request->data['Media']['ids']);
       $this->redirect(null, 412, true);

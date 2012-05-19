@@ -1,7 +1,7 @@
 (function($) {
   $.fn.selectMedia = function() {
     $(this).each(function() {
-      if ($(this).hasClass('selected') || !$(this).hasClass('editable')) {
+      if ($(this).hasClass('selected')) {
         return;
       }
       $(this).addClass('selected');
@@ -22,7 +22,7 @@
   };
   $.fn.unselectMedia = function() {
     $(this).each(function() {
-      if (!$(this).hasClass('selected') || !$(this).hasClass('editable')) {
+      if (!$(this).hasClass('selected')) {
         return;
       }
       $(this).removeClass('selected');

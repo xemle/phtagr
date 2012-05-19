@@ -25,18 +25,17 @@
 ?>
 
 <div class="p-explorer-media-actions" id="action-<?php echo $media['Media']['id']; ?>">
-<?php if ($media['Media']['canWriteTag'] || $media['Media']['canReadOriginal']): ?>
 <ul>
 <?php
+  $addIcon = $this->ImageData->getIcon('add',  __('Select media'));
+  echo $this->Html->tag('li',
+    $this->Html->link($addIcon, 'javascript:void', array('escape' => false, 'class' => 'add')),
+    array('escape' => false));
+  $delIcon = $this->ImageData->getIcon('delete',  __('Deselect media'));
+  echo $this->Html->tag('li',
+    $this->Html->link($delIcon, 'javascript:void', array('escape' => false, 'class' => 'del')),
+    array('escape' => false));
   if ($media['Media']['canWriteTag']) {
-    $addIcon = $this->ImageData->getIcon('add',  __('Select media'));
-    echo $this->Html->tag('li',
-      $this->Html->link($addIcon, 'javascript:void', array('escape' => false, 'class' => 'add')),
-      array('escape' => false));
-    $delIcon = $this->ImageData->getIcon('delete',  __('Deselect media'));
-    echo $this->Html->tag('li',
-      $this->Html->link($delIcon, 'javascript:void', array('escape' => false, 'class' => 'del')),
-      array('escape' => false));
     $editIcon = $this->ImageData->getIcon('tag',  __('Edit meta data'));
     echo $this->Html->tag('li',
       $this->Html->link($editIcon, 'javascript:void', array('escape' => false, 'class' => 'edit')),
@@ -58,7 +57,6 @@
   }
 ?>
 </ul>
-<?php endif; ?>
 </div>
 <div class="p-explorer-media-description" id="<?php echo 'description-'.$media['Media']['id']; ?>">
 <?php echo $this->element('Explorer/description', array('media' => $media)); ?>
