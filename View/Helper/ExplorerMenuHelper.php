@@ -21,9 +21,12 @@ class ExplorerMenuHelper extends AppHelper
 
   var $_id;
 
-  /** Count the association
-    @param association name
-    @return Array of accociation name as key and their count as value */
+  /**
+   * Count the association
+   *
+   * @param association name
+   * @return Array of accociation name as key and their count as value
+   */
   function _countAssociation($association) {
     $result = array();
     if (isset($this->request->data['Media'])) {

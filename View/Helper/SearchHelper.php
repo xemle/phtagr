@@ -35,12 +35,16 @@ class SearchHelper extends Search {
 
   var $isMyMedia = false;
 
-  /** Singular exception where the inflector does not match */
+  /**
+   * Singular exception where the inflector does not match
+   */
   var $singulars = array('pos');
 
-  /** Initialize query parameters from the global parameter array, which is
+  /**
+   * Initialize query parameters from the global parameter array, which is
    * set by the query component. All search parameters are reset after calling
-   * this function. All previous changes are overritten */
+   * this function. All previous changes are overritten
+   */
   function initialize($config = array()) {
     if (isset($this->request->params['search'])) {
       $params = $this->request->params['search'];
@@ -67,9 +71,12 @@ class SearchHelper extends Search {
     }
   }
 
-/** Add parameter to the data array
-    @param data Reference of data array
-    @param add Add values */
+  /**
+   * Add parameter to the data array
+   *
+   * @param data Reference of data array
+   * @param add Add values
+   */
   function _addParams(&$data, $add = false) {
     if (!$add) {
       return $data;
@@ -98,9 +105,12 @@ class SearchHelper extends Search {
     return $data;
   }
 
-  /** Removes parameter from the data array
-    @param Reference of data array
-    @param del Array of paramers which have to be removed */
+  /**
+   * Removes parameter from the data array
+   *
+   * @param Reference of data array
+   * @param del Array of paramers which have to be removed
+   */
   function _delParams(&$data, $del = false) {
     if (!$del) {
       return $data;
@@ -133,13 +143,16 @@ class SearchHelper extends Search {
     return $data;
   }
 
-  /** Serialize the search
-    @param data Search data. If false use current search. Default is false.
-    @param add Array of parameters to add
-    @param del Array of parameters to delete
-    @param options
-      - defaults: Array of default values
-    @result Serialized search as part of the URL */
+  /**
+   * Serialize the search
+   *
+   * @param data Search data. If false use current search. Default is false.
+   * @param add Array of parameters to add
+   * @param del Array of parameters to delete
+   * @param options
+   *   - defaults: Array of default values
+   * @return Serialized search as part of the URL
+   */
   function serialize($data = false, $add = false, $del = false, $options = false) {
     $params = array();
     $config = $this->config;
@@ -191,10 +204,11 @@ class SearchHelper extends Search {
   }
 
   /**
-    @param data Search data. If false use current search. Default is false.
-    @param add Array of parameters to add
-    @param del Array of parameters to delete
-    @return uri of current query */
+   * @param data Search data. If false use current search. Default is false.
+   * @param add Array of parameters to add
+   * @param del Array of parameters to delete
+   * @return uri of current query
+   */
   function getUri($data = false, $add = false, $del = false, $options = array()) {
     $serial = $this->serialize($data, $add, $del, $options);
     $config = am($this->config, $options);

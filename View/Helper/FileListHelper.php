@@ -19,9 +19,12 @@ class FileListHelper extends AppHelper
 {
   var $helpers = array('Html', 'Number', 'Form');
 
-  /** Returns an icon of a specific file type
-    @param type File type
-    @return Html resource of the icon or false on error */
+  /**
+   * Returns an icon of a specific file type
+   *
+   * @param type File type
+   * @return Html resource of the icon or false on error
+   */
   function _icon($type) {
     $icon = false;
     switch ($type) {

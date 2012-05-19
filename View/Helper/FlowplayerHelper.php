@@ -19,14 +19,17 @@ class FlowplayerHelper extends AppHelper
 {
   var $helpers = array('Html', 'ImageData');
 
-  /** Loads the required script of flowplayer for scripts_for_layout variable
+  /**
+   * Loads the required script of flowplayer for scripts_for_layout variable
    */
   function importPlayer() {
     $this->Html->script('/flowplayer/flowplayer-3.1.4.min.js', array('inline' => false));
     return '';
   }
 
-  /** Creates the link container for the flowplayer */
+  /**
+   * Creates the link container for the flowplayer
+   */
   function link($media) {
     list($width, $height) = $this->ImageData->getimagesize($this->request->data, OUTPUT_SIZE_VIDEO);
     $height += 24;
@@ -40,7 +43,9 @@ class FlowplayerHelper extends AppHelper
     return $out;
   }
 
-  /** Creates the start script for the flowplayer */
+  /**
+   * Creates the start script for the flowplayer
+   */
   function player($media) {
     $id = $media['Media']['id'];
     return $this->Html->scriptBlock("flowplayer('player', '".Router::url("/flowplayer/flowplayer-3.1.5.swf", true)."', {

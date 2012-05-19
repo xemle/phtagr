@@ -24,8 +24,11 @@ class ImageDataHelper extends AppHelper {
     $this->Option->beforeRender();
   }
 
-  /** Returns the rotated size of the media
-    @return Array of rotated width and height */
+  /**
+   * Returns the rotated size of the media
+   *
+   * @return Array of rotated width and height
+   */
   function rotate($width, $height, $orientation) {
     // Rotate the image according to the orientation
     $orientation = $orientation ? $orientation : 1;
@@ -36,8 +39,11 @@ class ImageDataHelper extends AppHelper {
     }
   }
 
-  /** Get resized size with maximum size
-    @return array of width and height */
+  /**
+   * Get resized size with maximum size
+   *
+   * @return array of width and height
+   */
   function resize($width, $height, $size) {
     if ($width >= $height && $width > $size) {
       $height = floor($height * $size / $width);
@@ -49,8 +55,11 @@ class ImageDataHelper extends AppHelper {
     return array($width, $height);
   }
 
-  /** Get squared width and height with maximum size
-    @return array of width and height */
+  /**
+   * Get squared width and height with maximum size
+   *
+   * @return array of width and height
+   */
   function square($width, $height, $size) {
     if (min($width, $height) < $size) {
       list($width, $height) = $this->resize($width, $height, $size);
@@ -61,8 +70,11 @@ class ImageDataHelper extends AppHelper {
     return array($width, $height);
   }
 
-  /** Get resized size with maximum width
-    @return array of width and height */
+  /**
+   * Get resized size with maximum width
+   *
+   * @return array of width and height
+   */
   function resizeWidth($width, $height, $size) {
     if ($width > $size) {
       $height = floor($height * $size / $width);
@@ -71,18 +83,21 @@ class ImageDataHelper extends AppHelper {
     return array($width, $height);
   }
 
-  /** Returns the image size of the given media. This function considers the
-    orientaion of the media.
-    @param media Media model data
-    @param options New size given as single value. Numeric value of maximum
-    width or height. Possible text values: 'mini', 'thumb', 'preview',
-    'original'.  If false than it returns the media size. If options is an
-    array following options are supported
-      - height - Maximum height
-      - width - Maximum width
-      - square - Square the sizes
-      - size - size
-    @return array of sizes. array(height, width, false, html size) */
+  /**
+   * Returns the image size of the given media. This function considers the
+   * orientaion of the media.
+   *
+   * @param media Media model data
+   * @param options New size given as single value. Numeric value of maximum
+   * width or height. Possible text values: 'mini', 'thumb', 'preview',
+   * 'original'.  If false than it returns the media size. If options is an
+   * array following options are supported
+   *   - height - Maximum height
+   *   - width - Maximum width
+   *   - square - Square the sizes
+   *   - size - size
+   * @return array of sizes. array(height, width, false, html size)
+   */
   function getimagesize($media, $options = false) {
     if (!isset($media['Media']['width']) ||
       !isset($media['Media']['height'])) {
@@ -136,13 +151,16 @@ class ImageDataHelper extends AppHelper {
     return $result;
   }
 
-  /** Creates an media source as HTML img tag
-    @param media Media model data
-    @param options Media size or option array. Options are
-      type - Type of the media. String values: 'mini', 'thumb', 'preview', 'original'
-      size - Size of the media - optional.
-      param - Extra url parameter
-    @return HTML link with media image */
+  /**
+   * Creates an media source as HTML img tag
+   *
+   * @param media Media model data
+   * @param options Media size or option array. Options are
+   *   type - Type of the media. String values: 'mini', 'thumb', 'preview', 'original'
+   *   size - Size of the media - optional.
+   *   param - Extra url parameter
+   * @return HTML link with media image
+   */
   function mediaImage($media, $options) {
     if (!isset($media['Media']['id'])) {
       Logger::err("Media id is not set");
@@ -179,16 +197,19 @@ class ImageDataHelper extends AppHelper {
     return $this->output($out);
   }
 
-  /** Creates an media image with the link
-    @param media Media model data
-    @param options Media size or option array. Options are
-      type - Type of the media. String values: 'mini', 'thumb', 'preview', 'original'
-      size - Size of the media - optional.
-      params - Extra url parameter
-      div - Wrapped div arround the link with the class given in the div options
-      before - (Optional) Text before image link
-      after - (Optional) Text after image link
-    @return HTML link with media image */
+  /**
+   * Creates an media image with the link
+   *
+   * @param media Media model data
+   * @param options Media size or option array. Options are
+   *   type - Type of the media. String values: 'mini', 'thumb', 'preview', 'original'
+   *   size - Size of the media - optional.
+   *   params - Extra url parameter
+   *   div - Wrapped div arround the link with the class given in the div options
+   *   before - (Optional) Text before image link
+   *   after - (Optional) Text after image link
+   * @return HTML link with media image
+   */
   function mediaLink($media, $options = array()) {
     if (!isset($media['Media']['id'])) {
       Logger::err("Media id is not set");
@@ -213,14 +234,17 @@ class ImageDataHelper extends AppHelper {
     return $out;
   }
 
-  /** Returns a link of the media date with different options
-    @param media Media model data
-    @param option
-      - from: All media after given media
-      - to: All media before given media
-      - offset: given in hours (3h), days (3.5d) or months (6m)
-      - interval: Set interval where
-    @return Link of the date search */
+  /**
+   * Returns a link of the media date with different options
+   *
+   * @param media Media model data
+   * @param option
+   *   - from: All media after given media
+   *   - to: All media before given media
+   *   - offset: given in hours (3h), days (3.5d) or months (6m)
+   *   - interval: Set interval where
+   * @return Link of the date search
+   */
   function getDateLink(&$media, $option = false) {
     $date = $media['Media']['date'];
     $extra = array('show' => $this->Search->getShow());
@@ -277,7 +301,9 @@ class ImageDataHelper extends AppHelper {
     //return $this->Search->getUri(array('from' => $from, 'to' => $to), $extra);
   }
 
-  /** Returns an single icon of a acl */
+  /**
+   * Returns an single icon of a acl
+   */
   function _acl2icon($acl, $titlePrefix = '') {
     $t='';
     // Write access
@@ -299,7 +325,9 @@ class ImageDataHelper extends AppHelper {
     return $t;
   }
 
-  /** Returns an text repesentation of the acl */
+  /**
+   * Returns an text repesentation of the acl
+   */
   function _acl2text($data) {
     $output = $this->_acl2icon($data['Media']['gacl'], __('Group members')).' ';
 
@@ -416,10 +444,12 @@ class ImageDataHelper extends AppHelper {
     return sprintf("%.2f%s/%.2f%s", $lat, $latSuffix, $long, $longSuffix);
   }
 
-  /** Creates a link list of names with urlBase and name
-    @param urlBase Base URL which is combinded with each name item
-    @param names Names names of links
-    */
+  /**
+   * Creates a link list of names with urlBase and name
+   *
+   * @param urlBase Base URL which is combinded with each name item
+   * @param names Names names of links
+   */
   function linkList($urlBase, $names) {
     $links = array();
     foreach ($names as $name) {
@@ -428,7 +458,9 @@ class ImageDataHelper extends AppHelper {
     return $links;
   }
 
-  /** Returns link for global search, user search, include and exclude */
+  /**
+   * Returns link for global search, user search, include and exclude
+   */
   function getExtendSearchUrls($crumbs, $username, $name, $value) {
     $urls = array();
     $baseUrl = '/explorer';
@@ -539,16 +571,17 @@ class ImageDataHelper extends AppHelper {
   }
 
   /**
-    Creates a ACL select element
-    @param fieldName fieldname of the select
-    @param data If data is numeric, the value is handled as acl level. If data
-    is an array, the data is assumed to be a image model data array. The level
-    is extracted bz the flag and the mask.
-    @param flag Bit flag of the acl (used for image data array)
-    @param mask Bit mask of the acl (used for image data array)
-
-  // 0=keep, 1=me only, 2=group, 3=user, 4=others
-  */
+   * Creates a ACL select element
+   *
+   * @param fieldName fieldname of the select
+   * @param data If data is numeric, the value is handled as acl level. If data
+   * is an array, the data is assumed to be a image model data array. The level
+   * is extracted bz the flag and the mask.
+   * @param flag Bit flag of the acl (used for image data array)
+   * @param mask Bit mask of the acl (used for image data array)
+   *
+   * // 0=keep, 1=me only, 2=group, 3=user, 4=others
+   */
   function acl2select($fieldName, $data, $flag=0, $mask=0, $options=null) {
     if (is_array($data)) {
       $level = $this->_getCurrentLevel(&$data, &$flag, &$mask);
@@ -576,9 +609,12 @@ class ImageDataHelper extends AppHelper {
     return $this->Form->input($fieldName, $options);
   }
 
-  /** Returns the visibility icon for the own media
-    @params media Media model data
-    @return Html output for the icon or false */
+  /**
+   * Returns the visibility icon for the own media
+   *
+   * @params media Media model data
+   * @return Html output for the icon or false
+   */
   function getVisibilityIcon(&$media) {
     $icon = false;
     if (isset($media['Media']['isOwner']) && $media['Media']['isOwner']) {
@@ -630,9 +666,12 @@ class ImageDataHelper extends AppHelper {
     return false;
   }
 
-  /** Returns the first file of a media which has the dependend flag
-    @param media Media model data
-    @result File model data or null */
+  /**
+   * Returns the first file of a media which has the dependend flag
+   *
+   * @param media Media model data
+   * @return File model data or null
+   */
   function _getFirstDependendFile($media) {
     if (!isset($media['File'])) {
       return null;
@@ -645,9 +684,12 @@ class ImageDataHelper extends AppHelper {
     return null;
   }
 
-  /** Returns the upload folder of an internal file
-    @param file
-    @return Relative upload folder or false on error */
+  /**
+   * Returns the upload folder of an internal file
+   *
+   * @param file
+   * @return Relative upload folder or false on error
+   */
   function _getUploadFolder($file) {
     if (!isset($file['user_id']) ||
       !isset($file['flag']) ||
@@ -672,9 +714,12 @@ class ImageDataHelper extends AppHelper {
     return trim($folder, '/');
   }
 
-  /** Returns the folder link of the media
-    @param media Media model data
-    @return Link string for user's folder of the media for the explorer */
+  /**
+   * Returns the folder link of the media
+   *
+   * @param media Media model data
+   * @return Link string for user's folder of the media for the explorer
+   */
   function getFolderLinks($media) {
     $file = $this->_getFirstDependendFile($media);
     $folder = $this->_getUploadFolder($file);

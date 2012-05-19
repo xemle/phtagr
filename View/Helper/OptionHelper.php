@@ -20,17 +20,22 @@ class OptionHelper extends AppHelper
 {
   var $options = null;
 
-  /** Intitialize the options */
+  /**
+   * Intitialize the options
+   */
   function beforeRender() {
     if (isset($this->request->params['options'])) {
       $this->options = $this->request->params['options'];
     }
   }
 
-  /** Return a option value or a default value if the option does not exist
-    @param name Option name
-    @param default Optional default value
-    @return Option value of default */
+  /**
+   * Return a option value or a default value if the option does not exist
+   *
+   * @param name Option name
+   * @param default Optional default value
+   * @return Option value of default
+   */
   function get($name, $default = null) {
     if (isset($this->options[$name])) {
       return $this->options[$name];
