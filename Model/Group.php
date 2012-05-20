@@ -42,6 +42,9 @@ class Group extends AppModel
    * @return type
    */
   function prepareMultiEditData(&$data, &$user) {
+    if (empty($data['Group']['names'])) {
+      return false;
+    }
     $names = $data['Group']['names'];
     $words = $this->splitWords($names);
     if (!count($words)) {

@@ -101,4 +101,23 @@ class ExplorerControllerTest extends ControllerTestCase {
     $expected = '/media/thumb/' . $media['Media']['id'] . '/' . $media['Media']['name'];
     $this->assertEqual(strpos($contentUrl[0], $expected) > 0, true);
   }
+
+  /**
+   * Test that all new locations will be created
+   */
+  public function testEditMultiWithNewLocations() {
+    $user = $this->User->save($this->User->create(array('username' => 'user', 'role' => ROLE_USER)));
+    $user = $this->User->findById($user['User']['id']);
+    $media = $this->Media->save($this->Media->create(array('name' => 'IMG_1234.JPG', 'user_id' => $user['User']['id'])));
+
+    $Explorer = $this->generate('Explorer', array('methods' => array('getUser')));
+    $Explorer->expects($this->any())->method('getUser')->will($this->returnValue($user));
+    $data = array('Media' => array('ids' => $media['Media']['id']), 'Location' => array('sublocation' => 'castle', 'city' => 'karlsruhe', 'state' => 'bw', 'country' => 'germany'));
+    $contents = $this->testAction('/explorer/edit', array('data' => $data, 'return' => 'vars'));
+
+    $media = $this->Media->findById($media['Media']['id']);
+    $locationNames = Set::extract('/Location/name', $media);
+    sort($locationNames);
+    $this->assertEqual($locationNames, array('bw', 'castle', 'germany', 'karlsruhe'));
+  }
 }

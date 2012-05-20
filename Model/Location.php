@@ -132,12 +132,13 @@ class Location extends AppModel
       if (!$name) {
         continue;
       }
-      $locationName = array('name' => $name, 'type' => $type);
-      $location = $this->find('first', array('conditions' => $locationName));
+      $conditions = array('name' => $name, 'type' => $type);
+      $location = $this->find('first', array('conditions' => $conditions));
       if ($isDelete && !$location) {
         continue;
       } elseif (!$location) {
-        if (!$this->save($locationName)) {
+        $location = $this->create($conditions);
+        if (!$this->save($location)) {
           Logger::warn("Could not create new $locationName '$name'");
         } else {
           Logger::debug("Create new $locationName '$name'");
