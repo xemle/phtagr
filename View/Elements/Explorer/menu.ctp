@@ -169,8 +169,8 @@
 <p><?php
   echo __('Download:') . ' ';
   echo $this->Html->link(__("Original"), 'javascript:void', array('id' => 'p-explorer-download-original', 'title' => __('Download original files from selected media')));
-  echo ' '.$this->Html->link(__("High Resolution"), 'javascript:void', array('id' => 'p-explorer-download-high', 'title' => __('Download high resolution files from selected media')));
-  echo ' '.$this->Html->link(__("Preview Resolution"), 'javascript:void', array('id' => 'p-explorer-download-preview', 'title' => __('Download preview files from selected media')));
+  echo ' '.$this->Html->link(__("High Resolution"), 'javascript:void', array('id' => 'p-explorer-download-high', 'title' => __('Download high resolution files (%d px) from selected media', OUTPUT_SIZE_HIGH)));
+  echo ' '.$this->Html->link(__("Preview Resolution"), 'javascript:void', array('id' => 'p-explorer-download-preview', 'title' => __('Download preview files (%d px) from selected media', OUTPUT_SIZE_PREVIEW)));
 ?></p>
 </div>
 </div>
