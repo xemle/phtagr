@@ -296,7 +296,7 @@ class MediaController extends AppController
     if ($this->hasRole(ROLE_GUEST) && count($ids) > BULK_DOWNLOAD_FILE_COUNT_USER) {
       Logger::warn("Download of more than 240 media is not allowed");
       $this->redirect(null, 412, true);
-    } else if (count($ids) > BULK_DOWNLOAD_FILE_COUNT_ANONYMOUS) {
+    } else if (!$this->hasRole(ROLE_GUEST) && count($ids) > BULK_DOWNLOAD_FILE_COUNT_ANONYMOUS) {
       Logger::warn("Download of more than 12 media is not allowed for anonymous visitors");
       $this->redirect(null, 412, true);
     }
