@@ -86,9 +86,10 @@ class Location extends AppModel
       if (!$name || $name == '-') {
         continue;
       }
-      $location = array('name' => $name, 'type' => $type);
-      $found = $this->find('first', array('conditions' => $location));
+      $conditions = array('name' => $name, 'type' => $type);
+      $found = $this->find('first', array('conditions' => $conditions));
       if (!$found) {
+        $location = $this->create($conditions);
         if (!$this->save($location)) {
           Logger::warn("Could not create new $locationName '$name'");
         } else {
