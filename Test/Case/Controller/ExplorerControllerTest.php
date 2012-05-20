@@ -120,4 +120,25 @@ class ExplorerControllerTest extends ControllerTestCase {
     sort($locationNames);
     $this->assertEqual($locationNames, array('bw', 'castle', 'germany', 'karlsruhe'));
   }
+
+  /**
+   * Test that all new locations will be created for single media
+   */
+  public function testEditSingleWithNewLocations() {
+    $user = $this->User->save($this->User->create(array('username' => 'user', 'role' => ROLE_USER)));
+    $user = $this->User->findById($user['User']['id']);
+    $media = $this->Media->save($this->Media->create(array('name' => 'IMG_2345.JPG', 'user_id' => $user['User']['id'])));
+
+    $Explorer = $this->generate('Explorer', array('methods' => array('getUser'), 'components' => array('RequestHandler' => array('isAjax', 'isMobile'))));
+    $Explorer->expects($this->any())->method('getUser')->will($this->returnValue($user));
+    $Explorer->RequestHandler->expects($this->once())->method('isAjax')->will($this->returnValue(true));
+    $Explorer->RequestHandler->expects($this->once())->method('isMobile')->will($this->returnValue(false));
+    $data = array('Location' => array('sublocation' => 'prater', 'city' => 'vienna', 'country' => 'austria'));
+    $contents = $this->testAction('/explorer/savemeta/' . $media['Media']['id'], array('data' => $data, 'return' => 'result'));
+
+    $media = $this->Media->findById($media['Media']['id']);
+    $locationNames = Set::extract('/Location/name', $media);
+    sort($locationNames);
+    $this->assertEqual($locationNames, array('austria', 'prater', 'vienna'));
+  }
 }
