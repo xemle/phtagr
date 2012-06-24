@@ -70,6 +70,35 @@ class ExcludeBehavior extends ModelBehavior {
   }
 
   /**
+   * Serialize condition to string for join statement
+   *
+   * @param $conditions
+   * @param String $op Operand for condition.
+   * @return String
+   */
+  function _serializeConditions($conditions, $op) {
+    $result = array();
+    foreach ($conditions as $key => $condition) {
+      if ($key === 'AND' || $key === 'OR') {
+        $result[] = $this->_serializeConditions($condition, $key);
+      } else if (is_array($condition)) {
+        $result[] = $this->_serializeConditions($condition, $op);
+      } else if (!is_numeric($key)) {
+        $result[] = $key . $condition;
+      } else {
+        $result[] = $condition;
+      }
+    }
+    if (!count($result)) {
+      return "";
+    } else if (count($result) == 1) {
+      return array_pop($result);
+    } else {
+      return "(" . join(" $op ", $result) . ")";
+    }
+  }
+
+  /**
    * Build SQL joins for hasAndBelongsToMany relations
    *
    * @param Model current model object
@@ -110,7 +139,7 @@ class ExcludeBehavior extends ModelBehavior {
       }
       $join .= " FROM {$Model->tablePrefix}$joinTable AS $with, $table AS $alias";
       $join .= " WHERE $with.$associationForeignKey = $alias.id";
-      $join .=   " AND ( ".implode(" OR ", $queryConditions)." )";
+      $join .=   " AND ".$this->_serializeConditions($queryConditions, 'OR');
       $join .= " GROUP BY $with.$foreignKey ";
       $join .= ") AS $with ON {$Model->alias}.id = $with.$foreignKey";
       $query['joins'][] = $join;
@@ -165,12 +194,28 @@ class ExcludeBehavior extends ModelBehavior {
   }
 
   /**
+   * Extract model name from condition
+   *
+   * @param $condition
+   * @return String Name of model
+   */
+  function _findModelName($condition) {
+    if (is_string($condition)) {
+      return $condition;
+    } else if (is_array($condition) && isset($condition['AND'])) {
+      return array_pop($condition['AND']);
+    } else {
+      return false;
+    }
+  }
+
+  /**
    * Extracts conditions for hasAndBelongsToMany and hasMany relations and build
    * joins for these relations.
    *
    * @param Model current model object
    * @param query query array
-   * @param options Join options
+   * @param optionscondition Join options
    */
   function _buildJoins(&$Model, &$query, $options = array()) {
     $joinConditions = array();
@@ -184,12 +229,12 @@ class ExcludeBehavior extends ModelBehavior {
     }
     //Logger::debug($conditions);
     foreach ($conditions as $key => $condition) {
-      // we expect only full conditions
-      if (!is_string($condition)) {
+      $name = $this->_findModelName($condition);
+      if (!$name) {
         continue;
       }
       // Match 'Model.field'
-      if (!preg_match('/^(\w+)\./', $condition, $matches)) {
+      if (!preg_match('/^(\w+)\./', $name, $matches)) {
         continue;
       }
       $name = $matches[1];

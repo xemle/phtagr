@@ -141,4 +141,48 @@ class ExplorerControllerTest extends ControllerTestCase {
     sort($locationNames);
     $this->assertEqual($locationNames, array('austria', 'prater', 'vienna'));
   }
+
+  /**
+   * Test explorer/{sublocation, city, state, country}/name URLs
+   */
+  public function testLocations() {
+    $user = $this->User->save($this->User->create(array('username' => 'user', 'role' => ROLE_USER)));
+
+    $media1 = $this->Media->save($this->Media->create(array('name' => 'IMG_1231.JPG', 'user_id' => $user['User']['id'])));
+    $media2 = $this->Media->save($this->Media->create(array('name' => 'IMG_1232.JPG', 'user_id' => $user['User']['id'])));
+    $media3 = $this->Media->save($this->Media->create(array('name' => 'IMG_1233.JPG', 'user_id' => $user['User']['id'])));
+    $media4 = $this->Media->save($this->Media->create(array('name' => 'IMG_1234.JPG', 'user_id' => $user['User']['id'])));
+
+    $sublocation = $this->Media->Location->save($this->Media->Location->create(array('type' => LOCATION_SUBLOCATION, 'name' => 'downtown')));
+    $city = $this->Media->Location->save($this->Media->Location->create(array('type' => LOCATION_CITY, 'name' => 'quebec')));
+    $state = $this->Media->Location->save($this->Media->Location->create(array('type' => LOCATION_STATE, 'name' => 'quebec')));
+    $country = $this->Media->Location->save($this->Media->Location->create(array('type' => LOCATION_COUNTRY, 'name' => 'canada')));
+
+    $this->Media->save(array('Media' => array('id' => $media1['Media']['id']), 'Location' => array('Location' => array($sublocation['Location']['id'], $city['Location']['id'], $state['Location']['id'], $country['Location']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media2['Media']['id']), 'Location' => array('Location' => array($city['Location']['id'], $state['Location']['id'], $country['Location']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media3['Media']['id']), 'Location' => array('Location' => array($state['Location']['id'], $country['Location']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media4['Media']['id']), 'Location' => array('Location' => array($country['Location']['id']))));
+
+    $user = $this->User->findById($user['User']['id']);
+    $Explorer = $this->generate('Explorer', array('methods' => array('getUser')));
+    $Explorer->expects($this->any())->method('getUser')->will($this->returnValue($user));
+
+    $this->testAction('/explorer/sublocation/downtown', array('return' => 'vars'));
+    $this->assertEqual(Set::extract('/Media/id', $Explorer->request->data), array($media1['Media']['id']));
+
+    $Explorer = $this->generate('Explorer', array('methods' => array('getUser')));
+    $Explorer->expects($this->any())->method('getUser')->will($this->returnValue($user));
+    $this->testAction('/explorer/city/quebec', array('return' => 'vars'));
+    $this->assertEqual(Set::extract('/Media/id', $Explorer->request->data), array($media1['Media']['id'], $media2['Media']['id']));
+
+    $Explorer = $this->generate('Explorer', array('methods' => array('getUser')));
+    $Explorer->expects($this->any())->method('getUser')->will($this->returnValue($user));
+    $this->testAction('/explorer/state/quebec', array('return' => 'vars'));
+    $this->assertEqual(Set::extract('/Media/id', $Explorer->request->data), array($media1['Media']['id'], $media2['Media']['id'], $media3['Media']['id']));
+
+    $Explorer = $this->generate('Explorer', array('methods' => array('getUser')));
+    $Explorer->expects($this->any())->method('getUser')->will($this->returnValue($user));
+    $this->testAction('/explorer/country/canada', array('return' => 'vars'));
+    $this->assertEqual(Set::extract('/Media/id', $Explorer->request->data), array($media1['Media']['id'], $media2['Media']['id'], $media3['Media']['id'], $media4['Media']['id']));
+  }
 }

@@ -50,10 +50,14 @@ class SearchComponentTestCase extends CakeTestCase {
         'wordRule' => array('rule' => array('custom', '/^[-]?\w+$/')),
         'minRule' => array('rule' => array('minLength', 3))
         ),
+      'cities' => array('rule' => array('maxLength', 30)),
+      'countries' => array('rule' => array('maxLength', 30)),
       'groups' => 'notEmpty',
+      'locations' => array('rule' => array('maxLength', 30)),
       'page' => 'numeric',
       'show' => array('rule' => array('inList', array(2, 12, 24, 64))),
       'sort' => array('rule' => array('inList', array('date', '-date', 'newest', 'changes', 'viewed', 'popularity', 'random', 'name'))),
+      'states' => array('rule' => array('maxLength', 30)),
       'tags' => array(
         'wordRule' => array('rule' => array('custom', '/^[-]?\w+$/')),
         'minRule' => array('rule' => array('minLength', 3))
@@ -640,4 +644,44 @@ class SearchComponentTestCase extends CakeTestCase {
     $this->assertEqual(Set::extract('/Media/name', $result), array('IMG_1232.JPG'));
   }
 
+  /**
+   * Test locations with city, state, and country searches
+   */
+  public function testLocationSearches() {
+    $user = $this->User->save($this->User->create(array('username' => 'user', 'role' => ROLE_USER)));
+
+    $media1 = $this->Media->save($this->Media->create(array('name' => 'IMG_1231.JPG', 'user_id' => $user['User']['id'])));
+    $media2 = $this->Media->save($this->Media->create(array('name' => 'IMG_1232.JPG', 'user_id' => $user['User']['id'])));
+    $media3 = $this->Media->save($this->Media->create(array('name' => 'IMG_1233.JPG', 'user_id' => $user['User']['id'])));
+
+    $city = $this->Media->Location->save($this->Media->Location->create(array('type' => LOCATION_CITY, 'name' => 'quebec')));
+    $state = $this->Media->Location->save($this->Media->Location->create(array('type' => LOCATION_STATE, 'name' => 'quebec')));
+    $country = $this->Media->Location->save($this->Media->Location->create(array('type' => LOCATION_COUNTRY, 'name' => 'canada')));
+
+    $this->Media->save(array('Media' => array('id' => $media1['Media']['id']), 'Location' => array('Location' => array($city['Location']['id'], $country['Location']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media2['Media']['id']), 'Location' => array('Location' => array($state['Location']['id'], $country['Location']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media3['Media']['id']), 'Location' => array('Location' => array($country['Location']['id']))));
+
+    $user = $this->User->findById($user['User']['id']);
+
+    // Allow 'user' parameter
+    $this->Search->disabled = array();
+
+    $this->mockUser($user);
+
+    $this->Search->addLocation('quebec');
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media1['Media']['id'], $media2['Media']['id']));
+
+    $this->Search->delLocation('quebec');
+    $this->Search->addCity('quebec');
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media1['Media']['id']));
+
+    $this->Search->delCity('quebec');
+    $this->Search->addLocation('canada');
+    $this->Search->addState('-quebec');
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media1['Media']['id'], $media3['Media']['id']));
+  }
 }

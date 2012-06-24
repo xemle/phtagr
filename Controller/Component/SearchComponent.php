@@ -38,6 +38,8 @@ class SearchComponent extends Component
   var $validate = array(
     'categories' => array('rule' => array('maxLength', 30)),
     'category_op' => array('rule' => array('inList', array('AND', 'OR'))),
+    'cities' => array('rule' => array('maxLength', 30)),
+    'countries' => array('rule' => array('maxLength', 30)),
     'created_from' => array('rule' => array('custom', '/^\d{4}-\d{2}-\d{2}([ T]\d{2}:\d{2}:\d{2})?$/')),
     'east' => array('rule' => array('custom', '/-?\d+(\.\d+)?/')),
     'exclude_user' => 'numeric',
@@ -56,6 +58,8 @@ class SearchComponent extends Component
     'show' => array('numericRule' => 'numeric', 'minRule' => array('rule' => array('comparison', '>=', 1)), 'maxRule' => array('rule' => array('comparison', '<=', 240))),
     'sort' => array('rule' => array('inList', array('date', '-date', 'newest', 'changes', 'viewed', 'popularity', 'random', 'name'))),
     'south' => array('rule' => array('custom', '/-?\d+(\.\d+)?/')),
+    'sublocations' => array('rule' => array('maxLength', 30)),
+    'states' => array('rule' => array('maxLength', 30)),
     'tags' => array('rule' => array('maxLength', 30)),
     'tag_op' => array('rule' => array('inList', array('AND', 'OR'))),
     'to' => array('rule' => array('custom', '/^\d{4}-\d{2}-\d{2}([ T]\d{2}:\d{2}:\d{2})?$/')),
@@ -501,7 +505,7 @@ class SearchComponent extends Component
   }
 
   function _getParameterFromCrumbs($crumbs) {
-    $listTypes = array('tag', 'category', 'location', 'group');
+    $listTypes = array('category', 'city', 'country', 'group', 'location', 'state', 'sublocation', 'tag');
     foreach ($crumbs as $crumb) {
       if (empty($crumb)) {
         continue;

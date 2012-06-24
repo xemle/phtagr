@@ -48,7 +48,7 @@ class ExplorerController extends AppController
   }
 
   function beforeRender() {
-    $paginateActions = array('category', 'date', 'edit', 'group', 'index', 'location', 'query', 'tag', 'user', 'view');
+    $paginateActions = array('category', 'date', 'edit', 'group', 'index', 'location', 'sublocation', 'city', 'state', 'country', 'query', 'tag', 'user', 'view');
     if (in_array($this->action, $paginateActions)) {
       $this->request->data = $this->Search->paginateByCrumbs($this->crumbs);
       $this->FastFileResponder->addAll($this->request->data, 'thumb');
@@ -98,6 +98,8 @@ class ExplorerController extends AppController
       $queryMap = array(
         'category' => '_getAssociation',
         'category_op' => array('OR', 'AND'),
+        'city' => '_getAssociation',
+        'country' => '_getAssociation',
         'from' => 'true',
         'group' => '_getAssociation',
         'location' => '_getAssociation',
@@ -105,6 +107,8 @@ class ExplorerController extends AppController
         'operand' => array('OR', 'AND'),
         'show' => array(2, 6, 12, 24, 60, 120, 240),
         'sort' => array('changes', 'date', '-date', 'name', 'newest', 'popularity', 'random', 'viewed'),
+        'state' => '_getAssociation',
+        'sublocation' => '_getAssociation',
         'tag' => '_getAssociation',
         'tag_op' => array('OR', 'AND'),
         'type' => array('image', 'video'),
@@ -495,6 +499,46 @@ class ExplorerController extends AppController
     $crumbs = array();
     foreach($locations as $location) {
       $crumbs[] = 'location:' . $location;
+    }
+    $this->crumbs = am($crumbs, $this->Search->urlToCrumbs($this->request->url, 3));
+    $this->render('index');
+  }
+
+  function sublocation($sublocations) {
+    $sublocations = preg_split('/\s*,\s*/', trim($sublocations));
+    $crumbs = array();
+    foreach($sublocations as $sublocation) {
+      $crumbs[] = 'sublocation:' . $sublocation;
+    }
+    $this->crumbs = am($crumbs, $this->Search->urlToCrumbs($this->request->url, 3));
+    $this->render('index');
+  }
+
+  function city($cities) {
+    $cities = preg_split('/\s*,\s*/', trim($cities));
+    $crumbs = array();
+    foreach($cities as $city) {
+      $crumbs[] = 'city:' . $city;
+    }
+    $this->crumbs = am($crumbs, $this->Search->urlToCrumbs($this->request->url, 3));
+    $this->render('index');
+  }
+
+  function state($states) {
+    $states = preg_split('/\s*,\s*/', trim($states));
+    $crumbs = array();
+    foreach($states as $state) {
+      $crumbs[] = 'state:' . $state;
+    }
+    $this->crumbs = am($crumbs, $this->Search->urlToCrumbs($this->request->url, 3));
+    $this->render('index');
+  }
+
+  function country($countries) {
+    $countries = preg_split('/\s*,\s*/', trim($countries));
+    $crumbs = array();
+    foreach($countries as $country) {
+      $crumbs[] = 'country:' . $country;
     }
     $this->crumbs = am($crumbs, $this->Search->urlToCrumbs($this->request->url, 3));
     $this->render('index');

@@ -38,8 +38,14 @@
   ksort($tagUrls);
   $categoryUrls = $this->ImageData->getAllExtendSearchUrls($crumbs, $user, 'category', array_unique(Set::extract('/Category/name', $this->request->data)));
   ksort($categoryUrls);
-  $locationUrls = $this->ImageData->getAllExtendSearchUrls($crumbs, $user, 'location', array_unique(Set::extract('/Location/name', $this->request->data)));
-  ksort($locationUrls);
+  $sublocationUrls = $this->ImageData->getAllExtendSearchUrls($crumbs, $user, 'sublocation', array_unique(Set::extract('/Location[type='.LOCATION_SUBLOCATION.']/name', $this->request->data)));
+  ksort($sublocationUrls);
+  $cityUrls = $this->ImageData->getAllExtendSearchUrls($crumbs, $user, 'city', array_unique(Set::extract('/Location[type='.LOCATION_CITY.']/name', $this->request->data)));
+  ksort($cityUrls);
+  $stateUrls = $this->ImageData->getAllExtendSearchUrls($crumbs, $user, 'state', array_unique(Set::extract('/Location[type='.LOCATION_STATE.']/name', $this->request->data)));
+  ksort($stateUrls);
+  $countryUrls = $this->ImageData->getAllExtendSearchUrls($crumbs, $user, 'country', array_unique(Set::extract('/Location[type='.LOCATION_COUNTRY.']/name', $this->request->data)));
+  ksort($countryUrls);
 
   if (count($tagUrls)) {
     echo "<p>" . __("Tags") . " \n";
@@ -55,9 +61,30 @@
     }
     echo "</p>\n";
   }
-  if (count($locationUrls)) {
-    echo "<p>" . __("Locations") . " \n";
-    foreach ($locationUrls as $name => $urls) {
+  if (count($sublocationUrls)) {
+    echo "<p>" . __("Sublocations") . " \n";
+    foreach ($sublocationUrls as $name => $urls) {
+      echo $this->ImageData->getExtendSearchLinks($urls, $name) . "\n";
+    }
+    echo "</p>\n";
+  }
+  if (count($cityUrls)) {
+    echo "<p>" . __("Cities") . " \n";
+    foreach ($cityUrls as $name => $urls) {
+      echo $this->ImageData->getExtendSearchLinks($urls, $name) . "\n";
+    }
+    echo "</p>\n";
+  }
+  if (count($stateUrls)) {
+    echo "<p>" . __("States") . " \n";
+    foreach ($stateUrls as $name => $urls) {
+      echo $this->ImageData->getExtendSearchLinks($urls, $name) . "\n";
+    }
+    echo "</p>\n";
+  }
+  if (count($countryUrls)) {
+    echo "<p>" . __("Countries") . " \n";
+    foreach ($countryUrls as $name => $urls) {
       echo $this->ImageData->getExtendSearchLinks($urls, $name) . "\n";
     }
     echo "</p>\n";

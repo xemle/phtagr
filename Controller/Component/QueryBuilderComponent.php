@@ -28,6 +28,8 @@ class QueryBuilderComponent extends Component
    */
   var $rules = array(
     'categories' => array('custom' => 'buildHabtm'),
+    'cities' => array('custom' => 'buildHabtm'),
+    'countries' => array('custom' => 'buildHabtm'),
     'created_from' => array('field' => 'Media.created', 'operand' => '>='),
     'east' => array('field' => 'Media.longitude', 'operand' => '<='),
     'exclude_user' => array('field' => 'Media.user_id', 'operand' => '!='),
@@ -39,6 +41,8 @@ class QueryBuilderComponent extends Component
     'name' => 'Media.name',
     'north' => array('field' => 'Media.latitude', 'operand' => '<='),
     'south' => array('field' => 'Media.latitude', 'operand' => '>='),
+    'states' => array('custom' => 'buildHabtm'),
+    'sublocations' => array('custom' => 'buildHabtm'),
     'to' => array('field' => 'Media.date', 'operand' => '<='),
     'tags' => array('custom' => 'buildHabtm'),
     'type' => array('field' => 'Media.type', 'mapping' => array('image' => MEDIA_TYPE_IMAGE, 'video' => MEDIA_TYPE_VIDEO)),
@@ -318,25 +322,52 @@ class QueryBuilderComponent extends Component
     }
 
     $habtm = Inflector::singularize($name);
+    $origHabtm = false;
+    if (in_array($habtm, array('sublocation', 'city', 'state', 'country'))) {
+      $origHabtm = $habtm;
+      $habtm = 'location';
+    }
+    $map = array(
+      'sublocation' => LOCATION_SUBLOCATION,
+      'city' => LOCATION_CITY,
+      'state' => LOCATION_STATE,
+      'country' => LOCATION_COUNTRY
+      );
 
     $field = Inflector::camelize($habtm).'.name';
 
     $tags = array();
-    foreach($value as $v) {
+    foreach((array)$value as $v) {
       if (preg_match('/[*\?]/', $v)) {
         $v = preg_replace('/\*/', '%', $v);
         $v = preg_replace('/\?/', '_', $v);
-        $query['conditions'][] = $this->_buildCondition($field, $v, array('operand' => 'LIKE'));
+        if (!$origHabtm) {
+          $query['conditions'][] = $this->_buildCondition($field, $v, array('operand' => 'LIKE'));
+        } else {
+          $query['conditions'][] = array('AND' => array(
+            $this->_buildCondition($field, $v, array('operand' => 'LIKE')),
+            $this->_buildCondition(Inflector::camelize($habtm).'.type', $map[$origHabtm])
+            ));
+        }
       } else {
         $tags[] = $v;
       }
     }
     if (count($tags)) {
-      $query['conditions'][] = $this->_buildCondition($field, $tags);
+      if (!$origHabtm) {
+        $query['conditions'][] = $this->_buildCondition($field, $tags);
+      } else {
+        $query['conditions'][] = array('AND' => array(
+          $this->_buildCondition($field, $tags),
+          $this->_buildCondition(Inflector::camelize($habtm).'.type', $map[$origHabtm])
+          ));
+      }
     }
 
     $fieldCount = Inflector::camelize($habtm).'Count';
-    $query['_counts'][] = $fieldCount;
+    if (!isset($query['_counts']) || !in_array($fieldCount, $query['_counts'])) {
+      $query['_counts'][] = $fieldCount;
+    }
 
     // handle operand conditions (AND and OR)
     $operand = $this->_getParam(&$data, 'operand');
@@ -348,15 +379,15 @@ class QueryBuilderComponent extends Component
       $operand = $this->_getParam(&$data, $habtm."_op", 'AND');
     }
 
-    switch ($operand) {
-      case 'AND':
-        $query['conditions'][] = $fieldCount.' >= '.count($data[$name]);
-        break;
-      case 'OR':
-        $query['conditions'][] = $fieldCount.' > 0';
-        break;
-      default:
-        Logger::err("Unknown $field operand '$operand'");
+    $condition = $fieldCount . ' >=';
+    if ($operand === 'AND') {
+      $count = !empty($query['conditions'][$condition]) ? $query['conditions'][$condition] : 0;
+      $count += count($data[$name]);
+      $query['conditions'][$condition] = $count;
+    } else if ($operand === 'OR') {
+      $query['conditions'][$condition] = 1;
+    } else {
+      Logger::err("Unknown $field operand '$operand'");
     }
   }
 
