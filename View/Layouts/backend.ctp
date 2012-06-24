@@ -40,7 +40,7 @@
 </div><!-- main -->
 
 <div id="footer"><div class="sub">
-<p>&copy; 2006-2012 by <?php echo $this->Html->link("phTagr - Tag, Browse, and Share Your Photos", 'http://www.phtagr.org'); ?></p>
+<p>&copy; 2006-2012 by <?php echo $this->Html->link("phTagr - Tag, Browse, and Share Your Photos", 'http://www.phtagr.org'); ?>. phTagr version <?php echo Configure::read('Phtagr.version'); ?></p>
 </div></div>
 </body>
 </html>
