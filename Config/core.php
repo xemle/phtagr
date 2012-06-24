@@ -81,7 +81,13 @@
  */
 	Configure::write('App.encoding', 'UTF-8');
 
- /**
+/**
+ * phTagr version from VERSION.txt file
+ */
+	$versionFile = file(APP . 'VERSION.txt');
+	Configure::write('Phtagr.version', trim(array_pop($versionFile)));
+
+/**
  * In some php versions escapeshellarg() removes special characters like german
  * umlaut. This bug causes wrong system calls to files like import of media
  * with umlaut. The call setlocale() to an UTF8 character set fixes this
