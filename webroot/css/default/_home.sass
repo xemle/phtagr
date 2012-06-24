@@ -1,6 +1,7 @@
 @import grid
 @import tag-cloud
 @import opacity
+
 *
   #random-media 
     +column(12)
@@ -25,6 +26,9 @@
         padding-left: 0
       a
         display: inline-block
+        &:hover
+          color: white
+          background-color: $clickable-hover-bg
 * #random-media .clip
   position: relative
   display: block
