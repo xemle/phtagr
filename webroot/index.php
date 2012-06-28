@@ -82,7 +82,7 @@
 /**
  * Fast media delivery without CakePHP 
  */
-	$url == '';
+	$url = '';
 	if (isset($_GET['url'])) {
 		$url = $_GET['url'];
 	} else {
