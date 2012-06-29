@@ -87,9 +87,10 @@ class SystemController extends AppController {
   }
 
   function index() {
-    if (isset($this->request->data)) {
+    if (!empty($this->request->data)) {
       $this->_set(0, 'general.title', $this->request->data);
       $this->_set(0, 'general.subtitle', $this->request->data);
+      $this->Session->setFlash(__("Titles were updated"));
     }
     $this->request->data = $this->Option->getTree(0);
   }

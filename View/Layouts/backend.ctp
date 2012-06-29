@@ -23,7 +23,8 @@
 <div id="page">
 
 <div id="header"><div class="sub">
-<?php echo $this->Html->link(__('Gallery'), '/'); ?>
+<h1><?php echo $this->Html->link($this->Option->get('general.title', 'phTagr.'), '/'); ?></h1>
+<span><?php echo $this->Option->get('general.subtitle', 'Tag, Browse, and Share Your Photos'); ?></span>
 </div></div>
 
 <div id="main">
