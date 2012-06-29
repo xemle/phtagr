@@ -97,7 +97,7 @@ class UsersController extends AppController
     $this->request->data['Media']['count'] = $this->Media->find('count', array('conditions' => array('Media.user_id' => $userId), 'recursive' => -1));
     $this->request->data['File']['count'] = $this->MyFile->find('count', array('conditions' => array('File.user_id' => $userId), 'recursive' => -1));
     $bytes = $this->MyFile->find('all', array('conditions' => array("File.user_id" => $userId), 'recursive' => -1, 'fields' => 'SUM(File.size) AS Bytes'));
-    $this->request->data['File']['bytes'] = $bytes[0][0]['Bytes'];
+    $this->request->data['File']['bytes'] = max(0, $bytes[0][0]['Bytes']);
 
     $groupUserIds = Set::extract('/Group/user_id');
     $this->set('users', $this->User->find('all', array('condition' => array('User.id' => $groupUserIds), 'recursive' => -1)));
