@@ -1,2 +1,2 @@
 // Version of phtagr
-2.2b3-dev
+2.2.1-dev
