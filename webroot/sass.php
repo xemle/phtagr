@@ -121,7 +121,7 @@ if ($regs[1]) {
 	if (is_dir('.' . DS . $plugin . DS . 'css')) {
 		$cssPath = '.' . DS . $plugin . DS . 'css' . DS;
 	} else {
-		$path = App::pluginPath($plugin);
+		$path = App::pluginPath(Inflector::camelize($plugin));
 		$cssPath = $path . 'webroot' . DS . 'css' . DS;
 	}
 }
