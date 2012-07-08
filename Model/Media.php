@@ -30,6 +30,7 @@ class Media extends AppModel
     'Group' => array(),
     'Tag' => array(),
     'Category' => array(),
+    'Field' => array(),
     'Location' => array('order' => 'Location.type'));
 
   var $_aclMap = array(
@@ -38,6 +39,12 @@ class Media extends AppModel
     ACL_LEVEL_OTHER => 'oacl');
 
   var $actsAs = array('Type', 'Flag', 'Cache', 'Exclude');
+
+  public function beforeSave($options = array()) {
+    parent::beforeSave();
+    $this->Field->createFields(&$this->data);
+    return true;
+  }
 
   function beforeDelete($cascade = true) {
     // Delete media cache files
@@ -947,21 +954,8 @@ class Media extends AppModel
    */
   function editSingle(&$media, &$data, &$user) {
     $tmp = array('Media' => array('id' => $media['Media']['id'], 'user_id' => $media['Media']['user_id']));
-    if ($media['Media']['canWriteTag']) {
-      $tag = $this->Tag->editMetaSingle(&$media, &$data);
-      if (isset($tag['Tag'])) {
-        $tmp['Tag'] = $tag['Tag'];
-      }
-    }
     if ($media['Media']['canWriteMeta']) {
-      $category = $this->Category->editMetaSingle(&$media, &$data);
-      if (isset($category['Category'])) {
-        $tmp['Category'] = $category['Category'];
-      }
-      $location = $this->Location->editMetaSingle(&$media, &$data);
-      if (isset($location['Location'])) {
-        $tmp['Location'] = $location['Location'];
-      }
+      $tmp = am($this->Field->editSingle(&$media, &$data), $tmp);
       if (!empty($data['Media']['geo'])) {
         $this->splitGeo(&$data, $data['Media']['geo']);
       }
@@ -971,6 +965,8 @@ class Media extends AppModel
           $tmp['Media'][$field] = $data['Media'][$field];
         }
       }
+    } else if ($media['Media']['canWriteTag']) {
+      $tmp = am($this->Field->editSingle(&$media, &$data, array('keyword')), $tmp);
     }
     if ($media['Media']['canWriteCaption']) {
       $fields = array('name', 'caption', 'date', 'latitude', 'longitude');

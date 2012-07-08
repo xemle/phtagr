@@ -22,6 +22,15 @@ class ImageFilterComponent extends BaseFilterComponent {
   var $controller = null;
   var $components = array('Command');
 
+  var $fieldMap = array(
+      'keyword' => 'Keywords',
+      'category' => 'SupplementalCategories',
+      'sublocation' => 'Sub-Location',
+      'city' => 'city',
+      'state' => 'Province-State',
+      'country' => 'Country-PrimaryLocationName'
+      );
+
   var $locationMap = array(
                         LOCATION_CITY => 'City',
                         LOCATION_SUBLOCATION => 'Sub-location',
@@ -260,26 +269,14 @@ class ImageFilterComponent extends BaseFilterComponent {
     }
 
     // Associations to meta data: Tags, Categories, Locations
-    $keywords = $this->_extract($data, 'Keywords');
-    $ids = $this->controller->Media->Tag->createIdListFromText($keywords, 'name', true);
-    if (count($ids) > 0)
-      $media['Tag']['Tag'] = am($ids, set::extract($media, 'Tag.{n}.id'));
-
-    $categories = $this->_extract($data, 'SupplementalCategories');
-    $ids = $this->controller->Media->Category->createIdListFromText($categories, 'name', true);
-    if (count($ids) > 0)
-      $media['Category']['Category'] = am($ids, set::extract($media, 'Category.{n}.id'));
-
-    // City, Sub-location, Province-State, Country-PrimaryLocationName
-    $items = array();
-    foreach ($this->locationMap as $type => $name) {
-      $value = $this->_extract($data, $name);
-      if ($value)
-        $items[] = array('name' => $value, 'type' => $type);
+    foreach ($this->fieldMap as $field => $name) {
+      $isList = $this->Media->Field->isListField($field);
+      if ($isList) {
+        $media['Field'][$field] = $this->_extractList($data, $name);
+      } else {
+        $media['Field'][$field] = $this->_extract($data, $name);
+      }
     }
-    $ids = $this->controller->Media->Location->createIdList($items, true);
-    if (count($ids) > 0)
-      $media['Location']['Location'] = am($ids,  set::extract($media, 'Location.{n}.id'));
 
     return $media;
   }
@@ -358,27 +355,14 @@ class ImageFilterComponent extends BaseFilterComponent {
     }
 
     // Associations to meta data: Tags, Categories, Locations
-    $keywords = $this->_extract($data, 'iptc/IPTCApplication/Keywords', array());
-    $ids = $this->controller->Tag->createIdListFromText(implode(',', $keywords), 'name', true);
-    if (count($ids) > 0)
-      $media['Tag']['Tag'] = am($ids, set::extract($media, 'Tag.{n}.id'));
-
-    $categories = $this->_extract($data, 'iptc/IPTCApplication/SupplementalCategories', array());
-    $ids = $this->controller->Category->createIdListFromText(implode(',', $categories), 'name', true);
-    if (count($ids) > 0)
-      $media['Category']['Category'] = am($ids, set::extract($media, 'Category.{n}.id'));
-
-    // City, Sub-location, Province-State, Country-PrimaryLocationName
-    $items = array();
-    foreach ($this->locationMap as $type => $name) {
-      $value = $this->_extract($data, "iptc/IPTCApplication/$name/0");
-      if ($value)
-        $items[] = array('name' => $value, 'type' => $type);
+    foreach ($this->fieldMap as $field => $name) {
+      $isList = $this->Media->Field->isListField($field);
+      if ($isList) {
+      $media['Field'][$field] = $this->_extractList($data, "iptc/IPTCApplication/$name", array());
+      } else {
+        $media['Field'][$field] = $this->_extract($data, "iptc/IPTCApplication/$name");
+      }
     }
-    $ids = $this->controller->Location->createIdList($items, true);
-    if (count($ids) > 0)
-      $media['Location']['Location'] = am($ids,  set::extract($media, 'Location.{n}.id'));
-
     return $media;
   }
 
@@ -581,63 +565,30 @@ class ImageFilterComponent extends BaseFilterComponent {
     $args = am($args, $this->_createExportArgument(&$data, 'Comment', $media['Media']['caption']));
 
     // Associations to meta data: Tags, Categories, Locations
-    $keywords = $this->_extract($data, 'Keywords');
-    if ($keywords) {
-      $fileTags = array_unique(preg_split('/\s*,\s*/', trim($keywords)));
-    } else {
-      $fileTags = array();
-    }
-
-    if (count($media['Tag'])) {
-      $dbTags = Set::extract($media, "Tag.{n}.name");
-    } else {
-      $dbTags = array();
-    }
-
-    foreach (array_diff($fileTags, $dbTags) as $del) {
-      $args[] = '-Keywords-=' . $del;
-    }
-    foreach (array_diff($dbTags, $fileTags) as $add) {
-      $args[] = '-Keywords+=' . $add;
-    }
-
-    $categories = $this->_extract($data, 'SupplementalCategories');
-    if ($categories) {
-      $fileCategories = array_unique(preg_split('/\s*,\s*/', trim($categories)));
-    } else {
-      $fileCategories = array();
-    }
-
-    if (count($media['Category'])) {
-      $dbCategories = Set::extract($media, "Category.{n}.name");
-    } else {
-      $dbCategories = array();
-    }
-    foreach (array_diff($fileCategories, $dbCategories) as $del) {
-      $args[] = '-SupplementalCategories-=' . $del;
-    }
-    foreach (array_diff($dbCategories, $fileCategories) as $add) {
-      $args[] = '-SupplementalCategories+=' . $add;
-    }
-    // Locations
-    if (count($media['Location'])) {
-      $dbLocations = Set::combine($media, "Location.{n}.type", "Location.{n}.name");
-    } else {
-      $dbLocations = array();
-    }
-
-    foreach ($this->locationMap as $type => $name) {
-      $fileValue = $this->_extract($data, $name);
-      $dbValue = $this->_extract($dbLocations, $type);
-
-      // DB overwrites file!
-      if (!$fileValue && $dbValue) {
-        $args[] = "-$name=" . $dbValue;
-      } elseif($fileValue && !$dbValue) {
-        $args[] = "-$name=";
+    foreach ($this->fieldMap as $field => $name) {
+      $isList = $this->Media->Field->isListField($field);
+      if ($isList) {
+        $fileValue = $this->_extractList($data, $name);
+      } else {
+        $fileValue = $this->_extract($data, $name);
+      }
+      $dbValue = Set::extract("/Field[name=$field]/data", $media);
+      if (!$isList) {
+        $dbValue = array_pop($dbValue);
+        if (!$fileValue && $dbValue) {
+          $args[] = "-$name=" . $dbValue;
+        } elseif($fileValue && !$dbValue) {
+          $args[] = "-$name=";
+        }
+      } else {
+        foreach (array_diff($fileValue, $dbValue) as $del) {
+          $args[] = "-$name-=" . $del;
+        }
+        foreach (array_diff($dbValue, $fileValue) as $add) {
+          $args[] = "-$name+=" . $add;
+        }
       }
     }
-
     return $args;
   }
 
@@ -661,6 +612,15 @@ class ImageFilterComponent extends BaseFilterComponent {
       $result =& $result[$p];
     }
     return $result;
+  }
+
+  function _extractList($data, $key, $default = array()) {
+    $value = $this->_extract($data, $key);
+    if (!$value) {
+      return $default;
+    }
+    $values = array_unique(preg_split('/\s+,\s+/', trim($value)));
+    return $values;
   }
 
   /**

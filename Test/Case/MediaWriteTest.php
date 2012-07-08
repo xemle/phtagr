@@ -70,7 +70,7 @@ class MediaWriteTestCase extends CakeTestCase {
    */
   public $fixtures = array('app.file', 'app.media', 'app.user', 'app.group', 'app.groups_media',
       'app.groups_user', 'app.option', 'app.guest', 'app.comment', 'app.my_file',
-      'app.tag', 'app.media_tag', 'app.category', 'app.categories_media',
+      'app.tag', 'app.media_tag', 'app.category', 'app.categories_media', 'app.fields_media', 'app.field',
       'app.location', 'app.locations_media', 'app.comment');
 
   /**
@@ -189,7 +189,7 @@ class MediaWriteTestCase extends CakeTestCase {
     $this->assertNotEqual($media, false);
     $user = $this->Controller->getUser();
     $this->Media->setAccessFlags(&$media, &$user);
-    $data = array('Tag' => array('names' => 'thailand'));
+    $data = array('Field' => array('keyword' => 'thailand'));
     $tmp = $this->Media->editSingle(&$media, &$data, &$user);
     $this->Media->save($tmp);
 

@@ -41,11 +41,11 @@ if (!is_writeable(TEST_FILES)) {
 }
 
 class TestReadController extends AppController {
-	
+
 	var $uses = array('Media', 'MyFile', 'User', 'Option');
 
 	var $components = array('FileManager', 'FilterManager');
-	
+
 	function getUser() {
     return $this->User->find('first');
 	}
@@ -64,7 +64,7 @@ class MediaReadTestCase extends CakeTestCase {
   var $Media;
   var $Option;
   var $userId;
-	
+
   var $Folder;
 
   /**
@@ -74,7 +74,7 @@ class MediaReadTestCase extends CakeTestCase {
    */
 	public $fixtures = array('app.file', 'app.media', 'app.user', 'app.group', 'app.groups_media',
       'app.groups_user', 'app.option', 'app.guest', 'app.comment', 'app.my_file',
-      'app.tag', 'app.media_tag', 'app.category', 'app.categories_media',
+      'app.tag', 'app.media_tag', 'app.category', 'app.categories_media', 'app.fields_media', 'app.field',
       'app.location', 'app.locations_media', 'app.comment');
 
 /**
@@ -267,7 +267,7 @@ class MediaReadTestCase extends CakeTestCase {
     $this->assertEqual($count, 1);
 
     $media = $this->Media->find('first');
-    $keywords = Set::extract('/Tag/name', $media);
+    $keywords = Set::extract('/Field[name=keyword]/data', $media);
     $this->assertEqual($keywords, array('thailand'));
 
     $this->assertEqual($media['Media']['date'], '2007-10-14 10:09:57');
