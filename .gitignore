@@ -1,6 +1,5 @@
 tmp
 users
-config/core.php
-config/database.php
-.gitignore
+Config/core.php
+Config/database.php
 nbproject
