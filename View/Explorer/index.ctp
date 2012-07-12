@@ -80,8 +80,14 @@
       });
     };
     $.fn.mediaAction = function() {
+      var data = $('body').data('phtagr');
+      if (!data) {
+        $('body').data('phtagr', {lastSelected:null, ids: []});
+        data = $('body').data('phtagr');
+      }
       $(this).each(function() {
         var id = $(this).attr('id').split('-')[1];
+        data.ids.push(id);
         var media = $('#media-' + id);
         // extract crumb data
         var crumbs = media.find('.p-explorer-media-image a').attr('href').split('/');
@@ -90,11 +96,32 @@
           i--;
         }
         crumbs = crumbs.slice(i + 1).join('/');
-        $(this).find('ul li .add').click(function() {
-          $(media).selectMedia();
+        $(this).find('.p-explorer-media-image').click(function(event) {
+          $(media).toggleMedia();
+          event.preventDefault();
+          if (data.lastSelected && event.shiftKey) {
+            var last = $('#media-' + data.lastSelected);
+            var isSelected = media.hasClass('selected');
+            if (last.hasClass('selected') == isSelected) {
+              var start = data.ids.indexOf(id);
+              var end = data.ids.indexOf(data.lastSelected);
+              if (start > end) {
+                var tmp = end; end = start; start = tmp;
+              }
+              start++;
+              while (start < end) {
+                if (isSelected) {
+                  $('#media-' + data.ids[start++]).selectMedia();
+                } else {
+                  $('#media-' + data.ids[start++]).unselectMedia();
+                }
+              }
+            }
+          }
+          data.lastSelected = id;
         });
-        $(this).find('ul li .del').hide().click(function() {
-          $(media).unselectMedia();
+        $(this).find('.p-explorer-media-image a').click(function(event) {
+          event.preventDefault();
         });
         $(this).find('ul li .edit').click(function() {
           $(this).updateMeta(id, crumbs);

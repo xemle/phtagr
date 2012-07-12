@@ -27,13 +27,10 @@
 <div class="p-explorer-media-actions" id="action-<?php echo $media['Media']['id']; ?>">
 <ul>
 <?php
-  $addIcon = $this->ImageData->getIcon('add',  __('Select media'));
+  $enlargeIcon = $this->ImageData->getIcon('arrow_out',  __('View media'));
+  $enlargeLink = "/images/view/".$media['Media']['id'].'/'.$this->Breadcrumb->params($imageCrumbs);
   echo $this->Html->tag('li',
-    $this->Html->link($addIcon, 'javascript:void', array('escape' => false, 'class' => 'add')),
-    array('escape' => false));
-  $delIcon = $this->ImageData->getIcon('delete',  __('Deselect media'));
-  echo $this->Html->tag('li',
-    $this->Html->link($delIcon, 'javascript:void', array('escape' => false, 'class' => 'del')),
+    $this->Html->link($enlargeIcon, $enlargeLink, array('escape' => false, 'class' => 'view')),
     array('escape' => false));
   if ($media['Media']['canWriteTag']) {
     $editIcon = $this->ImageData->getIcon('tag',  __('Edit meta data'));
