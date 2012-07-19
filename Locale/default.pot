@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2012-07-19 18:28+0200\n"
+"POT-Creation-Date: 2012-07-19 18:37+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -2232,6 +2232,15 @@ msgstr ""
 msgid "ISO"
 msgstr ""
 
+#: View/Layouts/backend.ctp:44
+#: View/Layouts/default.ctp:51
+msgid "&copy; 2006-2012 by %s - Tag, Browse, and Share Your Photos."
+msgstr ""
+
+#: View/Layouts/backend.ctp:44
+msgid "You are running version %s."
+msgstr ""
+
 #: View/Layouts/default.ctp:34
 #: View/Themed/Chrisd/Layouts/default.ctp:34
 msgid "Search..."
@@ -2243,7 +2252,7 @@ msgid "Go"
 msgstr ""
 
 #: View/Layouts/default.ctp:51
-msgid "phTagr - Tag, Browse, and Share Your Photos"
+msgid "phTagr.org"
 msgstr ""
 
 #: View/Options/import.ctp:5
