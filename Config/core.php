@@ -82,6 +82,14 @@
 	Configure::write('App.encoding', 'UTF-8');
 
 /**
+ * Usually phTagr will answer by client's preferred language if supported.
+ * Uncomment following line to set a fix language of the gallery.
+ *
+ * See Locale directory for supported languages.
+ */
+	// Configure::write('Config.language', 'fre');
+
+/**
  * phTagr version from VERSION.txt file
  */
 	$versionFile = file(APP . 'VERSION.txt');
