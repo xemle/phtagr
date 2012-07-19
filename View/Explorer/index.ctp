@@ -7,10 +7,10 @@
 
 <?php
   $baseUrl = Router::url('/', true);
-  $editTitleText = __("Edit Meta Data");
-  $aclTitleText = __("Edit Access Rights");
-  $saveText = __("Update");
-  $cancelText = __("Cancel");
+  $editTitleText = h(__("Edit Meta Data"));
+  $aclTitleText = h(__("Edit Access Rights"));
+  $saveText = h(__("Update"));
+  $cancelText = h(__("Cancel"));
   $script = <<<SCRIPT
 (function($) {
   $(document).ready(function() {
