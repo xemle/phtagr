@@ -1,0 +1,151 @@
+var phtagr = phtagr || {};
+phtagr.upload = phtagr.upload || {};
+
+phtagr.upload.File = Backbone.Model.extend({
+  url: '#',
+  save: function() { return true }
+});
+phtagr.upload.Files = Backbone.Collection.extend({
+  model: phtagr.upload.File,
+  percent: 0,
+  size: 0,
+  loadedFiles: 0,
+  started: 0,
+  currentId: '',
+  
+  initialize: function() {
+    _.bindAll(this, 'update', 'getEstimate', 'getCurrent');
+    this.on('add', this.update, this);
+  },
+  update: function() {
+    if (this.started == 0) {
+      this.started = new Date().getTime();
+    }
+    var loaded = 0;
+    var size = 0;
+    var loadedFiles = 0;
+    this.each(function(file) {
+      loaded += file.get('file').loaded;
+      size += file.get('file').size;
+      if (file.get('file').loaded) {
+        loadedFiles++;
+      };
+    })
+    this.size = size;
+    this.percent = 100 * loaded / size;
+    this.loadedFiles = loadedFiles;
+    this.trigger('change');
+  },
+  getEstimate: function() {
+    var seconds = (new Date().getTime() - this.started) / 1000;
+    return Math.ceil(seconds * (100 - this.percent) / (this.percent + 0.01));
+  },
+  getCurrent: function() {
+    var current = null;
+    this.each(function(file) {
+      if (file.get('file').id == this.currentId) {
+        current = file;
+      };
+    }, this);
+    return current;
+  }
+});
+phtagr.upload.SingleUploadView = Backbone.View.extend({
+  text: 'Upload file %d',
+  
+  initialize: function() {
+    this.collection.on('change', this.update, this);
+  },
+  update: function() {
+    var current = this.collection.getCurrent();
+    if (current) {
+      this.$('p').text(this.text.replace(/%d/, current.get('file').name));
+      this.$('.progress').progressbar({value: current.get('file').percent});
+    }
+    if (this.collection.percent == 100) {
+      $(this.el).hide();
+    } else {
+      $(this.el).show();
+    }
+  }
+});
+phtagr.upload.AllUploadView = Backbone.View.extend({
+  text: 'Upload file %d/%d. Estimate %s.',
+  
+  initialize: function() {
+    this.collection.on('change', this.update, this);
+  },
+  update: function() {
+    this.$('p').text(this.text.replace(/%d/, this.collection.loadedFiles)
+      .replace(/%d/, this.collection.length)
+      .replace(/%s/, this.formatTime(this.collection.getEstimate())));
+    this.$('.progress').progressbar({value: this.collection.percent});
+    if (this.collection.percent == 100) {
+      $(this.el).hide();
+    } else {
+      $(this.el).show();
+    }
+  },
+  formatTime: function(time) {
+    var seconds = time % 60;
+    var minutes = Math.floor((time / 60) % 60);
+    var hours = Math.floor(time / 3600);
+    var result = '';
+    if (hours > 9) {
+      result += hours + ':';
+    } else if (hours > 0) {
+      result += '0' + hours + ':';
+    }
+    if (minutes > 9) {
+      result += minutes + ':';
+    } else {
+      result += '0' + minutes + ':';
+    }
+    if (seconds > 9) {
+      result += seconds;
+    } else {
+      result += '0' + seconds;
+    }
+    return result;
+  }
+});
+
+
+phtagr.upload.initUploader = function(options, fileCollection, callback) {
+  var uploader = new plupload.Uploader(options);
+
+  if (typeof(callback) == 'function') {
+    uploader.bind('Init', callback);
+  }
+
+  uploader.init();
+
+  uploader.bind('FilesAdded', function(up, files) {
+    $.each(files, function(i, file) {
+      fileCollection.create({'file': file});
+    });
+    $('#filelist').show();
+    uploader.start();
+    up.refresh(); // Reposition Flash/Silverlight
+  });
+
+  uploader.bind('UploadProgress', function(up, file) {
+    fileCollection.currentId = file.id;
+    fileCollection.update();
+  });
+  uploader.bind('FileUploaded', function(up, file) {
+    fileCollection.currentId = file.id;
+    fileCollection.update();
+  });
+  
+  uploader.bind('Error', function(up, err) {
+    $('#filelist').append("<div>Error: " + err.code +
+      ", Message: " + err.message +
+      (err.file ? ", File: " + err.file.name : "") +
+      "</div>"
+    );
+
+    up.refresh(); // Reposition Flash/Silverlight
+  });
+
+};

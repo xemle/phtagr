@@ -32,11 +32,18 @@ class FileManagerComponent extends Component {
     $this->User = $controller->User;
   }
 
-  /** Add a file to the database
-    @param filename Filename to add
-    @param user Optional user. User model data or user Id.
-    @return File id or false on error */
+  /**
+   * Add a file to the database
+   *
+   * @param filename Filename to add
+   * @param user Optional user. User model data or user Id.
+   * @return File id or false on error
+   */
   function add($filename, $user = false) {
+    if (!is_readable($filename)) {
+      Logger::error("Can not read file: $filename");
+      return false;
+    }
     if (!$user) {
       $userId = $this->controller->getUserId();
     } elseif (is_numeric($user)) {
@@ -53,7 +60,9 @@ class FileManagerComponent extends Component {
 
     $id = $this->controller->MyFile->fileExists($filename);
     if ($id) {
-      Logger::verbose("File $filename already exists (id $id)");
+      $file = $this->controller->MyFile->findById($id);
+      $this->controller->MyFile->update($file);
+      Logger::verbose("Update file $filename (id $id)");
       return $id;
     }
     $flag = 0;
@@ -73,19 +82,29 @@ class FileManagerComponent extends Component {
 
   }
 
-  /** Delete a file
-    @param file File ID, filename or file model data
-    @return True on success */
+  /**
+   * Delete a file
+   *
+   * @param file File ID, filename or file model data
+   * @return True on success
+   */
   function delete($file) {
+    $isExternal = $this->isExternal($file);
     if (is_string($file)) {
       if (is_dir($file)) {
-        $deleteFolder = !$this->isExternal($file);
+        $deleteFolder = !$isExternal;
         return $this->controller->MyFile->deletePath($file, $deleteFolder);
       }
       $id = $this->controller->MyFile->fileExists($file);
       if (!$id) {
-        Logger::warn("Could not find file $file");
-        return false;
+        if (!$isExternal && is_readable($file) && is_writable(dirname($file))) {
+          Logger::warn("Delete unasigned internal file: $file");
+          @unlink($file);
+          return true;
+        } else {
+          Logger::warn("Could not find file $file");
+          return false;
+        }
       }
     } elseif (is_int($file)) {
       $id = $file;
@@ -98,14 +117,19 @@ class FileManagerComponent extends Component {
     return $this->controller->MyFile->delete($id);
   }
 
-  /** Delete a file (Alias of delete()) */
+  /**
+   * Delete a file (Alias of delete())
+   */
   function del($file) {
     return $this->delete($file);
   }
 
-  /** Returns the internal directory of a user
-    @param user Optional user
-    @return internal user directory */
+  /**
+   * Returns the internal directory of a user
+   *
+   * @param user Optional user
+   * @return internal user directory
+   */
   function getUserDir($user = false) {
     if (!$user) {
       $user = $this->controller->getUser();
@@ -123,10 +147,13 @@ class FileManagerComponent extends Component {
     return Folder::slashTerm($userDir);
   }
 
-  /** Evaluates if a filename is external or internal
-    @param filename Filename
-    @param user Optional user
-    @return True if filename is external */
+  /**
+   * Evaluates if a filename is external or internal
+   *
+   * @param filename Filename
+   * @param user Optional user
+   * @return True if filename is external
+   */
   function isExternal($filename, $user = false) {
     if (!is_dir($filename)) {
       $filename = Folder::slashTerm(dirname($filename));
@@ -139,9 +166,12 @@ class FileManagerComponent extends Component {
     }
   }
 
-  /** Checks if a user can read the file
-    @param file Filename
-    @param user Optional user */
+  /**
+   * Checks if a user can read the file
+   *
+   * @param file Filename
+   * @param user Optional user
+   */
   function canRead($file, $user = false) {
     if (!$user) {
       $user = $this->controller->getUser();
@@ -237,11 +267,14 @@ class FileManagerComponent extends Component {
     return $this->controller->MyFile->move($src, $dst);
   }
 
-  /** Creates a unique filename within a path and a filename. The new filename
+  /**
+   * Creates a unique filename within a path and a filename. The new filename
    * has the pattern of name.unique-number.extension
-    @param path Path for the filename
-    @param filename Filename
-    @return unique filename */
+   *
+   * @param path Path for the filename
+   * @param filename Filename
+   * @return unique filename
+   */
   function createUniqueFilename($path, $filename) {
     $path = Folder::slashTerm($path);
     if (!file_exists($path . $filename)) {

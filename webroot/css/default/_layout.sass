@@ -12,7 +12,7 @@
   display: block
   width: 100%
 
-#header 
+#header
   background-color: $headerBackgroundColor
   +linear-gradient(color-stops($headerBackgroundColor, darken($headerBackgroundColor, 20%)))
   border-bottom: 2px solid darken($headerBackgroundColor, 20%)
@@ -21,12 +21,12 @@
     width: 950px
     display: block
     margin: 0 auto
-    > h1 
+    > h1
       padding: 5px 0
       display: inline-block
       a
         color: white
-        font-size: 250% 
+        font-size: 250%
         +text-shadow(#444, 2px, 0px, 0)
     > .subtitle
       color: white
@@ -47,13 +47,13 @@
             border-color: darken($headerBackgroundColor, 35%)
             color: white
 
-#main-menu 
+#main-menu
   background-color:darken($headerBackgroundColor, 30%)
   > .sub
     width: 950px;
     display: block
     margin: 0 auto
-    > ul li 
+    > ul li
         display: block
         float: left
         > a
@@ -109,8 +109,9 @@
     +column(24, true)
     #content > .sub
       +column(24, true)
+      margin-bottom: 10px
 
-#footer 
+#footer
   +container
   > .sub
     +column(24, true)
@@ -129,7 +130,7 @@
     +text-shadow(white, 1px, 0px, 0)
     border: 1px solid #bbb
     padding: 3px 12px
-    
+
 .info,
 .message
   color: white

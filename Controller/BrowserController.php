@@ -736,5 +736,32 @@ class BrowserController extends AppController
     $this->_setQuotaForView();
     $this->layout = 'default';
   }
+
+  function plupload() {
+    $dst = $this->_getDailyUploadDir();
+    if (!$dst) {
+      $this->redirect($this->action);
+    }
+    $filename = $this->Plupload->upload($dst);
+    if ($filename) {
+      $files = array(Folder::addPathElement($dst, $filename));
+      $zips = $this->_extract($dst, $files);
+      foreach ($zips as $zip => $extracted) {
+        $this->FileManager->delete($zip);
+        unset($files[array_search($zip, $files)]);
+        $files = am($files, $extracted);
+      }
+      if (!$files) {
+        $this->Session->setFlash(__("No files uploaded"));
+        $this->redirect($this->action);
+      } else {
+        $toRead = array();
+      }
+      $this->FilterManager->clearErrors();
+      $this->FilterManager->readFiles($files, false);
+    }
+    $this->layout = 'bare';
+    $this->request->data = $this->Plupload->jsonResponse;
+  }
 }
 ?>
