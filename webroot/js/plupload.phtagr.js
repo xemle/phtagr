@@ -60,7 +60,8 @@ phtagr.upload.MediaList = Backbone.Collection.extend({
 phtagr.upload.SingleUploadView = Backbone.View.extend({
   text: 'Upload file %d',
 
-  initialize: function() {
+  initialize: function(options) {
+    this.text = options.text ? options.text : this.text
     this.collection.on('change', this.update, this);
   },
   update: function() {
@@ -79,7 +80,8 @@ phtagr.upload.SingleUploadView = Backbone.View.extend({
 phtagr.upload.AllUploadView = Backbone.View.extend({
   text: 'Upload file %d/%d. Estimate %s.',
 
-  initialize: function() {
+  initialize: function(options) {
+    this.text = options.text ? options.text : this.text
     this.collection.on('change', this.update, this);
   },
   update: function() {
@@ -125,9 +127,9 @@ phtagr.upload.MediaView = Backbone.View.extend({
   oldIndex: -1,
 
   initialize: function(options) {
-    this.baseUrl = options.baseUrl ? options.baseUrl : ''
-    this.showCount = options.showCount ? options.showCount : 24
-    this.crumbs = options.crumbs ? options.crumbs : ''
+    this.baseUrl = options.baseUrl ? options.baseUrl : this.baseUrl
+    this.showCount = options.showCount ? options.showCount : this.showCount
+    this.crumbs = options.crumbs ? options.crumbs : this.crumbs
     this.collection.on('add', this.update, this);
   },
   update: function() {
