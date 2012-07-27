@@ -41,12 +41,9 @@ class PluploadComponent extends Component {
   }
 
   function isPlupload() {
-    $dataNames = array('name', 'chunk', 'chunks');
     $request =& $this->controller->request;
-    foreach ($dataNames as $name) {
-      if (!isset($request->data[$name])) {
-        return false;
-      }
+    if (!isset($request->data['name'])) {
+      return false;
     }
     if (!isset($request->params['form']) || !isset($request->params['form']['file'])) {
       return false;
@@ -69,11 +66,11 @@ class PluploadComponent extends Component {
 
   /**
    * Upload a single chunk file
-   * 
+   *
    * @param String $path Target directory
    * @param Array $upload Upload
    * @param Arry $options
-   * @return mixed Returns filename without the directory. false on error. 
+   * @return mixed Returns filename without the directory. false on error.
    */
   function _handleCompleteFile($path, $upload, $options) {
     $folder = new Folder($path);
@@ -98,7 +95,7 @@ class PluploadComponent extends Component {
 
   /**
    * Copy one file to another
-   * 
+   *
    * @param file handle $in Input stream handle
    * @param file handle $out Output stream handle
    * @return Returns count of written bytes
@@ -192,13 +189,18 @@ class PluploadComponent extends Component {
       Logger::err("Upload path '$path' does not exists or is not writeable");
       return false;
     }
+    $request =& $this->controller->request;
 
-    $upload = $this->controller->request->params['form']['file'];
-    $name = $this->controller->request->data['name'];
+    $upload = $request->params['form']['file'];
+    $name = $request->data['name'];
     $upload['name'] = preg_replace('/[^\w\._]+/', '_', $name);
 
-    $chunk = $this->controller->request->data['chunk'];
-    $chunks = $this->controller->request->data['chunks'];
+    $chunk = 0;
+    $chunks = 1;
+    if (isset($request->data['chunk']) && isset($request->data['chunks'])) {
+      $chunk = intval($request->data['chunk']);
+      $chunks = intval($request->data['chunks']);
+    }
 
     if (!$this->FileManager->canWrite($upload['size'])) {
       $this->jsonResponse = '{"jsonrpc" : "2.0", "error" : {"code": 102, "message": "Upload limit exceeded"}, "id" : "id"}';
