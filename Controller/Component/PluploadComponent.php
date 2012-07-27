@@ -116,6 +116,15 @@ class PluploadComponent extends Component {
     return $count;
   }
 
+  function _getContentType() {
+    if (isset($_SERVER["HTTP_CONTENT_TYPE"])) {
+      return $_SERVER["HTTP_CONTENT_TYPE"];
+    } else if (isset($_SERVER["CONTENT_TYPE"])) {
+      return $_SERVER["CONTENT_TYPE"];
+    }
+    return '';
+  }
+  
   function _handleMultiPartFile($path, $upload, $chunk, $chunks, $options) {
     $folder = new Folder($path);
 
@@ -132,12 +141,7 @@ class PluploadComponent extends Component {
       return false;
     }
     // Look for the content type header
-    $contentType = '';
-    if (isset($_SERVER["HTTP_CONTENT_TYPE"])) {
-      $contentType = $_SERVER["HTTP_CONTENT_TYPE"];
-    } else if (isset($_SERVER["CONTENT_TYPE"])) {
-      $contentType = $_SERVER["CONTENT_TYPE"];
-    }
+    $contentType = $this->_getContentType();
 
     $out = fopen($absoluteFilename, $chunk == 0 ? "wb" : "ab");
     if (strpos($contentType, "multipart") !== false) {
