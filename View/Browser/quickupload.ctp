@@ -21,7 +21,7 @@
 
 <p><?php echo __("Upload your photos, videos, GPS logs or ZIP archives here."); ?></p>
 <p><?php echo __("You can upload maximal %s and %s at once. ZIP archives are extracted automatically.", $this->Number->toReadableSize($free), $this->Number->toReadableSize($max)); ?></p>
-<?php echo $this->Plupload->upload(); ?>
+<?php echo $this->Plupload->upload($currentUser); ?>
 
 <?php else: ?>
 <p class="info"><?php echo __("You cannot upload files now. Your upload quota is exceeded."); ?></p>

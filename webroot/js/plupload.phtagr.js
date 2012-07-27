@@ -5,6 +5,10 @@ phtagr.upload.File = Backbone.Model.extend({
   url: '#',
   save: function() { return true }
 });
+phtagr.upload.Media = Backbone.Model.extend({
+  url: '#',
+  save: function() { return true }
+});
 phtagr.upload.Files = Backbone.Collection.extend({
   model: phtagr.upload.File,
   percent: 0,
@@ -12,7 +16,7 @@ phtagr.upload.Files = Backbone.Collection.extend({
   loadedFiles: 0,
   started: 0,
   currentId: '',
-  
+
   initialize: function() {
     _.bindAll(this, 'update', 'getEstimate', 'getCurrent');
     this.on('add', this.update, this);
@@ -50,9 +54,12 @@ phtagr.upload.Files = Backbone.Collection.extend({
     return current;
   }
 });
+phtagr.upload.MediaList = Backbone.Collection.extend({
+  model: phtagr.upload.Media
+});
 phtagr.upload.SingleUploadView = Backbone.View.extend({
   text: 'Upload file %d',
-  
+
   initialize: function() {
     this.collection.on('change', this.update, this);
   },
@@ -71,7 +78,7 @@ phtagr.upload.SingleUploadView = Backbone.View.extend({
 });
 phtagr.upload.AllUploadView = Backbone.View.extend({
   text: 'Upload file %d/%d. Estimate %s.',
-  
+
   initialize: function() {
     this.collection.on('change', this.update, this);
   },
@@ -109,9 +116,36 @@ phtagr.upload.AllUploadView = Backbone.View.extend({
     return result;
   }
 });
+phtagr.upload.MediaView = Backbone.View.extend({
+  baseUrl: '',
+  thumbPrefix: 'media/mini/',
+  linkPrefix: 'images/view/',
+  showCount: 24,
+  oldIndex: -1,
 
+  initialize: function(options) {
+    this.baseUrl = options.baseUrl ? options.baseUrl : ''
+    this.showCount = options.showCount ? options.showCount : 24
+    this.collection.on('add', this.update, this);
+  },
+  update: function() {
+    if (this.collection.length) {
+      $(this.el).show();
+    }
+    var end = Math.min(this.showCount, this.collection.length) - 1;
+    var thumbs = this.$('.thumbs');
+    for (var i = this.oldIndex + 1; i <= end; i++) {
+      var media = this.collection.at(i);
+      var link = this.baseUrl + this.linkPrefix + media.get('id');
+      var thumb = this.baseUrl + this.thumbPrefix + media.get('id');
+      thumbs.append('<a href="' + link + '"><img src="' + thumb + '"/></a>');
+    }
+    this.oldIndex = end;
+  }
 
-phtagr.upload.initUploader = function(options, fileCollection, callback) {
+});
+
+phtagr.upload.initUploader = function(options, fileCollection, mediaCollection, callback) {
   var uploader = new plupload.Uploader(options);
 
   if (typeof(callback) == 'function') {
@@ -133,11 +167,18 @@ phtagr.upload.initUploader = function(options, fileCollection, callback) {
     fileCollection.currentId = file.id;
     fileCollection.update();
   });
-  uploader.bind('FileUploaded', function(up, file) {
+  uploader.bind('FileUploaded', function(up, file, response) {
     fileCollection.currentId = file.id;
     fileCollection.update();
+    var result = $.parseJSON(response.response);
+    if (result.mediaIds) {
+      var len = result.mediaIds.length;
+      for (var i = 0; i < len; i++) {
+        mediaCollection.create({'id': result.mediaIds[i]});
+      }
+    }
   });
-  
+
   uploader.bind('Error', function(up, err) {
     $('#filelist').append("<div>Error: " + err.code +
       ", Message: " + err.message +
