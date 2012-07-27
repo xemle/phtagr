@@ -19,9 +19,9 @@ class BrowserController extends AppController
 {
   var $name = "Browser";
 
-  var $components = array('FileManager', 'RequestHandler', 'FilterManager', 'Upload', 'Zip');
+  var $components = array('FileManager', 'RequestHandler', 'FilterManager', 'Upload', 'Zip', 'Plupload');
   var $uses = array('User', 'MyFile', 'Media', 'Tag', 'Category', 'Location', 'Option');
-  var $helpers = array('Form', 'Html', 'Number', 'FileList', 'ImageData');
+  var $helpers = array('Form', 'Html', 'Number', 'FileList', 'ImageData', 'Plupload');
   var $subMenu = false;
   /** Array of filesystem root directories. */
   var $_fsRoots = array();
@@ -410,6 +410,7 @@ class BrowserController extends AppController
         $this->Session->setFlash(__('Could not delete file or directory'));
       }
     }
+
     $this->redirect('index/'.$path);
   }
 
