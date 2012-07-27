@@ -29,6 +29,7 @@ class PluploadHelper extends AppHelper {
     $uploadUrl = h(Router::url(array('controller' => 'browser', 'action' => 'plupload')));
     $singleFile = h(__('Uploading file %s'));
     $allFiles = h(__('Uploding file %d/%d. Upload is finished in %s (estimated).'));
+    $crumbs = h('/sort:newest/user:' . $currentUser['User']['username']);
     $script = <<<SCRIPT
 (function($) {
   $(document).ready(function() {
@@ -36,7 +37,7 @@ class PluploadHelper extends AppHelper {
     var mediaList = new phtagr.upload.MediaList();
     var singleView = new phtagr.upload.SingleUploadView({el: $('#{$this->settings['containerId']} .file'), collection: files, text: '{$singleFile}'});
     var allView = new phtagr.upload.AllUploadView({el: $('#{$this->settings['containerId']} .total'), collection: files, text: '{$allFiles}'});
-    var mediaView = new phtagr.upload.MediaView({el: $('#{$this->settings['containerId']} .media-list'), collection: mediaList, baseUrl: '{$baseUrl}'});
+    var mediaView = new phtagr.upload.MediaView({el: $('#{$this->settings['containerId']} .media-list'), collection: mediaList, baseUrl: '{$baseUrl}', crumbs: '{$crumbs}'});
     $('#{$this->settings['buttonId']}').button();
     phtagr.upload.initUploader({
       runtimes : 'gears,html5,flash,silverlight',

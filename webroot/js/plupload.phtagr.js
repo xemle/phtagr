@@ -120,12 +120,14 @@ phtagr.upload.MediaView = Backbone.View.extend({
   baseUrl: '',
   thumbPrefix: 'media/mini/',
   linkPrefix: 'images/view/',
+  crumbs: '', 
   showCount: 24,
   oldIndex: -1,
 
   initialize: function(options) {
     this.baseUrl = options.baseUrl ? options.baseUrl : ''
     this.showCount = options.showCount ? options.showCount : 24
+    this.crumbs = options.crumbs ? options.crumbs : ''
     this.collection.on('add', this.update, this);
   },
   update: function() {
@@ -136,7 +138,7 @@ phtagr.upload.MediaView = Backbone.View.extend({
     var thumbs = this.$('.thumbs');
     for (var i = this.oldIndex + 1; i <= end; i++) {
       var media = this.collection.at(i);
-      var link = this.baseUrl + this.linkPrefix + media.get('id');
+      var link = this.baseUrl + this.linkPrefix + media.get('id') + this.crumbs;
       var thumb = this.baseUrl + this.thumbPrefix + media.get('id');
       thumbs.append('<a href="' + link + '"><img src="' + thumb + '"/></a>');
     }
