@@ -26,7 +26,7 @@ class PluploadComponent extends Component {
 
   var $maxAgeFile = 18000; // 5 hours
 
-  var $jsonResponse = '{"jsonrpc" : "2.0", "result" : null, "id" : "id"}';
+  var $response = array('jsonrpc' => '2.0', 'result' => null);
 
   function initialize(&$controller) {
     $this->controller = $controller;
@@ -102,11 +102,11 @@ class PluploadComponent extends Component {
    */
   function _copyFile($in, $out) {
     if (!$in) {
-      $this->jsonResponse = '{"jsonrpc" : "2.0", "error" : {"code": 103, "message": "Failed to open input stream."}, "id" : "id"}';
+      $this->response['error'] = array('code' => 103, 'message' => "Failed to open input stream.");
       return false;
     }
     if (!$out) {
-      $this->jsonResponse = '{"jsonrpc" : "2.0", "error" : {"code": 104, "message": "Failed to open output stream."}, "id" : "id"}';
+      $this->response['error'] = array('code' => 104, 'message' => "Failed to open output stream.");
       return false;
     }
     $count = 0;
@@ -183,13 +183,13 @@ class PluploadComponent extends Component {
    */
   function upload($path, $options = array()) {
     if (!$this->isPlupload()) {
-      $this->jsonResponse = '{"jsonrpc" : "2.0", "error" : {"code": 100, "message": "Invalid data"}, "id" : "id"}';
+      $this->response['error'] = array('code' => 100, 'message' => "Invalid data");
       return array();
     }
     $options = am(array('overwrite' => true), $options);
 
     if (!is_dir($path) || !is_writeable($path)) {
-      $this->jsonResponse = '{"jsonrpc" : "2.0", "error" : {"code": 101, "message": "Cound not writ to target directory"}, "id" : "id"}';
+      $this->response['error'] = array('code' => 101, 'message' => "Cound not write to target directory");
       Logger::err("Upload path '$path' does not exists or is not writeable");
       return false;
     }
@@ -207,7 +207,7 @@ class PluploadComponent extends Component {
     }
 
     if (!$this->FileManager->canWrite($upload['size'])) {
-      $this->jsonResponse = '{"jsonrpc" : "2.0", "error" : {"code": 102, "message": "Upload limit exceeded"}, "id" : "id"}';
+      $this->response['error'] = array('code' => 102, 'message' => "Upload limit exceeded");
       Logger::warn("Quota exceed. Deny upload of {$upload['size']} Bytes");
       return false;
     }

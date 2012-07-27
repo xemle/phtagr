@@ -744,6 +744,7 @@ class BrowserController extends AppController
       $this->redirect($this->action);
     }
     $filename = $this->Plupload->upload($dst);
+    $pluploadResponse = $this->Plupload->response;
     if ($filename) {
       $files = array(Folder::addPathElement($dst, $filename));
       $zips = $this->_extract($dst, $files);
@@ -759,10 +760,18 @@ class BrowserController extends AppController
         $toRead = array();
       }
       $this->FilterManager->clearErrors();
-      $this->FilterManager->readFiles($files, false);
+      $result = $this->FilterManager->readFiles($files, false);
+      $mediaIds = array();
+      foreach ($result as $name => $media) {
+        $mediaIds[] = $media['Media']['id'];
+      }
+      $pluploadResponse['mediaIds'] = $mediaIds;
     }
-    $this->layout = 'bare';
-    $this->request->data = $this->Plupload->jsonResponse;
+    $this->viewClass = 'Json';
+    foreach ($pluploadResponse as $key => $value) {
+      $this->set($key, $value);
+    }
+    $this->set('_serialize', array_keys($pluploadResponse));
   }
 }
 ?>
