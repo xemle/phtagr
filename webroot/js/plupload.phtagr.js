@@ -39,6 +39,10 @@ phtagr.upload.Files = Backbone.Collection.extend({
     this.percent = 100 * loaded / size;
     this.loadedFiles = loadedFiles;
     this.trigger('change');
+    if (this.percent == 100) {
+      this.trigger('complete');
+      this.reset();
+    }
   },
   getEstimate: function() {
     var seconds = (new Date().getTime() - this.started) / 1000;
@@ -58,42 +62,42 @@ phtagr.upload.MediaList = Backbone.Collection.extend({
   model: phtagr.upload.Media
 });
 phtagr.upload.SingleUploadView = Backbone.View.extend({
-  text: 'Upload file %d',
+  text: 'Uploading file %s',
 
   initialize: function(options) {
-    this.text = options.text ? options.text : this.text
+    this.text = options.text || this.text
     this.collection.on('change', this.update, this);
+    this.collection.on('complete', this.hide, this);
   },
   update: function() {
     var current = this.collection.getCurrent();
     if (current) {
-      this.$('p').text(this.text.replace(/%d/, current.get('file').name));
+      this.$('p').text(this.text.replace(/%s/, current.get('file').name));
       this.$('.progress').progressbar({value: current.get('file').percent});
     }
-    if (this.collection.percent == 100) {
-      $(this.el).hide();
-    } else {
-      $(this.el).show();
-    }
+    $(this.el).show();
+  },
+  hide: function() {
+    $(this.el).hide(300);
   }
 });
 phtagr.upload.AllUploadView = Backbone.View.extend({
   text: 'Upload file %d/%d. Estimate %s.',
 
   initialize: function(options) {
-    this.text = options.text ? options.text : this.text
+    this.text = options.text || this.text
     this.collection.on('change', this.update, this);
+    this.collection.on('complete', this.hide, this);
   },
   update: function() {
     this.$('p').text(this.text.replace(/%d/, this.collection.loadedFiles)
       .replace(/%d/, this.collection.length)
       .replace(/%s/, this.formatTime(this.collection.getEstimate())));
     this.$('.progress').progressbar({value: this.collection.percent});
-    if (this.collection.percent == 100) {
-      $(this.el).hide();
-    } else {
-      $(this.el).show();
-    }
+    $(this.el).show();
+  },
+  hide: function() {
+    $(this.el).hide(300);
   },
   formatTime: function(time) {
     var seconds = time % 60;
@@ -127,9 +131,9 @@ phtagr.upload.MediaView = Backbone.View.extend({
   oldIndex: -1,
 
   initialize: function(options) {
-    this.baseUrl = options.baseUrl ? options.baseUrl : this.baseUrl
-    this.showCount = options.showCount ? options.showCount : this.showCount
-    this.crumbs = options.crumbs ? options.crumbs : this.crumbs
+    this.baseUrl = options.baseUrl || this.baseUrl
+    this.showCount = options.showCount || this.showCount
+    this.crumbs = options.crumbs || this.crumbs
     this.collection.on('add', this.update, this);
   },
   update: function() {
@@ -142,7 +146,7 @@ phtagr.upload.MediaView = Backbone.View.extend({
       var media = this.collection.at(i);
       var link = this.baseUrl + this.linkPrefix + media.get('id') + this.crumbs;
       var thumb = this.baseUrl + this.thumbPrefix + media.get('id');
-      thumbs.append('<a href="' + link + '"><img src="' + thumb + '"/></a>');
+      thumbs.append('<a href="' + link + '"><img src="' + thumb + '" width="75" height="75"/></a>');
     }
     this.oldIndex = end;
   }
