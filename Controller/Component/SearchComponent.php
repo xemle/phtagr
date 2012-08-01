@@ -64,8 +64,8 @@ class SearchComponent extends Component
     'tag_op' => array('rule' => array('inList', array('AND', 'OR'))),
     'to' => array('rule' => array('custom', '/^\d{4}-\d{2}-\d{2}([ T]\d{2}:\d{2}:\d{2})?$/')),
     'type' => array('rule' => array('inList', array('image', 'video'))),
-    'user' => 'alphaNumeric',
-    'users' => array('rule' => array('custom', '/^-?[\w\d]+$/')),
+    'user' => 'notEmpty',
+    'users' => 'notEmpty',
     'west' => array('rule' => array('custom', '/-?\d+(\.\d+)?/')),
     'visibility' => array('rule' => array('inList', array('private', 'group', 'user', 'public'))),
     );
