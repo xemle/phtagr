@@ -221,7 +221,7 @@ class GroupsController extends AppController {
     if ($this->getUserRole() < ROLE_ADMIN) {
       $conditions['Group.user_id'] = $this->getUserId();
     }
-    $group = $this->Group->find('all', array('conditions' => $conditions));
+    $group = $this->Group->find('first', array('conditions' => $conditions));
     $user = $this->User->findByUsername($userName);
     $userId = ($user) ? $user['User']['id'] : false;
     $result = $this->Group->subscribe($group, $userId);
