@@ -407,8 +407,9 @@ class MyFile extends AppModel
     } else {
       $data['File']['path'] = Folder::slashTerm(dirname($dst));
       $data['File']['file'] = basename($dst);
+      $data['File']['type'] = $this->_getTypeFromFilename($dst);
     }
-    if (!$this->save($data, true, array('path', 'file'))) {
+    if (!$this->save($data, true, array('path', 'file', 'type'))) {
       Logger::err("Could not updated new filename '$dst' (id=$id)");
       return false;
     }

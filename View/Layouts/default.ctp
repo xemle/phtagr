@@ -41,14 +41,14 @@
 
 <div id="main"><div class="sub">
 
-<div id="content" class="content content-<?php echo $this->params['controller']; ?>"><div class="sub">
+<div id="content" class="content content-<?php echo $this->params['controller']; ?> content-<?php echo $this->params['controller'].'-'.$this->params['action']; ?>"><div class="sub">
 <?php echo $content_for_layout?>
 </div></div><!-- #content/sub -->
 
 </div></div><!-- #main/sub -->
 
 <div id="footer"><div class="sub">
-<p>&copy; 2006-2012 by <?php echo $this->Html->link("phTagr - Tag, Browse, and Share Your Photos", 'http://www.phtagr.org'); ?></p>
+<p><?php echo __("&copy; 2006-2012 by %s - Tag, Browse, and Share Your Photos.", $this->Html->link(__("phTagr.org"), 'http://www.phtagr.org')); ?></p>
 </div></div><!-- #footer/sub -->
 
 </div></body><!-- #page -->

@@ -86,7 +86,7 @@ if (!defined('CAKE_CORE_INCLUDE_PATH')) {
 	exit('File Not Found');
 }
 
-if (preg_match('|\.\.|', $url) || !preg_match('|^(\w+/)?ccss/(.+)(\.[^.]+)?$|iU', $url, $regs)) {
+if (preg_match('|\.\.|', $url) || !preg_match('|^([\w/]+)?ccss/(.+)(\.[^.]+)?$|iU', $url, $regs)) {
 	die('Wrong file name.');
 }
 
@@ -118,8 +118,12 @@ header("Pragma: cache");        // HTTP/1.0
 $cssPath = CSS;
 if ($regs[1]) {
 	$plugin = trim($regs[1], '/');
+	$theme = split('/', $plugin);
 	if (is_dir('.' . DS . $plugin . DS . 'css')) {
 		$cssPath = '.' . DS . $plugin . DS . 'css' . DS;
+	} else if (count($theme) > 1 && $theme[0] == 'theme') {
+		$path = App::themePath($theme[1]);
+		$cssPath = $path . 'webroot' . DS . 'css' . DS;
 	} else {
 		$path = App::pluginPath(Inflector::camelize($plugin));
 		$cssPath = $path . 'webroot' . DS . 'css' . DS;

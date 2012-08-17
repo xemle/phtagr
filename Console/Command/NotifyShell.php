@@ -20,7 +20,7 @@ class NotifyShell extends AppShell {
 
   var $uses = array('User', 'Media', 'MyFile');
   var $components = array('Search', 'PreviewManager');
-	
+
   var $verbose = false;
   var $force = false;
   var $dryrun = false;
@@ -36,21 +36,22 @@ class NotifyShell extends AppShell {
     }
     $this->Email = new CakeEmail('default');
   }
-	
-  function startup() {
-  }
 
-  function main() {
-    $this->help();
-  }
-
-  function help() {
-    $this->out("Help screen");
-    $this->hr();
-    $this->out("run [noemail] [dryrun] [verbose] [force]");
-    $this->out("\tNotify new media for users via email");
-    $this->hr();
-    exit();
+  public function getOptionParser() {
+    $parser = parent::getOptionParser();
+    $parser->addOption('noemail', array(
+      'help' => __('Do not send emails.'),
+      'boolean' => true
+    ))->addOption('dryrun', array(
+      'help' => __('Simulate the run. Do not change anything'),
+      'boolean' => true
+    ))->addOption('force', array(
+      'help' => __('Send emails always even if user already received an email'),
+      'boolean' => true
+    ))->addSubcommand('run', array(
+      'help' => __('Run the notification updates')
+    ))->description(__('Notify new media for users via email'));
+    return $parser;
   }
 
   function _buildImages($media) {
@@ -88,7 +89,7 @@ class NotifyShell extends AppShell {
   function run() {
     $args = array('dryrun', 'verbose', 'noemail', 'force');
     foreach($args as $arg) {
-      if (in_array($arg, $this->args)) {
+      if ($this->params[$arg]) {
         $this->{$arg} = true;
       }
     }

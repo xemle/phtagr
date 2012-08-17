@@ -1,4 +1,11 @@
 (function($) {
+  $.fn.toggleMedia = function() {
+    if ($(this).hasClass('selected')) {
+      $(this).unselectMedia();
+    } else {
+      $(this).selectMedia();
+    }
+  };
   $.fn.selectMedia = function() {
     $(this).each(function() {
       if ($(this).hasClass('selected')) {

@@ -37,10 +37,13 @@ class UploadComponent extends Component {
     $this->_errors = null;
   }
 
-  /** Add error for upload file
-    @param file Upload filename
-    @param msg Error message / Error code
-    @param data Arbitrary data. Optional */
+  /**
+   *  Add error for upload file
+   *
+   * @param file Upload filename
+   * @param msg Error message / Error code
+   * @param data Arbitrary data. Optional
+   */
   function _addError($file, $msg, $data = null) {
     if ($this->_errors === null) {
       $this->_errors = array();
@@ -52,9 +55,12 @@ class UploadComponent extends Component {
     return true;
   }
 
-  /** Extract upload data recursivly from a data array
-    @param data Data array
-    @return array of upload data */
+  /**
+   * Extract upload data recursivly from a data array
+   *
+   * @param data Data array
+   * @return array of upload data
+   */
   function _extractUploads($data) {
     if (!$data || !is_array($data)) {
       return array();
@@ -82,10 +88,13 @@ class UploadComponent extends Component {
     }
   }
 
-  /** Returns the upload data
-    @param data Upload data. If null the controler's default data is used
-    @return array of upload data
-    @note Before using new data call clear() otherwise the data will be cached */
+  /**
+   * Returns the upload data
+   *
+   * @param data Upload data. If null the controler's default data is used
+   * @return array of upload data
+   * @note Before using new data call clear() otherwise the data will be cached
+   */
   function getUploads($data = null) {
     if ($this->_uploads !== null) {
       return $this->_uploads;
@@ -99,13 +108,21 @@ class UploadComponent extends Component {
     if (count($uploads)) {
       $this->_uploads = $uploads;
     } else {
-      $this->_uploads = null;
+      $uploads = $this->_extractUploads(&$this->controller->request->params);
+      if (count($uploads)) {
+        $this->_uploads = $uploads;
+      } else {
+        $this->_uploads = null;
+      }
     }
     return $this->_uploads;
   }
 
-  /** Evaluates if upload data is true
-    @return true if upload data is available. false otherwise */
+  /**
+   * Evaluates if upload data is true
+   *
+   * @return true if upload data is available. false otherwise
+   */
   function isUpload($data = null) {
     if (count($this->getUploads($data))) {
       return true;
@@ -114,8 +131,11 @@ class UploadComponent extends Component {
     }
   }
 
-  /** Returns true if one of the upload files has errors
-    @return True if upload data contains error */
+  /**
+   * Returns true if one of the upload files has errors
+   *
+   * @return True if upload data contains error
+   */
   function hasErrors() {
     $this->getUploads();
     if (is_array($this->_errors) && count($this->_errors)) {
@@ -125,8 +145,11 @@ class UploadComponent extends Component {
     }
   }
 
-  /** Returns the error array.
-    @return Array of error */
+  /**
+   * Returns the error array.
+   *
+   * @return Array of error
+   */
   function getErrors() {
     if ($this->hasErrors()) {
       return $this->_errors;
@@ -135,8 +158,11 @@ class UploadComponent extends Component {
     }
   }
 
-  /** Returns the sum uploaded data size
-    @return Size of all uploded files */
+  /**
+   * Returns the sum uploaded data size
+   *
+   * @return Size of all uploded files
+   */
   function getSize() {
     $uploads = $this->getUploads();
     if (!$uploads || count($uploads) == 0) {
@@ -153,11 +179,14 @@ class UploadComponent extends Component {
     return move_uploaded_file($filename, $dst);
   }
 
-  /** Upload the data to a given directory
-    @param path Destination directory
-    @param options
-      - overwrite - If true overwrite file with same filename. If false create a unique filename if a file with same filename exists
-    @return array of uploaded files (without the path) */
+  /**
+   * Upload the data to a given directory
+   *
+   * @param path Destination directory
+   * @param options
+   *   - overwrite - If true overwrite file with same filename. If false create a unique filename if a file with same filename exists
+   * @return array of uploaded files (without the path)
+   */
   function upload($path, $options = array()) {
     $options = am(array('overwrite' => true), $options);
 

@@ -19,9 +19,9 @@ class BrowserController extends AppController
 {
   var $name = "Browser";
 
-  var $components = array('FileManager', 'RequestHandler', 'FilterManager', 'Upload', 'Zip');
+  var $components = array('FileManager', 'RequestHandler', 'FilterManager', 'Upload', 'Zip', 'Plupload');
   var $uses = array('User', 'MyFile', 'Media', 'Tag', 'Category', 'Location', 'Option');
-  var $helpers = array('Form', 'Html', 'Number', 'FileList', 'ImageData');
+  var $helpers = array('Form', 'Html', 'Number', 'FileList', 'ImageData', 'Plupload');
   var $subMenu = false;
   /** Array of filesystem root directories. */
   var $_fsRoots = array();
@@ -410,6 +410,7 @@ class BrowserController extends AppController
         $this->Session->setFlash(__('Could not delete file or directory'));
       }
     }
+
     $this->redirect('index/'.$path);
   }
 
@@ -735,6 +736,42 @@ class BrowserController extends AppController
     }
     $this->_setQuotaForView();
     $this->layout = 'default';
+  }
+
+  function plupload() {
+    $dst = $this->_getDailyUploadDir();
+    if (!$dst) {
+      $this->redirect($this->action);
+    }
+    $filename = $this->Plupload->upload($dst);
+    $pluploadResponse = $this->Plupload->response;
+    if ($filename) {
+      $files = array(Folder::addPathElement($dst, $filename));
+      $zips = $this->_extract($dst, $files);
+      foreach ($zips as $zip => $extracted) {
+        $this->FileManager->delete($zip);
+        unset($files[array_search($zip, $files)]);
+        $files = am($files, $extracted);
+      }
+      if (!$files) {
+        $this->Session->setFlash(__("No files uploaded"));
+        $this->redirect($this->action);
+      } else {
+        $toRead = array();
+      }
+      $this->FilterManager->clearErrors();
+      $result = $this->FilterManager->readFiles($files, false);
+      $mediaIds = array();
+      foreach ($result as $name => $media) {
+        $mediaIds[] = $media['Media']['id'];
+      }
+      $pluploadResponse['mediaIds'] = $mediaIds;
+    }
+    $this->viewClass = 'Json';
+    foreach ($pluploadResponse as $key => $value) {
+      $this->set($key, $value);
+    }
+    $this->set('_serialize', array_keys($pluploadResponse));
   }
 }
 ?>

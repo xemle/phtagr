@@ -1,97 +1,32 @@
-# LANGUAGE translation of CakePHP Application
-# Copyright YEAR NAME <EMAIL@ADDRESS>
-#
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2012-07-19 18:37+0200\n"
-"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
-"Last-Translator: NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"Project-Id-Version: fr\n"
+"POT-Creation-Date: 2012-06-29 10:35+0200\n"
+"PO-Revision-Date: \n"
+"Last-Translator: François Elie <francois@elie.org>\n"
+"Language-Team:  <francois@elie.org>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
-
-#: Console/Command/NotifyShell.php:43
-msgid "Do not send emails."
-msgstr ""
-
-#: Console/Command/NotifyShell.php:46
-msgid "Simulate the run. Do not change anything"
-msgstr ""
-
-#: Console/Command/NotifyShell.php:49
-msgid "Send emails always even if user already received an email"
-msgstr ""
-
-#: Console/Command/NotifyShell.php:52
-msgid "Run the notification updates"
-msgstr ""
-
-#: Console/Command/NotifyShell.php:53
-msgid "Notify new media for users via email"
-msgstr ""
-
-#: Console/Command/PreviewShell.php:36
-msgid "Maximum generation count. Default is 10. Use 0 to generate all previews"
-msgstr ""
-
-#: Console/Command/PreviewShell.php:38
-msgid "Set the start chunk number. A chunk has a size of 100 media. Default is 1"
-msgstr ""
-
-#: Console/Command/PreviewShell.php:40
-#: Console/Command/SyncShell.php:37
-msgid "Set the minimum preview size. Default is thumb"
-msgstr ""
-
-#: Console/Command/PreviewShell.php:43
-msgid "Generate only previews for given user"
-msgstr ""
-
-#: Console/Command/PreviewShell.php:45
-msgid "Create preview files"
-msgstr ""
-
-#: Console/Command/PreviewShell.php:46
-msgid "Generate preview files"
-msgstr ""
-
-#: Console/Command/SyncShell.php:35
-msgid "Maximum of synchronization count. Default is 100. Use 0 to synchronize all"
-msgstr ""
-
-#: Console/Command/SyncShell.php:40
-msgid "Synchronize only images for given username"
-msgstr ""
-
-#: Console/Command/SyncShell.php:42
-msgid "Run the synchronization process"
-msgstr ""
-
-#: Console/Command/SyncShell.php:43
-msgid "Write all meta data from database to images in batch mode"
-msgstr ""
+"X-Poedit-Language: French\n"
 
 #: Controller/AppController.php:35
 msgid "Recent photos"
-msgstr ""
+msgstr "Photos récentes"
 
 #: Controller/AppController.php:36
 msgid "Media RSS of recent photos"
-msgstr ""
+msgstr "Fil RSS des photos récentes"
 
 #: Controller/AppController.php:37
 msgid "Recent comments"
-msgstr ""
+msgstr "Commentaires récents"
 
 #: Controller/AppController.php:45
 #: Controller/HomeController.php:42
 #: View/Elements/menu.ctp:6
 msgid "Home"
-msgstr ""
+msgstr "Accueil"
 
 #: Controller/AppController.php:46
 #: View/Elements/menu.ctp:19;44
@@ -99,12 +34,12 @@ msgstr ""
 #: View/Images/notfound.ctp:3
 #: View/Themed/Mobile/Explorer/index.ctp:1
 msgid "Explorer"
-msgstr ""
+msgstr "Explorer"
 
 #: Controller/AppController.php:49
 #: View/Elements/menu.ctp:25
 msgid "My Photos"
-msgstr ""
+msgstr "Mes photos"
 
 #: Controller/AppController.php:52
 #: Controller/BrowserController.php:33
@@ -112,185 +47,185 @@ msgstr ""
 #: View/Browser/upload.ctp:21
 #: View/Elements/menu.ctp:32
 msgid "Upload"
-msgstr ""
+msgstr "Remonter"
 
 #: Controller/AppController.php:60
 #: View/Elements/topnav.ctp:14
 #: View/Themed/Mobile/Elements/header.ctp:7
 #: View/Users/login.ctp:5;15
 msgid "Login"
-msgstr ""
+msgstr "Login"
 
 #: Controller/AppController.php:62
 #: View/Users/login.ctp:17
 #: View/Users/register.ctp:16
 msgid "Sign Up"
-msgstr ""
+msgstr "S'identifier"
 
 #: Controller/AppController.php:66
 msgid "Howdy, %s!"
-msgstr ""
+msgstr "Salut, %s!"
 
 #: Controller/AppController.php:67
 #: View/Elements/topnav.ctp:12
 #: View/Themed/Mobile/Elements/header.ctp:5
 msgid "Logout"
-msgstr ""
+msgstr "Déconnexion"
 
 #: Controller/AppController.php:68
 msgid "Dashboard"
-msgstr ""
+msgstr "Tableau de bord"
 
 #: Controller/BrowserController.php:32
 msgid "Import Files"
-msgstr ""
+msgstr "Importer des fichiers"
 
 #: Controller/BrowserController.php:34
 msgid "Meta Data Sync"
-msgstr ""
+msgstr "Sync Metadonnées"
 
 #: Controller/BrowserController.php:35
 #: Controller/SystemController.php:35
 msgid "Overview"
-msgstr ""
+msgstr "Vue globale"
 
 #: Controller/BrowserController.php:50
 #: View/Elements/menu.ctp:37
 msgid "My Files"
-msgstr ""
+msgstr "Mes fichiers"
 
 #: Controller/BrowserController.php:313
 msgid "Imported %d files (%d) errors)"
-msgstr ""
+msgstr "Importation de %d fichiers (%d erreurs)"
 
 #: Controller/BrowserController.php:328
 msgid "Media %d was unlinked successfully"
-msgstr ""
+msgstr "Le Media %d a été delié avec succès."
 
 #: Controller/BrowserController.php:389
 msgid "Unlinked %d files."
-msgstr ""
+msgstr "%d fichiers déliés."
 
 #: Controller/BrowserController.php:405
 msgid "Deleted directory successfully"
-msgstr ""
+msgstr "Répertoire détruit avec succès"
 
 #: Controller/BrowserController.php:407
 msgid "Deleted file successfully"
-msgstr ""
+msgstr "Fichier détruit avec succès."
 
 #: Controller/BrowserController.php:410
 msgid "Could not delete file or directory"
-msgstr ""
+msgstr "Destruction de fichier ou de répertoire impossible"
 
 #: Controller/BrowserController.php:501
 msgid "Invalid path to create folder"
-msgstr ""
+msgstr "Chemin invalide pour créer le répertoire"
 
 #: Controller/BrowserController.php:505
 msgid "Could not create folder here: %s"
-msgstr ""
+msgstr "Ne peut pas créer de répertoire ici: %s"
 
 #: Controller/BrowserController.php:521
 msgid "Could not create folder"
-msgstr ""
+msgstr "Ne peut pas créer le répertoire"
 
 #: Controller/BrowserController.php:538
 msgid "Your upload quota is exceeded"
-msgstr ""
+msgstr "Votre quota de remontées est dépassé"
 
 #: Controller/BrowserController.php:647
 msgid "Invalid path for upload"
-msgstr ""
+msgstr "Chemin de remontée invalide"
 
 #: Controller/BrowserController.php:652
 msgid "Could not upload here: %s"
-msgstr ""
+msgstr "Remontée impossible ici: %s"
 
 #: Controller/BrowserController.php:673
 msgid "Uploaded %d and %d extraced file(s)"
-msgstr ""
+msgstr "Remonté %s et % fichiers extraits"
 
 #: Controller/BrowserController.php:675
 msgid "Uploaded %d file(s)"
-msgstr ""
+msgstr "%d fichiers remontés"
 
 #: Controller/BrowserController.php:686;694
 msgid "Error: Invalid upload directory"
-msgstr ""
+msgstr "Erreur: répertoire de remontée invalide"
 
 #: Controller/BrowserController.php:704
 msgid "No files uploaded or upload errors"
-msgstr ""
+msgstr "Aucun fichier remonté ou erreur de remontée"
 
 #: Controller/BrowserController.php:721
 msgid "No files uploaded"
-msgstr ""
+msgstr "Aucun fichier remonté"
 
 #: Controller/BrowserController.php:729
 msgid "Uploaded %d files with %d errors."
-msgstr ""
+msgstr "%d fichiers remontés avec %d erreurs."
 
 #: Controller/CommentsController.php:55
 msgid "Invalid Comment."
-msgstr ""
+msgstr "Commentaire invalide."
 
 #: Controller/CommentsController.php:112
 msgid "The Comment has been saved"
-msgstr ""
+msgstr "Le commentaire a été enregistré"
 
 #: Controller/CommentsController.php:120
 msgid "The Comment could not be saved. Please, try again."
-msgstr ""
+msgstr "Le commentaire n'a pas pu être enregistré. Merci d'essayer à nouveau."
 
 #: Controller/CommentsController.php:221
 msgid "Invalid id for Comment"
-msgstr ""
+msgstr "id invalide pour le commentaire"
 
 #: Controller/CommentsController.php:235
 msgid "Comment deleted"
-msgstr ""
+msgstr "Commentaire détruit"
 
 #: Controller/ExplorerController.php:60
 #: Controller/ImagesController.php:33
 msgid "[Keep]"
-msgstr ""
+msgstr "[Conserver]"
 
 #: Controller/ExplorerController.php:61
 #: Controller/ImagesController.php:34
 #: Controller/OptionsController.php:140
 msgid "[No Group]"
-msgstr ""
+msgstr "[Pas de groupe]"
 
 #: Controller/ExplorerController.php:69
 msgid "Slideshow Media RSS"
-msgstr ""
+msgstr "Fil RSS Diaporama"
 
 #: Controller/ExplorerController.php:420
 msgid "Invalid folder: %s"
-msgstr ""
+msgstr "répértoire invalide! %s"
 
 #: Controller/GroupsController.php:29
 msgid "My Groups"
-msgstr ""
+msgstr "Mes groupes"
 
 #: Controller/GroupsController.php:30
 msgid "My Memberships"
-msgstr ""
+msgstr "Mes appartenances"
 
 #: Controller/GroupsController.php:31
 msgid "All Groups"
-msgstr ""
+msgstr "Tous les groupes"
 
 #: Controller/GroupsController.php:32
 #: View/Groups/index.ctp:67
 msgid "Create Group"
-msgstr ""
+msgstr "Créer un groupe"
 
 #: Controller/GroupsController.php:86;199;260;280
 #: Model/Group.php:146;148;169
 msgid "%s not found"
-msgstr ""
+msgstr "%s introuvable"
 
 #: Controller/GroupsController.php:86;102;199;295;297;299
 #: Model/Group.php:146;154;169;175
@@ -299,31 +234,31 @@ msgstr ""
 #: View/Guests/edit.ctp:56
 #: View/Users/view.ctp:40
 msgid "Group"
-msgstr ""
+msgstr "Groupe"
 
 #: Controller/GroupsController.php:102;295
 msgid "%s already exists"
-msgstr ""
+msgstr "%s existe déjà"
 
 #: Controller/GroupsController.php:108
 msgid "Add successfully group '%s'"
-msgstr ""
+msgstr "Groupe '%s' ajouté avec succès"
 
 #: Controller/GroupsController.php:111
 msgid "Could not create group '%s'"
-msgstr ""
+msgstr "Ne peut pas créer le groupe '%s'"
 
 #: Controller/GroupsController.php:132
 msgid "Group subscription request was sent to the group owner"
-msgstr ""
+msgstr "La demande d'adhésion au groupe a été envoyée à son propriétaire"
 
 #: Controller/GroupsController.php:136
 msgid "Mail could not be sent"
-msgstr ""
+msgstr "Le message ne peut pas être envoyé"
 
 #: Controller/GroupsController.php:255;275
 msgid "You are not authorized to perform this action"
-msgstr ""
+msgstr "Vous n'êtes pas autorisé à faire cela"
 
 #: Controller/GroupsController.php:260;280
 #: Model/Group.php:148
@@ -333,60 +268,60 @@ msgstr ""
 #: View/Users/admin_edit.ctp:11
 #: View/Users/view.ctp:41
 msgid "User"
-msgstr ""
+msgstr "Utilisateur"
 
 #: Controller/GroupsController.php:267
 msgid "User %s is now subscribe to this group"
-msgstr ""
+msgstr "L'utilisateur %s est ne fait plus partie de ce groupe"
 
 #: Controller/GroupsController.php:287
 msgid "User %s is now unsubscribe from this group"
-msgstr ""
+msgstr "L'utilisateur %s ne fait plus partie de ce groupe"
 
 #: Controller/GroupsController.php:297
 #: Model/Group.php:154;175
 msgid "Could not save %s"
-msgstr ""
+msgstr "Ne peut pas sauvegarder %s"
 
 #: Controller/GroupsController.php:299
 msgid "%s updated"
-msgstr ""
+msgstr "%s mis à jour"
 
 #: Controller/GroupsController.php:311;331
 msgid "Could not find group"
-msgstr ""
+msgstr "Ne peut pas trouver le groupe"
 
 #: Controller/GroupsController.php:329
 msgid "Successfully deleted group '%s'"
-msgstr ""
+msgstr "Groupe '%s' détruit avec succès"
 
 #: Controller/GuestsController.php:32
 msgid "New Guest"
-msgstr ""
+msgstr "Nouvel invité"
 
 #: Controller/GuestsController.php:62
 msgid "Sorry. Username is already taken"
-msgstr ""
+msgstr "Désolé, ce pseudo est déjà pris"
 
 #: Controller/GuestsController.php:68
 msgid "Guest account '%s' was successfully created"
-msgstr ""
+msgstr "Le compte invité '%s' a été créé avec succès"
 
 #: Controller/GuestsController.php:71
 msgid "Sorry. Guest account could not created"
-msgstr ""
+msgstr "Désolé. Le compte invité ne peut pas être créé."
 
 #: Controller/GuestsController.php:81
 msgid "Sorry. Could not find requested guest"
-msgstr ""
+msgstr "Désolé. L'invité demandé est introuvable."
 
 #: Controller/GuestsController.php:90
 msgid "Guest data were saved"
-msgstr ""
+msgstr "Données de l'invité sauvegardées"
 
 #: Controller/GuestsController.php:96
 msgid "Updates could not be saved!"
-msgstr ""
+msgstr "Les mises à jour ne peut pas être enregistrées!"
 
 #: Controller/GuestsController.php:103;209
 #: Controller/UsersController.php:208
@@ -399,26 +334,26 @@ msgstr ""
 #: View/Users/admin_index.ctp:46
 #: View/Users/view.ctp:4
 msgid "Edit"
-msgstr ""
+msgstr "Modifier"
 
 #: Controller/GuestsController.php:104;210
 #: View/Guests/links.ctp:21
 msgid "RSS"
-msgstr ""
+msgstr "RSS"
 
 #: Controller/GuestsController.php:114
 msgid "Could not find requested guest"
-msgstr ""
+msgstr "L'invité demandé est introuvable."
 
 #: Controller/GuestsController.php:118
 msgid "Guest account '%s' deleted!"
-msgstr ""
+msgstr "Le compte invité '%s' est détruit!"
 
 #: Controller/OptionsController.php:26
 #: View/Options/password.ctp:1
 #: View/Options/profile.ctp:1
 msgid "Profile"
-msgstr ""
+msgstr "Profil"
 
 #: Controller/OptionsController.php:27
 #: Controller/UsersController.php:206
@@ -432,68 +367,68 @@ msgstr ""
 #: View/Users/login.ctp:8
 #: View/Users/register.ctp:8
 msgid "Password"
-msgstr ""
+msgstr "Mot de passe"
 
 #: Controller/OptionsController.php:28
 #: View/Options/import.ctp:1
 msgid "Import Options"
-msgstr ""
+msgstr "Options d'importation"
 
 #: Controller/OptionsController.php:29
 msgid "RSS Feeds"
-msgstr ""
+msgstr "Ressources RSS"
 
 #: Controller/OptionsController.php:57;72
 msgid "Could not save profile!"
-msgstr ""
+msgstr "Enregistrement du profil impossible!"
 
 #: Controller/OptionsController.php:60;75
 msgid "Profile saved"
-msgstr ""
+msgstr "Profil enregistré"
 
 #: Controller/OptionsController.php:127
 msgid "Settings saved"
-msgstr ""
+msgstr "Préférences enregistrées"
 
 #: Controller/SetupController.php:330
 msgid "Could not write configuration to '%s'"
-msgstr ""
+msgstr "Configuration impossible à écrire pour '%s'"
 
 #: Controller/SetupController.php:337
 msgid "Update core settings"
-msgstr ""
+msgstr "Préférence de mise à jour du système"
 
 #: Controller/SetupController.php:447
 msgid "Could not write database configuration file"
-msgstr ""
+msgstr "Ne peut pas écrire le fichier de configuration de la base de donnée"
 
 #: Controller/SetupController.php:484
 msgid "Could not connect to database. Please check your database configuration!"
-msgstr ""
+msgstr "Ne peut pas connecter à la base de données. Merci de vérifier la configuration de votre base de données!"
 
 #: Controller/SetupController.php:497
 msgid "Could not initialize database migration"
-msgstr ""
+msgstr "Ne peut pas initialiser la migration de la base de données"
 
 #: Controller/SetupController.php:503
 msgid "Could not initialize database"
-msgstr ""
+msgstr "Ne peut pas initialiser la base de données"
 
 #: Controller/SetupController.php:508
 msgid "All required tables are created"
-msgstr ""
+msgstr "Toutes les tables requises ont été créées"
 
 #: Controller/SetupController.php:512
 msgid "Could not create tables correctly. Please see logfile for details"
-msgstr ""
+msgstr "Ne peut pas créer correctement les tables. Merci de regarder les fichiers de logs pour les détails."
 
 #: Controller/SetupController.php:540
 msgid "Admin account was successfully created"
-msgstr ""
+msgstr "Le compte administrateur a été créé avec succès"
 
 #: Controller/SetupController.php:544
 msgid "Could not create admin account. Please retry"
-msgstr ""
+msgstr "Ne peut pas créer le compte administrateur. Merci de réessayer."
 
 #: Controller/SystemController.php:29
 #: View/Images/view.ctp:35
@@ -501,173 +436,170 @@ msgstr ""
 #: View/System/index.ctp:1;6
 #: View/Users/admin_edit.ctp:6
 msgid "General"
-msgstr ""
+msgstr "Général"
 
 #: Controller/SystemController.php:30
 #: View/System/register.ctp:1
 msgid "User Registration"
-msgstr ""
+msgstr "Inscription d'un utilisateur"
 
 #: Controller/SystemController.php:31
 #: View/Setup/system.ctp:1
 #: View/System/external.ctp:6
 msgid "External Programs"
-msgstr ""
+msgstr "Programmes externes"
 
+# pas top
 #: Controller/SystemController.php:32
 #: View/System/map.ctp:1
 msgid "Map Settings"
-msgstr ""
+msgstr "Paramètres cartographques"
 
 #: Controller/SystemController.php:33
 #: View/System/upgrade.ctp:1
 msgid "Database Upgrade"
-msgstr ""
+msgstr "Mise à jour de la base de données"
 
 #: Controller/SystemController.php:34
 #: View/System/delete_unused_meta_data.ctp:1
 msgid "Delete Unused Metadata"
-msgstr ""
+msgstr "Metadonnées inutilisées détruites"
 
-#: Controller/SystemController.php:93
-msgid "Titles were updated"
-msgstr ""
-
-#: Controller/SystemController.php:107
+#: Controller/SystemController.php:106
 msgid "Options saved!"
-msgstr ""
+msgstr "Options enregistrées!"
 
-#: Controller/SystemController.php:163
+#: Controller/SystemController.php:162
 msgid "Database migration failed. Please see the log files for errors."
-msgstr ""
+msgstr "La migration de la base de donnée a échoué. Merci de regarder les fichiers de logs pour les erreurs."
 
-#: Controller/SystemController.php:167
+#: Controller/SystemController.php:166
 msgid "The database migration was successful."
-msgstr ""
+msgstr "La migration de la base de donnée s'est bien déroulée."
 
-#: Controller/SystemController.php:197
+#: Controller/SystemController.php:196
 msgid "All unused meta data are deleted"
-msgstr ""
+msgstr "Toutes les métadonnées inutilisées ont été détruites"
 
 #: Controller/UsersController.php:32
 msgid "List User"
-msgstr ""
+msgstr "Liste des utilisateurs"
 
 #: Controller/UsersController.php:36
 msgid "Add User"
-msgstr ""
+msgstr "Ajouter un utilisateur"
 
 #: Controller/UsersController.php:113
 msgid "Sorry. Wrong password or unknown username!"
-msgstr ""
+msgstr "Désolé. Mauvais mot de passe ou identifiant inconnu!"
 
 #: Controller/UsersController.php:121
 msgid "Please enter username and password!"
-msgstr ""
+msgstr "Merci d'entrer un identifiant et un mot de passe!"
 
 #: Controller/UsersController.php:133
 msgid "Sorry. Your account is expired!"
-msgstr ""
+msgstr "Désolé, votre compte a expiré!"
 
 #: Controller/UsersController.php:155
 msgid "Sorry. Internal login procedure failed!"
-msgstr ""
+msgstr "Désolé, la procédure d'identification interne a échoué!"
 
 #: Controller/UsersController.php:196
 msgid "Can not degrade last admin"
-msgstr ""
+msgstr "Ne peut pas dégrader le dernier administrateur."
 
 #: Controller/UsersController.php:207
 msgid "Local Paths"
-msgstr ""
+msgstr "Chemins locaux"
 
 #: Controller/UsersController.php:225;248
 msgid "User data was updated"
-msgstr ""
+msgstr "Les données de l'utilisateur ont été mises à jour"
 
 #: Controller/UsersController.php:229;252
 msgid "Could not be updated"
-msgstr ""
+msgstr "Mise à jour impossible"
 
 #: Controller/UsersController.php:277
 msgid "Directory '%s' was added"
-msgstr ""
+msgstr "Le répertoire '%s' a été ajouté"
 
 #: Controller/UsersController.php:280
 msgid "Directory '%s' could not be read"
-msgstr ""
+msgstr "Le répertoire '%s' ne peut pas être lu"
 
 #: Controller/UsersController.php:298
 msgid "Username already exists, please choose a different name!"
-msgstr ""
+msgstr "Ce nom d'utilisateur existe déjà, merci d'en choisir un autre!"
 
 #: Controller/UsersController.php:303
 msgid "User was created"
-msgstr ""
+msgstr "L'utilisateur a été créé"
 
 #: Controller/UsersController.php:307
 msgid "Could not create user!"
-msgstr ""
+msgstr "Ne peut pas créer l'utilisateur!"
 
 #: Controller/UsersController.php:319
 msgid "Could not delete user: user not found!"
-msgstr ""
+msgstr "Ne peut pas détruire l'utilisateur: utilisateur introuvable!"
 
 #: Controller/UsersController.php:324
 msgid "User %s was deleted"
-msgstr ""
+msgstr "L'utilisateur %s a été detruit"
 
 #: Controller/UsersController.php:343
 msgid "Deleted external directory '%s'"
-msgstr ""
+msgstr "Répertoire externe '%s' détruit"
 
 #: Controller/UsersController.php:360
 msgid "No user with this email was found"
-msgstr ""
+msgstr "Aucun utilisateur avec cette adresse de courriel n'a été trouvé"
 
 #: Controller/UsersController.php:378
 msgid "Mail was sent!"
-msgstr ""
+msgstr "Le courrier a été envoyé!"
 
 #: Controller/UsersController.php:384
 msgid "Mail could not be sent: unknown error!"
-msgstr ""
+msgstr "Le courrier n'a pas pu être envoyé: erreur inconnue!"
 
 #: Controller/UsersController.php:401
 msgid "Captcha verification failed"
-msgstr ""
+msgstr "Ma vérification par captcha a échoué"
 
 #: Controller/UsersController.php:404
 msgid "Username already exists, please choose different name!"
-msgstr ""
+msgstr "Ce nom d'utilisateur existe déjà, merci d'en choisir un autre!"
 
 #: Controller/UsersController.php:413
 msgid "Could not create user"
-msgstr ""
+msgstr "Ne peut pas créer l'utilisateur"
 
 #: Controller/UsersController.php:451
 msgid "Could not send the confirmation email. Please contact the admin."
-msgstr ""
+msgstr "Ne peut pas envoyer le message de confirmation. Merci de voir avec l'administrateur."
 
 #: Controller/UsersController.php:459
 msgid "A confirmation email was sent to your email address"
-msgstr ""
+msgstr "Un message de confirmation a été envoyé à votre adresse de courriel"
 
 #: Controller/UsersController.php:474
 msgid "Please enter the confirmation key"
-msgstr ""
+msgstr "Merci d'entrer votre clé de confirmation"
 
 #: Controller/UsersController.php:494;509
 msgid "Could not find confirmation key"
-msgstr ""
+msgstr "Clé de confirmation introuvable"
 
 #: Controller/UsersController.php:500
 msgid "Internal error occured"
-msgstr ""
+msgstr "Une erreur interne s'est produite"
 
 #: Controller/Component/MenuComponent.php:40
 msgid "Account Settings"
-msgstr ""
+msgstr "Préférences du compte"
 
 #: Controller/Component/MenuComponent.php:41
 #: View/Elements/single_acl_form.ctp:8
@@ -679,7 +611,7 @@ msgstr ""
 #: View/Helper/ImageDataHelper.php:546
 #: View/System/view.ctp:15
 msgid "Groups"
-msgstr ""
+msgstr "Groupes"
 
 #: Controller/Component/MenuComponent.php:42
 #: View/Elements/Explorer/description.ctp:49
@@ -689,68 +621,68 @@ msgstr ""
 #: View/System/view.ctp:13
 #: View/Users/index.ctp:2
 msgid "Users"
-msgstr ""
+msgstr "Utilisateurs"
 
 #: Controller/Component/MenuComponent.php:43
 #: View/Guests/index.ctp:1
 #: View/System/view.ctp:14
 #: View/Users/admin_index.ctp:18
 msgid "Guests"
-msgstr ""
+msgstr "Invités"
 
 #: Controller/Component/MenuComponent.php:44
 msgid "Media Files"
-msgstr ""
+msgstr "Fichiers média"
 
 #: Controller/Component/MenuComponent.php:47
 #: View/Elements/topnav.ctp:7
 msgid "System"
-msgstr ""
+msgstr "Système"
 
 #: Model/Group.php:156
 msgid "You are now subscribed to group %s"
-msgstr ""
+msgstr "Vous appartenez maintenant au groupe %s"
 
 #: Model/Group.php:159
 msgid "You are allready subscribed to group %s"
-msgstr ""
+msgstr "Vous appartenez déjà au groupe %s"
 
 #: Model/Group.php:177
 msgid "You are now unsubscribed of group %s"
-msgstr ""
+msgstr "Vous ne faites plus partie du groupe %s"
 
 #: Model/Group.php:180
 msgid "You are not subscribed to group %s"
-msgstr ""
+msgstr "Vous ne faites pas partie du groupe %s"
 
 #: Model/User.php:108
 msgid "Password not given"
-msgstr ""
+msgstr "Mot de passe manquant"
 
 #: Model/User.php:110
 msgid "Password confirmation is missing"
-msgstr ""
+msgstr "Confirmation de mot de passe manquante"
 
 #: Model/User.php:112;113
 msgid "Password confirmation mismatch"
-msgstr ""
+msgstr "Les deux mots de passe ne correspondent pas"
 
 #: Model/User.php:125
 msgid "Username already taken"
-msgstr ""
+msgstr "Nom déjà pris"
 
 #: View/Browser/folder.ctp:1
 msgid "Create Folder"
-msgstr ""
+msgstr "Créer un répertoire"
 
 #: View/Browser/folder.ctp:5
 #: View/Browser/index.ctp:7;16
 msgid "Location %s"
-msgstr ""
+msgstr "Lieu %s"
 
 #: View/Browser/folder.ctp:9
 msgid "Folder Name"
-msgstr ""
+msgstr "Nom de répertoire"
 
 #: View/Browser/folder.ctp:12
 #: View/Groups/create.ctp:16
@@ -759,144 +691,144 @@ msgstr ""
 #: View/Setup/user.ctp:15
 #: View/Users/admin_add.ctp:14
 msgid "Create"
-msgstr ""
+msgstr "Créer"
 
 #: View/Browser/import.ctp:1
 msgid "Browser"
-msgstr ""
+msgstr "Explorateur"
 
 #: View/Browser/import.ctp:5
 msgid "View folder %s"
-msgstr ""
+msgstr "Voir le répertoire %s"
 
 #: View/Browser/index.ctp:1
 msgid "File Browser"
-msgstr ""
+msgstr "Explorateur de fichiers"
 
 #: View/Browser/index.ctp:9;18
 msgid " (%s or %s here)"
-msgstr ""
+msgstr " (%s ou %s ici)"
 
 #: View/Browser/index.ctp:10;19
 #: View/Browser/upload.ctp:10
 msgid "Upload files"
-msgstr ""
+msgstr "Remonter des fichiers"
 
 #: View/Browser/index.ctp:11;20
 msgid "create folder"
-msgstr ""
+msgstr "créer un répertoire"
 
 #: View/Browser/index.ctp:25
 msgid "Recursive"
-msgstr ""
+msgstr "Récursivement"
 
 #: View/Browser/index.ctp:27
 msgid "Import"
-msgstr ""
+msgstr "Importation"
 
 #: View/Browser/index.ctp:28
 msgid "Unlink"
-msgstr ""
+msgstr "Délier"
 
 #: View/Browser/quickupload.ctp:1
 msgid "Media Upload"
-msgstr ""
+msgstr "Remontée de média"
 
 #: View/Browser/quickupload.ctp:6
 msgid "Your uploaded media"
-msgstr ""
+msgstr "Media remontés"
 
 #: View/Browser/quickupload.ctp:17
 msgid "See all uploaded media of today %s"
-msgstr ""
+msgstr "Voir tous les médias remontés aujourd'hui %s"
 
 #: View/Browser/quickupload.ctp:17
 #: View/Setup/finish.ctp:7
 #: View/System/map.ctp:7
 msgid "here"
-msgstr ""
+msgstr "ici"
 
 #: View/Browser/quickupload.ctp:23
 msgid "Upload your photos, videos, GPS logs or ZIP archives here."
-msgstr ""
+msgstr "Remonter ici vos photos, videos, log de GPS ou archives ZIP."
 
 #: View/Browser/quickupload.ctp:25
 msgid "Photos, Videos - ZIP Archives"
-msgstr ""
+msgstr "Photos, Vidéos - Archives ZIP"
 
 #: View/Browser/quickupload.ctp:26;27;28;29;30
 #: View/Browser/upload.ctp:11;12;13;14;15
 msgid "File or archive"
-msgstr ""
+msgstr "Fichier ou archives"
 
 #: View/Browser/quickupload.ctp:44
 msgid "You can upload maximal %s and %s at once. ZIP archives are extracted automatically."
-msgstr ""
+msgstr "Vous pouvez remonter %s au maximum et %s en une seule fois. Les archives ZIP sont extraites automatiquement."
 
 #: View/Browser/quickupload.ctp:46
 #: View/Browser/upload.ctp:27
 msgid "You cannot upload files now. Your upload quota is exceeded."
-msgstr ""
+msgstr "Vous ne pouvez plus remonter de fichiers. Votre quota de remontées est atteint."
 
 #: View/Browser/sync.ctp:1
 msgid "Meta Data Synchronization"
-msgstr ""
+msgstr "Synchronisation des métadonnées"
 
 #: View/Browser/sync.ctp:5
 msgid "phTagr embedds meta data like tags, categories, or (geo) location information direct into the image video files."
-msgstr ""
+msgstr "phTagr enregistre les métadonnées (telles que les mots clés, catégories et information de localisation) dans les images des fichiers video."
 
 #: View/Browser/sync.ctp:7
 msgid "Note:  In case you are using phTagr with external paths it is recommended to synchronize your images to store this important information within the media file.  After the synchronization these mata data could be read by other image programs or desktop search engines."
-msgstr ""
+msgstr "Note: si vous utilisez phTagr avec des chemins externes il est recommandé de synchroniser vos images pour enregistrer ces informations importants dans le fichier média. Après la synchronisation ces métadonnées pourront être lues par d'autres programmes de traitement d'image ou moteurs de recherche de bureau."
 
 #: View/Browser/sync.ctp:10
 msgid "All media are synchronized"
-msgstr ""
+msgstr "Tous les média sont synchronisés."
 
 #: View/Browser/sync.ctp:14
 msgid "Some files could not be updated with new metadata. Mainly this happens if the files are write protected. Please have a look to the log files for details."
-msgstr ""
+msgstr "Quelques fichiers ne peuvent pas être mis à jour avec les nouvelles métadonnées. Cela arrive en général quand les fichiers sont protégés en écriture. Merci de regarder les fichiers de logs pour les détails."
 
 #: View/Browser/sync.ctp:19
 msgid "Synchronized %d media."
-msgstr ""
+msgstr "%d media synchronisé(s)."
 
 #: View/Browser/sync.ctp:21
 msgid " %d media remains unsynced. Click %s to synchronize again"
-msgstr ""
+msgstr "%d media restent à synchroniser. Cliquer %s pour synchroniser à nouveau."
 
 #: View/Browser/sync.ctp:21
 msgid "sync"
-msgstr ""
+msgstr "synchr"
 
 #: View/Browser/sync.ctp:27
 msgid "You have %d unsynchronized media. Click %s to start the synchronization (this might take some time)"
-msgstr ""
+msgstr "Vous avez %d media non synchronisés. Cliquer %s pour commencer la synchronisation (cela peut prendre du temps)"
 
 #: View/Browser/sync.ctp:27;28
 msgid "Write Metadata"
-msgstr ""
+msgstr "Ecrire les métadonnées"
 
 #: View/Browser/upload.ctp:1
 msgid "File Upload"
-msgstr ""
+msgstr "Remontée de fichier"
 
 #: View/Browser/upload.ctp:6
 msgid "You upload files to folder %s"
-msgstr ""
+msgstr "Vous avez remonté des fichiers vers le répertoire %s"
 
 #: View/Browser/upload.ctp:7
 msgid "You can upload maximal %s and %s at once"
-msgstr ""
+msgstr "Vous pouvez remonter %s au maximum et %s en une seule fois"
 
 #: View/Browser/upload.ctp:16
 msgid "Extract ZIP archive"
-msgstr ""
+msgstr "Extraire une archives ZIP"
 
 #: View/Browser/view.ctp:1
 msgid "File Overview"
-msgstr ""
+msgstr "Information fichier"
 
 #: View/Browser/view.ctp:5
 #: View/Groups/all.ctp:12
@@ -908,86 +840,86 @@ msgstr ""
 #: View/Groups/view.ctp:7
 #: View/Users/view.ctp:16;42
 msgid "Description"
-msgstr ""
+msgstr "Description"
 
 #: View/Browser/view.ctp:5
 #: View/Users/view.ctp:17
 msgid "Value"
-msgstr ""
+msgstr "Valeur"
 
 #: View/Browser/view.ctp:10
 msgid "Files total"
-msgstr ""
+msgstr "Total fichiers"
 
 #: View/Browser/view.ctp:11
 msgid "Count of images/videos"
-msgstr ""
+msgstr "Nombre d'images/videos"
 
 #: View/Browser/view.ctp:13
 msgid "External images/videos"
-msgstr ""
+msgstr "Images/videos externes"
 
 #: View/Browser/view.ctp:14
 msgid "Bytes total (with external sources)"
-msgstr ""
+msgstr "Poids total (sources externes comprises)"
 
 #: View/Browser/view.ctp:16
 msgid "Bytes total"
-msgstr ""
+msgstr "Poids total"
 
 #: View/Browser/view.ctp:19
 msgid "Quota (free)"
-msgstr ""
+msgstr "Quota (libre)"
 
 #: View/Browser/view.ctp:21
 msgid "Videos"
-msgstr ""
+msgstr "Vidéos"
 
 #: View/Browser/view.ctp:22
 msgid "Public files"
-msgstr ""
+msgstr "Fichiers publics"
 
 #: View/Browser/view.ctp:23
 msgid "Visible for users"
-msgstr ""
+msgstr "Visible pour les utilisateurs"
 
 #: View/Browser/view.ctp:24
 msgid "Visible for group members"
-msgstr ""
+msgstr "Visible pour les membres du groupe"
 
 #: View/Browser/view.ctp:25
 msgid "Private files"
-msgstr ""
+msgstr "Fichiers privés"
 
 #: View/Browser/view.ctp:26
 msgid "Unsynced files"
-msgstr ""
+msgstr "Fichiers non synchronisés"
 
 #: View/Comments/rss.ctp:3
 msgid "Most Recent Comments"
-msgstr ""
+msgstr "Commentaires les plus récents"
 
 #: View/Comments/rss.ctp:5
 msgid "Most recent comments at %s"
-msgstr ""
+msgstr "Commentaires les plus récents à %s"
 
 #: View/Elements/comment.ctp:7
 #: View/Guests/edit.ctp:19
 #: View/System/view.ctp:24
 msgid "Comments"
-msgstr ""
+msgstr "Commentaires"
 
 #: View/Elements/comment.ctp:19
 msgid "%s said %s"
-msgstr ""
+msgstr "%s a dit %s"
 
 #: View/Elements/comment.ctp:23
 msgid "(delete)"
-msgstr ""
+msgstr "(effacer)"
 
 #: View/Elements/comment.ctp:35
 msgid "Add new Comment"
-msgstr ""
+msgstr "Ajouter un nouveau commentaire"
 
 #: View/Elements/comment.ctp:43
 #: View/Explorer/search.ctp:30
@@ -1003,55 +935,55 @@ msgstr ""
 #: View/Helper/FileListHelper.php:134
 #: View/Users/index.ctp:15
 msgid "Name"
-msgstr ""
+msgstr "Nom"
 
 #: View/Elements/comment.ctp:44
 msgid "Will not be published"
-msgstr ""
+msgstr "Ne sera pas publié"
 
 #: View/Elements/comment.ctp:45
 msgid "Optional"
-msgstr ""
+msgstr "Optionnel"
 
 #: View/Elements/comment.ctp:49
 msgid "Verification"
-msgstr ""
+msgstr "Vérification"
 
 #: View/Elements/comment.ctp:53
 msgid "Comment"
-msgstr ""
+msgstr "Commentaire"
 
 #: View/Elements/comment.ctp:54
 msgid "Notify me on new comments"
-msgstr ""
+msgstr "Me prévenir des nouveaux commentaires"
 
 #: View/Elements/comment.ctp:57
 msgid "Add Comment"
-msgstr ""
+msgstr "Ajouter un commentaire"
 
 #: View/Elements/footer.ctp:4
 msgid "%s Social Web Gallery %s in %.3fs. Layout based on %s, Icons by %s"
-msgstr ""
+msgstr "%s Social Web Gallery %s en %.3fs Préférence basées sur %s, icons par %s"
 
 #: View/Elements/single_acl_form.ctp:2
 msgid "Who can view image?"
-msgstr ""
+msgstr "Qui peut voir les images"
 
 #: View/Elements/single_acl_form.ctp:3
 #: View/Elements/Explorer/menu.ctp:176
 #: View/Options/import.ctp:14
 msgid "Who can download the image?"
-msgstr ""
+msgstr "Qui peut télécharger l'image ?"
 
 #: View/Elements/single_acl_form.ctp:4
 msgid "Who can edit the tags?"
-msgstr ""
+msgstr "Qui peut écrire dans les mots clés ?"
 
 #: View/Elements/single_acl_form.ctp:5
 #: View/Elements/Explorer/menu.ctp:184
 #: View/Options/import.ctp:16
 msgid "Who can edit all meta data?"
-msgstr ""
+msgstr "Qui peut écrire modifier toutes les métadonnées ?"
 
 #: View/Elements/single_meta_form.ctp:3
 #: View/Elements/Explorer/description.ctp:6
@@ -1063,7 +995,7 @@ msgstr ""
 #: View/Themed/Mobile/Explorer/index.ctp:31
 #: View/Themed/Mobile/Images/view.ctp:29
 msgid "Tags"
-msgstr ""
+msgstr "Mots clés"
 
 #: View/Elements/single_meta_form.ctp:7
 #: View/Elements/Explorer/description.ctp:11
@@ -1075,91 +1007,91 @@ msgstr ""
 #: View/Themed/Mobile/Explorer/index.ctp:40
 #: View/Themed/Mobile/Images/view.ctp:38
 msgid "Categories"
-msgstr ""
+msgstr "Catégories"
 
 #: View/Elements/single_meta_form.ctp:9
 #: View/Elements/Explorer/menu.ctp:134
 msgid "City"
-msgstr ""
+msgstr "Ville"
 
 #: View/Elements/single_meta_form.ctp:11
 #: View/Elements/Explorer/menu.ctp:136
 msgid "Sublocation"
-msgstr ""
+msgstr "Quartier"
 
 #: View/Elements/single_meta_form.ctp:13
 #: View/Elements/Explorer/menu.ctp:138
 msgid "State"
-msgstr ""
+msgstr "Etat"
 
 #: View/Elements/single_meta_form.ctp:15
 #: View/Elements/Explorer/menu.ctp:140
 msgid "Country"
-msgstr ""
+msgstr "Pays"
 
 #: View/Elements/single_meta_form.ctp:21
 #: View/Elements/Explorer/menu.ctp:142
 msgid "Geo data"
-msgstr ""
+msgstr "Données de géolocalisation"
 
 #: View/Elements/single_meta_form.ctp:24
 #: View/Elements/Explorer/menu.ctp:145
 msgid "E.g. 2008-08-07 15:30"
-msgstr ""
+msgstr "Par ex: 2008-08-07 15:30"
 
 #: View/Elements/topnav.ctp:10
 msgid "Preferences"
-msgstr ""
+msgstr "Préférences"
 
 #: View/Elements/topnav.ctp:16
 msgid "Register"
-msgstr ""
+msgstr "Enregistrer"
 
 #: View/Elements/Explorer/date.ctp:2
 #: View/Explorer/search.ctp:19
 #: View/Helper/ImageDataHelper.php:525
 msgid "Date"
-msgstr ""
+msgstr "Date"
 
 #: View/Elements/Explorer/date.ctp:7
 #: View/Helper/ImageDataHelper.php:351
 msgid "View media of previous dates"
-msgstr ""
+msgstr "Voir les médiasde dates antérieures"
 
 #: View/Elements/Explorer/date.ctp:13;32
 #: View/Helper/ImageDataHelper.php:355;374
 msgid "View media of interval"
-msgstr ""
+msgstr "Voir les médias dans une période"
 
 #: View/Elements/Explorer/date.ctp:16
 #: View/Helper/ImageDataHelper.php:360
 msgid "Set new end date of interval"
-msgstr ""
+msgstr "Fixer une nouvelle fin de l'intervalle"
 
 #: View/Elements/Explorer/date.ctp:22
 #: View/Helper/ImageDataHelper.php:364
 msgid "View media of this day"
-msgstr ""
+msgstr "Voir les médias du jour"
 
 #: View/Elements/Explorer/date.ctp:24
 #: View/Helper/ImageDataHelper.php:367
 msgid "View media of this week"
-msgstr ""
+msgstr "Voir les médias de la semaine"
 
 #: View/Elements/Explorer/date.ctp:26
 #: View/Helper/ImageDataHelper.php:370
 msgid "View media of this month"
-msgstr ""
+msgstr "Voir les média du mois"
 
 #: View/Elements/Explorer/date.ctp:35
 #: View/Helper/ImageDataHelper.php:379
 msgid "Set new start date for interval"
-msgstr ""
+msgstr "Fixer une nouvelle date pour le début de l'intervalle"
 
 #: View/Elements/Explorer/date.ctp:41
 #: View/Helper/ImageDataHelper.php:383
 msgid "View media of next dates"
-msgstr ""
+msgstr "Voir les médias pour des dates ultérieures"
 
 #: View/Elements/Explorer/description.ctp:25
 #: View/Explorer/search.ctp:8
@@ -1167,369 +1099,369 @@ msgstr ""
 #: View/Helper/ImageDataHelper.php:542
 #: View/System/view.ctp:27
 msgid "Locations"
-msgstr ""
+msgstr "Lieux"
 
 #: View/Elements/Explorer/description.ctp:47
 #: View/Helper/ImageDataHelper.php:547
 msgid "Access"
-msgstr ""
+msgstr "Accès"
 
 #: View/Elements/Explorer/description.ctp:48
 #: View/Explorer/search.ctp:40
 #: View/Helper/ImageDataHelper.php:332;604
 #: View/Options/profile.ctp:19
 msgid "Group members"
-msgstr ""
+msgstr "Membres du groupe"
 
 #: View/Elements/Explorer/description.ctp:50
 #: View/Elements/Explorer/menu.ctp:169
 msgid "All"
-msgstr ""
+msgstr "Tous"
 
 #: View/Elements/Explorer/media.ctp:3
 #: View/home/index.ctp:8
 msgid "%s by %s"
-msgstr ""
+msgstr "%s par %s"
 
 #: View/Elements/Explorer/media.ctp:30
 msgid "Select media"
-msgstr ""
+msgstr "Choisir média"
 
 #: View/Elements/Explorer/media.ctp:34
 msgid "Deselect media"
-msgstr ""
+msgstr "Décocher média"
 
 #: View/Elements/Explorer/media.ctp:39
 msgid "Edit meta data"
-msgstr ""
+msgstr "Modifier métadonnées"
 
 #: View/Elements/Explorer/media.ctp:45
 msgid "Edit access rights"
-msgstr ""
+msgstr "Modifier droits d'accès"
 
 #: View/Elements/Explorer/media.ctp:52
 msgid "Download file %s"
-msgstr ""
+msgstr "Remontée fichier %s"
 
 #: View/Elements/Explorer/menu.ctp:12
 msgid "View Filter"
-msgstr ""
+msgstr "Voir filtre"
 
 #: View/Elements/Explorer/menu.ctp:14
 msgid "Edit Metadata"
-msgstr ""
+msgstr "Modifier Métadonnées"
 
 #: View/Elements/Explorer/menu.ctp:16
 #: View/Explorer/index.ctp:11
 msgid "Edit Access Rights"
-msgstr ""
+msgstr "Modifier Droits d'Accès"
 
 #: View/Elements/Explorer/menu.ctp:19
 msgid "More"
-msgstr ""
+msgstr "Davantage"
 
 #: View/Elements/Explorer/menu.ctp:20
 msgid "Slideshow"
-msgstr ""
+msgstr "Diaporama"
 
 #: View/Elements/Explorer/menu.ctp:27
 msgid "Page %d of %d"
-msgstr ""
+msgstr "Page %d sur %d"
 
 #: View/Elements/Explorer/menu.ctp:65
 msgid "Sublocations"
-msgstr ""
+msgstr "Quartiers"
 
 #: View/Elements/Explorer/menu.ctp:72
 msgid "Cities"
-msgstr ""
+msgstr "Villes"
 
 #: View/Elements/Explorer/menu.ctp:79
 msgid "States"
-msgstr ""
+msgstr "Etats"
 
 #: View/Elements/Explorer/menu.ctp:86
 msgid "Countries"
-msgstr ""
+msgstr "Pays"
 
 #: View/Elements/Explorer/menu.ctp:100
 #: View/Helper/ExplorerMenuHelper.php:171
 msgid "Pagesize"
-msgstr ""
+msgstr "Dimension de page"
 
 #: View/Elements/Explorer/menu.ctp:107
 msgid "Sort"
-msgstr ""
+msgstr "Tri"
 
 #: View/Elements/Explorer/menu.ctp:109
 #: View/Helper/ExplorerMenuHelper.php:132
 msgid "newest"
-msgstr ""
+msgstr "Plus récent"
 
 #: View/Elements/Explorer/menu.ctp:110
 msgid "date"
-msgstr ""
+msgstr "data"
 
 #: View/Elements/Explorer/menu.ctp:111
 msgid "date (reverse)"
-msgstr ""
+msgstr "date (inverse)"
 
 #: View/Elements/Explorer/menu.ctp:112
 msgid "name"
-msgstr ""
+msgstr "nom"
 
 #: View/Elements/Explorer/menu.ctp:113
 msgid "modified"
-msgstr ""
+msgstr "modifié"
 
 #: View/Elements/Explorer/menu.ctp:114
 msgid "view count"
-msgstr ""
+msgstr "nombre vues"
 
 #: View/Elements/Explorer/menu.ctp:115
 #: View/Helper/ExplorerMenuHelper.php:140
 msgid "random"
-msgstr ""
+msgstr "aléatoire"
 
 #: View/Elements/Explorer/menu.ctp:124
 #: View/Explorer/search.ctp:4
 msgid "Metadata"
-msgstr ""
+msgstr "Métadonnées"
 
 #: View/Elements/Explorer/menu.ctp:128
 msgid "E.g. newtag, -oldtag"
-msgstr ""
+msgstr "Ex: nouvelleclé, -ancienneclé"
 
 #: View/Elements/Explorer/menu.ctp:142
 msgid "latitude, longitude"
-msgstr ""
+msgstr "latitude, longitude"
 
 #: View/Elements/Explorer/menu.ctp:149;170
 #: View/Helper/ImageDataHelper.php:602
 msgid "Keep"
-msgstr ""
+msgstr "Conserver"
 
 #: View/Elements/Explorer/menu.ctp:150
 msgid "90 CW"
-msgstr ""
+msgstr "90 horaire"
 
 #: View/Elements/Explorer/menu.ctp:151
 msgid "180 CW"
-msgstr ""
+msgstr "180 horaire"
 
 #: View/Elements/Explorer/menu.ctp:152
 msgid "90 CCW"
-msgstr ""
+msgstr "90 anti-horaire"
 
 #: View/Elements/Explorer/menu.ctp:154
 msgid "Rotate"
-msgstr ""
+msgstr "Tourner"
 
 #: View/Elements/Explorer/menu.ctp:159;191
 msgid "Apply"
-msgstr ""
+msgstr "Appliquer"
 
 #: View/Elements/Explorer/menu.ctp:163
 msgid "Access Rights"
-msgstr ""
+msgstr "Droits d'Accès"
 
 #: View/Elements/Explorer/menu.ctp:166
 msgid "Me"
-msgstr ""
+msgstr "Moi"
 
 #: View/Elements/Explorer/menu.ctp:172
 msgid "Who can view the image"
-msgstr ""
+msgstr "Qui peut voir l'image"
 
 #: View/Elements/Explorer/menu.ctp:180
 #: View/Options/import.ctp:15
 msgid "Who can add tags?"
-msgstr ""
+msgstr "Qui peut ajouter des mots clés ?"
 
 #: View/Elements/Explorer/menu.ctp:187
 msgid "Media access group"
-msgstr ""
+msgstr "Groupe accédant au média"
 
 #: View/Elements/Explorer/menu.ctp:197
 msgid "Download:"
-msgstr ""
+msgstr "Téléchargement:"
 
 #: View/Elements/Explorer/menu.ctp:198
 msgid "Original"
-msgstr ""
+msgstr "Original"
 
 #: View/Elements/Explorer/menu.ctp:198
 msgid "Download original files from selected media"
-msgstr ""
+msgstr "Télécharger les fichiers originaux des média choisis"
 
 #: View/Elements/Explorer/menu.ctp:199
 msgid "High Resolution"
-msgstr ""
+msgstr "Haute résolution"
 
 #: View/Elements/Explorer/menu.ctp:199
 msgid "Download high resolution files (%d px) from selected media"
-msgstr ""
+msgstr "Télécharger les fichiers en haute résolution (%s px) des média choisis"
 
 #: View/Elements/Explorer/menu.ctp:200
 msgid "Preview Resolution"
-msgstr ""
+msgstr "Résolution de pré-vue"
 
 #: View/Elements/Explorer/menu.ctp:200
 msgid "Download preview files (%d px) from selected media"
-msgstr ""
+msgstr "Télécharger fichiers de pré-vue (%d px) des média choisis"
 
 #: View/Emails/html/notify_new_media.ctp:1
 #: View/Emails/text/notify_new_media.ctp:1
 msgid "Hi %s!"
-msgstr ""
+msgstr "Salut, %s!"
 
 #: View/Emails/html/notify_new_media.ctp:3
 #: View/Emails/text/notify_new_media.ctp:4
 msgid "New media available at %s"
-msgstr ""
+msgstr "Nouveau média disponible sur %s"
 
 #: View/Emails/html/notify_new_media.ctp:16
 #: View/Emails/text/notify_new_media.ctp:18
 msgid "User %s published following media"
-msgstr ""
+msgstr "L'utilisateur %s a publié des média suivants"
 
 #: View/Emails/html/notify_new_media.ctp:29
 #: View/Emails/text/notify_new_media.ctp:26
 msgid "See all new media at %s"
-msgstr ""
+msgstr "Voir tous les nouveau média sur %s"
 
 #: View/Emails/html/notify_new_media.ctp:31
 #: View/Emails/text/notify_new_media.ctp:29
 msgid "Sincerly, your phTagr agent"
-msgstr ""
+msgstr "Cordialement, votre agent phTagr"
 
 #: View/Emails/html/notify_new_media.ctp:33
 #: View/Emails/text/notify_new_media.ctp:32
 msgid "PS: If you do not like to receive this notification again, please configure the notification interval in your user profile."
-msgstr ""
+msgstr "PS: si vous ne souhaitez plus recevoir de notification, merci de configurer l'intervalle de notification dans votre profil d'utilisateur."
 
 #: View/Explorer/index.ctp:10
 msgid "Edit Meta Data"
-msgstr ""
+msgstr "Modifier les métadonnées"
 
 #: View/Explorer/index.ctp:12
 msgid "Update"
-msgstr ""
+msgstr "Mettre à jour"
 
 #: View/Explorer/index.ctp:13
 msgid "Cancel"
-msgstr ""
+msgstr "Annuler"
 
 #: View/Explorer/index.ctp:228
 msgid "Select All"
-msgstr ""
+msgstr "Tout sélectionner"
 
 #: View/Explorer/index.ctp:229
 msgid "Invert Selection"
-msgstr ""
+msgstr "Inverser la sélection"
 
 #: View/Explorer/quicksearch.ctp:11
 msgid "Sorry, nothing was found for %s"
-msgstr ""
+msgstr "Désolé, rien n'a été trouvé pour %s"
 
 #: View/Explorer/quicksearch.ctp:15
 msgid "Results of %s"
-msgstr ""
+msgstr "Résultats pour %s"
 
 #: View/Explorer/quicksearch.ctp:31
 msgid "See more results of tag"
-msgstr ""
+msgstr "Voir davantage de mots clés"
 
 #: View/Explorer/quicksearch.ctp:42
 msgid "See more results of category"
-msgstr ""
+msgstr "Voir davantage de catégories"
 
 #: View/Explorer/quicksearch.ctp:53
 msgid "See more results of location"
-msgstr ""
+msgstr "Voir davantage de lieux"
 
 #: View/Explorer/rss.ctp:3
 msgid "Most Recent Media"
-msgstr ""
+msgstr "Média les Plus Récents"
 
 #: View/Explorer/rss.ctp:5
 msgid "Most recent media of %s"
-msgstr ""
+msgstr "Plus récents médias de %s"
 
 #: View/Explorer/search.ctp:1
 #: View/Helper/ExplorerMenuHelper.php:204
 msgid "Advanced Search"
-msgstr ""
+msgstr "Recherche avancée"
 
 #: View/Explorer/search.ctp:6
 msgid "E.g. includeTag, -excludeTag"
-msgstr ""
+msgstr "Ex: avecclé, -sansclé"
 
 #: View/Explorer/search.ctp:10
 msgid "Date from"
-msgstr ""
+msgstr "Depuis "
 
 #: View/Explorer/search.ctp:10
 msgid "E.g. 2008-08-07"
-msgstr ""
+msgstr "Ex: 2008-08-07"
 
 #: View/Explorer/search.ctp:11
 msgid "Date to"
-msgstr ""
+msgstr "Jusqu'à"
 
 #: View/Explorer/search.ctp:14
 #: View/Helper/ExplorerMenuHelper.php:227
 msgid "Options"
-msgstr ""
+msgstr "Options"
 
 #: View/Explorer/search.ctp:17
 msgid "Page size"
-msgstr ""
+msgstr "Dimension de page"
 
 #: View/Explorer/search.ctp:19
 msgid "Default"
-msgstr ""
+msgstr "Par défaut"
 
 #: View/Explorer/search.ctp:19
 msgid "Newest"
-msgstr ""
+msgstr "Récents"
 
 #: View/Explorer/search.ctp:19
 #: View/Helper/ExplorerMenuHelper.php:144
 msgid "Changes"
-msgstr ""
+msgstr "Changements"
 
 #: View/Explorer/search.ctp:19
 msgid "Random"
-msgstr ""
+msgstr "Aléatoire"
 
 #: View/Explorer/search.ctp:19
 msgid "Popularity"
-msgstr ""
+msgstr "Popularité"
 
 #: View/Explorer/search.ctp:20
 msgid "Sort by"
-msgstr ""
+msgstr "Trier par"
 
 #: View/Explorer/search.ctp:24
 msgid "Advanced"
-msgstr ""
+msgstr "Avancé"
 
 #: View/Explorer/search.ctp:31
 msgid "Any Type"
-msgstr ""
+msgstr "Tous type"
 
 #: View/Explorer/search.ctp:31
 msgid "Image or Photos"
-msgstr ""
+msgstr "Image ou Photo"
 
 #: View/Explorer/search.ctp:31
 msgid "Video"
-msgstr ""
+msgstr "Vidéo"
 
 #: View/Explorer/search.ctp:32
 msgid "File Type"
-msgstr ""
+msgstr "Type de fichier"
 
 #: View/Explorer/search.ctp:36
 #: View/Groups/view.ctp:90
@@ -1543,65 +1475,65 @@ msgstr ""
 #: View/Users/password.ctp:9
 #: View/Users/register.ctp:7
 msgid "Username"
-msgstr ""
+msgstr "Utilisateur"
 
 #: View/Explorer/search.ctp:40
 msgid "Any"
-msgstr ""
+msgstr "Tous"
 
 #: View/Explorer/search.ctp:40
 #: View/Options/profile.ctp:18
 msgid "Private"
-msgstr ""
+msgstr "Privé"
 
 #: View/Explorer/search.ctp:40
 #: View/Options/profile.ctp:21
 msgid "Public"
-msgstr ""
+msgstr "Public"
 
 #: View/Explorer/search.ctp:41
 msgid "Media visibility"
-msgstr ""
+msgstr "Visibilité"
 
 #: View/Explorer/search.ctp:44
 msgid "AND"
-msgstr ""
+msgstr "AND"
 
 #: View/Explorer/search.ctp:44
 msgid "OR"
-msgstr ""
+msgstr "OR"
 
 #: View/Explorer/search.ctp:45
 msgid "General Operand"
-msgstr ""
+msgstr "Filtre général"
 
 #: View/Explorer/search.ctp:46
 msgid "Tag operand"
-msgstr ""
+msgstr "Filtre de mots clés"
 
 #: View/Explorer/search.ctp:47
 msgid "Category operand"
-msgstr ""
+msgstr "Filtre de catégories"
 
 #: View/Explorer/search.ctp:48
 msgid "Location operand"
-msgstr ""
+msgstr "Filtre de lieux"
 
 #: View/Explorer/search.ctp:53
 #: View/Groups/dashboard_search.ctp:22;50;78;106;134;162
 msgid "Search"
-msgstr ""
+msgstr "Rechercher"
 
 #: View/Groups/all.ctp:11
 #: View/Groups/members.ctp:11
 msgid "From User"
-msgstr ""
+msgstr "Par utilisateur"
 
 #: View/Groups/all.ctp:13
 #: View/Groups/index.ctp:12
 #: View/Groups/members.ctp:13
 msgid "Members"
-msgstr ""
+msgstr "Membres"
 
 #: View/Groups/all.ctp:14
 #: View/Groups/index.ctp:13
@@ -1612,27 +1544,27 @@ msgstr ""
 #: View/Users/admin_index.ctp:20
 #: View/Users/admin_path.ctp:13
 msgid "Actions"
-msgstr ""
+msgstr "Actions"
 
 #: View/Groups/all.ctp:31
 #: View/Groups/index.ctp:30
 #: View/Groups/members.ctp:31
 #: View/Groups/view.ctp:100
 msgid "Subscribe"
-msgstr ""
+msgstr "S'abonner"
 
 #: View/Groups/all.ctp:35
 #: View/Groups/index.ctp:34
 #: View/Groups/members.ctp:35
 #: View/Groups/view.ctp:98
 msgid "Unsubscribe"
-msgstr ""
+msgstr "Se désabonner"
 
 #: View/Groups/all.ctp:44
 #: View/Groups/index.ctp:43
 #: View/Groups/members.ctp:44
 msgid "Do you realy want to delete the group '%s'?"
-msgstr ""
+msgstr "Voulez-vous vraiment détruire le groupe '%s'"
 
 #: View/Groups/all.ctp:46
 #: View/Groups/index.ctp:45
@@ -1644,71 +1576,71 @@ msgstr ""
 #: View/Users/admin_index.ctp:48
 #: View/Users/admin_path.ctp:22
 msgid "Delete"
-msgstr ""
+msgstr "Détruire"
 
 #: View/Groups/all.ctp:64
 msgid "Currently no image groups are assigned. At the one hand each image could be assigned to a specific group. On the other hand a guest can be member of a set of groups. The guest is than able to view the images from his groups."
-msgstr ""
+msgstr "Actuellement il n'y a pas de groupe assigné à l'image. Chaque chaque image peut être assignée à un groupe spécifique. Un invité peut être membre d'un ensemble de groupes. L'invité peut alors voir les images de ses groupes."
 
 #: View/Groups/create.ctp:1
 msgid "New Group"
-msgstr ""
+msgstr "Nouveau groupe"
 
 #: View/Groups/create.ctp:7
 #: View/Groups/dashboard_create.ctp:6;26;46;66;86;106
 msgid "Create new group"
-msgstr ""
+msgstr "Créer un nouveau groupe"
 
 #: View/Groups/create.ctp:11
 #: View/Groups/dashboard_create.ctp:10;30;50;70;90;110
 #: View/Groups/edit.ctp:12
 msgid "This group is hidden"
-msgstr ""
+msgstr "Ce groupe est caché"
 
 #: View/Groups/create.ctp:12
 #: View/Groups/dashboard_create.ctp:11;31;51;71;91;111
 msgid "New group members are moderated"
-msgstr ""
+msgstr "Les nouveaux membres du groupes doivent être acceptés"
 
 #: View/Groups/create.ctp:13
 #: View/Groups/dashboard_create.ctp:12;32;52;72;92;112
 msgid "This group is shared and other group members can use this group"
-msgstr ""
+msgstr "Ce groupe est partagé et les membres d'autres groupes peuvent utiliser ce groupe"
 
 #: View/Groups/dashboard_manage.ctp:8;40;72;104;136;168
 msgid "Group Name"
-msgstr ""
+msgstr "Nom du groupe"
 
 #: View/Groups/dashboard_manage.ctp:8;40;72;104;136;168
 #: View/Groups/listmembers.ctp:13
 #: View/Groups/view.ctp:52
 #: View/Users/view.ctp:43
 msgid "Action"
-msgstr ""
+msgstr "Action"
 
 #: View/Groups/dashboard_search.ctp:5;33;61;89;117;145
 msgid "Results"
-msgstr ""
+msgstr "Résultats"
 
 #: View/Groups/dashboard_search.ctp:20;48;76;104;132;160
 msgid "Find Group:"
-msgstr ""
+msgstr "Trouver Groupe:"
 
 #: View/Groups/edit.ctp:1
 msgid "Group: %s"
-msgstr ""
+msgstr "Groupe: %s"
 
 #: View/Groups/edit.ctp:7
 msgid "Edit Group"
-msgstr ""
+msgstr "Modifier groupe"
 
 #: View/Groups/edit.ctp:13
 msgid "New group members require a confirmation by the moderator"
-msgstr ""
+msgstr "Les nouveaux membres du groupe doivent recevoir une confirmation par le modérateur"
 
 #: View/Groups/edit.ctp:14
 msgid "The group can be used by other members"
-msgstr ""
+msgstr "Le groupe peut être utilisé par d'autres membres"
 
 #: View/Groups/edit.ctp:17
 #: View/Guests/edit.ctp:47
@@ -1724,100 +1656,100 @@ msgstr ""
 #: View/Users/admin_edit.ctp:26
 #: View/Users/admin_password.ctp:13
 msgid "Save"
-msgstr ""
+msgstr "Enregistrer"
 
 #: View/Groups/index.ctp:63
 msgid "You have currently no media groups created."
-msgstr ""
+msgstr "Vous n'avez pas de groupes de média"
 
 #: View/Groups/listmembers.ctp:1
 #: View/Groups/view.ctp:1
 msgid "Group %s"
-msgstr ""
+msgstr "Groupe %s"
 
 #: View/Groups/listmembers.ctp:5
 #: View/Groups/view.ctp:44
 msgid "Member List"
-msgstr ""
+msgstr "Liste des Membres"
 
 #: View/Groups/listmembers.ctp:10
 #: View/Groups/view.ctp:49
 #: View/Users/admin_index.ctp:35
 msgid "Member"
-msgstr ""
+msgstr "Membre"
 
 #: View/Groups/listmembers.ctp:29
 #: View/Groups/view.ctp:68
 msgid "Unsubscribe '%s'"
-msgstr ""
+msgstr "Désabonner '%s'"
 
 #: View/Groups/members.ctp:64
 msgid "You have currently no memberships to media groups."
-msgstr ""
+msgstr "Vous n'avez pas d'appartenance à des groupes de média"
 
 #: View/Groups/view.ctp:5
 msgid "Details"
-msgstr ""
+msgstr "détails"
 
 #: View/Groups/view.ctp:11
 msgid "This group has no description"
-msgstr ""
+msgstr "Ce groupe n'a pas de description"
 
 #: View/Groups/view.ctp:16
 msgid "The group is owned by user %s and has %d media in total."
-msgstr ""
+msgstr "Le groupe appartient à l'utilisateur %s et contient %d média au total"
 
 #: View/Groups/view.ctp:27
 msgid "The group is hidden"
-msgstr ""
+msgstr "Le groupe est caché"
 
 #: View/Groups/view.ctp:29
 msgid "The group is shown with the media"
-msgstr ""
+msgstr "Le groupe est montré par le média"
 
 #: View/Groups/view.ctp:32
 msgid "The group subscription requires a confirmation"
-msgstr ""
+msgstr "L'abonnement au groupe demande une confirmation"
 
 #: View/Groups/view.ctp:34
 msgid "The group subscription is free and does not need a confirmation"
-msgstr ""
+msgstr "L'abonnement au groupe est libre et ne demande pas de confirmation"
 
 #: View/Groups/view.ctp:37
 msgid "This group is shared and can be used by other members"
-msgstr ""
+msgstr "Ce groupe est partagé et peut être utilisé par d'autres membres"
 
 #: View/Groups/view.ctp:39
 msgid "This group is not shared"
-msgstr ""
+msgstr "Ce groupe est n'est pas partagé"
 
 #: View/Groups/view.ctp:88
 msgid "Add user"
-msgstr ""
+msgstr "Ajouter un utilisateur"
 
 #: View/Groups/view.ctp:93
 #: View/Users/admin_path.ctp:41
 msgid "Add"
-msgstr ""
+msgstr "Ajouter"
 
 #: View/Groups/view.ctp:106
 #: View/Guests/links.ctp:31
 #: View/Options/rss.ctp:16
 #: View/Users/view.ctp:91
 msgid "Recent Media"
-msgstr ""
+msgstr "Médias Récents"
 
 #: View/Groups/view.ctp:112
 msgid "See all media of the group %s"
-msgstr ""
+msgstr "Voir tous les média du groupe %s"
 
 #: View/Guests/create.ctp:1
 msgid "Guest Creation"
-msgstr ""
+msgstr "Création d'invité"
 
 #: View/Guests/create.ctp:7
 msgid "Create new guest account"
-msgstr ""
+msgstr "Créer un nouveau compte d'invité"
 
 #: View/Guests/create.ctp:10
 #: View/Guests/edit.ctp:8
@@ -1828,7 +1760,7 @@ msgstr ""
 #: View/Users/password.ctp:10
 #: View/Users/register.ctp:10
 msgid "Email"
-msgstr ""
+msgstr "Courriel"
 
 #: View/Guests/create.ctp:12
 #: View/Guests/edit.ctp:16
@@ -1839,1047 +1771,1044 @@ msgstr ""
 #: View/Users/confirm.ctp:11
 #: View/Users/register.ctp:9
 msgid "Confirm"
-msgstr ""
+msgstr "Confirmation"
 
 #: View/Guests/edit.ctp:1
 msgid "Guest: %s"
-msgstr ""
+msgstr "Invité: %s"
 
 #: View/Guests/edit.ctp:6
 #: View/Users/admin_index.ctp:36
 msgid "Guest"
-msgstr ""
+msgstr "Invité"
 
 #: View/Guests/edit.ctp:9
 msgid "Expires"
-msgstr ""
+msgstr "Expiration"
 
 #: View/Guests/edit.ctp:10
 msgid "Enable WebDAV access"
-msgstr ""
+msgstr "Activer l'accès WebDAV"
 
 #: View/Guests/edit.ctp:22
 msgid "None"
-msgstr ""
+msgstr "Aucun"
 
 #: View/Guests/edit.ctp:24
 msgid "Name and captcha"
-msgstr ""
+msgstr "Nom et captcha"
 
 #: View/Guests/edit.ctp:28
 msgid "Authentication"
-msgstr ""
+msgstr "Authentification"
 
 #: View/Guests/edit.ctp:34
 msgid "Email Notification"
-msgstr ""
+msgstr "Notification par courriel"
 
 #: View/Guests/edit.ctp:37
 #: View/Options/profile.ctp:25
 msgid "Never"
-msgstr ""
+msgstr "Jamais"
 
 #: View/Guests/edit.ctp:38
 #: View/Options/profile.ctp:26
 msgid "Every 30 minutes"
-msgstr ""
+msgstr "Toutes les 30 minutes"
 
 #: View/Guests/edit.ctp:39
 #: View/Options/profile.ctp:27
 msgid "Every hour"
-msgstr ""
+msgstr "Toutes les heures"
 
 #: View/Guests/edit.ctp:40
 #: View/Options/profile.ctp:28
 msgid "Every day"
-msgstr ""
+msgstr "Tous les jours"
 
 #: View/Guests/edit.ctp:41
 #: View/Options/profile.ctp:29
 msgid "Every week"
-msgstr ""
+msgstr "Toutes les semaines"
 
 #: View/Guests/edit.ctp:42
 #: View/Options/profile.ctp:30
 msgid "Every month"
-msgstr ""
+msgstr "Tous les mois"
 
 #: View/Guests/edit.ctp:44
 #: View/Options/profile.ctp:32
 msgid "Send new media notifications"
-msgstr ""
+msgstr "Envoyer les notifications de nouveaux médias"
 
 #: View/Guests/edit.ctp:51
 #: View/Users/view.ctp:35
 msgid "Group List"
-msgstr ""
+msgstr "Liste des Groupes"
 
 #: View/Guests/edit.ctp:67
 msgid "Do you really want to delete the group '%s' from this guest '%s'?"
-msgstr ""
+msgstr "Voulez-vous vraiment enlever le groupe '%s' de l'invité '%s' ?"
 
 #: View/Guests/edit.ctp:80
 msgid "Currently this guest account has no assigned groups. Please add groups to grant access to your personal images."
-msgstr ""
+msgstr "Ce compte invité n'a pas de groupe. Merci de d'ajouter des groupes pour régler l'accès à vos images."
 
 #: View/Guests/edit.ctp:84
 msgid "Group Assignements"
-msgstr ""
+msgstr "Appartenances aux Groupes"
 
 #: View/Guests/edit.ctp:88
 msgid "Add Group"
-msgstr ""
+msgstr "Ajouter Groupe"
 
 #: View/Guests/index.ctp:35
 msgid "Currently, no guest accounts are set. You can create guests accounts to grant access to your images e.g. to your friends or family. Please add also some groups to the guest to grant access to this guest for these groups."
-msgstr ""
+msgstr "Aucun compte invité n'est défini. Vous pouvez créer des comptes invités pour permettre l'accès à vos images, par exemple pour vos amis ou votre famille. Il faut ajouter des groupes aux invité pour leur permettre l'accès à ces groupes."
 
 #: View/Guests/links.ctp:1
 msgid "Authenticated Links"
-msgstr ""
+msgstr "Liens d'Authentification"
 
 #: View/Guests/links.ctp:4
 msgid "Following links contains an authentication key which should be used carefully. Copy the links with with right mouse click and select <i>Copy link address</i>."
-msgstr ""
+msgstr "Le lien suivant contient une clé d'authentification qui doit être utilisée avec précaution. Clic droit et <i>Copier l'adresse du lien</i>."
 
 #: View/Guests/links.ctp:7
 #: View/Options/rss.ctp:7
 msgid "The links are valid for the current session. For permanent login the user has to login via username and password."
-msgstr ""
+msgstr "Le lien est valide pour la session courante. Pour un accès permanent l'utilisateur doit se connecter avec nom d'utilisateur et mot de passe."
 
 #: View/Guests/links.ctp:9
 msgid "Direct Link"
-msgstr ""
+msgstr "Lien Direct"
 
 #: View/Guests/links.ctp:11
 msgid "Following link provides a direct link to <i>My Photos</i> of the guest which omits the login with username and password."
-msgstr ""
+msgstr "Le lien suivant fournit un accès direct aux <i>Photos</i> de l'invité qui ne n'est pas pas connecté par nom d'utilisateur et mot de passe."
 
 #: View/Guests/links.ctp:17
 msgid "My Media of Guest %s (Link %s)"
-msgstr ""
+msgstr "Media de l'utilisateur %s (Link %s)"
 
 #: View/Guests/links.ctp:23
 msgid "Following links provide a authenticated RSS and Media RSS links."
-msgstr ""
+msgstr "Les liens suivants fournissent des liens RSS authentifiés."
 
 #: View/Guests/links.ctp:32
 #: View/Options/rss.ctp:17
 #: View/home/index.ctp:42
 msgid "Recent Comments"
-msgstr ""
+msgstr "Commentaires Récents"
 
 #: View/Guests/links.ctp:33
 #: View/Options/rss.ctp:18
 msgid "Media RSS"
-msgstr ""
+msgstr "Fil RSS"
 
 #: View/Guests/links.ctp:34
 #: View/Options/rss.ctp:19
 msgid "Media RSS of My Media"
-msgstr ""
+msgstr "Fil RSS de Mes Médias"
 
 #: View/Guests/links.ctp:37
 msgid "Click %s to renew the authentication key. All previous links become invalid."
-msgstr ""
+msgstr "Cliquer sur %s pour renouveler la clé d'authentification. Tous les liens précédents deviennent invalides."
 
 #: View/Guests/links.ctp:37
 #: View/Options/rss.ctp:22
 msgid "renew key"
-msgstr ""
+msgstr "Renouveler la clé"
 
 #: View/Helper/BreadcrumbHelper.php:192
 msgid "Filter"
-msgstr ""
+msgstr "Filtre"
 
 #: View/Helper/ExplorerMenuHelper.php:59
 msgid "Show media in high quality (if available)"
-msgstr ""
+msgstr "Voir média en bonne qualité (si disponible)"
 
 #: View/Helper/ExplorerMenuHelper.php:63
 msgid "Start Slideshow"
-msgstr ""
+msgstr "Démarrer le diaporama"
 
 #: View/Helper/ExplorerMenuHelper.php:122
 msgid "Order"
-msgstr ""
+msgstr "Ordre"
 
 #: View/Helper/ExplorerMenuHelper.php:128
 msgid "date asc"
-msgstr ""
+msgstr "Par date "
 
 #: View/Helper/ExplorerMenuHelper.php:128
 msgid "Show oldest first"
-msgstr ""
+msgstr "Voir les plus anciennes d'abord"
 
 #: View/Helper/ExplorerMenuHelper.php:132
 msgid "Show newest first"
-msgstr ""
+msgstr "Voir les plus récentes d'abord"
 
 #: View/Helper/ExplorerMenuHelper.php:136
 msgid "pouplarity"
-msgstr ""
+msgstr "popularité"
 
 #: View/Helper/ExplorerMenuHelper.php:136
 msgid "Show popular first"
-msgstr ""
+msgstr "Les plus populaire d'abord"
 
 #: View/Helper/ExplorerMenuHelper.php:140
 msgid "Show random order"
-msgstr ""
+msgstr "Voir dans un ordre aléatoire"
 
 #: View/Helper/ExplorerMenuHelper.php:144
 msgid "Show changes first"
-msgstr ""
+msgstr "Voir les changements d'abords"
 
 #: View/Helper/ExplorerMenuHelper.php:148
 msgid "Views"
-msgstr ""
+msgstr "Vues"
 
 #: View/Helper/ExplorerMenuHelper.php:148
 msgid "Show last views first"
-msgstr ""
+msgstr "Voir les dernières vues d'abord"
 
 #: View/Helper/ExplorerMenuHelper.php:152
 msgid "Order by name"
-msgstr ""
+msgstr "Trier par nom"
 
 #: View/Helper/FileListHelper.php:79
 msgid "Delete folder %s?"
-msgstr ""
+msgstr "Détruire le répertoire %s ?"
 
 #: View/Helper/FileListHelper.php:92
 msgid "Unlink media from this file"
-msgstr ""
+msgstr "détacher le media de ce fichier"
 
 #: View/Helper/FileListHelper.php:102
 msgid "Download %s"
-msgstr ""
+msgstr "Télécharger %s"
 
 #: View/Helper/FileListHelper.php:120
 msgid "(parent folder)"
-msgstr ""
+msgstr "(répertoire parent)"
 
 #: View/Helper/FileListHelper.php:122
 msgid "(this folder)"
-msgstr ""
+msgstr "(ce répertoire)"
 
 #: View/Helper/FileListHelper.php:134
 #: View/System/view.ctp:20
 msgid "Media"
-msgstr ""
+msgstr "Média"
 
 #: View/Helper/FileListHelper.php:134
 #: View/Images/view.ctp:78
 msgid "Size"
-msgstr ""
+msgstr "Taille"
 
 #: View/Helper/ImageDataHelper.php:311
 msgid "%s can edit the meta data"
-msgstr ""
+msgstr "%s peut modifier les métadonnées"
 
 #: View/Helper/ImageDataHelper.php:313
 msgid "%s can edit the tags"
-msgstr ""
+msgstr "% peut modifier les mots clés"
 
 #: View/Helper/ImageDataHelper.php:318
 msgid "%s can download this media"
-msgstr ""
+msgstr "%s peut télécharger ce média"
 
 #: View/Helper/ImageDataHelper.php:320
 msgid "%s an view this media"
-msgstr ""
+msgstr "%s peut voir ce média"
 
 #: View/Helper/ImageDataHelper.php:334
 msgid "users:"
-msgstr ""
+msgstr "utilisateurs:"
 
 #: View/Helper/ImageDataHelper.php:334
 msgid "Access for users"
-msgstr ""
+msgstr "Accès aux utilisateurs"
 
 #: View/Helper/ImageDataHelper.php:337
 msgid "public:"
-msgstr ""
+msgstr "Public:"
 
 #: View/Helper/ImageDataHelper.php:337
 msgid "Access for the public"
-msgstr ""
+msgstr "Accès au public"
 
 #: View/Helper/ImageDataHelper.php:338
 msgid "The public"
-msgstr ""
+msgstr "The public"
 
 #: View/Helper/ImageDataHelper.php:418
 msgid "This media belongs to the group '%s'"
-msgstr ""
+msgstr "Ce média appartient au groupe '%s'"
 
 #: View/Helper/ImageDataHelper.php:420
 msgid "View"
-msgstr ""
+msgstr "Vue"
 
 #: View/Helper/ImageDataHelper.php:423
 msgid "No group assigned"
-msgstr ""
+msgstr "Pas de groupe assigné"
 
 #: View/Helper/ImageDataHelper.php:491
 msgid "Search global for %s"
-msgstr ""
+msgstr "Recherche globale pour %s"
 
 #: View/Helper/ImageDataHelper.php:495
 msgid "Include %s from search"
-msgstr ""
+msgstr "Inclure %s dans la recherche"
 
 #: View/Helper/ImageDataHelper.php:497
 msgid "Exclude %s from search"
-msgstr ""
+msgstr "Exclure %s de la recherche"
 
 #: View/Helper/ImageDataHelper.php:603
 #: View/Options/import.ctp:12
 msgid "Me only"
-msgstr ""
+msgstr "Moi seulement"
 
 #: View/Helper/ImageDataHelper.php:606
 #: View/Options/import.ctp:9
 msgid "Everyone"
-msgstr ""
+msgstr "Tout le monde"
 
 #: View/Helper/ImageDataHelper.php:623
 msgid "This media is public visible"
-msgstr ""
+msgstr "Ce média est publiquement visible"
 
 #: View/Helper/ImageDataHelper.php:626
 msgid "This media is visible for users"
-msgstr ""
+msgstr "Ce média est visible pour tous les utilisateurs"
 
 #: View/Helper/ImageDataHelper.php:629
 msgid "This media is visible for group members"
-msgstr ""
+msgstr "Ce média est visible pour les membres du groupe"
 
 #: View/Helper/ImageDataHelper.php:632
 msgid "This media is private"
-msgstr ""
+msgstr "Ce média est privé"
 
 #: View/Helper/MenuHelper.php:128
 msgid "Main Menu"
-msgstr ""
+msgstr "Menu principal"
 
 #: View/Helper/NavigatorHelper.php:59;129
 msgid "prev"
-msgstr ""
+msgstr "précedent"
 
 #: View/Helper/NavigatorHelper.php:109;162
 msgid "next"
-msgstr ""
+msgstr "suivant"
 
 #: View/Images/notfound.ctp:1
 msgid "No media Found"
-msgstr ""
+msgstr "Aucun média trouvé"
 
 #: View/Images/notfound.ctp:3
 msgid "No media found. Please goto the %s and try again"
-msgstr ""
+msgstr "Aucun média trouvé. Merci d'aller à %s et essayer à nouveau"
 
 #: View/Images/view.ctp:35
 msgid "Media Details"
-msgstr ""
+msgstr "Détails Média"
 
 #: View/Images/view.ctp:37
 msgid "Map"
-msgstr ""
+msgstr "Carte"
 
 #: View/Images/view.ctp:43
 msgid "Access Right"
-msgstr ""
+msgstr "Droits d'accès"
 
 #: View/Images/view.ctp:69
 msgid "File(s)"
-msgstr ""
+msgstr "Fichier(s)"
 
 #: View/Images/view.ctp:73
 msgid "Folder"
-msgstr ""
+msgstr "Répertoire"
 
 #: View/Images/view.ctp:75
 msgid "View Count"
-msgstr ""
+msgstr "Nombre de vues"
 
 #: View/Images/view.ctp:76
 msgid "Created"
-msgstr ""
+msgstr "Crée"
 
 #: View/Images/view.ctp:77
 msgid "Last modified"
-msgstr ""
+msgstr "Dernière modification"
 
 #: View/Images/view.ctp:81
 msgid "Model"
-msgstr ""
+msgstr "Modèle"
 
 #: View/Images/view.ctp:84
 msgid "Duration"
-msgstr ""
+msgstr "Durée"
 
 #: View/Images/view.ctp:87
 msgid "Aperture"
-msgstr ""
+msgstr "Ouverture"
 
 #: View/Images/view.ctp:90
 msgid "Shutter"
-msgstr ""
+msgstr "Vitesse d'obturation"
 
 #: View/Images/view.ctp:93
 msgid "ISO"
-msgstr ""
+msgstr "ISO"
 
-#: View/Layouts/backend.ctp:44
-#: View/Layouts/default.ctp:51
-msgid "&copy; 2006-2012 by %s - Tag, Browse, and Share Your Photos."
-msgstr ""
-
-#: View/Layouts/backend.ctp:44
-msgid "You are running version %s."
-msgstr ""
+#: View/Layouts/backend.ctp:26
+msgid "Gallery"
+msgstr "Galerie"
 
 #: View/Layouts/default.ctp:34
-#: View/Themed/Chrisd/Layouts/default.ctp:34
 msgid "Search..."
-msgstr ""
+msgstr "Rechercher..."
 
 #: View/Layouts/default.ctp:35
-#: View/Themed/Chrisd/Layouts/default.ctp:35
 msgid "Go"
-msgstr ""
-
-#: View/Layouts/default.ctp:51
-msgid "phTagr.org"
-msgstr ""
+msgstr "OK"
 
 #: View/Options/import.ctp:5
 msgid "Default Access Rights"
-msgstr ""
+msgstr "Droits d'Accès par défaut"
 
 #: View/Options/import.ctp:6
 msgid "The following access rights are applied to new images."
-msgstr ""
+msgstr "Les droits d'accès suivants sont appliqués aux nouvelles images."
 
 #: View/Options/import.ctp:11
 msgid "Group Members"
-msgstr ""
+msgstr "Membres du Groupe"
 
 #: View/Options/import.ctp:13
 msgid "Who can view the image?"
-msgstr ""
+msgstr "Qui peut voir l'image ?"
 
 #: View/Options/import.ctp:17
 msgid "Default image group?"
-msgstr ""
+msgstr "Image par défaut du groupe ?"
 
 #: View/Options/import.ctp:21
 msgid "GPS Tracks"
-msgstr ""
+msgstr "Traces GPS"
 
 #: View/Options/import.ctp:22
 msgid "Usually GPS logs are in UTC while camera time is set to local time. Set time offset to correct time difference between GPS logs and your media."
-msgstr ""
+msgstr "Habituellement, les logs des GPS sont en Temps Universel (UTC) tandis que les appareils photos ou caméra sont en temps local. Indiquez le décalage pour corriger la différence entre les logs des GPS et vos média."
 
 #: View/Options/import.ctp:24
 msgid "Time offset (minutes)"
-msgstr ""
+msgstr "Décalage de temps (minutes)"
 
 #: View/Options/import.ctp:25
 msgid "Coordinate time range (minutes)"
-msgstr ""
+msgstr "Décalage de temps (minutes)"
 
 #: View/Options/import.ctp:26
 msgid "Overwrite existing coordinates?"
-msgstr ""
+msgstr "Remplacer les coordonnées existantes ?"
 
 #: View/Options/profile.ctp:9
 #: View/Users/admin_edit.ctp:8
 msgid "First name"
-msgstr ""
+msgstr "Prénom"
 
 #: View/Options/profile.ctp:10
 #: View/Users/admin_edit.ctp:9
 msgid "Last name"
-msgstr ""
+msgstr "Nom"
 
 #: View/Options/profile.ctp:15
 msgid "Others"
-msgstr ""
+msgstr "Autres"
 
 #: View/Options/profile.ctp:23
 msgid "Profile visibility"
-msgstr ""
+msgstr "Visibilité du profil"
 
 #: View/Options/rss.ctp:1
 msgid "Authenticated RSS"
-msgstr ""
+msgstr "Authentifié par RSS"
 
 #: View/Options/rss.ctp:4
 msgid "Following links contain authentication keys of your account. Using these links you are authenticated directly without username and password. The links could be spoofed easily and should be used carefully."
-msgstr ""
+msgstr "Les liens suivants contiennent des clés d'authentification de votre compte. En utilisant ces liens  vous être directement authentifié sans nom d'utilisateur ni mot de passe. Ces liens peuvent être facilement usurpés et doivent être utilisés avec précaution."
 
 #: View/Options/rss.ctp:22
 msgid "Click %s to renew the authentication key. All previous keys become invalid."
-msgstr ""
+msgstr "Cliquer sur %s pour renouveler la clé d'authentification. Toutes les clés précédentes deviennent invalides."
 
 #: View/Setup/config.ctp:1
 #: View/Setup/configro.ctp:1
 msgid "Database connection"
-msgstr ""
+msgstr "Connexion à la base de donnée"
 
 #: View/Setup/config.ctp:5
 msgid "This step creates the configuration for the database connection. Please add your database connection settings here."
-msgstr ""
+msgstr "Cette étape crée la configuration pour la connexion à la base de donnée. Merci d'indiquer ici vos paramètres de connexion à la base de données."
 
 #: View/Setup/config.ctp:9;12
 msgid "Database"
-msgstr ""
+msgstr "Base de données"
 
 #: View/Setup/config.ctp:11
 msgid "Host"
-msgstr ""
+msgstr "Hôte"
 
 #: View/Setup/config.ctp:15
 msgid "Prefix"
-msgstr ""
+msgstr "Préfixe"
 
 #: View/Setup/config.ctp:18
 #: View/Setup/configro.ctp:47
 #: View/Setup/saltro.ctp:16
 msgid "Continue"
-msgstr ""
+msgstr "Continuer"
 
 #: View/Setup/configro.ctp:6
 msgid "The configuration file for the database connection could not be written. Please create a database configuration file by your own!"
-msgstr ""
+msgstr "Le fichier de configuration pour la base de données ne peut être écrit. Merci de créer par vous même un fichier de configuration pour la base de données."
 
 #: View/Setup/configro.ctp:9
 msgid "Below a sample configuration file is shown. Please adapt your database credentials and continue."
-msgstr ""
+msgstr "Vous avez ci-desous un exemple de fichier de configuration. Adaptez le pour permettre l'accès à votre base de données et continuer."
 
 #: View/Setup/database.ctp:1
 msgid "Initialize Database"
-msgstr ""
+msgstr "Initialise la base données"
 
 #: View/Setup/database.ctp:3
 msgid "All tables are now initialized"
-msgstr ""
+msgstr "Toutes les tables sont été initialisées"
 
 #: View/Setup/finish.ctp:1
 msgid "Setup Complete"
-msgstr ""
+msgstr "Configuration initiale complète"
 
 #: View/Setup/finish.ctp:4
 msgid "Congratulations! Your configuration of phTagr is completed. Have fun using phTagr!"
-msgstr ""
+msgstr "Félicitations! Votre configuration de phTagr est achevée. Bonne utilisation de phTagr!"
 
 #: View/Setup/finish.ctp:7
 msgid "Click %s to go to home or %s your first media."
-msgstr ""
+msgstr "Cliquer %s pour aller à l'accueil ou %s pour votre premier média."
 
 #: View/Setup/finish.ctp:7
 msgid "upload"
-msgstr ""
+msgstr "remontée"
 
 #: View/Setup/index.ctp:1
 msgid "Welcome"
-msgstr ""
+msgstr "Bienvenue"
 
 #: View/Setup/index.ctp:5
 msgid "Welcome to the installation setup of phTagr. Following steps are required to install it:"
-msgstr ""
+msgstr "Bienvenue dans l'installation de phTagr. Les étapes suivantes sont requises pour l'installer:"
 
 #: View/Setup/index.ctp:8
 msgid "Initial file and directory check"
-msgstr ""
+msgstr "Vérification des répertoires et des fichiers"
 
 #: View/Setup/index.ctp:9
 msgid "Configuration of database connection"
-msgstr ""
+msgstr "Configuration de la connexion à la base de données"
 
 #: View/Setup/index.ctp:10
 msgid "Initialize required tables"
-msgstr ""
+msgstr "Initialisation des tables requises"
 
 #: View/Setup/index.ctp:11
 msgid "Administration account creation"
-msgstr ""
+msgstr "Création d'un compte administrateur"
 
 #: View/Setup/index.ctp:12
 msgid "Configuration of external tools"
-msgstr ""
+msgstr "Configuration d'outils externes"
 
 #: View/Setup/index.ctp:15
 msgid "Note: Cookies are required to install and run phTagr."
-msgstr ""
+msgstr "Notes: les cookies sont nécessaires pour installer et faire fonctionner phTagr"
 
 #: View/Setup/index.ctp:17
 msgid "This setup will step through the required steps."
-msgstr ""
+msgstr "Cette installation va parcourir les étapes requises."
 
 #: View/Setup/index.ctp:18
 msgid "Start Installation"
-msgstr ""
+msgstr "Démarrage de l'Installation"
 
 #: View/Setup/path.ctp:1
 msgid "Path settings"
-msgstr ""
+msgstr "Préférence de chemins"
 
 #: View/Setup/path.ctp:7
 msgid "Following paths are missing. Please create these paths!"
-msgstr ""
+msgstr "Les chemins suivants sont manquants. Merci de créer ces chemins!"
 
 #: View/Setup/path.ctp:19
 msgid "Following paths are not writeable. Please change the permissions!"
-msgstr ""
+msgstr "Les chemins suivants sont protégés en écriture. Merci de changer les permissions!"
 
 #: View/Setup/path.ctp:29
 msgid "Retry"
-msgstr ""
+msgstr "réessayer"
 
 #: View/Setup/salt.ctp:1
 #: View/Setup/saltro.ctp:1
 msgid "Security settings"
-msgstr ""
+msgstr "Préférences de sécurité"
 
 #: View/Setup/salt.ctp:5
 msgid "An error occured while setting the security salt. Please have look to the log files and click on %s"
-msgstr ""
+msgstr "Une erreur s'est produite en spécifiant la clé de sécurité. Merci de regarder les fichiers de logs et cliquer sur %s"
 
 #: View/Setup/salt.ctp:5
 #: View/Setup/saltro.ctp:7
 msgid "continue"
-msgstr ""
+msgstr "continuer"
 
 #: View/Setup/saltro.ctp:5
 msgid "phTagr could not set the security salt because the a configuration file file is write protected.  Please change the configuration manually"
-msgstr ""
+msgstr "phTagr ne peut pas mettre la clé de sécurité parce que le fichier de configuration est protégé en écriture. Merci de changer la configuration à la main."
 
 #: View/Setup/saltro.ctp:7
 msgid "Change the <b>Security.salt</b> setting in the core configuration file <code>%s</code> (line %d) to a random string with alpha numeric values. You can change the setting to the provided value below. After changing, click on %s."
-msgstr ""
+msgstr "Changer la <b>clé de sécurité</b> dans le fichier de configuration principal <code>%s</code> (line %d) en une chaine alphanumérique aléatoire. Vous pouvez changer la configuration avec la valeur fournie ci-dessous. Après changement, cliquer sur %s."
 
 #: View/Setup/saltro.ctp:9
 msgid "Current security salt value"
-msgstr ""
+msgstr "Valeur courante de la clé de sécurité"
 
 #: View/Setup/saltro.ctp:12
 msgid "New security salt value"
-msgstr ""
+msgstr "Nouvelle clé de sécurité"
 
 #: View/Setup/system.ctp:5
 msgid "Congratulation! phTagr just runs fine now!"
-msgstr ""
+msgstr "Frélicitation! phTagr tourne bien maintenant!"
 
 #: View/Setup/system.ctp:7
 msgid "phTagr can use <u>optional</u> external programs to enlarge the functionality. exiftool is used to export the meta data to images like tags, categories or (geo) locations. ffmpeg supports other video file formats like AVI, MPEG, or MOV. And convert supports better thumbnail creation for bigger photos."
-msgstr ""
+msgstr "phTagr peut utiliser des programmes externes <u>optionnels</u> pour élargir ses possibilités. Exiftool est utilisé pour exporter les métadonnées (comme les mots clés, catégories et informations de géolocalisation) vers les images. Ffmpeg accepte d'autres formats video comme AVIn MPEG ou MOV. And convert gère mieux la création d'imagettes pour les grandes photos."
 
 #: View/Setup/system.ctp:9
 msgid "You can set the file path of these exteranl programs here or set them later in the system preferences."
-msgstr ""
+msgstr "Vous pouvez indiquer ici les chemins de ces programmes externes ou les indiquer ultérieurement dans les préférences du système."
 
 #: View/Setup/system.ctp:11
 msgid "Skip these settings"
-msgstr ""
+msgstr "Passer ce paramétrage"
 
 #: View/Setup/system.ctp:15
 msgid "Following programs could not be found: %s."
-msgstr ""
+msgstr "Les progammes suivants sont introuvable: %s"
 
 #: View/Setup/system.ctp:20
 msgid "FFMPEG does not support the MP3 audio format. Sound will be disabled for videos!"
-msgstr ""
+msgstr "FFMPEG ne gère pas le format audio MP3. Le son ne marchera pas sur les vidéos!"
 
 #: View/Setup/system.ctp:27;28;29;30
 #: View/System/external.ctp:8;9;10;11
 msgid "Path to %s"
-msgstr ""
+msgstr "Chemin vers %s"
 
 #: View/Setup/user.ctp:1
 msgid "Create admin account"
-msgstr ""
+msgstr "Création du compte administrateur"
 
 #: View/System/delete_unused_meta_data.ctp:3
 msgid "Delete all unused meta data from database: %d tags, %d categories, %d locations."
-msgstr ""
+msgstr "Effacer toutes les métadonnées inutilisée de la base de données: %s mots clés, %d catégories, %d lieux."
 
 #: View/System/external.ctp:1
 msgid "Sytem Settings"
-msgstr ""
+msgstr "Paramétrage du Système"
 
 #: View/System/index.ctp:8
 msgid "Gallery title"
-msgstr ""
+msgstr "Nom (titre) de la galerie"
 
 #: View/System/index.ctp:9
 msgid "Gallery subtitle"
-msgstr ""
+msgstr "Sous-titre de la galerie"
 
 #: View/System/map.ctp:6
 msgid "Google Maps"
-msgstr ""
+msgstr "Google Maps"
 
 #: View/System/map.ctp:7
 msgid "Enter here your API map key for %s. You can signup %s for a new key. No API map key is required for local setup with localhost."
-msgstr ""
+msgstr "Entrez ici pour clé API pour %s. Vous pouvez rejoindre %s pour une nouvelle clé. Aucune clé API n'est requise pour une configuration locale avec localhost."
 
 #: View/System/map.ctp:9
 msgid "API key"
-msgstr ""
+msgstr "clé API"
 
 #: View/System/register.ctp:5
 msgid "Registration"
-msgstr ""
+msgstr "Inscription"
 
 #: View/System/register.ctp:6
 msgid "Allow anonymous registration"
-msgstr ""
+msgstr "Permettre l'inscription anonyme"
 
 #: View/System/register.ctp:7
 msgid "Initial quota limit"
-msgstr ""
+msgstr "Quota initial"
 
 #: View/System/upgrade.ctp:5
 msgid "Your database requires an update from version %d to %d!"
-msgstr ""
+msgstr "Votre base de donnée requiert une mise à jour de la version %d vers la version %d"
 
 #: View/System/upgrade.ctp:5
 msgid "Run database upgrade"
-msgstr ""
+msgstr "Lancer la mise à jour de la base de données"
 
 #: View/System/upgrade.ctp:6
 msgid "Following database migrations will be executed:"
-msgstr ""
+msgstr "Les migrations de base de données ont été effectuées:"
 
 #: View/System/upgrade.ctp:15
 msgid "Your system has the newest database version %d."
-msgstr ""
+msgstr "Votre système dispose de la nouvelle version (%s) de la base de données"
 
 #: View/System/view.ctp:1
 msgid "System overview"
-msgstr ""
+msgstr "Vue globale du système"
 
 #: View/System/view.ctp:5
 msgid "Type"
-msgstr ""
+msgstr "Type"
 
 #: View/System/view.ctp:5
 msgid "Amount"
-msgstr ""
+msgstr "Quantité"
 
 #: View/System/view.ctp:16
 msgid "Files"
-msgstr ""
+msgstr "Fichiers"
 
 #: View/System/view.ctp:17
 msgid "External files"
-msgstr ""
+msgstr "Fichiers externes"
 
 #: View/System/view.ctp:18
 msgid "Sum of file size"
-msgstr ""
+msgstr "Poids des fichiers"
 
 #: View/System/view.ctp:19
 msgid "Sum of external file size"
-msgstr ""
+msgstr "Poids des fichiers externes"
 
 #: View/System/view.ctp:21
 msgid "Image media"
-msgstr ""
+msgstr "Média images"
 
 #: View/System/view.ctp:22
 msgid "Video media"
-msgstr ""
+msgstr "Media vidéos"
 
 #: View/System/view.ctp:23
 msgid "Video duration"
-msgstr ""
+msgstr "Durée vidéo"
 
 #: View/Themed/Mobile/Elements/footer.ctp:1
 msgid "%s Web Gallery %s - mobile version"
-msgstr ""
+msgstr "%s galerie Web %s - version mobile"
 
 #: View/Themed/Mobile/Elements/header.ctp:1
 msgid "mobile"
-msgstr ""
+msgstr "mobile"
 
 #: View/Themed/Mobile/Explorer/index.ctp:49
 #: View/Themed/Mobile/Images/view.ctp:47
 msgid "Location"
-msgstr ""
+msgstr "Lieu"
 
 #: View/Themed/Mobile/Home/index.ctp:1
 msgid "Welcome to phTagr"
-msgstr ""
+msgstr "Bienvenue dans phTgar"
 
 #: View/Themed/Mobile/Home/index.ctp:3
 #: View/home/index.ctp:2
 msgid "Random Media"
-msgstr ""
+msgstr "Media aléatoire"
 
 #: View/Themed/Mobile/Home/index.ctp:21
 #: View/home/index.ctp:15
 msgid "See more %s"
-msgstr ""
+msgstr "Voir davantage %s"
 
 #: View/Themed/Mobile/Home/index.ctp:21
 #: View/home/index.ctp:15
 msgid "random media..."
-msgstr ""
+msgstr "media aléatoire..."
 
 #: View/Themed/Mobile/Home/index.ctp:25
 #: View/home/index.ctp:21
 msgid "Newest Media"
-msgstr ""
+msgstr "Média les plus récents"
 
 #: View/Themed/Mobile/Home/index.ctp:52
 #: View/home/index.ctp:37
 msgid "See %s"
-msgstr ""
+msgstr "Voir %s"
 
 #: View/Themed/Mobile/Home/index.ctp:52
 #: View/home/index.ctp:37
 msgid "all new media..."
-msgstr ""
+msgstr "tous les nouveaux médias..."
 
 #: View/Users/admin_add.ctp:1
 msgid "Add new User"
-msgstr ""
+msgstr "Ajouter un nouvel utilisateur"
 
 #: View/Users/admin_add.ctp:6
 msgid "Create new user"
-msgstr ""
+msgstr "Créer un nouvel utilisateur"
 
 #: View/Users/admin_edit.ctp:1
 #: View/Users/admin_password.ctp:1
 #: View/Users/admin_path.ctp:1
 msgid " User: %s"
-msgstr ""
+msgstr "Utilisateur: %s"
 
 #: View/Users/admin_edit.ctp:11
 msgid "System Operator"
-msgstr ""
+msgstr "Opérateur Système"
 
 #: View/Users/admin_edit.ctp:13
 #: View/Users/admin_index.ctp:33
 msgid "Admin"
-msgstr ""
+msgstr "Admin"
 
 #: View/Users/admin_edit.ctp:21
 msgid "Expire date"
-msgstr ""
+msgstr "Date d'expiration"
 
 #: View/Users/admin_edit.ctp:22
 msgid "Upload Quota"
-msgstr ""
+msgstr "Quota de remontée"
 
 #: View/Users/admin_index.ctp:6
 msgid "Prev"
-msgstr ""
+msgstr "Préc"
 
 #: View/Users/admin_index.ctp:8
 msgid "Next"
-msgstr ""
+msgstr "Suiv"
 
 #: View/Users/admin_index.ctp:16
 msgid "Firstname"
-msgstr ""
+msgstr "Prénom"
 
 #: View/Users/admin_index.ctp:17
 msgid "Lastname"
-msgstr ""
+msgstr "Nom"
 
 #: View/Users/admin_index.ctp:19
 msgid "User role"
-msgstr ""
+msgstr "Rôle"
 
 #: View/Users/admin_index.ctp:34
 msgid "SysOp"
-msgstr ""
+msgstr "SysOP"
 
 #: View/Users/admin_index.ctp:37
 msgid "Nobody"
-msgstr ""
+msgstr "Personne"
 
 #: View/Users/admin_index.ctp:39
 msgid "Unknown"
-msgstr ""
+msgstr "Inconnu"
 
 #: View/Users/admin_index.ctp:44
 msgid "Do you really want to detete the user '%s'? This action is irreversible! All the data of the users will be deleted!"
-msgstr ""
+msgstr "Voulez-vous vraiment détruire l'utilisateur '%s' ? Cette action est irréversible. Toutes les données de l'utilisateur seront détruites!"
 
 #: View/Users/admin_path.ctp:7
 msgid "The user can import media files from following external directories:"
-msgstr ""
+msgstr "L'utilisateur peut importer des fichiers média en provenance des fichiers externes suivants:"
 
 #: View/Users/admin_path.ctp:12;39
 msgid "Directory"
-msgstr ""
+msgstr "Répertoire"
 
 #: View/Users/admin_path.ctp:21
 msgid "Do you really want to detete the path '%s' of '%s'?"
-msgstr ""
+msgstr "Voulez-vous vraiment détruire les chemins '%s' de '%s' ?"
 
 #: View/Users/admin_path.ctp:22
 msgid "Delete path '%s'"
-msgstr ""
+msgstr "Détruire le chemin '%s'"
 
 #: View/Users/admin_path.ctp:31
 msgid "Currently no external directories are set for this user."
-msgstr ""
+msgstr "Aucun répertoire externe n'est défini pour cet utilisateur."
 
 #: View/Users/admin_path.ctp:33
 msgid "The user has a dedicated upload directory which is handled by phTagr itself. External directories can be added here to the user to allow the import of external media files from the local file system."
-msgstr ""
+msgstr "L'utilisateur a une répertoire de remontée qui est géré par phTagr lui-même. Les répertoires externes peuvent être ajoutés ici à l'utilisateur pour lui permettre d'importer des média externes en provenance du système de fichier local."
 
 #: View/Users/admin_path.ctp:38
 msgid "Add Directory"
-msgstr ""
+msgstr "Ajouter Répertoire"
 
 #: View/Users/confirm.ctp:5
 msgid "Account Confirmation"
-msgstr ""
+msgstr "Confirmation de Compte"
 
 #: View/Users/confirm.ctp:6
 msgid "Please insert your confirmation key to finalize the account creation."
-msgstr ""
+msgstr "Merci d'indiquer votre clé de confirmation pour achever la création de votre compte."
 
 #: View/Users/confirm.ctp:8
 msgid "Key"
-msgstr ""
+msgstr "Clé"
 
 #: View/Users/index.ctp:4
 msgid "Admin List"
-msgstr ""
+msgstr "Liste des Administrateurs"
 
 #: View/Users/index.ctp:16
 msgid "Member Since"
-msgstr ""
+msgstr "Membre depuis"
 
 #: View/Users/index.ctp:38
 msgid "User list is empty"
-msgstr ""
+msgstr "La liste des utilisateur est vide"
 
 #: View/Users/login.ctp:19
 msgid "Forgot your password"
-msgstr ""
+msgstr "Mot de passe oublié"
 
 #: View/Users/password.ctp:1
 msgid "Password Request"
-msgstr ""
+msgstr "Demande de mot de passe"
 
 #: View/Users/password.ctp:4
 msgid "Please insert your username and email address to request your lost password."
-msgstr ""
+msgstr "Merci d'indiquer ici votre nom d'utilisateur et votre adresse courriel pour récupérer votre mot de passe perdu."
 
 #: View/Users/password.ctp:7
 msgid "Account Data"
-msgstr ""
+msgstr "Données du compte"
 
 #: View/Users/password.ctp:13
 msgid "Submit"
-msgstr ""
+msgstr "Demande d'inscription"
 
 #: View/Users/register.ctp:5
 msgid "Create Account"
-msgstr ""
+msgstr "Création de Compte"
 
 #: View/Users/view.ctp:2
 msgid "User %s"
-msgstr ""
+msgstr "Utilisateur %s"
 
 #: View/Users/view.ctp:10
 msgid "User Details"
-msgstr ""
+msgstr "Détails Utilisateur"
 
 #: View/Users/view.ctp:26
 msgid "Member since"
-msgstr ""
+msgstr "Membre depuis"
 
 #: View/Users/view.ctp:27
 msgid "Count of media"
-msgstr ""
+msgstr "Nombre de médias"
 
 #: View/Users/view.ctp:28
 msgid "Count of files"
-msgstr ""
+msgstr "Nombre de fichiers"
 
 #: View/Users/view.ctp:29
 msgid "Size of files"
-msgstr ""
+msgstr "Taille des fichiers"
 
 #: View/Users/view.ctp:97
 msgid "See all media of user %s"
-msgstr ""
+msgstr "Voir tous les médias de l'utilisateur %s"
 
 #: View/home/index.ctp:60
 msgid "Older comments..."
-msgstr ""
+msgstr "Commentaires plus anciens..."
 
 #: View/home/index.ctp:65
 msgid "Popular Tags"
-msgstr ""
+msgstr "Mots clés Populaires"
 
 #: View/home/index.ctp:71
 msgid "No tags assigned"
-msgstr ""
+msgstr "Aucun mot clé assigné"
 
 #: View/home/index.ctp:77
 msgid "Popular Categories"
-msgstr ""
+msgstr "Catégorie Populaires"
 
 #: View/home/index.ctp:83
 msgid "No categories assigned"
-msgstr ""
+msgstr "Aucune catégorie assignée"
 
-#: /mnt/raidModel/Comment.php:validation for field name
+#: Model/Comment.php:validation
+#: for field name
 msgid "Name is missing"
-msgstr ""
+msgstr "Le nom est manquant"
 
-#: /mnt/raidModel/Comment.php:validation for field email
+#: Model/Comment.php:validation
+#: for field email
 msgid "Email is invalid"
-msgstr ""
+msgstr "L'adresse de courriel est invalide"
 
-#: /mnt/raidModel/Comment.php:validation for field url
+#: Model/Comment.php:validation
+#: for field url
 msgid "URL is invalid"
-msgstr ""
+msgstr "URL invalide"
 
-#: /mnt/raidModel/Comment.php:validation for field text
+#: Model/Comment.php:validation
+#: for field text
 msgid "Comment text is empty"
-msgstr ""
+msgstr "Le commentaire est vide"
 
-#: /mnt/raidModel/Comment.php:validation for field text
+#: Model/Comment.php:validation
+#: for field text
 msgid "Comment is to long"
-msgstr ""
+msgstr "Le commantaire est trop long"
 
-#: /mnt/raidModel/Guest.php:validation for field username
+#: Model/Guest.php:validation
+#: for field username
 msgid "Guestname must be between 3 and 32 characters long."
-msgstr ""
+msgstr "Le nom d'invité doit faire entre 3 et 32 caractère de long."
 
-#: /mnt/raidModel/Guest.php:validation for field password
-#: /mnt/raidModel/User.php:validation for field password
+#: Model/Guest.php:validation
+#: for field password Model/User.php:validation
 msgid "Password must be between 6 and 20 characters long."
-msgstr ""
+msgstr "Le mot de passe doit faire entre 6 et 20 caractère de long."
 
-#: /mnt/raidModel/Guest.php:validation for field email
-#: /mnt/raidModel/User.php:validation for field email
+#: Model/Guest.php:validation
+#: for field email Model/User.php:validation
 msgid "Email address is not valid"
-msgstr ""
+msgstr "L'adresse de courriel n'est pas pavlide."
 
-#: /mnt/raidModel/User.php:validation for field username
+#: Model/User.php:validation
+#: for field username
 msgid "Username must be between 3 and 32 characters long."
-msgstr ""
+msgstr "Le nom d'utilisateur doit faire entre 3 et 33 caractères de long."
 
-#: /mnt/raidModel/User.php:validation for field role
+#: Model/User.php:validation
+#: for field role
 msgid "Invalid role"
-msgstr ""
+msgstr "rôle invalide"
 
-#: /mnt/raidModel/User.php:validation for field notify_interval
+#: Model/User.php:validation
+#: for field notify_interval
 msgid "Invalid notification interval"
-msgstr ""
-
+msgstr "Intervale de notification invalide"

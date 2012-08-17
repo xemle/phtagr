@@ -23,40 +23,29 @@ class SyncShell extends AppShell {
   var $verbose = false;
   var $chunkSize = 100;
 
-  function startup() {
-  }
-
-  function main() {
-    $this->help();
-  }
-
   function verboseOut($msg) {
     if ($this->verbose) {
       $this->out($msg);
     }
   }
 
-  function help() {
-    $this->out("Help screen");
-    $this->hr();
-    $this->out("This shell generates preview images in batch mode.");
-    $this->out("");
-    $this->out("run");
-    $this->out("\tGenerate previews.");
-    $this->hr();
-    $this->out("Options:");
-    $this->out("-max count");
-    $this->out("\tMaximum generation count. Default is 10. Use 0 to generate all previews.");
-    $this->out("-user username");
-    $this->out("\tGenerate only previews for given user.");
-    $this->out("-verbose");
-    $this->out("\tBe verbose");
-    $this->hr();
-    exit();
+  public function getOptionParser() {
+    $parser = parent::getOptionParser();
+    $parser->addOption('max', array(
+      'help' => __('Maximum of synchronization count. Default is 100. Use 0 to synchronize all')
+    ))->addOption('size', array(
+      'help' => __('Set the minimum preview size. Default is thumb'),
+      'choices' => $this->chunkSize
+    ))->addOption('user', array(
+      'help' => __('Synchronize only images for given username')
+    ))->addSubcommand('run', array(
+      'help' => __('Run the synchronization process')
+    ))->description(__('Write all meta data from database to images in batch mode'));
+    return $parser;
   }
 
   function run() {
-    $this->verbose = isset($this->params['verbose']) ? true : false;
+    $this->verbose = $this->params['verbose'];
 
     $user = isset($this->params['user']) ? $this->params['user'] : false;
     $syncMax = isset($this->params['max']) ? $this->params['max'] : 100;
@@ -74,10 +63,10 @@ class SyncShell extends AppShell {
     while (true) {
       $data = $this->Media->find('all', array(
         'conditions' => $conditions,
-        'limit' => 10,
-        'order' => 'Media.modified ASC'));
+        'limit' => $this->chunkSize,
+        'order' => 'Media.id ASC'));
       foreach ($data as $media) {
-        $conditions['Media.modified >'] = $media['Media']['modified'];
+        $conditions['Media.id >'] = $media['Media']['id'];
         if (!$this->FilterManager->write($media)) {
           $this->out("Error: Could not sync metadata of media {$media['Media']['id']}");
           $errors[] = $media['Media']['id'];

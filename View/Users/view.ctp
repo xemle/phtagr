@@ -54,7 +54,7 @@
     $username = implode('', Set::extract("/User[id={$group['user_id']}]/username", $users));
     $cells[] = array(
       $this->Html->link($group['name'], "/groups/view/{$group['name']}"),
-      $this->Html->link($username, "/user/view/$username"),
+      $this->Html->link($username, "/users/view/$username"),
       $this->Text->truncate($group['description'], 30, array('ending' => '...', 'exact' => false, 'html' => false)),
       $this->Html->link("View media", "/explorer/group/{$group['name']}")
       );

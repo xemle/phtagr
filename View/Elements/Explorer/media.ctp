@@ -36,7 +36,7 @@
     $this->Html->link($delIcon, 'javascript:void', array('escape' => false, 'class' => 'del')),
     array('escape' => false));
   if ($media['Media']['canWriteTag']) {
-    $editIcon = $this->ImageData->getIcon('tag',  __('Edit meta data'));
+    $editIcon = $this->ImageData->getIcon('pencil',  __('Edit meta data'));
     echo $this->Html->tag('li',
       $this->Html->link($editIcon, 'javascript:void', array('escape' => false, 'class' => 'edit')),
       array('escape' => false));
