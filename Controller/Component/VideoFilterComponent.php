@@ -42,10 +42,13 @@ class VideoFilterComponent extends BaseFilterComponent {
     return am($this->_getVideoExtensions(), array('thm' => array('priority' => 5)));
   }
 
-  /** Finds the video thumb of a video
-    @param video File model data of the video
-    @param insertIfMissing If true, adds the thumb file to the database. Default is true
-    @return Filename of the thumb file. False if no thumb file was found */
+  /**
+   * Finds the video thumb of a video
+   *
+   * @param video File model data of the video
+   * @param insertIfMissing If true, adds the thumb file to the database. Default is true
+   * @return Filename of the thumb file. False if no thumb file was found
+   */
   function _findVideo($thumb) {
     $thumbFilename = $this->controller->MyFile->getFilename($thumb);
     $path = dirname($thumbFilename);
@@ -109,9 +112,12 @@ class VideoFilterComponent extends BaseFilterComponent {
     return $this->controller->Media->findById($media['Media']['id']);
   }
 
-  /** Read the video data from the file
+  /**
+   * Read the video data from the file
+   *
    * @param image Media model data
-   * @return True, false on error */
+   * @return True, false on error
+   */
   function read(&$file, &$media, $options = array()) {
     $filename = $this->controller->MyFile->getFilename($file);
 
@@ -170,7 +176,7 @@ class VideoFilterComponent extends BaseFilterComponent {
     if ($this->controller->getOption('bin.exiftool')) {
       $result = $this->_readExiftool($filename);
     }
-    if (!$result || $this->controller->getOption('bin.ffmpeg')) {
+    if (!$result && $this->controller->getOption('bin.ffmpeg')) {
       $result = $this->_readFfmpeg($filename);
     }
     if (!$result) {
@@ -181,9 +187,9 @@ class VideoFilterComponent extends BaseFilterComponent {
       Logger::err("Could extract video format");
       return false;
     }
-    $media['Media']['width'] = $result['width'];
-    $media['Media']['height'] = $result['height'];
-    $media['Media']['duration'] = $result['duration'];
+    foreach ($result as $name => $value) {
+      $media['Media'][$name] = $value;
+    }
     return $media;
   }
 
@@ -201,28 +207,42 @@ class VideoFilterComponent extends BaseFilterComponent {
       return false;
     }
 
-    $result = array();
+    $data = array();
     foreach ($output as $line) {
-      if (!preg_match('/^(\w+): (.*)$/', $line, $m)) {
+      if (preg_match('/^(\w+): (.*)$/', $line, $m)) {
+        $data[$m[1]] = $m[2];
+      } else {
         Logger::warn('Could not parse line: '.$line);
-        continue;
-      }
-      if ($m[1] == 'ImageWidth') {
-        $result['width'] = intval($m[2]);
-        Logger::trace("Extract video width of '$filename': ". $result['width']);
-      } else if ($m[1] == 'ImageHeight') {
-        $result['height'] = intval($m[2]);
-        Logger::trace("Extract video height of '$filename': ". $result['height']);
-      } else if ($m[1] == 'Duration') {
-        $result['duration'] = ceil(intval($m[2]));
-        Logger::trace("Extract duration of '$filename': ". $result['duration']."s");
       }
     }
-    if (count($result) != 3) {
+
+    $result = array();
+    if (!isset($data['ImageWidth']) || !isset($data['ImageWidth']) || !isset($data['Duration']) ) {
       Logger::warn("Could not extract width, height, or durration from '$filename'");
       Logger::warn($result);
       return false;
     }
+    $result['height'] = intval($data['ImageHeight']);
+    $result['width'] = intval($data['ImageWidth']);
+    $result['duration'] = ceil(intval($data['Duration']));
+
+    if (isset($data['DateTimeOriginal'])) {
+      $result['date'] = $data['DateTimeOriginal'];
+    } else if (isset($data['FileModifyDate'])) {
+      $result['date'] = $data['FileModifyDate'];
+    }
+    if (isset($data['Orientation'])) {
+      $result['orientation'] = $data['Orientation'];
+    }
+    if (isset($data['Model'])) {
+      $result['model'] = $data['Model'];
+    }
+    if (isset($data['GPSLatitude']) && isset($data['GPSLongitude'])) {
+      $result['latitude'] = $data['GPSLatitude'];
+      $result['longitude'] = $data['GPSLongitude'];
+    }
+    Logger::trace("Extracted " . count($result) . " fields via exiftool");
+    Logger::trace($result);
     return $result;
   }
 
@@ -340,5 +360,3 @@ class VideoFilterComponent extends BaseFilterComponent {
   }
 
 }
-
-?>
