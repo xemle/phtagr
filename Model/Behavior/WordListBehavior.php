@@ -57,7 +57,7 @@ class WordListBehavior extends ModelBehavior
    * @return type Array of words
    */
   function splitWords(&$Model, $input) {
-    $words = split(',', $input);
+    $words = preg_split('/,/', $input);
     $names = array();
     foreach ($words as $name) {
       $name = trim($name);

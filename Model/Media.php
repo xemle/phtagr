@@ -857,10 +857,10 @@ class Media extends AppModel
     if (!empty($data['Media']['geo'])) {
       $this->splitGeo(&$data, $data['Media']['geo']);
     }
-    $fields = array('name', 'description', 'date', 'latitude', 'longitude', 'rotation', 'readPreview', 'readOriginal', 'writeTag', 'writeMeta');
-    foreach ($fields as $field) {
-      if (!empty($data['Media'][$field])) {
-        $tmp['Media'][$field] = $data['Media'][$field];
+    $mediaFields = array('name', 'description', 'date', 'latitude', 'longitude', 'rotation', 'readPreview', 'readOriginal', 'writeTag', 'writeMeta');
+    foreach ($mediaFields as $name) {
+      if (!empty($data['Media'][$name])) {
+        $tmp['Media'][$name] = $data['Media'][$name];
       }
     }
 
@@ -880,15 +880,33 @@ class Media extends AppModel
     if ($location) {
       $tmp['Location'] = $location['Location'];
     }
+    $fields = $this->Field->prepareMultiEditData(&$data);
+    if ($fields) {
+      $tmp['Field'] = $fields['Field'];
+    }
     if (!count($tmp)) {
       return false;
     }
     return $tmp;
   }
 
-  function editMulti(&$media, &$data) {
+  function editMulti(&$media, &$data, &$user) {
     $tmp = array('Media' => array('id' => $media['Media']['id'], 'user_id' => $media['Media']['user_id']));
+    if (!isset($media['Media']['canWriteMeta'])) {
+      $this->setAccessFlags(&$media, &$user);
+    }
 
+    $fields = false;
+    if ($media['Media']['canWriteCaption']) {
+      $fields = $this->Field->editMulti(&$media, &$data);
+    } else if ($media['Media']['canWriteMeta']) {
+      $fields = $this->Field->editMulti(&$media, &$data, array('keyword', 'category', 'sublocation', 'city', 'state', 'country'));
+    } else if ($media['Media']['canWriteTag']) {
+      $fields = $this->Field->editMulti(&$media, &$data, array('keyword'));
+    }
+    if ($fields) {
+      $tmp['Field'] = $fields['Field'];
+    }
     if ($media['Media']['canWriteTag']) {
       $tag = $this->Tag->editMetaMulti(&$media, &$data);
       if ($tag) {
@@ -947,15 +965,25 @@ class Media extends AppModel
   /**
    * Creates an new media data with updated values of given data
    *
-   * @param type $media Media model data array
-   * @param type $data Input data array
-   * @param type $user Current user
-   * @return type
+   * @param array $media Media model data array
+   * @param array $data Input data array
+   * @param array $user Current user
+   * @return array
    */
   function editSingle(&$media, &$data, &$user) {
     $tmp = array('Media' => array('id' => $media['Media']['id'], 'user_id' => $media['Media']['user_id']));
-    if ($media['Media']['canWriteMeta']) {
+    if (!isset($media['Media']['canWriteMeta'])) {
+      $this->setAccessFlags(&$media, &$user);
+    }
+    // handle fields
+    if ($media['Media']['canWriteCaption']) {
       $tmp = am($this->Field->editSingle(&$media, &$data), $tmp);
+    } else if ($media['Media']['canWriteMeta']) {
+      $tmp = am($this->Field->editSingle(&$media, &$data, array('keyword', 'category', 'sublocation', 'city', 'state', 'country')), $tmp);
+    } else if ($media['Media']['canWriteTag']) {
+      $tmp = am($this->Field->editSingle(&$media, &$data, array('keyword')), $tmp);
+    }
+    if ($media['Media']['canWriteMeta']) {
       if (!empty($data['Media']['geo'])) {
         $this->splitGeo(&$data, $data['Media']['geo']);
       }
@@ -965,8 +993,6 @@ class Media extends AppModel
           $tmp['Media'][$field] = $data['Media'][$field];
         }
       }
-    } else if ($media['Media']['canWriteTag']) {
-      $tmp = am($this->Field->editSingle(&$media, &$data, array('keyword')), $tmp);
     }
     if ($media['Media']['canWriteCaption']) {
       $fields = array('name', 'caption', 'date', 'latitude', 'longitude');

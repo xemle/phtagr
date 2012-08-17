@@ -19,6 +19,7 @@ App::uses('Media', 'Model');
 App::uses('Tag', 'Model');
 App::uses('Group', 'Model');
 App::uses('User', 'Model');
+App::uses('Field', 'Model');
 
 /**
  * Media Test Case
@@ -32,7 +33,7 @@ class MediaTestCase extends CakeTestCase {
  */
 	public $fixtures = array('app.file', 'app.media', 'app.user', 'app.group', 'app.groups_media',
       'app.groups_user', 'app.option', 'app.guest', 'app.comment', 'app.my_file',
-      'app.tag', 'app.media_tag', 'app.category', 'app.categories_media',
+      'app.tag', 'app.media_tag', 'app.category', 'app.categories_media', 'app.fields_media', 'app.field',
       'app.location', 'app.locations_media', 'app.comment');
 
 /**
@@ -47,6 +48,7 @@ class MediaTestCase extends CakeTestCase {
 		$this->Tag = ClassRegistry::init('Tag');
 		$this->Group = ClassRegistry::init('Group');
 		$this->User = ClassRegistry::init('User');
+		$this->Field = ClassRegistry::init('Field');
 	}
 
 /**
@@ -59,6 +61,7 @@ class MediaTestCase extends CakeTestCase {
 		unset($this->Tag);
 		unset($this->Group);
 		unset($this->User);
+		unset($this->Field);
 
 		parent::tearDown();
 	}
@@ -272,7 +275,7 @@ class MediaTestCase extends CakeTestCase {
 
     $requestData = array('Group' => array('names' => 'group1'));
     $data = $this->Media->prepareMultiEditData($requestData, &$admin);
-    $tmp = $this->Media->editMulti(&$media, &$data);
+    $tmp = $this->Media->editMulti(&$media, &$data, &$admin);
     $this->Media->save($tmp);
     $media = $this->Media->findById($media['Media']['id']);
     $this->Media->setAccessFlags(&$media, &$admin);
@@ -280,7 +283,7 @@ class MediaTestCase extends CakeTestCase {
 
     $requestData = array('Group' => array('names' => ' group2 , -group1'));
     $data = $this->Media->prepareMultiEditData($requestData, &$admin);
-    $tmp = $this->Media->editMulti(&$media, &$data);
+    $tmp = $this->Media->editMulti(&$media, &$data, &$admin);
     $this->Media->save($tmp);
     $media = $this->Media->findById($media['Media']['id']);
     $this->Media->setAccessFlags(&$media, &$admin);
@@ -289,7 +292,7 @@ class MediaTestCase extends CakeTestCase {
     // Admin can use every group
     $requestData = array('Group' => array('names' => ' group 3 , group1'));
     $data = $this->Media->prepareMultiEditData($requestData, &$admin);
-    $tmp = $this->Media->editMulti(&$media, &$data);
+    $tmp = $this->Media->editMulti(&$media, &$data, &$admin);
     $this->Media->save($tmp);
     $media = $this->Media->findById($media['Media']['id']);
     $this->assertEqual(array('group2', 'group1', 'group 3'), Set::extract('/Group/name', $media));
@@ -301,7 +304,7 @@ class MediaTestCase extends CakeTestCase {
 
     $requestData = array('Group' => array('names' => ' group 3 , group1'));
     $data = $this->Media->prepareMultiEditData($requestData, &$user);
-    $tmp = $this->Media->editMulti(&$media, &$data);
+    $tmp = $this->Media->editMulti(&$media, &$data, &$user);
     $this->Media->save($tmp);
     $media = $this->Media->findById($media['Media']['id']);
     $this->Media->setAccessFlags(&$media, &$user);
@@ -309,7 +312,7 @@ class MediaTestCase extends CakeTestCase {
 
     $requestData = array('Group' => array('names' => ' group2 , -group 3'));
     $data = $this->Media->prepareMultiEditData($requestData, &$user);
-    $tmp = $this->Media->editMulti(&$media, &$data);
+    $tmp = $this->Media->editMulti(&$media, &$data, &$user);
     $this->Media->save($tmp);
     $media = $this->Media->findById($media['Media']['id']);
     $this->Media->setAccessFlags(&$media, &$user);
@@ -317,7 +320,7 @@ class MediaTestCase extends CakeTestCase {
 
     $requestData = array('Group' => array('names' => 'group 3, fake Group'));
     $data = $this->Media->prepareMultiEditData($requestData, &$user);
-    $tmp = $this->Media->editMulti(&$media, &$data);
+    $tmp = $this->Media->editMulti(&$media, &$data, &$user);
     $this->Media->save($tmp);
     $media = $this->Media->findById($media['Media']['id']);
     $this->Media->setAccessFlags(&$media, &$user);
@@ -450,4 +453,142 @@ class MediaTestCase extends CakeTestCase {
     $result = $this->Media->cloud($userNone, 'Tag');
     $this->assertEqual($result, array('vacation' => 1, 'sky' => 1));
   }
+
+  function testEditSingleWithFields() {
+    $userA = $this->User->save($this->User->create(array('username' => 'UserA', 'role' => ROLE_USER)));
+    $userB = $this->User->save($this->User->create(array('username' => 'UserB', 'role' => ROLE_USER)));
+    $userC = $this->User->save($this->User->create(array('username' => 'UserC', 'role' => ROLE_USER)));
+    $userD = $this->User->getNobody();
+
+    // UserA has a group and UserB is a member
+    $group = $this->Group->save($this->Group->create(array('name' => 'Group', 'user_id' => $userA['User']['id'])));
+    $this->Group->save(array('Group' => array('id' => $group['Group']['id']), 'Member' => array('Member' => array($userB['User']['id']))));
+
+    $keyword = $this->Field->save($this->Field->create(array('name' => 'keyword', 'data' => 'flower')));
+    $category = $this->Field->save($this->Field->create(array('name' => 'category', 'data' => 'vacation')));
+    $country = $this->Field->save($this->Field->create(array('name' => 'country', 'data' => 'swiss')));
+    $custom = $this->Field->save($this->Field->create(array('name' => 'custom', 'data' => 'someValue')));
+    $fieldIds = Set::extract("/Field/id", $this->Field->find('all'));
+
+    $media = $this->Media->save($this->Media->create(array('name' => 'IMG_1234.jpg', 'user_id' => $userA['User']['id'], 'gacl' => ACL_WRITE_META, 'uacl' => ACL_WRITE_TAG)));
+    $this->Media->save(array('Media' => array('id' => $media['Media']['id']), 'Group' => array('Group' => array($group['Group']['id'])), 'Field' => array('Field'=> $fieldIds)));
+
+    // Allow custom2 field
+    $this->Media->Field->singleFields[] = 'custom';
+
+    // UserD is not allowed to change anything
+    $media = $this->Media->findById($media['Media']['id']);
+    $data = array('Field' => array('keyword' => 'rose'));
+    $tmp = $this->Media->editSingle(&$media, &$data, &$userD);
+    $this->assertEqual($tmp, false);
+
+    // UserC can change only keywords
+    $userC = $this->User->findById($userC['User']['id']);
+    $media = $this->Media->findById($media['Media']['id']);
+    $data = array('Field' => array('keyword' => '-flower, rose', 'category' => 'people'));
+    $tmp = $this->Media->editSingle(&$media, &$data, &$userC);
+    $this->assertEqual(true, ($tmp['Media']['flag'] & MEDIA_FLAG_DIRTY) > 0);
+    $this->assertEqual(count($tmp['Field']['Field']), 4);
+    $fields = $this->Field->find('all', array('conditions' => array('id' => $tmp['Field']['Field'])));
+    $fieldValues = Set::extract('/Field/data', $fields);
+    sort($fieldValues);
+    $this->assertEqual($fieldValues, array('rose', 'someValue', 'swiss', 'vacation'));
+
+    // UserB can change meta data
+    $userB = $this->User->findById($userB['User']['id']);
+    $media = $this->Media->findById($media['Media']['id']);
+    $data = array('Field' => array('keyword' => 'tulip', 'category' => 'people, locals ', 'country' => 'italy', 'custom' => 'overwritten'));
+    $tmp = $this->Media->editSingle(&$media, &$data, &$userB);
+    $this->assertEqual(true, ($tmp['Media']['flag'] & MEDIA_FLAG_DIRTY) > 0);
+    $this->assertEqual(count($tmp['Field']['Field']), 5);
+    $fields = $this->Field->find('all', array('conditions' => array('id' => $tmp['Field']['Field'])));
+    $fieldValues = Set::extract('/Field/data', $fields);
+    sort($fieldValues);
+    $this->assertEqual($fieldValues, array('italy', 'locals', 'people', 'someValue', 'tulip'));
+
+    // UserA can change all fields
+    $userA = $this->User->findById($userA['User']['id']);
+    $media = $this->Media->findById($media['Media']['id']);
+    $this->Media->Field->singleFields[] = 'custom2';
+    $data = array('Field' => array('keyword' => 'john', 'category' => 'people', 'custom' => 'overwritten', 'custom2' => 'newValue'));
+    $tmp = $this->Media->editSingle(&$media, &$data, &$userA);
+    $this->assertEqual(true, ($tmp['Media']['flag'] & MEDIA_FLAG_DIRTY) > 0);
+    $this->assertEqual(count($tmp['Field']['Field']), 5);
+    $fields = $this->Field->find('all', array('conditions' => array('id' => $tmp['Field']['Field'])));
+    $fieldValues = Set::extract('/Field/data', $fields);
+    sort($fieldValues);
+    $this->assertEqual($fieldValues, array('john', 'newValue', 'overwritten', 'people', 'swiss'));
+  }
+
+
+  function testEditMultiWithFields() {
+    $userA = $this->User->save($this->User->create(array('username' => 'UserA', 'role' => ROLE_USER)));
+    $userB = $this->User->save($this->User->create(array('username' => 'UserB', 'role' => ROLE_USER)));
+    $userC = $this->User->save($this->User->create(array('username' => 'UserC', 'role' => ROLE_USER)));
+    $userD = $this->User->getNobody();
+
+    // UserA has a group and UserB is a member
+    $group = $this->Group->save($this->Group->create(array('name' => 'Group', 'user_id' => $userA['User']['id'])));
+    $this->Group->save(array('Group' => array('id' => $group['Group']['id']), 'Member' => array('Member' => array($userB['User']['id']))));
+
+    $keyword = $this->Field->save($this->Field->create(array('name' => 'keyword', 'data' => 'flower')));
+    $category = $this->Field->save($this->Field->create(array('name' => 'category', 'data' => 'vacation')));
+    $country = $this->Field->save($this->Field->create(array('name' => 'country', 'data' => 'swiss')));
+    $custom = $this->Field->save($this->Field->create(array('name' => 'custom', 'data' => 'someValue')));
+    $fieldIds = Set::extract("/Field/id", $this->Field->find('all'));
+
+    $media = $this->Media->save($this->Media->create(array('name' => 'IMG_1234.jpg', 'user_id' => $userA['User']['id'], 'gacl' => ACL_WRITE_META, 'uacl' => ACL_WRITE_TAG)));
+    $this->Media->save(array('Media' => array('id' => $media['Media']['id']), 'Group' => array('Group' => array($group['Group']['id'])), 'Field' => array('Field'=> $fieldIds)));
+
+    // Allow custom fields
+    $this->Media->Field->singleFields[] = 'custom';
+    $this->Media->Field->singleFields[] = 'custom2';
+
+    // UserD is not allowed to change anything
+    $media = $this->Media->findById($media['Media']['id']);
+    $data = array('Field' => array('keyword' => 'rose'));
+    $data = $this->Media->prepareMultiEditData(&$data, &$userD);
+    $tmp = $this->Media->editMulti(&$media, &$data, &$userD);
+    $this->assertEqual($tmp, false);
+
+    // UserC can change only keywords
+    $userC = $this->User->findById($userC['User']['id']);
+    $media = $this->Media->findById($media['Media']['id']);
+    $data = array('Field' => array('keyword' => '-flower, rose', 'category' => 'people'));
+    $data = $this->Media->prepareMultiEditData(&$data, &$userC);
+    $tmp = $this->Media->editMulti(&$media, &$data, &$userC);
+    $this->assertEqual(true, ($tmp['Media']['flag'] & MEDIA_FLAG_DIRTY) > 0);
+    $this->assertEqual(count($tmp['Field']['Field']), 4);
+    $fields = $this->Field->find('all', array('conditions' => array('id' => $tmp['Field']['Field'])));
+    $fieldValues = Set::extract('/Field/data', $fields);
+    sort($fieldValues);
+    $this->assertEqual($fieldValues, array('rose', 'someValue', 'swiss', 'vacation'));
+
+    // UserB can change meta data
+    $userB = $this->User->findById($userB['User']['id']);
+    $media = $this->Media->findById($media['Media']['id']);
+    $data = array('Field' => array('keyword' => 'tulip', 'category' => 'people, locals ', 'country' => 'italy', 'custom' => 'overwritten'));
+    $data = $this->Media->prepareMultiEditData(&$data, &$userB);
+    $tmp = $this->Media->editMulti(&$media, &$data, &$userB);
+    $this->assertEqual(true, ($tmp['Media']['flag'] & MEDIA_FLAG_DIRTY) > 0);
+    $this->assertEqual(count($tmp['Field']['Field']), 7);
+    $fields = $this->Field->find('all', array('conditions' => array('id' => $tmp['Field']['Field'])));
+    $fieldValues = Set::extract('/Field/data', $fields);
+    sort($fieldValues);
+    $this->assertEqual($fieldValues, array('flower', 'italy', 'locals', 'people', 'someValue', 'tulip', 'vacation'));
+
+    // UserA can change all fields
+    $userA = $this->User->findById($userA['User']['id']);
+    $media = $this->Media->findById($media['Media']['id']);
+    $data = array('Field' => array('keyword' => 'john', 'category' => 'people', 'custom' => 'overwritten', 'custom2' => 'newValue'));
+    $data = $this->Media->prepareMultiEditData(&$data, &$userA);
+    $tmp = $this->Media->editMulti(&$media, &$data, &$userA);
+    $this->assertEqual(true, ($tmp['Media']['flag'] & MEDIA_FLAG_DIRTY) > 0);
+    $this->assertEqual(count($tmp['Field']['Field']), 7);
+    $fields = $this->Field->find('all', array('conditions' => array('id' => $tmp['Field']['Field'])));
+    $fieldValues = Set::extract('/Field/data', $fields);
+    sort($fieldValues);
+    $this->assertEqual($fieldValues, array('flower', 'john', 'newValue', 'overwritten', 'people', 'swiss', 'vacation'));
+  }
+
 }

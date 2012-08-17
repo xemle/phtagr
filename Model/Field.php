@@ -18,6 +18,8 @@
 class Field extends AppModel {
   var $name = 'Field';
 
+  var $actsAs = array('WordList');
+
   var $singleFields = array(
       'sublocation',
       'city',
@@ -48,22 +50,20 @@ class Field extends AppModel {
     return am($this->singleFields, $this->listFields);
   }
 
-  public function createField(&$media, $name, $values) {
-    foreach ($values as $value) {
+  public function createField($name, $values) {
+    $ids = array();
+    foreach ((array)$values as $value) {
       $data = array('name' => $name, 'data' => $value);
       $field = $this->find('first', array('conditions' => $data));
       if (!$field) {
         $field = $this->save($this->create($data));
       }
-      if (!empty($media['Field']['Field'])) {
-        $media['Field']['Field'][] = $field['Field']['id'];
-      } else {
-        $media['Field']['Field'] = array($field['Field']['id']);
-      }
+      $ids[] = $field['Field']['id'];
       if (!$this->isListField($name)) {
-        return;
+        break;
       }
     }
+    return $ids;
   }
 
   public function createFields(&$media) {
@@ -71,7 +71,12 @@ class Field extends AppModel {
     foreach ($names as $name) {
       if (!empty($media['Field'][$name])) {
         $values = (array)$media['Field'][$name];
-        $this->createField(&$media, $name, $values);
+        $ids = $this->createField($name, $values);
+        if (!isset($media['Field']['Field'])) {
+          $media['Field']['Field'] = am($media['Field']['Field'], $ids);
+        } else {
+          $media['Field']['Field'] = $ids;
+        }
       }
     }
   }
@@ -84,26 +89,155 @@ class Field extends AppModel {
    * @return array Field assignments
    */
   public function editSingle(&$media, &$data, $onlyFields = null) {
-    $names = $this->getFieldNames();
-    $result = array();
-    foreach ($names as $name) {
-      if (!empty($data['Field'][$name])) {
-        // Skip disabled fields if set
-        if ($onlyFields === null || (is_array($onlyFields) && in_array($name, $onlyFields))) {
-          $values = (array)$data['Field'][$name];
-          $this->createField(&$result, $name, $values);
-        } else {
-          $oldIds = Set::extract("/Field[name=$name]/data");
-          if (!oldIds) {
+    if (empty($data['Field'])) {
+      return array();
+    }
+    // Save old ids as references
+    $oldIds = Set::extract('/Field/id', $media);
+    $removeIds = array();
+    $addIds = array();
+    foreach ($data['Field'] as $name => $values) {
+      if (is_numeric($name) || !preg_match('/[\w.-_\/]+/', $name)) {
+        continue;
+      }
+      // Skip disabled fields if set
+      if ($onlyFields === null || (is_array($onlyFields) && in_array($name, $onlyFields))) {
+        if ($this->isListField($name)) {
+          $values = $this->removeNegatedWords($this->splitWords($values));
+        }
+        $removeIds = am($removeIds, Set::extract("/Field[name=$name]/id", $media));
+        $addIds = am($addIds, $this->createField($name, $values));
+      }
+    }
+    $ids = array_diff($oldIds, $removeIds);
+    $ids = am($ids, $addIds);
+    if (count($oldIds) == count($ids) && !array_diff($oldIds, $ids)) {
+      return array();
+    }
+    return array('Field' => array('Field' => $ids));
+  }
+
+  /**
+   *
+   * @param type $data
+   * @return array Array of changes.
+   * <code>array(
+   *  'Field' => array(
+   *    'fieldName' => array(
+   *      'add' => array(1, ,2 ,3),
+   *      'delete' => array(4, 5, 6),
+   *      'deleteAll' )> true
+   *    ),
+   *    'fieldName2' => array(...)
+   *   )
+   * </code>
+   */
+
+  function prepareMultiEditData(&$data) {
+    if (!isset($data['Field'])) {
+       return false;
+    }
+    $validNames = $this->getFieldNames();
+    $tmp = array('Field' => array());
+    foreach ($data['Field'] as $name => $values) {
+      if (!in_array($name, $validNames)) {
+        continue;
+      }
+      $values = $this->splitWords($values);
+      foreach ($values as $value) {
+        $isDelete = false;
+        if ($value && $value[0] == '-') {
+          $value = trim(substr($value, 1));
+          if (!$name) {
+            // Remove field information
+            $tmp['Field'][$name]['deleteAll'] = true;
             continue;
-          } else if (!empty($result['Field']['Field'])) {
-            $result['Field']['Field'] = am($result['Field']['Field'], $oldIds);
-          } else {
-            $result['Field']['Field'] = $oldIds;
           }
+          $isDelete = true;
+        }
+        if (!$value) {
+          continue;
+        }
+        $conditions = array('name' => $name, 'data' => $value);
+        $field = $this->find('first', array('conditions' => $conditions));
+        if ($isDelete && !$field) {
+          continue;
+        } elseif (!$field) {
+          $field = $this->save($this->create($conditions));
+          if (!$field) {
+            Logger::error("Could not create new field '$name' with value '$value'");
+            continue;
+          }
+        }
+        $action = $isDelete ? 'delete' : 'add';
+        if (isset($tmp['Field'][$name][$action])) {
+          $tmp['Field'][$name][$action][] = $field['Field']['id'];
+        } else {
+          $tmp['Field'][$name][$action] = array($field['Field']['id']);
+        }
+        if (!$this->isListField($name)) {
+          break;
         }
       }
     }
-    return $result;
+
+    if (count($tmp['Field'])) {
+      // unify ids
+      foreach ($tmp['Field'] as $name => $actions) {
+        foreach ($actions as $action => $ids) {
+          if (is_array($ids)) {
+            $tmp['Field'][$name][$action] = array_unique($ids);
+          }
+        }
+      }
+      return $tmp;
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * Apply field changes to given media
+   *
+   * @param array $media Media model data
+   * @param array $data Data from Field::prepareMultiEditData()
+   * @param type $allowedFields List of fields to update. If null all field
+   * are allowed to update. Default is null.
+   * @return array Update data for field changes
+   */
+  function editMulti(&$media, &$data, $allowedFields = null) {
+    if (!isset($data['Field'])) {
+      return false;
+    }
+    $oldIds = Set::extract("/Field/id", $media);
+    $newIds = $oldIds;
+    foreach ($data['Field'] as $name => $actions) {
+      if ($allowedFields && !in_array($name, $allowedFields)) {
+        continue;
+      }
+      $isListField = $this->isListField($name);
+      if (isset($actions['deleteAll'])) {
+        $ids = Set::extract("/Field[name=$name]/id", $media);
+        $newIds = array_diff($newIds, $ids);
+        continue;
+      }
+      if (isset($actions['delete'])) {
+        $newIds = array_diff($newIds, $actions['delete']);
+      }
+      if (isset($actions['add'])) {
+        if (!$isListField) {
+          $ids = Set::extract("/Field[name=$name]/id", $media);
+          $newIds = array_diff($newIds, $ids);
+        }
+        $newIds = am($newIds, $actions['add']);
+      }
+    }
+    $newIds = array_unique($newIds);
+
+    if (count($oldIds) != count($newIds) || array_diff($oldIds, $newIds)) {
+      return array('Field' => array('Field' => $newIds));
+    } else {
+      return false;
+    }
   }
 }

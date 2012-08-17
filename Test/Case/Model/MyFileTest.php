@@ -32,7 +32,7 @@ class MyFileTestCase extends CakeTestCase {
  */
 	public $fixtures = array('app.file', 'app.media', 'app.user', 'app.group', 'app.groups_media',
       'app.groups_user', 'app.option', 'app.guest', 'app.comment', 'app.my_file',
-      'app.tag', 'app.media_tag', 'app.category', 'app.categories_media',
+      'app.tag', 'app.media_tag', 'app.category', 'app.categories_media', 'app.fields_media', 'app.field',
       'app.location', 'app.locations_media', 'app.comment');
 
 /**
