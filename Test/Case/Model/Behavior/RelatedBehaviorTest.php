@@ -17,7 +17,7 @@
 
 App::uses('RelatedBehavior', 'Model/Behavior');
 App::uses('Media', 'Model');
-App::uses('Tag', 'Model');
+App::uses('Field', 'Model');
 App::uses('Logger', 'Lib');
 /**
  * RelatedBehavior Test Case
@@ -31,8 +31,7 @@ class RelatedBehaviorTestCase extends CakeTestCase {
  */
   public $fixtures = array('app.file', 'app.media', 'app.user', 'app.group', 'app.groups_media',
       'app.groups_user', 'app.option', 'app.guest', 'app.comment', 'app.my_file',
-      'app.tag', 'app.media_tag', 'app.category', 'app.categories_media',
-      'app.location', 'app.locations_media', 'app.comment');
+      'app.field', 'app.field_media', 'app.comment');
   /**
  * setUp method
  *
@@ -41,7 +40,7 @@ class RelatedBehaviorTestCase extends CakeTestCase {
 	public function setUp() {
 		parent::setUp();
 		$this->Media = ClassRegistry::init('Media');
-		$this->Tag = ClassRegistry::init('Tag');
+		$this->Field = ClassRegistry::init('Field');
   }
 
 /**
@@ -51,7 +50,7 @@ class RelatedBehaviorTestCase extends CakeTestCase {
  */
 	public function tearDown() {
     unset($this->Media);
-    unset($this->Tag);
+    unset($this->Field);
 
     parent::tearDown();
 	}
@@ -62,29 +61,29 @@ class RelatedBehaviorTestCase extends CakeTestCase {
  * @return void
  */
 	public function testRelated() {
-    $this->Tag->save($this->Tag->create(array('name' => 'flower')));
-    $flowerId = $this->Tag->getLastInsertID();
-    $this->Tag->save($this->Tag->create(array('name' => 'food')));
-    $foodId = $this->Tag->getLastInsertID();
-    $this->Tag->save($this->Tag->create(array('name' => 'animal')));
-    $animalId = $this->Tag->getLastInsertID();
-    $this->Tag->save($this->Tag->create(array('name' => 'color')));
-    $colorId = $this->Tag->getLastInsertID();
+    $flower = $this->Field->save($this->Field->create(array('name' => 'keyword', 'data' => 'flower')));
+    $flowerId = $this->Field->getLastInsertID();
+    $this->Field->save($this->Field->create(array('name' => 'keyword', 'data' => 'food')));
+    $foodId = $this->Field->getLastInsertID();
+    $this->Field->save($this->Field->create(array('name' => 'keyword', 'data' => 'animal')));
+    $animalId = $this->Field->getLastInsertID();
+    $this->Field->save($this->Field->create(array('name' => 'keyword', 'data' => 'color')));
+    $colorId = $this->Field->getLastInsertID();
 
-    $media1 = array('Media' => array('name' => 'IMG_1234.JPG'), 'Tag' => array('Tag' => array($colorId, $flowerId)));
+    $media1 = array('Media' => array('name' => 'IMG_1234.JPG'), 'Field' => array('Field' => array($colorId, $flowerId)));
     $this->Media->save($media1);
 		$this->Media->create();
-    $media2 = array('Media' => array('name' => 'IMG_2345.JPG'), 'Tag' => array('Tag' => array($colorId, $foodId)));
+    $media2 = array('Media' => array('name' => 'IMG_2345.JPG'), 'Field' => array('Field' => array($colorId, $foodId)));
     $this->Media->save($media2);
 		$this->Media->create();
-    $media3 = array('Media' => array('name' => 'IMG_3456.JPG'), 'Tag' => array('Tag' => array($colorId, $animalId)));
+    $media3 = array('Media' => array('name' => 'IMG_3456.JPG'), 'Field' => array('Field' => array($colorId, $animalId)));
     $this->Media->save($media3);
 
-    $tag = $this->Media->Tag->findByName('color');
-    $this->Media->Tag->bindModel(array('hasAndBelongsToMany' => array('Media')));
-    $this->Media->Tag->Behaviors->load('Related', array('relatedHabtm' => 'Media', 'fields' => array('id', 'name')));
-    $tags = $this->Media->Tag->related($tag['Tag']['id']);
-		$names = Set::extract('/Tag/name', $tags);
+    $field = $this->Media->Field->findByData('color');
+    $this->Media->Field->bindModel(array('hasAndBelongsToMany' => array('Media')));
+    $this->Media->Field->Behaviors->load('Related', array('relatedHabtm' => 'Media', 'fields' => array('id', 'data')));
+    $Fields = $this->Media->Field->related($field['Field']['id']);
+		$names = Set::extract('/Field/data', $Fields);
 		sort($names);
 		$expected = array('flower', 'animal', 'food');
 		sort($expected);

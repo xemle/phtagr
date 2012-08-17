@@ -15,12 +15,15 @@
  * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
 
-class SimilarBehavior extends ModelBehavior
-{
-  /** Breaks a text into tokens of given length
-    * @param text Text to tokenize
-    * @param tokenLen Length of each token
-    * @result Array of tokens */
+class SimilarBehavior extends ModelBehavior {
+
+  /**
+   * Breaks a text into tokens of given length
+   *
+   * @param text Text to tokenize
+   * @param tokenLen Length of each token
+   * @return Array of tokens
+   */
   function _tokenize($text, $tokenLen = 3) {
     $len = strlen($text) - $tokenLen + 1;
     $tokens = array();
@@ -30,10 +33,13 @@ class SimilarBehavior extends ModelBehavior
     return $tokens;
   }
 
-  /** Creates a token array which token as key and occurance count as value
-    * @param text Text to tokenize
-    * @param tokenLen Length of token
-    * @result Array of token with occurance count as array value */
+  /**
+   * Creates a token array which token as key and occurance count as value
+   *
+   * @param text Text to tokenize
+   * @param tokenLen Length of token
+   * @return Array of token with occurance count as array value
+   */
   function _tokenizeAndCount($text, $tokenLen = 3) {
     $tokens = $this->_tokenize($text, $tokenLen);
     $counts = array();
@@ -47,13 +53,15 @@ class SimilarBehavior extends ModelBehavior
     return $counts;
   }
 
-  /** Evaluate current text with given searchTokens.
-    *
-    * The function counts the occurrence of search tokens in the given text.
-    * @param text Given text to evaluate
-    * @param searchTokens counted search tokens
-    * @param tokenLen Length of each search token
-    * @result count of matches */
+  /**
+   * Evaluate current text with given searchTokens.
+   *
+   * The function counts the occurrence of search tokens in the given text.
+   * @param text Given text to evaluate
+   * @param searchTokens counted search tokens
+   * @param tokenLen Length of each search token
+   * @return count of matches
+   */
   function _evaluate($text, $searchTokens) {
     if (!count($searchTokens)) {
       return 0;
@@ -70,14 +78,16 @@ class SimilarBehavior extends ModelBehavior
     return $matches;
   }
 
-  /** Search similar text through fuzzy text search through n-grams. For short
-    * search terms tokens of 2, and 3 length are compared. For longer search
-    * terms (string length greater as 6) tokens of 3 and 5 are used.
-    *
-    * @param Model Current model
-    * @param searchTerm search term (string with length between 3 and 32
-    * @param field Field name to search
-    * @return array of model data, ordered by relevance. Highest first. */
+  /**
+   * Search similar text through fuzzy text search through n-grams. For short
+   * search terms tokens of 2, and 3 length are compared. For longer search
+   * terms (string length greater as 6) tokens of 3 and 5 are used.
+   *
+   * @param Model Current model
+   * @param searchTerm search term (string with length between 3 and 32
+   * @param field Field name to search
+   * @return array of model data, ordered by relevance. Highest first.
+   */
   function similar(&$Model, $searchTerm, $field = 'name') {
     // Comparison is expensive. So cut long search terms
     if (strlen($searchTerm) > 32) {
@@ -114,4 +124,3 @@ class SimilarBehavior extends ModelBehavior
     return $result;
   }
 }
-?>
