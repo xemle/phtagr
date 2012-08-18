@@ -278,6 +278,10 @@ class MediaController extends AppController
   }
 
   function zip($format) {
+    // get explorer crumbs
+    $crumbs = join('/', array_splice(split('/', $this->request->url), 3));
+    $redirectUrl = "/explorer/view/" . $crumbs;
+    Logger::debug("Crumbs: $crumbs, url: $url");
     if (empty($this->request->data)) {
       $this->redirect(null, 404, true);
     }
@@ -286,19 +290,23 @@ class MediaController extends AppController
     }
     if (!preg_match('/^\d+(,\d+)*$/', $this->request->data['Media']['ids'])) {
       Logger::warn("Invalid id input: " . $this->request->data['Media']['ids']);
-      $this->redirect(null, 412, true);
+      $this->Session->setFlash("Invalid media ids");
+      $this->redirect($redirectUrl);
     } else if (!in_array($format, array('mini', 'thumb', 'preview', 'high', 'hd', 'original'))) {
       Logger::warn("Invalid format: $format");
-      $this->redirect(null, 412, true);
+      $this->Session->setFlash("Unsupported download format: " + $format);
+      $this->redirect($redirectUrl);
     }
     $ids = preg_split('/\s*,\s*/', trim($this->request->data['Media']['ids']));
     $ids = array_unique($ids);
     if ($this->hasRole(ROLE_GUEST) && count($ids) > BULK_DOWNLOAD_FILE_COUNT_USER) {
       Logger::warn("Download of more than 240 media is not allowed");
-      $this->redirect(null, 412, true);
+      $this->Session->setFlash(__("Download of more than %d media is not allowed", BULK_DOWNLOAD_FILE_COUNT_USER));
+      $this->redirect($redirectUrl);
     } else if (!$this->hasRole(ROLE_GUEST) && count($ids) > BULK_DOWNLOAD_FILE_COUNT_ANONYMOUS) {
       Logger::warn("Download of more than 12 media is not allowed for anonymous visitors");
-      $this->redirect(null, 412, true);
+      $this->Session->setFlash(__("Download of more than %d media is not allowed for anonymous visitors", BULK_DOWNLOAD_FILE_COUNT_ANONYMOUS));
+      $this->redirect($redirectUrl);
     }
 
     $user = $this->getUser();
@@ -318,12 +326,14 @@ class MediaController extends AppController
     }
     if (!count($files)) {
       Logger::warn("No files for download");
-      $this->redirect(null, 404, true);
+      $this->Session->setFlash(__("No files for download found for given media set"));
+      $this->redirect($redirectUrl);
     }
     $sizes = Set::extract('/size', $files);
     if (array_sum($sizes) > BULK_DOWNLOAD_TOTAL_MB_LIMIT * 1024 * 1024) {
       Logger::warn("Download of not more than " . BULK_DOWNLOAD_TOTAL_MB_LIMIT . " MB is not allowed");
-      $this->redirect(null, 403, true);
+      $this->Session->setFlash(__("Download of not more than %d MB is not allowed", BULK_DOWNLOAD_TOTAL_MB_LIMIT));
+      $this->redirect($redirectUrl);
     }
 
     $zipName = 'phtagr-' . date('Y-m-d_H-i-s') . '.zip';

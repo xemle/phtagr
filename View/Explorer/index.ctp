@@ -79,6 +79,17 @@
         }
       });
     };
+    $.fn.extractCrumbs = function(link) {
+      if (!link) {
+        return false;
+      }
+      var crumbs = link.split('/');
+      var i = crumbs.length - 1;
+      while (i >= 0 && crumbs[i].indexOf(':') > 0) {
+        i--;
+      }
+      return crumbs.slice(i + 1).join('/');
+    };
     $.fn.mediaAction = function() {
       var data = $('body').data('phtagr');
       if (!data) {
@@ -90,12 +101,7 @@
         data.ids.push(id);
         var media = $('#media-' + id);
         // extract crumb data
-        var crumbs = media.find('.p-explorer-media-image a').attr('href').split('/');
-        var i = crumbs.length - 1;
-        while (i >= 0 && crumbs[i].indexOf(':') > 0) {
-          i--;
-        }
-        crumbs = crumbs.slice(i + 1).join('/');
+        var crumbs = $.fn.extractCrumbs(media.find('.p-explorer-media-image a').attr('href'));
         $(this).find('.p-explorer-media-image').click(function(event) {
           if (event.ctrlKey) {
             $(media).toggleMedia();
@@ -208,6 +214,11 @@
         return;
       }
       var input = '<input type="hidden" name="data[Media][ids]" value="' + mediaIds + '"/>';
+      var firstMediaId = mediaIds.split(',').pop();
+      var crumbs = $.fn.extractCrumbs($('.p-breadcrumb-crumb').last().find('a').first().attr('href'));
+      if (crumbs) {
+        url += '/' + crumbs;
+      }
       var fakeForm = '<form action="' + url + '" method="post">' + input + '</form>';
       $(fakeForm).appendTo('body').submit().remove();
     };
