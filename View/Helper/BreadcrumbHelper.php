@@ -151,10 +151,11 @@ class BreadcrumbHelper extends AppHelper
    * Create breadcrumb html list
    *
    * @param crumbs Current breadcrumb stack
+   * @param exclude Array of excluded crumbs
    */
-  function breadcrumb($crumbs) {
+  function breadcrumb($crumbs, $exclude = array('key', 'page', 'pos')) {
     $links = array();
-    $crumbs = $this->filterCrumbs($crumbs);
+    $crumbs = $this->filterCrumbs($crumbs, $exclude);
     foreach ($crumbs as $key => $crumb) {
       if (!preg_match('/^(\w+):(.*)$/', $crumb, $match)) {
         Logger::warn("Invalid crumb: $crumb");
