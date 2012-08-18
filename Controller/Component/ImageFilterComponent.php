@@ -212,8 +212,15 @@ class ImageFilterComponent extends BaseFilterComponent {
       }
       return $dateIptc;
     }
-    // No IPTC date: Extract Exif date or now
-    return $this->_extract($data, 'DateTimeOriginal', date('Y-m-d H:i:s', time()));
+    // No IPTC date: Extract Exif date, file modification time, or NOW
+    $date = $this->_extract($data, 'DateTimeOriginal');
+    if (!$date) {
+      $date = $this->_extract($data, 'FileModifyDate');
+    }
+    if (!$date) {
+      $date = date('Y-m-d H:i:s', time());
+    }
+    return $date;
   }
 
   /**
