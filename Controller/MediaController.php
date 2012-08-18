@@ -281,7 +281,6 @@ class MediaController extends AppController
     // get explorer crumbs
     $crumbs = join('/', array_splice(split('/', $this->request->url), 3));
     $redirectUrl = "/explorer/view/" . $crumbs;
-    Logger::debug("Crumbs: $crumbs, url: $url");
     if (empty($this->request->data)) {
       $this->redirect(null, 404, true);
     }
