@@ -16,7 +16,6 @@
  */
 
 App::uses('Media', 'Model');
-App::uses('Tag', 'Model');
 App::uses('Group', 'Model');
 App::uses('User', 'Model');
 App::uses('Field', 'Model');
@@ -33,7 +32,7 @@ class MediaTestCase extends CakeTestCase {
  */
 	public $fixtures = array('app.file', 'app.media', 'app.user', 'app.group', 'app.groups_media',
       'app.groups_user', 'app.option', 'app.guest', 'app.comment', 'app.my_file',
-      'app.tag', 'app.media_tag', 'app.category', 'app.categories_media', 'app.fields_media', 'app.field',
+      'app.fields_media', 'app.field',
       'app.location', 'app.locations_media', 'app.comment');
 
 /**
@@ -45,7 +44,6 @@ class MediaTestCase extends CakeTestCase {
 		parent::setUp();
 
 		$this->Media = ClassRegistry::init('Media');
-		$this->Tag = ClassRegistry::init('Tag');
 		$this->Group = ClassRegistry::init('Group');
 		$this->User = ClassRegistry::init('User');
 		$this->Field = ClassRegistry::init('Field');
@@ -58,7 +56,6 @@ class MediaTestCase extends CakeTestCase {
  */
 	public function tearDown() {
 		unset($this->Media);
-		unset($this->Tag);
 		unset($this->Group);
 		unset($this->User);
 		unset($this->Field);
@@ -433,24 +430,25 @@ class MediaTestCase extends CakeTestCase {
     // media4 is private
     $media4 = $this->Media->save($this->Media->create(array('name' => 'IMG_4567.JPG', 'user_id' => $userA['User']['id'])));
 
-    $skyTag = $this->Tag->save($this->Tag->create(array('name' => 'sky')));
-    $vacationTag = $this->Tag->save($this->Tag->create(array('name' => 'vacation')));
-    $natureTag = $this->Tag->save($this->Tag->create(array('name' => 'nature')));
+    $skyField = $this->Field->save($this->Field->create(array('name' => 'keyword', 'data' => 'sky')));
+    $vacationField = $this->Field->save($this->Field->create(array('name' => 'keyword', 'data' => 'vacation')));
+    $natureField = $this->Field->save($this->Field->create(array('name' => 'keyword', 'data' => 'nature')));
+    $otherField = $this->Field->save($this->Field->create(array('name' => 'other', 'data' => 'otherdata')));
 
-    $this->Media->save(array('Media' => array('id' => $media1['Media']['id']), 'Tag' => array('Tag' => array($skyTag['Tag']['id'], $vacationTag['Tag']['id']))));
-    $this->Media->save(array('Media' => array('id' => $media2['Media']['id']), 'Tag' => array('Tag' => array($skyTag['Tag']['id'], $vacationTag['Tag']['id'], $natureTag['Tag']['id']))));
-    $this->Media->save(array('Media' => array('id' => $media3['Media']['id']), 'Tag' => array('Tag' => array($vacationTag['Tag']['id'], $natureTag['Tag']['id']))));
-    $this->Media->save(array('Media' => array('id' => $media4['Media']['id']), 'Tag' => array('Tag' => array($vacationTag['Tag']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media1['Media']['id']), 'Field' => array('Field' => array($skyField['Field']['id'], $vacationField['Field']['id'], $otherField['Field']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media2['Media']['id']), 'Field' => array('Field' => array($skyField['Field']['id'], $vacationField['Field']['id'], $natureField['Field']['id'], $otherField['Field']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media3['Media']['id']), 'Field' => array('Field' => array($vacationField['Field']['id'], $natureField['Field']['id'], $otherField['Field']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media4['Media']['id']), 'Field' => array('Field' => array($vacationField['Field']['id'], $otherField['Field']['id']))));
 
-    $result = $this->Media->cloud($userA, 'Tag');
+    $result = $this->Media->cloud($userA, array('conditions' => array('Field.name' => 'keyword')));
     $this->assertEqual($result, array('vacation' => 4, 'sky' => 2, 'nature' => 2));
-    $result = $this->Media->cloud($userB, 'Tag');
+    $result = $this->Media->cloud($userB, array('conditions' => array('Field.name' => 'keyword')));
     $this->assertEqual($result, array('vacation' => 3, 'sky' => 2, 'nature' => 2));
-    $result = $this->Media->cloud($userC, 'Tag');
+    $result = $this->Media->cloud($userC, array('conditions' => array('Field.name' => 'keyword')));
     $this->assertEqual($result, array('vacation' => 2, 'sky' => 2, 'nature' => 1));
-    $result = $this->Media->cloud($guestA, 'Tag');
+    $result = $this->Media->cloud($guestA, array('conditions' => array('Field.name' => 'keyword')));
     $this->assertEqual($result, array('vacation' => 2, 'sky' => 1, 'nature' => 1));
-    $result = $this->Media->cloud($userNone, 'Tag');
+    $result = $this->Media->cloud($userNone, array('conditions' => array('Field.name' => 'keyword')));
     $this->assertEqual($result, array('vacation' => 1, 'sky' => 1));
   }
 

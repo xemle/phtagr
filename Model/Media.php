@@ -15,8 +15,7 @@
  * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
 
-class Media extends AppModel
-{
+class Media extends AppModel {
   var $name = 'Media';
 
   var $belongsTo = array(
@@ -28,10 +27,8 @@ class Media extends AppModel
 
   var $hasAndBelongsToMany = array(
     'Group' => array(),
-    'Tag' => array(),
-    'Category' => array(),
-    'Field' => array(),
-    'Location' => array('order' => 'Location.type'));
+    'Field' => array()
+    );
 
   var $_aclMap = array(
     ACL_LEVEL_GROUP => 'gacl',
@@ -610,18 +607,25 @@ class Media extends AppModel
    * Create tag cloud of HABTM model assoziation
    *
    * @param array $user Current User
-   * @param string $assoc HABTM model assoziation
-   * @param int $num Maximum tags
+   * @param array $options
+   * - model - HABTM Model name. Default is 'Field'
+   * - field - Model field for tag cloud data. Default is 'data'
+   * - count - Count of top cloud items
+   * - conditions - Array of conditions
    * @return array Map from name to hits
    */
-  function cloud($user, $assoc = 'Tag', $num = 50) {
+  function cloud($user, $options = array()) {
+    $options = am(array('model' => 'Field', 'field' => 'data', 'count' => 50, 'conditions' => array()), $options);
+    $assoc = $options['model'];
     if (!isset($this->hasAndBelongsToMany[$assoc])) {
+      Logger::error("Model {$this->alias} has no HABTM relation to $assoc. Return emtyp result");
       return array();
     }
     $myTable = $this->tablePrefix.$this->table;
 
     $table = $this->{$assoc}->tablePrefix.$this->{$assoc}->table;
     $alias = $this->{$assoc}->alias;
+    $field = $options['field'];
     $key = $this->{$assoc}->primaryKey;
 
     $config = $this->hasAndBelongsToMany[$assoc];
@@ -632,24 +636,24 @@ class Media extends AppModel
     $associationForeignKey = $config['associationForeignKey'];
 
     $aclQuery = $this->buildAclQuery($user);
-    $fields = array("`$alias`.`name`", "COUNT(`$alias`.`name`) AS hits");
+    $fields = array("`$alias`.`$field`", "COUNT(`$alias`.`$field`) AS hits");
     $joins = am(array(
         "JOIN `$joinTable` AS `$joinAlias` ON `$alias`.`$key` = `$joinAlias`.`$associationForeignKey`",
         "JOIN `$myTable` AS `{$this->alias}` ON `$joinAlias`.`$foreignKey` = `{$this->alias}`.`{$this->primaryKey}`"
         ), $aclQuery['joins']);
-    $conditions = $aclQuery['conditions'];
+    $conditions = am($options['conditions'], $aclQuery['conditions']);
     $query = array(
         'fields' => $fields,
         'joins' => $joins,
         'conditions' => $conditions,
-        'group' => "`$alias`.`name`",
+        'group' => "`$alias`.`$field`",
         'order' => "hits DESC",
-        'limit' => $num,
+        'limit' => $options['count'],
         'page' => 0
     );
     $data = $this->{$assoc}->find('all', $query);
     if (count($data)) {
-      $data = Set::combine($data, "{n}.$assoc.name", "{n}.0.hits");
+      $data = Set::combine($data, "{n}.$assoc.$field", "{n}.0.hits");
     }
     return $data;
   }
@@ -868,18 +872,6 @@ class Media extends AppModel
     if ($group) {
       $tmp['Group'] = $group['Group'];
     }
-    $tag = $this->Tag->prepareMultiEditData(&$data);
-    if ($tag) {
-      $tmp['Tag'] = $tag['Tag'];
-    }
-    $category = $this->Category->prepareMultiEditData(&$data);
-    if ($category) {
-      $tmp['Category'] = $category['Category'];
-    }
-    $location = $this->Location->prepareMultiEditData(&$data);
-    if ($location) {
-      $tmp['Location'] = $location['Location'];
-    }
     $fields = $this->Field->prepareMultiEditData(&$data);
     if ($fields) {
       $tmp['Field'] = $fields['Field'];
@@ -907,48 +899,30 @@ class Media extends AppModel
     if ($fields) {
       $tmp['Field'] = $fields['Field'];
     }
-    if ($media['Media']['canWriteTag']) {
-      $tag = $this->Tag->editMetaMulti(&$media, &$data);
-      if ($tag) {
-        $tmp['Tag'] = $tag['Tag'];
-      }
-    }
+    $mediaFields = array();
     if ($media['Media']['canWriteMeta']) {
-      $category = $this->Category->editMetaMulti(&$media, &$data);
-      if ($category) {
-        $tmp['Category'] = $category['Category'];
-      }
-      $location = $this->Location->editMetaMulti(&$media, &$data);
-      if ($location) {
-        $tmp['Location'] = $location['Location'];
-      }
-      $fields = array('latitude', 'longitude');
-      foreach ($fields as $field) {
-        if (empty($data['Media'][$field])) {
-          continue;
-        } else if ($data['Media'][$field] == '-') {
-          $tmp['Media'][$field] = null;
-        } else {
-          $tmp['Media'][$field] = $data['Media'][$field];
-        }
-      }
+      $mediafields = am($mediaFields, array('latitude', 'longitude'));
     }
     if ($media['Media']['canWriteCaption']) {
-      $fields = array('name', 'caption', 'date');
-      foreach ($fields as $field) {
-        if (empty($data['Media'][$field])) {
-          continue;
-        } else {
-          $tmp['Media'][$field] = $data['Media'][$field];
-        }
-      }
+      $mediaFields = am($mediaFields, array('name', 'caption', 'date'));
       if (isset($data['Media']['rotation'])) {
         $this->rotate(&$tmp, $media['Media']['orientation'], $data['Media']['rotation']);
       }
     }
+    foreach ($mediaFields as $name) {
+      if (empty($data['Media'][$name])) {
+        continue;
+      } else if ($data['Media'][$name] == '-') {
+        $tmp['Media'][$name] = null;
+      } else {
+        $tmp['Media'][$name] = $data['Media'][$name];
+      }
+    }
+    // only meta data above mark media a dirty for meta data synchronization
     if (count($tmp) != 1 || count($tmp['Media']) != 2) {
       $tmp['Media']['flag'] = ($media['Media']['flag'] | MEDIA_FLAG_DIRTY);
     }
+
     if ($media['Media']['canWriteAcl']) {
       $groups = $this->Group->editMetaMulti(&$media, &$data);
       if ($groups) {
@@ -1005,6 +979,7 @@ class Media extends AppModel
         $this->rotate(&$tmp, $media['Media']['orientation'], $data['Media']['rotation']);
       }
     }
+    // only meta data above mark media a dirty for meta data synchronization
     if (count($tmp) != 1 || count($tmp['Media']) != 2) {
       $tmp['Media']['flag'] = ($media['Media']['flag'] | MEDIA_FLAG_DIRTY);
     }
