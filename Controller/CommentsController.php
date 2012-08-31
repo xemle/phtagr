@@ -130,7 +130,9 @@ class CommentsController extends AppController
   }
 
   function _createEmail() {
-    return new CakeEmail('default');
+    $Email = new CakeEmail('default');
+    $Email->helpers('Html');
+    return $Email;
   }
 
   function _sendEmail($commentId) {

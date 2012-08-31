@@ -35,6 +35,7 @@ class NotifyShell extends AppShell {
       exit(1);
     }
     $this->Email = new CakeEmail('default');
+    $this->Email->helpers('Html');
   }
 
   public function getOptionParser() {
