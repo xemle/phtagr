@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2012-08-31 19:01+0200\n"
+"POT-Creation-Date: 2012-08-31 19:07+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -240,6 +240,14 @@ msgstr ""
 
 #: Controller/CommentsController.php:120
 msgid "The Comment could not be saved. Please, try again."
+msgstr ""
+
+#: Controller/CommentsController.php:152
+msgid "[phtagr] Comment: %s"
+msgstr ""
+
+#: Controller/CommentsController.php:209
+msgid "[phtagr] Comment notification: %s"
 msgstr ""
 
 #: Controller/CommentsController.php:223
@@ -640,6 +648,10 @@ msgstr ""
 msgid "No user with this email was found"
 msgstr ""
 
+#: Controller/UsersController.php:371
+msgid "[phtagr] Password Request"
+msgstr ""
+
 #: Controller/UsersController.php:380
 msgid "Mail was sent!"
 msgstr ""
@@ -678,6 +690,18 @@ msgstr ""
 
 #: Controller/UsersController.php:502
 msgid "Internal error occured"
+msgstr ""
+
+#: Controller/UsersController.php:546
+msgid "[phtagr] Account confirmation: %s"
+msgstr ""
+
+#: Controller/UsersController.php:567
+msgid "[phtagr] Welcome %s"
+msgstr ""
+
+#: Controller/UsersController.php:598
+msgid "[phtagr] New account notification: %s"
 msgstr ""
 
 #: Controller/Component/MenuComponent.php:40

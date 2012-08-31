@@ -149,7 +149,7 @@ class CommentsController extends AppController
     $email = $this->_createEmail();
     $email->template('comment')
       ->to(array($user['User']['email'] => $user['User']['firstname'] . ' ' . $user['User']['lastname']))
-      ->subject('[phtagr] Comment: '.$comment['Media']['name'])
+      ->subject(__('[phtagr] Comment: %s', $comment['Media']['name']))
       ->viewVars(array('user' => $user, 'data' => $comment));
 
     try {
@@ -206,7 +206,7 @@ class CommentsController extends AppController
     $email->template('commentnotify')
       ->to($to)
       ->bcc($emails)
-      ->subject('[phtagr] Comment notification: '.$media['Media']['name'])
+      ->subject(__('[phtagr] Comment notification: %s', $media['Media']['name']))
       ->viewVars(array('data' => $comment));
 
     Logger::debug($comment);

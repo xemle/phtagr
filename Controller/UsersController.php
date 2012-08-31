@@ -368,7 +368,7 @@ class UsersController extends AppController
         $email = $this->_createEmail();
         $email->template('password')
           ->to(array($user['User']['email'] => $user['User']['username']))
-          ->subject('Password Request')
+          ->subject(__('[phtagr] Password Request'))
           ->viewVars(array('user' => $user));
 
         try {
@@ -543,7 +543,7 @@ class UsersController extends AppController
     $email = $this->_createEmail();
     $email->template('new_account_confirmation', 'default')
       ->to(array($user['User']['email'] => $user['User']['username']))
-      ->subject('[phtagr] Account confirmation: '.$user['User']['username'])
+      ->subject(__('[phtagr] Account confirmation: %s', $user['User']['username']))
       ->viewVars(array('user' => $user, 'key' => $key));
 
     try {
@@ -564,7 +564,7 @@ class UsersController extends AppController
     $email = $this->_createEmail();
     $email->template('new_account')
       ->to($user['User']['email'])
-      ->subject('[phtagr] Welcome '.$user['User']['username'])
+      ->subject(__('[phtagr] Welcome %s', $user['User']['username']))
       ->viewVars(array('user' => $user));
 
     try {
@@ -595,7 +595,7 @@ class UsersController extends AppController
     $email = $this->_createEmail();
     $email->template('new_account_notification')
       ->to($to)
-      ->subject('[phtagr] New account notification: '.$user['User']['username'])
+      ->subject(__('[phtagr] New account notification: %s', $user['User']['username']))
       ->viewVars(array('user' => $user));
     foreach ($sysOps as $sysOp) {
       $email->cc($sysOp['User']['email'], $sysOp['User']['username']);
