@@ -1,5 +1,5 @@
 <?php
-  echo __("Hello %s!", $user['User']['username'];
+  echo __("Hello %s!", $user['User']['username']);
   echo __("\n";
   echo __("Please confirm your account creation")."\n";
   echo "\n";
