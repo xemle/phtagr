@@ -38,6 +38,13 @@ class AppController extends Controller
 
     $this->_setMainMenu();
     $this->_setTopMenu();
+
+    if (isset($this->request->params['named']['mobile'])) {
+      // Allow 0, false, off as parameter
+      $param = $this->request->params['named']['mobile'];
+      $disable = in_array(strtolower(substr($param, 0, 5)), array('0', 'false', 'off'));
+      $this->Session->write('mobile', !$disable);
+    }
   }
 
   function _setMainMenu() {
@@ -80,7 +87,7 @@ class AppController extends Controller
     $this->request->params['options'] = $this->Option->getOptions($user);
     $this->set('currentUser', $user);
 
-    if ($this->RequestHandler->isMobile()) {
+    if ($this->Session->read('mobile')) {
       $this->viewClass = "Theme";
       $this->theme = "Mobile";
     }
@@ -116,6 +123,7 @@ class AppController extends Controller
     if (!$this->Session->check('Session.requestCount')) {
       $this->Session->write('Session.requestCount', 1);
       $this->Session->write('Session.start', time());
+      $this->Session->write('mobile', $this->RequestHandler->isMobile());
     } else {
       $count = $this->Session->read('Session.requestCount');
       $this->Session->write('Session.requestCount', $count + 1);
