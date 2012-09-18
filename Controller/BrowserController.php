@@ -232,7 +232,7 @@ class BrowserController extends AppController
     $options = $this->MyFile->getMediaViewOptions($filename);
     $options['download'] = true;
     $this->set($options);
-    $this->view = 'Media';
+    $this->viewClass = 'Media';
   }
 
   function index() {
