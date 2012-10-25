@@ -93,7 +93,7 @@ class FastFileResponder {
     } else {
       $headers = array();
       foreach($_SERVER as $h => $v) {
-        if(ereg('HTTP_(.+)', $h, $hp)) {
+        if(preg_match('HTTP_(.+)', $h, $hp)) {
           $headers[strtolower($hp[1])] = $v;
         }
       }
