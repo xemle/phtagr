@@ -280,10 +280,10 @@ class MediaTestCase extends CakeTestCase {
 
     $requestData = array('Group' => array('names' => ' group2 , -group1'));
     $data = $this->Media->prepareMultiEditData($requestData, $admin);
-    $tmp = $this->Media->editMulti($media, &$data);
+    $tmp = $this->Media->editMulti($media, $data);
     $this->Media->save($tmp);
     $media = $this->Media->findById($media['Media']['id']);
-    $this->Media->setAccessFlags($media, &$admin);
+    $this->Media->setAccessFlags($media, $admin);
     $this->assertEqual(array('group2'), Set::extract('/Group/name', $media));
 
     // Admin can use every group

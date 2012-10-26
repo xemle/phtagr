@@ -46,7 +46,7 @@ class TestReadController extends AppController {
 
 	var $components = array('FileManager', 'FilterManager');
 	
-	function getUser() {
+	public function &getUser() {
     return $this->User->find('first');
 	}
 
