@@ -229,10 +229,10 @@ class ImageFilterComponent extends BaseFilterComponent {
    * @param data Data array from exif tool array
    * @return Array of the the image data array as image model data
    */
-  public function _extractImageData($media, $data) {
+  public function _extractImageData(&$media, &$data) {
     $user = $this->controller->getUser();
 
-    $v = $media['Media'];
+    $v =& $media['Media'];
 
     // Media information
     $v['name'] = $this->_extract($data, 'FileName');
@@ -327,10 +327,10 @@ class ImageFilterComponent extends BaseFilterComponent {
    * @param data Data array from exif tool array
    * @return Array of the the image data array as image model data
    */
-  public function _extractImageDataGetId3($media, $data) {
+  public function _extractImageDataGetId3(&$media, &$data) {
     $user = $this->controller->getUser();
 
-    $v = $media['Media'];
+    $v =& $media['Media'];
 
     // Media information
     $v['name'] = $this->_extract($data, 'filename');

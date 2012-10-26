@@ -92,7 +92,7 @@ class Option extends AppModel {
       } elseif ($strip && strpos($subPath, '.') > 0) {
         $option['name'] = substr($option['name'], strrpos($subPath, '.')+1);
       }
-      $node = $tree;
+      $node =& $tree;
       $paths = explode('.', $option['name']);
       for($i=0; $i<count($paths); $i++) {
         $path=$paths[$i];
@@ -103,7 +103,10 @@ class Option extends AppModel {
         } else {
           $isArray = false;
         }
-        $node = $node[$path];
+        if (!isset($node[$path])) {
+          $node[$path] = array();
+        }
+        $node =& $node[$path];
       }
       if ($isArray) {
         $node[] = $option['value'];
@@ -183,8 +186,8 @@ class Option extends AppModel {
       $data['Option']['value'] = $value;
       $this->save($data);
     } else {
-      $this->create(array('Option' => array('name' => $name, 'value' => $value, 'user_id' => $userId)));
-      $this->save();
+      $data = $this->create(array('Option' => array('name' => $name, 'value' => $value, 'user_id' => $userId)));
+      $this->save($data);
     }
   }
 
@@ -197,8 +200,8 @@ class Option extends AppModel {
     } else {
       $userId = $this->data['User']['id'];
     }
-    $this->create(array('Option' => array('name' => $name, 'value' => $value, 'user_id' => $userId)));
-    $this->save();
+    $data = $this->create(array('Option' => array('name' => $name, 'value' => $value, 'user_id' => $userId)));
+    $this->save($data);
   }
 
   public function delValue($name, $value = null, $userId = null) {

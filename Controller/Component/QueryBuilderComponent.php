@@ -197,7 +197,7 @@ class QueryBuilderComponent extends Component
       }
       $method = 'build'.Inflector::camelize($name);
       if (method_exists($this, $method)) {
-        call_user_method($method, $this, $data, $query, $value);
+        call_user_func_array(array($this, $method), array(&$data, &$query, $value));
         continue;
       }
 
@@ -211,7 +211,7 @@ class QueryBuilderComponent extends Component
             continue;
           }
           //Logger::debug("Call custom rule {$rule['custom']}");
-          call_user_method($rule['custom'], $this, $data, $query, $name, $value);
+          call_user_func_array(array($this, $rule['custom']), array(&$data, &$query, $name, $value));
         } elseif (!isset($rule['field'])) {
            Logger::err("Field in rule is missing");
            Logger::debug($rule);

@@ -225,7 +225,7 @@ class ExcludeBehavior extends ModelBehavior {
     if (!is_array($query['conditions'])) {
       $conditions = array($query['conditions']);
     } else {
-      $conditions = $query['conditions'];
+      $conditions =& $query['conditions'];
     }
     //Logger::debug($conditions);
     foreach ($conditions as $key => $condition) {
