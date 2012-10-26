@@ -56,18 +56,14 @@ class MenuComponent extends Component {
     }
   }
 
-  public function &getData(&$data, $key) {
-    $p =& $data[$key];
-    return $p;
-  }
-
   public function beforeRender(Controller $controller) {
     $this->setCurrentMenu('main');
     $this->setBasicMainMenu();
+    $menu =& $this->menus[$this->currentMenu];
+
     if (isset($this->controller->subMenu)) {
       $name = strtolower($this->controller->name);
       $parentId = 'item-' . $name;
-      $parentItem = $this->getItem($parentId);
       foreach ($this->controller->subMenu as $action => $title) {
         $defaults = array('parent' => $parentId, 'active' => false, 'controller' => $name, 'action' => false, 'admin' => false);
         if (is_numeric($action)) {
@@ -78,15 +74,18 @@ class MenuComponent extends Component {
         if ($this->controller->action == $item['action']) {
           $item['active'] = true;
         }
-        $parentItem[] = $item;
+        $this->insertItem($menu, $parentId, $item);
       }
     }
     $this->controller->params['menus'] = $this->menus;
     $this->controller->set('menus_for_layout', $this->menus);
   }
 
-  /** Set the current menu
-    @param name Menu name */
+  /**
+   * Set the current menu
+   *
+   * @param name Menu name
+   */
   public function setCurrentMenu($name) {
     $this->currentMenu = $name;
     if (!isset($this->menus[$name])) {
@@ -94,51 +93,55 @@ class MenuComponent extends Component {
     }
   }
 
-  /** Add menu item
-    @param title Menu title
-    @param url Menu url
-    @param options e.g. html link class options */
+  /**
+   * Insert given item into menu tree below given parent Id
+   *
+   * @param type $tree Menu tree
+   * @param type $parentId Parent id
+   * @param type $item Submenu item
+   * @return boolean True if item was inserted
+   */
+  private function insertItem(&$tree, $parentId, $item) {
+    if (!is_array($tree)) {
+      return false;
+    }
+    if (isset($tree['id']) && $tree['id'] == $parentId) {
+      $tree[] = $item;
+      return true;
+    } else {
+      foreach ($tree as &$subItem) {
+        $found = $this->insertItem($subItem, $parentId, $item);
+        if ($found) {
+          return $found;
+        }
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Add menu item
+   *
+   * @param title Menu title
+   * @param url Menu url
+   * @param options e.g. html link class options
+   */
   public function addItem($title, $url, $options = array()) {
     $item = am(array('title' => $title, 'url' => $url), $options);
     $menu =& $this->menus[$this->currentMenu];
     if (isset($options['parent'])) {
-      $parent =& $this->getItem($options['parent']);
-      if ($parent) {
-        $parent[] = $item;
-      }
+      $this->insertItem($menu, $options['parent'], $item);
     } else {
       $menu[] = $item;
     }
   }
 
-  public function &_findItem($id, &$items) {
-    $keys = array_keys($items);
-    $found = false;
-    foreach($keys as $key) {
-      if (is_array($items[$key])) {
-        $found = $this->_findItem($id, $items[$key]);
-        if ($found) {
-          return $found;
-        }
-      } else if ($key == 'id' && $items[$key] == $id) {
-        return $items;
-      }
-    }
-    return $found;
-  }
-
-  public function &getItem($id, $menuName = null) {
-    if (!$menuName) {
-      $menu =& $this->menus[$this->currentMenu];
-    } else {
-      $menu =& $this->menus[$menuName];
-    }
-    return $this->_findItem($id, $menu);
-  }
-
-  /** Set menu option for current menu
-    @param name Option name
-    @param value Option value */
+  /**
+   * Set menu option for current menu
+   *
+   * @param name Option name
+   * @param value Option value
+   */
   public function setOption($name, $value) {
     $this->menus[$this->currentMenu]['options'][$name] = $value;
   }
