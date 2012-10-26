@@ -38,7 +38,7 @@ class CipherBehavior extends ModelBehavior
                   );
   var $config = array();
 
-  function setup(&$model, $config = array()) {
+  public function setup(Model $model, $config = array()) {
     $this->config[$model->name] = $this->default;
 
     if (isset($config['key'])) {
@@ -74,7 +74,7 @@ class CipherBehavior extends ModelBehavior
 
   /** Model hook to encrypt model data
     @param model Current model */
-  function beforeSave(&$model) {
+  public function beforeSave(Model $model) {
     if (isset($this->config[$model->name]) && !$this->config[$model->name]['noEncypt']) {
       if (!is_array($this->config[$model->name]['cipher'])) {
         $cipher = array($this->config[$model->name]['cipher']);
@@ -102,7 +102,7 @@ class CipherBehavior extends ModelBehavior
 
   /** Model hook to decrypt model data if auto decipher is turned on in the
     * model behavior configuration. Only primary model data are decrypted. */
-  function afterFind(&$model, $result, $primary = false) {
+  public function afterFind(Model $model, $result, $primary = false) {
     if (!$result || !isset($this->config[$model->name]['cipher']))
       return $result;
 
@@ -110,10 +110,10 @@ class CipherBehavior extends ModelBehavior
       // check for single of multiple model
       $keys = array_keys($result);
       if (!is_numeric($keys[0])) {
-        $this->decrypt(&$model, &$result);
+        $this->decrypt($model, $result);
       } else {
         foreach($keys as $index) {
-          $this->decrypt(&$model, &$result[$index]);
+          $this->decrypt($model, $result[$index]);
         }
       }
     }
@@ -124,10 +124,10 @@ class CipherBehavior extends ModelBehavior
     @param model Current model
     @param data Current model data. If null, the Model::data is used
     @return Deciphered model data */
-  function decrypt(&$model, &$data = null) {
+  public function decrypt(&$model, $data = null) {
     $this->log(print_r($data, true));
     if ($data === null)
-      $data =& $model->data;
+      $data = $model->data;
     if (isset($this->config[$model->name])) {
       if (!is_array($this->config[$model->name]['cipher'])) {
         $cipher = array($this->config[$model->name]['cipher']);
@@ -159,7 +159,7 @@ class CipherBehavior extends ModelBehavior
     @param key Key for encrpytion.
     @param len Length of resulting salt. Default is 4
     @return Randomly generated salt of the given lenth */
-  function _generateSalt($value, $key = '9nHPrYcxmvTliA', $len = 4) {
+  public function _generateSalt($value, $key = '9nHPrYcxmvTliA', $len = 4) {
     srand(microtime(true)*1000);
     $salt = '';
     $lenKey = strlen($key);
@@ -186,7 +186,7 @@ class CipherBehavior extends ModelBehavior
     @param padding Alignment size. Default is 4
     @return Envelope with salt
     @see _unpackValue() */
-  function _packValue($value, $salt, $padding = 4) {
+  public function _packValue($value, $salt, $padding = 4) {
     $l = strlen($value) + 2 * strlen($salt);
     $lp = $l % $padding;
     $pad = '';
@@ -200,7 +200,7 @@ class CipherBehavior extends ModelBehavior
     @param envelope
     @return Value or false on an error
     @see _packValue() */
-  function _unpackValue($envelope, $saltLen) {
+  public function _unpackValue($envelope, $saltLen) {
     $l = strlen($envelope);
     if ($l < 2*$saltLen) {
       $this->log(__METHOD__." Value for unpacking is to short");
@@ -225,7 +225,7 @@ class CipherBehavior extends ModelBehavior
     @return Return of the chiphered value in base64 encoding. To distinguish
     ciphed value, the ciphed value has a prefix of '$E$' i
     @see _decryptValue(), _packValue(), _generateSalt() */
-  function _encryptValue($value, $config) {
+  public function _encryptValue($value, $config) {
     extract($config);
     $bf = new Crypt_Blowfish($key);
 
@@ -241,7 +241,7 @@ class CipherBehavior extends ModelBehavior
   /** Decrpyted the given base64 string using the blowfish cipher
     @param base64Value Base 64 encoded string.
     @see _encryptValue(), _unpackValue() */
-  function _decryptValue($base64Value, $config) {
+  public function _decryptValue($base64Value, $config) {
     extract($config);
     $prefixLen = strlen($prefix);
     if (substr($base64Value, 0, $prefixLen) != $prefix) {
@@ -262,7 +262,7 @@ class CipherBehavior extends ModelBehavior
       return false;
     }
 
-    if (PEAR::isError($value)) {
+    if (!is_string($value)) {
       $this->log($value->getMessage());
       return false;
     }

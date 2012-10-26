@@ -29,7 +29,7 @@ class WebdavController extends AppController
   var $name = 'webdav';
 
   /** @todo Remove configuration of debug */
-  function beforeFilter() {
+  public function beforeFilter() {
     // dont't call parent::beforeFilter(). Cookies (and sessions) are not
     // supported for WebDAV..
 
@@ -54,7 +54,7 @@ class WebdavController extends AppController
   }
 
   /** @todo Set webdav root to creator's root if user is guest */
-  function index() {
+  public function index() {
     $this->requireRole(ROLE_GUEST);
     $this->layout = 'webdav';
 

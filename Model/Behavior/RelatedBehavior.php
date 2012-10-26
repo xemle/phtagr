@@ -25,7 +25,7 @@ class RelatedBehavior extends ModelBehavior
     - relatedHabtm: Related HasAndBelongsToMany model. Default is the first HABTM model
     - fields: Array of fields of the model which should be fetched
     - limit: Limit count of the related items. Default is 16 */
-  function setup(&$Model, $config = array()) {
+  public function setup(Model $Model, $config = array()) {
     $default = array();
     if (isset($Model->hasAndBelongsToMany) && is_array($Model->hasAndBelongsToMany)) {
       foreach($Model->hasAndBelongsToMany as $key => $definitions) {
@@ -64,7 +64,7 @@ class RelatedBehavior extends ModelBehavior
    * - relatedHabtm: (Optional) Related HasAndBelongsToMany model
    * - fields: (Optional) Array of fields of the model
    * - limit: (Optional) Limit count of the related items */
-  function related(&$Model, $ids, $options = array()) {
+  public function related(&$Model, $ids, $options = array()) {
     $ids = (array)$ids;
     if (count($ids) == 0) {
       return false;

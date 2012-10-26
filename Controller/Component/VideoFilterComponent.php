@@ -22,15 +22,15 @@ class VideoFilterComponent extends BaseFilterComponent {
   var $controller = null;
   var $components = array('VideoPreview', 'FileManager', 'Command');
 
-  function initialize(&$controller) {
-    $this->controller =& $controller;
+  public function initialize(Controller $controller) {
+    $this->controller = $controller;
   }
 
-  function getName() {
+  public function getName() {
     return "Video";
   }
 
-  function _getVideoExtensions() {
+  public function _getVideoExtensions() {
     if ($this->controller->getOption('bin.exiftool') || $this->controller->getOption('bin.ffmpeg')) {
       return array('avi', 'mov', 'mpeg', 'mpg', 'mts', 'mp4', 'flv', 'ogg');
     } else {
@@ -38,7 +38,7 @@ class VideoFilterComponent extends BaseFilterComponent {
     }
   }
 
-  function getExtensions() {
+  public function getExtensions() {
     return am($this->_getVideoExtensions(), array('thm' => array('priority' => 5)));
   }
 
@@ -49,10 +49,10 @@ class VideoFilterComponent extends BaseFilterComponent {
    * @param insertIfMissing If true, adds the thumb file to the database. Default is true
    * @return Filename of the thumb file. False if no thumb file was found
    */
-  function _findVideo($thumb) {
+  public function _findVideo($thumb) {
     $thumbFilename = $this->controller->MyFile->getFilename($thumb);
     $path = dirname($thumbFilename);
-    $folder =& new Folder($path);
+    $folder = new Folder($path);
     $pattern = basename($thumbFilename);
     $pattern = substr($pattern, 0, strrpos($pattern, '.')+1).'('.implode($this->_getVideoExtensions(), '|').')';
     $found = $folder->find($pattern);
@@ -71,7 +71,7 @@ class VideoFilterComponent extends BaseFilterComponent {
     return false;
   }
 
-  function _readThumb($file, &$media) {
+  public function _readThumb($file, &$media) {
     $filename = $this->controller->MyFile->getFilename($file);
     if (!$media) {
       $video = $this->_findVideo($file);
@@ -94,7 +94,7 @@ class VideoFilterComponent extends BaseFilterComponent {
         $tmp[$column] = $media['Media'][$column];
       }
     }
-    $ImageFilter->read(&$file, &$media, array('noSave' => true));
+    $ImageFilter->read($file, $media, array('noSave' => true));
     // accept different name except filename
     if ($media['Media']['name'] != basename($filename)) {
       unset($tmp['name']);
@@ -118,11 +118,11 @@ class VideoFilterComponent extends BaseFilterComponent {
    * @param image Media model data
    * @return True, false on error
    */
-  function read(&$file, &$media, $options = array()) {
+  public function read(&$file, &$media = null, $options = array()) {
     $filename = $this->controller->MyFile->getFilename($file);
 
     if ($this->controller->MyFile->isType($file, FILE_TYPE_VIDEOTHUMB)) {
-      return $this->_readThumb($file, &$media);
+      return $this->_readThumb($file, $media);
     } elseif (!$this->controller->MyFile->isType($file, FILE_TYPE_VIDEO)) {
       $this->FilterManager->addError($filename, "FileNotSupported");
       Logger::err("File type is not supported: ".$this->controller->MyFile->getFilename($file));
@@ -142,12 +142,12 @@ class VideoFilterComponent extends BaseFilterComponent {
       } else {
         $user = $this->controller->getUser();
       }
-      $media = $this->controller->Media->addDefaultAcl(&$media, &$user);
+      $media = $this->controller->Media->addDefaultAcl($media, $user);
 
       $isNew = true;
     }
 
-    $media = $this->_readVideoFormat(&$media, $filename);
+    $media = $this->_readVideoFormat($media, $filename);
     if (!$media || !$this->controller->Media->save($media)) {
       $this->FilterManager->addError($filename, "MediaSaveError");
       Logger::err("Could not save media");
@@ -172,7 +172,7 @@ class VideoFilterComponent extends BaseFilterComponent {
     return $this->controller->Media->findById($mediaId);
   }
 
-  function _readVideoFormat(&$media, $filename) {
+  public function _readVideoFormat(&$media, $filename) {
     if ($this->controller->getOption('bin.exiftool')) {
       $result = $this->_readExiftool($filename);
     }
@@ -193,7 +193,7 @@ class VideoFilterComponent extends BaseFilterComponent {
     return $media;
   }
 
-  function _readExiftool($filename) {
+  public function _readExiftool($filename) {
     $bin = $this->controller->getOption('bin.exiftool', 'exiftool');
     $this->Command->redirectError = true;
     $result = $this->Command->run($bin, array('-n', '-S', $filename));
@@ -246,7 +246,7 @@ class VideoFilterComponent extends BaseFilterComponent {
     return $result;
   }
 
-  function _readFfmpeg($filename) {
+  public function _readFfmpeg($filename) {
     $bin = $this->controller->getOption('bin.ffmpeg', 'ffmpeg');
     $this->Command->redirectError = true;
     $result = $this->Command->run($bin, array('-i' => $filename, '-t', 0.0));
@@ -286,7 +286,7 @@ class VideoFilterComponent extends BaseFilterComponent {
     return $result;
   }
 
-  function _readGetId3($filename) {
+  public function _readGetId3($filename) {
     App::import('vendor', 'getid3/getid3');
     $getId3 = new getId3();
     // disable not required modules
@@ -311,7 +311,7 @@ class VideoFilterComponent extends BaseFilterComponent {
   }
 
   // Check for video thumb
-  function _hasThumb($media) {
+  public function _hasThumb($media) {
     $thumb = $this->controller->Media->getFile($media, FILE_TYPE_VIDEOTHUMB);
     if ($thumb) {
       return true;
@@ -320,7 +320,7 @@ class VideoFilterComponent extends BaseFilterComponent {
     }
   }
 
-  function _createThumb($media) {
+  public function _createThumb($media) {
     $video = $this->controller->Media->getFile($media, FILE_TYPE_VIDEO);
     if (!$video) {
       Logger::err("Media {$media['Media']['id']} has no video");
@@ -336,7 +336,7 @@ class VideoFilterComponent extends BaseFilterComponent {
     return $this->FileManager->add($thumb);
   }
 
-  function write($file, $media, $options = array()) {
+  public function write(&$file, &$media, $options = array()) {
     if (!$this->_hasThumb($media)) {
       $id = $this->_createThumb($media);
       if ($id) {
@@ -354,7 +354,7 @@ class VideoFilterComponent extends BaseFilterComponent {
       }
       $filename = $this->controller->MyFile->getFilename($file);
       Logger::debug("Write video thumbnail by ImageFilter: $filename");
-      return $imageFilter->write(&$file, &$media);
+      return $imageFilter->write($file, $media);
     }
     return true;
   }

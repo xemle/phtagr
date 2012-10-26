@@ -25,13 +25,13 @@ class HomeController extends AppController
 
   /** Check database configuration and connection. If missing redirect to
    * the setup. */
-  function beforeFilter() {
+  public function beforeFilter() {
     if (!file_exists(CONFIGS . 'database.php')) {
       $this->redirect('/setup');
     }
 
     App::uses('ConnectionManager', 'Model');
-    $db =& ConnectionManager::getDataSource('default');
+    $db = ConnectionManager::getDataSource('default');
     if (!$db->enabled()) {
       $this->redirect('/setup');
     }
@@ -45,7 +45,7 @@ class HomeController extends AppController
   }
 
   /** @todo improve the randomized newest media */
-  function index() {
+  public function index() {
     $this->Search->setSort('newest');
     $this->Search->setShow(50);
     $newest = $this->Search->paginate();
@@ -70,7 +70,7 @@ class HomeController extends AppController
     $this->set('cloudTags', $this->Media->cloud($user, 'Tag', 50));
     $this->set('cloudCategories', $this->Media->cloud($user, 'Category', 50));
 
-    $this->Comment->currentUser =& $this->getUser();
+    $this->Comment->currentUser = $this->getUser();
     $comments = $this->Comment->paginate(array(), array(), 'Comment.date DESC', 4);
     $this->FastFileResponder->addAll($comments, 'mini');
     $this->set('comments', $comments);

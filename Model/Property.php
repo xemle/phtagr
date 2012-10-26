@@ -29,7 +29,7 @@ class Property extends AppModel {
       )
   );
 
-  function copy($data, $imageId) {
+  public function copy($data, $imageId) {
     if (empty($data['Property']))
       return;
     foreach ($data['Property'] as $property) {

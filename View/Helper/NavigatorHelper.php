@@ -18,7 +18,7 @@
 class NavigatorHelper extends AppHelper {
   var $helpers = array('Html', 'Search', 'Breadcrumb');
 
-  function beforeRender() {
+  function beforeRender($viewFile) {
     $this->Search->initialize();
   }
 

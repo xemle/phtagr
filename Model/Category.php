@@ -20,7 +20,7 @@ class Category extends AppModel
   var $name = 'Category';
   var $actsAs = array('WordList');
 
-  function editMetaSingle(&$media, &$data) {
+  public function editMetaSingle(&$media, &$data) {
     if (!isset($data['Category']['names'])) {
       return false;
     }
@@ -42,7 +42,7 @@ class Category extends AppModel
    * @param type $data
    * @return type
    */
-  function prepareMultiEditData(&$data) {
+  public function prepareMultiEditData(&$data) {
     if (empty($data['Category']['names'])) {
        return false;
     }
@@ -71,7 +71,7 @@ class Category extends AppModel
    * @param type $data
    * @return type
    */
-  function editMetaMulti(&$media, &$data) {
+  public function editMetaMulti(&$media, &$data) {
     if (empty($data['Category'])) {
       return false;
     }

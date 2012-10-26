@@ -21,7 +21,7 @@ class FileManagerComponent extends Component {
   var $MyFile = null;
   var $User = null;
 
-  function initialize(&$controller) {
+  public function initialize(Controller $controller) {
     $this->controller = $controller;
     if (!empty($controller->MyFile)) {
       $this->MyFile = $controller->MyFile;
@@ -39,7 +39,7 @@ class FileManagerComponent extends Component {
    * @param user Optional user. User model data or user Id.
    * @return File id or false on error
    */
-  function add($filename, $user = false) {
+  public function add($filename, $user = false) {
     if (!is_readable($filename)) {
       Logger::error("Can not read file: $filename");
       return false;
@@ -88,7 +88,7 @@ class FileManagerComponent extends Component {
    * @param file File ID, filename or file model data
    * @return True on success
    */
-  function delete($file) {
+  public function delete($file) {
     $isExternal = $this->isExternal($file);
     if (is_string($file)) {
       if (is_dir($file)) {
@@ -120,7 +120,7 @@ class FileManagerComponent extends Component {
   /**
    * Delete a file (Alias of delete())
    */
-  function del($file) {
+  public function del($file) {
     return $this->delete($file);
   }
 
@@ -130,7 +130,7 @@ class FileManagerComponent extends Component {
    * @param user Optional user
    * @return internal user directory
    */
-  function getUserDir($user = false) {
+  public function getUserDir($user = false) {
     if (!$user) {
       $user = $this->controller->getUser();
     }
@@ -154,7 +154,7 @@ class FileManagerComponent extends Component {
    * @param user Optional user
    * @return True if filename is external
    */
-  function isExternal($filename, $user = false) {
+  public function isExternal($filename, $user = false) {
     if (!is_dir($filename)) {
       $filename = Folder::slashTerm(dirname($filename));
     }
@@ -172,7 +172,7 @@ class FileManagerComponent extends Component {
    * @param file Filename
    * @param user Optional user
    */
-  function canRead($file, $user = false) {
+  public function canRead($file, $user = false) {
     if (!$user) {
       $user = $this->controller->getUser();
     }
@@ -182,7 +182,7 @@ class FileManagerComponent extends Component {
   /** Checks if the user can write to his user directory
     @param size Bytes to write
     @param user Optionial user */
-  function canWrite($size, $user = false) {
+  public function canWrite($size, $user = false) {
     if (!$user) {
       $user = $this->controller->getUser();
     }
@@ -196,9 +196,9 @@ class FileManagerComponent extends Component {
     return false;
   }
 
-  function copy($src, $dst) {
+  public function copy($src, $dst) {
     if (is_dir($src)) {
-      $folder =& new Folder($src);
+      $folder = new Folder($src);
       list($dirs, $files) = $folder->tree($src);
       sort($dirs);
       sort($files);
@@ -251,7 +251,7 @@ class FileManagerComponent extends Component {
     return true;
   }
 
-  function move($src, $dst) {
+  public function move($src, $dst) {
     if (!file_exists($src)) {
       Logger::err("Invalid source: $src. File does not exists");
       return false;
@@ -275,7 +275,7 @@ class FileManagerComponent extends Component {
    * @param filename Filename
    * @return unique filename
    */
-  function createUniqueFilename($path, $filename) {
+  public function createUniqueFilename($path, $filename) {
     $path = Folder::slashTerm($path);
     if (!file_exists($path . $filename)) {
       return $filename;

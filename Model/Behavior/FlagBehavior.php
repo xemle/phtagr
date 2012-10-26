@@ -19,11 +19,11 @@ class FlagBehavior extends ModelBehavior
 {
   var $config = array();
 
-  function setup(&$model, $config = array()) {
+  public function setup(Model $model, $config = array()) {
     $this->config[$model->name] = $config;
   }
 
-  function setFlag(&$model, $data, $flag) {
+  public function setFlag(&$model, $data, $flag) {
     if (!$data) {
       $data = $model->data;
     }
@@ -49,7 +49,7 @@ class FlagBehavior extends ModelBehavior
     return true;
   }
 
-  function deleteFlag(&$model, $data, $flag) {
+  public function deleteFlag(&$model, $data, $flag) {
     if (!$data) {
       $data = $model->data;
     }
@@ -75,11 +75,11 @@ class FlagBehavior extends ModelBehavior
   }
 
   /** Alias for deleteFlag */
-  function delFlag(&$model, $data, $flag) {
+  public function delFlag(&$model, $data, $flag) {
     return $this->deleteFlag($model, $data, $flag);
   }
 
-  function hasFlag(&$model, $data, $flag) {
+  public function hasFlag(&$model, $data, $flag) {
     if (!$data) {
       $data = $model->data;
     }

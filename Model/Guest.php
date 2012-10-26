@@ -46,14 +46,14 @@ class Guest extends AppModel
       'message' => 'Email address is not valid')
     );
 
-  function afterFind($result, $primary = false) {
+  public function afterFind($result, $primary = false) {
     if ($primary && isset($result[0]['Option'])) {
       $result[0]['Option'] = $this->Option->addDefaults($result[0]['Option']);
     }
     return $result;
   }
 
-  function beforeValidate() {
+  public function beforeValidate($options = array()) {
     if (isset($this->data['Guest']['password']) &&
       isset($this->data['Guest']['confirm'])) {
       if (empty($this->data['Guest']['password']) &&
@@ -72,7 +72,7 @@ class Guest extends AppModel
     }
   }
 
-  function beforeSave() {
+  public function beforeSave($options = array()) {
     if (isset($this->data['Guest']['webdav']) && $this->data['Guest']['webdav'] > 0) {
       $this->data['Guest']['quota'] = 1;
     } else {
@@ -86,7 +86,7 @@ class Guest extends AppModel
     return true;
   }
 
-  function generateKey($data) {
+  public function generateKey($data) {
     srand(microtime(true)*1000);
     $h = '';
     for ($i = 0; $i < 128; $i++) {

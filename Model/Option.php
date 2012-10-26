@@ -24,7 +24,7 @@ class Option extends AppModel {
                            ACL_LEVEL_USER => 'uacl',
                            ACL_LEVEL_OTHER => 'oacl');
 
-  function addDefaults($options) {
+  public function addDefaults($options) {
     $ownOptions = Set::extract('/name', $options);
     $this->unbindModel(array('belongsTo' => array('User')));
     $defaultOptions = $this->findAllByUserId(0);
@@ -45,7 +45,7 @@ class Option extends AppModel {
    * @param user User model data
    * @return Array of options
    */
-  function getOptions($user) {
+  public function getOptions($user) {
     $options = array();
     if (!isset($user['Option'])) {
       return $options;
@@ -66,24 +66,24 @@ class Option extends AppModel {
     return $options;
   }
 
-  function getTree($userId) {
+  public function getTree($userId) {
     $this->unbindModel(array('belongsTo' => array('User')));
     $data = $this->find('all', array('conditions' => "user_id = $userId OR user_id = 0 ORDER BY user_id ASC"));
     return $this->buildTree($data);
   }
 
-  function buildTree($data, $subPath = null, $strip = false) {
+  public function buildTree($data, $subPath = null, $strip = false) {
     $tree = array();
     // Option is set as root
     if (isset($data['Option']))
-      $data = &$data['Option'];
+      $data = $data['Option'];
 
     foreach ($data as $item) {
       // Option is set as item
       if (isset($item['Option'])) {
-        $option = &$item['Option'];
+        $option = $item['Option'];
       } else {
-        $option = &$item;
+        $option = $item;
       }
 
       // Skip if subpath does not match
@@ -92,7 +92,7 @@ class Option extends AppModel {
       } elseif ($strip && strpos($subPath, '.') > 0) {
         $option['name'] = substr($option['name'], strrpos($subPath, '.')+1);
       }
-      $node = &$tree;
+      $node = $tree;
       $paths = explode('.', $option['name']);
       for($i=0; $i<count($paths); $i++) {
         $path=$paths[$i];
@@ -103,7 +103,7 @@ class Option extends AppModel {
         } else {
           $isArray = false;
         }
-        $node = &$node[$path];
+        $node = $node[$path];
       }
       if ($isArray) {
         $node[] = $option['value'];
@@ -122,7 +122,7 @@ class Option extends AppModel {
    * @param default Default value, if value is not found
    * @return Value of the option
    */
-  function _getModelValue($data, $name, $default = null) {
+  public function _getModelValue($data, $name, $default = null) {
     if (!isset($data['Option'])) {
       return $default;
     }
@@ -158,7 +158,7 @@ class Option extends AppModel {
    * @return Extracted option (or default value)
    * @see _getModelValue
    */
-  function getValue($data, $path, $default = null) {
+  public function getValue($data, $path, $default = null) {
     if (isset($data['Option'])) {
       return $this->_getModelValue($data, $path, $default);
     }
@@ -169,7 +169,7 @@ class Option extends AppModel {
     return $default;
   }
 
-  function setValue($name, $value, $userId = null) {
+  public function setValue($name, $value, $userId = null) {
     if (strlen($name) > 1 && substr($name, -2) == '[]') {
       return $this->addValue($name, $value, $userId);
     }
@@ -188,7 +188,7 @@ class Option extends AppModel {
     }
   }
 
-  function addValue($name, $value, $userId = null) {
+  public function addValue($name, $value, $userId = null) {
     if (strlen($name) < 2 || substr($name, -2) != '[]') {
       return $this->setValue($name, $value, $userId);
     }
@@ -201,7 +201,7 @@ class Option extends AppModel {
     $this->save();
   }
 
-  function delValue($name, $value = null, $userId = null) {
+  public function delValue($name, $value = null, $userId = null) {
     if ($userId !== null) {
       $this->data['User']['id'] = $userId;
     } else {
@@ -225,7 +225,7 @@ class Option extends AppModel {
    * @param mask Bit mask of flag
    * @param level Highes ACL level which should be increased
    */
-  function _increaseAcl(&$data, $flag, $mask, $level) {
+  public function _increaseAcl(&$data, $flag, $mask, $level) {
     //Logger::debug("Increase: {$data['gacl']},{$data['uacl']},{$data['oacl']}: $flag/$mask ($level)");
     if ($level>ACL_LEVEL_OTHER)
       return;
@@ -250,7 +250,7 @@ class Option extends AppModel {
    * @param mask Bit mask of flag
    * @param level Lower ACL level which should be downgraded
    */
-  function _decreaseAcl(&$data, $flag, $mask, $level) {
+  public function _decreaseAcl(&$data, $flag, $mask, $level) {
     //Logger::debug("Decrease: {$data['gacl']},{$data['uacl']},{$data['oacl']}: $flag/$mask ($level)");
     if ($level<ACL_LEVEL_GROUP)
       return;
@@ -271,7 +271,7 @@ class Option extends AppModel {
     //Logger::debug("Decrease (result): {$data['gacl']},{$data['uacl']},{$data['oacl']}: $flag/$mask ($level)");
   }
 
-  function setAcl(&$data, $flag, $mask, $level) {
+  public function setAcl(&$data, $flag, $mask, $level) {
     if ($level<ACL_LEVEL_KEEP || $level>ACL_LEVEL_OTHER)
       return false;
 
@@ -279,15 +279,15 @@ class Option extends AppModel {
       return $data;
 
     if ($level>=ACL_LEVEL_GROUP)
-      $this->_increaseAcl(&$data, $flag, $mask, $level);
+      $this->_increaseAcl($data, $flag, $mask, $level);
 
     if ($level<ACL_LEVEL_OTHER)
-      $this->_decreaseAcl(&$data, $flag, $mask, $level+1);
+      $this->_decreaseAcl($data, $flag, $mask, $level+1);
 
     return $data;
   }
 
-  function addDefaultAclTree($tree) {
+  public function addDefaultAclTree($tree) {
     if (!isset($tree['acl']['write']['tag'])) {
       $tree['acl']['write']['tag'] = ACL_LEVEL_USER;
     }
@@ -306,7 +306,7 @@ class Option extends AppModel {
     return $tree;
   }
 
-  function getDefaultAcl($data) {
+  public function getDefaultAcl($data) {
     $tree = $this->buildTree($data);
 
     // default values
@@ -317,11 +317,11 @@ class Option extends AppModel {
         'oacl' => ACL_READ_PREVIEW
       );
 
-    $this->setAcl(&$acl, ACL_WRITE_TAG, ACL_WRITE_MASK, $this->getValue($tree, 'acl.write.tag', ACL_LEVEL_OTHER));
-    $this->setAcl(&$acl, ACL_WRITE_META, ACL_WRITE_MASK, $this->getValue($tree, 'acl.write.meta', ACL_LEVEL_USER));
+    $this->setAcl($acl, ACL_WRITE_TAG, ACL_WRITE_MASK, $this->getValue($tree, 'acl.write.tag', ACL_LEVEL_OTHER));
+    $this->setAcl($acl, ACL_WRITE_META, ACL_WRITE_MASK, $this->getValue($tree, 'acl.write.meta', ACL_LEVEL_USER));
 
-    $this->setAcl(&$acl, ACL_READ_PREVIEW, ACL_READ_MASK, $this->getValue($tree, 'acl.read.preview', ACL_LEVEL_OTHER));
-    $this->setAcl(&$acl, ACL_READ_ORIGINAL, ACL_READ_MASK, $this->getValue($tree, 'acl.read.original', ACL_LEVEL_GROUP));
+    $this->setAcl($acl, ACL_READ_PREVIEW, ACL_READ_MASK, $this->getValue($tree, 'acl.read.preview', ACL_LEVEL_OTHER));
+    $this->setAcl($acl, ACL_READ_ORIGINAL, ACL_READ_MASK, $this->getValue($tree, 'acl.read.original', ACL_LEVEL_GROUP));
 
     return $acl;
   }

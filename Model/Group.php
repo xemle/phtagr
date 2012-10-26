@@ -25,7 +25,7 @@ class Group extends AppModel
 
   var $actsAs = array('WordList');
 
-  function isNameUnique($group) {
+  public function isNameUnique($group) {
     $conditions = array('name' => $group['Group']['name']);
     if (isset($group['Group']['id'])) {
       $conditions['id !='] = $group['Group']['id'];
@@ -41,7 +41,7 @@ class Group extends AppModel
    * @param type $user Current user
    * @return type
    */
-  function prepareMultiEditData(&$data, &$user) {
+  public function prepareMultiEditData(&$data, &$user) {
     if (empty($data['Group']['names'])) {
       return false;
     }
@@ -80,7 +80,7 @@ class Group extends AppModel
    * @param type $data
    * @return type
    */
-  function editMetaMulti(&$media, &$data) {
+  public function editMetaMulti(&$media, &$data) {
     if (empty($data['Group'])) {
       return false;
     }
@@ -94,7 +94,7 @@ class Group extends AppModel
     }
   }
 
-  function editMetaSingle(&$media, &$data, &$user) {
+  public function editMetaSingle(&$media, &$data, &$user) {
     if (!isset($data['Group']['names'])) {
       return false;
     }
@@ -120,7 +120,7 @@ class Group extends AppModel
    * @param user Current user model data
    * @return Array of group model data
    */
-  function getGroupsForMedia($user) {
+  public function getGroupsForMedia($user) {
     if ($user['User']['role'] >= ROLE_ADMIN) {
       return $this->find('all', array('recursive' => -1));
     }
@@ -141,7 +141,7 @@ class Group extends AppModel
     @param groupId Group ID
     @param userId User ID
     @return Return code */
-  function subscribe($group, $userId) {
+  public function subscribe($group, $userId) {
     if (!$group) {
       return $this->returnCode(404, sprintf(__("%s not found", true), __("Group", true)));
     } elseif (!$userId) {
@@ -164,7 +164,7 @@ class Group extends AppModel
     @param groupName Group name
     @param userId User ID
     @return Return code */
-  function unsubscribe($group, $userId) {
+  public function unsubscribe($group, $userId) {
     if (!$group) {
       return $this->returnCode(404, sprintf(__("%s not found", true), __("Group", true)));
     }
@@ -182,7 +182,7 @@ class Group extends AppModel
   }
 
   /** Evaluates if the group is writeable */
-  function isAdmin(&$group, &$user) {
+  public function isAdmin(&$group, &$user) {
     if ($user['User']['role'] >= ROLE_ADMIN || $user['User']['id'] == $group['Group']['user_id']) {
       return true;
     } else {
@@ -194,8 +194,8 @@ class Group extends AppModel
     @param group Group model data (as reference)
     @param user Current user
     @return Group model data */
-  function setAdmin(&$group, &$user) {
-    $group['Group']['is_admin'] = $this->isAdmin(&$group, &$user);
+  public function setAdmin(&$group, &$user) {
+    $group['Group']['is_admin'] = $this->isAdmin($group, $user);
     return $group;
   }
 }

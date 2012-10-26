@@ -26,7 +26,7 @@ class Tag extends AppModel
    * @param type $data
    * @return type
    */
-  function prepareMultiEditData(&$data) {
+  public function prepareMultiEditData(&$data) {
     if (empty($data['Tag']['names'])) {
        return false;
     }
@@ -55,7 +55,7 @@ class Tag extends AppModel
    * @param type $data
    * @return type
    */
-  function editMetaMulti(&$media, &$data) {
+  public function editMetaMulti(&$media, &$data) {
     if (empty($data['Tag'])) {
       return false;
     }
@@ -69,7 +69,7 @@ class Tag extends AppModel
     }
   }
 
-  function editMetaSingle(&$media, &$data) {
+  public function editMetaSingle(&$media, &$data) {
     if (!isset($data['Tag']['names'])) {
       return false;
     }

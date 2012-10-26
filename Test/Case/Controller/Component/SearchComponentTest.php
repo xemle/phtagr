@@ -75,8 +75,8 @@ class SearchComponentTestCase extends CakeTestCase {
 	/**
    * Load ShellControllerMock with models and components
    */
-  function loadControllerMock() {
-    $this->ControllerMock =& new TestControllerMock();
+  public function loadControllerMock() {
+    $this->ControllerMock = new TestControllerMock();
     $this->ControllerMock->setRequest(new CakeRequest());
     $this->ControllerMock->response = new CakeResponse();
     $this->ControllerMock->uses = $this->uses;
@@ -88,7 +88,7 @@ class SearchComponentTestCase extends CakeTestCase {
   /**
    * Bind controller's components to shell
    */
-  function bindCompontents() {
+  public function bindCompontents() {
     foreach($this->ControllerMock->components as $key => $component) {
       if (!is_numeric($key)) {
         $component = $key;
@@ -97,14 +97,14 @@ class SearchComponentTestCase extends CakeTestCase {
         $this->out("Could not load component $component");
         exit(1);
       }
-      $this->{$component} =& $this->ControllerMock->{$component};
+      $this->{$component} = $this->ControllerMock->{$component};
     }
   }
 
   /**
    * Bind controller's model to shell
    */
-  function bindModels() {
+  public function bindModels() {
     foreach($this->ControllerMock->uses as $key => $model) {
       if (!is_numeric($key)) {
         $model = $key;
@@ -113,11 +113,11 @@ class SearchComponentTestCase extends CakeTestCase {
         $this->out("Could not load model $model");
         exit(1);
       }
-      $this->{$model} =& $this->ControllerMock->{$model};
+      $this->{$model} = $this->ControllerMock->{$model};
     }
   }
 
-  function mockUser($user) {
+  public function mockUser($user) {
     $this->ControllerMock->mockUser($user);
   }
 
@@ -132,7 +132,7 @@ class SearchComponentTestCase extends CakeTestCase {
 		parent::tearDown();
 	}
 
-  function testValidation() {
+  public function testValidation() {
 
     // simple rule, false test
     $this->Search->setPage('two');
@@ -191,12 +191,12 @@ class SearchComponentTestCase extends CakeTestCase {
     $this->assertEqual($result, "rule it");
   }
 
-  function testDecode() {
+  public function testDecode() {
     $decoded = $this->Search->decode("folder:2012=2f2012-03-10");
     $this->assertEqual($decoded, "folder:2012/2012-03-10");
   }
 
-  function testEncode() {
+  public function testEncode() {
     $encoded = $this->Search->encode("folder:2012/2012-03-10");
     $this->assertEqual($encoded, "folder:2012=2f2012-03-10");
   }
@@ -204,7 +204,7 @@ class SearchComponentTestCase extends CakeTestCase {
   /**
    * Test group search with correct acl sql query
    */
-  function testGroupSearchWithGroupAcl() {
+  public function testGroupSearchWithGroupAcl() {
     $admin = $this->User->save($this->User->create(array('username' => 'admin', 'role' => ROLE_ADMIN)));
     $user1 = $this->User->save($this->User->create(array('username' => 'admin', 'role' => ROLE_USER)));
 
@@ -226,7 +226,7 @@ class SearchComponentTestCase extends CakeTestCase {
     $this->assertEqual(array('IMG_1234.JPG'), Set::extract('/Media/name', $result));
   }
 
-  function testMultipleGroupSearch() {
+  public function testMultipleGroupSearch() {
     $this->User->save($this->User->create(array('username' => 'admin', 'role' => ROLE_ADMIN)));
     $admin = $this->User->findById($this->User->getLastInsertID());
 
@@ -273,7 +273,7 @@ class SearchComponentTestCase extends CakeTestCase {
     $this->assertEqual(array('IMG_1234.JPG'), Set::extract('/Media/name', $result));
   }
 
-  function testAccessForUserRole() {
+  public function testAccessForUserRole() {
     $this->User->save($this->User->create(array('username' => 'userA', 'role' => ROLE_USER)));
     $userA = $this->User->findById($this->User->getLastInsertID());
     $this->User->save($this->User->create(array('username' => 'userB', 'role' => ROLE_USER)));

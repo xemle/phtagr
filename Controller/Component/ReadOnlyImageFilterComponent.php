@@ -19,15 +19,15 @@ App::uses('BaseFilter', 'Component');
 class ReadOnlyImageFilterComponent extends BaseFilterComponent {
   var $controller = null;
 
-  function initialize(&$controller) {
-    $this->controller =& $controller;
+  public function initialize(Controller $controller) {
+    $this->controller = $controller;
   }
 
-  function getName() {
+  public function getName() {
     return "ReadOnlyImage";
   }
 
-  function getExtensions() {
+  public function getExtensions() {
     return array('bmp', 'gif', 'png', 'psd', 'tif', 'tiff');
   }
 
@@ -40,7 +40,7 @@ class ReadOnlyImageFilterComponent extends BaseFilterComponent {
    *  - noSave if set dont save model data
    * @return The image data array or False on error
    */
-  function read($file, &$media, $options = array()) {
+  public function read(&$file, &$media = null, $options = array()) {
     $options = am(array('noSave' => false), $options);
     $filename = $this->controller->MyFile->getFilename($file);
 
@@ -54,7 +54,7 @@ class ReadOnlyImageFilterComponent extends BaseFilterComponent {
       } else {
         $user = $this->controller->getUser();
       }
-      $media = $this->controller->Media->addDefaultAcl(&$media, &$user);
+      $media = $this->controller->Media->addDefaultAcl($media, $user);
 
       $isNew = true;
     };
@@ -108,7 +108,7 @@ class ReadOnlyImageFilterComponent extends BaseFilterComponent {
    * @param options Array of options
    * @return False on error
    */
-  function write($file, $media = null, $options = array()) {
+  public function write(&$file, &$media, $options = array()) {
     Logger::warn("Write action is not supported for {$file['File']['file']}");
     $filename = $this->controller->MyFile->getFilename($file);
     $this->FilterManager->addError($filename, 'MetaDataWriteNotSupported');

@@ -54,8 +54,8 @@ class PreviewManagerComponent extends Component {
 
   var $errors = 0;
 
-  function initialize(&$controller) {
-    $this->controller =& $controller;
+  public function initialize(Controller $controller) {
+    $this->controller = $controller;
     if (!isset($controller->Media)) {
       Logger::err("Model MyFile and Media is not found");
       return false;
@@ -63,14 +63,14 @@ class PreviewManagerComponent extends Component {
   }
 
   /** Return image source file of the media */
-  function _getImageSoureFilename($media) {
+  public function _getImageSoureFilename($media) {
     $type = $this->controller->Media->getType($media);
     if ($type != MEDIA_TYPE_IMAGE && $type != MEDIA_TYPE_VIDEO) {
       Logger::err("Media type not supported: {$this->controller->Media->getType($media)}");
       return false;
     }
     if ($type == MEDIA_TYPE_VIDEO) {
-      $this->controller->loadComponent('VideoPreview', &$this);
+      $this->controller->loadComponent('VideoPreview', $this);
       return $this->VideoPreview->getPreviewFilename($media);
     }
     $file = $this->controller->Media->getFile($media, FILE_TYPE_IMAGE, false);
@@ -86,7 +86,7 @@ class PreviewManagerComponent extends Component {
     @param name Configuration name
     @param config (Optional) configuration for the preview generation
     @return Full path to the preview file */
-  function getPreview(&$media, $name, $config = array()) {
+  public function getPreview(&$media, $name, $config = array()) {
     $config = am($this->defaults, $config);
     if (isset($this->config[$name])) {
       $config = am($config, $this->config[$name]);
@@ -116,7 +116,7 @@ class PreviewManagerComponent extends Component {
         return false;
       }
     }
-    $this->controller->loadComponent('ImageResizer', &$this);
+    $this->controller->loadComponent('ImageResizer', $this);
     if (!$this->ImageResizer->resize($src, $dst, $config)) {
       Logger::err("Resize of '$src' to '$dst' failed");
       //Logger::debug($config);

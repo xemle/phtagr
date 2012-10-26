@@ -39,7 +39,7 @@ class Media extends AppModel
 
   var $actsAs = array('Type', 'Flag', 'Cache', 'Exclude');
 
-  function beforeDelete($cascade = true) {
+  public function beforeDelete($cascade = true) {
     // Delete media cache files
     $this->unbindAll();
     $this->set($this->findById($this->id));
@@ -47,7 +47,7 @@ class Media extends AppModel
     return true;
   }
 
-  function afterDelete() {
+  public function afterDelete() {
     $this->File->unlinkMedia($this->id);
   }
 
@@ -60,7 +60,7 @@ class Media extends AppModel
    * $this->id.
    * @param fileId File id of the file to be unlinked
    */
-  function unlinkFile(&$data, $fileId) {
+  public function unlinkFile(&$data, $fileId) {
     if (is_numeric($data)) {
       $mediaId = $data;
     } elseif (isset($data['Media']['id'])) {
@@ -115,9 +115,9 @@ class Media extends AppModel
     return true;
   }
 
-  function addDefaultAcl(&$data, $user) {
+  public function addDefaultAcl(&$data, $user) {
     if (!$data) {
-      $data =& $this->data;
+      $data = $this->data;
     }
     if (!isset($user) || !isset($user['User']['id'])) {
       Logger::err("User data is not correct! Media ACL will be wrong!");
@@ -143,7 +143,7 @@ class Media extends AppModel
    * returns only the file model of the media without associations
    * @return Fals on error, null if file was not found
    */
-  function getFile($data, $fileType = FILE_TYPE_IMAGE, $fullModel = true) {
+  public function getFile($data, $fileType = FILE_TYPE_IMAGE, $fullModel = true) {
     if (!$data) {
       $data = $this->data;
     }
@@ -166,19 +166,19 @@ class Media extends AppModel
     return null;
   }
 
-  function canRead(&$media, &$user) {
-    return $this->checkAccess(&$media, &$user, ACL_READ_PREVIEW, ACL_READ_MASK, null);
+  public function canRead(&$media, &$user) {
+    return $this->checkAccess($media, $user, ACL_READ_PREVIEW, ACL_READ_MASK, null);
   }
 
-  function canReadOriginal(&$media, &$user) {
-    return $this->checkAccess(&$media, &$user, ACL_READ_ORIGINAL, ACL_READ_MASK, null);
+  public function canReadOriginal(&$media, &$user) {
+    return $this->checkAccess($media, $user, ACL_READ_ORIGINAL, ACL_READ_MASK, null);
   }
 
-  function canWrite(&$media, &$user) {
-    return $this->checkAccess(&$media, &$user, ACL_WRITE_TAG, ACL_WRITE_MASK, null);
+  public function canWrite(&$media, &$user) {
+    return $this->checkAccess($media, $user, ACL_WRITE_TAG, ACL_WRITE_MASK, null);
   }
 
-  function canWriteAcl(&$media, &$user) {
+  public function canWriteAcl(&$media, &$user) {
     return ($media['Media']['user_id'] == $user['User']['id'] ||
             $user['User']['role'] >= ROLE_ADMIN);
   }
@@ -194,7 +194,7 @@ class Media extends AppModel
    * by the user's data.
    * @return True is user is allowed, False otherwise
    */
-  function checkAccess(&$data, &$user, $flag, $mask, $userGroupIds = array()) {
+  public function checkAccess(&$data, &$user, $flag, $mask, $userGroupIds = array()) {
     if (!$data || !$user || !isset($data['Media']) || !isset($user['User'])) {
       Logger::err("precondition failed");
       return false;
@@ -238,7 +238,7 @@ class Media extends AppModel
    * @param user User array
    * @return $data of Media data with the access flags
    */
-  function setAccessFlags(&$data, $user) {
+  public function setAccessFlags(&$data, $user) {
     if (!isset($data)) {
       return $data;
     }
@@ -254,13 +254,13 @@ class Media extends AppModel
     $userGroupIds = Set::extract('/Group/id', $user);
     $userGroupIds = am($userGroupIds, Set::extract('/Member/id', $user));
 
-    $data['Media']['canWriteTag'] = $this->checkAccess(&$data, &$user, ACL_WRITE_TAG, ACL_WRITE_MASK, &$userGroupIds);
-    $data['Media']['canWriteMeta'] = $this->checkAccess(&$data, &$user, ACL_WRITE_META, ACL_WRITE_MASK, &$userGroupIds);
-    $data['Media']['canWriteCaption'] = $this->checkAccess(&$data, &$user, ACL_WRITE_CAPTION, ACL_WRITE_MASK, &$userGroupIds);
+    $data['Media']['canWriteTag'] = $this->checkAccess($data, $user, ACL_WRITE_TAG, ACL_WRITE_MASK, $userGroupIds);
+    $data['Media']['canWriteMeta'] = $this->checkAccess($data, $user, ACL_WRITE_META, ACL_WRITE_MASK, $userGroupIds);
+    $data['Media']['canWriteCaption'] = $this->checkAccess($data, $user, ACL_WRITE_CAPTION, ACL_WRITE_MASK, $userGroupIds);
 
-    $data['Media']['canReadPreview'] = $this->checkAccess(&$data, &$user, ACL_READ_PREVIEW, ACL_READ_MASK, &$userGroupIds);
-    $data['Media']['canReadHigh'] = $this->checkAccess(&$data, &$user, ACL_READ_HIGH, ACL_READ_MASK, &$userGroupIds);
-    $data['Media']['canReadOriginal'] = $this->checkAccess(&$data, &$user, ACL_READ_ORIGINAL, ACL_READ_MASK, &$userGroupIds);
+    $data['Media']['canReadPreview'] = $this->checkAccess($data, $user, ACL_READ_PREVIEW, ACL_READ_MASK, $userGroupIds);
+    $data['Media']['canReadHigh'] = $this->checkAccess($data, $user, ACL_READ_HIGH, ACL_READ_MASK, $userGroupIds);
+    $data['Media']['canReadOriginal'] = $this->checkAccess($data, $user, ACL_READ_ORIGINAL, ACL_READ_MASK, $userGroupIds);
     if (($data['Media']['oacl'] & ACL_READ_PREVIEW) > 0) {
       $data['Media']['visibility'] = ACL_LEVEL_OTHER;
     } elseif (($data['Media']['uacl'] & ACL_READ_PREVIEW) > 0) {
@@ -272,7 +272,7 @@ class Media extends AppModel
     }
 
     $data['Media']['isOwner'] = ($data['Media']['user_id'] == $user['User']['id']) ? true : false;
-    $data['Media']['canWriteAcl'] = $this->checkAccess(&$data, &$user, 1, 0, &$userGroupIds);
+    $data['Media']['canWriteAcl'] = $this->checkAccess($data, $user, 1, 0, $userGroupIds);
     $data['Media']['isDirty'] = (($data['Media']['flag'] & MEDIA_FLAG_DIRTY) > 0) ? true : false;
 
     return $data;
@@ -288,7 +288,7 @@ class Media extends AppModel
    * @param mask Bit mask of flag
    * @param level Highes ACL level which should be increased
    */
-  function _increaseAcl(&$data, $flag, $mask, $level) {
+  public function _increaseAcl(&$data, $flag, $mask, $level) {
     //Logger::debug("Increase: {$data['Media']['gacl']},{$data['Media']['uacl']},{$data['Media']['oacl']}: $flag/$mask ($level)");
     if ($level>ACL_LEVEL_OTHER)
       return;
@@ -313,7 +313,7 @@ class Media extends AppModel
    * @param mask Bit mask of flag
    * @param level Lower ACL level which should be downgraded
    */
-  function _decreaseAcl(&$data, $flag, $mask, $level) {
+  public function _decreaseAcl(&$data, $flag, $mask, $level) {
     //Logger::debug("Decrease: {$data['Media']['gacl']},{$data['Media']['uacl']},{$data['Media']['oacl']}: $flag/$mask ($level)");
     if ($level<ACL_LEVEL_GROUP)
       return;
@@ -334,7 +334,7 @@ class Media extends AppModel
     //Logger::debug("Decrease (result): {$data['Media']['gacl']},{$data['Media']['uacl']},{$data['Media']['oacl']}: $flag/$mask ($level)");
   }
 
-  function setAcl(&$data, $flag, $mask, $level) {
+  public function setAcl(&$data, $flag, $mask, $level) {
     if ($level<ACL_LEVEL_KEEP || $level>ACL_LEVEL_OTHER)
       return false;
 
@@ -342,10 +342,10 @@ class Media extends AppModel
       return $data;
 
     if ($level>=ACL_LEVEL_GROUP)
-      $this->_increaseAcl(&$data, $flag, $mask, $level);
+      $this->_increaseAcl($data, $flag, $mask, $level);
 
     if ($level<ACL_LEVEL_OTHER)
-      $this->_decreaseAcl(&$data, $flag, $mask, $level+1);
+      $this->_decreaseAcl($data, $flag, $mask, $level+1);
 
     return $data;
   }
@@ -357,7 +357,7 @@ class Media extends AppModel
    * @param model Model name
    * @return Array of the relation model
    */
-  function _optimizedHabtm($id, $model) {
+  public function _optimizedHabtm($id, $model) {
     if (!isset($this->hasAndBelongsToMany[$model]['cacheQuery'])) {
       $db =& ConnectionManager::getDataSource($this->useDbConfig);
 
@@ -384,7 +384,7 @@ class Media extends AppModel
     $list = array();
     if ($result) {
       foreach ($result as $item) {
-        $list[] = &$item[$model];
+        $list[] = $item[$model];
       }
     }
     return $list;
@@ -397,7 +397,7 @@ class Media extends AppModel
    * @param model Model name
    * @return Array of the relation model
    */
-  function _optimizedBelongsTo($modelId, $model) {
+  public function _optimizedBelongsTo($modelId, $model) {
     if (!$modelId)
       return array();
 
@@ -428,7 +428,7 @@ class Media extends AppModel
    * @param model Model name
    * @return Array of the relation model
    */
-  function _optimizedHasMany($modelId, $model) {
+  public function _optimizedHasMany($modelId, $model) {
     if (!$modelId) {
       return array();
     }
@@ -467,7 +467,7 @@ class Media extends AppModel
    * @param id Media id
    * @return Return the image Array as find
    */
-  function optimizedRead($id) {
+  public function optimizedRead($id) {
     $db =& ConnectionManager::getDataSource($this->useDbConfig);
     $myTable = $db->fullTableName($this->table, false, false);
     $sql = "SELECT Media.* FROM `$myTable` AS Media WHERE Media.id = $id";
@@ -475,7 +475,7 @@ class Media extends AppModel
     if (!$result)
       return array();
 
-    $image = &$result[0];
+    $image = $result[0];
 
     foreach ($this->belongsTo as $model => $config) {
       $name = Inflector::underscore(Inflector::singularize($model));
@@ -496,7 +496,7 @@ class Media extends AppModel
   /**
    * Build join for ACL condition
    */
-  function buildAclJoin($alias) {
+  public function buildAclJoin($alias) {
     $this->bindModel(array('hasMany' => array($alias => array('className' => 'GroupsMedia'))));
     $config = $this->hasMany[$alias];
     $foreignKey = $config['foreignKey'];
@@ -519,7 +519,7 @@ class Media extends AppModel
    * @param level Level of ACL which image must be have. Default is ACL_READ_PREVIEW.
    * @return returns ACL query
    */
-  function buildAclQuery($user, $userId = 0, $level = ACL_READ_PREVIEW) {
+  public function buildAclQuery($user, $userId = 0, $level = ACL_READ_PREVIEW) {
     $level = intval($level);
     $conditions = array();
     $joins = array();
@@ -578,7 +578,7 @@ class Media extends AppModel
     return array('joins' => $joins, 'conditions' => $conditions);
   }
 
-  function updateRanking($data) {
+  public function updateRanking($data) {
     if (!isset($data['Media']['id'])) {
       Logger::warn("Precondition failed");
       return false;
@@ -607,7 +607,7 @@ class Media extends AppModel
    * @param int $num Maximum tags
    * @return array Map from name to hits
    */
-  function cloud($user, $assoc = 'Tag', $num = 50) {
+  public function cloud($user, $assoc = 'Tag', $num = 50) {
     if (!isset($this->hasAndBelongsToMany[$assoc])) {
       return array();
     }
@@ -652,7 +652,7 @@ class Media extends AppModel
    *
    * @param userId User ID
    */
-  function _deleteHasAndBelongsToManyFromUser($userId) {
+  public function _deleteHasAndBelongsToManyFromUser($userId) {
     $db =& ConnectionManager::getDataSource($this->useDbConfig);
 
     $table = $db->fullTableName($this->table, false, false);
@@ -672,7 +672,7 @@ class Media extends AppModel
     }
   }
 
-  function _deleteHasManyFromUser($userId) {
+  public function _deleteHasManyFromUser($userId) {
     $db =& ConnectionManager::getDataSource($this->useDbConfig);
 
     $table = $db->fullTableName($this->table, false, false);
@@ -694,7 +694,7 @@ class Media extends AppModel
     }
   }
 
-  function deleteFromUser($userId) {
+  public function deleteFromUser($userId) {
     $this->bindModel(array(
       'hasMany' => array(
         'Comment' => array('dependent' => true)
@@ -709,7 +709,7 @@ class Media extends AppModel
    * @param groupIds Single group ID value or array of group IDs
    * @return Count of media which are assigned to the given groups
    */
-  function countByGroupId($groupIds) {
+  public function countByGroupId($groupIds) {
     $this->unbindModel(array('belongsTo' => array('Group')));
     return $this->find('count', array(
       'conditions' => array('Group.id' => $groupIds),
@@ -721,7 +721,7 @@ class Media extends AppModel
    *
    * @return One of 0, 90, 180, 270 degree
    */
-  function getRotationInDegree($media) {
+  public function getRotationInDegree($media) {
     $degree = 0;
     $data = $this->stripAlias($media);
     switch ($data['orientation']) {
@@ -730,7 +730,7 @@ class Media extends AppModel
       case 6: $degree = 90; break;
       case 8: $degree = 270; break;
       default:
-        Logger::warn("Unsupported rotation flag: {$data['orientation']} for {$this->toString($data)}");
+        Logger::warn("Unsupported rotation flag: {$data['orientation']} for {$this->toStringModel($data)}");
         break;
     }
     return $degree;
@@ -743,7 +743,7 @@ class Media extends AppModel
    * @param geo Geo data string
    * @return Model data
    */
-  function splitGeo(&$data, $geo) {
+  public function splitGeo(&$data, $geo) {
     $numbers = preg_split('/\s*,\s*/', trim($geo));
     if (count($numbers) != 2) {
       Logger::debug("Invalid geo input: $geo");
@@ -764,7 +764,7 @@ class Media extends AppModel
     $data['Media']['longitude'] = $numbers[1];
   }
 
-  function rotate(&$data, $orientation, $rotation) {
+  public function rotate(&$data, $orientation, $rotation) {
     $rotateClockwise = array(
       1 => 6, 6 => 3, 3 => 8, 8 => 1,
       2 => 5, 5 => 4, 4 => 7, 7 => 2
@@ -787,7 +787,7 @@ class Media extends AppModel
    * @param data Data input
    * @param user Current user
    */
-  function prepareGroupData(&$data, &$user) {
+  public function prepareGroupData(&$data, &$user) {
     if (!isset($data['Group']['id'])) {
       return;
     }
@@ -809,7 +809,7 @@ class Media extends AppModel
    * @param media Media model data
    * @param data Update data
    */
-  function updateAcl(&$target, &$media, &$data) {
+  public function updateAcl(&$target, &$media, &$data) {
     $fields = array('gacl', 'uacl', 'oacl');
     // copy acl fields to target
     foreach ($fields as $field) {
@@ -817,17 +817,17 @@ class Media extends AppModel
     }
     // Higher grants first
     if (!empty($data['Media']['writeMeta'])) {
-      $this->setAcl(&$target, ACL_WRITE_META, ACL_WRITE_MASK, $data['Media']['writeMeta']);
+      $this->setAcl($target, ACL_WRITE_META, ACL_WRITE_MASK, $data['Media']['writeMeta']);
     }
     if (!empty($data['Media']['writeTag'])) {
-      $this->setAcl(&$target, ACL_WRITE_TAG, ACL_WRITE_MASK, $data['Media']['writeTag']);
+      $this->setAcl($target, ACL_WRITE_TAG, ACL_WRITE_MASK, $data['Media']['writeTag']);
     }
 
     if (!empty($data['Media']['readOriginal'])) {
-      $this->setAcl(&$target, ACL_READ_ORIGINAL, ACL_READ_MASK, $data['Media']['readOriginal']);
+      $this->setAcl($target, ACL_READ_ORIGINAL, ACL_READ_MASK, $data['Media']['readOriginal']);
     }
     if (!empty($data['Media']['readPreview'])) {
-      $this->setAcl(&$target, ACL_READ_PREVIEW, ACL_READ_MASK, $data['Media']['readPreview']);
+      $this->setAcl($target, ACL_READ_PREVIEW, ACL_READ_MASK, $data['Media']['readPreview']);
     }
 
     // Remove unchanged values
@@ -845,10 +845,10 @@ class Media extends AppModel
    * @param type $user Current user
    * @return array Array of add and removals
    */
-  function prepareMultiEditData(&$data, &$user) {
+  public function prepareMultiEditData(&$data, &$user) {
     $tmp = array();
     if (!empty($data['Media']['geo'])) {
-      $this->splitGeo(&$data, $data['Media']['geo']);
+      $this->splitGeo($data, $data['Media']['geo']);
     }
     $fields = array('name', 'description', 'date', 'latitude', 'longitude', 'rotation', 'readPreview', 'readOriginal', 'writeTag', 'writeMeta');
     foreach ($fields as $field) {
@@ -857,19 +857,19 @@ class Media extends AppModel
       }
     }
 
-    $group = $this->Group->prepareMultiEditData(&$data, &$user);
+    $group = $this->Group->prepareMultiEditData($data, $user);
     if ($group) {
       $tmp['Group'] = $group['Group'];
     }
-    $tag = $this->Tag->prepareMultiEditData(&$data);
+    $tag = $this->Tag->prepareMultiEditData($data);
     if ($tag) {
       $tmp['Tag'] = $tag['Tag'];
     }
-    $category = $this->Category->prepareMultiEditData(&$data);
+    $category = $this->Category->prepareMultiEditData($data);
     if ($category) {
       $tmp['Category'] = $category['Category'];
     }
-    $location = $this->Location->prepareMultiEditData(&$data);
+    $location = $this->Location->prepareMultiEditData($data);
     if ($location) {
       $tmp['Location'] = $location['Location'];
     }
@@ -879,21 +879,21 @@ class Media extends AppModel
     return $tmp;
   }
 
-  function editMulti(&$media, &$data) {
+  public function editMulti(&$media, &$data) {
     $tmp = array('Media' => array('id' => $media['Media']['id'], 'user_id' => $media['Media']['user_id']));
 
     if ($media['Media']['canWriteTag']) {
-      $tag = $this->Tag->editMetaMulti(&$media, &$data);
+      $tag = $this->Tag->editMetaMulti($media, $data);
       if ($tag) {
         $tmp['Tag'] = $tag['Tag'];
       }
     }
     if ($media['Media']['canWriteMeta']) {
-      $category = $this->Category->editMetaMulti(&$media, &$data);
+      $category = $this->Category->editMetaMulti($media, $data);
       if ($category) {
         $tmp['Category'] = $category['Category'];
       }
-      $location = $this->Location->editMetaMulti(&$media, &$data);
+      $location = $this->Location->editMetaMulti($media, $data);
       if ($location) {
         $tmp['Location'] = $location['Location'];
       }
@@ -918,18 +918,18 @@ class Media extends AppModel
         }
       }
       if (isset($data['Media']['rotation'])) {
-        $this->rotate(&$tmp, $media['Media']['orientation'], $data['Media']['rotation']);
+        $this->rotate($tmp, $media['Media']['orientation'], $data['Media']['rotation']);
       }
     }
     if (count($tmp) != 1 || count($tmp['Media']) != 2) {
       $tmp['Media']['flag'] = ($media['Media']['flag'] | MEDIA_FLAG_DIRTY);
     }
     if ($media['Media']['canWriteAcl']) {
-      $groups = $this->Group->editMetaMulti(&$media, &$data);
+      $groups = $this->Group->editMetaMulti($media, $data);
       if ($groups) {
         $tmp['Group'] = $groups['Group'];
       }
-      $this->updateAcl(&$tmp, &$media, &$data);
+      $this->updateAcl($tmp, $media, $data);
     }
     if (count($tmp) == 1 && count($tmp['Media']) == 2) {
       return false;
@@ -945,25 +945,25 @@ class Media extends AppModel
    * @param type $user Current user
    * @return type
    */
-  function editSingle(&$media, &$data, &$user) {
+  public function editSingle(&$media, &$data, &$user) {
     $tmp = array('Media' => array('id' => $media['Media']['id'], 'user_id' => $media['Media']['user_id']));
     if ($media['Media']['canWriteTag']) {
-      $tag = $this->Tag->editMetaSingle(&$media, &$data);
+      $tag = $this->Tag->editMetaSingle($media, $data);
       if (isset($tag['Tag'])) {
         $tmp['Tag'] = $tag['Tag'];
       }
     }
     if ($media['Media']['canWriteMeta']) {
-      $category = $this->Category->editMetaSingle(&$media, &$data);
+      $category = $this->Category->editMetaSingle($media, $data);
       if (isset($category['Category'])) {
         $tmp['Category'] = $category['Category'];
       }
-      $location = $this->Location->editMetaSingle(&$media, &$data);
+      $location = $this->Location->editMetaSingle($media, $data);
       if (isset($location['Location'])) {
         $tmp['Location'] = $location['Location'];
       }
       if (!empty($data['Media']['geo'])) {
-        $this->splitGeo(&$data, $data['Media']['geo']);
+        $this->splitGeo($data, $data['Media']['geo']);
       }
       $fields = array('latitude', 'longitude', 'altitude');
       foreach ($fields as $field) {
@@ -980,18 +980,18 @@ class Media extends AppModel
         }
       }
       if (isset($data['Media']['rotation'])) {
-        $this->rotate(&$tmp, $media['Media']['orientation'], $data['Media']['rotation']);
+        $this->rotate($tmp, $media['Media']['orientation'], $data['Media']['rotation']);
       }
     }
     if (count($tmp) != 1 || count($tmp['Media']) != 2) {
       $tmp['Media']['flag'] = ($media['Media']['flag'] | MEDIA_FLAG_DIRTY);
     }
     if ($media['Media']['canWriteAcl']) {
-      $groups = $this->Group->editMetaSingle(&$media, &$data, &$user);
+      $groups = $this->Group->editMetaSingle($media, $data, $user);
       if (isset($groups['Group'])) {
         $tmp['Group'] = $groups['Group'];
       }
-      $this->updateAcl(&$tmp, &$media, &$data);
+      $this->updateAcl($tmp, $media, $data);
     }
     // Unchanged data
     if (count($tmp) == 1 && count($tmp['Media']) == 2) {

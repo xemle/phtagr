@@ -52,14 +52,14 @@ class User extends AppModel
       'message' => 'Invalid notification interval')
     );
 
-  function afterFind($result, $primary = false) {
+  public function afterFind($result, $primary = false) {
     if ($primary && isset($result[0]['Option'])) {
       $result[0]['Option'] = $this->Option->addDefaults($result[0]['Option']);
     }
     return $result;
   }
 
-  function __fromReadableSize($readable) {
+  public function __fromReadableSize($readable) {
     if (is_float($readable) || is_numeric($readable)) {
       return $readable;
     } elseif (preg_match_all('/^\s*(0|[1-9][0-9]*)(\.[0-9]+)?\s*([KkMmGg][Bb]?)?\s*$/', $readable, $matches, PREG_SET_ORDER)) {
@@ -96,7 +96,7 @@ class User extends AppModel
     }
   }
 
-  function beforeValidate() {
+  public function beforeValidate($options = array()) {
     if (isset($this->data['User']['password']) &&
       isset($this->data['User']['confirm'])) {
       if (empty($this->data['User']['password']) &&
@@ -128,7 +128,7 @@ class User extends AppModel
     return true;
   }
 
-  function beforeSave() {
+  public function beforeSave($options = array()) {
     if (isset($this->data['User']['quota'])) {
       $this->data['User']['quota'] = $this->__fromReadableSize($this->data['User']['quota']);
     }
@@ -140,7 +140,7 @@ class User extends AppModel
     return true;
   }
 
-  function beforeDelete($cascade) {
+  public function beforeDelete($cascade = true) {
     $id = $this->id;
     $this->bindModel(array('hasMany' => array('Media')));
     Logger::info("Delete all image database entries of user $id");
@@ -157,7 +157,7 @@ class User extends AppModel
     return true;
   }
 
-  function writeSession($user, $session) {
+  public function writeSession(&$user, &$session) {
     if (!$session || !isset($user['User']['id']) || !isset($user['User']['role']) || !isset($user['User']['username'])) {
       return;
     }
@@ -166,12 +166,12 @@ class User extends AppModel
     $session->write('User.username', $user['User']['username']);
   }
 
-  function hasAnyWithRole($role = ROLE_ADMIN) {
+  public function hasAnyWithRole($role = ROLE_ADMIN) {
     $role = min(max(intval($role), ROLE_NOBODY), ROLE_ADMIN);
     return $this->hasAny("role >= $role");
   }
 
-  function getNobody() {
+  public function getNobody() {
     $nobody = array(
         'User' => array(
             'id' => -1,
@@ -182,7 +182,7 @@ class User extends AppModel
     return $nobody;
   }
 
-  function isExpired($data) {
+  public function isExpired($data) {
     if (!isset($data['User']['expires']))
       return false;
     $now = time();
@@ -197,7 +197,7 @@ class User extends AppModel
     @param length Key length. Default is 10. Must be beween 3 and 128.
     @param alphabet Key alphabet as string. Default is [a-zA-Z0-9]. Must be at least 10 characters long.
     @return User model data */
-  function generateKey($data, $length = 10, $alphabet = false) {
+  public function generateKey($data, $length = 10, $alphabet = false) {
     srand(microtime(true)*1000);
 
     if (!$alphabet || strlen(strval($alphabet)) < 10) {
@@ -216,7 +216,7 @@ class User extends AppModel
     return $data;
   }
 
-  function getRootDir($data) {
+  public function getRootDir($data) {
     if (!isset($data['User']['id'])) {
       Logger::err("Data does not contain user's id");
       return false;
@@ -231,14 +231,14 @@ class User extends AppModel
     return $rootDir;
   }
 
-  function allowWebdav($user) {
+  public function allowWebdav($user) {
     if (isset($user['User']['quota']) && $user['User']['quota'] > 0) {
       return true;
     }
     return false;
   }
 
-  function canUpload($user, $size) {
+  public function canUpload($user, $size) {
     $this->bindModel(array('hasMany' => array('MyFile')));
     $userId = intval($user['User']['id']);
     if ($userId < 1) {
@@ -262,7 +262,7 @@ class User extends AppModel
    * @param boolean like If true search for similar
    * @return Array of users model data. If username is set only one user model data
    */
-  function findVisibleUsers($user, $username = false, $like = false) {
+  public function findVisibleUsers($user, $username = false, $like = false) {
     $conditions = array();
     $findType = 'all';
     $resusive = -1;

@@ -21,8 +21,8 @@ class VideoPreviewComponent extends Component {
   var $components = array('FileCache', 'FileManager', 'Command');
   var $_semaphoreId = false;
 
-  function initialize(&$controller) {
-    $this->controller =& $controller;
+  public function initialize(Controller $controller) {
+    $this->controller = $controller;
     if (function_exists('sem_get')) {
       $this->_semaphoreId = sem_get(4713);
     }
@@ -35,13 +35,13 @@ class VideoPreviewComponent extends Component {
    * @param insertIfMissing If true, adds the thumb file to the database. Default is true
    * @return Filename of the thumb file. False if no thumb file was found
    */
-  function _findThumb($video, $insertIfMissing = true) {
+  public function _findThumb($video, $insertIfMissing = true) {
     $videoFilename = $this->controller->MyFile->getFilename($video);
     if (!file_exists($videoFilename)) {
       throw new Exception("Video file does not exists: $videoFilename");
     }
     $path = dirname($videoFilename);
-    $folder =& new Folder($path);
+    $folder = new Folder($path);
     $pattern = basename($videoFilename);
     $pattern = substr($pattern, 0, strrpos($pattern, '.')+1).'[Tt][Hh][Mm]';
     $found = $folder->find($pattern);
@@ -71,8 +71,8 @@ class VideoPreviewComponent extends Component {
     @param video File model data of a video
     @param thumbFilename Optional filename of the thumbnail image file
     @return Filename of the video thumbnail. False on failure */
-  function create($video, $thumbFilename = '', $overwrite = false) {
-    $videoFilename = $this->controller->MyFile->getFilename(&$video);
+  public function create($video, $thumbFilename = '', $overwrite = false) {
+    $videoFilename = $this->controller->MyFile->getFilename($video);
     $isNew = false;
     if (!file_exists($videoFilename) || !is_readable($videoFilename)) {
       Logger::err("Video file '$videoFilename' does not exists or is readable");
@@ -125,7 +125,7 @@ class VideoPreviewComponent extends Component {
   /** Returns the preview filename of the internal cache
     @param image Media model data
     @return Cached preview filename */
-  function getPreviewFilenameCache($media) {
+  public function getPreviewFilenameCache($media) {
     $path = $this->FileCache->getPath($media);
     $file = $this->FileCache->getFilenamePrefix($media['Media']['id']);
     $thumbFilename = $path.$file.'preview.thm';
@@ -137,7 +137,7 @@ class VideoPreviewComponent extends Component {
     @param options Array of options. Set 'create' to false to disable automaitc
     thumbnail creations. Default is true. Set 'noCache' to true to disable
     thumbnail creation in the cache directory. Default is false. */
-  function getPreviewFilename($media, $options = array()) {
+  public function getPreviewFilename($media, $options = array()) {
     $options = am($options, array('create' => true, 'noCache' => false));
 
     $thumb = $this->controller->Media->getFile($media, FILE_TYPE_VIDEOTHUMB, false);

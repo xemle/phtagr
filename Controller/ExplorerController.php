@@ -37,7 +37,7 @@ class ExplorerController extends AppController
     return $events;
   }
 
-  function beforeFilter() {
+  public function beforeFilter() {
     if ($this->action == 'points' &&
       Configure::read('Security.level') === 'high') {
       Configure::write('Security.level', 'medium');
@@ -47,7 +47,7 @@ class ExplorerController extends AppController
     $this->crumbs = $this->Search->urlToCrumbs($this->request->url, 2);
   }
 
-  function beforeRender() {
+  public function beforeRender() {
     $paginateActions = array('category', 'date', 'edit', 'group', 'index', 'location', 'sublocation', 'city', 'state', 'country', 'query', 'tag', 'user', 'view');
     if (in_array($this->action, $paginateActions)) {
       $this->request->data = $this->Search->paginateByCrumbs($this->crumbs);
@@ -70,11 +70,11 @@ class ExplorerController extends AppController
     parent::beforeRender();
   }
 
-  function index() {
+  public function index() {
     //$this->render('table');
   }
 
-  function view() {
+  public function view() {
     if (!empty($this->request->data)) {
       $crumbs = split('/', $this->request->data['Breadcrumb']['current']);
       $crumbs[] = $this->request->data['Breadcrumb']['input'];
@@ -83,7 +83,7 @@ class ExplorerController extends AppController
     $this->render('index');
   }
 
-  function autocomplete($type) {
+  public function autocomplete($type) {
     if (in_array($type, array('tag', 'category', 'city', 'sublocation', 'state', 'country', 'aclgroup'))) {
       if ($type == 'tag' || $type == 'category') {
         $field = Inflector::camelize($type);
@@ -169,7 +169,7 @@ class ExplorerController extends AppController
   }
 
   /** Find needle in tags, categories, locations, or users */
-  function _findGenericCrumb($needle, $queryMap) {
+  public function _findGenericCrumb($needle, $queryMap) {
     $prefix = '';
     if (substr($needle, 0, 1) == '-') {
       $prefix = '-';
@@ -226,10 +226,10 @@ class ExplorerController extends AppController
     }
   }
 
-  function _getDate($type, $value) {
+  public function _getDate($type, $value) {
   }
 
-  function _getAssociation($type, $value) {
+  public function _getAssociation($type, $value) {
     $result = array();
     $isNegated = false;
     $normalized = $value;
@@ -299,7 +299,7 @@ class ExplorerController extends AppController
         break;
       case 'aclgroup':
         $user = $this->getUser();
-        $groups = $this->Group->getGroupsForMedia(&$user);
+        $groups = $this->Group->getGroupsForMedia($user);
         $data = array();
         $len = strlen($normalized);
         $normalized = strtolower($normalized);
@@ -332,7 +332,7 @@ class ExplorerController extends AppController
     return $result;
   }
 
-  function quicksearch($quicksearch = false) {
+  public function quicksearch($quicksearch = false) {
     if (!empty($this->request->data) && isset($this->request->data['quicksearch'])) {
       $quicksearch = $this->request->data['quicksearch'];
     }
@@ -343,7 +343,7 @@ class ExplorerController extends AppController
     $this->set('quicksearch', $quicksearch);
   }
 
-  function query() {
+  public function query() {
     if (!empty($this->request->data)) {
       $this->Search->addTags(preg_split('/\s*,\s*/', trim($this->request->data['Media']['tags'])));
       $this->Search->setTagOp($this->request->data['Media']['tag_op']);
@@ -380,7 +380,7 @@ class ExplorerController extends AppController
     $this->render('index');
   }
 
-  function search() {
+  public function search() {
     if ($this->hasRole(ROLE_USER)) {
       $groups = $this->Group->find('all', array('conditions' => array('Group.user_id' => $this->getUserId()), 'order' => 'Group.name'));
       if ($groups) {
@@ -393,7 +393,7 @@ class ExplorerController extends AppController
     $this->set('userRole', $this->getUserRole());
   }
 
-  function user($username, $param = false, $value = false) {
+  public function user($username, $param = false, $value = false) {
     $user = $this->User->find('first', array('conditions' => array('User.username' => $username, 'User.role' >= ROLE_USER), 'recursive' => 0));
     if (!$user) {
       Logger::verbose(sprintf("User not found %s", $username));
@@ -426,12 +426,12 @@ class ExplorerController extends AppController
     $this->render('index');
   }
 
-  function group($name) {
+  public function group($name) {
     $this->crumbs = am(array('group:' . $name), $this->Search->urlToCrumbs($this->request->url, 3));
     $this->render('index');
   }
 
-  function date($year = null, $month = null, $day = null) {
+  public function date($year = null, $month = null, $day = null) {
     $this->crumbs = array();
     if ($year && $year > 1950 && $year < 2050) {
       $year = intval($year);
@@ -474,7 +474,7 @@ class ExplorerController extends AppController
     $this->render('index');
   }
 
-  function tag($tags) {
+  public function tag($tags) {
     $tags = preg_split('/\s*,\s*/', trim($tags));
     $crumbs = array();
     foreach($tags as $tag) {
@@ -484,7 +484,7 @@ class ExplorerController extends AppController
     $this->render('index');
   }
 
-  function category($categories) {
+  public function category($categories) {
     $categories = preg_split('/\s*,\s*/', trim($categories));
     $crumbs = array();
     foreach($categories as $category) {
@@ -494,7 +494,7 @@ class ExplorerController extends AppController
     $this->render('index');
   }
 
-  function location($locations) {
+  public function location($locations) {
     $locations = preg_split('/\s*,\s*/', trim($locations));
     $crumbs = array();
     foreach($locations as $location) {
@@ -504,7 +504,7 @@ class ExplorerController extends AppController
     $this->render('index');
   }
 
-  function sublocation($sublocations) {
+  public function sublocation($sublocations) {
     $sublocations = preg_split('/\s*,\s*/', trim($sublocations));
     $crumbs = array();
     foreach($sublocations as $sublocation) {
@@ -514,7 +514,7 @@ class ExplorerController extends AppController
     $this->render('index');
   }
 
-  function city($cities) {
+  public function city($cities) {
     $cities = preg_split('/\s*,\s*/', trim($cities));
     $crumbs = array();
     foreach($cities as $city) {
@@ -524,7 +524,7 @@ class ExplorerController extends AppController
     $this->render('index');
   }
 
-  function state($states) {
+  public function state($states) {
     $states = preg_split('/\s*,\s*/', trim($states));
     $crumbs = array();
     foreach($states as $state) {
@@ -534,7 +534,7 @@ class ExplorerController extends AppController
     $this->render('index');
   }
 
-  function country($countries) {
+  public function country($countries) {
     $countries = preg_split('/\s*,\s*/', trim($countries));
     $crumbs = array();
     foreach($countries as $country) {
@@ -545,7 +545,7 @@ class ExplorerController extends AppController
   }
 
 
-  function edit() {
+  public function edit() {
     if (!empty($this->request->data)) {
       $ids = preg_split('/\s*,\s*/', $this->request->data['Media']['ids']);
       $ids = array_unique($ids);
@@ -554,18 +554,18 @@ class ExplorerController extends AppController
       }
 
       $user = $this->getUser();
-      $editData = $this->Media->prepareMultiEditData(&$this->request->data, &$user);
+      $editData = $this->Media->prepareMultiEditData($this->request->data, $user);
 
       $allMedia = $this->Media->find('all', array('conditions' => array('Media.id' => $ids)));
       $changedMedia = array();
       foreach ($allMedia as $media) {
-        $this->Media->setAccessFlags(&$media, &$user);
+        $this->Media->setAccessFlags($media, $user);
         // primary access check
         if (!$media['Media']['canWriteTag'] && !$media['Media']['canWriteAcl']) {
           Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change any metadata of image ".$id);
           continue;
         }
-        $tmp = $this->Media->editMulti(&$media, $editData);
+        $tmp = $this->Media->editMulti($media, $editData);
         if ($tmp) {
           $changedMedia[] = $tmp;
         }
@@ -593,7 +593,7 @@ class ExplorerController extends AppController
     * @todo Check for edit permissions
     * @todo Check and handle non-ajax request
     */
-  function editmeta($id) {
+  public function editmeta($id) {
     if (!$this->RequestHandler->isAjax()) {
       Logger::warn("Decline wrong ajax request");
       $this->redirect(null, '404');
@@ -601,11 +601,11 @@ class ExplorerController extends AppController
     $id = intval($id);
     $user = $this->getUser();
     $media = $this->Media->findById($id);
-    if (!$this->Media->canWrite(&$media, &$user)) {
+    if (!$this->Media->canWrite($media, $user)) {
       Logger::warn("User is not allowed to edit media {$media['Media']['id']}");
       $this->redirect(null, '403');
     }
-    $this->Media->setAccessFlags(&$media, $user);
+    $this->Media->setAccessFlags($media, $user);
     $this->request->data = $media;
     $this->layout='bare';
     $this->render('editmeta');
@@ -615,7 +615,7 @@ class ExplorerController extends AppController
   /**
    * @todo Check and handle non-ajax request
    */
-  function savemeta($id) {
+  public function savemeta($id) {
     if (!$this->RequestHandler->isAjax()) {
       Logger::warn("Decline wrong ajax request");
       $this->redirect(null, '404');
@@ -629,11 +629,11 @@ class ExplorerController extends AppController
       if (!$media) {
         Logger::warn("Invalid media id: $id");
         $this->redirect(null, '404');
-      } elseif (!$this->Media->canWrite(&$media, &$user)) {
+      } elseif (!$this->Media->canWrite($media, $user)) {
         Logger::warn("User '{$username}' ({$user['User']['id']}) has no previleges to change tags of image ".$id);
       } else {
-        $this->Media->setAccessFlags(&$media, $user);
-        $tmp = $this->Media->editSingle(&$media, &$this->request->data, &$user);
+        $this->Media->setAccessFlags($media, $user);
+        $tmp = $this->Media->editSingle($media, $this->request->data, $user);
         if (!$this->Media->save($tmp)) {
           Logger::warn("Could not save media");
         } else {
@@ -647,7 +647,7 @@ class ExplorerController extends AppController
       }
     }
     $media = $this->Media->findById($id);
-    $this->Media->setAccessFlags(&$media, $user);
+    $this->Media->setAccessFlags($media, $user);
     $this->request->data = $media;
     $this->Search->parseArgs();
     $this->Search->setUser($user['User']['username']);
@@ -660,14 +660,14 @@ class ExplorerController extends AppController
    * @todo check for save permissions
    * @todo Check and handle non-ajax request
    */
-  function updatemeta($id) {
+  public function updatemeta($id) {
     if (!$this->RequestHandler->isAjax()) {
       Logger::warn("Decline wrong ajax request");
       $this->redirect(null, '404');
     }
     $id = intval($id);
     $media = $this->Media->findById($id);
-    $this->Media->setAccessFlags(&$media, $this->getUser());
+    $this->Media->setAccessFlags($media, $this->getUser());
     $this->set('data', $media);
     $this->layout='bare';
     $user = $this->getUser();
@@ -677,7 +677,7 @@ class ExplorerController extends AppController
     Configure::write('debug', 0);
   }
 
-  function editacl($id) {
+  public function editacl($id) {
     if (!$this->RequestHandler->isAjax()) {
       Logger::warn("Decline wrong ajax request");
       $this->redirect(null, '404');
@@ -685,17 +685,17 @@ class ExplorerController extends AppController
     $id = intval($id);
     $user = $this->getUser();
     $media = $this->Media->findById($id);
-    if (!$this->Media->canWriteAcl(&$media, &$user)) {
+    if (!$this->Media->canWriteAcl($media, $user)) {
       Logger::warn("User is not allowed to edit acl of media {$media['Media']['id']}");
       $this->redirect('400');
     }
-    $this->Media->setAccessFlags(&$media, $user);
+    $this->Media->setAccessFlags($media, $user);
     $this->request->data = $media;
     $this->layout='bare';
     //Configure::write('debug', 0);
   }
 
-  function saveacl($id) {
+  public function saveacl($id) {
     if (!$this->RequestHandler->isAjax()) {
       Logger::warn("Decline wrong ajax request");
       $this->redirect(null, '404');
@@ -708,11 +708,11 @@ class ExplorerController extends AppController
       $user = $this->getUser();
       $userId = $user['User']['id'];
       $this->Search->setUser($user['User']['username']); // Triggers acl descriptions
-      if (!$this->Media->canWriteAcl(&$media, &$user)) {
+      if (!$this->Media->canWriteAcl($media, $user)) {
         Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change ACL of image ".$id);
       } else {
-        $this->Media->setAccessFlags(&$media, &$user);
-        $tmp = $this->Media->editSingle(&$media, &$this->request->data, &$user);
+        $this->Media->setAccessFlags($media, $user);
+        $tmp = $this->Media->editSingle($media, $this->request->data, $user);
         if ($tmp) {
           if ($this->Media->save($tmp, true)) {
             Logger::info("Changed acl of media $id");
@@ -724,7 +724,7 @@ class ExplorerController extends AppController
       }
     }
     $media = $this->Media->findById($id);
-    $this->Media->setAccessFlags(&$media, $this->getUser());
+    $this->Media->setAccessFlags($media, $this->getUser());
     $this->request->data = $media;
     $this->layout='bare';
     $this->Search->parseArgs();
@@ -734,7 +734,7 @@ class ExplorerController extends AppController
     $this->render('updatemeta');
   }
 
-  function sync($id) {
+  public function sync($id) {
     if (!$this->RequestHandler->isAjax() || !$this->RequestHandler->isPost()) {
       Logger::warn("Decline wrong ajax request");
       $this->redirect(null, '404');
@@ -747,13 +747,13 @@ class ExplorerController extends AppController
       Logger::err("User '{$user['User']['username']}' ({$user['User']['id']}) requested non existing image id '$id'");
       $this->redirect(null, 401);
     }
-    $this->Media->setAccessFlags(&$media, $user);
+    $this->Media->setAccessFlags($media, $user);
     if (!$media['Media']['isOwner']) {
       Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to sync image '$id'");
     } else {
       $this->FilterManager->write($media);
       $media =  $this->Media->findById($id);
-      $this->Media->setAccessFlags(&$media, $user);
+      $this->Media->setAccessFlags($media, $user);
     }
     $this->set('data', $media);
     $this->layout='bare';
@@ -761,7 +761,7 @@ class ExplorerController extends AppController
     Configure::write('debug', 0);
   }
 
-  function rss() {
+  public function rss() {
     $this->layoutPath = 'rss';
     $this->Search->setShow(30);
     $this->Search->setSort('newest');
@@ -772,7 +772,7 @@ class ExplorerController extends AppController
     $this->set('data', $this->Search->paginateByCrumbs($this->crumbs));
   }
 
-  function media() {
+  public function media() {
     $this->layout = 'bare';
     if (Configure::read('debug') > 1) {
       Configure::write('debug', 1);
@@ -780,7 +780,7 @@ class ExplorerController extends AppController
     $this->request->data = $this->Search->paginateByCrumbs($this->crumbs);
   }
 
-  function points($north, $south, $west, $east) {
+  public function points($north, $south, $west, $east) {
     $this->Search->setSort('random');
 
     $this->request->data = array();

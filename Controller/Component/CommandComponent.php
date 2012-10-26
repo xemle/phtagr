@@ -22,11 +22,11 @@ class CommandComponent extends Component {
   var $lastCommand = '';
   var $redirectError = false;
 
-  function initialize(&$controller) {
-    $this->controller =& $controller;
+  public function initialize(Controller $controller) {
+    $this->controller = $controller;
   }
 
-  function escapeArgs($args) {
+  public function escapeArgs($args) {
     $escaped = '';
     foreach ($args as $param => $value) {
       if (!is_numeric($param)) {
@@ -39,7 +39,7 @@ class CommandComponent extends Component {
     return $escaped;
   }
 
-  function run($bin, $args) {
+  public function run($bin, $args) {
     if (!is_executable($bin)) {
       Logger::err("Command is not exectuable: '$bin'");
       return 1;
@@ -54,7 +54,7 @@ class CommandComponent extends Component {
       $this->lastCommand .= ' 2>&1';
     }
     $t1 = microtime(true);
-    exec($this->lastCommand, &$output, &$result);
+    exec($this->lastCommand, $output, $result);
     $t2 = microtime(true);
     $this->output = $output;
     Logger::debug("Command '{$this->lastCommand}' returned $result and required ".round($t2-$t1, 4)."ms");

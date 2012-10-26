@@ -27,15 +27,15 @@ class MenuComponent extends Component {
 
   var $currentMenu = 'main';
 
-  function initialize(&$controller) {
+  public function initialize(Controller $controller) {
     if ($this->controller) {
       return;
     }
-    $this->controller =& $controller;
+    $this->controller = $controller;
     $this->setCurrentMenu('main');
   }
 
-  function setBasicMainMenu() {
+  public function setBasicMainMenu() {
     $controllers = array(
       'options' => __('Account Settings'),
       'groups' => __('Groups'),
@@ -56,18 +56,18 @@ class MenuComponent extends Component {
     }
   }
 
-  function &getData(&$data, $key) {
+  public function &getData(&$data, $key) {
     $p =& $data[$key];
     return $p;
   }
 
-  function beforeRender() {
+  public function beforeRender(Controller $controller) {
     $this->setCurrentMenu('main');
     $this->setBasicMainMenu();
     if (isset($this->controller->subMenu)) {
       $name = strtolower($this->controller->name);
       $parentId = 'item-' . $name;
-      $parentItem =& $this->getItem($parentId);
+      $parentItem = $this->getItem($parentId);
       foreach ($this->controller->subMenu as $action => $title) {
         $defaults = array('parent' => $parentId, 'active' => false, 'controller' => $name, 'action' => false, 'admin' => false);
         if (is_numeric($action)) {
@@ -87,7 +87,7 @@ class MenuComponent extends Component {
 
   /** Set the current menu
     @param name Menu name */
-  function setCurrentMenu($name) {
+  public function setCurrentMenu($name) {
     $this->currentMenu = $name;
     if (!isset($this->menus[$name])) {
       $this->menus[$name] = array('options' => array());
@@ -98,7 +98,7 @@ class MenuComponent extends Component {
     @param title Menu title
     @param url Menu url
     @param options e.g. html link class options */
-  function addItem($title, $url, $options = array()) {
+  public function addItem($title, $url, $options = array()) {
     $item = am(array('title' => $title, 'url' => $url), $options);
     $menu =& $this->menus[$this->currentMenu];
     if (isset($options['parent'])) {
@@ -111,12 +111,12 @@ class MenuComponent extends Component {
     }
   }
 
-  function &_findItem($id, &$items) {
+  public function &_findItem($id, &$items) {
     $keys = array_keys($items);
     $found = false;
     foreach($keys as $key) {
       if (is_array($items[$key])) {
-        $found =& $this->_findItem($id, &$items[$key]);
+        $found = $this->_findItem($id, $items[$key]);
         if ($found) {
           return $found;
         }
@@ -127,19 +127,19 @@ class MenuComponent extends Component {
     return $found;
   }
 
-  function &getItem($id, $menuName = null) {
+  public function &getItem($id, $menuName = null) {
     if (!$menuName) {
       $menu =& $this->menus[$this->currentMenu];
     } else {
       $menu =& $this->menus[$menuName];
     }
-    return $this->_findItem($id, &$menu);
+    return $this->_findItem($id, $menu);
   }
 
   /** Set menu option for current menu
     @param name Option name
     @param value Option value */
-  function setOption($name, $value) {
+  public function setOption($name, $value) {
     $this->menus[$this->currentMenu]['options'][$name] = $value;
   }
 }

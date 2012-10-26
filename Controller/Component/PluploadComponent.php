@@ -28,20 +28,20 @@ class PluploadComponent extends Component {
 
   var $response = array('jsonrpc' => '2.0', 'result' => null);
 
-  function initialize(&$controller) {
+  public function initialize(Controller $controller) {
     $this->controller = $controller;
   }
 
-  function isUploadedFile($filename) {
+  public function isUploadedFile($filename) {
     return is_uploaded_file($filename);
   }
 
-  function moveUploadedFile($filename, $dst) {
+  public function moveUploadedFile($filename, $dst) {
     return move_uploaded_file($filename, $dst);
   }
 
-  function isPlupload() {
-    $request =& $this->controller->request;
+  public function isPlupload() {
+    $request = $this->controller->request;
     if (!isset($request->data['name'])) {
       return false;
     }
@@ -72,7 +72,7 @@ class PluploadComponent extends Component {
    * @param Arry $options
    * @return mixed Returns filename without the directory. false on error.
    */
-  function _handleCompleteFile($path, $upload, $options) {
+  public function _handleCompleteFile($path, $upload, $options) {
     $folder = new Folder($path);
 
     $filename = $upload['name'];
@@ -100,7 +100,7 @@ class PluploadComponent extends Component {
    * @param file handle $out Output stream handle
    * @return Returns count of written bytes
    */
-  function _copyFile($in, $out) {
+  public function _copyFile($in, $out) {
     if (!$in) {
       $this->response['error'] = array('code' => 103, 'message' => "Failed to open input stream.");
       return false;
@@ -116,7 +116,7 @@ class PluploadComponent extends Component {
     return $count;
   }
 
-  function _getContentType() {
+  public function _getContentType() {
     if (isset($_SERVER["HTTP_CONTENT_TYPE"])) {
       return $_SERVER["HTTP_CONTENT_TYPE"];
     } else if (isset($_SERVER["CONTENT_TYPE"])) {
@@ -125,7 +125,7 @@ class PluploadComponent extends Component {
     return '';
   }
   
-  function _handleMultiPartFile($path, $upload, $chunk, $chunks, $options) {
+  public function _handleMultiPartFile($path, $upload, $chunk, $chunks, $options) {
     $folder = new Folder($path);
 
     $filename = $upload['name'] . '.part';
@@ -181,7 +181,7 @@ class PluploadComponent extends Component {
    *   - overwrite - If true overwrite file with same filename. If false create a unique filename if a file with same filename exists
    * @return array of uploaded files (without the path)
    */
-  function upload($path, $options = array()) {
+  public function upload($path, $options = array()) {
     if (!$this->isPlupload()) {
       $this->response['error'] = array('code' => 100, 'message' => "Invalid data");
       return array();
@@ -193,7 +193,7 @@ class PluploadComponent extends Component {
       Logger::err("Upload path '$path' does not exists or is not writeable");
       return false;
     }
-    $request =& $this->controller->request;
+    $request = $this->controller->request;
 
     $upload = $request->params['form']['file'];
     $name = $request->data['name'];

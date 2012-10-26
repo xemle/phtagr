@@ -29,7 +29,7 @@ class AppController extends Controller
 
   /** Calls _checkSession() to check the credentials of the user
     @see _checkSession() */
-  function beforeFilter() {
+  public function beforeFilter() {
     parent::beforeFilter();
     $this->_checkSession();
     $this->Feed->add('/explorer/rss', array('title' => __('Recent photos')));
@@ -47,7 +47,7 @@ class AppController extends Controller
     }
   }
 
-  function _setMainMenu() {
+  public function _setMainMenu() {
     $this->Menu->setCurrentMenu('main-menu');
     $this->Menu->addItem(__('Home'), "/");
     $this->Menu->addItem(__('Explorer'), array('controller' => 'explorer', 'action' => 'index'));
@@ -60,7 +60,7 @@ class AppController extends Controller
     }
   }
 
-  function _setTopMenu() {
+  public function _setTopMenu() {
     $this->Menu->setCurrentMenu('top-menu');
     $role = $this->getUserRole();
     if ($role == ROLE_NOBODY) {
@@ -76,7 +76,7 @@ class AppController extends Controller
     }
   }
 
-  function beforeRender() {
+  public function beforeRender() {
     parent::beforeRender();
     if ($this->getUserId() > 0) {
       // reread user for updated options
@@ -93,12 +93,12 @@ class AppController extends Controller
     }
   }
 
-  function _checkCookie() {
+  public function _checkCookie() {
     $this->Cookie->name = 'phTagr';
     return $this->Cookie->read('user');
   }
 
-  function _checkKey() {
+  public function _checkKey() {
     if (!isset($this->request->params['named']['key'])) {
       return false;
     }
@@ -118,7 +118,7 @@ class AppController extends Controller
   /** Checks a cookie for a valid user id. If a id found, the user is load to
    * the session
    * @todo Check expired user */
-  function _checkSession() {
+  public function _checkSession() {
     //$this->Session->activate();
     if (!$this->Session->check('Session.requestCount')) {
       $this->Session->write('Session.requestCount', 1);
@@ -155,7 +155,7 @@ class AppController extends Controller
       return false;
     }
 
-    $this->User->writeSession($user, &$this->Session);
+    $this->User->writeSession($user, $this->Session);
     Logger::info("User '{$user['User']['username']}' (id {$user['User']['id']}) authenticated via $authType!");
 
     return true;
@@ -164,7 +164,7 @@ class AppController extends Controller
   /** Checks the session for valid user. If no user is found, it checks for a
    * valid cookie
    * @return True if the correct session correspond to an user */
-  function _checkUser() {
+  public function _checkUser() {
     if (!$this->_checkSession()) {
       return false;
     }
@@ -183,7 +183,7 @@ class AppController extends Controller
     return true;
   }
 
-  function getUser() {
+  public function &getUser() {
     if (!$this->_checkUser() || !$this->_user) {
       if (!$this->_nobody && isset($this->User)) {
         $this->_nobody = $this->User->getNobody();
@@ -195,24 +195,24 @@ class AppController extends Controller
     return $this->_user;
   }
 
-  function getUserRole() {
-    $user =& $this->getUser();
+  public function getUserRole() {
+    $user = $this->getUser();
     return $user['User']['role'];
   }
 
-  function getUserId() {
-    $user =& $this->getUser();
+  public function getUserId() {
+    $user = $this->getUser();
     return $user['User']['id'];
   }
 
-  function hasRole($requiredRole = ROLE_NOBODY) {
+  public function hasRole($requiredRole = ROLE_NOBODY) {
     if ($requiredRole <= $this->getUserRole()) {
       return true;
     }
     return false;
   }
 
-  function requireRole($requiredRole=ROLE_NOBODY, $options = null) {
+  public function requireRole($requiredRole=ROLE_NOBODY, $options = null) {
     $options = am(array(
       'redirect' => '/users/login',
       'loginRedirect' => false,
@@ -231,24 +231,24 @@ class AppController extends Controller
     return true;
   }
 
-  function getOption($name, $default=null) {
+  public function getOption($name, $default=null) {
     $user = $this->getUser();
     return $this->Option->getValue($user, $name, $default);
   }
 
   /** Load a component
     */
-  function loadComponent($componentName, &$parent = null) {
+  public function loadComponent($componentName, &$parent = null) {
     if (is_array($componentName)) {
       $loaded = true;
       foreach ($componentName as $name) {
-        $loaded &= $this->loadComponent($name, &$parent);
+        $loaded &= $this->loadComponent($name, $parent);
       }
       return $loaded;
     }
 
     if (!$parent) {
-      $parent = &$this;
+      $parent = $this;
     }
     if (isset($parent->{$componentName})) {
       return true;
@@ -264,9 +264,9 @@ class AppController extends Controller
     $parent->{$componentName} = $component;
     // Load components recusivly
     if (is_array($component->components)) {
-      $this->loadComponent($component->components, &$component);
+      $this->loadComponent($component->components, $component);
     }
-    $component->initialize(&$this);
+    $component->initialize($this);
 
     return true;
   }

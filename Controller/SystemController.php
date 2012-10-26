@@ -21,7 +21,7 @@ class SystemController extends AppController {
   var $uses = array('Media', 'Option');
   var $subMenu = array();
 
-  function beforeFilter() {
+  public function beforeFilter() {
     parent::beforeFilter();
     $this->requireRole(ROLE_SYSOP, array('redirect' => '/'));
 
@@ -36,17 +36,17 @@ class SystemController extends AppController {
       );
   }
 
-  function beforeRender() {
+  public function beforeRender() {
     $this->layout = 'backend';
     parent::beforeRender();
   }
 
-  function _set($userId, $path, $data) {
+  private function _setOption($userId, $path, $data) {
     $value = Set::extract($data, $path);
     $this->Option->setValue($path, $value, $userId);
   }
 
-  function __fromReadableSize($readable) {
+  public function __fromReadableSize($readable) {
     if (is_float($readable) || is_numeric($readable)) {
       return $readable;
     } elseif (preg_match_all('/^\s*(0|[1-9][0-9]*)(\.[0-9]+)?\s*([KkMmGg][Bb]?)?\s*$/', $readable, $matches, PREG_SET_ORDER)) {
@@ -86,16 +86,16 @@ class SystemController extends AppController {
     }
   }
 
-  function index() {
+  public function index() {
     if (!empty($this->request->data)) {
-      $this->_set(0, 'general.title', $this->request->data);
-      $this->_set(0, 'general.subtitle', $this->request->data);
+      $this->_setOption(0, 'general.title', $this->request->data);
+      $this->_setOption(0, 'general.subtitle', $this->request->data);
       $this->Session->setFlash(__("Titles were updated"));
     }
     $this->request->data = $this->Option->getTree(0);
   }
 
-  function register() {
+  public function register() {
     if (!empty($this->request->data)) {
       if ($this->request->data['user']['register']['enable']) {
         $this->Option->setValue('user.register.enable', 1, 0);
@@ -117,13 +117,13 @@ class SystemController extends AppController {
     }
   }
 
-  function external() {
+  public function external() {
     if (!empty($this->request->data)) {
       // TODO check valid acl
-      $this->_set(0, 'bin.exiftool', $this->request->data);
-      $this->_set(0, 'bin.convert', $this->request->data);
-      $this->_set(0, 'bin.ffmpeg', $this->request->data);
-      $this->_set(0, 'bin.flvtool2', $this->request->data);
+      $this->_setOption(0, 'bin.exiftool', $this->request->data);
+      $this->_setOption(0, 'bin.convert', $this->request->data);
+      $this->_setOption(0, 'bin.ffmpeg', $this->request->data);
+      $this->_setOption(0, 'bin.flvtool2', $this->request->data);
       // debug
       $this->set('commit', $this->request->data);
       $this->Session->setFlash("Settings saved");
@@ -132,9 +132,9 @@ class SystemController extends AppController {
     $this->request->data = $tree;
   }
 
-  function map() {
+  public function map() {
     if (!empty($this->request->data)) {
-      $this->_set(0, 'google.map.key', $this->request->data);
+      $this->_setOption(0, 'google.map.key', $this->request->data);
       // debug
       $this->set('commit', $this->request->data);
       $this->Session->setFlash("Settings saved");
@@ -144,7 +144,7 @@ class SystemController extends AppController {
   }
 
   /** Database upgrade via the Migraions plugin */
-  function upgrade($action = '') {
+  public function upgrade($action = '') {
     CakePlugin::load('Migrations');
     App::import('Lib', 'Migrations.MigrationVersion');
     $Migration = new MigrationVersion(array('connection' => 'default'));
@@ -180,7 +180,7 @@ class SystemController extends AppController {
     $this->set('newMappingNames', $newMappingNames);
   }
 
-  function deleteUnusedMetaData($delete = '') {
+  public function deleteUnusedMetaData($delete = '') {
     $this->Media->Tag->bindModel(array('hasAndBelongsToMany' => array('Media')), false);
     $this->Media->Tag->Behaviors->attach('DeleteUnused', array('relatedHabtm' => 'Media'));
 
@@ -204,7 +204,7 @@ class SystemController extends AppController {
     $this->request->data = compact('unusedTagCount', 'unusedCategoryCount', 'unusedLocationCount');
   }
 
-  function view() {
+  public function view() {
     $data = array();
     $data['users'] = $this->User->find('count', array('conditions' => array('User.role >=' => ROLE_USER)));
     $data['guests'] = $this->User->find('count', array('conditions' => array('User.role =' => ROLE_GUEST)));

@@ -24,8 +24,8 @@ class ImageResizerComponent extends Component {
   var $components = array('Command');
   var $_semaphoreId = false;
 
-  function initialize(&$controller) {
-    $this->controller =& $controller;
+  public function initialize(Controller $controller) {
+    $this->controller = $controller;
     // allow only to converts at the same time to reduce system load
     if (function_exists('sem_get')) {
       $this->_semaphoreId = sem_get(4711, 2);
@@ -41,7 +41,7 @@ class ImageResizerComponent extends Component {
       - rotation Rotation in degree. Default i s0
       - square Square the image. Default is false. If set, only width is considered.
       - clearMetaData Clear all meta data. Default is true */
-  function resize($src, $dst, $options = array()) {
+  public function resize($src, $dst, $options = array()) {
     $options = am(array(
       'size' => 220,
       'quality' => 85,
@@ -86,7 +86,7 @@ class ImageResizerComponent extends Component {
     $phpThumb->cache_filename = $dst;
 
     if ($options['square'] && $options['height'] > 0) {
-      $this->_getSquareOption(&$phpThumb, &$options);
+      $this->_getSquareOption($phpThumb, &$options);
     }
 
     $t0 = microtime(true);
@@ -117,7 +117,7 @@ class ImageResizerComponent extends Component {
   /* Set phpThumb options for square image
     @param phpThumb phpThumb object (reference)
     @param options Array of options */
-  function _getSquareOption($phpThumb, $options) {
+  public function _getSquareOption($phpThumb, $options) {
     $width = $options['width'];
     $height = $options['height'];
     if ($width < $height) {
@@ -151,7 +151,7 @@ class ImageResizerComponent extends Component {
 
   /** Clear image metadata from a file
     @param filename Filename to file to clean */
-  function clearMetaData($filename) {
+  public function clearMetaData($filename) {
     if (!file_exists($filename)) {
       Logger::err("Filename '$filename' does not exists");
       return false;

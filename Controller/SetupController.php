@@ -33,7 +33,7 @@ class SetupController extends AppController {
   var $Migration = null;
   var $Version = null;
 
-  function beforeFilter() {
+  public function beforeFilter() {
     $this->layout = 'backend';
     Configure::write('Cache.disable', true);
     $this->UpgradeSchema->modelMapping = array('files' => 'MyFile');
@@ -48,7 +48,7 @@ class SetupController extends AppController {
     }
   }
 
-  function beforeRender() {
+  public function beforeRender() {
   }
 
   /**
@@ -56,7 +56,7 @@ class SetupController extends AppController {
    *
    * @return True if the database source could be loaded
    */
-  function __initDataSource() {
+  public function __initDataSource() {
     if (isset($this->checks['initDataSource'])) {
       return $this->checks['initDataSource'];
     }
@@ -76,7 +76,7 @@ class SetupController extends AppController {
    * @param models array of models
    * @return true on success
    */
-  function __loadModel($models) {
+  public function __loadModel($models) {
     if (!$this->UpgradeSchema->isConnected()) {
       Logger::warn("Not connected");
       return false;
@@ -96,12 +96,12 @@ class SetupController extends AppController {
         $success = false;
         continue;
       }
-      $this->$model =& new $model();
+      $this->$model = new $model();
     }
     return $success;
   }
 
-  function __hasSalt() {
+  public function __hasSalt() {
     if (isset($this->checks['hasSalt'])) {
       return $this->checks['hasSalt'];
     }
@@ -117,7 +117,7 @@ class SetupController extends AppController {
     return true;
   }
 
-  function __hasSession() {
+  public function __hasSession() {
     if (isset($this->checks['hasSession'])) {
       return $this->checks['hasSession'];
     }
@@ -126,7 +126,7 @@ class SetupController extends AppController {
     return $this->checks['hasSession'];
   }
 
-  function __checkSession() {
+  public function __checkSession() {
     if (!$this->__hasSession()) {
       Logger::warn('Setup is disabled. Setup session variable is not set.');
       Logger::bt();
@@ -137,7 +137,7 @@ class SetupController extends AppController {
   /**
    * Checks for required writable paths
    */
-  function __hasPaths() {
+  public function __hasPaths() {
     if (isset($this->checks['hasPaths'])) {
       return $this->checks['hasPaths'];
     }
@@ -154,7 +154,7 @@ class SetupController extends AppController {
   }
 
   /** Checks the existence of the database configuration */
-  function __hasConfig() {
+  public function __hasConfig() {
     if (isset($this->checks['hasConfig'])) {
       return $this->checks['hasConfig'];
     }
@@ -171,7 +171,7 @@ class SetupController extends AppController {
   /**
    * Checks the database connection
    */
-  function __hasConnection() {
+  public function __hasConnection() {
     if (isset($this->checks['hasConnection'])) {
       return $this->checks['hasConnection'];
     }
@@ -197,7 +197,7 @@ class SetupController extends AppController {
    * @param tables. Array of tables names. Default array('users')
    * @return True if all given tables exists
    */
-  function __hasTables($tables = array('users')) {
+  public function __hasTables($tables = array('users')) {
     if (isset($this->checks['hasTables'])) {
       return $this->checks['hasTables'];
     }
@@ -221,7 +221,7 @@ class SetupController extends AppController {
   /**
    * Check for administration account
    */
-  function __hasSysOp() {
+  public function __hasSysOp() {
     if (isset($this->checks['hasSysOp'])) {
       return $this->checks['hasSysOp'];
     }
@@ -240,7 +240,7 @@ class SetupController extends AppController {
     return $this->checks['hasSysOp'];
   }
 
-  function __hasCommands($commands = null) {
+  public function __hasCommands($commands = null) {
     if (!$this->__hasSysOp()) {
       return false;
     }
@@ -266,7 +266,7 @@ class SetupController extends AppController {
     }
   }
 
-  function getUser() {
+  public function getUser() {
     if (!$this->__hasSysOp() && $this->Session->read('setup')) {
       return array('User' => array('id' => 0, 'username' => '', 'role' => ROLE_ADMIN));
     }
@@ -276,7 +276,7 @@ class SetupController extends AppController {
   /**
    * Setup entry. Dispatches preparation, installation or upgrade
    */
-  function index() {
+  public function index() {
     if ($this->__hasSysOp()) {
       if ($this->hasRole(ROLE_SYSOP)) {
         Logger::verbose("Redirect to upgrade");
@@ -297,7 +297,7 @@ class SetupController extends AppController {
 
   /** Generate a random salt string
     @return Random salt string */
-  function __generateSalt() {
+  public function __generateSalt() {
     $chars  = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     $chars .= 'abcdefghijklmnopqrstuvwxyz';
     $chars .= '0123456789';
@@ -312,7 +312,7 @@ class SetupController extends AppController {
     return $salt;
   }
 
-  function salt() {
+  public function salt() {
     if ($this->__hasSalt())
       $this->redirect('index');
 
@@ -323,7 +323,7 @@ class SetupController extends AppController {
     $oldSalt = 'DYhG93b0qyJfIxfs2guVoUubWwvniR2G0FgaC9m';
     $salt = $this->__generateSalt();
 
-    $file =& new File($this->core);
+    $file = new File($this->core);
     $content = $file->read();
     $newContent = preg_replace("/$oldSalt/", $salt, $content);
     if (!$file->write($newContent)) {
@@ -340,7 +340,7 @@ class SetupController extends AppController {
     }
   }
 
-  function saltro() {
+  public function saltro() {
     if ($this->__hasSalt()) {
       $this->redirect('index');
 		}
@@ -351,7 +351,7 @@ class SetupController extends AppController {
 
     $oldSalt = Configure::read('Security.salt');
 
-    $file =& new File($this->core);
+    $file = new File($this->core);
     $content = $file->read();
     $lines = preg_split('/\n/', $content);
     $c = count($lines);
@@ -367,7 +367,7 @@ class SetupController extends AppController {
     $this->set('file', $this->core);
   }
 
-  function path() {
+  public function path() {
     if ($this->__hasPaths()) {
       $this->redirect('config');
 		}
@@ -388,7 +388,7 @@ class SetupController extends AppController {
     $this->set('readonly', $readonly);
   }
 
-  function config() {
+  public function config() {
     if (!$this->__hasPaths()) {
       $this->redirect('path');
     }
@@ -437,7 +437,7 @@ class DATABASE_CONFIG {
   );
 }
 ";
-      $file =& new File($this->dbConfig, true, 644);
+      $file = new File($this->dbConfig, true, 644);
       if ($file->write($output)) {
         Logger::info("Database configuration file '{$this->dbConfig}' was written successfully");
         $file->close();
@@ -461,7 +461,7 @@ class DATABASE_CONFIG {
     Logger::info("Request database configuration");
   }
 
-  function configro() {
+  public function configro() {
     $error = $this->Session->read('configError');
     if ($this->__hasConfig() && !$error) {
       $this->redirect('database');
@@ -475,7 +475,7 @@ class DATABASE_CONFIG {
     Logger::info("Request database configuration (readonly)");
   }
 
-  function database() {
+  public function database() {
     if (!$this->__hasConfig()) {
       $this->redirect('config');
     }
@@ -513,7 +513,7 @@ class DATABASE_CONFIG {
     }
   }
 
-  function user() {
+  public function user() {
     if (!$this->__hasTables()) {
       $this->redirect('database');
     }
@@ -549,7 +549,7 @@ class DATABASE_CONFIG {
     Logger::info("Request account data for the admin");
   }
 
-  function __findCommand($command) {
+  public function __findCommand($command) {
     $paths = array('/usr/local/bin/', '/usr/bin/');
     foreach ($paths as $path) {
       $file = new File($path.$command);
@@ -560,7 +560,7 @@ class DATABASE_CONFIG {
     return false;
   }
 
-  function __checkMp3Support($bin) {
+  public function __checkMp3Support($bin) {
     $file = new File($bin);
     if (!$file->executable()) {
       return false;
@@ -572,7 +572,7 @@ class DATABASE_CONFIG {
 
     $output = array();
     $result = -1;
-    exec($command, &$output, &$result);
+    exec($command, $output, $result);
     $output = implode(' ', $output);
 
     if (preg_match('/--enable-libmp3lame/', $output)) {
@@ -582,7 +582,7 @@ class DATABASE_CONFIG {
     }
   }
 
-  function system() {
+  public function system() {
     if (!$this->__hasSysOp()) {
       $this->redirect('user');
     }
@@ -629,7 +629,7 @@ class DATABASE_CONFIG {
     $this->set('missing', $missing);
   }
 
-  function finish() {
+  public function finish() {
     if (!$this->__hasSysOp()) {
       $this->redirect('user');
     }
@@ -644,7 +644,7 @@ class DATABASE_CONFIG {
     $this->Session->delete('setup');
   }
 
-  function __deleteModelCache() {
+  public function __deleteModelCache() {
     $modelCacheDir = TMP.'cache'.DS.'models'.DS;
     $folder = new Folder($modelCacheDir);
     $modelCacheFiles = $folder->find('cake_model_.*');
@@ -660,7 +660,7 @@ class DATABASE_CONFIG {
    *
    * @return True on success
    */
-  function __loadMigration() {
+  public function __loadMigration() {
     if (!empty($this->Migration)) {
       return true;
     }

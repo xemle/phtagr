@@ -25,7 +25,7 @@ class UpgradeMediaSchemaShell extends Shell {
   var $deletePolicy = false;
 
   function initialize() {
-    $this->UpgradeSchema =& new UpgradeSchemaComponent();
+    $this->UpgradeSchema = new UpgradeSchemaComponent();
 
     $this->out("Schema Upgrade Shell Script for Media Schema");
     $this->hr();
@@ -103,7 +103,7 @@ class UpgradeMediaSchemaShell extends Shell {
   function _addVideoThumb($media, $file) {
     $name = $file['File']['file'];
     $pattern = substr($name, 0, strrpos($name, '.')+1)."[Tt][Hh][Mm]";
-    $folder =& new Folder();
+    $folder = new Folder();
     $folder->cd($file['File']['path']);
     $found = $folder->find($pattern);
     if (!count($found)) {
@@ -202,8 +202,8 @@ class UpgradeMediaSchemaShell extends Shell {
     * each media */
   function _migrateData() {
     // init media and file model
-    $this->Media =& new Media();
-    $this->MyFile =& new MyFile();
+    $this->Media = new Media();
+    $this->MyFile = new MyFile();
 
     // fetch all media
     $this->Media->unbindAll();

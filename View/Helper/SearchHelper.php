@@ -164,8 +164,8 @@ class SearchHelper extends Search {
       $data = $this->_data;
     }
 
-    $this->_addParams(&$data, $add);
-    $this->_delParams(&$data, $del);
+    $this->_addParams($data, $add);
+    $this->_delParams($data, $del);
     if (!$data) {
       return '';
     }

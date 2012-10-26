@@ -21,11 +21,11 @@ class GpxComponent extends Component {
 
   var $controller;
 
-  function initialize(&$controller) {
-    $this->controller =& $controller;
+  public function initialize(Controller $controller) {
+    $this->controller = $controller;
   }
 
-  function _getChildByName($node, $childName) {
+  public function _getChildByName($node, $childName) {
     if (!$node) {
       return null;
     }
@@ -43,7 +43,7 @@ class GpxComponent extends Component {
    * @param DomNode $point
    * @return Array Gps point
    */
-  function _readTrackPoint($point) {
+  public function _readTrackPoint($point) {
     $lat = $point->getAttribute('lat');
     $long = $point->getAttribute('lon');
     if (!$lat || !$long) {
@@ -70,7 +70,7 @@ class GpxComponent extends Component {
    * @param filename Filename of the NMEA file
    * @return Array of GPS points. False on error
    */
-  function readFile($filename) {
+  public function readFile($filename) {
     if (!is_readable($filename)) {
       Logger::warn("File '$file' is not readable");
       return false;

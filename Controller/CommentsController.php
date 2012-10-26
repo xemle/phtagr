@@ -34,7 +34,7 @@ class CommentsController extends AppController
   );
   var $namedArgs = '';
 
-  function beforeFilter() {
+  public function beforeFilter() {
     parent::beforeFilter();
 
     $params = array();
@@ -44,13 +44,13 @@ class CommentsController extends AppController
     $this->namedArgs = implode('/', $params);
   }
 
-  function index() {
-    $this->Comment->currentUser =& $this->getUser();
+  public function index() {
+    $this->Comment->currentUser = $this->getUser();
     $data = $this->paginate('Comment');
     $this->set('comments', $data);
   }
 
-  function view($id = null) {
+  public function view($id = null) {
     if (!$id) {
       $this->Session->setFlash(__('Invalid Comment.'));
       $this->redirect(array('action'=>'index'));
@@ -58,7 +58,7 @@ class CommentsController extends AppController
     $this->set('comment', $this->Comment->read(null, $id));
   }
 
-  function add() {
+  public function add() {
     if (!empty($this->request->data) && isset($this->request->data['Media']['id'])) {
       $mediaId = intval($this->request->data['Media']['id']);
       $user = $this->getUser();
@@ -92,7 +92,7 @@ class CommentsController extends AppController
         Logger::info("Media $mediaId not found");
         $this->redirect("/explorer");
       }
-      if (!$this->Media->canRead(&$media, &$user)) {
+      if (!$this->Media->canRead($media, $user)) {
         $this->Session->setFlash("Media not found");
         Logger::info("Comments denied to media $mediaId");
         $this->redirect("/explorer");
@@ -129,13 +129,13 @@ class CommentsController extends AppController
     }
   }
 
-  function _createEmail() {
+  public function _createEmail() {
     $Email = new CakeEmail('default');
     $Email->helpers('Html');
     return $Email;
   }
 
-  function _sendEmail($commentId) {
+  public function _sendEmail($commentId) {
     $comment = $this->Comment->findById($commentId);
     if (!$comment) {
       Logger::err("Could not find comment $commentId");
@@ -168,7 +168,7 @@ class CommentsController extends AppController
    * @param mediaId Current media id
    * @param commentId Id of the new comment
    */
-  function _sendNotifies($mediaId, $commentId) {
+  public function _sendNotifies($mediaId, $commentId) {
     $this->Media->bindModel(array('hasMany' => array('Comment')));
     $media = $this->Media->findById($mediaId);
     if (!$media) {
@@ -218,7 +218,7 @@ class CommentsController extends AppController
     }
   }
 
-  function delete($id = null) {
+  public function delete($id = null) {
     if (!$id) {
       $this->Session->setFlash(__('Invalid id for Comment'));
       $this->redirect("/explorer");
@@ -244,13 +244,13 @@ class CommentsController extends AppController
     $this->redirect("/images/view/".$comment['Media']['id']."/{$this->namedArgs}");
   }
 
-  function captcha() {
+  public function captcha() {
     $this->Captcha->render();
   }
 
-  function rss() {
+  public function rss() {
     $this->layoutPath = 'rss';
-    $this->Comment->currentUser =& $this->getUser();
+    $this->Comment->currentUser = $this->getUser();
     $data = $this->paginate('Comment');
     $this->set('data', $data);
 

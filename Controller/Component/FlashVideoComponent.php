@@ -26,14 +26,14 @@ class FlashVideoComponent extends Component {
     );
   var $_semaphoreId = false;
 
-  function initialize(&$controller) {
-    $this->controller =& $controller;
+  public function initialize(Controller $controller) {
+    $this->controller = $controller;
     if (function_exists('sem_get')) {
       $this->_semaphoreId = sem_get(4712);
     }
   }
 
-  function _scaleSize($media, $size) {
+  public function _scaleSize($media, $size) {
     $width = $media['Media']['width'];
     $height = $media['Media']['height'];
     if ($width > $size && $width > $height) {
@@ -53,7 +53,7 @@ class FlashVideoComponent extends Component {
     @param media Current media
     @param file Video file of the media
     @return True if current media is a flash movie */
-  function isValidFlash($media, $file) {
+  public function isValidFlash($media, $file) {
     if ($this->controller->MyFile->getExtension($file) == 'flv' &&
       $media['Media']['width'] <= $this->config['size'] &&
       $media['Media']['height'] <= $this->config['size']) {
@@ -62,7 +62,7 @@ class FlashVideoComponent extends Component {
     return false;
   }
 
-  function create($media, $config = array()) {
+  public function create($media, $config = array()) {
     $config = am($this->config, $config);
     if (!$this->controller->Media->isType($media, MEDIA_TYPE_VIDEO)) {
       Logger::err("Media {$media['Media']['id']} is not a video");
@@ -94,7 +94,7 @@ class FlashVideoComponent extends Component {
     return $flashFilename;
   }
 
-  function convertVideo($media, $src, $dst, $config = array()) {
+  public function convertVideo($media, $src, $dst, $config = array()) {
     $config = am($this->config, $config);
     $bin = $this->controller->getOption('bin.ffmpeg');
     if (!$bin) {
@@ -126,7 +126,7 @@ class FlashVideoComponent extends Component {
     return true;
   }
 
-  function _addCuePoints($filename) {
+  public function _addCuePoints($filename) {
     $bin = $this->controller->getOption('bin.flvtool2');
     if (!$bin) {
       return;
