@@ -132,11 +132,14 @@ class OptionsController extends AppController {
 
     $this->set('userId', $userId);
     $groups = $this->Group->find('all', array('conditions' => "Group.user_id = $userId", 'order' => array('Group.name' => 'ASC')));
+    $user = $this->User->findById($userId);
+    $groups = $this->Group->getGroupsForMedia($user);
     if ($groups) {
       $groups = Set::combine($groups, '{n}.Group.id', '{n}.Group.name');
     } else {
       $groups = array();
     }
+    sort($groups);
     $groups[-1] = __('[No Group]');
     $this->set('groups', $groups);
   }
