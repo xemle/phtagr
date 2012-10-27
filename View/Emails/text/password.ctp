@@ -1,9 +1,11 @@
-Dear <?php echo $user['User']['username']."\n"; ?>
-
-Your phTagr account password is:
-
-  <?php echo $user['User']['password']."\n"; ?>
-
-Sincerely
-
-Your phTagr Agent
+<?php
+  echo __("Hello %s!", $user['User']['username'])."\n";
+  echo "\n";
+  echo __("Your phTagr account password is:")."\n";
+  echo "\n";
+  echo $user['User']['password']."\n";
+  echo "\n";
+  echo __("Sincerely")."\n";
+  echo "\n";
+  echo __("Your phTagr Agent");
+?>

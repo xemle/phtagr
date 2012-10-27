@@ -30,7 +30,7 @@ class Location extends AppModel
   /**
     @param name Location name. Valid values are: city, sublocation, state, country, and any.
     @return Returns the type value of a given location string */
-  function nameToType($name) {
+  public function nameToType($name) {
     $type = array_search($name, $this->types);
     if ($type !== false)
       return $type;
@@ -41,7 +41,7 @@ class Location extends AppModel
   /**
     @param type Location type
     @return Name of the location type */
-  function typeToName($type) {
+  public function typeToName($type) {
     if (isset($this->types[$type]))
       return $this->types[$type];
     else
@@ -61,7 +61,7 @@ class Location extends AppModel
     @return List of items for model creations
     @see createIdList()
     */
-  function createLocationItems($locations) {
+  public function createLocationItems($locations) {
     $list = array();
     foreach ($this->types as $type => $name) {
       if (isset($locations[$name])) {
@@ -74,7 +74,7 @@ class Location extends AppModel
     return $list;
   }
 
-  function editMetaSingle(&$media, &$data) {
+  public function editMetaSingle(&$media, &$data) {
     $ids = array();
     $changed = false;
     foreach ($this->types as $type => $locationName) {
@@ -112,7 +112,7 @@ class Location extends AppModel
     }
   }
 
-  function prepareMultiEditData(&$data) {
+  public function prepareMultiEditData(&$data) {
     $tmp = array();
     foreach ($this->types as $type => $locationName) {
       if ($type == LOCATION_ANY || empty($data['Location'][$locationName])) {
@@ -161,7 +161,7 @@ class Location extends AppModel
     }
   }
 
-  function editMetaMulti(&$media, &$data) {
+  public function editMetaMulti(&$media, &$data) {
     if (empty($data['Location'])) {
       return false;
     }

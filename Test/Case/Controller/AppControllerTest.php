@@ -22,10 +22,10 @@ class ComponentAComponent extends Component {
   var $controller = null;
   var $components = array();
 
-  function initialize(Controller $controller) {
+  public function initialize(Controller $controller) {
     parent::initialize($controller);
-    $this->controller =& $controller;
-    $this->controller->loadComponent('ComponentB', &$this);
+    $this->controller = $controller;
+    $this->controller->loadComponent('ComponentB', $this);
   }
 }
 
@@ -34,9 +34,9 @@ class ComponentBComponent extends Component {
   var $controller = null;
   var $components = array('ComponentC');
 
-  function initialize(Controller $controller) {
+  public function initialize(Controller $controller) {
     parent::initialize($controller);
-    $this->controller = & $controller;
+    $this->controller = $controller;
   }
 
 }
@@ -46,9 +46,9 @@ class ComponentCComponent extends Component {
   var $controller = null;
   var $components = array('ComponentB');
 
-  function initialize(Controller $controller) {
+  public function initialize(Controller $controller) {
     parent::initialize($controller);
-    $this->controller = & $controller;
+    $this->controller = $controller;
   }
 }
 
@@ -56,7 +56,7 @@ class LoadComponentController extends AppController {
 
   var $components = array('ComponentA');
 
-  function __construct($request = null, $response = null) {
+  public function __construct($request = null, $response = null) {
     parent::__construct($request, $response);
   }
 }

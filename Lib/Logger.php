@@ -30,7 +30,8 @@ define("LOG_HTML",    2);
 define("LOG_CONSOLE", 3);
 define("LOG_FILE",    4);
 
-/** @class Logger
+/** 
+ @class Logger
   Class to log messages with different backends. Available backends are
 LOG_CONSOLE which prints message directly to the console. LOG_BUF which saves
 the log mesages in a internal buffer. LOG_FILE which dumps the log message to a
@@ -46,16 +47,16 @@ class Logger extends Object {
   var $_lines = array();
   var $_enabled = false;
 
-  function &getInstance() {
+  public static function &getInstance() {
     static $instance = null;
     if (!$instance) {
-      $instance =& new Logger();
+      $instance = new Logger();
       $instance->__loadBootstrap();
     }
     return $instance;
   }
 
-  function __loadBootstrap() {
+  public function __loadBootstrap() {
     $this->setLevel(Configure::read('Logger.level'));
     $this->setType(LOG_FILE, Configure::read('Logger.file'));
 
@@ -66,20 +67,20 @@ class Logger extends Object {
 
   /** Sets the new log threshold
     @param level new log threshold */
-  function setLevel($level) {
+  public function setLevel($level) {
     if ($level >= L_FATAL && $level <= L_TRACE) {
       $this->_level=$level;
     }
   }
 
   /** @return Returns the current log threshold */
-  function getLevel() {
+  public function getLevel() {
     return $this->_level;
   }
 
   /** Enables the logger. By default, the loger is disabled
     @return True, if the logger could be enabled  */
-  function enable() {
+  public function enable() {
     //global $db;
     if ($this->_enabled) {
       return true;
@@ -100,7 +101,7 @@ class Logger extends Object {
   }
 
   /** Disables the logger */
-  function disable() {
+  public function disable() {
     if (!$this->_enabled) {
       return;
     }
@@ -112,7 +113,7 @@ class Logger extends Object {
   }
 
   /** @return returns true if the logger is enables */
-  function isEnabled() {
+  public function isEnabled() {
     return $this->_enabled;
   }
 
@@ -121,7 +122,7 @@ class Logger extends Object {
     @param filename Filename if backend type is LOG_FILE
     @note If the logger is enabled, it will be disabled and enabled again to
   invoke backend finalizations and initialisations */
-  function setType($type, $filename = false) {
+  public function setType($type, $filename = false) {
     if ($type < LOG_BUF || $type > LOG_FILE) {
       return;
     }
@@ -148,12 +149,12 @@ class Logger extends Object {
   }
 
   /** @return Returns current backend type */
-  function getType() {
+  public function getType() {
     return $this->_type;
   }
 
   /** @return Returns the internal log buffer, if LOG_BUF is used */
-  function getBuffer() {
+  public function getBuffer() {
     if ($this->_type == LOG_BUF)
       return $this->_buf;
     if ($this->_type == LOG_SESSION && isset($_SESSION['log_buf']))
@@ -162,7 +163,7 @@ class Logger extends Object {
   }
 
   /** @return Returns the lines if LOG_HTML is used */
-  function getLines() {
+  public function getLines() {
     if ($this->_type == LOG_HTML) {
       return $this->_lines;
     }
@@ -173,7 +174,7 @@ class Logger extends Object {
     @param level Log level. If the level lower than the current threshold (but no
     error or fatal error), the function returns immediately
     @param msg Log message */
-  function _write($level, $msg) {
+  public function _write($level, $msg) {
     if (!$this->_enabled ||
       ($level < $this->_level && $level >= 0))
       return;
@@ -242,7 +243,7 @@ class Logger extends Object {
   }
 
   /** Add span block around the level message */
-  function _logHtml($time, $level, $image, $user, $file, $lineno, $msg) {
+  public function _logHtml($time, $level, $image, $user, $file, $lineno, $msg) {
     $line = "<span class=\"time\">$time </span>"
       ."<span class=\"$level\">[$level] </span>";
 
@@ -253,7 +254,7 @@ class Logger extends Object {
     $this->_lines[] = $line;
   }
 
-  function _openFile() {
+  public function _openFile() {
     if ($this->_filename == '') {
       return false;
     }
@@ -266,64 +267,64 @@ class Logger extends Object {
     return true;
   }
 
-  function _closeFile() {
+  public function _closeFile() {
     if ($this->_file != null) {
       fclose($this->_file);
     }
   }
 
-  function _logFile($line) {
+  public function _logFile($line) {
     if ($this->_file != null) {
       fwrite($this->_file, $line);
     }
   }
 
-  function fatal($msg) {
+  public static function fatal($msg) {
     $_this = self::getInstance();
     $_this->write($msg, L_FATAL);
   }
 
-  function err($msg) {
+  public static function err($msg) {
     $_this = self::getInstance();
     $_this->write($msg, L_ERR);
   }
 
-  function warn($msg) {
+  public static function warn($msg) {
     $_this = self::getInstance();
     $_this->write($msg, L_WARN);
   }
 
-  function notice($msg) {
+  public static function notice($msg) {
     $_this = self::getInstance();
     $_this->write($msg, L_NOTICE);
   }
 
-  function info($msg) {
+  public static function info($msg) {
     $_this = self::getInstance();
     $_this->write($msg, L_INFO);
   }
 
-  function verbose($msg) {
+  public static function verbose($msg) {
     $_this = self::getInstance();
     $_this->write($msg, L_VERBOSE);
   }
 
-  function debug($msg) {
+  public static function debug($msg) {
     $_this = self::getInstance();
     $_this->write($msg, L_DEBUG);
   }
 
-  function trace($msg) {
+  public static function trace($msg) {
     $_this = self::getInstance();
     $_this->write($msg, L_TRACE);
   }
 
-  function write($msg, $level=L_INFO) {
+  public static function write($msg, $level=L_INFO) {
     $_this = self::getInstance();
     $_this->_write($level, $msg);
   }
 
-  function bt() {
+  public static function bt() {
     $steps = @debug_backtrace();
     array_pop($steps);
     $trace = array();

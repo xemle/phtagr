@@ -40,7 +40,7 @@ class AppModel extends Model
   \endcode
    @param create If true, missing items are created. Default is false
    @return Array of ids */
-  function createIdList($items, $create=false) {
+  public function createIdList($items, $create=false) {
     $ids = array();
 
     if (empty($items))
@@ -80,7 +80,7 @@ class AppModel extends Model
     @param name Name of column. Default is 'name'
     @param sep Optional separator. Default is ','
     @return Array of items, which can be created by the model */
-  function createItems($text, $name='name', $sep=',') {
+  public function createItems($text, $name='name', $sep=',') {
     $items = explode($sep, $text);
     foreach ($items as $key => $item) {
       $item = trim($item);
@@ -105,7 +105,7 @@ class AppModel extends Model
     only items for exclusion are returned. In this case the minus char is
     stripped. Default is true
     @param Filtered list */
-  function filterItems($items, $includes=true, $name='name') {
+  public function filterItems($items, $includes=true, $name='name') {
     $new = array();
     foreach ($items as $item) {
       if (!isset($item[$name]))
@@ -131,7 +131,7 @@ class AppModel extends Model
     @param create If true, items are created if not exists.
     @return Array of ids
     @see createIdList */
-  function createIdListFromText($text, $name='name', $create=false) {
+  public function createIdListFromText($text, $name='name', $create=false) {
     if (!strlen($text))
       return array();
 
@@ -140,7 +140,7 @@ class AppModel extends Model
     return $this->createIdList($items, $create);
   }
 
-  function unbindAll($params = array()) {
+  public function unbindAll($params = array()) {
     $bindings = array(
         'belongsTo' => array_keys($this->belongsTo),
         'hasOne' => array_keys($this->hasOne),
@@ -181,7 +181,7 @@ class AppModel extends Model
       - 505 Version not supported
     @param message Message text
     @return array */
-  function returnCode($code, $message, $id = false) {
+  public function returnCode($code, $message, $id = false) {
     return compact('code', 'message', 'id');
   }
 
@@ -190,7 +190,7 @@ class AppModel extends Model
     @param habtmName Alias name of HABTM relation
     @param habtmIds Array of Ids for HABTM relation
     @return Returns the save result */
-  function saveHabtm($id, $habtmName, $habtmIds) {
+  public function saveHabtm($id, $habtmName, $habtmIds) {
     $dummy = array(
       $this->alias => array('id' => $id),
       $habtmName => array($habtmName => $habtmIds)
@@ -199,7 +199,7 @@ class AppModel extends Model
   }
 
   /** Strips the model alias from the moded data */
-  function stripAlias($data = null) {
+  public function stripAlias($data = null) {
     if (!$data) {
       $data = $this->data;
     }
@@ -211,7 +211,7 @@ class AppModel extends Model
   }
 
   /** Magic method to fetch model fields. Use Model::set() before */
-  function __get($name) {
+  public function __get($name) {
     if ($this->data) {
       $data = $this->stripAlias();
       $unserscore = Inflector::underscore($name);
@@ -222,10 +222,13 @@ class AppModel extends Model
     return parent::__get($name);
   }
 
-  /** Get a string representation of a model
-    @param data Model data
-    @return String alias:ID */
-  function toString($data) {
+  /** 
+   * Get a string representation of a model
+   *
+   * @param data Model data
+   * @return String alias:ID 
+   */
+  public function toStringModel($data) {
     $data = $this->stripAlias($data);
     if (isset($data['id'])) {
       return $this->alias . ":" . $data['id'];

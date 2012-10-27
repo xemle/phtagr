@@ -95,16 +95,16 @@ class SearchComponent extends Component
    */
   var $escapeChars = '=,/';
 
-  function initialize(&$controller) {
-    $this->controller =& $controller;
+  public function initialize(Controller $controller) {
+    $this->controller = $controller;
     if (!$this->QueryBuilder->controller) {
-      $this->QueryBuilder->initialize(&$controller);
+      $this->QueryBuilder->initialize($controller);
     }
     $this->clear();
     return true;
   }
 
-  function clear() {
+  public function clear() {
     $this->_data = $this->defaults;
   }
 
@@ -113,7 +113,7 @@ class SearchComponent extends Component
    *
    * @return Parameter array
    */
-  function getParams() {
+  public function getParams() {
     return $this->_data;
   }
 
@@ -123,7 +123,7 @@ class SearchComponent extends Component
    * @param data Parameter array
    * @note The parameters are not validated!
    */
-  function setParams($data = array()) {
+  public function setParams($data = array()) {
     $this->_data = $data;
   }
 
@@ -134,7 +134,7 @@ class SearchComponent extends Component
    * @param default Default value, if the parameter does not exists. Default
    * value is null
    */
-  function getParam($name, $default = null) {
+  public function getParam($name, $default = null) {
     if (!empty($this->_data[$name])) {
       return $this->_data[$name];
     } else {
@@ -151,7 +151,7 @@ class SearchComponent extends Component
    * true
    * @return True on success
    */
-  function setParam($name, $value, $validate = true) {
+  public function setParam($name, $value, $validate = true) {
     if ($validate === false || $this->validate($name, $value)) {
       $this->_data[$name] = $value;
       return true;
@@ -169,7 +169,7 @@ class SearchComponent extends Component
    * true
    * @note The name will be pluralized.
    */
-  function addParam($name, $value, $validate = true) {
+  public function addParam($name, $value, $validate = true) {
     $name = Inflector::pluralize($name);
     if (is_array($value)) {
       foreach ($value as $v) {
@@ -184,7 +184,7 @@ class SearchComponent extends Component
     }
   }
 
-  function delParam($name, $value = false) {
+  public function delParam($name, $value = false) {
     if (!isset($this->_data[$name])) {
       return;
     }
@@ -210,7 +210,7 @@ class SearchComponent extends Component
     }
   }
 
-  function encode($input) {
+  public function encode($input) {
     $out = '';
     $input = (string)$input;
     $len = strlen($input);
@@ -224,7 +224,7 @@ class SearchComponent extends Component
     return $out;
   }
 
-  function _c2h($c) {
+  public function _c2h($c) {
     $d = ord($c);
     if ($d >= 48 && $d <= 57) {
       return $d - 48;
@@ -237,7 +237,7 @@ class SearchComponent extends Component
     }
   }
 
-  function _dechex($c1, $c2) {
+  public function _dechex($c1, $c2) {
     $d1 = $this->_c2h($c1);
     $d2 = $this->_c2h($c2);
     if ($d1 === false || $d2 === false) {
@@ -247,7 +247,7 @@ class SearchComponent extends Component
     }
   }
 
-  function decode($input) {
+  public function decode($input) {
     $out = '';
     $input = (string)$input;
     $len = strlen($input);
@@ -271,7 +271,7 @@ class SearchComponent extends Component
     return $out;
   }
 
-  function __call($name, $args) {
+  public function __call($name, $args) {
     if (!preg_match('/^(get|set|add|del|delete)(.*)$/', $name, $matches)) {
       $this->log("Undefined function $name");
       return;
@@ -323,7 +323,7 @@ class SearchComponent extends Component
    * @param value Parameter value
    * @result True on success validation
    */
-  function validate($name, $value) {
+  public function validate($name, $value) {
     if (!$value && $value !== 0) {
       Logger::verbose("Parameter value of '$name' is empty!");
       return false;
@@ -370,7 +370,7 @@ class SearchComponent extends Component
    * @param check Value to check
    * @result True on successful validation
    */
-  function _dispatchRule($ruleSet, $check) {
+  public function _dispatchRule($ruleSet, $check) {
     if (!is_array($ruleSet)) {
       $rule = $ruleSet;
       $params = array($check);
@@ -386,7 +386,7 @@ class SearchComponent extends Component
       $params = array($check);
     }
 
-    if (method_exists(&$this, $rule)) {
+    if (method_exists($this, $rule)) {
       $result = $this->dispatchMethod($rule, $params);
     } elseif (method_exists('Validation', $rule)) {
       $result = call_user_func_array(array('Validation', $rule), $params);
@@ -407,7 +407,7 @@ class SearchComponent extends Component
   /**
    * Set the disabled search fields according to the user role
    */
-  function _setDisabledFields() {
+  public function _setDisabledFields() {
     // disable search parameter after role
     $role = $this->controller->getUserRole();
     $disabled = array();
@@ -430,7 +430,7 @@ class SearchComponent extends Component
   /**
    * parse all parameters given in the URL and adds them to the search
    */
-  function parseArgs() {
+  public function parseArgs() {
     $this->_setDisabledFields();
     foreach($this->controller->passedArgs as $name => $value) {
       if (is_numeric($name) || empty($value)) {
@@ -453,8 +453,9 @@ class SearchComponent extends Component
    * @param $skip Skip parts splited by slash '/'
    * @return Array of crumbs
    */
-  function urlToCrumbs($url, $skip = 2) {
-    $encoded = array_splice(split('/', trim(urldecode($url), '/')), $skip);
+  public function urlToCrumbs($url, $skip = 2) {
+    $parts = split('/', trim(urldecode($url), '/'));
+    $encoded = array_splice($parts, $skip);
     $crumbs = array();
     foreach ($encoded as $crumb) {
       if (!preg_match('/^(\w+):(.+)$/', $crumb, $matches)) {
@@ -472,7 +473,7 @@ class SearchComponent extends Component
    * @param $crumbs Array of crumbs
    * @return Array of encoded crumbs for an URL
    */
-  function encodeCrumbs($crumbs) {
+  public function encodeCrumbs($crumbs) {
     $escaped = array();
     foreach ($crumbs as $crumb) {
       if (!preg_match('/^(\w+):(.*)$/', $crumb, $matches)) {
@@ -488,7 +489,7 @@ class SearchComponent extends Component
    *
    * @return Array of crumbs
    */
-  function convertToCrumbs() {
+  public function convertToCrumbs() {
     $params = $this->getParams();
     $crumbs = array();
     foreach ($params as $name => $value) {
@@ -504,7 +505,7 @@ class SearchComponent extends Component
     return $crumbs;
   }
 
-  function _getParameterFromCrumbs($crumbs) {
+  public function _getParameterFromCrumbs($crumbs) {
     $listTypes = array('category', 'city', 'country', 'group', 'location', 'state', 'sublocation', 'tag');
     foreach ($crumbs as $crumb) {
       if (empty($crumb)) {
@@ -527,7 +528,7 @@ class SearchComponent extends Component
     }
   }
 
-  function paginateByCrumbs($crumbs) {
+  public function paginateByCrumbs($crumbs) {
     $tmp = $this->getParams();
     $this->clear();
     $this->_getParameterFromCrumbs($crumbs);
@@ -536,7 +537,7 @@ class SearchComponent extends Component
     return $data;
   }
 
-  function paginate() {
+  public function paginate() {
     $query = $this->QueryBuilder->build($this->getParams());
     $tmp = $query;
     unset($query['limit']);
@@ -581,7 +582,7 @@ class SearchComponent extends Component
     $data = $this->controller->Media->find('all', $query);
     $user = $this->controller->getUser();
     for ($i = 0; $i < count($data); $i++) {
-      $this->controller->Media->setAccessFlags(&$data[$i], $user);
+      $this->controller->Media->setAccessFlags($data[$i], $user);
     }
 
     // Set data for search helper
@@ -593,7 +594,7 @@ class SearchComponent extends Component
   /**
    * Sets the data for the search helper
    */
-  function setHelperData() {
+  public function setHelperData() {
     $params = array(
       'pageCount' => 0,
       'current' => 0,
@@ -607,7 +608,7 @@ class SearchComponent extends Component
     $this->controller->request->params['search'] = $params;
   }
 
-  function paginateMediaByCrumb($id, $crumbs) {
+  public function paginateMediaByCrumb($id, $crumbs) {
     $tmp = $this->getParams();
     $this->clear();
     $this->_getParameterFromCrumbs($crumbs);
@@ -616,7 +617,7 @@ class SearchComponent extends Component
     return $data;
   }
 
-  function paginateMedia($id) {
+  public function paginateMedia($id) {
     $query = $this->QueryBuilder->build($this->getParams());
     $tmp = $query;
     unset($query['limit']);
@@ -639,7 +640,7 @@ class SearchComponent extends Component
 
     $data = $this->controller->Media->findById($id);
     $user = $this->controller->getUser();
-    $access = $this->controller->Media->canRead(&$data, &$user);
+    $access = $this->controller->Media->canRead($data, $user);
     if ($count == 0 || !$data || !$access) {
       if (!$data) {
         Logger::info("Media $id not found");
@@ -649,7 +650,7 @@ class SearchComponent extends Component
       $this->controller->request->params['search'] = $params;
       return array();
     }
-    $this->controller->Media->setAccessFlags(&$data, $user);
+    $this->controller->Media->setAccessFlags($data, $user);
 
     $pos = $this->getPos(1);
     $mediaOffset = 1; // offset from previews media
@@ -705,7 +706,7 @@ class SearchComponent extends Component
     return $data;
   }
 
-  function quicksearch($text, $show = 12) {
+  public function quicksearch($text, $show = 12) {
     $words = preg_split('/\s+/', trim($text));
 
     $tmp = array();

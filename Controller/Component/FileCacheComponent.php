@@ -21,7 +21,7 @@ class FileCacheComponent extends Component {
 
   var $controller = null;
 
-  function initialize(&$controller) {
+  public function initialize(Controller $controller) {
     $this->controller = $controller;
   }
 
@@ -30,7 +30,7 @@ class FileCacheComponent extends Component {
     @param create Creates the directory if true. If false and the directory
     does not exists, it returns false. Default is true.
     @return Path for the cache file. False on error */
-  function getPath($media, $create = true) {
+  public function getPath($media, $create = true) {
     $userId = intval($media['Media']['user_id']);
     $mediaId = intval($media['Media']['id']);
 
@@ -43,7 +43,7 @@ class FileCacheComponent extends Component {
         return false;
       }
 
-      $folder =& new Folder($cacheDir);
+      $folder = new Folder($cacheDir);
       if (!$folder->create($cacheDir)) {
         Logger::err("Could not create cache dir '$cacheDir'");
         return false;
@@ -61,12 +61,12 @@ class FileCacheComponent extends Component {
   /** Returns the filename prefix of the cache file
     @param id ID of the current image/file
     @return filename prefix */
-  function getFilenamePrefix($id) {
+  public function getFilenamePrefix($id) {
     $prefix = sprintf("%07d-", intval($id));
     return $prefix;
   }
 
-  function getFilename($media, $alias, $ext = 'jpg') {
+  public function getFilename($media, $alias, $ext = 'jpg') {
     $prefix = $this->getFilenamePrefix($media['Media']['id']);
     return $prefix . $alias . "." . $ext;
   }
@@ -76,7 +76,7 @@ class FileCacheComponent extends Component {
     @param alias Alias for cache file
     @param ext (Optional) file extension. Default is 'jpg'
     @return Full path of the cache file. False on error */
-  function getFilePath($media, $alias, $ext = 'jpg') {
+  public function getFilePath($media, $alias, $ext = 'jpg') {
     $path = $this->getPath($media);
     if (!$path) {
       return false;
@@ -87,15 +87,15 @@ class FileCacheComponent extends Component {
   /** Deletes all cached files of a specific image/file.
     @param userId Id of the current user
     @param mediaId Id of the current image/file */
-  function delete(&$media) {
+  public function delete(&$media) {
     $mediaId = intval($media['Media']['id']);
-    $cacheDir = $this->getPath(&$media, false);
+    $cacheDir = $this->getPath($media, false);
     if (!$cacheDir) {
       Logger::trace("No cache dir found for media $mediaId");
       return true;
     }
 
-    $folder =& new Folder($cacheDir);
+    $folder = new Folder($cacheDir);
     $pattern = $this->getFilenamePrefix($mediaId).'.*';
     $files = $folder->find($pattern);
     if ($files) {
@@ -113,7 +113,7 @@ class FileCacheComponent extends Component {
 
   /** Deletes all cached files of the given user
     @param userId Id of the user */
-  function deleteAll($userId) {
+  public function deleteAll($userId) {
     $userId = intval($userId);
     $cacheDir = USER_DIR.$userId.DS.'cache'.DS;
     if (is_dir($cacheDir)) {

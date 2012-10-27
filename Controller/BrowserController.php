@@ -26,7 +26,7 @@ class BrowserController extends AppController
   /** Array of filesystem root directories. */
   var $_fsRoots = array();
 
-  function beforeFilter() {
+  public function beforeFilter() {
     parent::beforeFilter();
     $this->subMenu = array(
       'import' => __("Import Files"),
@@ -51,7 +51,7 @@ class BrowserController extends AppController
     $this->layout = 'backend';
   }
 
-  function beforeRender() {
+  public function beforeRender() {
     parent::beforeRender();
   }
 
@@ -65,7 +65,7 @@ class BrowserController extends AppController
    * '.')
    * @return True on success. False otherwise
    */
-  function _addFsRoot($root, $alias = null) {
+  public function _addFsRoot($root, $alias = null) {
     if (!$root) {
       Logger::warn("Invalid directory. Input is empty");
       return false;
@@ -102,7 +102,7 @@ class BrowserController extends AppController
   /**
    * @return Returns the path of the current request
    */
-  function _getPathFromUrl($strip = 0, $len = false) {
+  public function _getPathFromUrl($strip = 0, $len = false) {
     $strip = max(0, $strip);
     if (count($this->request->params['pass']) - $strip - abs($len) > 0) {
       if ($len) {
@@ -123,7 +123,7 @@ class BrowserController extends AppController
    * @param path
    * @return canonicalized path
    */
-  function _canonicalPath($path) {
+  public function _canonicalPath($path) {
     $paths = explode('/', $path);
     $canonical = array();
     foreach ($paths as $p) {
@@ -149,7 +149,7 @@ class BrowserController extends AppController
    * resolved it returns false
    * @note At lease one filesystem root must be defined
    */
-  function _getFsPath($path) {
+  public function _getFsPath($path) {
     $path = $this->_canonicalPath($path);
     $dirs = explode('/', $path);
     $fspath = false;
@@ -179,7 +179,7 @@ class BrowserController extends AppController
    * @param fsPath Filesystem path
    * @return Array of files or false on error
    */
-  function _readPath($fsPath) {
+  public function _readPath($fsPath) {
     if (!$fsPath || !is_dir($fsPath)) {
       Logger::err("Invalid path $fsPath");
       return false;
@@ -191,7 +191,7 @@ class BrowserController extends AppController
     $dbFiles = $this->MyFile->find('all', array('conditions' => array('path' => $fsPath), 'recursive' => -1));
     $dbFileNames = Set::extract('/File/file', $dbFiles);
 
-    $folder =& new Folder();
+    $folder = new Folder();
     $folder->cd($fsPath);
     list($fsDirs, $fsFiles) = $folder->read();
 
@@ -215,7 +215,7 @@ class BrowserController extends AppController
     return array($dirs, $files);
   }
 
-  function _readFile($filename) {
+  public function _readFile($filename) {
     $user = $this->getUser();
     if (!$this->MyFile->canRead($filename, $user)) {
       Logger::info("User cannot read $filename");
@@ -232,10 +232,10 @@ class BrowserController extends AppController
     $options = $this->MyFile->getMediaViewOptions($filename);
     $options['download'] = true;
     $this->set($options);
-    $this->view = 'Media';
+    $this->viewClass = 'Media';
   }
 
-  function index() {
+  public function index() {
     $path = $this->_getPathFromUrl();
     $fsPath = $this->_getFsPath($path);
 
@@ -270,7 +270,7 @@ class BrowserController extends AppController
     $this->set('isInternal', !$isExternal);
   }
 
-  function import() {
+  public function import() {
     $path = $this->_getPathFromUrl();
     if (empty($this->request->data)) {
       Logger::warn("Empty post data");
@@ -315,7 +315,7 @@ class BrowserController extends AppController
     $this->redirect('index/'.$path);
   }
 
-  function unlink() {
+  public function unlink() {
     $path = $this->_getPathFromUrl();
     $fsPath = $this->_getFsPath($path);
     $file = $this->MyFile->findByFilename($fsPath);
@@ -339,7 +339,7 @@ class BrowserController extends AppController
    * @param type $recursive Find media files recursivly if true
    * @return type Array of File model data
    */
-  function _findMediaFiles($path, $files, $recursive) {
+  public function _findMediaFiles($path, $files, $recursive) {
     $fsPath = $this->_getFsPath($path);
     $fsPath = Folder::slashTerm($fsPath);
     if (!is_dir($fsPath)) {
@@ -378,7 +378,7 @@ class BrowserController extends AppController
    * @param type $files List of selected files or directories
    * @param type $recursive True is unlinking should be act recursive
    */
-  function _unlinkselected($path, $files, $recursive) {
+  public function _unlinkselected($path, $files, $recursive) {
     $unlinkedCount=0;
     $mediaFiles = $this->_findMediaFiles($path, $files, $recursive);
     foreach ($mediaFiles as $file) {
@@ -391,7 +391,7 @@ class BrowserController extends AppController
     $this->redirect('index/'.$path);
   }
 
-  function delete() {
+  public function delete() {
     $path = $this->_getPathFromUrl();
     $fsPath = $this->_getFsPath($path);
     if (file_exists($fsPath)) {
@@ -419,7 +419,7 @@ class BrowserController extends AppController
    * the MEDIA_FLAG_DIRTY are synced or shortly before the maximum execution
    * time is exceed.
    */
-  function sync($action = false) {
+  public function sync($action = false) {
     $userId = $this->getUserId();
     $data = array('action' => $action, 'synced' => array(), 'errors' => array(), 'unsynced' => 0);
 
@@ -468,7 +468,7 @@ class BrowserController extends AppController
     $this->request->data = $data;
   }
 
-  function view() {
+  public function view() {
     $user = $this->getUser();
     $userId = $this->getUserId();
     $this->request->data = $user;
@@ -493,7 +493,7 @@ class BrowserController extends AppController
     $this->set('files', $files);
   }
 
-  function folder() {
+  public function folder() {
     $path = $this->_getPathFromUrl();
     $fsPath = $this->_getFsPath($path);
     // Check for internal path
@@ -527,7 +527,7 @@ class BrowserController extends AppController
     $this->set('path', $path);
   }
 
-  function _upload($dst, $redirectOnFailure = false) {
+  public function _upload($dst, $redirectOnFailure = false) {
     if ($redirectOnFailure === false) {
       $redirectOnFailure = $this->action;
     }
@@ -548,7 +548,7 @@ class BrowserController extends AppController
     return $result;
   }
 
-  function _extract($dst, $files) {
+  public function _extract($dst, $files) {
     $result = array();
     foreach ($files as $file) {
       if (strtolower(substr($file, -4)) == '.zip') {
@@ -568,7 +568,7 @@ class BrowserController extends AppController
     return $result;
   }
 
-  function __fromReadableSize($readable) {
+  public function __fromReadableSize($readable) {
     if (is_float($readable) || is_numeric($readable)) {
       return $readable;
     } elseif (preg_match_all('/^\s*(0|[1-9][0-9]*)(\.[0-9]+)?\s*([KkMmGg][Bb]?)?\s*$/', $readable, $matches, PREG_SET_ORDER)) {
@@ -607,7 +607,7 @@ class BrowserController extends AppController
 
   /** Evaluates the maximum upload size by php configuration of post_max_size,
  * upload_max_filesize, and memory_limit */
-  function _getMaxUploadSize() {
+  public function _getMaxUploadSize() {
     $max = 1024 * 1024 * 1024;
     if (!function_exists('ini_get')) {
       return 16 * 1024 * 1024;
@@ -628,7 +628,7 @@ class BrowserController extends AppController
   /**
    * Set quota information for the view
    */
-  function _setQuotaForView() {
+  public function _setQuotaForView() {
     // Fetch quota and free bytes
     $user = $this->getUser();
     $userId = $this->getUserId();
@@ -640,7 +640,7 @@ class BrowserController extends AppController
     $this->set('max', $this->_getMaxUploadSize());
   }
 
-  function upload() {
+  public function upload() {
     $path = $this->_getPathFromUrl();
     $fsPath = $this->_getFsPath($path);
     if (!$fsPath) {
@@ -680,7 +680,7 @@ class BrowserController extends AppController
     $this->_setQuotaForView();
   }
 
-  function _getDailyUploadDir() {
+  public function _getDailyUploadDir() {
     $root = $this->User->getRootDir($this->getUser());
     if (!$root) {
       Logger::err("Invalid user upload directory");
@@ -698,7 +698,7 @@ class BrowserController extends AppController
     return $dst;
   }
 
-  function quickupload() {
+  public function quickupload() {
     if (!empty($this->request->data)) {
       if (!$this->Upload->isUpload()) {
         Logger::info("No upload data");
@@ -738,7 +738,7 @@ class BrowserController extends AppController
     $this->layout = 'default';
   }
 
-  function plupload() {
+  public function plupload() {
     $dst = $this->_getDailyUploadDir();
     if (!$dst) {
       $this->redirect($this->action);

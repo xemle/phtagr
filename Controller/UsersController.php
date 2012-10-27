@@ -26,7 +26,7 @@ class UsersController extends AppController
   var $paginate = array('limit' => 10, 'order' => array('User.username' => 'asc'));
   var $subMenu = false;
 
-  function beforeFilter() {
+  public function beforeFilter() {
     parent::beforeFilter();
     $this->subMenu = array(
       'index' => __("List User"),
@@ -39,11 +39,11 @@ class UsersController extends AppController
     $this->layout = 'backend';
   }
 
-  function beforeRender() {
+  public function beforeRender() {
     parent::beforeRender();
   }
 
-  function __fromReadableSize($readable) {
+  public function __fromReadableSize($readable) {
     if (is_float($readable) || is_numeric($readable)) {
       return $readable;
     } elseif (preg_match_all('/^\s*(0|[1-9][0-9]*)(\.[0-9]+)?\s*([KkMmGg][Bb]?)?\s*$/', $readable, $matches, PREG_SET_ORDER)) {
@@ -83,12 +83,12 @@ class UsersController extends AppController
     }
   }
 
-  function index() {
+  public function index() {
     $this->set('isAdmin', $this->hasRole(ROLE_SYSOP));
     $this->request->data = $this->User->findVisibleUsers($this->getUser());
   }
 
-  function view($name) {
+  public function view($name) {
     $this->request->data = $this->User->findVisibleUsers($this->getUser(), $name);
     if (!$this->request->data) {
       $this->redirect('index');
@@ -109,7 +109,7 @@ class UsersController extends AppController
 
   /** Checks the login of the user. If the session variable 'loginRedirect' is
    * set the user is forwarded to this given address on successful login. */
-  function login() {
+  public function login() {
     $failedText = __("Sorry. Wrong password or unknown username!");
     if (!empty($this->request->data) && !$this->RequestHandler->isPost()) {
       Logger::warn("Authentication failed: Request was not HTTP POST");
@@ -132,12 +132,12 @@ class UsersController extends AppController
         Logger::warn("User account of '{$user['User']['username']}' (id {$user['User']['id']}) is expired!");
         $this->Session->setFlash(__("Sorry. Your account is expired!"));
       } else {
-        $user = $this->User->decrypt(&$user);
+        $user = $this->User->decrypt($user);
         if ($user['User']['password'] == $this->request->data['User']['password']) {
           $this->Session->renew();
           if (!$this->Session->check('User.id') || $this->Session->read('User.id') != $user['User']['id']) {
             Logger::info("Start new session for '{$user['User']['username']}' (id {$user['User']['id']})");
-            $this->User->writeSession($user, &$this->Session);
+            $this->User->writeSession($user, $this->Session);
 
             // Save Cookie for 3 months
             $this->Cookie->write('user', $user['User']['id'], true, 92*24*3600);
@@ -165,7 +165,7 @@ class UsersController extends AppController
     $this->layout = 'default';
   }
 
-  function logout() {
+  public function logout() {
     $user = $this->getUser();
     Logger::info("Delete session for user id {$user['User']['id']}");
 
@@ -177,7 +177,7 @@ class UsersController extends AppController
     $this->redirect('/');
   }
 
-  function admin_index() {
+  public function admin_index() {
     $this->requireRole(ROLE_SYSOP, array('loginRedirect' => '/admin/users'));
 
     $this->request->data = $this->paginate('User', array('User.role>='.ROLE_USER));
@@ -186,7 +186,7 @@ class UsersController extends AppController
   /** Ensure at least one admin exists
     @param id Current user
     @return True if at least one system operator exists */
-  function _lastAdminCheck($id) {
+  public function _lastAdminCheck($id) {
     $userId = $this->getUserId();
     $userRole = $this->getUserRole();
     if ($userId == $id && $userRole == ROLE_ADMIN && $this->request->data['User']['role'] < ROLE_ADMIN) {
@@ -201,7 +201,7 @@ class UsersController extends AppController
   }
 
   /** Add 3rd level menu for user edit for admin */
-  function _addAdminEditMenu($userId) {
+  public function _addAdminEditMenu($userId) {
     $subActions = array(
       'password' => __("Password"),
       'path' => __("Local Paths"));
@@ -213,7 +213,7 @@ class UsersController extends AppController
     $this->subMenu[] = $subItems;
   }
 
-  function admin_edit($id) {
+  public function admin_edit($id) {
     $this->requireRole(ROLE_SYSOP, array('loginRedirect' => '/admin/users'));
 
     $id = intval($id);
@@ -236,7 +236,7 @@ class UsersController extends AppController
     $this->_addAdminEditMenu($id);
   }
 
-  function admin_password($id) {
+  public function admin_password($id) {
     $this->requireRole(ROLE_SYSOP, array('loginRedirect' => '/admin/users'));
 
     $id = intval($id);
@@ -259,7 +259,7 @@ class UsersController extends AppController
     $this->_addAdminEditMenu($id);
   }
 
-  function admin_path($id) {
+  public function admin_path($id) {
     $this->requireRole(ROLE_SYSOP, array('loginRedirect' => '/admin/users'));
 
     $id = intval($id);
@@ -290,7 +290,7 @@ class UsersController extends AppController
     $this->_addAdminEditMenu($id);
   }
 
-  function admin_add() {
+  public function admin_add() {
     $this->requireRole(ROLE_SYSOP, array('loginRedirect' => '/admin/users'));
 
     if (!empty($this->request->data)) {
@@ -310,7 +310,7 @@ class UsersController extends AppController
     }
   }
 
-  function admin_del($id) {
+  public function admin_del($id) {
     $this->requireRole(ROLE_SYSOP, array('loginRedirect' => '/admin/users'));
 
     $id = intval($id);
@@ -326,7 +326,7 @@ class UsersController extends AppController
     }
   }
 
-  function admin_delpath($id) {
+  public function admin_delpath($id) {
     $this->requireRole(ROLE_SYSOP);
 
     $id = intval($id);
@@ -344,14 +344,16 @@ class UsersController extends AppController
     $this->redirect("path/$id");
   }
 
-  function _createEmail() {
-    return new CakeEmail('default');
+  public function _createEmail() {
+    $Email = new CakeEmail('default');
+    $Email->helpers('Html');
+    return $Email;
   }
 
   /**
    * Password recovery
    */
-  function password() {
+  public function password() {
     if (!empty($this->request->data)) {
       $user = $this->User->find('first', array('conditions' => array(
           'username' => $this->request->data['User']['username'],
@@ -361,12 +363,12 @@ class UsersController extends AppController
         Logger::warn(sprintf("No user '%s' with email %s was found",
             $this->request->data['User']['username'], $this->request->data['User']['email']));
       } else {
-        $user = $this->User->decrypt(&$user);
+        $user = $this->User->decrypt($user);
 
         $email = $this->_createEmail();
         $email->template('password')
           ->to(array($user['User']['email'] => $user['User']['username']))
-          ->subject('Password Request')
+          ->subject(__('[phtagr] Password Request'))
           ->viewVars(array('user' => $user));
 
         try {
@@ -388,7 +390,7 @@ class UsersController extends AppController
     $this->layout = 'default';
   }
 
-  function register() {
+  public function register() {
     if ($this->getUserRole() != ROLE_NOBODY) {
       $this->redirect('/');
     } elseif (!$this->getOption('user.register.enable', 0)) {
@@ -420,7 +422,7 @@ class UsersController extends AppController
     $this->layout = 'default';
   }
 
-  function captcha() {
+  public function captcha() {
     if (!$this->getOption('user.register.enable', 0)) {
       $this->redirect(null, 404);
     }
@@ -428,7 +430,7 @@ class UsersController extends AppController
     $this->Captcha->render('user.register.captcha');
   }
 
-  function _initRegisteredUser($newUserId) {
+  public function _initRegisteredUser($newUserId) {
     $user = $this->User->findById($newUserId);
     if (!$user) {
       Logger::err("Could not find user with ID $newUserId");
@@ -460,7 +462,7 @@ class UsersController extends AppController
     $this->redirect("/users/confirm");
   }
 
-  function confirm($key = false) {
+  public function confirm($key = false) {
     if ($this->getUserRole() != ROLE_NOBODY) {
       $this->redirect('/');
     } elseif (!$this->getOption('user.register.enable', 0)) {
@@ -486,7 +488,7 @@ class UsersController extends AppController
    * Verifies the confirmation key and activates the new user account
    * @param key Account confirmation key
    */
-  function _checkConfirmation($key) {
+  public function _checkConfirmation($key) {
     // check key. Option [belongsTo] User: The user is bound to option
     $user = $this->Option->find('first', array('conditions' => array("Option.value" => $key)));
     if (!$user) {
@@ -528,7 +530,7 @@ class UsersController extends AppController
     $this->Option->delete($user['Option']['id']);
 
     // login the user automatically
-    $this->User->writeSession($user, &$this->Session);
+    $this->User->writeSession($user, $this->Session);
     $this->redirect('/options/profile');
   }
 
@@ -537,11 +539,11 @@ class UsersController extends AppController
    * @param user User model data
    * @param key Confirmation key to activate the account
    */
-  function _sendConfirmationEmail($user, $key) {
+  public function _sendConfirmationEmail($user, $key) {
     $email = $this->_createEmail();
     $email->template('new_account_confirmation', 'default')
       ->to(array($user['User']['email'] => $user['User']['username']))
-      ->subject('[phtagr] Account confirmation: '.$user['User']['username'])
+      ->subject(__('[phtagr] Account confirmation: %s', $user['User']['username']))
       ->viewVars(array('user' => $user, 'key' => $key));
 
     try {
@@ -558,11 +560,11 @@ class UsersController extends AppController
    * Send an email for the new account to the new user
    * @param user User model data
    */
-  function _sendNewAccountEmail($user) {
+  public function _sendNewAccountEmail($user) {
     $email = $this->_createEmail();
     $email->template('new_account')
       ->to($user['User']['email'])
-      ->subject('[phtagr] Welcome '.$user['User']['username'])
+      ->subject(__('[phtagr] Welcome %s', $user['User']['username']))
       ->viewVars(array('user' => $user));
 
     try {
@@ -580,7 +582,7 @@ class UsersController extends AppController
    * account
    * @param user User model data (of the new user)
    */
-  function _sendNewAccountNotifiactionEmail($user) {
+  public function _sendNewAccountNotifiactionEmail($user) {
     $sysOps = $this->User->find('all', array('conditions' => "User.role >= ".ROLE_SYSOP));
     if (!$sysOps) {
       Logger::err("Could not find system operators");
@@ -593,7 +595,7 @@ class UsersController extends AppController
     $email = $this->_createEmail();
     $email->template('new_account_notification')
       ->to($to)
-      ->subject('[phtagr] New account notification: '.$user['User']['username'])
+      ->subject(__('[phtagr] New account notification: %s', $user['User']['username']))
       ->viewVars(array('user' => $user));
     foreach ($sysOps as $sysOp) {
       $email->cc($sysOp['User']['email'], $sysOp['User']['username']);

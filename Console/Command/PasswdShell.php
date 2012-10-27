@@ -21,7 +21,7 @@ class PasswdShell extends Shell {
   var $User = null;
 
   function initialize() {
-    $this->User =& new User();
+    $this->User = new User();
 
     $this->out("phtagr shell utilities");
     $this->hr();
@@ -93,7 +93,7 @@ class PasswdShell extends Shell {
     if (!$user) {
       $this->out("Could not find user '$userIdOrName'");
     } else {
-      $user = $this->User->decrypt(&$user);
+      $user = $this->User->decrypt($user);
       $this->out("Password of user '{$user['User']['username']}' is: '{$user['User']['password']}'");
     }
   }
@@ -111,7 +111,7 @@ class PasswdShell extends Shell {
       $user = $this->User->findByUsername($userIdOrName);
 
     $pass = $this->in("Please enter password");
-    $user = $this->User->decrypt(&$user);
+    $user = $this->User->decrypt($user);
     if ($user['User']['password'] != $pass) {
       $this->out("Password is correct");
     } else {

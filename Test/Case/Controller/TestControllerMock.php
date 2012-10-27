@@ -27,7 +27,7 @@ class TestControllerMock extends AppController {
 
   var $userMock = null;
 	
-	function getUser() {
+	public function &getUser() {
 		if (!$this->userMock) {
 			$this->userMock = $this->User->getNobody();
       $this->userMock['User']['role'] = ROLE_ADMIN;		

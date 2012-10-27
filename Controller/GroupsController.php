@@ -23,7 +23,7 @@ class GroupsController extends AppController {
   var $helpers = array('Form', 'ImageData', 'Text', 'Autocomplete');
   var $subMenu = false;
 
-  function beforeFilter() {
+  public function beforeFilter() {
     parent::beforeFilter();
     $this->subMenu = array(
       'index' => __("My Groups"),
@@ -42,25 +42,25 @@ class GroupsController extends AppController {
     $this->layout = 'backend';
   }
 
-  function fail($type) {
+  public function fail($type) {
     Logger::err("The security component denied action {$this->action}. Reason: $type");
     Logger::debug($this->request->data);
     $this->redirect(null, '404');
   }
 
-  function index() {
+  public function index() {
     $userId = $this->getUserId();
     $this->request->data = $this->Group->find('all', array('conditions' => array('User.id' => $userId), 'order' => 'Group.name'));
   }
 
-  function members() {
+  public function members() {
     $userId = $this->getUserId();
     $this->Group->bindModel(array('hasOne' => array('GroupsUser' => array())));
     $this->request->data = $this->Group->find('all', array('conditions' => array('GroupsUser.user_id' => $userId)));
     Logger::debug($this->request->data);
   }
 
-  function all() {
+  public function all() {
     $userId = $this->getUserId();
     if ($this->hasRole(ROLE_ADMIN)) {
       $this->request->data = $this->Group->find('all', array('order' => 'Group.name'));
@@ -80,13 +80,13 @@ class GroupsController extends AppController {
     $this->layout = "xml";
   }
 
-  function view($name) {
+  public function view($name) {
     $this->request->data = $this->Group->findByName($name);
     if (!$this->request->data) {
       $this->Session->setFlash(__("%s not found", true, __("Group")));
       $this->redirect('index');
     }
-    $this->Group->setAdmin(&$this->request->data, $this->getUser());
+    $this->Group->setAdmin($this->request->data, $this->getUser());
     $this->set('mediaCount', $this->Media->countByGroupId($this->request->data['Group']['id']));
 
     $this->Search->addGroup($name);
@@ -94,7 +94,7 @@ class GroupsController extends AppController {
     $this->set('media', $this->Search->paginate());
   }
 
-  function create() {
+  public function create() {
     if (!empty($this->request->data)) {
       $user = $this->getUser();
       $this->request->data['Group']['user_id'] = $user['User']['id'];
@@ -113,11 +113,13 @@ class GroupsController extends AppController {
     }
   }
 
-  function _createEmail() {
-    return new CakeEmail('default');
+  public function _createEmail() {
+    $Email = new CakeEmail('default');
+    $Email->helpers('Html');
+    return $Email;
   }
 
-  function _sendSubscribtionRequest($group) {
+  public function _sendSubscribtionRequest($group) {
     $user = $this->getUser();
 
     $email = $this->_createEmail();
@@ -138,7 +140,7 @@ class GroupsController extends AppController {
     }
   }
 
-  function _sendConfirmation($group, $user) {
+  public function _sendConfirmation($group, $user) {
     $email = $this->_createEmail();
     $email->template('group_confirmation')
       ->to(array($user['User']['email'] => $user['User']['username']))
@@ -155,7 +157,7 @@ class GroupsController extends AppController {
     }
   }
 
-  function _sendSubscribtion($group) {
+  public function _sendSubscribtion($group) {
     $user = $this->getUser();
 
     $email = $this->_createEmail();
@@ -174,7 +176,7 @@ class GroupsController extends AppController {
     }
   }
 
-  function _sendUnsubscribtion($group) {
+  public function _sendUnsubscribtion($group) {
     $user = $this->getUser();
 
     $email = $this->_createEmail();
@@ -193,7 +195,7 @@ class GroupsController extends AppController {
     }
   }
 
-  function subscribe($name) {
+  public function subscribe($name) {
     $group = $this->Group->findByName($name);
     if (!$group) {
       $this->Session->setFlash(__("%s not found", true, __("Group")));
@@ -216,7 +218,7 @@ class GroupsController extends AppController {
     }
   }
 
-  function confirm($groupName, $userName) {
+  public function confirm($groupName, $userName) {
     $conditions = array('Group.name' => $groupName);
     if ($this->getUserRole() < ROLE_ADMIN) {
       $conditions['Group.user_id'] = $this->getUserId();
@@ -235,7 +237,7 @@ class GroupsController extends AppController {
     }
   }
 
-  function unsubscribe($name) {
+  public function unsubscribe($name) {
     $group = $this->Group->findByName($name);
     $result = $this->Group->unsubscribe($group, $this->getUserId());
     $this->Session->setFlash($result['message']);
@@ -249,9 +251,9 @@ class GroupsController extends AppController {
     }
   }
 
-  function addMember($id) {
+  public function addMember($id) {
     $group = $this->Group->findById($id);
-    if (!$this->Group->isAdmin(&$group, $this->getUser())) {
+    if (!$this->Group->isAdmin($group, $this->getUser())) {
       $this->Session->setFlash(__("You are not authorized to perform this action"));
       $this->redirect("view/{$group['Group']['name']}");
     }
@@ -269,9 +271,9 @@ class GroupsController extends AppController {
     $this->redirect("view/{$group['Group']['name']}");
   }
 
-  function deleteMember($groupName, $userName) {
+  public function deleteMember($groupName, $userName) {
     $group = $this->Group->findByName($groupName);
-    if (!$this->Group->isAdmin(&$group, $this->getUser())) {
+    if (!$this->Group->isAdmin($group, $this->getUser())) {
       $this->Session->setFlash(__("You are not authorized to perform this action"));
       $this->redirect("view/{$group['Group']['name']}");
     }
@@ -289,7 +291,7 @@ class GroupsController extends AppController {
     $this->redirect("view/{$group['Group']['name']}");
   }
 
-  function edit($groupName) {
+  public function edit($groupName) {
     if (!empty($this->request->data)) {
       if ($this->request->data['Group']['name'] != $groupName && !$this->Group->isNameUnique($this->request->data)) {
         $this->Session->setFlash(__("%s already exists", true, __('Group')));
@@ -316,7 +318,7 @@ class GroupsController extends AppController {
   /**
     @todo Reset all group information of image
     @todo Check for permission! */
-  function delete($groupId) {
+  public function delete($groupId) {
     $conditions = array('Group.id' => $groupId);
     if ($this->getUserRole() < ROLE_ADMIN) {
       $conditions['Group.user_id'] = $this->getUserId();

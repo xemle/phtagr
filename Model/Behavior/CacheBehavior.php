@@ -21,7 +21,7 @@ class CacheBehavior extends ModelBehavior
 {
   var $config = array();
 
-  function setup(&$model, $config = array()) {
+  public function setup(Model $model, $config = array()) {
     $this->config[$model->name] = $config;
   }
 
@@ -29,9 +29,9 @@ class CacheBehavior extends ModelBehavior
     @param model Reference of model
     @param data Model data
     @return True on success */
-  function deleteCache(&$model, &$data = null) {
+  public function deleteCache(&$model, &$data = null) {
     if (!$data) {
-      $data =& $model->data;
+      $data = $model->data;
     }
 
     $modelData = $data;
@@ -51,7 +51,7 @@ class CacheBehavior extends ModelBehavior
 
     // catch all cache files and delete them
     $pattern = sprintf("%07d-.*", $modelData['id']);
-    $folder =& new Folder($cacheDir);
+    $folder = new Folder($cacheDir);
     $files = $folder->find($pattern);
     if (!$files) {
       Logger::trace("No cache files found for media {$modelData['id']}");

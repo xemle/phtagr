@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2012-07-19 18:37+0200\n"
+"POT-Creation-Date: 2012-09-14 20:17+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -14,23 +14,23 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: Console/Command/NotifyShell.php:43
+#: Console/Command/NotifyShell.php:44
 msgid "Do not send emails."
 msgstr ""
 
-#: Console/Command/NotifyShell.php:46
+#: Console/Command/NotifyShell.php:47
 msgid "Simulate the run. Do not change anything"
 msgstr ""
 
-#: Console/Command/NotifyShell.php:49
+#: Console/Command/NotifyShell.php:50
 msgid "Send emails always even if user already received an email"
 msgstr ""
 
-#: Console/Command/NotifyShell.php:52
+#: Console/Command/NotifyShell.php:53
 msgid "Run the notification updates"
 msgstr ""
 
-#: Console/Command/NotifyShell.php:53
+#: Console/Command/NotifyShell.php:54
 msgid "Notify new media for users via email"
 msgstr ""
 
@@ -108,7 +108,6 @@ msgstr ""
 
 #: Controller/AppController.php:52
 #: Controller/BrowserController.php:33
-#: View/Browser/quickupload.ctp:33
 #: View/Browser/upload.ctp:21
 #: View/Elements/menu.ctp:32
 msgid "Upload"
@@ -183,51 +182,51 @@ msgstr ""
 msgid "Could not delete file or directory"
 msgstr ""
 
-#: Controller/BrowserController.php:501
+#: Controller/BrowserController.php:502
 msgid "Invalid path to create folder"
 msgstr ""
 
-#: Controller/BrowserController.php:505
+#: Controller/BrowserController.php:506
 msgid "Could not create folder here: %s"
 msgstr ""
 
-#: Controller/BrowserController.php:521
+#: Controller/BrowserController.php:522
 msgid "Could not create folder"
 msgstr ""
 
-#: Controller/BrowserController.php:538
+#: Controller/BrowserController.php:539
 msgid "Your upload quota is exceeded"
 msgstr ""
 
-#: Controller/BrowserController.php:647
+#: Controller/BrowserController.php:648
 msgid "Invalid path for upload"
 msgstr ""
 
-#: Controller/BrowserController.php:652
+#: Controller/BrowserController.php:653
 msgid "Could not upload here: %s"
 msgstr ""
 
-#: Controller/BrowserController.php:673
+#: Controller/BrowserController.php:674
 msgid "Uploaded %d and %d extraced file(s)"
 msgstr ""
 
-#: Controller/BrowserController.php:675
+#: Controller/BrowserController.php:676
 msgid "Uploaded %d file(s)"
 msgstr ""
 
-#: Controller/BrowserController.php:686;694
+#: Controller/BrowserController.php:687;695
 msgid "Error: Invalid upload directory"
 msgstr ""
 
-#: Controller/BrowserController.php:704
+#: Controller/BrowserController.php:705
 msgid "No files uploaded or upload errors"
 msgstr ""
 
-#: Controller/BrowserController.php:721
+#: Controller/BrowserController.php:722;757
 msgid "No files uploaded"
 msgstr ""
 
-#: Controller/BrowserController.php:729
+#: Controller/BrowserController.php:730
 msgid "Uploaded %d files with %d errors."
 msgstr ""
 
@@ -243,11 +242,19 @@ msgstr ""
 msgid "The Comment could not be saved. Please, try again."
 msgstr ""
 
-#: Controller/CommentsController.php:221
+#: Controller/CommentsController.php:152
+msgid "[phtagr] Comment: %s"
+msgstr ""
+
+#: Controller/CommentsController.php:209
+msgid "[phtagr] Comment notification: %s"
+msgstr ""
+
+#: Controller/CommentsController.php:223
 msgid "Invalid id for Comment"
 msgstr ""
 
-#: Controller/CommentsController.php:235
+#: Controller/CommentsController.php:237
 msgid "Comment deleted"
 msgstr ""
 
@@ -287,12 +294,12 @@ msgstr ""
 msgid "Create Group"
 msgstr ""
 
-#: Controller/GroupsController.php:86;199;260;280
+#: Controller/GroupsController.php:86;201;262;282
 #: Model/Group.php:146;148;169
 msgid "%s not found"
 msgstr ""
 
-#: Controller/GroupsController.php:86;102;199;295;297;299
+#: Controller/GroupsController.php:86;102;201;297;299;301
 #: Model/Group.php:146;154;169;175
 #: View/Elements/Explorer/menu.ctp:167
 #: View/Explorer/search.ctp:38
@@ -301,7 +308,7 @@ msgstr ""
 msgid "Group"
 msgstr ""
 
-#: Controller/GroupsController.php:102;295
+#: Controller/GroupsController.php:102;297
 msgid "%s already exists"
 msgstr ""
 
@@ -313,19 +320,19 @@ msgstr ""
 msgid "Could not create group '%s'"
 msgstr ""
 
-#: Controller/GroupsController.php:132
+#: Controller/GroupsController.php:134
 msgid "Group subscription request was sent to the group owner"
 msgstr ""
 
-#: Controller/GroupsController.php:136
+#: Controller/GroupsController.php:138
 msgid "Mail could not be sent"
 msgstr ""
 
-#: Controller/GroupsController.php:255;275
+#: Controller/GroupsController.php:257;277
 msgid "You are not authorized to perform this action"
 msgstr ""
 
-#: Controller/GroupsController.php:260;280
+#: Controller/GroupsController.php:262;282
 #: Model/Group.php:148
 #: View/Explorer/search.ctp:40
 #: View/Images/view.ctp:62
@@ -335,28 +342,28 @@ msgstr ""
 msgid "User"
 msgstr ""
 
-#: Controller/GroupsController.php:267
+#: Controller/GroupsController.php:269
 msgid "User %s is now subscribe to this group"
 msgstr ""
 
-#: Controller/GroupsController.php:287
+#: Controller/GroupsController.php:289
 msgid "User %s is now unsubscribe from this group"
 msgstr ""
 
-#: Controller/GroupsController.php:297
+#: Controller/GroupsController.php:299
 #: Model/Group.php:154;175
 msgid "Could not save %s"
 msgstr ""
 
-#: Controller/GroupsController.php:299
+#: Controller/GroupsController.php:301
 msgid "%s updated"
 msgstr ""
 
-#: Controller/GroupsController.php:311;331
+#: Controller/GroupsController.php:313;333
 msgid "Could not find group"
 msgstr ""
 
-#: Controller/GroupsController.php:329
+#: Controller/GroupsController.php:331
 msgid "Successfully deleted group '%s'"
 msgstr ""
 
@@ -412,6 +419,22 @@ msgstr ""
 
 #: Controller/GuestsController.php:118
 msgid "Guest account '%s' deleted!"
+msgstr ""
+
+#: Controller/MediaController.php:303
+msgid "Download of more than %d media is not allowed"
+msgstr ""
+
+#: Controller/MediaController.php:307
+msgid "Download of more than %d media is not allowed for anonymous visitors"
+msgstr ""
+
+#: Controller/MediaController.php:328
+msgid "No files for download found for given media set"
+msgstr ""
+
+#: Controller/MediaController.php:334
+msgid "Download of not more than %d MB is not allowed"
 msgstr ""
 
 #: Controller/OptionsController.php:26
@@ -621,48 +644,64 @@ msgstr ""
 msgid "Deleted external directory '%s'"
 msgstr ""
 
-#: Controller/UsersController.php:360
+#: Controller/UsersController.php:362
 msgid "No user with this email was found"
 msgstr ""
 
-#: Controller/UsersController.php:378
+#: Controller/UsersController.php:371
+msgid "[phtagr] Password Request"
+msgstr ""
+
+#: Controller/UsersController.php:380
 msgid "Mail was sent!"
 msgstr ""
 
-#: Controller/UsersController.php:384
+#: Controller/UsersController.php:386
 msgid "Mail could not be sent: unknown error!"
 msgstr ""
 
-#: Controller/UsersController.php:401
+#: Controller/UsersController.php:403
 msgid "Captcha verification failed"
 msgstr ""
 
-#: Controller/UsersController.php:404
+#: Controller/UsersController.php:406
 msgid "Username already exists, please choose different name!"
 msgstr ""
 
-#: Controller/UsersController.php:413
+#: Controller/UsersController.php:415
 msgid "Could not create user"
 msgstr ""
 
-#: Controller/UsersController.php:451
+#: Controller/UsersController.php:453
 msgid "Could not send the confirmation email. Please contact the admin."
 msgstr ""
 
-#: Controller/UsersController.php:459
+#: Controller/UsersController.php:461
 msgid "A confirmation email was sent to your email address"
 msgstr ""
 
-#: Controller/UsersController.php:474
+#: Controller/UsersController.php:476
 msgid "Please enter the confirmation key"
 msgstr ""
 
-#: Controller/UsersController.php:494;509
+#: Controller/UsersController.php:496;511
 msgid "Could not find confirmation key"
 msgstr ""
 
-#: Controller/UsersController.php:500
+#: Controller/UsersController.php:502
 msgid "Internal error occured"
+msgstr ""
+
+#: Controller/UsersController.php:546
+msgid "[phtagr] Account confirmation: %s"
+msgstr ""
+
+#: Controller/UsersController.php:567
+msgid "[phtagr] Welcome %s"
+msgstr ""
+
+#: Controller/UsersController.php:598
+msgid "[phtagr] New account notification: %s"
 msgstr ""
 
 #: Controller/Component/MenuComponent.php:40
@@ -816,24 +855,15 @@ msgstr ""
 msgid "here"
 msgstr ""
 
-#: View/Browser/quickupload.ctp:23
+#: View/Browser/quickupload.ctp:22
 msgid "Upload your photos, videos, GPS logs or ZIP archives here."
 msgstr ""
 
-#: View/Browser/quickupload.ctp:25
-msgid "Photos, Videos - ZIP Archives"
-msgstr ""
-
-#: View/Browser/quickupload.ctp:26;27;28;29;30
-#: View/Browser/upload.ctp:11;12;13;14;15
-msgid "File or archive"
-msgstr ""
-
-#: View/Browser/quickupload.ctp:44
+#: View/Browser/quickupload.ctp:23
 msgid "You can upload maximal %s and %s at once. ZIP archives are extracted automatically."
 msgstr ""
 
-#: View/Browser/quickupload.ctp:46
+#: View/Browser/quickupload.ctp:27
 #: View/Browser/upload.ctp:27
 msgid "You cannot upload files now. Your upload quota is exceeded."
 msgstr ""
@@ -888,6 +918,10 @@ msgstr ""
 
 #: View/Browser/upload.ctp:7
 msgid "You can upload maximal %s and %s at once"
+msgstr ""
+
+#: View/Browser/upload.ctp:11;12;13;14;15
+msgid "File or archive"
 msgstr ""
 
 #: View/Browser/upload.ctp:16
@@ -1379,7 +1413,7 @@ msgid "Download preview files (%d px) from selected media"
 msgstr ""
 
 #: View/Emails/html/notify_new_media.ctp:1
-#: View/Emails/text/notify_new_media.ctp:1
+#: View/Emails/text/notify_new_media.ctp:2
 msgid "Hi %s!"
 msgstr ""
 
@@ -1389,23 +1423,214 @@ msgid "New media available at %s"
 msgstr ""
 
 #: View/Emails/html/notify_new_media.ctp:16
-#: View/Emails/text/notify_new_media.ctp:18
+#: View/Emails/text/notify_new_media.ctp:17
 msgid "User %s published following media"
 msgstr ""
 
 #: View/Emails/html/notify_new_media.ctp:29
-#: View/Emails/text/notify_new_media.ctp:26
+#: View/Emails/text/notify_new_media.ctp:24
 msgid "See all new media at %s"
 msgstr ""
 
 #: View/Emails/html/notify_new_media.ctp:31
-#: View/Emails/text/notify_new_media.ctp:29
+#: View/Emails/text/notify_new_media.ctp:27
 msgid "Sincerly, your phTagr agent"
 msgstr ""
 
 #: View/Emails/html/notify_new_media.ctp:33
-#: View/Emails/text/notify_new_media.ctp:32
+#: View/Emails/text/notify_new_media.ctp:30
 msgid "PS: If you do not like to receive this notification again, please configure the notification interval in your user profile."
+msgstr ""
+
+#: View/Emails/text/comment.ctp:2
+msgid "Hi %s"
+msgstr ""
+
+#: View/Emails/text/comment.ctp:4
+msgid "New comment on your media %s: %s was submitted"
+msgstr ""
+
+#: View/Emails/text/comment.ctp:7
+msgid "Author: %s"
+msgstr ""
+
+#: View/Emails/text/comment.ctp:8
+msgid "Email: %s"
+msgstr ""
+
+#: View/Emails/text/comment.ctp:9
+msgid "URL: %s"
+msgstr ""
+
+#: View/Emails/text/comment.ctp:10
+#: View/Emails/text/commentnotify.ctp:7
+msgid "Date: %s"
+msgstr ""
+
+#: View/Emails/text/comment.ctp:14
+msgid "You can see the comments on this media here: %s"
+msgstr ""
+
+#: View/Emails/text/comment.ctp:16
+msgid "Delete it: %s"
+msgstr ""
+
+#: View/Emails/text/comment.ctp:19
+#: View/Emails/text/commentnotify.ctp:13
+#: View/Emails/text/group_confirmation.ctp:14
+#: View/Emails/text/group_subscribtion.ctp:16
+#: View/Emails/text/group_subscribtion_request.ctp:18
+#: View/Emails/text/group_unsubscribtion.ctp:16
+#: View/Emails/text/new_account.ctp:8
+#: View/Emails/text/new_account_confirmation.ctp:14
+#: View/Emails/text/new_account_notification.ctp:6
+#: View/Emails/text/password.ctp:8
+msgid "Sincerely"
+msgstr ""
+
+#: View/Emails/text/comment.ctp:21
+#: View/Emails/text/commentnotify.ctp:15
+#: View/Emails/text/group_confirmation.ctp:16
+#: View/Emails/text/group_subscribtion.ctp:18
+#: View/Emails/text/group_subscribtion_request.ctp:20
+#: View/Emails/text/group_unsubscribtion.ctp:18
+#: View/Emails/text/new_account.ctp:10
+#: View/Emails/text/new_account_confirmation.ctp:16
+#: View/Emails/text/new_account_notification.ctp:8
+#: View/Emails/text/password.ctp:10
+msgid "Your phTagr Agent"
+msgstr ""
+
+#: View/Emails/text/commentnotify.ctp:2
+msgid "Hello"
+msgstr ""
+
+#: View/Emails/text/commentnotify.ctp:4
+msgid "A new comment on %s was submitted."
+msgstr ""
+
+#: View/Emails/text/commentnotify.ctp:6
+msgid "From: %s"
+msgstr ""
+
+#: View/Emails/text/commentnotify.ctp:8
+msgid "Link: %s"
+msgstr ""
+
+#: View/Emails/text/commentnotify.ctp:17
+msgid "PS: This mail is a comment notification of your previous comment(s) on this media."
+msgstr ""
+
+#: View/Emails/text/group_confirmation.ctp:2
+#: View/Emails/text/group_subscribtion.ctp:2
+#: View/Emails/text/group_subscribtion_request.ctp:2
+#: View/Emails/text/group_unsubscribtion.ctp:2
+#: View/Emails/text/new_account_confirmation.ctp:2
+#: View/Emails/text/password.ctp:2
+msgid "Hello %s!"
+msgstr ""
+
+#: View/Emails/text/group_confirmation.ctp:4
+msgid "Your group subscription of group %s was accepted."
+msgstr ""
+
+#: View/Emails/text/group_confirmation.ctp:6
+msgid "Group information:"
+msgstr ""
+
+#: View/Emails/text/group_confirmation.ctp:8
+#: View/Emails/text/group_subscribtion.ctp:10
+#: View/Emails/text/group_subscribtion_request.ctp:12
+#: View/Emails/text/group_unsubscribtion.ctp:10
+msgid "Description: %s"
+msgstr ""
+
+#: View/Emails/text/group_confirmation.ctp:9
+#: View/Emails/text/group_subscribtion.ctp:11
+#: View/Emails/text/group_subscribtion_request.ctp:13
+#: View/Emails/text/group_unsubscribtion.ctp:11
+msgid "Number of members: %d"
+msgstr ""
+
+#: View/Emails/text/group_confirmation.ctp:11
+msgid "More details of group %s are available at %s."
+msgstr ""
+
+#: View/Emails/text/group_subscribtion.ctp:4
+msgid "User %s joined your group %s"
+msgstr ""
+
+#: View/Emails/text/group_subscribtion.ctp:6
+msgid "To see more information about user %s, please visit %s."
+msgstr ""
+
+#: View/Emails/text/group_subscribtion.ctp:8
+#: View/Emails/text/group_subscribtion_request.ctp:10
+#: View/Emails/text/group_unsubscribtion.ctp:8
+msgid "Group info:"
+msgstr ""
+
+#: View/Emails/text/group_subscribtion.ctp:13
+#: View/Emails/text/group_subscribtion_request.ctp:15
+#: View/Emails/text/group_unsubscribtion.ctp:13
+msgid "More details of your group %s are available at %s"
+msgstr ""
+
+#: View/Emails/text/group_subscribtion_request.ctp:4
+msgid "User %s likes to join your group %s."
+msgstr ""
+
+#: View/Emails/text/group_subscribtion_request.ctp:6
+msgid "To confirm the subscription please visit %s"
+msgstr ""
+
+#: View/Emails/text/group_subscribtion_request.ctp:8
+#: View/Emails/text/group_unsubscribtion.ctp:6
+msgid "To see more information about user %s, please visit %s"
+msgstr ""
+
+#: View/Emails/text/group_unsubscribtion.ctp:4
+msgid "User %s unsubscribed from your group %s."
+msgstr ""
+
+#: View/Emails/text/new_account.ctp:2
+msgid "Welcome %s!"
+msgstr ""
+
+#: View/Emails/text/new_account.ctp:4
+msgid "Your phTagr account is now activated for %s"
+msgstr ""
+
+#: View/Emails/text/new_account.ctp:6
+msgid "Login at %s with your new account and see %s for first steps."
+msgstr ""
+
+#: View/Emails/text/new_account_confirmation.ctp:3
+msgid "\n"
+msgstr ""
+
+#: View/Emails/text/new_account_confirmation.ctp:4
+msgid "Please confirm your account creation"
+msgstr ""
+
+#: View/Emails/text/new_account_confirmation.ctp:8
+msgid "Or visit %s and enter the confirmation key:"
+msgstr ""
+
+#: View/Emails/text/new_account_confirmation.ctp:12
+msgid "to finalize your account creation"
+msgstr ""
+
+#: View/Emails/text/new_account_notification.ctp:2
+msgid "Hello System Operator!"
+msgstr ""
+
+#: View/Emails/text/new_account_notification.ctp:4
+msgid "A new phTagr user account was created for %s"
+msgstr ""
+
+#: View/Emails/text/password.ctp:4
+msgid "Your phTagr account password is:"
 msgstr ""
 
 #: View/Explorer/index.ctp:10
@@ -1420,11 +1645,11 @@ msgstr ""
 msgid "Cancel"
 msgstr ""
 
-#: View/Explorer/index.ctp:228
+#: View/Explorer/index.ctp:276
 msgid "Select All"
 msgstr ""
 
-#: View/Explorer/index.ctp:229
+#: View/Explorer/index.ctp:277
 msgid "Invert Selection"
 msgstr ""
 
@@ -1988,7 +2213,7 @@ msgstr ""
 msgid "renew key"
 msgstr ""
 
-#: View/Helper/BreadcrumbHelper.php:192
+#: View/Helper/BreadcrumbHelper.php:193
 msgid "Filter"
 msgstr ""
 
@@ -2172,6 +2397,34 @@ msgstr ""
 msgid "next"
 msgstr ""
 
+#: View/Helper/PluploadHelper.php:30
+msgid "Uploading file %s"
+msgstr ""
+
+#: View/Helper/PluploadHelper.php:31
+msgid "Uploding file %d/%d. Upload is finished in %s (estimated)."
+msgstr ""
+
+#: View/Helper/PluploadHelper.php:68
+msgid "Upload Files"
+msgstr ""
+
+#: View/Helper/PluploadHelper.php:69
+msgid "Drop files here"
+msgstr ""
+
+#: View/Helper/PluploadHelper.php:70
+msgid "Your new uploaded photos:"
+msgstr ""
+
+#: View/Helper/PluploadHelper.php:71
+msgid "View your %s in explorer"
+msgstr ""
+
+#: View/Helper/PluploadHelper.php:71
+msgid "newest media"
+msgstr ""
+
 #: View/Images/notfound.ctp:1
 msgid "No media Found"
 msgstr ""
@@ -2242,17 +2495,24 @@ msgid "You are running version %s."
 msgstr ""
 
 #: View/Layouts/default.ctp:34
-#: View/Themed/Chrisd/Layouts/default.ctp:34
 msgid "Search..."
 msgstr ""
 
 #: View/Layouts/default.ctp:35
-#: View/Themed/Chrisd/Layouts/default.ctp:35
 msgid "Go"
 msgstr ""
 
 #: View/Layouts/default.ctp:51
 msgid "phTagr.org"
+msgstr ""
+
+#: View/Layouts/Emails/html/default.ctp:3
+msgid "New Media notifications"
+msgstr ""
+
+#: View/Layouts/Emails/html/default.ctp:7
+#: View/Layouts/Emails/text/default.ctp:4
+msgid "Email was sent by the open source web gallery %s"
 msgstr ""
 
 #: View/Options/import.ctp:5
@@ -2837,49 +3097,49 @@ msgstr ""
 msgid "No categories assigned"
 msgstr ""
 
-#: /mnt/raidModel/Comment.php:validation for field name
+#: /mnt/raid/var/www/tests/phtagr-git/Model/Comment.php:validation for field name
 msgid "Name is missing"
 msgstr ""
 
-#: /mnt/raidModel/Comment.php:validation for field email
+#: /mnt/raid/var/www/tests/phtagr-git/Model/Comment.php:validation for field email
 msgid "Email is invalid"
 msgstr ""
 
-#: /mnt/raidModel/Comment.php:validation for field url
+#: /mnt/raid/var/www/tests/phtagr-git/Model/Comment.php:validation for field url
 msgid "URL is invalid"
 msgstr ""
 
-#: /mnt/raidModel/Comment.php:validation for field text
+#: /mnt/raid/var/www/tests/phtagr-git/Model/Comment.php:validation for field text
 msgid "Comment text is empty"
 msgstr ""
 
-#: /mnt/raidModel/Comment.php:validation for field text
+#: /mnt/raid/var/www/tests/phtagr-git/Model/Comment.php:validation for field text
 msgid "Comment is to long"
 msgstr ""
 
-#: /mnt/raidModel/Guest.php:validation for field username
+#: /mnt/raid/var/www/tests/phtagr-git/Model/Guest.php:validation for field username
 msgid "Guestname must be between 3 and 32 characters long."
 msgstr ""
 
-#: /mnt/raidModel/Guest.php:validation for field password
-#: /mnt/raidModel/User.php:validation for field password
+#: /mnt/raid/var/www/tests/phtagr-git/Model/Guest.php:validation for field password
+#: /mnt/raid/var/www/tests/phtagr-git/Model/User.php:validation for field password
 msgid "Password must be between 6 and 20 characters long."
 msgstr ""
 
-#: /mnt/raidModel/Guest.php:validation for field email
-#: /mnt/raidModel/User.php:validation for field email
+#: /mnt/raid/var/www/tests/phtagr-git/Model/Guest.php:validation for field email
+#: /mnt/raid/var/www/tests/phtagr-git/Model/User.php:validation for field email
 msgid "Email address is not valid"
 msgstr ""
 
-#: /mnt/raidModel/User.php:validation for field username
+#: /mnt/raid/var/www/tests/phtagr-git/Model/User.php:validation for field username
 msgid "Username must be between 3 and 32 characters long."
 msgstr ""
 
-#: /mnt/raidModel/User.php:validation for field role
+#: /mnt/raid/var/www/tests/phtagr-git/Model/User.php:validation for field role
 msgid "Invalid role"
 msgstr ""
 
-#: /mnt/raidModel/User.php:validation for field notify_interval
+#: /mnt/raid/var/www/tests/phtagr-git/Model/User.php:validation for field notify_interval
 msgid "Invalid notification interval"
 msgstr ""
 

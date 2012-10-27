@@ -39,7 +39,7 @@ class FilterManagerController extends AppController {
 
 	var $components = array('FileManager', 'FilterManager');
 
-	function getUser() {
+	public function &getUser() {
     return $this->User->find('first');
 	}
 
@@ -85,8 +85,8 @@ class FilterManagerComponentTest  extends CakeTestCase {
 		$this->Controller = new FilterManagerController($CakeRequest, $CakeResponse);
 		$this->Controller->constructClasses();
 		$this->Controller->startupProcess();
-    $this->Media =& $this->Controller->Media;
-    $this->MyFile = & $this->Controller->MyFile;
+    $this->Media = $this->Controller->Media;
+    $this->MyFile = $this->Controller->MyFile;
 
     $this->Folder->create(TEST_FILES_TMP);
   }
@@ -120,7 +120,7 @@ class FilterManagerComponentTest  extends CakeTestCase {
       }
     }
     $result = array();
-    exec('which ' . $command, &$result);
+    exec('which ' . $command, $result);
     if ($result) {
       return $result[0];
     } else {

@@ -28,11 +28,11 @@ class UploadComponent extends Component {
 
   var $_errors = null;
 
-  function initialize(&$controller) {
+  public function initialize(Controller $controller) {
     $this->controller = $controller;
   }
 
-  function clear() {
+  public function clear() {
     $this->_uploads = null;
     $this->_errors = null;
   }
@@ -44,7 +44,7 @@ class UploadComponent extends Component {
    * @param msg Error message / Error code
    * @param data Arbitrary data. Optional
    */
-  function _addError($file, $msg, $data = null) {
+  public function _addError($file, $msg, $data = null) {
     if ($this->_errors === null) {
       $this->_errors = array();
     }
@@ -61,7 +61,7 @@ class UploadComponent extends Component {
    * @param data Data array
    * @return array of upload data
    */
-  function _extractUploads($data) {
+  public function _extractUploads($data) {
     if (!$data || !is_array($data)) {
       return array();
     } elseif (isset($data['error']) && isset($data['name']) &&
@@ -69,20 +69,20 @@ class UploadComponent extends Component {
       isset($data['tmp_name'])) {
       // handle errors
       if ($data['error']) {
-        $this->_addError($data['name'], 'uploadError', &$data);
+        $this->_addError($data['name'], 'uploadError', $data);
         return array();
       // uploaded files
       } elseif ($this->isUploadedFile($data['tmp_name'])) {
         extract($data);
         return array(compact('error', 'name', 'type', 'size', 'tmp_name'));
       } else {
-        $this->_addError($data['name'], 'noUploadFile', &$data);
+        $this->_addError($data['name'], 'noUploadFile', $data);
         return array();
       }
     } else {
       $result = array();
       foreach ($data as $d) {
-        $result = am($result, $this->_extractUploads(&$d));
+        $result = am($result, $this->_extractUploads($d));
       }
       return $result;
     }
@@ -95,20 +95,20 @@ class UploadComponent extends Component {
    * @return array of upload data
    * @note Before using new data call clear() otherwise the data will be cached
    */
-  function getUploads($data = null) {
+  public function getUploads($data = null) {
     if ($this->_uploads !== null) {
       return $this->_uploads;
     }
 
     if (!$data && $this->controller->request->data) {
-      $data =& $this->controller->request->data;
+      $data = $this->controller->request->data;
     }
 
-    $uploads = $this->_extractUploads(&$data);
+    $uploads = $this->_extractUploads($data);
     if (count($uploads)) {
       $this->_uploads = $uploads;
     } else {
-      $uploads = $this->_extractUploads(&$this->controller->request->params);
+      $uploads = $this->_extractUploads($this->controller->request->params);
       if (count($uploads)) {
         $this->_uploads = $uploads;
       } else {
@@ -123,7 +123,7 @@ class UploadComponent extends Component {
    *
    * @return true if upload data is available. false otherwise
    */
-  function isUpload($data = null) {
+  public function isUpload($data = null) {
     if (count($this->getUploads($data))) {
       return true;
     } else {
@@ -136,7 +136,7 @@ class UploadComponent extends Component {
    *
    * @return True if upload data contains error
    */
-  function hasErrors() {
+  public function hasErrors() {
     $this->getUploads();
     if (is_array($this->_errors) && count($this->_errors)) {
       return true;
@@ -150,7 +150,7 @@ class UploadComponent extends Component {
    *
    * @return Array of error
    */
-  function getErrors() {
+  public function getErrors() {
     if ($this->hasErrors()) {
       return $this->_errors;
     } else {
@@ -163,7 +163,7 @@ class UploadComponent extends Component {
    *
    * @return Size of all uploded files
    */
-  function getSize() {
+  public function getSize() {
     $uploads = $this->getUploads();
     if (!$uploads || count($uploads) == 0) {
       return 0;
@@ -171,11 +171,11 @@ class UploadComponent extends Component {
     return array_sum(Set::extract('/size', $uploads));
   }
 
-  function isUploadedFile($filename) {
+  public function isUploadedFile($filename) {
     return is_uploaded_file($filename);
   }
 
-  function moveUploadedFile($filename, $dst) {
+  public function moveUploadedFile($filename, $dst) {
     return move_uploaded_file($filename, $dst);
   }
 
@@ -187,7 +187,7 @@ class UploadComponent extends Component {
    *   - overwrite - If true overwrite file with same filename. If false create a unique filename if a file with same filename exists
    * @return array of uploaded files (without the path)
    */
-  function upload($path, $options = array()) {
+  public function upload($path, $options = array()) {
     $options = am(array('overwrite' => true), $options);
 
     if (!is_dir($path) || !is_writeable($path)) {

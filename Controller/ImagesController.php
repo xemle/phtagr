@@ -23,7 +23,7 @@ class ImagesController extends AppController
   var $helpers = array('Form', 'Html', 'ImageData', 'Time', 'Search', 'ExplorerMenu', 'Rss', 'Map', 'Navigator', 'Flowplayer', 'Tab', 'Number', 'Option', 'Autocomplete');
   var $crumbs = array();
 
-  function beforeFilter() {
+  public function beforeFilter() {
     parent::beforeFilter();
 
     if ($this->hasRole(ROLE_USER)) {
@@ -43,7 +43,7 @@ class ImagesController extends AppController
     }
   }
 
-  function beforeRender() {
+  public function beforeRender() {
     parent::beforeRender();
     $this->set('crumbs', $this->crumbs);
     $this->request->params['crumbs'] = $this->crumbs;
@@ -51,13 +51,13 @@ class ImagesController extends AppController
 
   /** Simple crawler detection
     @todo Verifiy and improve crawler detection */
-  function _isCrawler() {
+  public function _isCrawler() {
     return (preg_match('/(agent|bot|crawl|search|spider|walker)/i', env('HTTP_USER_AGENT')) == 1);
   }
 
   /** Update the rating and clicks of a media. The rated media will be stored
    * in the session to avoid multiple rating per session. */
-  function _updateRating() {
+  public function _updateRating() {
     if (!$this->request->data || !isset($this->request->data['Media']['id'])) {
       Logger::warn("Precondition failed");
       return;
@@ -89,7 +89,7 @@ class ImagesController extends AppController
     $this->Session->write('Media.ranked', $ranked);
   }
 
-  function view($id) {
+  public function view($id) {
     $this->request->data = $this->Search->paginateMediaByCrumb($id, $this->crumbs);
     if (!$this->request->data) {
       $this->render('notfound');
@@ -119,18 +119,18 @@ class ImagesController extends AppController
     }
   }
 
-  function update($id) {
+  public function update($id) {
     if (!empty($this->request->data)) {
       $user = $this->getUser();
       $media = $this->Media->findById($id);
       if (!$media) {
         Logger::warn("Invalid media id: $id");
         $this->redirect(null, '404');
-      } elseif (!$this->Media->canWrite(&$media, &$user)) {
+      } elseif (!$this->Media->canWrite($media, $user)) {
         Logger::warn("User '{$username}' ({$user['User']['id']}) has no previleges to change tags of image ".$id);
       } else {
-        $this->Media->setAccessFlags(&$media, &$user);
-        $tmp = $this->Media->editSingle(&$media, &$this->request->data, &$user);
+        $this->Media->setAccessFlags($media, $user);
+        $tmp = $this->Media->editSingle($media, $this->request->data, $user);
         if (!$this->Media->save($tmp)) {
           Logger::warn("Could not save media");
           Logger::debug($tmp);
@@ -151,18 +151,18 @@ class ImagesController extends AppController
     $this->redirect($url);
   }
 
-  function updateAcl($id) {
+  public function updateAcl($id) {
     if (!empty($this->request->data)) {
       $user = $this->getUser();
       $media = $this->Media->findById($id);
       if (!$media) {
         Logger::warn("Invalid media id: $id");
         $this->redirect(null, '404');
-      } elseif (!$this->Media->canWriteAcl(&$media, &$user)) {
+      } elseif (!$this->Media->canWriteAcl($media, $user)) {
         Logger::warn("User '{$username}' ({$user['User']['id']}) has no previleges to change tags of image ".$id);
       } else {
-        $this->Media->setAccessFlags(&$media, $user);
-        $tmp = $this->Media->editSingle(&$media, &$this->request->data, &$user);
+        $this->Media->setAccessFlags($media, $user);
+        $tmp = $this->Media->editSingle($media, $this->request->data, $user);
         if ($tmp) {
           if ($this->Media->save($tmp, true)) {
             Logger::info("Changed acl of media $id");

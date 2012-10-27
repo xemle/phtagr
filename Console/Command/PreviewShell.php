@@ -85,7 +85,7 @@ class PreviewShell extends AppShell {
           continue;
         }
         //$this->out($file);
-        $preview = $this->PreviewManager->getPreview(&$media, $size);
+        $preview = $this->PreviewManager->getPreview($media, $size);
         if (!$preview) {
           $this->out("Error: Could not create preview of media {$media['Media']['id']}");
           $errors[] = $media['Media']['id'];

@@ -40,15 +40,15 @@ if (!is_writeable(TEST_FILES)) {
 }
 
 class PluploadComponentMock extends PluploadComponent {
-  function isUploadedFile($filename) {
+  public function isUploadedFile($filename) {
     return true;
   }
 
-  function moveUploadedFile($filename, $dst) {
+  public function moveUploadedFile($filename, $dst) {
     return rename($filename, $dst);
   }
   
-  function _getContentType() {
+  public function _getContentType() {
     return 'multipart';
   }
 }
@@ -58,23 +58,23 @@ class FileManagerComponentMockB extends FileManagerComponent {
   var $uniqueFilenameMockValue = '';
   var $addMockValue = true;
 
-  function canWrite($size, $user = false) {
+  public function canWrite($size, $user = false) {
     return $this->canWriteMockValue;
   }
 
-  function delete($file) {
+  public function delete($file) {
     return true;
   }
 
-  function createUniqueFilename($path, $filename) {
+  public function createUniqueFilename($path, $filename) {
     return $this->uniqueFilenameMockValue;
   }
 
-  function add($filename, $user = false) {
+  public function add($filename, $user = false) {
     return $this->addMockValue;
   }
   
-  function move($src, $dst) {
+  public function move($src, $dst) {
     rename($src, $dst);
     return true;
   }
@@ -116,7 +116,7 @@ class PluploadComponentTest extends CakeTestCase {
     parent::tearDown();
   }
 
-  function _buildUploadFolders() {
+  public function _buildUploadFolders() {
     $src = TEST_FILES . 'src' . DS;
     $dst = TEST_FILES . 'dst' . DS;
     $this->Folder->create($src);
@@ -125,7 +125,7 @@ class PluploadComponentTest extends CakeTestCase {
     $this->assertEqual(true, is_dir($dst));
   }
 
-  function _deleteUploadFolders() {
+  public function _deleteUploadFolders() {
     $src = TEST_FILES . 'src' . DS;
     $dst = TEST_FILES . 'dst' . DS;
     $this->Folder->delete($src);
@@ -134,7 +134,7 @@ class PluploadComponentTest extends CakeTestCase {
     $this->assertEqual(false, is_dir($dst));
   }
 
-  function testIsPlupload() {
+  public function testIsPlupload() {
     $result = $this->Plupload->isPlupload();
     $this->assertEqual(false, $result);
     
@@ -155,7 +155,7 @@ class PluploadComponentTest extends CakeTestCase {
     $this->assertEqual(false, $result);
   }
 
-  function testUploadSingle() {
+  public function testUploadSingle() {
     $src = TEST_FILES . 'src' . DS;
     $dst = TEST_FILES . 'dst' . DS;
     $this->_buildUploadFolders();
@@ -201,7 +201,7 @@ class PluploadComponentTest extends CakeTestCase {
   }
 
 
-  function testUploadChunks() {
+  public function testUploadChunks() {
     $src = TEST_FILES . 'src' . DS;
     $dst = TEST_FILES . 'dst' . DS;
     $this->_buildUploadFolders();

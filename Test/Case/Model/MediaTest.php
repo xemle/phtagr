@@ -65,17 +65,17 @@ class MediaTestCase extends CakeTestCase {
 
   public function testRotate() {
     $data = array();
-    $this->Media->rotate(&$data, 1, 90);
+    $this->Media->rotate($data, 1, 90);
     $this->assertSame(6, $data['Media']['orientation']);
-    $this->Media->rotate(&$data, 1, 180);
+    $this->Media->rotate($data, 1, 180);
     $this->assertSame(3, $data['Media']['orientation']);
-    $this->Media->rotate(&$data, 1, 270);
+    $this->Media->rotate($data, 1, 270);
 
-    $this->Media->rotate(&$data, 6, 90);
+    $this->Media->rotate($data, 6, 90);
     $this->assertSame(3, $data['Media']['orientation']);
-    $this->Media->rotate(&$data, 3, 90);
+    $this->Media->rotate($data, 3, 90);
     $this->assertSame(8, $data['Media']['orientation']);
-    $this->Media->rotate(&$data, 8, 90);
+    $this->Media->rotate($data, 8, 90);
     $this->assertSame(1, $data['Media']['orientation']);
   }
 
@@ -107,7 +107,7 @@ class MediaTestCase extends CakeTestCase {
         'oacl' => 0)));
     $mediaId = $this->Media->getLastInsertID();
     $media = $this->Media->findById($mediaId);
-    $this->Media->setAccessFlags(&$media, &$admin);
+    $this->Media->setAccessFlags($media, $admin);
 
     $this->assertEqual(1, $media['Media']['canReadPreview']);
     $this->assertEqual(1, $media['Media']['canReadHigh']);
@@ -123,55 +123,55 @@ class MediaTestCase extends CakeTestCase {
     $this->assertEqual(0, $media['Media']['isDirty']);
 
     // Test canRead
-    $this->Media->setAccessFlags(&$media, &$user);
+    $this->Media->setAccessFlags($media, $user);
     $this->assertEqual(0, $media['Media']['canReadPreview']);
     $this->assertEqual(0, $media['Media']['canReadHigh']);
     $this->assertEqual(0, $media['Media']['canReadOriginal']);
 
     $this->Media->save(array('Media' => array('id' => $mediaId, 'oacl' => ACL_READ_PREVIEW)));
     $media = $this->Media->findById($mediaId);
-    $this->Media->setAccessFlags(&$media, &$user);
+    $this->Media->setAccessFlags($media, $user);
     $this->assertEqual(1, $media['Media']['canReadPreview']);
     $this->assertEqual(0, $media['Media']['canReadHigh']);
     $this->assertEqual(0, $media['Media']['canReadOriginal']);
 
     $this->Media->save(array('Media' => array('id' => $mediaId, 'oacl' => ACL_READ_HIGH)));
     $media = $this->Media->findById($mediaId);
-    $this->Media->setAccessFlags(&$media, &$user);
+    $this->Media->setAccessFlags($media, $user);
     $this->assertEqual(1, $media['Media']['canReadPreview']);
     $this->assertEqual(1, $media['Media']['canReadHigh']);
     $this->assertEqual(0, $media['Media']['canReadOriginal']);
 
     $this->Media->save(array('Media' => array('id' => $mediaId, 'oacl' => ACL_READ_ORIGINAL)));
     $media = $this->Media->findById($mediaId);
-    $this->Media->setAccessFlags(&$media, &$user);
+    $this->Media->setAccessFlags($media, $user);
     $this->assertEqual(1, $media['Media']['canReadPreview']);
     $this->assertEqual(1, $media['Media']['canReadHigh']);
     $this->assertEqual(1, $media['Media']['canReadOriginal']);
 
     // Test canWrite
-    $this->Media->setAccessFlags(&$media, &$user);
+    $this->Media->setAccessFlags($media, $user);
     $this->assertEqual(0, $media['Media']['canWriteTag']);
     $this->assertEqual(0, $media['Media']['canWriteMeta']);
     $this->assertEqual(0, $media['Media']['canWriteCaption']);
 
     $this->Media->save(array('Media' => array('id' => $mediaId, 'oacl' => ACL_READ_PREVIEW | ACL_WRITE_TAG)));
     $media = $this->Media->findById($mediaId);
-    $this->Media->setAccessFlags(&$media, &$user);
+    $this->Media->setAccessFlags($media, $user);
     $this->assertEqual(1, $media['Media']['canWriteTag']);
     $this->assertEqual(0, $media['Media']['canWriteMeta']);
     $this->assertEqual(0, $media['Media']['canWriteCaption']);
 
     $this->Media->save(array('Media' => array('id' => $mediaId, 'oacl' => ACL_READ_PREVIEW | ACL_WRITE_META)));
     $media = $this->Media->findById($mediaId);
-    $this->Media->setAccessFlags(&$media, &$user);
+    $this->Media->setAccessFlags($media, $user);
     $this->assertEqual(1, $media['Media']['canWriteTag']);
     $this->assertEqual(1, $media['Media']['canWriteMeta']);
     $this->assertEqual(0, $media['Media']['canWriteCaption']);
 
     $this->Media->save(array('Media' => array('id' => $mediaId, 'oacl' => ACL_READ_PREVIEW | ACL_WRITE_CAPTION)));
     $media = $this->Media->findById($mediaId);
-    $this->Media->setAccessFlags(&$media, &$user);
+    $this->Media->setAccessFlags($media, $user);
     $this->assertEqual(1, $media['Media']['canWriteTag']);
     $this->assertEqual(1, $media['Media']['canWriteMeta']);
     $this->assertEqual(1, $media['Media']['canWriteCaption']);
@@ -179,48 +179,48 @@ class MediaTestCase extends CakeTestCase {
     // Test visiblility
     $this->Media->save(array('Media' => array('id' => $mediaId, 'oacl' => 0)));
     $media = $this->Media->findById($mediaId);
-    $this->Media->setAccessFlags(&$media, &$user);
+    $this->Media->setAccessFlags($media, $user);
     $this->assertEqual(ACL_LEVEL_PRIVATE, $media['Media']['visibility']);
 
     $this->Media->save(array('Media' => array('id' => $mediaId, 'gacl' => ACL_READ_PREVIEW)));
     $media = $this->Media->findById($mediaId);
-    $this->Media->setAccessFlags(&$media, &$user);
+    $this->Media->setAccessFlags($media, $user);
     $this->assertEqual(ACL_LEVEL_GROUP, $media['Media']['visibility']);
 
     $this->Media->save(array('Media' => array('id' => $mediaId, 'gacl' => ACL_READ_PREVIEW, 'uacl' => ACL_READ_PREVIEW)));
     $media = $this->Media->findById($mediaId);
-    $this->Media->setAccessFlags(&$media, &$user);
+    $this->Media->setAccessFlags($media, $user);
     $this->assertEqual(ACL_LEVEL_USER, $media['Media']['visibility']);
 
     $this->Media->save(array('Media' => array('id' => $mediaId, 'gacl' => ACL_READ_PREVIEW, 'uacl' => ACL_READ_PREVIEW, 'oacl' => ACL_READ_PREVIEW)));
     $media = $this->Media->findById($mediaId);
-    $this->Media->setAccessFlags(&$media, &$user);
+    $this->Media->setAccessFlags($media, $user);
     $this->assertEqual(ACL_LEVEL_OTHER, $media['Media']['visibility']);
 
     // Test owner
-    $this->Media->setAccessFlags(&$media, &$admin);
+    $this->Media->setAccessFlags($media, $admin);
     $this->assertEqual(1, $media['Media']['isOwner']);
-    $this->Media->setAccessFlags(&$media, &$user);
+    $this->Media->setAccessFlags($media, $user);
     $this->assertEqual(0, $media['Media']['isOwner']);
 
     // Test canWriteAcl
-    $this->Media->setAccessFlags(&$media, &$admin);
+    $this->Media->setAccessFlags($media, $admin);
     $this->assertEqual(1, $media['Media']['canWriteAcl']);
-    $this->Media->setAccessFlags(&$media, &$user);
+    $this->Media->setAccessFlags($media, $user);
     $this->assertEqual(0, $media['Media']['canWriteAcl']);
 
     // Set image owner from 'admin' to 'user'. Admin can write Acl
     $this->Media->save(array('Media' => array('id' => $mediaId, 'user_id' => $user['User']['id'])));
     $media = $this->Media->findById($mediaId);
-    $this->Media->setAccessFlags(&$media, &$admin);
+    $this->Media->setAccessFlags($media, $admin);
     $this->assertEqual(1, $media['Media']['canWriteAcl']);
-    $this->Media->setAccessFlags(&$media, &$user);
+    $this->Media->setAccessFlags($media, $user);
     $this->assertEqual(1, $media['Media']['canWriteAcl']);
 
     // Test access gaining over group
     $this->Media->save(array('Media' => array('id' => $mediaId, 'user_id' => $admin['User']['id'], 'gacl' => ACL_READ_PREVIEW | ACL_WRITE_META, 'uacl' => 0, 'oacl' => 0)));
     $media = $this->Media->findById($mediaId);
-    $this->Media->setAccessFlags(&$media, &$user);
+    $this->Media->setAccessFlags($media, $user);
     $this->assertEqual(0, $media['Media']['canReadPreview']);
     $this->assertEqual(0, $media['Media']['canReadHigh']);
     $this->assertEqual(0, $media['Media']['canReadOriginal']);
@@ -230,11 +230,11 @@ class MediaTestCase extends CakeTestCase {
 
     // Add 'group1' and 'group2', to media. User 'user' will gain rights via group 'group2'
     $requestData = array('Group' => array('names' => 'group1, group2'));
-    $this->Media->setAccessFlags(&$media, &$admin);
-    $tmp = $this->Media->editSingle(&$media, &$requestData, &$admin);
+    $this->Media->setAccessFlags($media, $admin);
+    $tmp = $this->Media->editSingle($media, $requestData, $admin);
     $this->Media->save($tmp);
     $media = $this->Media->findById($mediaId);
-    $this->Media->setAccessFlags(&$media, &$user);
+    $this->Media->setAccessFlags($media, $user);
     $this->assertEqual(1, $media['Media']['canReadPreview']);
     $this->assertEqual(0, $media['Media']['canReadHigh']);
     $this->assertEqual(0, $media['Media']['canReadOriginal']);
@@ -268,28 +268,28 @@ class MediaTestCase extends CakeTestCase {
 
     $this->Media->save($this->Media->create(array('name' => 'IMG_1234.JPG', 'user_id' => $admin['User']['id'])));
     $media = $this->Media->findById($this->Media->getLastInsertID());
-    $this->Media->setAccessFlags(&$media, &$admin);
+    $this->Media->setAccessFlags($media, $admin);
 
     $requestData = array('Group' => array('names' => 'group1'));
     $data = $this->Media->prepareMultiEditData($requestData, &$admin);
-    $tmp = $this->Media->editMulti(&$media, &$data, &$admin);
+    $tmp = $this->Media->editMulti($media, $data);
     $this->Media->save($tmp);
     $media = $this->Media->findById($media['Media']['id']);
-    $this->Media->setAccessFlags(&$media, &$admin);
+    $this->Media->setAccessFlags($media, $admin);
     $this->assertEqual(array('group1'), Set::extract('/Group/name', $media));
 
     $requestData = array('Group' => array('names' => ' group2 , -group1'));
-    $data = $this->Media->prepareMultiEditData($requestData, &$admin);
-    $tmp = $this->Media->editMulti(&$media, &$data, &$admin);
+    $data = $this->Media->prepareMultiEditData($requestData, $admin);
+    $tmp = $this->Media->editMulti($media, $data);
     $this->Media->save($tmp);
     $media = $this->Media->findById($media['Media']['id']);
-    $this->Media->setAccessFlags(&$media, &$admin);
+    $this->Media->setAccessFlags($media, $admin);
     $this->assertEqual(array('group2'), Set::extract('/Group/name', $media));
 
     // Admin can use every group
     $requestData = array('Group' => array('names' => ' group 3 , group1'));
-    $data = $this->Media->prepareMultiEditData($requestData, &$admin);
-    $tmp = $this->Media->editMulti(&$media, &$data, &$admin);
+    $data = $this->Media->prepareMultiEditData($requestData, $admin);
+    $tmp = $this->Media->editMulti($media, $data);
     $this->Media->save($tmp);
     $media = $this->Media->findById($media['Media']['id']);
     $this->assertEqual(array('group2', 'group1', 'group 3'), Set::extract('/Group/name', $media));
@@ -297,30 +297,30 @@ class MediaTestCase extends CakeTestCase {
     // Test group set for user
     $this->Media->save($this->Media->create(array('name' => 'IMG_2345.JPG', 'user_id' => $user['User']['id'])));
     $media = $this->Media->findById($this->Media->getLastInsertID());
-    $this->Media->setAccessFlags(&$media, &$user);
+    $this->Media->setAccessFlags($media, $user);
 
     $requestData = array('Group' => array('names' => ' group 3 , group1'));
-    $data = $this->Media->prepareMultiEditData($requestData, &$user);
-    $tmp = $this->Media->editMulti(&$media, &$data, &$user);
+    $data = $this->Media->prepareMultiEditData($requestData, $user);
+    $tmp = $this->Media->editMulti($media, $data);
     $this->Media->save($tmp);
     $media = $this->Media->findById($media['Media']['id']);
-    $this->Media->setAccessFlags(&$media, &$user);
+    $this->Media->setAccessFlags($media, $user);
     $this->assertEqual(array('group 3'), Set::extract('/Group/name', $media));
 
     $requestData = array('Group' => array('names' => ' group2 , -group 3'));
-    $data = $this->Media->prepareMultiEditData($requestData, &$user);
-    $tmp = $this->Media->editMulti(&$media, &$data, &$user);
+    $data = $this->Media->prepareMultiEditData($requestData, $user);
+    $tmp = $this->Media->editMulti($media, $data);
     $this->Media->save($tmp);
     $media = $this->Media->findById($media['Media']['id']);
-    $this->Media->setAccessFlags(&$media, &$user);
+    $this->Media->setAccessFlags($media, $user);
     $this->assertEqual(array('group2'), Set::extract('/Group/name', $media));
 
     $requestData = array('Group' => array('names' => 'group 3, fake Group'));
-    $data = $this->Media->prepareMultiEditData($requestData, &$user);
-    $tmp = $this->Media->editMulti(&$media, &$data, &$user);
+    $data = $this->Media->prepareMultiEditData($requestData, $user);
+    $tmp = $this->Media->editMulti($media, $data);
     $this->Media->save($tmp);
     $media = $this->Media->findById($media['Media']['id']);
-    $this->Media->setAccessFlags(&$media, &$user);
+    $this->Media->setAccessFlags($media, $user);
     $this->assertEqual(array('group2', 'group 3'), Set::extract('/Group/name', $media));
   }
 
@@ -349,25 +349,25 @@ class MediaTestCase extends CakeTestCase {
 
     $this->Media->save($this->Media->create(array('name' => 'IMG_1234.JPG', 'user_id' => $admin['User']['id'])));
     $media = $this->Media->findById($this->Media->getLastInsertID());
-    $this->Media->setAccessFlags(&$media, &$admin);
+    $this->Media->setAccessFlags($media, $admin);
 
     $requestData = array('Group' => array('names' => 'group1'));
-    $tmp = $this->Media->editSingle(&$media, &$requestData, &$admin);
+    $tmp = $this->Media->editSingle($media, $requestData, $admin);
     $this->Media->save($tmp);
     $media = $this->Media->findById($media['Media']['id']);
-    $this->Media->setAccessFlags(&$media, &$admin);
+    $this->Media->setAccessFlags($media, $admin);
     $this->assertEqual(array('group1'), Set::extract('/Group/name', $media));
 
     $requestData = array('Group' => array('names' => ' group2 , -group1'));
-    $tmp = $this->Media->editSingle(&$media, &$requestData, &$admin);
+    $tmp = $this->Media->editSingle($media, $requestData, $admin);
     $this->Media->save($tmp);
     $media = $this->Media->findById($media['Media']['id']);
-    $this->Media->setAccessFlags(&$media, &$admin);
+    $this->Media->setAccessFlags($media, $admin);
     $this->assertEqual(array('group2'), Set::extract('/Group/name', $media));
 
     // Admin can use every group
     $requestData = array('Group' => array('names' => ' group 3 , group1'));
-    $tmp = $this->Media->editSingle(&$media, &$requestData, &$admin);
+    $tmp = $this->Media->editSingle($media, $requestData, $admin);
     $this->Media->save($tmp);
     $media = $this->Media->findById($media['Media']['id']);
     $this->assertEqual(array('group1', 'group 3'), Set::extract('/Group/name', $media));
@@ -375,27 +375,27 @@ class MediaTestCase extends CakeTestCase {
     // Test group set for user
     $this->Media->save($this->Media->create(array('name' => 'IMG_2345.JPG', 'user_id' => $user['User']['id'])));
     $media = $this->Media->findById($this->Media->getLastInsertID());
-    $this->Media->setAccessFlags(&$media, &$user);
+    $this->Media->setAccessFlags($media, $user);
 
     $requestData = array('Group' => array('names' => ' group 3 , group1'));
-    $tmp = $this->Media->editSingle(&$media, &$requestData, &$user);
+    $tmp = $this->Media->editSingle($media, $requestData, $user);
     $this->Media->save($tmp);
     $media = $this->Media->findById($media['Media']['id']);
-    $this->Media->setAccessFlags(&$media, &$user);
+    $this->Media->setAccessFlags($media, $user);
     $this->assertEqual(array('group 3'), Set::extract('/Group/name', $media));
 
     $requestData = array('Group' => array('names' => ' group2 , -group 3'));
-    $tmp = $this->Media->editSingle(&$media, &$requestData, &$user);
+    $tmp = $this->Media->editSingle($media, $requestData, $user);
     $this->Media->save($tmp);
     $media = $this->Media->findById($media['Media']['id']);
-    $this->Media->setAccessFlags(&$media, &$user);
+    $this->Media->setAccessFlags($media, $user);
     $this->assertEqual(array('group2'), Set::extract('/Group/name', $media));
 
     $requestData = array('Group' => array('names' => 'group 3, fake Group'));
-    $tmp = $this->Media->editSingle(&$media, &$requestData, &$user);
+    $tmp = $this->Media->editSingle($media, $requestData, $user);
     $this->Media->save($tmp);
     $media = $this->Media->findById($media['Media']['id']);
-    $this->Media->setAccessFlags(&$media, &$user);
+    $this->Media->setAccessFlags($media, $user);
     $this->assertEqual(array('group 3'), Set::extract('/Group/name', $media));
   }
 

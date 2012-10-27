@@ -43,7 +43,7 @@ class TestWriteController extends AppController {
   var $uses = array('Media', 'MyFile', 'User', 'Option');
   var $components = array('FileManager', 'FilterManager');
 
-  function getUser() {
+  public function &getUser() {
     return $this->User->find('first');
   }
 
@@ -96,8 +96,8 @@ class MediaWriteTestCase extends CakeTestCase {
     $this->Controller = new TestWriteController($CakeRequest, $CakeResponse);
     $this->Controller->constructClasses();
     $this->Controller->startupProcess();
-    $this->Media = & $this->Controller->Media;
-    $this->MyFile = & $this->Controller->MyFile;
+    $this->Media = $this->Controller->Media;
+    $this->MyFile = $this->Controller->MyFile;
 
 
     $this->Folder->create(TEST_FILES_TMP);
@@ -114,7 +114,7 @@ class MediaWriteTestCase extends CakeTestCase {
       }
     }
     $result = array();
-    exec('which ' . $command, &$result);
+    exec('which ' . $command, $result);
     if ($result) {
       return $result[0];
     } else {
@@ -165,7 +165,7 @@ class MediaWriteTestCase extends CakeTestCase {
     $cmd .= ' ' . escapeshellarg($filename);
     $result = array();
     $exitCode = 0;
-    exec($cmd, &$result, &$exitcode);
+    exec($cmd, $result, $exitcode);
     if (!$result) {
       return array();
     }
@@ -188,13 +188,13 @@ class MediaWriteTestCase extends CakeTestCase {
     $media = $this->Media->find('first');
     $this->assertNotEqual($media, false);
     $user = $this->Controller->getUser();
-    $this->Media->setAccessFlags(&$media, &$user);
+    $this->Media->setAccessFlags($media, $user);
     $data = array('Field' => array('keyword' => 'thailand'));
-    $tmp = $this->Media->editSingle(&$media, &$data, &$user);
+    $tmp = $this->Media->editSingle($media, $data, $user);
     $this->Media->save($tmp);
 
     $media = $this->Media->findById($media['Media']['id']);
-    $result = $this->Controller->FilterManager->write(&$media);
+    $result = $this->Controller->FilterManager->write($media);
     $this->assertEqual($result, true);
 
     $thumb = TEST_FILES_TMP . 'MVI_7620.thm';

@@ -19,11 +19,11 @@ class SysUtilsComponent extends Component {
 
   var $controller = null;
 
-  function initialize(&$controller) {
+  public function initialize(Controller $controller) {
     $this->controller = $controller;
   }
 
-  function slashify($path)
+  public function slashify($path)
   {
     $len = strlen($path);
     if ($len > 0 && $path[$len-1] != '/')
@@ -31,7 +31,7 @@ class SysUtilsComponent extends Component {
     return $path;
   }
 
-  function unslashify($path)
+  public function unslashify($path)
   {
     $len = strlen($path);
     while ($len > 0 && $path[$len-1] == '/') {
@@ -40,7 +40,7 @@ class SysUtilsComponent extends Component {
     return substr($path, 0, $len);
   }
 
-  function mergepath($parent, $child)
+  public function mergepath($parent, $child)
   {
     if (strlen($child) == 0) {
       return $this->slashify($parent);

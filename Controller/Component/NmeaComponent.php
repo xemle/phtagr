@@ -26,8 +26,8 @@ class NmeaComponent extends Component {
 
   var $gga = array();
 
-  function initialize(&$controller) {
-    $this->controller =& $controller;
+  public function initialize(Controller $controller) {
+    $this->controller = $controller;
   }
 
   /**
@@ -36,7 +36,7 @@ class NmeaComponent extends Component {
    * @param line NMEA line
    * @return True if the NMEA is correct. Otherwise false
    */
-  function _checkNmeaLine($line) {
+  public function _checkNmeaLine($line) {
     $i = 1;
     $len = strlen($line);
     $sum = 0;
@@ -64,7 +64,7 @@ class NmeaComponent extends Component {
    * @param value Position of langitude or longitude
    * @return Degree value of the given value
    */
-  function _toDegree($value) {
+  public function _toDegree($value) {
     $value /= 100;
     $int = intval($value);
     return $int+(5*($value-$int)/3);
@@ -77,7 +77,7 @@ class NmeaComponent extends Component {
    * @param String $time Time in format HHMMSS
    * @return String Date in ISO8601 format YYYY-mm-DDTHH:MM:SSZ
    */
-  function _getIso8601Date($date, $time) {
+  public function _getIso8601Date($date, $time) {
     // Split 2-digit year to year 1970 - 2069
     $year = intval(substr($date, 4, 2));
     if ($year >= 70) {
@@ -117,7 +117,7 @@ class NmeaComponent extends Component {
    * @param Int $offset
    * @return Array Gps point
    */
-  function _readGga($line) {
+  public function _readGga($line) {
     if (!$this->_checkNmeaLine($line)) {
       return false;
     }
@@ -173,7 +173,7 @@ class NmeaComponent extends Component {
    * @param String $line
    * @return Array
    */
-  function _readRmc($line) {
+  public function _readRmc($line) {
     if (!$this->_checkNmeaLine($line)) {
       return false;
     }
@@ -215,7 +215,7 @@ class NmeaComponent extends Component {
    * @param filename Filename of the NMEA file
    * @return False on error
    */
-  function readFile($filename) {
+  public function readFile($filename) {
     if (!is_readable($filename)) {
       Logger::warn("File '$file' is not readable");
       return false;

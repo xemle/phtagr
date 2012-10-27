@@ -146,7 +146,7 @@ $.fn.resizeImage = function(size) {
   var image = $(this);
   var w = image.attr('width');
   var h = image.attr('height');
-  if (0 >= Math.min(w, h) || size > Math.max(w, h)) {
+  if (size < 100 || 0 >= Math.min(w, h) || size > Math.max(w, h)) {
     return;
   }
   if (w > h) {
@@ -163,7 +163,7 @@ $(document).ready(function() {
   media = $('#p-media-preview');
   if (media) {
     var top = media.position().top;
-    var size = window.innerHeight - top - 10;
+    var size = $(window).height() - top - 10;
     media.find('img').resizeImageHeight(size);
   }
   $("#image-tabs").tabs({

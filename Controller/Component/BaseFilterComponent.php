@@ -24,33 +24,33 @@ class BaseFilterComponent extends Component {
   var $Media = null;
   var $MyFile = null;
 
-  function initialize(&$controller) {
-    $this->controller =& $controller;
+  public function initialize(Controller $controller) {
+    $this->controller = $controller;
   }
 
-  function init(&$manager) {
+  public function init(&$manager) {
     if ($manager->controller) {
-      $this->controller =& $manager->controller;
+      $this->controller = $manager->controller;
     }
-    $this->Manager =& $manager;
-    $this->Media =& $manager->controller->Media;
-    $this->MyFile =& $manager->controller->MyFile;
+    $this->Manager = $manager;
+    $this->Media = $manager->controller->Media;
+    $this->MyFile = $manager->controller->MyFile;
     return true;
   }
 
-  function getName() {
+  public function getName() {
     return false;
   }
 
-  function getExtensions() {
+  public function getExtensions() {
     return false;
   }
 
-  function read($file, $media = false, $options = array()) {
+  public function read(&$file, &$media = null, $options = array()) {
     return false;
   }
 
-  function write($file, $media = false, $options = array()) {
+  public function write(&$file, &$media, $options = array()) {
     return false;
   }
 }

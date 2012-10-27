@@ -28,7 +28,7 @@ class SearchHelperTest extends CakeTestCase {
     $this->View = new View($controller);
     $this->Search = new SearchHelper($this->View);
     $request = new CakeRequest(null, false);
-    $this->Search->request =& $request;
+    $this->Search->request = $request;
     $request->params['search']['data'] = array();
     $request->params['search']['baseUri'] = '/explorer/query';
     $request->params['search']['afterUri'] = false;

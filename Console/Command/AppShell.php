@@ -39,7 +39,7 @@ class AppShell extends Shell {
    * Load ShellControllerMock with models and components
    */
   function loadControllerMock() {
-    $this->ControllerMock =& new ShellControllerMock();
+    $this->ControllerMock = new ShellControllerMock();
     $this->ControllerMock->setRequest(new CakeRequest());
     $this->ControllerMock->response = new CakeResponse();
     $this->ControllerMock->uses = $this->uses;

@@ -19,12 +19,12 @@ class WordListBehavior extends ModelBehavior
 {
   var $config = array();
 
-  function setup(&$Model, $config = array()) {
+  public function setup(Model $Model, $config = array()) {
     $default = array('field' => 'name');
     $this->config[$Model->alias] = am($config, $default);
   }
 
-  function findAllByField(&$Model, $values, $createMissing = true) {
+  public function findAllByField(&$Model, $values, $createMissing = true) {
     $config = $this->config[$Model->alias];
     $field = $config['field'];
     $alias = $Model->alias;
@@ -56,7 +56,7 @@ class WordListBehavior extends ModelBehavior
    * @param type $withRemovals Include words with leading minus
    * @return type Array of words
    */
-  function splitWords(&$Model, $input) {
+  public function splitWords(&$Model, $input) {
     $words = preg_split('/,/', $input);
     $names = array();
     foreach ($words as $name) {
@@ -76,7 +76,7 @@ class WordListBehavior extends ModelBehavior
    * @param type $words Array of words
    * @return array Remaining non negated words
    */
-  function removeNegatedWords(&$Model, $words) {
+  public function removeNegatedWords(&$Model, $words) {
     $result = array();
     foreach ((array) $words as $word) {
       if (!$word) {
@@ -96,7 +96,7 @@ class WordListBehavior extends ModelBehavior
    * @param type $words Array of words
    * @return array Array of negated words
    */
-  function getNegatedWords(&$Model, $words) {
+  public function getNegatedWords(&$Model, $words) {
     $result = array();
     foreach ((array) $words as $word) {
       if (!$word) {
@@ -119,7 +119,7 @@ class WordListBehavior extends ModelBehavior
    * @param type $words Array of words
    * @return array
    */
-  function normalizeWords(&$Model, $words) {
+  public function normalizeWords(&$Model, $words) {
     $result = array();
     foreach ((array) $words as $word) {
       if (!$word) {

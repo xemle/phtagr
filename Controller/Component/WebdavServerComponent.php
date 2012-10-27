@@ -46,32 +46,32 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
 
   var $components = array('FileManager', 'FilterManager');
 
-  function WebdavServer() {
+  public function WebdavServer() {
     $this->HTTP_WebDAV_Server();
     $this->_fsRoot=$_SERVER['DOCUMENT_ROOT'];
     $this->_davRoot="";
   }
 
-  function initialize(&$controller) {
-    $this->controller = &$controller;
+  public function initialize(Controller $controller) {
+    $this->controller = $controller;
     // set current controller URL
     $this->setDavRoot($controller->webroot.$controller->name);
     $this->controller->loadComponent(array('FileManager', 'FilterManager'), &$this);
-    $this->FilterManager->initialize(&$controller);
+    $this->FilterManager->initialize($controller);
   }
 
   /** Set a new filesystem root directory
     @param root Base directory
     @return True on success, false otherwise
     @note The root directory must be exists, otherwise it returns false */
-  function setFsRoot($root) {
+  public function setFsRoot($root) {
     if (!is_dir($root))
       return false;
     $this->_fsRoot=$this->_unslashify($root);
     return true;
   }
 
-  function setDavRoot($root) {
+  public function setDavRoot($root) {
     $this->_davRoot=$this->_unslashify($root);
     Logger::trace("setDavRoot to $root");
     return true;
@@ -80,7 +80,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
   /** Returns the canonicalized path
     @param path
     @return canonicalized path */
-  function canonicalpath($path) {
+  public function canonicalpath($path) {
     $paths=explode('/', $path);
     $result=array();
     for ($i=0; $i<sizeof($paths); $i++) {
@@ -98,7 +98,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
   /** Returns the relative WebDAV path to the current WebDAV path
     @param path webdav path
     @return relative WebDAV path */
-  function getRelativeDavpath($path) {
+  public function getRelativeDavpath($path) {
     $lenroot=strlen($this->_davRoot);
     $lenpath=strlen($path);
 
@@ -116,7 +116,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
   /** Returns the filesystem path to the corresponding request path
     @param path Request path
     @return filesystem path */
-  function getFsPath($path) {
+  public function getFsPath($path) {
     //$relativePath=$this->getRelativeDavpath($path);
     $relativePath=$this->canonicalpath($path);
     if ($relativePath!='/') {
@@ -130,19 +130,19 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
 
   /** Sets a new realm
     @param realm Realm name */
-  function setRealm($realm) {
+  public function setRealm($realm) {
     $this->_realm=$realm;
   }
 
   /** Set string for server identification
     @param text Text of server identification */
-  function setPoweredBy($text) {
+  public function setPoweredBy($text) {
     $this->dav_powered_by=$text;
   }
 
   /** Reads all files of a given path and build an file cache
     @param path System path to read */
-  function _buildFileCache($path) {
+  public function _buildFileCache($path) {
     if (isset($this->_fileCache[$path]) || !is_dir($path)) {
       return;
     }
@@ -174,7 +174,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
    * path is not available, it builds the cache first
    @param filename Filename of file
    @return file model data or false if file was not found */
-  function _getFile($filename) {
+  public function _getFile($filename) {
     if (is_dir($filename)) {
       return false;
     }
@@ -196,14 +196,15 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
     @param path Path
     @return Escaped path
     @note Requires PHP 5 (uses references in foreach statement) */
-  function pathRawurlencode($path) {
+  public function pathRawurlencode($path) {
     $paths=explode('/', $path);
-    foreach ($paths as &$part)
-      $part=rawurlencode($part);
+    for ($i = 0; $i < count($parts); $i++) {
+      $part[$i] = rawurlencode($part[$i]);
+    }
     return implode('/', $paths);
   }
 
-  function ServeRequest($base=false) {
+  public function ServeRequest($base=false) {
     Logger::info("ServeRequest: {$this->_SERVER["REQUEST_METHOD"]} $base");
 
     // special treatment for litmus compliance test
@@ -239,7 +240,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
    * @param  string  Password
    * @return bool  true on successful authentication
    */
-  function checkAuth($type, $auser, $apass) {
+  public function checkAuth($type, $auser, $apass) {
     return true;
   }
 
@@ -247,7 +248,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
     @param path System directory or filename
     @return True if user is authorized to read directory. False otherwise
     @todo This function must be implemented */
-  function _canRead($fspath) {
+  public function _canRead($fspath) {
     if ($this->controller->getUserRole() >= ROLE_USER) {
       return true;
     }
@@ -267,7 +268,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
    * @param  array  return array for file properties
    * @return bool   true on success
    */
-  function PROPFIND(&$options, &$files) {
+  public function PROPFIND(&$options, &$files) {
     // get absolute fs path to requested resource
     $fspath=$this->getFsPath($options["path"]);
     Logger::debug("PROFIND: '$fspath' ({$options["path"]})");
@@ -325,7 +326,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
    * @param  string  resource path
    * @return array   resource properties
    */
-  function fileinfo($path) {
+  public function fileinfo($path) {
     // map URI path to filesystem path
     $fspath=$this->getFsPath($path);
     Logger::trace("fileinfo: '$fspath' ($path)");
@@ -386,7 +387,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
    * @param  string  optional search path, defaults to $PATH
    * @return bool  true if executable program found in path
    */
-  function _canExecute($name, $path=false) {
+  public function _canExecute($name, $path=false) {
     // path defaults to PATH from environment if not set
     if ($path === false) {
       $path=getenv("PATH");
@@ -424,7 +425,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
    * @param  string  file path
    * @return string  guessed mime type
    */
-  function _mimetype($fspath) {
+  public function _mimetype($fspath) {
     if (@is_dir($fspath)) {
       // directories are easy
       return "httpd/unix-directory";
@@ -491,7 +492,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
    * @param  array  parameter passing array
    * @return bool   true on success
    */
-  function GET(&$options) {
+  public function GET(&$options) {
     // get absolute fs path to requested resource
     $fspath=$this->getFsPath($options["path"]);
     Logger::debug("GET: '$fspath' ({$options["path"]})");
@@ -547,9 +548,9 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
    * See RFC 2518, Section 8.4 on GET/HEAD for collections
    *
    * @param  string  directory path
-   * @return void  function has to handle HTTP response itself
+   * @return void  public function has to handle HTTP response itself
    */
-  function GetDir($fspath, &$options) {
+  public function GetDir($fspath, &$options) {
     Logger::debug("GetDir: '$fspath' ({$options["path"]})");
 
     $path=$this->_slashify($options["path"]);
@@ -638,7 +639,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
     exit;
   }
 
-  function http_PUT() {
+  public function http_PUT() {
     // http_PUT() calls PUT()
     parent::http_PUT();
 
@@ -657,7 +658,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
 
     $file = $this->controller->MyFile->findByFilename($fspath);
     if ($file) {
-      $this->controller->MyFile->update(&$file);
+      $this->controller->MyFile->update($file);
       if ($this->controller->MyFile->save($file)) {
         Logger::info("Update file '{$file['File']['path']}{$file['File']['file']}' to size {$file['File']['size']} bytes");
       } else {
@@ -679,7 +680,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
    * @param  array  parameter passing array
    * @return bool   true on success
    */
-  function PUT(&$options) {
+  public function PUT(&$options) {
     if ($this->controller->getUserRole() <= ROLE_GUEST) {
       Logger::warn("PUT denyied for guests");
       return "403 Forbidden";
@@ -729,7 +730,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
    * @param  array  general parameter passing array
    * @return bool   true on success
    */
-  function MKCOL($options) {
+  public function MKCOL($options) {
     if ($this->controller->getUserRole() <= ROLE_GUEST) {
       Logger::warn("MKCOL: Denied for guests");
       return "403 Forbidden";
@@ -769,7 +770,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
    * @param  array  general parameter passing array
    * @return bool   true on success
    */
-  function DELETE($options) {
+  public function DELETE($options) {
     if ($this->controller->getUserRole() <= ROLE_GUEST) {
       Logger::warn("DELETE denyied for guests");
       return "403 Forbidden";
@@ -796,7 +797,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
    * @param  array  general parameter passing array
    * @return bool   true on success
    */
-  function MOVE($options) {
+  public function MOVE($options) {
     return $this->COPY($options, true);
   }
 
@@ -806,7 +807,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
    * @param  array  general parameter passing array
    * @return bool   true on success
    */
-  function COPY($options, $del=false) {
+  public function COPY($options, $del=false) {
 
     if ($this->controller->getUserRole() <= ROLE_GUEST) {
       Logger::warn("COPY/MOVE denied for guests");
@@ -899,7 +900,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
       }
       /*
       if (is_dir($source)) {
-        $folder =& new Folder($source);
+        $folder = new Folder($source);
         list($dirs, $files) = $folder->tree($source);
         sort($dirs);
         sort($files);
@@ -959,7 +960,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
    * @param  array  general parameter passing array
    * @return bool   true on success
    */
-  function PROPPATCH(&$options) {
+  public function PROPPATCH(&$options) {
     Logger::debug("PROPATCH: ".$options["path"]);
 
     $path=$options["path"];
@@ -1008,7 +1009,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
    * @param  array  general parameter passing array
    * @return bool   true on success
    */
-  function LOCK(&$options) {
+  public function LOCK(&$options) {
     Logger::info("LOCK: ".$options["path"]);
 
     // get absolute fs path to requested resource
@@ -1074,7 +1075,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
    * @param  array  general parameter passing array
    * @return bool   true on success
    */
-  function UNLOCK(&$options) {
+  public function UNLOCK(&$options) {
     Logger::info("UNLOCK: ".$options["path"]);
 
     $fspath = $this->getFsPath($options["path"]);
@@ -1099,7 +1100,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
    * @param  string resource path to check for locks
    * @return bool   true on success
    */
-  function checkLock($path) {
+  public function checkLock($path) {
     //Logger::debug("checkLock: ".$path);
     $result=false;
 

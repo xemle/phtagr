@@ -50,8 +50,8 @@ class QueryBuilderComponent extends Component
     'west' => array('field' => 'Media.longitude', 'operand' => '>='),
     );
 
-  function initialize(&$controller) {
-    $this->controller =& $controller;
+  public function initialize(Controller $controller) {
+    $this->controller = $controller;
   }
 
   /**
@@ -62,7 +62,7 @@ class QueryBuilderComponent extends Component
    * @param default Default value
    * @return data value or default
    */
-  function _getParam(&$data, $name, $default = null) {
+  public function _getParam(&$data, $name, $default = null) {
     if (!isset($data[$name])) {
       return $default;
     } else {
@@ -76,7 +76,7 @@ class QueryBuilderComponent extends Component
    * @param Data as single value or array
    * @return Sanitized data
    */
-  function _sanitizeData($data) {
+  public function _sanitizeData($data) {
     if (!is_array($data)) {
       if (is_numeric($data)) {
         return $data;
@@ -103,7 +103,7 @@ class QueryBuilderComponent extends Component
    *   - mapping: Array of value mapping
    * @return Sanitized condition
    */
-  function _buildCondition($field, $value, $options = false) {
+  public function _buildCondition($field, $value, $options = false) {
     if (is_string($options)) {
       $o['operand'] = $options;
       $options = $o;
@@ -146,7 +146,7 @@ class QueryBuilderComponent extends Component
    * @param skip Parameter list which are not evaluated and skiped
    * @return exclusions parameter
    */
-  function _extractExclusions(&$data, $skip = array('sort', 'north', 'south', 'west', 'east')) {
+  public function _extractExclusions(&$data, $skip = array('sort', 'north', 'south', 'west', 'east')) {
     $exclusions = array();
     if (!count($data)) {
       return $exclusions;
@@ -184,7 +184,7 @@ class QueryBuilderComponent extends Component
     return $exclusions;
   }
 
-  function buildConditions($data) {
+  public function buildConditions($data) {
     $query = array('conditions' => array());
     if (!count($data)) {
       return $query;
@@ -197,7 +197,7 @@ class QueryBuilderComponent extends Component
       }
       $method = 'build'.Inflector::camelize($name);
       if (method_exists($this, $method)) {
-        call_user_method($method, &$this, &$data, &$query, $value);
+        call_user_func_array(array($this, $method), array(&$data, &$query, $value));
         continue;
       }
 
@@ -211,7 +211,7 @@ class QueryBuilderComponent extends Component
             continue;
           }
           //Logger::debug("Call custom rule {$rule['custom']}");
-          call_user_method($rule['custom'], &$this, &$data, &$query, $name, $value);
+          call_user_func_array(array($this, $rule['custom']), array(&$data, &$query, $name, $value));
         } elseif (!isset($rule['field'])) {
            Logger::err("Field in rule is missing");
            Logger::debug($rule);
@@ -233,27 +233,27 @@ class QueryBuilderComponent extends Component
     }
 
     if (isset($data['sort'])) {
-      $this->_buildOrder(&$data, &$query);
+      $this->_buildOrder($data, $query);
     }
     return $query;
   }
 
-  function build($data) {
-    $exclude = $this->_extractExclusions(&$data);
-    $query = $this->buildConditions(&$data);
+  public function build($data) {
+    $exclude = $this->_extractExclusions($data);
+    $query = $this->buildConditions($data);
     if (count($exclude)) {
       $exclude['operand'] = 'OR';
       $query['conditions']['exclude'] = $this->buildConditions($exclude);
     }
-    $this->_buildAccessConditions(&$data, &$query);
+    $this->_buildAccessConditions($data, $query);
     $query['group'] = 'Media.id';
     return $query;
   }
 
-  function _buildOrder(&$data, &$query) {
+  public function _buildOrder(&$data, &$query) {
     if ($data['sort'] == 'default') {
       if (isset($query['_counts']) && count($query['_counts']) > 0) {
-        if ($this->_getParam(&$data, 'operand') == 'OR') {
+        if ($this->_getParam($data, 'operand') == 'OR') {
           // global OR operand
           $counts = array();
           $conditions = array();
@@ -268,7 +268,7 @@ class QueryBuilderComponent extends Component
           foreach (array('tag', 'category', 'location') as $habtm) {
             $fieldCount = Inflector::camelize($habtm)."Count";
             if (in_array($fieldCount, $query['_counts']) &&
-              $this->_getParam(&$data, $habtm."_op") == 'OR') {
+              $this->_getParam($data, $habtm."_op") == 'OR') {
               $query['order'][] = "COALESCE($fieldCount, 0) DESC";
             }
           }
@@ -316,7 +316,7 @@ class QueryBuilderComponent extends Component
    * @param name Parameter name
    * @param value Parameter value
    */
-  function buildHabtm(&$data, &$query, $name, $value) {
+  public function buildHabtm(&$data, &$query, $name, $value) {
     if (count($data[$name]) == 0) {
       return;
     }
@@ -370,13 +370,13 @@ class QueryBuilderComponent extends Component
     }
 
     // handle operand conditions (AND and OR)
-    $operand = $this->_getParam(&$data, 'operand');
+    $operand = $this->_getParam($data, 'operand');
     if ($operand == 'OR') {
       // handled by _buildOrder()
       return;
     } elseif ($operand == null) {
       // habtm operand
-      $operand = $this->_getParam(&$data, $habtm."_op", 'AND');
+      $operand = $this->_getParam($data, $habtm."_op", 'AND');
     }
 
     $condition = $fieldCount . ' >=';
@@ -391,7 +391,7 @@ class QueryBuilderComponent extends Component
     }
   }
 
-  function _buildAccessConditions(&$data, &$query) {
+  public function _buildAccessConditions(&$data, &$query) {
     if (isset($data['visibility'])) {
       return true;
     }
@@ -420,7 +420,7 @@ class QueryBuilderComponent extends Component
     }
   }
 
-  function buildFolder(&$data, &$query, $value) {
+  public function buildFolder(&$data, &$query, $value) {
     if (!isset($data['user']) || $value === false) {
       return;
     }
@@ -440,7 +440,7 @@ class QueryBuilderComponent extends Component
     $query['_counts'][] = "FileCount";
   }
 
-  function buildVisibility(&$data, &$query, $value) {
+  public function buildVisibility(&$data, &$query, $value) {
     // allow only admins to query others visibility, otherwise query only media
     // of the current user
     $me = $this->controller->getUser();

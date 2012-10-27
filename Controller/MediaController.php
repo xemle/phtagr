@@ -24,7 +24,7 @@ class MediaController extends AppController
                     );
   var $components = array('PreviewManager');
 
-  function beforeFilter() {
+  public function beforeFilter() {
     // Reduce security level for this controller if required. Security level
     // 'high' allows only 10 concurrent requests
     if (Configure::read('Security.level') === 'high') {
@@ -37,7 +37,7 @@ class MediaController extends AppController
     parent::beforeFilter();
   }
 
-  function beforeRender() {
+  public function beforeRender() {
     parent::beforeRender();
     $this->viewClass = 'Media';
   }
@@ -48,7 +48,7 @@ class MediaController extends AppController
    *
    * @return Array of request header
    */
-  function _getRequestHeaders() {
+  public function _getRequestHeaders() {
     $headers = array();
     if (function_exists('apache_request_headers')) {
       $headers = apache_request_headers();
@@ -58,7 +58,7 @@ class MediaController extends AppController
     } else {
       $headers = array();
       foreach($_SERVER as $h => $v) {
-        if(ereg('HTTP_(.+)', $h, $hp)) {
+        if(preg_match('HTTP_(.+)', $h, $hp)) {
           $headers[strtolower($hp[1])] = $v;
         }
       }
@@ -72,7 +72,7 @@ class MediaController extends AppController
    *
    * @param filename filename of cache file
    */
-  function _handleClientCache($filename) {
+  public function _handleClientCache($filename) {
     $cacheTime = filemtime($filename);
     $headers = $this->_getRequestHeaders();
     if (isset($headers['if-modified-since']) &&
@@ -96,7 +96,7 @@ class MediaController extends AppController
    * @return Media model data. If no media is found or access is denied it
    * responses 404
    */
-  function _getMedia($id, $type = 'preview') {
+  public function _getMedia($id, $type = 'preview') {
     $user = $this->getUser();
     switch ($type) {
       case 'hd':
@@ -118,7 +118,7 @@ class MediaController extends AppController
     return $media;
   }
 
-  function _sendPreview($id, $type) {
+  public function _sendPreview($id, $type) {
     $media = $this->_getMedia($id, $type);
     $preview = $this->PreviewManager->getPreview($media, $type);
     if (!$preview) {
@@ -131,7 +131,7 @@ class MediaController extends AppController
     $this->viewClass = 'Media';
   }
 
-  function _createFlashVideo($id) {
+  public function _createFlashVideo($id) {
     $id = intval($id);
     $media = $this->_getMedia($id, 'preview');
     $this->loadComponent('FlashVideo');
@@ -149,27 +149,27 @@ class MediaController extends AppController
     return $flashFilename;
   }
 
-  function mini($id) {
+  public function mini($id) {
     $this->_sendPreview($id, 'mini');
   }
 
-  function thumb($id)	{
+  public function thumb($id)	{
     $this->_sendPreview($id, 'thumb');
   }
 
-  function preview($id) {
+  public function preview($id) {
     $this->_sendPreview($id, 'preview');
   }
 
-  function high($id) {
+  public function high($id) {
     $this->_sendPreview($id, 'high');
   }
 
-  function hd($id) {
+  public function hd($id) {
     $this->_sendPreview($id, 'hd');
   }
 
-  function video($id) {
+  public function video($id) {
     $filename = $this->_createFlashVideo($id);
     $mediaOptions = $this->MyFile->getMediaViewOptions($filename);
     $mediaOptions['download'] = true;
@@ -177,7 +177,7 @@ class MediaController extends AppController
     $this->set($mediaOptions);
   }
 
-  function file($id) {
+  public function file($id) {
     $id = intval($id);
     $file = $this->MyFile->findById($id);
     $user = $this->getUser();
@@ -185,7 +185,7 @@ class MediaController extends AppController
       Logger::warn("User {$user['User']['id']} requested file {$file['File']['id']} without media");
       $this->redirect(null, 404);
     }
-    if (!$this->Media->canReadOriginal(&$file, &$user)) {
+    if (!$this->Media->canReadOriginal($file, $user)) {
       Logger::warn("User {$user['User']['id']} has no previleges to access image ".$file['Media']['id']);
       $this->redirect(null, 404);
     }
@@ -210,16 +210,16 @@ class MediaController extends AppController
    * @param format File format
    * @return array of file information (name, filename, size)
    */
-  function _getMediaFiles($media, $format) {
+  public function _getMediaFiles($media, $format) {
     $files = array();
     if (!count($media['File'])) {
       return $files;
     }
     if ($format == 'original') {
       // Write meta data if dirty
-      if ($this->Media->hasFlag(&$media, MEDIA_FLAG_DIRTY)) {
+      if ($this->Media->hasFlag($media, MEDIA_FLAG_DIRTY)) {
         $this->loadComponent('FilterManager');
-        if ($this->FilterManager->write(&$media)) {
+        if ($this->FilterManager->write($media)) {
           // reload written media
           $media = $this->Media->findById($media['Media']['id']);
         }
@@ -260,7 +260,7 @@ class MediaController extends AppController
    * @param name Name of the zip file
    * @param files Array of files
    */
-  function _createZipFile($name, $files) {
+  public function _createZipFile($name, $files) {
     App::import('Vendor', 'ZipStream/ZipStream');
 
     ini_set('memory_limit', '51002M');
@@ -277,7 +277,10 @@ class MediaController extends AppController
     $this->redirect(null, 200, true);
   }
 
-  function zip($format) {
+  public function zip($format) {
+    // get explorer crumbs
+    $crumbs = join('/', array_splice(split('/', $this->request->url), 3));
+    $redirectUrl = "/explorer/view/" . $crumbs;
     if (empty($this->request->data)) {
       $this->redirect(null, 404, true);
     }
@@ -286,26 +289,30 @@ class MediaController extends AppController
     }
     if (!preg_match('/^\d+(,\d+)*$/', $this->request->data['Media']['ids'])) {
       Logger::warn("Invalid id input: " . $this->request->data['Media']['ids']);
-      $this->redirect(null, 412, true);
+      $this->Session->setFlash("Invalid media ids");
+      $this->redirect($redirectUrl);
     } else if (!in_array($format, array('mini', 'thumb', 'preview', 'high', 'hd', 'original'))) {
       Logger::warn("Invalid format: $format");
-      $this->redirect(null, 412, true);
+      $this->Session->setFlash("Unsupported download format: " + $format);
+      $this->redirect($redirectUrl);
     }
     $ids = preg_split('/\s*,\s*/', trim($this->request->data['Media']['ids']));
     $ids = array_unique($ids);
     if ($this->hasRole(ROLE_GUEST) && count($ids) > BULK_DOWNLOAD_FILE_COUNT_USER) {
       Logger::warn("Download of more than 240 media is not allowed");
-      $this->redirect(null, 412, true);
+      $this->Session->setFlash(__("Download of more than %d media is not allowed", BULK_DOWNLOAD_FILE_COUNT_USER));
+      $this->redirect($redirectUrl);
     } else if (!$this->hasRole(ROLE_GUEST) && count($ids) > BULK_DOWNLOAD_FILE_COUNT_ANONYMOUS) {
       Logger::warn("Download of more than 12 media is not allowed for anonymous visitors");
-      $this->redirect(null, 412, true);
+      $this->Session->setFlash(__("Download of more than %d media is not allowed for anonymous visitors", BULK_DOWNLOAD_FILE_COUNT_ANONYMOUS));
+      $this->redirect($redirectUrl);
     }
 
     $user = $this->getUser();
     $allMedia = $this->Media->find('all', array('conditions' => array('Media.id' => $ids)));
     $files = array();
     foreach ($allMedia as $media) {
-      $this->Media->setAccessFlags(&$media, &$user);
+      $this->Media->setAccessFlags($media, $user);
       if (!$media['Media']['canReadPreview']) {
         continue;
       }
@@ -314,16 +321,18 @@ class MediaController extends AppController
       if ($fileFormat == 'original' && !$media['Media']['canReadOriginal']) {
         $fileFormat = 'high';
       }
-      $files = am($files, $this->_getMediaFiles(&$media, $fileFormat));
+      $files = am($files, $this->_getMediaFiles($media, $fileFormat));
     }
     if (!count($files)) {
       Logger::warn("No files for download");
-      $this->redirect(null, 404, true);
+      $this->Session->setFlash(__("No files for download found for given media set"));
+      $this->redirect($redirectUrl);
     }
     $sizes = Set::extract('/size', $files);
     if (array_sum($sizes) > BULK_DOWNLOAD_TOTAL_MB_LIMIT * 1024 * 1024) {
       Logger::warn("Download of not more than " . BULK_DOWNLOAD_TOTAL_MB_LIMIT . " MB is not allowed");
-      $this->redirect(null, 403, true);
+      $this->Session->setFlash(__("Download of not more than %d MB is not allowed", BULK_DOWNLOAD_TOTAL_MB_LIMIT));
+      $this->redirect($redirectUrl);
     }
 
     $zipName = 'phtagr-' . date('Y-m-d_H-i-s') . '.zip';

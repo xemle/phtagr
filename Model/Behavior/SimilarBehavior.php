@@ -24,7 +24,7 @@ class SimilarBehavior extends ModelBehavior {
    * @param tokenLen Length of each token
    * @return Array of tokens
    */
-  function _tokenize($text, $tokenLen = 3) {
+  public function _tokenize($text, $tokenLen = 3) {
     $len = strlen($text) - $tokenLen + 1;
     $tokens = array();
     for ($i = 0; $i < $len; $i++) {
@@ -40,7 +40,7 @@ class SimilarBehavior extends ModelBehavior {
    * @param tokenLen Length of token
    * @return Array of token with occurance count as array value
    */
-  function _tokenizeAndCount($text, $tokenLen = 3) {
+  public function _tokenizeAndCount($text, $tokenLen = 3) {
     $tokens = $this->_tokenize($text, $tokenLen);
     $counts = array();
     foreach($tokens as $token) {
@@ -62,7 +62,7 @@ class SimilarBehavior extends ModelBehavior {
    * @param tokenLen Length of each search token
    * @return count of matches
    */
-  function _evaluate($text, $searchTokens) {
+  public function _evaluate($text, $searchTokens) {
     if (!count($searchTokens)) {
       return 0;
     }
@@ -88,7 +88,7 @@ class SimilarBehavior extends ModelBehavior {
    * @param field Field name to search
    * @return array of model data, ordered by relevance. Highest first.
    */
-  function similar(&$Model, $searchTerm, $field = 'name') {
+  public function similar(&$Model, $searchTerm, $field = 'name') {
     // Comparison is expensive. So cut long search terms
     if (strlen($searchTerm) > 32) {
       $searchTerm = substr($searchTerm, 0, 32);

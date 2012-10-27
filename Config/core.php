@@ -105,7 +105,7 @@
  * See also http://bugs.php.net/bug.php?id=44945
  *          http://bugs.php.net/bug.php?id=44564
  */
-//setlocale(LC_CTYPE, "UTF8", "en_US.UTF-8");
+  setlocale(LC_CTYPE, "UTF8", "en_US.UTF-8");
 
 /**
  * To configure CakePHP *not* to use mod_rewrite and to

@@ -26,16 +26,16 @@ class GpsFilterComponent extends BaseFilterComponent {
   var $range = 600;
   var $utcZone = null;
 
-  function initialize(&$controller) {
-    $this->controller =& $controller;
+  public function initialize(Controller $controller) {
+    $this->controller = $controller;
     $this->utcZone = new DateTimeZone('UTC');
   }
 
-  function getName() {
+  public function getName() {
     return "Gps";
   }
 
-  function getExtensions() {
+  public function getExtensions() {
     return array(
         'log' => array('priority' => 2),
         'gpx' => array('priority' => 3));
@@ -52,7 +52,7 @@ class GpsFilterComponent extends BaseFilterComponent {
    *  - range Threshold in seconds which media get a GPS point
    * @return The image data array or False on error
    */
-  function read($file, &$media, $options = array()) {
+  public function read(&$file, &$media = null, $options = array()) {
     $offset = $this->controller->getOption('filter.gps.offset', 0) * 60;
     $overwrite = $this->controller->getOption('filter.gps.overwrite', 0);
     $range = $this->controller->getOption('filter.gps.range', 10) * 60;
@@ -131,11 +131,11 @@ class GpsFilterComponent extends BaseFilterComponent {
     return 1;
   }
 
-  function write($file, $media = null, $options = array()) {
+  public function write(&$file, &$media, $options = array()) {
     return 0;
   }
 
-  function clear() {
+  public function clear() {
     $this->points = array();
     $this->times = array();
   }
@@ -147,7 +147,7 @@ class GpsFilterComponent extends BaseFilterComponent {
    * following array keys: time, latitude, longitude.
    * @param offset Timeoffset for points
    */
-  function addPoints($points, $offset) {
+  public function addPoints($points, $offset) {
     foreach ($points as $point) {
       if (!isset($point['date']) || !isset($point['latitude']) || !isset($point['longitude'])) {
         continue;
@@ -168,7 +168,7 @@ class GpsFilterComponent extends BaseFilterComponent {
    * @param time Time in seconds
    * @return True if the time is in the current time interval
    */
-  function _containsDate($time) {
+  public function _containsDate($time) {
     if (count($this->times) > 0 &&
       $time >= $this->times[0] - $this->range &&
       $time <= $this->times[count($this->times)-1] + $this->range) {
@@ -186,7 +186,7 @@ class GpsFilterComponent extends BaseFilterComponent {
    * @param high Higher bound
    * @return Index of time which is before the given time.
    */
-  function _getIndex($time, $low, $high) {
+  public function _getIndex($time, $low, $high) {
     if ($high-$low < 2) {
       return $low;
     }
@@ -207,7 +207,7 @@ class GpsFilterComponent extends BaseFilterComponent {
    * @param y Second GPS point
    * @return Estimated position at the given time
    */
-  function _estimatePosition($time, $x, $y) {
+  public function _estimatePosition($time, $x, $y) {
     // check pre conditions: x < time < y
     if ($x['time'] > $y['time']) {
       $z = $x;
@@ -251,7 +251,7 @@ class GpsFilterComponent extends BaseFilterComponent {
   /**
    * Returns count of available points
    */
-  function getPointCount() {
+  public function getPointCount() {
     return count($this->times);
   }
 
@@ -261,7 +261,7 @@ class GpsFilterComponent extends BaseFilterComponent {
    * @param time Time in seconds
    * @return Array of position. False on failure
    */
-  function getPosition($time) {
+  public function getPosition($time) {
     if (!$this->_containsDate($time)) {
       //echo "GPS track does not contain $time\n";
       return false;
@@ -282,7 +282,7 @@ class GpsFilterComponent extends BaseFilterComponent {
     }
   }
 
-  function getNorthWest() {
+  public function getNorthWest() {
     $maxLatitude = -400;
     $minLongitude = 400;
     foreach($this->points as $point) {
@@ -292,7 +292,7 @@ class GpsFilterComponent extends BaseFilterComponent {
     return array('latitude' => $maxLatitude, 'longitude' => $minLongitude);
   }
 
-  function getSouthEast() {
+  public function getSouthEast() {
     $minLatitude = 400;
     $maxLongitude = -400;
     foreach($this->points as $point) {
@@ -307,7 +307,7 @@ class GpsFilterComponent extends BaseFilterComponent {
    *
    * @return Array of start and end time in seconds
    */
-  function getTimeInterval() {
+  public function getTimeInterval() {
     if (!count($this->times)) {
       return array(0, 0);
     }

@@ -17,7 +17,7 @@
 
 class ExcludeBehavior extends ModelBehavior {
 
-  function setup(&$Model, $settings = array()) {
+  public function setup(Model $Model, $settings = array()) {
     if (!isset($this->settings[$Model->alias])) {
       $this->settings[$Model->alias] = array();
     }
@@ -35,7 +35,7 @@ class ExcludeBehavior extends ModelBehavior {
    * @result Type of the binding to the current model. Return value is one of
    * 'hasOne', 'belongsTo', 'hasMany', 'hasAndBelongsToMany', or false on error.
    */
-  function _findBindingType(&$Model, $name) {
+  public function _findBindingType(&$Model, $name) {
     if (isset($Model->hasAndBelongsToMany[$name])) {
       return 'hasAndBelongsToMany';
     } elseif (isset($Model->hasMany[$name])) {
@@ -55,7 +55,7 @@ class ExcludeBehavior extends ModelBehavior {
    * @param array $conditions
    * @return array
    */
-  function renameGroupAlias($conditions) {
+  public function renameGroupAlias($conditions) {
     $result = array();
     foreach ($conditions as $key => $condition) {
       if ($key === 'OR' || $key === 'AND') {
@@ -76,7 +76,7 @@ class ExcludeBehavior extends ModelBehavior {
    * @param String $op Operand for condition.
    * @return String
    */
-  function _serializeConditions($conditions, $op) {
+  public function _serializeConditions($conditions, $op) {
     $result = array();
     foreach ($conditions as $key => $condition) {
       if ($key === 'AND' || $key === 'OR') {
@@ -106,7 +106,7 @@ class ExcludeBehavior extends ModelBehavior {
    * @param joinConditions Join conditions for HABTM bindings
    * @param joinType Type of SQL join (INNER, LEFT, RIGHT)
    */
-  function _buildHasAndBelongsToManyJoins(&$Model, &$query, $joinConditions, $options = array()) {
+  public function _buildHasAndBelongsToManyJoins(&$Model, &$query, $joinConditions, $options = array()) {
     $options = am(array('type' => false, 'count' => true), $options);
 
     $options['type'] = strtoupper($options['type']);
@@ -155,7 +155,7 @@ class ExcludeBehavior extends ModelBehavior {
    * @param joinConditions Conditions
    * @param options Options
    */
-  function _buildHasManyJoins(&$Model, &$query, &$joinConditions, $options = array()) {
+  public function _buildHasManyJoins(&$Model, &$query, &$joinConditions, $options = array()) {
     $options = am(array('type' => false, 'count' => true), $options);
     $options['type'] = strtoupper($options['type']);
     if (!in_array($options['type'], array(false, 'RIGHT', 'LEFT'))) {
@@ -199,7 +199,7 @@ class ExcludeBehavior extends ModelBehavior {
    * @param $condition
    * @return String Name of model
    */
-  function _findModelName($condition) {
+  public function _findModelName($condition) {
     if (is_string($condition)) {
       return $condition;
     } else if (is_array($condition) && isset($condition['AND'])) {
@@ -217,7 +217,7 @@ class ExcludeBehavior extends ModelBehavior {
    * @param query query array
    * @param optionscondition Join options
    */
-  function _buildJoins(&$Model, &$query, $options = array()) {
+  public function _buildJoins(&$Model, &$query, $options = array()) {
     $joinConditions = array();
     if (empty($query['conditions'])) {
       return;
@@ -258,10 +258,10 @@ class ExcludeBehavior extends ModelBehavior {
     }
     //Logger::debug($joinConditions);
     if (isset($joinConditions['hasAndBelongsToMany'])) {
-      $this->_buildHasAndBelongsToManyJoins($Model, &$query, $joinConditions['hasAndBelongsToMany'], $options);
+      $this->_buildHasAndBelongsToManyJoins($Model, $query, $joinConditions['hasAndBelongsToMany'], $options);
     }
     if (isset($joinConditions['hasMany'])) {
-      $this->_buildHasManyJoins($Model, &$query, $joinConditions['hasMany'], $options);
+      $this->_buildHasManyJoins($Model, $query, $joinConditions['hasMany'], $options);
     }
     return $query;
   }
@@ -273,10 +273,10 @@ class ExcludeBehavior extends ModelBehavior {
    * @param query query array
    * @return SQL exclusion condition
    */
-  function _buildExclusion(&$Model, $query) {
+  public function _buildExclusion(&$Model, $query) {
     $query = am(array('joins' => array()), $query);
     //Logger::debug($query);
-    $this->_buildJoins($Model, &$query, array('count' => true, 'type' => 'LEFT'));
+    $this->_buildJoins($Model, $query, array('count' => true, 'type' => 'LEFT'));
     //Logger::debug($query);
     $exclusion = " {$Model->alias}.id NOT IN (";
     $exclusion .= " SELECT {$Model->alias}.id";
@@ -301,7 +301,7 @@ class ExcludeBehavior extends ModelBehavior {
     return $exclusion;
   }
 
-  function beforeFind(&$Model, $query) {
+  public function beforeFind(Model $Model, $query) {
     $exclude = false;
     if (isset($query['conditions']['exclude']) &&
       is_array($query['conditions']['exclude'])) {
@@ -310,7 +310,7 @@ class ExcludeBehavior extends ModelBehavior {
     } elseif (isset($query['exclude'])) {
       $exclude = $query['exclude'];
     }
-    $this->_buildJoins($Model, &$query, array('type' => 'LEFT'));
+    $this->_buildJoins($Model, $query, array('type' => 'LEFT'));
     if ($exclude) {
       $query['conditions'][] = $this->_buildExclusion($Model, $exclude);
     }

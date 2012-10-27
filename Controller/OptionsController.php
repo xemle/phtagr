@@ -21,7 +21,7 @@ class OptionsController extends AppController {
   var $uses = array('Option', 'Group');
   var $subMenu = false;
 
-  function beforeFilter() {
+  public function beforeFilter() {
     $this->subMenu = array(
       'profile' => __("Profile"),
       'password' => __("Password"),
@@ -33,22 +33,22 @@ class OptionsController extends AppController {
     $this->requireRole(ROLE_GUEST, array('redirect' => '/'));
   }
 
-  function beforeRender() {
+  public function beforeRender() {
     $this->requireRole(ROLE_USER);
     $this->layout = 'backend';
     parent::beforeRender();
   }
 
-  function _set($userId, $path, $data) {
+  private function _setOption($userId, $path, $data) {
     $value = Set::extract($data, $path);
     $this->Option->setValue($path, $value, $userId);
   }
 
-  function index() {
+  public function index() {
     // dummy
   }
 
-  function profile() {
+  public function profile() {
     $userId = $this->getUserId();
     if (!empty($this->request->data)) {
       $this->User->id = $userId;
@@ -63,7 +63,7 @@ class OptionsController extends AppController {
     $this->request->data = $this->User->findById($userId);
   }
 
-  function password() {
+  public function password() {
     $userId = $this->getUserId();
     if (!empty($this->request->data)) {
       $this->User->id = $userId;
@@ -79,12 +79,12 @@ class OptionsController extends AppController {
     unset($this->request->data['User']['password']);
   }
 
-  function rss($action = null) {
+  public function rss($action = null) {
     $userId = $this->getUserId();
     $user = $this->User->findById($userId);
     if ($action == 'renew' || empty($user['User']['key'])) {
       $tmp = array('User' => array('id' => $userId));
-      $this->User->generateKey(&$tmp);
+      $this->User->generateKey($tmp);
       if (!$this->User->save($tmp, false, array('key'))) {
         Logger::err("Could not save user data");
         Logger::debug($this->User->validationErrors);
@@ -93,10 +93,10 @@ class OptionsController extends AppController {
     $this->request->data = $this->User->findById($userId);
   }
 
-  function import() {
+  public function import() {
     $userId = $this->getUserId();
     if (!empty($this->request->data)) {
-      $this->_set($userId, 'acl.group', $this->request->data);
+      $this->_setOption($userId, 'acl.group', $this->request->data);
 
       // check values
       if ($this->request->data['acl']['write']['meta'] > $this->request->data['acl']['write']['tag']) {
@@ -106,11 +106,11 @@ class OptionsController extends AppController {
         $this->request->data['acl']['read']['original'] = $this->request->data['acl']['read']['preview'];
       }
 
-      $this->_set($userId, 'acl.write.tag', $this->request->data);
-      $this->_set($userId, 'acl.write.meta', $this->request->data);
+      $this->_setOption($userId, 'acl.write.tag', $this->request->data);
+      $this->_setOption($userId, 'acl.write.meta', $this->request->data);
 
-      $this->_set($userId, 'acl.read.original', $this->request->data);
-      $this->_set($userId, 'acl.read.preview', $this->request->data);
+      $this->_setOption($userId, 'acl.read.original', $this->request->data);
+      $this->_setOption($userId, 'acl.read.preview', $this->request->data);
 
       $offset = intval(Set::extract('filter.gps.offset', $this->request->data));
       $offset = min(720, max(-720, $offset));
@@ -127,7 +127,7 @@ class OptionsController extends AppController {
       $this->Session->setFlash(__("Settings saved"));
     }
     $tree = $this->Option->getTree($userId);
-    $this->Option->addDefaultAclTree(&$tree);
+    $this->Option->addDefaultAclTree($tree);
     $this->request->data = $tree;
 
     $this->set('userId', $userId);

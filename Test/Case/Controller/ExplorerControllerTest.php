@@ -132,7 +132,6 @@ class ExplorerControllerTest extends ControllerTestCase {
     $Explorer = $this->generate('Explorer', array('methods' => array('getUser'), 'components' => array('RequestHandler' => array('isAjax', 'isMobile'))));
     $Explorer->expects($this->any())->method('getUser')->will($this->returnValue($user));
     $Explorer->RequestHandler->expects($this->once())->method('isAjax')->will($this->returnValue(true));
-    $Explorer->RequestHandler->expects($this->once())->method('isMobile')->will($this->returnValue(false));
     $data = array('Location' => array('sublocation' => 'prater', 'city' => 'vienna', 'country' => 'austria'));
     $contents = $this->testAction('/explorer/savemeta/' . $media['Media']['id'], array('data' => $data, 'return' => 'result'));
 

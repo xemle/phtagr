@@ -24,13 +24,13 @@ class UpgradeSchemaComponent extends Component {
   var $schema = null;
   var $modelMapping = array('files' => 'MyFile', 'media' => 'Media');
 
-  function initialize(&$controller) {
+  public function initialize(Controller $controller) {
     $this->controller = $controller;
   }
 
   /** Initialize the database schema and data source
     @return True if the database source could be loaded */
-  function initDataSource($options = array()) {
+  public function initDataSource($options = array()) {
     if (!empty($this->db)) {
       return true;
     }
@@ -51,7 +51,7 @@ class UpgradeSchemaComponent extends Component {
   }
 
   /*
-  function loadSchema($options = array()) {
+  public function loadSchema($options = array()) {
     $options = am(array('path' => CONFIGS.'schema'.DS, 'name' => 'Phtagr'), $options);
     $schema = $this->cakeSchema->load($options);
     if (!$schema) {
@@ -62,7 +62,7 @@ class UpgradeSchemaComponent extends Component {
   }
   */
 
-  function isConnected() {
+  public function isConnected() {
     if (!empty($this->db) && $this->db->enabled()) {
       return true;
     } else {
@@ -73,7 +73,7 @@ class UpgradeSchemaComponent extends Component {
   /** Checks for existing tables
     @param tables. Array of tables names. Default array('users')
     @return True if all given tables exists */
-  function hasTables($tables = array()) {
+  public function hasTables($tables = array()) {
     if (!$this->isConnected()) {
       return false;
     }
@@ -94,7 +94,7 @@ class UpgradeSchemaComponent extends Component {
     return true;
   }
 
-  function requireUpgrade() {
+  public function requireUpgrade() {
     $missingTables = $this->_getMissingTables($this->schema);
     if ($missingTables) {
       Logger::verbose("Missing table(s): ".implode(", ", array_keys($missingTables)));
@@ -108,7 +108,7 @@ class UpgradeSchemaComponent extends Component {
     return false;
   }
 
-  function upgrade($noDrop = false) {
+  public function upgrade($noDrop = false) {
     $errorTables = $this->_createMissingTables();
     $errorColumns = $this->_upgradeTables($noDrop);
     if ($errorTables || $errorColumns) {
@@ -118,7 +118,7 @@ class UpgradeSchemaComponent extends Component {
     }
   }
 
-  function deleteModelCache() {
+  public function deleteModelCache() {
     $modelCacheDir = TMP.'cache'.DS.'models'.DS;
     $folder = new Folder($modelCacheDir);
     $modelCacheFiles = $folder->find('cake_model_.*');
