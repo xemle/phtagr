@@ -565,7 +565,7 @@ class ExplorerController extends AppController
           Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change any metadata of image ".$id);
           continue;
         }
-        $tmp = $this->Media->editMulti($media, $editData);
+        $tmp = $this->Media->editMulti($media, $editData, $user);
         if ($tmp) {
           $changedMedia[] = $tmp;
         }

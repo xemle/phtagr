@@ -27,8 +27,7 @@ class ExplorerControllerTest extends ControllerTestCase {
    */
   public $fixtures = array('app.file', 'app.media', 'app.user', 'app.group', 'app.groups_media',
       'app.groups_user', 'app.option', 'app.guest', 'app.comment', 'app.my_file',
-      'app.tag', 'app.media_tag', 'app.category', 'app.categories_media', 'app.fields_media', 'app.field',
-      'app.location', 'app.locations_media', 'app.comment');
+      'app.fields_media', 'app.field', 'app.comment');
 
   /**
    * setUp method
@@ -112,11 +111,11 @@ class ExplorerControllerTest extends ControllerTestCase {
 
     $Explorer = $this->generate('Explorer', array('methods' => array('getUser')));
     $Explorer->expects($this->any())->method('getUser')->will($this->returnValue($user));
-    $data = array('Media' => array('ids' => $media['Media']['id']), 'Location' => array('sublocation' => 'castle', 'city' => 'karlsruhe', 'state' => 'bw', 'country' => 'germany'));
+    $data = array('Media' => array('ids' => $media['Media']['id']), 'Field' => array('sublocation' => 'castle', 'city' => 'karlsruhe', 'state' => 'bw', 'country' => 'germany'));
     $contents = $this->testAction('/explorer/edit', array('data' => $data, 'return' => 'vars'));
 
     $media = $this->Media->findById($media['Media']['id']);
-    $locationNames = Set::extract('/Location/name', $media);
+    $locationNames = Set::extract('/Field/data', $media);
     sort($locationNames);
     $this->assertEqual($locationNames, array('bw', 'castle', 'germany', 'karlsruhe'));
   }
@@ -132,11 +131,11 @@ class ExplorerControllerTest extends ControllerTestCase {
     $Explorer = $this->generate('Explorer', array('methods' => array('getUser'), 'components' => array('RequestHandler' => array('isAjax', 'isMobile'))));
     $Explorer->expects($this->any())->method('getUser')->will($this->returnValue($user));
     $Explorer->RequestHandler->expects($this->once())->method('isAjax')->will($this->returnValue(true));
-    $data = array('Location' => array('sublocation' => 'prater', 'city' => 'vienna', 'country' => 'austria'));
+    $data = array('Field' => array('sublocation' => 'prater', 'city' => 'vienna', 'country' => 'austria'));
     $contents = $this->testAction('/explorer/savemeta/' . $media['Media']['id'], array('data' => $data, 'return' => 'result'));
 
     $media = $this->Media->findById($media['Media']['id']);
-    $locationNames = Set::extract('/Location/name', $media);
+    $locationNames = Set::extract('/Field/data', $media);
     sort($locationNames);
     $this->assertEqual($locationNames, array('austria', 'prater', 'vienna'));
   }
@@ -152,15 +151,15 @@ class ExplorerControllerTest extends ControllerTestCase {
     $media3 = $this->Media->save($this->Media->create(array('name' => 'IMG_1233.JPG', 'user_id' => $user['User']['id'])));
     $media4 = $this->Media->save($this->Media->create(array('name' => 'IMG_1234.JPG', 'user_id' => $user['User']['id'])));
 
-    $sublocation = $this->Media->Location->save($this->Media->Location->create(array('type' => LOCATION_SUBLOCATION, 'name' => 'downtown')));
-    $city = $this->Media->Location->save($this->Media->Location->create(array('type' => LOCATION_CITY, 'name' => 'quebec')));
-    $state = $this->Media->Location->save($this->Media->Location->create(array('type' => LOCATION_STATE, 'name' => 'quebec')));
-    $country = $this->Media->Location->save($this->Media->Location->create(array('type' => LOCATION_COUNTRY, 'name' => 'canada')));
+    $sublocation = $this->Media->Field->save($this->Media->Field->create(array('name' => 'sublocation', 'data' => 'downtown')));
+    $city = $this->Media->Field->save($this->Media->Field->create(array('name' => 'city', 'data' => 'quebec')));
+    $state = $this->Media->Field->save($this->Media->Field->create(array('name' => 'state', 'data' => 'quebec')));
+    $country = $this->Media->Field->save($this->Media->Field->create(array('name' => 'country', 'data' => 'canada')));
 
-    $this->Media->save(array('Media' => array('id' => $media1['Media']['id']), 'Location' => array('Location' => array($sublocation['Location']['id'], $city['Location']['id'], $state['Location']['id'], $country['Location']['id']))));
-    $this->Media->save(array('Media' => array('id' => $media2['Media']['id']), 'Location' => array('Location' => array($city['Location']['id'], $state['Location']['id'], $country['Location']['id']))));
-    $this->Media->save(array('Media' => array('id' => $media3['Media']['id']), 'Location' => array('Location' => array($state['Location']['id'], $country['Location']['id']))));
-    $this->Media->save(array('Media' => array('id' => $media4['Media']['id']), 'Location' => array('Location' => array($country['Location']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media1['Media']['id']), 'Field' => array('Field' => array($sublocation['Field']['id'], $city['Field']['id'], $state['Field']['id'], $country['Field']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media2['Media']['id']), 'Field' => array('Field' => array($city['Field']['id'], $state['Field']['id'], $country['Field']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media3['Media']['id']), 'Field' => array('Field' => array($state['Field']['id'], $country['Field']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media4['Media']['id']), 'Field' => array('Field' => array($country['Field']['id']))));
 
     $user = $this->User->findById($user['User']['id']);
     $Explorer = $this->generate('Explorer', array('methods' => array('getUser')));
