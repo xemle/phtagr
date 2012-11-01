@@ -352,12 +352,12 @@ class QueryBuilderComponent extends Component {
   public function build($data) {
     $this->counter = 0;
     list($include, $exclude) = $this->_splitRequirements($data);
-    $operand = $this->_getParam($data, 'operand', 'AND');
-    $query = array();
+    // if we have some must-include default is OR for other conditions
+    $defaultOperand = $include ? 'OR' : 'AND';
+    $operand = $this->_getParam($data, 'operand', $defaultOperand);
 
     $conditionsByModel = $this->_buildConditions($data);
-    $subQuery = $this->_buildJoins($conditionsByModel, $operand);
-    $query = array_merge_recursive($query, $subQuery);
+    $query = $this->_buildJoins($conditionsByModel, $operand);
     if (count($exclude)) {
       $conditionsByModel = $this->_buildConditions($exclude);
       $excludeQuery = $this->_buildJoins($conditionsByModel, 'NOT');

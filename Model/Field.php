@@ -67,12 +67,15 @@ class Field extends AppModel {
   }
 
   public function createFields(&$media) {
+    if (empty($media['Field'])) {
+      return;
+    }
     $names = $this->getFieldNames();
     foreach ($names as $name) {
       if (!empty($media['Field'][$name])) {
         $values = (array)$media['Field'][$name];
         $ids = $this->createField($name, $values);
-        if (!isset($media['Field']['Field'])) {
+        if (isset($media['Field']['Field'])) {
           $media['Field']['Field'] = am($media['Field']['Field'], $ids);
         } else {
           $media['Field']['Field'] = $ids;
