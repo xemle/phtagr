@@ -399,6 +399,7 @@ class SearchComponentTestCase extends CakeTestCase {
     $this->Media->save(array('Media' => array('id' => $media1['Media']['id']), 'Group' => array('Group' => array($groupA['Group']['id']))));
     $media2 = $this->Media->save($this->Media->create(array('name' => 'IMG_2345.JPG', 'user_id' => $userB['User']['id'], 'gacl' => 97)));
     $this->Media->save(array('Media' => array('id' => $media2['Media']['id']), 'Group' => array('Group' => array($groupA['Group']['id']))));
+    $this->assertEqual(true, $media1['Media']['id'] < $media2['Media']['id']);
 
     $this->mockUser($userA);
     $result = $this->Search->paginateMediaByCrumb($media1['Media']['id'], array('sort:newest'));
@@ -677,5 +678,47 @@ class SearchComponentTestCase extends CakeTestCase {
     $this->Search->addState('-quebec');
     $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
     $this->assertEqual($mediaIds, array($media1['Media']['id'], $media3['Media']['id']));
+  }
+
+  public function testSearcheWithIncludeOptionalAndExcludedValues() {
+    $user = $this->User->save($this->User->create(array('username' => 'user', 'role' => ROLE_USER)));
+
+    $media1 = $this->Media->save($this->Media->create(array('name' => 'IMG_1231.JPG', 'user_id' => $user['User']['id'])));
+    $media2 = $this->Media->save($this->Media->create(array('name' => 'IMG_1232.JPG', 'user_id' => $user['User']['id'])));
+    $media3 = $this->Media->save($this->Media->create(array('name' => 'IMG_1233.JPG', 'user_id' => $user['User']['id'])));
+    $media4 = $this->Media->save($this->Media->create(array('name' => 'IMG_1234.JPG', 'user_id' => $user['User']['id'])));
+    $media5 = $this->Media->save($this->Media->create(array('name' => 'IMG_1235.JPG', 'user_id' => $user['User']['id'])));
+    $media6 = $this->Media->save($this->Media->create(array('name' => 'IMG_1236.JPG', 'user_id' => $user['User']['id'])));
+
+    $building = $this->Media->Field->save($this->Media->Field->create(array('name' => 'keyword', 'data' => 'building')));
+    $church = $this->Media->Field->save($this->Media->Field->create(array('name' => 'keyword', 'data' => 'church')));
+    $ruine = $this->Media->Field->save($this->Media->Field->create(array('name' => 'keyword', 'data' => 'ruine')));
+    $vacation = $this->Media->Field->save($this->Media->Field->create(array('name' => 'category', 'data' => 'vacation')));
+    $rome = $this->Media->Field->save($this->Media->Field->create(array('name' => 'city', 'data' => 'rome')));
+    $venice = $this->Media->Field->save($this->Media->Field->create(array('name' => 'city', 'data' => 'venice')));
+
+    $this->Media->save(array('Media' => array('id' => $media1['Media']['id']), 'Field' => array('Field' => array($building['Field']['id'], $vacation['Field']['id'], $rome['Field']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media2['Media']['id']), 'Field' => array('Field' => array($building['Field']['id'], $church['Field']['id'], $vacation['Field']['id'], $rome['Field']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media3['Media']['id']), 'Field' => array('Field' => array($building['Field']['id'], $church['Field']['id'], $ruine['Field']['id'], $vacation['Field']['id'], $rome['Field']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media4['Media']['id']), 'Field' => array('Field' => array($vacation['Field']['id'], $rome['Field']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media5['Media']['id']), 'Field' => array('Field' => array($building['Field']['id'], $church['Field']['id'], $ruine['Field']['id'], $vacation['Field']['id'], $venice['Field']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media6['Media']['id']), 'Field' => array('Field' => array($building['Field']['id'], $church['Field']['id'], $ruine['Field']['id'], $rome['Field']['id']))));
+
+    $user = $this->User->findById($user['User']['id']);
+
+    // Allow 'user' parameter
+    $this->Search->disabled = array();
+
+    $this->mockUser($user);
+
+    // Test must include of vaction. Optional building, church, and ruine. Exclude venice
+    // Images with more matches should be ranked higher
+    $this->Search->addTag('building');
+    $this->Search->addTag('church');
+    $this->Search->addTag('ruine');
+    $this->Search->addCategory('+vacation');
+    $this->Search->addCity('-venice');
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media3['Media']['id'], $media2['Media']['id'], $media1['Media']['id'], $media4['Media']['id']));
   }
 }

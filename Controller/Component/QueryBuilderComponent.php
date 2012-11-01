@@ -325,6 +325,8 @@ class QueryBuilderComponent extends Component {
       $conditions = array("COALESCE($counterName, 0) >= " . 1);
     } else if ($operand === 'NOT') {
       $conditions = array("COALESCE($counterName, 0) = " . 0);
+    } else if ($operand !== 'ANY') {
+      Logger::err("Unknown operand $operand");
     }
     return array('joins' => array($join), 'conditions' => $conditions, '_counters' => array($counterName));
   }
@@ -353,7 +355,7 @@ class QueryBuilderComponent extends Component {
     $this->counter = 0;
     list($include, $exclude) = $this->_splitRequirements($data);
     // if we have some must-include default is OR for other conditions
-    $defaultOperand = $include ? 'OR' : 'AND';
+    $defaultOperand = $include ? 'ANY' : 'AND';
     $operand = $this->_getParam($data, 'operand', $defaultOperand);
 
     $conditionsByModel = $this->_buildConditions($data);
@@ -365,7 +367,7 @@ class QueryBuilderComponent extends Component {
       $query = array_merge_recursive($query, $excludeQuery);
     }
     if (count($include)) {
-      $conditionsByModel = $this->_buildConditions($exclude);
+      $conditionsByModel = $this->_buildConditions($include);
       $includeQuery = $this->_buildJoins($conditionsByModel, 'AND');
       $query = array_merge_recursive($query, $includeQuery);
     }
