@@ -32,8 +32,7 @@ class MediaTestCase extends CakeTestCase {
  */
 	public $fixtures = array('app.file', 'app.media', 'app.user', 'app.group', 'app.groups_media',
       'app.groups_user', 'app.option', 'app.guest', 'app.comment', 'app.my_file',
-      'app.fields_media', 'app.field',
-      'app.location', 'app.locations_media', 'app.comment');
+      'app.fields_media', 'app.field', 'app.comment');
 
 /**
  * setUp method
@@ -272,7 +271,7 @@ class MediaTestCase extends CakeTestCase {
 
     $requestData = array('Group' => array('names' => 'group1'));
     $data = $this->Media->prepareMultiEditData($requestData, $admin);
-    $tmp = $this->Media->editMulti($media, $data);
+    $tmp = $this->Media->editMulti($media, $data, $admin);
     $this->Media->save($tmp);
     $media = $this->Media->findById($media['Media']['id']);
     $this->Media->setAccessFlags($media, $admin);
@@ -280,7 +279,7 @@ class MediaTestCase extends CakeTestCase {
 
     $requestData = array('Group' => array('names' => ' group2 , -group1'));
     $data = $this->Media->prepareMultiEditData($requestData, $admin);
-    $tmp = $this->Media->editMulti($media, $data);
+    $tmp = $this->Media->editMulti($media, $data, $admin);
     $this->Media->save($tmp);
     $media = $this->Media->findById($media['Media']['id']);
     $this->Media->setAccessFlags($media, $admin);
@@ -289,7 +288,7 @@ class MediaTestCase extends CakeTestCase {
     // Admin can use every group
     $requestData = array('Group' => array('names' => ' group 3 , group1'));
     $data = $this->Media->prepareMultiEditData($requestData, $admin);
-    $tmp = $this->Media->editMulti($media, $data);
+    $tmp = $this->Media->editMulti($media, $data, $admin);
     $this->Media->save($tmp);
     $media = $this->Media->findById($media['Media']['id']);
     $this->assertEqual(array('group2', 'group1', 'group 3'), Set::extract('/Group/name', $media));
@@ -301,7 +300,7 @@ class MediaTestCase extends CakeTestCase {
 
     $requestData = array('Group' => array('names' => ' group 3 , group1'));
     $data = $this->Media->prepareMultiEditData($requestData, $user);
-    $tmp = $this->Media->editMulti($media, $data);
+    $tmp = $this->Media->editMulti($media, $data, $user);
     $this->Media->save($tmp);
     $media = $this->Media->findById($media['Media']['id']);
     $this->Media->setAccessFlags($media, $user);
@@ -309,7 +308,7 @@ class MediaTestCase extends CakeTestCase {
 
     $requestData = array('Group' => array('names' => ' group2 , -group 3'));
     $data = $this->Media->prepareMultiEditData($requestData, $user);
-    $tmp = $this->Media->editMulti($media, $data);
+    $tmp = $this->Media->editMulti($media, $data, $user);
     $this->Media->save($tmp);
     $media = $this->Media->findById($media['Media']['id']);
     $this->Media->setAccessFlags($media, $user);
@@ -317,7 +316,7 @@ class MediaTestCase extends CakeTestCase {
 
     $requestData = array('Group' => array('names' => 'group 3, fake Group'));
     $data = $this->Media->prepareMultiEditData($requestData, $user);
-    $tmp = $this->Media->editMulti($media, $data);
+    $tmp = $this->Media->editMulti($media, $data, $user);
     $this->Media->save($tmp);
     $media = $this->Media->findById($media['Media']['id']);
     $this->Media->setAccessFlags($media, $user);
