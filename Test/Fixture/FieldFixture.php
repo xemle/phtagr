@@ -16,15 +16,16 @@
  */
 
 /**
- * CategoriesMediaFixture
+ * FieldFixture
  *
  */
-class CategoriesMediaFixture extends CakeTestFixture {
-	
-	public $fields = array(
-			'category_id' => array('type' => 'integer', 'null' => false),
-			'media_id' => array('type' => 'integer', 'null' => false)
-	);
+class FieldFixture extends CakeTestFixture {
+/**
+ * Import
+ *
+ * @var array
+ */
+	public $import = array('model' => 'Field');
 
 
 /**

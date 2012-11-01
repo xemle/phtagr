@@ -16,16 +16,15 @@
  */
 
 /**
- * TagFixture
+ * FieldsMediaFixture
  *
  */
-class TagFixture extends CakeTestFixture {
-/**
- * Import
- *
- * @var array
- */
-	public $import = array('model' => 'Tag');
+class FieldsMediaFixture extends CakeTestFixture {
+	
+	public $fields = array(
+			'field_id' => array('type' => 'integer', 'null' => false),
+			'media_id' => array('type' => 'integer', 'null' => false)
+	);
 
 
 /**
