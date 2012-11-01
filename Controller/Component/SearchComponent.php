@@ -36,10 +36,9 @@ class SearchComponent extends Component
    * @see http://book.cakephp.org/view/125/Data-Validation
    */
   var $validate = array(
-    'categories' => array('rule' => array('maxLength', 30)),
-    'category_op' => array('rule' => array('inList', array('AND', 'OR'))),
-    'cities' => array('rule' => array('maxLength', 30)),
-    'countries' => array('rule' => array('maxLength', 30)),
+    'category' => array('rule' => array('maxLength', 30), 'multiple' => true),
+    'city' => array('rule' => array('maxLength', 30), 'multiple' => true),
+    'country' => array('rule' => array('maxLength', 30), 'multiple' => true),
     'created_from' => array('rule' => array('custom', '/^\d{4}-\d{2}-\d{2}([ T]\d{2}:\d{2}:\d{2})?$/')),
     'east' => array('rule' => array('custom', '/-?\d+(\.\d+)?/')),
     'exclude_user' => 'numeric',
@@ -50,18 +49,16 @@ class SearchComponent extends Component
     'media' => 'numeric',
     'name' => 'notEmpty',
     'north' => array('rule' => array('custom', '/-?\d+(\.\d+)?/')),
-    'locations' => array('rule' => array('maxLength', 30)),
-    'location_op' => array('rule' => array('inList', array('AND', 'OR'))),
+    'location' => array('rule' => array('maxLength', 30), 'multiple' => true),
     'operand' => array('rule' => array('inList', array('AND', 'OR'))),
     'page' => array('numericRule' => 'numeric', 'minRule' => array('rule' => array('comparison', '>=', 1))),
     'pos' => array('numericRule' => 'numeric', 'minRule' => array('rule' => array('comparison', '>=', 1))),
     'show' => array('numericRule' => 'numeric', 'minRule' => array('rule' => array('comparison', '>=', 1)), 'maxRule' => array('rule' => array('comparison', '<=', 240))),
     'sort' => array('rule' => array('inList', array('date', '-date', 'newest', 'changes', 'viewed', 'popularity', 'random', 'name'))),
     'south' => array('rule' => array('custom', '/-?\d+(\.\d+)?/')),
-    'sublocations' => array('rule' => array('maxLength', 30)),
-    'states' => array('rule' => array('maxLength', 30)),
-    'tags' => array('rule' => array('maxLength', 30)),
-    'tag_op' => array('rule' => array('inList', array('AND', 'OR'))),
+    'sublocation' => array('rule' => array('maxLength', 30), 'multiple' => true),
+    'state' => array('rule' => array('maxLength', 30), 'multiple' => true),
+    'tag' => array('rule' => array('maxLength', 30), 'multiple' => true),
     'to' => array('rule' => array('custom', '/^\d{4}-\d{2}-\d{2}([ T]\d{2}:\d{2}:\d{2})?$/')),
     'type' => array('rule' => array('inList', array('image', 'video'))),
     'user' => 'notEmpty',
@@ -135,6 +132,7 @@ class SearchComponent extends Component
    * value is null
    */
   public function getParam($name, $default = null) {
+    $name = Inflector::singularize($name);
     if (!empty($this->_data[$name])) {
       return $this->_data[$name];
     } else {
@@ -170,7 +168,7 @@ class SearchComponent extends Component
    * @note The name will be pluralized.
    */
   public function addParam($name, $value, $validate = true) {
-    $name = Inflector::pluralize($name);
+    $name = Inflector::singularize($name);
     if (is_array($value)) {
       foreach ($value as $v) {
         $this->addParam($name, $v, $validate);
@@ -185,6 +183,7 @@ class SearchComponent extends Component
   }
 
   public function delParam($name, $value = false) {
+    $name = Inflector::singularize($name);
     if (!isset($this->_data[$name])) {
       return;
     }

@@ -17,8 +17,7 @@
 
 App::uses('Sanitize', 'Utility');
 
-class QueryBuilderComponent extends Component
-{
+class QueryBuilderComponent extends Component {
   var $controller = null;
 
   /**
@@ -26,29 +25,28 @@ class QueryBuilderComponent extends Component
    * 'name' => array('rule' => 'special rule name')
    * 'name' => array('field' => 'Model.field', 'operand' => 'condition operand')
    */
-  var $rules = array(
-    'categories' => array('custom' => 'buildHabtm'),
-    'cities' => array('custom' => 'buildHabtm'),
-    'countries' => array('custom' => 'buildHabtm'),
+  var $conditionRules = array(
+    'category' => array('field' => 'Field.data', 'with' => array('Field.name' => 'category')),
+    'city' => array('field' => 'Field.data', 'with' => array('Field.name' => 'city')),
+    'country' => array('field' => 'Field.data', 'with' => array('Field.name' => 'country')),
     'created_from' => array('field' => 'Media.created', 'operand' => '>='),
     'east' => array('field' => 'Media.longitude', 'operand' => '<='),
-    'exclude_user' => array('field' => 'Media.user_id', 'operand' => '!='),
-    'folder' => true, // calls buildFolder
+    'folder' => 'File.path',
     'from' => array('field' => 'Media.date', 'operand' => '>='),
-    'groups' => array('custom' => 'buildHabtm'),
-    'locations' => array('custom' => 'buildHabtm'),
+    'group' => 'Group.name',
+    'location' => array('field' => 'Field.data', 'with' => array('Field.name' => array('sublocation', 'city', 'state', 'country'))),
     'media' => 'Media.id',
     'name' => 'Media.name',
     'north' => array('field' => 'Media.latitude', 'operand' => '<='),
     'south' => array('field' => 'Media.latitude', 'operand' => '>='),
-    'states' => array('custom' => 'buildHabtm'),
-    'sublocations' => array('custom' => 'buildHabtm'),
+    'state' => array('field' => 'Field.data', 'with' => array('Field.name' => 'state')),
+    'sublocation' => array('field' => 'Field.data', 'with' => array('Field.name' => 'sublocation')),
     'to' => array('field' => 'Media.date', 'operand' => '<='),
-    'tags' => array('custom' => 'buildHabtm'),
-    'type' => array('field' => 'Media.type', 'mapping' => array('image' => MEDIA_TYPE_IMAGE, 'video' => MEDIA_TYPE_VIDEO)),
-    'visibility' => true, // calls buildVisibility
+    'tag' => array('field' => 'Field.data', 'with' => array('Field.name' => 'keyword')),
+    'type' => 'Media.type',
     'west' => array('field' => 'Media.longitude', 'operand' => '>='),
     );
+  var $counter = 0;
 
   public function initialize(Controller $controller) {
     $this->controller = $controller;
@@ -62,7 +60,7 @@ class QueryBuilderComponent extends Component
    * @param default Default value
    * @return data value or default
    */
-  public function _getParam(&$data, $name, $default = null) {
+  private function _getParam(&$data, $name, $default = null) {
     if (!isset($data[$name])) {
       return $default;
     } else {
@@ -76,7 +74,7 @@ class QueryBuilderComponent extends Component
    * @param Data as single value or array
    * @return Sanitized data
    */
-  public function _sanitizeData($data) {
+  private function _sanitizeData($data) {
     if (!is_array($data)) {
       if (is_numeric($data)) {
         return $data;
@@ -100,15 +98,10 @@ class QueryBuilderComponent extends Component
    * @param value Value as single value or array
    * @param Options Optional options
    *   - operand: Default is '='
-   *   - mapping: Array of value mapping
-   * @return Sanitized condition
+   * @return Array of Sanitized condition and value count
    */
-  public function _buildCondition($field, $value, $options = false) {
-    if (is_string($options)) {
-      $o['operand'] = $options;
-      $options = $o;
-    }
-    $options = am(array('operand' => '=', 'mapping' => array()), $options);
+  private function _buildCondition($field, $value, $options = array()) {
+    $options = am(array('operand' => '='), $options);
     $operands = array('=', '!=', '>', '<', '>=', '<=', 'IN', 'NOT IN', 'LIKE');
     extract($options);
     if (!in_array(strtoupper($operand), $operands)) {
@@ -116,11 +109,9 @@ class QueryBuilderComponent extends Component
       $operand = '=';
     }
 
-    if (isset($mapping) && !is_array($value) && isset($mapping[$value])) {
-      $value = $mapping[$value];
-    }
     $condition = $field;
     $value = (array)$value;
+    $count = count($value);
     if (count($value) == 1 && $operand != 'IN' && $operand != 'NOT IN') {
       $condition .= " $operand " . $this->_sanitizeData(array_pop($value));
     } else {
@@ -135,21 +126,95 @@ class QueryBuilderComponent extends Component
         $condition .= " $operand (" . implode(', ', $this->_sanitizeData($value)) . ')';
       }
     }
-    return $condition;
+    return array($condition, $count);
+  }
+
+  private function _getModelName($field) {
+    if (preg_match('/^(\w+)\..*/', $field, $m)) {
+      return $m[1];
+    }
+    Logger::error("Could not get model name from $field!");
+    return false;
+  }
+
+  private function _addCondition(&$modelToConditions, $field, &$condition, $count = 1) {
+    $model = $this->_getModelName($field);
+    if (!$model) {
+      return;
+    } else if (!isset($modelToConditions[$model])) {
+      $modelToConditions[$model] = array('conditions' => array(), 'count' => 0);
+    }
+    $modelToConditions[$model]['conditions'][] = $condition;
+    $modelToConditions[$model]['count'] += $count;
   }
 
   /**
-   * Extract exclusion parameters. A exclustion is a value which starts with a
-   * minus sign ('-')
+   * Build condition list from params
+   *
+   * @param array params Parameter array
+   * @return array Array of conditions sorted by model
+   */
+  private function _buildConditions(&$params) {
+    $conditions = array();
+    if (!count($params)) {
+      return $conditions;
+    }
+    foreach ($params as $name => $value) {
+      if (!isset($this->conditionRules[$name])) {
+        Logger::warn("No rule for $name. Skip it.");
+        continue;
+      }
+
+      $rule = $this->conditionRules[$name];
+      if (!is_array($rule)) {
+        list($condition, $count) = $this->_buildCondition($rule, $value);
+        $this->_addCondition($conditions, $rule, $condition, $count);
+      } else {
+        $rule = am(array('field' => false, 'operand' => '=', 'with' => false), $rule);
+        if (!$rule['field']) {
+           Logger::err("Field in rule is missing for parameter name '$name'");
+           Logger::debug($rule);
+           continue;
+        } else if ($rule['with']) {
+          list($condition, $count) = $this->_buildCondition($rule['field'], $value, $rule);
+          if (is_array($rule['with'])) {
+            $withConditions = array();
+            foreach ($rule['with'] as $field => $value) {
+              list($withCondition) = $this->_buildCondition($field, $value);
+              $withConditions[] = $withCondition;
+            }
+            if (count($withConditions) > 1) {
+              $flat = "( " . join(" AND ", $withConditions) . " )";
+            } else {
+              $flat = $withConditions[0];
+            }
+            $combined = array('AND' => am($condition, $flat));
+          } else {
+            $combined = array('AND' => am($condition, $rule['with']));
+          }
+          $this->_addCondition($conditions, $rule['field'], $combined, $count);
+        } else {
+          list($condition, $count) = $this->_buildCondition($rule['field'], $value, $rule);
+          $this->_addCondition($conditions, $rule['field'], $condition, $count);
+        }
+      }
+    }
+    return $conditions;
+  }
+
+  /**
+   * Extract inclusion and exclusion parameters. A exclustion is a value
+   * starting with a minus sign ('-'). An inclusion starts with a plus sign.
    *
    * @param data Parameter data
    * @param skip Parameter list which are not evaluated and skiped
-   * @return exclusions parameter
+   * @return array Array of inclusions, optionals and exclusions
    */
-  public function _extractExclusions(&$data, $skip = array('sort', 'north', 'south', 'west', 'east')) {
+  private function _splitRequirements(&$data, $skip = array('sort', 'north', 'south', 'west', 'east')) {
+    $inclusions = array();
     $exclusions = array();
     if (!count($data)) {
-      return $exclusions;
+      return array($inclusions, $exclusions);
     }
 
     foreach ($data as $name => $values) {
@@ -159,18 +224,27 @@ class QueryBuilderComponent extends Component
 
       if (!is_array($values)) {
         // single values
-        if (preg_match('/^-(.*)$/', $values, $matches)) {
-          $exclusions[$name] = $matches[1];
+        if (preg_match('/^([-+])(.*)$/', $values, $matches)) {
+          if ($matches[1] == '-') {
+            $exclusions[$name] = $matches[2];
+          } else {
+            $inclusions[$name] = $matches[2];
+          }
           unset($data[$name]);
         }
       } else {
         // array values
         foreach ($values as $key => $value) {
-          if (preg_match('/^-(.*)$/', $value, $matches)) {
-            if (!isset($exclusions[$name])) {
-              $exclusions[$name] = array();
+          if (preg_match('/^([-+])(.*)$/', $value, $matches)) {
+            if ($matches[1] == '-') {
+              $list =& $exclusions;
+            } else {
+              $list =& $inclusions;
             }
-            $exclusions[$name][] = $matches[1];
+            if (!isset($list[$name])) {
+              $list[$name] = array();
+            }
+            $list[$name][] = $matches[2];
             unset($data[$name][$key]);
           }
         }
@@ -180,98 +254,143 @@ class QueryBuilderComponent extends Component
         }
       }
     }
-    //Logger::info($exclusions);
-    return $exclusions;
+    return array($inclusions, $exclusions);
   }
 
-  public function buildConditions($data) {
-    $query = array('conditions' => array());
-    if (!count($data)) {
-      return $query;
-    }
-    foreach ($this->rules as $name => $rule) {
-      if (!isset($data[$name])) {
-        continue;
-      } else {
-        $value = $data[$name];
-      }
-      $method = 'build'.Inflector::camelize($name);
-      if (method_exists($this, $method)) {
-        call_user_func_array(array($this, $method), array(&$data, &$query, $value));
-        continue;
-      }
-
-      if (!is_array($rule)) {
-        $query['conditions'][] = $this->_buildCondition($rule, $value);
-      } else {
-        $rule = am(array('custom' => false, 'operand' => '=', 'mapping' => false), $rule);
-        if ($rule['custom']) {
-          if (!method_exists($this, $rule['custom'])) {
-            Logger::err("Custom method {$rule['custom']} does not exists or is missing");
-            continue;
+  private function _buildSqlConditions($conditions) {
+    $result = array();
+    foreach ($conditions as $key => $value) {
+      $sqls = array();
+      $operand = 'AND';
+      if ($key === 'OR') {
+        $sqls = $this->_buildSqlConditions($value);
+        $operand = 'OR';
+      } else if ($key === 'AND' || (is_numeric($key) && is_array($value))) {
+        $sqls = $this->_buildSqlConditions($value);
+      } else if (!is_numeric($key) && is_array($value)) {
+        $sqls[] = $key . "(" . join(', ', $this->_sanitizeData($value)) . ")";
+      } else if (!is_numeric($key)) {
+        $value = $this->_sanitizeData($value);
+        if (preg_match('/(.*)\s*(=|<|>|>=|<=|IN|LIKE)\s*/', $key, $m)) {
+          if ($m[2] == 'IN') {
+            $sqls[] = "{$m[1]} {$m[2]} (" . join(", ", (array) $value) . ")";
+          } else {
+            $sqls[] = "{$m[1]} {$m[2]} " . $value;
           }
-          //Logger::debug("Call custom rule {$rule['custom']}");
-          call_user_func_array(array($this, $rule['custom']), array(&$data, &$query, $name, $value));
-        } elseif (!isset($rule['field'])) {
-           Logger::err("Field in rule is missing");
-           Logger::debug($rule);
-           continue;
         } else {
-           $query['conditions'][] = $this->_buildCondition($rule['field'], $value, $rule);
+          $sqls[] = $key . ' = ' . $value;
         }
+      } else {
+        $sqls[] = $value;
+      }
+      if (count($sqls) > 1) {
+        $result[] = "(" . join(" $operand ", $sqls) . ")";
+      } else if (count($sqls) > 0) {
+        $result[] = array_pop($sqls);
       }
     }
+    return $result;
+  }
 
-    // paging, offsets and limit
-    if (!empty($data['pos'])) {
-      $query['offset'] = $data['pos'];
-    } elseif (isset($data['show']) && isset($data['page'])) {
-      $query['page'] = $data['page'];
+  private function _buildHABTMStatement($Model, $assoc, $conditions, $count, $operand) {
+    if (!isset($Model->{$assoc})) {
+      Logger::err("Could not access $assoc");
     }
-    if (isset($data['show'])) {
-      $query['limit'] = $data['show'];
-    }
+    $this->counter++;
+    $table = $Model->{$assoc}->tablePrefix.$Model->{$assoc}->table;
+    $alias = $Model->{$assoc}->alias;
+    $key = $Model->{$assoc}->primaryKey;
 
-    if (isset($data['sort'])) {
-      $this->_buildOrder($data, $query);
+    $config = $Model->hasAndBelongsToMany[$assoc];
+
+    $joinTable = $Model->tablePrefix.$config['joinTable'];
+    $joinAlias = "{$config['with']}{$this->counter}";
+    $foreignKey = $config['foreignKey'];
+    $associationForeignKey = $config['associationForeignKey'];
+
+    $modelAlias = $Model->alias;
+    $modelKey = $Model->primaryKey;
+    $counterName = "{$assoc}Count{$this->counter}";
+
+    $join = "LEFT JOIN ("
+            ." SELECT `$joinAlias`.`$foreignKey`,COUNT(*) as $counterName"
+            ." FROM `$joinTable` AS `$joinAlias`, `$table` AS `$alias`"
+            ." WHERE `$joinAlias`.`$associationForeignKey` = `$alias`.`$key`"
+            ." AND (" . join(' AND ', $this->_buildSqlConditions($conditions)) . ")"
+            ." GROUP BY `$joinAlias`.`$foreignKey`) AS $joinAlias ON `$joinAlias`.`$foreignKey` = `$modelAlias`.`$modelKey`";
+
+    if ($operand === 'AND') {
+      $conditions = array("COALESCE($counterName, 0) >= " . $count);
+    } else if ($operand === 'OR') {
+      $conditions = array("COALESCE($counterName, 0) >= " . 1);
+    } else if ($operand === 'NOT') {
+      $conditions = array("COALESCE($counterName, 0) = " . 0);
+    }
+    return array('joins' => array($join), 'conditions' => $conditions, '_counters' => array($counterName));
+  }
+
+  private function _getAssociationType($Model, $assoc) {
+    $data = $Model->hasAndBelongsToMany;
+    if (isset($Model->hasAndBelongsToMany[$assoc])) {
+      return 'HABTM';
+    }
+    return false;
+  }
+
+  private function _buildJoins($conditions, $operand = 'AND') {
+    $Model =& $this->controller->Media;
+    $query = array();
+    foreach ($conditions as $assoc => $assocConditions) {
+      $type = $this->_getAssociationType($Model, $assoc);
+      if ($type == 'HABTM') {
+        $query = array_merge_recursive($query, $this->_buildHABTMStatement($Model, $assoc, $assocConditions['conditions'], $assocConditions['count'], $operand));
+      }
     }
     return $query;
   }
 
   public function build($data) {
-    $exclude = $this->_extractExclusions($data);
-    $query = $this->buildConditions($data);
+    $this->counter = 0;
+    list($include, $exclude) = $this->_splitRequirements($data);
+    $operand = $this->_getParam($data, 'operand', 'AND');
+    $query = array();
+
+    $conditionsByModel = $this->_buildConditions($data);
+    $subQuery = $this->_buildJoins($conditionsByModel, $operand);
+    $query = array_merge_recursive($query, $subQuery);
     if (count($exclude)) {
-      $exclude['operand'] = 'OR';
-      $query['conditions']['exclude'] = $this->buildConditions($exclude);
+      $conditionsByModel = $this->_buildConditions($exclude);
+      $excludeQuery = $this->_buildJoins($conditionsByModel, 'NOT');
+      unset($excludeQuery['_counters']);
+      $query = array_merge_recursive($query, $excludeQuery);
+    }
+    if (count($include)) {
+      $conditionsByModel = $this->_buildConditions($exclude);
+      $includeQuery = $this->_buildJoins($conditionsByModel, 'AND');
+      $query = array_merge_recursive($query, $includeQuery);
     }
     $this->_buildAccessConditions($data, $query);
+    $this->_buildOrder($data, $query);
+    $visibility = $this->_getParam($data, 'visibility');
+    if ($visibility) {
+      $this->_buildVisibility($data, $query, $visibility);
+    }
     $query['group'] = 'Media.id';
     return $query;
   }
 
-  public function _buildOrder(&$data, &$query) {
-    if ($data['sort'] == 'default') {
-      if (isset($query['_counts']) && count($query['_counts']) > 0) {
-        if ($this->_getParam($data, 'operand') == 'OR') {
-          // global OR operand
-          $counts = array();
-          $conditions = array();
-          foreach ($query['_counts'] as $count) {
-            $counts[] = "( COALESCE($count, 0) + 1 )";
-            $conditions[] = "COALESCE($count, 0)";
+  private function _buildOrder(&$data, &$query) {
+    if (!isset($data['sort']) || $data['sort'] == 'default') {
+      if (isset($query['_counters']) && count($query['_counters']) > 0) {
+        if (count($query['_counters']) > 1) {
+          $counters = array();
+          foreach ($query['_counters'] as $counter) {
+            $counters[] = "( COALESCE($counter, 0) + 1 )";
           }
-          $query['conditions'][] = '( '.implode(' + ', $conditions).' ) > 0';
-          $query['order'][] = implode(" * ", $counts).' DESC';
+          $query['order'][] = implode(" * ", $counters).' DESC';
         } else {
-          // OR operand on habtm
-          foreach (array('tag', 'category', 'location') as $habtm) {
-            $fieldCount = Inflector::camelize($habtm)."Count";
-            if (in_array($fieldCount, $query['_counts']) &&
-              $this->_getParam($data, $habtm."_op") == 'OR') {
-              $query['order'][] = "COALESCE($fieldCount, 0) DESC";
-            }
-          }
+          $counter = $query['_counters'][0];
+          $query['order'][] = "COALESCE($counter, 0) DESC";
         }
       }
       $query['order'][] = 'Media.date DESC';
@@ -315,83 +434,63 @@ class QueryBuilderComponent extends Component
    * @param SQL array
    * @param name Parameter name
    * @param value Parameter value
+   * @param array $options Array of builder options
    */
-  public function buildHabtm(&$data, &$query, $name, $value) {
+  private function buildField(&$data, &$query, $name, $values, $options) {
     if (count($data[$name]) == 0) {
       return;
     }
 
-    $habtm = Inflector::singularize($name);
-    $origHabtm = false;
-    if (in_array($habtm, array('sublocation', 'city', 'state', 'country'))) {
-      $origHabtm = $habtm;
-      $habtm = 'location';
+    $model = 'Field';
+    if (isset($options['model'])) {
+      $model = $options['model'];
     }
-    $map = array(
-      'sublocation' => LOCATION_SUBLOCATION,
-      'city' => LOCATION_CITY,
-      'state' => LOCATION_STATE,
-      'country' => LOCATION_COUNTRY
-      );
-
-    $field = Inflector::camelize($habtm).'.name';
-
-    $tags = array();
-    foreach((array)$value as $v) {
-      if (preg_match('/[*\?]/', $v)) {
-        $v = preg_replace('/\*/', '%', $v);
-        $v = preg_replace('/\?/', '_', $v);
-        if (!$origHabtm) {
-          $query['conditions'][] = $this->_buildCondition($field, $v, array('operand' => 'LIKE'));
-        } else {
-          $query['conditions'][] = array('AND' => array(
-            $this->_buildCondition($field, $v, array('operand' => 'LIKE')),
-            $this->_buildCondition(Inflector::camelize($habtm).'.type', $map[$origHabtm])
-            ));
-        }
-      } else {
-        $tags[] = $v;
-      }
+    if (isset($options['names'])) {
+      $name = $options['names'];
     }
-    if (count($tags)) {
-      if (!$origHabtm) {
-        $query['conditions'][] = $this->_buildCondition($field, $tags);
-      } else {
+    $count = 0;
+    $fieldValues = array();
+    foreach((array)$values as $value) {
+      if (preg_match('/[*\?]/', $value)) {
+        $value = preg_replace('/\*/', '%', $value);
+        $value = preg_replace('/\?/', '_', $value);
+        $valueCondition = $this->_buildCondition($model.'.data', $value, array('operand' => 'LIKE'));
         $query['conditions'][] = array('AND' => array(
-          $this->_buildCondition($field, $tags),
-          $this->_buildCondition(Inflector::camelize($habtm).'.type', $map[$origHabtm])
-          ));
+            $this->_buildCondition($model.'.name', (array)$name),
+            $valueCondition
+        ));
+      } else {
+        $fieldValues[] = $value;
       }
+      $count++;
     }
-
-    $fieldCount = Inflector::camelize($habtm).'Count';
-    if (!isset($query['_counts']) || !in_array($fieldCount, $query['_counts'])) {
-      $query['_counts'][] = $fieldCount;
+    if ($fieldValues) {
+        $query['conditions'][] = array('AND' => array(
+            $this->_buildCondition($model.'.name', (array)$name),
+            $this->_buildCondition($model.'.data', (array)$fieldValues),
+        ));
     }
 
     // handle operand conditions (AND and OR)
-    $operand = $this->_getParam($data, 'operand');
-    if ($operand == 'OR') {
-      // handled by _buildOrder()
-      return;
-    } elseif ($operand == null) {
-      // habtm operand
-      $operand = $this->_getParam($data, $habtm."_op", 'AND');
-    }
+    $operand = $this->_getParam($data, 'operand', 'OR');
 
-    $condition = $fieldCount . ' >=';
+    $counter = $model.'Count';
+    if (!isset($query['_counts']) || !in_array($counter, $query['_counts'])) {
+      $query['_counts'][] = $counter;
+    }
+    $counter = $counter . ' >=';
     if ($operand === 'AND') {
-      $count = !empty($query['conditions'][$condition]) ? $query['conditions'][$condition] : 0;
+      $count = !empty($query['conditions'][$counter]) ? $query['conditions'][$counter] : 0;
       $count += count($data[$name]);
-      $query['conditions'][$condition] = $count;
+      $query['conditions'][$counter] = $count;
     } else if ($operand === 'OR') {
-      $query['conditions'][$condition] = 1;
+      $query['conditions'][$counter] = 1;
     } else {
-      Logger::err("Unknown $field operand '$operand'");
+      Logger::err("Unknown operand '$operand'");
     }
   }
 
-  public function _buildAccessConditions(&$data, &$query) {
+  private function _buildAccessConditions(&$data, &$query) {
     if (isset($data['visibility'])) {
       return true;
     }
@@ -410,17 +509,10 @@ class QueryBuilderComponent extends Component
       }
     }
     $aclQuery = $this->controller->Media->buildAclQuery($user, $userId);
-    // merge acl query
-    foreach ($aclQuery as $key => $values) {
-      if (!isset($query[$key])) {
-        $query[$key] = $values;
-      } else {
-        $query[$key] = am($query[$key], $aclQuery[$key]);
-      }
-    }
+    $query = array_merge_recursive($query, $aclQuery);
   }
 
-  public function buildFolder(&$data, &$query, $value) {
+  private function buildFolder(&$data, &$query, $value) {
     if (!isset($data['user']) || $value === false) {
       return;
     }
@@ -440,7 +532,7 @@ class QueryBuilderComponent extends Component
     $query['_counts'][] = "FileCount";
   }
 
-  public function buildVisibility(&$data, &$query, $value) {
+  private function _buildVisibility(&$data, &$query, $value) {
     // allow only admins to query others visibility, otherwise query only media
     // of the current user
     $me = $this->controller->getUser();
@@ -460,27 +552,34 @@ class QueryBuilderComponent extends Component
       }
     }
 
-    $query['conditions'][] = $this->_buildCondition("Media.user_id", $userId);
+    list($condition) = $this->_buildCondition("Media.user_id", $userId);
+    $query['conditions'][] = $condition;
 
     // setup visibility level
     switch ($value) {
       case 'private':
-        $query['conditions'][] = $this->_buildCondition("Media.gacl", ACL_READ_PREVIEW, '<');
+        list($condition) = $this->_buildCondition("Media.gacl", ACL_READ_PREVIEW, array('operand' => '<'));
+        $query['conditions'][] = $condition;
         break;
       case 'group':
-        $query['conditions'][] = $this->_buildCondition("Media.gacl", ACL_READ_PREVIEW, '>=');
-        $query['conditions'][] = $this->_buildCondition("Media.uacl", ACL_READ_PREVIEW, '<');
+        list($condition1) = $this->_buildCondition("Media.gacl", ACL_READ_PREVIEW, array('operand' => '>='));
+        $query['conditions'][] = $condition1;
+        list($condition2) = $this->_buildCondition("Media.uacl", ACL_READ_PREVIEW, array('operand' => '<'));
+        $query['conditions'][] = $condition2;
         break;
       case 'user':
-        $query['conditions'][] = $this->_buildCondition("Media.uacl", ACL_READ_PREVIEW, '>=');
-        $query['conditions'][] = $this->_buildCondition("Media.oacl", ACL_READ_PREVIEW, '<');
+        list($condition1) = $this->_buildCondition("Media.uacl", ACL_READ_PREVIEW, array('operand' => '>='));
+        $query['conditions'][] = $condition1;
+        list($condition2) = $this->_buildCondition("Media.oacl", ACL_READ_PREVIEW, array('operand' => '<'));
+        $query['conditions'][] = $condition2;
         break;
       case 'public':
-        $query['conditions'][] = $this->_buildCondition("Media.oacl", ACL_READ_PREVIEW, '>=');
+        list($condition) = $this->_buildCondition("Media.oacl", ACL_READ_PREVIEW, '>=');
+        $query['conditions'][] = $condition;
         break;
       default:
         Logger::err("Unknown visibility value $value");
+        $query['conditions'][] = "1 = 0";
     }
   }
 }
-?>

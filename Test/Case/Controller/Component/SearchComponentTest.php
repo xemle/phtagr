@@ -19,19 +19,19 @@ App::uses('SearchComponent', 'Controller/Component');
 if (!class_exists('TestControllerMock')) {
   App::import('File', 'TestControllerMock', array('file' => dirname(dirname(__FILE__)) . DS . 'TestControllerMock.php'));
 }
+
 /**
  * SearchComponent Test Case
  *
  */
 class SearchComponentTestCase extends CakeTestCase {
 	var $controllerMock;
-	var $uses = array('User', 'Group', 'Media', 'Tag', 'Category');
+	var $uses = array('User', 'Group', 'Media', 'Field');
 	var $components = array('Search');
 
 	public $fixtures = array('app.file', 'app.media', 'app.user', 'app.group', 'app.groups_media',
       'app.groups_user', 'app.option', 'app.guest', 'app.comment', 'app.my_file',
-      'app.tag', 'app.media_tag', 'app.category', 'app.categories_media', 'app.fields_media', 'app.field',
-      'app.location', 'app.locations_media', 'app.comment');
+      'app.fields_media', 'app.field', 'app.comment');
 
   /**
  * setUp method
@@ -46,23 +46,20 @@ class SearchComponentTestCase extends CakeTestCase {
     $this->bindCompontents();
 
     $this->Search->validate = array(
-      'categories' => array(
-        'wordRule' => array('rule' => array('custom', '/^[-]?\w+$/')),
-        'minRule' => array('rule' => array('minLength', 3))
-        ),
-      'cities' => array('rule' => array('maxLength', 30)),
-      'countries' => array('rule' => array('maxLength', 30)),
-      'groups' => 'notEmpty',
-      'locations' => array('rule' => array('maxLength', 30)),
+      'category' => array('rule' => array('maxLength', 30)),
+      'city' => array('rule' => array('maxLength', 30)),
+      'country' => array('rule' => array('maxLength', 30)),
+      'group' => array('rule' => 'notEmpty'),
+      'location' => array('rule' => array('maxLength', 30)),
+      'operand' => array('rule' => array('inList', array('AND', 'OR'))),
       'page' => 'numeric',
       'show' => array('rule' => array('inList', array(2, 12, 24, 64))),
       'sort' => array('rule' => array('inList', array('date', '-date', 'newest', 'changes', 'viewed', 'popularity', 'random', 'name'))),
-      'states' => array('rule' => array('maxLength', 30)),
-      'tags' => array(
+      'state' => array('rule' => array('maxLength', 30)),
+      'tag' => array(
         'wordRule' => array('rule' => array('custom', '/^[-]?\w+$/')),
         'minRule' => array('rule' => array('minLength', 3))
         ),
-      'tag_op' => array('rule' => array('inList', array('AND', 'OR'))),
       'user' => 'alphaNumeric', // disabled
       'visibility', // no validation
       'world' // no validation but disabled
@@ -159,7 +156,7 @@ class SearchComponentTestCase extends CakeTestCase {
     $result = $this->Search->getShow();
     $this->assertEqual($result, 'no validation');
 
-    // multple rules
+    // multple rules. Tag should have at least 3 chars
     $this->Search->addTag(array('he', 'the'));
     $result = $this->Search->getTags();
     $this->assertEqual($result, array('the'));
@@ -445,35 +442,32 @@ class SearchComponentTestCase extends CakeTestCase {
     // media4 is private
     $media4 = $this->Media->save($this->Media->create(array('name' => 'IMG_4567.JPG', 'user_id' => $userA['User']['id'])));
 
-    $skyTag = $this->Tag->save($this->Tag->create(array('name' => 'sky')));
-    $vacationTag = $this->Tag->save($this->Tag->create(array('name' => 'vacation')));
-    $natureTag = $this->Tag->save($this->Tag->create(array('name' => 'nature')));
+    $skyKeyword = $this->Field->save($this->Field->create(array('name' => 'keyword', 'data' => 'sky')));
+    $vacationKeyword = $this->Field->save($this->Field->create(array('name' => 'keyword', 'data' => 'vacation')));
+    $natureKeyword = $this->Field->save($this->Field->create(array('name' => 'keyword', 'data' => 'nature')));
 
-    $familyCategory = $this->Category->save($this->Category->create(array('name' => 'family')));
-    $friendsCategory = $this->Category->save($this->Category->create(array('name' => 'friends')));
+    $familyCategory = $this->Field->save($this->Field->create(array('name' => 'category', 'data' => 'family')));
+    $friendsCategory = $this->Field->save($this->Field->create(array('name' => 'category', 'data' => 'friends')));
 
-    // media1: Tags: sky, vacation. Category: family
+    // media1: Fields: sky, vacation. Category: family
     $this->Media->save(array(
         'Media' => array('id' => $media1['Media']['id']),
-        'Tag' => array('Tag' => array($skyTag['Tag']['id'], $vacationTag['Tag']['id'])),
-        'Category' => array('Category' => array($familyCategory['Category']['id'])),
+        'Field' => array('Field' => array($skyKeyword['Field']['id'], $vacationKeyword['Field']['id'], $familyCategory['Field']['id']))
         ));
-    // media2: Tags: sky, vacation, nature. Category: family, friends
+    // media2: Fields: sky, vacation, nature. Category: family, friends
     $this->Media->save(array(
         'Media' => array('id' => $media2['Media']['id']),
-        'Tag' => array('Tag' => array($skyTag['Tag']['id'], $vacationTag['Tag']['id'], $natureTag['Tag']['id'])),
-        'Category' => array('Category' => array($familyCategory['Category']['id'], $friendsCategory['Category']['id'])),
+        'Field' => array('Field' => array($skyKeyword['Field']['id'], $vacationKeyword['Field']['id'], $natureKeyword['Field']['id'], $familyCategory['Field']['id'], $friendsCategory['Field']['id']))
         ));
-    // media3: Tags: vacation, nature. Category:
+    // media3: Fields: vacation, nature. Category:
     $this->Media->save(array(
         'Media' => array('id' => $media3['Media']['id']),
-        'Tag' => array('Tag' => array($vacationTag['Tag']['id'], $natureTag['Tag']['id']))
+        'Field' => array('Field' => array($vacationKeyword['Field']['id'], $natureKeyword['Field']['id']))
         ));
-    // media4: Tags: vacation. Category: friends
+    // media4: Fields: vacation. Category: friends
     $this->Media->save(array(
         'Media' => array('id' => $media4['Media']['id']),
-        'Tag' => array('Tag' => array($vacationTag['Tag']['id'])),
-        'Category' => array('Category' => array($friendsCategory['Category']['id'])),
+        'Field' => array('Field' => array($vacationKeyword['Field']['id'], $friendsCategory['Field']['id'])),
         ));
 
     $this->mockUser($userB);
@@ -485,12 +479,12 @@ class SearchComponentTestCase extends CakeTestCase {
     $result = $this->Search->paginate();
     $this->assertEqual(array('IMG_1234.JPG'), Set::extract('/Media/name', $result));
 
-    // test with tag OR Operand
+    // test with keyword OR Operand
     $this->mockUser($userB);
     $this->Search->clear();
     $this->Search->addTag('sky');
     $this->Search->addTag('nature');
-    $this->Search->setTagOp('OR');
+    $this->Search->setOperand('OR');
     $this->Search->addCategory('-friends');
     $result = $this->Search->paginate();
     $this->assertEqual(array('IMG_1234.JPG', 'IMG_3456.JPG'), Set::extract('/Media/name', $result));
@@ -654,13 +648,13 @@ class SearchComponentTestCase extends CakeTestCase {
     $media2 = $this->Media->save($this->Media->create(array('name' => 'IMG_1232.JPG', 'user_id' => $user['User']['id'])));
     $media3 = $this->Media->save($this->Media->create(array('name' => 'IMG_1233.JPG', 'user_id' => $user['User']['id'])));
 
-    $city = $this->Media->Location->save($this->Media->Location->create(array('type' => LOCATION_CITY, 'name' => 'quebec')));
-    $state = $this->Media->Location->save($this->Media->Location->create(array('type' => LOCATION_STATE, 'name' => 'quebec')));
-    $country = $this->Media->Location->save($this->Media->Location->create(array('type' => LOCATION_COUNTRY, 'name' => 'canada')));
+    $city = $this->Media->Field->save($this->Media->Field->create(array('name' => 'city', 'data' => 'quebec')));
+    $state = $this->Media->Field->save($this->Media->Field->create(array('name' => 'state', 'data' => 'quebec')));
+    $country = $this->Media->Field->save($this->Media->Field->create(array('name' => 'country', 'data' => 'canada')));
 
-    $this->Media->save(array('Media' => array('id' => $media1['Media']['id']), 'Location' => array('Location' => array($city['Location']['id'], $country['Location']['id']))));
-    $this->Media->save(array('Media' => array('id' => $media2['Media']['id']), 'Location' => array('Location' => array($state['Location']['id'], $country['Location']['id']))));
-    $this->Media->save(array('Media' => array('id' => $media3['Media']['id']), 'Location' => array('Location' => array($country['Location']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media1['Media']['id']), 'Field' => array('Field' => array($city['Field']['id'], $country['Field']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media2['Media']['id']), 'Field' => array('Field' => array($state['Field']['id'], $country['Field']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media3['Media']['id']), 'Field' => array('Field' => array($country['Field']['id']))));
 
     $user = $this->User->findById($user['User']['id']);
 

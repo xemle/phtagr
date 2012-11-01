@@ -271,7 +271,7 @@ class MediaTestCase extends CakeTestCase {
     $this->Media->setAccessFlags($media, $admin);
 
     $requestData = array('Group' => array('names' => 'group1'));
-    $data = $this->Media->prepareMultiEditData($requestData, &$admin);
+    $data = $this->Media->prepareMultiEditData($requestData, $admin);
     $tmp = $this->Media->editMulti($media, $data);
     $this->Media->save($tmp);
     $media = $this->Media->findById($media['Media']['id']);
@@ -450,7 +450,7 @@ class MediaTestCase extends CakeTestCase {
     $this->assertEqual($result, array('vacation' => 2, 'sky' => 1, 'nature' => 1));
     $result = $this->Media->cloud($userNone, array('conditions' => array('Field.name' => 'keyword')));
     $this->assertEqual($result, array('vacation' => 1, 'sky' => 1));
-  }
+   }
 
   function testEditSingleWithFields() {
     $userA = $this->User->save($this->User->create(array('username' => 'UserA', 'role' => ROLE_USER)));
@@ -477,14 +477,14 @@ class MediaTestCase extends CakeTestCase {
     // UserD is not allowed to change anything
     $media = $this->Media->findById($media['Media']['id']);
     $data = array('Field' => array('keyword' => 'rose'));
-    $tmp = $this->Media->editSingle(&$media, &$data, &$userD);
+    $tmp = $this->Media->editSingle($media, $data, $userD);
     $this->assertEqual($tmp, false);
 
     // UserC can change only keywords
     $userC = $this->User->findById($userC['User']['id']);
     $media = $this->Media->findById($media['Media']['id']);
     $data = array('Field' => array('keyword' => '-flower, rose', 'category' => 'people'));
-    $tmp = $this->Media->editSingle(&$media, &$data, &$userC);
+    $tmp = $this->Media->editSingle($media, $data, $userC);
     $this->assertEqual(true, ($tmp['Media']['flag'] & MEDIA_FLAG_DIRTY) > 0);
     $this->assertEqual(count($tmp['Field']['Field']), 4);
     $fields = $this->Field->find('all', array('conditions' => array('id' => $tmp['Field']['Field'])));
@@ -496,7 +496,7 @@ class MediaTestCase extends CakeTestCase {
     $userB = $this->User->findById($userB['User']['id']);
     $media = $this->Media->findById($media['Media']['id']);
     $data = array('Field' => array('keyword' => 'tulip', 'category' => 'people, locals ', 'country' => 'italy', 'custom' => 'overwritten'));
-    $tmp = $this->Media->editSingle(&$media, &$data, &$userB);
+    $tmp = $this->Media->editSingle($media, $data, $userB);
     $this->assertEqual(true, ($tmp['Media']['flag'] & MEDIA_FLAG_DIRTY) > 0);
     $this->assertEqual(count($tmp['Field']['Field']), 5);
     $fields = $this->Field->find('all', array('conditions' => array('id' => $tmp['Field']['Field'])));
@@ -509,7 +509,7 @@ class MediaTestCase extends CakeTestCase {
     $media = $this->Media->findById($media['Media']['id']);
     $this->Media->Field->singleFields[] = 'custom2';
     $data = array('Field' => array('keyword' => 'john', 'category' => 'people', 'custom' => 'overwritten', 'custom2' => 'newValue'));
-    $tmp = $this->Media->editSingle(&$media, &$data, &$userA);
+    $tmp = $this->Media->editSingle($media, $data, $userA);
     $this->assertEqual(true, ($tmp['Media']['flag'] & MEDIA_FLAG_DIRTY) > 0);
     $this->assertEqual(count($tmp['Field']['Field']), 5);
     $fields = $this->Field->find('all', array('conditions' => array('id' => $tmp['Field']['Field'])));
@@ -545,16 +545,16 @@ class MediaTestCase extends CakeTestCase {
     // UserD is not allowed to change anything
     $media = $this->Media->findById($media['Media']['id']);
     $data = array('Field' => array('keyword' => 'rose'));
-    $data = $this->Media->prepareMultiEditData(&$data, &$userD);
-    $tmp = $this->Media->editMulti(&$media, &$data, &$userD);
+    $data = $this->Media->prepareMultiEditData($data, $userD);
+    $tmp = $this->Media->editMulti($media, $data, $userD);
     $this->assertEqual($tmp, false);
 
     // UserC can change only keywords
     $userC = $this->User->findById($userC['User']['id']);
     $media = $this->Media->findById($media['Media']['id']);
     $data = array('Field' => array('keyword' => '-flower, rose', 'category' => 'people'));
-    $data = $this->Media->prepareMultiEditData(&$data, &$userC);
-    $tmp = $this->Media->editMulti(&$media, &$data, &$userC);
+    $data = $this->Media->prepareMultiEditData($data, $userC);
+    $tmp = $this->Media->editMulti($media, $data, $userC);
     $this->assertEqual(true, ($tmp['Media']['flag'] & MEDIA_FLAG_DIRTY) > 0);
     $this->assertEqual(count($tmp['Field']['Field']), 4);
     $fields = $this->Field->find('all', array('conditions' => array('id' => $tmp['Field']['Field'])));
@@ -566,8 +566,8 @@ class MediaTestCase extends CakeTestCase {
     $userB = $this->User->findById($userB['User']['id']);
     $media = $this->Media->findById($media['Media']['id']);
     $data = array('Field' => array('keyword' => 'tulip', 'category' => 'people, locals ', 'country' => 'italy', 'custom' => 'overwritten'));
-    $data = $this->Media->prepareMultiEditData(&$data, &$userB);
-    $tmp = $this->Media->editMulti(&$media, &$data, &$userB);
+    $data = $this->Media->prepareMultiEditData($data, $userB);
+    $tmp = $this->Media->editMulti($media, $data, $userB);
     $this->assertEqual(true, ($tmp['Media']['flag'] & MEDIA_FLAG_DIRTY) > 0);
     $this->assertEqual(count($tmp['Field']['Field']), 7);
     $fields = $this->Field->find('all', array('conditions' => array('id' => $tmp['Field']['Field'])));
@@ -579,8 +579,8 @@ class MediaTestCase extends CakeTestCase {
     $userA = $this->User->findById($userA['User']['id']);
     $media = $this->Media->findById($media['Media']['id']);
     $data = array('Field' => array('keyword' => 'john', 'category' => 'people', 'custom' => 'overwritten', 'custom2' => 'newValue'));
-    $data = $this->Media->prepareMultiEditData(&$data, &$userA);
-    $tmp = $this->Media->editMulti(&$media, &$data, &$userA);
+    $data = $this->Media->prepareMultiEditData($data, $userA);
+    $tmp = $this->Media->editMulti($media, $data, $userA);
     $this->assertEqual(true, ($tmp['Media']['flag'] & MEDIA_FLAG_DIRTY) > 0);
     $this->assertEqual(count($tmp['Field']['Field']), 7);
     $fields = $this->Field->find('all', array('conditions' => array('id' => $tmp['Field']['Field'])));

@@ -39,7 +39,7 @@ class Media extends AppModel {
 
   public function beforeSave($options = array()) {
     parent::beforeSave();
-    $this->Field->createFields(&$this->data);
+    $this->Field->createFields($this->data);
     return true;
   }
 
@@ -872,7 +872,7 @@ class Media extends AppModel {
     if ($group) {
       $tmp['Group'] = $group['Group'];
     }
-    $fields = $this->Field->prepareMultiEditData(&$data);
+    $fields = $this->Field->prepareMultiEditData($data);
     if ($fields) {
       $tmp['Field'] = $fields['Field'];
     }
@@ -885,16 +885,16 @@ class Media extends AppModel {
   public function editMulti(&$media, &$data, &$user) {
     $tmp = array('Media' => array('id' => $media['Media']['id'], 'user_id' => $media['Media']['user_id']));
     if (!isset($media['Media']['canWriteMeta'])) {
-      $this->setAccessFlags(&$media, &$user);
+      $this->setAccessFlags($media, $user);
     }
 
     $fields = false;
     if ($media['Media']['canWriteCaption']) {
-      $fields = $this->Field->editMulti(&$media, &$data);
+      $fields = $this->Field->editMulti($media, $data);
     } else if ($media['Media']['canWriteMeta']) {
-      $fields = $this->Field->editMulti(&$media, &$data, array('keyword', 'category', 'sublocation', 'city', 'state', 'country'));
+      $fields = $this->Field->editMulti($media, $data, array('keyword', 'category', 'sublocation', 'city', 'state', 'country'));
     } else if ($media['Media']['canWriteTag']) {
-      $fields = $this->Field->editMulti(&$media, &$data, array('keyword'));
+      $fields = $this->Field->editMulti($media, $data, array('keyword'));
     }
     if ($fields) {
       $tmp['Field'] = $fields['Field'];
@@ -947,7 +947,7 @@ class Media extends AppModel {
   public function editSingle(&$media, &$data, &$user) {
     $tmp = array('Media' => array('id' => $media['Media']['id'], 'user_id' => $media['Media']['user_id']));
     if (!isset($media['Media']['canWriteMeta'])) {
-      $this->setAccessFlags(&$media, &$user);
+      $this->setAccessFlags($media, $user);
     }
     // handle fields
     if ($media['Media']['canWriteCaption']) {
