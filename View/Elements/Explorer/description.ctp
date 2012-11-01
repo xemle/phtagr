@@ -1,16 +1,10 @@
 <?php
   $this->Search->initialize();
   echo $this->element('Explorer/date', array('media' => $media));
-  $fields = array('tag' => array(), 'category' => array(), 'location' => array());
-  $fields = am($fields, Set::combine($media, '/Field/name', '/Field/data'));
-  foreach (array('sublocation', 'city', 'state', 'country') as $l) {
-    if (isset($fields[$l])) {
-      $fields['location'][] = $fields[$l];
-    }
-  }
-  if (count($fields['tag'])) {
+  $fields = $this->ImageData->getMediaFields($media);
+  if (count($fields['keyword'])) {
     echo $this->Html->tag('p',
-      __("Tags").' '.implode(', ', $this->ImageData->linkList('/explorer/tag', $fields['tag'])),
+      __("Tags").' '.implode(', ', $this->ImageData->linkList('/explorer/tag', $fields['keyword'])),
       array('class' => 'tag list', 'escape' => false));
   }
   if (count($fields['category'])) {

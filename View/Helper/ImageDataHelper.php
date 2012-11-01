@@ -387,8 +387,32 @@ class ImageDataHelper extends AppHelper {
     return $output;
   }
 
-  function _metaHabtm($data, $habtm) {
-    if (!count($data[$habtm])) {
+  /**
+   * Returns media fields as field name to field value array
+   *
+   * @param array $media Media model data
+   * @return array nameToValue array
+   */
+  function getMediaFields(&$media) {
+    $fields = array('keyword' => array(), 'category' => array(), 'location' => array());
+    $locations = array('sublocation', 'city', 'state', 'country');
+    if (!isset($media['Field'])) {
+      return $fields;
+    }
+    foreach ($media['Field'] as $field) {
+      if (!isset($fields[$field['name']])) {
+        $fields[$field['name']] = array();
+      }
+      $fields[$field['name']][] = $field['data'];
+      if (in_array($field['name'], $locations)) {
+        $fields['location'][] = $field['data'];
+      }
+    }
+    return $fields;
+  }
+
+  function _metaHabtm($data, $name, $values) {
+    if (!count($values)) {
       return false;
     }
 
@@ -396,11 +420,11 @@ class ImageDataHelper extends AppHelper {
     if ($this->action == 'user') {
       $base .= "/user/".$this->params['pass'][0];
     }
-    $base .= "/".strtolower($habtm);
+    $base .= "/".$name;
 
     $links = array();
-    foreach ($data[$habtm] as $assoc) {
-      $links[] = $this->Html->link($assoc['name'], "$base/{$assoc['name']}");
+    foreach ($values as $value) {
+      $links[] = $this->Html->link($value, "$base/$value");
     }
     return implode(', ', $links);
   }
@@ -524,16 +548,17 @@ class ImageDataHelper extends AppHelper {
     }
     $cells[] = array(__("Date"), $this->_metaDate($data));
 
-    if (count($data['Tag'])) {
-      $cells[] = array(__('Tags'), $this->_metaHabtm($data, 'Tag'));
+    $fields = $this->getMediaFields($data);
+    if (count($fields['keyword'])) {
+      $cells[] = array(__('Tags'), $this->_metaHabtm($data, 'tag', $fields['keyword']));
     }
-    if (count($data['Category'])) {
-      $cells[] = array(__('Categories'), $this->_metaHabtm($data, 'Category'));
+    if (count($fields['category'])) {
+      $cells[] = array(__('Categories'), $this->_metaHabtm($data, 'category', $fields['category']));
     }
 
     $locations = array();
-    if (count($data['Location'])) {
-      $locations[] = $this->_metaHabtm($data, 'Location');
+    if (count($fields['location'])) {
+      $locations[] = $this->_metaHabtm($data, 'location', $fields['location']);
     }
     if (isset($data['Media']['longitude']) && isset($data['Media']['latitude'])) {
       $locations[] = $this->geoLocation($data);
