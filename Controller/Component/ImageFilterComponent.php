@@ -364,10 +364,14 @@ class ImageFilterComponent extends BaseFilterComponent {
     // Associations to meta data: Tags, Categories, Locations
     foreach ($this->fieldMap as $field => $name) {
       $isList = $this->Media->Field->isListField($field);
-      if ($isList) {
-      $media['Field'][$field] = $this->_extractList($data, "iptc/IPTCApplication/$name", array());
+      $value = $this->_extract($data, "iptc/IPTCApplication/$name", array());
+      if (!$value) {
+        continue;
+      }
+      if (!$isList && is_array($value)) {
+        $media['Field'][$field] = $value[0];
       } else {
-        $media['Field'][$field] = $this->_extract($data, "iptc/IPTCApplication/$name");
+        $media['Field'][$field] = $value;
       }
     }
     return $media;
