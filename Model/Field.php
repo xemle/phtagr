@@ -50,9 +50,21 @@ class Field extends AppModel {
     return am($this->singleFields, $this->listFields);
   }
 
+  /**
+   * Find or create field by given name and values. Values are trimmed. Empty
+   * values are not considered.
+   *
+   * @param type $name Field name
+   * @param type $values string or array of string
+   * @return type array of ids
+   */
   public function createField($name, $values) {
     $ids = array();
     foreach ((array)$values as $value) {
+      $value = trim($value);
+      if (!$value) {
+        continue;
+      }
       $data = array('name' => $name, 'data' => $value);
       $field = $this->find('first', array('conditions' => $data));
       if (!$field) {

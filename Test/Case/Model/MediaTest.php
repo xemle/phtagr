@@ -517,6 +517,23 @@ class MediaTestCase extends CakeTestCase {
     $this->assertEqual($fieldValues, array('john', 'newValue', 'overwritten', 'people', 'swiss'));
   }
 
+  function testEditSingleWithEmptyFieldValues() {
+    $user = $this->User->save($this->User->create(array('username' => 'UserA', 'role' => ROLE_USER)));
+    $user = $this->User->findById($user['User']['id']);
+    $media = $this->Media->save($this->Media->create(array('name' => 'IMG_1234.jpg', 'user_id' => $user['User']['id'])));
+    $media = $this->Media->findById($media['Media']['id']);
+
+    // Precondition: No fields should be exist
+    $this->assertEqual(0, $this->Media->Field->find('count'));
+
+    // empty category and city should not trigger new fields
+    $data = array('Field' => array('keyword' => 'rose', 'category' => '', 'city' => ''));
+    $tmp = $this->Media->editSingle($media, $data, $user);
+
+    $allFields = $this->Media->Field->find('all');
+    $this->assertEqual(1, count($allFields));
+    $this->assertEqual(Set::extract('/Field/id', $allFields), Set::extract('/Field/Field', $tmp));
+  }
 
   function testEditMultiWithFields() {
     $userA = $this->User->save($this->User->create(array('username' => 'UserA', 'role' => ROLE_USER)));
