@@ -50,6 +50,7 @@ class SearchComponentTestCase extends CakeTestCase {
       'city' => array('rule' => array('maxLength', 30)),
       'country' => array('rule' => array('maxLength', 30)),
       'group' => array('rule' => 'notEmpty'),
+      'folder' => 'notEmpty',
       'location' => array('rule' => array('maxLength', 30)),
       'operand' => array('rule' => array('inList', array('AND', 'OR'))),
       'page' => 'numeric',
@@ -395,14 +396,14 @@ class SearchComponentTestCase extends CakeTestCase {
     $userA = $this->User->findById($userA['User']['id']);
     $userB = $this->User->findById($userB['User']['id']);
 
-    $media1 = $this->Media->save($this->Media->create(array('name' => 'IMG_1234.JPG', 'user_id' => $userB['User']['id'], 'gacl' => 97)));
+    $media1 = $this->Media->save($this->Media->create(array('name' => 'IMG_1234.JPG', 'user_id' => $userB['User']['id'], 'gacl' => 97, 'date' => date('Y-m-d h:i:s', time() - 1000))));
     $this->Media->save(array('Media' => array('id' => $media1['Media']['id']), 'Group' => array('Group' => array($groupA['Group']['id']))));
-    $media2 = $this->Media->save($this->Media->create(array('name' => 'IMG_2345.JPG', 'user_id' => $userB['User']['id'], 'gacl' => 97)));
+    $media2 = $this->Media->save($this->Media->create(array('name' => 'IMG_2345.JPG', 'user_id' => $userB['User']['id'], 'gacl' => 97, 'date' => date('Y-m-d h:i:s', time()))));
     $this->Media->save(array('Media' => array('id' => $media2['Media']['id']), 'Group' => array('Group' => array($groupA['Group']['id']))));
     $this->assertEqual(true, $media1['Media']['id'] < $media2['Media']['id']);
 
     $this->mockUser($userA);
-    $result = $this->Search->paginateMediaByCrumb($media1['Media']['id'], array('sort:newest'));
+    $result = $this->Search->paginateMediaByCrumb($media1['Media']['id'], array('sort:-date'));
     $this->assertEqual($result['Media']['name'], 'IMG_1234.JPG');
     // Check ACL
     $this->assertEqual($result['Media']['canWriteTag'], 1);
@@ -418,7 +419,7 @@ class SearchComponentTestCase extends CakeTestCase {
     $search = $this->ControllerMock->request->params['search'];
     $this->assertEqual($search['prevMedia'], false);
     $this->assertEqual($search['nextMedia'], $media2['Media']['id']);
-    $this->assertEqual($search['data'], array('sort' => 'newest'));
+    $this->assertEqual($search['data'], array('sort' => '-date'));
   }
 
   public function testExclusion() {
@@ -720,5 +721,28 @@ class SearchComponentTestCase extends CakeTestCase {
     $this->Search->addCity('-venice');
     $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
     $this->assertEqual($mediaIds, array($media3['Media']['id'], $media2['Media']['id'], $media1['Media']['id'], $media4['Media']['id']));
+  }
+
+  function testFolder() {
+    $user = $this->User->save($this->User->create(array('username' => 'user', 'role' => ROLE_USER)));
+    $uploadDir = $this->User->getRootDir($user);
+
+    $media1 = $this->Media->save($this->Media->create(array('name' => 'IMG_1231.JPG', 'user_id' => $user['User']['id'])));
+    $media2 = $this->Media->save($this->Media->create(array('name' => 'IMG_1232.JPG', 'user_id' => $user['User']['id'])));
+    $media3 = $this->Media->save($this->Media->create(array('name' => 'IMG_1233.JPG', 'user_id' => $user['User']['id'])));
+    $file1 = $this->Media->File->save($this->Media->File->create(array('media_id' => $media1['Media']['id'], 'path' => $uploadDir . '2006-01-22' . DS)));
+    $file2 = $this->Media->File->save($this->Media->File->create(array('media_id' => $media2['Media']['id'], 'path' => $uploadDir . '2012-11-02' . DS)));
+    $file3 = $this->Media->File->save($this->Media->File->create(array('media_id' => $media3['Media']['id'], 'path' => $uploadDir . '2012-11-02' . DS . 'post' . DS)));
+
+    $user = $this->User->findById($user['User']['id']);
+    $this->mockUser($user);
+
+    // Allow 'user' parameter
+    $this->Search->disabled = array();
+
+    $this->Search->setUser('user');
+    $this->Search->setFolder('2012-11-02');
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media2['Media']['id'], $media3['Media']['id']));
   }
 }

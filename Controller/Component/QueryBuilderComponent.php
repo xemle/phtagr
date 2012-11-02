@@ -31,7 +31,7 @@ class QueryBuilderComponent extends Component {
     'country' => array('field' => 'Field.data', 'with' => array('Field.name' => 'country')),
     'created_from' => array('field' => 'Media.created', 'operand' => '>='),
     'east' => array('field' => 'Media.longitude', 'operand' => '<='),
-    'folder' => 'File.path',
+    'folder' => array('field' => 'File.path', 'custom' => '_buildFolder'),
     'from' => array('field' => 'Media.date', 'operand' => '>='),
     'group' => 'Group.name',
     'location' => array('field' => 'Field.data', 'with' => array('Field.name' => array('sublocation', 'city', 'state', 'country'))),
@@ -139,7 +139,7 @@ class QueryBuilderComponent extends Component {
 
   private function _addCondition(&$modelToConditions, $field, &$condition, $count = 1) {
     $model = $this->_getModelName($field);
-    if (!$model) {
+    if (!$model || !$condition) {
       return;
     } else if (!isset($modelToConditions[$model])) {
       $modelToConditions[$model] = array('conditions' => array(), 'count' => 0);
@@ -155,9 +155,9 @@ class QueryBuilderComponent extends Component {
    * @return array Array of conditions sorted by model
    */
   private function _buildConditions(&$params) {
-    $conditions = array();
+    $modelToConditions = array();
     if (!count($params)) {
-      return $conditions;
+      return $modelToConditions;
     }
     foreach ($params as $name => $value) {
       if (!isset($this->conditionRules[$name])) {
@@ -168,15 +168,19 @@ class QueryBuilderComponent extends Component {
       $rule = $this->conditionRules[$name];
       if (!is_array($rule)) {
         list($condition, $count) = $this->_buildCondition($rule, $value);
-        $this->_addCondition($conditions, $rule, $condition, $count);
+        $this->_addCondition($modelToConditions, $rule, $condition, $count);
       } else {
-        $rule = am(array('field' => false, 'operand' => '=', 'with' => false), $rule);
+        $rule = am(array('field' => false, 'operand' => '=', 'with' => false, 'custom' => false), $rule);
         if (!$rule['field']) {
            Logger::err("Field in rule is missing for parameter name '$name'");
            Logger::debug($rule);
            continue;
-        } else if ($rule['with']) {
+        } else if ($rule['custom'] && method_exists($this, $rule['custom'])) {
+          list($condition, $count) = call_user_func_array(array($this, $rule['custom']), array(&$params, $value));
+        } else {
           list($condition, $count) = $this->_buildCondition($rule['field'], $value, $rule);
+        }
+        if ($rule['with']) {
           if (is_array($rule['with'])) {
             $withConditions = array();
             foreach ($rule['with'] as $field => $value) {
@@ -188,18 +192,15 @@ class QueryBuilderComponent extends Component {
             } else {
               $flat = $withConditions[0];
             }
-            $combined = array('AND' => am($condition, $flat));
+            $condition = array('AND' => am($condition, $flat));
           } else {
-            $combined = array('AND' => am($condition, $rule['with']));
+            $condition = array('AND' => am($condition, $rule['with']));
           }
-          $this->_addCondition($conditions, $rule['field'], $combined, $count);
-        } else {
-          list($condition, $count) = $this->_buildCondition($rule['field'], $value, $rule);
-          $this->_addCondition($conditions, $rule['field'], $condition, $count);
         }
+        $this->_addCondition($modelToConditions, $rule['field'], $condition, $count);
       }
     }
-    return $conditions;
+    return $modelToConditions;
   }
 
   /**
@@ -325,6 +326,43 @@ class QueryBuilderComponent extends Component {
       $conditions = array("COALESCE($counterName, 0) >= " . 1);
     } else if ($operand === 'NOT') {
       $conditions = array("COALESCE($counterName, 0) = " . 0);
+    } else if ($operand === 'ANY') {
+      $conditions = array();
+    } else {
+      Logger::err("Unknown operand $operand");
+    }
+    return array('joins' => array($join), 'conditions' => $conditions, '_counters' => array($counterName));
+  }
+
+
+  private function _buildHasManyStatement($Model, $assoc, $conditions, $count, $operand) {
+    if (!isset($Model->{$assoc})) {
+      Logger::err("Could not access $assoc");
+    }
+    $this->counter++;
+    $table = $Model->{$assoc}->tablePrefix.$Model->{$assoc}->table;
+    $alias = $Model->{$assoc}->alias;
+    $joinAlias = $Model->{$assoc}->alias . $this->counter;
+    $key = $Model->{$assoc}->primaryKey;
+
+    $config = $Model->hasMany[$assoc];
+    $foreignKey = $config['foreignKey'];
+    $modelAlias = $Model->alias;
+    $modelKey = $Model->primaryKey;
+    $counterName = "{$assoc}Count{$this->counter}";
+
+    $join = "LEFT JOIN ("
+            ." SELECT `$alias`.`$foreignKey`,COUNT(*) as $counterName"
+            ." FROM `$table` AS `$alias`"
+            ." WHERE " . join(' AND ', $this->_buildSqlConditions($conditions))
+            ." GROUP BY `$alias`.`$foreignKey`) AS $joinAlias ON `$joinAlias`.`$foreignKey` = `$modelAlias`.`$modelKey`";
+
+    if ($operand === 'AND') {
+      $conditions = array("COALESCE($counterName, 0) >= " . $count);
+    } else if ($operand === 'OR') {
+      $conditions = array("COALESCE($counterName, 0) >= " . 1);
+    } else if ($operand === 'NOT') {
+      $conditions = array("COALESCE($counterName, 0) = " . 0);
     } else if ($operand !== 'ANY') {
       Logger::err("Unknown operand $operand");
     }
@@ -335,17 +373,27 @@ class QueryBuilderComponent extends Component {
     $data = $Model->hasAndBelongsToMany;
     if (isset($Model->hasAndBelongsToMany[$assoc])) {
       return 'HABTM';
+    } else if (isset($Model->belongsTo[$assoc])) {
+      return 'belongsTo';
+    } else if (isset($Model->hasOne[$assoc])) {
+      return 'hasOne';
+    } else if (isset($Model->hasMany[$assoc])) {
+      return 'hasMany';
     }
     return false;
   }
 
-  private function _buildJoins($conditions, $operand = 'AND') {
-    $Model =& $this->controller->Media;
-    $query = array();
-    foreach ($conditions as $assoc => $assocConditions) {
-      $type = $this->_getAssociationType($Model, $assoc);
+  private function _buildJoins($modelToConditions, $operand = 'AND') {
+    $Media =& $this->controller->Media;
+    $query = array('conditions' => array());
+    foreach ($modelToConditions as $modelAlias => $modelConditions) {
+      $type = $this->_getAssociationType($Media, $modelAlias);
       if ($type == 'HABTM') {
-        $query = array_merge_recursive($query, $this->_buildHABTMStatement($Model, $assoc, $assocConditions['conditions'], $assocConditions['count'], $operand));
+        $query = array_merge_recursive($query, $this->_buildHABTMStatement($Media, $modelAlias, $modelConditions['conditions'], $modelConditions['count'], $operand));
+      } else if ($type == 'hasMany') {
+        $query = array_merge_recursive($query, $this->_buildHasManyStatement($Media, $modelAlias, $modelConditions['conditions'], $modelConditions['count'], $operand));
+      } else {
+        $query['conditions'] = $this->_buildSqlConditions($modelConditions['conditions']);
       }
     }
     return $query;
@@ -514,24 +562,32 @@ class QueryBuilderComponent extends Component {
     $query = array_merge_recursive($query, $aclQuery);
   }
 
-  private function buildFolder(&$data, &$query, $value) {
+  /**
+   * Add condition for folder query
+   *
+   * @param type $data query data
+   * @param type $value value of folder
+   * @return type array of condition and count
+   */
+  private function _buildFolder(&$data, $value) {
     if (!isset($data['user']) || $value === false) {
-      return;
+      return array(false, false);
     }
     $me = $this->controller->getUser();
     if ($data['user'] != $me['User']['username']) {
       $user = $this->controller->User->find('first', array('conditions' => array('User.username' => $data['user'], 'User.role >=' => ROLE_USER), 'fields' => 'User.id', 'recursive' => -1));
       if (!$user) {
-        return;
+        return array(false, false);
       }
-      $userId = $user['User']['id'];
+      $rootDir = $this->controller->User->getRootDir($user, false);
     } else {
-      $userId = $this->controller->getUserId();
+      $rootDir = $this->controller->User->getRootDir($me, false);
     }
-    $uploadPath = USER_DIR . $userId . DS . 'files' . DS . $value . '%';
-    $query['conditions'][] = $this->_buildCondition("File.path", $uploadPath, array('operand' => 'LIKE'));
-    $query['conditions'][] = "FileCount > 0";
-    $query['_counts'][] = "FileCount";
+    if (!$rootDir) {
+      Logger::err("Root dir is empty. Invalidate query");
+      $conditions[] = '0 = 1';
+    }
+    return $this->_buildCondition('File.path', $rootDir . $value . '%', array('operand' => 'LIKE'));
   }
 
   private function _buildVisibility(&$data, &$query, $value) {

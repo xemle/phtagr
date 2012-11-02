@@ -216,17 +216,19 @@ class User extends AppModel
     return $data;
   }
 
-  public function getRootDir($data) {
+  public function getRootDir($data, $create = true) {
     if (!isset($data['User']['id'])) {
       Logger::err("Data does not contain user's id");
       return false;
     }
 
     $rootDir = USER_DIR.$data['User']['id'].DS.'files'.DS;
-    $folder = new Folder();
-    if (!$folder->create($rootDir)) {
-      Logger::err("Could not create users root directory '$fileDir'");
-      return false;
+    if ($create) {
+      $folder = new Folder();
+      if (!$folder->create($rootDir)) {
+        Logger::err("Could not create users root directory '$fileDir'");
+        return false;
+      }
     }
     return $rootDir;
   }

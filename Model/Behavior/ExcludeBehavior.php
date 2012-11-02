@@ -302,6 +302,7 @@ class ExcludeBehavior extends ModelBehavior {
   }
 
   public function beforeFind(Model $Model, $query) {
+    return $query;
     $exclude = false;
     if (isset($query['conditions']['exclude']) &&
       is_array($query['conditions']['exclude'])) {
