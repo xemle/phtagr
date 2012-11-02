@@ -318,7 +318,7 @@ class QueryBuilderComponent extends Component {
             ." SELECT `$joinAlias`.`$foreignKey`,COUNT(*) as $counterName"
             ." FROM `$joinTable` AS `$joinAlias`, `$table` AS `$alias`"
             ." WHERE `$joinAlias`.`$associationForeignKey` = `$alias`.`$key`"
-            ." AND (" . join(' AND ', $this->_buildSqlConditions($conditions)) . ")"
+            ." AND (" . join(' OR ', $this->_buildSqlConditions($conditions)) . ")"
             ." GROUP BY `$joinAlias`.`$foreignKey`) AS $joinAlias ON `$joinAlias`.`$foreignKey` = `$modelAlias`.`$modelKey`";
 
     if ($operand === 'AND') {
@@ -355,7 +355,7 @@ class QueryBuilderComponent extends Component {
     $join = "$joinType JOIN ("
             ." SELECT `$alias`.`$foreignKey`,COUNT(*) as $counterName"
             ." FROM `$table` AS `$alias`"
-            ." WHERE " . join(' AND ', $this->_buildSqlConditions($conditions))
+            ." WHERE " . join(' OR ', $this->_buildSqlConditions($conditions))
             ." GROUP BY `$alias`.`$foreignKey`) AS $joinAlias ON `$joinAlias`.`$foreignKey` = `$modelAlias`.`$modelKey`";
 
     if ($operand === 'AND') {
@@ -409,7 +409,7 @@ class QueryBuilderComponent extends Component {
 
     $conditionsByModel = $this->_buildConditions($data);
     // If operand is OR we require a values. Therefore, we can use a INNER JOIN
-    $joinType = $operand === 'OR' ? 'INNER' : 'LEFT';
+    $joinType = $operand === 'ANY' ? 'LEFT' : 'INNER';
     $query = $this->_buildJoins($conditionsByModel, $joinType, $operand);
     if (count($exclude)) {
       $conditionsByModel = $this->_buildConditions($exclude);
