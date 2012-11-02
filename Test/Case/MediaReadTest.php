@@ -257,6 +257,35 @@ class MediaReadTestCase extends CakeTestCase {
     $this->assertEqual($media['Media']['longitude'], 8.89242);
   }
 
+  public function testImageRead() {
+    copy(RESOURCES . 'IMG_7795.JPG', TEST_FILES_TMP . 'IMG_7795.JPG');
+    $this->Controller->FilterManager->readFiles(TEST_FILES_TMP, false);
+    $count = $this->Media->find('count');
+    $this->assertEqual($count, 1);
+
+    $media = $this->Media->find('first');
+    $this->assertEqual($media['Media']['date'], '2009-02-14 14:36:34');
+    $this->assertEqual($media['Media']['orientation'], 1);
+    $this->assertEqual($media['Media']['duration'], -1);
+    $this->assertEqual($media['Media']['model'], 'Canon PowerShot A570 IS');
+    $this->assertEqual($media['Media']['iso'], 80);
+    $this->assertEqual($media['Media']['shutter'], 15);
+    $this->assertEqual($media['Media']['aperture'], 7.1);
+    $this->assertEqual($media['Media']['latitude'], 14.3593);
+    $this->assertEqual($media['Media']['longitude'], 100.567);
+
+    $keywords = Set::extract('/Field[name=keyword]/data', $media);
+    sort($keywords);
+    $this->assertEqual($keywords, array('light', 'night', 'temple'));
+    $categories = Set::extract('/Field[name=category]/data', $media);
+    sort($categories);
+    $this->assertEqual($categories, array('asia', 'vacation'));
+    $this->assertEqual(Set::extract('/Field[name=sublocation]/data', $media), array('wat ratburana'));
+    $this->assertEqual(Set::extract('/Field[name=city]/data', $media), array('ayutthaya'));
+    $this->assertEqual(Set::extract('/Field[name=state]/data', $media), array('ayutthaya'));
+    $this->assertEqual(Set::extract('/Field[name=country]/data', $media), array('thailand'));
+  }
+
   public function testVideoRead() {
     copy(RESOURCES . 'MVI_7620.OGG', TEST_FILES_TMP . 'MVI_7620.OGG');
     copy(RESOURCES . 'MVI_7620.THM', TEST_FILES_TMP . 'MVI_7620.THM');

@@ -25,8 +25,8 @@ class ImageFilterComponent extends BaseFilterComponent {
   var $fieldMap = array(
       'keyword' => 'Keywords',
       'category' => 'SupplementalCategories',
-      'sublocation' => 'Sub-Location',
-      'city' => 'city',
+      'sublocation' => 'Sub-location',
+      'city' => 'City',
       'state' => 'Province-State',
       'country' => 'Country-PrimaryLocationName'
       );
@@ -609,7 +609,7 @@ class ImageFilterComponent extends BaseFilterComponent {
    *        exists. Default value is null.
    * @return The hash value or the default value, id hash key is not set
    */
-  public function _extract($data, $key, $default = null) {
+  public function _extract(&$data, $key, $default = null) {
     $paths = explode('/', trim($key, '/'));
     $result = $data;
     foreach ($paths as $p) {
@@ -621,12 +621,12 @@ class ImageFilterComponent extends BaseFilterComponent {
     return $result;
   }
 
-  function _extractList($data, $key, $default = array()) {
+  function _extractList(&$data, $key, $default = array()) {
     $value = $this->_extract($data, $key);
     if (!$value) {
       return $default;
     }
-    $values = array_unique(preg_split('/\s+,\s+/', trim($value)));
+    $values = array_unique(preg_split('/\s*,\s*/', trim($value)));
     return $values;
   }
 
