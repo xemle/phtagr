@@ -180,21 +180,15 @@ class ExplorerController extends AppController
     }
     $sqlNeedle = Sanitize::escape($needle) . '%';
 
-    $tags = Set::extract('/Tag/name', $this->Media->Tag->find(
-      'all', array('conditions' => array("Tag.name like" => $sqlNeedle), 'recursive' => 0, 'limit' => 10
-      )));
+    $tags = $this->Media->Field->complete('keyword', $needle);
     foreach ($tags as $tag) {
       $this->request->data[] = 'tag:' . $prefix . $tag;
     }
-    $categories = Set::extract('/Category/name', $this->Media->Category->find(
-      'all', array('conditions' => array("Category.name like" => $sqlNeedle), 'recursive' => 0, 'limit' => 10
-      )));
+    $categories = $this->Media->Field->complete('category', $needle);
     foreach ($categories as $category) {
       $this->request->data[] = 'category:' . $prefix . $category;
     }
-    $locations = array_unique(Set::extract('/Location/name', $this->Media->Location->find(
-      'all', array('conditions' => array("Location.name like" => $sqlNeedle), 'recursive' => 0, 'limit' => 10
-      ))));
+    $locations = $this->Media->Field->complete(array('sublocation', 'city', 'state', 'country'), $needle);
     foreach ($locations as $location) {
       $this->request->data[] = 'location:' . $prefix . $location;
     }
@@ -242,53 +236,17 @@ class ExplorerController extends AppController
     }
     switch ($type) {
       case 'tag':
-        $data = $this->Media->Tag->find('all', array(
-          'conditions' => array('name LIKE' => $normalized.'%'),
-          'limit' => 10
-          ));
-        $result = Set::extract('/Tag/name', $data);
-        break;
-      case 'category':
-        $data = $this->Media->Category->find('all', array(
-          'conditions' => array('name LIKE' => $normalized.'%'),
-          'limit' => 10
-          ));
-        $result = Set::extract('/Category/name', $data);
+        $result = $this->Media->Field->complete('keyword', $normalized);
         break;
       case 'location':
-        $data = $this->Media->Location->find('all', array(
-          'conditions' => array('name LIKE' => $normalized.'%'),
-          'limit' => 10
-          ));
-        $result = Set::extract('/Location/name', $data);
+        $result = $this->Media->Field->complete(array('sublocation', 'city', 'state', 'country'), $normalized);
         break;
+      case 'category':
       case 'city':
-        $data = $this->Media->Location->find('all', array(
-          'conditions' => array('name LIKE' => $normalized.'%', 'type' => LOCATION_CITY),
-          'limit' => 10
-          ));
-        $result = Set::extract('/Location/name', $data);
-        break;
       case 'sublocation':
-        $data = $this->Media->Location->find('all', array(
-          'conditions' => array('name LIKE' => $normalized.'%', 'type' => LOCATION_SUBLOCATION),
-          'limit' => 10
-          ));
-        $result = Set::extract('/Location/name', $data);
-        break;
       case 'state':
-        $data = $this->Media->Location->find('all', array(
-          'conditions' => array('name LIKE' => $normalized.'%', 'type' => LOCATION_STATE),
-          'limit' => 10
-          ));
-        $result = Set::extract('/Location/name', $data);
-        break;
       case 'country':
-        $data = $this->Media->Location->find('all', array(
-          'conditions' => array('name LIKE' => $normalized.'%', 'type' => LOCATION_COUNTRY),
-          'limit' => 10
-          ));
-        $result = Set::extract('/Location/name', $data);
+        $result = $this->Media->Field->complete($type, $normalized);
         break;
       case 'group':
         $data = $this->Media->Group->find('all', array(
@@ -346,13 +304,8 @@ class ExplorerController extends AppController
   public function query() {
     if (!empty($this->request->data)) {
       $this->Search->addTags(preg_split('/\s*,\s*/', trim($this->request->data['Media']['tags'])));
-      $this->Search->setTagOp($this->request->data['Media']['tag_op']);
-
       $this->Search->addCategories(preg_split('/\s*,\s*/', trim($this->request->data['Media']['categories'])));
-      $this->Search->setCategoryOp($this->request->data['Media']['category_op']);
-
       $this->Search->addLocations(preg_split('/\s*,\s*/', trim($this->request->data['Media']['locations'])));
-      $this->Search->setLocationOp($this->request->data['Media']['location_op']);
       $this->Search->setOperand($this->request->data['Media']['operand']);
 
       $this->Search->setFrom($this->request->data['Media']['from']);

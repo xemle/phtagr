@@ -242,4 +242,19 @@ class Field extends AppModel {
       return false;
     }
   }
+
+  /**
+   * Returns a list of values which start with given prefix
+   *
+   * @param $type Field name(s) as string or array
+   * @param string $start Start value
+   * @return Return complete values
+   */
+  public function complete($type, $prefix, $max = 10) {
+    $result = $this->find('all', array(
+        'conditions' => array('Field.name' => $type, 'Field.data LIKE' => $prefix.'%'),
+        'limit' => $max,
+        'recursive' => -1));
+    return Set::extract('/Field/data', $result);
+  }
 }
