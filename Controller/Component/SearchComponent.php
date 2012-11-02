@@ -45,7 +45,7 @@ class SearchComponent extends Component
     'from' => array('rule' => array('custom', '/^\d{4}-\d{2}-\d{2}([ T]\d{2}:\d{2}:\d{2})?$/')),
     'folder' => 'notEmpty',
     'field_value' => array('rule' => array('notEmpty'), 'multiple' => true),
-    'groups' => 'notEmpty',
+    'group' => 'notEmpty',
     'key' => false,
     'media' => 'numeric',
     'name' => 'notEmpty',

@@ -721,10 +721,20 @@ class Media extends AppModel {
    * @return Count of media which are assigned to the given groups
    */
   public function countByGroupId($groupIds) {
-    $this->unbindModel(array('belongsTo' => array('Group')));
-    return $this->find('count', array(
-      'conditions' => array('Group.id' => $groupIds),
-      'joins' => array("JOIN `{$this->tablePrefix}groups` AS `Group` ON `Media`.`group_id` = `Group`.`id`")));
+    $config = $this->hasAndBelongsToMany['Group'];
+    $table = $config['joinTable'];
+    $alias = $config['with'];
+    $foreignKey = $config['foreignKey'];
+    $associationForeignKey = $config['associationForeignKey'];
+
+    $result = $this->find('count', array(
+        'conditions' => array("{$alias}.{$associationForeignKey}" => $groupIds),
+        'joins' => array(array(
+          'table' => $table,
+          'alias' => $alias,
+          'conditions' => array("`{$alias}`.`{$foreignKey}` = `{$this->alias}`.`{$this->primaryKey}`")
+        ))));
+    return $result;
   }
 
   /**
