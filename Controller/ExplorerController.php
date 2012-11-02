@@ -296,7 +296,7 @@ class ExplorerController extends AppController
     }
 
     if ($quicksearch) {
-      $this->request->data = $this->Search->quicksearch($quicksearch, 6);
+      $this->request->data = $this->Search->quicksearch($quicksearch, 12);
     }
     $this->set('quicksearch', $quicksearch);
   }

@@ -713,10 +713,12 @@ class SearchComponent extends Component
     $this->controller->Media->Field->Behaviors->attach('Similar');
     $values = array();
     foreach ($words as $word) {
-      $similarValues = Set::extract('/Field/data', $this->controller->Media->Field->similar($word, 'data'));
+      $similarValues = Set::extract('/Field/data', $this->controller->Media->Field->similar($word, 'data', 0.5));
       $values = am($values, $similarValues);
     }
-
+    if (!$values) {
+      return array();
+    }
     $this->addFieldValue($values);
     $this->setOperand('OR');
     $this->setShow($show);

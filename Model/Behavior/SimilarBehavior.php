@@ -88,24 +88,28 @@ class SimilarBehavior extends ModelBehavior {
    * @param field Field name to search
    * @return array of model data, ordered by relevance. Highest first.
    */
-  public function similar(&$Model, $searchTerm, $field = 'name') {
+  public function similar(&$Model, $searchTerm, $field = 'name', $similarity = 0.3) {
     // Comparison is expensive. So cut long search terms
     if (strlen($searchTerm) > 32) {
       $searchTerm = substr($searchTerm, 0, 32);
     }
     $all = $Model->find('all', array('recursive' => -1));
     if (strlen($searchTerm) < 3) {
-      return $all;
+      return array($searchTerm);
     }
 
     $searchTerm = strtolower(trim($searchTerm));
-    if (strlen($searchTerm) > 6) {
-      $searchTokensA = $this->_tokenizeAndCount($searchTerm, 5);
-      $searchTokensB = $this->_tokenizeAndCount($searchTerm, 3);
-    } else {
-      $searchTokensA = $this->_tokenizeAndCount($searchTerm, 3);
-      $searchTokensB = $this->_tokenizeAndCount($searchTerm, 2);
+    $lenSearchTerm = strlen($searchTerm);
+    $lenA = 5;
+    $lenB = 3;
+    if ($lenSearchTerm < 8) {
+      $lenA = 3;
+      $lenB = 2;
     }
+    $searchTokensA = $this->_tokenizeAndCount($searchTerm, $lenA);
+    $searchTokensB = $this->_tokenizeAndCount($searchTerm, $lenB);
+    $maxA = $lenSearchTerm - $lenA + 1;
+    $maxB = $lenSearchTerm - $lenB + 1;
 
     $match = array();
     foreach ($all as $index => $data) {
@@ -113,12 +117,18 @@ class SimilarBehavior extends ModelBehavior {
       $matchesA = $this->_evaluate($text, $searchTokensA);
       $matchesB = $this->_evaluate($text, $searchTokensB);
       if ($matchesA > 0 || $matchesB > 1) {
-        $match[$index] = ($matchesA + 1) * ($matchesB + 1);
+        $weight = ($lenSearchTerm / strlen($text));
+        $rating = (0.4 * $matchesA / $maxA) + (0.6 * $matchesB / $maxB);
+        $match[$index] = $weight * $rating;
       }
     }
     arsort($match);
     $result = array();
     foreach ($match as $index => $levenshtein) {
+      if ($levenshtein < $similarity) {
+        // List is ordered by levenshtein
+        break;
+      }
       $result[] = $all[$index];
     }
     return $result;
