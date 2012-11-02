@@ -181,27 +181,17 @@ class SystemController extends AppController {
   }
 
   public function deleteUnusedMetaData($delete = '') {
-    $this->Media->Tag->bindModel(array('hasAndBelongsToMany' => array('Media')), false);
-    $this->Media->Tag->Behaviors->attach('DeleteUnused', array('relatedHabtm' => 'Media'));
-
-    $this->Media->Category->bindModel(array('hasAndBelongsToMany' => array('Media')), false);
-    $this->Media->Category->Behaviors->attach('DeleteUnused', array('relatedHabtm' => 'Media'));
-
-    $this->Media->Location->bindModel(array('hasAndBelongsToMany' => array('Media')), false);
-    $this->Media->Location->Behaviors->attach('DeleteUnused', array('relatedHabtm' => 'Media'));
+    $this->Media->Field->bindModel(array('hasAndBelongsToMany' => array('Media')), false);
+    $this->Media->Field->Behaviors->attach('DeleteUnused', array('relatedHabtm' => 'Media'));
 
     if ($delete == 'delete') {
-      $this->Media->Tag->deleteAllUnused();
-      $this->Media->Location->deleteAllUnused();
-      $this->Media->Category->deleteAllUnused();
+      $this->Media->Field->deleteAllUnused();
       $this->Session->setFlash(__("All unused meta data are deleted"));
     }
 
-    $unusedTagCount = count($this->Media->Tag->findAllUnused());
-    $unusedCategoryCount = count($this->Media->Category->findAllUnused());
-    $unusedLocationCount = count($this->Media->Location->findAllUnused());
+    $unusedFieldCount = count($this->Media->Field->findAllUnused());
 
-    $this->request->data = compact('unusedTagCount', 'unusedCategoryCount', 'unusedLocationCount');
+    $this->request->data = compact('unusedFieldCount');
   }
 
   public function view() {
