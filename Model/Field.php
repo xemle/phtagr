@@ -135,7 +135,6 @@ class Field extends AppModel {
    *   )
    * </code>
    */
-
   function prepareMultiEditData(&$data) {
     if (!isset($data['Field'])) {
        return false;

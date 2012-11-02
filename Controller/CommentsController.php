@@ -21,7 +21,7 @@ App::uses('CakeEmail', 'Network/Email');
 class CommentsController extends AppController
 {
   var $name = 'Comments';
-  var $uses = array('Comment', 'Media', 'Tag');
+  var $uses = array('Comment', 'Media');
   var $helpers = array('Html', 'Time', 'Text', 'Form', 'Rss', 'Paginator');
   var $components = array('Captcha');
 
