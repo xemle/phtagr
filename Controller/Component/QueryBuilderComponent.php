@@ -294,7 +294,7 @@ class QueryBuilderComponent extends Component {
     return $result;
   }
 
-  private function _buildHABTMStatement($Model, $assoc, $conditions, $count, $operand) {
+  private function _buildHABTMStatement($Model, $assoc, $joinType, $conditions, $count, $operand) {
     if (!isset($Model->{$assoc})) {
       Logger::err("Could not access $assoc");
     }
@@ -314,7 +314,7 @@ class QueryBuilderComponent extends Component {
     $modelKey = $Model->primaryKey;
     $counterName = "{$assoc}Count{$this->counter}";
 
-    $join = "LEFT JOIN ("
+    $join = "$joinType JOIN ("
             ." SELECT `$joinAlias`.`$foreignKey`,COUNT(*) as $counterName"
             ." FROM `$joinTable` AS `$joinAlias`, `$table` AS `$alias`"
             ." WHERE `$joinAlias`.`$associationForeignKey` = `$alias`.`$key`"
@@ -336,7 +336,7 @@ class QueryBuilderComponent extends Component {
   }
 
 
-  private function _buildHasManyStatement($Model, $assoc, $conditions, $count, $operand) {
+  private function _buildHasManyStatement($Model, $assoc, $joinType, $conditions, $count, $operand) {
     if (!isset($Model->{$assoc})) {
       Logger::err("Could not access $assoc");
     }
@@ -352,7 +352,7 @@ class QueryBuilderComponent extends Component {
     $modelKey = $Model->primaryKey;
     $counterName = "{$assoc}Count{$this->counter}";
 
-    $join = "LEFT JOIN ("
+    $join = "$joinType JOIN ("
             ." SELECT `$alias`.`$foreignKey`,COUNT(*) as $counterName"
             ." FROM `$table` AS `$alias`"
             ." WHERE " . join(' AND ', $this->_buildSqlConditions($conditions))
@@ -384,15 +384,15 @@ class QueryBuilderComponent extends Component {
     return false;
   }
 
-  private function _buildJoins($modelToConditions, $operand = 'AND') {
+  private function _buildJoins($modelToConditions, $joinType, $operand) {
     $Media =& $this->controller->Media;
     $query = array('conditions' => array());
     foreach ($modelToConditions as $modelAlias => $modelConditions) {
       $type = $this->_getAssociationType($Media, $modelAlias);
       if ($type == 'HABTM') {
-        $query = array_merge_recursive($query, $this->_buildHABTMStatement($Media, $modelAlias, $modelConditions['conditions'], $modelConditions['count'], $operand));
+        $query = array_merge_recursive($query, $this->_buildHABTMStatement($Media, $modelAlias, $joinType, $modelConditions['conditions'], $modelConditions['count'], $operand));
       } else if ($type == 'hasMany') {
-        $query = array_merge_recursive($query, $this->_buildHasManyStatement($Media, $modelAlias, $modelConditions['conditions'], $modelConditions['count'], $operand));
+        $query = array_merge_recursive($query, $this->_buildHasManyStatement($Media, $modelAlias, $joinType, $modelConditions['conditions'], $modelConditions['count'], $operand));
       } else {
         $query['conditions'] = $this->_buildSqlConditions($modelConditions['conditions']);
       }
@@ -408,16 +408,19 @@ class QueryBuilderComponent extends Component {
     $operand = $this->_getParam($data, 'operand', $defaultOperand);
 
     $conditionsByModel = $this->_buildConditions($data);
-    $query = $this->_buildJoins($conditionsByModel, $operand);
+    // If operand is OR we require a values. Therefore, we can use a INNER JOIN
+    $joinType = $operand === 'OR' ? 'INNER' : 'LEFT';
+    $query = $this->_buildJoins($conditionsByModel, $joinType, $operand);
     if (count($exclude)) {
       $conditionsByModel = $this->_buildConditions($exclude);
-      $excludeQuery = $this->_buildJoins($conditionsByModel, 'NOT');
+      // We exclude media by WHERE condition. We need a LEFT JOIN
+      $excludeQuery = $this->_buildJoins($conditionsByModel, 'LEFT', 'NOT');
       unset($excludeQuery['_counters']);
       $query = array_merge_recursive($query, $excludeQuery);
     }
     if (count($include)) {
       $conditionsByModel = $this->_buildConditions($include);
-      $includeQuery = $this->_buildJoins($conditionsByModel, 'AND');
+      $includeQuery = $this->_buildJoins($conditionsByModel, 'INNER', 'AND');
       $query = array_merge_recursive($query, $includeQuery);
     }
     $this->_buildAccessConditions($data, $query);
@@ -425,6 +428,15 @@ class QueryBuilderComponent extends Component {
     $visibility = $this->_getParam($data, 'visibility');
     if ($visibility) {
       $this->_buildVisibility($data, $query, $visibility);
+    }
+    // paging, offsets and limit
+    if (!empty($data['pos'])) {
+      $query['offset'] = $data['pos'];
+    } elseif (isset($data['show']) && isset($data['page'])) {
+      $query['page'] = $data['page'];
+    }
+    if (isset($data['show'])) {
+      $query['limit'] = $data['show'];
     }
     $query['group'] = 'Media.id';
     return $query;
