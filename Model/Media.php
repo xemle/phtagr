@@ -35,7 +35,7 @@ class Media extends AppModel {
     ACL_LEVEL_USER => 'uacl',
     ACL_LEVEL_OTHER => 'oacl');
 
-  var $actsAs = array('Type', 'Flag', 'Cache', 'Exclude');
+  var $actsAs = array('Type', 'Flag', 'Cache');
 
   public function beforeSave($options = array()) {
     parent::beforeSave();
