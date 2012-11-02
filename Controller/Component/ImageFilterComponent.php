@@ -430,6 +430,17 @@ class ImageFilterComponent extends BaseFilterComponent {
 
     $tmp = $this->_getTempFilename($filename);
     $bin = $this->controller->getOption('bin.exiftool', 'exiftool');
+
+    //ignore minor errors -the file could had minor errors before importing to phtagr,
+    //consequently the write process will fail due to previous minor errors
+    $args[] = '-m';
+    
+    //write in binary format, not human readable; exemple: for 'orientation' field
+    $args[] = '-n';
+    
+    //generates new IPTCDigest code in order to 'help' adobe products to see that the file was modified
+    $args[] = '-IPTCDigest=new';
+
     $args['-o'] = $tmp;
     $args[] = $filename;
     $result = $this->Command->run($bin, $args);
