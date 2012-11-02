@@ -711,17 +711,16 @@ class SearchComponent extends Component
     $words = preg_split('/\s+/', trim($text));
 
     $this->controller->Media->Field->Behaviors->attach('Similar');
-    $result = array();
+    $values = array();
     foreach ($words as $word) {
-      $values = Set::extract('/Field/data', $this->controller->Media->Field->similar($word, 'data'));
-      $result = am($result, $values);
+      $similarValues = Set::extract('/Field/data', $this->controller->Media->Field->similar($word, 'data'));
+      $values = am($values, $similarValues);
     }
 
-    $this->addFieldValue($result);
+    $this->addFieldValue($values);
     $this->setOperand('OR');
     $this->setShow($show);
 
     return $this->paginate();
   }
 }
-?>
