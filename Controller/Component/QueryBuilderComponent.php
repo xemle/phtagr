@@ -31,6 +31,7 @@ class QueryBuilderComponent extends Component {
     'country' => array('field' => 'Field.data', 'with' => array('Field.name' => 'country')),
     'created_from' => array('field' => 'Media.created', 'operand' => '>='),
     'east' => array('field' => 'Media.longitude', 'operand' => '<='),
+    'field_value' => array('field' => 'Field.data'),
     'folder' => array('field' => 'File.path', 'custom' => '_buildFolder'),
     'from' => array('field' => 'Media.date', 'operand' => '>='),
     'group' => 'Group.name',

@@ -44,6 +44,7 @@ class SearchComponent extends Component
     'exclude_user' => 'numeric',
     'from' => array('rule' => array('custom', '/^\d{4}-\d{2}-\d{2}([ T]\d{2}:\d{2}:\d{2})?$/')),
     'folder' => 'notEmpty',
+    'field_value' => array('rule' => array('notEmpty'), 'multiple' => true),
     'groups' => 'notEmpty',
     'key' => false,
     'media' => 'numeric',
@@ -708,18 +709,15 @@ class SearchComponent extends Component
   public function quicksearch($text, $show = 12) {
     $words = preg_split('/\s+/', trim($text));
 
-    $tmp = array();
-    foreach($words as $word) {
-      $tmp[] = '*' . $word . '*';
+    $this->controller->Media->Field->Behaviors->attach('Similar');
+    $result = array();
+    foreach ($words as $word) {
+      $values = Set::extract('/Field/data', $this->controller->Media->Field->similar($word, 'data'));
+      $result = am($result, $values);
     }
-    $words = $tmp;
 
-    $this->addTags($words, false);
-    $this->addCategories($words, false);
-    $this->addLocations($words, false);
+    $this->addFieldValue($result);
     $this->setOperand('OR');
-
-    $this->setSort('default', false);
     $this->setShow($show);
 
     return $this->paginate();
