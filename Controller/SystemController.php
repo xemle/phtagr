@@ -223,9 +223,10 @@ class SystemController extends AppController {
     Logger::debug($result);
     $data['media.video.length'] = floatval($result[0][0]['Duration']);
     $data['comments'] = $this->Media->Comment->find('count');
-    $data['tags'] = $this->Media->Tag->find('count');
-    $data['categories'] = $this->Media->Category->find('count');
-    $data['locations'] = $this->Media->Location->find('count');
+    $allFields = $this->Media->Field->find('all');
+    $data['tags'] = count(Set::extract('/Field[name=keyword]/data', $allFields));
+    $data['categories'] = count(Set::extract('/Field[name=category]/data', $allFields));
+    $data['locations'] = count(Set::extract('/Field[name=/(sublocation|city|state|country)/]/data', $allFields));
     $this->set('data', $data);
   }
 }
