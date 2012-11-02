@@ -12,9 +12,9 @@ Page <?php echo $this->Paginator->counter() ?>
 <table class="default">
 <thead>
 <tr>
-  <td><?php echo $this->Paginator->sort(__('Username'), 'username'); ?></td>
-  <td><?php echo $this->Paginator->sort(__('Firstname'), 'firstname'); ?></td>
-  <td><?php echo $this->Paginator->sort(__('Lastname'), 'lastname'); ?></td>
+  <td><?php echo $this->Paginator->sort(__('username'), 'Username'); ?></td>
+  <td><?php echo $this->Paginator->sort(__('firstname'), 'Firstname'); ?></td>
+  <td><?php echo $this->Paginator->sort(__('lastname'), 'Lastname'); ?></td>
   <td><?php echo __('Guests'); ?></td>
   <td><?php echo $this->Paginator->sort(__('User role'), 'role'); ?></td>
   <td><?php echo __('Actions'); ?></td>
@@ -27,14 +27,14 @@ Page <?php echo $this->Paginator->counter() ?>
   <td><?php echo $this->Html->link($user['User']['username'], '/admin/users/edit/'.$user['User']['id']);?></td>
   <td><?php echo $user['User']['firstname'];?></td>
   <td><?php echo $user['User']['lastname'];?></td>
-  <td><?php count($user['Guest']); ?></td>
+  <td><?php  echo count($user['Guest']); ?></td>
   <td><?php
   switch ($user['User']['role']) {
-    case ROLE_ADMIN: __('Admin'); break;
-    case ROLE_SYSOP: __('SysOp'); break;
-    case ROLE_USER: __('Member'); break;
-    case ROLE_GUEST: __('Guest'); break;
-    case ROLE_NOBODY: __('Nobody'); break;
+    case ROLE_ADMIN:  echo __('Admin'); break;
+    case ROLE_SYSOP:  echo __('SysOp'); break;
+    case ROLE_USER:  echo __('Member'); break;
+    case ROLE_GUEST:  echo __('Guest'); break;
+    case ROLE_NOBODY: echo __('Nobody'); break;
     default:
       echo __('Unknown');
       Logger::error("Unkown role of user: ".$user['User']['role']);
