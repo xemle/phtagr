@@ -66,7 +66,7 @@ class SimilarBehaviorTestCase extends CakeTestCase {
     $this->Field->save($this->Field->create(array('name' => 'keyword', 'data' => 'action')));
     $this->Field->save($this->Field->create(array('name' => 'keyword', 'data' => 'activate')));
 
-    $keywords = $this->Field->similar('access', 'data');
+    $keywords = $this->Field->similar('access', 'data', 0.2);
 		$names = Set::extract('/Field/data', $keywords);
 		$this->assertEqual($names, array('access', 'accept', 'account'));
 
