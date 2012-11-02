@@ -109,6 +109,7 @@ class UpgradeSchemaComponent extends Component {
   }
 
   public function upgrade($noDrop = false) {
+    @ini_set('max_execution_time', 600);
     $errorTables = $this->_createMissingTables();
     $errorColumns = $this->_upgradeTables($noDrop);
     if ($errorTables || $errorColumns) {

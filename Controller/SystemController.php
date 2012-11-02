@@ -159,6 +159,7 @@ class SystemController extends AppController {
     }
     $migrationVersion = max(array_keys($Migration->getMapping('app')));
     if ($action == 'run' && $currentVersion < $migrationVersion) {
+      @ini_set('max_execution_time', 600);
       if (!$Migration->run(array('type' => 'app', 'direction' => 'up'))) {
         $this->Session->setFlash(__("Database migration failed. Please see the log files for errors."));
         Logger::error("Could not run migration");
