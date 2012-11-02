@@ -545,6 +545,7 @@ class SearchComponent extends Component
     // Ensure only unique Media ids are counted
     $query['fields'] = 'DISTINCT Media.id';
     $query['recursive'] = -1;
+    unset($query['group']);
     $count = $this->controller->Media->find('count', $query);
     $query = $tmp;
 
