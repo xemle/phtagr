@@ -483,7 +483,7 @@ class ImageFilterComponent extends BaseFilterComponent {
     // Remove IPTC data and time if database date is not set
     $args = array();
     if (!$media['Media']['date']) {
-      $args[] = '-DateCreated-=';
+      $args[] = '-IPTC:DateCreated-=';
       $args[] = '-TimeCreated-=';
       return '';
     }
@@ -493,6 +493,8 @@ class ImageFilterComponent extends BaseFilterComponent {
 
     // Date priorities: IPTC, EXIF
     $dateIptc = $this->_extract($data, 'DateCreated');
+      //correct possible reading from XMP: DateCreated instead of IPTC:DateCreated 
+      $dateIptc=substr($dateIptc,0,10);
     if ($dateIptc) {
       $time = $this->_extract($data, 'TimeCreated');
       if ($time) {
@@ -510,7 +512,7 @@ class ImageFilterComponent extends BaseFilterComponent {
     }
 
     if ($timeDb && (!$timeFile || ($timeFile != $timeDb))) {
-      $args[] = '-DateCreated=' . date("Y:m:d", $timeDb);
+      $args[] = '-IPTC:DateCreated=' . date("Y:m:d", $timeDb);
       $args[] = '-TimeCreated=' . date("H:i:sO", $timeDb);
       //Logger::trace("Set new date via IPTC: $arg");
     }
