@@ -653,6 +653,8 @@ class ImageFilterComponent extends BaseFilterComponent {
         $args[] = "-$name=" . $dbValue;
       } elseif($fileValue && !$dbValue) {
         $args[] = "-$name=";
+      } elseif($fileValue != $dbValue) {
+        $args[] = "-$name=" . $dbValue;
       }
     }
 
