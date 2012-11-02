@@ -15,8 +15,10 @@
  * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
 
-/** This class enables a fast file response without the framework stack of
- * CakePHP. It checks the session and the URL and returns a valid file */
+/**
+ * This class enables a fast file response without the framework stack of
+ * CakePHP. It checks the session and the URL and returns a valid file
+ */
 class FastFileResponder {
   /** Should be same as in app/config/core.php Session.cookie */
   var $sessionCookie = 'CAKEPHP';
@@ -27,7 +29,9 @@ class FastFileResponder {
     $this->startSession();
   }
 
-  /** Starts the session if the session sessionCookie is set */
+  /**
+   * Starts the session if the session sessionCookie is set
+   */
   function startSession() {
     if (!isset($_COOKIE[$this->sessionCookie])) {
       return;
@@ -40,7 +44,9 @@ class FastFileResponder {
     }
   }
 
-  /** Deletes expired itemes from the session list */
+  /**
+   * Deletes expired itemes from the session list
+   */
   function deleteExpiredItems() {
     if (!count($this->items)) {
       return;
@@ -53,23 +59,29 @@ class FastFileResponder {
     }
   }
 
-  /** Simple log function for debug purpos */
+  /**
+   * Simple log function for debug purpos
+   */
   function log($msg) {
     $h = @fopen(dirname(__FILE__) . DS . 'fast_file_responder.log', 'a');
     @fwrite($h, sprintf("%s %s\n", date('Y-M-d h:i:s', time()), $msg));
     @fclose($h);
   }
 
-  /** Extracts the item key from the url and returns it. Returns false if no
-   * key could be found */
+  /**
+   * Extracts the item key from the url and returns it. Returns false if no
+   * key could be found
+   */
   function getItemKey($url) {
-    if (!preg_match('/media\/(\w+)\/(\d+)/', $url, $matches)) {
+    if (!preg_match('/.*media\/(\w+)\/(\d+)/', $url, $matches)) {
       return false;
     }
     return $matches[1] . '-' . $matches[2];
   }
 
-  /** Returns the file of the media request */
+  /**
+   * Returns the file of the media request
+   */
   function getFilename($url) {
     $key = $this->getItemKey($url);
     if (!$key || !isset($this->items[$key])) {
@@ -82,7 +94,9 @@ class FastFileResponder {
     return $item['file'];
   }
 
-  /** Returns an array of request headers */
+  /**
+   * Returns an array of request headers
+   */
   function getRequestHeaders() {
     $headers = array();
     if (function_exists('apache_request_headers')) {
@@ -101,9 +115,12 @@ class FastFileResponder {
     return $headers;
   }
 
-  /** Evaluates the client file cache and response if the client has still a
+  /**
+   * Evaluates the client file cache and response if the client has still a
    * valid file
-   * @param filename Current cache file */
+   *
+   * @param filename Current cache file
+   */
   function checkClientCache($filename) {
     $cacheTime = filemtime($filename);
     $headers = $this->getRequestHeaders();
@@ -125,13 +142,17 @@ class FastFileResponder {
     header('Last-Modified: ' . gmdate('D, d M Y H:i:s', filemtime($file)));
   }
 
-  /** Evaluates if a valid cache file exists */
+  /**
+   * Evaluates if a valid cache file exists
+   */
   function exists($url) {
     return $this->getFilename($url) != false;
   }
 
-  /** Sends the cache file if it exists and exit. If it returns an error
-    * occured */
+  /**
+   * Sends the cache file if it exists and exit. If it returns an error
+   * occured
+   */
   function send($url) {
     $filename = $this->getFilename($url);
     if (!$filename) {
@@ -152,7 +173,9 @@ class FastFileResponder {
     exit(0);
   }
 
-  /** Closes the session */
+  /**
+   * Closes the session
+   */
   function close() {
     session_write_close();
   }
