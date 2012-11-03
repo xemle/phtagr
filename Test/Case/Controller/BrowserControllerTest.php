@@ -97,7 +97,7 @@ class BrowserControllerTest extends ControllerTestCase {
     // Check names
     $names = Set::extract('/Media/name', $media);
     sort($names);
-    $this->assertEqual($names, array('IMG_4145.JPG', 'IMG_6131.JPG', 'IMG_7795.JPG'));
+    $this->assertEqual($names, array('IMG_4145.JPG', 'IMG_6131.JPG', 'Temple, Ayutthaya'));
     // Check user Ids
     $userIds = Set::extract('/User/id', $media);
     $userIds = array_unique($userIds);

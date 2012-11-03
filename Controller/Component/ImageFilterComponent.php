@@ -244,6 +244,7 @@ class ImageFilterComponent extends BaseFilterComponent {
     $v =& $media['Media'];
 
     // Media information
+    $v['name'] = $this->_extract($data, 'ObjectName', $this->_extract($data, 'FileName'));
     $v['name'] = $this->_extract($data, 'FileName');
     // TODO Read IPTC date, than EXIF date
     $v['date'] = $this->_extractMediaDate($data);
@@ -330,7 +331,7 @@ class ImageFilterComponent extends BaseFilterComponent {
     $v =& $media['Media'];
 
     // Media information
-    $v['name'] = $this->_extract($data, 'filename');
+    $v['name'] = $this->_extract($data, 'iptc/IPTCApplication/ObjectName/0', $this->_extract($data, 'filename'));
     // TODO Read IPTC date, than EXIF date
     $v['date'] = $this->_extractMediaDateGetId3($data);
     $v['width'] = $this->_extract($data, 'jpg/exif/COMPUTED/Width', 0);
@@ -343,7 +344,6 @@ class ImageFilterComponent extends BaseFilterComponent {
     $v['model'] = $this->_extract($data, 'jpg/exif/IFD0/Model', null);
     $v['iso'] = $this->_extract($data, 'jpg/exif/EXIF/ISOSpeedRatings', null);
     //Logger::debug($data);
-    $v['caption'] = $this->_extract($data, 'jpg/exif/EXIF/ISOSpeedRatings', null);
 
     // fetch GPS coordinates
     $latitude = $this->_computeGps($this->_extract($data, 'jpg/exif/GPS/GPSLatitude', null));
@@ -422,10 +422,10 @@ class ImageFilterComponent extends BaseFilterComponent {
     //ignore minor errors -the file could had minor errors before importing to phtagr,
     //consequently the write process will fail due to previous minor errors
     $args[] = '-m';
-    
+
     //write in binary format, not human readable; exemple: for 'orientation' field
     $args[] = '-n';
-    
+
     //generates new IPTCDigest code in order to 'help' adobe products to see that the file was modified
     $args[] = '-IPTCDigest=new';
 
@@ -449,6 +449,7 @@ class ImageFilterComponent extends BaseFilterComponent {
       }
       rename($tmp, $filename);
       @unlink($tmp2);
+      clearstatcache(true, $filename);
     }
 
     $this->controller->MyFile->update($file);
@@ -481,7 +482,7 @@ class ImageFilterComponent extends BaseFilterComponent {
 
     // Date priorities: IPTC, EXIF
     $dateIptc = $this->_extract($data, 'DateCreated');
-      //correct possible reading from XMP: DateCreated instead of IPTC:DateCreated 
+      //correct possible reading from XMP: DateCreated instead of IPTC:DateCreated
       $dateIptc=substr($dateIptc,0,10);
     if ($dateIptc) {
       $time = $this->_extract($data, 'TimeCreated');
@@ -585,6 +586,9 @@ class ImageFilterComponent extends BaseFilterComponent {
     $args = am($args, $this->_createExportDate($data, $media));
     $args = am($args, $this->_createExportGps($data, $media));
 
+    if ($media['Media']['name'] != $this->_extract($data, 'FileName')) {
+      $args = am($args, $this->_createExportArgument($data, 'ObjectName', $media['Media']['name']));
+    }
     $args = am($args, $this->_createExportArgument($data, 'Orientation', $media['Media']['orientation']));
     $args = am($args, $this->_createExportArgument($data, 'Comment', $media['Media']['caption']));
 
@@ -599,9 +603,12 @@ class ImageFilterComponent extends BaseFilterComponent {
       $dbValue = Set::extract("/Field[name=$field]/data", $media);
       if (!$isList) {
         $dbValue = array_pop($dbValue);
-        if (!$fileValue && $dbValue) {
+        if ($dbValue && $fileValue != $dbValue) {
+          // write value if database value differs from file value
+          // (file value does not exist or database value was changed)
           $args[] = "-$name=" . $dbValue;
         } elseif($fileValue && !$dbValue) {
+          // remove file value if no database value is empty
           $args[] = "-$name=";
         }
       } else {

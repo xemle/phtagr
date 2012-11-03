@@ -172,10 +172,11 @@ class MediaWriteTestCase extends CakeTestCase {
 
     $values = array();
     foreach ($result as $line) {
-      if (preg_match('/(\w+):\s(.*)/', $line, $m)) {
+      if (preg_match('/(\S+):\s(.*)/', $line, $m)) {
         $values[$m[1]] = $m[2];
       }
     }
+    ksort($values);
     return $values;
   }
 
@@ -201,5 +202,142 @@ class MediaWriteTestCase extends CakeTestCase {
     $this->assertEqual(file_exists($thumb), true);
     $values = $this->extractMeta($thumb);
     $this->assertEqual($values['Keywords'], 'thailand');
+  }
+
+  function testImageMetaData() {
+    $filename = TEST_FILES_TMP . 'IMG_6131.JPG';
+    copy(RESOURCES . 'IMG_6131.JPG', $filename);
+    clearstatcache(true, $filename);
+    $user = $this->Controller->getUser();
+
+    $this->Controller->FilterManager->read($filename);
+    $media = $this->Media->find('first');
+    $this->assertNotEqual($media, false);
+    $this->assertEqual($media['Media']['flag'], 0);
+    $this->assertEqual($media['Media']['orientation'], 1);
+    $this->assertEqual($media['Media']['latitude'], null);
+    $this->assertEqual($media['Media']['longitude'], null);
+    $this->assertEqual($media['Field'], array());
+
+    $data = array(
+        'Media' => array(
+            'name' => 'Mosque Taj Mahal, India',
+            'geo' => '27.175,78.0416',
+            'rotation' => 90
+        ),
+        'Field' => array(
+            'keyword' => 'sunset',
+            'category' => 'vacation, sightseeing',
+            'sublocation' => 'taj mahal',
+            'city' => 'agra',
+            'state' => 'uttar pradesh',
+            'country' => 'india')
+        );
+    $tmp = $this->Media->editSingle($media, $data, $user);
+    $this->Media->save($tmp);
+
+    $media = $this->Media->findById($media['Media']['id']);
+    // test if meta data has changed
+    $this->assertEqual($media['Media']['flag'], MEDIA_FLAG_DIRTY);
+    $result = $this->Controller->FilterManager->write($media);
+    $this->assertEqual($result, true);
+    $media = $this->Media->findById($media['Media']['id']);
+    // test if all media are written and clean
+    $this->assertEqual($media['Media']['flag'], 0);
+
+    // Verify written meta data
+    $values = $this->extractMeta($filename);
+    $this->assertEqual($values['ObjectName'], 'Mosque Taj Mahal, India');
+    $this->assertEqual($values['Orientation'], '6');
+    $this->assertEqual($values['GPSLatitudeRef'], 'N');
+    $this->assertEqual($values['GPSLatitude'], '27.175');
+    $this->assertEqual($values['GPSLongitudeRef'], 'E');
+    $this->assertEqual($values['GPSLongitude'], '78.0416');
+    $this->assertEqual($values['Keywords'], 'sunset');
+    $this->assertEqual($values['SupplementalCategories'], 'vacation, sightseeing');
+    $this->assertEqual($values['Sub-location'], 'taj mahal');
+    $this->assertEqual($values['City'], 'agra');
+    $this->assertEqual($values['Province-State'], 'uttar pradesh');
+    $this->assertEqual($values['Country-PrimaryLocationName'], 'india');
+  }
+
+  function testImageWithChangedLocation() {
+    $filename = TEST_FILES_TMP . 'IMG_6131.JPG';
+    copy(RESOURCES . 'IMG_6131.JPG', $filename);
+    clearstatcache(true, $filename);
+    $user = $this->Controller->getUser();
+
+    $this->Controller->FilterManager->read($filename);
+    $media = $this->Media->find('first');
+
+    $data = array(
+        'Media' => array(
+            'geo' => '27.175,78.0416'
+        ),
+        'Field' => array(
+            'keyword' => 'sunset',
+            'category' => 'vacation, sightseeing',
+            'sublocation' => 'taj mahal',
+            'city' => 'agra',
+            'state' => 'uttar pradesh',
+            'country' => 'india')
+        );
+    $tmp = $this->Media->editSingle($media, $data, $user);
+    $this->Media->save($tmp);
+    $media = $this->Media->findById($media['Media']['id']);
+    $result = $this->Controller->FilterManager->write($media);
+
+    // Verify written meta data
+    $values = $this->extractMeta($filename);
+    $this->assertTrue(!isset($values['ObjectName']));
+    $this->assertTrue(!isset($values['Comment']));
+    $this->assertEqual($values['Orientation'], '1');
+    $this->assertEqual($values['GPSLatitudeRef'], 'N');
+    $this->assertEqual($values['GPSLatitude'], '27.175');
+    $this->assertEqual($values['GPSLongitudeRef'], 'E');
+    $this->assertEqual($values['GPSLongitude'], '78.0416');
+    $this->assertEqual($values['Keywords'], 'sunset');
+    $this->assertEqual($values['SupplementalCategories'], 'vacation, sightseeing');
+    $this->assertEqual($values['Sub-location'], 'taj mahal');
+    $this->assertEqual($values['City'], 'agra');
+    $this->assertEqual($values['Province-State'], 'uttar pradesh');
+    $this->assertEqual($values['Country-PrimaryLocationName'], 'india');
+
+    $data = array(
+        'Media' => array(
+            'rotation' => 90,
+            'geo' => '10.461,-12.674',      // value change
+            'date' => '2012-10-03 10:10:43',
+            'name' => 'Mosque Taj Mahal, India',
+            'caption' => 'Temple of love'
+        ),
+        'Field' => array(
+            'keyword' => 'sunset, mosque', // list addition +mosque
+            'category' => 'sightseeing',   // list removal -vacation
+            'city' => 'agra city',         // value change
+            'state' => ''                  // value removal
+        ));
+    $tmp = $this->Media->editSingle($media, $data, $user);
+    $this->Media->save($tmp);
+    $media = $this->Media->findById($media['Media']['id']);
+    $result = $this->Controller->FilterManager->write($media);
+
+    // Verify written meta data
+    $values = $this->extractMeta($filename);
+    $this->assertEqual($values['ObjectName'], 'Mosque Taj Mahal, India');
+    $this->assertEqual($values['Comment'], 'Temple of love');
+    $this->assertEqual($values['DateCreated'], '2012:10:03');
+    $this->assertEqual($values['TimeCreated'], '10:10:43+02:00');
+    $this->assertEqual($values['Orientation'], '6');
+    $this->assertEqual($values['GPSLatitudeRef'], 'N');
+    $this->assertEqual($values['GPSLatitude'], '10.461');
+    $this->assertEqual($values['GPSLongitudeRef'], 'W');
+    $this->assertEqual($values['GPSLongitude'], '-12.674');
+    $this->assertEqual($values['Keywords'], 'sunset, mosque');
+    $this->assertEqual($values['SupplementalCategories'], 'sightseeing');
+    $this->assertEqual($values['Sub-location'], 'taj mahal');
+    $this->assertEqual($values['City'], 'agra city');
+    $this->assertTrue(!isset($values['Province-State']));
+    $this->assertEqual($values['Country-PrimaryLocationName'], 'india');
   }
 }
