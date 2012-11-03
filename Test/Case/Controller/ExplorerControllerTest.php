@@ -183,4 +183,28 @@ class ExplorerControllerTest extends ControllerTestCase {
     $this->testAction('/explorer/country/canada', array('return' => 'vars'));
     $this->assertEqual(Set::extract('/Media/id', $Explorer->request->data), array($media1['Media']['id'], $media2['Media']['id'], $media3['Media']['id'], $media4['Media']['id']));
   }
+
+  public function testSearchInclusion() {
+    $user = $this->User->save($this->User->create(array('username' => 'user', 'role' => ROLE_USER)));
+
+    $media1 = $this->Media->save($this->Media->create(array('name' => 'IMG_1231.JPG', 'user_id' => $user['User']['id'])));
+    $media2 = $this->Media->save($this->Media->create(array('name' => 'IMG_1232.JPG', 'user_id' => $user['User']['id'])));
+    $media3 = $this->Media->save($this->Media->create(array('name' => 'IMG_1233.JPG', 'user_id' => $user['User']['id'])));
+
+    $flower = $this->Media->Field->save($this->Media->Field->create(array('name' => 'keyword', 'data' => 'flower')));
+    $nature = $this->Media->Field->save($this->Media->Field->create(array('name' => 'category', 'data' => 'nature')));
+
+    $this->Media->save(array('Media' => array('id' => $media1['Media']['id']), 'Field' => array('Field' => array($flower['Field']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media2['Media']['id']), 'Field' => array('Field' => array($flower['Field']['id'], $nature['Field']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media3['Media']['id']), 'Field' => array('Field' => array($nature['Field']['id']))));
+
+    $user = $this->User->findById($user['User']['id']);
+    $Explorer = $this->generate('Explorer', array('methods' => array('getUser')));
+    $Explorer->expects($this->any())->method('getUser')->will($this->returnValue($user));
+
+    // tag flower is a must, category nature is optional
+    $this->testAction('/explorer/view/tag:+flower/category:nature', array('return' => 'vars'));
+    $this->assertEqual(Set::extract('/Media/id', $Explorer->request->data), array($media2['Media']['id'], $media1['Media']['id']));
+  }
+
 }

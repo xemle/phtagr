@@ -97,20 +97,17 @@ class ExplorerController extends AppController
     } elseif ($type == 'crumb') {
       $queryMap = array(
         'category' => '_getAssociation',
-        'category_op' => array('OR', 'AND'),
         'city' => '_getAssociation',
         'country' => '_getAssociation',
         'from' => 'true',
         'group' => '_getAssociation',
         'location' => '_getAssociation',
-        'location_op' => array('OR', 'AND'),
         'operand' => array('OR', 'AND'),
         'show' => array(2, 6, 12, 24, 60, 120, 240),
         'sort' => array('changes', 'date', '-date', 'name', 'newest', 'popularity', 'random', 'viewed'),
         'state' => '_getAssociation',
         'sublocation' => '_getAssociation',
         'tag' => '_getAssociation',
-        'tag_op' => array('OR', 'AND'),
         'type' => array('image', 'video'),
         'to' => 'true',
         'user' => '_getAssociation'
@@ -171,8 +168,8 @@ class ExplorerController extends AppController
   /** Find needle in tags, categories, locations, or users */
   public function _findGenericCrumb($needle, $queryMap) {
     $prefix = '';
-    if (substr($needle, 0, 1) == '-') {
-      $prefix = '-';
+    if ($needle && ($needle[0] == '-' || $needle[0] == '+')) {
+      $prefix = $needle[0];
       $needle = substr($needle, 1);
     }
     if (strlen($needle) < 2) {
@@ -225,11 +222,11 @@ class ExplorerController extends AppController
 
   public function _getAssociation($type, $value) {
     $result = array();
-    $isNegated = false;
+    $prefix = false;
     $normalized = $value;
-    if ($value && $value[0] == '-') {
+    if ($value && $value[0] === '-' || $value[0] === '+') {
+      $prefix = $value[0];
       $normalized = trim(substr($value, 1));
-      $isNegated = true;
     }
     if (!$normalized) {
       return $result;
@@ -280,10 +277,10 @@ class ExplorerController extends AppController
         $this->redirect(404);
         break;
     }
-    if ($isNegated && count($result)) {
+    if ($prefix && count($result)) {
       $tmp = array();
       foreach ($result as $name) {
-        $tmp[] = '-' . $name;
+        $tmp[] = $prefix . $name;
       }
       $result = $tmp;
     }

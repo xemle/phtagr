@@ -454,6 +454,8 @@ class SearchComponent extends Component
    * @return Array of crumbs
    */
   public function urlToCrumbs($url, $skip = 2) {
+    // We need '+' sign for search inclusion
+    $url = str_replace('+', '%2B', $url);
     $parts = split('/', trim(urldecode($url), '/'));
     $encoded = array_splice($parts, $skip);
     $crumbs = array();
