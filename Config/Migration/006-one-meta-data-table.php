@@ -64,19 +64,15 @@ class Mffcaea2061011ff9181c79c14fa83622 extends CakeMigration {
    */
   private function migrateModel($name) {
     $prefix = $this->Field->tablePrefix;
+    $config = $this->createConfig($name);
+    $fieldConfig = $this->createConfig('Field');
+
     $tableName = Inflector::tableize($name);
-    $habtmTables = array($tableName, 'media');
-    sort($habtmTables);
-    $habtmTableName = join("_", $habtmTables);
-    $habtmForeignKey = Inflector::underscore($name) . "_id";
-    $habtmNames = array(Inflector::pluralize($name), 'Media');
-    sort($habtmNames);
-    $habtmAlias = join('', $habtmNames);
+    $alias = $name;
 
     $page = 1;
-    $limit = 20;
-    $query = "select * from $prefix$tableName $name order by id limit %d offset %d";
-    $mediaQuery = "select * from $prefix$habtmTableName $habtmAlias where $habtmForeignKey = %d";
+    $limit = 300;
+    $query = "select * from $prefix$tableName $alias order by id limit %d offset %d";
 
     $db = $this->Field->getDataSource();
     $all = $db->fetchAll(sprintf($query, $limit, ($page - 1) * $limit), array());
@@ -84,21 +80,26 @@ class Mffcaea2061011ff9181c79c14fa83622 extends CakeMigration {
     $modelCount = 0;
     $mediaCount = 0;
     while (count($all)) {
-      foreach ($all as $data) {
-        $fieldName = $this->getFieldName($data);
-        $field = $this->Field->create(array('name' => $fieldName, 'data' => $data[$name]['name']));
-        $field = $this->Field->save($field);
-        $modelCount++;
+      // Create new fields
+      $oldIdToFieldId = $this->createFields($name, $all);
 
-        $media = $db->fetchAll(sprintf($mediaQuery, $data[$name]['id']));
-        $mediaIds = Set::extract("/$habtmAlias/media_id", $media);
-        if (!count($mediaIds)) {
-          continue;
-        }
-        $tmp = array('Field' => array('id' => $field['Field']['id']), 'Media' => array('Media' => $mediaIds));
-        $this->Field->save($tmp);
-        $mediaCount += count($mediaIds);
+      // Create mappings
+      $oldIds = join(', ', array_keys($oldIdToFieldId));
+      $oldMappings = $db->fetchAll("select * from $prefix{$config['joinTable']} {$config['joinAlias']} where {$config['foreignKey']} in ($oldIds)");
+      $newMappings = array();
+      foreach ($oldMappings as $map) {
+        $mediaId = $map[$config['joinAlias']][$config['associationForeignKey']];
+
+        $oldId = $map[$config['joinAlias']][$config['foreignKey']];
+        $newId = $oldIdToFieldId[$oldId];
+        $newMappings[] = "({$mediaId}, {$newId})";
       }
+
+      // Insert mappings
+      $db->query("insert into {$prefix}{$fieldConfig['joinTable']} ({$fieldConfig['associationForeignKey']}, {$fieldConfig['foreignKey']}) values " . join(', ', $newMappings));
+      $mediaCount += count($oldMappings);
+      $modelCount += count($all);
+
       $page++;
       $all = $db->fetchAll(sprintf($query, $limit, ($page - 1) * $limit), array());
     }
@@ -107,12 +108,52 @@ class Mffcaea2061011ff9181c79c14fa83622 extends CakeMigration {
   }
 
   /**
+   * Create join config for given model
+   *
+   * @param string $name Model name
+   * @return array Configuration
+   */
+  private function createConfig($name) {
+    $tableName = Inflector::tableize($name);
+    $habtmTables = array($tableName, 'media');
+    sort($habtmTables);
+    $habtmNames = array(Inflector::pluralize($name), 'Media');
+    sort($habtmNames);
+
+    return array(
+        'joinTable' => join("_", $habtmTables),
+        'joinAlias' => join('', $habtmNames),
+        'foreignKey' => Inflector::underscore($name) . "_id",
+        'associationForeignKey' => "media_id"
+    );
+  }
+
+  /**
+   * Create fields for given data
+   *
+   * @param string $name Model name (Tag, Category, or Location)
+   * @param array $all current model data (e.g. of Tag)
+   * @return array Old model id to new field id
+   */
+  private function createFields($name, &$all) {
+    $oldIdToFieldId = array();
+    foreach ($all as $data) {
+      $fieldName = $this->getFieldName(&$data);
+      $field = $this->Field->create(array('name' => $fieldName, 'data' => $data[$name]['name']));
+      $field = $this->Field->save($field);
+      $oldId = $data[$name]['id'];
+      $oldIdToFieldId[$oldId] = $field['Field']['id'];
+    }
+    return $oldIdToFieldId;
+  }
+
+  /**
    * Get the field name of the model data
    *
    * @param array $data Model data
    * @return string Fieldname
    */
-  private function getFieldName($data) {
+  private function getFieldName(&$data) {
     if (!empty($data['Tag'])) {
       return 'keyword';
     } else if (!empty($data['Category'])) {
@@ -151,8 +192,6 @@ class Mffcaea2061011ff9181c79c14fa83622 extends CakeMigration {
     App::import('Model', 'Field');
     $this->Media = ClassRegistry::init('Media');
     $this->Field = ClassRegistry::init('Field');
-    // bind Media to Field as HABTM
-    $this->Field->bindModel(array('hasAndBelongsToMany' => array('Media' => array())), false);
 
     $this->migrateModel('Tag');
     $this->migrateModel('Category');
