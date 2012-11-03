@@ -272,6 +272,7 @@ class MediaWriteTestCase extends CakeTestCase {
 
     $data = array(
         'Media' => array(
+            'name' => 'Mosque Taj Mahal, India',
             'geo' => '27.175,78.0416'
         ),
         'Field' => array(
@@ -289,7 +290,7 @@ class MediaWriteTestCase extends CakeTestCase {
 
     // Verify written meta data
     $values = $this->extractMeta($filename);
-    $this->assertTrue(!isset($values['ObjectName']));
+    $this->assertEqual($values['ObjectName'], 'Mosque Taj Mahal, India');
     $this->assertTrue(!isset($values['Comment']));
     $this->assertEqual($values['Orientation'], '1');
     $this->assertEqual($values['GPSLatitudeRef'], 'N');
@@ -305,6 +306,7 @@ class MediaWriteTestCase extends CakeTestCase {
 
     $data = array(
         'Media' => array(
+            'name' => 'IMG_6131.JPG',
             'rotation' => 90,
             'geo' => '10.461,-12.674',      // value change
             'date' => '2012-10-03 10:10:43',
@@ -324,7 +326,7 @@ class MediaWriteTestCase extends CakeTestCase {
 
     // Verify written meta data
     $values = $this->extractMeta($filename);
-    $this->assertEqual($values['ObjectName'], 'Mosque Taj Mahal, India');
+    $this->assertTrue(!isset($values['ObjectName']));
     $this->assertEqual($values['Comment'], 'Temple of love');
     $this->assertEqual($values['DateCreated'], '2012:10:03');
     $this->assertEqual($values['TimeCreated'], '10:10:43+02:00');

@@ -563,13 +563,17 @@ class ImageFilterComponent extends BaseFilterComponent {
    * @param data Exif data
    * @param exifParam Exif parameter
    * @param currentValue Current value
+   * @param removeIfEqual If set to true and currentValue is equal to fileValue
+   * the flag will be removed
    * @return Array of export arguments
    */
-  public function _createExportArgument(&$data, $exifParam, $currentValue) {
+  public function _createExportArgument(&$data, $exifParam, $currentValue, $removeIfEqual = false) {
     $args = array();
     $fileValue = $this->_extract($data, $exifParam);
     if ($fileValue != $currentValue) {
       $args[] = "-$exifParam=$currentValue";
+    } else if ($fileValue && $removeIfEqual) {
+      $args[] = "-$exifParam=";
     }
     return $args;
   }
@@ -580,15 +584,13 @@ class ImageFilterComponent extends BaseFilterComponent {
    * @param data metadata from the file (Exiftool information)
    * @param image Media data array
    */
-  public function _createExportArguments($data, $media) {
+  public function _createExportArguments(&$data, $media) {
     $args = array();
 
     $args = am($args, $this->_createExportDate($data, $media));
     $args = am($args, $this->_createExportGps($data, $media));
 
-    if ($media['Media']['name'] != $this->_extract($data, 'FileName')) {
-      $args = am($args, $this->_createExportArgument($data, 'ObjectName', $media['Media']['name']));
-    }
+    $args = am($args, $this->_createExportArgument($data, 'ObjectName', $media['Media']['name'], true));
     $args = am($args, $this->_createExportArgument($data, 'Orientation', $media['Media']['orientation']));
     $args = am($args, $this->_createExportArgument($data, 'Comment', $media['Media']['caption']));
 
