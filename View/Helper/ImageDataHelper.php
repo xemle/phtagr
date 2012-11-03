@@ -516,7 +516,7 @@ class ImageDataHelper extends AppHelper {
     } else {
       $output = $this->Html->link($value, $urls['global']);
     }
-    $icons[] = $this->Html->link($this->getIcon('add', false, __("Include %s from search", $value)), $urls['add'], array('escape' => false));
+    $icons[] = $this->Html->link($this->getIcon('add', false, __("Include %s into search", $value)), $urls['add'], array('escape' => false));
     if ($withExclude) {
       $icons[] = $this->Html->link($this->getIcon('delete', false, __("Exclude %s from search", $value)), $urls['del'], array('escape' => false));
     }
