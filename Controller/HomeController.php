@@ -67,8 +67,8 @@ class HomeController extends AppController
     $this->set('randomMedia', $random);
 
     $user = $this->getUser();
-    $this->set('cloudTags', $this->Media->cloud($user, 'Tag', 50));
-    $this->set('cloudCategories', $this->Media->cloud($user, 'Category', 50));
+    $this->set('cloudTags', $this->Media->cloud($user, array('conditions' => array('Field.name' => 'keyword'), 'count' => 50)));
+    $this->set('cloudCategories', $this->Media->cloud($user, array('conditions' => array('Field.name' => 'category'), 'count' => 50)));
 
     $this->Comment->currentUser = $this->getUser();
     $comments = $this->Comment->paginate(array(), array(), 'Comment.date DESC', 4);
