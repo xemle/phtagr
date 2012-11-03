@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2012-09-14 20:17+0200\n"
+"POT-Creation-Date: 2012-11-03 18:54+0100\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -87,13 +87,13 @@ msgstr ""
 msgid "Recent comments"
 msgstr ""
 
-#: Controller/AppController.php:45
+#: Controller/AppController.php:52
 #: Controller/HomeController.php:42
 #: View/Elements/menu.ctp:6
 msgid "Home"
 msgstr ""
 
-#: Controller/AppController.php:46
+#: Controller/AppController.php:53
 #: View/Elements/menu.ctp:19;44
 #: View/Helper/NavigatorHelper.php:139
 #: View/Images/notfound.ctp:3
@@ -101,42 +101,42 @@ msgstr ""
 msgid "Explorer"
 msgstr ""
 
-#: Controller/AppController.php:49
+#: Controller/AppController.php:56
 #: View/Elements/menu.ctp:25
 msgid "My Photos"
 msgstr ""
 
-#: Controller/AppController.php:52
+#: Controller/AppController.php:59
 #: Controller/BrowserController.php:33
 #: View/Browser/upload.ctp:21
 #: View/Elements/menu.ctp:32
 msgid "Upload"
 msgstr ""
 
-#: Controller/AppController.php:60
+#: Controller/AppController.php:67
 #: View/Elements/topnav.ctp:14
 #: View/Themed/Mobile/Elements/header.ctp:7
 #: View/Users/login.ctp:5;15
 msgid "Login"
 msgstr ""
 
-#: Controller/AppController.php:62
+#: Controller/AppController.php:69
 #: View/Users/login.ctp:17
 #: View/Users/register.ctp:16
 msgid "Sign Up"
 msgstr ""
 
-#: Controller/AppController.php:66
+#: Controller/AppController.php:73
 msgid "Howdy, %s!"
 msgstr ""
 
-#: Controller/AppController.php:67
+#: Controller/AppController.php:74
 #: View/Elements/topnav.ctp:12
 #: View/Themed/Mobile/Elements/header.ctp:5
 msgid "Logout"
 msgstr ""
 
-#: Controller/AppController.php:68
+#: Controller/AppController.php:75
 msgid "Dashboard"
 msgstr ""
 
@@ -265,7 +265,7 @@ msgstr ""
 
 #: Controller/ExplorerController.php:61
 #: Controller/ImagesController.php:34
-#: Controller/OptionsController.php:140
+#: Controller/OptionsController.php:143
 msgid "[No Group]"
 msgstr ""
 
@@ -273,7 +273,7 @@ msgstr ""
 msgid "Slideshow Media RSS"
 msgstr ""
 
-#: Controller/ExplorerController.php:420
+#: Controller/ExplorerController.php:370
 msgid "Invalid folder: %s"
 msgstr ""
 
@@ -560,15 +560,15 @@ msgstr ""
 msgid "Options saved!"
 msgstr ""
 
-#: Controller/SystemController.php:163
+#: Controller/SystemController.php:164
 msgid "Database migration failed. Please see the log files for errors."
 msgstr ""
 
-#: Controller/SystemController.php:167
+#: Controller/SystemController.php:168
 msgid "The database migration was successful."
 msgstr ""
 
-#: Controller/SystemController.php:197
+#: Controller/SystemController.php:190
 msgid "All unused meta data are deleted"
 msgstr ""
 
@@ -710,20 +710,20 @@ msgstr ""
 
 #: Controller/Component/MenuComponent.php:41
 #: View/Elements/single_acl_form.ctp:8
-#: View/Elements/Explorer/description.ctp:41
+#: View/Elements/Explorer/description.ctp:42
 #: View/Groups/all.ctp:1
 #: View/Groups/index.ctp:1
 #: View/Groups/members.ctp:1
 #: View/Guests/index.ctp:10
-#: View/Helper/ImageDataHelper.php:546
+#: View/Helper/ImageDataHelper.php:571
 #: View/System/view.ctp:15
 msgid "Groups"
 msgstr ""
 
 #: Controller/Component/MenuComponent.php:42
-#: View/Elements/Explorer/description.ctp:49
+#: View/Elements/Explorer/description.ctp:50
 #: View/Elements/Explorer/menu.ctp:93;168
-#: View/Helper/ImageDataHelper.php:335;605
+#: View/Helper/ImageDataHelper.php:335;630
 #: View/Options/profile.ctp:20
 #: View/System/view.ctp:13
 #: View/Users/index.ctp:2
@@ -1088,11 +1088,11 @@ msgid "Who can edit all meta data?"
 msgstr ""
 
 #: View/Elements/single_meta_form.ctp:3
-#: View/Elements/Explorer/description.ctp:6
+#: View/Elements/Explorer/description.ctp:7
 #: View/Elements/Explorer/menu.ctp:51;128
 #: View/Explorer/search.ctp:6
 #: View/Helper/ExplorerMenuHelper.php:211
-#: View/Helper/ImageDataHelper.php:528
+#: View/Helper/ImageDataHelper.php:553
 #: View/System/view.ctp:25
 #: View/Themed/Mobile/Explorer/index.ctp:31
 #: View/Themed/Mobile/Images/view.ctp:29
@@ -1100,11 +1100,11 @@ msgid "Tags"
 msgstr ""
 
 #: View/Elements/single_meta_form.ctp:7
-#: View/Elements/Explorer/description.ctp:11
+#: View/Elements/Explorer/description.ctp:12
 #: View/Elements/Explorer/menu.ctp:58;132
 #: View/Explorer/search.ctp:7
 #: View/Helper/ExplorerMenuHelper.php:216
-#: View/Helper/ImageDataHelper.php:531
+#: View/Helper/ImageDataHelper.php:556
 #: View/System/view.ctp:26
 #: View/Themed/Mobile/Explorer/index.ctp:40
 #: View/Themed/Mobile/Images/view.ctp:38
@@ -1151,7 +1151,7 @@ msgstr ""
 
 #: View/Elements/Explorer/date.ctp:2
 #: View/Explorer/search.ctp:19
-#: View/Helper/ImageDataHelper.php:525
+#: View/Helper/ImageDataHelper.php:549
 msgid "Date"
 msgstr ""
 
@@ -1195,27 +1195,27 @@ msgstr ""
 msgid "View media of next dates"
 msgstr ""
 
-#: View/Elements/Explorer/description.ctp:25
+#: View/Elements/Explorer/description.ctp:26
 #: View/Explorer/search.ctp:8
 #: View/Helper/ExplorerMenuHelper.php:221
-#: View/Helper/ImageDataHelper.php:542
+#: View/Helper/ImageDataHelper.php:567
 #: View/System/view.ctp:27
 msgid "Locations"
 msgstr ""
 
-#: View/Elements/Explorer/description.ctp:47
-#: View/Helper/ImageDataHelper.php:547
+#: View/Elements/Explorer/description.ctp:48
+#: View/Helper/ImageDataHelper.php:572
 msgid "Access"
 msgstr ""
 
-#: View/Elements/Explorer/description.ctp:48
+#: View/Elements/Explorer/description.ctp:49
 #: View/Explorer/search.ctp:40
-#: View/Helper/ImageDataHelper.php:332;604
+#: View/Helper/ImageDataHelper.php:332;629
 #: View/Options/profile.ctp:19
 msgid "Group members"
 msgstr ""
 
-#: View/Elements/Explorer/description.ctp:50
+#: View/Elements/Explorer/description.ctp:51
 #: View/Elements/Explorer/menu.ctp:169
 msgid "All"
 msgstr ""
@@ -1339,7 +1339,7 @@ msgid "latitude, longitude"
 msgstr ""
 
 #: View/Elements/Explorer/menu.ctp:149;170
-#: View/Helper/ImageDataHelper.php:602
+#: View/Helper/ImageDataHelper.php:627
 msgid "Keep"
 msgstr ""
 
@@ -1763,7 +1763,6 @@ msgstr ""
 #: View/Setup/config.ctp:13
 #: View/Setup/user.ctp:9
 #: View/Users/admin_add.ctp:8
-#: View/Users/admin_index.ctp:15
 #: View/Users/login.ctp:7
 #: View/Users/password.ctp:9
 #: View/Users/register.ctp:7
@@ -2335,53 +2334,53 @@ msgstr ""
 msgid "The public"
 msgstr ""
 
-#: View/Helper/ImageDataHelper.php:418
+#: View/Helper/ImageDataHelper.php:442
 msgid "This media belongs to the group '%s'"
 msgstr ""
 
-#: View/Helper/ImageDataHelper.php:420
+#: View/Helper/ImageDataHelper.php:444
 msgid "View"
 msgstr ""
 
-#: View/Helper/ImageDataHelper.php:423
+#: View/Helper/ImageDataHelper.php:447
 msgid "No group assigned"
 msgstr ""
 
-#: View/Helper/ImageDataHelper.php:491
+#: View/Helper/ImageDataHelper.php:515
 msgid "Search global for %s"
 msgstr ""
 
-#: View/Helper/ImageDataHelper.php:495
-msgid "Include %s from search"
+#: View/Helper/ImageDataHelper.php:519
+msgid "Include %s into search"
 msgstr ""
 
-#: View/Helper/ImageDataHelper.php:497
+#: View/Helper/ImageDataHelper.php:521
 msgid "Exclude %s from search"
 msgstr ""
 
-#: View/Helper/ImageDataHelper.php:603
+#: View/Helper/ImageDataHelper.php:628
 #: View/Options/import.ctp:12
 msgid "Me only"
 msgstr ""
 
-#: View/Helper/ImageDataHelper.php:606
+#: View/Helper/ImageDataHelper.php:631
 #: View/Options/import.ctp:9
 msgid "Everyone"
 msgstr ""
 
-#: View/Helper/ImageDataHelper.php:623
+#: View/Helper/ImageDataHelper.php:648
 msgid "This media is public visible"
 msgstr ""
 
-#: View/Helper/ImageDataHelper.php:626
+#: View/Helper/ImageDataHelper.php:651
 msgid "This media is visible for users"
 msgstr ""
 
-#: View/Helper/ImageDataHelper.php:629
+#: View/Helper/ImageDataHelper.php:654
 msgid "This media is visible for group members"
 msgstr ""
 
-#: View/Helper/ImageDataHelper.php:632
+#: View/Helper/ImageDataHelper.php:657
 msgid "This media is private"
 msgstr ""
 
@@ -2764,7 +2763,7 @@ msgid "Create admin account"
 msgstr ""
 
 #: View/System/delete_unused_meta_data.ctp:3
-msgid "Delete all unused meta data from database: %d tags, %d categories, %d locations."
+msgid "Delete all unused meta data from database: %d fields."
 msgstr ""
 
 #: View/System/external.ctp:1
@@ -2859,8 +2858,12 @@ msgstr ""
 msgid "Video duration"
 msgstr ""
 
-#: View/Themed/Mobile/Elements/footer.ctp:1
+#: View/Themed/Mobile/Elements/footer.ctp:2
 msgid "%s Web Gallery %s - mobile version"
+msgstr ""
+
+#: View/Themed/Mobile/Elements/footer.ctp:3
+msgid "View standard version"
 msgstr ""
 
 #: View/Themed/Mobile/Elements/header.ctp:1
@@ -2945,12 +2948,16 @@ msgstr ""
 msgid "Next"
 msgstr ""
 
+#: View/Users/admin_index.ctp:15
+msgid "username"
+msgstr ""
+
 #: View/Users/admin_index.ctp:16
-msgid "Firstname"
+msgid "firstname"
 msgstr ""
 
 #: View/Users/admin_index.ctp:17
-msgid "Lastname"
+msgid "lastname"
 msgstr ""
 
 #: View/Users/admin_index.ctp:19
