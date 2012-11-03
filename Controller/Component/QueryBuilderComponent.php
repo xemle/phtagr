@@ -44,7 +44,7 @@ class QueryBuilderComponent extends Component {
     'sublocation' => array('field' => 'Field.data', 'with' => array('Field.name' => 'sublocation')),
     'to' => array('field' => 'Media.date', 'operand' => '<='),
     'tag' => array('field' => 'Field.data', 'with' => array('Field.name' => 'keyword')),
-    'type' => 'Media.type',
+    'type' => array('field' => 'Media.type', 'custom' => '_buildMediaType'),
     'west' => array('field' => 'Media.longitude', 'operand' => '>='),
     );
   var $counter = 0;
@@ -601,6 +601,18 @@ class QueryBuilderComponent extends Component {
       $conditions[] = '0 = 1';
     }
     return $this->_buildCondition('File.path', $rootDir . $value . '%', array('operand' => 'LIKE'));
+  }
+
+  private function _buildMediaType(&$data, $value) {
+    $map = array(
+      'image' => MEDIA_TYPE_IMAGE,
+      'video' => MEDIA_TYPE_VIDEO
+    );
+    if (isset($map[$value])) {
+      return $this->_buildCondition('Media.type', $map[$value]);
+    } else {
+      return array(false, false);
+    }
   }
 
   private function _buildVisibility(&$data, &$query, $value) {

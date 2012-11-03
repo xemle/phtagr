@@ -61,6 +61,7 @@ class SearchComponentTestCase extends CakeTestCase {
         'wordRule' => array('rule' => array('custom', '/^[-]?\w+$/')),
         'minRule' => array('rule' => array('minLength', 3))
         ),
+      'type' => array('rule' => array('inList', array('image', 'video'))),
       'user' => 'alphaNumeric', // disabled
       'visibility', // no validation
       'world' // no validation but disabled
@@ -767,5 +768,23 @@ class SearchComponentTestCase extends CakeTestCase {
     $this->Search->addCategory('nature');
     $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
     $this->assertEqual($mediaIds, array($media1['Media']['id']));
+  }
+
+  function testMediaType() {
+    $user = $this->User->save($this->User->create(array('username' => 'user', 'role' => ROLE_USER)));
+    $user = $this->User->findById($user['User']['id']);
+    $this->mockUser($user);
+
+    $media1 = $this->Media->save($this->Media->create(array('name' => 'IMG_1231.JPG', 'user_id' => $user['User']['id'], 'type' => MEDIA_TYPE_IMAGE)));
+    $media2 = $this->Media->save($this->Media->create(array('name' => 'IMG_1232.JPG', 'user_id' => $user['User']['id'], 'type' => MEDIA_TYPE_VIDEO)));
+    $media3 = $this->Media->save($this->Media->create(array('name' => 'IMG_1233.JPG', 'user_id' => $user['User']['id'], 'type' => MEDIA_TYPE_IMAGE)));
+
+    $this->Search->setType('image');
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media1['Media']['id'], $media3['Media']['id']));
+
+    $this->Search->setType('video');
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media2['Media']['id']));
   }
 }
