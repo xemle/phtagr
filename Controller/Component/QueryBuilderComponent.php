@@ -45,6 +45,7 @@ class QueryBuilderComponent extends Component {
     'to' => array('field' => 'Media.date', 'operand' => '<='),
     'tag' => array('field' => 'Field.data', 'with' => array('Field.name' => 'keyword')),
     'type' => array('field' => 'Media.type', 'custom' => '_buildMediaType'),
+    'user' => array('field' => 'User.username'),
     'west' => array('field' => 'Media.longitude', 'operand' => '>='),
     );
   var $counter = 0;
@@ -335,7 +336,6 @@ class QueryBuilderComponent extends Component {
     return array('joins' => array($join), 'conditions' => $conditions, '_counters' => array($counterName));
   }
 
-
   private function _buildHasManyStatement($Model, $assoc, $joinType, $conditions, $count, $operand) {
     if (!isset($Model->{$assoc})) {
       Logger::err("Could not access $assoc");
@@ -370,10 +370,29 @@ class QueryBuilderComponent extends Component {
     return array('joins' => array($join), 'conditions' => $conditions, '_counters' => array($counterName));
   }
 
+  private function _buildBelongsToStatement($Model, $assoc, $joinType, $conditions) {
+    if (!isset($Model->{$assoc})) {
+      Logger::err("Could not access $assoc");
+    }
+    $this->counter++;
+    $table = $Model->{$assoc}->tablePrefix.$Model->{$assoc}->table;
+    $alias = $Model->{$assoc}->alias;
+    $key = $Model->{$assoc}->primaryKey;
+
+    $config = $Model->belongsTo[$assoc];
+    $foreignKey = $config['foreignKey'];
+    $modelAlias = $Model->alias;
+
+    $join = "$joinType JOIN `$table` AS `$alias` ON `$alias`.`$key` = `$modelAlias`.`$foreignKey`";
+    $conditions = $this->_buildSqlConditions($conditions);
+
+    return array('joins' => array($join), 'conditions' => $conditions);
+  }
+
   private function _getAssociationType($Model, $assoc) {
     $data = $Model->hasAndBelongsToMany;
     if (isset($Model->hasAndBelongsToMany[$assoc])) {
-      return 'HABTM';
+      return 'hasAndBelongsToMany';
     } else if (isset($Model->belongsTo[$assoc])) {
       return 'belongsTo';
     } else if (isset($Model->hasOne[$assoc])) {
@@ -389,12 +408,17 @@ class QueryBuilderComponent extends Component {
     $query = array('conditions' => array());
     foreach ($modelToConditions as $modelAlias => $modelConditions) {
       $type = $this->_getAssociationType($Media, $modelAlias);
-      if ($type == 'HABTM') {
+      if ($type == 'hasAndBelongsToMany') {
         $query = array_merge_recursive($query, $this->_buildHABTMStatement($Media, $modelAlias, $joinType, $modelConditions['conditions'], $modelConditions['count'], $operand));
       } else if ($type == 'hasMany') {
         $query = array_merge_recursive($query, $this->_buildHasManyStatement($Media, $modelAlias, $joinType, $modelConditions['conditions'], $modelConditions['count'], $operand));
-      } else {
-        $query['conditions'] = $this->_buildSqlConditions($modelConditions['conditions']);
+      } else if ($type == 'belongsTo') {
+        // User model is handled via _buildAccessConditions()
+        if ($modelAlias != 'User') {
+          $query = array_merge_recursive($query, $this->_buildBelongsToStatement($Media, $modelAlias, $joinType, $modelConditions['conditions']));
+        }
+      } else if ($modelAlias == 'Media') {
+        $query['conditions'] = am($query['conditions'], $this->_buildSqlConditions($modelConditions['conditions']));
       }
     }
     return $query;

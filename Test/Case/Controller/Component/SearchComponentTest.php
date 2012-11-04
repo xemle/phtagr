@@ -787,4 +787,69 @@ class SearchComponentTestCase extends CakeTestCase {
     $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
     $this->assertEqual($mediaIds, array($media2['Media']['id']));
   }
+
+  function testMediaTypeWithFields() {
+    $user = $this->User->save($this->User->create(array('username' => 'user', 'role' => ROLE_USER)));
+    $user = $this->User->findById($user['User']['id']);
+    $this->mockUser($user);
+
+    $media1 = $this->Media->save($this->Media->create(array('name' => 'IMG_1231.JPG', 'user_id' => $user['User']['id'], 'type' => MEDIA_TYPE_IMAGE)));
+    $media2 = $this->Media->save($this->Media->create(array('name' => 'IMG_1232.JPG', 'user_id' => $user['User']['id'], 'type' => MEDIA_TYPE_VIDEO)));
+    $media3 = $this->Media->save($this->Media->create(array('name' => 'IMG_1233.JPG', 'user_id' => $user['User']['id'], 'type' => MEDIA_TYPE_IMAGE)));
+    $media4 = $this->Media->save($this->Media->create(array('name' => 'IMG_1234.JPG', 'user_id' => $user['User']['id'], 'type' => MEDIA_TYPE_IMAGE)));
+    $media5 = $this->Media->save($this->Media->create(array('name' => 'IMG_1235.JPG', 'user_id' => $user['User']['id'], 'type' => MEDIA_TYPE_VIDEO)));
+
+    $snow = $this->Media->Field->save($this->Media->Field->create(array('name' => 'keyword', 'data' => 'snow')));
+    $nature = $this->Media->Field->save($this->Media->Field->create(array('name' => 'category', 'data' => 'nature')));
+
+    $this->Media->save(array('Media' => array('id' => $media1['Media']['id']), 'Field' => array('Field' => array($snow['Field']['id'], $nature['Field']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media2['Media']['id']), 'Field' => array('Field' => array($snow['Field']['id'], $nature['Field']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media3['Media']['id']), 'Field' => array('Field' => array($snow['Field']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media4['Media']['id']), 'Field' => array('Field' => array($nature['Field']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media5['Media']['id']), 'Field' => array('Field' => array($nature['Field']['id']))));
+
+    $this->Search->addTag('snow');
+    $this->Search->addCategory('nature');
+    $this->Search->setType('image');
+    // Media must contain 'snow' and 'nature' and must be an image
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media1['Media']['id']));
+
+    $this->Search->setType('video');
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media2['Media']['id']));
+  }
+
+  function testUserWithFields() {
+    $userA = $this->User->save($this->User->create(array('username' => 'userA', 'role' => ROLE_USER)));
+    $userA = $this->User->findById($userA['User']['id']);
+    $this->mockUser($userA);
+    $userB = $this->User->save($this->User->create(array('username' => 'userB', 'role' => ROLE_USER)));
+
+    $media1 = $this->Media->save($this->Media->create(array('name' => 'IMG_1231.JPG', 'user_id' => $userB['User']['id'], 'type' => MEDIA_TYPE_IMAGE, 'oacl' => ACL_READ_ORIGINAL)));
+    $media2 = $this->Media->save($this->Media->create(array('name' => 'IMG_1232.JPG', 'user_id' => $userB['User']['id'], 'type' => MEDIA_TYPE_VIDEO, 'oacl' => ACL_READ_ORIGINAL)));
+    $media3 = $this->Media->save($this->Media->create(array('name' => 'IMG_1233.JPG', 'user_id' => $userB['User']['id'], 'type' => MEDIA_TYPE_IMAGE, 'oacl' => ACL_READ_ORIGINAL)));
+    $media4 = $this->Media->save($this->Media->create(array('name' => 'IMG_1234.JPG', 'user_id' => $userA['User']['id'], 'type' => MEDIA_TYPE_IMAGE, 'oacl' => ACL_READ_ORIGINAL)));
+    $media5 = $this->Media->save($this->Media->create(array('name' => 'IMG_1235.JPG', 'user_id' => $userA['User']['id'], 'type' => MEDIA_TYPE_VIDEO, 'oacl' => ACL_READ_ORIGINAL)));
+
+    $snow = $this->Media->Field->save($this->Media->Field->create(array('name' => 'keyword', 'data' => 'snow')));
+    $nature = $this->Media->Field->save($this->Media->Field->create(array('name' => 'category', 'data' => 'nature')));
+
+    $this->Media->save(array('Media' => array('id' => $media1['Media']['id']), 'Field' => array('Field' => array($snow['Field']['id'], $nature['Field']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media2['Media']['id']), 'Field' => array('Field' => array($nature['Field']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media4['Media']['id']), 'Field' => array('Field' => array($snow['Field']['id'], $nature['Field']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media5['Media']['id']), 'Field' => array('Field' => array($nature['Field']['id']))));
+
+    // Allow 'user' parameter
+    $this->Search->disabled = array();
+
+    $this->Search->addTag('snow');
+    $this->Search->addCategory('nature');
+    $this->Search->setOperand('OR');
+    $this->Search->setUser('UserB');
+    // Media must contain 'snow' or 'nature' and must belong to userB
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media1['Media']['id'], $media2['Media']['id']));
+  }
+
 }
