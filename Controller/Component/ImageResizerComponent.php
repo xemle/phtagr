@@ -86,7 +86,7 @@ class ImageResizerComponent extends Component {
     $phpThumb->cache_filename = $dst;
 
     if ($options['square'] && $options['height'] > 0) {
-      $this->_getSquareOption($phpThumb, &$options);
+      $this->_getSquareOption($phpThumb, $options);
     }
 
     $t0 = microtime(true);

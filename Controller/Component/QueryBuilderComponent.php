@@ -111,7 +111,11 @@ class QueryBuilderComponent extends Component {
       $operand = '=';
     }
 
-    $condition = $field;
+    if (preg_match('/(.*)\.(.*)/', $field, $m)) {
+      $condition = "`{$m[1]}`.`{$m[2]}`";
+    } else {
+      $condition = $field;
+    }
     $value = (array)$value;
     $count = count($value);
     if (count($value) == 1 && $operand != 'IN' && $operand != 'NOT IN') {

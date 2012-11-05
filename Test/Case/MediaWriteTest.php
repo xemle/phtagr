@@ -44,7 +44,7 @@ class TestWriteController extends AppController {
   var $components = array('FileManager', 'FilterManager');
 
   public function &getUser() {
-    $user =& $this->User->find('first');
+    $user = $this->User->find('first');
     return $user;
   }
 
