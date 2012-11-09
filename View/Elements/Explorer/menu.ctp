@@ -126,19 +126,19 @@
   echo $this->Form->hidden('Media.ids', array('id' => 'MediaIds'));
   if ($canWriteTag) {
     echo $this->Form->input('Field.keyword', array('label' => __('Tags'), 'after' => $this->Html->tag('div', __('E.g. newtag, -oldtag'), array('class' => 'description'))));
-    echo $this->Autocomplete->autoComplete('Tag.names', 'autocomplete/tag', array('split' => true));
+    echo $this->Autocomplete->autoComplete('Field.keyword', 'autocomplete/tag', array('split' => true));
   }
   if ($canWriteMeta) {
     echo $this->Form->input('Field.category', array('label' => __('Categories')));
-    echo $this->Autocomplete->autoComplete('Category.names', 'autocomplete/category', array('split' => true));
+    echo $this->Autocomplete->autoComplete('Field.category', 'autocomplete/category', array('split' => true));
     echo $this->Form->input('Field.city', array('label' => __('City')));
-    echo $this->Autocomplete->autoComplete('Location.city', 'autocomplete/city');
+    echo $this->Autocomplete->autoComplete('Field.city', 'autocomplete/city');
     echo $this->Form->input('Field.sublocation', array('label' => __('Sublocation')));
-    echo $this->Autocomplete->autoComplete('Location.sublocation', 'autocomplete/sublocation');
+    echo $this->Autocomplete->autoComplete('Field.sublocation', 'autocomplete/sublocation');
     echo $this->Form->input('Field.state', array('label' => __('State')));
-    echo $this->Autocomplete->autoComplete('Location.state', 'autocomplete/state');
+    echo $this->Autocomplete->autoComplete('Field.state', 'autocomplete/state');
     echo $this->Form->input('Field.country', array('label' => __('Country')));
-    echo $this->Autocomplete->autoComplete('Location.country', 'autocomplete/country');
+    echo $this->Autocomplete->autoComplete('Field.country', 'autocomplete/country');
     echo $this->Form->input('Media.geo', array('label' => __('Geo data'), 'maxlength' => 32, 'after' => $this->Html->tag('div', __('latitude, longitude'), array('class' => 'description'))));
   }
   if ($canWriteCaption) {
