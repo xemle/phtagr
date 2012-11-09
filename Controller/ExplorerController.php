@@ -85,13 +85,12 @@ class ExplorerController extends AppController
 
   public function autocomplete($type) {
     if (in_array($type, array('tag', 'category', 'city', 'sublocation', 'state', 'country', 'aclgroup'))) {
-      if ($type == 'tag' || $type == 'category') {
-        $field = Inflector::camelize($type);
-        $value = $this->request->data[$field]['names'];
+      if ($type == 'tag') {
+        $value = $this->request->data['Field']['keyword'];
       } else if ($type == 'aclgroup') {
         $value = $this->request->data['Group']['names'];
       } else {
-        $value = $this->request->data['Location'][$type];
+        $value = $this->request->data['Field'][$type];
       }
       $this->request->data = $this->_getAssociation($type, $value);
     } elseif ($type == 'crumb') {
