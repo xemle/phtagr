@@ -102,7 +102,7 @@ class SimilarBehavior extends ModelBehavior {
     $lenSearchTerm = strlen($searchTerm);
     $lenA = 5;
     $lenB = 3;
-    if ($lenSearchTerm < 8) {
+    if ($lenSearchTerm < 12) {
       $lenA = 3;
       $lenB = 2;
     }
@@ -110,6 +110,7 @@ class SimilarBehavior extends ModelBehavior {
     $searchTokensB = $this->_tokenizeAndCount($searchTerm, $lenB);
     $maxA = $lenSearchTerm - $lenA + 1;
     $maxB = $lenSearchTerm - $lenB + 1;
+    $lenWeight = 0.5 / $lenSearchTerm;
 
     $match = array();
     foreach ($all as $index => $data) {
@@ -117,18 +118,16 @@ class SimilarBehavior extends ModelBehavior {
       $matchesA = $this->_evaluate($text, $searchTokensA);
       $matchesB = $this->_evaluate($text, $searchTokensB);
       if ($matchesA > 0 || $matchesB > 1) {
-        $weight = ($lenSearchTerm / strlen($text));
-        $rating = (0.4 * $matchesA / $maxA) + (0.6 * $matchesB / $maxB);
-        $match[$index] = $weight * $rating;
+        $weight = 1 - $lenWeight * abs($lenSearchTerm - strlen($text));
+        $rating = $weight * (0.3 * $matchesA / $maxA) + (0.7 * $matchesB / $maxB);
+        if ($rating >= $similarity) {
+          $match[$index] = $rating;
+        }
       }
     }
     arsort($match);
     $result = array();
     foreach ($match as $index => $levenshtein) {
-      if ($levenshtein < $similarity) {
-        // List is ordered by levenshtein
-        break;
-      }
       $result[] = $all[$index];
     }
     return $result;
