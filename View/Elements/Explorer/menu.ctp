@@ -149,7 +149,8 @@
         '0' => __("Keep"),
         '90' => __("90 CW"),
         '180' => __("180 CW"),
-        '270' => __("90 CCW")
+        '270' => __("90 CCW"),
+        'reset' => __("Reset")
     );
     echo $this->Html->tag('div', $this->Html->tag('label', __("Rotate")) .
             $this->Html->tag('div', $this->Form->radio('Media.rotation', $rotations, array('legend' => false, 'value' => '0')), array('escape' => false, 'class' => 'radioSet')), array('escape' => false, 'class' => 'input radio'));

@@ -76,6 +76,9 @@ class MediaTestCase extends CakeTestCase {
     $this->assertSame(8, $data['Media']['orientation']);
     $this->Media->rotate($data, 8, 90);
     $this->assertSame(1, $data['Media']['orientation']);
+
+    $this->Media->rotate($data, 6, 'reset');
+    $this->assertSame(1, $data['Media']['orientation']);
   }
 
   public function testSetAccessFlags() {

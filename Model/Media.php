@@ -792,6 +792,7 @@ class Media extends AppModel {
       );
     $rotated = $orientation;
     switch ($rotation) {
+      case 'reset': $rotated = 1; break;
       case '270': $rotated = $rotateClockwise[$rotated];
       case '180': $rotated = $rotateClockwise[$rotated];
       case '90': $rotated = $rotateClockwise[$rotated];
