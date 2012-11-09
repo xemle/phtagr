@@ -24,6 +24,7 @@ class ExplorerController extends AppController
   var $helpers = array('Form', 'Html', 'ImageData', 'Time', 'ExplorerMenu', 'Rss', 'Search', 'Navigator', 'Tab', 'Breadcrumb', 'Autocomplete');
 
   var $crumbs = array();
+  var $paginateActions = array('category', 'date', 'edit', 'group', 'index', 'location', 'sublocation', 'city', 'state', 'country', 'query', 'tag', 'user', 'view', 'quicksearch');
 
   public function implementedEvents() {
     $events = parent::implementedEvents();
@@ -48,8 +49,7 @@ class ExplorerController extends AppController
   }
 
   public function beforeRender() {
-    $paginateActions = array('category', 'date', 'edit', 'group', 'index', 'location', 'sublocation', 'city', 'state', 'country', 'query', 'tag', 'user', 'view');
-    if (in_array($this->action, $paginateActions)) {
+    if (in_array($this->action, $this->paginateActions)) {
       $this->request->data = $this->Search->paginateByCrumbs($this->crumbs);
       $this->FastFileResponder->addAll($this->request->data, 'thumb');
 
@@ -77,7 +77,11 @@ class ExplorerController extends AppController
   public function view() {
     if (!empty($this->request->data)) {
       $crumbs = split('/', $this->request->data['Breadcrumb']['current']);
-      $crumbs[] = $this->request->data['Breadcrumb']['input'];
+      $input = $this->request->data['Breadcrumb']['input'];
+      if (strpos($input, ":") === false) {
+        $input = "any:$input";
+      }
+      $crumbs[] = $input;
       $this->crumbs = $crumbs;
     }
     $this->render('index');
@@ -292,9 +296,22 @@ class ExplorerController extends AppController
     }
 
     if ($quicksearch) {
-      $this->request->data = $this->Search->quicksearch($quicksearch, 12);
+      $crumbs = array();
+      if (strpos($quicksearch, ",")) {
+        $words = preg_split('/\s*,\s*/', trim($quicksearch));
+      } else {
+        $words = preg_split('/\s+/', trim($quicksearch));
+      }
+      foreach ($words as $word) {
+        if (strpos($word, ":") === false) {
+          $crumbs[] = "similar:$word";
+        } else {
+          $crumbs[] = $word;
+        }
+      }
+      $this->crumbs = $crumbs;
     }
-    $this->set('quicksearch', $quicksearch);
+    $this->render('index');
   }
 
   public function query() {

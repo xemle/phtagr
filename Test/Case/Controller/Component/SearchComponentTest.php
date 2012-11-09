@@ -938,4 +938,47 @@ class SearchComponentTestCase extends CakeTestCase {
     $this->assertEqual($mediaIds, array($media1['Media']['id']));
   }
 
+  /**
+   * Test search term similar:power
+   */
+  function testSimilar() {
+    $user = $this->User->save($this->User->create(array('username' => 'user', 'role' => ROLE_USER)));
+    $user = $this->User->findById($user['User']['id']);
+    $this->mockUser($user);
+
+    $media1 = $this->Media->save($this->Media->create(array('name' => 'IMG_1231.JPG', 'user_id' => $user['User']['id'])));
+    $media2 = $this->Media->save($this->Media->create(array('name' => 'IMG_1232.JPG', 'user_id' => $user['User']['id'])));
+
+    $flower = $this->Media->Field->save($this->Media->Field->create(array('name' => 'keyword', 'data' => 'flower')));
+    $vacation = $this->Media->Field->save($this->Media->Field->create(array('name' => 'keyword', 'data' => 'flower')));
+
+    $this->Media->save(array('Media' => array('id' => $media2['Media']['id']), 'Field' => array('Field' => $flower['Field']['id'])));
+
+    $this->Search->addSimilar('power');
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media2['Media']['id']));
+  }
+
+  /**
+   * Test search term any:vacation
+   */
+  function testAny() {
+    $user = $this->User->save($this->User->create(array('username' => 'user', 'role' => ROLE_USER)));
+    $user = $this->User->findById($user['User']['id']);
+    $this->mockUser($user);
+
+    $media1 = $this->Media->save($this->Media->create(array('name' => 'IMG_1231.JPG', 'user_id' => $user['User']['id'])));
+    $media2 = $this->Media->save($this->Media->create(array('name' => 'IMG_1232.JPG', 'user_id' => $user['User']['id'])));
+    $media3 = $this->Media->save($this->Media->create(array('name' => 'IMG_1233.JPG', 'user_id' => $user['User']['id'])));
+
+    $vacationKeyword = $this->Media->Field->save($this->Media->Field->create(array('name' => 'keyword', 'data' => 'vacation')));
+    $vacationCategory = $this->Media->Field->save($this->Media->Field->create(array('name' => 'category', 'data' => 'vacation')));
+
+    $this->Media->save(array('Media' => array('id' => $media2['Media']['id']), 'Field' => array('Field' => $vacationKeyword['Field']['id'])));
+    $this->Media->save(array('Media' => array('id' => $media3['Media']['id']), 'Field' => array('Field' => $vacationCategory['Field']['id'])));
+
+    $this->Search->addAny('vacation');
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media2['Media']['id'], $media3['Media']['id']));
+  }
 }

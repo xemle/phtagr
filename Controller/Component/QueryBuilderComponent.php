@@ -28,6 +28,7 @@ class QueryBuilderComponent extends Component {
    * 'name' => array('field' => 'Model.field', 'skipValue' => false)
    */
   var $conditionRules = array(
+    'any' => array('field' => 'Field.data', 'with' => array('Field.name' => array('keyword', 'category', 'sublocation', 'city', 'state', 'country'))),
     'any_geo' => array('field' => 'Media.latitude', 'with' => array('Media.latitude' => null, 'Media.longitude' => null), 'operand' => 'IS NOT', 'skipValue' => true),
     'category' => array('field' => 'Field.data', 'with' => array('Field.name' => 'category')),
     'city' => array('field' => 'Field.data', 'with' => array('Field.name' => 'city')),
@@ -50,6 +51,7 @@ class QueryBuilderComponent extends Component {
     'no_sublocation' => array('field' => 'Field.data', 'with' => array('Field.name' => 'sublocation'), 'skipValue' => true),
     'no_tag' => array('field' => 'Field.data', 'with' => array('Field.name' => 'keyword'), 'skipValue' => true),
     'north' => array('field' => 'Media.latitude', 'operand' => '<='),
+    'similar' => array('field' => 'Field.data', 'with' => array('Field.name' => array('keyword', 'category', 'sublocation', 'city', 'state', 'country')), 'custom' => '_buildSimilar'),
     'south' => array('field' => 'Media.latitude', 'operand' => '>='),
     'state' => array('field' => 'Field.data', 'with' => array('Field.name' => 'state')),
     'sublocation' => array('field' => 'Field.data', 'with' => array('Field.name' => 'sublocation')),
@@ -59,6 +61,10 @@ class QueryBuilderComponent extends Component {
     'user' => array('field' => 'User.username'),
     'west' => array('field' => 'Media.longitude', 'operand' => '>='),
     );
+
+  /**
+   * SQL table counter for unique table names
+   */
   var $counter = 0;
 
   public function initialize(Controller $controller) {
@@ -111,12 +117,13 @@ class QueryBuilderComponent extends Component {
    * @param value Value as single value or array
    * @param Options Optional options
    *   - operand: Default is '='
+   *   - count: Default is false
    * @return Array of Sanitized condition and value count
    */
   private function _buildCondition($field, $value, $options = array()) {
-    $options = am(array('operand' => '='), $options);
+    $options = am(array('operand' => '=', 'count' => false), $options);
     $operands = array('=', '!=', '>', '<', '>=', '<=', 'IN', 'NOT IN', 'LIKE', 'IS', 'IS NOT');
-    extract($options);
+    extract($options); // extract operand and count
     if (!in_array(strtoupper($operand), $operands)) {
       Logger::err("Illigal operand '$operand'. Set it to '='");
       $operand = '=';
@@ -128,7 +135,9 @@ class QueryBuilderComponent extends Component {
       $condition = $field;
     }
     $values = (array)$value;
-    $count = count($values);
+    if ($count === false) {
+      $count = count($values);
+    }
     if ($count == 0 && $value === null) {
       if ($operand == 'IS NOT') {
         $condition .= ' IS NOT NULL';
@@ -136,7 +145,7 @@ class QueryBuilderComponent extends Component {
         $condition .= ' IS NULL';
       }
       $count = 1;
-    } else if ($count == 1 && $operand != 'IN' && $operand != 'NOT IN') {
+    } else if (count($values) == 1 && $operand != 'IN' && $operand != 'NOT IN') {
       $condition .= " $operand " . $this->_sanitizeData(array_pop($values));
     } else {
       if ($operand == '=') {
@@ -660,6 +669,29 @@ class QueryBuilderComponent extends Component {
       $conditions[] = '0 = 1';
     }
     return $this->_buildCondition('File.path', $rootDir . $value . '%', array('operand' => 'LIKE'));
+  }
+
+  /**
+   * Add condition for similar field query. This method is called dynamically by _mapQueryConditions
+   *
+   * @param type $data query data
+   * @param type $value value of folder
+   * @return type array of condition and count
+   */
+  private function _buildSimilar(&$data, $values) {
+    if ($values == false) {
+      return array(false, false);
+    }
+    $this->controller->Media->Field->Behaviors->attach('Similar');
+    $similarValues = array();
+    foreach ((array) $values as $value) {
+      $similarValues = am($similarValues, Set::extract('/Field/data', $this->controller->Media->Field->similar($value, 'data', 0.4)));
+    }
+    if (!$similarValues) {
+      return array("0 = 1", 1);
+    }
+
+    return $this->_buildCondition('Field.data', $similarValues, array('count' => 1));
   }
 
   /**

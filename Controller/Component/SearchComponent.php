@@ -36,6 +36,7 @@ class SearchComponent extends Component
    * @see http://book.cakephp.org/view/125/Data-Validation
    */
   var $validate = array(
+    'any' => array('rule' => array('maxLength', 30), 'multiple' => true),
     'category' => array('rule' => array('maxLength', 30), 'multiple' => true),
     'city' => array('rule' => array('maxLength', 30), 'multiple' => true),
     'country' => array('rule' => array('maxLength', 30), 'multiple' => true),
@@ -55,6 +56,7 @@ class SearchComponent extends Component
     'operand' => array('rule' => array('inList', array('AND', 'OR'))),
     'page' => array('numericRule' => 'numeric', 'minRule' => array('rule' => array('comparison', '>=', 1))),
     'pos' => array('numericRule' => 'numeric', 'minRule' => array('rule' => array('comparison', '>=', 1))),
+    'similar' => array('rule' => array('maxLength', 30), 'multiple' => true),
     'show' => array('numericRule' => 'numeric', 'minRule' => array('rule' => array('comparison', '>=', 1)), 'maxRule' => array('rule' => array('comparison', '<=', 240))),
     'sort' => array('rule' => array('inList', array('date', '-date', 'newest', 'changes', 'viewed', 'popularity', 'random', 'name'))),
     'south' => array('rule' => array('custom', '/-?\d+(\.\d+)?/')),
@@ -69,6 +71,7 @@ class SearchComponent extends Component
     'visibility' => array('rule' => array('inList', array('private', 'group', 'user', 'public'))),
     );
 
+  var $listTerms = array('any', 'category', 'city', 'country', 'group', 'location', 'state', 'sublocation', 'similar', 'tag');
   /**
    * Array of disabled parameter names
    */
@@ -509,7 +512,6 @@ class SearchComponent extends Component
   }
 
   public function _getParameterFromCrumbs($crumbs) {
-    $listTypes = array('category', 'city', 'country', 'group', 'location', 'state', 'sublocation', 'tag');
     foreach ($crumbs as $crumb) {
       if (empty($crumb)) {
         continue;
@@ -520,7 +522,7 @@ class SearchComponent extends Component
       }
       $type = Inflector::singularize($match[1]);
       $value = $match[2];
-      if (in_array($type, $listTypes)) {
+      if (in_array($type, $this->listTerms)) {
         $values = split(',', $value);
         foreach ($values as $value) {
           $this->addParam($type, $value);
