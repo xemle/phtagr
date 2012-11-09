@@ -24,6 +24,8 @@ class QueryBuilderComponent extends Component {
    * 'name' => 'Model.field' // map condition to 'Model.field = value'
    * 'name' => array('rule' => 'special rule name')
    * 'name' => array('field' => 'Model.field', 'operand' => 'condition operand')
+   * 'name' => array('field' => 'Model.field', 'with' => array('array of extra conditions'))
+   * 'name' => array('field' => 'Model.field', 'skipValue' => false)
    */
   var $conditionRules = array(
     'category' => array('field' => 'Field.data', 'with' => array('Field.name' => 'category')),
@@ -38,6 +40,14 @@ class QueryBuilderComponent extends Component {
     'location' => array('field' => 'Field.data', 'with' => array('Field.name' => array('sublocation', 'city', 'state', 'country'))),
     'media' => 'Media.id',
     'name' => 'Media.name',
+    'no_category' => array('field' => 'Field.data', 'with' => array('Field.name' => 'category'), 'skipValue' => true),
+    'no_city' => array('field' => 'Field.data', 'with' => array('Field.name' => 'city'), 'skipValue' => true),
+    'no_country' => array('field' => 'Field.data', 'with' => array('Field.name' => 'country'), 'skipValue' => true),
+    'no_location' => array('field' => 'Field.data', 'with' => array('Field.name' => array('sublocation', 'city', 'state', 'country')), 'skipValue' => true),
+    'no_geo' => array('field' => 'Media.id', 'with' => array('Media.latitude' => null, 'Media.longitude' => null), 'skipValue' => true),
+    'no_state' => array('field' => 'Field.data', 'with' => array('Field.name' => 'state'), 'skipValue' => true),
+    'no_sublocation' => array('field' => 'Field.data', 'with' => array('Field.name' => 'sublocation'), 'skipValue' => true),
+    'no_tag' => array('field' => 'Field.data', 'with' => array('Field.name' => 'keyword'), 'skipValue' => true),
     'north' => array('field' => 'Media.latitude', 'operand' => '<='),
     'south' => array('field' => 'Media.latitude', 'operand' => '>='),
     'state' => array('field' => 'Field.data', 'with' => array('Field.name' => 'state')),
@@ -116,20 +126,23 @@ class QueryBuilderComponent extends Component {
     } else {
       $condition = $field;
     }
-    $value = (array)$value;
-    $count = count($value);
-    if (count($value) == 1 && $operand != 'IN' && $operand != 'NOT IN') {
-      $condition .= " $operand " . $this->_sanitizeData(array_pop($value));
+    $values = (array)$value;
+    $count = count($values);
+    if ($count == 0 && $value === null) {
+      $condition .= ' IS NULL';
+      $count = 1;
+    } else if ($count == 1 && $operand != 'IN' && $operand != 'NOT IN') {
+      $condition .= " $operand " . $this->_sanitizeData(array_pop($values));
     } else {
       if ($operand == '=') {
         $operand = 'IN';
       }
       if ($operand != 'IN' && $operand != 'NOT IN') {
         Logger::err("Illigal operand '$operand' for field '$field' with array values: " . implode(', ', $value) . ". Use first value.");
-        $condition .= " $operand ".$this->_sanitizeData(array_pop($value));
+        $condition .= " $operand ".$this->_sanitizeData(array_pop($values));
       } else {
-        sort($value);
-        $condition .= " $operand (" . implode(', ', $this->_sanitizeData($value)) . ')';
+        sort($values);
+        $condition .= " $operand (" . implode(', ', $this->_sanitizeData($values)) . ')';
       }
     }
     return array($condition, $count);
@@ -176,14 +189,16 @@ class QueryBuilderComponent extends Component {
         list($condition, $count) = $this->_buildCondition($rule, $value);
         $this->_addCondition($modelToConditions, $rule, $condition, $count);
       } else {
-        $rule = am(array('field' => false, 'operand' => '=', 'with' => false, 'custom' => false), $rule);
+        $rule = am(array('field' => false, 'operand' => '=', 'with' => false, 'custom' => false, 'skipValue' => false), $rule);
+        $condition = array();
+        $count = 1;
         if (!$rule['field']) {
            Logger::err("Field in rule is missing for parameter name '$name'");
            Logger::debug($rule);
            continue;
         } else if ($rule['custom'] && method_exists($this, $rule['custom'])) {
           list($condition, $count) = call_user_func_array(array($this, $rule['custom']), array(&$params, $value));
-        } else {
+        } else if (!$rule['skipValue']) {
           list($condition, $count) = $this->_buildCondition($rule['field'], $value, $rule);
         }
         if ($rule['with']) {
@@ -428,8 +443,44 @@ class QueryBuilderComponent extends Component {
     return $query;
   }
 
+  /**
+   * Prepare and query terms like category:none to no_category
+   *
+   * @param array $data parameter array reference
+   * @return array Prepared parameter
+   */
+  private function _prepareParams(&$data) {
+    $noneNames = array('tag', 'category', 'location', 'sublocation', 'city', 'state', 'country', 'geo');
+    foreach ($data as $name => $values) {
+      if (is_array($values)) {
+        foreach ($values as $i => $value) {
+          if ($value == 'none' && in_array($name, $noneNames)) {
+            unset($data[$name][$i]);
+            if (!count($data[$name])) {
+              unset($data[$name]);
+            }
+            $key = 'no_' . $name;
+            if (!isset($data[$key])) {
+              $data[$key] = array("-none");
+            } else {
+              $data[$key][] = "-none";
+            }
+          }
+        }
+      } else {
+        if ($values == 'none' && in_array($name, $noneNames)) {
+          unset($data[$name]);
+          $key = 'no_' . $name;
+          $data[$key] = "-none";
+        }
+      }
+    }
+    return $data;
+  }
+
   public function build($data) {
     $this->counter = 0;
+    $data = $this->_prepareParams($data);
     list($include, $exclude) = $this->_splitRequirements($data);
     // if we have some must-include default is OR for other conditions
     $defaultOperand = $include ? 'ANY' : 'AND';

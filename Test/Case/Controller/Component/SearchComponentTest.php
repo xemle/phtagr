@@ -45,27 +45,6 @@ class SearchComponentTestCase extends CakeTestCase {
     $this->bindModels();
     $this->bindCompontents();
 
-    $this->Search->validate = array(
-      'category' => array('rule' => array('maxLength', 30)),
-      'city' => array('rule' => array('maxLength', 30)),
-      'country' => array('rule' => array('maxLength', 30)),
-      'group' => array('rule' => 'notEmpty'),
-      'folder' => 'notEmpty',
-      'location' => array('rule' => array('maxLength', 30)),
-      'operand' => array('rule' => array('inList', array('AND', 'OR'))),
-      'page' => 'numeric',
-      'show' => array('rule' => array('inList', array(2, 12, 24, 64))),
-      'sort' => array('rule' => array('inList', array('date', '-date', 'newest', 'changes', 'viewed', 'popularity', 'random', 'name'))),
-      'state' => array('rule' => array('maxLength', 30)),
-      'tag' => array(
-        'wordRule' => array('rule' => array('custom', '/^[-]?\w+$/')),
-        'minRule' => array('rule' => array('minLength', 3))
-        ),
-      'type' => array('rule' => array('inList', array('image', 'video'))),
-      'user' => 'alphaNumeric', // disabled
-      'visibility', // no validation
-      'world' // no validation but disabled
-      );
     $this->Search->disabled = array('user', 'world');
     $this->Search->defaults = array();
     $this->Search->clear();
@@ -132,6 +111,15 @@ class SearchComponentTestCase extends CakeTestCase {
 	}
 
   public function testValidation() {
+    // overwrite rules for testing
+    $this->Search->validate['show'] = array('rule' => array('inList', array(2, 12, 24, 64)));
+    $this->Search->validate['tag'] = array(
+        'wordRule' => array('rule' => array('custom', '/^[-]?\w+$/')),
+        'minRule' => array('rule' => array('minLength', 3))
+        );
+    // No validation for visibility
+    unset($this->Search->validate['visibility']);
+    $this->Search->validate[] = 'visibility';
 
     // simple rule, false test
     $this->Search->setPage('two');
@@ -852,4 +840,85 @@ class SearchComponentTestCase extends CakeTestCase {
     $this->assertEqual($mediaIds, array($media1['Media']['id'], $media2['Media']['id']));
   }
 
+  /**
+   * Test non assignments to fields and go
+   */
+  function testNotAssignedFields() {
+    $user = $this->User->save($this->User->create(array('username' => 'user', 'role' => ROLE_USER)));
+    $user = $this->User->findById($user['User']['id']);
+    $this->mockUser($user);
+
+    $media1 = $this->Media->save($this->Media->create(array('name' => 'IMG_1231.JPG', 'user_id' => $user['User']['id'], 'latitude' => 48.4, 'longitude' => 8.12)));
+    $media2 = $this->Media->save($this->Media->create(array('name' => 'IMG_1232.JPG', 'user_id' => $user['User']['id'])));
+
+    $keyword = $this->Media->Field->save($this->Media->Field->create(array('name' => 'keyword', 'data' => 'church')));
+    $category = $this->Media->Field->save($this->Media->Field->create(array('name' => 'category', 'data' => 'urban')));
+    $sublocation = $this->Media->Field->save($this->Media->Field->create(array('name' => 'sublocation', 'data' => 'munster')));
+    $city = $this->Media->Field->save($this->Media->Field->create(array('name' => 'city', 'data' => 'freiburg')));
+    $state = $this->Media->Field->save($this->Media->Field->create(array('name' => 'state', 'data' => 'bw')));
+    $country = $this->Media->Field->save($this->Media->Field->create(array('name' => 'country', 'data' => 'germany')));
+
+    $fieldIds = Set::extract('/Field/id', array($keyword, $category, $sublocation, $city, $state, $country));
+    $this->Media->save(array('Media' => array('id' => $media1['Media']['id']), 'Field' => array('Field' => $fieldIds)));
+
+    $this->Search->addTag('none');
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media2['Media']['id']));
+
+    $this->Search->clear();
+    $this->Search->addCategory('none');
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media2['Media']['id']));
+
+    $this->Search->clear();
+    $this->Search->addSublocation('none');
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media2['Media']['id']));
+
+    $this->Search->clear();
+    $this->Search->addCity('none');
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media2['Media']['id']));
+
+    $this->Search->clear();
+    $this->Search->addState('none');
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media2['Media']['id']));
+
+    $this->Search->clear();
+    $this->Search->addCountry('none');
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media2['Media']['id']));
+
+    $this->Search->clear();
+    $this->Search->addLocation('none');
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media2['Media']['id']));
+
+    $this->Search->clear();
+    $this->Search->setGeo('none');
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media2['Media']['id']));
+  }
+
+  function testNotAssignedFieldsMultiple() {
+    $user = $this->User->save($this->User->create(array('username' => 'user', 'role' => ROLE_USER)));
+    $user = $this->User->findById($user['User']['id']);
+    $this->mockUser($user);
+
+    $media1 = $this->Media->save($this->Media->create(array('name' => 'IMG_1231.JPG', 'user_id' => $user['User']['id'])));
+    $media2 = $this->Media->save($this->Media->create(array('name' => 'IMG_1232.JPG', 'user_id' => $user['User']['id'])));
+    $media3 = $this->Media->save($this->Media->create(array('name' => 'IMG_1234.JPG', 'user_id' => $user['User']['id'])));
+
+    $keyword = $this->Media->Field->save($this->Media->Field->create(array('name' => 'keyword', 'data' => 'church')));
+    $category = $this->Media->Field->save($this->Media->Field->create(array('name' => 'category', 'data' => 'urban')));
+
+    $this->Media->save(array('Media' => array('id' => $media1['Media']['id']), 'Field' => array('Field' => $keyword['Field']['id'])));
+    $this->Media->save(array('Media' => array('id' => $media3['Media']['id']), 'Field' => array('Field' => $category['Field']['id'])));
+
+    $this->Search->addTag('none');
+    $this->Search->addCategory('none');
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media2['Media']['id']));
+  }
 }
