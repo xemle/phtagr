@@ -192,11 +192,14 @@ class User extends AppModel
     return false;
   }
 
-  /** Generate a keystring
-    @param data User model data
-    @param length Key length. Default is 10. Must be beween 3 and 128.
-    @param alphabet Key alphabet as string. Default is [a-zA-Z0-9]. Must be at least 10 characters long.
-    @return User model data */
+  /**
+   * Generate a random key
+   *
+   * @param data User model data as reference
+   * @param length Key length. Default is 10. Must be beween 3 and 128.
+   * @param alphabet Key alphabet as string. Default is [a-zA-Z0-9]. Must be at least 10 characters long.
+   * @return User model data
+   */
   public function generateKey(&$data, $length = 10, $alphabet = false) {
     srand(microtime(true)*1000);
 
@@ -210,7 +213,7 @@ class User extends AppModel
 
     $key = '';
     for ($i = 0; $i < $length; $i++) {
-      $key .= substr($alphabet, rand(0, $count), 1);
+      $key .= substr($alphabet, rand(0, $count - 1), 1);
     }
     $data['User']['key'] = $key;
     return $data;

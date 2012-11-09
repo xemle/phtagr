@@ -123,4 +123,18 @@ class UserTestCase extends CakeTestCase {
     $users = $this->User->findVisibleUsers($userB);
     $this->assertEqual(array('admin', 'sysop'), Set::extract('/User/username', $users));
   }
+
+  public function testGenerateKey() {
+    $user = $this->User->save($this->User->create(array('username' => 'user')));
+    $user = $this->User->findById($user['User']['id']);
+
+    $this->User->generateKey($user, 20, '0123456789abcdef');
+    $key = $user['User']['key'];
+    $this->assertEqual(20, strlen($key));
+    $this->assertEqual(true, preg_match('/[0123456789abcdef]+/', $key));
+
+    $this->User->generateKey($user);
+    $this->assertEqual(true, $user['User']['key'] != $key);
+  }
+
 }
