@@ -26,7 +26,7 @@ class OptionsController extends AppController {
       'profile' => __("Profile"),
       'password' => __("Password"),
       'import' => __("Import Options"),
-      'rss' => __("RSS Feeds"),
+      'links' => __("Links"),
       );
     parent::beforeFilter();
 
@@ -79,7 +79,7 @@ class OptionsController extends AppController {
     unset($this->request->data['User']['password']);
   }
 
-  public function rss($action = null) {
+  public function links($action = null) {
     $userId = $this->getUserId();
     $user = $this->User->findById($userId);
     if ($action == 'renew' || empty($user['User']['key'])) {

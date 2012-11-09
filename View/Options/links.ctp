@@ -19,4 +19,4 @@
   <li><?php echo $this->Html->link(__('Media RSS of My Media'), $myMediaMediaRss); ?> (Link: <code><?php echo $myMediaMediaRss; ?></code>)</li>
 </ul>
 
-<p><?php echo __("Click %s to renew the authentication key. All previous keys become invalid.", $this->Html->link(__('renew key'), 'rss/renew')); ?></p>
+<p><?php echo __("Click %s to renew the authentication key. All previous keys become invalid.", $this->Html->link(__('renew key'), 'links/renew')); ?></p>
