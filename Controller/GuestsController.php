@@ -33,6 +33,18 @@ class GuestsController extends AppController {
       );
   }
 
+  /**
+   * Add sub menu entry for guest
+   */
+  private function _addSubmenu(&$guest) {
+    $this->subMenu[] = array(
+      'url' => array('action' => $this->action, $guest['Guest']['id']),
+      'title' => __("Edit %s", $guest['Guest']['username']), 'active' => true,
+      array(
+        'url' => array('action' => 'links', $guest['Guest']['id']), 'title' => __("Links")),
+      );
+  }
+
   public function beforeRender() {
     parent::beforeRender();
   }
@@ -96,13 +108,12 @@ class GuestsController extends AppController {
         $this->Session->setFlash(__("Updates could not be saved!"));
       }
     }
-    $this->request->data = $this->Guest->findById($guestId);
-    unset($this->request->data['Guest']['password']);
-    $this->request->data['Comment']['auth'] = $this->Option->getValue($this->request->data, 'comment.auth', COMMENT_AUTH_NONE);
+    $guest = $this->Guest->findById($guestId);
+    unset($guest['Guest']['password']);
+    $this->_addSubMenu($guest);
+    $this->request->data = $guest;
+    $this->request->data['Comment']['auth'] = $this->Option->getValue($guest, 'comment.auth', COMMENT_AUTH_NONE);
     $this->set('userId', $userId);
-    $this->subMenu[] = array('url' => array('action' => $this->action, $guestId), 'title' => __("Edit"), 'active' => true,
-      array('url' => array('action' => 'links', $guestId), 'title' => __("RSS")),
-      );
   }
 
   /**
@@ -205,10 +216,9 @@ class GuestsController extends AppController {
         Logger::debug($this->Guest->validationErrors);
       }
     }
-    $this->request->data = $this->Guest->findById($guestId);
-    $this->subMenu[] = array('url' => array('action' => 'edit', $guestId), 'title' => __("Edit"), 'active' => true,
-      array('url' => array('action' => 'links', $guestId), 'title' => __("RSS"), 'active' => true),
-      );
+    $guest = $this->Guest->findById($guestId);
+    $this->_addSubMenu($guest);
+    $this->request->data = $guest;
   }
 }
 ?>
