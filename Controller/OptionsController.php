@@ -84,7 +84,7 @@ class OptionsController extends AppController {
     $user = $this->User->findById($userId);
     if ($action == 'renew' || empty($user['User']['key'])) {
       $tmp = array('User' => array('id' => $userId));
-      $this->User->generateKey($tmp);
+      $tmp = $this->User->generateKey($tmp);
       if (!$this->User->save($tmp, false, array('key'))) {
         Logger::err("Could not save user data");
         Logger::debug($this->User->validationErrors);
