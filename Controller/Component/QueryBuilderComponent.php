@@ -171,9 +171,9 @@ class QueryBuilderComponent extends Component {
    * Build condition list from params
    *
    * @param array params Parameter array
-   * @return array Array of conditions sorted by model
+   * @return array Array of conditions maped by model alias
    */
-  private function _buildConditions(&$params) {
+  private function _mapQueryConditions(&$params) {
     $modelToConditions = array();
     if (!count($params)) {
       return $modelToConditions;
@@ -225,18 +225,18 @@ class QueryBuilderComponent extends Component {
   }
 
   /**
-   * Extract inclusion and exclusion parameters. A exclustion is a value
-   * starting with a minus sign ('-'). An inclusion starts with a plus sign.
+   * Extract required and exclusion parameters. A exclustion is a value
+   * starting with a minus sign ('-'). An required term starts with a plus sign.
    *
    * @param data Parameter data
    * @param skip Parameter list which are not evaluated and skiped
-   * @return array Array of inclusions, optionals and exclusions
+   * @return array Array of required, optionals and exclusions
    */
   private function _splitRequirements(&$data, $skip = array('sort', 'north', 'south', 'west', 'east')) {
-    $inclusions = array();
+    $required = array();
     $exclusions = array();
     if (!count($data)) {
-      return array($inclusions, $exclusions);
+      return array($required, $exclusions);
     }
 
     foreach ($data as $name => $values) {
@@ -250,7 +250,7 @@ class QueryBuilderComponent extends Component {
           if ($matches[1] == '-') {
             $exclusions[$name] = $matches[2];
           } else {
-            $inclusions[$name] = $matches[2];
+            $required[$name] = $matches[2];
           }
           unset($data[$name]);
         }
@@ -261,7 +261,7 @@ class QueryBuilderComponent extends Component {
             if ($matches[1] == '-') {
               $list =& $exclusions;
             } else {
-              $list =& $inclusions;
+              $list =& $required;
             }
             if (!isset($list[$name])) {
               $list[$name] = array();
@@ -276,25 +276,31 @@ class QueryBuilderComponent extends Component {
         }
       }
     }
-    return array($inclusions, $exclusions);
+    return array($required, $exclusions);
   }
 
-  private function _buildSqlConditions($conditions) {
+  /**
+   * Build SQL conditions
+   *
+   * @param array $conditions Nested conditions array
+   * @return array Sanitized SQL conditions
+   */
+  private function _buildConditions($conditions) {
     $result = array();
     foreach ($conditions as $key => $value) {
       $sqls = array();
       $operand = 'AND';
       if ($key === 'OR') {
-        $sqls = $this->_buildSqlConditions($value);
+        $sqls = $this->_buildConditions($value);
         $operand = 'OR';
       } else if ($key === 'AND' || (is_numeric($key) && is_array($value))) {
-        $sqls = $this->_buildSqlConditions($value);
+        $sqls = $this->_buildConditions($value);
       } else if (!is_numeric($key) && is_array($value)) {
         $sqls[] = $key . "(" . join(', ', $this->_sanitizeData($value)) . ")";
       } else if (!is_numeric($key)) {
         $value = $this->_sanitizeData($value);
-        if (preg_match('/(.*)\s*(=|<|>|>=|<=|IN|LIKE)\s*/', $key, $m)) {
-          if ($m[2] == 'IN') {
+        if (preg_match('/(.*)\s*(=|<|>|>=|<=|IN|NOT IN|LIKE)\s*/', $key, $m)) {
+          if ($m[2] == 'IN' || $m[2] == 'NOT IN') {
             $sqls[] = "{$m[1]} {$m[2]} (" . join(", ", (array) $value) . ")";
           } else {
             $sqls[] = "{$m[1]} {$m[2]} " . $value;
@@ -314,7 +320,7 @@ class QueryBuilderComponent extends Component {
     return $result;
   }
 
-  private function _buildHABTMStatement($Model, $assoc, $joinType, $conditions, $count, $operand) {
+  private function _buildQueryForHABTM($Model, $assoc, $joinType, $modelConditions, $count, $operand) {
     if (!isset($Model->{$assoc})) {
       Logger::err("Could not access $assoc");
     }
@@ -334,28 +340,39 @@ class QueryBuilderComponent extends Component {
     $modelKey = $Model->primaryKey;
     $counterName = "{$assoc}Count{$this->counter}";
 
-    $join = "$joinType JOIN ("
-            ." SELECT `$joinAlias`.`$foreignKey`,COUNT(*) as $counterName"
-            ." FROM `$joinTable` AS `$joinAlias`, `$table` AS `$alias`"
-            ." WHERE `$joinAlias`.`$associationForeignKey` = `$alias`.`$key`"
-            ." AND (" . join(' OR ', $this->_buildSqlConditions($conditions)) . ")"
-            ." GROUP BY `$joinAlias`.`$foreignKey`) AS $joinAlias ON `$joinAlias`.`$foreignKey` = `$modelAlias`.`$modelKey`";
+    $conditions = array();
+    $joins = array();
+    if ($operand !== 'NOT') {
+      $joins[] = "$joinType JOIN ("
+              ." SELECT `$joinAlias`.`$foreignKey`,COUNT(*) AS `$counterName`"
+              ." FROM `$joinTable` AS `$joinAlias`, `$table` AS `$alias`"
+              ." WHERE `$joinAlias`.`$associationForeignKey` = `$alias`.`$key`"
+              ." AND (" . join(' OR ', $this->_buildConditions($modelConditions)) . ")"
+              ." GROUP BY `$joinAlias`.`$foreignKey`) AS $joinAlias ON `$joinAlias`.`$foreignKey` = `$modelAlias`.`$modelKey`";
+    } else {
+      // Exclusion with operand NOT: use NOT IN () with subquery for query speed
+      $subQuery = "SELECT `$joinAlias`.`$foreignKey`"
+              ." FROM `$joinTable` AS `$joinAlias`, `$table` AS `$alias`"
+              ." WHERE `$joinAlias`.`$associationForeignKey` = `$alias`.`$key`"
+              ." AND (" . join(' OR ', $this->_buildConditions($modelConditions)) . ")";
+      if ($alias == 'Group') {
+        // Workaround for CakePHP's magic condition quoting in DboSource::_quoteFields($conditions)
+        $subQuery = preg_replace("/`$alias`/", "`$alias{$this->counter}`", $subQuery);
+      }
+      $conditions[] = "Media.id NOT IN ( $subQuery )";
+    }
 
     if ($operand === 'AND') {
-      $conditions = array("COALESCE($counterName, 0) >= " . $count);
+      $conditions[] = "COALESCE($counterName, 0) >= $count";
     } else if ($operand === 'OR') {
-      $conditions = array("COALESCE($counterName, 0) >= " . 1);
-    } else if ($operand === 'NOT') {
-      $conditions = array("COALESCE($counterName, 0) = " . 0);
-    } else if ($operand === 'ANY') {
-      $conditions = array();
-    } else {
+      $conditions[] = "COALESCE($counterName, 0) >= 1";
+    } else if ($operand !== 'NOT' && $operand !== 'ANY') {
       Logger::err("Unknown operand $operand");
     }
-    return array('joins' => array($join), 'conditions' => $conditions, '_counters' => array($counterName));
+    return array('joins' => $joins, 'conditions' => $conditions, '_counters' => array($counterName));
   }
 
-  private function _buildHasManyStatement($Model, $assoc, $joinType, $conditions, $count, $operand) {
+  private function _buildQueryForHasMany($Model, $assoc, $joinType, $conditions, $count, $operand) {
     if (!isset($Model->{$assoc})) {
       Logger::err("Could not access $assoc");
     }
@@ -374,7 +391,7 @@ class QueryBuilderComponent extends Component {
     $join = "$joinType JOIN ("
             ." SELECT `$alias`.`$foreignKey`,COUNT(*) as $counterName"
             ." FROM `$table` AS `$alias`"
-            ." WHERE " . join(' OR ', $this->_buildSqlConditions($conditions))
+            ." WHERE " . join(' OR ', $this->_buildConditions($conditions))
             ." GROUP BY `$alias`.`$foreignKey`) AS $joinAlias ON `$joinAlias`.`$foreignKey` = `$modelAlias`.`$modelKey`";
 
     if ($operand === 'AND') {
@@ -389,7 +406,7 @@ class QueryBuilderComponent extends Component {
     return array('joins' => array($join), 'conditions' => $conditions, '_counters' => array($counterName));
   }
 
-  private function _buildBelongsToStatement($Model, $assoc, $joinType, $conditions) {
+  private function _buildQueryForBelongsTo($Model, $assoc, $joinType, $conditions) {
     if (!isset($Model->{$assoc})) {
       Logger::err("Could not access $assoc");
     }
@@ -403,14 +420,22 @@ class QueryBuilderComponent extends Component {
     $modelAlias = $Model->alias;
 
     $join = "$joinType JOIN `$table` AS `$alias` ON `$alias`.`$key` = `$modelAlias`.`$foreignKey`";
-    $conditions = $this->_buildSqlConditions($conditions);
+    $conditions = $this->_buildConditions($conditions);
 
     return array('joins' => array($join), 'conditions' => $conditions);
   }
 
-  private function _getAssociationType($Model, $assoc) {
-    $data = $Model->hasAndBelongsToMany;
-    if (isset($Model->hasAndBelongsToMany[$assoc])) {
+  /**
+   * Returns the association type for Model
+   *
+   * @param type $Model Main model
+   * @param type $assoc Association name
+   * @return string Return values are 'self', 'hasAndBelongsToMany','belongsTo', 'hasOne', 'hasMany' or false
+   */
+  private function _getAssociationType(&$Model, $assoc) {
+    if ($assoc == $Model->alias) {
+      return 'self';
+    } else if (isset($Model->hasAndBelongsToMany[$assoc])) {
       return 'hasAndBelongsToMany';
     } else if (isset($Model->belongsTo[$assoc])) {
       return 'belongsTo';
@@ -422,22 +447,22 @@ class QueryBuilderComponent extends Component {
     return false;
   }
 
-  private function _buildJoins($modelToConditions, $joinType, $operand) {
+  private function _buildQuery($modelToConditions, $joinType, $operand) {
     $Media =& $this->controller->Media;
     $query = array('conditions' => array());
     foreach ($modelToConditions as $modelAlias => $modelConditions) {
       $type = $this->_getAssociationType($Media, $modelAlias);
       if ($type == 'hasAndBelongsToMany') {
-        $query = array_merge_recursive($query, $this->_buildHABTMStatement($Media, $modelAlias, $joinType, $modelConditions['conditions'], $modelConditions['count'], $operand));
+        $query = array_merge_recursive($query, $this->_buildQueryForHABTM($Media, $modelAlias, $joinType, $modelConditions['conditions'], $modelConditions['count'], $operand));
       } else if ($type == 'hasMany') {
-        $query = array_merge_recursive($query, $this->_buildHasManyStatement($Media, $modelAlias, $joinType, $modelConditions['conditions'], $modelConditions['count'], $operand));
+        $query = array_merge_recursive($query, $this->_buildQueryForHasMany($Media, $modelAlias, $joinType, $modelConditions['conditions'], $modelConditions['count'], $operand));
       } else if ($type == 'belongsTo') {
         // User model is handled via _buildAccessConditions()
         if ($modelAlias != 'User') {
-          $query = array_merge_recursive($query, $this->_buildBelongsToStatement($Media, $modelAlias, $joinType, $modelConditions['conditions']));
+          $query = array_merge_recursive($query, $this->_buildQueryForBelongsTo($Media, $modelAlias, $joinType, $modelConditions['conditions']));
         }
-      } else if ($modelAlias == 'Media') {
-        $query['conditions'] = am($query['conditions'], $this->_buildSqlConditions($modelConditions['conditions']));
+      } else if ($type == 'self') {
+        $query['conditions'] = am($query['conditions'], $this->_buildConditions($modelConditions['conditions']));
       }
     }
     return $query;
@@ -481,26 +506,26 @@ class QueryBuilderComponent extends Component {
   public function build($data) {
     $this->counter = 0;
     $data = $this->_prepareParams($data);
-    list($include, $exclude) = $this->_splitRequirements($data);
-    // if we have some must-include default is OR for other conditions
-    $defaultOperand = $include ? 'ANY' : 'AND';
+    list($required, $exclude) = $this->_splitRequirements($data);
+    // if we have some required conditions default operand is OR for optional conditions
+    $defaultOperand = $required ? 'ANY' : 'AND';
     $operand = $this->_getParam($data, 'operand', $defaultOperand);
 
-    $conditionsByModel = $this->_buildConditions($data);
+    $conditionsByModel = $this->_mapQueryConditions($data);
     // If operand is OR we require a values. Therefore, we can use a INNER JOIN
     $joinType = $operand === 'ANY' ? 'LEFT' : 'INNER';
-    $query = $this->_buildJoins($conditionsByModel, $joinType, $operand);
+    $query = $this->_buildQuery($conditionsByModel, $joinType, $operand);
     if (count($exclude)) {
-      $conditionsByModel = $this->_buildConditions($exclude);
+      $conditionsByModel = $this->_mapQueryConditions($exclude);
       // We exclude media by WHERE condition. We need a LEFT JOIN
-      $excludeQuery = $this->_buildJoins($conditionsByModel, 'LEFT', 'NOT');
+      $excludeQuery = $this->_buildQuery($conditionsByModel, 'LEFT', 'NOT');
       unset($excludeQuery['_counters']);
       $query = array_merge_recursive($query, $excludeQuery);
     }
-    if (count($include)) {
-      $conditionsByModel = $this->_buildConditions($include);
-      $includeQuery = $this->_buildJoins($conditionsByModel, 'INNER', 'AND');
-      $query = array_merge_recursive($query, $includeQuery);
+    if (count($required)) {
+      $conditionsByModel = $this->_mapQueryConditions($required);
+      $requiredQuery = $this->_buildQuery($conditionsByModel, 'INNER', 'AND');
+      $query = array_merge_recursive($query, $requiredQuery);
     }
     $this->_buildAccessConditions($data, $query);
     $this->_buildOrder($data, $query);
@@ -572,66 +597,11 @@ class QueryBuilderComponent extends Component {
   }
 
   /**
-   * @param data Search parameters array
-   * @param SQL array
-   * @param name Parameter name
-   * @param value Parameter value
-   * @param array $options Array of builder options
+   * Build user access condition
+   *
+   * @param array $data Query terms
+   * @param array $query Current query
    */
-  private function buildField(&$data, &$query, $name, $values, $options) {
-    if (count($data[$name]) == 0) {
-      return;
-    }
-
-    $model = 'Field';
-    if (isset($options['model'])) {
-      $model = $options['model'];
-    }
-    if (isset($options['names'])) {
-      $name = $options['names'];
-    }
-    $count = 0;
-    $fieldValues = array();
-    foreach((array)$values as $value) {
-      if (preg_match('/[*\?]/', $value)) {
-        $value = preg_replace('/\*/', '%', $value);
-        $value = preg_replace('/\?/', '_', $value);
-        $valueCondition = $this->_buildCondition($model.'.data', $value, array('operand' => 'LIKE'));
-        $query['conditions'][] = array('AND' => array(
-            $this->_buildCondition($model.'.name', (array)$name),
-            $valueCondition
-        ));
-      } else {
-        $fieldValues[] = $value;
-      }
-      $count++;
-    }
-    if ($fieldValues) {
-        $query['conditions'][] = array('AND' => array(
-            $this->_buildCondition($model.'.name', (array)$name),
-            $this->_buildCondition($model.'.data', (array)$fieldValues),
-        ));
-    }
-
-    // handle operand conditions (AND and OR)
-    $operand = $this->_getParam($data, 'operand', 'OR');
-
-    $counter = $model.'Count';
-    if (!isset($query['_counts']) || !in_array($counter, $query['_counts'])) {
-      $query['_counts'][] = $counter;
-    }
-    $counter = $counter . ' >=';
-    if ($operand === 'AND') {
-      $count = !empty($query['conditions'][$counter]) ? $query['conditions'][$counter] : 0;
-      $count += count($data[$name]);
-      $query['conditions'][$counter] = $count;
-    } else if ($operand === 'OR') {
-      $query['conditions'][$counter] = 1;
-    } else {
-      Logger::err("Unknown operand '$operand'");
-    }
-  }
-
   private function _buildAccessConditions(&$data, &$query) {
     if (isset($data['visibility'])) {
       return true;
@@ -652,10 +622,11 @@ class QueryBuilderComponent extends Component {
     }
     $aclQuery = $this->controller->Media->buildAclQuery($user, $userId);
     $query = array_merge_recursive($query, $aclQuery);
+    return $query;
   }
 
   /**
-   * Add condition for folder query
+   * Add condition for folder query. This method is called dynamically by _mapQueryConditions
    *
    * @param type $data query data
    * @param type $value value of folder
@@ -682,6 +653,13 @@ class QueryBuilderComponent extends Component {
     return $this->_buildCondition('File.path', $rootDir . $value . '%', array('operand' => 'LIKE'));
   }
 
+  /**
+   * This method is called dynamically by _mapQueryConditions
+   *
+   * @param array $data Parameters
+   * @param String $value Parameter value
+   * @return array Array of conditions and counter
+   */
   private function _buildMediaType(&$data, $value) {
     $map = array(
       'image' => MEDIA_TYPE_IMAGE,
