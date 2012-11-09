@@ -921,4 +921,21 @@ class SearchComponentTestCase extends CakeTestCase {
     $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
     $this->assertEqual($mediaIds, array($media2['Media']['id']));
   }
+
+  /**
+   * Test search term geo:any
+   */
+  function testAnyGeo() {
+    $user = $this->User->save($this->User->create(array('username' => 'user', 'role' => ROLE_USER)));
+    $user = $this->User->findById($user['User']['id']);
+    $this->mockUser($user);
+
+    $media1 = $this->Media->save($this->Media->create(array('name' => 'IMG_1231.JPG', 'user_id' => $user['User']['id'], 'latitude' => 48.4, 'longitude' => 8.12)));
+    $media2 = $this->Media->save($this->Media->create(array('name' => 'IMG_1232.JPG', 'user_id' => $user['User']['id'])));
+
+    $this->Search->setGeo('any');
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media1['Media']['id']));
+  }
+
 }

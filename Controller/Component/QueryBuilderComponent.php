@@ -28,6 +28,7 @@ class QueryBuilderComponent extends Component {
    * 'name' => array('field' => 'Model.field', 'skipValue' => false)
    */
   var $conditionRules = array(
+    'any_geo' => array('field' => 'Media.latitude', 'with' => array('Media.latitude' => null, 'Media.longitude' => null), 'operand' => 'IS NOT', 'skipValue' => true),
     'category' => array('field' => 'Field.data', 'with' => array('Field.name' => 'category')),
     'city' => array('field' => 'Field.data', 'with' => array('Field.name' => 'city')),
     'country' => array('field' => 'Field.data', 'with' => array('Field.name' => 'country')),
@@ -44,7 +45,7 @@ class QueryBuilderComponent extends Component {
     'no_city' => array('field' => 'Field.data', 'with' => array('Field.name' => 'city'), 'skipValue' => true),
     'no_country' => array('field' => 'Field.data', 'with' => array('Field.name' => 'country'), 'skipValue' => true),
     'no_location' => array('field' => 'Field.data', 'with' => array('Field.name' => array('sublocation', 'city', 'state', 'country')), 'skipValue' => true),
-    'no_geo' => array('field' => 'Media.id', 'with' => array('Media.latitude' => null, 'Media.longitude' => null), 'skipValue' => true),
+    'no_geo' => array('field' => 'Media.latitude', 'with' => array('Media.latitude' => null, 'Media.longitude' => null), 'operand' => 'IS', 'skipValue' => true),
     'no_state' => array('field' => 'Field.data', 'with' => array('Field.name' => 'state'), 'skipValue' => true),
     'no_sublocation' => array('field' => 'Field.data', 'with' => array('Field.name' => 'sublocation'), 'skipValue' => true),
     'no_tag' => array('field' => 'Field.data', 'with' => array('Field.name' => 'keyword'), 'skipValue' => true),
@@ -114,7 +115,7 @@ class QueryBuilderComponent extends Component {
    */
   private function _buildCondition($field, $value, $options = array()) {
     $options = am(array('operand' => '='), $options);
-    $operands = array('=', '!=', '>', '<', '>=', '<=', 'IN', 'NOT IN', 'LIKE');
+    $operands = array('=', '!=', '>', '<', '>=', '<=', 'IN', 'NOT IN', 'LIKE', 'IS', 'IS NOT');
     extract($options);
     if (!in_array(strtoupper($operand), $operands)) {
       Logger::err("Illigal operand '$operand'. Set it to '='");
@@ -129,7 +130,11 @@ class QueryBuilderComponent extends Component {
     $values = (array)$value;
     $count = count($values);
     if ($count == 0 && $value === null) {
-      $condition .= ' IS NULL';
+      if ($operand == 'IS NOT') {
+        $condition .= ' IS NOT NULL';
+      } else {
+        $condition .= ' IS NULL';
+      }
       $count = 1;
     } else if ($count == 1 && $operand != 'IN' && $operand != 'NOT IN') {
       $condition .= " $operand " . $this->_sanitizeData(array_pop($values));
@@ -205,7 +210,7 @@ class QueryBuilderComponent extends Component {
           if (is_array($rule['with'])) {
             $withConditions = array();
             foreach ($rule['with'] as $field => $value) {
-              list($withCondition) = $this->_buildCondition($field, $value);
+              list($withCondition) = $this->_buildCondition($field, $value, array('operand' => $rule['operand']));
               $withConditions[] = $withCondition;
             }
             if (count($withConditions) > 1) {
@@ -497,6 +502,10 @@ class QueryBuilderComponent extends Component {
           unset($data[$name]);
           $key = 'no_' . $name;
           $data[$key] = "-none";
+        } else if ($values == 'any' && $name == 'geo') {
+          unset($data[$name]);
+          $key = 'any_' . $name;
+          $data[$key] = "+any";
         }
       }
     }

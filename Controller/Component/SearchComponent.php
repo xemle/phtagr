@@ -46,7 +46,7 @@ class SearchComponent extends Component
     'folder' => 'notEmpty',
     'field_value' => array('rule' => array('notEmpty'), 'multiple' => true),
     'group' => 'notEmpty',
-    'geo' => array('rule' => array('inList', array('none'))),
+    'geo' => array('rule' => array('inList', array('any', 'none'))),
     'key' => false,
     'media' => 'numeric',
     'name' => 'notEmpty',
