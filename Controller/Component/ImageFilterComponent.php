@@ -286,6 +286,70 @@ class ImageFilterComponent extends BaseFilterComponent {
       }
     }
 
+    // Associations to meta data: Groups
+    $fileGroups = $this->_extract($data, 'PhtagrGroups');
+    $media =  $this->_readFileGroups(&$fileGroups, &$media);
+        
+    return $media;
+
+  }
+
+  
+  public function _readFileGroups(&$fileGroups, &$media) {
+  
+    $user = $this->controller->getUser();
+    $fileGroups = array_unique(preg_split('/\s*,\s*/', trim($fileGroups)));
+    
+    $DBGroups = $this->controller->Media->Group->find('all', array('order' => array('Group.name' => 'ASC')));
+    $DBGroupsNames = Set::extract('/Group/name', $DBGroups);
+
+    //create groups missing from phtagr db
+    foreach($fileGroups as $fileGroupName) {
+      if (!in_array($fileGroupName, $DBGroupsNames)) {
+        $group = $this->Media->Group->save($this->Media->Group->create(array('user_id' => $user['User']['id'], 'name' => $fileGroupName, 'description' => 'AUTO added group', 'is_hidden' => true, 'is_moderated' => true, 'is_shared' => false)));
+      }
+    }
+
+    // also add to media default user group
+    $acl = $this->controller->User->Option->getDefaultAcl($user);
+    $defaultGroup = Set::extract('/Group[id='.$acl['groupId'].']/name', $DBGroups);
+    $fileGroups = array_unique(am($fileGroups,$defaultGroup));
+
+    //subscribe to shared groups if not owner and not already subscribed
+    foreach($DBGroups as $DBGroup) {
+      if ($DBGroup['Group']['user_id']!=$user['User']['id']) {
+        $members = Set::extract('Member.{n}.id', $DBGroup);
+        if (!in_array($user['User']['id'], $members)) {
+          if (($DBGroup['Group']['is_shared']==true) and $DBGroup['Group']['is_moderated']==false) {
+            $result = $this->Media->Group->subscribe($DBGroup, $user['User']['id']);
+          }
+        }
+      }
+    }
+
+    $user = $this->Media->User->findById($user['User']['id']);
+    $allowedgroups = $this->controller->Media->Group->getGroupsForMedia($user);
+    
+    if ($allowedgroups) {
+      $allowedgroups = Set::combine($allowedgroups, '{n}.Group.id', '{n}.Group.name');
+      sort($allowedgroups);
+    } else {
+      $allowedgroups = array();
+    }
+
+    $finalGroups = array_intersect($fileGroups,$allowedgroups);
+
+    $finalGroupsList = implode(",", $finalGroups);
+    $dataGroups = array('Group'=>array('names' => $finalGroupsList));
+
+    $changedgroups = $this->controller->Media->editSingle(&$media, $dataGroups, &$user);
+
+    if ($changedgroups) {
+      $media['Group']['Group'] = $changedgroups['Group']['Group'];
+    } else {
+      $media['Group']['Group'] = Set::extract('Group.{n}.id', $media);
+    }
+    
     return $media;
   }
 
@@ -587,6 +651,9 @@ class ImageFilterComponent extends BaseFilterComponent {
   public function _createExportArguments(&$data, $media) {
     $args = array();
 
+    $cfgPath = APP.'Config/ExifToolConfig';
+    $args['-config'] = $cfgPath;
+
     $args = am($args, $this->_createExportDate($data, $media));
     $args = am($args, $this->_createExportGps($data, $media));
 
@@ -622,6 +689,35 @@ class ImageFilterComponent extends BaseFilterComponent {
         }
       }
     }
+
+    //add Groups to metadata xmp:   XMP-Phtagr:PhtagrGroups
+    $metaGroups = $this->_extractList($data, 'PhtagrGroups');
+
+    if (count($media['Group'])) {
+      $mediaGroups = Set::extract('/Group/name', $media);
+    } else {
+      $dbGroups = array();
+    }
+
+    $user = $this->controller->getUser();
+    $allowedgroups= $this->controller->Media->Group->getGroupsForMedia($user);
+    $allowedgroups = Set::extract('/Group/name', $allowedgroups);
+
+    if (!$allowedgroups) {
+      $allowedgroups= array();
+    }
+    
+    foreach (array_diff($metaGroups, $mediaGroups) as $del) {
+      //do not erase existing, not allowed (yet) groups = delete only allowed groups
+      if (in_array($del, $allowedgroups)) {
+        $args[] = '-PhtagrGroups-=' . $del;
+      }
+    }
+    
+    foreach (array_diff($mediaGroups, $metaGroups) as $add) {
+      $args[] = '-PhtagrGroups+=' . $add;
+    }
+
     return $args;
   }
 
