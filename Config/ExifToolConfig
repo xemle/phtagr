@@ -1,0 +1,111 @@
+#------------------------------------------------------------------------------
+# File:         ExifTool_config  -->  ~/.ExifTool_config
+#
+# Description:  Sample user configuration file for Image::ExifTool
+#
+# Notes:        This example file shows how to define your own shortcuts and
+#               add new EXIF, IPTC, XMP, PNG, MIE and Composite tags, as well
+#               as how to specify preferred lenses for the LensID tag and
+#               define default values for ExifTool options.
+#
+#               Note that unknown tags may be extracted even if they aren't
+#               defined, but tags must be defined to be written.  Also note
+#               that it is possible to override an existing tag definition
+#               with a user-defined tag.
+#
+#               To activate this file, rename it to ".ExifTool_config" and
+#               place it in your home directory or the exiftool application
+#               directory.  (On Windows and Mac systems this must be done via
+#               the command line since the GUI's don't allow filenames to begin
+#               with a dot.  Use the "rename" command in Windows or "mv" on the
+#               Mac.)  This causes ExifTool to automatically load the file when
+#               run.  Your home directory is determined by the first defined of
+#               the following environment variables:
+#
+#                   1. EXIFTOOL_HOME
+#                   2. HOME
+#                   3. HOMEDRIVE + HOMEPATH
+#                   4. (the current directory)
+#
+#               Alternatively, the -config option of the exiftool application
+#               may be used to load a specific configuration file (note that
+#               it must be the first option on the command line):
+#
+#                   exiftool -config ExifTool_config ...
+#
+#               This sample file defines the following 16 new tags as well as a
+#               number of Shortcut and Composite tags:
+#
+
+#                   5.  XMP-xmp:NewXMPxmpTag
+#                   6.  XMP-exif:GPSPitch
+#                   7.  XMP-exif:GPSRoll
+#                   8.  XMP-xxx:NewXMPxxxTag1
+#                   9.  XMP-xxx:NewXMPxxxTag2
+#                  10.  XMP-xxx:NewXMPxxxTag3
+#                  11.  XMP-xxx:NewXMPxxxStruct
+
+#
+#               For detailed information on the definition of tag tables and
+#               tag information hashes, see lib/Image/ExifTool/README.
+#------------------------------------------------------------------------------
+
+
+# NOTE: All tag names used in the following tables are case sensitive.
+
+# The %Image::ExifTool::UserDefined hash defines new tags to be added
+# to existing tables.
+
+%Image::ExifTool::UserDefined = (
+
+    # new XMP namespaces (ie. Phtagr) must be added to the Main XMP table:
+    'Image::ExifTool::XMP::Main' => {
+        Phtagr => { # <-- must be the same as the NAMESPACE prefix
+            SubDirectory => {
+                TagTable => 'Image::ExifTool::UserDefined::Phtagr',
+                # (see the definition of this table below)
+            },
+        },
+        # add more user-defined XMP namespaces here...
+    },
+
+);
+
+# This is a basic example of the definition for a new XMP namespace.
+# This table is referenced through a SubDirectory tag definition
+# in the %Image::ExifTool::UserDefined definition above.
+# The namespace prefix for these tags is 'Phtagr', which corresponds to
+# an ExifTool family 1 group name of 'XMP-Phtagr'.
+%Image::ExifTool::UserDefined::Phtagr = (
+    GROUPS => { 0 => 'XMP', 1 => 'XMP-Phtagr', 2 => 'Image' },
+    NAMESPACE => { 'Phtagr' => 'http://xmp.phtagr.org/Phtagr/1.0/' },
+    WRITABLE => 'string',
+
+    PhtagrGroups => { List => 'Bag' },
+
+    #Me only, Group members, Users, Everyone
+    #PhtagrACLview => { List => 'Bag' },
+    #PhtagrACLdown => { List => 'Bag' },
+    #PhtagrACLaddtags => { List => 'Bag' },
+    #PhtagrACLeditmeta => { List => 'Bag' },
+
+#exemple other types
+    #NewXMPxxxTag1 => { Writable => 'lang-alt' },
+    #NewXMPxxxTag2 => { Groups => { 2 => 'Author' } },
+    #NewXMPxxxTag3 => { List => 'Bag' },
+
+);
+
+
+
+
+# Specify default ExifTool option values
+# (see the Options function documentation for available options)
+%Image::ExifTool::UserDefined::Options = (
+    CoordFormat => '%.6f',  # change default GPS coordinate format
+    Duplicates => 1,        # make -a default for the exiftool app
+    GeoMaxHDOP => 4,        # ignore GPS fixes with HDOP > 4
+);
+
+#------------------------------------------------------------------------------
+1;  #end

@@ -310,7 +310,7 @@ class BrowserController extends AppController
         $readCount++;
       }
     }
-    $this->Session->setFlash(__("Imported %d files (%d) errors)", $readCount, $errorCount));
+    $this->Session->setFlash(__("Imported %d files (%d errors)", $readCount, $errorCount));
 
     $this->redirect('index/'.$path);
   }

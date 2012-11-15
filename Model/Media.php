@@ -929,16 +929,18 @@ class Media extends AppModel {
         $tmp['Media'][$name] = $data['Media'][$name];
       }
     }
+    if ($media['Media']['canWriteAcl']) {
+      $groups = $this->Group->editMetaMulti($media, $data);
+      if ($groups) {
+        $tmp['Group'] = $groups['Group'];
+      }
+    }
     // only meta data above mark media a dirty for meta data synchronization
     if (count($tmp) != 1 || count($tmp['Media']) != 2) {
       $tmp['Media']['flag'] = ($media['Media']['flag'] | MEDIA_FLAG_DIRTY);
     }
 
     if ($media['Media']['canWriteAcl']) {
-      $groups = $this->Group->editMetaMulti($media, $data);
-      if ($groups) {
-        $tmp['Group'] = $groups['Group'];
-      }
       $this->updateAcl($tmp, $media, $data);
     }
     if (count($tmp) == 1 && count($tmp['Media']) == 2) {
@@ -990,15 +992,17 @@ class Media extends AppModel {
         $this->rotate($tmp, $media['Media']['orientation'], $data['Media']['rotation']);
       }
     }
-    // only meta data above mark media a dirty for meta data synchronization
-    if (count($tmp) != 1 || count($tmp['Media']) != 2) {
-      $tmp['Media']['flag'] = ($media['Media']['flag'] | MEDIA_FLAG_DIRTY);
-    }
     if ($media['Media']['canWriteAcl']) {
       $groups = $this->Group->editMetaSingle($media, $data, $user);
       if (isset($groups['Group'])) {
         $tmp['Group'] = $groups['Group'];
       }
+    }
+    // only meta data above mark media a dirty for meta data synchronization
+    if (count($tmp) != 1 || count($tmp['Media']) != 2) {
+      $tmp['Media']['flag'] = ($media['Media']['flag'] | MEDIA_FLAG_DIRTY);
+    }
+    if ($media['Media']['canWriteAcl']) {
       $this->updateAcl($tmp, $media, $data);
     }
     // Unchanged data
