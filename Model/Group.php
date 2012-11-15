@@ -15,8 +15,8 @@
  * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
 
-class Group extends AppModel
-{
+class Group extends AppModel {
+
   var $name = 'Group';
 
   var $belongsTo = array('User' => array());
@@ -137,10 +137,17 @@ class Group extends AppModel
     return $groups;
   }
 
-  /** Subscribe a user to a group
-    @param groupId Group ID
-    @param userId User ID
-    @return Return code */
+  public function canSubscribe(&$group, &$user) {
+    return $user['User']['role'] >= ROLE_ADMIN || $group['Group']['is_shared'] && !$group['Group']['is_moderated'];
+  }
+
+  /**
+   * Subscribe a user to a group
+   *
+   * @param groupId Group ID
+   * @param userId User ID
+   * @return Return code
+   */
   public function subscribe($group, $userId) {
     if (!$group) {
       return $this->returnCode(404, sprintf(__("%s not found", true), __("Group", true)));
@@ -160,10 +167,13 @@ class Group extends AppModel
     }
   }
 
-  /** Unsubscribe a user of a group
-    @param groupName Group name
-    @param userId User ID
-    @return Return code */
+  /**
+   * Unsubscribe a user of a group
+   *
+   * @param groupName Group name
+   * @param userId User ID
+   * @return Return code
+   */
   public function unsubscribe($group, $userId) {
     if (!$group) {
       return $this->returnCode(404, sprintf(__("%s not found", true), __("Group", true)));
@@ -181,7 +191,9 @@ class Group extends AppModel
     }
   }
 
-  /** Evaluates if the group is writeable */
+  /**
+   * Evaluates if the group is writeable
+   */
   public function isAdmin(&$group, &$user) {
     if ($user['User']['role'] >= ROLE_ADMIN || $user['User']['id'] == $group['Group']['user_id']) {
       return true;
@@ -190,10 +202,13 @@ class Group extends AppModel
     }
   }
 
-  /** Set the writeable flag of the group
-    @param group Group model data (as reference)
-    @param user Current user
-    @return Group model data */
+  /**
+   * Set the writeable flag of the group
+   *
+   * @param group Group model data (as reference)
+   * @param user Current user
+   * @return Group model data
+   */
   public function setAdmin(&$group, &$user) {
     $group['Group']['is_admin'] = $this->isAdmin($group, $user);
     return $group;

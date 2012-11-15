@@ -46,8 +46,10 @@ class TestReadController extends AppController {
 
 	var $components = array('FileManager', 'FilterManager');
 
+  var $userMockId;
+
 	public function &getUser() {
-    $user = $this->User->find('first');
+    $user = $this->User->findById($this->userMockId);
     return $user;
 	}
 
@@ -100,6 +102,7 @@ class MediaReadTestCase extends CakeTestCase {
     $CakeRequest = new CakeRequest();
 		$CakeResponse = new CakeResponse();
 		$this->Controller = new TestReadController($CakeRequest, $CakeResponse);
+    $this->Controller->userMockId = $this->userId;
 		$this->Controller->constructClasses();
 		$this->Controller->startupProcess();
     $this->Media = $this->Controller->Media;
@@ -124,6 +127,10 @@ class MediaReadTestCase extends CakeTestCase {
     unset($this->Folder);
 		parent::tearDown();
 	}
+
+  public function mockUser(&$user) {
+    $this->Controller->userMockId = $user['User']['id'];
+  }
 
   private function findExecutable($command) {
     if (DS != '/') {
@@ -259,9 +266,11 @@ class MediaReadTestCase extends CakeTestCase {
 
   public function testImageRead() {
     copy(RESOURCES . 'IMG_7795.JPG', TEST_FILES_TMP . 'IMG_7795.JPG');
+    // Precondition: There are not groups yet and will be created on import
+    $this->assertEqual($this->Media->Group->find('count'), 0);
+
     $this->Controller->FilterManager->readFiles(TEST_FILES_TMP, false);
-    $count = $this->Media->find('count');
-    $this->assertEqual($count, 1);
+    $this->assertEqual($this->Media->find('count'), 1);
 
     $media = $this->Media->find('first');
     $this->assertEqual($media['Media']['date'], '2009-02-14 14:36:34');
@@ -280,6 +289,22 @@ class MediaReadTestCase extends CakeTestCase {
     $this->assertEqual(Set::extract('/Field[name=city]/data', $media), array('ayutthaya'));
     $this->assertEqual(Set::extract('/Field[name=state]/data', $media), array('ayutthaya'));
     $this->assertEqual(Set::extract('/Field[name=country]/data', $media), array('thailand'));
+
+    $groupNames = Set::extract('/Group/name', $media);
+    sort($groupNames);
+    $this->assertEqual($groupNames, array('family', 'friends'));
+
+    // Check auto created groups
+    $groups = $this->Media->Group->find('all');
+    $this->assertEqual(count($groups), 2);
+    $this->assertEqual($groups[0]['Group']['user_id'], $media['User']['id']);
+    $this->assertEqual($groups[1]['Group']['user_id'], $media['User']['id']);
+    $this->assertEqual($groups[0]['Group']['is_moderated'], 1);
+    $this->assertEqual($groups[1]['Group']['is_moderated'], 1);
+    $this->assertEqual($groups[0]['Group']['is_shared'], 0);
+    $this->assertEqual($groups[1]['Group']['is_shared'], 0);
+    $this->assertEqual($groups[0]['Group']['is_hidden'], 1);
+    $this->assertEqual($groups[1]['Group']['is_hidden'], 1);
   }
 
   public function testVideoRead() {
@@ -300,4 +325,24 @@ class MediaReadTestCase extends CakeTestCase {
     $this->assertEqual($media['Media']['longitude'], 8.89242);
   }
 
+  public function testGroupAutoSubscription() {
+    copy(RESOURCES . 'IMG_7795.JPG', TEST_FILES_TMP . 'IMG_7795.JPG');
+    // Precondition: There are not groups yet and will be created on import
+    $this->assertEqual($this->Media->Group->find('count'), 0);
+
+    $userA = $this->User->save($this->User->create(array('username' => 'User')));
+    $this->mockUser($userA);
+
+    $userB = $this->User->save($this->User->create(array('username' => 'Another User')));
+    $this->User->Group->save($this->User->Group->create(array('name' => 'friends', 'user_id' => $userB['User']['id'], 'is_moderated' => false, 'is_shared' => true)));
+    $this->User->Group->save($this->User->Group->create(array('name' => 'family', 'user_id' => $userB['User']['id'], 'is_moderated' => true, 'is_shared' => true)));
+
+    $this->Controller->FilterManager->readFiles(TEST_FILES_TMP, false);
+    $media = $this->Media->find('first');
+    // Test auto subscription. Exclude group family which is moderated
+    $this->assertEqual(Set::extract('/Group/name', $media), array('friends'));
+    // Check subscription to group friends
+    $user = $this->User->findById($media['User']['id']);
+    $this->assertEqual(Set::extract('/Member/name', $user), array('friends'));
+  }
 }

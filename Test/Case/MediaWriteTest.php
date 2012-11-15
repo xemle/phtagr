@@ -42,9 +42,9 @@ class TestWriteController extends AppController {
 
   var $uses = array('Media', 'MyFile', 'User', 'Option');
   var $components = array('FileManager', 'FilterManager');
-
+  var $mockUserId;
   public function &getUser() {
-    $user = $this->User->find('first');
+    $user = $this->User->findById($this->mockUserId);
     return $user;
   }
 
@@ -94,6 +94,7 @@ class MediaWriteTestCase extends CakeTestCase {
     $CakeRequest = new CakeRequest();
     $CakeResponse = new CakeResponse();
     $this->Controller = new TestWriteController($CakeRequest, $CakeResponse);
+    $this->Controller->mockUserId = $this->userId;
     $this->Controller->constructClasses();
     $this->Controller->startupProcess();
     $this->Media = $this->Controller->Media;
@@ -101,6 +102,10 @@ class MediaWriteTestCase extends CakeTestCase {
 
 
     $this->Folder->create(TEST_FILES_TMP);
+  }
+
+  private function mockUser(&$user) {
+    $this->Controller->mockUserId = $user['User']['id'];
   }
 
   private function findExecutable($command) {
@@ -160,6 +165,7 @@ class MediaWriteTestCase extends CakeTestCase {
       return array();
     }
     $cmd = $option['Option']['value'];
+    $cmd .= ' -config ' . escapeshellarg(APP . 'Config' . DS . 'ExifTool-phtagr.conf');
     $cmd .= ' ' . escapeshellarg('-n');
     $cmd .= ' ' . escapeshellarg('-S');
     $cmd .= ' ' . escapeshellarg($filename);
@@ -342,4 +348,67 @@ class MediaWriteTestCase extends CakeTestCase {
     $this->assertTrue(!isset($values['Province-State']));
     $this->assertEqual($values['Country-PrimaryLocationName'], 'india');
   }
+
+  function testGroupWrite() {
+    $filename = TEST_FILES_TMP . 'IMG_6131.JPG';
+    copy(RESOURCES . 'IMG_6131.JPG', $filename);
+    clearstatcache(true, $filename);
+    $user = $this->Controller->getUser();
+    $group1 = $this->User->Group->save($this->User->Group->create(array('name' => 'family', 'user_id' => $user['User']['id'])));
+    $group2 = $this->User->Group->save($this->User->Group->create(array('name' => 'friends', 'user_id' => $user['User']['id'])));
+
+    $this->Controller->FilterManager->read($filename);
+    $media = $this->Media->find('first');
+
+    $data = array('Group' => array('names' => 'family,friends'));
+
+    $tmp = $this->Media->editSingle($media, $data, $user);
+    $this->Media->save($tmp);
+    $media = $this->Media->findById($media['Media']['id']);
+    $result = $this->Controller->FilterManager->write($media);
+    $this->assertEqual($result, true);
+
+    // Verify written meta data
+    $values = $this->extractMeta($filename);
+    $this->assertEqual($values['PhtagrGroups'], 'family, friends');
+  }
+
+  public function testKeepFileGroupIfSubscriptionIsMissing() {
+    $filename = TEST_FILES_TMP . 'IMG_7795.JPG';
+    copy(RESOURCES . 'IMG_7795.JPG', $filename);
+    clearstatcache(true, $filename);
+
+    // Precondition: There are not groups yet and will be created on import
+    $this->assertEqual($this->Media->Group->find('count'), 0);
+
+    $userA = $this->User->save($this->User->create(array('username' => 'User')));
+    $this->User->Group->save($this->User->Group->create(array('name' => 'worker', 'user_id' => $userA['User']['id'], 'is_moderated' => true, 'is_shared' => false)));
+    $this->mockUser($userA);
+
+    $userB = $this->User->save($this->User->create(array('username' => 'Another User')));
+    $this->User->Group->save($this->User->Group->create(array('name' => 'friends', 'user_id' => $userB['User']['id'], 'is_moderated' => false, 'is_shared' => true)));
+    $this->User->Group->save($this->User->Group->create(array('name' => 'family', 'user_id' => $userB['User']['id'], 'is_moderated' => true, 'is_shared' => true)));
+
+    $this->Controller->FilterManager->readFiles(TEST_FILES_TMP, false);
+    $userA = $this->User->findById($userA['User']['id']);
+    $media = $this->Media->find('first');
+    // Test auto subscription. Exclude group family which is moderated
+    $this->assertEqual(Set::extract('/Group/name', $media), array('friends'));
+
+    $data = array('Group' => array('names' => 'friends, worker'));
+    $tmp = $this->Media->editSingle($media, $data, $userA);
+    $this->Media->save($tmp);
+    $media = $this->Media->find('first');
+    // Test auto subscription. Exclude group family which is moderated
+    $this->assertEqual(Set::extract('/Group/name', $media), array('friends', 'worker'));
+
+    $media = $this->Media->findById($media['Media']['id']);
+    $result = $this->Controller->FilterManager->write($media);
+    $this->assertEqual($result, true);
+
+    // Verify written meta data
+    $values = $this->extractMeta($filename);
+    $this->assertEqual($values['PhtagrGroups'], 'family, friends, worker');
+  }
+
 }

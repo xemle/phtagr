@@ -52,7 +52,7 @@ class ImageFilterComponent extends BaseFilterComponent {
    * @param media Reference of Media model data
    * @param options Options
    *  - noSave if set dont save model data
-   * @return The image data array or False on error
+   * @return mixed The image data array or False on error
    */
   public function read(&$file, &$media = null, $options = array()) {
     $options = am(array('noSave' => false), $options);
@@ -147,19 +147,24 @@ class ImageFilterComponent extends BaseFilterComponent {
     Logger::debug("Cleaned meta data of '$filename'");
   }
 
+  private function _getExifToolConf() {
+    return APP . 'Config' . DS . 'ExifTool-phtagr.conf';
+  }
+
   /**
    * Read the meta data viea exiftool from a file
    *
    * @param filename Filename to read
    * @result Array of metadata or false on error
    */
-  public function _readMetaData($filename) {
+  private function _readMetaData($filename) {
     if (!$this->controller->getOption('bin.exiftool')) {
       return false;
     }
     // read meta data
     $bin = $this->controller->getOption('bin.exiftool', 'exiftool');
-    $result = $this->Command->run($bin, array('-S', '-n', $filename));
+    $args = array('-config', $this->_getExifToolConf(), '-S', '-n', $filename);
+    $result = $this->Command->run($bin, $args);
     $output = $this->Command->output;
     if ($result == 127) {
       Logger::err("$bin could not be found!");
@@ -182,9 +187,9 @@ class ImageFilterComponent extends BaseFilterComponent {
    * IPTC has the priority.
    *
    * @param data Meta data
-   * @return Date of the meta data or now if not data information was found
+   * @return string Date of the meta data or now if not data information was found
    */
-  public function _extractMediaDateGetId3($data) {
+  private function _extractMediaDateGetId3($data) {
     // IPTC date
     $dateIptc = $this->_extract($data, 'iptc/IPTCApplication/DateCreated/0', null);
     if ($dateIptc) {
@@ -207,9 +212,9 @@ class ImageFilterComponent extends BaseFilterComponent {
    * IPTC has the priority.
    *
    * @param data Meta data
-   * @return Date of the meta data or now if not data information was found
+   * @return string Date of the meta data or now if not data information was found
    */
-  public function _extractMediaDate($data) {
+  private function _extractMediaDate($data) {
     // IPTC date
     $dateIptc = $this->_extract($data, 'DateCreated', null);
     if ($dateIptc) {
@@ -238,7 +243,7 @@ class ImageFilterComponent extends BaseFilterComponent {
    * @param data Data array from exif tool array
    * @return Array of the the image data array as image model data
    */
-  public function _extractImageData(&$media, &$data) {
+  private function _extractImageData(&$media, &$data) {
     $user = $this->controller->getUser();
 
     $v =& $media['Media'];
@@ -288,72 +293,48 @@ class ImageFilterComponent extends BaseFilterComponent {
 
     // Associations to meta data: Groups
     $fileGroups = $this->_extract($data, 'PhtagrGroups');
-    $media =  $this->_readFileGroups(&$fileGroups, &$media);
-        
-    return $media;
+    $media = $this->_readFileGroups($fileGroups, $media);
 
+    return $media;
   }
 
-  
-  public function _readFileGroups(&$fileGroups, &$media) {
-  
-    $user = $this->controller->getUser();
-    $fileGroups = array_unique(preg_split('/\s*,\s*/', trim($fileGroups)));
-    
-    $DBGroups = $this->controller->Media->Group->find('all', array('order' => array('Group.name' => 'ASC')));
-    $DBGroupsNames = Set::extract('/Group/name', $DBGroups);
-
-    //create groups missing from phtagr db
-    foreach($fileGroups as $fileGroupName) {
-      if (!in_array($fileGroupName, $DBGroupsNames)) {
-        $group = $this->Media->Group->save($this->Media->Group->create(array('user_id' => $user['User']['id'], 'name' => $fileGroupName, 'description' => 'AUTO added group', 'is_hidden' => true, 'is_moderated' => true, 'is_shared' => false)));
-      }
+  private function _readFileGroups($fileGroups, &$media) {
+    if (!$fileGroups) {
+      return $media;
     }
-
-    // also add to media default user group
-    $acl = $this->controller->User->Option->getDefaultAcl($user);
-    $defaultGroup = Set::extract('/Group[id='.$acl['groupId'].']/name', $DBGroups);
-    $fileGroups = array_unique(am($fileGroups,$defaultGroup));
-
-    //subscribe to shared groups if not owner and not already subscribed
-    foreach($DBGroups as $DBGroup) {
-      if ($DBGroup['Group']['user_id']!=$user['User']['id']) {
-        $members = Set::extract('Member.{n}.id', $DBGroup);
-        if (!in_array($user['User']['id'], $members)) {
-          if (($DBGroup['Group']['is_shared']==true) and $DBGroup['Group']['is_moderated']==false) {
-            $result = $this->Media->Group->subscribe($DBGroup, $user['User']['id']);
-          }
+    $fileGroupNames = array_unique(preg_split('/\s*,\s*/', trim($fileGroups)));
+    $user = $this->controller->getUser();
+    $dbGroups = $this->Media->Group->find('all', array('conditions' => array('Group.name' => $fileGroupNames)));
+    $dbGroupNames = Set::extract('/Group/name', $dbGroups);
+    
+    $mediaGroupIds = array();
+    foreach ($fileGroupNames as $fileGroupName) {
+      if (!in_array($fileGroupName, $dbGroupNames)) {
+        // create missing group with restriced rights
+        $group = $this->Media->Group->save($this->Media->Group->create(array('user_id' => $user['User']['id'], 'name' => $fileGroupName, 'description' => 'AUTO added group', 'is_hidden' => true, 'is_moderated' => true, 'is_shared' => false)));
+        $mediaGroupIds[] = $group['Group']['id'];
+      } else {
+        $dbGroup = Set::extract("/Group[name=$fileGroupName]", $dbGroups);
+        if (!$dbGroup) {
+          Logger::err("Could not find group with name $fileGroupName in groups " . join(', ', Set::extract("/Group/name", $dbGroups)));
+          continue;
+        }
+        $dbGroup = array_pop($dbGroup); // Set::extract returns always arrays
+        if ($this->Media->Group->isAdmin($dbGroup, $user)) {
+          $mediaGroupIds[] = $dbGroup['Group']['id'];
+        } else if ($this->Media->Group->canSubscribe($dbGroup, $user)) {
+          $this->Media->Group->subscribe($dbGroup, $user['User']['id']);
+          $mediaGroupIds[] = $dbGroup['Group']['id'];
         }
       }
     }
 
-    $user = $this->Media->User->findById($user['User']['id']);
-    $allowedgroups = $this->controller->Media->Group->getGroupsForMedia($user);
-    
-    if ($allowedgroups) {
-      $allowedgroups = Set::combine($allowedgroups, '{n}.Group.id', '{n}.Group.name');
-      sort($allowedgroups);
-    } else {
-      $allowedgroups = array();
-    }
-
-    $finalGroups = array_intersect($fileGroups,$allowedgroups);
-
-    $finalGroupsList = implode(",", $finalGroups);
-    $dataGroups = array('Group'=>array('names' => $finalGroupsList));
-
-    $changedgroups = $this->controller->Media->editSingle(&$media, $dataGroups, &$user);
-
-    if ($changedgroups) {
-      $media['Group']['Group'] = $changedgroups['Group']['Group'];
-    } else {
-      $media['Group']['Group'] = Set::extract('Group.{n}.id', $media);
-    }
-    
+    // Default acl group is assigned by media creation
+    $media['Group']['Group'] = am($media['Group']['Group'], $mediaGroupIds);
     return $media;
   }
 
-  public function _compute($value) {
+  private function _compute($value) {
     if ($value && preg_match('/(\d+)\/(\d+)/', $value, $m)) {
       return ($m[1] / $m[2]);
     } else {
@@ -361,7 +342,7 @@ class ImageFilterComponent extends BaseFilterComponent {
     }
   }
 
-  public function _computeGps($values) {
+  private function _computeGps($values) {
     if (!is_array($values) || count($values) < 3) {
       return $values;
     }
@@ -374,7 +355,7 @@ class ImageFilterComponent extends BaseFilterComponent {
     return $v;
   }
 
-  public function _computeSutter($value) {
+  private function _computeSutter($value) {
     if (!$value) {
       return $value;
     }
@@ -389,7 +370,7 @@ class ImageFilterComponent extends BaseFilterComponent {
    * @param data Data array from exif tool array
    * @return Array of the the image data array as image model data
    */
-  public function _extractImageDataGetId3(&$media, &$data) {
+  private function _extractImageDataGetId3(&$media, &$data) {
     $user = $this->controller->getUser();
 
     $v =& $media['Media'];
@@ -447,7 +428,7 @@ class ImageFilterComponent extends BaseFilterComponent {
    * @param file File model data
    * @param media Media model data
    * @param options Array of options
-   * @return False on error
+   * @return mixed False on error
    */
   public function write(&$file, &$media, $options = array()) {
     if (!$file || !$media) {
@@ -529,10 +510,10 @@ class ImageFilterComponent extends BaseFilterComponent {
    *
    * @param data Meta data of the file
    * @param image Model data of the current image
-   * @return export arguments or an empty string
+   * @return array export arguments or an empty string
    * @note IPTC dates are set in the default timezone
    */
-  public function _createExportDate($data, $media) {
+  private function _createExportDate($data, $media) {
     // Remove IPTC data and time if database date is not set
     $args = array();
     if (!$media['Media']['date']) {
@@ -572,7 +553,7 @@ class ImageFilterComponent extends BaseFilterComponent {
     return $args;
   }
 
-  public function _createExportGps(&$data, &$media) {
+  private function _createExportGps(&$data, &$media) {
     $args = array();
 
     $latitude = $this->_extract($data, 'GPSLatitude', null);
@@ -629,9 +610,9 @@ class ImageFilterComponent extends BaseFilterComponent {
    * @param currentValue Current value
    * @param removeIfEqual If set to true and currentValue is equal to fileValue
    * the flag will be removed
-   * @return Array of export arguments
+   * @return array Array of export arguments
    */
-  public function _createExportArgument(&$data, $exifParam, $currentValue, $removeIfEqual = false) {
+  private function _createExportArgument(&$data, $exifParam, $currentValue, $removeIfEqual = false) {
     $args = array();
     $fileValue = $this->_extract($data, $exifParam);
     if ($fileValue != $currentValue) {
@@ -648,11 +629,10 @@ class ImageFilterComponent extends BaseFilterComponent {
    * @param data metadata from the file (Exiftool information)
    * @param image Media data array
    */
-  public function _createExportArguments(&$data, $media) {
+  private function _createExportArguments(&$data, $media) {
     $args = array();
 
-    $cfgPath = APP.'Config/ExifToolConfig';
-    $args['-config'] = $cfgPath;
+    $args['-config'] = $this->_getExifToolConf();
 
     $args = am($args, $this->_createExportDate($data, $media));
     $args = am($args, $this->_createExportGps($data, $media));
@@ -661,6 +641,14 @@ class ImageFilterComponent extends BaseFilterComponent {
     $args = am($args, $this->_createExportArgument($data, 'Orientation', $media['Media']['orientation']));
     $args = am($args, $this->_createExportArgument($data, 'Comment', $media['Media']['caption']));
 
+    $args = am($args, $this->_createExportArgumentsForFields($data, $media));
+    $args = am($args, $this->_createExportArgumentsForGroups($data, $media));
+
+    return $args;
+  }
+
+  private function _createExportArgumentsForFields(&$data, $media) {
+    $args = array();
     // Associations to meta data: Tags, Categories, Locations
     foreach ($this->fieldMap as $field => $name) {
       $isList = $this->Media->Field->isListField($field);
@@ -690,34 +678,33 @@ class ImageFilterComponent extends BaseFilterComponent {
       }
     }
 
+    return $args;
+  }
+
+  private function _createExportArgumentsForGroups(&$data, $media) {
     //add Groups to metadata xmp:   XMP-Phtagr:PhtagrGroups
-    $metaGroups = $this->_extractList($data, 'PhtagrGroups');
+    $fileGroups = $this->_extractList($data, 'PhtagrGroups');
 
     if (count($media['Group'])) {
-      $mediaGroups = Set::extract('/Group/name', $media);
+      $dbGroups = Set::extract('/Group/name', $media);
     } else {
       $dbGroups = array();
     }
 
     $user = $this->controller->getUser();
-    $allowedgroups= $this->controller->Media->Group->getGroupsForMedia($user);
-    $allowedgroups = Set::extract('/Group/name', $allowedgroups);
+    $allowedGroupNames = Set::extract('/Group/name', $this->controller->Media->Group->getGroupsForMedia($user));
 
-    if (!$allowedgroups) {
-      $allowedgroups= array();
-    }
-    
-    foreach (array_diff($metaGroups, $mediaGroups) as $del) {
-      //do not erase existing, not allowed (yet) groups = delete only allowed groups
-      if (in_array($del, $allowedgroups)) {
+    $args = array();
+    foreach (array_diff($fileGroups, $dbGroups) as $del) {
+      // do not erase existing, not allowed (yet) groups = delete only allowed groups
+      if (in_array($del, $allowedGroupNames)) {
         $args[] = '-PhtagrGroups-=' . $del;
       }
     }
-    
-    foreach (array_diff($mediaGroups, $metaGroups) as $add) {
+
+    foreach (array_diff($dbGroups, $fileGroups) as $add) {
       $args[] = '-PhtagrGroups+=' . $add;
     }
-
     return $args;
   }
 
@@ -729,9 +716,9 @@ class ImageFilterComponent extends BaseFilterComponent {
    * @param key Path or key of the hash value
    * @param default Default Value which will be return, if the key does not
    *        exists. Default value is null.
-   * @return The hash value or the default value, id hash key is not set
+   * @return mixed The hash value or the default value, id hash key is not set
    */
-  public function _extract(&$data, $key, $default = null) {
+  private function _extract(&$data, $key, $default = null) {
     $paths = explode('/', trim($key, '/'));
     $result = $data;
     foreach ($paths as $p) {
@@ -743,7 +730,7 @@ class ImageFilterComponent extends BaseFilterComponent {
     return $result;
   }
 
-  function _extractList(&$data, $key, $default = array()) {
+  private function _extractList(&$data, $key, $default = array()) {
     $value = $this->_extract($data, $key);
     if (!$value) {
       return $default;
@@ -757,7 +744,7 @@ class ImageFilterComponent extends BaseFilterComponent {
    *
    * @param filename Current filename
    */
-  public function _getTempFilename($filename) {
+  private function _getTempFilename($filename) {
     // create temporary file
     $tmp = "$filename.tmp";
     $count = 0;
@@ -768,7 +755,7 @@ class ImageFilterComponent extends BaseFilterComponent {
     return $tmp;
   }
 
-  public function _readMetaDataGetId3($filename) {
+  private function _readMetaDataGetId3($filename) {
     App::import('vendor', 'getid3/getid3');
     $getId3 = new getId3();
     // disable not required modules
@@ -931,5 +918,3 @@ array
 )
 */
 }
-
-?>

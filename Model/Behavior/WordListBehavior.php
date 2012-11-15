@@ -15,8 +15,8 @@
  * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
 
-class WordListBehavior extends ModelBehavior
-{
+class WordListBehavior extends ModelBehavior {
+
   var $config = array();
 
   public function setup(Model $Model, $config = array()) {
@@ -137,4 +137,3 @@ class WordListBehavior extends ModelBehavior
     return $result;
   }
 }
-?>
