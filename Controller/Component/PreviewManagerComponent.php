@@ -20,7 +20,9 @@ class PreviewManagerComponent extends Component {
   var $controller = null;
   var $components = array('FileCache');
 
-  /** Defauls for a preview configuration */
+  /**
+   * Defauls for a preview configuration
+   */
   var $defaults = array(
     'type' => 'image',
     'square' => false,
@@ -33,7 +35,9 @@ class PreviewManagerComponent extends Component {
     'rotation' => 0
     );
 
-  /** Different preview configurations */
+  /**
+   * Different preview configurations
+   */
   var $config = array(
     'mini' => array(
       'size' => OUTPUT_SIZE_MINI,
@@ -62,7 +66,9 @@ class PreviewManagerComponent extends Component {
     }
   }
 
-  /** Return image source file of the media */
+  /**
+   * Return image source file of the media
+   */
   public function _getImageSoureFilename($media) {
     $type = $this->controller->Media->getType($media);
     if ($type != MEDIA_TYPE_IMAGE && $type != MEDIA_TYPE_VIDEO) {
@@ -81,11 +87,14 @@ class PreviewManagerComponent extends Component {
     return $this->controller->Media->File->getFilename($file);
   }
 
-  /** Fetches the preview of a given media.
-    @param media Media model data
-    @param name Configuration name
-    @param config (Optional) configuration for the preview generation
-    @return Full path to the preview file */
+  /**
+   * Fetches the preview of a given media.
+   *
+   * @param media Media model data
+   * @param name Configuration name
+   * @param config (Optional) configuration for the preview generation
+   * @return Full path to the preview file
+   */
   public function getPreview(&$media, $name, $config = array()) {
     $config = am($this->defaults, $config);
     if (isset($this->config[$name])) {
@@ -125,4 +134,3 @@ class PreviewManagerComponent extends Component {
     return $dst;
   }
 }
-?>
