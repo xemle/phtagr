@@ -12,6 +12,8 @@
 //                                                          //
 //////////////////////////////////////////////////////////////
 
+die('For security reasons, this demo is disabled by default. Please comment out line '.__LINE__.' in '.basename(__FILE__));
+
 function SelectRandomImage($dirname='.', $portrait=true, $landscape=true, $square=true) {
 	// return a random image filename from $dirname
 	// the last 3 parameters determine what aspect ratio of images
@@ -19,7 +21,7 @@ function SelectRandomImage($dirname='.', $portrait=true, $landscape=true, $squar
 	$possibleimages = array();
 	if ($dh = opendir($dirname)) {
 		while ($file = readdir($dh)) {
-			if (is_file($dirname.'/'.$file) && eregi('\.(jpg|jpeg|gif|png|tiff|bmp)$', $file)) {
+			if (is_file($dirname.'/'.$file) && preg_match('#\\.(jpg|jpeg|gif|png|tiff|bmp)$#i', $file)) {
 				if ($gis = @GetImageSize($dirname.'/'.$file)) {
 					if ($portrait && ($gis[0] < $gis[1])) {
 						// portrait
@@ -58,7 +60,7 @@ if (@$_REQUEST['dir']) {
 		$square    = (strpos(@$_REQUEST['o'], 'S') !== false);
 		$randomSRC = SelectRandomImage($_REQUEST['dir'], $portrait, $landscape, $square);
 		if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
-			$randomSRC = str_replace('\\', '/', eregi_replace('^'.realpath(@$_SERVER['DOCUMENT_ROOT']), '', realpath($randomSRC)));
+			$randomSRC = str_replace('\\', '/', preg_replace('#^'.realpath(@$_SERVER['DOCUMENT_ROOT']).'#i', '', realpath($randomSRC)));
 		} else {
 			$randomSRC = str_replace(realpath(@$_SERVER['DOCUMENT_ROOT']), '', realpath($randomSRC));
 		}

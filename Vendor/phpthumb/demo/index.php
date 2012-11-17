@@ -1,9 +1,19 @@
 <?php
-if (!@$_REQUEST['list']) {
+if (empty($_REQUEST['list'])) {
 	header('Location: phpThumb.demo.demo.php');
 	exit;
 }
-echo '<html><body>';
+?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<title>Demo of phpThumb() - thumbnails created by PHP using GD and/or ImageMagick</title>
+	<link rel="stylesheet"    type="text/css" href="/style.css" title="style sheet">
+	<link rel="shortcut icon" type="image/x-icon" href="http://phpthumb.sourceforge.net/thumb.ico">
+	<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+</head>
+<body style="background-color: #C5C5C5;">
+<?php
 $dh = opendir('.');
 while ($file = readdir($dh)) {
 	if (is_file($file) && ($file{0} != '.') && ($file != basename(__FILE__))) {
@@ -18,5 +28,6 @@ while ($file = readdir($dh)) {
 		}
 	}
 }
-echo '</body></html>';
 ?>
+</body>
+</html>
