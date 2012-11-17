@@ -608,4 +608,109 @@ class MediaTestCase extends CakeTestCase {
     $this->assertEqual($fieldValues, array('flower', 'john', 'newValue', 'overwritten', 'people', 'swiss', 'vacation'));
   }
 
+  public function testMarkDirtyByGroup() {
+    $userA = $this->User->save($this->User->create(array('username' => 'UserA', 'role' => ROLE_USER)));
+    $userB = $this->User->save($this->User->create(array('username' => 'UserB', 'role' => ROLE_USER)));
+
+    $group = $this->Group->save($this->Group->create(array('name' => 'Group', 'user_id' => $userA['User']['id'])));
+
+    $media1 = $this->Media->save($this->Media->create(array('Media' => array('user_id' => $userA['User']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media1['Media']['id']), 'Group' => array('Group' => array($group['Group']['id']))));
+    $media2 = $this->Media->save($this->Media->create(array('Media' => array('user_id' => $userB['User']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media2['Media']['id']), 'Group' => array('Group' => array($group['Group']['id']))));
+
+    // Test precondition
+    $media1 = $this->Media->findById($media1['Media']['id']);
+    $this->assertEqual($media1['Media']['flag'], 0);
+    $media2 = $this->Media->findById($media2['Media']['id']);
+    $this->assertEqual($media2['Media']['flag'], 0);
+
+    $result = $this->Media->markDirtyByGroup($group);
+    $this->assertEqual($result, true);
+
+    $media1 = $this->Media->findById($media1['Media']['id']);
+    $this->assertEqual($media1['Media']['flag'], MEDIA_FLAG_DIRTY);
+    $media2 = $this->Media->findById($media2['Media']['id']);
+    $this->assertEqual($media2['Media']['flag'], MEDIA_FLAG_DIRTY);
+  }
+
+  public function testMarkDirtyByGroupAndUser() {
+    $userA = $this->User->save($this->User->create(array('username' => 'UserA', 'role' => ROLE_USER)));
+    $userB = $this->User->save($this->User->create(array('username' => 'UserB', 'role' => ROLE_USER)));
+
+    $group = $this->Group->save($this->Group->create(array('name' => 'Group', 'user_id' => $userA['User']['id'])));
+
+    $media1 = $this->Media->save($this->Media->create(array('Media' => array('user_id' => $userA['User']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media1['Media']['id']), 'Group' => array('Group' => array($group['Group']['id']))));
+    $media2 = $this->Media->save($this->Media->create(array('Media' => array('user_id' => $userB['User']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media2['Media']['id']), 'Group' => array('Group' => array($group['Group']['id']))));
+
+    // Test precondition
+    $media1 = $this->Media->findById($media1['Media']['id']);
+    $this->assertEqual($media1['Media']['flag'], 0);
+    $media2 = $this->Media->findById($media2['Media']['id']);
+    $this->assertEqual($media2['Media']['flag'], 0);
+
+    $result = $this->Media->markDirtyByGroupAndUser($group, $userB);
+    $this->assertEqual($result, true);
+
+    $media1 = $this->Media->findById($media1['Media']['id']);
+    $this->assertEqual($media1['Media']['flag'], 0);
+    $media2 = $this->Media->findById($media2['Media']['id']);
+    $this->assertEqual($media2['Media']['flag'], MEDIA_FLAG_DIRTY);
+  }
+
+  public function testDeleteGroup() {
+    $userA = $this->User->save($this->User->create(array('username' => 'UserA', 'role' => ROLE_USER)));
+    $userB = $this->User->save($this->User->create(array('username' => 'UserB', 'role' => ROLE_USER)));
+
+    $group = $this->Group->save($this->Group->create(array('name' => 'Group', 'user_id' => $userA['User']['id'])));
+
+    $media1 = $this->Media->save($this->Media->create(array('Media' => array('user_id' => $userA['User']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media1['Media']['id']), 'Group' => array('Group' => array($group['Group']['id']))));
+    $media2 = $this->Media->save($this->Media->create(array('Media' => array('user_id' => $userB['User']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media2['Media']['id']), 'Group' => array('Group' => array($group['Group']['id']))));
+
+    // Test precondition
+    $media1 = $this->Media->findById($media1['Media']['id']);
+    $this->assertEqual(count(Set::extract('/Group/id', $media1)), 1);
+    $media2 = $this->Media->findById($media2['Media']['id']);
+    $this->assertEqual(count(Set::extract('/Group/id', $media2)), 1);
+
+    // Delete group from all media
+    $result = $this->Media->deleteGroup($group);
+    $this->assertEqual($result, true);
+
+    $media1 = $this->Media->findById($media1['Media']['id']);
+    $this->assertEqual(count(Set::extract('/Group/id', $media1)), 0);
+    $media2 = $this->Media->findById($media2['Media']['id']);
+    $this->assertEqual(count(Set::extract('/Group/id', $media2)), 0);
+  }
+
+  public function testDeleteGroupByUser() {
+    $userA = $this->User->save($this->User->create(array('username' => 'UserA', 'role' => ROLE_USER)));
+    $userB = $this->User->save($this->User->create(array('username' => 'UserB', 'role' => ROLE_USER)));
+
+    $group = $this->Group->save($this->Group->create(array('name' => 'Group', 'user_id' => $userA['User']['id'])));
+
+    $media1 = $this->Media->save($this->Media->create(array('Media' => array('user_id' => $userA['User']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media1['Media']['id']), 'Group' => array('Group' => array($group['Group']['id']))));
+    $media2 = $this->Media->save($this->Media->create(array('Media' => array('user_id' => $userB['User']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media2['Media']['id']), 'Group' => array('Group' => array($group['Group']['id']))));
+
+    // Test precondition
+    $media1 = $this->Media->findById($media1['Media']['id']);
+    $this->assertEqual(count(Set::extract('/Group/id', $media1)), 1);
+    $media2 = $this->Media->findById($media2['Media']['id']);
+    $this->assertEqual(count(Set::extract('/Group/id', $media2)), 1);
+
+    // Delete group from all media of user UserB
+    $result = $this->Media->deleteGroupByUser($group, $userB);
+    $this->assertEqual($result, true);
+
+    $media1 = $this->Media->findById($media1['Media']['id']);
+    $this->assertEqual(count(Set::extract('/Group/id', $media1)), 1);
+    $media2 = $this->Media->findById($media2['Media']['id']);
+    $this->assertEqual(count(Set::extract('/Group/id', $media2)), 0);
+  }
 }

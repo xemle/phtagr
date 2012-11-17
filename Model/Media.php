@@ -1011,5 +1011,96 @@ class Media extends AppModel {
     }
     return $tmp;
   }
+
+  /**
+   * Mark all media dirty which are assigned to given group
+   *
+   * @param array $group Group model data
+   * @return mixed True on success
+   */
+  public function markDirtyByGroup(&$group) {
+    $emptyUser = array();
+    return $this->markDirtyByGroupAndUser($group, $emptyUser);
+  }
+
+  /**
+   * Mark all media dirty of media which are assigned to given group and
+   * belong to given user
+   *
+   * @param array $group Group model data
+   * @param array $user User model data
+   * @return mixed True on success
+   */
+  public function markDirtyByGroupAndUser(&$group, &$user) {
+    $config = $this->hasAndBelongsToMany['Group'];
+
+    $alias = $this->alias;
+    $table = $this->tablePrefix . $this->table;
+    $key = $this->primaryKey;
+
+    $joinTable = $this->tablePrefix . $config['joinTable'];
+    $joinAlias = 'MediaGroup';
+    $joinForeignKey = $config['foreignKey'];
+    $joinAssociationForeignKey = $config['associationForeignKey'];
+
+    $conditions = array(
+        "`$alias`.`$key` = `$joinAlias`.`$joinForeignKey`",
+        "`$joinAlias`.`$joinAssociationForeignKey` = " . $group['Group']['id']
+        );
+    if ($user) {
+      $conditions[] = "`$alias`.`user_id` = " . $user['User']['id'];
+    }
+    $sql = "UPDATE $table `$alias`, $joinTable `$joinAlias`"
+         . " SET `Media`.`flag` = `Media`.`flag` | " . MEDIA_FLAG_DIRTY
+         . " WHERE " . join(" AND ", $conditions);
+    $result = $this->query($sql);
+    return is_array($result) && !count($result);
+  }
+
+  /**
+   * Delete a group from all media
+   *
+   * @param array $group
+   * @return mixed True on success
+   */
+  public function deleteGroup(&$group) {
+    $config = $this->hasAndBelongsToMany['Group'];
+
+    $joinTable = $this->tablePrefix . $config['joinTable'];
+    $joinAlias = 'MediaGroup';
+    $joinAssociationForeignKey = $config['associationForeignKey'];
+
+    $sql = "DELETE FROM $joinTable WHERE `$joinAssociationForeignKey` = " . $group['Group']['id'];
+    $result = $this->query($sql);
+    return is_array($result) && !count($result);
+  }
+
+  /**
+   * Delete a group from all media of given user
+   *
+   * @param array $group Group model data
+   * @param array $user User model data
+   * @return mixed True on success
+   */
+  public function deleteGroupByUser(&$group, &$user) {
+    $config = $this->hasAndBelongsToMany['Group'];
+
+    $alias = $this->alias;
+    $table = $this->tablePrefix . $this->table;
+    $key = $this->primaryKey;
+
+    $joinTable = $this->tablePrefix . $config['joinTable'];
+    $joinAlias = 'MediaGroup';
+    $joinForeignKey = $config['foreignKey'];
+    $joinAssociationForeignKey = $config['associationForeignKey'];
+
+    $subQuery = "SELECT `$alias`.`$key` FROM $table `$alias` WHERE `$alias`.`user_id` = " . $user['User']['id'];
+    $conditions = array(
+        "`$joinAssociationForeignKey` = " . $group['Group']['id'],
+        "`$joinForeignKey` IN ($subQuery)"
+        );
+    $sql = "DELETE FROM $joinTable WHERE " . join(" AND ", $conditions);
+    $result = $this->query($sql);
+    return is_array($result) && !count($result);
+  }
 }
-?>
