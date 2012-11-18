@@ -139,7 +139,7 @@ class OptionsController extends AppController {
     } else {
       $groups = array();
     }
-    sort($groups);
+    asort($groups);
     $groups[-1] = __('[No Group]');
     $this->set('groups', $groups);
   }
