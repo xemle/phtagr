@@ -178,9 +178,32 @@ class UsersController extends AppController
   }
 
   public function admin_index() {
+  $userId = $this->getUserId();
+
     $this->requireRole(ROLE_SYSOP, array('loginRedirect' => '/admin/users'));
 
     $this->request->data = $this->paginate('User', array('User.role>='.ROLE_USER));
+
+  foreach($this->request->data as $user):
+ 
+    $userId = $user['User']['id'];
+     
+    $this->request->data['calc'][$userId]['MediaCount'] = $this->Media->find('count', array('conditions' => array('Media.user_id' => $userId), 'recursive' => -1));
+    $this->request->data['calc'][$userId]['FileCount'] = $this->MyFile->find('count', array('conditions' => array('File.user_id' => $userId), 'recursive' => -1));
+
+    $this->request->data['calc'][$userId]['files.external'] = $this->Media->File->find('count', array('conditions' => array('File.flag & ' . FILE_FLAG_EXTERNAL. ' > 0', 'File.user_id' => $userId)));
+
+    $bytes = $this->MyFile->find('all', array('conditions' => array("File.user_id" => $userId), 'recursive' => -1, 'fields' => 'SUM(File.size) AS Bytes'));
+    $this->request->data['calc'][$userId]['FileBytes'] = max(0, floatval($bytes[0][0]['Bytes']));
+
+
+    $bytes = $this->Media->File->find('all', array('conditions' => array("File.flag & ".FILE_FLAG_EXTERNAL." > 0", 'Media.user_id' => $userId), 'fields' => 'SUM(File.size) AS Bytes'));
+    $this->request->data['calc'][$userId]['file.size.external'] = floatval($bytes[0][0]['Bytes']);
+
+    $bytes = $this->Media->File->find('all', array('conditions' => array("File.flag & ".FILE_FLAG_EXTERNAL." = 0", 'Media.user_id' => $userId), 'fields' => 'SUM(File.size) AS Bytes'));
+    $this->request->data['calc'][$userId]['file.size.internal'] = floatval($bytes[0][0]['Bytes']);
+
+  endforeach;
   }
 
   /** Ensure at least one admin exists
