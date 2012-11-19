@@ -122,8 +122,10 @@ class ImageResizerComponent extends Component {
     $phpThumb->q = $options['quality'];
     $phpThumb->ra = $options['rotation'];
 
-    if ($options['square'] && $options['height'] > 0) {
-      $this->_getSquareOption($phpThumb, $options);
+    if ($options['square']) {
+      $phpThumb->zc = 1;
+      $phpThumb->w = $options['size'];
+      $phpThumb->h = $options['size'];
     }
   }
 
@@ -180,44 +182,6 @@ class ImageResizerComponent extends Component {
     $phpThumb->config_cache_directory = dirname($dst);
     $phpThumb->config_cache_disable_warning = false;
     $phpThumb->cache_filename = $dst;
-  }
-
-  /**
-   * Set phpThumb options for square image
-   *
-   * @param phpThumb phpThumb object (reference)
-   * @param options Array of options
-   */
-  public function _getSquareOption($phpThumb, $options) {
-    $width = $options['width'];
-    $height = $options['height'];
-    if ($width < $height) {
-      $ratio = ($width / $height);
-      $size = $options['size'] / $ratio;
-      $phpThumb->sx = 0;
-      $phpThumb->sy = intval(($size - $options['size']) / 2);
-    } else {
-      $ratio = ($height / $width);
-      $size = $options['size'] / $ratio;
-      $phpThumb->sx = intval(($size - $options['size']) / 2);
-      $phpThumb->sy = 0;
-    }
-
-    if ($phpThumb->ra == 90 || $phpThumb->ra == 270) {
-      $tmp = $phpThumb->sx;
-      $phpThumb->sx = $phpThumb->sy;
-      $phpThumb->sy = $tmp;
-    }
-
-    $phpThumb->sw = $options['size'];
-    $phpThumb->sh = $options['size'];
-
-    $phpThumb->w = $size;
-    $phpThumb->h = $size;
-
-    //Logger::debug(sprintf("square: %dx%d %dx%d",
-    //  $phpThumb->sx, $phpThumb->sy,
-    //  $phpThumb->sw, $phpThumb->sh));
   }
 
   /**
