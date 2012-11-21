@@ -266,9 +266,10 @@ class SetupController extends AppController {
     }
   }
 
-  public function getUser() {
+  public function &getUser() {
     if (!$this->__hasSysOp() && $this->Session->read('setup')) {
-      return array('User' => array('id' => 0, 'username' => '', 'role' => ROLE_ADMIN));
+      $user = array('User' => array('id' => 0, 'username' => '', 'role' => ROLE_ADMIN));
+      return $user;
     }
     return parent::getUser();
   }

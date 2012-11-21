@@ -37,7 +37,7 @@ class UpgradeSchemaComponent extends Component {
 
     App::uses('ConnectionManager', 'Model');
     try {
-      $this->db =& ConnectionManager::getDataSource('default');
+      $this->db = ConnectionManager::getDataSource('default');
     } catch (Exception $e) {
       $this->db = null;
       return false;
