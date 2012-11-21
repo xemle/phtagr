@@ -231,7 +231,7 @@ class CipherBehavior extends ModelBehavior
 
     $enclose = $this->_packValue($value, $this->_generateSalt($value, $key, $saltLen), $padding);
     $encrypted = $bf->encrypt($enclose);
-    if (PEAR::isError($encrypted)) {
+    if (!is_string($encrypted)) {
       $this->log($encrypted->getMessage());
       return false;
     }
