@@ -68,7 +68,7 @@ class ImageResizerComponent extends Component {
     }
 
     $phpThumb = new phpThumb();
-    $this->_configurePhpThump(&$phpThumb, $src, $dst, $options);
+    $this->_configurePhpThump($phpThumb, $src, $dst, $options);
 
     $t0 = microtime(true);
     if ($this->_semaphoreId) {
