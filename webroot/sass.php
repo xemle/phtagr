@@ -136,6 +136,27 @@ if ($ext === 'css') {
 	$sassFile = str_replace('.css', '.sass', $cssFile);
 }
 
+// Used Sass compiler does not work with PHP 5.4. Following section is a
+// work around to provide a precompiled SASS file
+$phpVersion = preg_split('/[-\.]/', phpversion());
+$requiredPhpVersion = $phpVersion[0] == 5 && $phpVersion[1] < 4;
+$useSassCompiler = $requiredPhpVersion && Configure::read('debug') > 0;
+
+if (!$useSassCompiler) {
+  if (file_exists($cssFile)) {
+    echo file_get_contents($cssFile);
+  } else {
+    echo "/*\nCan not compile SASS file '$sassFile'!\n\n"
+      . "PHP 5.3 with and debug mode 1 or 2 is required. ";
+    if ($requiredPhpVersion) {
+      echo "Please set Configure::write(\"debug\", 1); in Config/core.php.\n*/";
+    } else {
+      echo "Please use PHP 5.3. You are running PHP " . phpversion() . "\n*/";
+    }
+  }
+  die;
+}
+
 // Parse the Sass file if there is one
 if ($sassFile && file_exists($sassFile)) {
 	$options = array();
