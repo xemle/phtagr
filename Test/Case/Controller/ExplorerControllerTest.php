@@ -120,6 +120,22 @@ class ExplorerControllerTest extends ControllerTestCase {
     $this->assertEqual($locationNames, array('bw', 'castle', 'germany', 'karlsruhe'));
   }
 
+  public function testEditMultiWithGeo() {
+    $user = $this->User->save($this->User->create(array('username' => 'user', 'role' => ROLE_USER)));
+    $user = $this->User->findById($user['User']['id']);
+    $media = $this->Media->save($this->Media->create(array('name' => 'IMG_1234.JPG', 'user_id' => $user['User']['id'])));
+
+    $Explorer = $this->generate('Explorer', array('methods' => array('getUser')));
+    $Explorer->expects($this->any())->method('getUser')->will($this->returnValue($user));
+    $data = array('Media' => array('ids' => $media['Media']['id'], 'geo' => '41.9021,12.4540'));
+    $contents = $this->testAction('/explorer/edit', array('data' => $data, 'return' => 'vars'));
+
+    $media = $this->Media->findById($media['Media']['id']);
+    $this->assertEqual($media['Media']['latitude'], 41.9021);
+    $this->assertEqual($media['Media']['longitude'], 12.4540);
+  }
+
+
   /**
    * Test that all new locations will be created for single media
    */

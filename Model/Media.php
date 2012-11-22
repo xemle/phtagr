@@ -912,7 +912,7 @@ class Media extends AppModel {
     }
     $mediaFields = array();
     if ($media['Media']['canWriteMeta']) {
-      $mediafields = am($mediaFields, array('latitude', 'longitude'));
+      $mediaFields = am($mediaFields, array('latitude', 'longitude'));
     }
     if ($media['Media']['canWriteCaption']) {
       $mediaFields = am($mediaFields, array('name', 'caption', 'date'));
