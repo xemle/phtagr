@@ -338,7 +338,7 @@ class SearchComponentTestCase extends CakeTestCase {
     $this->Media->save(array('Media' => array('id' => $media2['Media']['id']), 'Group' => array('Group' => array($groupA['Group']['id']))));
 
     $this->mockUser($userA);
-    $this->Search->addSort('newest');
+    $this->Search->setSort('newest');
     $result = $this->Search->paginate();
     $this->assertEqual(Set::extract('/Media/name', $result), array('IMG_1234.JPG', 'IMG_2345.JPG'));
   }

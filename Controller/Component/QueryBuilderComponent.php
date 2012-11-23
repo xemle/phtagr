@@ -565,6 +565,10 @@ class QueryBuilderComponent extends Component {
   }
 
   private function _buildOrder(&$data, &$query) {
+    if (isset($data['sort']) && is_array($data['sort'])) {
+      Logger::err("Invalid sort value. Value is an array: " . join(', ', $data['sort']) . " Use default sort order");
+      $data['sort'] = 'default';
+    }
     if (!isset($data['sort']) || $data['sort'] == 'default') {
       if (isset($query['_counters']) && count($query['_counters']) > 0) {
         if (count($query['_counters']) > 1) {
@@ -579,6 +583,7 @@ class QueryBuilderComponent extends Component {
         }
       }
       $query['order'][] = 'Media.date DESC';
+      $query['order'][] = 'Media.id';
     } else {
       switch ($data['sort']) {
         case 'date':
@@ -609,7 +614,12 @@ class QueryBuilderComponent extends Component {
           $query['order'][] = 'Media.name DESC';
           break;
         default:
-          Logger::err("Unknown sort value: {$data['sort']}");
+          Logger::err("Unknown sort value: {$sort}. Use default sort order");
+          $query['order'][] = 'Media.date DESC, Media.id';
+          break;
+      }
+      if ($data['sort'] != 'random') {
+        $query['order'][] = 'Media.id';
       }
     }
   }
