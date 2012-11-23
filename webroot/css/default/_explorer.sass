@@ -63,22 +63,19 @@
       font-family: Ubuntu-bold
       color: white
 
-.p-explorer-media-list > .row
-  margin: 2px 0px
+#p-explorer-media-list > .row
+  margin: 5px 0
   +column(24, true)
   > .clear
     display: block
     clear: both
-  > .cell0, > .cell1, > .cell2
-    +column(6)
-  > .cell3
-    +column(6, true)
-  > .p-explorer-media
+  > .cell
     position: relative
     &:hover
       background-color: $clickable-default-bg
-    &.selected > .p-explorer-media-image
-      background-color: #203c60
+    &.selected
+      .preview,.actions
+        background-color: #203c60
     h2
       font-family: Ubuntu ! important
       font-weight: normal
@@ -92,13 +89,10 @@
       background-color: #000
       a
         +link
-    > .p-explorer-media-image
+    > .preview
       display: table-cell
       text-align: center
-      vertical-align: bottom
-      width: 230px
       padding: 3px
-      height: 230px
       > a
         vertical-align: middle
         > img
@@ -106,43 +100,66 @@
       > *
         text-align: center
         overflow: hidden
-    > .p-explorer-media-actions
+    > .actions
       position: absolute
-      right: 4px
-      top: 204px
-      padding: 4px
       background-color: $clickable-default-bg
       +opacity(0.0)
       > ul > li
         display: inline
         > a > img
-          padding: 4px
+          padding: 3px
           vertical-align: center
           &:hover
             background-color: $clickable-default-text
-    > .p-explorer-media-meta
-      *
-        font-size: 9pt
-      p
-        color: #080808
-        margin: 0
-        padding: 0
-    > .p-explorer-media-description
+    > .description
       margin-top: 3px
       *
         color: #444
     &:hover
       > h2
         +opacity(1.0)
-      > .p-explorer-media-actions
+      > .actions
         +opacity(.3)
         &:hover
           +opacity(1.0)
-      > .p-explorer-media-description
+      > .description
         *
           color: #888
         a
           +link
+
+#p-explorer-media-list.p-list-default,#p-explorer-media-list.p-list-compact
+  .cell
+    +column(6)
+  .cell-right
+    +column(6, true)
+  .preview
+    width: 230px
+    height: 230px
+    vertical-align: bottom
+    padding: 5px
+    img
+      margin: 3px 0px
+  .actions
+    right: 2px
+    top: 197px
+    padding: 4px
+
+#p-explorer-media-list.p-list-small
+  .cell
+    +column(3)
+  .cell-right
+    +column(3, true)
+  .preview
+    width: 110px
+    padding: 0px
+    height: 110px
+    vertical-align: middle
+  .actions
+    right: 0px
+    top: 77px
+    padding: 4px
+
 ul.p-breadcrumb
   width: 100%
   margin: 4px 0px

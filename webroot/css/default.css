@@ -495,42 +495,25 @@ pre {
       font-family: Ubuntu-bold;
       color: white; }
 
-.p-explorer-media-list > .row {
-  margin: 2px 0px;
+#p-explorer-media-list > .row {
+  margin: 5px 0;
   display: inline;
   float: left;
   margin-right: 0;
   width: 950px; }
-  * html .p-explorer-media-list > .row {
+  * html #p-explorer-media-list > .row {
     overflow-x: hidden; }
-  .p-explorer-media-list > .row > .clear {
+  #p-explorer-media-list > .row > .clear {
     display: block;
     clear: both; }
-  .p-explorer-media-list > .row > .cell0,
-  .p-explorer-media-list > .row > .cell1,
-  .p-explorer-media-list > .row > .cell2 {
-    display: inline;
-    float: left;
-    margin-right: 10px;
-    width: 230px; }
-  * html .p-explorer-media-list > .row > .cell0,
-  * html .p-explorer-media-list > .row > .cell1,
-  * html .p-explorer-media-list > .row > .cell2 {
-    overflow-x: hidden; }
-  .p-explorer-media-list > .row > .cell3 {
-    display: inline;
-    float: left;
-    margin-right: 0;
-    width: 230px; }
-  * html .p-explorer-media-list > .row > .cell3 {
-    overflow-x: hidden; }
-  .p-explorer-media-list > .row > .p-explorer-media {
+  #p-explorer-media-list > .row > .cell {
     position: relative; }
-    .p-explorer-media-list > .row > .p-explorer-media:hover {
+    #p-explorer-media-list > .row > .cell:hover {
       background-color: #222222; }
-    .p-explorer-media-list > .row > .p-explorer-media.selected > .p-explorer-media-image {
-      background-color: #203c60; }
-    .p-explorer-media-list > .row > .p-explorer-media h2 {
+      #p-explorer-media-list > .row > .cell.selected .actions,
+      #p-explorer-media-list > .row > .cell.selected .preview {
+        background-color: #203c60; }
+    #p-explorer-media-list > .row > .cell h2 {
       font-family: Ubuntu ! important;
       font-weight: normal;
       padding: 2px 2px ! important;
@@ -543,70 +526,115 @@ pre {
       -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0);
       filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0);
       background-color: black; }
-      .p-explorer-media-list > .row > .p-explorer-media h2 a {
+      #p-explorer-media-list > .row > .cell h2 a {
         color: #2259a5; }
-  .p-explorer-media-list > .row > .p-explorer-media h2 a:hover {
+  #p-explorer-media-list > .row > .cell h2 a:hover {
     background-color: #2259a5;
     color: white; }
-    .p-explorer-media-list > .row > .p-explorer-media > .p-explorer-media-image {
+    #p-explorer-media-list > .row > .cell > .preview {
       display: table-cell;
       text-align: center;
-      vertical-align: bottom;
-      width: 230px;
-      padding: 3px;
-      height: 230px; }
-      .p-explorer-media-list > .row > .p-explorer-media > .p-explorer-media-image > a {
+      padding: 3px; }
+      #p-explorer-media-list > .row > .cell > .preview > a {
         vertical-align: middle; }
-        .p-explorer-media-list > .row > .p-explorer-media > .p-explorer-media-image > a > img {
+        #p-explorer-media-list > .row > .cell > .preview > a > img {
           vertical-align: middle; }
-      .p-explorer-media-list > .row > .p-explorer-media > .p-explorer-media-image > * {
+      #p-explorer-media-list > .row > .cell > .preview > * {
         text-align: center;
         overflow: hidden; }
-    .p-explorer-media-list > .row > .p-explorer-media > .p-explorer-media-actions {
+    #p-explorer-media-list > .row > .cell > .actions {
       position: absolute;
-      right: 4px;
-      top: 204px;
-      padding: 4px;
       background-color: #222222;
       opacity: 0;
       -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0);
       filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0); }
-      .p-explorer-media-list > .row > .p-explorer-media > .p-explorer-media-actions > ul > li {
+      #p-explorer-media-list > .row > .cell > .actions > ul > li {
         display: inline; }
-        .p-explorer-media-list > .row > .p-explorer-media > .p-explorer-media-actions > ul > li > a > img {
-          padding: 4px;
+        #p-explorer-media-list > .row > .cell > .actions > ul > li > a > img {
+          padding: 3px;
           vertical-align: center; }
-          .p-explorer-media-list > .row > .p-explorer-media > .p-explorer-media-actions > ul > li > a > img:hover {
+          #p-explorer-media-list > .row > .cell > .actions > ul > li > a > img:hover {
             background-color: #dddddd; }
-      .p-explorer-media-list > .row > .p-explorer-media > .p-explorer-media-meta * {
-        font-size: 9pt; }
-      .p-explorer-media-list > .row > .p-explorer-media > .p-explorer-media-meta p {
-        color: #080808;
-        margin: 0;
-        padding: 0; }
-    .p-explorer-media-list > .row > .p-explorer-media > .p-explorer-media-description {
+    #p-explorer-media-list > .row > .cell > .description {
       margin-top: 3px; }
-      .p-explorer-media-list > .row > .p-explorer-media > .p-explorer-media-description * {
+      #p-explorer-media-list > .row > .cell > .description * {
         color: #444444; }
-      .p-explorer-media-list > .row > .p-explorer-media:hover > h2 {
+      #p-explorer-media-list > .row > .cell:hover > h2 {
         opacity: 1;
         -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=100);
         filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=100); }
-      .p-explorer-media-list > .row > .p-explorer-media:hover > .p-explorer-media-actions {
+      #p-explorer-media-list > .row > .cell:hover > .actions {
         opacity: 0.3;
         -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=30);
         filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=30); }
-        .p-explorer-media-list > .row > .p-explorer-media:hover > .p-explorer-media-actions:hover {
+        #p-explorer-media-list > .row > .cell:hover > .actions:hover {
           opacity: 1;
           -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=100);
           filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=100); }
-        .p-explorer-media-list > .row > .p-explorer-media:hover > .p-explorer-media-description * {
+        #p-explorer-media-list > .row > .cell:hover > .description * {
           color: #888888; }
-        .p-explorer-media-list > .row > .p-explorer-media:hover > .p-explorer-media-description a {
+        #p-explorer-media-list > .row > .cell:hover > .description a {
           color: #2259a5; }
-  .p-explorer-media-list > .row > .p-explorer-media:hover > .p-explorer-media-description a:hover {
+  #p-explorer-media-list > .row > .cell:hover > .description a:hover {
     background-color: #2259a5;
     color: white; }
+
+  #p-explorer-media-list.p-list-compact .cell,
+  #p-explorer-media-list.p-list-default .cell {
+    display: inline;
+    float: left;
+    margin-right: 10px;
+    width: 230px; }
+  * html #p-explorer-media-list.p-list-compact .cell,
+  * html #p-explorer-media-list.p-list-default .cell {
+    overflow-x: hidden; }
+  #p-explorer-media-list.p-list-compact .cell-right,
+  #p-explorer-media-list.p-list-default .cell-right {
+    display: inline;
+    float: left;
+    margin-right: 0;
+    width: 230px; }
+  * html #p-explorer-media-list.p-list-compact .cell-right,
+  * html #p-explorer-media-list.p-list-default .cell-right {
+    overflow-x: hidden; }
+  #p-explorer-media-list.p-list-compact .preview,
+  #p-explorer-media-list.p-list-default .preview {
+    width: 230px;
+    height: 230px;
+    vertical-align: bottom;
+    padding: 5px; }
+    #p-explorer-media-list.p-list-compact .preview img,
+    #p-explorer-media-list.p-list-default .preview img {
+      margin: 3px 0px; }
+  #p-explorer-media-list.p-list-compact .actions,
+  #p-explorer-media-list.p-list-default .actions {
+    right: 2px;
+    top: 197px;
+    padding: 4px; }
+
+  #p-explorer-media-list.p-list-small .cell {
+    display: inline;
+    float: left;
+    margin-right: 10px;
+    width: 110px; }
+  * html #p-explorer-media-list.p-list-small .cell {
+    overflow-x: hidden; }
+  #p-explorer-media-list.p-list-small .cell-right {
+    display: inline;
+    float: left;
+    margin-right: 0;
+    width: 110px; }
+  * html #p-explorer-media-list.p-list-small .cell-right {
+    overflow-x: hidden; }
+  #p-explorer-media-list.p-list-small .preview {
+    width: 110px;
+    padding: 0px;
+    height: 110px;
+    vertical-align: middle; }
+  #p-explorer-media-list.p-list-small .actions {
+    right: 0px;
+    top: 77px;
+    padding: 4px; }
 
 ul.p-breadcrumb {
   width: 100%;

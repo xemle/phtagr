@@ -101,8 +101,8 @@
         data.ids.push(id);
         var media = $('#media-' + id);
         // extract crumb data
-        var crumbs = $.fn.extractCrumbs(media.find('.p-explorer-media-image a').attr('href'));
-        $(this).find('.p-explorer-media-image').click(function(event) {
+        var crumbs = $.fn.extractCrumbs(media.find('.preview a').attr('href'));
+        $(this).find('.preview').click(function(event) {
           if (event.ctrlKey) {
             $(media).toggleMedia();
             event.preventDefault();
@@ -128,34 +128,34 @@
           }
           data.lastSelected = id;
         });
-        $(this).find('.p-explorer-media-image a').click(function(event) {
+        $(this).find('.preview a').click(function(event) {
           if (event.ctrlKey) {
             event.preventDefault();
           }
         });
-        $(this).find('ul li .add').click(function() {
+        $(this).find('.actions .add').click(function() {
           $(media).selectMedia();
         });
-        $(this).find('ul li .del').hide().click(function() {
+        $(this).find('.actions .del').hide().click(function() {
           $(media).unselectMedia();
         });
-        $(this).find('ul li .edit').click(function() {
+        $(this).find('.actions .edit').click(function() {
           $(this).updateMeta(id, crumbs);
         });
-        $(this).find('ul li .acl').click(function() {
+        $(this).find('.actions .acl').click(function() {
           $(this).updateAcl(id, crumbs);
         });
         $(this).find('.tooltip-actions').tooltipAction();
       });
     };
-    $('.p-explorer-media').each(function() {
+    $('#p-explorer-media-list .cell').each(function() {
       $(this).mediaAction();
     });
     $('#select-all').click(function() {
-      $('#content .sub .p-explorer-media').selectMedia();
+      $('#p-explorer-media-list .cell').selectMedia();
     });
     $('#invert-selection').click(function() {
-      $('#content .sub .p-explorer-media').invertMediaSelection();
+      $('#p-explorer-media-list .cell').invertMediaSelection();
     });
 
     $.fn.activateExplorerMenu = function(id, target) {
@@ -248,8 +248,23 @@ SCRIPT;
   echo $this->Html->script('/piclenslite/piclens_optimized');
   echo $this->Html->scriptBlock($script, array('inline' => false));
 ?>
-
-<div class="p-explorer-media-list">
+<?php
+  $view = $this->Search->getView();
+  if ($view == 'small') {
+    $class = "p-list-small";
+    $element = "Explorer/media_small";
+    $columns = 8;
+  } else if ($view == 'compact' ) {
+    $class = "p-list-compact";
+    $element = "Explorer/media_compact";
+    $columns = 4;
+  } else {
+    $class = "p-list-default";
+    $element = "Explorer/media";
+    $columns = 4;
+  }
+?>
+<div id="p-explorer-media-list" class="<?php echo $class; ?>">
 <?php
 $canWriteTag = count($this->request->data) ? max(Set::extract('/Media/canWriteTag', $this->request->data)) : 0;
 $index = 0;
@@ -258,12 +273,12 @@ $pos = ($this->Search->getPage(1)-1) * $this->Search->getShow(12) + 1;
 echo '<div class="row">';
 foreach ($this->request->data as $media) {
   $editable = $media['Media']['canWriteTag'] ? 'editable' : '';
-  $cell = "cell" . ($index %4);
+  $cell = (($index + 1) % $columns) ? "cell" : "cell cell-right";
   echo $this->Html->tag('div',
-    $this->element('Explorer/media', array('media' => $media, 'index' => $index, 'pos' => $pos)),
-    array('class' => "p-explorer-media $editable $cell", 'id' => 'media-' . $media['Media']['id'], 'escape' => false));
+    $this->element($element, array('media' => $media, 'index' => $index, 'pos' => $pos)),
+    array('class' => "$cell $editable", 'id' => 'media-' . $media['Media']['id'], 'escape' => false));
   $index++;
-  if ($index % 4 == 0) {
+  if ($index % $columns == 0) {
     echo "<div class=\"clear\"> </div></div>\n";
     echo "<div class=\"row\">";
   }

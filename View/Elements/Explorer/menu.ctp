@@ -115,6 +115,13 @@
   $links[] = $this->Html->link(__('random'), $this->Breadcrumb->crumbUrl($this->Breadcrumb->replace($crumbs, 'sort', 'random')));
   echo implode(' ', $links);
 ?></p>
+<p><?php echo __('View') . " "; ?>
+<?php  $links = array();
+  $links[] = $this->Html->link(__('default'), $this->Breadcrumb->crumbUrl($this->Breadcrumb->replace($crumbs, 'view', 'default')));
+  $links[] = $this->Html->link(__('compact'), $this->Breadcrumb->crumbUrl($this->Breadcrumb->replace($crumbs, 'view', 'compact')));
+  $links[] = $this->Html->link(__('small'), $this->Breadcrumb->crumbUrl($this->Breadcrumb->replace($crumbs, 'view', 'small')));
+  echo implode(' ', $links);
+?></p>
 </div><!-- all meta -->
 <?php
   $url = $this->Breadcrumb->params($crumbs);

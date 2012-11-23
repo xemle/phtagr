@@ -67,11 +67,13 @@ class SearchComponent extends Component
     'type' => array('rule' => array('inList', array('image', 'video'))),
     'user' => 'notEmpty',
     'users' => 'notEmpty',
+    'view' => array('rule' => array('inList', array('default', 'compact', 'small'))),
     'west' => array('rule' => array('custom', '/-?\d+(\.\d+)?/')),
     'visibility' => array('rule' => array('inList', array('private', 'group', 'user', 'public'))),
     );
 
-  var $listTerms = array('any', 'category', 'city', 'country', 'group', 'location', 'state', 'sublocation', 'similar', 'tag');
+  var $listTerms = array('any', 'category', 'city', 'country', 'group',
+      'location', 'state', 'sublocation', 'similar', 'tag');
   /**
    * Array of disabled parameter names
    */
