@@ -138,7 +138,7 @@ class Mffcaea2061011ff9181c79c14fa83622 extends CakeMigration {
   private function createFields($name, &$all) {
     $oldIdToFieldId = array();
     foreach ($all as $data) {
-      $fieldName = $this->getFieldName(&$data);
+      $fieldName = $this->getFieldName($data);
       $field = $this->Field->create(array('name' => $fieldName, 'data' => $data[$name]['name']));
       $field = $this->Field->save($field);
       $oldId = $data[$name]['id'];
