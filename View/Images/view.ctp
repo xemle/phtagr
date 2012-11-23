@@ -48,7 +48,7 @@
 <div class="meta">
 <div id="meta-<?php echo $this->request->data['Media']['id']; ?>">
 <table class="bare">
-  <?php echo $this->Html->tableCells($this->ImageData->metaTable(&$this->request->data)); ?>
+  <?php echo $this->Html->tableCells($this->ImageData->metaTable($this->request->data)); ?>
 </table>
 </div>
 </div><!-- meta -->
