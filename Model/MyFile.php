@@ -442,7 +442,6 @@ class MyFile extends AppModel
     $src = Folder::slashTerm($src);
     $dst = Folder::slashTerm($dst);
 
-    uses('sanitize');
     $sqlSrc = Sanitize::escape($src);
     $sqlDst = Sanitize::escape($dst);
 

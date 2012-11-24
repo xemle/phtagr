@@ -56,7 +56,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
     $this->controller = $controller;
     // set current controller URL
     $this->setDavRoot($controller->webroot.$controller->name);
-    $this->controller->loadComponent(array('FileManager', 'FilterManager'), &$this);
+    $this->controller->loadComponent(array('FileManager', 'FilterManager'), $this);
     $this->FilterManager->initialize($controller);
   }
 
@@ -1089,7 +1089,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
       Logger::err("Could not find lock token '{$options['token']}' for file $fileId");
       return "409 Conflict";
     }
-    $this->controller->Lock->del($lock['Lock']['id']);
+    $this->controller->Lock->delete($lock['Lock']['id']);
     Logger::info("Deleted lock for '$fspath'");
     return "204 No Content";
   }
