@@ -272,6 +272,11 @@ class BrowserController extends AppController
   }
 
   public function import() {
+
+    if ($this->hasRole(ROLE_ADMIN)) {
+      ini_set('max_execution_time', 3600);//1 hour
+    }
+
     $path = $this->_getPathFromUrl();
     if (empty($this->request->data)) {
       Logger::warn("Empty post data");
