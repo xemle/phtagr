@@ -275,8 +275,9 @@ class MediaReadTestCase extends CakeTestCase {
     copy(RESOURCES . 'IMG_7795.JPG', TEST_FILES_TMP . 'IMG_7795.JPG');
     // Precondition: There are not groups yet and will be created on import
     $this->assertEqual($this->Media->Group->find('count'), 0);
-
-    $this->Controller->FilterManager->readFiles(TEST_FILES_TMP, false);
+    
+    $options = array('recursive'=>0,'forceReadMeta'=>0, 'extToRead'=>array('any'));
+    $this->Controller->FilterManager->readFiles(TEST_FILES_TMP, $options);
     $this->Controller->FilterManager->Exiftool->exitExiftool();
     $this->assertEqual($this->Media->find('count'), 1);
 
@@ -316,11 +317,13 @@ class MediaReadTestCase extends CakeTestCase {
   }
 
   public function testVideoRead() {
+    date_default_timezone_set('Europe/Belgrade');
     copy(RESOURCES . 'MVI_7620.OGG', TEST_FILES_TMP . 'MVI_7620.OGG');
     copy(RESOURCES . 'MVI_7620.THM', TEST_FILES_TMP . 'MVI_7620.THM');
     copy(RESOURCES . 'example.gpx', TEST_FILES_TMP . 'example.gpx');
 
-    $this->Controller->FilterManager->readFiles(TEST_FILES_TMP, false);
+    $options = array('recursive'=>0,'forceReadMeta'=>0, 'extToRead'=>array('any'));
+    $this->Controller->FilterManager->readFiles(TEST_FILES_TMP, $options);
     $this->Controller->FilterManager->Exiftool->exitExiftool();
     $count = $this->Media->find('count');
     $this->assertEqual($count, 1);
@@ -346,7 +349,8 @@ class MediaReadTestCase extends CakeTestCase {
     $this->User->Group->save($this->User->Group->create(array('name' => 'friends', 'user_id' => $userB['User']['id'], 'is_moderated' => false, 'is_shared' => true)));
     $this->User->Group->save($this->User->Group->create(array('name' => 'family', 'user_id' => $userB['User']['id'], 'is_moderated' => true, 'is_shared' => true)));
 
-    $this->Controller->FilterManager->readFiles(TEST_FILES_TMP, false);
+    $options = array('recursive'=>0,'forceReadMeta'=>0, 'extToRead'=>array('any'));
+    $this->Controller->FilterManager->readFiles(TEST_FILES_TMP, $options);
     $this->Controller->FilterManager->Exiftool->exitExiftool();
     $media = $this->Media->find('first');
     // Test auto subscription. Exclude group family which is moderated

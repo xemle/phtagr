@@ -206,15 +206,19 @@ class FilterManagerComponent extends Component {
    * @return array of files to read
    * @todo Add recursive read
    */
-  public function _readPath($path, $recursive) {
+  public function _readPath($path, $options = array('recursive'=>0, 'extToRead'=>array('any'))) {
     if (!is_dir($path) || !is_readable($path)) {
       return array();
     }
     $files = array();
+    $recursive = (bool) $options['recursive'];
 
     $folder = new Folder($path);
     $extensions = $this->getExtensions();
-    $pattern = ".*\.(".implode('|', $this->getExtensions()).")";
+    if (!in_array('any', $options['extToRead'])) {
+      $extensions = array_intersect($extensions, $options['extToRead']);
+    }
+    $pattern = ".*\.(".implode('|', $extensions).")";
     if ($recursive) {
       $found = $folder->findRecursive($pattern, true);
     } else {
@@ -240,7 +244,9 @@ class FilterManagerComponent extends Component {
    * @return Array of readed files. filename => Media model data (result of
    * FilterManager->read())
    */
-  public function readFiles($files, $recursive) {
+  public function readFiles($files, $options) {
+
+    $forceReadMeta = (bool) $options['forceReadMeta'];
     $stack = array();
     if (!is_array($files)) {
       $files = array($files);
@@ -248,10 +254,13 @@ class FilterManagerComponent extends Component {
 
     foreach ($files as $file) {
       if (is_dir($file)) {
-        $stack = am($stack, $this->_readPath($file, $recursive));
+        $stack = am($stack, $this->_readPath($file, $options));
       } else {
         if (is_readable($file)) {
-          $stack[] = $file;
+          $ext = strtolower(substr($file, strrpos($file, '.') + 1));
+          if (in_array('any', $options['extToRead']) || in_array($ext, $options['extToRead'])) {
+            $stack[] = $file;
+          }
         }
       }
     }
@@ -269,7 +278,7 @@ class FilterManagerComponent extends Component {
       $files = $extStack[$ext];
       sort($files);
       foreach ($files as $file) {
-        $result[$file] = $this->read($file);
+        $result[$file] = $this->read($file, $forceReadMeta);
       }
     }
     $this->Exiftool->exitExiftool();//TODO move this line in  before exit event and before shutdown
@@ -309,7 +318,7 @@ class FilterManagerComponent extends Component {
    *
    * @param filename Filename of the single file
    */
-  public function read($filename) {
+  public function read($filename, $forceReadMeta = false) {
     if (!is_readable($filename)) {
       Logger::err("Could not read file $filename");
       $this->addError($filename, 'FileNotReadable');
@@ -344,12 +353,19 @@ class FilterManagerComponent extends Component {
     if ($this->controller->MyFile->hasMedia($file)) {
       $media = $this->controller->Media->findById($file['File']['media_id']);
       $readed = strtotime($file['File']['readed']);
+      if ($forceReadMeta) {
+        $forceRead = true;
+      }
       if ($readed && !$forceRead) {
         Logger::verbose("File '$filename' already readed. Skip reading!");
         return $media;
       }
     } else {
       $media = false;
+      if ($forceReadMeta) {
+        //media missing, file will not be readed; force read meta only for EXISTING media;
+        return false;
+      }
     }
 
     $filter = $this->getFilterByExtension($filename);

@@ -137,7 +137,8 @@ class FilterManagerComponentTest  extends CakeTestCase {
     copy(RESOURCES . 'IMG_6131.JPG', $subdir . 'IMG_6131.JPG');
     copy(RESOURCES . 'IMG_7795.JPG', $subsubdir . 'IMG_7795.JPG');
 
-    $this->Controller->FilterManager->readFiles(TEST_FILES_TMP, false);
+    $options = array('recursive'=>0,'forceReadMeta'=>0, 'extToRead'=>array('any'));
+    $this->Controller->FilterManager->readFiles(TEST_FILES_TMP, $options);
     $count = $this->Media->find('count');
     $this->assertEqual($count, 1);
 
@@ -146,7 +147,8 @@ class FilterManagerComponentTest  extends CakeTestCase {
     sort($names);
     $this->assertEqual($names, array('IMG_4145.JPG'));
 
-    $this->Controller->FilterManager->readFiles(TEST_FILES_TMP, true);
+    $options = array('recursive'=>true,'forceReadMeta'=>0, 'extToRead'=>array('any'));
+    $this->Controller->FilterManager->readFiles(TEST_FILES_TMP, $options);
     $count = $this->Media->find('count');
     $this->assertEqual($count, 3);
 

@@ -223,7 +223,7 @@ class BrowserController extends AppController
       $this->redirect(null, 404);
     }
 
-    // Update metadata on dirty file
+    // Update metadata on dirty file ??? and if file was also changed? ask owner before writing?
     $file = $this->MyFile->findByFilename($filename);
     if ($file && $this->Media->hasFlag($file, MEDIA_FLAG_DIRTY)) {
       $media = $this->Media->findById($file['Media']['id']);
@@ -283,7 +283,8 @@ class BrowserController extends AppController
       $this->redirect('index/'.$path);
     }
 
-    $recursive = (bool) $this->request->data['Browser']['recursive'];
+    $recursive = (bool) $this->request->data['Browser']['options']['recursive'];
+    $options = $this->request->data['Browser']['options'];
     if (isset($this->request->data['unlink'])) {
       $this->_unlinkSelected($path, $this->request->data['Browser']['import'], $recursive);
       return;
@@ -307,7 +308,8 @@ class BrowserController extends AppController
     }
 
     $this->FilterManager->clearErrors();
-    $readed = $this->FilterManager->readFiles($toRead, $recursive);
+
+    $readed = $this->FilterManager->readFiles($toRead, $options);
     $errorCount = count($this->FilterManager->errors);
 
     $readCount = 0;
