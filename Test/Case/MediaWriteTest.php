@@ -274,6 +274,9 @@ class MediaWriteTestCase extends CakeTestCase {
   }
 
   function testImageWithChangedLocation() {
+    //use the same time zone +02:00
+    date_default_timezone_set('Europe/Belgrade');//Europe/Belgrade is 1 hrs behind Europe/Helsinki.
+    //$d = date_default_timezone_get();
     $filename = TEST_FILES_TMP . 'IMG_6131.JPG';
     copy(RESOURCES . 'IMG_6131.JPG', $filename);
     clearstatcache(true, $filename);
@@ -399,7 +402,8 @@ class MediaWriteTestCase extends CakeTestCase {
     $this->User->Group->save($this->User->Group->create(array('name' => 'friends', 'user_id' => $userB['User']['id'], 'is_moderated' => false, 'is_shared' => true)));
     $this->User->Group->save($this->User->Group->create(array('name' => 'family', 'user_id' => $userB['User']['id'], 'is_moderated' => true, 'is_shared' => true)));
 
-    $this->Controller->FilterManager->readFiles(TEST_FILES_TMP, false);
+    $options = array('recursive'=>0,'forceReadMeta'=>0, 'extToRead'=>array('any'));
+    $this->Controller->FilterManager->readFiles(TEST_FILES_TMP, $options);
     $this->Controller->FilterManager->Exiftool->exitExiftool();
     $userA = $this->User->findById($userA['User']['id']);
     $media = $this->Media->find('first');

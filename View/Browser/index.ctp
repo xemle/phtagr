@@ -22,7 +22,24 @@
 </p>
 
 <?php
-  echo $this->Form->input('Browser.recursive', array('type' => 'checkbox', 'label' => __('Recursive')));
+  echo $this->Form->input('Browser.options.recursive', array('type' => 'checkbox', 'label' => __('Recursive')));
+  echo $this->Form->input('Browser.options.forceReadMeta', array('type' => 'checkbox', 'label' => __('Only for existing media - Force reread metadata')));
+?>
+
+<p>
+<?php
+   $ExtSelect = array(
+    'any' => __('any'),
+    'xmp' => __('xmp (sidecar)'),
+    'jpg' => __('jpg'),
+    'avi' => __('avi'));
+   $ExtSelected = array('any');
+   echo $this->Html->tag('div',
+           $this->Form->input('Browser.options.extToRead', array('type' => 'select', 'options' => $ExtSelect,'multiple' => 'checkbox', 'selected' => $ExtSelected, 'label' => __("Select extensions to be imported:"))),
+           array('class' => 'submit-list'));
+?></p>
+
+<?php
   echo $this->Html->tag('div',
     $this->Form->submit(__('Import'), array('div' => false, 'name' => 'import', 'value' => 'import'))
     . $this->Form->submit(__('Unlink'), array('div' => false, 'name' => 'unlink', 'value' => 'unlink')),
