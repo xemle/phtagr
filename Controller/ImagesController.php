@@ -25,6 +25,7 @@ class ImagesController extends AppController
 
   public function beforeFilter() {
     parent::beforeFilter();
+    $this->logUser();
 
     if ($this->hasRole(ROLE_USER)) {
       $groups = $this->Group->getGroupsForMedia($this->getUser());

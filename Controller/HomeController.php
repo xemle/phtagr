@@ -42,6 +42,7 @@ class HomeController extends AppController
     $this->pageTitle = __("Home");
 
     parent::beforeFilter();
+    $this->logUser();
   }
 
   /** @todo improve the randomized newest media */
