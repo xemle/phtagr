@@ -28,6 +28,7 @@ class BrowserController extends AppController
 
   public function beforeFilter() {
     parent::beforeFilter();
+    $this->logUser();
     $this->subMenu = array(
       'import' => __("Import Files"),
       'upload' => __("Upload"),

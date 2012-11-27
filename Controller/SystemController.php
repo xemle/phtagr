@@ -104,6 +104,13 @@ class SystemController extends AppController {
       }
       $quota = $this->__fromReadableSize($this->request->data['user']['register']['quota']);
       $this->Option->setValue('user.register.quota', $quota, 0);
+      
+      if ($this->request->data['user']['logging']['enable']) {
+        $this->Option->setValue('user.logging.enable', 1, 0);
+      } else {
+        $this->Option->setValue('user.logging.enable', 0, 0);
+      }
+      
       $this->Session->setFlash(__("Options saved!"));
     }
     $this->request->data = $this->Option->getTree($this->getUserId());
@@ -115,6 +122,10 @@ class SystemController extends AppController {
     if (!isset($this->request->data['user']['register']['quota'])) {
       $this->request->data['user']['register']['quota'] = (float)100*1024*1024;
     }
+    if (!isset($this->request->data['user']['logging']['enable'])) {
+      $this->request->data['user']['logging']['enable'] = 0;
+    }
+    
   }
 
   public function external() {

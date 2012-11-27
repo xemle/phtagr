@@ -45,6 +45,7 @@ class ExplorerController extends AppController
     }
 
     parent::beforeFilter();
+    $this->logUser();
     $this->crumbs = $this->Search->urlToCrumbs($this->request->url, 2);
   }
 
