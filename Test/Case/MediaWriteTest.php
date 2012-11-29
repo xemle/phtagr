@@ -211,6 +211,8 @@ class MediaWriteTestCase extends CakeTestCase {
   }
 
   function testImageMetaData() {
+    //use for testing the same time zone as initial values (+02:00)
+    date_default_timezone_set('Europe/Belgrade');//GMT+2 = Europe/Belgrade is 1 hrs behind Europe/Helsinki.
     $filename = TEST_FILES_TMP . 'IMG_6131.JPG';
     copy(RESOURCES . 'IMG_6131.JPG', $filename);
     clearstatcache(true, $filename);
