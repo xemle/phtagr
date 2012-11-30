@@ -46,7 +46,7 @@ class FilterManagerComponent extends Component {
       Logger::err("Model MyFile and Media is not found");
       return false;
     }
-    $this->loadFilter(array('ImageFilter', 'ReadOnlyImageFilter', 'VideoFilter', 'GpsFilter', 'Exiftool'));
+    $this->loadFilter(array('ImageFilter', 'ReadOnlyImageFilter', 'VideoFilter', 'GpsFilter', 'Exiftool', 'SidecarFilter'));
   }
 
   /**

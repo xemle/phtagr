@@ -31,7 +31,8 @@ class MyFile extends AppModel
     FILE_TYPE_VIDEO => array('avi', 'mpg', 'mpeg', 'mov', 'mp4', 'mts', 'flv', 'ogg'),
     FILE_TYPE_VIDEOTHUMB => array('thm'),
     FILE_TYPE_TEXT => array('txt'),
-    FILE_TYPE_GPS => array('log')
+    FILE_TYPE_GPS => array('log'),
+    FILE_TYPE_SIDECAR => array('xmp')
     );
 
   var $actsAs = array('Type', 'Flag');

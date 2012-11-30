@@ -34,6 +34,7 @@ class FileListHelper extends AppHelper
       case FILE_TYPE_VIDEO: $icon = 'film'; break;
       case FILE_TYPE_GPS: $icon = 'map'; break;
       case FILE_TYPE_TEXT: break;
+      case FILE_TYPE_SIDECAR: $icon = 'chain'; break;
       default:
         Logger::warn("Unhanded file type $type");
         return false;
