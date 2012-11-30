@@ -26,4 +26,12 @@
   echo $this->Form->input('filter.gps.overwrite', array('type' => 'checkbox',  'label' => __("Overwrite existing coordinates?")));
 ?>
 </fieldset>
+
+<fieldset><legend><?php echo __('Sidecar XMP options'); ?></legend>
+<p><?php echo __('Import from and save to sidecar XMP files - only for images (jpg):'); ?></p>
+<?php
+  echo $this->Form->input('xmp.use.sidecar', array('type' => 'checkbox',  'label' => __("Use sidecar XMP files?")));
+?>
+</fieldset>
+
 <?php echo $this->Form->end(__('Save')); ?>

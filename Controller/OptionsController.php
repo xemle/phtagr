@@ -124,6 +124,10 @@ class OptionsController extends AppController {
       $range = max(0, min(60, $range));
       $this->Option->setValue('filter.gps.range', $range, $userId);
 
+      $check2 = Set::extract('xmp.use.sidecar', $this->request->data);
+      $check2 = $check2 ? 1 : 0;
+      $this->Option->setValue('xmp.use.sidecar', $check2, $userId);
+
       $this->Session->setFlash(__("Settings saved"));
     }
     $tree = $this->Option->getTree($userId);

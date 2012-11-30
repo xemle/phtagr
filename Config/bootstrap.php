@@ -151,6 +151,7 @@ define("FILE_TYPE_SOUND",       4);
 define("FILE_TYPE_VIDEO",       5);
 define("FILE_TYPE_VIDEOTHUMB",  6);
 define("FILE_TYPE_GPS",         7);
+define("FILE_TYPE_SIDECAR",     8);
 
 define("LOCATION_ANY", 0x00);
 define("LOCATION_CITY", 0x01);
