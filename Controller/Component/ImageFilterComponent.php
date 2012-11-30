@@ -24,6 +24,7 @@ class ImageFilterComponent extends BaseFilterComponent {
 
   var $fieldMap = array(
       'keyword' => 'Keywords',
+      'keyword2' => 'Subject',
       'category' => 'SupplementalCategories',
       'sublocation' => 'Sub-location',
       'city' => 'City',
@@ -252,8 +253,24 @@ class ImageFilterComponent extends BaseFilterComponent {
       $v['longitude'] = $longitude;
     }
 
+    //merge Keywords and Subject
+    if (isset($data['Subject'])) {
+      if (isset($data['Keywords'])) {
+        $data['Keywords']=$data['Subject'].",".$data['Keywords'];
+      } else {
+        $data['Keywords']=$data['Subject'];
+      }
+    } elseif (isset($data['Keywords'])) {
+      $data['Subject'] = $data['Keywords'];
+    }
+    
     // Associations to meta data: Tags, Categories, Locations
     foreach ($this->fieldMap as $field => $name) {
+      //hack to allow two names with the same key (field)
+      if ($field === 'keyword2') {
+        $field = 'keyword';
+        $isList = true;
+      }
       $isList = $this->Media->Field->isListField($field);
       if ($isList) {
         $media['Field'][$field] = $this->_extractList($data, $name);
@@ -621,6 +638,11 @@ class ImageFilterComponent extends BaseFilterComponent {
     // Associations to meta data: Tags, Categories, Locations
     foreach ($this->fieldMap as $field => $name) {
       $isList = $this->Media->Field->isListField($field);
+      //hack to allow two names with the same key (field)
+      if ($field === 'keyword2') {
+        $field = 'keyword';
+        $isList = true;
+      }
       if ($isList) {
         $fileValue = $this->_extractList($data, $name);
       } else {
