@@ -174,7 +174,7 @@ class VideoFilterComponent extends BaseFilterComponent {
 
   public function _readVideoFormat(&$media, $filename) {
     if ($this->controller->getOption('bin.exiftool')) {
-      $result = $this->_readExiftool($filename);
+      $result = $this->FilterManager->Exiftool->readMetaData($filename);
     }
     if (!$result && $this->controller->getOption('bin.ffmpeg')) {
       $result = $this->_readFfmpeg($filename);
@@ -191,59 +191,6 @@ class VideoFilterComponent extends BaseFilterComponent {
       $media['Media'][$name] = $value;
     }
     return $media;
-  }
-
-  public function _readExiftool($filename) {
-    $bin = $this->controller->getOption('bin.exiftool', 'exiftool');
-    $this->Command->redirectError = true;
-    $result = $this->Command->run($bin, array('-n', '-S', $filename));
-    $output = $this->Command->output;
-
-    if ($result != 0) {
-      Logger::err("Command '$bin' returned unexcpected $result");
-      return false;
-    } elseif (!count($output)) {
-      Logger::err("Command returned no output!");
-      return false;
-    }
-
-    $data = array();
-    foreach ($output as $line) {
-      if (preg_match('/^(\w+): (.*)$/', $line, $m)) {
-        $data[$m[1]] = $m[2];
-      } else {
-        Logger::warn('Could not parse line: '.$line);
-      }
-    }
-
-    $result = array();
-    if (!isset($data['ImageWidth']) || !isset($data['ImageWidth']) || !isset($data['Duration']) ) {
-      Logger::warn("Could not extract width, height, or durration from '$filename'");
-      Logger::warn($result);
-      return false;
-    }
-    $result['height'] = intval($data['ImageHeight']);
-    $result['width'] = intval($data['ImageWidth']);
-    $result['duration'] = ceil(intval($data['Duration']));
-
-    if (isset($data['DateTimeOriginal'])) {
-      $result['date'] = $data['DateTimeOriginal'];
-    } else if (isset($data['FileModifyDate'])) {
-      $result['date'] = $data['FileModifyDate'];
-    }
-    if (isset($data['Orientation'])) {
-      $result['orientation'] = $data['Orientation'];
-    }
-    if (isset($data['Model'])) {
-      $result['model'] = $data['Model'];
-    }
-    if (isset($data['GPSLatitude']) && isset($data['GPSLongitude'])) {
-      $result['latitude'] = $data['GPSLatitude'];
-      $result['longitude'] = $data['GPSLongitude'];
-    }
-    Logger::trace("Extracted " . count($result) . " fields via exiftool");
-    Logger::trace($result);
-    return $result;
   }
 
   public function _readFfmpeg($filename) {

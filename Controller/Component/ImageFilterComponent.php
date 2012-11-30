@@ -59,7 +59,7 @@ class ImageFilterComponent extends BaseFilterComponent {
     $filename = $this->MyFile->getFilename($file);
 
     if ($this->controller->getOption('bin.exiftool')) {
-      $meta = $this->_readMetaData($filename);
+      $meta = $this->FilterManager->Exiftool->readMetaData($filename);
     } else {
       $meta = $this->_readMetaDataGetId3($filename);
     }
@@ -145,41 +145,6 @@ class ImageFilterComponent extends BaseFilterComponent {
     $this->Command->run($bin, array('-all=', $filename));
 
     Logger::debug("Cleaned meta data of '$filename'");
-  }
-
-  private function _getExifToolConf() {
-    return APP . 'Config' . DS . 'ExifTool-phtagr.conf';
-  }
-
-  /**
-   * Read the meta data viea exiftool from a file
-   *
-   * @param filename Filename to read
-   * @result Array of metadata or false on error
-   */
-  private function _readMetaData($filename) {
-    if (!$this->controller->getOption('bin.exiftool')) {
-      return false;
-    }
-    // read meta data
-    $bin = $this->controller->getOption('bin.exiftool', 'exiftool');
-    $args = array('-config', $this->_getExifToolConf(), '-S', '-n', $filename);
-    $result = $this->Command->run($bin, $args);
-    $output = $this->Command->output;
-    if ($result == 127) {
-      Logger::err("$bin could not be found!");
-      return false;
-    } elseif ($result != 0) {
-      Logger::err("$bin returned with error: $result (command: '{$this->Command->lastCommand}')");
-      return false;
-    }
-
-    $data = array();
-    foreach ($output as $line) {
-      list($name, $value) = preg_split('/:(\s+|$)/', $line);
-      $data[$name] = $value;
-    }
-    return $data;
   }
 
   /**
@@ -446,7 +411,7 @@ class ImageFilterComponent extends BaseFilterComponent {
       return false;
     }
 
-    $data = $this->_readMetaData($filename);
+    $data = $this->FilterManager->Exiftool->readMetaData($filename);
     if ($data === false) {
       Logger::warn("File has no metadata!");
       return false;
@@ -474,28 +439,15 @@ class ImageFilterComponent extends BaseFilterComponent {
     //generates new IPTCDigest code in order to 'help' adobe products to see that the file was modified
     $args[] = '-IPTCDigest=new';
 
-    $args['-o'] = $tmp;
+    $args[] = '-o';
+    $args[] = $tmp;
     $args[] = $filename;
-    $result = $this->Command->run($bin, $args);
-    clearstatcache(true, $tmp);
 
-    if ($result != 0 || !file_exists($tmp)) {
-      Logger::err("$bin returns with error: $result");
-      if (file_exists($tmp)) {
-        @unlink($tmp);
-      }
+    $result = $this->FilterManager->Exiftool->writeMetaData($filename, $tmp, $args);
+    if (!$result) {
       return false;
-    } else {
-      $tmp2 = $this->_getTempFilename($filename);
-      if (!rename($filename, $tmp2)) {
-        Logger::err("Could not rename original file '$filename' to temporary file '$tmp2'");
-        @unlink($tmp);
-        return false;
-      }
-      rename($tmp, $filename);
-      @unlink($tmp2);
-      clearstatcache(true, $filename);
     }
+    $this->FilterManager->Exiftool->exitExiftool();//TODO move this line in parent controller before exit  and before shutdown
 
     $this->controller->MyFile->update($file);
     if (!$this->Media->deleteFlag($media, MEDIA_FLAG_DIRTY)) {
@@ -631,9 +583,7 @@ class ImageFilterComponent extends BaseFilterComponent {
    */
   private function _createExportArguments(&$data, $media) {
     $args = array();
-
-    $args['-config'] = $this->_getExifToolConf();
-
+ 
     $args = am($args, $this->_createExportDate($data, $media));
     $args = am($args, $this->_createExportGps($data, $media));
 
