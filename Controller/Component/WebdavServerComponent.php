@@ -120,7 +120,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
     //$relativePath=$this->getRelativeDavpath($path);
     $relativePath=$this->canonicalpath($path);
     if ($relativePath!='/') {
-      $fspath=$this->_mergePathes($this->_fsRoot, $relativePath);
+      $fspath=$this->_mergePaths($this->_fsRoot, $relativePath);
     } else {
       $fspath=$this->_fsRoot;
     }
