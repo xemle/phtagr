@@ -358,7 +358,8 @@ class FilterManagerComponent extends Component {
       }
       if ($readed && !$forceRead) {
         Logger::verbose("File '$filename' already readed. Skip reading!");
-        return $media;
+        //return $media;//overload memory with 20kb for each file
+        return $filename;//around 0.2kb
       }
     } else {
       $media = false;
@@ -371,7 +372,14 @@ class FilterManagerComponent extends Component {
     $filter = $this->getFilterByExtension($filename);
     Logger::debug("Read file $filename with filter ".$filter->getName());
     $result = $filter->read($file, $media);
-    return $result;
+
+    //changes only for ImageFilter
+    if ($filter->getName() == "Image" || $filter->getName() == "Sidecar") {
+      if ($result) {$result = $filename;}
+    }
+    return $result;//overload memory with 20kb for each file
+    //return $filename;//around 0.2kb
+
   }
 
   /**
