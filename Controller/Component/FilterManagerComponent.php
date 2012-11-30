@@ -270,6 +270,7 @@ class FilterManagerComponent extends Component {
     //Logger::debug($order);
 
     $result = array();
+    $importLog = $this->_importlog(&$importLog, $file);
     foreach ($order as $ext) {
       if (!isset($extStack[$ext])) {
         continue;
@@ -279,6 +280,7 @@ class FilterManagerComponent extends Component {
       sort($files);
       foreach ($files as $file) {
         $result[$file] = $this->read($file, $forceReadMeta);
+        $importLog = $this->_importlog(&$importLog, $file);
       }
     }
     $this->Exiftool->exitExiftool();//TODO move this line in  before exit event and before shutdown
@@ -422,6 +424,40 @@ class FilterManagerComponent extends Component {
     return $success && !$filterMissing;
   }
 
+  /**
+   * Log importing speed and memory utilized
+   */
+  Function _importlog(&$importLog = array(), $file) {
+    $enableImportLogging = true;
+    if (!$enableImportLogging){
+      return false;
+    }
+    $v =& $importLog;
+    if (!isset($v['StartTime'])){
+      $v['file_nr']=0;
+      $v['StartTime'] = microtime(true);//seconds
+      $v['StartMemory'] = round((memory_get_usage()/1000000),4);//MB
+      $v['LastTime'] = $v['StartTime'];
+      $v['LastMemory'] = $v['StartMemory'];
+      $this->log(" \n \n \n \n new import ------------------------------------------------------------", 'import_memory_speed');//add 10 new lines  \n?
+      return $importLog;
+    }
+    $CrtTime = microtime(true);
+    $CrtMemory = round((memory_get_usage()/1000000),4);
+    $v['file_nr']=$v['file_nr']+1;
+    $averageFileMemory = round(($CrtMemory-$v['StartMemory'])*1000/$v['file_nr'],1);//kb  nr zecimale??
+    $totalTime = round(($CrtTime-$v['StartTime']),4);
+    $LastFileTime = round(($CrtTime-$v['LastTime']),4);
+    $averageFileTime = round($totalTime/$v['file_nr'],4);
+    $LastFileMemory = round(($CrtMemory-$v['LastMemory'])*1000,1);//kb  nr zecimale??
+    $v['LastMemory'] = $CrtMemory;
+
+    $this->log($file, 'import_memory_speed');
+    $this->log("------ FILE NO: ".$v['file_nr'].", total time ".$totalTime." seconds, averageFileTime ".$averageFileTime." sec/file", 'import_memory_speed');
+    $this->log("------ memory_get_usage = ".$CrtMemory." MB, used for last file = ".$LastFileMemory." kb, averageFileMemory ".$averageFileMemory." kb", 'import_memory_speed');
+
+    return $importLog;
+  }
 }
 
 ?>
