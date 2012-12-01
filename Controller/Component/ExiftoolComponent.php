@@ -79,7 +79,7 @@ class ExiftoolComponent extends Component {
     return is_resource($this->process);
   }
 
-  private function writeCommands(&$pipe, $commands) {
+  private function _writeCommands(&$pipe, $commands) {
     if (!is_resource($pipe)) {
       Logger::err("Invalid pipe. Command could not be written: " . join(', ', $commands));
       return;
@@ -104,7 +104,7 @@ class ExiftoolComponent extends Component {
     if (is_resource($this->process)) {
       //exiftool is opened with -stay_open option
       //exiftool can be closed
-      $this->writeCommands($this->stdin, array('-stay_open', 'False', '-execute', ''));
+      $this->_writeCommands($this->stdin, array('-stay_open', 'False', '-execute', ''));
       //close pipes
       fclose($this->stdin);
       fclose($this->stdout);
@@ -118,18 +118,18 @@ class ExiftoolComponent extends Component {
     unset($this->stderr);
   }
 
-  private function _readFromPipe(&$pipe, $token = false) {
+  private function _readFromPipe(&$pipe, $stopToken = false) {
     if (!is_resource($pipe)) {
       return false;
     }
     $starttime = microtime(true);
-    $current_line = '';
+    $currentLine = '';
     $lines = array();
     stream_set_blocking($pipe, 0); //just as a precaution
-    while ($current_line !== $token) {
-      $current_line = fgets($pipe, 8192);  //1024? for speed?
-      if ($current_line !== $token && $current_line !== false) {
-        $lines[] = $current_line;
+    while ($currentLine !== $stopToken) {
+      $currentLine = fgets($pipe, 8192);  //1024? for speed?
+      if ($currentLine !== $stopToken && $currentLine !== false) {
+        $lines[] = $currentLine;
       }
       $processingtime = round((microtime(true) - $starttime), 4); //seconds
       if ($processingtime > 1) {
@@ -177,7 +177,7 @@ class ExiftoolComponent extends Component {
     //fwrite($this->stdin, "-json\n");
 
     //next line is not really necessary; good for reading over slow networks
-    $this->writeCommands($this->stdin, array('-fast2'));
+    $this->_writeCommands($this->stdin, array('-fast2'));
 
     // comment next lines in order to read all metadata, not only these fields
     $base = array('-Error', '-Warning', '-FileName', '-ImageWidth', '-ImageHeight', '-ObjectName', '-DateTimeCreated', '-SubSecDateTimeOriginal', '-SubSecCreateDate');
@@ -191,12 +191,12 @@ class ExiftoolComponent extends Component {
     $xmp = array('-Location', '-State', '-Country');
     $video = array('-Width', '-Height', '-Duration');
 
-    $this->writeCommands($this->stdin, $base);
-    $this->writeCommands($this->stdin, $exif);
-    $this->writeCommands($this->stdin, $gps);
-    $this->writeCommands($this->stdin, $iptc);
-    $this->writeCommands($this->stdin, $xmp);
-    $this->writeCommands($this->stdin, $video);
+    $this->_writeCommands($this->stdin, $base);
+    $this->_writeCommands($this->stdin, $exif);
+    $this->_writeCommands($this->stdin, $gps);
+    $this->_writeCommands($this->stdin, $iptc);
+    $this->_writeCommands($this->stdin, $xmp);
+    $this->_writeCommands($this->stdin, $video);
 
     //-b          (-binary)            Output data in binary format
     //-n          (--printConv)        Read/write numerical tag values, not passed through print Conversation; (not human readable)
@@ -209,14 +209,14 @@ class ExiftoolComponent extends Component {
     //numerical values format, not human readable; exemple: for 'orientation' field
     //fwrite($pipes[0], "-n\n");
 
-    $this->writeCommands($this->stdin, array('-S', $filename, '', '-execute'));
+    $this->_writeCommands($this->stdin, array('-S', $filename, '', '-execute'));
 
     //"-executeNUMBER\n" can be utilized to obtain {readyNUMBER} on eof stdout
 
     $stdout = $this->_readFromPipe($this->stdout, "{ready}\n");
     $stderr = $this->_readFromPipe($this->stderr);
 
-    if (count($stderr) > 1 || (count($stderr) && $strerr[0] === false)) {// and count($stdout) !==1//i.e.="    1 image files created "
+    if (count($stderr) > 1 || (count($stderr) && $stderr[0] === false)) {// and count($stdout) !==1//i.e.="    1 image files created "
       //TODO: test if warnings and original file internal errors are reported on stderr or stdout
       $errors = implode(",", $stderr);
       Logger::err(am("exiftool stderr returned errors: ",$errors));
@@ -270,8 +270,7 @@ class ExiftoolComponent extends Component {
 
    private function _videoMetaDataProcess($data, $filename) {
     $filetype = $this->controller->MyFile->_getTypeFromFilename($filename);
-    if ($filetype == 5) {
-      // FILE_TYPE_VIDEOTHUMB
+    if ($filetype == FILE_TYPE_VIDEO) {
       $result = array();
       if (!isset($data['ImageWidth']) || !isset($data['ImageWidth']) || !isset($data['Duration']) ) {
         Logger::warn("Could not extract width, height, or durration from '$filename'");
@@ -305,7 +304,6 @@ class ExiftoolComponent extends Component {
     }
   }
 
-
   /**
    * Write the meta data to an image file
    *
@@ -334,8 +332,8 @@ class ExiftoolComponent extends Component {
    */
   private function _writeMetaDataPipes(&$args) {
 
-    $this->writeCommands($this->stdin, $args);
-    $this->writeCommands($this->stdin, array('-execute'));
+    $this->_writeCommands($this->stdin, $args);
+    $this->_writeCommands($this->stdin, array('-execute'));
 
     $this->_readFromPipe($this->stdout);
     $stderr = $this->_readFromPipe($this->stderr);
