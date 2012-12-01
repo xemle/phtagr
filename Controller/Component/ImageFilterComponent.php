@@ -20,7 +20,7 @@ App::uses('BaseFilter', 'Component');
 
 class ImageFilterComponent extends BaseFilterComponent {
   var $controller = null;
-  var $components = array('Command', 'FileManager', 'SidecarFilter');
+  var $components = array('Command', 'FileManager', 'SidecarFilter', 'Exiftool');
 
   var $fieldMap = array(
       'keyword' => 'Keywords',
@@ -60,7 +60,7 @@ class ImageFilterComponent extends BaseFilterComponent {
     $filename = $this->MyFile->getFilename($file);
 
     if ($this->controller->getOption('bin.exiftool')) {
-      $meta = $this->FilterManager->Exiftool->readMetaData($filename);
+      $meta = $this->Exiftool->readMetaData($filename);
     } else {
       $meta = $this->_readMetaDataGetId3($filename);
     }
@@ -124,12 +124,12 @@ class ImageFilterComponent extends BaseFilterComponent {
     }
     $this->controller->MyFile->updateReaded($file);
     $this->controller->MyFile->setFlag($file, FILE_FLAG_DEPENDENT);
-    
+
     if ($this->controller->getOption('xmp.use.sidecar', 0)) {
       //$hasSidecar = $this->SidecarFilter->hasSidecar($filename, false);
       //link sidecar to media(to main file); really needed here?
     }
-    
+
     return $media;
   }
 
@@ -263,7 +263,7 @@ class ImageFilterComponent extends BaseFilterComponent {
     } elseif (isset($data['Keywords'])) {
       $data['Subject'] = $data['Keywords'];
     }
-    
+
     // Associations to meta data: Tags, Categories, Locations
     foreach ($this->fieldMap as $field => $name) {
       //hack to allow two names with the same key (field)
@@ -294,7 +294,7 @@ class ImageFilterComponent extends BaseFilterComponent {
     $user = $this->controller->getUser();
     $dbGroups = $this->Media->Group->find('all', array('conditions' => array('Group.name' => $fileGroupNames)));
     $dbGroupNames = Set::extract('/Group/name', $dbGroups);
-    
+
     $mediaGroupIds = array();
     foreach ($fileGroupNames as $fileGroupName) {
       if (!in_array($fileGroupName, $dbGroupNames)) {
@@ -439,14 +439,14 @@ class ImageFilterComponent extends BaseFilterComponent {
         return false;
       }
     }
-    
+
     if (!file_exists($filename) || !is_writeable(dirname($filename)) || !is_writeable($filename)) {
       $id = isset($media['Media']['id']) ? $media['Media']['id'] : 0;
       Logger::warn("File: $filename (#$id) does not exists nor is readable");
       return false;
     }
 
-    $data = $this->FilterManager->Exiftool->readMetaData($filename);
+    $data = $this->Exiftool->readMetaData($filename);
     if ($data === false) {
       Logger::warn("File has no metadata!");
       return false;
@@ -478,11 +478,10 @@ class ImageFilterComponent extends BaseFilterComponent {
     $args[] = $tmp;
     $args[] = $filename;
 
-    $result = $this->FilterManager->Exiftool->writeMetaData($filename, $tmp, $args);
+    $result = $this->Exiftool->writeMetaData($filename, $tmp, $args);
     if (!$result) {
       return false;
     }
-    $this->FilterManager->Exiftool->exitExiftool();//TODO move this line in parent controller before exit  and before shutdown
 
     $this->controller->MyFile->update($file);
     if (!$this->Media->deleteFlag($media, MEDIA_FLAG_DIRTY)) {
@@ -619,7 +618,7 @@ class ImageFilterComponent extends BaseFilterComponent {
    */
   private function _createExportArguments(&$data, $media) {
     $args = array();
- 
+
     $args = am($args, $this->_createExportDate($data, $media));
     $args = am($args, $this->_createExportGps($data, $media));
 
@@ -765,7 +764,7 @@ class ImageFilterComponent extends BaseFilterComponent {
     return $data;
   }
 
-/*
+  /*
 exiftool -S -n IMG_0498.jpg|sed -e 's/^/  [/' -e 's/: /] => "/' -e 's/$/"/'
 
 array

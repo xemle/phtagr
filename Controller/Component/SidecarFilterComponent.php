@@ -20,7 +20,7 @@ App::uses('BaseFilter', 'Component');
 
 class SidecarFilterComponent extends BaseFilterComponent {
   var $controller = null;
-  var $components = array('Command', 'FileManager', 'Command');
+  var $components = array('Command', 'FileManager', 'Command', 'Exiftool');
 
   var $fieldMapIPTC = array(
       'keyword' => 'Keywords',
@@ -38,25 +38,32 @@ class SidecarFilterComponent extends BaseFilterComponent {
       'state' => 'State',
       'country' => 'Country'
       );
-      
+
+  /**
+   * Map of directory to File models
+   *
+   * @var array
+   */
+  var $fileCache = array();
+
   public function getName() {
     return "Sidecar";
   }
 
   public function getExtensions() {
-    return array('xmp');
+    return array('xmp' => array('priority' => 5));
   }
 
   public function hasSidecar($filename, $createSidecar = false) {
-    
+
     if (!$this->controller->getOption('xmp.use.sidecar', 0)) {
       return false;
     }
-      
-    $media = $this->MyFile->findByFilename($filename);
-    $filename_xmp = substr($filename, 0, strrpos($filename, '.')+1).'xmp';
 
-    if (!file_exists($filename_xmp)){
+    $media = $this->MyFile->findByFilename($filename);
+    $xmpFilename = substr($filename, 0, strrpos($filename, '.') + 1) . 'xmp';
+
+    if (!file_exists($xmpFilename)){
       if ($createSidecar){
         $this->_createSidecar($filename, $media);
       } else {
@@ -64,19 +71,19 @@ class SidecarFilterComponent extends BaseFilterComponent {
       }
     }
 
-    $sidecar = $this->MyFile->findByFilename($filename_xmp);
+    $sidecar = $this->MyFile->findByFilename($xmpFilename);
     if (!$sidecar){
-      $this->FileManager->add($filename_xmp);
+      $this->FileManager->add($xmpFilename);
     }
-    $sidecar = $this->MyFile->findByFilename($filename_xmp);
+    $sidecar = $this->MyFile->findByFilename($xmpFilename);
 
     $mediaId = $media['Media']['id'];
     if (!isset($sidecar['media_id'])) {
       //add media to sidecar file
-      $sidecar = $this->MyFile->findByFilename($filename_xmp);
+      $sidecar = $this->MyFile->findByFilename($xmpFilename);
       if (!$this->controller->MyFile->setMedia($sidecar, $mediaId)) {
-        Logger::err("File was not saved: " . $filename_xmp);
-        $this->FilterManager->addError($filename_xmp, "FileSaveError");
+        Logger::err("File was not saved: " . $xmpFilename);
+        $this->FilterManager->addError($xmpFilename, "FileSaveError");
         return false;
       }
     } elseif ($mediaId !== $sidecar['File']['media_id']) {
@@ -90,34 +97,52 @@ class SidecarFilterComponent extends BaseFilterComponent {
     return true;
 
   }
-  
+
   private function _createSidecar($filename) {
 
-    $filename_xmp = substr($filename, 0, strrpos($filename, '.')+1).'xmp';
+    $xmpFilename = substr($filename, 0, strrpos($filename, '.') + 1) . 'xmp';
 
     //create sidecar xmp if missing
-    if (!file_exists($filename_xmp)) {
-      Logger::debug("Write sidecar: $filename_xmp");
+    if (!file_exists($xmpFilename)) {
+      Logger::debug("Write sidecar: $xmpFilename");
       if (!is_writable(dirname($filename))) {
         Logger::warn("Cannot create file sidecar. Directory of media is not writeable");
       }
-    
-      $bin = $this->controller->getOption('bin.exiftool', 'exiftool');
-      $args_xmp[] = "-tagsfromfile";
-      $args_xmp[] = $filename;
-      $args_xmp[] = $filename_xmp ;
-      $result = $this->Command->run($bin, $args_xmp);
 
-      if ($result != 0 || !file_exists($filename_xmp)) {
+      $bin = $this->controller->getOption('bin.exiftool', 'exiftool');
+      $args[] = "-tagsfromfile";
+      $args[] = $filename;
+      $args[] = $xmpFilename ;
+      $result = $this->Command->run($bin, $args);
+
+      if ($result != 0 || !file_exists($xmpFilename)) {
         Logger::err("$bin returns with error(xmp sidecar creation): $result");
       }
     }
 
-    return $this->FileManager->add($filename_xmp);
+    return $this->FileManager->add($xmpFilename);
   }
 
-  
-   /**
+  /**
+   * Lookup file from database to match filename to Media.
+   *
+   * @param string $path Path of file
+   * @param string $filename Filename
+   * @return mixed File model data or false if file was not found
+   */
+  private function _findFileInPath($path, $filename) {
+    if (!isset($this->fileCache[$path])) {
+      $this->fileCache[$path] = $this->controller->MyFile->findAllByPath($path);
+    }
+    foreach ($this->fileCache[$path] as $file) {
+      if ($file['File']['file'] == $filename) {
+        return $file;
+      }
+    }
+    return false;
+  }
+
+  /**
    * Finds the MainFile of a sidecar
    *
    * @param video File model data of the video
@@ -129,10 +154,7 @@ class SidecarFilterComponent extends BaseFilterComponent {
     $folder = new Folder($path);
     $pattern = basename($sidecarFilename);
     $ExtensionsList = $this->FilterManager->getExtensions();
-    
-    //if (isset($ExtensionsList['xmp'])) {unset($ExtensionsList['xmp']);}
-    //if (isset($ExtensionsList['thm'])) {unset($ExtensionsList['thm']);}
-    
+
     $pattern = substr($pattern, 0, strrpos($pattern, '.')+1).'('.implode($ExtensionsList, '|').')';
     $found = $folder->find($pattern);
     asort($found);
@@ -140,10 +162,8 @@ class SidecarFilterComponent extends BaseFilterComponent {
       return false;
     }
     foreach ($found as $file) {
-      // $ ext = strtolower(substr($file, strrpos($file, '.') + 1));
       if (is_readable(Folder::addPathElement($path, $file))) {
-        $MainFileFilename = Folder::addPathElement($path, $file);
-        $MainFile = $this->controller->MyFile->findByFilename($MainFileFilename);
+        $MainFile = $this->_findFileInPath($path, $file);
         if ($MainFile) {
           return $MainFile;
         }
@@ -151,8 +171,8 @@ class SidecarFilterComponent extends BaseFilterComponent {
     }
     return false;
   }
-  
-  
+
+
   /**
    * Read the meta data from the file
    *
@@ -170,7 +190,7 @@ class SidecarFilterComponent extends BaseFilterComponent {
         !$this->controller->getOption('bin.exiftool') ||
         !$this->controller->getOption('xmp.use.sidecar', 0)) {
       return false;
-    } 
+    }
     $sidecar = $this->MyFile->findByFilename($filename);
     if (!$media){
       if (isset($sidecar['File']['media_id'])){
@@ -182,22 +202,17 @@ class SidecarFilterComponent extends BaseFilterComponent {
           return false;
         } else {
           $mediaId = $media['Media']['id'];
-            //add media to sidecar file
-            if (!$this->controller->MyFile->setMedia($sidecar, $mediaId)) {
-              Logger::err("File was not saved: " . $filename);
-              $this->FilterManager->addError($filename, "FileSaveError");
-              return false;
-            }
-
-          //$this->controller->MyFile->updateReaded($sidecar);
-          //$this->controller->MyFile->setFlag($sidecar, FILE_FLAG_DEPENDENT);
-          //return true;
-          
+          // attach sidecar file to media
+          if (!$this->controller->MyFile->setMedia($sidecar, $mediaId)) {
+            Logger::err("File was not saved: " . $filename);
+            $this->FilterManager->addError($filename, "FileSaveError");
+            return false;
+          }
         }
       }
     }
 
-    $meta = $this->FilterManager->Exiftool->readMetaData($filename);
+    $meta = $this->Exiftool->readMetaData($filename);
 
     if ($meta === false) {
       $this->FilterManager->addError($filename, 'NoMetaDataFound');
@@ -275,7 +290,7 @@ class SidecarFilterComponent extends BaseFilterComponent {
     // EXIF date
     //'DateTimeOriginal' is from EXIF group, all cameras should write this field
     $date = $this->_extract($data, 'DateTimeOriginal');
-    
+
     if ($date) {
       return $date;
     }
@@ -293,7 +308,7 @@ class SidecarFilterComponent extends BaseFilterComponent {
       return $dateIptc;
     }
     // No EXIF or IPTC date: Extract file modification time, or NOW
-    
+
     if (!$date) {
       $date = $this->_extract($data, 'FileModifyDate');
     }
@@ -311,7 +326,7 @@ class SidecarFilterComponent extends BaseFilterComponent {
    */
   private function _extractImageData(&$media, &$data) {
     $user = $this->controller->getUser();
-    
+
     $v =& $media['Media'];
 
     // Media information
@@ -357,7 +372,7 @@ class SidecarFilterComponent extends BaseFilterComponent {
     foreach ($this->fieldMapXMP as $field => $name) {
       $isList = $this->Media->Field->isListField($field);
       if ($isList) {
-        if (isset($data[$name])) { 
+        if (isset($data[$name])) {
           $media['Field'][$field] = $this->_extractList($data, $name);
         }
       } else {
@@ -383,7 +398,7 @@ class SidecarFilterComponent extends BaseFilterComponent {
     $user = $this->controller->getUser();
     $dbGroups = $this->Media->Group->find('all', array('conditions' => array('Group.name' => $fileGroupNames)));
     $dbGroupNames = Set::extract('/Group/name', $dbGroups);
-    
+
     $mediaGroupIds = array();
     foreach ($fileGroupNames as $fileGroupName) {
       if (!in_array($fileGroupName, $dbGroupNames)) {
@@ -478,7 +493,7 @@ class SidecarFilterComponent extends BaseFilterComponent {
       return false;
     }
 
-    $data = $this->FilterManager->Exiftool->readMetaData($filename);
+    $data = $this->Exiftool->readMetaData($filename);
     if ($data === false) {
       Logger::warn("File has no metadata!");
       return false;
@@ -508,7 +523,7 @@ class SidecarFilterComponent extends BaseFilterComponent {
     //without -n values are written in human readable format
     //tag names in the input JSON file may be suffixed with a # to disable print conversion
     //less errors if -b,-n options are not used and non numeric values are incorrectly formated (ex:dates)
-    
+
     //generates new IPTCDigest code in order to 'help' adobe products to see that the file was modified
     $args[] = '-IPTCDigest=new';
 
@@ -563,13 +578,13 @@ class SidecarFilterComponent extends BaseFilterComponent {
     $timeDb = strtotime($media['Media']['date']);
     $timeFile = false;
 
-    // Date priorities: EXIF, IPTC 
+    // Date priorities: EXIF, IPTC
     $dateExif = $this->_extract($data, 'DateTimeOriginal');
     if ($dateExif) {
       $timeFile = strtotime($dateExif);
     } else {
       $dateIptc = $this->_extract($data, 'DateCreated');
-      //correct possible reading from XMP: DateCreated instead of IPTC:DateCreated 
+      //correct possible reading from XMP: DateCreated instead of IPTC:DateCreated
       $dateIptc=substr($dateIptc,0,10);
       if ($dateIptc) {
         $time = $this->_extract($data, 'TimeCreated');
@@ -691,7 +706,7 @@ class SidecarFilterComponent extends BaseFilterComponent {
     $args = am($args, $this->_createExportArgument($data, 'ObjectName', $media['Media']['name'], true));
     $args = am($args, $this->_createExportArgument($data, 'Orientation', $media['Media']['orientation']));
     $args = am($args, $this->_createExportArgument($data, 'UserComment', $media['Media']['caption']));
-    
+
     $args = am($args, $this->_createExportArgumentsForFields($data, $media));
     $args = am($args, $this->_createExportArgumentsForGroups($data, $media));
 
@@ -731,7 +746,7 @@ class SidecarFilterComponent extends BaseFilterComponent {
         }
       }
     }
-    
+
     // Associations to sidecar XMP meta data: Tags(keywords)
     if ($this->controller->getOption('xmp.use.sidecar', 0)) {
       $fileTags = $this->_extractList($data, 'Keywords');

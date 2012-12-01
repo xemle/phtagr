@@ -20,7 +20,7 @@ App::uses('BaseFilter', 'Component');
 class VideoFilterComponent extends BaseFilterComponent {
 
   var $controller = null;
-  var $components = array('VideoPreview', 'FileManager', 'Command');
+  var $components = array('VideoPreview', 'FileManager', 'Command', 'Exiftool');
 
   public function initialize(Controller $controller) {
     $this->controller = $controller;
@@ -174,7 +174,7 @@ class VideoFilterComponent extends BaseFilterComponent {
 
   public function _readVideoFormat(&$media, $filename) {
     if ($this->controller->getOption('bin.exiftool')) {
-      $result = $this->FilterManager->Exiftool->readMetaData($filename);
+      $result = $this->Exiftool->readMetaData($filename);
     }
     if (!$result && $this->controller->getOption('bin.ffmpeg')) {
       $result = $this->_readFfmpeg($filename);
