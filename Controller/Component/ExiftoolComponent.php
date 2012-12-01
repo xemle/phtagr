@@ -426,37 +426,6 @@ class ExiftoolComponent extends Component {
   }
 
   /**
-   * Search for an given hash values by a key. If the key does not exists,
-   * return the default value
-   *
-   * @param array $data Hash array
-   * @param string $key Path or key of the hash value
-   * @param mixed $default Default Value which will be return, if the key does not
-   *        exists. Default value is null.
-   * @return mixed The hash value or the default value, id hash key is not set
-   */
-  private function _extract(&$data, $key, $default = null) {
-    $paths = explode('/', trim($key, '/'));
-    $result = $data;
-    foreach ($paths as $p) {
-      if (!isset($result[$p])) {
-        return $default;
-      }
-      $result =& $result[$p];
-    }
-    return $result;
-  }
-
-  private function _extractList(&$data, $key, $default = array()) {
-    $value = $this->_extract($data, $key);
-    if (!$value) {
-      return $default;
-    }
-    $values = array_unique(preg_split('/\s*,\s*/', trim($value)));
-    return $values;
-  }
-
-  /**
    * Generates a unique temporary filename
    *
    * @param filename Current filename
