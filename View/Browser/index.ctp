@@ -28,14 +28,14 @@
 
 <p>
 <?php
-   $ExtSelect = array(
+   $options = array(
     'any' => __('any'),
     'xmp' => __('xmp (sidecar)'),
     'jpg' => __('jpg'),
     'avi' => __('avi'));
-   $ExtSelected = array('any');
+   $selected = 'any';
    echo $this->Html->tag('div',
-           $this->Form->input('Browser.options.extToRead', array('type' => 'select', 'options' => $ExtSelect,'multiple' => 'checkbox', 'selected' => $ExtSelected, 'label' => __("Select extensions to be imported:"))),
+           $this->Form->input('Browser.options.extensions', array('type' => 'select', 'options' => $options, 'multiple' => 'checkbox', 'selected' => $selected, 'label' => __("Select extensions to be imported:"))),
            array('class' => 'submit-list'));
 ?></p>
 

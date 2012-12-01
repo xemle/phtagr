@@ -107,6 +107,7 @@ class GpsFilterComponent extends BaseFilterComponent {
     }
     // fetch images of same user, no gps, range
     $updated = 0;
+    $mediaIds = array();
     foreach ($mediaSet as $media) {
       $utc = new DateTime($media['Media']['date'], $this->utcZone);
       $time = $utc->format('U');
@@ -121,6 +122,7 @@ class GpsFilterComponent extends BaseFilterComponent {
       $media['Media']['longitude'] = $position['longitude'];
       $media['Media']['flag'] |= MEDIA_FLAG_DIRTY;
       if ($this->controller->Media->save($media['Media'], true, array('latitude', 'longitude', 'flag'))) {
+        $mediaIds[] = $media['Media']['id'];
         Logger::debug("Update GPS position of image {$media['Media']['id']} to {$position['latitude']}/{$position['longitude']}");
       } else {
         Logger::warn("Could not update GPS position of image {$media['Media']['id']}");
@@ -128,7 +130,11 @@ class GpsFilterComponent extends BaseFilterComponent {
       $updated++;
     }
     Logger::info("Updated $updated of " . count($mediaSet) . " media for interval $startDate to $endDate");
-    return 1;
+    if (count($mediaIds)) {
+      $dummy = array('Media' => array('id' => array_pop($mediaIds)));
+      return $dummy;
+    }
+    return false;
   }
 
   public function write(&$file, &$media, $options = array()) {

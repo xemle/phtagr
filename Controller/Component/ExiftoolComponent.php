@@ -15,27 +15,36 @@
  * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
 
-App::uses('BaseFilter', 'Component');
+App::uses('Component', 'Controller');
 
-class ExiftoolComponent extends BaseFilterComponent {
+class ExiftoolComponent extends Component {
   var $controller = null;
   var $components = array('Command');
 
-  public function getName() {
-    return "Exiftool";
+  // to be changed in case of old exiftool versions or problems with non UTF8 filenames...
+  var $usePipes = false;
+
+  var $process = null;
+  var $stdin = null;
+  var $stdout = null;
+  var $stderr = null;
+
+  public function initialize(Controller $controller) {
+    $this->controller = $controller;
   }
 
-  public function getExtensions() {
-    return array('abcdef');
+  public function shutdown(Controller $controller) {
+    $this->exitExiftool();
   }
 
   /**
    * Start exiftool process and open pipes
+   *
+   * @return bool True on success
    */
   private function _startExiftool() {
-    
-    $usePipes = true; //to be changed in case of old exiftool versions or problems with non UTF8 filenames...
-    if (!$usePipes || !$this->controller->getOption('bin.exiftool')) {
+
+    if (!$this->usePipes || !$this->controller->getOption('bin.exiftool')) {
       return false;
     }
     $descriptors = array(
@@ -44,12 +53,14 @@ class ExiftoolComponent extends BaseFilterComponent {
       2 => array('pipe', 'w'),             // stderr
     );
     $bin = $this->controller->getOption('bin.exiftool', 'exiftool');
-    $cmd = $bin.' -config '.$this->_getExifToolConf().' -stay_open 1 -@ -';
+    $cmd = $bin.' -config '.escapeshellarg($this->_getExifToolConf()).' -stay_open 1 -@ -';
     //http://www.php.net/manual/en/function.proc-open.php
-    $process = proc_open($cmd, &$descriptors, &$pipes);
-    if (is_resource($process)) {
+    $this->process = proc_open($cmd, $descriptors, $pipes);
+    if (is_resource($this->process)) {
       //$this->FilterManager->ExiftoolData = array('process' => $process, 'pipes' => $pipes);
-      $this->ExiftoolData = array('process' => $process, 'pipes' => $pipes);
+      $this->stdin = $pipes[0];
+      $this->stdout = $pipes[1];
+      $this->stderr = $pipes[2];
       return true;
     } else {
       return false;
@@ -58,182 +69,134 @@ class ExiftoolComponent extends BaseFilterComponent {
 
   /**
    * Check if exiftool is still open
+   *
+   * @return bool True if exiftool pipes are open
    */
-  private function _IsOpenExiftool() {
-    $ExiftoolData = $this->ExiftoolData;
-    $process = $ExiftoolData['process'];
-    if (is_resource($process)) {
-      return true;
-    } else {
+  private function _isExiftoolOpen() {
+    if (!$this->process) {
       return $this->_startExiftool();
+    }
+    return is_resource($this->process);
+  }
+
+  private function writeCommands(&$pipe, $commands) {
+    if (!is_resource($pipe)) {
+      Logger::err("Invalid pipe. Command could not be written: " . join(', ', $commands));
+      return;
+    }
+    try {
+      foreach ($commands as $command) {
+        fwrite($pipe, $command);
+        fwrite($pipe, "\n");
+      }
+    } catch (Exception $e) {
+      Logger::err("Writing error on pipe: " . $e->getMessage() . " Command could not be written: " . join(', ', $commands));
     }
   }
 
   /**
    * Close exiftool pipes and exit process
    */
-  public function exitExiftool() {  
-    //TODO: auto call exitExiftool before exit FilterManager and before shutdown (in case it  hangs up)
-    $ExiftoolData = $this->ExiftoolData;
-    $pipes = $ExiftoolData['pipes'];
-    $process = $ExiftoolData['process'];
-    if (is_resource($process)) {
+  public function exitExiftool() {
+    if (!$this->process) {
+      return;
+    }
+    if (is_resource($this->process)) {
       //exiftool is opened with -stay_open option
       //exiftool can be closed
-      fwrite($pipes[0], "-stay_open\nFalse\n");
-      fwrite($pipes[0], "-execute");
-      fwrite($pipes[0], "\n");
+      $this->writeCommands($this->stdin, array('-stay_open', 'False', '-execute', ''));
       //close pipes
-      fclose($pipes[0]);
-      fclose($pipes[1]);
-      fclose($pipes[2]);
+      fclose($this->stdin);
+      fclose($this->stdout);
+      fclose($this->stderr);
       // ends process(handle)
-      proc_close($process);
-      $this->ExiftoolData = null;
+      proc_close($this->process);
     }
+    unset($this->process);
+    unset($this->stdin);
+    unset($this->stdout);
+    unset($this->stderr);
   }
-  
-  /**
-   * Read exiftool Stdout pipe 
-   */
-  private function _readStdout($pipes)  {
+
+  private function _readFromPipe(&$pipe, $token = false) {
+    if (!is_resource($pipe)) {
+      return false;
+    }
     $starttime = microtime(true);
     $current_line = '';
-    $stdout = array();
-    stream_set_blocking($pipes[1], 0);//just as a precaution
-    while ($current_line !== "{ready}\n") {
-      //TODO exit loop after 2 sec if not processed
-      $current_line  = fgets($pipes[1], 8192);  //1024? for speed?
-      if ($current_line !== "{ready}\n" and $current_line !== false) {
-        //$stdout .= fread($pipes[1], 16384); //for up to lenght 8192 
-        $stdout[] = $current_line;
+    $lines = array();
+    stream_set_blocking($pipe, 0); //just as a precaution
+    while ($current_line !== $token) {
+      $current_line = fgets($pipe, 8192);  //1024? for speed?
+      if ($current_line !== $token && $current_line !== false) {
+        $lines[] = $current_line;
       }
-      $processingtime = round((microtime(true)-$starttime),4); //seconds
-      if ($processingtime>1){
+      $processingtime = round((microtime(true) - $starttime), 4); //seconds
+      if ($processingtime > 1) {
         //increase for big video files?
         //probabily blocked
         $this->exitExiftool();
-        return $stdout;
+        return $lines;
       }
     }
-    return $stdout;
+    return $lines;
   }
-  
-  /**
-   * Read exiftool Stderr pipe 
-   */
-  private function _readStderr($pipes)  {
-    $starttime = microtime(true);
-    $current_line = '';
-    $stderr = array();
-    stream_set_blocking($pipes[2], 0);
-    while ($current_line !== false) {
-      $current_line  = fgets($pipes[2], 8192);  //1024? for speed?
-      $stderr[] = $current_line;
-      $processingtime = round((microtime(true)-$starttime),4); //seconds
-      if ($processingtime>1){
-        //increase for big video files?
-        //probabily blocked
-        $this->exitExiftool();
-        return $stderr;
-      }
-    }
-    return $stderr;
-  }
-  
+
   /**
    * Read path of exiftool configuration file
    */
   private function _getExifToolConf() {
     return APP . 'Config' . DS . 'ExifTool-phtagr.conf';
   }
-  
+
   /**
    * Read the meta data via exiftool from a file
    *
    * @param filename Filename to read
    * @result Array of metadata or false on error
    */
-    public function readMetaData($filename) {
-      $usePipes = true; //to be changed in case of old exiftool versions or problems with non UTF8 filenames...
-      if ($usePipes and ($this->_IsOpenExiftool())) {
-        return $this->_readMetaDataPipes($filename);
-      } else {
-        return $this->_readMetaDataDirect($filename);
-      }
+  public function readMetaData($filename) {
+    $usePipes = true; //to be changed in case of old exiftool versions or problems with non UTF8 filenames...
+    if ($usePipes && $this->_isExiftoolOpen()) {
+      return $this->_readMetaDataPipes($filename);
+    } else {
+      return $this->_readMetaDataDirect($filename);
     }
+  }
 
   /**
    * Read the meta data via exiftool, through pipes, using -stay_open option
    * avoid perl start-up time needed each exiftool call
    *
-   * @param filename Filename to read
+   * @param string $filename Filename to read
    * @result Array of metadata or false on error
    */
   private function _readMetaDataPipes($filename)  {
-    $ExiftoolData = $this->ExiftoolData;
-    $pipes = $ExiftoolData['pipes'];
-
     //TODO: use exiftool arg -json and json_decode ( string $json) OR exiftool arg -php and eval($array_string)
 
-    //fwrite($pipes[0], "-json\n");
+    //fwrite($this->stdin, "-json\n");
 
     //next line is not really necessary; good for reading over slow networks
-    fwrite($pipes[0], "-fast2\n");
+    $this->writeCommands($this->stdin, array('-fast2'));
 
     // comment next lines in order to read all metadata, not only these fields
-    fwrite($pipes[0], "-Error\n");
-    fwrite($pipes[0], "-Warning\n");
-    fwrite($pipes[0], "-FileName\n");
-    fwrite($pipes[0], "-ObjectName\n");
-    fwrite($pipes[0], "-DateTimeCreated\n");
-    fwrite($pipes[0], "-SubSecDateTimeOriginal\n");
-    fwrite($pipes[0], "-SubSecCreateDate\n");
-    //read only IPTC:DateCreated for avoiding confusion with XMP-photoshop:DateCreated = Date + Time + zone
-    fwrite($pipes[0], "-IPTC:DateCreated\n");
-    fwrite($pipes[0], "-TimeCreated\n");
-    fwrite($pipes[0], "-DateTimeOriginal\n");
-    fwrite($pipes[0], "-FileModifyDate\n");
-    fwrite($pipes[0], "-ImageWidth\n");
-    fwrite($pipes[0], "-ImageHeight\n");
+    $base = array('-Error', '-Warning', '-FileName', '-ImageWidth', '-ImageHeight', '-ObjectName', '-DateTimeCreated', '-SubSecDateTimeOriginal', '-SubSecCreateDate');
     //for numerical Orientation a # can be used as field suffix: -Orientation#
-    fwrite($pipes[0], "-Orientation#\n");
-    fwrite($pipes[0], "-Aperture\n");
-    fwrite($pipes[0], "-ShutterSpeed\n");
-    fwrite($pipes[0], "-Model\n");
-    fwrite($pipes[0], "-ISO\n");
-    fwrite($pipes[0], "-Comment\n");
-    fwrite($pipes[0], "-UserComment\n");
-    fwrite($pipes[0], "-GPSLatitude#\n");
-    fwrite($pipes[0], "-GPSLatitudeRef\n");
-    fwrite($pipes[0], "-GPSLongitude#\n");
-    fwrite($pipes[0], "-GPSLongitudeRef\n");
-    fwrite($pipes[0], "-Keywords\n");
-    fwrite($pipes[0], "-Subject\n");
-    fwrite($pipes[0], "-PhtagrGroups\n");
-    fwrite($pipes[0], "-SupplementalCategories\n");
+    $exif = array('-Orientation#', '-Aperture', '-ShutterSpeed', '-Model', '-ISO', '-Comment', '-UserComment');
+    $gps = array('-GPSLatitude#', '-GPSLatitudeRef', '-GPSLongitude#', '-GPSLongitudeRef');
+    //read only IPTC:DateCreated for avoiding confusion with XMP-photoshop:DateCreated = Date + Time + zone
     //IPTC - location
-    fwrite($pipes[0], "-City\n");
-    fwrite($pipes[0], "-Sub-location\n");
-    fwrite($pipes[0], "-Province-State\n");
-    fwrite($pipes[0], "-Country-PrimaryLocationName\n");
+    $iptc = array('-IPTC:DateCreated', '-TimeCreated', '-DateTimeOriginal', '-FileModifyDate', '-Keywords', '-Subject', '-City', '-Sub-location', '-Province-State', '-Country-PrimaryLocationName', '-Caption');
     //XMP - location
-    //fwrite($pipes[0], "-City\n");
-    fwrite($pipes[0], "-Location\n");
-    fwrite($pipes[0], "-State\n");
-    fwrite($pipes[0], "-Country\n");
-    //video
-    fwrite($pipes[0], "-Width\n");
-    fwrite($pipes[0], "-Height\n");
-    fwrite($pipes[0], "-Duration\n");
-    //???
-    fwrite($pipes[0], "-caption\n");
-      //$result['height'] = intval($data['ImageHeight']);
-      //$result['width'] = intval($data['ImageWidth']);
-      //$result['duration'] = ceil(intval($data['Duration']));
+    $xmp = array('-Location', '-State', '-Country');
+    $video = array('-Width', '-Height', '-Duration');
 
-
-    fwrite($pipes[0], "-S\n");
+    $this->writeCommands($this->stdin, $base);
+    $this->writeCommands($this->stdin, $exif);
+    $this->writeCommands($this->stdin, $gps);
+    $this->writeCommands($this->stdin, $iptc);
+    $this->writeCommands($this->stdin, $xmp);
+    $this->writeCommands($this->stdin, $video);
 
     //-b          (-binary)            Output data in binary format
     //-n          (--printConv)        Read/write numerical tag values, not passed through print Conversation; (not human readable)
@@ -246,21 +209,19 @@ class ExiftoolComponent extends BaseFilterComponent {
     //numerical values format, not human readable; exemple: for 'orientation' field
     //fwrite($pipes[0], "-n\n");
 
-    fwrite($pipes[0], $filename);
-    fwrite($pipes[0], "\n");
+    $this->writeCommands($this->stdin, array('-S', $filename, '', '-execute'));
 
-    fwrite($pipes[0], "-execute\n");
     //"-executeNUMBER\n" can be utilized to obtain {readyNUMBER} on eof stdout
 
-    $stdout = $this->_readStdout($pipes);
-    $stderr = $this->_readStderr($pipes);
+    $stdout = $this->_readFromPipe($this->stdout, "{ready}\n");
+    $stderr = $this->_readFromPipe($this->stderr);
 
-    if ((count($stderr) > 1) || ($stderr[0] != false)) {// and count($stdout) !==1//i.e.="    1 image files created "
+    if (count($stderr) > 1 || (count($stderr) && $strerr[0] === false)) {// and count($stdout) !==1//i.e.="    1 image files created "
       //TODO: test if warnings and original file internal errors are reported on stderr or stdout
       $errors = implode(",", $stderr);
       Logger::err(am("exiftool stderr returned errors: ",$errors));
     }
-    
+
     //parse results
     $data = array();
     foreach ($stdout as $line) {
@@ -271,7 +232,7 @@ class ExiftoolComponent extends BaseFilterComponent {
 
     $data = $this->_videoMetaDataProcess($data, $filename);
     return $data;
-    
+
   }
 
 
@@ -343,66 +304,61 @@ class ExiftoolComponent extends BaseFilterComponent {
       return $data;
     }
   }
-  
-  
+
+
   /**
    * Write the meta data to an image file
    *
-   * @param filename Filename 
+   * @param filename Filename
    * @param args Arguments for exiftool
-   * @return 
+   * @return
    */
   public function writeMetaData($filename, $tmp, $args) {
 
-    if ($this->_IsOpenExiftool()) {
-      $result = $this->_writeMetaDataPipes($filename, $tmp, $args);
+    if ($this->_isExiftoolOpen()) {
+      $result = $this->_writeMetaDataPipes($args);
     } else {
-      $result = $this->_writeMetaDataDirect($filename, $tmp, $args);
+      $result = $this->_writeMetaDataDirect($args);
     }
     $result = $this->_checktmp($result, $filename, $tmp);
     return $result;
   }
 
-  
+
   /**
    * Write the meta data to an image file, through pipes
    *
-   * @param filename Filename 
+   * @param filename Filename
    * @param args Arguments for exiftool
-   * @return 
+   * @return
    */
-  private function _writeMetaDataPipes($filename, $tmp, $args) {
-   
-    $ExiftoolData = $this->ExiftoolData;
-    $pipes = $ExiftoolData['pipes'];
-    
-    foreach ($args as $arg) {
-      fwrite($pipes[0], $arg."\n");
-    }
-    fwrite($pipes[0], "-execute\n");
+  private function _writeMetaDataPipes(&$args) {
 
-    $stdout = $this->_readStdout($pipes);
-    $stderr = $this->_readStderr($pipes);
-    
+    $this->writeCommands($this->stdin, $args);
+    $this->writeCommands($this->stdin, array('-execute'));
+
+    $this->_readFromPipe($this->stdout);
+    $stderr = $this->_readFromPipe($this->stderr);
+
     if ((count($stderr) > 1) || ($stderr[0] != false)) {// and count($stdout) !==1//i.e.="    1 image files created "
       //TODO: test if warnings and original file internal errors are reported on stderr or stdout
       $errors = implode(",", $stderr);
       Logger::err(am("exiftool stderr returned errors: ",$errors));
       return $errors;
     }
-    
+
     return 0;
   }
 
-  
+
   /**
    * Write the meta data to an image file, directly calling exiftool
    *
-   * @param filename Filename 
+   * @param filename Filename
    * @param args Arguments for exiftool
-   * @return 
+   * @return
    */
-  private function _writeMetaDataDirect($filename, $tmp, $args) {
+  private function _writeMetaDataDirect($args) {
     $bin = $this->controller->getOption('bin.exiftool', 'exiftool');
     $args = am( $this->_getExifToolConf(), $args);
     $args = am('-config', $args);
@@ -418,8 +374,7 @@ class ExiftoolComponent extends BaseFilterComponent {
       return false;
     }
   }
-  
-  
+
   /**
    * Check if newfile tmp was created by exiftool and replace original file
    *
@@ -450,7 +405,7 @@ class ExiftoolComponent extends BaseFilterComponent {
     }
     return true;
   }
-  
+
   /**
    * Clear image metadata from a file
    *
@@ -471,14 +426,14 @@ class ExiftoolComponent extends BaseFilterComponent {
 
     Logger::debug("Cleaned meta data of '$filename'");
   }
-  
+
   /**
    * Search for an given hash values by a key. If the key does not exists,
    * return the default value
    *
-   * @param data Hash array
-   * @param key Path or key of the hash value
-   * @param default Default Value which will be return, if the key does not
+   * @param array $data Hash array
+   * @param string $key Path or key of the hash value
+   * @param mixed $default Default Value which will be return, if the key does not
    *        exists. Default value is null.
    * @return mixed The hash value or the default value, id hash key is not set
    */
@@ -518,7 +473,7 @@ class ExiftoolComponent extends BaseFilterComponent {
     }
     return $tmp;
   }
-  
+
 /*
 exiftool -S -n IMG_0498.jpg|sed -e 's/^/  [/' -e 's/: /] => "/' -e 's/$/"/'
 
