@@ -1,4 +1,37 @@
-<?php
+<?php // $Id$
+/*
+   +----------------------------------------------------------------------+
+   | Copyright (c) 2002-2007 Christian Stocker, Hartmut Holzgraefe        |
+   | All rights reserved                                                  |
+   |                                                                      |
+   | Redistribution and use in source and binary forms, with or without   |
+   | modification, are permitted provided that the following conditions   |
+   | are met:                                                             |
+   |                                                                      |
+   | 1. Redistributions of source code must retain the above copyright    |
+   |    notice, this list of conditions and the following disclaimer.     |
+   | 2. Redistributions in binary form must reproduce the above copyright |
+   |    notice, this list of conditions and the following disclaimer in   |
+   |    the documentation and/or other materials provided with the        |
+   |    distribution.                                                     |
+   | 3. The names of the authors may not be used to endorse or promote    |
+   |    products derived from this software without specific prior        |
+   |    written permission.                                               |
+   |                                                                      |
+   | THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS  |
+   | "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT    |
+   | LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS    |
+   | FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE       |
+   | COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,  |
+   | INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, |
+   | BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;     |
+   | LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER     |
+   | CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT   |
+   | LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN    |
+   | ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE      |
+   | POSSIBILITY OF SUCH DAMAGE.                                          |
+   +----------------------------------------------------------------------+
+*/
 
 require_once "HTTP/WebDAV/Server.php";
 require_once "System.php";
@@ -73,11 +106,9 @@ class HTTP_WebDAV_Server_Filesystem extends HTTP_WebDAV_Server
         // special treatment for litmus compliance test
         // reply on its identifier header
         // not needed for the test itself but eases debugging
-        foreach (apache_request_headers() as $key => $value) {
-            if (stristr($key, "litmus")) {
-                error_log("Litmus test $value");
-                header("X-Litmus-reply: ".$value);
-            }
+        if (isset($this->_SERVER['HTTP_X_LITMUS'])) {
+            error_log("Litmus test ".$this->_SERVER['HTTP_X_LITMUS']);
+            header("X-Litmus-reply: ".$this->_SERVER['HTTP_X_LITMUS']);
         }
 
         // set root directory, defaults to webserver document root if not set
@@ -135,13 +166,12 @@ class HTTP_WebDAV_Server_Filesystem extends HTTP_WebDAV_Server
         $files["files"][] = $this->fileinfo($options["path"]);
 
         // information for contained resources requested?
-        if (!empty($options["depth"])) { // TODO check for is_dir() first?
-                
+        if (!empty($options["depth"]) && is_dir($fspath) && is_readable($fspath)) {                
             // make sure path ends with '/'
             $options["path"] = $this->_slashify($options["path"]);
 
             // try to open directory
-            $handle = @opendir($fspath);
+            $handle = opendir($fspath);
                 
             if ($handle) {
                 // ok, now get all its contents
@@ -181,6 +211,10 @@ class HTTP_WebDAV_Server_Filesystem extends HTTP_WebDAV_Server
         // creation and modification time
         $info["props"][] = $this->mkprop("creationdate",    filectime($fspath));
         $info["props"][] = $this->mkprop("getlastmodified", filemtime($fspath));
+
+        // Microsoft extensions: last access time and 'hidden' status
+        $info["props"][] = $this->mkprop("lastaccessed",    fileatime($fspath));
+        $info["props"][] = $this->mkprop("ishidden", ('.' === substr(basename($fspath), 0, 1)));
 
         // type and size (caller already made sure that path exists)
         if (is_dir($fspath)) {
@@ -263,7 +297,7 @@ class HTTP_WebDAV_Server_Filesystem extends HTTP_WebDAV_Server
      */
     function _mimetype($fspath) 
     {
-        if (@is_dir($fspath)) {
+        if (is_dir($fspath)) {
             // directories are easy
             return "httpd/unix-directory"; 
         } else if (function_exists("mime_content_type")) {
@@ -324,23 +358,18 @@ class HTTP_WebDAV_Server_Filesystem extends HTTP_WebDAV_Server
     }
 
     /**
-     * GET method handler
+     * HEAD method handler
      * 
      * @param  array  parameter passing array
      * @return bool   true on success
      */
-    function GET(&$options) 
+    function HEAD(&$options) 
     {
         // get absolute fs path to requested resource
         $fspath = $this->base . $options["path"];
 
         // sanity check
         if (!file_exists($fspath)) return false;
-            
-        // is this a collection?
-        if (is_dir($fspath)) {
-            return $this->GetDir($fspath, $options);
-        }
             
         // detect resource type
         $options['mimetype'] = $this->_mimetype($fspath); 
@@ -354,6 +383,30 @@ class HTTP_WebDAV_Server_Filesystem extends HTTP_WebDAV_Server
         // detect resource size
         $options['size'] = filesize($fspath);
             
+        return true;
+    }
+
+    /**
+     * GET method handler
+     * 
+     * @param  array  parameter passing array
+     * @return bool   true on success
+     */
+    function GET(&$options) 
+    {
+        // get absolute fs path to requested resource
+        $fspath = $this->base . $options["path"];
+
+        // is this a collection?
+        if (is_dir($fspath)) {
+            return $this->GetDir($fspath, $options);
+        }
+
+        // the header output is the same as for HEAD
+        if (!$this->HEAD($options)) {
+            return false;
+        }
+
         // no need to check result here, it is handled by the base class
         $options['stream'] = fopen($fspath, "r");
             
@@ -380,7 +433,11 @@ class HTTP_WebDAV_Server_Filesystem extends HTTP_WebDAV_Server
         // fixed width directory column format
         $format = "%15s  %-19s  %-s\n";
 
-        $handle = @opendir($fspath);
+        if (!is_readable($fspath)) {
+            return false;
+        }
+
+        $handle = opendir($fspath);
         if (!$handle) {
             return false;
         }
@@ -400,7 +457,7 @@ class HTTP_WebDAV_Server_Filesystem extends HTTP_WebDAV_Server
                 printf($format, 
                        number_format(filesize($fullpath)),
                        strftime("%Y-%m-%d %H:%M:%S", filemtime($fullpath)), 
-                       "<a href='$name'>$name</a>");
+                       '<a href="' . $name . '">' . $name . '</a>");
             }
         }
 
@@ -423,11 +480,22 @@ class HTTP_WebDAV_Server_Filesystem extends HTTP_WebDAV_Server
     {
         $fspath = $this->base . $options["path"];
 
-        if (!@is_dir(dirname($fspath))) {
-            return "409 Conflict";
+        $dir = dirname($fspath);
+        if (!file_exists($dir) || !is_dir($dir)) {
+            return "409 Conflict"; // TODO right status code for both?
         }
 
         $options["new"] = ! file_exists($fspath);
+
+        if ($options["new"] && !is_writeable($dir)) {
+            return "403 Forbidden";
+        }
+        if (!$options["new"] && !is_writeable($fspath)) {
+            return "403 Forbidden";
+        }
+        if (!$options["new"] && is_dir($fspath)) {
+            return "403 Forbidden";
+        }
 
         $fp = fopen($fspath, "w");
 
@@ -490,7 +558,7 @@ class HTTP_WebDAV_Server_Filesystem extends HTTP_WebDAV_Server
             $query = "DELETE FROM {$this->db_prefix}properties 
                            WHERE path LIKE '".$this->_slashify($options["path"])."%'";
             mysql_query($query);
-            System::rm("-rf $path");
+            System::rm(array("-rf", $path));
         } else {
             unlink($path);
         }
@@ -532,10 +600,34 @@ class HTTP_WebDAV_Server_Filesystem extends HTTP_WebDAV_Server
             return "502 bad gateway";
         }
 
-        $source = $this->base .$options["path"];
-        if (!file_exists($source)) return "404 Not found";
+        $source = $this->base . $options["path"];
+        if (!file_exists($source)) {
+            return "404 Not found";
+        }
+
+        if (is_dir($source)) { // resource is a collection
+            switch ($options["depth"]) {
+            case "infinity": // valid 
+                break;
+            case "0": // valid for COPY only
+                if ($del) { // MOVE?
+                    return "400 Bad request";
+                }
+                break;
+            case "1": // invalid for both COPY and MOVE
+            default: 
+                return "400 Bad request";
+            }
+        }
 
         $dest         = $this->base . $options["dest"];
+        $destdir      = dirname($dest);
+        
+        if (!file_exists($destdir) || !is_dir($destdir)) {
+            return "409 Conflict";
+        }
+
+
         $new          = !file_exists($dest);
         $existing_col = false;
 
@@ -563,11 +655,6 @@ class HTTP_WebDAV_Server_Filesystem extends HTTP_WebDAV_Server
             } else {
                 return "412 precondition failed";
             }
-        }
-
-        if (is_dir($source) && ($options["depth"] != "infinity")) {
-            // RFC 2518 Section 9.2, last paragraph
-            return "400 Bad request";
         }
 
         if ($del) {
@@ -607,14 +694,19 @@ class HTTP_WebDAV_Server_Filesystem extends HTTP_WebDAV_Server
                 $destfile = str_replace($source, $dest, $file);
                     
                 if (is_dir($file)) {
-                    if (!is_dir($destfile)) {
-                        // TODO "mkdir -p" here? (only natively supported by PHP 5) 
-                        if (!@mkdir($destfile)) {
+                    if (!file_exists($destfile)) {
+                        if (!is_writeable(dirname($destfile))) {
+                            return "403 Forbidden";
+                        }
+                        if (!mkdir($destfile)) {
                             return "409 Conflict";
                         }
-                    } 
+                    } else if (!is_dir($destfile)) {
+                        return "409 Conflict";
+                    }
                 } else {
-                    if (!@copy($file, $destfile)) {
+                    
+                    if (!copy($file, $destfile)) {
                         return "409 Conflict";
                     }
                 }
@@ -680,6 +772,7 @@ class HTTP_WebDAV_Server_Filesystem extends HTTP_WebDAV_Server
         $fspath = $this->base . $options["path"];
 
         // TODO recursive locks on directories not supported yet
+        // makes litmus test "32. lock_collection" fail
         if (is_dir($fspath) && !empty($options["depth"])) {
             return "409 Conflict";
         }

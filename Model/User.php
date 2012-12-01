@@ -39,8 +39,8 @@ class User extends AppModel
       'rule' => array('between', 3, 32),
       'message' => 'Username must be between 3 and 32 characters long.'),
     'password' => array(
-      'rule' => array('between', 6, 20),
-      'message' => 'Password must be between 6 and 20 characters long.'),
+      'rule' => array('between', 6, 32),
+      'message' => 'Password must be between 6 and 32 characters long.'),
     'role' => array(
       'rule' => array('between', ROLE_GUEST, ROLE_ADMIN),
       'message' => 'Invalid role'),

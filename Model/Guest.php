@@ -39,8 +39,8 @@ class Guest extends AppModel
       'rule' => array('between', 3, 32),
       'message' => 'Guestname must be between 3 and 32 characters long.'),
     'password' => array(
-      'rule' => array('between', 6, 20),
-      'message' => 'Password must be between 6 and 20 characters long.'),
+      'rule' => array('between', 6, 32),
+      'message' => 'Password must be between 6 and 32 characters long.'),
     'email' => array(
       'rule' => array('email'),
       'message' => 'Email address is not valid')
