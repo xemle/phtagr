@@ -146,6 +146,16 @@ class MyFile extends AppModel
   }
 
   /**
+   * Find all files within the path
+   *
+   * @param string $path
+   * @return array
+   */
+  public function findAllByPath($path) {
+    return $this->find('all', array('conditions' => array("path" => Folder::slashTerm($path))));
+  }
+
+  /**
    * Checks if a file exists already in the database.
    *
    * @param filename Filename of image

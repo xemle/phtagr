@@ -41,7 +41,7 @@ if (!is_writeable(TEST_FILES)) {
 class TestWriteController extends AppController {
 
   var $uses = array('Media', 'MyFile', 'User', 'Option');
-  var $components = array('FileManager', 'FilterManager');
+  var $components = array('FileManager', 'FilterManager', 'Exiftool');
   var $mockUserId;
   public function &getUser() {
     $user = $this->User->findById($this->mockUserId);
@@ -134,7 +134,9 @@ class MediaWriteTestCase extends CakeTestCase {
    */
   public function tearDown() {
     $this->Folder->delete(TEST_FILES_TMP);
-
+    
+    $this->Controller->Exiftool->exitExiftool();
+    $this->Controller->shutdownProcess();
     unset($this->Controller);
     unset($this->Media);
     unset($this->User);
@@ -192,7 +194,6 @@ class MediaWriteTestCase extends CakeTestCase {
 
     // Insert video and add tag 'thailand'
     $this->Controller->FilterManager->read($filename);
-    $this->Controller->FilterManager->Exiftool->exitExiftool();
     $media = $this->Media->find('first');
     $this->assertNotEqual($media, false);
     $user = $this->Controller->getUser();
@@ -203,7 +204,6 @@ class MediaWriteTestCase extends CakeTestCase {
 
     $media = $this->Media->findById($media['Media']['id']);
     $result = $this->Controller->FilterManager->write($media);
-    $this->Controller->FilterManager->Exiftool->exitExiftool();
     $this->assertEqual($result, true);
 
     $thumb = TEST_FILES_TMP . 'MVI_7620.thm';
@@ -221,7 +221,6 @@ class MediaWriteTestCase extends CakeTestCase {
     $user = $this->Controller->getUser();
 
     $this->Controller->FilterManager->read($filename);
-    //$this->Controller->FilterManager->Exiftool->exitExiftool();
     $media = $this->Media->find('first');
     $this->assertNotEqual($media, false);
     $this->assertEqual($media['Media']['flag'], 0);
@@ -251,7 +250,6 @@ class MediaWriteTestCase extends CakeTestCase {
     // test if meta data has changed
     $this->assertEqual($media['Media']['flag'], MEDIA_FLAG_DIRTY);
     $result = $this->Controller->FilterManager->write($media);
-    $this->Controller->FilterManager->Exiftool->exitExiftool();
     $this->assertEqual($result, true);
     $media = $this->Media->findById($media['Media']['id']);
     // test if all media are written and clean
@@ -283,7 +281,6 @@ class MediaWriteTestCase extends CakeTestCase {
     $user = $this->Controller->getUser();
 
     $this->Controller->FilterManager->read($filename);
-    $this->Controller->FilterManager->Exiftool->exitExiftool();
     $media = $this->Media->find('first');
 
     $data = array(
@@ -303,7 +300,6 @@ class MediaWriteTestCase extends CakeTestCase {
     $this->Media->save($tmp);
     $media = $this->Media->findById($media['Media']['id']);
     $result = $this->Controller->FilterManager->write($media);
-    $this->Controller->FilterManager->Exiftool->exitExiftool();
     // Verify written meta data
     $values = $this->extractMeta($filename);
     $this->assertEqual($values['ObjectName'], 'Mosque Taj Mahal, India');
@@ -339,7 +335,6 @@ class MediaWriteTestCase extends CakeTestCase {
     $this->Media->save($tmp);
     $media = $this->Media->findById($media['Media']['id']);
     $result = $this->Controller->FilterManager->write($media);
-    $this->Controller->FilterManager->Exiftool->exitExiftool();
 
     // Verify written meta data
     $values = $this->extractMeta($filename);
@@ -369,7 +364,6 @@ class MediaWriteTestCase extends CakeTestCase {
     $group2 = $this->User->Group->save($this->User->Group->create(array('name' => 'friends', 'user_id' => $user['User']['id'])));
 
     $this->Controller->FilterManager->read($filename);
-    $this->Controller->FilterManager->Exiftool->exitExiftool();
     $media = $this->Media->find('first');
 
     $data = array('Group' => array('names' => 'family,friends'));
@@ -378,7 +372,6 @@ class MediaWriteTestCase extends CakeTestCase {
     $this->Media->save($tmp);
     $media = $this->Media->findById($media['Media']['id']);
     $result = $this->Controller->FilterManager->write($media);
-    $this->Controller->FilterManager->Exiftool->exitExiftool();
     $this->assertEqual($result, true);
 
     // Verify written meta data
@@ -402,9 +395,7 @@ class MediaWriteTestCase extends CakeTestCase {
     $this->User->Group->save($this->User->Group->create(array('name' => 'friends', 'user_id' => $userB['User']['id'], 'is_moderated' => false, 'is_shared' => true)));
     $this->User->Group->save($this->User->Group->create(array('name' => 'family', 'user_id' => $userB['User']['id'], 'is_moderated' => true, 'is_shared' => true)));
 
-    $options = array('recursive'=>0,'forceReadMeta'=>0, 'extToRead'=>array('any'));
-    $this->Controller->FilterManager->readFiles(TEST_FILES_TMP, $options);
-    $this->Controller->FilterManager->Exiftool->exitExiftool();
+    $this->Controller->FilterManager->readFiles(TEST_FILES_TMP);
     $userA = $this->User->findById($userA['User']['id']);
     $media = $this->Media->find('first');
     // Test auto subscription. Exclude group family which is moderated
@@ -419,7 +410,6 @@ class MediaWriteTestCase extends CakeTestCase {
 
     $media = $this->Media->findById($media['Media']['id']);
     $result = $this->Controller->FilterManager->write($media);
-    $this->Controller->FilterManager->Exiftool->exitExiftool();
     $this->assertEqual($result, true);
 
     // Verify written meta data

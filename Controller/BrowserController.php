@@ -320,6 +320,7 @@ class BrowserController extends AppController
     }
     $this->Session->setFlash(__("Imported %d files (%d errors)", $readCount, $errorCount));
 
+    $this->FilterManager->ImageFilter->Exiftool->exitExiftool();
     $this->redirect('index/'.$path);
   }
 
@@ -735,8 +736,15 @@ class BrowserController extends AppController
       $this->FilterManager->clearErrors();
       $readed = $this->FilterManager->readFiles($files, false);
       $errors = $this->FilterManager->errors;
-      $this->Session->setFlash(__("Uploaded %d files with %d errors.", count($readed), count($errors)));
-      $this->set('imports', $readed);
+      $mediaIds = array();
+      foreach ($readed as $file => $mediaId) {
+        if ($mediaId) {
+          $mediaIds[] = $mediaId;
+        }
+      }
+      $this->Session->setFlash(__("Uploaded %d files with %d errors.", count($mediaIds), count($errors)));
+      $media = $this->Media->find('all', array('conditions' => array('Media.id' => $mediaIds)));
+      $this->set('imports', $media);
       $this->set('errors', $errors);
     } else {
       $this->set('imports', array());
@@ -764,14 +772,14 @@ class BrowserController extends AppController
       if (!$files) {
         $this->Session->setFlash(__("No files uploaded"));
         $this->redirect($this->action);
-      } else {
-        $toRead = array();
       }
       $this->FilterManager->clearErrors();
-      $result = $this->FilterManager->readFiles($files, false);
+      $result = $this->FilterManager->readFiles($files);
       $mediaIds = array();
-      foreach ($result as $name => $media) {
-        $mediaIds[] = $media['Media']['id'];
+      foreach ($result as $filename => $mediaId) {
+        if ($mediaId) {
+          $mediaIds[] = $mediaId;
+        }
       }
       $pluploadResponse['mediaIds'] = $mediaIds;
     }
@@ -782,4 +790,3 @@ class BrowserController extends AppController
     $this->set('_serialize', array_keys($pluploadResponse));
   }
 }
-?>

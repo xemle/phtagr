@@ -90,7 +90,8 @@ class BrowserControllerTest extends ControllerTestCase {
     $Browser = $this->generate('Browser', array('methods' => array('getUser')));
     $Browser->expects($this->any())->method('getUser')->will($this->returnValue($user));
 
-    $data = array('import' => 'import', 'Browser' => array('import' => array('IMG_4145.JPG', 'subdir'), 'options' => array('recursive' => 1, 'forceReadMeta' => 0, 'extToRead' => array('any'))));
+    $options = array('recursive' => true);
+    $data = array('import' => 'import', 'Browser' => array('import' => array('IMG_4145.JPG', 'subdir'), 'options' => $options));
     $this->testAction('/browser/import/' . basename(TEST_FILES_TMP), array('data' => $data));
     $media = $this->Media->find('all');
     $this->assertEqual(count($media), 3);
@@ -119,12 +120,14 @@ class BrowserControllerTest extends ControllerTestCase {
     $Browser = $this->generate('Browser', array('methods' => array('getUser')));
     $Browser->expects($this->any())->method('getUser')->will($this->returnValue($user));
 
-    $data = array('import' => 'import', 'Browser' => array('import' => array('IMG_4145.JPG', 'subdir'), 'options' => array('recursive' => 1, 'forceReadMeta' => 0, 'extToRead' => array('any'))));
+    $options = array('recursive' => true);
+    $data = array('import' => 'import', 'Browser' => array('import' => array('IMG_4145.JPG', 'subdir'), 'options' => $options));
     $this->testAction('/browser/import/' . basename(TEST_FILES_TMP), array('data' => $data));
     $media = $this->Media->find('all');
     $this->assertEqual(count($media), 3);
 
-    $data = array('unlink' => 'unlink', 'Browser' => array('import' => array('IMG_4145.JPG', 'subdir'), 'options' => array('recursive' => 1, 'forceReadMeta' => 0, 'extToRead' => array('any'))));
+    $options = array('recursive' => true);
+    $data = array('unlink' => 'unlink', 'Browser' => array('import' => array('IMG_4145.JPG', 'subdir'), 'options' => $options));
     $Browser = $this->generate('Browser', array('methods' => array('getUser')));
     $Browser->expects($this->any())->method('getUser')->will($this->returnValue($user));
     $this->testAction('/browser/import/' . basename(TEST_FILES_TMP), array('data' => $data));

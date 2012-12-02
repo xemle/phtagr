@@ -42,16 +42,16 @@ if (!is_writeable(TEST_FILES)) {
 
 class TestReadController extends AppController {
 
-	var $uses = array('Media', 'MyFile', 'User', 'Option');
+  var $uses = array('Media', 'MyFile', 'User', 'Option');
 
-	var $components = array('FileManager', 'FilterManager');
+  var $components = array('FileManager', 'FilterManager', 'Exiftool');
 
   var $userMockId;
 
-	public function &getUser() {
+  public function &getUser() {
     $user = $this->User->findById($this->userMockId);
     return $user;
-	}
+  }
 
 }
 
@@ -61,7 +61,7 @@ class TestReadController extends AppController {
  */
 class MediaReadTestCase extends CakeTestCase {
 
-	var $controller;
+  var $controller;
 
   var $User;
   var $Media;
@@ -75,7 +75,7 @@ class MediaReadTestCase extends CakeTestCase {
    *
    * @var array
    */
-	public $fixtures = array('app.file', 'app.media', 'app.user', 'app.group', 'app.groups_media',
+  public $fixtures = array('app.file', 'app.media', 'app.user', 'app.group', 'app.groups_media',
       'app.groups_user', 'app.option', 'app.guest', 'app.comment', 'app.my_file',
       'app.fields_media', 'app.field', 'app.comment');
 
@@ -84,8 +84,8 @@ class MediaReadTestCase extends CakeTestCase {
  *
  * @return void
  */
-	public function setUp() {
-		parent::setUp();
+  public function setUp() {
+    parent::setUp();
     $this->Folder = new Folder();
 
     $this->User = ClassRegistry::init('User');
@@ -100,11 +100,11 @@ class MediaReadTestCase extends CakeTestCase {
     $this->Option->setValue('bin.convert', $this->findExecutable('convert'), 0);
 
     $CakeRequest = new CakeRequest();
-		$CakeResponse = new CakeResponse();
-		$this->Controller = new TestReadController($CakeRequest, $CakeResponse);
+    $CakeResponse = new CakeResponse();
+    $this->Controller = new TestReadController($CakeRequest, $CakeResponse);
     $this->Controller->userMockId = $this->userId;
-		$this->Controller->constructClasses();
-		$this->Controller->startupProcess();
+    $this->Controller->constructClasses();
+    $this->Controller->startupProcess();
     $this->Media = $this->Controller->Media;
     $this->MyFile = $this->Controller->MyFile;
 
@@ -116,17 +116,19 @@ class MediaReadTestCase extends CakeTestCase {
  *
  * @return void
  */
-	public function tearDown() {
+  public function tearDown() {
     $this->Folder->delete(TEST_FILES_TMP);
-
+    
+    $this->Controller->Exiftool->exitExiftool();
+    $this->Controller->shutdownProcess();
     unset($this->Controller);
     unset($this->Media);
     unset($this->Option);
     unset($this->Group);
     unset($this->User);
     unset($this->Folder);
-		parent::tearDown();
-	}
+    parent::tearDown();
+  }
 
   public function mockUser(&$user) {
     $this->Controller->userMockId = $user['User']['id'];
@@ -172,12 +174,11 @@ class MediaReadTestCase extends CakeTestCase {
  *
  * @return void
  */
-	public function testRead() {
-		$filename = RESOURCES . 'example.gpx';
-		$result = $this->Controller->FilterManager->read($filename);
-        $this->Controller->FilterManager->Exiftool->exitExiftool();
-		$this->assertEqual($result, false);
-	}
+  public function testRead() {
+    $filename = RESOURCES . 'example.gpx';
+    $result = $this->Controller->FilterManager->read($filename);
+    $this->assertEqual($result, false);
+  }
 
   public function testReadWithDefaultRights() {
     $user = $this->User->find('first');
@@ -191,7 +192,6 @@ class MediaReadTestCase extends CakeTestCase {
     $filename = TEST_FILES_TMP . 'IMG_4145.JPG';
     copy(RESOURCES . 'IMG_4145.JPG', $filename);
     $this->Controller->FilterManager->read($filename);
-    $this->Controller->FilterManager->Exiftool->exitExiftool();
     $media = $this->Media->find('first');
 
     $this->assertEqual($media['Media']['gacl'], ACL_READ_ORIGINAL | ACL_WRITE_META);
@@ -205,10 +205,9 @@ class MediaReadTestCase extends CakeTestCase {
     $this->Option->setValue('filter.gps.offset', 120, $this->userId);
     $this->Media->save($this->Media->create(array('user_id' => $this->userId, 'date' => '2007-10-14T12:12:39')));
     $mediaId = $this->Media->getLastInsertID();
-		$filename = RESOURCES . 'example.gpx';
+    $filename = RESOURCES . 'example.gpx';
     $result = $this->Controller->FilterManager->read($filename);
-    $this->Controller->FilterManager->Exiftool->exitExiftool();
-		$this->assertEqual($result, 1);
+    $this->assertEqual($result, $mediaId);
     $media = $this->Media->findById($mediaId);
     $this->assertEqual($media['Media']['latitude'], 46.5764);
     $this->assertEqual($media['Media']['longitude'], 8.89267);
@@ -221,8 +220,7 @@ class MediaReadTestCase extends CakeTestCase {
     $mediaId = $this->Media->getLastInsertID();
     $filename = RESOURCES . 'example.log';
     $result = $this->Controller->FilterManager->read($filename);
-    $this->Controller->FilterManager->Exiftool->exitExiftool();
-    $this->assertEqual($result, 1);
+    $this->assertEqual($result, $mediaId);
     $media = $this->Media->findById($mediaId);
     $this->assertEqual($media['Media']['latitude'], 49.0074);
     $this->assertEqual($media['Media']['longitude'], 8.42879);
@@ -238,8 +236,7 @@ class MediaReadTestCase extends CakeTestCase {
 
     $filename = RESOURCES . 'example.gpx';
     $result = $this->Controller->FilterManager->read($filename);
-    $this->Controller->FilterManager->Exiftool->exitExiftool();
-    $this->assertEqual($result, 1);
+    $this->assertEqual($result, $mediaId);
     $media = $this->Media->findById($mediaId);
     $this->assertEqual($media['Media']['latitude'], 46.5764);
     $this->assertEqual($media['Media']['longitude'], 8.89267);
@@ -255,7 +252,6 @@ class MediaReadTestCase extends CakeTestCase {
 
     // Time 09:59:57 does not fit. GPS log starts at 10:09:57
     $result = $this->Controller->FilterManager->read($filename);
-    $this->Controller->FilterManager->Exiftool->exitExiftool();
     $this->assertEqual($result, false);
     $media = $this->Media->findById($mediaId);
     $this->assertEqual($media['Media']['latitude'], null);
@@ -264,8 +260,7 @@ class MediaReadTestCase extends CakeTestCase {
     // Set time range of GPS log to 15 minues
     $this->Option->setValue('filter.gps.range', 15, $this->userId);
     $result = $this->Controller->FilterManager->read($filename);
-    $this->Controller->FilterManager->Exiftool->exitExiftool();
-    $this->assertEqual($result, 1);
+    $this->assertEqual($result, $mediaId);
     $media = $this->Media->findById($mediaId);
     $this->assertEqual($media['Media']['latitude'], 46.5761);
     $this->assertEqual($media['Media']['longitude'], 8.89242);
@@ -275,10 +270,8 @@ class MediaReadTestCase extends CakeTestCase {
     copy(RESOURCES . 'IMG_7795.JPG', TEST_FILES_TMP . 'IMG_7795.JPG');
     // Precondition: There are not groups yet and will be created on import
     $this->assertEqual($this->Media->Group->find('count'), 0);
-    
-    $options = array('recursive'=>0,'forceReadMeta'=>0, 'extToRead'=>array('any'));
-    $this->Controller->FilterManager->readFiles(TEST_FILES_TMP, $options);
-    $this->Controller->FilterManager->Exiftool->exitExiftool();
+
+    $this->Controller->FilterManager->readFiles(TEST_FILES_TMP);
     $this->assertEqual($this->Media->find('count'), 1);
 
     $media = $this->Media->find('first');
@@ -322,9 +315,7 @@ class MediaReadTestCase extends CakeTestCase {
     copy(RESOURCES . 'MVI_7620.THM', TEST_FILES_TMP . 'MVI_7620.THM');
     copy(RESOURCES . 'example.gpx', TEST_FILES_TMP . 'example.gpx');
 
-    $options = array('recursive'=>0,'forceReadMeta'=>0, 'extToRead'=>array('any'));
-    $this->Controller->FilterManager->readFiles(TEST_FILES_TMP, $options);
-    $this->Controller->FilterManager->Exiftool->exitExiftool();
+    $this->Controller->FilterManager->readFiles(TEST_FILES_TMP);
     $count = $this->Media->find('count');
     $this->assertEqual($count, 1);
 
@@ -349,9 +340,7 @@ class MediaReadTestCase extends CakeTestCase {
     $this->User->Group->save($this->User->Group->create(array('name' => 'friends', 'user_id' => $userB['User']['id'], 'is_moderated' => false, 'is_shared' => true)));
     $this->User->Group->save($this->User->Group->create(array('name' => 'family', 'user_id' => $userB['User']['id'], 'is_moderated' => true, 'is_shared' => true)));
 
-    $options = array('recursive'=>0,'forceReadMeta'=>0, 'extToRead'=>array('any'));
-    $this->Controller->FilterManager->readFiles(TEST_FILES_TMP, $options);
-    $this->Controller->FilterManager->Exiftool->exitExiftool();
+    $this->Controller->FilterManager->readFiles(TEST_FILES_TMP);
     $media = $this->Media->find('first');
     // Test auto subscription. Exclude group family which is moderated
     $this->assertEqual(Set::extract('/Group/name', $media), array('friends'));

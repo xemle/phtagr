@@ -37,7 +37,7 @@ class FilterManagerController extends AppController {
 
 	var $uses = array('Media', 'MyFile', 'User', 'Option');
 
-	var $components = array('FileManager', 'FilterManager');
+	var $components = array('FileManager', 'FilterManager', 'Exiftool');
 
 	public function &getUser() {
     $user = $this->User->find('first');
@@ -99,6 +99,7 @@ class FilterManagerComponentTest  extends CakeTestCase {
 	public function tearDown() {
     $this->Folder->delete(TEST_FILES_TMP);
 
+    $this->Controller->Exiftool->exitExiftool();
     unset($this->Controller);
     unset($this->Media);
     unset($this->Option);
@@ -137,7 +138,7 @@ class FilterManagerComponentTest  extends CakeTestCase {
     copy(RESOURCES . 'IMG_6131.JPG', $subdir . 'IMG_6131.JPG');
     copy(RESOURCES . 'IMG_7795.JPG', $subsubdir . 'IMG_7795.JPG');
 
-    $options = array('recursive'=>0,'forceReadMeta'=>0, 'extToRead'=>array('any'));
+    $options = array('recursive' => false);
     $this->Controller->FilterManager->readFiles(TEST_FILES_TMP, $options);
     $count = $this->Media->find('count');
     $this->assertEqual($count, 1);
@@ -147,7 +148,7 @@ class FilterManagerComponentTest  extends CakeTestCase {
     sort($names);
     $this->assertEqual($names, array('IMG_4145.JPG'));
 
-    $options = array('recursive'=>true,'forceReadMeta'=>0, 'extToRead'=>array('any'));
+    $options = array('recursive' => true);
     $this->Controller->FilterManager->readFiles(TEST_FILES_TMP, $options);
     $count = $this->Media->find('count');
     $this->assertEqual($count, 3);

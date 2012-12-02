@@ -37,7 +37,7 @@ class FileManagerComponent extends Component {
    *
    * @param filename Filename to add
    * @param user Optional user. User model data or user Id.
-   * @return File id or false on error
+   * @return array File id or false on error
    */
   public function add($filename, $user = false) {
     if (!is_readable($filename)) {
