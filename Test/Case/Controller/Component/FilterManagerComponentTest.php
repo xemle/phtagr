@@ -37,7 +37,7 @@ class FilterManagerController extends AppController {
 
 	var $uses = array('Media', 'MyFile', 'User', 'Option');
 
-	var $components = array('FileManager', 'FilterManager');
+	var $components = array('FileManager', 'FilterManager', 'Exiftool');
 
 	public function &getUser() {
     $user = $this->User->find('first');
@@ -99,6 +99,7 @@ class FilterManagerComponentTest  extends CakeTestCase {
 	public function tearDown() {
     $this->Folder->delete(TEST_FILES_TMP);
 
+    $this->Controller->Exiftool->exitExiftool();
     unset($this->Controller);
     unset($this->Media);
     unset($this->Option);
