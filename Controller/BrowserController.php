@@ -320,6 +320,7 @@ class BrowserController extends AppController
     }
     $this->Session->setFlash(__("Imported %d files (%d errors)", $readCount, $errorCount));
 
+    $this->FilterManager->ImageFilter->Exiftool->exitExiftool();
     $this->redirect('index/'.$path);
   }
 

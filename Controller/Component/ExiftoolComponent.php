@@ -22,7 +22,8 @@ class ExiftoolComponent extends Component {
   var $components = array('Command');
 
   // to be changed in case of old exiftool versions or problems with non UTF8 filenames...
-  var $usePipes = false;
+  var $usePipes = true;
+  var $debugging = false;//set to true to stop exiting exiftool after not reading pipes for 1 sec(during any debugging)
 
   var $process = null;
   var $stdin = null;
@@ -132,7 +133,7 @@ class ExiftoolComponent extends Component {
         $lines[] = $currentLine;
       }
       $processingtime = round((microtime(true) - $starttime), 4); //seconds
-      if ($processingtime > 1) {
+      if (($processingtime > 1)  and ($this->debugging != true)) {
         //increase for big video files?
         //probabily blocked
         $this->exitExiftool();
@@ -156,8 +157,7 @@ class ExiftoolComponent extends Component {
    * @result Array of metadata or false on error
    */
   public function readMetaData($filename) {
-    $usePipes = true; //to be changed in case of old exiftool versions or problems with non UTF8 filenames...
-    if ($usePipes && $this->_isExiftoolOpen()) {
+    if ($this->_isExiftoolOpen()) {
       return $this->_readMetaDataPipes($filename);
     } else {
       return $this->_readMetaDataDirect($filename);
@@ -186,9 +186,9 @@ class ExiftoolComponent extends Component {
     $gps = array('-GPSLatitude#', '-GPSLatitudeRef', '-GPSLongitude#', '-GPSLongitudeRef');
     //read only IPTC:DateCreated for avoiding confusion with XMP-photoshop:DateCreated = Date + Time + zone
     //IPTC - location
-    $iptc = array('-IPTC:DateCreated', '-TimeCreated', '-DateTimeOriginal', '-FileModifyDate', '-Keywords', '-Subject', '-City', '-Sub-location', '-Province-State', '-Country-PrimaryLocationName', '-Caption');
+    $iptc = array('-IPTC:DateCreated', '-TimeCreated', '-DateTimeOriginal', '-FileModifyDate', '-SupplementalCategories', '-Keywords', '-Subject', '-City', '-Sub-location', '-Province-State', '-Country-PrimaryLocationName', '-Caption');
     //XMP - location
-    $xmp = array('-Location', '-State', '-Country');
+    $xmp = array('-Location', '-State', '-Country', '-PhtagrGroups');
     $video = array('-Width', '-Height', '-Duration');
 
     $this->_writeCommands($this->stdin, $base);
@@ -216,7 +216,7 @@ class ExiftoolComponent extends Component {
     $stdout = $this->_readFromPipe($this->stdout, "{ready}\n");
     $stderr = $this->_readFromPipe($this->stderr);
 
-    if (count($stderr) > 1 || (count($stderr) && $stderr[0] === false)) {// and count($stdout) !==1//i.e.="    1 image files created "
+    if (count($stderr) > 1 || (count($stderr) && !($stderr[0] === false))) {// and count($stdout) !==1//i.e.="    1 image files created "
       //TODO: test if warnings and original file internal errors are reported on stderr or stdout
       $errors = implode(",", $stderr);
       Logger::err(am("exiftool stderr returned errors: ",$errors));
@@ -335,10 +335,10 @@ class ExiftoolComponent extends Component {
     $this->_writeCommands($this->stdin, $args);
     $this->_writeCommands($this->stdin, array('-execute'));
 
-    $this->_readFromPipe($this->stdout);
+    $this->_readFromPipe($this->stdout, "{ready}\n");
     $stderr = $this->_readFromPipe($this->stderr);
 
-    if ((count($stderr) > 1) || ($stderr[0] != false)) {// and count($stdout) !==1//i.e.="    1 image files created "
+    if (count($stderr) > 1 || (count($stderr) && !($stderr[0] === false))) {// and count($stdout) !==1//i.e.="    1 image files created "
       //TODO: test if warnings and original file internal errors are reported on stderr or stdout
       $errors = implode(",", $stderr);
       Logger::err(am("exiftool stderr returned errors: ",$errors));
@@ -383,24 +383,30 @@ class ExiftoolComponent extends Component {
   private function _checktmp($result, $filename, $tmp) {
 
     clearstatcache(true, $tmp);
-
+    
+    //wait until 1 sec if file is not created yet; increase time to allow large files to be written(like video)?
+    $starttime = microtime(true);
+    while (!file_exists($tmp) and (round((microtime(true) - $starttime), 4)<1)) {
+      //nanospllep is not  available on windows systems
+      time_nanosleep(0, 10000000); // 0.01 sec to avoid high cpu utilisation
+    }
     if ($result != 0 || !file_exists($tmp)) {
-      Logger::err("$bin returns with error: $result");//works for array or only for string?
+      Logger::err("exiftool returns with error: $result");//works for array or only for string?
       if (file_exists($tmp)) {
         @unlink($tmp);
       }
       return false;
-    } else {
-      $tmp2 = $this->_getTempFilename($filename);
-      if (!rename($filename, $tmp2)) {
-        Logger::err("Could not rename original file '$filename' to temporary file '$tmp2'");
-        @unlink($tmp);
-        return false;
-      }
-      rename($tmp, $filename);
-      @unlink($tmp2);
-      clearstatcache(true, $filename);
     }
+    $tmp2 = $this->_getTempFilename($filename);
+    if (!rename($filename, $tmp2)) {
+      Logger::err("Could not rename original file '$filename' to temporary file '$tmp2'");
+      @unlink($tmp);
+      return false;
+    }
+    rename($tmp, $filename);
+    @unlink($tmp2);
+    clearstatcache(true, $filename);
+
     return true;
   }
 

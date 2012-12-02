@@ -118,7 +118,8 @@ class MediaReadTestCase extends CakeTestCase {
  */
   public function tearDown() {
     $this->Folder->delete(TEST_FILES_TMP);
-
+    
+    $this->Controller->Exiftool->exitExiftool();
     $this->Controller->shutdownProcess();
     unset($this->Controller);
     unset($this->Media);
