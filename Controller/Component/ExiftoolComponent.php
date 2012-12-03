@@ -21,6 +21,10 @@ class ExiftoolComponent extends Component {
   var $controller = null;
   var $components = array('Command');
 
+  var $bin = false;             // exiftool binary
+  var $hasOptionConfig = false;
+  var $hasOptionStayOpen = false;
+
   // to be changed in case of old exiftool versions or problems with non UTF8 filenames...
   var $usePipes = true;
   var $debugging = false;//set to true to stop exiting exiftool after not reading pipes for 1 sec(during any debugging)
@@ -31,13 +35,57 @@ class ExiftoolComponent extends Component {
   var $stderr = null;
 
   public function initialize(Controller $controller) {
+    if ($this->controller) {
+      // It is already initialized
+      return;
+    }
     $this->controller = $controller;
+    $this->_readExiftoolVersion();
   }
 
+  /**
+   * Close open pipes on compoment shutdown.
+   *
+   * Shutdown will be called by the shutdownProcess of controller.
+   *
+   * For Tests: Please make sure that you will call Controller::shutdownProcess()
+   * in tests when you use Exiftool component
+   *
+   * @param Controller $controller
+   */
   public function shutdown(Controller $controller) {
     $this->exitExiftool();
+    unset($this->bin);
+    unset($this->controller);
   }
 
+  /**
+   *
+   */
+  private function _readExiftoolVersion() {
+    $this->bin = $this->controller->getOption('bin.exiftool');
+    if (!$this->bin) {
+      return false;
+    }
+    $result = $this->Command->run($this->bin, array('-ver'));
+    $outputline = join("", $this->Command->output);
+    // result is 0 for no error
+    if ($result || !preg_match('/^(\d+)\.(\d+).*/', $outputline, $version)) {
+      Logger::err("Unexpected result output of exiftool ({$this->bin}): Returnd $result with output: $output. Disable exiftool");
+      $this->bin = false;
+      return false;
+    }
+
+    // Exif version in $version[0]. major version in $version[1], minor version in $version[2]
+    // -config since 7.98
+    if ($version[1] > 7 || ($version[1] == 7 && $version[2] >= 98)) {
+      $this->hasOptionConfig = true;
+    }
+    // -stay_open since 8.42
+    if ($version[1] > 8 || ($version[1] == 8 && $version[2] >= 42)) {
+      $this->hasOptionStayOpen = true;
+    }
+  }
   /**
    * Start exiftool process and open pipes
    *
@@ -45,7 +93,7 @@ class ExiftoolComponent extends Component {
    */
   private function _startExiftool() {
 
-    if (!$this->usePipes || !$this->controller->getOption('bin.exiftool')) {
+    if (!$this->usePipes || !$this->hasOptionStayOpen) {
       return false;
     }
     $descriptors = array(
@@ -53,8 +101,7 @@ class ExiftoolComponent extends Component {
       1 => array('pipe', 'w'),             // stdout
       2 => array('pipe', 'w'),             // stderr
     );
-    $bin = $this->controller->getOption('bin.exiftool', 'exiftool');
-    $cmd = $bin.' -config '.escapeshellarg($this->_getExifToolConf()).' -stay_open 1 -@ -';
+    $cmd = $this->bin . ' -config '.escapeshellarg($this->_getExifToolConf()) . ' -stay_open 1 -@ -';
     //http://www.php.net/manual/en/function.proc-open.php
     $this->process = proc_open($cmd, $descriptors, $pipes);
     if (is_resource($this->process)) {
@@ -64,6 +111,7 @@ class ExiftoolComponent extends Component {
       $this->stderr = $pipes[2];
       return true;
     } else {
+      Logger::warn("Could not open exiftool pipes");
       return false;
     }
   }
@@ -133,7 +181,7 @@ class ExiftoolComponent extends Component {
         $lines[] = $currentLine;
       }
       $processingtime = round((microtime(true) - $starttime), 4); //seconds
-      if (($processingtime > 1)  and ($this->debugging != true)) {
+      if (($processingtime > 1) && ($this->debugging != true)) {
         //increase for big video files?
         //probabily blocked
         $this->exitExiftool();
@@ -157,7 +205,9 @@ class ExiftoolComponent extends Component {
    * @result Array of metadata or false on error
    */
   public function readMetaData($filename) {
-    if ($this->_isExiftoolOpen()) {
+    if (!$this->bin) {
+      return false;
+    } else if ($this->_isExiftoolOpen()) {
       return $this->_readMetaDataPipes($filename);
     } else {
       return $this->_readMetaDataDirect($filename);
@@ -243,13 +293,13 @@ class ExiftoolComponent extends Component {
    * @result Array of metadata or false on error
    */
   private function _readMetaDataDirect($filename) {
-    if (!$this->controller->getOption('bin.exiftool')) {
-      return false;
-    }
     // read meta data
-    $bin = $this->controller->getOption('bin.exiftool', 'exiftool');
-    $args = array('-config', $this->_getExifToolConf(), '-S', '-n', $filename);
-    $result = $this->Command->run($bin, $args);
+    $args = array();
+    if ($this->hasOptionConfig) {
+      $args = am($args, array('-config', $this->_getExifToolConf()));
+    }
+    $args = am($args, array('-S', '-n', $filename));
+    $result = $this->Command->run($this->bin, $args);
     $output = $this->Command->output;
     if ($result == 127) {
       Logger::err("$bin could not be found!");
@@ -312,8 +362,9 @@ class ExiftoolComponent extends Component {
    * @return
    */
   public function writeMetaData($filename, $tmp, $args) {
-
-    if ($this->_isExiftoolOpen()) {
+    if (!$this->bin) {
+      return false;
+    } else if ($this->_isExiftoolOpen()) {
       $result = $this->_writeMetaDataPipes($args);
     } else {
       $result = $this->_writeMetaDataDirect($args);
@@ -352,16 +403,15 @@ class ExiftoolComponent extends Component {
   /**
    * Write the meta data to an image file, directly calling exiftool
    *
-   * @param filename Filename
-   * @param args Arguments for exiftool
+   * @param array $args Arguments for exiftool
    * @return
    */
   private function _writeMetaDataDirect($args) {
-    $bin = $this->controller->getOption('bin.exiftool', 'exiftool');
-    $args = am( $this->_getExifToolConf(), $args);
-    $args = am('-config', $args);
+    if ($this->hasOptionConfig) {
+      $args = am(array('-config', $this->_getExifToolConf()), $args);
+    }
 
-    $result = $this->Command->run($bin, $args);
+    $result = $this->Command->run($this->bin, $args);
     $output = $this->Command->output;
     if ($result == 127) {
       Logger::err("$bin could not be found!");
@@ -383,10 +433,10 @@ class ExiftoolComponent extends Component {
   private function _checktmp($result, $filename, $tmp) {
 
     clearstatcache(true, $tmp);
-    
+
     //wait until 1 sec if file is not created yet; increase time to allow large files to be written(like video)?
     $starttime = microtime(true);
-    while (!file_exists($tmp) and (round((microtime(true) - $starttime), 4)<1)) {
+    while (!file_exists($tmp) && (round((microtime(true) - $starttime), 4)<1)) {
       //nanospllep is not  available on windows systems
       time_nanosleep(0, 10000000); // 0.01 sec to avoid high cpu utilisation
     }
@@ -416,17 +466,17 @@ class ExiftoolComponent extends Component {
    * @param filename Filename to file to clean
    */
   public function clearMetaData($filename) {
-    if (!file_exists($filename)) {
+    if (!$this->bin) {
+      return;
+    } else if (!file_exists($filename)) {
       Logger::err("Filename '$filename' does not exists");
       return;
-    }
-    if (!is_writeable($filename)) {
+    } else if (!is_writeable($filename)) {
       Logger::err("Filename '$filename' is not writeable");
       return;
     }
 
-    $bin = $this->controller->getOption('bin.exiftool', 'exiftool');
-    $this->Command->run($bin, array('-all=', $filename));
+    $this->Command->run($this->bin, array('-all=', $filename));
 
     Logger::debug("Cleaned meta data of '$filename'");
   }
