@@ -12,8 +12,8 @@
         return;
       }
       $(this).addClass('selected');
-      $(this).find('.p-explorer-media-actions ul li .add').hide();
-      $(this).find('.p-explorer-media-actions ul li .del').show();
+      $(this).find('.actions li.add').hide();
+      $(this).find('.actions li.del').show();
 
       var id = $(this).attr('id').split('-')[1];
       var input = $(':input[id=MediaIds]');
@@ -33,8 +33,8 @@
         return;
       }
       $(this).removeClass('selected');
-      $(this).find('.p-explorer-media-actions ul li .add').show();
-      $(this).find('.p-explorer-media-actions ul li .del').hide();
+      $(this).find('.actions li.add').show();
+      $(this).find('.actions li.del').hide();
 
       var id = $(this).attr('id').split('-')[1];
       var input = $(':input[id=MediaIds]');

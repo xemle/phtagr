@@ -95,7 +95,12 @@ class AppController extends Controller
 
   public function _checkCookie() {
     $this->Cookie->name = 'phTagr';
-    return $this->Cookie->read('user');
+    $id = $this->Cookie->read('user');
+    if (is_numeric($id)) {
+      return (int) $id;
+    } else {
+      return false;
+    }
   }
 
   public function _checkKey() {
@@ -147,6 +152,7 @@ class AppController extends Controller
     // Fetch User
     $user = $this->User->findById($id);
     if (!$user) {
+      Logger::err("Could not find user with given id '$id' (via $authType)");
       return false;
     }
 

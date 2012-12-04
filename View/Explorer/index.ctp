@@ -133,16 +133,17 @@
             event.preventDefault();
           }
         });
-        $(this).find('.actions .add').click(function() {
+        $(this).find('.actions .add a').click(function() {
           $(media).selectMedia();
         });
-        $(this).find('.actions .del').hide().click(function() {
+        $(this).find('.actions .del').hide();
+        $(this).find('.actions .del a').click(function() {
           $(media).unselectMedia();
         });
-        $(this).find('.actions .edit').click(function() {
+        $(this).find('.actions .edit a').click(function() {
           $(this).updateMeta(id, crumbs);
         });
-        $(this).find('.actions .acl').click(function() {
+        $(this).find('.actions .acl a').click(function() {
           $(this).updateAcl(id, crumbs);
         });
         $(this).find('.tooltip-actions').tooltipAction();
