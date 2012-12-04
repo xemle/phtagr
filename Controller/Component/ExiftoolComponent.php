@@ -20,6 +20,7 @@ App::uses('Component', 'Controller');
 class ExiftoolComponent extends Component {
   var $controller = null;
   var $components = array('Command');
+  var $enableImportLogging = true;
 
   var $bin = false;             // exiftool binary
   var $hasOptionConfig = false;
@@ -222,6 +223,7 @@ class ExiftoolComponent extends Component {
    * @result Array of metadata or false on error
    */
   private function _readMetaDataPipes($filename)  {
+    $starttime = microtime(true);
     //TODO: use exiftool arg -json and json_decode ( string $json) OR exiftool arg -php and eval($array_string)
 
     //fwrite($this->stdin, "-json\n");
@@ -272,6 +274,10 @@ class ExiftoolComponent extends Component {
       Logger::err(am("exiftool stderr returned errors: ",$errors));
     }
 
+    if ($this->enableImportLogging) {
+      $processingtime = round((microtime(true)-$starttime),4); //seconds
+      $this->log("----- read with PIPES. Just exiftool read time: ".$processingtime, 'import_memory_speed');
+    }
     //parse results
     $data = array();
     foreach ($stdout as $line) {
@@ -293,6 +299,7 @@ class ExiftoolComponent extends Component {
    * @result Array of metadata or false on error
    */
   private function _readMetaDataDirect($filename) {
+    $starttime = microtime(true);
     // read meta data
     $args = array();
     if ($this->hasOptionConfig) {
@@ -308,7 +315,10 @@ class ExiftoolComponent extends Component {
       Logger::err("$bin returned with error: $result (command: '{$this->Command->lastCommand}')");
       return false;
     }
-
+    if ($this->enableImportLogging) {
+      $processingtime = round((microtime(true)-$starttime),4); //seconds
+      $this->log("----- read directly with exiftool. Just exiftool read time: ".$processingtime, 'import_memory_speed');
+    }
     $data = array();
     foreach ($output as $line) {
       list($name, $value) = preg_split('/:(\s+|$)/', $line);

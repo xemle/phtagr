@@ -23,6 +23,7 @@ class FilterManagerComponent extends Component {
 
   var $controller = null;
   var $components = array('FileManager');
+  var $enableImportLogging = true;
 
   /**
    * List of extensions
@@ -273,6 +274,9 @@ class FilterManagerComponent extends Component {
 
     $result = array();
     $importLog = $this->_importlog(&$importLog, $file);
+    if ($this->enableImportLogging) {
+      $this->log(("Found ".count($stack)." files to import"), 'import_memory_speed');
+    }
     foreach ($order as $ext) {
       if (!isset($extStack[$ext])) {
         continue;
@@ -429,8 +433,7 @@ class FilterManagerComponent extends Component {
    * Log importing speed and memory utilized
    */
   Function _importlog(&$importLog = array(), $file) {
-    $enableImportLogging = true;
-    if (!$enableImportLogging){
+    if (!$this->enableImportLogging){
       return false;
     }
     $v =& $importLog;
@@ -452,9 +455,10 @@ class FilterManagerComponent extends Component {
     $averageFileTime = round($totalTime/$v['file_nr'],4);
     $LastFileMemory = round(($CrtMemory-$v['LastMemory'])*1000,1);//kb  nr zecimale??
     $v['LastMemory'] = $CrtMemory;
-
+    $v['LastTime'] = $CrtTime;
+    
     $this->log($file, 'import_memory_speed');
-    $this->log("------ FILE NO: ".$v['file_nr'].", total time ".$totalTime." seconds, averageFileTime ".$averageFileTime." sec/file", 'import_memory_speed');
+    $this->log("------ FILE NO: ".$v['file_nr'].", total time ".$totalTime." seconds, LastFileTime ".$LastFileTime.", averageFileTime ".$averageFileTime." sec/file", 'import_memory_speed');
     $this->log("------ memory_get_usage = ".$CrtMemory." MB, used for last file = ".$LastFileMemory." kb, averageFileMemory ".$averageFileMemory." kb", 'import_memory_speed');
 
     return $importLog;
