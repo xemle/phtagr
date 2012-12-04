@@ -438,7 +438,7 @@ class ExiftoolComponent extends Component {
     $starttime = microtime(true);
     while (!file_exists($tmp) && (round((microtime(true) - $starttime), 4)<1)) {
       //nanospllep is not  available on windows systems
-      time_nanosleep(0, 10000000); // 0.01 sec to avoid high cpu utilisation
+      time_nanosleep(0, 1000000); // 1 ms to avoid high cpu utilisation; 0.01 is too slow
     }
     if ($result != 0 || !file_exists($tmp)) {
       Logger::err("exiftool returns with error: $result");//works for array or only for string?
@@ -475,10 +475,18 @@ class ExiftoolComponent extends Component {
       Logger::err("Filename '$filename' is not writeable");
       return;
     }
-
-    $this->Command->run($this->bin, array('-all=', $filename));
-
+    $args = array('-all=', '-overwrite_original', $filename);
+    if ($this->_isExiftoolOpen()) {
+      $result = $this->_writeMetaDataPipes($args);
+    } else {
+      $result = $this->Command->run($this->bin, $args);
+    }
+    if ($result != 0) {
+      Logger::err("Cleaning of meta data of file '$filename' failed");
+      return false;
+    }
     Logger::debug("Cleaned meta data of '$filename'");
+    return true;
   }
 
   /**

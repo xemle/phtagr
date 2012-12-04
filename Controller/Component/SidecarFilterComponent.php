@@ -238,28 +238,6 @@ class SidecarFilterComponent extends BaseFilterComponent {
     return $media;
   }
 
-  /**
-   * Clear image metadata from a file
-   *
-   * @param filename Filename to file to clean
-   */
-  public function clearMetaData($filename) {
-    if (!file_exists($filename)) {
-      Logger::err("Filename '$filename' does not exists");
-      return;
-    }
-    if (!is_writeable($filename)) {
-      Logger::err("Filename '$filename' is not writeable");
-      return;
-    }
-
-    $bin = $this->controller->getOption('bin.exiftool', 'exiftool');
-    $this->Command->run($bin, array('-all=', $filename));
-
-    Logger::debug("Cleaned meta data of '$filename'");
-  }
-
-
   private function _getExifToolConf() {
     return APP . 'Config' . DS . 'ExifTool-phtagr.conf';
   }
