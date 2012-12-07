@@ -61,6 +61,12 @@ class ExiftoolComponent extends Component {
   }
 
   /**
+   * @return boolean True if exiftool is enabled
+   */
+  public function isEnabled() {
+    return $this->bin != null;
+  }
+  /**
    *
    */
   private function _readExiftoolVersion() {
@@ -87,6 +93,7 @@ class ExiftoolComponent extends Component {
       $this->hasOptionStayOpen = true;
     }
   }
+
   /**
    * Start exiftool process and open pipes
    *
@@ -110,6 +117,8 @@ class ExiftoolComponent extends Component {
       $this->stdin = $pipes[0];
       $this->stdout = $pipes[1];
       $this->stderr = $pipes[2];
+      stream_set_blocking($this->stdout, 0);
+      stream_set_blocking($this->stderr, 0);
       return true;
     } else {
       Logger::warn("Could not open exiftool pipes");
@@ -168,26 +177,33 @@ class ExiftoolComponent extends Component {
     unset($this->stderr);
   }
 
+  /**
+   * Read lines from given pipe
+   *
+   * @param resource $pipe Pipe to read
+   * @param mixed $stopToken Top token to read. Default is false
+   * @return array Lines
+   */
   private function _readFromPipe(&$pipe, $stopToken = false) {
     if (!is_resource($pipe)) {
       return false;
     }
-    $starttime = microtime(true);
-    $currentLine = '';
+    $starttime = $processingTime = microtime(true);
+    $timeoutInSec = 0.2;
+    if ($this->debugging) {
+      $timeoutInSec = 20;
+    }
+
     $lines = array();
-    stream_set_blocking($pipe, 0); //just as a precaution
-    while ($currentLine !== $stopToken) {
-      $currentLine = fgets($pipe, 8192);  //1024? for speed?
-      if ($currentLine !== $stopToken && $currentLine !== false) {
-        $lines[] = $currentLine;
+    while ($processingTime - $starttime < $timeoutInSec) {
+      $line = fgets($pipe, 8192);  //1024? for speed?
+      if ($line !== $stopToken && $line !== false) {
+        // lines have \n appended. Trim white space at the end
+        $lines[] = rtrim($line);
+      } else if ($line === $stopToken) {
+        break;
       }
-      $processingtime = round((microtime(true) - $starttime), 4); //seconds
-      if (($processingtime > 1) && ($this->debugging != true)) {
-        //increase for big video files?
-        //probabily blocked
-        $this->exitExiftool();
-        return $lines;
-      }
+      $processingTime = microtime(true);
     }
     return $lines;
   }
@@ -282,21 +298,19 @@ class ExiftoolComponent extends Component {
     $data = array();
     foreach ($stdout as $line) {
       list($name, $value) = preg_split('/:(\s+|$)/', $line);
-      $data[$name] = str_replace("\n", "", $value);// to avoid new line at end of $media['Media']['model']
+      $data[$name] = $value;
       //TODO - log fields Error and Warning
     }
 
-    $data = $this->_videoMetaDataProcess($data, $filename);
     return $data;
-
   }
 
 
   /**
    * Read the meta data via exiftool from a file
    *
-   * @param filename Filename to read
-   * @result Array of metadata or false on error
+   * @param string $filename Filename to read
+   * @result array Array of metadata or false on error
    */
   private function _readMetaDataDirect($filename) {
     $starttime = microtime(true);
@@ -324,54 +338,17 @@ class ExiftoolComponent extends Component {
       list($name, $value) = preg_split('/:(\s+|$)/', $line);
       $data[$name] = $value;
     }
-    $data = $this->_videoMetaDataProcess($data, $filename);
     return $data;
   }
 
-   private function _videoMetaDataProcess($data, $filename) {
-    $filetype = $this->controller->MyFile->_getTypeFromFilename($filename);
-    if ($filetype == FILE_TYPE_VIDEO) {
-      $result = array();
-      if (!isset($data['ImageWidth']) || !isset($data['ImageWidth']) || !isset($data['Duration']) ) {
-        Logger::warn("Could not extract width, height, or durration from '$filename'");
-        Logger::warn($result);
-        return false;
-      }
-      $result['height'] = intval($data['ImageHeight']);
-      $result['width'] = intval($data['ImageWidth']);
-      $result['duration'] = ceil(intval($data['Duration']));
-
-      if (isset($data['DateTimeOriginal'])) {
-        $result['date'] = $data['DateTimeOriginal'];
-      } else if (isset($data['FileModifyDate'])) {
-        $result['date'] = $data['FileModifyDate'];
-      }
-      if (isset($data['Orientation'])) {
-        $result['orientation'] = $data['Orientation'];
-      }
-      if (isset($data['Model'])) {
-        $result['model'] = $data['Model'];
-      }
-      if (isset($data['GPSLatitude']) && isset($data['GPSLongitude'])) {
-        $result['latitude'] = $data['GPSLatitude'];
-        $result['longitude'] = $data['GPSLongitude'];
-      }
-      Logger::trace("Extracted " . count($result) . " fields via exiftool");
-      Logger::trace($result);
-      return $result;
-    } else {
-      return $data;
-    }
-  }
-
   /**
-   * Write the meta data to an image file
+   * Write the meta data to given file
    *
-   * @param filename Filename
-   * @param args Arguments for exiftool
-   * @return
+   * @param string $filename Filename
+   * @param array $args Arguments for exiftool including filename
+   * @return mixed True on no error
    */
-  public function writeMetaData($filename, $tmp, $args) {
+  public function writeMetaData($filename, $args) {
     if (!$this->bin) {
       return false;
     } else if ($this->_isExiftoolOpen()) {
@@ -379,7 +356,7 @@ class ExiftoolComponent extends Component {
     } else {
       $result = $this->_writeMetaDataDirect($args);
     }
-    $result = $this->_checktmp($result, $filename, $tmp);
+    clearstatcache(true, $filename);
     return $result;
   }
 
@@ -406,7 +383,7 @@ class ExiftoolComponent extends Component {
       return $errors;
     }
 
-    return 0;
+    return true;
   }
 
 
@@ -424,49 +401,13 @@ class ExiftoolComponent extends Component {
     $result = $this->Command->run($this->bin, $args);
     $output = $this->Command->output;
     if ($result == 127) {
-      Logger::err("$bin could not be found!");
+      Logger::err("{$this->bin} could not be found!");
       return false;
     } elseif ($result != 0) {
       $errors = implode(",", $output);
-      Logger::err("$bin returned with error: $result (command: '{$this->Command->lastCommand}'). Errors: $errors");
+      Logger::err("{$this->bin} returned with error: $result (command: '{$this->Command->lastCommand}'). Errors: $errors");
       return false;
     }
-  }
-
-  /**
-   * Check if newfile tmp was created by exiftool and replace original file
-   *
-   * @param filename Filename
-   * @param filename temporrary Filename
-   * @return False on error
-   */
-  private function _checktmp($result, $filename, $tmp) {
-
-    clearstatcache(true, $tmp);
-
-    //wait until 1 sec if file is not created yet; increase time to allow large files to be written(like video)?
-    $starttime = microtime(true);
-    while (!file_exists($tmp) && (round((microtime(true) - $starttime), 4)<1)) {
-      //nanospllep is not  available on windows systems
-      time_nanosleep(0, 1000000); // 1 ms to avoid high cpu utilisation; 0.01 is too slow
-    }
-    if ($result != 0 || !file_exists($tmp)) {
-      Logger::err("exiftool returns with error: $result");//works for array or only for string?
-      if (file_exists($tmp)) {
-        @unlink($tmp);
-      }
-      return false;
-    }
-    $tmp2 = $this->_getTempFilename($filename);
-    if (!rename($filename, $tmp2)) {
-      Logger::err("Could not rename original file '$filename' to temporary file '$tmp2'");
-      @unlink($tmp);
-      return false;
-    }
-    rename($tmp, $filename);
-    @unlink($tmp2);
-    clearstatcache(true, $filename);
-
     return true;
   }
 
