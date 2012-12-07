@@ -173,8 +173,9 @@ class VideoFilterComponent extends BaseFilterComponent {
   }
 
   public function _readVideoFormat(&$media, $filename) {
-    if ($this->controller->getOption('bin.exiftool')) {
-      $result = $this->Exiftool->readMetaData($filename);
+    $result = false;
+    if ($this->Exiftool->isEnabled()) {
+      $result = $this->_readExiftool($filename);
     }
     if (!$result && $this->controller->getOption('bin.ffmpeg')) {
       $result = $this->_readFfmpeg($filename);
@@ -193,7 +194,46 @@ class VideoFilterComponent extends BaseFilterComponent {
     return $media;
   }
 
-  public function _readFfmpeg($filename) {
+  /**
+   * Reads video information via exiftool
+   *
+   * @param string $filename
+   * @return array Media properties
+   */
+  private function _readExiftool($filename) {
+    $data = $this->Exiftool->readMetaData($filename);
+
+    $result = array();
+    if (!$data || !isset($data['ImageWidth']) || !isset($data['ImageWidth']) || !isset($data['Duration']) ) {
+      Logger::warn("Could not extract width, height, or durration from '$filename' via exiftool");
+      Logger::warn($data);
+      return false;
+    }
+    $result['height'] = intval($data['ImageHeight']);
+    $result['width'] = intval($data['ImageWidth']);
+    $result['duration'] = ceil(intval($data['Duration']));
+
+    if (isset($data['DateTimeOriginal'])) {
+      $result['date'] = $data['DateTimeOriginal'];
+    } else if (isset($data['FileModifyDate'])) {
+      $result['date'] = $data['FileModifyDate'];
+    }
+    if (isset($data['Orientation'])) {
+      $result['orientation'] = $data['Orientation'];
+    }
+    if (isset($data['Model'])) {
+      $result['model'] = $data['Model'];
+    }
+    if (isset($data['GPSLatitude']) && isset($data['GPSLongitude'])) {
+      $result['latitude'] = $data['GPSLatitude'];
+      $result['longitude'] = $data['GPSLongitude'];
+    }
+    Logger::trace("Extracted " . count($result) . " fields via exiftool");
+    Logger::trace($result);
+    return $result;
+  }
+
+  private function _readFfmpeg($filename) {
     $bin = $this->controller->getOption('bin.ffmpeg', 'ffmpeg');
     $this->Command->redirectError = true;
     $result = $this->Command->run($bin, array('-i' => $filename, '-t', 0.0));

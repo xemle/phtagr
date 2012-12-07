@@ -402,7 +402,7 @@ class ImageFilterComponent extends BaseFilterComponent {
       Logger::err("File or media is empty");
       return false;
     }
-    if (!$this->controller->getOption('bin.exiftool')) {
+    if (!$this->Exiftool->isEnabled()) {
       Logger::err("Exiftool is not defined. Abored writing of meta data");
       return false;
     }
@@ -440,9 +440,6 @@ class ImageFilterComponent extends BaseFilterComponent {
       return true;
     }
 
-    $tmp = $this->_getTempFilename($filename);
-    $bin = $this->controller->getOption('bin.exiftool', 'exiftool');
-
     //ignore minor errors -the file could had minor errors before importing to phtagr,
     //consequently the write process will fail due to previous minor errors
     $args[] = '-m';
@@ -453,12 +450,12 @@ class ImageFilterComponent extends BaseFilterComponent {
     //generates new IPTCDigest code in order to 'help' adobe products to see that the file was modified
     $args[] = '-IPTCDigest=new';
 
-    $args[] = '-o';
-    $args[] = $tmp;
+    $args[] = '-overwrite_original';
     $args[] = $filename;
 
-    $result = $this->Exiftool->writeMetaData($filename, $tmp, $args);
-    if (!$result) {
+    $result = $this->Exiftool->writeMetaData($filename, $args);
+    if ($result !== true) {
+      Logger::warn("Could not write meta data. Result is " . join(", ", (array) $result));
       return false;
     }
 
