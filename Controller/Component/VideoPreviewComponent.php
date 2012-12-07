@@ -28,6 +28,10 @@ class VideoPreviewComponent extends Component {
     }
   }
 
+  public function getDummyPreview() {
+    return APP . 'webroot' . DS . 'img' . DS . 'dummy_video_preview.jpg';
+  }
+
   /**
    * Finds the video thumb of a video
    *
@@ -95,9 +99,8 @@ class VideoPreviewComponent extends Component {
     }
     $bin = $this->controller->getOption('bin.ffmpeg');
     if (!$bin) {
-      Logger::info("FFmpeg is missing to create video preview. Use phtagrs dummy picture");
-      $dummy = APP . 'webroot' . DS . 'img' . DS . 'dummy_video_preview.jpg';
-      return $dummy;
+      Logger::warn("FFmpeg is missing to create video preview.");
+      return false;
     }
     if ($this->_semaphoreId) {
       sem_acquire($this->_semaphoreId);
@@ -162,16 +165,24 @@ class VideoPreviewComponent extends Component {
       $thumbFilename = $this->_findThumb($video);
       if ($thumbFilename) {
         return $thumbFilename;
-      } elseif (!$thumbFilename && is_writeable(dirname($videoFile))) {
+      }
+
+      if (!$thumbFilename && is_writeable(dirname($videoFile))) {
         $thumbFilename = $this->create($video);
-        $thumb = $this->controller->MyFile->findByFilename($thumbFilename);
-        if ($this->controller->MyFile->setMedia($thumb, $video['File']['media_id'])) {
-          Logger::verbose("Link thumbnail {$thumb['File']['id']} to media {$video['File']['media_id']}");
+        if ($thumbFilename) {
+          $thumb = $this->controller->MyFile->findByFilename($thumbFilename);
+          if ($this->controller->MyFile->setMedia($thumb, $video['File']['media_id'])) {
+            Logger::verbose("Link thumbnail {$thumb['File']['id']} to media {$video['File']['media_id']}");
+          }
         }
       } elseif (!$options['noCache']) {
         Logger::info("Origination directory of video is not writable. Use cache file ($cache)");
         $thumbFilename = $this->create($video, $cache);
       }
+    }
+    if (!$thumbFilename) {
+      Logger::info("Preview file could not be found or created. Use phtagrs dummy picture");
+      return $this->getDummyPreview();
     }
     return $thumbFilename;
   }
