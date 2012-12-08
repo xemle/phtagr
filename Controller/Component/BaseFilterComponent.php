@@ -38,18 +38,44 @@ class BaseFilterComponent extends Component {
     return true;
   }
 
+  /**
+   * Returns the filter name
+   *
+   * @return string Filername
+   */
   public function getName() {
     return false;
   }
 
+  /**
+   * Returns the file extensions which could be read from the filter
+   *
+   * @return array List of file extensions
+   */
   public function getExtensions() {
     return false;
   }
 
+  /**
+   * Reads meat data from given file to media
+   *
+   * @param array $file File model data
+   * @param array $media Media model data
+   * @param array $options Options for the filter
+   * @param mixed Media model data on success. False on error
+   */
   public function read(&$file, &$media = null, $options = array()) {
     return false;
   }
 
+  /**
+   * Writes meta data to given file and media
+   *
+   * @param array $file File model data
+   * @param array $media Media model data
+   * @param array $options Options for the filter
+   * @param boolean True on success
+   */
   public function write(&$file, &$media, $options = array()) {
     return false;
   }
