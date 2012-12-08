@@ -40,6 +40,7 @@ class FilterManagerComponent extends Component {
   var $config = array();
 
   var $errors = array();
+  var $skipped = array();
 
   public function initialize(Controller $controller) {
     $this->controller = $controller;
@@ -367,6 +368,7 @@ class FilterManagerComponent extends Component {
       }
       if ($readed && !$forceRead) {
         Logger::verbose("File '$filename' already readed. Skip reading!");
+        $this->skipped[$filename] = 'skipped';
         //return $media;//overload memory with 20kb for each file
         return $filename;//around 0.2kb
       }

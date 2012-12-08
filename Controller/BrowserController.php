@@ -310,6 +310,7 @@ class BrowserController extends AppController
     $this->FilterManager->clearErrors();
 
     $readed = $this->FilterManager->readFiles($toRead, $options);
+    $skipped = count($this->FilterManager->skipped);
     $errorCount = count($this->FilterManager->errors);
 
     $readCount = 0;
@@ -318,7 +319,7 @@ class BrowserController extends AppController
         $readCount++;
       }
     }
-    $this->Session->setFlash(__("Imported %d files (%d errors)", $readCount, $errorCount));
+    $this->Session->setFlash(__("Processed %d files (imported %d, skipped %d, %d errors)", $readCount, $readCount-$skipped, $skipped, $errorCount));
 
     $this->FilterManager->ImageFilter->Exiftool->exitExiftool();
     $this->redirect('index/'.$path);
