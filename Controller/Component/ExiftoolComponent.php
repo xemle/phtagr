@@ -357,6 +357,9 @@ class ExiftoolComponent extends Component {
     }
 
     // Default acl group is assigned by media creation
+    if (!isset($media['Group']['Group'])){
+      $media['Group']['Group'] = array();
+    }
     $media['Group']['Group'] = am($media['Group']['Group'], $mediaGroupIds);
     return $media;
   }
