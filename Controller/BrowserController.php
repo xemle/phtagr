@@ -361,7 +361,11 @@ class BrowserController extends AppController
       if (!$file) {
         continue;
       }
-      $filename = $fsPath . $file;
+      if ($file==="."){
+        $filename = $fsPath;
+      } else {
+        $filename = $fsPath . $file;
+      }
       if (is_dir($filename)) {
         $filename = Folder::slashTerm($filename);
         if ($recursive) {
