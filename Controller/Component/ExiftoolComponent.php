@@ -36,6 +36,7 @@ class ExiftoolComponent extends Component {
   var $stdout = null;
   var $stderr = null;
 
+  //IPTC
   var $fieldMap = array(
       'keyword' => 'Keywords',
       'keyword2' => 'Subject',
@@ -46,6 +47,17 @@ class ExiftoolComponent extends Component {
       'country' => 'Country-PrimaryLocationName'
       );
 
+  //XMP
+  var $fieldMapXMP = array(
+      'keyword' => 'Keywords',
+      'keyword2' => 'Subject',
+      'category' => 'SupplementalCategories',
+      'sublocation' => 'Location',
+      'city' => 'City',
+      'state' => 'State',
+      'country' => 'Country'
+      );
+  
   public function initialize(Controller $controller) {
     if ($this->controller) {
       // It is already initialized
@@ -419,12 +431,87 @@ class ExiftoolComponent extends Component {
       $data['Subject'] = $data['Keywords'];
     }
 
-    // Associations to meta data: Tags, Categories, Locations
+    // Associations to IPTC meta data: Tags, Categories, Locations
     foreach ($this->fieldMap as $field => $name) {
       //hack to allow two names with the same key (field)
       if ($field === 'keyword2') {
         $field = 'keyword';
         $isList = true;
+      }
+      $isList = $this->controller->Media->Field->isListField($field);
+      if ($isList) {
+        $media['Field'][$field] = $this->_extractList($data, $name);
+      } else {
+        $media['Field'][$field] = $this->_extract($data, $name);
+      }
+    }
+
+    // Associations to meta data: Groups
+    $fileGroups = $this->_extract($data, 'PhtagrGroups');
+    $media = $this->_readFileGroups($fileGroups, $media);
+
+    return $media;
+  }
+
+  public function extractImageDataSidecar(&$media, &$data) {
+    $user = $this->controller->getUser();//not used?
+
+    $v =& $media['Media'];
+
+    // Media information
+    $v['name'] = $this->_extract($data, 'ObjectName', $v['name']);
+    
+    $v['date'] = $this->_extractMediaDate($data);
+    //size will be zero on sidecar
+    //$v['width'] = $this->_extract($data, 'ImageWidth', 0);
+    //$v['height'] = $this->_extract($data, 'ImageHeight', 0);
+    //$v['duration'] = -1;
+    $v['orientation'] = $this->_extract($data, 'Orientation', $v['orientation']);
+
+    $v['aperture'] = $this->_extract($data, 'Aperture', $v['aperture']);
+    $v['shutter'] = $this->_extract($data, 'ShutterSpeed', $v['shutter']);
+    $v['model'] = $this->_extract($data, 'Model', $v['model']);
+    $v['iso'] = $this->_extract($data, 'ISO', $v['iso']);
+    $v['caption'] = $this->_extract($data, 'Comment', $v['caption']);
+
+    // fetch GPS coordinates
+    $latitude = $this->_extract($data, 'GPSLatitude', $v['latitude']);
+    $latitudeRef = $this->_extract($data, 'GPSLatitudeRef', null);
+    $longitude = $this->_extract($data, 'GPSLongitude', $v['longitude']);
+    $longitudeRef = $this->_extract($data, 'GPSLongitudeRef', null);
+
+    if ($latitude && $latitudeRef && $longitude && $longitudeRef) {
+      if ($latitudeRef == 'S' && $latitude > 0) {
+        $latitude *= -1;
+      }
+      if ($longitudeRef == 'W' && $longitude > 0) {
+        $longitude *= -1;
+      }
+      $v['latitude'] = $latitude;
+      $v['longitude'] = $longitude;
+    }
+
+    //merge Keywords and Subject
+    if (isset($data['Subject'])) {
+      if (isset($data['Keywords'])) {
+        $data['Keywords']=$data['Subject'].",".$data['Keywords'];
+      } else {
+        $data['Keywords']=$data['Subject'];
+      }
+    } elseif (isset($data['Keywords'])) {
+      $data['Subject'] = $data['Keywords'];
+    }
+
+    // Associations to XMP meta data: Tags, Categories, Locations
+    foreach ($this->fieldMapXMP as $field => $name) {
+      //hack to allow two names with the same key (field)
+      if ($field === 'keyword2') {
+        $field = 'keyword';
+        $isList = true;
+      }
+      //read field from sidecar only if it is present in sidecar
+      if (!isset($data[$name])) {
+        continue;
       }
       $isList = $this->controller->Media->Field->isListField($field);
       if ($isList) {
@@ -712,13 +799,33 @@ class ExiftoolComponent extends Component {
 
   private function _createExportArgumentsForFields(&$data, $media) {
     $args = array();
+    
+    $usedFieldMap = $this->fieldMap;
+    
+    if ($this->controller->getOption('xmp.use.sidecar', 0)) {
+      
+      $usedFieldMap = $this->fieldMapXMP;
+      
+      // Associations to sidecar XMP meta data: Tags(XMP:keywords)
+      $fileTags = $this->_extractList($data, 'Keywords');
+      $dbTags = Set::extract("/Field[name=keyword]/data", $media);
+      //XMP-pdf:Keywords(not IPTC:keywords) is string formated, not as a bag, can only be changed entirely
+      if (count(array_diff($fileTags, $dbTags)) or count(array_diff($dbTags, $fileTags))) {
+        $keywords = join(',',$dbTags);
+        $args[] = '-Keywords=' . $keywords;
+      }
+    }
+
     // Associations to meta data: Tags, Categories, Locations
-    foreach ($this->fieldMap as $field => $name) {
+    foreach ($usedFieldMap as $field => $name) {
       $isList = $this->controller->Media->Field->isListField($field);
       //hack to allow two names with the same key (field)
       if ($field === 'keyword2') {
         $field = 'keyword';
         $isList = true;
+      }
+      if ($this->controller->getOption('xmp.use.sidecar', 0) && $name === 'Keywords') {
+        continue;//XMP:keywords is string, not bag
       }
       if ($isList) {
         $fileValue = $this->_extractList($data, $name);

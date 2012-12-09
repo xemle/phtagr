@@ -251,7 +251,7 @@ class SidecarFilterComponent extends BaseFilterComponent {
     //missing sidecar PhtagrGroups should not delete current groups of media
     //empty PhtagrGroups should delete current groups of media
     //idem for all fields
-    $this->Exiftool->extractImageData($media, $meta);
+    $this->Exiftool->extractImageDataSidecar($media, $meta);
 
     if ($options['noSave']) {
       return $media;
@@ -309,7 +309,7 @@ class SidecarFilterComponent extends BaseFilterComponent {
       return false;
     }
 
-    $args = $this->Exiftool->createExportArguments($data, $media);
+    $args = $this->Exiftool->createExportArguments($data, $media, $filename);
     if (!count($args)) {
       Logger::debug("File '$filename' has no metadata changes");
       if (!$this->Media->deleteFlag($media, MEDIA_FLAG_DIRTY)) {
