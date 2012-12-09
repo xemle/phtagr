@@ -220,11 +220,14 @@ class SidecarFilterComponent extends BaseFilterComponent {
         $media = $this->Media->findById($sidecar['File']['media_id']);
       } else {
         //search if media can be attached
-        $media = $this->_findMainFile($sidecar);
-        if (!isset($media['Media']['id'])) {
+        //$media is retrieved only as a file of media; associations (like comments...) will be lost on save of 'media'
+        $fileOfMedia = $this->_findMainFile($sidecar);
+        if (!isset($fileOfMedia['Media']['id'])) {
           return false;
         } else {
-          $mediaId = $media['Media']['id'];
+          $mediaId = $fileOfMedia['Media']['id'];
+          $media = $this->Media->findById($mediaId);
+          //TODO build Media->findByPath and cache results
           // attach sidecar file to media
           if (!$this->controller->MyFile->setMedia($sidecar, $mediaId)) {
             Logger::err("File was not saved: " . $filename);
@@ -242,6 +245,12 @@ class SidecarFilterComponent extends BaseFilterComponent {
       return false;
     }
 
+    //possible errors if sidecar was created outside phtagr (not all meta fields available):
+    //all needed meta should be in sidecar file, otherwise missing fields in sidecar will be replaced by default values
+    //TODO: only available meta should be processed
+    //missing sidecar PhtagrGroups should not delete current groups of media
+    //empty PhtagrGroups should delete current groups of media
+    //idem for all fields
     $this->Exiftool->extractImageData($media, $meta);
 
     if ($options['noSave']) {
