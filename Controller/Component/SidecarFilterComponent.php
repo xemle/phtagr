@@ -134,8 +134,16 @@ class SidecarFilterComponent extends BaseFilterComponent {
     $args[] = $filename;
     $args[] = $xmpFilename ;
     $result = $this->Exiftool->writeMetaData($xmpFilename, $args);
-
-    if ($result != 0 || !file_exists($xmpFilename)) {
+    
+    //wait until 1 sec if file is not created yet
+    //without the loop it fails condition file_exists($xmpFilename)
+    $starttime = microtime(true);
+    while (!file_exists($xmpFilename) && (round((microtime(true) - $starttime), 4)<1)) {
+      //nanospllep is not available on windows systems
+      time_nanosleep(0, 1000000); // 1 ms to avoid high cpu utilisation; 0.01 is too slow
+    }
+    
+    if ($result != true || !file_exists($xmpFilename)) {
       Logger::err("Could not create sidecar file: " . join(", ", (array)$result));
       return false;
     } else {
