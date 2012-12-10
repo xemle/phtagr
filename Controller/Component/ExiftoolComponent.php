@@ -294,46 +294,61 @@ class ExiftoolComponent extends Component {
    * @return string Date of the meta data or now if not data information was found
    */
   private function _extractMediaDate($data) {
-    //sample error in old code,caused by
-    //the fact that both XMP and IPTC contain
-    //a field named [DateCreated], with different purpose
     //IPTC:DateCreated => YYYY:MM:DD
     //XMP: DateCreated => YYYY:MM:DD HH:MM:SS, without timezone
     //IPTC:TimeCreated => HH:MM:SS.020+03:00
-    //if only shortname [DateCreated] is extracted, without Group
-    //value should be corrected (by eliminating time and zone) with =>substr([DateCreated],0,10);
 
-    //exemple:if no IPTC data and with XMP:DateCreated
-    //old code will try to read DateCreated(from XMP) + TimeCreated(missing),ie: 2012:08:11 16:16:10 00:00:00
-
-    // EXIF date
+    // EXIF date: directly in EXIF:DateTimeOriginal or in XMP-exif:DateTimeOriginal
     //'DateTimeOriginal' is from EXIF group, all cameras should write this field
     $date = $this->_extract($data, 'DateTimeOriginal');
-
     if ($date) {
+      $date = substr($date,0,19);
       return $date;
     }
-
-    // IPTC date
-    $dateIptc = $this->_extract($data, 'DateCreated', null);
-    $dateIptc = substr($dateIptc,0,10);
-    if ($dateIptc) {
-      $time = $this->_extract($data, 'TimeCreated', null);
-      if ($time) {
-        $dateIptc .= ' '.$time;
-      } else {
-        $dateIptc .= ' 00:00:00';
-      }
-      return $dateIptc;
+    if (!$date) {
+      //-EXIF:CreateDate or -XMP-xmp:CreateDate
+      $date = $this->_extract($data, 'CreateDate');
     }
-    // No EXIF or IPTC date: Extract file modification time, or NOW
+    
+    //Adobe XMP properties:XMP-photoshop:DateCreated
+    $date = $this->_extract($data, 'DateCreated', null);
+    
+    //Dublin Core: XMP-dc:Date
+    if (!$date) {
+      $date = $this->_extract($data, 'Date');
+    }
+    
+    //IPTC Core: IPTC:DateCreated and IPTC:TimeCreated
+    if (1==2) {
+      //sice we already have DateCreated from XMP-photoshop
+      //this option can be used only with -G option to have also groups
+      $dateIptc = $this->_extract($data, '[IPTC] DateCreated', null);
+      $dateIptc = substr($dateIptc,0,10);
+      if ($dateIptc) {
+        $time = $this->_extract($data, '[IPTC] TimeCreated', null);
+        if ($time) {
+          $dateIptc .= ' '.$time;
+        } else {
+          $dateIptc .= ' 00:00:00';
+        }
+        $dateIptc = substr($dateIptc,0,19);
+        return $dateIptc;
+      }
+    }
+    
+    //TIFF inside XMP: XMP-tiff:DateTime
+    if (!$date) {
+      $date = $this->_extract($data, 'DateTime');
+    }
 
+    // No EXIF, XMP or IPTC date: Extract file modification time, or NOW
     if (!$date) {
       $date = $this->_extract($data, 'FileModifyDate');
     }
     if (!$date) {
       $date = date('Y-m-d H:i:s', time());
     }
+    $date = substr($date,0,19);
     return $date;
   }
 
@@ -545,15 +560,15 @@ class ExiftoolComponent extends Component {
     $this->_writeCommands($this->stdin, array('-fast2'));
 
     // comment next lines in order to read all metadata, not only these fields
-    $base = array('-Error', '-Warning', '-FileName', '-ImageWidth', '-ImageHeight', '-ObjectName', '-DateTimeCreated', '-SubSecDateTimeOriginal', '-SubSecCreateDate');
+    $base = array('-Error', '-Warning', '-FileName', '-ImageWidth', '-ImageHeight', '-ObjectName', '-FileModifyDate');//, '-DateTimeCreated', '-SubSecDateTimeOriginal', '-SubSecCreateDate'
     //for numerical Orientation a # can be used as field suffix: -Orientation#
-    $exif = array('-Orientation#', '-Aperture', '-ShutterSpeed', '-Model', '-ISO', '-Comment', '-UserComment');
+    $exif = array('-Orientation#', '-Aperture', '-ShutterSpeed', '-Model', '-ISO', '-Comment', '-UserComment', '-DateTimeOriginal', '-XMP-xmp:CreateDate');
     $gps = array('-GPSLatitude#', '-GPSLatitudeRef', '-GPSLongitude#', '-GPSLongitudeRef');
     //read only IPTC:DateCreated for avoiding confusion with XMP-photoshop:DateCreated = Date + Time + zone
     //IPTC - location
-    $iptc = array('-IPTC:DateCreated', '-TimeCreated', '-DateTimeOriginal', '-FileModifyDate', '-SupplementalCategories', '-Keywords', '-Subject', '-City', '-Sub-location', '-Province-State', '-Country-PrimaryLocationName', '-Caption');
+    $iptc = array('-TimeCreated', '-SupplementalCategories', '-Keywords', '-Subject', '-City', '-Sub-location', '-Province-State', '-Country-PrimaryLocationName', '-Caption');//'-IPTC:DateCreated' - imported in XMP
     //XMP - location
-    $xmp = array('-Location', '-State', '-Country', '-PhtagrGroups');
+    $xmp = array('-Location', '-State', '-Country', '-PhtagrGroups', '-XMP-photoshop:DateCreated', '-XMP-dc:Date', '-XMP-tiff:DateTime');
     $video = array('-Width', '-Height', '-Duration');
 
     $this->_writeCommands($this->stdin, $base);
@@ -652,36 +667,32 @@ class ExiftoolComponent extends Component {
     $args = array();
     if (!$media['Media']['date']) {
       $args[] = '-IPTC:DateCreated-=';
-      $args[] = '-TimeCreated-=';
-      return '';
+      $args[] = '-IPTC:TimeCreated-=';
+      $args[] = '-DateTimeOriginal-=';
+      $args[] = '-XMP-xmp:CreateDate-=';
+      $args[] = '-XMP-photoshop:DateCreated-=';
+      $args[] = '-XMP-tiff:DateTime-=';
+      return '';//not return $args???
     }
 
     $timeDb = strtotime($media['Media']['date']);
     $timeFile = false;
 
-    // Date priorities: IPTC, EXIF
-    $dateIptc = $this->_extract($data, 'DateCreated');
-      //correct possible reading from XMP: DateCreated instead of IPTC:DateCreated
-      $dateIptc=substr($dateIptc,0,10);
-    if ($dateIptc) {
-      $time = $this->_extract($data, 'TimeCreated');
-      if ($time) {
-        $dateIptc .= ' '.$time;
-      } else {
-        //Midnight with timezone
-        $dateIptc .= ' 00:00:00'.date('O');
-      }
-      $timeFile = strtotime($dateIptc);
-    } else {
-      $dateExif = $this->_extract($data, 'DateTimeOriginal');
-      if ($dateExif) {
-        $timeFile = strtotime($dateExif);
-      }
-    }
-
+    //$date = substr($date,0,19);
+    $timeFileString = $this->_extractMediaDate($data);
+    $timeFile = strtotime($timeFileString);
+    
+    //http://php.net/manual/en/function.date.php
+    //I (capital i)   Whether or not the date is in daylight saving time   1 if Daylight Saving Time, 0 otherwise.
+    //O Difference to Greenwich time (GMT) in hours   Example: +0200
+    //P Difference to Greenwich time (GMT) with colon between hours and minutes (added in PHP 5.1.3)   Example: +02:00
     if ($timeDb && (!$timeFile || ($timeFile != $timeDb))) {
       $args[] = '-IPTC:DateCreated=' . date("Y:m:d", $timeDb);
-      $args[] = '-TimeCreated=' . date("H:i:sO", $timeDb);
+      $args[] = '-IPTC:TimeCreated=' . date("H:i:sO", $timeDb);
+      $args[] = '-DateTimeOriginal=' . date("Y:m:d H:i:sP", $timeDb);
+      $args[] = '-XMP-xmp:CreateDate=' . date("Y:m:d H:i:sP", $timeDb);
+      $args[] = '-XMP-photoshop:DateCreated=' . date("Y:m:d H:i:sP", $timeDb);
+      $args[] = '-XMP-tiff:DateTime=' . date("Y:m:d H:i:sP", $timeDb);
       //Logger::trace("Set new date via IPTC: $arg");
     }
     return $args;
