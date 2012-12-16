@@ -178,6 +178,7 @@ class User extends AppModel
             'username' => '',
             'role' => ROLE_NOBODY),
         'Member' => array(),
+        'Group' => array(),
         'Option' => $this->Option->addDefaults(array()));
     return $nobody;
   }
