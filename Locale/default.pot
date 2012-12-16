@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2012-12-16 19:40+0100\n"
+"POT-Creation-Date: 2012-12-16 20:17+0100\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -2025,6 +2025,7 @@ msgid "Add user"
 msgstr ""
 
 #: View/Groups/view.ctp:93
+#: View/Helper/BreadcrumbHelper.php:188
 #: View/Users/admin_path.ctp:41
 msgid "Add"
 msgstr ""
