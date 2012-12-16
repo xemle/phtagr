@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2012-11-03 18:54+0100\n"
+"POT-Creation-Date: 2012-12-16 19:40+0100\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -13,6 +13,26 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: Console/Command/MongoShell.php:35
+#: Console/Command/SyncShell.php:35
+msgid "Maximum of synchronization count. Default is 100. Use 0 to synchronize all"
+msgstr ""
+
+#: Console/Command/MongoShell.php:37
+#: Console/Command/SyncShell.php:40
+msgid "Synchronize only images for given username"
+msgstr ""
+
+#: Console/Command/MongoShell.php:39
+#: Console/Command/SyncShell.php:42
+msgid "Run the synchronization process"
+msgstr ""
+
+#: Console/Command/MongoShell.php:40
+#: Console/Command/SyncShell.php:43
+msgid "Write all meta data from database to images in batch mode"
+msgstr ""
 
 #: Console/Command/NotifyShell.php:44
 msgid "Do not send emails."
@@ -59,41 +79,25 @@ msgstr ""
 msgid "Generate preview files"
 msgstr ""
 
-#: Console/Command/SyncShell.php:35
-msgid "Maximum of synchronization count. Default is 100. Use 0 to synchronize all"
-msgstr ""
-
-#: Console/Command/SyncShell.php:40
-msgid "Synchronize only images for given username"
-msgstr ""
-
-#: Console/Command/SyncShell.php:42
-msgid "Run the synchronization process"
-msgstr ""
-
-#: Console/Command/SyncShell.php:43
-msgid "Write all meta data from database to images in batch mode"
-msgstr ""
-
-#: Controller/AppController.php:35
+#: Controller/AppController.php:36
 msgid "Recent photos"
 msgstr ""
 
-#: Controller/AppController.php:36
+#: Controller/AppController.php:37
 msgid "Media RSS of recent photos"
 msgstr ""
 
-#: Controller/AppController.php:37
+#: Controller/AppController.php:38
 msgid "Recent comments"
 msgstr ""
 
-#: Controller/AppController.php:52
+#: Controller/AppController.php:53
 #: Controller/HomeController.php:42
 #: View/Elements/menu.ctp:6
 msgid "Home"
 msgstr ""
 
-#: Controller/AppController.php:53
+#: Controller/AppController.php:54
 #: View/Elements/menu.ctp:19;44
 #: View/Helper/NavigatorHelper.php:139
 #: View/Images/notfound.ctp:3
@@ -101,42 +105,42 @@ msgstr ""
 msgid "Explorer"
 msgstr ""
 
-#: Controller/AppController.php:56
+#: Controller/AppController.php:57
 #: View/Elements/menu.ctp:25
 msgid "My Photos"
 msgstr ""
 
-#: Controller/AppController.php:59
+#: Controller/AppController.php:60
 #: Controller/BrowserController.php:33
 #: View/Browser/upload.ctp:21
 #: View/Elements/menu.ctp:32
 msgid "Upload"
 msgstr ""
 
-#: Controller/AppController.php:67
+#: Controller/AppController.php:68
 #: View/Elements/topnav.ctp:14
 #: View/Themed/Mobile/Elements/header.ctp:7
 #: View/Users/login.ctp:5;15
 msgid "Login"
 msgstr ""
 
-#: Controller/AppController.php:69
+#: Controller/AppController.php:70
 #: View/Users/login.ctp:17
 #: View/Users/register.ctp:16
 msgid "Sign Up"
 msgstr ""
 
-#: Controller/AppController.php:73
+#: Controller/AppController.php:74
 msgid "Howdy, %s!"
 msgstr ""
 
-#: Controller/AppController.php:74
+#: Controller/AppController.php:75
 #: View/Elements/topnav.ctp:12
 #: View/Themed/Mobile/Elements/header.ctp:5
 msgid "Logout"
 msgstr ""
 
-#: Controller/AppController.php:75
+#: Controller/AppController.php:76
 msgid "Dashboard"
 msgstr ""
 
@@ -159,7 +163,7 @@ msgid "My Files"
 msgstr ""
 
 #: Controller/BrowserController.php:313
-msgid "Imported %d files (%d) errors)"
+msgid "Imported %d files (%d errors)"
 msgstr ""
 
 #: Controller/BrowserController.php:328
@@ -273,7 +277,7 @@ msgstr ""
 msgid "Slideshow Media RSS"
 msgstr ""
 
-#: Controller/ExplorerController.php:370
+#: Controller/ExplorerController.php:387
 msgid "Invalid folder: %s"
 msgstr ""
 
@@ -295,13 +299,13 @@ msgid "Create Group"
 msgstr ""
 
 #: Controller/GroupsController.php:86;201;262;282
-#: Model/Group.php:146;148;169
+#: Model/Group.php:153;155;179
 msgid "%s not found"
 msgstr ""
 
 #: Controller/GroupsController.php:86;102;201;297;299;301
-#: Model/Group.php:146;154;169;175
-#: View/Elements/Explorer/menu.ctp:167
+#: Model/Group.php:153;161;179;185
+#: View/Elements/Explorer/menu.ctp:175
 #: View/Explorer/search.ctp:38
 #: View/Guests/edit.ctp:56
 #: View/Users/view.ctp:40
@@ -333,7 +337,7 @@ msgid "You are not authorized to perform this action"
 msgstr ""
 
 #: Controller/GroupsController.php:262;282
-#: Model/Group.php:148
+#: Model/Group.php:155
 #: View/Explorer/search.ctp:40
 #: View/Images/view.ctp:62
 #: View/Options/import.ctp:10
@@ -351,7 +355,7 @@ msgid "User %s is now unsubscribe from this group"
 msgstr ""
 
 #: Controller/GroupsController.php:299
-#: Model/Group.php:154;175
+#: Model/Group.php:161;185
 msgid "Could not save %s"
 msgstr ""
 
@@ -371,69 +375,60 @@ msgstr ""
 msgid "New Guest"
 msgstr ""
 
-#: Controller/GuestsController.php:62
+#: Controller/GuestsController.php:42
+msgid "Edit %s"
+msgstr ""
+
+#: Controller/GuestsController.php:44
+#: Controller/OptionsController.php:29
+msgid "Links"
+msgstr ""
+
+#: Controller/GuestsController.php:74
 msgid "Sorry. Username is already taken"
 msgstr ""
 
-#: Controller/GuestsController.php:68
+#: Controller/GuestsController.php:80
 msgid "Guest account '%s' was successfully created"
 msgstr ""
 
-#: Controller/GuestsController.php:71
+#: Controller/GuestsController.php:83
 msgid "Sorry. Guest account could not created"
 msgstr ""
 
-#: Controller/GuestsController.php:81
+#: Controller/GuestsController.php:93
 msgid "Sorry. Could not find requested guest"
 msgstr ""
 
-#: Controller/GuestsController.php:90
+#: Controller/GuestsController.php:102
 msgid "Guest data were saved"
 msgstr ""
 
-#: Controller/GuestsController.php:96
+#: Controller/GuestsController.php:108
 msgid "Updates could not be saved!"
 msgstr ""
 
-#: Controller/GuestsController.php:103;209
-#: Controller/UsersController.php:208
-#: View/Groups/all.ctp:42
-#: View/Groups/index.ctp:41
-#: View/Groups/members.ctp:42
-#: View/Groups/view.ctp:18
-#: View/Guests/index.ctp:23
-#: View/Images/view.ctp:40
-#: View/Users/admin_index.ctp:46
-#: View/Users/view.ctp:4
-msgid "Edit"
-msgstr ""
-
-#: Controller/GuestsController.php:104;210
-#: View/Guests/links.ctp:21
-msgid "RSS"
-msgstr ""
-
-#: Controller/GuestsController.php:114
+#: Controller/GuestsController.php:125
 msgid "Could not find requested guest"
 msgstr ""
 
-#: Controller/GuestsController.php:118
+#: Controller/GuestsController.php:129
 msgid "Guest account '%s' deleted!"
 msgstr ""
 
-#: Controller/MediaController.php:303
+#: Controller/MediaController.php:304
 msgid "Download of more than %d media is not allowed"
 msgstr ""
 
-#: Controller/MediaController.php:307
+#: Controller/MediaController.php:308
 msgid "Download of more than %d media is not allowed for anonymous visitors"
 msgstr ""
 
-#: Controller/MediaController.php:328
+#: Controller/MediaController.php:329
 msgid "No files for download found for given media set"
 msgstr ""
 
-#: Controller/MediaController.php:334
+#: Controller/MediaController.php:335
 msgid "Download of not more than %d MB is not allowed"
 msgstr ""
 
@@ -462,10 +457,6 @@ msgstr ""
 msgid "Import Options"
 msgstr ""
 
-#: Controller/OptionsController.php:29
-msgid "RSS Feeds"
-msgstr ""
-
 #: Controller/OptionsController.php:57;72
 msgid "Could not save profile!"
 msgstr ""
@@ -478,43 +469,43 @@ msgstr ""
 msgid "Settings saved"
 msgstr ""
 
-#: Controller/SetupController.php:330
+#: Controller/SetupController.php:331
 msgid "Could not write configuration to '%s'"
 msgstr ""
 
-#: Controller/SetupController.php:337
+#: Controller/SetupController.php:338
 msgid "Update core settings"
 msgstr ""
 
-#: Controller/SetupController.php:447
+#: Controller/SetupController.php:448
 msgid "Could not write database configuration file"
 msgstr ""
 
-#: Controller/SetupController.php:484
+#: Controller/SetupController.php:485
 msgid "Could not connect to database. Please check your database configuration!"
 msgstr ""
 
-#: Controller/SetupController.php:497
+#: Controller/SetupController.php:498
 msgid "Could not initialize database migration"
 msgstr ""
 
-#: Controller/SetupController.php:503
+#: Controller/SetupController.php:504
 msgid "Could not initialize database"
 msgstr ""
 
-#: Controller/SetupController.php:508
+#: Controller/SetupController.php:509
 msgid "All required tables are created"
 msgstr ""
 
-#: Controller/SetupController.php:512
+#: Controller/SetupController.php:513
 msgid "Could not create tables correctly. Please see logfile for details"
 msgstr ""
 
-#: Controller/SetupController.php:540
+#: Controller/SetupController.php:541
 msgid "Admin account was successfully created"
 msgstr ""
 
-#: Controller/SetupController.php:544
+#: Controller/SetupController.php:545
 msgid "Could not create admin account. Please retry"
 msgstr ""
 
@@ -602,6 +593,18 @@ msgstr ""
 
 #: Controller/UsersController.php:207
 msgid "Local Paths"
+msgstr ""
+
+#: Controller/UsersController.php:208
+#: View/Groups/all.ctp:42
+#: View/Groups/index.ctp:41
+#: View/Groups/members.ctp:42
+#: View/Groups/view.ctp:18
+#: View/Guests/index.ctp:23
+#: View/Images/view.ctp:40
+#: View/Users/admin_index.ctp:46
+#: View/Users/view.ctp:4
+msgid "Edit"
 msgstr ""
 
 #: Controller/UsersController.php:225;248
@@ -722,7 +725,7 @@ msgstr ""
 
 #: Controller/Component/MenuComponent.php:42
 #: View/Elements/Explorer/description.ctp:50
-#: View/Elements/Explorer/menu.ctp:93;168
+#: View/Elements/Explorer/menu.ctp:93;176
 #: View/Helper/ImageDataHelper.php:335;630
 #: View/Options/profile.ctp:20
 #: View/System/view.ctp:13
@@ -746,19 +749,19 @@ msgstr ""
 msgid "System"
 msgstr ""
 
-#: Model/Group.php:156
+#: Model/Group.php:163
 msgid "You are now subscribed to group %s"
 msgstr ""
 
-#: Model/Group.php:159
+#: Model/Group.php:166
 msgid "You are allready subscribed to group %s"
 msgstr ""
 
-#: Model/Group.php:177
+#: Model/Group.php:187
 msgid "You are now unsubscribed of group %s"
 msgstr ""
 
-#: Model/Group.php:180
+#: Model/Group.php:190
 msgid "You are not subscribed to group %s"
 msgstr ""
 
@@ -1072,7 +1075,7 @@ msgid "Who can view image?"
 msgstr ""
 
 #: View/Elements/single_acl_form.ctp:3
-#: View/Elements/Explorer/menu.ctp:176
+#: View/Elements/Explorer/menu.ctp:184
 #: View/Options/import.ctp:14
 msgid "Who can download the image?"
 msgstr ""
@@ -1082,14 +1085,14 @@ msgid "Who can edit the tags?"
 msgstr ""
 
 #: View/Elements/single_acl_form.ctp:5
-#: View/Elements/Explorer/menu.ctp:184
+#: View/Elements/Explorer/menu.ctp:192
 #: View/Options/import.ctp:16
 msgid "Who can edit all meta data?"
 msgstr ""
 
 #: View/Elements/single_meta_form.ctp:3
 #: View/Elements/Explorer/description.ctp:7
-#: View/Elements/Explorer/menu.ctp:51;128
+#: View/Elements/Explorer/menu.ctp:51;135
 #: View/Explorer/search.ctp:6
 #: View/Helper/ExplorerMenuHelper.php:211
 #: View/Helper/ImageDataHelper.php:553
@@ -1101,7 +1104,7 @@ msgstr ""
 
 #: View/Elements/single_meta_form.ctp:7
 #: View/Elements/Explorer/description.ctp:12
-#: View/Elements/Explorer/menu.ctp:58;132
+#: View/Elements/Explorer/menu.ctp:58;139
 #: View/Explorer/search.ctp:7
 #: View/Helper/ExplorerMenuHelper.php:216
 #: View/Helper/ImageDataHelper.php:556
@@ -1112,32 +1115,32 @@ msgid "Categories"
 msgstr ""
 
 #: View/Elements/single_meta_form.ctp:9
-#: View/Elements/Explorer/menu.ctp:134
+#: View/Elements/Explorer/menu.ctp:141
 msgid "City"
 msgstr ""
 
 #: View/Elements/single_meta_form.ctp:11
-#: View/Elements/Explorer/menu.ctp:136
+#: View/Elements/Explorer/menu.ctp:143
 msgid "Sublocation"
 msgstr ""
 
 #: View/Elements/single_meta_form.ctp:13
-#: View/Elements/Explorer/menu.ctp:138
+#: View/Elements/Explorer/menu.ctp:145
 msgid "State"
 msgstr ""
 
 #: View/Elements/single_meta_form.ctp:15
-#: View/Elements/Explorer/menu.ctp:140
+#: View/Elements/Explorer/menu.ctp:147
 msgid "Country"
 msgstr ""
 
 #: View/Elements/single_meta_form.ctp:21
-#: View/Elements/Explorer/menu.ctp:142
+#: View/Elements/Explorer/menu.ctp:149
 msgid "Geo data"
 msgstr ""
 
 #: View/Elements/single_meta_form.ctp:24
-#: View/Elements/Explorer/menu.ctp:145
+#: View/Elements/Explorer/menu.ctp:152
 msgid "E.g. 2008-08-07 15:30"
 msgstr ""
 
@@ -1147,6 +1150,26 @@ msgstr ""
 
 #: View/Elements/topnav.ctp:16
 msgid "Register"
+msgstr ""
+
+#: View/Elements/Explorer/actions.ctp:3
+msgid "Select media"
+msgstr ""
+
+#: View/Elements/Explorer/actions.ctp:7
+msgid "Deselect media"
+msgstr ""
+
+#: View/Elements/Explorer/actions.ctp:12
+msgid "Edit meta data"
+msgstr ""
+
+#: View/Elements/Explorer/actions.ctp:18
+msgid "Edit access rights"
+msgstr ""
+
+#: View/Elements/Explorer/actions.ctp:25
+msgid "Download file %s"
 msgstr ""
 
 #: View/Elements/Explorer/date.ctp:2
@@ -1216,33 +1239,14 @@ msgid "Group members"
 msgstr ""
 
 #: View/Elements/Explorer/description.ctp:51
-#: View/Elements/Explorer/menu.ctp:169
+#: View/Elements/Explorer/menu.ctp:177
 msgid "All"
 msgstr ""
 
 #: View/Elements/Explorer/media.ctp:3
+#: View/Elements/Explorer/media_compact.ctp:3
 #: View/home/index.ctp:8
 msgid "%s by %s"
-msgstr ""
-
-#: View/Elements/Explorer/media.ctp:30
-msgid "Select media"
-msgstr ""
-
-#: View/Elements/Explorer/media.ctp:34
-msgid "Deselect media"
-msgstr ""
-
-#: View/Elements/Explorer/media.ctp:39
-msgid "Edit meta data"
-msgstr ""
-
-#: View/Elements/Explorer/media.ctp:45
-msgid "Edit access rights"
-msgstr ""
-
-#: View/Elements/Explorer/media.ctp:52
-msgid "Download file %s"
 msgstr ""
 
 #: View/Elements/Explorer/menu.ctp:12
@@ -1325,90 +1329,111 @@ msgstr ""
 msgid "random"
 msgstr ""
 
-#: View/Elements/Explorer/menu.ctp:124
+#: View/Elements/Explorer/menu.ctp:118
+#: View/Helper/ImageDataHelper.php:444
+msgid "View"
+msgstr ""
+
+#: View/Elements/Explorer/menu.ctp:120
+msgid "default"
+msgstr ""
+
+#: View/Elements/Explorer/menu.ctp:121
+msgid "compact"
+msgstr ""
+
+#: View/Elements/Explorer/menu.ctp:122
+msgid "small"
+msgstr ""
+
+#: View/Elements/Explorer/menu.ctp:131
 #: View/Explorer/search.ctp:4
 msgid "Metadata"
 msgstr ""
 
-#: View/Elements/Explorer/menu.ctp:128
+#: View/Elements/Explorer/menu.ctp:135
 msgid "E.g. newtag, -oldtag"
 msgstr ""
 
-#: View/Elements/Explorer/menu.ctp:142
+#: View/Elements/Explorer/menu.ctp:149
 msgid "latitude, longitude"
 msgstr ""
 
-#: View/Elements/Explorer/menu.ctp:149;170
+#: View/Elements/Explorer/menu.ctp:156;178
 #: View/Helper/ImageDataHelper.php:627
 msgid "Keep"
 msgstr ""
 
-#: View/Elements/Explorer/menu.ctp:150
+#: View/Elements/Explorer/menu.ctp:157
 msgid "90 CW"
 msgstr ""
 
-#: View/Elements/Explorer/menu.ctp:151
+#: View/Elements/Explorer/menu.ctp:158
 msgid "180 CW"
 msgstr ""
 
-#: View/Elements/Explorer/menu.ctp:152
+#: View/Elements/Explorer/menu.ctp:159
 msgid "90 CCW"
 msgstr ""
 
-#: View/Elements/Explorer/menu.ctp:154
+#: View/Elements/Explorer/menu.ctp:160
+msgid "Reset"
+msgstr ""
+
+#: View/Elements/Explorer/menu.ctp:162
 msgid "Rotate"
 msgstr ""
 
-#: View/Elements/Explorer/menu.ctp:159;191
+#: View/Elements/Explorer/menu.ctp:167;199
 msgid "Apply"
 msgstr ""
 
-#: View/Elements/Explorer/menu.ctp:163
+#: View/Elements/Explorer/menu.ctp:171
 msgid "Access Rights"
 msgstr ""
 
-#: View/Elements/Explorer/menu.ctp:166
+#: View/Elements/Explorer/menu.ctp:174
 msgid "Me"
 msgstr ""
 
-#: View/Elements/Explorer/menu.ctp:172
+#: View/Elements/Explorer/menu.ctp:180
 msgid "Who can view the image"
 msgstr ""
 
-#: View/Elements/Explorer/menu.ctp:180
+#: View/Elements/Explorer/menu.ctp:188
 #: View/Options/import.ctp:15
 msgid "Who can add tags?"
 msgstr ""
 
-#: View/Elements/Explorer/menu.ctp:187
+#: View/Elements/Explorer/menu.ctp:195
 msgid "Media access group"
 msgstr ""
 
-#: View/Elements/Explorer/menu.ctp:197
+#: View/Elements/Explorer/menu.ctp:205
 msgid "Download:"
 msgstr ""
 
-#: View/Elements/Explorer/menu.ctp:198
+#: View/Elements/Explorer/menu.ctp:206
 msgid "Original"
 msgstr ""
 
-#: View/Elements/Explorer/menu.ctp:198
+#: View/Elements/Explorer/menu.ctp:206
 msgid "Download original files from selected media"
 msgstr ""
 
-#: View/Elements/Explorer/menu.ctp:199
+#: View/Elements/Explorer/menu.ctp:207
 msgid "High Resolution"
 msgstr ""
 
-#: View/Elements/Explorer/menu.ctp:199
+#: View/Elements/Explorer/menu.ctp:207
 msgid "Download high resolution files (%d px) from selected media"
 msgstr ""
 
-#: View/Elements/Explorer/menu.ctp:200
+#: View/Elements/Explorer/menu.ctp:208
 msgid "Preview Resolution"
 msgstr ""
 
-#: View/Elements/Explorer/menu.ctp:200
+#: View/Elements/Explorer/menu.ctp:208
 msgid "Download preview files (%d px) from selected media"
 msgstr ""
 
@@ -1645,32 +1670,12 @@ msgstr ""
 msgid "Cancel"
 msgstr ""
 
-#: View/Explorer/index.ctp:276
+#: View/Explorer/index.ctp:292
 msgid "Select All"
 msgstr ""
 
-#: View/Explorer/index.ctp:277
+#: View/Explorer/index.ctp:293
 msgid "Invert Selection"
-msgstr ""
-
-#: View/Explorer/quicksearch.ctp:11
-msgid "Sorry, nothing was found for %s"
-msgstr ""
-
-#: View/Explorer/quicksearch.ctp:15
-msgid "Results of %s"
-msgstr ""
-
-#: View/Explorer/quicksearch.ctp:31
-msgid "See more results of tag"
-msgstr ""
-
-#: View/Explorer/quicksearch.ctp:42
-msgid "See more results of category"
-msgstr ""
-
-#: View/Explorer/quicksearch.ctp:53
-msgid "See more results of location"
 msgstr ""
 
 #: View/Explorer/rss.ctp:3
@@ -2026,7 +2031,7 @@ msgstr ""
 
 #: View/Groups/view.ctp:106
 #: View/Guests/links.ctp:31
-#: View/Options/rss.ctp:16
+#: View/Options/links.ctp:16
 #: View/Users/view.ctp:91
 msgid "Recent Media"
 msgstr ""
@@ -2167,7 +2172,7 @@ msgid "Following links contains an authentication key which should be used caref
 msgstr ""
 
 #: View/Guests/links.ctp:7
-#: View/Options/rss.ctp:7
+#: View/Options/links.ctp:7
 msgid "The links are valid for the current session. For permanent login the user has to login via username and password."
 msgstr ""
 
@@ -2183,23 +2188,27 @@ msgstr ""
 msgid "My Media of Guest %s (Link %s)"
 msgstr ""
 
+#: View/Guests/links.ctp:21
+msgid "RSS"
+msgstr ""
+
 #: View/Guests/links.ctp:23
 msgid "Following links provide a authenticated RSS and Media RSS links."
 msgstr ""
 
 #: View/Guests/links.ctp:32
-#: View/Options/rss.ctp:17
+#: View/Options/links.ctp:17
 #: View/home/index.ctp:42
 msgid "Recent Comments"
 msgstr ""
 
 #: View/Guests/links.ctp:33
-#: View/Options/rss.ctp:18
+#: View/Options/links.ctp:18
 msgid "Media RSS"
 msgstr ""
 
 #: View/Guests/links.ctp:34
-#: View/Options/rss.ctp:19
+#: View/Options/links.ctp:19
 msgid "Media RSS of My Media"
 msgstr ""
 
@@ -2208,7 +2217,7 @@ msgid "Click %s to renew the authentication key. All previous links become inval
 msgstr ""
 
 #: View/Guests/links.ctp:37
-#: View/Options/rss.ctp:22
+#: View/Options/links.ctp:22
 msgid "renew key"
 msgstr ""
 
@@ -2336,10 +2345,6 @@ msgstr ""
 
 #: View/Helper/ImageDataHelper.php:442
 msgid "This media belongs to the group '%s'"
-msgstr ""
-
-#: View/Helper/ImageDataHelper.php:444
-msgid "View"
 msgstr ""
 
 #: View/Helper/ImageDataHelper.php:447
@@ -2494,10 +2499,12 @@ msgid "You are running version %s."
 msgstr ""
 
 #: View/Layouts/default.ctp:34
+#: View/Themed/Chrisd/Layouts/default.ctp:34
 msgid "Search..."
 msgstr ""
 
 #: View/Layouts/default.ctp:35
+#: View/Themed/Chrisd/Layouts/default.ctp:35
 msgid "Go"
 msgstr ""
 
@@ -2554,6 +2561,18 @@ msgstr ""
 msgid "Overwrite existing coordinates?"
 msgstr ""
 
+#: View/Options/links.ctp:1
+msgid "Authenticated RSS"
+msgstr ""
+
+#: View/Options/links.ctp:4
+msgid "Following links contain authentication keys of your account. Using these links you are authenticated directly without username and password. The links could be spoofed easily and should be used carefully."
+msgstr ""
+
+#: View/Options/links.ctp:22
+msgid "Click %s to renew the authentication key. All previous keys become invalid."
+msgstr ""
+
 #: View/Options/profile.ctp:9
 #: View/Users/admin_edit.ctp:8
 msgid "First name"
@@ -2570,18 +2589,6 @@ msgstr ""
 
 #: View/Options/profile.ctp:23
 msgid "Profile visibility"
-msgstr ""
-
-#: View/Options/rss.ctp:1
-msgid "Authenticated RSS"
-msgstr ""
-
-#: View/Options/rss.ctp:4
-msgid "Following links contain authentication keys of your account. Using these links you are authenticated directly without username and password. The links could be spoofed easily and should be used carefully."
-msgstr ""
-
-#: View/Options/rss.ctp:22
-msgid "Click %s to renew the authentication key. All previous keys become invalid."
 msgstr ""
 
 #: View/Setup/config.ctp:1
@@ -3104,49 +3111,49 @@ msgstr ""
 msgid "No categories assigned"
 msgstr ""
 
-#: /mnt/raid/var/www/tests/phtagr-git/Model/Comment.php:validation for field name
+#: /mnt/raidModel/Comment.php:validation for field name
 msgid "Name is missing"
 msgstr ""
 
-#: /mnt/raid/var/www/tests/phtagr-git/Model/Comment.php:validation for field email
+#: /mnt/raidModel/Comment.php:validation for field email
 msgid "Email is invalid"
 msgstr ""
 
-#: /mnt/raid/var/www/tests/phtagr-git/Model/Comment.php:validation for field url
+#: /mnt/raidModel/Comment.php:validation for field url
 msgid "URL is invalid"
 msgstr ""
 
-#: /mnt/raid/var/www/tests/phtagr-git/Model/Comment.php:validation for field text
+#: /mnt/raidModel/Comment.php:validation for field text
 msgid "Comment text is empty"
 msgstr ""
 
-#: /mnt/raid/var/www/tests/phtagr-git/Model/Comment.php:validation for field text
+#: /mnt/raidModel/Comment.php:validation for field text
 msgid "Comment is to long"
 msgstr ""
 
-#: /mnt/raid/var/www/tests/phtagr-git/Model/Guest.php:validation for field username
+#: /mnt/raidModel/Guest.php:validation for field username
 msgid "Guestname must be between 3 and 32 characters long."
 msgstr ""
 
-#: /mnt/raid/var/www/tests/phtagr-git/Model/Guest.php:validation for field password
-#: /mnt/raid/var/www/tests/phtagr-git/Model/User.php:validation for field password
-msgid "Password must be between 6 and 20 characters long."
+#: /mnt/raidModel/Guest.php:validation for field password
+#: /mnt/raidModel/User.php:validation for field password
+msgid "Password must be between 6 and 32 characters long."
 msgstr ""
 
-#: /mnt/raid/var/www/tests/phtagr-git/Model/Guest.php:validation for field email
-#: /mnt/raid/var/www/tests/phtagr-git/Model/User.php:validation for field email
+#: /mnt/raidModel/Guest.php:validation for field email
+#: /mnt/raidModel/User.php:validation for field email
 msgid "Email address is not valid"
 msgstr ""
 
-#: /mnt/raid/var/www/tests/phtagr-git/Model/User.php:validation for field username
+#: /mnt/raidModel/User.php:validation for field username
 msgid "Username must be between 3 and 32 characters long."
 msgstr ""
 
-#: /mnt/raid/var/www/tests/phtagr-git/Model/User.php:validation for field role
+#: /mnt/raidModel/User.php:validation for field role
 msgid "Invalid role"
 msgstr ""
 
-#: /mnt/raid/var/www/tests/phtagr-git/Model/User.php:validation for field notify_interval
+#: /mnt/raidModel/User.php:validation for field notify_interval
 msgid "Invalid notification interval"
 msgstr ""
 
