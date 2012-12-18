@@ -604,6 +604,75 @@ class Media extends AppModel {
   }
 
   /**
+   * Find all media matching param $options
+   *
+   * @param array $user
+   * @param array $options
+   * @return array
+   */
+  public function findAllByOptions($user = false, $options = array()) {
+
+    $options = am(array('model' => 'File', 'field' => 'path', 'conditions' => array()), $options);
+    
+    $table = $this->tablePrefix.$this->table;//'media'
+    $alias = $this->alias;//'Media'
+    $key = $this->primaryKey;//'id'
+
+    $assoc = $options['model'];
+    $joinedTable = $this->{$assoc}->tablePrefix .$this->{$assoc}->table;
+    $joinedAlias = $this->{$assoc}->alias;
+    $joinedKey = $this->{$assoc}->primaryKey;
+    
+    $aclQuery = $this->buildAclQuery($user);
+    $conditions = am($options['conditions'], $aclQuery['conditions']);
+
+    if (isset($this->hasMany[$assoc])) {
+      
+        $config = $this->hasMany[$assoc];
+        $joinedForeignKey = $config['foreignKey'];
+        $joinedConditions = array("`{$joinedAlias}`.`{$joinedForeignKey}` = `{$alias}`.`{$key}`");
+        $joins = array(array(
+                'table' => $joinedTable,
+                'alias' => $joinedAlias,
+                'conditions' => $joinedConditions));
+        if ($user) {
+          $conditions[] = "`$alias`.`user_id` = " . $user['User']['id'];
+        }
+          
+    } elseif (isset($this->hasAndBelongsToMany[$assoc])) {
+      
+        $config = $this->hasAndBelongsToMany[$assoc];
+
+        $joinTable = $this->tablePrefix.$config['joinTable'];
+        $joinAlias = $config['with'];
+        $foreignKey = $config['foreignKey'];
+        $associationForeignKey = $config['associationForeignKey'];
+
+        $joins = am(array(
+            "JOIN `$joinTable` AS `$joinAlias` ON `$alias`.`$key` = `$joinAlias`.`$foreignKey`",
+            "JOIN `$joinedTable` AS `$joinedAlias` ON `$joinAlias`.`$associationForeignKey` = `$joinedAlias`.`$key`"
+            ), $aclQuery['joins']);
+
+    } else {
+      Logger::error("Model {$this->alias} has no relation to $assoc. Return empty result");
+      return array();
+    }
+
+    $query = array(
+        //'fields' => $fields,
+        'joins' => $joins,
+        'conditions' => $conditions,
+        'group' => "`$alias`.`$key`"//avoid returning 2 media for 1 media with 2 files in path,
+        //'order' => "hits DESC",
+        //'limit' => $options['count'],
+        //'page' => 0
+        );
+    $result = $this->find('all', $query);
+
+    return $result;
+  }
+  
+  /**
    * Create tag cloud of HABTM model assoziation
    *
    * @param array $user Current User
