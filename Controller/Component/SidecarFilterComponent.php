@@ -76,11 +76,12 @@ class SidecarFilterComponent extends BaseFilterComponent {
       return false;
     }
 
-    $media = $this->MyFile->findByFilename($filename);
-    if (!$media || empty($media['Media']['id'])) {
+    $fileOfMedia = $this->MyFile->findByFilename($filename);
+    if (!$fileOfMedia || empty($fileOfMedia['File']['media_id'])) {//['Media']['id']
       Logger::err("Could not find File with filename: $filename");
       return false;
     }
+    $media = $this->Media->findById($fileOfMedia['Media']['id']);
 
     $xmpFilename = $this->_findOrCreate($filename, $createSidecar);
     if (!$xmpFilename) {
