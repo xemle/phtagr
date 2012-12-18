@@ -17,8 +17,8 @@
 class OptionsController extends AppController {
 
   var $name = 'Options';
-  var $helpers = array('Form');
-  var $uses = array('Option', 'Group');
+  var $helpers = array('Form', 'Autocomplete');
+  var $uses = array('Option', 'Group', 'Media');
   var $subMenu = false;
 
   public function beforeFilter() {
@@ -27,6 +27,7 @@ class OptionsController extends AppController {
       'password' => __("Password"),
       'import' => __("Import Options"),
       'links' => __("Links"),
+      'easyacl' => __("ACL - access rights"),
       );
     parent::beforeFilter();
 
@@ -147,5 +148,77 @@ class OptionsController extends AppController {
     $groups[-1] = __('[No Group]');
     $this->set('groups', $groups);
   }
+  
+  
+  //change acl for all media of first selected group or first sellected keyword
+  public function easyacl(){
+    if (!empty($this->request->data)) {
+      $userId = $this->getUserId();
+      $user = $this->User->findById($userId);
+      
+      $groups=array_map('trim',explode(',', $this->request->data['Group']['names']));
+      $group = $groups[0];
+      
+      $tags = array_map('trim',explode(',', $this->request->data['Field']['keyword']));
+      $tag = $tags[0];
+
+      if ($group) {
+        $allMedia = $this->Media->findAllByOptions($user, array('model' => 'Group', 'conditions' => array('Group.name' => $group)));
+      } elseif ($field) {
+        $allMedia = $this->Media->findAllByOptions($user, array('model' => 'Field', 'conditions' => array('Field.name' => 'keyword','Field.data' => $tag )));
+      }
+      
+      if ($allMedia) {
+        $this->request->data['Media']['ids'] = implode(',', Set::extract('{n}.Media.id', $allMedia));
+        //implode(',', Set::extract($media, '{n}.Media.id'));
+        $this->request->data['Field']['keyword'] = "";
+        $this->request->data['Group']['names'] = "";
+        //Superglobals->_REQUEST->data['Field']['keyword'] = "";
+        //$options = $this->request->data;
+        //$this->requestAction('/Explorer/edit', $options);
+        //$this->requestAction( array( 'controller' => 'Explorer', 'action' => 'edit' ), array( 'pass' => $options) ); 
+        $this->editacl($allMedia, $user);
+      } else {
+        $this->Session->setFlash(__("No media found!"));
+      }
+      
+    }
+  }
+
+  //
+  public function editacl($allMedia, $user) {
+    //based on '/Explorer/edit'
+    if (!empty($this->request->data)) {
+
+      $editData = $this->Media->prepareMultiEditData($this->request->data, $user);
+
+      $changedMedia = array();
+      foreach ($allMedia as $media) {
+        $this->Media->setAccessFlags($media, $user);
+        // primary access check
+        if (!$media['Media']['canWriteTag'] && !$media['Media']['canWriteAcl']) {
+          Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change any metadata of image ".$id);
+          continue;
+        }
+        $tmp = $this->Media->editMulti($media, $editData, $user);
+        if ($tmp) {
+          $changedMedia[] = $tmp;
+        }
+      }
+      if ($changedMedia) {
+        if (!$this->Media->saveAll($changedMedia)) {
+          Logger::warn("Could not save media: " . join(", ", Set::extract("/Media/id", $changedMedia)));
+        } else {
+          Logger::debug("Saved media: " . join(', ', Set::extract("/Media/id", $changedMedia)));
+          $this->Session->setFlash(__("Saved ".count($changedMedia)." media: " . join(', ', Set::extract("/Media/id", $changedMedia))));
+        }
+      } else {
+        $this->Session->setFlash(__("No media changed!"));
+      }
+      $this->request->data = array();
+    }
+
+  }
+
 }
 ?>
