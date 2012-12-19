@@ -622,12 +622,9 @@ class Media extends AppModel {
     $joinedTable = $this->{$assoc}->tablePrefix .$this->{$assoc}->table;
     $joinedAlias = $this->{$assoc}->alias;
     $joinedKey = $this->{$assoc}->primaryKey;
-    
-    $aclQuery = $this->buildAclQuery($user);
-    $conditions = am($options['conditions'], $aclQuery['conditions']);
 
     if (isset($this->hasMany[$assoc])) {
-      
+        $conditions = $options['conditions'];
         $config = $this->hasMany[$assoc];
         $joinedForeignKey = $config['foreignKey'];
         $joinedConditions = array("`{$joinedAlias}`.`{$joinedForeignKey}` = `{$alias}`.`{$key}`");
@@ -640,7 +637,9 @@ class Media extends AppModel {
         }
           
     } elseif (isset($this->hasAndBelongsToMany[$assoc])) {
-      
+        $aclQuery = $this->buildAclQuery($user);//?
+        $conditions = am($options['conditions'], $aclQuery['conditions']);
+        
         $config = $this->hasAndBelongsToMany[$assoc];
 
         $joinTable = $this->tablePrefix.$config['joinTable'];
