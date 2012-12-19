@@ -259,15 +259,6 @@ class SidecarFilterComponent extends BaseFilterComponent {
     return $media;
   }
 
-  function reverse_strrchr($haystack, $needle) {
-    //?????
-    $pos = strrpos($haystack, $needle);
-    if($pos === false) {
-        return $haystack;
-    }
-    return substr($haystack, 0, $pos + 1);
-}
-
   /**
    * Write the meta data to an image file
    *
