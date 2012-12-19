@@ -41,6 +41,9 @@ class FilterManagerComponent extends Component {
 
   var $errors = array();
   var $skipped = array();
+  
+  var $fileCache = array();
+  var $mediaCache = array();
 
   public function initialize(Controller $controller) {
     $this->controller = $controller;
@@ -285,6 +288,9 @@ class FilterManagerComponent extends Component {
       // sort files by name
       $files = $extStack[$ext];
       sort($files);
+      //new extension is processed, cache is cleared (ex:read xmp; media could be changed be previously by reading mainfile)
+      $this->mediaCache = array();
+      $this->fileCache = array();
       foreach ($files as $file) {
         $result[$file] = $this->read($file, $options['forceReadMeta']);
         $importLog = $this->_importlog(&$importLog, $file);
@@ -322,6 +328,78 @@ class FilterManagerComponent extends Component {
   }
 
   /**
+   * Lookup file from database to match filename to Media.
+   *
+   * @param string $path Path of file
+   * @param string $filename Filename
+   * @return mixed File model data or false if file was not found
+   */
+  public function _findFileInPath($path, $filename) {
+    if (!isset($this->fileCache[$path])) {
+      $this->fileCache[$path] = array();//cache only current folder to avoid memory issues
+      $this->fileCache[$path] = $this->controller->MyFile->findAllByPath($path);
+    }
+    foreach ($this->fileCache[$path] as $file) {
+      if ($file['File']['path'].$file['File']['file'] == $filename) {
+        return $file;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Lookup media from database to match filename to Media.
+   *
+   * @param string $path Path of file
+   * @param string $filename Filename
+   * @return mixed Media model data or false if media was not found
+   */
+  public function _findMediaInPath($path, $filename) {
+    if (!isset($this->mediaCache[$path])) {
+      $this->mediaCache[$path] = array();//cache only current folder to avoid memory issues
+      $this->mediaCache = array();
+      $user = $this->controller->getUser();
+      $this->mediaCache[$path] = $this->controller->Media->findAllByOptions($user, array('model' => 'File', 'conditions' => array('File.path' => $path)));
+    }
+    foreach ($this->mediaCache[$path] as $media) {
+      foreach ($media['File'] as $file) {
+        if ($file['path'].$file['file'] == $filename) {
+          return $media;
+        }
+      }
+    }
+    return false;
+  }
+
+  /**
+   * replace model in cache
+   * 
+   * @param string $path Path of file
+   * @param string $model Model
+   * @param string $modelType 'Media' or 'File'
+   * @return mixed Media model data or false if media was not found
+   */
+  public function _replaceInCache($path, $model, $modelType) {
+    if ($modelType='Media') {
+      $cache =& $this->mediaCache;
+    } elseif ($modelType='File') {
+      $cache =& $this->fileCache;
+    } else {
+      return false;
+    }
+    if (!isset($cache[$path])) {
+      return false;
+    }
+    foreach ($cache[$path] as $key=>$cachedModel) {
+      if ($model[$modelType]['id'] == $cachedModel[$modelType]['id']) {
+        $cache[$path][$key] = $model; 
+        return true;
+      }
+    }
+    return false;
+  }
+  
+  /**
    * Import a file to the database
    *
    * @param string $filename Filename of the single file
@@ -338,15 +416,21 @@ class FilterManagerComponent extends Component {
       Logger::verbose("File $filename is not supported");
       return false;
     }
-    if (!$this->controller->MyFile->fileExists($filename) && !$this->FileManager->add($filename)) {
-      Logger::err("Could not add file $filename");
-      $this->addError($filename, 'FileAddError');
-      return false;
-    }
+    $path = Folder::slashTerm(dirname($filename));
+    $file = $this->_findFileInPath($path, $filename);
+    if (!$file){
+      if (!$this->FileManager->add($filename)) {
+        Logger::err("Could not add file $filename");
+        $this->addError($filename, 'FileAddError');
+        return false;
+      }
 
-    $file = $this->controller->MyFile->findByFilename($filename);
-    if (!$file) {
-      Logger::err("Could not find file with filename: " . $filename);
+      $file = $this->controller->MyFile->findByFilename($filename);
+      if (!$file) {
+        Logger::err("Could not find file with filename: " . $filename);
+        return false;
+      }
+      $this->fileCache[$path][] = $file;
     }
 
     // Check changes
@@ -362,6 +446,7 @@ class FilterManagerComponent extends Component {
 
     if ($this->controller->MyFile->hasMedia($file)) {
       $media = $this->controller->Media->findById($file['File']['media_id']);
+      $media = $this->_findMediaInPath($path, $filename);
       $readed = strtotime($file['File']['readed']);
       if ($forceReadMeta) {
         $forceRead = true;

@@ -156,25 +156,6 @@ class SidecarFilterComponent extends BaseFilterComponent {
   }
 
   /**
-   * Lookup file from database to match filename to Media.
-   *
-   * @param string $path Path of file
-   * @param string $filename Filename
-   * @return mixed File model data or false if file was not found
-   */
-  private function _findFileInPath($path, $filename) {
-    if (!isset($this->fileCache[$path])) {
-      $this->fileCache[$path] = $this->controller->MyFile->findAllByPath($path);
-    }
-    foreach ($this->fileCache[$path] as $file) {
-      if ($file['File']['file'] == $filename) {
-        return $file;
-      }
-    }
-    return false;
-  }
-
-  /**
    * Finds the MainFile of a sidecar
    *
    * @param video File model data of the video
@@ -223,26 +204,24 @@ class SidecarFilterComponent extends BaseFilterComponent {
         !$this->controller->getOption('xmp.use.sidecar', 0)) {
       return false;
     }
-    $sidecar = $this->MyFile->findByFilename($filename);
+
+    $path = Folder::slashTerm(dirname($filename));
     if (!$media){
-      if (isset($sidecar['File']['media_id'])){
-        $media = $this->Media->findById($sidecar['File']['media_id']);
+      //no media attached yet; 
+      //search if media can be attached
+      $mainfileOfMedia = $this->_findMainFile($file);
+      if (!isset($mainfileOfMedia['Media']['id'])) {
+        return false;
       } else {
-        //search if media can be attached
-        //$media is retrieved only as a file of media; associations (like comments...) will be lost on save of 'media'
-        $fileOfMedia = $this->_findMainFile($sidecar);
-        if (!isset($fileOfMedia['Media']['id'])) {
+        $mediaId = $mainfileOfMedia['Media']['id'];
+        $mediaMainFilename = $mainfileOfMedia['File']['path'].$mainfileOfMedia['File']['file'];
+        //$media = $this->Media->findById($mediaId);
+        $media = $this->FilterManager->_findMediaInPath($path, $mediaMainFilename);
+        // attach sidecar file to media
+        if (!$this->controller->MyFile->setMedia($file, $mediaId)) {
+          Logger::err("File was not saved: " . $filename);
+          $this->FilterManager->addError($filename, "FileSaveError");
           return false;
-        } else {
-          $mediaId = $fileOfMedia['Media']['id'];
-          $media = $this->Media->findById($mediaId);
-          //TODO build Media->findByPath and cache results
-          // attach sidecar file to media
-          if (!$this->controller->MyFile->setMedia($sidecar, $mediaId)) {
-            Logger::err("File was not saved: " . $filename);
-            $this->FilterManager->addError($filename, "FileSaveError");
-            return false;
-          }
         }
       }
     }
@@ -270,6 +249,7 @@ class SidecarFilterComponent extends BaseFilterComponent {
       $this->FilterManager->addError($filename, 'MediaSaveError');
       return false;
     }
+    $this->FilterManager->_replaceInCache($path, $media, 'Media');
 
     Logger::verbose("Updated media (id ".$media['Media']['id'].")");
 
