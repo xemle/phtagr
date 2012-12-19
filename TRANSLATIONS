@@ -5,7 +5,7 @@ German (deu) - Xemle <xemle AT phtagr.org>
 Dutch (dut) - Remy Wetzels <r.wetzels AT chello.nl>
 Estonian (est) - Craig <edmfk AT hot.ee>
 Italian (ita) - Francesco PIRANEO G. <fpiraneo@iface.ch>
-Polish (pol) - Bartosz Fenski aka fEnIo <fenio AT debian.org>
+Polish (pol) - Bartosz Fenski aka fEnIo <fenio AT debian.org>, Piotr Skiba <ps AT eldil.pl>
 French (fre) - François Elie <francois AT elie.org>
 
 Update POT file
@@ -13,4 +13,4 @@ Update POT file
 
 Run
 
-cakephp/lib/Cake/Console/cake i18n extract --exclude Vendor,Test,users,Plugin,plugins,webroot,cakephp
+cakephp/lib/Cake/Console/cake i18n extract --exclude Vendor,vendors,Test,users,Plugin,plugins,webroot,cakephp
