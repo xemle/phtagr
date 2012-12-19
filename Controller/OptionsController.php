@@ -164,7 +164,7 @@ class OptionsController extends AppController {
 
       if ($group) {
         $allMedia = $this->Media->findAllByOptions($user, array('model' => 'Group', 'conditions' => array('Group.name' => $group)));
-      } elseif ($field) {
+      } elseif ($tag) {
         $allMedia = $this->Media->findAllByOptions($user, array('model' => 'Field', 'conditions' => array('Field.name' => 'keyword','Field.data' => $tag )));
       }
       
