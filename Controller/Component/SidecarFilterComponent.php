@@ -39,13 +39,6 @@ class SidecarFilterComponent extends BaseFilterComponent {
       'country' => 'Country'
       );
 
-  /**
-   * Map of directory to File models
-   *
-   * @var array
-   */
-  var $fileCache = array();
-
   public function getName() {
     return "Sidecar";
   }
@@ -175,9 +168,14 @@ class SidecarFilterComponent extends BaseFilterComponent {
       return false;
     }
     foreach ($found as $file) {
-      if (is_readable(Folder::addPathElement($path, $file))) {
-        $MainFile = $this->_findFileInPath($path, $file);
+      $filename = Folder::addPathElement($path, $file);
+      if (is_readable($filename)) {
+        $MainFile = $this->FilterManager->_findFileInPath($path, $filename);
         if ($MainFile) {
+          //Err: it finds first file in database, not the first file found on hdd;
+          //maybe a higher priority file exists on hdd but it is not imported yet (video and jpg with same basename)
+          //possible to have higher priority and missing from database?
+          //todo:?:check just the first $file in $found, after sorting by ext priority? 
           return $MainFile;
         }
       }
