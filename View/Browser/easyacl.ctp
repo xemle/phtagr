@@ -42,4 +42,4 @@
 
 ?>
 </fieldset>
-<?php echo $this->Form->end(__('Save')); ?>
+<?php echo $this->Form->end(__('Update')); ?>

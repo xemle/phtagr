@@ -814,6 +814,23 @@ class BrowserController extends AppController
   }
 
   /**
+   * Spilt text into words and remove empty words
+   *
+   * @param string $text
+   * @return array
+   */
+  private function _splitWords($text) {
+    $words = preg_split('/\s*,\s*/', trim($text));
+    $result = array();
+    foreach ($words as $word) {
+      if ($word) {
+        $result[] = $word;
+      }
+    }
+    return $result;
+  }
+
+  /**
    * Change acl for all media of first selected group or first sellected keyword
    */
   public function easyacl() {
@@ -824,8 +841,8 @@ class BrowserController extends AppController
       return;
     }
 
-    $groupNames = trim($this->request->data['Group']['names']);
-    $tagNames = trim($this->request->data['Field']['keyword']);
+    $groupNames = $this->_splitWords($this->request->data['Group']['names']);
+    $tagNames = $this->_splitWords($this->request->data['Field']['keyword']);
 
     if (!$groupNames && !$tagNames) {
       $this->Session->setFlash(__("Group or tag criteria is missing"));
@@ -843,10 +860,10 @@ class BrowserController extends AppController
 
     $queryData = array('user' => $user['User']['username']);
     if ($groupNames) {
-      $queryData['group'] = preg_split('/\s*,\s*/', $groupNames);
+      $queryData['group'] = $groupNames;
     }
     if ($tagNames) {
-      $queryData['tag'] = preg_split('/\s*,\s*/', $tagNames);
+      $queryData['tag'] = $tagNames;
     }
     $query = $this->QueryBuilder->build($queryData);
     $allMedia = $this->Media->find('all', $query);
