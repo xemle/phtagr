@@ -21,23 +21,24 @@
   } ?>.
 </p>
 
+<fieldset><legend><?php echo __("Import Options") ?></legend>
 <?php
   echo $this->Form->input('Browser.options.recursive', array('type' => 'checkbox', 'label' => __('Recursive')));
-  echo $this->Form->input('Browser.options.forceReadMeta', array('type' => 'checkbox', 'label' => __('Only for existing media - Force reread metadata')));
+  echo $this->Form->input('Browser.options.forceReadMeta', array('type' => 'checkbox', 'label' => __('Reread metadata for exisiting files')));
 ?>
+</fieldset>
 
-<p>
+<fieldset><legend><?php echo __("File Filter") ?></legend>
 <?php
    $options = array(
-    'any' => __('any'),
-    'xmp' => __('xmp (sidecar)'),
-    'jpg' => __('jpg'),
-    'avi' => __('avi'));
+    'any' => __('Any'),
+    'xmp' => __('XMP (sidecar)'),
+    'jpg' => __('JPG'),
+    'avi' => __('AVI'));
    $selected = 'any';
-   echo $this->Html->tag('div',
-           $this->Form->input('Browser.options.extensions', array('type' => 'select', 'options' => $options, 'multiple' => 'checkbox', 'selected' => $selected, 'label' => __("Select extensions to be imported:"))),
-           array('class' => 'submit-list'));
-?></p>
+   echo $this->Form->input('Browser.options.extensions', array('type' => 'select', 'options' => $options, 'multiple' => 'checkbox', 'selected' => $selected, 'label' => __("Select extensions to be imported:")));
+?>
+</fieldset>
 
 <?php
   echo $this->Html->tag('div',

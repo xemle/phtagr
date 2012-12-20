@@ -199,26 +199,27 @@ code {
 
 form {
   overflow: hidden;
-  width: 710px; }
-  form > fieldset {
+  width: 710px;
+  margin: 15px 0; }
+  form fieldset {
     padding: 15px 0;
     border: 0; }
-    form > fieldset > legend {
+    form fieldset legend {
       font-family: Ubuntu-bold;
       width: 81.5%;
       border-bottom: 1px solid #e6e6e6; }
-    form > fieldset > div {
+    form fieldset div.input {
       padding: 5px 0;
       position: relative;
       display: block;
       width: 100%; }
-      form > fieldset > div > label {
+      form fieldset div.input > label {
         display: inline;
         float: left;
         width: 30%; }
-      form > fieldset > div > input[type=password],
-      form > fieldset > div > input[type=text],
-      form > fieldset > div > textarea {
+      form fieldset div.input input[type=password],
+      form fieldset div.input input[type=text],
+      form fieldset div.input textarea {
         width: 50%;
         -moz-border-radius: 3px;
         -webkit-border-radius: 3px;
@@ -229,17 +230,17 @@ form {
         border: #aaaaaa 1px solid;
         padding: 5px;
         background-color: #efefef; }
-  form > fieldset > div > input[type=password]:hover,
-  form > fieldset > div > input[type=text]:hover,
-  form > fieldset > div > textarea:hover {
+  form fieldset div.input input[type=password]:hover,
+  form fieldset div.input input[type=text]:hover,
+  form fieldset div.input textarea:hover {
     border: #999999 1px solid;
     background-color: #ffffdd; }
-  form > fieldset > div > input[type=password]:focus,
-  form > fieldset > div > input[type=text]:focus,
-  form > fieldset > div > textarea:focus {
+  form fieldset div.input input[type=password]:focus,
+  form fieldset div.input input[type=text]:focus,
+  form fieldset div.input textarea:focus {
     border: #aa0000 1px solid;
     background-color: #ffffdd; }
-      form > fieldset > div > select {
+      form fieldset div.input select {
         width: 51.5%;
         -moz-border-radius: 3px;
         -webkit-border-radius: 3px;
@@ -250,22 +251,41 @@ form {
         border: #aaaaaa 1px solid;
         padding: 5px;
         background-color: #efefef; }
-  form > fieldset > div > select:hover {
+  form fieldset div.input select:hover {
     border: #999999 1px solid;
     background-color: #ffffdd; }
-  form > fieldset > div > select:focus {
+  form fieldset div.input select:focus {
     border: #aa0000 1px solid;
     background-color: #ffffdd; }
-        form > fieldset > div.checkbox > input[type=checkbox] {
+        form fieldset div.input.select div.checkbox {
+          margin-left: 30%; }
+          form fieldset div.input.select div.checkbox input[type=checkbox] {
+            margin-right: 5px; }
+        form fieldset div.input.checkbox input[type=checkbox] {
           margin-left: 30%;
           margin-right: 5px; }
-        form > fieldset > div.checkbox > label {
+        form fieldset div.input.checkbox label {
           float: none;
           display: inline-block;
           width: 50%; }
-      form > fieldset > div > .error-message {
+      form fieldset div.input .radioSet {
+        margin: 3px 0; }
+        form fieldset div.input .radioSet input[type=radio] {
+          display: none; }
+        form fieldset div.input .radioSet label {
+          padding: 5px 10px;
+          border: 1px solid #aaaaaa;
+          color: #666666;
+          background-color: #efefef; }
+          form fieldset div.input .radioSet label:hover {
+            cursor: pointer; }
+        form fieldset div.input .radioSet input[type=radio]:checked + label {
+          color: white;
+          background-color: #557799;
+          border-color: #314457; }
+      form fieldset div.input .error-message {
         padding-left: 30%; }
-      form > fieldset > div.error {
+      form fieldset div.input.error {
         background-color: #ffaaaa; }
   form ul.buttons {
     margin-left: 30%; }
@@ -290,7 +310,7 @@ form {
     border-color: #314457; }
   form div.submit {
     padding-left: 30%; }
-    form div.submit > input {
+    form div.submit input {
       border: 1px solid #aaaaaa;
       -moz-border-radius: 2px;
       -webkit-border-radius: 2px;
@@ -301,12 +321,12 @@ form {
       padding: 5px 15px;
       color: #666666;
       background-color: #efefef; }
-  form div.submit > input:hover {
+  form div.submit input:hover {
     cursor: pointer;
     background-color: #557799;
     color: white;
     border-color: #314457; }
-    form div.submit-list > input {
+    form div.submit-list input {
       margin-right: 5px;
       border: 1px solid #aaaaaa;
       -moz-border-radius: 2px;
@@ -318,7 +338,7 @@ form {
       padding: 5px 15px;
       color: #666666;
       background-color: #efefef; }
-  form div.submit-list > input:hover {
+  form div.submit-list input:hover {
     cursor: pointer;
     background-color: #557799;
     color: white;
