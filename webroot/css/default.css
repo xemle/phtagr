@@ -612,6 +612,9 @@ pre {
     top: 197px;
     padding: 4px; }
 
+  #p-explorer-media-list.p-list-compact .preview {
+    vertical-align: middle; }
+
   #p-explorer-media-list.p-list-small .cell {
     display: inline;
     float: left;
