@@ -188,6 +188,10 @@ class ExiftoolComponent extends Component {
       //exiftool is opened with -stay_open option
       //exiftool can be closed
       $this->_writeCommands($this->stdin, array('-stay_open', 'False', '-execute', ''));
+      // read rest from pipes
+      $this->_readFromPipe($this->stdout);
+      $this->_readFromPipe($this->stderr);
+
       //close pipes
       fclose($this->stdin);
       fclose($this->stdout);
