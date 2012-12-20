@@ -15,67 +15,14 @@
  * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
 
-App::uses('Option', 'Model');
-App::uses('User', 'Model');
-App::uses('Group', 'Model');
-App::uses('Media', 'Model');
-
-App::uses('Router', 'Routing');
-App::uses('Controller', 'Controller');
-App::uses('AppController', 'Controller');
-App::uses('Logger', 'Lib');
-App::uses('Folder', 'Utility');
-
-if (!defined('RESOURCES')) {
-  define('RESOURCES', TESTS . 'Resources' . DS);
-}
-if (!defined('TEST_FILES')) {
-  define('TEST_FILES', TMP);
-}
-if (!defined('TEST_FILES_TMP')) {
-  define('TEST_FILES_TMP', TEST_FILES . 'write.test.tmp' . DS);
-}
-
-if (!is_writeable(TEST_FILES)) {
-  trigger_error(__('Test file directory %s must be writeable', TEST_FILES), E_USER_ERROR);
-}
-
-class TestNativeReadController extends AppController {
-
-	var $uses = array('Media', 'MyFile', 'User', 'Option');
-
-	var $components = array('FileManager', 'FilterManager');
-
-	public function &getUser() {
-    $user = $this->User->find('first');
-    return $user;
-	}
-
-}
+App::uses('PhtagrTestCase', 'Test/Case');
 
 /**
- * GpsFilterComponent Test Case
- *
+ * Test read meta data nativly
  */
-class MediaReadGetId3TestCase extends CakeTestCase {
+class MediaReadGetId3TestCase extends PhtagrTestCase {
 
-	var $controller;
-
-  var $User;
-  var $Media;
-  var $Option;
-  var $userId;
-
-  var $Folder;
-
-  /**
-   * Fixtures
-   *
-   * @var array
-   */
-	public $fixtures = array('app.file', 'app.media', 'app.user', 'app.group', 'app.groups_media',
-      'app.groups_user', 'app.option', 'app.guest', 'app.comment', 'app.my_file',
-      'app.fields_media', 'app.field', 'app.comment');
+  var $components = array('FilterManager');
 
 /**
  * setUp method
@@ -84,44 +31,13 @@ class MediaReadGetId3TestCase extends CakeTestCase {
  */
 	public function setUp() {
 		parent::setUp();
-    $this->Folder = new Folder();
 
-    $this->User = ClassRegistry::init('User');
-    $this->User->save($this->User->create(array('username' => 'admin', 'role' => ROLE_ADMIN)));
-    $this->userId = $this->User->getLastInsertID();
-
-    $this->Group = ClassRegistry::init('Group');
-
-    $CakeRequest = new CakeRequest();
-		$CakeResponse = new CakeResponse();
-		$this->Controller = new TestNativeReadController($CakeRequest, $CakeResponse);
-		$this->Controller->constructClasses();
-		$this->Controller->startupProcess();
-    $this->Media = $this->Controller->Media;
-    $this->MyFile = $this->Controller->MyFile;
-
-    $this->Folder->create(TEST_FILES_TMP);
+    $admin = $this->Factory->createUser('admin', ROLE_ADMIN);
+    $this->Controller->mockUser = $admin;
   }
 
-/**
- * tearDown method
- *
- * @return void
- */
-	public function tearDown() {
-    $this->Folder->delete(TEST_FILES_TMP);
-
-    unset($this->Controller);
-    unset($this->Media);
-    unset($this->Option);
-    unset($this->Group);
-    unset($this->User);
-    unset($this->Folder);
-		parent::tearDown();
-	}
-
 	public function testNativeRead() {
-		$filename = RESOURCES . 'IMG_7795.JPG';
+		$filename = $this->getResource('IMG_7795.JPG');
     // Read file via GetID3 PHP library
 		$result = $this->Controller->FilterManager->read($filename);
 		$this->assertNotEqual($result, false);
