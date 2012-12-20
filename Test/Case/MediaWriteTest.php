@@ -339,8 +339,7 @@ class MediaWriteTestCase extends CakeTestCase {
     $values = $this->extractMeta($filename);
     $this->assertTrue(!isset($values['ObjectName']));
     $this->assertEqual($values['Comment'], 'Temple of love');
-    $this->assertEqual($values['DateCreated'], '2012:10:03');
-    $this->assertEqual($values['TimeCreated'], '10:10:43+02:00');
+    $this->assertEqual(substr($values['DateTimeOriginal'], 0, 19), "2012:10:03 10:10:43");
     $this->assertEqual($values['Orientation'], '6');
     $this->assertEqual($values['GPSLatitudeRef'], 'N');
     $this->assertEqual($values['GPSLatitude'], '10.461');

@@ -200,7 +200,7 @@ class SidecarFilterComponent extends BaseFilterComponent {
     $filename = $this->MyFile->getFilename($file);
 
     if (!$this->controller->MyFile->isType($file, FILE_TYPE_SIDECAR) ||
-        !$this->controller->getOption('bin.exiftool') ||
+        !$this->Exiftool->isEnabled() ||
         !$this->controller->getOption('xmp.use.sidecar', 0)) {
       return false;
     }

@@ -57,7 +57,7 @@ class ExiftoolComponent extends Component {
       'state' => 'State',
       'country' => 'Country'
       );
-  
+
   public function initialize(Controller $controller) {
     if ($this->controller) {
       // It is already initialized
@@ -309,15 +309,15 @@ class ExiftoolComponent extends Component {
       //-EXIF:CreateDate or -XMP-xmp:CreateDate
       $date = $this->_extract($data, 'CreateDate');
     }
-    
+
     //Adobe XMP properties:XMP-photoshop:DateCreated
     $date = $this->_extract($data, 'DateCreated', null);
-    
+
     //Dublin Core: XMP-dc:Date
     if (!$date) {
       $date = $this->_extract($data, 'Date');
     }
-    
+
     //IPTC Core: IPTC:DateCreated and IPTC:TimeCreated
     if (1==2) {
       //sice we already have DateCreated from XMP-photoshop
@@ -335,7 +335,7 @@ class ExiftoolComponent extends Component {
         return $dateIptc;
       }
     }
-    
+
     //TIFF inside XMP: XMP-tiff:DateTime
     if (!$date) {
       $date = $this->_extract($data, 'DateTime');
@@ -475,7 +475,7 @@ class ExiftoolComponent extends Component {
 
     // Media information
     $v['name'] = $this->_extract($data, 'ObjectName', $v['name']);
-    
+
     $v['date'] = $this->_extractMediaDate($data);
     //size will be zero on sidecar
     //$v['width'] = $this->_extract($data, 'ImageWidth', 0);
@@ -681,7 +681,7 @@ class ExiftoolComponent extends Component {
     //$date = substr($date,0,19);
     $timeFileString = $this->_extractMediaDate($data);
     $timeFile = strtotime($timeFileString);
-    
+
     //http://php.net/manual/en/function.date.php
     //I (capital i)   Whether or not the date is in daylight saving time   1 if Daylight Saving Time, 0 otherwise.
     //O Difference to Greenwich time (GMT) in hours   Example: +0200
@@ -810,13 +810,13 @@ class ExiftoolComponent extends Component {
 
   private function _createExportArgumentsForFields(&$data, $media) {
     $args = array();
-    
+
     $usedFieldMap = $this->fieldMap;
-    
+
     if ($this->controller->getOption('xmp.use.sidecar', 0)) {
-      
+
       $usedFieldMap = $this->fieldMapXMP;
-      
+
       // Associations to sidecar XMP meta data: Tags(XMP:keywords)
       $fileTags = $this->_extractList($data, 'Keywords');
       $dbTags = Set::extract("/Field[name=keyword]/data", $media);
@@ -868,6 +868,10 @@ class ExiftoolComponent extends Component {
   }
 
   private function _createExportArgumentsForGroups(&$data, $media) {
+    if (!$this->hasOptionConfig) {
+      return array();
+    }
+
     //add Groups to metadata xmp:   XMP-Phtagr:PhtagrGroups
     $fileGroups = $this->_extractList($data, 'PhtagrGroups');
 
