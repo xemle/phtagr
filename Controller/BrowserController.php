@@ -19,9 +19,9 @@ class BrowserController extends AppController
 {
   var $name = "Browser";
 
-  var $components = array('FileManager', 'RequestHandler', 'FilterManager', 'Upload', 'Zip', 'Plupload');
+  var $components = array('FileManager', 'RequestHandler', 'FilterManager', 'Upload', 'Zip', 'Plupload', 'QueryBuilder');
   var $uses = array('User', 'MyFile', 'Media', 'Option');
-  var $helpers = array('Form', 'Html', 'Number', 'FileList', 'ImageData', 'Plupload');
+  var $helpers = array('Form', 'Html', 'Number', 'FileList', 'ImageData', 'Plupload', 'Autocomplete');
   var $subMenu = false;
   /** Array of filesystem root directories. */
   var $_fsRoots = array();
@@ -32,6 +32,7 @@ class BrowserController extends AppController
     $this->subMenu = array(
       'import' => __("Import Files"),
       'upload' => __("Upload"),
+      'easyacl' => __("Edit Access Rrights"),
       'sync' => __("Meta Data Sync"),
       'view' => __("Overview"),
       );
@@ -793,5 +794,94 @@ class BrowserController extends AppController
       $this->set($key, $value);
     }
     $this->set('_serialize', array_keys($pluploadResponse));
+  }
+
+  /**
+   * Extract acl changes from request form
+   *
+   * @param array $user Current model user
+   * @return array ACL changes
+   */
+  private function _extractAclParameter(&$user) {
+    $aclData = array('Media' => array());
+    foreach (array('readPreview', 'readOriginal', 'writeTag', 'writeMeta') as $name) {
+      if (!empty($this->request->data['Media'][$name]) && $this->request->data['Media'][$name] != ACL_LEVEL_KEEP) {
+        $aclData['Media'][$name] = $this->request->data['Media'][$name];
+      }
+    }
+    $editData = $this->Media->prepareMultiEditData($aclData, $user);
+    return $editData;
+  }
+
+  /**
+   * Change acl for all media of first selected group or first sellected keyword
+   */
+  public function easyacl() {
+    $mediaIds = array();
+    $this->set('mediaIds', $mediaIds);
+
+    if (empty($this->request->data)) {
+      return;
+    }
+
+    $groupNames = trim($this->request->data['Group']['names']);
+    $tagNames = trim($this->request->data['Field']['keyword']);
+
+    if (!$groupNames && !$tagNames) {
+      $this->Session->setFlash(__("Group or tag criteria is missing"));
+      return;
+    }
+
+    $userId = $this->getUserId();
+    $user = $this->User->findById($userId);
+
+    $editData = $this->_extractAclParameter($user);
+    if (!$editData) {
+      $this->Session->setFlash(__("No access right changes given"));
+      return;
+    }
+
+    $queryData = array('user' => $user['User']['username']);
+    if ($groupNames) {
+      $queryData['group'] = preg_split('/\s*,\s*/', $groupNames);
+    }
+    if ($tagNames) {
+      $queryData['tag'] = preg_split('/\s*,\s*/', $tagNames);
+    }
+    $query = $this->QueryBuilder->build($queryData);
+    $allMedia = $this->Media->find('all', $query);
+
+    if ($allMedia) {
+      $mediaIds = $this->_applyAclChanges($allMedia, $editData, $user);
+      $this->set('mediaIds', $mediaIds);
+      $this->Session->setFlash(__("Updated access rights of %d media", count($mediaIds)));
+    } else {
+      $this->Session->setFlash(__("No media found!"));
+    }
+  }
+
+  private function _applyAclChanges(&$allMedia, &$editData, &$user) {
+    $changedMedia = array();
+    foreach ($allMedia as $media) {
+      $this->Media->setAccessFlags($media, $user);
+      // primary access check
+      if (!$media['Media']['canWriteTag'] && !$media['Media']['canWriteAcl']) {
+        Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change any metadata of image ".$id);
+        continue;
+      }
+      $tmp = $this->Media->editMulti($media, $editData, $user);
+      if ($tmp) {
+        $changedMedia[] = $tmp;
+      }
+    }
+    if ($changedMedia) {
+      if (!$this->Media->saveAll($changedMedia)) {
+        Logger::warn("Could not save media: " . join(", ", Set::extract("/Media/id", $changedMedia)));
+      } else {
+        Logger::debug("Saved media: " . join(', ', Set::extract("/Media/id", $changedMedia)));
+        return Set::extract('/Media/id', $changedMedia);
+      }
+    }
+    return array();
   }
 }
