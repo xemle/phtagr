@@ -170,7 +170,7 @@ class SidecarFilterComponent extends BaseFilterComponent {
     foreach ($found as $file) {
       $filename = Folder::addPathElement($path, $file);
       if (is_readable($filename)) {
-        $MainFile = $this->FilterManager->_findFileInPath($path, $filename);
+        $MainFile = $this->FilterManager->findFileInPath($path, $filename);
         if ($MainFile) {
           //Err: it finds first file in database, not the first file found on hdd;
           //maybe a higher priority file exists on hdd but it is not imported yet (video and jpg with same basename)

@@ -334,7 +334,7 @@ class FilterManagerComponent extends Component {
    * @param string $filename Filename
    * @return mixed File model data or false if file was not found
    */
-  public function _findFileInPath($path, $filename) {
+  public function findFileInPath($path, $filename) {
     if (!isset($this->fileCache[$path])) {
       $this->fileCache[$path] = array();//cache only current folder to avoid memory issues
       $this->fileCache[$path] = $this->controller->MyFile->findAllByPath($path);
@@ -417,7 +417,7 @@ class FilterManagerComponent extends Component {
       return false;
     }
     $path = Folder::slashTerm(dirname($filename));
-    $file = $this->_findFileInPath($path, $filename);
+    $file = $this->findFileInPath($path, $filename);
     if (!$file){
       if (!$this->FileManager->add($filename)) {
         Logger::err("Could not add file $filename");
