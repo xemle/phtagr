@@ -76,5 +76,12 @@ class HomeController extends AppController
     $this->FastFileResponder->addAll($comments, 'mini');
     $this->set('comments', $comments);
   }
+  
+  public function cloud() {
+    $user = $this->getUser();
+
+    $this->set('cloudTags', $this->Media->cloud($user, array('conditions' => array('Field.name' => 'keyword'), 'count' => 400)));
+    $this->set('cloudCategories', $this->Media->cloud($user, array('conditions' => array('Field.name' => 'category'), 'count' => 100)));
+  }
 }
 ?>
