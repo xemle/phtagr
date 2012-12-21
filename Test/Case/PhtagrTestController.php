@@ -30,6 +30,9 @@ class PhtagrTestController extends AppController {
       $user = $this->User->find('first');
       if ($user) {
         $this->mockUser = $user;
+      } else {
+        $user = $this->User->getNobody();
+        $this->mockUser = $user;
       }
       return $user;
     }

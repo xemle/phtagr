@@ -37,6 +37,7 @@ class PhtagrTestCase extends CakeTestCase {
 
   var $Factory;
   var $Controller;
+  var $_tmpDirs = array();
 
   var $uses = array();
   var $components = array();
@@ -45,7 +46,7 @@ class PhtagrTestCase extends CakeTestCase {
       'app.groups_user', 'app.option', 'app.guest', 'app.comment', 'app.my_file',
       'app.fields_media', 'app.field', 'app.comment');
 
-  public function setUp() {
+  public function setUp($startController = true) {
     parent::setUp();
     $this->Factory = new PhtagrTestFactory();
 
@@ -58,7 +59,9 @@ class PhtagrTestCase extends CakeTestCase {
     $this->Controller->uses = $uses;
     $this->Controller->components = $this->components;
     $this->Controller->constructClasses();
-    $this->Controller->startupProcess();
+    if ($startController) {
+      $this->Controller->startupProcess();
+    }
 
     // Copy models and compoments from controller to test case for direct access
     foreach ($uses as $modelName) {
@@ -71,7 +74,25 @@ class PhtagrTestCase extends CakeTestCase {
 
   public function tearDown() {
     $this->Controller->shutdownProcess();
+
+    $Folder = new Folder();
+    foreach ($this->_tmpDirs as $path) {
+      $Folder->delete($path);
+    }
     parent::tearDown();
+  }
+
+  /**
+   * Mock user to the current controller
+   *
+   * @param array $user User model data
+   */
+  public function mockUser(&$user) {
+    $this->Controller->mockUser = $user;
+  }
+
+  public function getUser() {
+    return $this->Controller->getUser();
   }
 
   /**
@@ -100,6 +121,17 @@ class PhtagrTestCase extends CakeTestCase {
   }
 
   /**
+   * Set global options for external tools
+   *
+   * @param array $commands
+   */
+  public function setOptionsForExternalTools($commands = array('exiftool', 'convert', 'ffmpeg')) {
+    foreach ($commands as $command) {
+      $this->Option->setValue("bin.$command", $this->findExecutable($command), 0);
+    }
+  }
+
+  /**
    * Returns the filename of a resource file
    *
    * @param string $filename
@@ -114,4 +146,45 @@ class PhtagrTestCase extends CakeTestCase {
       return false;
     }
   }
+
+  /**
+   * Copy a test resource file to a given directory
+   *
+   * @param string $filename Resoure filename. See also getResource()
+   * @param string $dstPath Destination directory
+   * @param string $dstFilename Optional destination filename. If not given the
+   * resource filename is taken.
+   * @return string Filename of copied resource
+   * @throws Exception
+   */
+  public function copyResource($filename, $dstPath, $dstFilename = null) {
+    $src = $this->getResource($filename);
+    if (!is_dir($dstPath) || !is_writable($dstPath)) {
+      throw new Exception("Destination does not exist or is not writeable: $dstPath");
+    }
+    $dst = Folder::slashTerm($dstPath);
+    $dst .= ($dstFilename ? $dstFilename : $filename);
+    copy($src, $dst);
+
+    clearstatcache(true, $dst);
+    return $dst;
+  }
+
+  /**
+   * Create a uniq test directory. This directory will be deleted on tearDown()
+   * automatically
+   *
+   * @param string $prefix Prefix of testdir. Default is 'test-'
+   * @param string $postfix Postfix of testdir. Default is '.tmp'
+   * @return string Temporary directory
+   */
+  public function createTestDir($prefix = 'test-', $postfix = '.tmp') {
+    $path = TMP . $prefix . rand(10000, 100000) . $postfix;
+    $Folder = new Folder();
+    $Folder->create($path);
+    $this->_tmpDirs[] = $path;
+
+    return $path;
+  }
+
 }
