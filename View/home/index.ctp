@@ -71,7 +71,9 @@ if (isset($cloudTags) && count($cloudTags)) {
   echo '<p>' . __("No tags assigned") . '</p>';
 }
 ?>
-</div></div>
+</div>
+<p><?php echo $this->Html->link(__("See more..."), 'cloud'); ?></p>
+</div>
 
 <div id="category-cloud">
 <h3><?php echo __("Popular Categories"); ?></h3>
@@ -83,4 +85,6 @@ if (isset($cloudCategories) && count($cloudCategories)) {
   echo '<p>' . __("No categories assigned") . '</p>';
 }
 ?>
-</div></div>
+</div>
+<p><?php echo $this->Html->link(__("See more..."), 'cloud'); ?></p>
+</div>

@@ -1,7 +1,5 @@
-
-<div id="category-cloud" style="width:930px;">
 <h3><?php echo __("Categories"); ?></h3>
-<div class="cloud" style="width:900px;">
+<div class="cloud">
 <?php
 if (isset($cloudCategories) && count($cloudCategories)) {
   echo $this->Cloud->cloud($cloudCategories, '/explorer/category/');
@@ -9,12 +7,10 @@ if (isset($cloudCategories) && count($cloudCategories)) {
   echo '<p>' . __("No categories assigned") . '</p>';
 }
 ?>
-</div></div>
-
-<div id="tag-cloud" style="width:930px;" >
+</div>
    
 <h3><?php echo __("Tags"); ?></h3>
-<div class="cloud" style="width:900px;">
+<div class="cloud">
 <?php
 if (isset($cloudTags) && count($cloudTags)) {
   echo $this->Cloud->cloud($cloudTags, '/explorer/tag/');
@@ -22,5 +18,4 @@ if (isset($cloudTags) && count($cloudTags)) {
   echo '<p>' . __("No tags assigned") . '</p>';
 }
 ?>
-</div></div>
-
+</div>

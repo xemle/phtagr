@@ -50,7 +50,6 @@ class AppController extends Controller
   public function _setMainMenu() {
     $this->Menu->setCurrentMenu('main-menu');
     $this->Menu->addItem(__('Home'), "/");
-    $this->Menu->addItem(__('Categories/Tags'), array('controller' => 'home', 'action' => 'cloud'));
     $this->Menu->addItem(__('Explorer'), array('controller' => 'explorer', 'action' => 'index'));
     if ($this->hasRole(ROLE_GUEST)) {
       $user = $this->getUser();
