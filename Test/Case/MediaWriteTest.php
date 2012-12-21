@@ -15,63 +15,18 @@
  * @since         phTagr 2.2b3
  * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
-App::uses('Option', 'Model');
-App::uses('User', 'Model');
 
-App::uses('Router', 'Routing');
-App::uses('Controller', 'Controller');
-App::uses('AppController', 'Controller');
-App::uses('Logger', 'Lib');
-App::uses('Folder', 'Utility');
-
-if (!defined('RESOURCES')) {
-  define('RESOURCES', TESTS . 'Resources' . DS);
-}
-if (!defined('TEST_FILES')) {
-  define('TEST_FILES', TMP);
-}
-if (!defined('TEST_FILES_TMP')) {
-  define('TEST_FILES_TMP', TEST_FILES . 'write.test.tmp' . DS);
-}
-
-if (!is_writeable(TEST_FILES)) {
-  trigger_error(__('Test file directory %s must be writeable', TEST_FILES), E_USER_ERROR);
-}
-
-class TestWriteController extends AppController {
-
-  var $uses = array('Media', 'MyFile', 'User', 'Option');
-  var $components = array('FileManager', 'FilterManager', 'Exiftool');
-  var $mockUserId;
-  public function &getUser() {
-    $user = $this->User->findById($this->mockUserId);
-    return $user;
-  }
-
-}
+App::uses('PhtagrTestCase', 'Test/Case');
 
 /**
  * GpsFilterComponent Test Case
- *
  */
-class MediaWriteTestCase extends CakeTestCase {
+class MediaWriteTestCase extends PhtagrTestCase {
 
-  var $controller;
-  var $User;
-  var $Media;
-  var $Option;
-  var $userId;
+  var $uses = array('Media', 'Option');
+  var $components = array('FilterManager');
 
-  var $Folder;
-
-  /**
-   * Fixtures
-   *
-   * @var array
-   */
-  public $fixtures = array('app.file', 'app.media', 'app.user', 'app.group', 'app.groups_media',
-      'app.groups_user', 'app.option', 'app.guest', 'app.comment', 'app.my_file',
-      'app.fields_media', 'app.field', 'app.comment');
+  var $testDir;
 
   /**
    * setUp method
@@ -79,79 +34,15 @@ class MediaWriteTestCase extends CakeTestCase {
    * @return void
    */
   public function setUp() {
-    parent::setUp();
-    $this->Folder = new Folder();
+    parent::setUp(false);
 
-    $this->User = ClassRegistry::init('User');
-    $this->User->save($this->User->create(array('username' => 'admin', 'role' => ROLE_ADMIN)));
-    $this->userId = $this->User->getLastInsertID();
+    $this->testDir = $this->createTestDir();
+    $this->setOptionsForExternalTools();
 
-    $this->Option = ClassRegistry::init('Option');
-    $this->Option->setValue('bin.ffmpeg', $this->findExecutable('ffmpeg'), 0);
-    $this->Option->setValue('bin.exiftool', $this->findExecutable('exiftool'), 0);
-    $this->Option->setValue('bin.convert', $this->findExecutable('convert'), 0);
+    $admin = $this->Factory->createUser('admin', ROLE_ADMIN);
+    $this->mockUser($admin);
 
-    $CakeRequest = new CakeRequest();
-    $CakeResponse = new CakeResponse();
-    $this->Controller = new TestWriteController($CakeRequest, $CakeResponse);
-    $this->Controller->mockUserId = $this->userId;
-    $this->Controller->constructClasses();
     $this->Controller->startupProcess();
-    $this->Media = $this->Controller->Media;
-    $this->MyFile = $this->Controller->MyFile;
-
-
-    $this->Folder->create(TEST_FILES_TMP);
-  }
-
-  private function mockUser(&$user) {
-    $this->Controller->mockUserId = $user['User']['id'];
-  }
-
-  private function findExecutable($command) {
-    if (DS != '/') {
-      throw new Exception("Non Unix OS are not supported yet");
-    }
-    $paths = array('/usr/local/bin/', '/usr/bin/');
-    foreach ($paths as $path) {
-      if (file_exists($path . $command)) {
-        return $path . $command;
-      }
-    }
-    $result = array();
-    exec('which ' . $command, $result);
-    if ($result) {
-      return $result[0];
-    } else {
-      return false;
-    }
-  }
-
-  /**
-   * tearDown method
-   *
-   * @return void
-   */
-  public function tearDown() {
-    $this->Folder->delete(TEST_FILES_TMP);
-    
-    $this->Controller->shutdownProcess();
-    unset($this->Controller);
-    unset($this->Media);
-    unset($this->User);
-    unset($this->Folder);
-    parent::tearDown();
-  }
-
-  private function copyResource($resourceName, $dstPath, $dstName = null) {
-    $src = dirname(dirname(__FILE__)) . DS . 'Resources' . DS . $resourceName;
-    if (is_dir($dstPath) || can_write($dstPath)) {
-      throw new Exception("Destination does not exist or is not writeabel: $dstPath");
-    }
-    $dst = Folder::slashTerm($dstPath);
-    $dst .= ($dstName ? $dstName : $resourceName);
-    copy($src, $dst);
-    return $dst;
   }
 
   /**
@@ -188,24 +79,23 @@ class MediaWriteTestCase extends CakeTestCase {
   }
 
   function testThumbnailCreation() {
-    $filename = TEST_FILES_TMP . 'MVI_7620.OGG';
-    copy(RESOURCES . 'MVI_7620.OGG', $filename);
+    $filename = $this->copyResource('MVI_7620.OGG', $this->testDir);
 
     // Insert video and add tag 'thailand'
-    $this->Controller->FilterManager->read($filename);
+    $this->FilterManager->read($filename);
     $media = $this->Media->find('first');
     $this->assertNotEqual($media, false);
-    $user = $this->Controller->getUser();
+    $user = $this->getUser();
     $this->Media->setAccessFlags($media, $user);
     $data = array('Field' => array('keyword' => 'thailand'));
     $tmp = $this->Media->editSingle($media, $data, $user);
     $this->Media->save($tmp);
 
     $media = $this->Media->findById($media['Media']['id']);
-    $result = $this->Controller->FilterManager->write($media);
+    $result = $this->FilterManager->write($media);
     $this->assertEqual($result, true);
 
-    $thumb = TEST_FILES_TMP . 'MVI_7620.thm';
+    $thumb = dirname($filename) . DS . 'MVI_7620.thm';
     $this->assertEqual(file_exists($thumb), true);
     $values = $this->extractMeta($thumb);
     $this->assertEqual($values['Keywords'], 'thailand');
@@ -214,12 +104,11 @@ class MediaWriteTestCase extends CakeTestCase {
   function testImageMetaData() {
     //use for testing the same time zone as initial values (+02:00)
     date_default_timezone_set('Europe/Belgrade');//GMT+2 = Europe/Belgrade is 1 hrs behind Europe/Helsinki.
-    $filename = TEST_FILES_TMP . 'IMG_6131.JPG';
-    copy(RESOURCES . 'IMG_6131.JPG', $filename);
-    clearstatcache(true, $filename);
-    $user = $this->Controller->getUser();
+    $filename = $this->copyResource('IMG_6131.JPG', $this->testDir);
 
-    $this->Controller->FilterManager->read($filename);
+    $user = $this->getUser();
+
+    $this->FilterManager->read($filename);
     $media = $this->Media->find('first');
     $this->assertNotEqual($media, false);
     $this->assertEqual($media['Media']['flag'], 0);
@@ -248,7 +137,7 @@ class MediaWriteTestCase extends CakeTestCase {
     $media = $this->Media->findById($media['Media']['id']);
     // test if meta data has changed
     $this->assertEqual($media['Media']['flag'], MEDIA_FLAG_DIRTY);
-    $result = $this->Controller->FilterManager->write($media);
+    $result = $this->FilterManager->write($media);
     $this->assertEqual($result, true);
     $media = $this->Media->findById($media['Media']['id']);
     // test if all media are written and clean
@@ -274,12 +163,11 @@ class MediaWriteTestCase extends CakeTestCase {
     //use the same time zone +02:00
     date_default_timezone_set('Europe/Belgrade');//Europe/Belgrade is 1 hrs behind Europe/Helsinki.
     //$d = date_default_timezone_get();
-    $filename = TEST_FILES_TMP . 'IMG_6131.JPG';
-    copy(RESOURCES . 'IMG_6131.JPG', $filename);
-    clearstatcache(true, $filename);
-    $user = $this->Controller->getUser();
+    $filename = $this->copyResource('IMG_6131.JPG', $this->testDir);
 
-    $this->Controller->FilterManager->read($filename);
+    $user = $this->getUser();
+
+    $this->FilterManager->read($filename);
     $media = $this->Media->find('first');
 
     $data = array(
@@ -298,7 +186,7 @@ class MediaWriteTestCase extends CakeTestCase {
     $tmp = $this->Media->editSingle($media, $data, $user);
     $this->Media->save($tmp);
     $media = $this->Media->findById($media['Media']['id']);
-    $result = $this->Controller->FilterManager->write($media);
+    $result = $this->FilterManager->write($media);
     // Verify written meta data
     $values = $this->extractMeta($filename);
     $this->assertEqual($values['ObjectName'], 'Mosque Taj Mahal, India');
@@ -333,7 +221,7 @@ class MediaWriteTestCase extends CakeTestCase {
     $tmp = $this->Media->editSingle($media, $data, $user);
     $this->Media->save($tmp);
     $media = $this->Media->findById($media['Media']['id']);
-    $result = $this->Controller->FilterManager->write($media);
+    $result = $this->FilterManager->write($media);
 
     // Verify written meta data
     $values = $this->extractMeta($filename);
@@ -354,14 +242,13 @@ class MediaWriteTestCase extends CakeTestCase {
   }
 
   function testGroupWrite() {
-    $filename = TEST_FILES_TMP . 'IMG_6131.JPG';
-    copy(RESOURCES . 'IMG_6131.JPG', $filename);
-    clearstatcache(true, $filename);
-    $user = $this->Controller->getUser();
-    $group1 = $this->User->Group->save($this->User->Group->create(array('name' => 'family', 'user_id' => $user['User']['id'])));
-    $group2 = $this->User->Group->save($this->User->Group->create(array('name' => 'friends', 'user_id' => $user['User']['id'])));
+    $filename = $this->copyResource('IMG_6131.JPG', $this->testDir);
 
-    $this->Controller->FilterManager->read($filename);
+    $user = $this->getUser();
+    $group1 = $this->Factory->createGroup('family', $user);
+    $group2 = $this->Factory->createGroup('friends', $user);
+
+    $this->FilterManager->read($filename);
     $media = $this->Media->find('first');
 
     $data = array('Group' => array('names' => 'family,friends'));
@@ -369,7 +256,7 @@ class MediaWriteTestCase extends CakeTestCase {
     $tmp = $this->Media->editSingle($media, $data, $user);
     $this->Media->save($tmp);
     $media = $this->Media->findById($media['Media']['id']);
-    $result = $this->Controller->FilterManager->write($media);
+    $result = $this->FilterManager->write($media);
     $this->assertEqual($result, true);
 
     // Verify written meta data
@@ -378,22 +265,20 @@ class MediaWriteTestCase extends CakeTestCase {
   }
 
   public function testKeepFileGroupIfSubscriptionIsMissing() {
-    $filename = TEST_FILES_TMP . 'IMG_7795.JPG';
-    copy(RESOURCES . 'IMG_7795.JPG', $filename);
-    clearstatcache(true, $filename);
+    $filename = $this->copyResource('IMG_7795.JPG', $this->testDir);
 
     // Precondition: There are not groups yet and will be created on import
     $this->assertEqual($this->Media->Group->find('count'), 0);
 
-    $userA = $this->User->save($this->User->create(array('username' => 'User')));
-    $this->User->Group->save($this->User->Group->create(array('name' => 'worker', 'user_id' => $userA['User']['id'], 'is_moderated' => true, 'is_shared' => false)));
+    $userA = $this->Factory->createUser('User');
+    $this->Factory->createGroup('worker', $userA, array('is_moderated' => true, 'is_shared' => false));
     $this->mockUser($userA);
 
-    $userB = $this->User->save($this->User->create(array('username' => 'Another User')));
-    $this->User->Group->save($this->User->Group->create(array('name' => 'friends', 'user_id' => $userB['User']['id'], 'is_moderated' => false, 'is_shared' => true)));
-    $this->User->Group->save($this->User->Group->create(array('name' => 'family', 'user_id' => $userB['User']['id'], 'is_moderated' => true, 'is_shared' => true)));
+    $userB = $this->Factory->createUser('Another User');
+    $this->Factory->createGroup('friends', $userB, array('is_moderated' => false, 'is_shared' => true));
+    $this->Factory->createGroup('family', $userB, array('is_moderated' => true, 'is_shared' => true));
 
-    $this->Controller->FilterManager->readFiles(TEST_FILES_TMP);
+    $this->FilterManager->readFiles($this->testDir);
     $userA = $this->User->findById($userA['User']['id']);
     $media = $this->Media->find('first');
     // Test auto subscription. Exclude group family which is moderated
@@ -407,7 +292,7 @@ class MediaWriteTestCase extends CakeTestCase {
     $this->assertEqual(Set::extract('/Group/name', $media), array('friends', 'worker'));
 
     $media = $this->Media->findById($media['Media']['id']);
-    $result = $this->Controller->FilterManager->write($media);
+    $result = $this->FilterManager->write($media);
     $this->assertEqual($result, true);
 
     // Verify written meta data
