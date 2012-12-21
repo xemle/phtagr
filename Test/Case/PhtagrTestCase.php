@@ -191,4 +191,11 @@ class PhtagrTestCase extends CakeTestCase {
     return Folder::slashTerm($path);
   }
 
+  public function testGetUser() {
+    $admin = $this->Factory->createUser('admin', ROLE_ADMIN);
+    $this->mockUser($admin);
+
+    $result = $this->getUser();
+    $this->assertEqual($result['User']['id'], $admin['User']['id']);
+  }
 }
