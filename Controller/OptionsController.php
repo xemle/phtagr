@@ -116,17 +116,15 @@ class OptionsController extends AppController {
       $offset = min(720, max(-720, $offset));
       $this->Option->setValue('filter.gps.offset', $offset, $userId);
 
-      $check = Set::extract('filter.gps.overwrite', $this->request->data);
-      $check = $check ? 1 : 0;
-      $this->Option->setValue('filter.gps.overwrite', $check, $userId);
-
       $range = intval(Set::extract('filter.gps.range', $this->request->data));
       $range = max(0, min(60, $range));
       $this->Option->setValue('filter.gps.range', $range, $userId);
 
-      $check2 = Set::extract('xmp.use.sidecar', $this->request->data);
-      $check2 = $check2 ? 1 : 0;
-      $this->Option->setValue('xmp.use.sidecar', $check2, $userId);
+      $flags = array('filter.gps.overwrite', 'filter.write.metadata.embedded', 'filter.write.metadata.sidecar', 'filter.create.metadata.sidecar');
+      foreach ($flags as $flag) {
+        $bool = Set::extract($flag, $this->request->data) ? 1 : 0;
+        $this->Option->setValue($flag, $bool, $userId);
+      }
 
       $this->Session->setFlash(__("Settings saved"));
     }
