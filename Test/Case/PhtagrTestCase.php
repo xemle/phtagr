@@ -159,6 +159,10 @@ class PhtagrTestCase extends CakeTestCase {
    */
   public function copyResource($filename, $dstPath, $dstFilename = null) {
     $src = $this->getResource($filename);
+    if (!file_exists($dstPath)) {
+      $Folder = new Folder();
+      $Folder->create($dstPath);
+    }
     if (!is_dir($dstPath) || !is_writable($dstPath)) {
       throw new Exception("Destination does not exist or is not writeable: $dstPath");
     }
@@ -184,7 +188,7 @@ class PhtagrTestCase extends CakeTestCase {
     $Folder->create($path);
     $this->_tmpDirs[] = $path;
 
-    return $path;
+    return Folder::slashTerm($path);
   }
 
 }
