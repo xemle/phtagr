@@ -57,7 +57,7 @@ class SidecarFilterComponent extends BaseFilterComponent {
       return $xmpFilename;
     }
     if ($createSidecar){
-      return $this->_createSidecar($filename);
+      return $this->create($filename);
     } else {
       return false;
     }
@@ -108,14 +108,38 @@ class SidecarFilterComponent extends BaseFilterComponent {
     return true;
   }
 
-  private function _createSidecar($filename) {
+  /**
+   * Write empty XMP file
+   *
+   * @param string $filename Filename of XMP
+   * @return true on success
+   */
+  public function _createEmpty($filename) {
+    $output = '<?xpacket begin="?" id="W5M0MpCehiHzreSzNTczkc9d"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/" >
+   <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   </rdf:RDF>
+</x:xmpmeta>
+<?xpacket end="w"?>';
+    $File = new File($filename);
+    return $File->write($output);
+  }
+
+  /**
+   * Create a XMP sidecar from given filename by using exiftool. If exiftoll
+   * could not read given original file an empty XMP file is created.
+   *
+   * @param string $filename Original file
+   * @return Sidecare filename on success
+   */
+  public function create($filename) {
     if (!$this->Exiftool->isEnabled()) {
       return false;
     }
     $xmpFilename = $this->getSidecarFilename($filename);
 
-    //create sidecar xmp if missing
     if (file_exists($xmpFilename)) {
+      $this->FileManager->add($xmpFilename);
       return $xmpFilename;
     }
 
@@ -128,7 +152,7 @@ class SidecarFilterComponent extends BaseFilterComponent {
     $args[] = $filename;
     $args[] = $xmpFilename ;
     $result = $this->Exiftool->writeMetaData($xmpFilename, $args);
-    
+
     //wait until 1 sec if file is not created yet
     //without the loop it fails condition file_exists($xmpFilename)
     $starttime = microtime(true);
@@ -136,12 +160,17 @@ class SidecarFilterComponent extends BaseFilterComponent {
       //nanospllep is not available on windows systems
       time_nanosleep(0, 1000000); // 1 ms to avoid high cpu utilisation; 0.01 is too slow
     }
-    
+
     if ($result != true || !file_exists($xmpFilename)) {
-      Logger::err("Could not create sidecar file: " . join(", ", (array)$result));
-      return false;
+      Logger::err("Could not create sidecar file from original file '$filename': " . join(", ", (array)$result));
+      if (!$this->_createEmpty($xmpFilename)) {
+        Logger::err("Could not create empty sidecar '$xmpFilename' file from original file '$filename'");
+        return false;
+      } else {
+        Logger::info("Created empty xmp sidecar file: $xmpFilename");
+      }
     } else {
-      Logger::info("Created xmp sidecar file: $xmpFilename");
+      Logger::info("Created xmp sidecar file from '$filename': $xmpFilename");
     }
 
     $this->FileManager->add($xmpFilename);
@@ -175,7 +204,7 @@ class SidecarFilterComponent extends BaseFilterComponent {
           //Err: it finds first file in database, not the first file found on hdd;
           //maybe a higher priority file exists on hdd but it is not imported yet (video and jpg with same basename)
           //possible to have higher priority and missing from database?
-          //todo:?:check just the first $file in $found, after sorting by ext priority? 
+          //todo:?:check just the first $file in $found, after sorting by ext priority?
           return $MainFile;
         }
       }
@@ -198,14 +227,13 @@ class SidecarFilterComponent extends BaseFilterComponent {
     $filename = $this->MyFile->getFilename($file);
 
     if (!$this->controller->MyFile->isType($file, FILE_TYPE_SIDECAR) ||
-        !$this->Exiftool->isEnabled() ||
-        !$this->controller->getOption('xmp.use.sidecar', 0)) {
+        !$this->Exiftool->isEnabled()) {
       return false;
     }
 
     $path = Folder::slashTerm(dirname($filename));
     if (!$media){
-      //no media attached yet; 
+      //no media attached yet;
       //search if media can be attached
       $mainfileOfMedia = $this->_findMainFile($file);
       if (!isset($mainfileOfMedia['Media']['id'])) {

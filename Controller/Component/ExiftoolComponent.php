@@ -64,7 +64,7 @@ class ExiftoolComponent extends Component {
       return;
     }
     $this->controller = $controller;
-    $this->_readExiftoolVersion();
+    $this->readExiftoolVersion();
   }
 
   /**
@@ -93,7 +93,7 @@ class ExiftoolComponent extends Component {
   /**
    * Reads the exiftool version and sets supported features
    */
-  private function _readExiftoolVersion() {
+  public function readExiftoolVersion() {
     $this->bin = $this->controller->getOption('bin.exiftool');
     if (!$this->bin) {
       return false;

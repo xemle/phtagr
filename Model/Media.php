@@ -170,6 +170,28 @@ class Media extends AppModel {
     return null;
   }
 
+  /**
+   * Returns the main filename of the media. The main file is the file
+   * which has FILE_FLAG_DEPENDENT flag. If no file has a FILE_FLAG_DEPENDENT
+   * returns the first file
+   *
+   * @param array $media Media model data
+   * @return filename
+   */
+  public function getMainFilename(&$media) {
+    $filename = false;
+    foreach ($media['File'] as $file) {
+      if ($this->File->hasFlag($file, FILE_FLAG_DEPENDENT)) {
+        $filename = $this->File->getFilename($file);
+        break;
+      }
+    }
+    if (!$filename && count($media['File'])) {
+        $filename = $this->File->getFilename($media['File'][0]);
+    }
+    return $filename;
+  }
+
   public function canRead(&$media, &$user) {
     return $this->checkAccess($media, $user, ACL_READ_PREVIEW, ACL_READ_MASK, null);
   }
@@ -613,7 +635,7 @@ class Media extends AppModel {
   public function findAllByOptions($user = false, $options = array()) {
 
     $options = am(array('model' => 'File', 'field' => 'path', 'conditions' => array()), $options);
-    
+
     $table = $this->tablePrefix.$this->table;//'media'
     $alias = $this->alias;//'Media'
     $key = $this->primaryKey;//'id'
@@ -635,11 +657,11 @@ class Media extends AppModel {
         if ($user) {
           $conditions[] = "`$alias`.`user_id` = " . $user['User']['id'];
         }
-          
+
     } elseif (isset($this->hasAndBelongsToMany[$assoc])) {
         $aclQuery = $this->buildAclQuery($user);//?
         $conditions = am($options['conditions'], $aclQuery['conditions']);
-        
+
         $config = $this->hasAndBelongsToMany[$assoc];
 
         $joinTable = $this->tablePrefix.$config['joinTable'];
@@ -670,7 +692,7 @@ class Media extends AppModel {
 
     return $result;
   }
-  
+
   /**
    * Create tag cloud of HABTM model assoziation
    *

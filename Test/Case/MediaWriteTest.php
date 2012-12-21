@@ -39,6 +39,10 @@ class MediaWriteTestCase extends PhtagrTestCase {
     $this->testDir = $this->createTestDir();
     $this->setOptionsForExternalTools();
 
+    $this->Option->addValue($this->FilterManager->embeddedEnabledOption, 1, 0);
+    $this->Option->addValue($this->FilterManager->sidecarEnabledOption, 1, 0);
+    $this->Option->addValue($this->FilterManager->createSidecarOption, 0, 0);
+
     $admin = $this->Factory->createUser('admin', ROLE_ADMIN);
     $this->mockUser($admin);
 

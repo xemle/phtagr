@@ -25,6 +25,28 @@ class FilterManagerComponent extends Component {
   var $components = array('FileManager');
   var $enableImportLogging = true;
 
+  // Option values
+  var $embeddedEnabledOption = 'filter.write.metadata.embedded';
+  var $sidecarEnabledOption = 'filter.write.metadata.sidecar';
+  var $createSidecarOption = 'filter.create.metadata.sidecar';
+
+  /**
+   * True if embedded write support is enabled
+   */
+  var $embeddedEnabled = false;
+  /**
+   * True if sidecar write support is enabled
+   */
+  var $sidecarEnabled = false;
+  /**
+   * True if missing sidecare will be created
+   */
+  var $createSidecar = false;
+  /**
+   * True if write support is enabled
+   */
+  var $_writeEnabled = false;
+
   /**
    * List of extensions
    * 'extensions' => filter
@@ -41,7 +63,7 @@ class FilterManagerComponent extends Component {
 
   var $errors = array();
   var $skipped = array();
-  
+
   var $fileCache = array();
   var $mediaCache = array();
 
@@ -52,6 +74,12 @@ class FilterManagerComponent extends Component {
       return false;
     }
     $this->loadFilter(array('ImageFilter', 'ReadOnlyImageFilter', 'VideoFilter', 'GpsFilter', 'SidecarFilter'));
+
+    $this->embeddedEnabled = $this->controller->getOption($this->embeddedEnabledOption);
+    $this->sidecarEnabled = $this->controller->getOption($this->sidecarEnabledOption);
+    $this->createSidecar = $this->controller->getOption($this->createSidecarOption);
+
+    $this->_writeEnabled = $this->embeddedEnabled || $this->sidecarEnabled || $this->createSidecar;
   }
 
   /**
@@ -142,7 +170,7 @@ class FilterManagerComponent extends Component {
    * @return True if filename is supported. False otherwise
    */
   public function isSupported($filename) {
-    $ext = strtolower(substr($filename, strrpos($filename, '.') + 1));
+    $ext = $this->_getFileExtension($filename);
     if (isset($this->extensions[$ext])) {
       return true;
     } else {
@@ -150,6 +178,9 @@ class FilterManagerComponent extends Component {
     }
   }
 
+  private function _getFileExtension($filename) {
+    return strtolower(substr($filename, strrpos($filename, '.') + 1));
+  }
   /**
    * Returns a filter by filename
    *
@@ -157,7 +188,7 @@ class FilterManagerComponent extends Component {
    * @result Filter which handles the file
    */
   public function getFilterByExtension($filename) {
-    $ext = strtolower(substr($filename, strrpos($filename, '.') + 1));
+    $ext = $this->_getFileExtension($filename);
     if (isset($this->extensions[$ext])) {
       return $this->extensions[$ext];
     } else {
@@ -373,7 +404,7 @@ class FilterManagerComponent extends Component {
 
   /**
    * replace model in cache
-   * 
+   *
    * @param string $path Path of file
    * @param string $model Model
    * @param string $modelType 'Media' or 'File'
@@ -392,13 +423,13 @@ class FilterManagerComponent extends Component {
     }
     foreach ($cache[$path] as $key=>$cachedModel) {
       if ($model[$modelType]['id'] == $cachedModel[$modelType]['id']) {
-        $cache[$path][$key] = $model; 
+        $cache[$path][$key] = $model;
         return true;
       }
     }
     return false;
   }
-  
+
   /**
    * Import a file to the database
    *
@@ -445,7 +476,6 @@ class FilterManagerComponent extends Component {
     }
 
     if ($this->controller->MyFile->hasMedia($file)) {
-      $media = $this->controller->Media->findById($file['File']['media_id']);
       $media = $this->_findMediaInPath($path, $filename);
       $readed = strtotime($file['File']['readed']);
       if ($forceReadMeta) {
@@ -476,6 +506,35 @@ class FilterManagerComponent extends Component {
     return false;
   }
 
+  private function _createAndWriteSidecar(&$media) {
+    $filename = $this->controller->Media->getMainFilename($media);
+    if (!$filename) {
+      Logger::err("Main file for {$media['Media']['id']} not found");
+      $this->addError($filename, 'FileNotFound');
+      return false;
+    } else if (!is_writable(dirname($filename))) {
+      Logger::err("Can not create sidecar file for {$media['Media']['id']}");
+      $this->addError($filename, 'DirectoryNotWritable');
+      return false;
+    }
+
+    $sidecar = $this->SidecarFilter->create($filename);
+    if (!$sidecar) {
+      Logger::err("Creation of sidecar file for $filename failed");
+      return false;
+    }
+    $file = $this->controller->MyFile->findByFilename($sidecar);
+    if (!$file) {
+      Logger::err("Can not find file in database for $sidecar");
+      return false;
+    }
+    if (!$this->controller->MyFile->setMedia($file, $media['Media']['id'])) {
+      Logger::err("Could not assign media {$media['Media']['id']} to file {$file['File']['id']}");
+      return false;
+    }
+    return $this->SidecarFilter->write($file, $media);
+  }
+
   /**
    * Export database to file
    */
@@ -485,8 +544,12 @@ class FilterManagerComponent extends Component {
       $this->addError('Media-' . $media['Media']['id'], 'NoMediaFile');
       return false;
     }
+    if (!$this->_writeEnabled) {
+      return false;
+    }
     $success = true;
     $filterMissing = false;
+    $hasSidecar = false;
     foreach ($media['File'] as $file) {
       $file = $this->controller->MyFile->findById($file['id']);
       $filename = $this->controller->MyFile->getFilename($file);
@@ -495,7 +558,22 @@ class FilterManagerComponent extends Component {
         $this->addError($filename, 'FileNotFound');
         $success = false;
         continue;
+      } else if (!is_writable(dirname($filename))) {
+        Logger::err("Directory of file of media {$media['Media']['id']} is not writeable: $filename");
+        $this->addError($filename, 'DirectoryNotWritable');
+        $success = false;
+        continue;
       }
+      $isSidecar = $this->controller->MyFile->isType($file, FILE_TYPE_SIDECAR);
+      if ($isSidecar) {
+        $hasSidecar = true;
+      }
+      if (!$isSidecar && !$this->embeddedEnabled) {
+        continue;
+      } else if ($isSidecar && !$this->sidecarEnabled) {
+        continue;
+      }
+
       $filter = $this->getFilterByExtension($filename);
       if (!$filter) {
         Logger::verbose("Could not find a filter for $filename");
@@ -503,15 +581,12 @@ class FilterManagerComponent extends Component {
         $filterMissing = true;
         continue;
       }
-      if (!is_writable(dirname($filename))) {
-        Logger::err("Directory of file of media {$media['Media']['id']} is not writeable: $filename");
-        $this->addError($filename, 'DirectoryNotWritable');
-        $success = false;
-        continue;
-      }
       $filterMissing = false;
       Logger::trace("Call filter ".$filter->getName()." for $filename");
       $success = ($success && $filter->write($file, $media));
+    }
+    if (!$hasSidecar && $this->createSidecar) {
+      $success = ($success && $this->_createAndWriteSidecar($media));
     }
     return $success && !$filterMissing;
   }
@@ -543,7 +618,7 @@ class FilterManagerComponent extends Component {
     $LastFileMemory = round(($CrtMemory-$v['LastMemory'])*1000,1);//kb  nr zecimale??
     $v['LastMemory'] = $CrtMemory;
     $v['LastTime'] = $CrtTime;
-    
+
     $this->log($file, 'import_memory_speed');
     $this->log("------ FILE NO: ".$v['file_nr'].", total time ".$totalTime." seconds, LastFileTime ".$LastFileTime.", averageFileTime ".$averageFileTime." sec/file", 'import_memory_speed');
     $this->log("------ memory_get_usage = ".$CrtMemory." MB, used for last file = ".$LastFileMemory." kb, averageFileMemory ".$averageFileMemory." kb", 'import_memory_speed');
@@ -551,5 +626,3 @@ class FilterManagerComponent extends Component {
     return $importLog;
   }
 }
-
-?>

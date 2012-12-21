@@ -15,50 +15,14 @@
  * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
 
-App::uses('SearchComponent', 'Controller/Component');
-if (!class_exists('TestControllerMock')) {
-  App::import('File', 'TestControllerMock', array('file' => dirname(dirname(__FILE__)) . DS . 'TestControllerMock.php'));
-}
-if (!defined('RESOURCES')) {
-  define('RESOURCES', TESTS . 'Resources' . DS);
-}
-if (!defined('TEST_FILES')) {
-  define('TEST_FILES', TMP);
-}
-if (!defined('TEST_FILES_TMP')) {
-  define('TEST_FILES_TMP', TEST_FILES . 'filter.manager.tmp' . DS);
-}
+App::uses('PhtagrTestCase', 'Test/Case');
 
-if (!is_writeable(TEST_FILES)) {
-  trigger_error(__('Test file directory %s must be writeable', TEST_FILES), E_USER_ERROR);
-}
-
-class FilterManagerController extends AppController {
+class FilterManagerComponentTest  extends PhtagrTestCase {
 
 	var $uses = array('Media', 'MyFile', 'User', 'Option');
-
 	var $components = array('FileManager', 'FilterManager', 'Exiftool');
 
-	public function &getUser() {
-    $user = $this->User->find('first');
-    return $user;
-	}
-
-}
-class FilterManagerComponentTest  extends CakeTestCase {
-
-	var $controller;
-
-  var $User;
-  var $Media;
-  var $Option;
-  var $userId;
-
-  var $Folder;
-
-  public $fixtures = array('app.file', 'app.media', 'app.user', 'app.group', 'app.groups_media',
-      'app.groups_user', 'app.option', 'app.guest', 'app.comment', 'app.my_file',
-      'app.fields_media', 'app.field', 'app.comment');
+  var $testDir;
 
 /**
  * setUp method
@@ -66,80 +30,29 @@ class FilterManagerComponentTest  extends CakeTestCase {
  * @return void
  */
 	public function setUp() {
-		parent::setUp();
-    $this->Folder = new Folder();
+    parent::setUp(false);
 
-    $this->User = ClassRegistry::init('User');
-    $this->User->save($this->User->create(array('username' => 'admin', 'role' => ROLE_ADMIN)));
-    $this->userId = $this->User->getLastInsertID();
+    $this->testDir = $this->createTestDir();
+    $this->setOptionsForExternalTools();
 
-    $this->Group = ClassRegistry::init('Group');
+    $this->Option->addValue($this->FilterManager->embeddedEnabledOption, 1, 0);
+    $this->Option->addValue($this->FilterManager->sidecarEnabledOption, 1, 0);
+    $this->Option->addValue($this->FilterManager->createSidecarOption, 0, 0);
 
-    $this->Option = ClassRegistry::init('Option');
-    $this->Option->setValue('bin.ffmpeg', $this->findExecutable('ffmpeg'), 0);
-    $this->Option->setValue('bin.exiftool', $this->findExecutable('exiftool'), 0);
-    $this->Option->setValue('bin.convert', $this->findExecutable('convert'), 0);
+    $admin = $this->Factory->createUser('admin', ROLE_ADMIN);
+    $this->mockUser($admin);
 
-    $CakeRequest = new CakeRequest();
-		$CakeResponse = new CakeResponse();
-		$this->Controller = new FilterManagerController($CakeRequest, $CakeResponse);
-		$this->Controller->constructClasses();
-		$this->Controller->startupProcess();
-    $this->Media = $this->Controller->Media;
-    $this->MyFile = $this->Controller->MyFile;
-
-    $this->Folder->create(TEST_FILES_TMP);
+    $this->Controller->startupProcess();
   }
 
-/**
- * tearDown method
- *
- * @return void
- */
-	public function tearDown() {
-    $this->Folder->delete(TEST_FILES_TMP);
-
-    $this->Controller->shutdownProcess();
-    unset($this->Controller);
-    unset($this->Media);
-    unset($this->Option);
-    unset($this->Group);
-    unset($this->User);
-    unset($this->Folder);
-
-		parent::tearDown();
-	}
-
-  private function findExecutable($command) {
-    if (DS != '/') {
-      throw new Exception("Non Unix OS are not supported yet");
-    }
-    $paths = array('/usr/local/bin/', '/usr/bin/');
-    foreach ($paths as $path) {
-      if (file_exists($path . $command)) {
-        return $path . $command;
-      }
-    }
-    $result = array();
-    exec('which ' . $command, $result);
-    if ($result) {
-      return $result[0];
-    } else {
-      return false;
-    }
-  }
 
   public function testReadFilesRecursivly() {
-    $subdir = TEST_FILES_TMP . 'subdir' . DS;
-    $subsubdir = $subdir . 'subdir' . DS;
-    mkdir($subdir);
-    mkdir($subsubdir);
-    copy(RESOURCES . 'IMG_4145.JPG', TEST_FILES_TMP . 'IMG_4145.JPG');
-    copy(RESOURCES . 'IMG_6131.JPG', $subdir . 'IMG_6131.JPG');
-    copy(RESOURCES . 'IMG_7795.JPG', $subsubdir . 'IMG_7795.JPG');
+    $this->copyResource('IMG_4145.JPG', $this->testDir);
+    $this->copyResource('IMG_6131.JPG', $this->testDir . 'subdir');
+    $this->copyResource('IMG_7795.JPG', $this->testDir . 'subdir' . DS . 'subsubdir');
 
     $options = array('recursive' => false);
-    $this->Controller->FilterManager->readFiles(TEST_FILES_TMP, $options);
+    $this->Controller->FilterManager->readFiles($this->testDir, $options);
     $count = $this->Media->find('count');
     $this->assertEqual($count, 1);
 
@@ -149,7 +62,7 @@ class FilterManagerComponentTest  extends CakeTestCase {
     $this->assertEqual($names, array('IMG_4145.JPG'));
 
     $options = array('recursive' => true);
-    $this->Controller->FilterManager->readFiles(TEST_FILES_TMP, $options);
+    $this->Controller->FilterManager->readFiles($this->testDir, $options);
     $count = $this->Media->find('count');
     $this->assertEqual($count, 3);
 
@@ -158,5 +71,133 @@ class FilterManagerComponentTest  extends CakeTestCase {
     sort($names);
     $this->assertEqual($names, array('IMG_4145.JPG', 'IMG_6131.JPG', 'IMG_7795.JPG'));
   }
+  public function testDisabledWrite() {
+    $this->FilterManager->embeddedEnabled = false;
+    $this->FilterManager->sidecarEnabled = false;
+    $this->FilterManager->createSidecar = false;
+
+    $filename = $this->copyResource('IMG_7795.JPG', $this->testDir);
+    $this->FilterManager->readFiles($this->testDir);
+
+    $media = $this->Media->find('first');
+    $data = array('Fields' => array('keywords' => 'light,night,temple,stars'));
+    $tmp = $this->Media->editSingle($media, $data, $userA);
+    $this->Media->save($tmp);
+    $media = $this->Media->find('first');
+    $filesize = filesize($filename);
+
+    // No meta data should be written
+    $result = $this->FilterManager->write($media);
+    $this->assertEqual($result, true);
+    $this->assertEqual(filesize($filename), $filesize);
+
+    // No new file should be created
+    $Folder = new Folder($this->testDir);
+    $this->assertEqual(count($Folder->find()), 1);
+  }
+
+  public function testWriteEmbedded() {
+    $this->FilterManager->embeddedEnabled = true;
+    $this->FilterManager->sidecarEnabled = false;
+    $this->FilterManager->createSidecar = false;
+
+    $filename = $this->copyResource('IMG_7795.JPG', $this->testDir);
+    $this->FilterManager->readFiles($this->testDir);
+
+    $media = $this->Media->find('first');
+    $data = array('Fields' => array('keywords' => 'light,night,temple,stars'));
+    $tmp = $this->Media->editSingle($media, $data, $userA);
+    $this->Media->save($tmp);
+    $media = $this->Media->find('first');
+    $filesize = filesize($filename);
+
+    $result = $this->FilterManager->write($media);
+    $this->assertEqual($result, true);
+    $this->assertNotEqual(filesize($filename), $filesize);
+
+    // No new files should be created
+    $Folder = new Folder($this->testDir);
+    $this->assertEqual(count($Folder->find()), 1);
+  }
+
+  public function testCreateSidecar() {
+    $this->FilterManager->embeddedEnabled = false;
+    $this->FilterManager->sidecarEnabled = true;
+    $this->FilterManager->createSidecar = true;
+
+    $filename = $this->copyResource('IMG_7795.JPG', $this->testDir);
+    $this->FilterManager->readFiles($this->testDir);
+
+    $media = $this->Media->find('first');
+    $data = array('Fields' => array('keywords' => 'light,night,temple,stars'));
+    $tmp = $this->Media->editSingle($media, $data, $userA);
+    $this->Media->save($tmp);
+    $media = $this->Media->find('first');
+    $filesize = filesize($filename);
+
+    $result = $this->FilterManager->write($media);
+    $this->assertEqual($result, true);
+    $this->assertEqual(filesize($filename), $filesize);
+
+    // New sidecar file should be created
+    $Folder = new Folder($this->testDir);
+    $files = $Folder->find();
+    $this->assertEqual(count($files), 2);
+    $this->assertEqual(count($Folder->find('IMG_7795.xmp')), 1);
+  }
+
+  public function testDisabledSidecarCreation() {
+    $this->FilterManager->embeddedEnabled = false;
+    $this->FilterManager->sidecarEnabled = true;
+    $this->FilterManager->createSidecar = false;
+
+    $filename = $this->copyResource('IMG_7795.JPG', $this->testDir);
+    $this->FilterManager->readFiles($this->testDir);
+
+    $media = $this->Media->find('first');
+    $data = array('Fields' => array('keywords' => 'light,night,temple,stars'));
+    $tmp = $this->Media->editSingle($media, $data, $userA);
+    $this->Media->save($tmp);
+    $media = $this->Media->find('first');
+    $filesize = filesize($filename);
+
+    $result = $this->FilterManager->write($media);
+    $this->assertEqual($result, true);
+    $this->assertEqual(filesize($filename), $filesize);
+
+    // New sidecar file should be created
+    $Folder = new Folder($this->testDir);
+    $this->assertEqual(count($Folder->find()), 1);
+  }
+
+  public function testWriteEmbeddedAndSidecar() {
+    $this->FilterManager->embeddedEnabled = true;
+    $this->FilterManager->sidecarEnabled = true;
+    $this->FilterManager->createSidecar = true;
+
+    $imageFile = $this->copyResource('IMG_7795.JPG', $this->testDir);
+    $sidecarFile = $this->copyResource('IMG_7795.xmp', $this->testDir);
+    $this->FilterManager->readFiles($this->testDir);
+
+    $media = $this->Media->find('first');
+    $this->assertEqual(count($media['File']), 2);
+
+    $data = array('Fields' => array('keywords' => 'light,night,temple,stars'));
+    $tmp = $this->Media->editSingle($media, $data, $userA);
+    $this->Media->save($tmp);
+    $media = $this->Media->find('first');
+    $imageFileSize = filesize($imageFile);
+    $sidecarFileSize = filesize($sidecarFile);
+
+    // Image and sidecar file should be updated
+    $result = $this->FilterManager->write($media);
+    $this->assertEqual($result, true);
+    $this->assertNotEqual(filesize($imageFile), $imageFileSize);
+    $this->assertNotEqual(filesize($sidecarFile), $sidecarFileSize);
+
+    // Now new files should be created
+    $Folder = new Folder($this->testDir);
+    $this->assertEqual(count($Folder->find()), 2);
+  }
+
 }
-?>
