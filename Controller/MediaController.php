@@ -189,7 +189,7 @@ class MediaController extends AppController
       Logger::warn("User {$user['User']['id']} has no previleges to access image ".$file['Media']['id']);
       $this->redirect(null, 404);
     }
-    if ($this->Media->hasFlag($file, MEDIA_FLAG_DIRTY)) {
+    if ($this->Media->hasFlag($file, MEDIA_FLAG_DIRTY) && $this->getOption('filter.write.onDemand')) {
       $media = $this->Media->findById($file['Media']['id']);
       $this->loadComponent('FilterManager');
       $this->FilterManager->write($media);
@@ -215,9 +215,10 @@ class MediaController extends AppController
     if (!count($media['File'])) {
       return $files;
     }
+    $writeMetaData = $this->getOption('filter.write.onDemand');
     if ($format == 'original') {
       // Write meta data if dirty
-      if ($this->Media->hasFlag($media, MEDIA_FLAG_DIRTY)) {
+      if ($this->Media->hasFlag($media, MEDIA_FLAG_DIRTY) && $writeMetaData) {
         $this->loadComponent('FilterManager');
         if ($this->FilterManager->write($media)) {
           // reload written media

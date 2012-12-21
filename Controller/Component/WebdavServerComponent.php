@@ -515,7 +515,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
 
     // Update metadata on dirty file
     $file = $this->controller->MyFile->findByFilename($fspath);
-    if ($file && $this->controller->Media->hasFlag($file, MEDIA_FLAG_DIRTY)) {
+    if ($file && $this->controller->Media->hasFlag($file, MEDIA_FLAG_DIRTY) && $this->controller->getOption('filter.write.onDemand')) {
       $media = $this->controller->Media->findById($file['Media']['id']);
       $this->FilterManager->write($media);
     }

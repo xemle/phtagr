@@ -120,7 +120,9 @@ class OptionsController extends AppController {
       $range = max(0, min(60, $range));
       $this->Option->setValue('filter.gps.range', $range, $userId);
 
-      $flags = array('filter.gps.overwrite', 'filter.write.metadata.embedded', 'filter.write.metadata.sidecar', 'filter.create.metadata.sidecar');
+      $flags = array('filter.gps.overwrite',
+        'filter.write.metadata.embedded', 'filter.write.metadata.sidecar', 'filter.create.metadata.sidecar',
+        'filter.write.onDemand');
       foreach ($flags as $flag) {
         $bool = Set::extract($flag, $this->request->data) ? 1 : 0;
         $this->Option->setValue($flag, $bool, $userId);

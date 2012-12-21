@@ -224,9 +224,9 @@ class BrowserController extends AppController
       $this->redirect(null, 404);
     }
 
-    // Update metadata on dirty file ??? and if file was also changed? ask owner before writing?
+    // Update metadata on dirty file
     $file = $this->MyFile->findByFilename($filename);
-    if ($file && $this->Media->hasFlag($file, MEDIA_FLAG_DIRTY)) {
+    if ($file && $this->Media->hasFlag($file, MEDIA_FLAG_DIRTY) && $this->getOption('filter.write.onDemand')) {
       $media = $this->Media->findById($file['Media']['id']);
       $this->FilterManager->write($media);
     }
