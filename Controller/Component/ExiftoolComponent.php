@@ -566,7 +566,7 @@ class ExiftoolComponent extends Component {
     // comment next lines in order to read all metadata, not only these fields
     $base = array('-Error', '-Warning', '-FileName', '-ImageWidth', '-ImageHeight', '-ObjectName', '-FileModifyDate');//, '-DateTimeCreated', '-SubSecDateTimeOriginal', '-SubSecCreateDate'
     //for numerical Orientation a # can be used as field suffix: -Orientation#
-    $exif = array('-Orientation#', '-Aperture', '-ShutterSpeed', '-Model', '-ISO', '-Comment', '-UserComment', '-DateTimeOriginal', '-XMP-xmp:CreateDate');
+    $exif = array('-IFD0:Orientation#', '-Aperture', '-ShutterSpeed', '-Model', '-ISO', '-Comment', '-UserComment', '-DateTimeOriginal', '-XMP-xmp:CreateDate');
     $gps = array('-GPSLatitude#', '-GPSLatitudeRef', '-GPSLongitude#', '-GPSLongitudeRef');
     //read only IPTC:DateCreated for avoiding confusion with XMP-photoshop:DateCreated = Date + Time + zone
     //IPTC - location
