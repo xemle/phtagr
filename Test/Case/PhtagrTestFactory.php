@@ -42,11 +42,9 @@ class PhtagrTestFactory {
     return $this->User->findById($this->User->getLastInsertID());
   }
 
-  public function createMedia($name = 'null', $user = null, $options = array()) {
+  public function createMedia($name = null, $user = null, $options = array()) {
     $data = array();
-    if (!$name) {
-      $data['name'] = 'IMG_1234.JPG';
-    }
+    $data['name'] = $name ? $name : 'IMG_1234.JPG';
     if ($user) {
       $data['user_id'] = $user['User']['id'];
     }

@@ -150,7 +150,7 @@ class PhtagrTestCase extends CakeTestCase {
   /**
    * Copy a test resource file to a given directory
    *
-   * @param string $filename Resoure filename. See also getResource()
+   * @param mixed $filename Resoure filename or array of filenames. See also getResource()
    * @param string $dstPath Destination directory
    * @param string $dstFilename Optional destination filename. If not given the
    * resource filename is taken.
@@ -158,6 +158,12 @@ class PhtagrTestCase extends CakeTestCase {
    * @throws Exception
    */
   public function copyResource($filename, $dstPath, $dstFilename = null) {
+    if (is_array($filename)) {
+      foreach ($filename as $file) {
+        $this->copyResource($file, $dstPath);
+      }
+      return;
+    }
     $src = $this->getResource($filename);
     if (!file_exists($dstPath)) {
       $Folder = new Folder();
