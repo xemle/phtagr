@@ -24,27 +24,29 @@ class FilterManagerComponentTest  extends PhtagrTestCase {
 
   var $testDir;
 
+  var $autostartController = false;
+
 /**
  * setUp method
  *
  * @return void
  */
 	public function setUp() {
-    parent::setUp(false);
+    parent::setUp();
 
     $this->testDir = $this->createTestDir();
     $this->setOptionsForExternalTools();
 
-    $this->Option->addValue($this->FilterManager->embeddedEnabledOption, 1, 0);
-    $this->Option->addValue($this->FilterManager->sidecarEnabledOption, 1, 0);
+    $this->Option->addValue($this->FilterManager->writeEmbeddedEnabledOption, 1, 0);
+    $this->Option->addValue($this->FilterManager->writeSidecarEnabledOption, 1, 0);
     $this->Option->addValue($this->FilterManager->createSidecarOption, 0, 0);
+    $this->Option->addValue($this->FilterManager->createSidecarForNonEmbeddableFileOption, 0, 0);
 
     $admin = $this->Factory->createUser('admin', ROLE_ADMIN);
     $this->mockUser($admin);
 
     $this->Controller->startupProcess();
   }
-
 
   public function testReadFilesRecursivly() {
     $this->copyResource('IMG_4145.JPG', $this->testDir);
@@ -71,10 +73,12 @@ class FilterManagerComponentTest  extends PhtagrTestCase {
     sort($names);
     $this->assertEqual($names, array('IMG_4145.JPG', 'IMG_6131.JPG', 'IMG_7795.JPG'));
   }
+
   public function testDisabledWrite() {
-    $this->FilterManager->embeddedEnabled = false;
-    $this->FilterManager->sidecarEnabled = false;
+    $this->FilterManager->writeEmbeddedEnabled = false;
+    $this->FilterManager->writeSidecarEnabled = false;
     $this->FilterManager->createSidecar = false;
+    $this->FilterManager->createSidecarForNonEmbeddableFile = true;
 
     $filename = $this->copyResource('IMG_7795.JPG', $this->testDir);
     $this->FilterManager->readFiles($this->testDir);
@@ -97,9 +101,10 @@ class FilterManagerComponentTest  extends PhtagrTestCase {
   }
 
   public function testWriteEmbedded() {
-    $this->FilterManager->embeddedEnabled = true;
-    $this->FilterManager->sidecarEnabled = false;
+    $this->FilterManager->writeEmbeddedEnabled = true;
+    $this->FilterManager->writeSidecarEnabled = false;
     $this->FilterManager->createSidecar = false;
+    $this->FilterManager->createSidecarForNonEmbeddableFile = false;
 
     $filename = $this->copyResource('IMG_7795.JPG', $this->testDir);
     $this->FilterManager->readFiles($this->testDir);
@@ -121,9 +126,10 @@ class FilterManagerComponentTest  extends PhtagrTestCase {
   }
 
   public function testCreateSidecar() {
-    $this->FilterManager->embeddedEnabled = false;
-    $this->FilterManager->sidecarEnabled = true;
+    $this->FilterManager->writeEmbeddedEnabled = false;
+    $this->FilterManager->writeSidecarEnabled = true;
     $this->FilterManager->createSidecar = true;
+    $this->FilterManager->createSidecarForNonEmbeddableFile = false;
 
     $filename = $this->copyResource('IMG_7795.JPG', $this->testDir);
     $this->FilterManager->readFiles($this->testDir);
@@ -146,10 +152,37 @@ class FilterManagerComponentTest  extends PhtagrTestCase {
     $this->assertEqual(count($Folder->find('IMG_7795.xmp')), 1);
   }
 
-  public function testDisabledSidecarCreation() {
-    $this->FilterManager->embeddedEnabled = false;
-    $this->FilterManager->sidecarEnabled = true;
+  public function testCreateSidecarForNonEmbeddableFile() {
+    $this->FilterManager->writeEmbeddedEnabled = false;
+    $this->FilterManager->writeSidecarEnabled = true;
     $this->FilterManager->createSidecar = false;
+    $this->FilterManager->createSidecarForNonEmbeddableFile = true;
+
+    $filename = $this->copyResource('MVI_7620.OGG', $this->testDir);
+    $this->FilterManager->readFiles($this->testDir);
+    $media = $this->Media->find('first');
+    $data = array('Fields' => array('keywords' => 'beach'));
+    $tmp = $this->Media->editSingle($media, $data, $userA);
+    $this->Media->save($tmp);
+    $media = $this->Media->find('first');
+    $filesize = filesize($filename);
+
+    $result = $this->FilterManager->write($media);
+    $this->assertEqual($result, true);
+    $this->assertEqual(filesize($filename), $filesize);
+
+    // New sidecar file should be created
+    $Folder = new Folder($this->testDir);
+    $files = $Folder->find();
+    $this->assertEqual(count($files), 2);
+    $this->assertEqual(count($Folder->find('MVI_7620.xmp')), 1);
+  }
+
+  public function testDisabledSidecarCreation() {
+    $this->FilterManager->writeEmbeddedEnabled = false;
+    $this->FilterManager->writeSidecarEnabled = true;
+    $this->FilterManager->createSidecar = false;
+    $this->FilterManager->createSidecarForNonEmbeddableFile = false;
 
     $filename = $this->copyResource('IMG_7795.JPG', $this->testDir);
     $this->FilterManager->readFiles($this->testDir);
@@ -171,9 +204,10 @@ class FilterManagerComponentTest  extends PhtagrTestCase {
   }
 
   public function testWriteEmbeddedAndSidecar() {
-    $this->FilterManager->embeddedEnabled = true;
-    $this->FilterManager->sidecarEnabled = true;
+    $this->FilterManager->writeEmbeddedEnabled = true;
+    $this->FilterManager->writeSidecarEnabled = true;
     $this->FilterManager->createSidecar = true;
+    $this->FilterManager->createSidecarForNonEmbeddableFile = false;
 
     $imageFile = $this->copyResource('IMG_7795.JPG', $this->testDir);
     $sidecarFile = $this->copyResource('IMG_7795.xmp', $this->testDir);

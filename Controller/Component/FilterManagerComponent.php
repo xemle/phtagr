@@ -26,22 +26,27 @@ class FilterManagerComponent extends Component {
   var $enableImportLogging = true;
 
   // Option values
-  var $embeddedEnabledOption = 'filter.write.metadata.embedded';
-  var $sidecarEnabledOption = 'filter.write.metadata.sidecar';
+  var $writeEmbeddedEnabledOption = 'filter.write.metadata.embedded';
+  var $writeSidecarEnabledOption = 'filter.write.metadata.sidecar';
   var $createSidecarOption = 'filter.create.metadata.sidecar';
+  var $createSidecarForNonEmbeddableFileOption = 'filter.create.nonEmbeddableFile.metadata.sidecar';
 
   /**
    * True if embedded write support is enabled
    */
-  var $embeddedEnabled = false;
+  var $writeEmbeddedEnabled = false;
   /**
    * True if sidecar write support is enabled
    */
-  var $sidecarEnabled = false;
+  var $writeSidecarEnabled = false;
   /**
    * True if missing sidecare will be created
    */
   var $createSidecar = false;
+  /**
+   * True if XMP sidecar should be used for non embeddedable meta data like video files
+   */
+  var $createSidecarForNonEmbeddableFile = false;
   /**
    * True if write support is enabled
    */
@@ -75,11 +80,12 @@ class FilterManagerComponent extends Component {
     }
     $this->loadFilter(array('ImageFilter', 'ReadOnlyImageFilter', 'VideoFilter', 'GpsFilter', 'SidecarFilter'));
 
-    $this->embeddedEnabled = $this->controller->getOption($this->embeddedEnabledOption);
-    $this->sidecarEnabled = $this->controller->getOption($this->sidecarEnabledOption);
+    $this->writeEmbeddedEnabled = $this->controller->getOption($this->writeEmbeddedEnabledOption);
+    $this->writeSidecarEnabled = $this->controller->getOption($this->writeSidecarEnabledOption);
+    $this->createSidecarForNonEmbeddableFile = $this->controller->getOption($this->createSidecarForNonEmbeddableFileOption);
     $this->createSidecar = $this->controller->getOption($this->createSidecarOption);
 
-    $this->_writeEnabled = $this->embeddedEnabled || $this->sidecarEnabled || $this->createSidecar;
+    $this->_writeEnabled = $this->writeEmbeddedEnabled || $this->writeSidecarEnabled || $this->createSidecar;
   }
 
   /**
@@ -550,6 +556,8 @@ class FilterManagerComponent extends Component {
     $success = true;
     $filterMissing = false;
     $hasSidecar = false;
+    $embeddableExtensions = $this->ImageFilter->getExtensions();
+    $hasEmbeddableFile = false;
     foreach ($media['File'] as $file) {
       $file = $this->controller->MyFile->findById($file['id']);
       $filename = $this->controller->MyFile->getFilename($file);
@@ -568,12 +576,15 @@ class FilterManagerComponent extends Component {
       if ($isSidecar) {
         $hasSidecar = true;
       }
-      if (!$isSidecar && !$this->embeddedEnabled) {
+      $ext = $this->_getFileExtension($filename);
+      if (in_array($ext, $embeddableExtensions)) {
+        $hasEmbeddableFile = true;
+      }
+      if (!$isSidecar && !$this->writeEmbeddedEnabled) {
         continue;
-      } else if ($isSidecar && !$this->sidecarEnabled) {
+      } else if ($isSidecar && !$this->writeSidecarEnabled) {
         continue;
       }
-
       $filter = $this->getFilterByExtension($filename);
       if (!$filter) {
         Logger::verbose("Could not find a filter for $filename");
@@ -585,7 +596,7 @@ class FilterManagerComponent extends Component {
       Logger::trace("Call filter ".$filter->getName()." for $filename");
       $success = ($success && $filter->write($file, $media));
     }
-    if (!$hasSidecar && $this->createSidecar) {
+    if (!$hasSidecar && ($this->createSidecar || (!$hasEmbeddableFile && $this->createSidecarForNonEmbeddableFile))) {
       $success = ($success && $this->_createAndWriteSidecar($media));
     }
     return $success && !$filterMissing;

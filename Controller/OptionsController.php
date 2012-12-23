@@ -122,7 +122,7 @@ class OptionsController extends AppController {
 
       $flags = array('filter.gps.overwrite',
         'filter.write.metadata.embedded', 'filter.write.metadata.sidecar', 'filter.create.metadata.sidecar',
-        'filter.write.onDemand');
+        'filter.create.nonEmbeddableFile.metadata.sidecar', 'filter.write.onDemand');
       foreach ($flags as $flag) {
         $bool = Set::extract($flag, $this->request->data) ? 1 : 0;
         $this->Option->setValue($flag, $bool, $userId);

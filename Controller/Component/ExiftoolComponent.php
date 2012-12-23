@@ -217,7 +217,7 @@ class ExiftoolComponent extends Component {
       return false;
     }
     $starttime = $processingTime = microtime(true);
-    $timeoutInSec = 0.2;
+    $timeoutInSec = 0.5;
     if ($this->debugging) {
       $timeoutInSec = 20;
     }
@@ -613,9 +613,13 @@ class ExiftoolComponent extends Component {
     //parse results
     $data = array();
     foreach ($stdout as $line) {
-      list($name, $value) = preg_split('/:(\s+|$)/', $line);
-      $data[$name] = $value;
-      //TODO - log fields Error and Warning
+      if (preg_match('/([^:]+):(.*)/', $line, $m)) {
+        $name = $m[1];
+        $value = trim($m[2]);
+        $data[$name] = $value;
+      } else {
+        Logger::warn("Unexprected line: $line");
+      }
     }
 
     return $data;

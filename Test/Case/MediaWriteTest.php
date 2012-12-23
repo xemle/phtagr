@@ -27,6 +27,7 @@ class MediaWriteTestCase extends PhtagrTestCase {
   var $components = array('FilterManager');
 
   var $testDir;
+  var $autostartController = false;
 
   /**
    * setUp method
@@ -34,13 +35,13 @@ class MediaWriteTestCase extends PhtagrTestCase {
    * @return void
    */
   public function setUp() {
-    parent::setUp(false);
+    parent::setUp();
 
     $this->testDir = $this->createTestDir();
     $this->setOptionsForExternalTools();
 
-    $this->Option->addValue($this->FilterManager->embeddedEnabledOption, 1, 0);
-    $this->Option->addValue($this->FilterManager->sidecarEnabledOption, 1, 0);
+    $this->Option->addValue($this->FilterManager->writeEmbeddedEnabledOption, 1, 0);
+    $this->Option->addValue($this->FilterManager->writeSidecarEnabledOption, 1, 0);
     $this->Option->addValue($this->FilterManager->createSidecarOption, 0, 0);
 
     $admin = $this->Factory->createUser('admin', ROLE_ADMIN);

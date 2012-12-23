@@ -49,7 +49,7 @@ class ImageFilterComponent extends BaseFilterComponent {
       $meta = $this->_readMetaDataGetId3($filename);
     }
 
-    if ($meta === false) {
+    if ($meta === false || count($meta) == 0) {
       $this->FilterManager->addError($filename, 'NoMetaDataFound');
       return false;
     }

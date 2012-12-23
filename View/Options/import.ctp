@@ -46,7 +46,8 @@
 <?php
   echo $this->Form->input('filter.write.metadata.embedded', array('type' => 'checkbox',  'label' => __("Write meta data embedded into media files")));
   echo $this->Form->input('filter.write.metadata.sidecar', array('type' => 'checkbox',  'label' => __("Write meta data to XMP sidecar files")));
-  echo $this->Form->input('filter.create.metadata.sidecar', array('type' => 'checkbox',  'label' => __("Create XMP sidecar file if missing")));
+  echo $this->Form->input('filter.create.metadata.sidecar', array('type' => 'checkbox',  'label' => __("Create XMP sidecar file if missing (for all files)")));
+  echo $this->Form->input('filter.create.nonEmbeddableFile.metadata.sidecar', array('type' => 'checkbox',  'label' => __("Create XMP sidecar file if missing for non JPEG files only")));
 ?>
 <p><?php echo __('Meta data are not written immediatly to files for performance. They are written manually by %s. If a file is requested by a download action the meta data can be updated.', $this->Html->link(__("Meta Data Sync"), '/browser/sync')); ?></p>
 <?php

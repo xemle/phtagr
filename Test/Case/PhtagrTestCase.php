@@ -46,20 +46,34 @@ class PhtagrTestCase extends CakeTestCase {
       'app.groups_user', 'app.option', 'app.guest', 'app.comment', 'app.my_file',
       'app.fields_media', 'app.field', 'app.comment');
 
-  public function setUp($startController = true) {
+  /**
+   * Name of test controller. Default is PhtagrTestController
+   */
+  var $testController = 'PhtagrTestController';
+  /**
+   * Auto start controller. It will call Controller::startupProcess()
+   */
+  var $autostartController = true;
+
+  public function setUp() {
     parent::setUp();
     $this->Factory = new PhtagrTestFactory();
 
+    if ($this->testController) {
+      $this->initTestController();
+    }
+  }
+
+  private function initTestController() {
     $uses = array_unique(am(array('User', 'Media', 'MyFile'), $this->uses));
 
-    // Load test controller
     $CakeRequest = new CakeRequest();
     $CakeResponse = new CakeResponse();
-    $this->Controller = new PhtagrTestController($CakeRequest, $CakeResponse);
-    $this->Controller->uses = $uses;
-    $this->Controller->components = $this->components;
+    $this->Controller = new $this->testController($CakeRequest, $CakeResponse);
+    $this->Controller->uses = am($uses, $this->Controller->uses);
+    $this->Controller->components = am($this->components, $this->Controller->components);
     $this->Controller->constructClasses();
-    if ($startController) {
+    if ($this->autostartController) {
       $this->Controller->startupProcess();
     }
 
@@ -87,7 +101,7 @@ class PhtagrTestCase extends CakeTestCase {
    *
    * @param array $user User model data
    */
-  public function mockUser(&$user) {
+  public function mockUser($user) {
     $this->Controller->mockUser = $user;
   }
 
