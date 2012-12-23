@@ -198,8 +198,8 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
     @note Requires PHP 5 (uses references in foreach statement) */
   public function pathRawurlencode($path) {
     $paths=explode('/', $path);
-    for ($i = 0; $i < count($parts); $i++) {
-      $part[$i] = rawurlencode($part[$i]);
+    for ($i = 0; $i < count($paths); $i++) {
+      $paths[$i] = rawurlencode($paths[$i]);
     }
     return implode('/', $paths);
   }
