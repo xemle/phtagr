@@ -46,6 +46,18 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
 
   var $components = array('FileManager', 'FilterManager');
 
+  public function startup(Controller $controller) {
+  }
+
+  public function beforeRender(Controller $controller) {
+  }
+
+  public function shutdown(Controller $controller) {
+  }
+
+  public function beforeRedirect(Controller $controller, $url, $status = null, $exit = true) {
+  }
+
   public function WebdavServer() {
     $this->HTTP_WebDAV_Server();
     $this->_fsRoot=$_SERVER['DOCUMENT_ROOT'];
