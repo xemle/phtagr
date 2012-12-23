@@ -43,7 +43,7 @@ class ImageFilterComponent extends BaseFilterComponent {
     $options = am(array('noSave' => false), $options);
     $filename = $this->MyFile->getFilename($file);
 
-    if ($this->controller->getOption('bin.exiftool')) {
+    if ($this->Exiftool->isEnabled()) {
       $meta = $this->Exiftool->readMetaData($filename);
     } else {
       $meta = $this->_readMetaDataGetId3($filename);
@@ -69,7 +69,7 @@ class ImageFilterComponent extends BaseFilterComponent {
       $isNew = true;
     };
 
-    if ($this->controller->getOption('bin.exiftool')) {
+    if ($this->Exiftool->isEnabled()) {
       $this->Exiftool->extractImageData($media, $meta);
     } else {
       $this->_extractImageDataGetId3($media, $meta);

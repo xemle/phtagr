@@ -243,4 +243,13 @@ class MediaReadTestCase extends PhtagrTestCase {
     $user = $this->User->findById($media['User']['id']);
     $this->assertEqual(Set::extract('/Member/name', $user), array('friends'));
   }
+
+  // Image has two orienations: Main file is 6, embedded thumbnail is 1
+  public function testOrientationWithEmbeddedThumbnail() {
+    $this->copyResource('IMG_7795.JPG', $this->testDir);
+
+    $this->Controller->FilterManager->readFiles($this->testDir);
+    $media = $this->Media->find('first');
+    $this->assertEqual($media['Media']['orientation'], 6);
+  }
 }
