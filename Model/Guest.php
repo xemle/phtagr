@@ -43,7 +43,10 @@ class Guest extends AppModel
       'message' => 'Password must be between 6 and 32 characters long.'),
     'email' => array(
       'rule' => array('email'),
-      'message' => 'Email address is not valid')
+      'message' => 'Email address is not valid'),
+    'notify_interval' => array(
+      'rule' => array('inList', array('0', '1800', '3600', '86400', '604800', '2592000')),
+      'message' => 'Invalid notification interval')
     );
 
   public function afterFind($result, $primary = false) {
