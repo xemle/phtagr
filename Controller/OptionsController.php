@@ -26,6 +26,7 @@ class OptionsController extends AppController {
       'profile' => __("Profile"),
       'password' => __("Password"),
       'import' => __("Import Options"),
+      'export' => __("Export Options"),
       'links' => __("Links"),
       );
     parent::beforeFilter();
@@ -120,9 +121,7 @@ class OptionsController extends AppController {
       $range = max(0, min(60, $range));
       $this->Option->setValue('filter.gps.range', $range, $userId);
 
-      $flags = array('filter.gps.overwrite',
-        'filter.write.metadata.embedded', 'filter.write.metadata.sidecar', 'filter.create.metadata.sidecar',
-        'filter.create.nonEmbeddableFile.metadata.sidecar', 'filter.write.onDemand');
+      $flags = array('filter.gps.overwrite');
       foreach ($flags as $flag) {
         $bool = Set::extract($flag, $this->request->data) ? 1 : 0;
         $this->Option->setValue($flag, $bool, $userId);
@@ -146,6 +145,26 @@ class OptionsController extends AppController {
     asort($groups);
     $groups[-1] = __('[No Group]');
     $this->set('groups', $groups);
+  }
+
+  public function export() {
+    $userId = $this->getUserId();
+    if (!empty($this->request->data)) {
+      $flags = array('filter.write.metadata.embedded', 'filter.write.metadata.sidecar',
+        'filter.create.metadata.sidecar', 'filter.create.nonEmbeddableFile.metadata.sidecar',
+        'filter.write.onDemand');
+      foreach ($flags as $flag) {
+        $bool = Set::extract($flag, $this->request->data) ? 1 : 0;
+        $this->Option->setValue($flag, $bool, $userId);
+      }
+
+      $this->Session->setFlash(__("Settings saved"));
+    }
+    $tree = $this->Option->getTree($userId);
+    $this->Option->addDefaultAclTree($tree);
+    $this->request->data = $tree;
+
+    $this->set('userId', $userId);
   }
 
 }
