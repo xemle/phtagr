@@ -308,7 +308,7 @@ class FilterManagerComponent extends Component {
     //Logger::debug($order);
 
     $result = array();
-    $importLog = $this->_importlog(&$importLog, $file);
+    $importLog = $this->_importlog($importLog, $file);
     if ($this->enableImportLogging) {
       $this->log(("Found ".count($stack)." files to import"), 'import_memory_speed');
     }
@@ -324,7 +324,7 @@ class FilterManagerComponent extends Component {
       $this->fileCache = array();
       foreach ($files as $file) {
         $result[$file] = $this->read($file, $options['forceReadMeta']);
-        $importLog = $this->_importlog(&$importLog, $file);
+        $importLog = $this->_importlog($importLog, $file);
       }
     }
     return $result;
