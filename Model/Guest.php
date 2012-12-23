@@ -62,12 +62,12 @@ class Guest extends AppModel
         unset($this->data['Guest']['confirm']);
         unset($this->data['Guest']['password']);
       } elseif (empty($this->data['Guest']['password'])) {
-        $this->invalidate('password', 'Password not given');
+        $this->invalidate('password', __('Password not given'));
       } elseif (empty($this->data['Guest']['confirm'])) {
-        $this->invalidate('confirm', 'Password confirmation is missing');
+        $this->invalidate('confirm', __('Password confirmation is missing'));
       } elseif ($this->data['Guest']['password'] != $this->data['Guest']['confirm']) {
-        $this->invalidate('password', 'Password confirmation mismatch');
-        $this->invalidate('confirm', 'Password confirmation mismatch');
+        $this->invalidate('password', __('Password confirmation mismatch'));
+        $this->invalidate('confirm', __('Password confirmation mismatch'));
       }
     }
   }
@@ -97,6 +97,4 @@ class Guest extends AppModel
     return $data;
   }
 
-
 }
-?>

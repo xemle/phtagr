@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2012-12-16 20:17+0100\n"
+"POT-Creation-Date: 2012-12-23 20:23+0000\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -13,26 +13,6 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
-
-#: Console/Command/MongoShell.php:35
-#: Console/Command/SyncShell.php:35
-msgid "Maximum of synchronization count. Default is 100. Use 0 to synchronize all"
-msgstr ""
-
-#: Console/Command/MongoShell.php:37
-#: Console/Command/SyncShell.php:40
-msgid "Synchronize only images for given username"
-msgstr ""
-
-#: Console/Command/MongoShell.php:39
-#: Console/Command/SyncShell.php:42
-msgid "Run the synchronization process"
-msgstr ""
-
-#: Console/Command/MongoShell.php:40
-#: Console/Command/SyncShell.php:43
-msgid "Write all meta data from database to images in batch mode"
-msgstr ""
 
 #: Console/Command/NotifyShell.php:44
 msgid "Do not send emails."
@@ -77,6 +57,22 @@ msgstr ""
 
 #: Console/Command/PreviewShell.php:46
 msgid "Generate preview files"
+msgstr ""
+
+#: Console/Command/SyncShell.php:35
+msgid "Maximum of synchronization count. Default is 100. Use 0 to synchronize all"
+msgstr ""
+
+#: Console/Command/SyncShell.php:40
+msgid "Synchronize only images for given username"
+msgstr ""
+
+#: Console/Command/SyncShell.php:42
+msgid "Run the synchronization process"
+msgstr ""
+
+#: Console/Command/SyncShell.php:43
+msgid "Write all meta data from database to images in batch mode"
 msgstr ""
 
 #: Controller/AppController.php:36
@@ -707,11 +703,11 @@ msgstr ""
 msgid "[phtagr] New account notification: %s"
 msgstr ""
 
-#: Controller/Component/MenuComponent.php:40
+#: Controller/Component/MenuComponent.php:42
 msgid "Account Settings"
 msgstr ""
 
-#: Controller/Component/MenuComponent.php:41
+#: Controller/Component/MenuComponent.php:43
 #: View/Elements/single_acl_form.ctp:8
 #: View/Elements/Explorer/description.ctp:42
 #: View/Groups/all.ctp:1
@@ -723,7 +719,7 @@ msgstr ""
 msgid "Groups"
 msgstr ""
 
-#: Controller/Component/MenuComponent.php:42
+#: Controller/Component/MenuComponent.php:44
 #: View/Elements/Explorer/description.ctp:50
 #: View/Elements/Explorer/menu.ctp:93;176
 #: View/Helper/ImageDataHelper.php:335;630
@@ -733,18 +729,18 @@ msgstr ""
 msgid "Users"
 msgstr ""
 
-#: Controller/Component/MenuComponent.php:43
+#: Controller/Component/MenuComponent.php:45
 #: View/Guests/index.ctp:1
 #: View/System/view.ctp:14
 #: View/Users/admin_index.ctp:18
 msgid "Guests"
 msgstr ""
 
-#: Controller/Component/MenuComponent.php:44
+#: Controller/Component/MenuComponent.php:46
 msgid "Media Files"
 msgstr ""
 
-#: Controller/Component/MenuComponent.php:47
+#: Controller/Component/MenuComponent.php:49
 #: View/Elements/topnav.ctp:7
 msgid "System"
 msgstr ""
@@ -765,14 +761,17 @@ msgstr ""
 msgid "You are not subscribed to group %s"
 msgstr ""
 
+#: Model/Guest.php:68
 #: Model/User.php:108
 msgid "Password not given"
 msgstr ""
 
+#: Model/Guest.php:70
 #: Model/User.php:110
 msgid "Password confirmation is missing"
 msgstr ""
 
+#: Model/Guest.php:72;73
 #: Model/User.php:112;113
 msgid "Password confirmation mismatch"
 msgstr ""
@@ -2278,8 +2277,16 @@ msgstr ""
 msgid "Order by name"
 msgstr ""
 
+#: View/Helper/FileListHelper.php:79;108
+msgid "delete"
+msgstr ""
+
 #: View/Helper/FileListHelper.php:79
 msgid "Delete folder %s?"
+msgstr ""
+
+#: View/Helper/FileListHelper.php:92
+msgid "unlink"
 msgstr ""
 
 #: View/Helper/FileListHelper.php:92
@@ -2500,12 +2507,10 @@ msgid "You are running version %s."
 msgstr ""
 
 #: View/Layouts/default.ctp:34
-#: View/Themed/Chrisd/Layouts/default.ctp:34
 msgid "Search..."
 msgstr ""
 
 #: View/Layouts/default.ctp:35
-#: View/Themed/Chrisd/Layouts/default.ctp:35
 msgid "Go"
 msgstr ""
 
@@ -3088,73 +3093,82 @@ msgstr ""
 msgid "Size of files"
 msgstr ""
 
+#: View/Users/view.ctp:59;71
+msgid "View media"
+msgstr ""
+
 #: View/Users/view.ctp:97
 msgid "See all media of user %s"
 msgstr ""
 
-#: View/home/index.ctp:60
+#: View/home/index.ctp:50
+msgid "%s said %s:"
+msgstr ""
+
+#: View/home/index.ctp:59
 msgid "Older comments..."
 msgstr ""
 
-#: View/home/index.ctp:65
+#: View/home/index.ctp:64
 msgid "Popular Tags"
 msgstr ""
 
-#: View/home/index.ctp:71
+#: View/home/index.ctp:70
 msgid "No tags assigned"
 msgstr ""
 
-#: View/home/index.ctp:77
+#: View/home/index.ctp:76
 msgid "Popular Categories"
 msgstr ""
 
-#: View/home/index.ctp:83
+#: View/home/index.ctp:82
 msgid "No categories assigned"
 msgstr ""
 
-#: /mnt/raidModel/Comment.php:validation for field name
+#: Model/Comment.php:validation for field name
 msgid "Name is missing"
 msgstr ""
 
-#: /mnt/raidModel/Comment.php:validation for field email
+#: Model/Comment.php:validation for field email
 msgid "Email is invalid"
 msgstr ""
 
-#: /mnt/raidModel/Comment.php:validation for field url
+#: Model/Comment.php:validation for field url
 msgid "URL is invalid"
 msgstr ""
 
-#: /mnt/raidModel/Comment.php:validation for field text
+#: Model/Comment.php:validation for field text
 msgid "Comment text is empty"
 msgstr ""
 
-#: /mnt/raidModel/Comment.php:validation for field text
+#: Model/Comment.php:validation for field text
 msgid "Comment is to long"
 msgstr ""
 
-#: /mnt/raidModel/Guest.php:validation for field username
+#: Model/Guest.php:validation for field username
 msgid "Guestname must be between 3 and 32 characters long."
 msgstr ""
 
-#: /mnt/raidModel/Guest.php:validation for field password
-#: /mnt/raidModel/User.php:validation for field password
+#: Model/Guest.php:validation for field password
+#: Model/User.php:validation for field password
 msgid "Password must be between 6 and 32 characters long."
 msgstr ""
 
-#: /mnt/raidModel/Guest.php:validation for field email
-#: /mnt/raidModel/User.php:validation for field email
+#: Model/Guest.php:validation for field email
+#: Model/User.php:validation for field email
 msgid "Email address is not valid"
 msgstr ""
 
-#: /mnt/raidModel/User.php:validation for field username
+#: Model/Guest.php:validation for field notify_interval
+#: Model/User.php:validation for field notify_interval
+msgid "Invalid notification interval"
+msgstr ""
+
+#: Model/User.php:validation for field username
 msgid "Username must be between 3 and 32 characters long."
 msgstr ""
 
-#: /mnt/raidModel/User.php:validation for field role
+#: Model/User.php:validation for field role
 msgid "Invalid role"
-msgstr ""
-
-#: /mnt/raidModel/User.php:validation for field notify_interval
-msgid "Invalid notification interval"
 msgstr ""
 

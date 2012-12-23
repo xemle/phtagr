@@ -56,7 +56,7 @@
       $this->Html->link($group['name'], "/groups/view/{$group['name']}"),
       $this->Html->link($username, "/users/view/$username"),
       $this->Text->truncate($group['description'], 30, array('ending' => '...', 'exact' => false, 'html' => false)),
-      $this->Html->link("View media", "/explorer/group/{$group['name']}")
+      $this->Html->link(__("View media"), "/explorer/group/{$group['name']}")
       );
   }
   foreach ($this->request->data['Member'] as $group) {
@@ -68,7 +68,7 @@
       $this->Html->link($group['name'], "/groups/view/{$group['name']}"),
       $this->Html->link($username, "/users/view/$username"),
       $this->Text->truncate($group['description'], 30, array('ending' => '...', 'exact' => false, 'html' => false)),
-      $this->Html->link("View media", "/explorer/group/{$group['name']}")
+      $this->Html->link(__("View media"), "/explorer/group/{$group['name']}")
       );
   }
 
