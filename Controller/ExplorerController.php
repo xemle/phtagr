@@ -24,7 +24,7 @@ class ExplorerController extends AppController
   var $helpers = array('Form', 'Html', 'ImageData', 'Time', 'ExplorerMenu', 'Rss', 'Search', 'Navigator', 'Tab', 'Breadcrumb', 'Autocomplete');
 
   var $crumbs = array();
-  var $paginateActions = array('category', 'date', 'edit', 'group', 'index', 'location', 'sublocation', 'city', 'state', 'country', 'query', 'tag', 'user', 'view', 'quicksearch');
+  var $paginateActions = array('category', 'date', 'edit', 'group', 'index', 'location', 'sublocation', 'city', 'state', 'country', 'query', 'tag', 'user', 'view', 'quicksearch', 'selection');
 
   public function implementedEvents() {
     $events = parent::implementedEvents();
@@ -700,6 +700,35 @@ class ExplorerController extends AppController
     $this->Search->setHelperData();
     Configure::write('debug', 0);
     $this->render('updatemeta');
+  }
+
+  public function selection($action) {
+    $validActions = array('unlink');
+    if (!$this->RequestHandler->isPost()) {
+      Logger::warn("Decline wrong ajax request");
+      $this->redirect(null, 404);
+    } else if (!in_array($action, $validActions)) {
+      Logger::warn("Invalid selection action: $action");
+      $this->render('index');
+      return;
+    } else if (!isset($this->request->data['Media']['ids'])) {
+      Logger::warn("No media ids is empty");
+      $this->render('index');
+      return;
+    }
+    $user = $this->getUser();
+    $ids = preg_split('/\s*,\s*/', trim($this->request->data['Media']['ids']));
+    $ids = array_unique($ids);
+    $allMedia = $this->Media->find('all', array('conditions' => array('Media.id' => $ids)));
+    foreach ($allMedia as $media) {
+      if (!$this->Media->canWriteAcl($media, $user)) {
+        continue;
+      }
+      if ($action == 'unlink') {
+        $this->Media->delete($media['Media']['id']);
+      }
+    }
+    $this->render('index');
   }
 
   public function sync($id) {
