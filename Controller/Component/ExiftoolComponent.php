@@ -567,7 +567,7 @@ class ExiftoolComponent extends Component {
     $base = array('-Error', '-Warning', '-FileName', '-ImageWidth', '-ImageHeight', '-ObjectName', '-FileModifyDate');//, '-DateTimeCreated', '-SubSecDateTimeOriginal', '-SubSecCreateDate'
     //for numerical Orientation a # can be used as field suffix: -Orientation#
     $exif = array('-IFD0:Orientation#', '-Aperture', '-ShutterSpeed', '-Model', '-ISO', '-Comment', '-UserComment', '-DateTimeOriginal', '-XMP-xmp:CreateDate');
-    $gps = array('-GPSLatitude#', '-GPSLatitudeRef', '-GPSLongitude#', '-GPSLongitudeRef');
+    $gps = array('-GPS:GPSLatitude#', '-GPSLatitudeRef#', '-GPS:GPSLongitude#', '-GPSLongitudeRef#');
     //read only IPTC:DateCreated for avoiding confusion with XMP-photoshop:DateCreated = Date + Time + zone
     //IPTC - location
     $iptc = array('-TimeCreated', '-SupplementalCategories', '-Keywords', '-Subject', '-City', '-Sub-location', '-Province-State', '-Country-PrimaryLocationName', '-Caption');//'-IPTC:DateCreated' - imported in XMP

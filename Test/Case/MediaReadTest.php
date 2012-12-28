@@ -208,6 +208,18 @@ class MediaReadTestCase extends PhtagrTestCase {
     $this->assertEqual($groups[1]['Group']['is_hidden'], 1);
   }
 
+  /**
+   * Test correct GPS position for negative values
+   */
+  public function testImageReadGps() {
+    $this->copyResource('IMG_1721.JPG', $this->testDir);
+    $this->Controller->FilterManager->readFiles($this->testDir);
+
+    $media = $this->Media->find('first');
+    $this->assertEqual($media['Media']['latitude'], -13.5698);
+    $this->assertEqual($media['Media']['longitude'], -71.7819);
+  }
+
   public function testVideoRead() {
     date_default_timezone_set('Europe/Belgrade');
     $this->copyResource(array('MVI_7620.OGG','MVI_7620.THM', 'example.gpx'), $this->testDir);
