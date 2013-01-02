@@ -202,7 +202,7 @@ class VideoFilterComponent extends BaseFilterComponent {
    * @return array Media properties
    */
   private function _readExiftool($filename) {
-    $data = $this->Exiftool->readMetaData($filename);
+    $data = $this->Exiftool->readMetaData($filename, array('image', 'video', 'other'));
 
     $result = array();
     if (!$data || !isset($data['ImageWidth']) || !isset($data['ImageWidth']) || !isset($data['Duration']) ) {
@@ -212,10 +212,14 @@ class VideoFilterComponent extends BaseFilterComponent {
     }
     $result['height'] = intval($data['ImageHeight']);
     $result['width'] = intval($data['ImageWidth']);
-    $result['duration'] = ceil(intval($data['Duration']));
+    $result['duration'] = intval(ceil($data['Duration']));
 
     if (isset($data['DateTimeOriginal'])) {
       $result['date'] = $data['DateTimeOriginal'];
+    } else if (isset($data['TrackCreateDate'])) {
+      $result['date'] = $data['TrackCreateDate'];
+    } else if (isset($data['MediaCreateDate'])) {
+      $result['date'] = $data['MediaCreateDate'];
     } else if (isset($data['FileModifyDate'])) {
       $result['date'] = $data['FileModifyDate'];
     }

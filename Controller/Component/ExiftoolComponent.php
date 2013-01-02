@@ -244,19 +244,43 @@ class ExiftoolComponent extends Component {
   }
 
   /**
+   * Convert output to parameter list
+   *
+   * @param array $meta Imported meta data
+   */
+  private function _convertOutputToParams($output) {
+    $result = array();
+    foreach ($output as $line) {
+      if (preg_match('/([^:]+):(.*)/', $line, $m)) {
+        $name = $m[1];
+        $value = trim($m[2]);
+        $result[$name] = $value;
+      } else {
+        Logger::warn("Unexprected line: $line");
+      }
+    }
+    ksort($result);
+    return $result;
+  }
+
+  /**
    * Read the meta data via exiftool from a file
    *
    * @param filename Filename to read
+   * @param array $groups Meta data groups
    * @result Array of metadata or false on error
    */
-  public function readMetaData($filename) {
+  public function readMetaData($filename, $groups = array('image', 'other')) {
     if (!$this->bin) {
       return false;
-    } else if ($this->_isExiftoolOpen()) {
-      return $this->_readMetaDataPipes($filename);
-    } else {
-      return $this->_readMetaDataDirect($filename);
     }
+    $output = array();
+    if ($this->_isExiftoolOpen()) {
+      $output = $this->_readMetaDataPipes($filename, $groups);
+    } else {
+      $output = $this->_readMetaDataDirect($filename, $groups);
+    }
+    return $this->_convertOutputToParams($output);
   }
 
   /**
@@ -402,8 +426,6 @@ class ExiftoolComponent extends Component {
    * @return Array of the the image data array as image model data
    */
   public function extractImageData(&$media, &$data) {
-    $user = $this->controller->getUser();
-
     $v =& $media['Media'];
 
     // Media information
@@ -424,17 +446,9 @@ class ExiftoolComponent extends Component {
 
     // fetch GPS coordinates
     $latitude = $this->_extract($data, 'GPSLatitude', null);
-    $latitudeRef = $this->_extract($data, 'GPSLatitudeRef', null);
     $longitude = $this->_extract($data, 'GPSLongitude', null);
-    $longitudeRef = $this->_extract($data, 'GPSLongitudeRef', null);
 
-    if ($latitude && $latitudeRef && $longitude && $longitudeRef) {
-      if ($latitudeRef == 'S' && $latitude > 0) {
-        $latitude *= -1;
-      }
-      if ($longitudeRef == 'W' && $longitude > 0) {
-        $longitude *= -1;
-      }
+    if ($latitude && $longitude) {
       $v['latitude'] = $latitude;
       $v['longitude'] = $longitude;
     }
@@ -473,8 +487,6 @@ class ExiftoolComponent extends Component {
   }
 
   public function extractImageDataSidecar(&$media, &$data) {
-    $user = $this->controller->getUser();//not used?
-
     $v =& $media['Media'];
 
     // Media information
@@ -495,17 +507,9 @@ class ExiftoolComponent extends Component {
 
     // fetch GPS coordinates
     $latitude = $this->_extract($data, 'GPSLatitude', $v['latitude']);
-    $latitudeRef = $this->_extract($data, 'GPSLatitudeRef', null);
     $longitude = $this->_extract($data, 'GPSLongitude', $v['longitude']);
-    $longitudeRef = $this->_extract($data, 'GPSLongitudeRef', null);
 
-    if ($latitude && $latitudeRef && $longitude && $longitudeRef) {
-      if ($latitudeRef == 'S' && $latitude > 0) {
-        $latitude *= -1;
-      }
-      if ($longitudeRef == 'W' && $longitude > 0) {
-        $longitude *= -1;
-      }
+    if ($latitude && $longitude) {
       $v['latitude'] = $latitude;
       $v['longitude'] = $longitude;
     }
@@ -548,13 +552,50 @@ class ExiftoolComponent extends Component {
   }
 
   /**
+   * Returns list of exif read meta data parameters
+   *
+   * @param array $groups metadata groups.
+   * - image Basic image information like width and height
+   * - video Basic video information like duration
+   * - other Other meta data
+   */
+  private function _getReadParams($groups) {
+    $groups = (array) $groups;
+    $params = array('-Error', '-Warning', '-FileName', '-FileModifyDate');
+    if (in_array('image', $groups)) {
+      $params = am($params, array('-ImageWidth', '-ImageHeight'));
+    }
+    if (in_array('video', $groups)) {
+      $params = am($params, array('-Duration#', '-TrackCreateDate', '-MediaCreateDate'));
+    }
+    if (in_array('other', $groups)) {
+      $params = am($params, array(
+          '-ObjectName',
+          //for numerical Orientation a # can be used as field suffix: -Orientation#
+          '-IFD0:Orientation#', '-Aperture#', '-ShutterSpeed#', '-Model', '-ISO#',
+          '-Comment', '-UserComment',
+          '-DateTimeOriginal', '-XMP-xmp:CreateDate','-TimeCreated',
+          //read only IPTC:DateCreated for avoiding confusion with XMP-photoshop:DateCreated = Date + Time + zone
+          '-XMP-photoshop:DateCreated', '-XMP-dc:Date', '-XMP-tiff:DateTime',
+          '-Composite:GPSLatitude#', '-Composite:GPSLongitude#',
+          '-SupplementalCategories', '-Keywords', '-Subject',
+          '-City', '-Sub-location', '-Province-State', '-Country-PrimaryLocationName', '-Location', '-State', '-Country',
+          '-PhtagrGroups',
+          '-RegionPersonDisplayName',
+          '-Caption'));
+    }
+    return $params;
+  }
+
+  /**
    * Read the meta data via exiftool, through pipes, using -stay_open option
    * avoid perl start-up time needed each exiftool call
    *
    * @param string $filename Filename to read
-   * @result Array of metadata or false on error
+   * @param array $groups Meta data groups
+   * @result Array Output lines
    */
-  private function _readMetaDataPipes($filename)  {
+  private function _readMetaDataPipes($filename, $groups)  {
     $starttime = microtime(true);
     //TODO: use exiftool arg -json and json_decode ( string $json) OR exiftool arg -php and eval($array_string)
 
@@ -563,24 +604,7 @@ class ExiftoolComponent extends Component {
     //next line is not really necessary; good for reading over slow networks
     $this->_writeCommands($this->stdin, array('-fast2'));
 
-    // comment next lines in order to read all metadata, not only these fields
-    $base = array('-Error', '-Warning', '-FileName', '-ImageWidth', '-ImageHeight', '-ObjectName', '-FileModifyDate');//, '-DateTimeCreated', '-SubSecDateTimeOriginal', '-SubSecCreateDate'
-    //for numerical Orientation a # can be used as field suffix: -Orientation#
-    $exif = array('-IFD0:Orientation#', '-Aperture', '-ShutterSpeed', '-Model', '-ISO', '-Comment', '-UserComment', '-DateTimeOriginal', '-XMP-xmp:CreateDate');
-    $gps = array('-GPS:GPSLatitude#', '-GPSLatitudeRef#', '-GPS:GPSLongitude#', '-GPSLongitudeRef#');
-    //read only IPTC:DateCreated for avoiding confusion with XMP-photoshop:DateCreated = Date + Time + zone
-    //IPTC - location
-    $iptc = array('-TimeCreated', '-SupplementalCategories', '-Keywords', '-Subject', '-City', '-Sub-location', '-Province-State', '-Country-PrimaryLocationName', '-Caption');//'-IPTC:DateCreated' - imported in XMP
-    //XMP - location
-    $xmp = array('-Location', '-State', '-Country', '-PhtagrGroups', '-XMP-photoshop:DateCreated', '-XMP-dc:Date', '-XMP-tiff:DateTime');
-    $video = array('-Width', '-Height', '-Duration');
-
-    $this->_writeCommands($this->stdin, $base);
-    $this->_writeCommands($this->stdin, $exif);
-    $this->_writeCommands($this->stdin, $gps);
-    $this->_writeCommands($this->stdin, $iptc);
-    $this->_writeCommands($this->stdin, $xmp);
-    $this->_writeCommands($this->stdin, $video);
+    $this->_writeCommands($this->stdin, $this->_getReadParams($groups));
 
     //-b          (-binary)            Output data in binary format
     //-n          (--printConv)        Read/write numerical tag values, not passed through print Conversation; (not human readable)
@@ -610,36 +634,25 @@ class ExiftoolComponent extends Component {
       $processingtime = round((microtime(true)-$starttime),4); //seconds
       $this->log("----- read with PIPES. Just exiftool read time: ".$processingtime, 'import_memory_speed');
     }
-    //parse results
-    $data = array();
-    foreach ($stdout as $line) {
-      if (preg_match('/([^:]+):(.*)/', $line, $m)) {
-        $name = $m[1];
-        $value = trim($m[2]);
-        $data[$name] = $value;
-      } else {
-        Logger::warn("Unexprected line: $line");
-      }
-    }
-
-    return $data;
+    return $stdout;
   }
-
 
   /**
    * Read the meta data via exiftool from a file
    *
    * @param string $filename Filename to read
-   * @result array Array of metadata or false on error
+   * @param array $groups Meta data groups
+   * @result array Output lines
    */
-  private function _readMetaDataDirect($filename) {
+  private function _readMetaDataDirect($filename, $groups) {
     $starttime = microtime(true);
     // read meta data
     $args = array();
     if ($this->hasOptionConfig) {
       $args = am($args, array('-config', $this->_getExifToolConf()));
     }
-    $args = am($args, array('-S', '-n', $filename));
+    $args = am($args, $this->_getReadParams($groups));
+    $args = am($args, array('-fast2', '-S', $filename));
     $result = $this->Command->run($this->bin, $args);
     $output = $this->Command->output;
     if ($result == 127) {
@@ -653,12 +666,7 @@ class ExiftoolComponent extends Component {
       $processingtime = round((microtime(true)-$starttime),4); //seconds
       $this->log("----- read directly with exiftool. Just exiftool read time: ".$processingtime, 'import_memory_speed');
     }
-    $data = array();
-    foreach ($output as $line) {
-      list($name, $value) = preg_split('/:(\s+|$)/', $line);
-      $data[$name] = $value;
-    }
-    return $data;
+    return $output;
   }
 
   /**
