@@ -23,6 +23,7 @@ App::uses('PhtagrTestCase', 'Test/Case');
 class MediaReadGetId3TestCase extends PhtagrTestCase {
 
   var $components = array('FilterManager');
+  var $testDir;
 
 /**
  * setUp method
@@ -31,6 +32,8 @@ class MediaReadGetId3TestCase extends PhtagrTestCase {
  */
 	public function setUp() {
 		parent::setUp();
+
+    $this->testDir = $this->createTestDir();
 
     $admin = $this->Factory->createUser('admin', ROLE_ADMIN);
     $this->Controller->mockUser = $admin;
@@ -64,4 +67,25 @@ class MediaReadGetId3TestCase extends PhtagrTestCase {
     $this->assertEqual(Set::extract('/Field[name=state]/data', $media), array('ayutthaya'));
     $this->assertEqual(Set::extract('/Field[name=country]/data', $media), array('thailand'));
 	}
+
+  /**
+   * Test correct GPS position for negative values
+   */
+  public function testImageReadGps() {
+    $this->copyResource('IMG_1721.JPG', $this->testDir);
+    $this->Controller->FilterManager->readFiles($this->testDir);
+
+    $media = $this->Media->find('first');
+    $this->assertEqual($media['Media']['latitude'], -13.5698);
+    $this->assertEqual($media['Media']['longitude'], -71.7819);
+  }
+
+  // Image has two orienations: Main file is 6, embedded thumbnail is 1
+  public function testOrientationWithEmbeddedThumbnail() {
+    $this->copyResource('IMG_7795.JPG', $this->testDir);
+
+    $this->Controller->FilterManager->readFiles($this->testDir);
+    $media = $this->Media->find('first');
+    $this->assertEqual($media['Media']['orientation'], 6);
+  }
 }

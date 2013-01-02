@@ -18,6 +18,7 @@
 
 App::uses('Media', 'Model');
 App::uses('User', 'Model');
+App::uses('PhtagrTestFactory', 'Test/Case');
 
 class ExplorerControllerTest extends ControllerTestCase {
   /**
@@ -29,6 +30,8 @@ class ExplorerControllerTest extends ControllerTestCase {
       'app.groups_user', 'app.option', 'app.guest', 'app.comment', 'app.my_file',
       'app.fields_media', 'app.field', 'app.comment');
 
+  var $Factory;
+
   /**
    * setUp method
    *
@@ -36,6 +39,8 @@ class ExplorerControllerTest extends ControllerTestCase {
    */
   public function setUp() {
     parent::setUp();
+    $this->Factory = new PhtagrTestFactory();
+
     $this->Media = ClassRegistry::init('Media');
     $this->User = ClassRegistry::init('User');
   }
@@ -223,4 +228,27 @@ class ExplorerControllerTest extends ControllerTestCase {
     $this->assertEqual(Set::extract('/Media/id', $Explorer->request->data), array($media2['Media']['id'], $media1['Media']['id']));
   }
 
+  public function testSelectionUnlink() {
+    $userA = $this->Factory->createUser('UserA', ROLE_USER);
+    $userB = $this->Factory->createUser('UserB', ROLE_USER);
+    $media1 = $this->Factory->createMedia('IMG_1234.JPG', $userA);
+    $media2 = $this->Factory->createMedia('IMG_2345.JPG', $userA);
+    $media3 = $this->Factory->createMedia('IMG_3456.JPG', $userA);
+    $media4 = $this->Factory->createMedia('IMG_4567.JPG', $userB);
+
+    $this->assertEqual($this->Media->find('count'), 4);
+
+    $Explorer = $this->generate('Explorer', array('methods' => array('getUser')));
+    $Explorer->expects($this->any())->method('getUser')->will($this->returnValue($userA));
+
+    $idsToUnlink = array($media1['Media']['id'], $media3['Media']['id'], $media4['Media']['id']);
+    $data = array('Media' => array('ids' => join(',', $idsToUnlink)));
+    $this->testAction('/explorer/selection/unlink', array('return' => 'vars', 'data' => $data, 'method' => 'post'));
+
+    // Media1 and Media3 could be removed. Media4 belongs to another user
+    $this->assertEqual($this->Media->find('count'), 2);
+    $mediaIds = Set::extract('/Media/id', $this->Media->find('all'));
+    sort($mediaIds);
+    $this->assertEquals($mediaIds, array($media2['Media']['id'], $media4['Media']['id']));
+  }
 }

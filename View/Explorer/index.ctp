@@ -238,6 +238,11 @@
       var mediaIds = $('#MediaIds').val();
       $(this).triggerZipDownload(url, mediaIds);
     });
+    $('#p-explorer-selection-remove').click(function() {
+      var url = '{$baseUrl}explorer/selection/unlink';
+      var mediaIds = $('#MediaIds').val();
+      $(this).triggerZipDownload(url, mediaIds);
+    });
     $('.tooltip-actions').tooltipAction();
     $('.radioSet').buttonset();
   });

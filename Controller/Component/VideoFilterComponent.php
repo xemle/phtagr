@@ -20,7 +20,7 @@ App::uses('BaseFilter', 'Component');
 class VideoFilterComponent extends BaseFilterComponent {
 
   var $controller = null;
-  var $components = array('VideoPreview', 'FileManager', 'Command', 'Exiftool');
+  var $components = array('VideoPreview', 'FileManager', 'Command', 'Exiftool', 'SidecarFilter');
 
   public function initialize(Controller $controller) {
     $this->controller = $controller;
@@ -332,6 +332,8 @@ class VideoFilterComponent extends BaseFilterComponent {
         $this->controller->MyFile->setMedia($file, $media['Media']['id']);
         $media = $this->controller->Media->findById($media['Media']['id']);
         $this->write($file, $media);
+      } else {
+        Logger::info("Could not create video thumbnail");
       }
     }
     if ($this->controller->MyFile->isType($file, FILE_TYPE_VIDEOTHUMB)) {
@@ -344,7 +346,17 @@ class VideoFilterComponent extends BaseFilterComponent {
       Logger::debug("Write video thumbnail by ImageFilter: $filename");
       return $imageFilter->write($file, $media);
     }
-    return true;
+    if ($this->controller->getOption('xmp.use.sidecar', 0)) {
+      $filename = $this->controller->MyFile->getFilename($file);
+      if ($this->SidecarFilter->hasSidecar($filename, true)) {
+        $filename_xmp = substr($filename, 0, strrpos($filename, '.') + 1) . 'xmp';
+        $sidecar = $this->MyFile->findByFilename($filename_xmp);
+        return ($this->SidecarFilter->write($sidecar, $media));
+      } else {
+        return false;
+      }
+    }
+    return false;
   }
 
 }

@@ -17,8 +17,8 @@
 class OptionsController extends AppController {
 
   var $name = 'Options';
-  var $helpers = array('Form');
-  var $uses = array('Option', 'Group');
+  var $helpers = array('Form', 'Autocomplete');
+  var $uses = array('Option', 'Group', 'Media');
   var $subMenu = false;
 
   public function beforeFilter() {
@@ -26,6 +26,7 @@ class OptionsController extends AppController {
       'profile' => __("Profile"),
       'password' => __("Password"),
       'import' => __("Import Options"),
+      'export' => __("Export Options"),
       'links' => __("Links"),
       );
     parent::beforeFilter();
@@ -116,17 +117,15 @@ class OptionsController extends AppController {
       $offset = min(720, max(-720, $offset));
       $this->Option->setValue('filter.gps.offset', $offset, $userId);
 
-      $check = Set::extract('filter.gps.overwrite', $this->request->data);
-      $check = $check ? 1 : 0;
-      $this->Option->setValue('filter.gps.overwrite', $check, $userId);
-
       $range = intval(Set::extract('filter.gps.range', $this->request->data));
       $range = max(0, min(60, $range));
       $this->Option->setValue('filter.gps.range', $range, $userId);
 
-      $check2 = Set::extract('xmp.use.sidecar', $this->request->data);
-      $check2 = $check2 ? 1 : 0;
-      $this->Option->setValue('xmp.use.sidecar', $check2, $userId);
+      $flags = array('filter.gps.overwrite');
+      foreach ($flags as $flag) {
+        $bool = Set::extract($flag, $this->request->data) ? 1 : 0;
+        $this->Option->setValue($flag, $bool, $userId);
+      }
 
       $this->Session->setFlash(__("Settings saved"));
     }
@@ -147,5 +146,26 @@ class OptionsController extends AppController {
     $groups[-1] = __('[No Group]');
     $this->set('groups', $groups);
   }
+
+  public function export() {
+    $userId = $this->getUserId();
+    if (!empty($this->request->data)) {
+      $flags = array('filter.write.metadata.embedded', 'filter.write.metadata.sidecar',
+        'filter.create.metadata.sidecar', 'filter.create.nonEmbeddableFile.metadata.sidecar',
+        'filter.write.onDemand');
+      foreach ($flags as $flag) {
+        $bool = Set::extract($flag, $this->request->data) ? 1 : 0;
+        $this->Option->setValue($flag, $bool, $userId);
+      }
+
+      $this->Session->setFlash(__("Settings saved"));
+    }
+    $tree = $this->Option->getTree($userId);
+    $this->Option->addDefaultAclTree($tree);
+    $this->request->data = $tree;
+
+    $this->set('userId', $userId);
+  }
+
 }
 ?>

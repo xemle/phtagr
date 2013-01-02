@@ -207,6 +207,10 @@
   echo ' '.$this->Html->link(__("High Resolution"), 'javascript:void', array('id' => 'p-explorer-download-high', 'title' => __('Download high resolution files (%d px) from selected media', OUTPUT_SIZE_HIGH)));
   echo ' '.$this->Html->link(__("Preview Resolution"), 'javascript:void', array('id' => 'p-explorer-download-preview', 'title' => __('Download preview files (%d px) from selected media', OUTPUT_SIZE_PREVIEW)));
 ?></p>
+<p><?php
+  echo __('Media:') . ' ';
+  echo $this->Html->link(__("Remove"), 'javascript:void', array('id' => 'p-explorer-selection-remove', 'title' => __('Remove Media from database')));
+?></p>
 </div>
 </div>
 </div><!-- explorer menu -->

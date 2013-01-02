@@ -17,18 +17,16 @@
     +column(6)
   #category-cloud
     +column(6, true)
-  #tag-cloud, #category-cloud
-    .cloud
-      +column(6)
-      +tag-cloud(14pt)
-      .xxs, .xs, .s, .m, .l, .xl, .xxl
-        padding: 2px 5px
-        padding-left: 0
-      a
-        display: inline-block
-        &:hover
-          color: white
-          background-color: $clickable-hover-bg
+  .cloud
+    +tag-cloud(14pt)
+    .xxs, .xs, .s, .m, .l, .xl, .xxl
+      padding: 2px 5px
+      padding-left: 0
+    a
+      display: inline-block
+      &:hover
+        color: white
+        background-color: $clickable-hover-bg
 * #random-media .clip
   position: relative
   display: block

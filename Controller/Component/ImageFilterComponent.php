@@ -22,22 +22,6 @@ class ImageFilterComponent extends BaseFilterComponent {
   var $controller = null;
   var $components = array('Command', 'FileManager', 'SidecarFilter', 'Exiftool');
 
-  var $fieldMap = array(
-      'keyword' => 'Keywords',
-      'keyword2' => 'Subject',
-      'category' => 'SupplementalCategories',
-      'sublocation' => 'Sub-location',
-      'city' => 'City',
-      'state' => 'Province-State',
-      'country' => 'Country-PrimaryLocationName'
-      );
-
-  var $locationMap = array(
-                        LOCATION_CITY => 'City',
-                        LOCATION_SUBLOCATION => 'Sub-location',
-                        LOCATION_STATE => 'Province-State',
-                        LOCATION_COUNTRY => 'Country-PrimaryLocationName');
-
   public function getName() {
     return "Image";
   }
@@ -59,13 +43,13 @@ class ImageFilterComponent extends BaseFilterComponent {
     $options = am(array('noSave' => false), $options);
     $filename = $this->MyFile->getFilename($file);
 
-    if ($this->controller->getOption('bin.exiftool')) {
+    if ($this->Exiftool->isEnabled()) {
       $meta = $this->Exiftool->readMetaData($filename);
     } else {
       $meta = $this->_readMetaDataGetId3($filename);
     }
 
-    if ($meta === false) {
+    if ($meta === false || count($meta) == 0) {
       $this->FilterManager->addError($filename, 'NoMetaDataFound');
       return false;
     }
@@ -85,8 +69,8 @@ class ImageFilterComponent extends BaseFilterComponent {
       $isNew = true;
     };
 
-    if ($this->controller->getOption('bin.exiftool')) {
-      $this->_extractImageData($media, $meta);
+    if ($this->Exiftool->isEnabled()) {
+      $this->Exiftool->extractImageData($media, $meta);
     } else {
       $this->_extractImageDataGetId3($media, $meta);
     }
@@ -156,149 +140,6 @@ class ImageFilterComponent extends BaseFilterComponent {
     }
     // No IPTC date: Extract Exif date or now
     return $this->_extract($data, 'jpg/exif/EXIF/DateTimeOriginal', date('Y-m-d H:i:s', time()));
-  }
-
-  /**
-   * Extracts the date of the file. It extracts the date of IPTC and EXIF.
-   * IPTC has the priority.
-   *
-   * @param data Meta data
-   * @return string Date of the meta data or now if not data information was found
-   */
-  private function _extractMediaDate($data) {
-    // IPTC date
-    $dateIptc = $this->_extract($data, 'DateCreated', null);
-    if ($dateIptc) {
-      $time = $this->_extract($data, 'TimeCreated', null);
-      if ($time) {
-        $dateIptc .= ' '.$time;
-      } else {
-        $dateIptc .= ' 00:00:00';
-      }
-      return $dateIptc;
-    }
-    // No IPTC date: Extract Exif date, file modification time, or NOW
-    $date = $this->_extract($data, 'DateTimeOriginal');
-    if (!$date) {
-      $date = $this->_extract($data, 'FileModifyDate');
-    }
-    if (!$date) {
-      $date = date('Y-m-d H:i:s', time());
-    }
-    return $date;
-  }
-
-  /**
-   * Extract the image data from the exif tool array and save it as Media
-   *
-   * @param data Data array from exif tool array
-   * @return Array of the the image data array as image model data
-   */
-  private function _extractImageData(&$media, &$data) {
-    $user = $this->controller->getUser();
-
-    $v =& $media['Media'];
-
-    // Media information
-    $v['name'] = $this->_extract($data, 'ObjectName', $this->_extract($data, 'FileName'));
-    $v['name'] = $this->_extract($data, 'FileName');
-    // TODO Read IPTC date, than EXIF date
-    $v['date'] = $this->_extractMediaDate($data);
-    $v['width'] = $this->_extract($data, 'ImageWidth', 0);
-    $v['height'] = $this->_extract($data, 'ImageHeight', 0);
-    $v['duration'] = -1;
-    $v['orientation'] = $this->_extract($data, 'Orientation', 1);
-
-    $v['aperture'] = $this->_extract($data, 'Aperture', NULL);
-    $v['shutter'] = $this->_extract($data, 'ShutterSpeed', NULL);
-    $v['model'] = $this->_extract($data, 'Model', null);
-    $v['iso'] = $this->_extract($data, 'ISO', null);
-    $v['caption'] = $this->_extract($data, 'Comment', null);
-
-    // fetch GPS coordinates
-    $latitude = $this->_extract($data, 'GPSLatitude', null);
-    $latitudeRef = $this->_extract($data, 'GPSLatitudeRef', null);
-    $longitude = $this->_extract($data, 'GPSLongitude', null);
-    $longitudeRef = $this->_extract($data, 'GPSLongitudeRef', null);
-
-    if ($latitude && $latitudeRef && $longitude && $longitudeRef) {
-      if ($latitudeRef == 'S' && $latitude > 0) {
-        $latitude *= -1;
-      }
-      if ($longitudeRef == 'W' && $longitude > 0) {
-        $longitude *= -1;
-      }
-      $v['latitude'] = $latitude;
-      $v['longitude'] = $longitude;
-    }
-
-    //merge Keywords and Subject
-    if (isset($data['Subject'])) {
-      if (isset($data['Keywords'])) {
-        $data['Keywords']=$data['Subject'].",".$data['Keywords'];
-      } else {
-        $data['Keywords']=$data['Subject'];
-      }
-    } elseif (isset($data['Keywords'])) {
-      $data['Subject'] = $data['Keywords'];
-    }
-
-    // Associations to meta data: Tags, Categories, Locations
-    foreach ($this->fieldMap as $field => $name) {
-      //hack to allow two names with the same key (field)
-      if ($field === 'keyword2') {
-        $field = 'keyword';
-        $isList = true;
-      }
-      $isList = $this->Media->Field->isListField($field);
-      if ($isList) {
-        $media['Field'][$field] = $this->_extractList($data, $name);
-      } else {
-        $media['Field'][$field] = $this->_extract($data, $name);
-      }
-    }
-
-    // Associations to meta data: Groups
-    $fileGroups = $this->_extract($data, 'PhtagrGroups');
-    $media = $this->_readFileGroups($fileGroups, $media);
-
-    return $media;
-  }
-
-  private function _readFileGroups($fileGroups, &$media) {
-    if (!$fileGroups) {
-      return $media;
-    }
-    $fileGroupNames = array_unique(preg_split('/\s*,\s*/', trim($fileGroups)));
-    $user = $this->controller->getUser();
-    $dbGroups = $this->Media->Group->find('all', array('conditions' => array('Group.name' => $fileGroupNames)));
-    $dbGroupNames = Set::extract('/Group/name', $dbGroups);
-
-    $mediaGroupIds = array();
-    foreach ($fileGroupNames as $fileGroupName) {
-      if (!in_array($fileGroupName, $dbGroupNames)) {
-        // create missing group with restriced rights
-        $group = $this->Media->Group->save($this->Media->Group->create(array('user_id' => $user['User']['id'], 'name' => $fileGroupName, 'description' => 'AUTO added group', 'is_hidden' => true, 'is_moderated' => true, 'is_shared' => false)));
-        $mediaGroupIds[] = $group['Group']['id'];
-      } else {
-        $dbGroup = Set::extract("/Group[name=$fileGroupName]", $dbGroups);
-        if (!$dbGroup) {
-          Logger::err("Could not find group with name $fileGroupName in groups " . join(', ', Set::extract("/Group/name", $dbGroups)));
-          continue;
-        }
-        $dbGroup = array_pop($dbGroup); // Set::extract returns always arrays
-        if ($this->Media->Group->isAdmin($dbGroup, $user)) {
-          $mediaGroupIds[] = $dbGroup['Group']['id'];
-        } else if ($this->Media->Group->canSubscribe($dbGroup, $user)) {
-          $this->Media->Group->subscribe($dbGroup, $user['User']['id']);
-          $mediaGroupIds[] = $dbGroup['Group']['id'];
-        }
-      }
-    }
-
-    // Default acl group is assigned by media creation
-    $media['Group']['Group'] = am($media['Group']['Group'], $mediaGroupIds);
-    return $media;
   }
 
   private function _compute($value) {
@@ -374,7 +215,7 @@ class ImageFilterComponent extends BaseFilterComponent {
     }
 
     // Associations to meta data: Tags, Categories, Locations
-    foreach ($this->fieldMap as $field => $name) {
+    foreach ($this->Exiftool->fieldMap as $field => $name) {
       $isList = $this->Media->Field->isListField($field);
       $value = $this->_extract($data, "iptc/IPTCApplication/$name", array());
       if (!$value) {
@@ -409,9 +250,8 @@ class ImageFilterComponent extends BaseFilterComponent {
     $filename = $this->controller->MyFile->getFilename($file);
 
     if ($this->controller->getOption('xmp.use.sidecar', 0)) {
-
       if ($this->SidecarFilter->hasSidecar($filename, true)) {
-        $filename_xmp = substr($filename, 0, strrpos($filename, '.')+1).'xmp';
+        $filename_xmp = substr($filename, 0, strrpos($filename, '.') + 1) . 'xmp';
         $sidecar = $this->MyFile->findByFilename($filename_xmp);
         return ($this->SidecarFilter->write($sidecar, $media));
       } else {
@@ -431,7 +271,7 @@ class ImageFilterComponent extends BaseFilterComponent {
       return false;
     }
 
-    $args = $this->_createExportArguments($data, $media);
+    $args = $this->Exiftool->createExportArguments($data, $media, $filename);
     if (!count($args)) {
       Logger::debug("File '$filename' has no metadata changes");
       if (!$this->Media->deleteFlag($media, MEDIA_FLAG_DIRTY)) {
@@ -439,19 +279,6 @@ class ImageFilterComponent extends BaseFilterComponent {
       }
       return true;
     }
-
-    //ignore minor errors -the file could had minor errors before importing to phtagr,
-    //consequently the write process will fail due to previous minor errors
-    $args[] = '-m';
-
-    //write in binary format, not human readable; exemple: for 'orientation' field
-    $args[] = '-n';
-
-    //generates new IPTCDigest code in order to 'help' adobe products to see that the file was modified
-    $args[] = '-IPTCDigest=new';
-
-    $args[] = '-overwrite_original';
-    $args[] = $filename;
 
     $result = $this->Exiftool->writeMetaData($filename, $args);
     if ($result !== true) {
@@ -464,214 +291,6 @@ class ImageFilterComponent extends BaseFilterComponent {
       $this->controller->warn("Could not update image data of media {$media['Media']['id']}");
     }
     return true;
-  }
-
-  /**
-   * Creates the export arguments for date for IPTC if date information of the
-   * file differs from the database entry
-   *
-   * @param data Meta data of the file
-   * @param image Model data of the current image
-   * @return array export arguments or an empty string
-   * @note IPTC dates are set in the default timezone
-   */
-  private function _createExportDate($data, $media) {
-    // Remove IPTC data and time if database date is not set
-    $args = array();
-    if (!$media['Media']['date']) {
-      $args[] = '-IPTC:DateCreated-=';
-      $args[] = '-TimeCreated-=';
-      return '';
-    }
-
-    $timeDb = strtotime($media['Media']['date']);
-    $timeFile = false;
-
-    // Date priorities: IPTC, EXIF
-    $dateIptc = $this->_extract($data, 'DateCreated');
-      //correct possible reading from XMP: DateCreated instead of IPTC:DateCreated
-      $dateIptc=substr($dateIptc,0,10);
-    if ($dateIptc) {
-      $time = $this->_extract($data, 'TimeCreated');
-      if ($time) {
-        $dateIptc .= ' '.$time;
-      } else {
-        //Midnight with timezone
-        $dateIptc .= ' 00:00:00'.date('O');
-      }
-      $timeFile = strtotime($dateIptc);
-    } else {
-      $dateExif = $this->_extract($data, 'DateTimeOriginal');
-      if ($dateExif) {
-        $timeFile = strtotime($dateExif);
-      }
-    }
-
-    if ($timeDb && (!$timeFile || ($timeFile != $timeDb))) {
-      $args[] = '-IPTC:DateCreated=' . date("Y:m:d", $timeDb);
-      $args[] = '-TimeCreated=' . date("H:i:sO", $timeDb);
-      //Logger::trace("Set new date via IPTC: $arg");
-    }
-    return $args;
-  }
-
-  private function _createExportGps(&$data, &$media) {
-    $args = array();
-
-    $latitude = $this->_extract($data, 'GPSLatitude', null);
-    $latitudeRef = $this->_extract($data, 'GPSLatitudeRef', null);
-    $longitude = $this->_extract($data, 'GPSLongitude', null);
-    $longitudeRef = $this->_extract($data, 'GPSLongitudeRef', null);
-
-    if ($latitude && $latitudeRef && $longitude && $longitudeRef) {
-      if ($latitudeRef == 'S' && $latitude > 0) {
-        $latitude *= -1;
-      }
-      if ($longitudeRef == 'W' && $longitude > 0) {
-        $longitude *= -1;
-      }
-    }
-
-    $latitudeDb = $media['Media']['latitude'];
-    if ($latitude != $latitudeDb) {
-      if (!$latitudeDb) {
-        $latitudeRef = '';
-        $latitudeDb = '';
-      } elseif ($latitudeDb < 0) {
-        $latitudeRef = 'S';
-        $latitudeDb *= -1;
-      } else  {
-        $latitudeRef = 'N';
-      }
-      $args[] = '-GPSLatitude=' . $latitudeDb;
-      $args[] = '-GPSLatitudeRef=' . $latitudeRef;
-    }
-
-    $longitudeDb = $media['Media']['longitude'];
-    if ($longitude != $longitudeDb) {
-      if (!$longitudeDb) {
-        $longitudeRef = '';
-        $longitudeDb = '';
-      } elseif ($longitudeDb < 0) {
-        $longitudeRef = 'W';
-        $longitudeDb *= -1;
-      } else  {
-        $longitudeRef = 'E';
-      }
-      $args[] = '-GPSLongitude=' . $longitudeDb;
-      $args[] = '-GPSLongitudeRef=' . $longitudeRef;
-    }
-    return $args;
-  }
-
-  /**
-   * Create generic export argument
-   *
-   * @param data Exif data
-   * @param exifParam Exif parameter
-   * @param currentValue Current value
-   * @param removeIfEqual If set to true and currentValue is equal to fileValue
-   * the flag will be removed
-   * @return array Array of export arguments
-   */
-  private function _createExportArgument(&$data, $exifParam, $currentValue, $removeIfEqual = false) {
-    $args = array();
-    $fileValue = $this->_extract($data, $exifParam);
-    if ($fileValue != $currentValue) {
-      if ($exifParam === 'Orientation') {$exifParam=$exifParam.'#';}
-      $args[] = "-$exifParam=$currentValue";
-    } else if ($fileValue && $removeIfEqual) {
-      $args[] = "-$exifParam=";
-    }
-    return $args;
-  }
-
-  /**
-   * Create arguments to export the metadata from the database to the file.
-   *
-   * @param data metadata from the file (Exiftool information)
-   * @param image Media data array
-   */
-  private function _createExportArguments(&$data, $media) {
-    $args = array();
-
-    $args = am($args, $this->_createExportDate($data, $media));
-    $args = am($args, $this->_createExportGps($data, $media));
-
-    $args = am($args, $this->_createExportArgument($data, 'ObjectName', $media['Media']['name'], true));
-    $args = am($args, $this->_createExportArgument($data, 'Orientation', $media['Media']['orientation']));
-    $args = am($args, $this->_createExportArgument($data, 'Comment', $media['Media']['caption']));
-
-    $args = am($args, $this->_createExportArgumentsForFields($data, $media));
-    $args = am($args, $this->_createExportArgumentsForGroups($data, $media));
-
-    return $args;
-  }
-
-  private function _createExportArgumentsForFields(&$data, $media) {
-    $args = array();
-    // Associations to meta data: Tags, Categories, Locations
-    foreach ($this->fieldMap as $field => $name) {
-      $isList = $this->Media->Field->isListField($field);
-      //hack to allow two names with the same key (field)
-      if ($field === 'keyword2') {
-        $field = 'keyword';
-        $isList = true;
-      }
-      if ($isList) {
-        $fileValue = $this->_extractList($data, $name);
-      } else {
-        $fileValue = $this->_extract($data, $name);
-      }
-      $dbValue = Set::extract("/Field[name=$field]/data", $media);
-      if (!$isList) {
-        $dbValue = array_pop($dbValue);
-        if ($dbValue && $fileValue != $dbValue) {
-          // write value if database value differs from file value
-          // (file value does not exist or database value was changed)
-          $args[] = "-$name=" . $dbValue;
-        } elseif($fileValue && !$dbValue) {
-          // remove file value if no database value is empty
-          $args[] = "-$name=";
-        }
-      } else {
-        foreach (array_diff($fileValue, $dbValue) as $del) {
-          $args[] = "-$name-=" . $del;
-        }
-        foreach (array_diff($dbValue, $fileValue) as $add) {
-          $args[] = "-$name+=" . $add;
-        }
-      }
-    }
-
-    return $args;
-  }
-
-  private function _createExportArgumentsForGroups(&$data, $media) {
-    //add Groups to metadata xmp:   XMP-Phtagr:PhtagrGroups
-    $fileGroups = $this->_extractList($data, 'PhtagrGroups');
-
-    if (count($media['Group'])) {
-      $dbGroups = Set::extract('/Group/name', $media);
-    } else {
-      $dbGroups = array();
-    }
-
-    $user = $this->controller->getUser();
-    $allowedGroupNames = Set::extract('/Group/name', $this->controller->Media->Group->getGroupsForMedia($user));
-
-    $args = array();
-    foreach (array_diff($fileGroups, $dbGroups) as $del) {
-      // do not erase existing, not allowed (yet) groups = delete only allowed groups
-      if (in_array($del, $allowedGroupNames)) {
-        $args[] = '-PhtagrGroups-=' . $del;
-      }
-    }
-
-    foreach (array_diff($dbGroups, $fileGroups) as $add) {
-      $args[] = '-PhtagrGroups+=' . $add;
-    }
-    return $args;
   }
 
   /**
@@ -694,31 +313,6 @@ class ImageFilterComponent extends BaseFilterComponent {
       $result =& $result[$p];
     }
     return $result;
-  }
-
-  private function _extractList(&$data, $key, $default = array()) {
-    $value = $this->_extract($data, $key);
-    if (!$value) {
-      return $default;
-    }
-    $values = array_unique(preg_split('/\s*,\s*/', trim($value)));
-    return $values;
-  }
-
-  /**
-   * Generates a unique temporary filename
-   *
-   * @param filename Current filename
-   */
-  private function _getTempFilename($filename) {
-    // create temporary file
-    $tmp = "$filename.tmp";
-    $count = 0;
-    while (file_exists($tmp)) {
-      $tmp = "$filename.$count.tmp";
-      $count++;
-    }
-    return $tmp;
   }
 
   private function _readMetaDataGetId3($filename) {

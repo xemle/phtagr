@@ -46,6 +46,18 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
 
   var $components = array('FileManager', 'FilterManager');
 
+  public function startup(Controller $controller) {
+  }
+
+  public function beforeRender(Controller $controller) {
+  }
+
+  public function shutdown(Controller $controller) {
+  }
+
+  public function beforeRedirect(Controller $controller, $url, $status = null, $exit = true) {
+  }
+
   public function WebdavServer() {
     $this->HTTP_WebDAV_Server();
     $this->_fsRoot=$_SERVER['DOCUMENT_ROOT'];
@@ -198,8 +210,8 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
     @note Requires PHP 5 (uses references in foreach statement) */
   public function pathRawurlencode($path) {
     $paths=explode('/', $path);
-    for ($i = 0; $i < count($parts); $i++) {
-      $part[$i] = rawurlencode($part[$i]);
+    for ($i = 0; $i < count($paths); $i++) {
+      $paths[$i] = rawurlencode($paths[$i]);
     }
     return implode('/', $paths);
   }
@@ -515,7 +527,7 @@ class WebdavServerComponent extends HTTP_WebDAV_Server
 
     // Update metadata on dirty file
     $file = $this->controller->MyFile->findByFilename($fspath);
-    if ($file && $this->controller->Media->hasFlag($file, MEDIA_FLAG_DIRTY)) {
+    if ($file && $this->controller->Media->hasFlag($file, MEDIA_FLAG_DIRTY) && $this->controller->getOption('filter.write.onDemand')) {
       $media = $this->controller->Media->findById($file['Media']['id']);
       $this->FilterManager->write($media);
     }
