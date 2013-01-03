@@ -251,4 +251,38 @@ class ExplorerControllerTest extends ControllerTestCase {
     sort($mediaIds);
     $this->assertEquals($mediaIds, array($media2['Media']['id'], $media4['Media']['id']));
   }
+
+  public function testSelectionDeleteCache() {
+    $userA = $this->Factory->createUser('UserA', ROLE_USER);
+    $userB = $this->Factory->createUser('UserB', ROLE_USER);
+    $media1 = $this->Factory->createMedia('IMG_1234.JPG', $userA);
+    $media2 = $this->Factory->createMedia('IMG_2345.JPG', $userB);
+
+    $Explorer = $this->generate('Explorer', array(
+        'methods' => array('getUser'),
+        'models' => array('Media' => array('deleteCache'))));
+    $Explorer->expects($this->any())->method('getUser')->will($this->returnValue($userA));
+    $Explorer->Media->expects($this->once())->method('deleteCache');
+
+    $mediaIds = array($media1['Media']['id'], $media2['Media']['id']);
+    $data = array('Media' => array('ids' => join(',', $mediaIds)));
+    $this->testAction('/explorer/selection/deleteCache', array('return' => 'vars', 'data' => $data, 'method' => 'post'));
+  }
+
+  public function testSelectionSync() {
+    $userA = $this->Factory->createUser('UserA', ROLE_USER);
+    $userB = $this->Factory->createUser('UserB', ROLE_USER);
+    $media1 = $this->Factory->createMedia('IMG_1234.JPG', $userA);
+    $media2 = $this->Factory->createMedia('IMG_2345.JPG', $userB);
+
+    $Explorer = $this->generate('Explorer', array(
+        'methods' => array('getUser'),
+        'components' => array('FilterManager')));
+    $Explorer->expects($this->any())->method('getUser')->will($this->returnValue($userA));
+    $Explorer->FilterManager->expects($this->once())->method('write');
+
+    $mediaIds = array($media1['Media']['id'], $media2['Media']['id']);
+    $data = array('Media' => array('ids' => join(',', $mediaIds)));
+    $this->testAction('/explorer/selection/sync', array('return' => 'vars', 'data' => $data, 'method' => 'post'));
+  }
 }

@@ -703,7 +703,7 @@ class ExplorerController extends AppController
   }
 
   public function selection($action) {
-    $validActions = array('unlink');
+    $validActions = array('unlink', 'deleteCache', 'sync');
     if (!$this->RequestHandler->isPost()) {
       Logger::warn("Decline wrong ajax request");
       $this->redirect(null, 404);
@@ -726,8 +726,13 @@ class ExplorerController extends AppController
       }
       if ($action == 'unlink') {
         $this->Media->delete($media['Media']['id']);
+      } else if ($action == 'deleteCache') {
+        $this->Media->deleteCache($media);
+      } else if ($action == 'sync') {
+        $this->FilterManager->write($media);
       }
     }
+
     $this->render('index');
   }
 

@@ -243,6 +243,16 @@
       var mediaIds = $('#MediaIds').val();
       $(this).triggerZipDownload(url, mediaIds);
     });
+    $('#p-explorer-selection-delete-cache').click(function() {
+      var url = '{$baseUrl}explorer/selection/deleteCache';
+      var mediaIds = $('#MediaIds').val();
+      $(this).triggerZipDownload(url, mediaIds);
+    });
+    $('#p-explorer-selection-clear-sync').click(function() {
+      var url = '{$baseUrl}explorer/selection/sync';
+      var mediaIds = $('#MediaIds').val();
+      $(this).triggerZipDownload(url, mediaIds);
+    });
     $('.tooltip-actions').tooltipAction();
     $('.radioSet').buttonset();
   });

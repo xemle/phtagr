@@ -9,14 +9,14 @@
 ?>
 <div id="p-explorer-menu">
 <ul>
-  <li id="p-explorer-button-all-meta"><a><?php echo __("View Filter"); ?></a></li>
+  <li id="p-explorer-button-all-meta"><a><?php echo __("View"); ?></a></li>
   <?php if ($canWriteTag): ?>
-  <li id="p-explorer-button-meta"><a><?php echo __("Edit Metadata"); ?></a></li>
+  <li id="p-explorer-button-meta"><a><?php echo __("Metadata"); ?></a></li>
   <?php if ($canWriteAcl): ?>
-  <li id="p-explorer-button-access"><a><?php echo __("Edit Access Rights"); ?></a></li>
+  <li id="p-explorer-button-access"><a><?php echo __("Access Right"); ?></a></li>
   <?php endif; // canWriteAcl ?>
   <?php endif; // canWriteTag ?>
-  <li id="p-explorer-button-more"><a><?php echo __("More"); ?></a></li>
+  <li id="p-explorer-button-more"><a><?php echo __("Selection"); ?></a></li>
   <li id="p-explorer-button-slideshow"><a><?php echo __("Slideshow"); ?></a></li>
 </ul>
 <div class="pages">
@@ -210,6 +210,8 @@
 <p><?php
   echo __('Media:') . ' ';
   echo $this->Html->link(__("Remove"), 'javascript:void', array('id' => 'p-explorer-selection-remove', 'title' => __('Remove Media from database')));
+  echo $this->Html->link(__("Clear Cache"), 'javascript:void', array('id' => 'p-explorer-selection-delete-cache', 'title' => __('Clear media cache files')));
+  echo $this->Html->link(__("Sync"), 'javascript:void', array('id' => 'p-explorer-selection-sync', 'title' => __('Synchorinze meta data')));
 ?></p>
 </div>
 </div>
