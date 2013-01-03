@@ -25,43 +25,34 @@ class GpxComponent extends Component {
     $this->controller = $controller;
   }
 
-  public function _getChildByName($node, $childName) {
-    if (!$node) {
-      return null;
-    }
-    foreach ($node->childNodes as $child) {
-      if ($child->nodeName == $childName) {
-        return $child;
-      }
-    }
-    return null;
-  }
-
   /**
    * Add point to the point array
    *
    * @param DomNode $point
    * @return Array Gps point
    */
-  public function _readTrackPoint($point) {
-    $lat = $point->getAttribute('lat');
-    $long = $point->getAttribute('lon');
-    if (!$lat || !$long) {
+  public function _readTrackPoint(&$point) {
+    if (!$point) {
       return false;
     }
-    $timeNode = $this->_getChildByName($point, 'time');
-    if (!$timeNode) {
+    $result = array();
+    foreach ($point->attributes() as $name => $value) {
+      if ($name == 'lat') {
+        $result['latitude'] = (string) $value;
+      } else if ($name == 'lon') {
+        $result['longitude'] = (string) $value;
+      }
+    }
+    if ($point->time) {
+      $result['date'] = (string) $point->time;
+    }
+    if (count($result) < 3) {
       return false;
     }
-    $altitude = $this->_getChildByName($point, 'ele');
-    $point = array(
-        'latitude' => $lat,
-        'longitude' => $long,
-        'date' => $timeNode->nodeValue);
-    if ($altitude) {
-      $point['altitude'] = $altitude->nodeValue;
+    if ($point->ele) {
+      $result['altitude'] = (string) $point->ele;
     }
-    return $point;
+    return $result;
   }
 
   /**
@@ -75,23 +66,29 @@ class GpxComponent extends Component {
       Logger::warn("File '$file' is not readable");
       return false;
     }
+    $t1 = microtime(true);
     try {
-      $xml = Xml::build($filename, array('return' => 'domdocument'));
+      $xml = Xml::build($filename);
     } catch (XmlException $xe) {
       Logger::err("Could not read gpx file $filename: " . $xe->getMessage());
       return false;
     }
 
     $points = array();
-    foreach ($xml->getElementsByTagName('trkpt') as $trkpt) {
-      $point = $this->_readTrackPoint($trkpt);
-      if ($point) {
-        $points[] = $point;
+    foreach ($xml->trk as $trk) {
+      foreach ($trk->trkseg as $trkseg) {
+        foreach ($trkseg->trkpt as $trkpt) {
+          $point = $this->_readTrackPoint($trkpt);
+          if ($point) {
+            $points[] = $point;
+          }
+        }
       }
     }
+    unset($xml);
+    $time = sprintf("%.3fs", microtime(true) - $t1);
 
-    Logger::info("Read $filename with " . count($points) . " track points");
+    Logger::info("Read $filename with " . count($points) . " track points in $time");
     return $points;
   }
-
 }
