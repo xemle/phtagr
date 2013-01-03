@@ -280,7 +280,13 @@ class ExiftoolComponent extends Component {
     } else {
       $output = $this->_readMetaDataDirect($filename, $groups);
     }
-    return $this->_convertOutputToParams($output);
+    $params = $this->_convertOutputToParams($output);
+    if ($params['FileName'] != basename($filename)) {
+      Logger::err("Unexpected meta data for file: $filename. FileName does not match");
+      Logger::err($output);
+      return false;
+    }
+    return $params;
   }
 
   /**
