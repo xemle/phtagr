@@ -76,7 +76,7 @@ class FilterManagerComponent extends Component {
     $this->controller = $controller;
     if (!isset($controller->MyFile) || !isset($controller->Media)) {
       Logger::err("Model MyFile and Media is not found");
-      return false;
+      return;
     }
     $this->loadFilter(array('ImageFilter', 'ReadOnlyImageFilter', 'VideoFilter', 'GpsFilter', 'SidecarFilter'));
 
@@ -123,7 +123,7 @@ class FilterManagerComponent extends Component {
         $ext = $config;
         $config = array();
       }
-      $config = am(array('priority' => 8), $config);
+      $config = am(array('priority' => 8, 'hasMetaData' => false), $config);
       $ext = strtolower($ext);
       if (!isset($this->extensions[$ext])) {
         $this->extensions[$ext] = $filter;
@@ -542,6 +542,32 @@ class FilterManagerComponent extends Component {
   }
 
   /**
+   * Collects all extensions with embeddable meta data
+   *
+   * @return array List of file extensions
+   */
+  private function _getExtensionsWithMetaData() {
+    $result = array();
+    foreach ($this->config as $ext => $config) {
+      if ($config['hasMetaData']) {
+        $result[] = $ext;
+      }
+    }
+    return $result;
+  }
+
+  /**
+   * Create additional files
+   *
+   * @param array $media Media model data
+   */
+  private function _createAdditionalFiles(&$media) {
+    if ($this->controller->Media->isType($media, MEDIA_TYPE_VIDEO) && isset($this->VideoFilter)) {
+      $this->VideoFilter->createThumb($media);
+    }
+  }
+
+  /**
    * Export database to file
    */
   public function write(&$media) {
@@ -556,8 +582,10 @@ class FilterManagerComponent extends Component {
     $success = true;
     $filterMissing = false;
     $hasSidecar = false;
-    $embeddableExtensions = $this->ImageFilter->getExtensions();
-    $hasEmbeddableFile = false;
+    $metaDataExtensions = $this->_getExtensionsWithMetaData();
+    $hasFileWithMetaData = false;
+
+    $this->_createAdditionalFiles($media);
     foreach ($media['File'] as $file) {
       $file = $this->controller->MyFile->findById($file['id']);
       $filename = $this->controller->MyFile->getFilename($file);
@@ -577,8 +605,8 @@ class FilterManagerComponent extends Component {
         $hasSidecar = true;
       }
       $ext = $this->_getFileExtension($filename);
-      if (in_array($ext, $embeddableExtensions)) {
-        $hasEmbeddableFile = true;
+      if (in_array($ext, $metaDataExtensions)) {
+        $hasFileWithMetaData = true;
       }
       if (!$isSidecar && !$this->writeEmbeddedEnabled) {
         continue;
@@ -596,7 +624,7 @@ class FilterManagerComponent extends Component {
       Logger::trace("Call filter ".$filter->getName()." for $filename");
       $success = ($success && $filter->write($file, $media));
     }
-    if (!$hasSidecar && ($this->createSidecar || (!$hasEmbeddableFile && $this->createSidecarForNonEmbeddableFile))) {
+    if (!$hasSidecar && ($this->createSidecar || (!$hasFileWithMetaData && $this->createSidecarForNonEmbeddableFile))) {
       $success = ($success && $this->_createAndWriteSidecar($media));
     }
     return $success && !$filterMissing;

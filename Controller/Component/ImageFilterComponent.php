@@ -27,7 +27,10 @@ class ImageFilterComponent extends BaseFilterComponent {
   }
 
   public function getExtensions() {
-    return array('jpeg', 'jpg');
+    return array(
+        'jpeg' => array('hasMetaData' => true),
+        'jpg' => array('hasMetaData' => true)
+        );
   }
 
   /**

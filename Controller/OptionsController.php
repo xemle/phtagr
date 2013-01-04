@@ -18,7 +18,8 @@ class OptionsController extends AppController {
 
   var $name = 'Options';
   var $helpers = array('Form', 'Autocomplete');
-  var $uses = array('Option', 'Group', 'Media');
+  var $uses = array('Option', 'Group', 'Media', 'MyFile');
+  var $components = array('FilterManager', 'VideoPreview');
   var $subMenu = false;
 
   public function beforeFilter() {
@@ -150,8 +151,10 @@ class OptionsController extends AppController {
   public function export() {
     $userId = $this->getUserId();
     if (!empty($this->request->data)) {
-      $flags = array('filter.write.metadata.embedded', 'filter.write.metadata.sidecar',
-        'filter.create.metadata.sidecar', 'filter.create.nonEmbeddableFile.metadata.sidecar',
+      $flags = array(
+        $this->VideoPreview->createVideoThumbOption,
+        $this->FilterManager->writeEmbeddedEnabledOption, $this->FilterManager->writeSidecarEnabledOption,
+        $this->FilterManager->createSidecarOption, $this->FilterManager->createSidecarForNonEmbeddableFileOption,
         'filter.write.onDemand');
       foreach ($flags as $flag) {
         $bool = Set::extract($flag, $this->request->data) ? 1 : 0;

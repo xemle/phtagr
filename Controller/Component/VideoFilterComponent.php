@@ -22,8 +22,11 @@ class VideoFilterComponent extends BaseFilterComponent {
   var $controller = null;
   var $components = array('VideoPreview', 'FileManager', 'Command', 'Exiftool', 'SidecarFilter');
 
+  var $createVideoThumb = false;
+
   public function initialize(Controller $controller) {
     $this->controller = $controller;
+    $this->createVideoThumb = $this->controller->getOption($this->VideoPreview->createVideoThumbOption, false);
   }
 
   public function getName() {
@@ -39,7 +42,7 @@ class VideoFilterComponent extends BaseFilterComponent {
   }
 
   public function getExtensions() {
-    return am($this->_getVideoExtensions(), array('thm' => array('priority' => 5)));
+    return am($this->_getVideoExtensions(), array('thm' => array('priority' => 5, 'hasMetaData' => true)));
   }
 
   /**
@@ -302,17 +305,11 @@ class VideoFilterComponent extends BaseFilterComponent {
     return $result;
   }
 
-  // Check for video thumb
-  private function _hasThumb($media) {
-    $thumb = $this->controller->Media->getFile($media, FILE_TYPE_VIDEOTHUMB);
-    if ($thumb) {
-      return true;
-    } else {
-      return false;
+  public function createThumb(&$media) {
+    if (!$this->createVideoThumb || $this->VideoPreview->findVideoThumb($media)) {
+      return;
     }
-  }
 
-  private function _createThumb($media) {
     $video = $this->controller->Media->getFile($media, FILE_TYPE_VIDEO);
     if (!$video) {
       Logger::err("Media {$media['Media']['id']} has no video");
@@ -320,26 +317,17 @@ class VideoFilterComponent extends BaseFilterComponent {
     }
     if (!is_writable(dirname($this->controller->MyFile->getFilename($video)))) {
       Logger::warn("Cannot create video thumb. Directory of video is not writeable");
-    }
-    $thumb = $this->VideoPreview->create($video);
-    if (!$thumb) {
       return false;
     }
-    return $this->FileManager->add($thumb);
+    $thumbFilename = $this->VideoPreview->createVideoThumb($media);
+    if ($thumbFilename) {
+      $thumb = $this->controller->MyFile->findByFilename($thumbFilename);
+      $media['File'][] = $thumb['File'];
+    }
+    return true;
   }
 
   public function write(&$file, &$media, $options = array()) {
-    if (!$this->_hasThumb($media)) {
-      $id = $this->_createThumb($media);
-      if ($id) {
-        $file = $this->controller->MyFile->findById($id);
-        $this->controller->MyFile->setMedia($file, $media['Media']['id']);
-        $media = $this->controller->Media->findById($media['Media']['id']);
-        $this->write($file, $media);
-      } else {
-        Logger::info("Could not create video thumbnail");
-      }
-    }
     if ($this->controller->MyFile->isType($file, FILE_TYPE_VIDEOTHUMB)) {
       $imageFilter = $this->FilterManager->getFilter('Image');
       if (!$imageFilter) {
@@ -350,17 +338,7 @@ class VideoFilterComponent extends BaseFilterComponent {
       Logger::debug("Write video thumbnail by ImageFilter: $filename");
       return $imageFilter->write($file, $media);
     }
-    if ($this->controller->getOption('xmp.use.sidecar', 0)) {
-      $filename = $this->controller->MyFile->getFilename($file);
-      if ($this->SidecarFilter->hasSidecar($filename, true)) {
-        $filename_xmp = substr($filename, 0, strrpos($filename, '.') + 1) . 'xmp';
-        $sidecar = $this->MyFile->findByFilename($filename_xmp);
-        return ($this->SidecarFilter->write($sidecar, $media));
-      } else {
-        return false;
-      }
-    }
-    return false;
+    return true;
   }
 
 }

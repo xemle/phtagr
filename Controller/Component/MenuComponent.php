@@ -61,7 +61,7 @@ class MenuComponent extends Component {
     $this->setBasicMainMenu();
     $menu =& $this->menus[$this->currentMenu];
 
-    if (isset($this->controller->subMenu)) {
+    if (isset($this->controller->subMenu) && $this->controller->subMenu) {
       $name = strtolower($this->controller->name);
       $parentId = 'item-' . $name;
       foreach ($this->controller->subMenu as $action => $title) {
