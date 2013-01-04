@@ -194,7 +194,6 @@ class QueryBuilderComponent extends Component {
     }
     foreach ($params as $name => $value) {
       if (!isset($this->conditionRules[$name])) {
-        Logger::warn("No rule for $name. Skip it.");
         continue;
       }
 
