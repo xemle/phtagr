@@ -166,16 +166,21 @@ class ExiftoolComponent extends Component {
     return is_resource($this->process);
   }
 
-  private function _writeCommands(&$pipe, $commands) {
+  /**
+   * Write given commands to exiftool pipe
+   *
+   * @param resource $pipe Resource pipe to write
+   * @param array $commands Array of commands. Each command will be append with a new line.
+   */
+  private function _writeCommands(&$pipe, &$commands) {
     if (!is_resource($pipe)) {
       Logger::err("Invalid pipe. Command could not be written: " . join(', ', $commands));
       return;
     }
     try {
-      foreach ($commands as $command) {
-        fwrite($pipe, $command);
-        fwrite($pipe, "\n");
-      }
+      $data = join("\n", $commands) . "\n";
+      fwrite($pipe, $data);
+      Logger::debug("Write exiftool pipe: " . join(" ", $commands));
     } catch (Exception $e) {
       Logger::err("Writing error on pipe: " . $e->getMessage() . " Command could not be written: " . join(', ', $commands));
     }
@@ -191,7 +196,8 @@ class ExiftoolComponent extends Component {
     if (is_resource($this->process)) {
       //exiftool is opened with -stay_open option
       //exiftool can be closed
-      $this->_writeCommands($this->stdin, array('-stay_open', 'False', '-execute', ''));
+      $commands = array('-stay_open', 'False', '-execute');
+      $this->_writeCommands($this->stdin, $commands);
       // read rest from pipes
       $this->_readFromPipe($this->stdout);
       $this->_readFromPipe($this->stderr);
@@ -612,9 +618,9 @@ class ExiftoolComponent extends Component {
     //fwrite($this->stdin, "-json\n");
 
     //next line is not really necessary; good for reading over slow networks
-    $this->_writeCommands($this->stdin, array('-fast2'));
+    $commands = array('-fast2');
 
-    $this->_writeCommands($this->stdin, $this->_getReadParams($groups));
+    $commands = am($commands, $this->_getReadParams($groups));
 
     //-b          (-binary)            Output data in binary format
     //-n          (--printConv)        Read/write numerical tag values, not passed through print Conversation; (not human readable)
@@ -627,7 +633,8 @@ class ExiftoolComponent extends Component {
     //numerical values format, not human readable; exemple: for 'orientation' field
     //fwrite($pipes[0], "-n\n");
 
-    $this->_writeCommands($this->stdin, array('-S', $filename, '', '-execute'));
+    $commands = am($commands, array('-S', $filename, '-execute'));
+    $this->_writeCommands($this->stdin, $commands);
 
     //"-executeNUMBER\n" can be utilized to obtain {readyNUMBER} on eof stdout
 
@@ -953,8 +960,9 @@ class ExiftoolComponent extends Component {
    */
   private function _writeMetaDataPipes(&$args) {
 
-    $this->_writeCommands($this->stdin, $args);
-    $this->_writeCommands($this->stdin, array('-execute'));
+    $commands = am($args);
+    $commands[] = "-execute";
+    $this->_writeCommands($this->stdin, $commands);
 
     $this->_readFromPipe($this->stdout, "{ready}\n");
     $stderr = $this->_readFromPipe($this->stderr);
