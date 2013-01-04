@@ -48,7 +48,7 @@
 </div></div><!-- #main/sub -->
 
 <div id="footer"><div class="sub">
-<p><?php echo __("&copy; 2006-2012 by %s - Tag, Browse, and Share Your Photos.", $this->Html->link(__("phTagr.org"), 'http://www.phtagr.org')); ?></p>
+<p><?php echo __("&copy; 2006-2013 by %s - Tag, Browse, and Share Your Photos.", $this->Html->link(__("phTagr.org"), 'http://www.phtagr.org')); ?></p>
 </div></div><!-- #footer/sub -->
 
 </div></body><!-- #page -->

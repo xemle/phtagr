@@ -41,7 +41,7 @@
 </div><!-- main -->
 
 <div id="footer"><div class="sub">
-<p><?php echo __("&copy; 2006-2012 by %s - Tag, Browse, and Share Your Photos.", $this->Html->link("phTagr.org", 'http://www.phtagr.org')) . ' ' . __("You are running version %s.", Configure::read('Phtagr.version')); ?></p>
+<p><?php echo __("&copy; 2006-2013 by %s - Tag, Browse, and Share Your Photos.", $this->Html->link("phTagr.org", 'http://www.phtagr.org')) . ' ' . __("You are running version %s.", Configure::read('Phtagr.version')); ?></p>
 </div></div>
 </body>
 </html>
