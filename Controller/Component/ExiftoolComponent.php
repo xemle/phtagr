@@ -27,6 +27,8 @@ class ExiftoolComponent extends Component {
   var $hasOptionConfig = false;
   var $hasOptionStayOpen = false;
 
+  var $stayOpenOption = 'bin.exiftoolOption.stayOpen';
+
   // to be changed in case of old exiftool versions or problems with non UTF8 filenames...
   var $usePipes = true;
   var $debugging = false;//set to true to stop exiting exiftool after not reading pipes for 1 sec(during any debugging)
@@ -101,19 +103,21 @@ class ExiftoolComponent extends Component {
     $result = $this->Command->run($this->bin, array('-ver'));
     $outputline = join("", $this->Command->output);
     // result is 0 for no error
-    if ($result || !preg_match('/^(\d+)\.(\d+).*/', $outputline, $version)) {
+    if ($result || !preg_match('/^(\d+\.\d+).*/', $outputline, $match)) {
       Logger::err("Unexpected result output of exiftool ({$this->bin}): Returnd $result with output: $output. Disable exiftool");
       $this->bin = false;
       return false;
     }
+    $version = $match[1];
 
     // Exif version in $version[0]. major version in $version[1], minor version in $version[2]
     // -config since 7.98
-    if ($version[1] > 7 || ($version[1] == 7 && $version[2] >= 98)) {
+    if ($version >= 7.98) {
       $this->hasOptionConfig = true;
     }
     // -stay_open since 8.42
-    if ($version[1] > 8 || ($version[1] == 8 && $version[2] >= 42)) {
+    $stayOpenEnabled = $this->controller->getOption($this->stayOpenOption, false);
+    if ($stayOpenEnabled && $version >= 8.42) {
       $this->hasOptionStayOpen = true;
     }
   }

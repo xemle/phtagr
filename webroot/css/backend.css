@@ -283,6 +283,7 @@ form {
           color: white;
           background-color: #557799;
           border-color: #314457; }
+      form fieldset div.input .description,
       form fieldset div.input .error-message {
         padding-left: 30%; }
       form fieldset div.input.error {

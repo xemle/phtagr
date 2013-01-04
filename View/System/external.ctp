@@ -11,4 +11,10 @@
   echo $this->Form->input('bin.flvtool2', array('label' => __("Path to %s", "flvtool2")));
 ?>
 </fieldset>
+<fieldset><legend><?php echo __('Exiftool Options'); ?></legend>
+<?php
+  $description = __("Option -stayOpen enables fast reading and writing of meta data. This option is experimental.");
+  echo $this->Form->input('bin.exiftoolOption.stayOpen', array('type' => 'checkbox', 'label' => __("Enable -stayOpen"), 'after' => "<p class=\"description\">$description</p>"));
+?>
+</fieldset>
 <?php echo $this->Form->end(__('Save')); ?>
