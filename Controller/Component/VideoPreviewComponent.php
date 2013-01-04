@@ -156,61 +156,51 @@ class VideoPreviewComponent extends Component {
         Logger::verbose("Link thumbnail {$thumb['File']['id']} to media {$video['File']['media_id']}");
       }
     }
-    $this->addWatermark($thumbFilename);
     return $thumbFilename;
   }
-  private function addWatermark($vidThumbFile) {
-    // Add watermark of video-icon.png
-    $imgVidThumb = imagecreatefromjpeg($vidThumbFile);
-    $imgVidThWidth = imagesx($imgVidThumb);
-    $imgVidThHeight = imagesy($imgVidThumb);
-    $imgWM = imagecreatefrompng(APP . 'webroot' . DS . 'img' . DS . 'play.icon.png');
-    $imgWMWidth = imagesx($imgWM);
-    $imgWMHeight = imagesy($imgWM);
-    if($imgVidThWidth > '1000' || $imgVidThHeight > '1000') {
-        $WMXpos = ($imgVidThWidth - 344) / 2;
-        $WMYpos = ($imgVidThHeight - 344) / 2;
-      imagecopy(
-                    $imgVidThumb,
-                    $imgWM,
-                    $WMXpos,
-                    $WMYpos,
-                    0,
-                    0,
-                    $imgWMWidth,
-                    $imgWMHeight
-                    );
-      imagejpeg($imgVidThumb, $vidThumbFile, 100);
+
+  /**
+   * Add play watermark to the video preview file
+   *
+   * @param type $filename
+   */
+  private function _addWatermark($filename) {
+    if (!function_exists('imagecreatefromjpeg')) {
+      return;
+    }
+    $maxSize = 1920;
+
+    $img = imagecreatefromjpeg($filename);
+    $imgWidth = imagesx($img);
+    $imgHeight = imagesy($img);
+    $watermark = imagecreatefrompng(APP . 'webroot' . DS . 'img' . DS . 'play.icon.png');
+    $watermarkWidth = imagesx($watermark);
+    $watermarkHeight = imagesy($watermark);
+    if ($imgWidth > $maxSize || $imgHeight > $maxSize) {
+      $watermarkX = ($imgWidth - $watermarkWidth) / 2;
+      $watermarkY = ($imgHeight - $watermarkHeight) / 2;
+      imagecopy($img, $watermark, $watermarkX, $watermarkY, 0, 0, $watermarkWidth, $watermarkHeight);
     } else {
       // resize to suit smaller thumbnails
-      if($imgVidThWidth < $imgVidThHeight) {
-        $newWMSize = round(344*($imgVidThWidth/1000));
-        $WMXpos = ($imgVidThWidth - $newWMSize) / 2;
-        $WMYpos = ($imgVidThHeight - $newWMSize) / 2;
-      } else {
-        $newWMSize = round(344*($imgVidThHeight/1000));
-        $WMXpos = ($imgVidThWidth - $newWMSize) / 2;
-        $WMYpos = ($imgVidThHeight - $newWMSize) / 2;
-      }
-      $newWMimg = imagecreatetruecolor($newWMSize,$newWMSize);
-      $white = imagecolorallocate($newWMimg, 255, 255, 255);
-      imagecolortransparent($newWMimg, $white);
-      imagealphablending($newWMimg, false);
-      imagecopyresized($newWMimg, $imgWM, 0, 0, 0, 0, $newWMSize,$newWMSize, $imgWMWidth, $imgWMHeight);
-      imagecopy(
-                    $imgVidThumb,
-                    $newWMimg,
-                    $WMXpos,
-                    $WMYpos,
-                    0,
-                    0,
-                    $newWMSize,
-                    $newWMSize
-                    );
-      imagejpeg($imgVidThumb, $vidThumbFile, 100);
+      $scale = $imgWidth / $maxSize;
+      $scaledWidth = (int) ($scale * $watermarkWidth);
+      $scaledHeight = (int) ($scale * $watermarkHeight);
+
+      $scaledWatermark = imagecreatetruecolor($scaledWidth, $scaledHeight);
+      $white = imagecolorallocate($scaledWatermark, 255, 255, 255);
+      imagecolortransparent($scaledWatermark, $white);
+      imagealphablending($scaledWatermark, false);
+      imagecopyresized($scaledWatermark, $watermark, 0, 0, 0, 0, $scaledWidth, $scaledHeight, $watermarkWidth, $watermarkHeight);
+
+      $watermarkX = ($imgWidth - $scaledWidth) / 2;
+      $watermarkY = ($imgHeight - $scaledHeight) / 2;
+
+      imagecopy($img, $scaledWatermark, $watermarkX, $watermarkY, 0, 0, $scaledWidth, $scaledHeight);
     }
-    imagedestroy($imgVidThumb);
-    imagedestroy($imgWM);
+
+    imagejpeg($img, $filename, 95);
+    imagedestroy($img);
+    imagedestroy($watermark);
   }
 
   /**
@@ -244,6 +234,7 @@ class VideoPreviewComponent extends Component {
     if ($thumbFilename != $cacheFilename) {
       @copy($thumbFilename, $cacheFilename);
     }
+    $this->_addWatermark($cacheFilename);
 
     return $cacheFilename;
   }
