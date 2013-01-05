@@ -9,7 +9,7 @@ echo $this->Navigator->prevMedia().' '.$this->Navigator->up().' '.$this->Navigat
 
 <?php
   if (($this->data['Media']['type'] & MEDIA_TYPE_VIDEO) > 0) {
-    echo $flowplayer->video($this->data);
+    echo $this->Flowplayer->video($this->data);
   } else {
     $size = $this->ImageData->getimagesize($this->data, OUTPUT_SIZE_PREVIEW);
     echo $this->Html->tag('img', '', array(
