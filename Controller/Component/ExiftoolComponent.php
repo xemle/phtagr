@@ -31,7 +31,8 @@ class ExiftoolComponent extends Component {
 
   // to be changed in case of old exiftool versions or problems with non UTF8 filenames...
   var $usePipes = true;
-  var $debugging = false;//set to true to stop exiting exiftool after not reading pipes for 1 sec(during any debugging)
+  // Timeout for reading pipe in seconds
+  var $pipeReadTimeoutSec = 10;
 
   var $process = null;
   var $stdin = null;
@@ -226,24 +227,22 @@ class ExiftoolComponent extends Component {
     if (!is_resource($pipe)) {
       return false;
     }
-    $starttime = $processingTime = microtime(true);
-    $timeoutInSec = 0.5;
-    if ($this->debugging) {
-      $timeoutInSec = 20;
-    }
+    $starttime = microtime(true);
 
-    $lines = array();
-    while ($processingTime - $starttime < $timeoutInSec) {
+    $result = array();
+    while (true) {
       $line = fgets($pipe, 8192);  //1024? for speed?
       if ($line !== $stopToken && $line !== false) {
-        // lines have \n appended. Trim white space at the end
-        $lines[] = rtrim($line);
+        // result have \n appended. Trim white space at the end
+        $result[] = rtrim($line);
       } else if ($line === $stopToken) {
         break;
       }
-      $processingTime = microtime(true);
+      if (microtime(true) - $starttime < $this->pipeReadTimeoutSec) {
+        Logger::err('Pipe read timeout');
+      }
     }
-    return $lines;
+    return $result;
   }
 
   /**
