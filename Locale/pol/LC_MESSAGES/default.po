@@ -2419,7 +2419,7 @@ msgid "Uploading file %s"
 msgstr "Ładowanie pliku %s"
 
 #: View/Helper/PluploadHelper.php:31
-msgid "Uploding file %d/%d. Upload is finished in %s (estimated)."
+msgid "Uploading file %d/%d. Upload is finished in %s (estimated)."
 msgstr "Ładowanie pliku %d/%d. Koniec ładowania za %s."
 
 #: View/Helper/PluploadHelper.php:68
