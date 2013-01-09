@@ -24,7 +24,7 @@
 <fieldset><legend><?php echo __("Import Options") ?></legend>
 <?php
   echo $this->Form->input('Browser.options.recursive', array('type' => 'checkbox', 'label' => __('Recursive')));
-  echo $this->Form->input('Browser.options.forceReadMeta', array('type' => 'checkbox', 'label' => __('Reread metadata for exisiting files')));
+  echo $this->Form->input('Browser.options.forceReadMeta', array('type' => 'checkbox', 'label' => __('Reread metadata for existing files')));
 ?>
 </fieldset>
 

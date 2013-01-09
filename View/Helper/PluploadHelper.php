@@ -28,7 +28,7 @@ class PluploadHelper extends AppHelper {
     $baseUrl = h(Router::url('/'));
     $uploadUrl = h(Router::url(array('controller' => 'browser', 'action' => 'plupload')));
     $singleFile = h(__('Uploading file %s'));
-    $allFiles = h(__('Uploding file %d/%d. Upload is finished in %s (estimated).'));
+    $allFiles = h(__('Uploading file %d/%d. Upload is finished in %s (estimated).'));
     $crumbs = h('/sort:newest/user:' . $currentUser['User']['username']);
     $script = <<<SCRIPT
 (function($) {
