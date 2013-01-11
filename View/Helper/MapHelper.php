@@ -18,14 +18,10 @@ class MapHelper extends AppHelper
 {
   var $helpers = array("Html", "Search", "Option");
 
-  var $googleMapApiUrl = 'http://maps.google.com/maps?file=api&amp;v=2&amp;key=';
+  var $googleMapApiUrl = 'http://maps.google.com/maps/api/js?v=3.2&amp;sensor=false';
 
   function initialize() {
     $this->Search->initialize();
-  }
-
-  private function hasGoogleApi() {
-    return ($this->Option->get('google.map.key') != false);
   }
 
   function hasMediaGeo($media) {
@@ -34,10 +30,6 @@ class MapHelper extends AppHelper
       $data = $media['Media'];
     }
     return !empty($data['latitude']) && !empty($data['longitude']);
-  }
-
-  function showMap($media) {
-    return $this->hasGoogleApi() && $this->hasMediaGeo($media);
   }
 
   function container() {
@@ -56,28 +48,54 @@ class MapHelper extends AppHelper
   }
 
   function script() {
-    if (!$this->hasGoogleApi()) {
-      return $this->output();
-    }
-
-    $out = $this->Html->script(array($this->googleMapApiUrl . h($this->Option->get('google.map.key')), 'prototype', 'pmap'), array('inline' => false));
+    $out = $this->Html->script(array($this->googleMapApiUrl, 'OpenLayers'), array('inline' => false));
+    $out .= $this->Html->css('OpenLayers/style');
 
     $url = Router::url('/explorer/points/' . $this->Search->serialize(), true);
     $url = preg_replace("/'/", "\\'", $url);
     $code = "
 var map = null;
-var loadMap = function(id, latitude, longitude) {
-  if (undefined == map) {
 
-    var options = {
-      url: '$url'
-      };
+function newLonLat(lon, lat) {
+    return new OpenLayers.LonLat(lon, lat).transform(new OpenLayers.Projection('EPSG:4326'), new OpenLayers.Projection('EPSG:900913'));
+}
 
-    map = new PMap(latitude, longitude, options);
-    map.setMediaMarker(id, latitude, longitude);
-    map.updateInfo();
-    map.updateMarkers();
-  }
+function loadMap(id, lat, lon) {
+    OpenLayers.ImgPath = '".Router::url('/img/OpenLayers/')."';
+    map = new OpenLayers.Map('map', {
+        projection: 'EPSG:4326',
+	zoom: 15,
+        center: newLonLat(lon, lat),
+        layers: [
+            new OpenLayers.Layer.Google(
+                'Google Physical',
+                {type: google.maps.MapTypeId.TERRAIN}
+            ),
+            new OpenLayers.Layer.Google(
+                'Google Streets',
+                {numZoomLevels: 20}
+            ),
+            new OpenLayers.Layer.Google(
+                'Google Hybrid',
+                {type: google.maps.MapTypeId.HYBRID, numZoomLevels: 20}
+            ),
+            new OpenLayers.Layer.Google(
+                'Google Satellite',
+                {type: google.maps.MapTypeId.SATELLITE, numZoomLevels: 22}
+            )
+        ]
+    });
+
+    var markers = new OpenLayers.Layer.Markers('Picture Locations');
+    map.addLayer(markers);
+
+
+    var size = new OpenLayers.Size(21, 25);
+    var offset = new OpenLayers.Pixel(-(size.w/2), -size.h);
+    var icon = new OpenLayers.Icon('".Router::url('/img/OpenLayers/marker-gold.png')."', size, offset);
+    markers.addMarker(new OpenLayers.Marker(newLonLat(lon, lat), icon));
+
+    map.addControl(new OpenLayers.Control.LayerSwitcher());
 };";
     $out .= $this->Html->scriptBlock($code, array('inline' => false));
     return $this->output($out);
