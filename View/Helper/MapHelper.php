@@ -24,7 +24,7 @@ class MapHelper extends AppHelper
     $this->Search->initialize();
   }
 
-  function hasApi() {
+  private function hasGoogleApi() {
     return ($this->Option->get('google.map.key') != false);
   }
 
@@ -34,6 +34,10 @@ class MapHelper extends AppHelper
       $data = $media['Media'];
     }
     return !empty($data['latitude']) && !empty($data['longitude']);
+  }
+
+  function showMap($media) {
+    return $this->hasGoogleApi() && $this->hasMediaGeo($media);
   }
 
   function container() {
@@ -52,7 +56,7 @@ class MapHelper extends AppHelper
   }
 
   function script() {
-    if (!$this->hasApi()) {
+    if (!$this->hasGoogleApi()) {
       return $this->output();
     }
 

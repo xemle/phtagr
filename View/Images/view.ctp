@@ -33,7 +33,7 @@
 <div id="image-tabs">
 <?php
   $items = array(__("General"), __("Media Details"));
-  if ($this->Map->hasApi() && $this->Map->hasMediaGeo($this->request->data)) {
+  if ($this->Map->showMap($this->request->data)) {
     $items['map'] = __("Map");
   }
   if ($this->request->data['Media']['canWriteTag']) {
@@ -99,7 +99,7 @@
 </div>
 <?php echo $this->Tab->close(); ?>
 <?php
-  if ($this->Map->hasApi() && $this->Map->hasMediaGeo($this->request->data)) {
+  if ($this->Map->showMap($this->request->data)) {
     echo $this->Tab->open('map');
     echo $this->Map->container();
     echo $this->Map->script();
