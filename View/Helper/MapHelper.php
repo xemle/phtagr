@@ -55,9 +55,33 @@ class MapHelper extends AppHelper
     $url = preg_replace("/'/", "\\'", $url);
     $code = "
 var map = null;
+var markers = null;
 
 function newLonLat(lon, lat) {
     return new OpenLayers.LonLat(lon, lat).transform(new OpenLayers.Projection('EPSG:4326'), new OpenLayers.Projection('EPSG:900913'));
+}
+
+function getMarkerURL() {
+    /* left, bottom, right, top */
+    var extents = map.getExtent().toArray();
+    var c1 = new OpenLayers.LonLat(extents[0], extents[1]).transform(new OpenLayers.Projection('EPSG:900913'), new OpenLayers.Projection('EPSG:4326'));
+    var c2 = new OpenLayers.LonLat(extents[2], extents[3]).transform(new OpenLayers.Projection('EPSG:900913'), new OpenLayers.Projection('EPSG:4326'));
+    extents = [ c1.lat, c1.lon, c2.lat, c2.lon ];
+
+    return '$url/' + extents[2] + '/' + extents[0] + '/' + extents[1] + '/' + extents[3];
+}
+
+/* name, icon, description are optional */
+function addMarker(lon, lat, id, name, icon, description) {
+    if (icon === null) {
+        var size = new OpenLayers.Size(21, 25);
+        var offset = new OpenLayers.Pixel(-10, -12);
+        icon = new OpenLayers.Icon('".Router::url('/img/OpenLayers/marker-gold.png')."', size, offset);
+    } else {
+        icon = new OpenLayers.Icon(icon, new OpenLayers.Size(40, 40), new OpenLayers.Pixel(-20, -20));
+    }
+
+    markers.addMarker(new OpenLayers.Marker(newLonLat(lon, lat), icon));
 }
 
 function loadMap(id, lat, lon) {
@@ -86,16 +110,33 @@ function loadMap(id, lat, lon) {
         ]
     });
 
-    var markers = new OpenLayers.Layer.Markers('Picture Locations');
+    markers = new OpenLayers.Layer.Markers('Picture Locations');
     map.addLayer(markers);
 
-
-    var size = new OpenLayers.Size(21, 25);
-    var offset = new OpenLayers.Pixel(-(size.w/2), -size.h);
-    var icon = new OpenLayers.Icon('".Router::url('/img/OpenLayers/marker-gold.png')."', size, offset);
-    markers.addMarker(new OpenLayers.Marker(newLonLat(lon, lat), icon));
-
     map.addControl(new OpenLayers.Control.LayerSwitcher());
+
+    addMarker(lon, lat, id, null, null, null);
+
+    OpenLayers.Request.GET({
+        url: getMarkerURL(),
+	success: function(data) {
+	    var xml = data.responseXML;
+	    var markerData = xml.getElementsByTagName('marker');
+	    for (var i = 0; i < markerData.length; i++) {
+	        var curMarker = markerData[i];
+	        var id = parseInt(curMarker.getAttribute('id'));
+
+		/* TODO: skip existing markers */
+
+		addMarker(parseFloat(curMarker.getAttribute('lng')),
+		    parseFloat(curMarker.getAttribute('lat')),
+		    id,
+		    curMarker.getElementsByTagName('name')[0].childNodes[0].nodeValue,
+		    curMarker.getElementsByTagName('icon')[0].childNodes[0].nodeValue,
+		    curMarker.getElementsByTagName('description')[0].childNodes[0].nodeValue);
+	    }
+	}
+    });
 };";
     $out .= $this->Html->scriptBlock($code, array('inline' => false));
     return $this->output($out);
