@@ -84,8 +84,9 @@ function addMarker(lon, lat, id, name, icon, description) {
     var location = newLonLat(lon, lat);
     var marker = new OpenLayers.Marker(location, icon);
     var popup = new OpenLayers.Popup(id, location, new OpenLayers.Size(200,200),
-        description, true /*, callback for closebox */);
+        description, true);
     map.addPopup(popup);
+    popup.updateSize();
     popup.hide();
 
     marker.events.register('mousedown', popup, function() {
