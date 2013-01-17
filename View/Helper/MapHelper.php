@@ -40,7 +40,7 @@ class MapHelper extends AppHelper
       </div>
       <div id="mapSearch">
         <label for="mapSearch">Goto:</label>
-        <input type="text" id="mapSearch" size="32" onkeydown="if ((event.which && event.which == 13) || (event.keyCode && event.keyCode == 13)) { map.showAddress(this.value); return false; } else { return true; }"/>
+        <input type="text" id="mapSearch" size="32" onkeydown="if ((event.which && event.which == 13) || (event.keyCode && event.keyCode == 13)) { geolocate(this.value); return false; } else { return true; }"/>
       </div>
     </div>
     </div>
@@ -57,6 +57,8 @@ class MapHelper extends AppHelper
 var map = null;
 var markers = null;
 
+OpenLayers.ProxyHost = '".Router::url('/proxy?')."';
+
 function newLonLat(lon, lat) {
     return new OpenLayers.LonLat(lon, lat).transform(new OpenLayers.Projection('EPSG:4326'), new OpenLayers.Projection('EPSG:900913'));
 }
@@ -69,6 +71,35 @@ function getMarkerURL() {
     extents = [ c1.lat, c1.lon, c2.lat, c2.lon ];
 
     return '$url/' + extents[2] + '/' + extents[0] + '/' + extents[1] + '/' + extents[3];
+}
+
+function reportError(message) {
+    document.getElementById('mapInfo').firstChild.nodeValue = message;
+}
+
+function geolocate(queryString) {
+    OpenLayers.Request.POST({
+        url: 'http://www.openrouteservice.org/php/OpenLSLUS_Geocode.php',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+	data: OpenLayers.Util.getParameterString({FreeFormAdress: queryString, MaxResponse: 1}),
+        failure: function() {
+             reportError('".__("Could not communicate with geo-location service")."');
+        },
+        success: function(data) {
+            var xml = data.responseXML;
+            var format = new OpenLayers.Format.XLS();
+            var output = format.read(xml);
+            if ((output.responseLists.length > 0) &&
+	        (output.responseLists[0].features.length > 0) &&
+		output.responseLists[0]) {
+                var geometry = output.responseLists[0].features[0].geometry;
+                var foundPosition = newLonLat(geometry.x, geometry.y);
+                map.setCenter(foundPosition, 16);
+            } else {
+                reportError('".__("No address found")."');
+            }
+        }
+    });
 }
 
 /* name, icon, description are optional */
