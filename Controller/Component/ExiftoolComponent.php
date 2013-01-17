@@ -238,7 +238,7 @@ class ExiftoolComponent extends Component {
       } else if ($line === $stopToken) {
         break;
       }
-      if (microtime(true) - $starttime < $this->pipeReadTimeoutSec) {
+      if (microtime(true) - $starttime > $this->pipeReadTimeoutSec) {
         Logger::err('Pipe read timeout');
       }
     }
