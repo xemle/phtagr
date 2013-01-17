@@ -1,0 +1,3174 @@
+# LANGUAGE translation of CakePHP Application
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2012-12-23 20:23+0000\n"
+"PO-Revision-Date: 2013-01-17 13:38+0400\n"
+"Last-Translator: eugene pazhitnov <pazhitnov@gmail.com>\n"
+"Language-Team: eugene pazhitnov <pazhitnov@gmail.com>\n"
+"Language: Russian\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Generator: Poedit 1.5.4\n"
+
+#: Console/Command/NotifyShell.php:44
+msgid "Do not send emails."
+msgstr "Не посылать письма."
+
+#: Console/Command/NotifyShell.php:47
+msgid "Simulate the run. Do not change anything"
+msgstr "Имитировать запуск. Не менять ничего"
+
+#: Console/Command/NotifyShell.php:50
+msgid "Send emails always even if user already received an email"
+msgstr "Всегда посылать письмо, даже если пользователь уже получал письма"
+
+#: Console/Command/NotifyShell.php:53
+msgid "Run the notification updates"
+msgstr "Запустить уведомления об обновлениях"
+
+#: Console/Command/NotifyShell.php:54
+msgid "Notify new media for users via email"
+msgstr "Уведомить пользователей о новых медиа-файлах"
+
+#: Console/Command/PreviewShell.php:36
+msgid "Maximum generation count. Default is 10. Use 0 to generate all previews"
+msgstr ""
+"Максимальное количество генерируемых предпросмотров. По умолчанию 10. "
+"Введите 0, чтобы сгенерировать все предпросмотры."
+
+#: Console/Command/PreviewShell.php:38
+msgid ""
+"Set the start chunk number. A chunk has a size of 100 media. Default is 1"
+msgstr ""
+"Устанавливает стартовый номер чанка. В одном чанке содержится 100 медиа-"
+"файлов. По умолчанию 1."
+
+#: Console/Command/PreviewShell.php:40 Console/Command/SyncShell.php:37
+msgid "Set the minimum preview size. Default is thumb"
+msgstr ""
+"Устанавливает минимальный размер предпросмотра. По умолчанию это размер "
+"иконки."
+
+#: Console/Command/PreviewShell.php:43
+msgid "Generate only previews for given user"
+msgstr "Генерировать предпросмотр только для указанного пользователя."
+
+#: Console/Command/PreviewShell.php:45
+msgid "Create preview files"
+msgstr "Создать файлы предпросмотра"
+
+#: Console/Command/PreviewShell.php:46
+msgid "Generate preview files"
+msgstr "Сгенерировать файлы предпросмотра"
+
+#: Console/Command/SyncShell.php:35
+msgid ""
+"Maximum of synchronization count. Default is 100. Use 0 to synchronize all"
+msgstr ""
+"Максимальное значение счётчика синхронизации. По умолчанию 100. Введито 0, "
+"чтобы синхронизировать всё."
+
+#: Console/Command/SyncShell.php:40
+msgid "Synchronize only images for given username"
+msgstr "Синхронизировать только изображения для указанного пользователя."
+
+#: Console/Command/SyncShell.php:42
+msgid "Run the synchronization process"
+msgstr "Запустить процесс синхронизации"
+
+#: Console/Command/SyncShell.php:43
+msgid "Write all meta data from database to images in batch mode"
+msgstr ""
+"Записать все метаданные из базы данных в файлы изображений в пакетном режиме"
+
+#: Controller/AppController.php:36
+msgid "Recent photos"
+msgstr "Последние фотографии"
+
+#: Controller/AppController.php:37
+msgid "Media RSS of recent photos"
+msgstr "Лента RSS для свежих фотографий"
+
+#: Controller/AppController.php:38
+msgid "Recent comments"
+msgstr "Свежие комментарии"
+
+#: Controller/AppController.php:53 Controller/HomeController.php:42
+#: View/Elements/menu.ctp:6
+msgid "Home"
+msgstr "В начало"
+
+#: Controller/AppController.php:54 View/Elements/menu.ctp:19;44
+#: View/Helper/NavigatorHelper.php:139 View/Images/notfound.ctp:3
+#: View/Themed/Mobile/Explorer/index.ctp:1
+msgid "Explorer"
+msgstr "Обозреватель"
+
+#: Controller/AppController.php:57 View/Elements/menu.ctp:25
+msgid "My Photos"
+msgstr "Мои фотографии"
+
+#: Controller/AppController.php:60 Controller/BrowserController.php:33
+#: View/Browser/upload.ctp:21 View/Elements/menu.ctp:32
+msgid "Upload"
+msgstr "Загрузить"
+
+#: Controller/AppController.php:68 View/Elements/topnav.ctp:14
+#: View/Themed/Mobile/Elements/header.ctp:7 View/Users/login.ctp:5;15
+msgid "Login"
+msgstr "Вход"
+
+#: Controller/AppController.php:70 View/Users/login.ctp:17
+#: View/Users/register.ctp:16
+msgid "Sign Up"
+msgstr "Регистрация"
+
+#: Controller/AppController.php:74
+msgid "Howdy, %s!"
+msgstr "Привет, %s!"
+
+#: Controller/AppController.php:75 View/Elements/topnav.ctp:12
+#: View/Themed/Mobile/Elements/header.ctp:5
+msgid "Logout"
+msgstr "Выход"
+
+#: Controller/AppController.php:76
+msgid "Dashboard"
+msgstr "Управление"
+
+#: Controller/BrowserController.php:32
+msgid "Import Files"
+msgstr "Импортировать"
+
+#: Controller/BrowserController.php:34
+msgid "Meta Data Sync"
+msgstr "Синхронизация мета-данных"
+
+#: Controller/BrowserController.php:35 Controller/SystemController.php:35
+msgid "Overview"
+msgstr "Общий обзор"
+
+#: Controller/BrowserController.php:50 View/Elements/menu.ctp:37
+msgid "My Files"
+msgstr "Мои файлы"
+
+#: Controller/BrowserController.php:313
+msgid "Imported %d files (%d errors)"
+msgstr "Импортировано %d файлов(%d ошибок)"
+
+#: Controller/BrowserController.php:328
+msgid "Media %d was unlinked successfully"
+msgstr "Медиа-файл %d отсоединён успешно"
+
+#: Controller/BrowserController.php:389
+msgid "Unlinked %d files."
+msgstr "Отсоединено %d файлов"
+
+#: Controller/BrowserController.php:405
+msgid "Deleted directory successfully"
+msgstr "Каталог стёрт успешно"
+
+#: Controller/BrowserController.php:407
+msgid "Deleted file successfully"
+msgstr "Файлы стёрты успешно"
+
+#: Controller/BrowserController.php:410
+msgid "Could not delete file or directory"
+msgstr "Не могу стереть файл или каталог"
+
+#: Controller/BrowserController.php:502
+msgid "Invalid path to create folder"
+msgstr "Недопустимый путь при создании каталога"
+
+#: Controller/BrowserController.php:506
+msgid "Could not create folder here: %s"
+msgstr "Не могу создать каталог: %s"
+
+#: Controller/BrowserController.php:522
+msgid "Could not create folder"
+msgstr "Не смог создать каталог"
+
+#: Controller/BrowserController.php:539
+msgid "Your upload quota is exceeded"
+msgstr "Ваш лимит на объем загрузок исчерпан"
+
+#: Controller/BrowserController.php:648
+msgid "Invalid path for upload"
+msgstr "Неверный путь для загрузки файлов"
+
+#: Controller/BrowserController.php:653
+msgid "Could not upload here: %s"
+msgstr "Не могу загрузить файлы сюда: %s"
+
+#: Controller/BrowserController.php:674
+msgid "Uploaded %d and %d extraced file(s)"
+msgstr "Загружено %d и извлечено %d файл(ов)"
+
+#: Controller/BrowserController.php:676
+msgid "Uploaded %d file(s)"
+msgstr "Загружено %d файл(ов)"
+
+#: Controller/BrowserController.php:687;695
+msgid "Error: Invalid upload directory"
+msgstr "Ошибка: неправильное имя каталога"
+
+#: Controller/BrowserController.php:705
+msgid "No files uploaded or upload errors"
+msgstr "Файлы не были загружены или ошибка загрузки"
+
+#: Controller/BrowserController.php:722;757
+msgid "No files uploaded"
+msgstr "Файлы не были загружены"
+
+#: Controller/BrowserController.php:730
+msgid "Uploaded %d files with %d errors."
+msgstr "Загружено %d файлов, возникло %d ошибок"
+
+#: Controller/CommentsController.php:55
+msgid "Invalid Comment."
+msgstr "Недопустимый комментарий."
+
+#: Controller/CommentsController.php:112
+msgid "The Comment has been saved"
+msgstr "Комментарий был сохранён"
+
+#: Controller/CommentsController.php:120
+msgid "The Comment could not be saved. Please, try again."
+msgstr "Комментарий не может быть сохранён. Пожалуйста, попробуйте ещё раз."
+
+#: Controller/CommentsController.php:152
+msgid "[phtagr] Comment: %s"
+msgstr "[phtagr] Комментарий: %s"
+
+#: Controller/CommentsController.php:209
+msgid "[phtagr] Comment notification: %s"
+msgstr "[phtagr] Уведомление о комментарии: %s"
+
+#: Controller/CommentsController.php:223
+msgid "Invalid id for Comment"
+msgstr "Неверный id комментария"
+
+#: Controller/CommentsController.php:237
+msgid "Comment deleted"
+msgstr "Комментарий удалён"
+
+#: Controller/ExplorerController.php:60 Controller/ImagesController.php:33
+msgid "[Keep]"
+msgstr "[Сохранить]"
+
+#: Controller/ExplorerController.php:61 Controller/ImagesController.php:34
+#: Controller/OptionsController.php:143
+msgid "[No Group]"
+msgstr "[Нет группы]"
+
+#: Controller/ExplorerController.php:69
+msgid "Slideshow Media RSS"
+msgstr "Лента RSS для слайд-шоу"
+
+#: Controller/ExplorerController.php:387
+msgid "Invalid folder: %s"
+msgstr "Недопустимая папка: %s"
+
+#: Controller/GroupsController.php:29
+msgid "My Groups"
+msgstr "Мои группы"
+
+#: Controller/GroupsController.php:30
+msgid "My Memberships"
+msgstr "Моё участие"
+
+#: Controller/GroupsController.php:31
+msgid "All Groups"
+msgstr "Все группы"
+
+#: Controller/GroupsController.php:32 View/Groups/index.ctp:67
+msgid "Create Group"
+msgstr "Создать группу"
+
+#: Controller/GroupsController.php:86;201;262;282 Model/Group.php:153;155;179
+msgid "%s not found"
+msgstr "%s не найден"
+
+#: Controller/GroupsController.php:86;102;201;297;299;301
+#: Model/Group.php:153;161;179;185 View/Elements/Explorer/menu.ctp:175
+#: View/Explorer/search.ctp:38 View/Guests/edit.ctp:56 View/Users/view.ctp:40
+msgid "Group"
+msgstr "Группа"
+
+#: Controller/GroupsController.php:102;297
+msgid "%s already exists"
+msgstr "%s уже существует"
+
+#: Controller/GroupsController.php:108
+msgid "Add successfully group '%s'"
+msgstr "Группа '%s' успешно добавлена"
+
+#: Controller/GroupsController.php:111
+msgid "Could not create group '%s'"
+msgstr "Не могу создать группу '%s'"
+
+#: Controller/GroupsController.php:134
+msgid "Group subscription request was sent to the group owner"
+msgstr "Запрос о подписке был отправлен владельцу группы"
+
+#: Controller/GroupsController.php:138
+msgid "Mail could not be sent"
+msgstr "Письмо не может быть отправлено"
+
+#: Controller/GroupsController.php:257;277
+msgid "You are not authorized to perform this action"
+msgstr "Вы не авторизованы для этой операции"
+
+#: Controller/GroupsController.php:262;282 Model/Group.php:155
+#: View/Explorer/search.ctp:40 View/Images/view.ctp:62
+#: View/Options/import.ctp:10 View/Users/admin_edit.ctp:11
+#: View/Users/view.ctp:41
+msgid "User"
+msgstr "Пользователь"
+
+#: Controller/GroupsController.php:269
+msgid "User %s is now subscribe to this group"
+msgstr "Пользователь %s подписан на эту группу"
+
+#: Controller/GroupsController.php:289
+msgid "User %s is now unsubscribe from this group"
+msgstr "Пользователь %s отписан от этой группы"
+
+#: Controller/GroupsController.php:299 Model/Group.php:161;185
+msgid "Could not save %s"
+msgstr "Не могу сохранить %s"
+
+#: Controller/GroupsController.php:301
+msgid "%s updated"
+msgstr "%s обновлено"
+
+#: Controller/GroupsController.php:313;333
+msgid "Could not find group"
+msgstr "Не могу найти группу"
+
+#: Controller/GroupsController.php:331
+msgid "Successfully deleted group '%s'"
+msgstr "Группа '%s' успешно удалена"
+
+#: Controller/GuestsController.php:32
+msgid "New Guest"
+msgstr "Новый посетитель"
+
+#: Controller/GuestsController.php:42
+msgid "Edit %s"
+msgstr "Редактировать %s"
+
+#: Controller/GuestsController.php:44 Controller/OptionsController.php:29
+msgid "Links"
+msgstr "Ссылки"
+
+#: Controller/GuestsController.php:74
+msgid "Sorry. Username is already taken"
+msgstr "Извините, это имя пользователя уже занято"
+
+#: Controller/GuestsController.php:80
+msgid "Guest account '%s' was successfully created"
+msgstr "Гостевая учётная запись '%s' успешно создана"
+
+#: Controller/GuestsController.php:83
+msgid "Sorry. Guest account could not created"
+msgstr "Извините, гостевая учётная запись не может быть создана"
+
+#: Controller/GuestsController.php:93
+msgid "Sorry. Could not find requested guest"
+msgstr "Извините, не могу найти указанную гостевую учётную запись"
+
+#: Controller/GuestsController.php:102
+msgid "Guest data were saved"
+msgstr "Данные гостевой учётной записи сохранены"
+
+#: Controller/GuestsController.php:108
+msgid "Updates could not be saved!"
+msgstr "Обновления не могут быть сохранены!"
+
+#: Controller/GuestsController.php:125
+msgid "Could not find requested guest"
+msgstr "Не могу найти указанную гостевую учётную запись"
+
+#: Controller/GuestsController.php:129
+msgid "Guest account '%s' deleted!"
+msgstr "Гостевая учётная запись '%s' удалена!"
+
+#: Controller/MediaController.php:304
+msgid "Download of more than %d media is not allowed"
+msgstr "Загрузка более %d медиа-файлов не разрешена"
+
+#: Controller/MediaController.php:308
+msgid "Download of more than %d media is not allowed for anonymous visitors"
+msgstr "Загрузка более %d медиа-файлов не разрешена для анонимных посетителей"
+
+#: Controller/MediaController.php:329
+msgid "No files for download found for given media set"
+msgstr "Для выбранного набора медиа-файлов нечего загружать"
+
+#: Controller/MediaController.php:335
+msgid "Download of not more than %d MB is not allowed"
+msgstr "Загрузка более %d Мб не разрешена"
+
+#: Controller/OptionsController.php:26 View/Options/password.ctp:1
+#: View/Options/profile.ctp:1
+msgid "Profile"
+msgstr "Профиль"
+
+#: Controller/OptionsController.php:27 Controller/UsersController.php:206
+#: View/Guests/create.ctp:11 View/Guests/edit.ctp:13;15
+#: View/Options/password.ctp:7;9 View/Setup/config.ctp:14
+#: View/Setup/user.ctp:10 View/Users/admin_add.ctp:10
+#: View/Users/admin_password.ctp:8 View/Users/login.ctp:8
+#: View/Users/register.ctp:8
+msgid "Password"
+msgstr "Пароль"
+
+#: Controller/OptionsController.php:28 View/Options/import.ctp:1
+msgid "Import Options"
+msgstr "Параметры импорта"
+
+#: Controller/OptionsController.php:57;72
+msgid "Could not save profile!"
+msgstr "Не могу сохранить параметры профиля!"
+
+#: Controller/OptionsController.php:60;75
+msgid "Profile saved"
+msgstr "Профиль сохранён"
+
+#: Controller/OptionsController.php:127
+msgid "Settings saved"
+msgstr "Установки сохранены"
+
+#: Controller/SetupController.php:331
+msgid "Could not write configuration to '%s'"
+msgstr "Не могу сохранить конфигурацию в '%s'"
+
+#: Controller/SetupController.php:338
+msgid "Update core settings"
+msgstr "Обновить основные установки"
+
+#: Controller/SetupController.php:448
+msgid "Could not write database configuration file"
+msgstr "Не могу записать конфигурационный файл базы данных"
+
+#: Controller/SetupController.php:485
+msgid ""
+"Could not connect to database. Please check your database configuration!"
+msgstr ""
+"Не могу соединиться с базой данных. Пожалуйста, проверьте конфигурацию БД."
+
+#: Controller/SetupController.php:498
+msgid "Could not initialize database migration"
+msgstr "Не могу инициализировать миграцию базы данных"
+
+#: Controller/SetupController.php:504
+msgid "Could not initialize database"
+msgstr "Не могу инициализировать базу данных"
+
+#: Controller/SetupController.php:509
+msgid "All required tables are created"
+msgstr "Все требуемые таблицы созданы"
+
+#: Controller/SetupController.php:513
+msgid "Could not create tables correctly. Please see logfile for details"
+msgstr ""
+"Не могу корректно создать таблицы. Пожалуйста, посмотрите лог-файлы за "
+"подробностями"
+
+#: Controller/SetupController.php:541
+msgid "Admin account was successfully created"
+msgstr "Учетная запись администратора успешно создана"
+
+#: Controller/SetupController.php:545
+msgid "Could not create admin account. Please retry"
+msgstr ""
+"Не могу создать учётную запись администратора. Пожалуйста, повторите ещё раз."
+
+#: Controller/SystemController.php:29 View/Images/view.ctp:35
+#: View/Options/profile.ctp:6 View/System/index.ctp:1;6
+#: View/Users/admin_edit.ctp:6
+msgid "General"
+msgstr "Общее"
+
+#: Controller/SystemController.php:30 View/System/register.ctp:1
+msgid "User Registration"
+msgstr "Регистрация пользователей"
+
+#: Controller/SystemController.php:31 View/Setup/system.ctp:1
+#: View/System/external.ctp:6
+msgid "External Programs"
+msgstr "Внешние программы"
+
+#: Controller/SystemController.php:32 View/System/map.ctp:1
+msgid "Map Settings"
+msgstr "Настройки карты"
+
+#: Controller/SystemController.php:33 View/System/upgrade.ctp:1
+msgid "Database Upgrade"
+msgstr "Обновление БД"
+
+#: Controller/SystemController.php:34
+#: View/System/delete_unused_meta_data.ctp:1
+msgid "Delete Unused Metadata"
+msgstr "Удаление неиспользуемых метаданных"
+
+#: Controller/SystemController.php:93
+msgid "Titles were updated"
+msgstr "Заголовки были обновлены"
+
+#: Controller/SystemController.php:107
+msgid "Options saved!"
+msgstr "Параметры сохранены!"
+
+#: Controller/SystemController.php:164
+msgid "Database migration failed. Please see the log files for errors."
+msgstr ""
+"Миграция базы данных не удалась. Пожалуйста, посмотрите ошибки в лог-файлах."
+
+#: Controller/SystemController.php:168
+msgid "The database migration was successful."
+msgstr "Миграция базы данных завершилась успешно"
+
+#: Controller/SystemController.php:190
+msgid "All unused meta data are deleted"
+msgstr "Все неиспользуемые мета-данные были удалены"
+
+#: Controller/UsersController.php:32
+msgid "List User"
+msgstr "Список пользователей"
+
+#: Controller/UsersController.php:36
+msgid "Add User"
+msgstr "Добавить пользователя"
+
+#: Controller/UsersController.php:113
+msgid "Sorry. Wrong password or unknown username!"
+msgstr "Извините. Неверное имя пользователя или пароль!"
+
+#: Controller/UsersController.php:121
+msgid "Please enter username and password!"
+msgstr "Пожалуйста, введите имя пользователя и пароль!"
+
+#: Controller/UsersController.php:133
+msgid "Sorry. Your account is expired!"
+msgstr "Извините. Срок использования учётной записи истёк!"
+
+#: Controller/UsersController.php:155
+msgid "Sorry. Internal login procedure failed!"
+msgstr "Извините. Ошибка внутренней процедуры входа."
+
+#: Controller/UsersController.php:196
+msgid "Can not degrade last admin"
+msgstr "Не могу урезать в правах последнего оставшегося администратора"
+
+#: Controller/UsersController.php:207
+msgid "Local Paths"
+msgstr "Локальные пути"
+
+#: Controller/UsersController.php:208 View/Groups/all.ctp:42
+#: View/Groups/index.ctp:41 View/Groups/members.ctp:42 View/Groups/view.ctp:18
+#: View/Guests/index.ctp:23 View/Images/view.ctp:40
+#: View/Users/admin_index.ctp:46 View/Users/view.ctp:4
+msgid "Edit"
+msgstr "Редактировать"
+
+#: Controller/UsersController.php:225;248
+msgid "User data was updated"
+msgstr "Пользовательские данные обновлены"
+
+#: Controller/UsersController.php:229;252
+msgid "Could not be updated"
+msgstr "Невозможно обновить"
+
+#: Controller/UsersController.php:277
+msgid "Directory '%s' was added"
+msgstr "Каталог '%s' был добавлен"
+
+#: Controller/UsersController.php:280
+msgid "Directory '%s' could not be read"
+msgstr "Не могу прочесть содержимое каталога '%s'"
+
+#: Controller/UsersController.php:298
+msgid "Username already exists, please choose a different name!"
+msgstr "Это имя пользователя уже существует, пожалуйста, выберите другое имя!"
+
+#: Controller/UsersController.php:303
+msgid "User was created"
+msgstr "Пользователь создан"
+
+#: Controller/UsersController.php:307
+msgid "Could not create user!"
+msgstr "Не могу создать пользователя!"
+
+#: Controller/UsersController.php:319
+msgid "Could not delete user: user not found!"
+msgstr "Не могу удалить пользователя: пользователь не найден"
+
+#: Controller/UsersController.php:324
+msgid "User %s was deleted"
+msgstr "Пользователь %s удалён"
+
+#: Controller/UsersController.php:343
+msgid "Deleted external directory '%s'"
+msgstr "Удалён внешний каталог '%s'"
+
+#: Controller/UsersController.php:362
+msgid "No user with this email was found"
+msgstr "Не найдено пользователя с указанным адресом электронной почты"
+
+#: Controller/UsersController.php:371
+msgid "[phtagr] Password Request"
+msgstr "[phtagr] Запрос пароля"
+
+#: Controller/UsersController.php:380
+msgid "Mail was sent!"
+msgstr "Письмо отослано!"
+
+#: Controller/UsersController.php:386
+msgid "Mail could not be sent: unknown error!"
+msgstr "Писмо не может быть отправлено: неизвестная ошибка!"
+
+#: Controller/UsersController.php:403
+msgid "Captcha verification failed"
+msgstr "Ошибка ввода капчи"
+
+#: Controller/UsersController.php:406
+msgid "Username already exists, please choose different name!"
+msgstr "Это имя пользователя уже занято, пожалуйста, выберите другое имя!"
+
+#: Controller/UsersController.php:415
+msgid "Could not create user"
+msgstr "Не могу создать пользователя"
+
+#: Controller/UsersController.php:453
+msgid "Could not send the confirmation email. Please contact the admin."
+msgstr ""
+"Не могу отправить письмо-подтверждение. Пожалуйста, сообщите системному "
+"администратору."
+
+#: Controller/UsersController.php:461
+msgid "A confirmation email was sent to your email address"
+msgstr ""
+"Письмо-подтверждение было отправлено по указанному вами адресу электронной "
+"почты"
+
+#: Controller/UsersController.php:476
+msgid "Please enter the confirmation key"
+msgstr "Пожалуйста, введите код подтверждения"
+
+#: Controller/UsersController.php:496;511
+msgid "Could not find confirmation key"
+msgstr "Не могу найти такой код подтверждения"
+
+#: Controller/UsersController.php:502
+msgid "Internal error occured"
+msgstr "Возникла внутренняя ошибка"
+
+#: Controller/UsersController.php:546
+msgid "[phtagr] Account confirmation: %s"
+msgstr "[phtagr] Подтверждение учётной записи: %s"
+
+#: Controller/UsersController.php:567
+msgid "[phtagr] Welcome %s"
+msgstr "[phtagr] Добро пожаловать, %s"
+
+#: Controller/UsersController.php:598
+msgid "[phtagr] New account notification: %s"
+msgstr "[phtagr] Уведомление о новой учётной записи: %s"
+
+#: Controller/Component/MenuComponent.php:42
+msgid "Account Settings"
+msgstr "Настройки учётной записи"
+
+#: Controller/Component/MenuComponent.php:43
+#: View/Elements/single_acl_form.ctp:8
+#: View/Elements/Explorer/description.ctp:42 View/Groups/all.ctp:1
+#: View/Groups/index.ctp:1 View/Groups/members.ctp:1 View/Guests/index.ctp:10
+#: View/Helper/ImageDataHelper.php:571 View/System/view.ctp:15
+msgid "Groups"
+msgstr "Группы"
+
+#: Controller/Component/MenuComponent.php:44
+#: View/Elements/Explorer/description.ctp:50
+#: View/Elements/Explorer/menu.ctp:93;176
+#: View/Helper/ImageDataHelper.php:335;630 View/Options/profile.ctp:20
+#: View/System/view.ctp:13 View/Users/index.ctp:2
+msgid "Users"
+msgstr "Пользователи"
+
+#: Controller/Component/MenuComponent.php:45 View/Guests/index.ctp:1
+#: View/System/view.ctp:14 View/Users/admin_index.ctp:18
+msgid "Guests"
+msgstr "Гости"
+
+#: Controller/Component/MenuComponent.php:46
+msgid "Media Files"
+msgstr "Медиа-файлы"
+
+#: Controller/Component/MenuComponent.php:49 View/Elements/topnav.ctp:7
+msgid "System"
+msgstr "Система"
+
+#: Model/Group.php:163
+msgid "You are now subscribed to group %s"
+msgstr "Вы подписаны на группу %s"
+
+#: Model/Group.php:166
+msgid "You are allready subscribed to group %s"
+msgstr "Вы уже подписаны на группу %s"
+
+#: Model/Group.php:187
+msgid "You are now unsubscribed of group %s"
+msgstr "Вы отписаны от группы %s"
+
+#: Model/Group.php:190
+msgid "You are not subscribed to group %s"
+msgstr "Вы не подписаны на группу %s"
+
+#: Model/Guest.php:68 Model/User.php:108
+msgid "Password not given"
+msgstr "Пароль не указан"
+
+#: Model/Guest.php:70 Model/User.php:110
+msgid "Password confirmation is missing"
+msgstr "Подтверждение пароля отсутствует"
+
+#: Model/Guest.php:72;73 Model/User.php:112;113
+msgid "Password confirmation mismatch"
+msgstr "Пароли не совпадают"
+
+#: Model/User.php:125
+msgid "Username already taken"
+msgstr "Это имя пользователя уже занято"
+
+#: View/Browser/folder.ctp:1
+msgid "Create Folder"
+msgstr "Создать папку"
+
+#: View/Browser/folder.ctp:5 View/Browser/index.ctp:7;16
+msgid "Location %s"
+msgstr "Место %s"
+
+#: View/Browser/folder.ctp:9
+msgid "Folder Name"
+msgstr "Имя папки"
+
+#: View/Browser/folder.ctp:12 View/Groups/create.ctp:16
+#: View/Groups/dashboard_create.ctp:15;35;55;75;95;115
+#: View/Guests/create.ctp:15 View/Setup/user.ctp:15
+#: View/Users/admin_add.ctp:14
+msgid "Create"
+msgstr "Создать"
+
+#: View/Browser/import.ctp:1
+msgid "Browser"
+msgstr "Просмотрщик"
+
+#: View/Browser/import.ctp:5
+msgid "View folder %s"
+msgstr "Просмотр папки %s"
+
+#: View/Browser/index.ctp:1
+msgid "File Browser"
+msgstr "Файловый менеджер"
+
+#: View/Browser/index.ctp:9;18
+msgid " (%s or %s here)"
+msgstr "(%s или %s здесь)"
+
+#: View/Browser/index.ctp:10;19 View/Browser/upload.ctp:10
+msgid "Upload files"
+msgstr "Загрузить файлы"
+
+#: View/Browser/index.ctp:11;20
+msgid "create folder"
+msgstr "Создать папку"
+
+#: View/Browser/index.ctp:25
+msgid "Recursive"
+msgstr "С вложенными каталогами"
+
+#: View/Browser/index.ctp:27
+msgid "Import"
+msgstr "Импортировать"
+
+#: View/Browser/index.ctp:28
+msgid "Unlink"
+msgstr "Отсоединить"
+
+#: View/Browser/quickupload.ctp:1
+msgid "Media Upload"
+msgstr "Загрузка медиа-файлов"
+
+#: View/Browser/quickupload.ctp:6
+msgid "Your uploaded media"
+msgstr "Загруженные вами медиа-файлы"
+
+#: View/Browser/quickupload.ctp:17
+msgid "See all uploaded media of today %s"
+msgstr "См все загруженные сегодня медиа-файлы %s"
+
+#: View/Browser/quickupload.ctp:17 View/Setup/finish.ctp:7
+#: View/System/map.ctp:7
+msgid "here"
+msgstr "здесь"
+
+#: View/Browser/quickupload.ctp:22
+msgid "Upload your photos, videos, GPS logs or ZIP archives here."
+msgstr "Загружайте свои фото, видео, логи GPS или ZIP-архивы здесь"
+
+#: View/Browser/quickupload.ctp:23
+msgid ""
+"You can upload maximal %s and %s at once. ZIP archives are extracted "
+"automatically."
+msgstr ""
+"Вы можете загрузить максимум %s и %s за один раз. ZIP-архивы распаковываются "
+"автоматически."
+
+#: View/Browser/quickupload.ctp:27 View/Browser/upload.ctp:27
+msgid "You cannot upload files now. Your upload quota is exceeded."
+msgstr "Вы не можете загружать файлы. Квота исчерпана."
+
+#: View/Browser/sync.ctp:1
+msgid "Meta Data Synchronization"
+msgstr "Синхронизация мета-данных"
+
+#: View/Browser/sync.ctp:5
+msgid ""
+"phTagr embedds meta data like tags, categories, or (geo) location "
+"information direct into the image video files."
+msgstr ""
+"phTagr включает мета-данные (теги, категории или информацию о "
+"местоположении) непосредственно в файл видеоизображения."
+
+#: View/Browser/sync.ctp:7
+msgid ""
+"Note:  In case you are using phTagr with external paths it is recommended to "
+"synchronize your images to store this important information within the media "
+"file.  After the synchronization these mata data could be read by other "
+"image programs or desktop search engines."
+msgstr ""
+"Замечание: если вы используете phTagr с с путями к внешним хранилищам, "
+"рекомендуется синхронизировать ваши изображения, чтобы они хранили важную "
+"информацию внутри медиа-файла. После синхронизации эти мета-данные могут "
+"быть прочитаны другими программами обработки изображений или программами "
+"индексирования файлов."
+
+#: View/Browser/sync.ctp:10
+msgid "All media are synchronized"
+msgstr "Все медиа-файлы синхронизированы"
+
+#: View/Browser/sync.ctp:14
+msgid ""
+"Some files could not be updated with new metadata. Mainly this happens if "
+"the files are write protected. Please have a look to the log files for "
+"details."
+msgstr ""
+"Для некоторых файлов не получилось обновить мета-данные. Обычно это "
+"происходит, если файлы защищены от записи. Пожалуйста, посмотрите лог-файлы "
+"за подробностями."
+
+#: View/Browser/sync.ctp:19
+msgid "Synchronized %d media."
+msgstr "Синхронизировано %d медиа-файлов"
+
+#: View/Browser/sync.ctp:21
+msgid " %d media remains unsynced. Click %s to synchronize again"
+msgstr ""
+"%d медиа-файлов остались незасинхронизированными. Нажмите %s чтобы повторить "
+"попытку"
+
+#: View/Browser/sync.ctp:21
+msgid "sync"
+msgstr "синхронизировать"
+
+#: View/Browser/sync.ctp:27
+msgid ""
+"You have %d unsynchronized media. Click %s to start the synchronization "
+"(this might take some time)"
+msgstr ""
+"Незасинхронизировано %d медиа-файлов. Нажмите %s для запуска процесса "
+"синхронизации (это может занять некоторое время)."
+
+#: View/Browser/sync.ctp:27;28
+msgid "Write Metadata"
+msgstr "Записать мета-данные"
+
+#: View/Browser/upload.ctp:1
+msgid "File Upload"
+msgstr "Загрузка файлов"
+
+#: View/Browser/upload.ctp:6
+msgid "You upload files to folder %s"
+msgstr "Вы загрузили файлы в папку %s"
+
+#: View/Browser/upload.ctp:7
+msgid "You can upload maximal %s and %s at once"
+msgstr "Вы можете загрузить максимум %s и %s за один раз"
+
+#: View/Browser/upload.ctp:11;12;13;14;15
+msgid "File or archive"
+msgstr "Файл или архив"
+
+#: View/Browser/upload.ctp:16
+msgid "Extract ZIP archive"
+msgstr "Извлечь из ZIP-архива"
+
+#: View/Browser/view.ctp:1
+msgid "File Overview"
+msgstr "Обзор файла"
+
+#: View/Browser/view.ctp:5 View/Groups/all.ctp:12 View/Groups/create.ctp:10
+#: View/Groups/dashboard_create.ctp:9;29;49;69;89;109 View/Groups/edit.ctp:11
+#: View/Groups/index.ctp:11 View/Groups/members.ctp:12 View/Groups/view.ctp:7
+#: View/Users/view.ctp:16;42
+msgid "Description"
+msgstr "Описание"
+
+#: View/Browser/view.ctp:5 View/Users/view.ctp:17
+msgid "Value"
+msgstr "Значение"
+
+#: View/Browser/view.ctp:10
+msgid "Files total"
+msgstr "Всего файлов"
+
+#: View/Browser/view.ctp:11
+msgid "Count of images/videos"
+msgstr "Счетчик изображений/видео"
+
+#: View/Browser/view.ctp:13
+msgid "External images/videos"
+msgstr "Внешних изображений/видео"
+
+#: View/Browser/view.ctp:14
+msgid "Bytes total (with external sources)"
+msgstr "Всего байт (включая внешние источники)"
+
+#: View/Browser/view.ctp:16
+msgid "Bytes total"
+msgstr "Всего байт"
+
+#: View/Browser/view.ctp:19
+msgid "Quota (free)"
+msgstr "Квота (свободно)"
+
+#: View/Browser/view.ctp:21
+msgid "Videos"
+msgstr "Видео"
+
+#: View/Browser/view.ctp:22
+msgid "Public files"
+msgstr "Публичные файлы"
+
+#: View/Browser/view.ctp:23
+msgid "Visible for users"
+msgstr "Видимые пользователям"
+
+#: View/Browser/view.ctp:24
+msgid "Visible for group members"
+msgstr "Видимые членам группы"
+
+#: View/Browser/view.ctp:25
+msgid "Private files"
+msgstr "Приватные файлы"
+
+#: View/Browser/view.ctp:26
+msgid "Unsynced files"
+msgstr "Несинхронизированные файлы"
+
+#: View/Comments/rss.ctp:3
+msgid "Most Recent Comments"
+msgstr "Самые свежие комментарии"
+
+#: View/Comments/rss.ctp:5
+msgid "Most recent comments at %s"
+msgstr "Самые свежие комментарии на %s"
+
+#: View/Elements/comment.ctp:7 View/Guests/edit.ctp:19 View/System/view.ctp:24
+msgid "Comments"
+msgstr "Комментарии"
+
+#: View/Elements/comment.ctp:19
+msgid "%s said %s"
+msgstr "%s сообщил %s"
+
+#: View/Elements/comment.ctp:23
+msgid "(delete)"
+msgstr "(удалить)"
+
+#: View/Elements/comment.ctp:35
+msgid "Add new Comment"
+msgstr "Добавить новый комментарий"
+
+#: View/Elements/comment.ctp:43 View/Explorer/search.ctp:30
+#: View/Groups/all.ctp:10 View/Groups/create.ctp:9
+#: View/Groups/dashboard_create.ctp:8;28;48;68;88;108 View/Groups/edit.ctp:10
+#: View/Groups/index.ctp:10 View/Groups/members.ctp:10 View/Guests/edit.ctp:23
+#: View/Guests/index.ctp:9 View/Helper/ExplorerMenuHelper.php:152
+#: View/Helper/FileListHelper.php:134 View/Users/index.ctp:15
+msgid "Name"
+msgstr "Имя"
+
+#: View/Elements/comment.ctp:44
+msgid "Will not be published"
+msgstr "Не будет опубликовано"
+
+#: View/Elements/comment.ctp:45
+msgid "Optional"
+msgstr "Необязательно"
+
+#: View/Elements/comment.ctp:49
+msgid "Verification"
+msgstr "Проверка"
+
+#: View/Elements/comment.ctp:53
+msgid "Comment"
+msgstr "Комментарий"
+
+#: View/Elements/comment.ctp:54
+msgid "Notify me on new comments"
+msgstr "Уведомлять меня о новых комментариях"
+
+#: View/Elements/comment.ctp:57
+msgid "Add Comment"
+msgstr "Добавить комментарий"
+
+#: View/Elements/footer.ctp:4
+msgid "%s Social Web Gallery %s in %.3fs. Layout based on %s, Icons by %s"
+msgstr ""
+"%s Social Web Gallery %s в %.3fs. Внешний вид основан на %s, иконки от %s"
+
+#: View/Elements/single_acl_form.ctp:2
+msgid "Who can view image?"
+msgstr "Кто может просматривать изображение?"
+
+#: View/Elements/single_acl_form.ctp:3 View/Elements/Explorer/menu.ctp:184
+#: View/Options/import.ctp:14
+msgid "Who can download the image?"
+msgstr "Кто может загрузить изображение?"
+
+#: View/Elements/single_acl_form.ctp:4
+msgid "Who can edit the tags?"
+msgstr "Кто может редактировать теги?"
+
+#: View/Elements/single_acl_form.ctp:5 View/Elements/Explorer/menu.ctp:192
+#: View/Options/import.ctp:16
+msgid "Who can edit all meta data?"
+msgstr "Кто может редактировать все мета-данные?"
+
+#: View/Elements/single_meta_form.ctp:3
+#: View/Elements/Explorer/description.ctp:7
+#: View/Elements/Explorer/menu.ctp:51;135 View/Explorer/search.ctp:6
+#: View/Helper/ExplorerMenuHelper.php:211 View/Helper/ImageDataHelper.php:553
+#: View/System/view.ctp:25 View/Themed/Mobile/Explorer/index.ctp:31
+#: View/Themed/Mobile/Images/view.ctp:29
+msgid "Tags"
+msgstr "Теги"
+
+#: View/Elements/single_meta_form.ctp:7
+#: View/Elements/Explorer/description.ctp:12
+#: View/Elements/Explorer/menu.ctp:58;139 View/Explorer/search.ctp:7
+#: View/Helper/ExplorerMenuHelper.php:216 View/Helper/ImageDataHelper.php:556
+#: View/System/view.ctp:26 View/Themed/Mobile/Explorer/index.ctp:40
+#: View/Themed/Mobile/Images/view.ctp:38
+msgid "Categories"
+msgstr "Категории"
+
+#: View/Elements/single_meta_form.ctp:9 View/Elements/Explorer/menu.ctp:141
+msgid "City"
+msgstr "Город"
+
+#: View/Elements/single_meta_form.ctp:11 View/Elements/Explorer/menu.ctp:143
+msgid "Sublocation"
+msgstr "Место"
+
+#: View/Elements/single_meta_form.ctp:13 View/Elements/Explorer/menu.ctp:145
+msgid "State"
+msgstr "Регион"
+
+#: View/Elements/single_meta_form.ctp:15 View/Elements/Explorer/menu.ctp:147
+msgid "Country"
+msgstr "Страна"
+
+#: View/Elements/single_meta_form.ctp:21 View/Elements/Explorer/menu.ctp:149
+msgid "Geo data"
+msgstr "Расположение"
+
+#: View/Elements/single_meta_form.ctp:24 View/Elements/Explorer/menu.ctp:152
+msgid "E.g. 2008-08-07 15:30"
+msgstr "Например, 2008-08-07 15:30"
+
+#: View/Elements/topnav.ctp:10
+msgid "Preferences"
+msgstr "Предпочтения"
+
+#: View/Elements/topnav.ctp:16
+msgid "Register"
+msgstr "Регистрация"
+
+#: View/Elements/Explorer/actions.ctp:3
+msgid "Select media"
+msgstr "Выбрать медиа-файл"
+
+#: View/Elements/Explorer/actions.ctp:7
+msgid "Deselect media"
+msgstr "Отменить выбор медиа"
+
+#: View/Elements/Explorer/actions.ctp:12
+msgid "Edit meta data"
+msgstr "Редактировать мета-данные"
+
+#: View/Elements/Explorer/actions.ctp:18
+msgid "Edit access rights"
+msgstr "Редактировать права доступа"
+
+#: View/Elements/Explorer/actions.ctp:25
+msgid "Download file %s"
+msgstr "Загрузить медиа-файл"
+
+#: View/Elements/Explorer/date.ctp:2 View/Explorer/search.ctp:19
+#: View/Helper/ImageDataHelper.php:549
+msgid "Date"
+msgstr "Дата"
+
+#: View/Elements/Explorer/date.ctp:7 View/Helper/ImageDataHelper.php:351
+msgid "View media of previous dates"
+msgstr "Просмотреть медиа предыдущих дней"
+
+#: View/Elements/Explorer/date.ctp:13;32
+#: View/Helper/ImageDataHelper.php:355;374
+msgid "View media of interval"
+msgstr "Просмотр медиа в интервале"
+
+#: View/Elements/Explorer/date.ctp:16 View/Helper/ImageDataHelper.php:360
+msgid "Set new end date of interval"
+msgstr "Установить новую конечную дату интервала"
+
+#: View/Elements/Explorer/date.ctp:22 View/Helper/ImageDataHelper.php:364
+msgid "View media of this day"
+msgstr "Просмотр медиа этого дня"
+
+#: View/Elements/Explorer/date.ctp:24 View/Helper/ImageDataHelper.php:367
+msgid "View media of this week"
+msgstr "Просмотр медиа этой недели"
+
+#: View/Elements/Explorer/date.ctp:26 View/Helper/ImageDataHelper.php:370
+msgid "View media of this month"
+msgstr "Просмотр медиа этого месяца"
+
+#: View/Elements/Explorer/date.ctp:35 View/Helper/ImageDataHelper.php:379
+msgid "Set new start date for interval"
+msgstr "Установить новую начальную дату интервала"
+
+#: View/Elements/Explorer/date.ctp:41 View/Helper/ImageDataHelper.php:383
+msgid "View media of next dates"
+msgstr "Просмотр медиа последующих дней"
+
+#: View/Elements/Explorer/description.ctp:26 View/Explorer/search.ctp:8
+#: View/Helper/ExplorerMenuHelper.php:221 View/Helper/ImageDataHelper.php:567
+#: View/System/view.ctp:27
+msgid "Locations"
+msgstr "Местоположения"
+
+#: View/Elements/Explorer/description.ctp:48
+#: View/Helper/ImageDataHelper.php:572
+msgid "Access"
+msgstr "Доступ"
+
+#: View/Elements/Explorer/description.ctp:49 View/Explorer/search.ctp:40
+#: View/Helper/ImageDataHelper.php:332;629 View/Options/profile.ctp:19
+msgid "Group members"
+msgstr "Члены группы"
+
+#: View/Elements/Explorer/description.ctp:51
+#: View/Elements/Explorer/menu.ctp:177
+msgid "All"
+msgstr "Все"
+
+#: View/Elements/Explorer/media.ctp:3
+#: View/Elements/Explorer/media_compact.ctp:3 View/home/index.ctp:8
+msgid "%s by %s"
+msgstr "%s от %s"
+
+#: View/Elements/Explorer/menu.ctp:12
+msgid "View Filter"
+msgstr "Фильтр на просмотр"
+
+#: View/Elements/Explorer/menu.ctp:14
+msgid "Edit Metadata"
+msgstr "Редактировать мета-данные"
+
+#: View/Elements/Explorer/menu.ctp:16 View/Explorer/index.ctp:11
+msgid "Edit Access Rights"
+msgstr "Редактировать права доступа"
+
+#: View/Elements/Explorer/menu.ctp:19
+msgid "More"
+msgstr "Далее"
+
+#: View/Elements/Explorer/menu.ctp:20
+msgid "Slideshow"
+msgstr "Слайд-шоу"
+
+#: View/Elements/Explorer/menu.ctp:27
+msgid "Page %d of %d"
+msgstr "Страница %d из %d"
+
+#: View/Elements/Explorer/menu.ctp:65
+msgid "Sublocations"
+msgstr "Конкреное место"
+
+#: View/Elements/Explorer/menu.ctp:72
+msgid "Cities"
+msgstr "Города"
+
+#: View/Elements/Explorer/menu.ctp:79
+msgid "States"
+msgstr "Регионы"
+
+#: View/Elements/Explorer/menu.ctp:86
+msgid "Countries"
+msgstr "Страны"
+
+#: View/Elements/Explorer/menu.ctp:100 View/Helper/ExplorerMenuHelper.php:171
+msgid "Pagesize"
+msgstr "Размер страницы"
+
+#: View/Elements/Explorer/menu.ctp:107
+msgid "Sort"
+msgstr "Сотрировка"
+
+#: View/Elements/Explorer/menu.ctp:109 View/Helper/ExplorerMenuHelper.php:132
+msgid "newest"
+msgstr "новейшее"
+
+#: View/Elements/Explorer/menu.ctp:110
+msgid "date"
+msgstr "дата"
+
+#: View/Elements/Explorer/menu.ctp:111
+msgid "date (reverse)"
+msgstr "дата (в обратном)"
+
+#: View/Elements/Explorer/menu.ctp:112
+msgid "name"
+msgstr "имя"
+
+#: View/Elements/Explorer/menu.ctp:113
+msgid "modified"
+msgstr "исправлено"
+
+#: View/Elements/Explorer/menu.ctp:114
+msgid "view count"
+msgstr "счетчик просмотров"
+
+#: View/Elements/Explorer/menu.ctp:115 View/Helper/ExplorerMenuHelper.php:140
+msgid "random"
+msgstr "случайно"
+
+#: View/Elements/Explorer/menu.ctp:118 View/Helper/ImageDataHelper.php:444
+msgid "View"
+msgstr "Просмотр"
+
+#: View/Elements/Explorer/menu.ctp:120
+msgid "default"
+msgstr "по умолчанию"
+
+#: View/Elements/Explorer/menu.ctp:121
+msgid "compact"
+msgstr "сжато"
+
+#: View/Elements/Explorer/menu.ctp:122
+msgid "small"
+msgstr "маленький"
+
+#: View/Elements/Explorer/menu.ctp:131 View/Explorer/search.ctp:4
+msgid "Metadata"
+msgstr "Мета-данные"
+
+#: View/Elements/Explorer/menu.ctp:135
+msgid "E.g. newtag, -oldtag"
+msgstr "Например, newtag, -oldtag"
+
+#: View/Elements/Explorer/menu.ctp:149
+msgid "latitude, longitude"
+msgstr "широта, долгота"
+
+#: View/Elements/Explorer/menu.ctp:156;178 View/Helper/ImageDataHelper.php:627
+msgid "Keep"
+msgstr "Оставить"
+
+#: View/Elements/Explorer/menu.ctp:157
+msgid "90 CW"
+msgstr "90° по часовой"
+
+#: View/Elements/Explorer/menu.ctp:158
+msgid "180 CW"
+msgstr "180° по часовой"
+
+#: View/Elements/Explorer/menu.ctp:159
+msgid "90 CCW"
+msgstr "90° против часовой"
+
+#: View/Elements/Explorer/menu.ctp:160
+msgid "Reset"
+msgstr "Сброс"
+
+#: View/Elements/Explorer/menu.ctp:162
+msgid "Rotate"
+msgstr "Вращение"
+
+#: View/Elements/Explorer/menu.ctp:167;199
+msgid "Apply"
+msgstr "Применить"
+
+#: View/Elements/Explorer/menu.ctp:171
+msgid "Access Rights"
+msgstr "Права доступа"
+
+#: View/Elements/Explorer/menu.ctp:174
+msgid "Me"
+msgstr "Владелец"
+
+#: View/Elements/Explorer/menu.ctp:180
+msgid "Who can view the image"
+msgstr "Кто может просматривать изображение"
+
+#: View/Elements/Explorer/menu.ctp:188 View/Options/import.ctp:15
+msgid "Who can add tags?"
+msgstr "Кто может добавлять теги?"
+
+#: View/Elements/Explorer/menu.ctp:195
+msgid "Media access group"
+msgstr "Группа доступа к данным"
+
+#: View/Elements/Explorer/menu.ctp:205
+msgid "Download:"
+msgstr "Загрузка:"
+
+#: View/Elements/Explorer/menu.ctp:206
+msgid "Original"
+msgstr "Оригинал"
+
+#: View/Elements/Explorer/menu.ctp:206
+msgid "Download original files from selected media"
+msgstr "Загрузить оригинальные файлы для выбранных медиа"
+
+#: View/Elements/Explorer/menu.ctp:207
+msgid "High Resolution"
+msgstr "Высокое разрешение"
+
+#: View/Elements/Explorer/menu.ctp:207
+msgid "Download high resolution files (%d px) from selected media"
+msgstr "Загрузить файлы в высоком разрешении (%d px) для выбранных медиа"
+
+#: View/Elements/Explorer/menu.ctp:208
+msgid "Preview Resolution"
+msgstr "Разрешение предпросмотра"
+
+#: View/Elements/Explorer/menu.ctp:208
+msgid "Download preview files (%d px) from selected media"
+msgstr "Загрузить файлы предпросмотра (%d px) для выбранных медиа"
+
+#: View/Emails/html/notify_new_media.ctp:1
+#: View/Emails/text/notify_new_media.ctp:2
+msgid "Hi %s!"
+msgstr "Привет, %s!"
+
+#: View/Emails/html/notify_new_media.ctp:3
+#: View/Emails/text/notify_new_media.ctp:4
+msgid "New media available at %s"
+msgstr "Новый медиа-файл доступен по %s "
+
+#: View/Emails/html/notify_new_media.ctp:16
+#: View/Emails/text/notify_new_media.ctp:17
+msgid "User %s published following media"
+msgstr "Пользователь %s опубликовал следующие медиа-файлы"
+
+#: View/Emails/html/notify_new_media.ctp:29
+#: View/Emails/text/notify_new_media.ctp:24
+msgid "See all new media at %s"
+msgstr "Смотрите все новые медиа-файлы по %s"
+
+#: View/Emails/html/notify_new_media.ctp:31
+#: View/Emails/text/notify_new_media.ctp:27
+msgid "Sincerly, your phTagr agent"
+msgstr "С уважением, ваш phTagr-агент"
+
+#: View/Emails/html/notify_new_media.ctp:33
+#: View/Emails/text/notify_new_media.ctp:30
+msgid ""
+"PS: If you do not like to receive this notification again, please configure "
+"the notification interval in your user profile."
+msgstr ""
+"PS: Если вы не хотите в дальнейшем получать такие уведомления, пожалуйста, "
+"установите интервал для уведомлений профиле вашей учётной записи."
+
+#: View/Emails/text/comment.ctp:2
+msgid "Hi %s"
+msgstr "Привет, %s"
+
+#: View/Emails/text/comment.ctp:4
+msgid "New comment on your media %s: %s was submitted"
+msgstr "К вашему медиа-файлу %s: %s добавлен новый комментарий"
+
+#: View/Emails/text/comment.ctp:7
+msgid "Author: %s"
+msgstr "Автор: %s"
+
+#: View/Emails/text/comment.ctp:8
+msgid "Email: %s"
+msgstr "E-mail: %s"
+
+#: View/Emails/text/comment.ctp:9
+msgid "URL: %s"
+msgstr "Ссылка: %s"
+
+#: View/Emails/text/comment.ctp:10 View/Emails/text/commentnotify.ctp:7
+msgid "Date: %s"
+msgstr "Дата: %s"
+
+#: View/Emails/text/comment.ctp:14
+msgid "You can see the comments on this media here: %s"
+msgstr "Вы можете просмотреть комментарии к этому медиа-файлу здесь: %s"
+
+#: View/Emails/text/comment.ctp:16
+msgid "Delete it: %s"
+msgstr "Удалить это: %s"
+
+#: View/Emails/text/comment.ctp:19 View/Emails/text/commentnotify.ctp:13
+#: View/Emails/text/group_confirmation.ctp:14
+#: View/Emails/text/group_subscribtion.ctp:16
+#: View/Emails/text/group_subscribtion_request.ctp:18
+#: View/Emails/text/group_unsubscribtion.ctp:16
+#: View/Emails/text/new_account.ctp:8
+#: View/Emails/text/new_account_confirmation.ctp:14
+#: View/Emails/text/new_account_notification.ctp:6
+#: View/Emails/text/password.ctp:8
+msgid "Sincerely"
+msgstr "С уважением,"
+
+#: View/Emails/text/comment.ctp:21 View/Emails/text/commentnotify.ctp:15
+#: View/Emails/text/group_confirmation.ctp:16
+#: View/Emails/text/group_subscribtion.ctp:18
+#: View/Emails/text/group_subscribtion_request.ctp:20
+#: View/Emails/text/group_unsubscribtion.ctp:18
+#: View/Emails/text/new_account.ctp:10
+#: View/Emails/text/new_account_confirmation.ctp:16
+#: View/Emails/text/new_account_notification.ctp:8
+#: View/Emails/text/password.ctp:10
+msgid "Your phTagr Agent"
+msgstr "Ваш phTagr-агент"
+
+#: View/Emails/text/commentnotify.ctp:2
+msgid "Hello"
+msgstr "Привет"
+
+#: View/Emails/text/commentnotify.ctp:4
+msgid "A new comment on %s was submitted."
+msgstr "Был опубликован новый комментарий про %s"
+
+#: View/Emails/text/commentnotify.ctp:6
+msgid "From: %s"
+msgstr "От: %s"
+
+#: View/Emails/text/commentnotify.ctp:8
+msgid "Link: %s"
+msgstr "Ссылка: %s"
+
+#: View/Emails/text/commentnotify.ctp:17
+msgid ""
+"PS: This mail is a comment notification of your previous comment(s) on this "
+"media."
+msgstr ""
+"PS: Это письмо является уведомлением о комментарии на ваш комментарий к "
+"медиа-файлу."
+
+#: View/Emails/text/group_confirmation.ctp:2
+#: View/Emails/text/group_subscribtion.ctp:2
+#: View/Emails/text/group_subscribtion_request.ctp:2
+#: View/Emails/text/group_unsubscribtion.ctp:2
+#: View/Emails/text/new_account_confirmation.ctp:2
+#: View/Emails/text/password.ctp:2
+msgid "Hello %s!"
+msgstr "Привет, %s!"
+
+#: View/Emails/text/group_confirmation.ctp:4
+msgid "Your group subscription of group %s was accepted."
+msgstr "Ваша подписка на группу %s была утверждена."
+
+#: View/Emails/text/group_confirmation.ctp:6
+msgid "Group information:"
+msgstr "Информация о группе:"
+
+#: View/Emails/text/group_confirmation.ctp:8
+#: View/Emails/text/group_subscribtion.ctp:10
+#: View/Emails/text/group_subscribtion_request.ctp:12
+#: View/Emails/text/group_unsubscribtion.ctp:10
+msgid "Description: %s"
+msgstr "Описание: %s"
+
+#: View/Emails/text/group_confirmation.ctp:9
+#: View/Emails/text/group_subscribtion.ctp:11
+#: View/Emails/text/group_subscribtion_request.ctp:13
+#: View/Emails/text/group_unsubscribtion.ctp:11
+msgid "Number of members: %d"
+msgstr "Количество участников: %d"
+
+#: View/Emails/text/group_confirmation.ctp:11
+msgid "More details of group %s are available at %s."
+msgstr "Больше подробной информации про группу %s доступно по %s."
+
+#: View/Emails/text/group_subscribtion.ctp:4
+msgid "User %s joined your group %s"
+msgstr "Пользователь %s вструпил в вашу группу %s"
+
+#: View/Emails/text/group_subscribtion.ctp:6
+msgid "To see more information about user %s, please visit %s."
+msgstr ""
+"Для просмотра более подробной информации про пользователя %s, пожалуйста, "
+"посетите %s."
+
+#: View/Emails/text/group_subscribtion.ctp:8
+#: View/Emails/text/group_subscribtion_request.ctp:10
+#: View/Emails/text/group_unsubscribtion.ctp:8
+msgid "Group info:"
+msgstr "Информация о группе:"
+
+#: View/Emails/text/group_subscribtion.ctp:13
+#: View/Emails/text/group_subscribtion_request.ctp:15
+#: View/Emails/text/group_unsubscribtion.ctp:13
+msgid "More details of your group %s are available at %s"
+msgstr "Больше подробностей про вашу группу %s доступно по %s."
+
+#: View/Emails/text/group_subscribtion_request.ctp:4
+msgid "User %s likes to join your group %s."
+msgstr "Пользователь %s хотел бы вступить в вашу группу %s."
+
+#: View/Emails/text/group_subscribtion_request.ctp:6
+msgid "To confirm the subscription please visit %s"
+msgstr "Для подтверждения подписки, пожалуйста, посетите %s"
+
+#: View/Emails/text/group_subscribtion_request.ctp:8
+#: View/Emails/text/group_unsubscribtion.ctp:6
+msgid "To see more information about user %s, please visit %s"
+msgstr ""
+"Для просмотра более подробной информации про пользователя %s, пожалуйста, "
+"посетите %s"
+
+#: View/Emails/text/group_unsubscribtion.ctp:4
+msgid "User %s unsubscribed from your group %s."
+msgstr "Пользователь %s отписался от вашей группы %s."
+
+#: View/Emails/text/new_account.ctp:2
+msgid "Welcome %s!"
+msgstr "Добро пожаловать, %s!"
+
+#: View/Emails/text/new_account.ctp:4
+msgid "Your phTagr account is now activated for %s"
+msgstr "Ваша учетная запись phTagr была активирована для %s"
+
+#: View/Emails/text/new_account.ctp:6
+msgid "Login at %s with your new account and see %s for first steps."
+msgstr ""
+"Войдите на %s под вашей новой учётной записью и просмотрите %s, чтобы "
+"сделать первые шаги."
+
+#: View/Emails/text/new_account_confirmation.ctp:3
+msgid "\n"
+msgstr "\n"
+
+#: View/Emails/text/new_account_confirmation.ctp:4
+msgid "Please confirm your account creation"
+msgstr "Пожалуйста, подтвердите создание вашей учётной записи"
+
+#: View/Emails/text/new_account_confirmation.ctp:8
+msgid "Or visit %s and enter the confirmation key:"
+msgstr "Или посетите %s и введите код подтверждения:"
+
+#: View/Emails/text/new_account_confirmation.ctp:12
+msgid "to finalize your account creation"
+msgstr "для завершения процесса создания вашей учётной записи"
+
+#: View/Emails/text/new_account_notification.ctp:2
+msgid "Hello System Operator!"
+msgstr "Здравствуй, Системный Оператор!"
+
+#: View/Emails/text/new_account_notification.ctp:4
+msgid "A new phTagr user account was created for %s"
+msgstr "Новая учётная запись phTagr была создана для %s"
+
+#: View/Emails/text/password.ctp:4
+msgid "Your phTagr account password is:"
+msgstr "Пароль от вашей учётной записи в phTagr: "
+
+#: View/Explorer/index.ctp:10
+msgid "Edit Meta Data"
+msgstr "Редактировать мета-данные"
+
+#: View/Explorer/index.ctp:12
+msgid "Update"
+msgstr "Обновить"
+
+#: View/Explorer/index.ctp:13
+msgid "Cancel"
+msgstr "Отмена"
+
+#: View/Explorer/index.ctp:292
+msgid "Select All"
+msgstr "Выбрать все"
+
+#: View/Explorer/index.ctp:293
+msgid "Invert Selection"
+msgstr "Инвертировать выбор"
+
+#: View/Explorer/rss.ctp:3
+msgid "Most Recent Media"
+msgstr "Самы свежие медиа-файлы"
+
+#: View/Explorer/rss.ctp:5
+msgid "Most recent media of %s"
+msgstr "Самые свежие медиа-файлы от %s"
+
+#: View/Explorer/search.ctp:1 View/Helper/ExplorerMenuHelper.php:204
+msgid "Advanced Search"
+msgstr "Продвинутый поиск"
+
+#: View/Explorer/search.ctp:6
+msgid "E.g. includeTag, -excludeTag"
+msgstr "Например, includeTag, -excludeTag"
+
+#: View/Explorer/search.ctp:10
+msgid "Date from"
+msgstr "Дата, начиная с"
+
+#: View/Explorer/search.ctp:10
+msgid "E.g. 2008-08-07"
+msgstr "Например, 2008-08-07"
+
+#: View/Explorer/search.ctp:11
+msgid "Date to"
+msgstr "Дата, до"
+
+#: View/Explorer/search.ctp:14 View/Helper/ExplorerMenuHelper.php:227
+msgid "Options"
+msgstr "Опции"
+
+#: View/Explorer/search.ctp:17
+msgid "Page size"
+msgstr "Размер страницы"
+
+#: View/Explorer/search.ctp:19
+msgid "Default"
+msgstr "По умолчанию"
+
+#: View/Explorer/search.ctp:19
+msgid "Newest"
+msgstr "Самое новое"
+
+#: View/Explorer/search.ctp:19 View/Helper/ExplorerMenuHelper.php:144
+msgid "Changes"
+msgstr "Изменения"
+
+#: View/Explorer/search.ctp:19
+msgid "Random"
+msgstr "Случайно"
+
+#: View/Explorer/search.ctp:19
+msgid "Popularity"
+msgstr "Популярность"
+
+#: View/Explorer/search.ctp:20
+msgid "Sort by"
+msgstr "Сортировать по"
+
+#: View/Explorer/search.ctp:24
+msgid "Advanced"
+msgstr "Расширенный"
+
+#: View/Explorer/search.ctp:31
+msgid "Any Type"
+msgstr "Любой тип"
+
+#: View/Explorer/search.ctp:31
+msgid "Image or Photos"
+msgstr "Изображение или фотографии"
+
+#: View/Explorer/search.ctp:31
+msgid "Video"
+msgstr "Видео"
+
+#: View/Explorer/search.ctp:32
+msgid "File Type"
+msgstr "Тип файла"
+
+#: View/Explorer/search.ctp:36 View/Groups/view.ctp:90
+#: View/Guests/create.ctp:9 View/Options/profile.ctp:8
+#: View/Setup/config.ctp:13 View/Setup/user.ctp:9 View/Users/admin_add.ctp:8
+#: View/Users/login.ctp:7 View/Users/password.ctp:9 View/Users/register.ctp:7
+msgid "Username"
+msgstr "Имя пользователя"
+
+#: View/Explorer/search.ctp:40
+msgid "Any"
+msgstr "Любой"
+
+#: View/Explorer/search.ctp:40 View/Options/profile.ctp:18
+msgid "Private"
+msgstr "Закрытый"
+
+#: View/Explorer/search.ctp:40 View/Options/profile.ctp:21
+msgid "Public"
+msgstr "Широкодоступный"
+
+#: View/Explorer/search.ctp:41
+msgid "Media visibility"
+msgstr "Видимость медиа-файла"
+
+#: View/Explorer/search.ctp:44
+msgid "AND"
+msgstr "И"
+
+#: View/Explorer/search.ctp:44
+msgid "OR"
+msgstr "ИЛИ"
+
+#: View/Explorer/search.ctp:45
+msgid "General Operand"
+msgstr "Общий операнд"
+
+#: View/Explorer/search.ctp:46
+msgid "Tag operand"
+msgstr "Операнд тега"
+
+#: View/Explorer/search.ctp:47
+msgid "Category operand"
+msgstr "Операнд категории"
+
+#: View/Explorer/search.ctp:48
+msgid "Location operand"
+msgstr "Операнд местоположения"
+
+#: View/Explorer/search.ctp:53
+#: View/Groups/dashboard_search.ctp:22;50;78;106;134;162
+msgid "Search"
+msgstr "Поиск"
+
+#: View/Groups/all.ctp:11 View/Groups/members.ctp:11
+msgid "From User"
+msgstr "От пользователя"
+
+#: View/Groups/all.ctp:13 View/Groups/index.ctp:12 View/Groups/members.ctp:13
+msgid "Members"
+msgstr "Участники"
+
+#: View/Groups/all.ctp:14 View/Groups/index.ctp:13 View/Groups/members.ctp:14
+#: View/Guests/edit.ctp:57 View/Guests/index.ctp:11
+#: View/Helper/FileListHelper.php:134 View/Users/admin_index.ctp:20
+#: View/Users/admin_path.ctp:13
+msgid "Actions"
+msgstr "Действия"
+
+#: View/Groups/all.ctp:31 View/Groups/index.ctp:30 View/Groups/members.ctp:31
+#: View/Groups/view.ctp:100
+msgid "Subscribe"
+msgstr "Подписаться"
+
+#: View/Groups/all.ctp:35 View/Groups/index.ctp:34 View/Groups/members.ctp:35
+#: View/Groups/view.ctp:98
+msgid "Unsubscribe"
+msgstr "Отписаться"
+
+#: View/Groups/all.ctp:44 View/Groups/index.ctp:43 View/Groups/members.ctp:44
+msgid "Do you realy want to delete the group '%s'?"
+msgstr "Вы действительно хотите удалить группу '%s'?"
+
+#: View/Groups/all.ctp:46 View/Groups/index.ctp:45
+#: View/Groups/listmembers.ctp:28 View/Groups/members.ctp:46
+#: View/Groups/view.ctp:67 View/Guests/index.ctp:26
+#: View/System/delete_unused_meta_data.ctp:4 View/Users/admin_index.ctp:48
+#: View/Users/admin_path.ctp:22
+msgid "Delete"
+msgstr "Удалить"
+
+#: View/Groups/all.ctp:64
+msgid ""
+"Currently no image groups are assigned. At the one hand each image could be "
+"assigned to a specific group. On the other hand a guest can be member of a "
+"set of groups. The guest is than able to view the images from his groups."
+msgstr ""
+"В настоящий момент групп изображений не назначено. С одной стороны, каждое "
+"изображение может относиться к отдельной группе. С другой стороны, гостевые "
+"пользователи могут быть членами нескольких групп сразу. Гостевые учётные "
+"записи имеют права на просмотр изображений из своих групп."
+
+#: View/Groups/create.ctp:1
+msgid "New Group"
+msgstr "Новая группа"
+
+#: View/Groups/create.ctp:7 View/Groups/dashboard_create.ctp:6;26;46;66;86;106
+msgid "Create new group"
+msgstr "Создать новую группу"
+
+#: View/Groups/create.ctp:11
+#: View/Groups/dashboard_create.ctp:10;30;50;70;90;110 View/Groups/edit.ctp:12
+msgid "This group is hidden"
+msgstr "Эта группа спрятана"
+
+#: View/Groups/create.ctp:12
+#: View/Groups/dashboard_create.ctp:11;31;51;71;91;111
+msgid "New group members are moderated"
+msgstr "Новые участники группы модерируются"
+
+#: View/Groups/create.ctp:13
+#: View/Groups/dashboard_create.ctp:12;32;52;72;92;112
+msgid "This group is shared and other group members can use this group"
+msgstr ""
+"Эта группа разделяемая, и другие пользователи могут использовать эту группу"
+
+#: View/Groups/dashboard_manage.ctp:8;40;72;104;136;168
+msgid "Group Name"
+msgstr "Название группы"
+
+#: View/Groups/dashboard_manage.ctp:8;40;72;104;136;168
+#: View/Groups/listmembers.ctp:13 View/Groups/view.ctp:52
+#: View/Users/view.ctp:43
+msgid "Action"
+msgstr "Действие"
+
+#: View/Groups/dashboard_search.ctp:5;33;61;89;117;145
+msgid "Results"
+msgstr "Результаты"
+
+#: View/Groups/dashboard_search.ctp:20;48;76;104;132;160
+msgid "Find Group:"
+msgstr "Найти группу:"
+
+#: View/Groups/edit.ctp:1
+msgid "Group: %s"
+msgstr "Группа: %s"
+
+#: View/Groups/edit.ctp:7
+msgid "Edit Group"
+msgstr "Редактировать группу"
+
+#: View/Groups/edit.ctp:13
+msgid "New group members require a confirmation by the moderator"
+msgstr "Новые участники группы требуют подтверждения модератора"
+
+#: View/Groups/edit.ctp:14
+msgid "The group can be used by other members"
+msgstr "Эта группа может быть использована членами других групп"
+
+#: View/Groups/edit.ctp:17 View/Guests/edit.ctp:47
+#: View/Images/view.ctp:114;123 View/Options/import.ctp:29
+#: View/Options/password.ctp:13 View/Options/profile.ctp:35
+#: View/Setup/system.ctp:33 View/System/external.ctp:14
+#: View/System/index.ctp:13 View/System/map.ctp:12 View/System/register.ctp:9
+#: View/Users/admin_edit.ctp:26 View/Users/admin_password.ctp:13
+msgid "Save"
+msgstr "Сохранить"
+
+#: View/Groups/index.ctp:63
+msgid "You have currently no media groups created."
+msgstr "Вами не создано ни одной группы медиа-файлов."
+
+#: View/Groups/listmembers.ctp:1 View/Groups/view.ctp:1
+msgid "Group %s"
+msgstr "Группа %s"
+
+#: View/Groups/listmembers.ctp:5 View/Groups/view.ctp:44
+msgid "Member List"
+msgstr "Список участников группы"
+
+#: View/Groups/listmembers.ctp:10 View/Groups/view.ctp:49
+#: View/Users/admin_index.ctp:35
+msgid "Member"
+msgstr "Участник"
+
+#: View/Groups/listmembers.ctp:29 View/Groups/view.ctp:68
+msgid "Unsubscribe '%s'"
+msgstr "Отписаться от '%s'"
+
+#: View/Groups/members.ctp:64
+msgid "You have currently no memberships to media groups."
+msgstr "Вы не входите ни в одну медиа-группу"
+
+#: View/Groups/view.ctp:5
+msgid "Details"
+msgstr "Подробности"
+
+#: View/Groups/view.ctp:11
+msgid "This group has no description"
+msgstr "У этой группы отсутствует описание"
+
+#: View/Groups/view.ctp:16
+msgid "The group is owned by user %s and has %d media in total."
+msgstr "Группа управляется пользователем %s и в ней %d медиа-файлов"
+
+#: View/Groups/view.ctp:27
+msgid "The group is hidden"
+msgstr "Группа спрятана"
+
+#: View/Groups/view.ctp:29
+msgid "The group is shown with the media"
+msgstr "Показана группа с медиа-файлами"
+
+#: View/Groups/view.ctp:32
+msgid "The group subscription requires a confirmation"
+msgstr "Подписка на группу требует подтверждения"
+
+#: View/Groups/view.ctp:34
+msgid "The group subscription is free and does not need a confirmation"
+msgstr "Подписка на группу свободная и не требует подтверждения"
+
+#: View/Groups/view.ctp:37
+msgid "This group is shared and can be used by other members"
+msgstr "Группа разделяемая и может использоваться другими пользователями"
+
+#: View/Groups/view.ctp:39
+msgid "This group is not shared"
+msgstr "Группа не разделяемая"
+
+#: View/Groups/view.ctp:88
+msgid "Add user"
+msgstr "Добавить пользователя"
+
+#: View/Groups/view.ctp:93 View/Helper/BreadcrumbHelper.php:188
+#: View/Users/admin_path.ctp:41
+msgid "Add"
+msgstr "Добавить"
+
+#: View/Groups/view.ctp:106 View/Guests/links.ctp:31 View/Options/links.ctp:16
+#: View/Users/view.ctp:91
+msgid "Recent Media"
+msgstr "Свежие медиа-файлы"
+
+#: View/Groups/view.ctp:112
+msgid "See all media of the group %s"
+msgstr "Смотрите все медиа-файлы группы %s"
+
+#: View/Guests/create.ctp:1
+msgid "Guest Creation"
+msgstr "Создание гостевой учётной записи"
+
+#: View/Guests/create.ctp:7
+msgid "Create new guest account"
+msgstr "Создать новую гостевую учётную запись"
+
+#: View/Guests/create.ctp:10 View/Guests/edit.ctp:8
+#: View/Options/profile.ctp:11 View/Setup/user.ctp:12
+#: View/Users/admin_add.ctp:9 View/Users/admin_edit.ctp:10
+#: View/Users/password.ctp:10 View/Users/register.ctp:10
+msgid "Email"
+msgstr "E-Mail"
+
+#: View/Guests/create.ctp:12 View/Guests/edit.ctp:16
+#: View/Options/password.ctp:10 View/Setup/user.ctp:11
+#: View/Users/admin_add.ctp:11 View/Users/admin_password.ctp:9
+#: View/Users/confirm.ctp:11 View/Users/register.ctp:9
+msgid "Confirm"
+msgstr "Подтвердить"
+
+#: View/Guests/edit.ctp:1
+msgid "Guest: %s"
+msgstr "Гость: %s"
+
+#: View/Guests/edit.ctp:6 View/Users/admin_index.ctp:36
+msgid "Guest"
+msgstr "Гость"
+
+#: View/Guests/edit.ctp:9
+msgid "Expires"
+msgstr "Истекает"
+
+#: View/Guests/edit.ctp:10
+msgid "Enable WebDAV access"
+msgstr "Разрешить доступ через WebDAV"
+
+#: View/Guests/edit.ctp:22
+msgid "None"
+msgstr "Нет"
+
+#: View/Guests/edit.ctp:24
+msgid "Name and captcha"
+msgstr "Имя и капча"
+
+#: View/Guests/edit.ctp:28
+msgid "Authentication"
+msgstr "Аутентификация"
+
+#: View/Guests/edit.ctp:34
+msgid "Email Notification"
+msgstr "Уведомление по E-Mail"
+
+#: View/Guests/edit.ctp:37 View/Options/profile.ctp:25
+msgid "Never"
+msgstr "Ниога"
+
+#: View/Guests/edit.ctp:38 View/Options/profile.ctp:26
+msgid "Every 30 minutes"
+msgstr "Каждые 30 мин."
+
+#: View/Guests/edit.ctp:39 View/Options/profile.ctp:27
+msgid "Every hour"
+msgstr "Каждый час"
+
+#: View/Guests/edit.ctp:40 View/Options/profile.ctp:28
+msgid "Every day"
+msgstr "Каждый день"
+
+#: View/Guests/edit.ctp:41 View/Options/profile.ctp:29
+msgid "Every week"
+msgstr "Каждую неделю"
+
+#: View/Guests/edit.ctp:42 View/Options/profile.ctp:30
+msgid "Every month"
+msgstr "Каждый месяц"
+
+#: View/Guests/edit.ctp:44 View/Options/profile.ctp:32
+msgid "Send new media notifications"
+msgstr "Отправлять уведомления о новых медиа-файлах"
+
+#: View/Guests/edit.ctp:51 View/Users/view.ctp:35
+msgid "Group List"
+msgstr "Список групп"
+
+#: View/Guests/edit.ctp:67
+msgid "Do you really want to delete the group '%s' from this guest '%s'?"
+msgstr "Вы действительно хотите удалить группу '%s' от пользователя '%s'?"
+
+#: View/Guests/edit.ctp:80
+msgid ""
+"Currently this guest account has no assigned groups. Please add groups to "
+"grant access to your personal images."
+msgstr ""
+"В настоящее время гостевые учётные записи не имеют назначенных групп. "
+"Пожалуйста, добавьте группы, чтобы предоставить доступ к вашим персональным "
+"изображениям."
+
+#: View/Guests/edit.ctp:84
+msgid "Group Assignements"
+msgstr "Назначения групп"
+
+#: View/Guests/edit.ctp:88
+msgid "Add Group"
+msgstr "Добавить группу"
+
+#: View/Guests/index.ctp:35
+msgid ""
+"Currently, no guest accounts are set. You can create guests accounts to "
+"grant access to your images e.g. to your friends or family. Please add also "
+"some groups to the guest to grant access to this guest for these groups."
+msgstr ""
+"На текущий момент нет гостевых учётных записей. Вы можете создать гостевые "
+"учётные записи, чтобы предоставить доступ к вашим изображениям, например, "
+"вашим друзьям или родственникам. Пожалуйста, не забудьте добавить группы "
+"гостевым записям, чтобы предоставить доступ гостям к этим группам."
+
+#: View/Guests/links.ctp:1
+msgid "Authenticated Links"
+msgstr "Авторизованные ссылки"
+
+#: View/Guests/links.ctp:4
+msgid ""
+"Following links contains an authentication key which should be used "
+"carefully. Copy the links with with right mouse click and select <i>Copy "
+"link address</i>."
+msgstr ""
+"Следующие ссылки содержат аутентификационную информацию, с которой надо "
+"обращаться очень бережно. Скопируйте эти ссылки с помощью правой кнопки "
+"мыши, выбрав <i>Копировать ссылку</i>."
+
+#: View/Guests/links.ctp:7 View/Options/links.ctp:7
+msgid ""
+"The links are valid for the current session. For permanent login the user "
+"has to login via username and password."
+msgstr ""
+"Эти ссылки работают только для текущей сессии. Для постоянного входа "
+"необходимо войти, используя имя и пароль."
+
+#: View/Guests/links.ctp:9
+msgid "Direct Link"
+msgstr "Прямая ссылка"
+
+#: View/Guests/links.ctp:11
+msgid ""
+"Following link provides a direct link to <i>My Photos</i> of the guest which "
+"omits the login with username and password."
+msgstr ""
+"Следующие ссылки обеспечивают прямой вход в <i>Мои фотографии</i> для "
+"гостей, минуя необходимость входа с помощью имени и пароля."
+
+#: View/Guests/links.ctp:17
+msgid "My Media of Guest %s (Link %s)"
+msgstr "Мои медиа-файлы гостя %s (Ссылка %s)"
+
+#: View/Guests/links.ctp:21
+msgid "RSS"
+msgstr "RSS"
+
+#: View/Guests/links.ctp:23
+msgid "Following links provide a authenticated RSS and Media RSS links."
+msgstr ""
+"Следующие ссылки обеспечивают аутентифицированный поток RSS и Media RSS."
+
+#: View/Guests/links.ctp:32 View/Options/links.ctp:17 View/home/index.ctp:42
+msgid "Recent Comments"
+msgstr "Свежие комментарии"
+
+#: View/Guests/links.ctp:33 View/Options/links.ctp:18
+msgid "Media RSS"
+msgstr "RSS медиа-файлов"
+
+#: View/Guests/links.ctp:34 View/Options/links.ctp:19
+msgid "Media RSS of My Media"
+msgstr "RSS моих медиа-файлов"
+
+#: View/Guests/links.ctp:37
+msgid ""
+"Click %s to renew the authentication key. All previous links become invalid."
+msgstr ""
+"Нажмите %s для обновления ключа аутентификации. Все предыдущие ссылки станут "
+"нерабочими."
+
+#: View/Guests/links.ctp:37 View/Options/links.ctp:22
+msgid "renew key"
+msgstr "обновить ключ"
+
+#: View/Helper/BreadcrumbHelper.php:193
+msgid "Filter"
+msgstr "Фильтр"
+
+#: View/Helper/ExplorerMenuHelper.php:59
+msgid "Show media in high quality (if available)"
+msgstr "Показать медиа-файлы в высоком разрешении (если доступно)"
+
+#: View/Helper/ExplorerMenuHelper.php:63
+msgid "Start Slideshow"
+msgstr "Начать слайд-шоу"
+
+#: View/Helper/ExplorerMenuHelper.php:122
+msgid "Order"
+msgstr "Порядок"
+
+#: View/Helper/ExplorerMenuHelper.php:128
+msgid "date asc"
+msgstr "Дата возр"
+
+#: View/Helper/ExplorerMenuHelper.php:128
+msgid "Show oldest first"
+msgstr "Сперва самые старые"
+
+#: View/Helper/ExplorerMenuHelper.php:132
+msgid "Show newest first"
+msgstr "Сперва самые свежие"
+
+#: View/Helper/ExplorerMenuHelper.php:136
+msgid "pouplarity"
+msgstr "популярность"
+
+#: View/Helper/ExplorerMenuHelper.php:136
+msgid "Show popular first"
+msgstr "Сперва самые популярные"
+
+#: View/Helper/ExplorerMenuHelper.php:140
+msgid "Show random order"
+msgstr "Показать в случайном порядке"
+
+#: View/Helper/ExplorerMenuHelper.php:144
+msgid "Show changes first"
+msgstr "Показывать сперва изменения"
+
+#: View/Helper/ExplorerMenuHelper.php:148
+msgid "Views"
+msgstr "Просмотры"
+
+#: View/Helper/ExplorerMenuHelper.php:148
+msgid "Show last views first"
+msgstr "Показывать сперва самые непросматриваемые"
+
+#: View/Helper/ExplorerMenuHelper.php:152
+msgid "Order by name"
+msgstr "Сортировать по имени"
+
+#: View/Helper/FileListHelper.php:79;108
+msgid "delete"
+msgstr "удалить"
+
+#: View/Helper/FileListHelper.php:79
+msgid "Delete folder %s?"
+msgstr "Удалить папку %s?"
+
+#: View/Helper/FileListHelper.php:92
+msgid "unlink"
+msgstr "отсоединить"
+
+#: View/Helper/FileListHelper.php:92
+msgid "Unlink media from this file"
+msgstr "Отсоединить медиа от этого файла"
+
+#: View/Helper/FileListHelper.php:102
+msgid "Download %s"
+msgstr "Загрузить %s"
+
+#: View/Helper/FileListHelper.php:120
+msgid "(parent folder)"
+msgstr "(каталог уровнем выше)"
+
+#: View/Helper/FileListHelper.php:122
+msgid "(this folder)"
+msgstr "(этот каталог)"
+
+#: View/Helper/FileListHelper.php:134 View/System/view.ctp:20
+msgid "Media"
+msgstr "Медиа"
+
+#: View/Helper/FileListHelper.php:134 View/Images/view.ctp:78
+msgid "Size"
+msgstr "Размер"
+
+#: View/Helper/ImageDataHelper.php:311
+msgid "%s can edit the meta data"
+msgstr "%s может редактировать мета-данные"
+
+#: View/Helper/ImageDataHelper.php:313
+msgid "%s can edit the tags"
+msgstr "%s может редактировать теги"
+
+#: View/Helper/ImageDataHelper.php:318
+msgid "%s can download this media"
+msgstr "%s может загрузить этот медиа-файл"
+
+#: View/Helper/ImageDataHelper.php:320
+msgid "%s an view this media"
+msgstr "%s может просматривать этот медиа-файл"
+
+#: View/Helper/ImageDataHelper.php:334
+msgid "users:"
+msgstr "пользователи:"
+
+#: View/Helper/ImageDataHelper.php:334
+msgid "Access for users"
+msgstr "Доступ для пользователей"
+
+#: View/Helper/ImageDataHelper.php:337
+msgid "public:"
+msgstr "публичный:"
+
+#: View/Helper/ImageDataHelper.php:337
+msgid "Access for the public"
+msgstr "Доступ для остальных"
+
+#: View/Helper/ImageDataHelper.php:338
+msgid "The public"
+msgstr "Публичный"
+
+#: View/Helper/ImageDataHelper.php:442
+msgid "This media belongs to the group '%s'"
+msgstr "Этот медиа-файл относится к группе '%s'"
+
+#: View/Helper/ImageDataHelper.php:447
+msgid "No group assigned"
+msgstr "Группа не присвоена"
+
+#: View/Helper/ImageDataHelper.php:515
+msgid "Search global for %s"
+msgstr "Искать везде %s"
+
+#: View/Helper/ImageDataHelper.php:519
+msgid "Include %s into search"
+msgstr "Включить %s в поиск"
+
+#: View/Helper/ImageDataHelper.php:521
+msgid "Exclude %s from search"
+msgstr "Исключить %s из поиска"
+
+#: View/Helper/ImageDataHelper.php:628 View/Options/import.ctp:12
+msgid "Me only"
+msgstr "Только мне"
+
+#: View/Helper/ImageDataHelper.php:631 View/Options/import.ctp:9
+msgid "Everyone"
+msgstr "Все"
+
+#: View/Helper/ImageDataHelper.php:648
+msgid "This media is public visible"
+msgstr "Этот медиа-файл виден всем"
+
+#: View/Helper/ImageDataHelper.php:651
+msgid "This media is visible for users"
+msgstr "Этот медиа-файл виден пользователям"
+
+#: View/Helper/ImageDataHelper.php:654
+msgid "This media is visible for group members"
+msgstr "Этот медиа-файл виден участникам группы"
+
+#: View/Helper/ImageDataHelper.php:657
+msgid "This media is private"
+msgstr "Этот медиа-файл приватный"
+
+#: View/Helper/MenuHelper.php:128
+msgid "Main Menu"
+msgstr "Основное меню"
+
+#: View/Helper/NavigatorHelper.php:59;129
+msgid "prev"
+msgstr "пред"
+
+#: View/Helper/NavigatorHelper.php:109;162
+msgid "next"
+msgstr "след"
+
+#: View/Helper/PluploadHelper.php:30
+msgid "Uploading file %s"
+msgstr "Загружается файл %s"
+
+#: View/Helper/PluploadHelper.php:31
+msgid "Uploading file %d/%d. Upload is finished in %s (estimated)."
+msgstr "Загружается файл %d/%d. Загрузка завершится в течение %s (примерно)."
+
+#: View/Helper/PluploadHelper.php:68
+msgid "Upload Files"
+msgstr "Загрузить файлы"
+
+#: View/Helper/PluploadHelper.php:69
+msgid "Drop files here"
+msgstr "Перетащите сюда файлы"
+
+#: View/Helper/PluploadHelper.php:70
+msgid "Your new uploaded photos:"
+msgstr "Ваши новые загруженные фото:"
+
+#: View/Helper/PluploadHelper.php:71
+msgid "View your %s in explorer"
+msgstr "Просмотрите %s в проводнике"
+
+#: View/Helper/PluploadHelper.php:71
+msgid "newest media"
+msgstr "свежий медиа-файл"
+
+#: View/Images/notfound.ctp:1
+msgid "No media Found"
+msgstr "Не найдены медиа-файлы"
+
+#: View/Images/notfound.ctp:3
+msgid "No media found. Please goto the %s and try again"
+msgstr ""
+"Медиа-файлы не найдены. Пожалуйста, пройдите по %s и попробуйте ещё раз"
+
+#: View/Images/view.ctp:35
+msgid "Media Details"
+msgstr "Подробности про медиа"
+
+#: View/Images/view.ctp:37
+msgid "Map"
+msgstr "Карта"
+
+#: View/Images/view.ctp:43
+msgid "Access Right"
+msgstr "Права доступа"
+
+#: View/Images/view.ctp:69
+msgid "File(s)"
+msgstr "Файл(ы)"
+
+#: View/Images/view.ctp:73
+msgid "Folder"
+msgstr "Папка"
+
+#: View/Images/view.ctp:75
+msgid "View Count"
+msgstr "Счётчик просмотров"
+
+#: View/Images/view.ctp:76
+msgid "Created"
+msgstr "Создано"
+
+#: View/Images/view.ctp:77
+msgid "Last modified"
+msgstr "Модифицировано"
+
+#: View/Images/view.ctp:81
+msgid "Model"
+msgstr "Модель"
+
+#: View/Images/view.ctp:84
+msgid "Duration"
+msgstr "Продолжительность"
+
+#: View/Images/view.ctp:87
+msgid "Aperture"
+msgstr "Диафрагма"
+
+#: View/Images/view.ctp:90
+msgid "Shutter"
+msgstr "Выдержка"
+
+#: View/Images/view.ctp:93
+msgid "ISO"
+msgstr "ISO"
+
+#: View/Layouts/backend.ctp:44 View/Layouts/default.ctp:51
+msgid "&copy; 2006-2012 by %s - Tag, Browse, and Share Your Photos."
+msgstr ""
+"&copy; 2006-2012 by %s - Категоризируйте, просматривайте и делитесь вашими "
+"фотографиями."
+
+#: View/Layouts/backend.ctp:44
+msgid "You are running version %s."
+msgstr "Вы используете версию %s."
+
+#: View/Layouts/default.ctp:34
+msgid "Search..."
+msgstr "Поиск..."
+
+#: View/Layouts/default.ctp:35
+msgid "Go"
+msgstr "Go"
+
+#: View/Layouts/default.ctp:51
+msgid "phTagr.org"
+msgstr "phTagr.org"
+
+#: View/Layouts/Emails/html/default.ctp:3
+msgid "New Media notifications"
+msgstr "Уведомления о новых медиа"
+
+#: View/Layouts/Emails/html/default.ctp:7
+#: View/Layouts/Emails/text/default.ctp:4
+msgid "Email was sent by the open source web gallery %s"
+msgstr "E-Mail был отправлен веб-галлереей с открытым кодом %s"
+
+#: View/Options/import.ctp:5
+msgid "Default Access Rights"
+msgstr "Права доступа по умолчанию"
+
+#: View/Options/import.ctp:6
+msgid "The following access rights are applied to new images."
+msgstr "Следующие права доступа будут присвоены новым изображениям"
+
+#: View/Options/import.ctp:11
+msgid "Group Members"
+msgstr "Участники группы"
+
+#: View/Options/import.ctp:13
+msgid "Who can view the image?"
+msgstr "Кто может просматривать изображение?"
+
+#: View/Options/import.ctp:17
+msgid "Default image group?"
+msgstr "Группа изображения по умолчанию?"
+
+#: View/Options/import.ctp:21
+msgid "GPS Tracks"
+msgstr "Треки GPS"
+
+#: View/Options/import.ctp:22
+msgid ""
+"Usually GPS logs are in UTC while camera time is set to local time. Set time "
+"offset to correct time difference between GPS logs and your media."
+msgstr ""
+"Обычно журнал GPS ведётся во временной зоне UTC, в то время как камера "
+"фиксирует локальное время. Установите корректное смещение между GPS-логами и "
+"вашими медиа-данными."
+
+#: View/Options/import.ctp:24
+msgid "Time offset (minutes)"
+msgstr "ВременнОе смещение (в минутах)"
+
+#: View/Options/import.ctp:25
+msgid "Coordinate time range (minutes)"
+msgstr "Coordinate time range (в минутах)"
+
+#: View/Options/import.ctp:26
+msgid "Overwrite existing coordinates?"
+msgstr "Перезаписать существующие координаты?"
+
+#: View/Options/links.ctp:1
+msgid "Authenticated RSS"
+msgstr "Аутентифицированный RSS-поток"
+
+#: View/Options/links.ctp:4
+msgid ""
+"Following links contain authentication keys of your account. Using these "
+"links you are authenticated directly without username and password. The "
+"links could be spoofed easily and should be used carefully."
+msgstr ""
+"Следующие ссылки содержат аутентификационный ключ вашей учётной записи. "
+"Входя по этим ссылкам, вы аутентифицируетесь минуя ввод имени и пароля. Эти "
+"ссылки могут быть использованы злоумышленниками, если попадут к ним, поэтому "
+"обращайтесь с ними осторожно."
+
+#: View/Options/links.ctp:22
+msgid ""
+"Click %s to renew the authentication key. All previous keys become invalid."
+msgstr ""
+"Нажмите %s, чтобы обновить аутентификационный ключ. Все предыдущие ключи "
+"станут недействительными."
+
+#: View/Options/profile.ctp:9 View/Users/admin_edit.ctp:8
+msgid "First name"
+msgstr "Имя"
+
+#: View/Options/profile.ctp:10 View/Users/admin_edit.ctp:9
+msgid "Last name"
+msgstr "Фамилия"
+
+#: View/Options/profile.ctp:15
+msgid "Others"
+msgstr "Другое"
+
+#: View/Options/profile.ctp:23
+msgid "Profile visibility"
+msgstr "Видимость профиля"
+
+#: View/Setup/config.ctp:1 View/Setup/configro.ctp:1
+msgid "Database connection"
+msgstr "Соединение с базой данных"
+
+#: View/Setup/config.ctp:5
+msgid ""
+"This step creates the configuration for the database connection. Please add "
+"your database connection settings here."
+msgstr ""
+"На этом шаге мы сконфигурируем соединение с базой данных. Пожалуйста, "
+"укажите здесь параметры соединения с вашей базой данных."
+
+#: View/Setup/config.ctp:9;12
+msgid "Database"
+msgstr "База данных"
+
+#: View/Setup/config.ctp:11
+msgid "Host"
+msgstr "Хост"
+
+#: View/Setup/config.ctp:15
+msgid "Prefix"
+msgstr "Префикс"
+
+#: View/Setup/config.ctp:18 View/Setup/configro.ctp:47
+#: View/Setup/saltro.ctp:16
+msgid "Continue"
+msgstr "Продолжить"
+
+#: View/Setup/configro.ctp:6
+msgid ""
+"The configuration file for the database connection could not be written. "
+"Please create a database configuration file by your own!"
+msgstr ""
+"Конфигурационный файл соединения с базой данных не может быть записан. "
+"Пожалуйста, создайте этот файл самостоятельно!"
+
+#: View/Setup/configro.ctp:9
+msgid ""
+"Below a sample configuration file is shown. Please adapt your database "
+"credentials and continue."
+msgstr ""
+"Ниже показан пример конфигурационного файла. Пожалуйста, исправьте параметры "
+"для вашей базы данных и продолжите дальше."
+
+#: View/Setup/database.ctp:1
+msgid "Initialize Database"
+msgstr "Инициализировать базу данных"
+
+#: View/Setup/database.ctp:3
+msgid "All tables are now initialized"
+msgstr "Все таблицы инициализированы"
+
+#: View/Setup/finish.ctp:1
+msgid "Setup Complete"
+msgstr "Установка завершена"
+
+#: View/Setup/finish.ctp:4
+msgid ""
+"Congratulations! Your configuration of phTagr is completed. Have fun using "
+"phTagr!"
+msgstr ""
+"Поздравляем! Вы закончили конфигурировать phTagr. Пользуйтесь phTagr с "
+"удовольствием!"
+
+#: View/Setup/finish.ctp:7
+msgid "Click %s to go to home or %s your first media."
+msgstr ""
+"Нажмите %s для перехода на начальную страницу или %s для вашего первого "
+"медиа-файла."
+
+#: View/Setup/finish.ctp:7
+msgid "upload"
+msgstr "загрузка"
+
+#: View/Setup/index.ctp:1
+msgid "Welcome"
+msgstr "Добро пожаловать"
+
+#: View/Setup/index.ctp:5
+msgid ""
+"Welcome to the installation setup of phTagr. Following steps are required to "
+"install it:"
+msgstr ""
+"Добро пожаловать в начальную установку phTagr. Ниже перечислены шаги, "
+"требуемые для установки:"
+
+#: View/Setup/index.ctp:8
+msgid "Initial file and directory check"
+msgstr "Начальная проверка файлов и каталогов"
+
+#: View/Setup/index.ctp:9
+msgid "Configuration of database connection"
+msgstr "Параметры соединения с базой данных"
+
+#: View/Setup/index.ctp:10
+msgid "Initialize required tables"
+msgstr "Инициализировать требуемые таблицы"
+
+#: View/Setup/index.ctp:11
+msgid "Administration account creation"
+msgstr "Создание учётной записи администратора"
+
+#: View/Setup/index.ctp:12
+msgid "Configuration of external tools"
+msgstr "Конфигурирование внешних программ"
+
+#: View/Setup/index.ctp:15
+msgid "Note: Cookies are required to install and run phTagr."
+msgstr ""
+"Замечание: для установки и использования phTagr необходимо, чтобы в браузере "
+"были разрешены cookies."
+
+#: View/Setup/index.ctp:17
+msgid "This setup will step through the required steps."
+msgstr "Этот скрипт установки проведёт вас через все необходимые шаги."
+
+#: View/Setup/index.ctp:18
+msgid "Start Installation"
+msgstr "Начать установку"
+
+#: View/Setup/path.ctp:1
+msgid "Path settings"
+msgstr "Установка путей"
+
+#: View/Setup/path.ctp:7
+msgid "Following paths are missing. Please create these paths!"
+msgstr "Следующие пути отсутствуют. Пожалуйста, создайте эти каталоги!"
+
+#: View/Setup/path.ctp:19
+msgid "Following paths are not writeable. Please change the permissions!"
+msgstr ""
+"Следующие пути не доступны на запись. Пожалуйста, добавьте необходимые "
+"разрешения!"
+
+#: View/Setup/path.ctp:29
+msgid "Retry"
+msgstr "Повторить"
+
+#: View/Setup/salt.ctp:1 View/Setup/saltro.ctp:1
+msgid "Security settings"
+msgstr "Установки безопасности"
+
+#: View/Setup/salt.ctp:5
+msgid ""
+"An error occured while setting the security salt. Please have look to the "
+"log files and click on %s"
+msgstr ""
+"При установке модификатора (соли) возникла ошибка. Пожалуйста, посмотрите "
+"лог-файлы и нажмите %s."
+
+#: View/Setup/salt.ctp:5 View/Setup/saltro.ctp:7
+msgid "continue"
+msgstr "продолжить"
+
+#: View/Setup/saltro.ctp:5
+msgid ""
+"phTagr could not set the security salt because the a configuration file file "
+"is write protected.  Please change the configuration manually"
+msgstr ""
+"phTagr не может установить модификатор (соль), потому что конфигурационный "
+"файл доступен только на чтение. Пожалуйста, измените конфигурацию вручную."
+
+#: View/Setup/saltro.ctp:7
+msgid ""
+"Change the <b>Security.salt</b> setting in the core configuration file <code>"
+"%s</code> (line %d) to a random string with alpha numeric values. You can "
+"change the setting to the provided value below. After changing, click on %s."
+msgstr ""
+"Смените <b>Модификатор (криптографическая &laquo;соль&raquo;)</b> в ключевом "
+"файле конфигурации <code>%s</code> (строка %d) в случайное значение из цифр "
+"и букв. Вы можете изменить эту установку в предлагаемое ниже значение. После "
+"изменения нажмите %s."
+
+#: View/Setup/saltro.ctp:9
+msgid "Current security salt value"
+msgstr ""
+"Текущее установленное значение модификатора (криптографической &laquo;"
+"соли&raquo;)"
+
+#: View/Setup/saltro.ctp:12
+msgid "New security salt value"
+msgstr ""
+"Новое значение величины модификатора (криптографической &laquo;соли&raquo;)"
+
+#: View/Setup/system.ctp:5
+msgid "Congratulation! phTagr just runs fine now!"
+msgstr "Поздравляем! phTagr готов к использованию!"
+
+#: View/Setup/system.ctp:7
+msgid ""
+"phTagr can use <u>optional</u> external programs to enlarge the "
+"functionality. exiftool is used to export the meta data to images like tags, "
+"categories or (geo) locations. ffmpeg supports other video file formats like "
+"AVI, MPEG, or MOV. And convert supports better thumbnail creation for bigger "
+"photos."
+msgstr ""
+"phTagr может использовать <u>необязательные</u> внешние программы для "
+"расширения функциональности. exiftool используется для экспорта мета-данных "
+"(теги, категории, местоположение) в файлы изображений. ffmpeg поддерживает "
+"разные форматы видео-файлов типа AVI, MPEG или MOV. Программа convert лучше "
+"обеспечивает создание предпросмотра для больших изображений."
+
+#: View/Setup/system.ctp:9
+msgid ""
+"You can set the file path of these exteranl programs here or set them later "
+"in the system preferences."
+msgstr ""
+"Вы можете установить пути к этим внешним программам на этой странице или "
+"вернуться к этому позже в системных настройках."
+
+#: View/Setup/system.ctp:11
+msgid "Skip these settings"
+msgstr "Пропустить эти установки"
+
+#: View/Setup/system.ctp:15
+msgid "Following programs could not be found: %s."
+msgstr "Следующие программы не могут быть найдены: %s."
+
+#: View/Setup/system.ctp:20
+msgid ""
+"FFMPEG does not support the MP3 audio format. Sound will be disabled for "
+"videos!"
+msgstr "FFMPEG не поддерживает формат MP3. Видео будет без звука!"
+
+#: View/Setup/system.ctp:27;28;29;30 View/System/external.ctp:8;9;10;11
+msgid "Path to %s"
+msgstr "Путь к %s"
+
+#: View/Setup/user.ctp:1
+msgid "Create admin account"
+msgstr "Создать учётную запись администратора"
+
+#: View/System/delete_unused_meta_data.ctp:3
+msgid "Delete all unused meta data from database: %d fields."
+msgstr "Стереть все неиспользуемые мета-данные из базы данных: %d полей."
+
+#: View/System/external.ctp:1
+msgid "Sytem Settings"
+msgstr "Системные установки"
+
+#: View/System/index.ctp:8
+msgid "Gallery title"
+msgstr "Название галереи"
+
+#: View/System/index.ctp:9
+msgid "Gallery subtitle"
+msgstr "Подзаголовок галереи"
+
+#: View/System/map.ctp:6
+msgid "Google Maps"
+msgstr "Карты Google"
+
+#: View/System/map.ctp:7
+msgid ""
+"Enter here your API map key for %s. You can signup %s for a new key. No API "
+"map key is required for local setup with localhost."
+msgstr ""
+"Введите здесь ваш ключ API от карт Google. Вы можете зарегистрироваться %s "
+"для получения нового ключа. Ключ не требуется при локальной установке на "
+"localhost."
+
+#: View/System/map.ctp:9
+msgid "API key"
+msgstr "Ключ API"
+
+#: View/System/register.ctp:5
+msgid "Registration"
+msgstr "Регистрация"
+
+#: View/System/register.ctp:6
+msgid "Allow anonymous registration"
+msgstr "Разрешить анонимную регистрацию"
+
+#: View/System/register.ctp:7
+msgid "Initial quota limit"
+msgstr "Начальный лимит"
+
+#: View/System/upgrade.ctp:5
+msgid "Your database requires an update from version %d to %d!"
+msgstr "Вашей базе данных требуется апгрейд с версии %d на %d!"
+
+#: View/System/upgrade.ctp:5
+msgid "Run database upgrade"
+msgstr "Запустить апгрейд базы данных"
+
+#: View/System/upgrade.ctp:6
+msgid "Following database migrations will be executed:"
+msgstr "Следующие шаги по миграции базы данных будут выполнены:"
+
+#: View/System/upgrade.ctp:15
+msgid "Your system has the newest database version %d."
+msgstr "У вашей системы самая свежая версия базы данных %d."
+
+#: View/System/view.ctp:1
+msgid "System overview"
+msgstr "Обзор системы"
+
+#: View/System/view.ctp:5
+msgid "Type"
+msgstr "Тип"
+
+#: View/System/view.ctp:5
+msgid "Amount"
+msgstr "Количество"
+
+#: View/System/view.ctp:16
+msgid "Files"
+msgstr "Файлы"
+
+#: View/System/view.ctp:17
+msgid "External files"
+msgstr "Внешние файлы"
+
+#: View/System/view.ctp:18
+msgid "Sum of file size"
+msgstr "Общий размер файлов"
+
+#: View/System/view.ctp:19
+msgid "Sum of external file size"
+msgstr "Общий размер внешних файлов"
+
+#: View/System/view.ctp:21
+msgid "Image media"
+msgstr "Изображения"
+
+#: View/System/view.ctp:22
+msgid "Video media"
+msgstr "Видео"
+
+#: View/System/view.ctp:23
+msgid "Video duration"
+msgstr "Длительность видео"
+
+#: View/Themed/Mobile/Elements/footer.ctp:2
+msgid "%s Web Gallery %s - mobile version"
+msgstr "%s Web Gallery %s - версия для мобильных устройств"
+
+#: View/Themed/Mobile/Elements/footer.ctp:3
+msgid "View standard version"
+msgstr "Просмотр стандартной версии"
+
+#: View/Themed/Mobile/Elements/header.ctp:1
+msgid "mobile"
+msgstr "мобильная"
+
+#: View/Themed/Mobile/Explorer/index.ctp:49
+#: View/Themed/Mobile/Images/view.ctp:47
+msgid "Location"
+msgstr "Местоположение"
+
+#: View/Themed/Mobile/Home/index.ctp:1
+msgid "Welcome to phTagr"
+msgstr "Добро пожаловать в phTagr"
+
+#: View/Themed/Mobile/Home/index.ctp:3 View/home/index.ctp:2
+msgid "Random Media"
+msgstr "Случаный медиа-файл"
+
+#: View/Themed/Mobile/Home/index.ctp:21 View/home/index.ctp:15
+msgid "See more %s"
+msgstr "Смотрите больше %s"
+
+#: View/Themed/Mobile/Home/index.ctp:21 View/home/index.ctp:15
+msgid "random media..."
+msgstr "случайных медиа-файлов..."
+
+#: View/Themed/Mobile/Home/index.ctp:25 View/home/index.ctp:21
+msgid "Newest Media"
+msgstr "Самые свежие поступления"
+
+#: View/Themed/Mobile/Home/index.ctp:52 View/home/index.ctp:37
+msgid "See %s"
+msgstr "Смотрите %s"
+
+#: View/Themed/Mobile/Home/index.ctp:52 View/home/index.ctp:37
+msgid "all new media..."
+msgstr "все новые медиа-файлы..."
+
+#: View/Users/admin_add.ctp:1
+msgid "Add new User"
+msgstr "Добавить нового пользователя"
+
+#: View/Users/admin_add.ctp:6
+msgid "Create new user"
+msgstr "Создать нового пользователя"
+
+#: View/Users/admin_edit.ctp:1 View/Users/admin_password.ctp:1
+#: View/Users/admin_path.ctp:1
+msgid " User: %s"
+msgstr "Пользователь: %s"
+
+#: View/Users/admin_edit.ctp:11
+msgid "System Operator"
+msgstr "Системый оператор"
+
+#: View/Users/admin_edit.ctp:13 View/Users/admin_index.ctp:33
+msgid "Admin"
+msgstr "Администратор"
+
+#: View/Users/admin_edit.ctp:21
+msgid "Expire date"
+msgstr "Действует до"
+
+#: View/Users/admin_edit.ctp:22
+msgid "Upload Quota"
+msgstr "Лимит на загрузку"
+
+#: View/Users/admin_index.ctp:6
+msgid "Prev"
+msgstr "Пред"
+
+#: View/Users/admin_index.ctp:8
+msgid "Next"
+msgstr "След"
+
+#: View/Users/admin_index.ctp:15
+msgid "username"
+msgstr "имя пользователя"
+
+#: View/Users/admin_index.ctp:16
+msgid "firstname"
+msgstr "имя"
+
+#: View/Users/admin_index.ctp:17
+msgid "lastname"
+msgstr "фамилия"
+
+#: View/Users/admin_index.ctp:19
+msgid "User role"
+msgstr "Роль пользователя"
+
+#: View/Users/admin_index.ctp:34
+msgid "SysOp"
+msgstr "Системный оператор"
+
+#: View/Users/admin_index.ctp:37
+msgid "Nobody"
+msgstr "Никто"
+
+#: View/Users/admin_index.ctp:39
+msgid "Unknown"
+msgstr "Неизвестно"
+
+#: View/Users/admin_index.ctp:44
+msgid ""
+"Do you really want to detete the user '%s'? This action is irreversible! All "
+"the data of the users will be deleted!"
+msgstr ""
+"Вы действительно хотите удалить пользователя '%s'? Это действие невозможно "
+"отменить! Все данные этого пользователя будут удалены!"
+
+#: View/Users/admin_path.ctp:7
+msgid "The user can import media files from following external directories:"
+msgstr ""
+"Пользователь может импортировать медиа-файлы из следующих внешних каталогов:"
+
+#: View/Users/admin_path.ctp:12;39
+msgid "Directory"
+msgstr "Каталог"
+
+#: View/Users/admin_path.ctp:21
+msgid "Do you really want to detete the path '%s' of '%s'?"
+msgstr "Вы действительно хотите удалить путь '%s' от '%s'?"
+
+#: View/Users/admin_path.ctp:22
+msgid "Delete path '%s'"
+msgstr "Удалить путь '%s'"
+
+#: View/Users/admin_path.ctp:31
+msgid "Currently no external directories are set for this user."
+msgstr "Для этого пользователя не установлены внешние каталоги"
+
+#: View/Users/admin_path.ctp:33
+msgid ""
+"The user has a dedicated upload directory which is handled by phTagr itself. "
+"External directories can be added here to the user to allow the import of "
+"external media files from the local file system."
+msgstr ""
+"Пользователь имеет выделенный каталог для загрузок, обслуживаемый phTagr "
+"самостоятельно. Здесь можно добавить внешние каталоги для того, чтобы "
+"позволить пользователю импортировать медиа-файлы откуда-нибудь из локальной "
+"файловой системы."
+
+#: View/Users/admin_path.ctp:38
+msgid "Add Directory"
+msgstr "Добавить каталог"
+
+#: View/Users/confirm.ctp:5
+msgid "Account Confirmation"
+msgstr "Подтверждение учётной записи пользователя"
+
+#: View/Users/confirm.ctp:6
+msgid "Please insert your confirmation key to finalize the account creation."
+msgstr ""
+"Пожалуйста, укажите ваш ключ подтверждения для завершения процесса создания "
+"учётной записи."
+
+#: View/Users/confirm.ctp:8
+msgid "Key"
+msgstr "Ключ"
+
+#: View/Users/index.ctp:4
+msgid "Admin List"
+msgstr "Список администраторов"
+
+#: View/Users/index.ctp:16
+msgid "Member Since"
+msgstr "Участник с"
+
+#: View/Users/index.ctp:38
+msgid "User list is empty"
+msgstr "Список пользователей пуст"
+
+#: View/Users/login.ctp:19
+msgid "Forgot your password"
+msgstr "Забыли ваш пароль"
+
+#: View/Users/password.ctp:1
+msgid "Password Request"
+msgstr "Запрос пароля"
+
+#: View/Users/password.ctp:4
+msgid ""
+"Please insert your username and email address to request your lost password."
+msgstr ""
+"Пожалуйста, укажите ваше имя и адрес электронной почты для запроса "
+"потерянного пароля."
+
+#: View/Users/password.ctp:7
+msgid "Account Data"
+msgstr "Данные учётной записи"
+
+#: View/Users/password.ctp:13
+msgid "Submit"
+msgstr "Отправить"
+
+#: View/Users/register.ctp:5
+msgid "Create Account"
+msgstr "Создать учётную запись"
+
+#: View/Users/view.ctp:2
+msgid "User %s"
+msgstr "Пользователь %s"
+
+#: View/Users/view.ctp:10
+msgid "User Details"
+msgstr "Подробности о пользователе"
+
+#: View/Users/view.ctp:26
+msgid "Member since"
+msgstr "Учатник с"
+
+#: View/Users/view.ctp:27
+msgid "Count of media"
+msgstr "Счётчик медиа-файлов"
+
+#: View/Users/view.ctp:28
+msgid "Count of files"
+msgstr "Счётчик файлов"
+
+#: View/Users/view.ctp:29
+msgid "Size of files"
+msgstr "Размер файлов"
+
+#: View/Users/view.ctp:59;71
+msgid "View media"
+msgstr "Просмотр медиа-файлов"
+
+#: View/Users/view.ctp:97
+msgid "See all media of user %s"
+msgstr "Просмотреть все медиа-файлы пользователя %s"
+
+#: View/home/index.ctp:50
+msgid "%s said %s:"
+msgstr "%s заметил %s:"
+
+#: View/home/index.ctp:59
+msgid "Older comments..."
+msgstr "Более старые комментарии..."
+
+#: View/home/index.ctp:64
+msgid "Popular Tags"
+msgstr "Популярные теги"
+
+#: View/home/index.ctp:70
+msgid "No tags assigned"
+msgstr "Тегов не присвоено"
+
+#: View/home/index.ctp:76
+msgid "Popular Categories"
+msgstr "Популярные категории"
+
+#: View/home/index.ctp:82
+msgid "No categories assigned"
+msgstr "Категорий не присвоено"
+
+#: Model/Comment.php:validation for field name
+msgid "Name is missing"
+msgstr "Имя отсутствует"
+
+#: Model/Comment.php:validation for field email
+msgid "Email is invalid"
+msgstr "Недопустимый адрес эл. почты"
+
+#: Model/Comment.php:validation for field url
+msgid "URL is invalid"
+msgstr "Недопустимая ссылка"
+
+#: Model/Comment.php:validation for field text
+msgid "Comment text is empty"
+msgstr "Текст комментария пустой"
+
+#: Model/Comment.php:validation for field text
+msgid "Comment is to long"
+msgstr "Комментарий слишком длинный"
+
+#: Model/Guest.php:validation for field username
+msgid "Guestname must be between 3 and 32 characters long."
+msgstr "Имя гостевого пользователя должно быть длиной от 3 до 32 символов"
+
+#: Model/Guest.php:validation for field password Model/User.php:validation
+msgid "Password must be between 6 and 32 characters long."
+msgstr "Длина пароля должна быть от 6 до 32 символов"
+
+#: Model/Guest.php:validation for field email Model/User.php:validation
+msgid "Email address is not valid"
+msgstr "Недопустимый адрес эл. почты"
+
+#: Model/Guest.php:validation for field notify_interval
+#: Model/User.php:validation
+msgid "Invalid notification interval"
+msgstr "Недопустимый интервал уведомления"
+
+#: Model/User.php:validation for field username
+msgid "Username must be between 3 and 32 characters long."
+msgstr "Длина имени пользователя должна быть от 3 до 32 символов"
+
+#: Model/User.php:validation for field role
+msgid "Invalid role"
+msgstr "Неверная роль"
