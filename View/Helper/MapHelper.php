@@ -109,25 +109,31 @@ function addMarker(lon, lat, id, name, icon, description) {
     if (markerIDs[id] === true) {
        return;
     }
+
+    var doPopup = false;
+
     if (icon === null) {
         var size = new OpenLayers.Size(21, 25);
         var offset = new OpenLayers.Pixel(-10, -12);
         icon = new OpenLayers.Icon('".Router::url('/img/OpenLayers/marker-gold.png')."', size, offset);
+	doPupup = true;
     } else {
         icon = new OpenLayers.Icon(icon, new OpenLayers.Size(40, 40), new OpenLayers.Pixel(-20, -20));
     }
 
     var location = newLonLat(lon, lat);
     var marker = new OpenLayers.Marker(location, icon);
-    var popup = new OpenLayers.Popup(id, location, new OpenLayers.Size(200,200),
-        description, true);
-    map.addPopup(popup);
-    popup.updateSize();
-    popup.hide();
+    if (doPopup) {
+        var popup = new OpenLayers.Popup(id, location, new OpenLayers.Size(200,200),
+            description, true);
+        map.addPopup(popup);
+        popup.updateSize();
+        popup.hide();
 
-    marker.events.register('mousedown', popup, function() {
-        this.toggle();
-    });
+        marker.events.register('mousedown', popup, function() {
+            this.toggle();
+        });
+    }
 
     markers.addMarker(marker);
     markerIDs[id] = true;
