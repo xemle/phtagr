@@ -56,6 +56,7 @@ class MapHelper extends AppHelper
     $code = "
 var map = null;
 var markers = null;
+var markerIDs = {};
 
 OpenLayers.ProxyHost = '".Router::url('/proxy?')."';
 
@@ -104,6 +105,10 @@ function geolocate(queryString) {
 
 /* name, icon, description are optional */
 function addMarker(lon, lat, id, name, icon, description) {
+    /* does marker exist already? */
+    if (markerIDs[id] === true) {
+       return;
+    }
     if (icon === null) {
         var size = new OpenLayers.Size(21, 25);
         var offset = new OpenLayers.Pixel(-10, -12);
@@ -125,6 +130,7 @@ function addMarker(lon, lat, id, name, icon, description) {
     });
 
     markers.addMarker(marker);
+    markerIDs[id] = true;
 }
 
 function loadMap(id, lat, lon) {
@@ -168,8 +174,6 @@ function loadMap(id, lat, lon) {
 	    for (var i = 0; i < markerData.length; i++) {
 	        var curMarker = markerData[i];
 	        var id = parseInt(curMarker.getAttribute('id'));
-
-		/* TODO: skip existing markers */
 
 		addMarker(parseFloat(curMarker.getAttribute('lng')),
 		    parseFloat(curMarker.getAttribute('lat')),
