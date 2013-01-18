@@ -139,6 +139,27 @@ function addMarker(lon, lat, id, name, icon, description) {
     markerIDs[id] = true;
 }
 
+function fetchMarkers() {
+    OpenLayers.Request.GET({
+        url: getMarkerURL(),
+	success: function(data) {
+	    var xml = data.responseXML;
+	    var markerData = xml.getElementsByTagName('marker');
+	    for (var i = 0; i < markerData.length; i++) {
+	        var curMarker = markerData[i];
+	        var id = parseInt(curMarker.getAttribute('id'));
+
+		addMarker(parseFloat(curMarker.getAttribute('lng')),
+		    parseFloat(curMarker.getAttribute('lat')),
+		    id,
+		    curMarker.getElementsByTagName('name')[0].childNodes[0].nodeValue,
+		    curMarker.getElementsByTagName('icon')[0].childNodes[0].nodeValue,
+		    curMarker.getElementsByTagName('description')[0].childNodes[0].nodeValue);
+	    }
+	}
+    });
+}
+
 function loadMap(id, lat, lon) {
     OpenLayers.ImgPath = '".Router::url('/img/OpenLayers/')."';
     map = new OpenLayers.Map('map', {
@@ -172,24 +193,10 @@ function loadMap(id, lat, lon) {
 
     addMarker(lon, lat, id, null, null, null);
 
-    OpenLayers.Request.GET({
-        url: getMarkerURL(),
-	success: function(data) {
-	    var xml = data.responseXML;
-	    var markerData = xml.getElementsByTagName('marker');
-	    for (var i = 0; i < markerData.length; i++) {
-	        var curMarker = markerData[i];
-	        var id = parseInt(curMarker.getAttribute('id'));
+    fetchMarkers();
 
-		addMarker(parseFloat(curMarker.getAttribute('lng')),
-		    parseFloat(curMarker.getAttribute('lat')),
-		    id,
-		    curMarker.getElementsByTagName('name')[0].childNodes[0].nodeValue,
-		    curMarker.getElementsByTagName('icon')[0].childNodes[0].nodeValue,
-		    curMarker.getElementsByTagName('description')[0].childNodes[0].nodeValue);
-	    }
-	}
-    });
+    map.events.register('moveend', map, fetchMarkers);
+    map.events.register('zoomend', map, fetchMarkers);
 };";
     $out .= $this->Html->scriptBlock($code, array('inline' => false));
     return $this->output($out);
