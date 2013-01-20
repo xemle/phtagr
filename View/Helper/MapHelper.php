@@ -40,7 +40,7 @@ class MapHelper extends AppHelper
       </div>
       <div id="mapSearch">
         <label for="mapSearch">Goto:</label>
-        <input type="text" id="mapSearch" size="32" onkeydown="if ((event.which && event.which == 13) || (event.keyCode && event.keyCode == 13)) { geolocate(this.value); return false; } else { return true; }"/>
+        <input type="text" id="mapSearch" size="32" onkeydown="if ((event.which && event.which == 13) || (event.keyCode && event.keyCode == 13)) { map.geolocate(this.value); return false; } else { return true; }"/>
       </div>
     </div>
     </div>
@@ -54,15 +54,14 @@ class MapHelper extends AppHelper
     $url = Router::url('/explorer/points/' . $this->Search->serialize(), true);
     $url = preg_replace("/'/", "\\'", $url);
     $code = "
-OpenLayers.ProxyHost = '".Router::url('/proxy?')."';
 OpenLayers.ImgPath = '".Router::url('/img/OpenLayers/')."';
-var explorerPointsURL = '$url/';
-
-/* TODO: inject translations somehow (right now it's english only)
-reportError('".__("Could not communicate with geo-location service")."');
-reportError('".__("No address found")."');
-*/
- ";
+var mapOptions = {
+    explorerPointsURL: '$url/',
+    iconSize: 30,
+    i18n: {
+        noAddressFound: \"".__("No address found")."\",
+    },
+};";
     $out .= $this->Html->scriptBlock($code, array('inline' => false));
     return $this->output($out);
   }

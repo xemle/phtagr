@@ -131,6 +131,7 @@
   $lat = $this->request->data['Media']['latitude'] ? $this->request->data['Media']['latitude'] : 0;
   $long = $this->request->data['Media']['longitude'] ? $this->request->data['Media']['longitude'] : 0;
   $script = <<<SCRIPT
+var map = null;
 (function($) {
 $.fn.resizeImageHeight = function(size) {
   var image = $(this);
@@ -171,7 +172,12 @@ $(document).ready(function() {
       if (ui.panel.id == 'tab-map') {
         if ($('#map').children().length == 0) {
           $('#mapbox').show();
-          loadMap($mediaId, $lat, $long);
+	  mapOptions.center = {
+	      lon: $long,
+	      lat: $lat
+	  };
+          map = new phMap(mapOptions);
+          map.addMarker($mediaId, $lat, $long);
         }
       }
       return true;
