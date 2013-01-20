@@ -18,14 +18,10 @@ class MapHelper extends AppHelper
 {
   var $helpers = array("Html", "Search", "Option");
 
-  var $googleMapApiUrl = 'http://maps.google.com/maps?file=api&amp;v=2&amp;key=';
+  var $googleMapApiUrl = 'http://maps.google.com/maps/api/js?v=3.2&amp;sensor=false';
 
   function initialize() {
     $this->Search->initialize();
-  }
-
-  function hasApi() {
-    return ($this->Option->get('google.map.key') != false);
   }
 
   function hasMediaGeo($media) {
@@ -44,7 +40,7 @@ class MapHelper extends AppHelper
       </div>
       <div id="mapSearch">
         <label for="mapSearch">Goto:</label>
-        <input type="text" id="mapSearch" size="32" onkeydown="if ((event.which && event.which == 13) || (event.keyCode && event.keyCode == 13)) { map.showAddress(this.value); return false; } else { return true; }"/>
+        <input type="text" id="mapSearch" size="32" onkeydown="if ((event.which && event.which == 13) || (event.keyCode && event.keyCode == 13)) { map.geolocate(this.value); return false; } else { return true; }"/>
       </div>
     </div>
     </div>
@@ -52,28 +48,19 @@ class MapHelper extends AppHelper
   }
 
   function script() {
-    if (!$this->hasApi()) {
-      return $this->output();
-    }
-
-    $out = $this->Html->script(array($this->googleMapApiUrl . h($this->Option->get('google.map.key')), 'prototype', 'pmap'), array('inline' => false));
+    $out = $this->Html->script(array($this->googleMapApiUrl, 'OpenLayers', 'maps'), array('inline' => false));
+    $out .= $this->Html->css('OpenLayers/style');
 
     $url = Router::url('/explorer/points/' . $this->Search->serialize(), true);
     $url = preg_replace("/'/", "\\'", $url);
     $code = "
-var map = null;
-var loadMap = function(id, latitude, longitude) {
-  if (undefined == map) {
-
-    var options = {
-      url: '$url'
-      };
-
-    map = new PMap(latitude, longitude, options);
-    map.setMediaMarker(id, latitude, longitude);
-    map.updateInfo();
-    map.updateMarkers();
-  }
+OpenLayers.ImgPath = '".Router::url('/img/OpenLayers/')."';
+var mapOptions = {
+    explorerPointsURL: '$url/',
+    iconSize: 30,
+    i18n: {
+        noAddressFound: \"".__("No address found")."\",
+    },
 };";
     $out .= $this->Html->scriptBlock($code, array('inline' => false));
     return $this->output($out);

@@ -33,7 +33,7 @@
 <div id="image-tabs">
 <?php
   $items = array(__("General"), __("Media Details"));
-  if ($this->Map->hasApi() && $this->Map->hasMediaGeo($this->request->data)) {
+  if ($this->Map->hasMediaGeo($this->request->data)) {
     $items['map'] = __("Map");
   }
   if ($this->request->data['Media']['canWriteTag']) {
@@ -99,7 +99,7 @@
 </div>
 <?php echo $this->Tab->close(); ?>
 <?php
-  if ($this->Map->hasApi() && $this->Map->hasMediaGeo($this->request->data)) {
+  if ($this->Map->hasMediaGeo($this->request->data)) {
     echo $this->Tab->open('map');
     echo $this->Map->container();
     echo $this->Map->script();
@@ -131,6 +131,7 @@
   $lat = $this->request->data['Media']['latitude'] ? $this->request->data['Media']['latitude'] : 0;
   $long = $this->request->data['Media']['longitude'] ? $this->request->data['Media']['longitude'] : 0;
   $script = <<<SCRIPT
+var map = null;
 (function($) {
 $.fn.resizeImageHeight = function(size) {
   var image = $(this);
@@ -171,7 +172,12 @@ $(document).ready(function() {
       if (ui.panel.id == 'tab-map') {
         if ($('#map').children().length == 0) {
           $('#mapbox').show();
-          loadMap($mediaId, $lat, $long);
+	  mapOptions.center = {
+	      lon: $long,
+	      lat: $lat
+	  };
+          map = new phMap(mapOptions);
+          map.addMarker($mediaId, $lat, $long);
         }
       }
       return true;
