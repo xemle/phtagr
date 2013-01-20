@@ -131,6 +131,11 @@ function phMap(options) {
     this.map.setCenter(this.newLonLat(lon, lat), 15);
   }
 
+  this.updateInfo = function() {
+    var lonLat = this.map.getCenter().transform(new OpenLayers.Projection('EPSG:900913'), new OpenLayers.Projection('EPSG:4326'));
+    var text = this.i18n.currentLocation + ' ' +  lonLat.lat.toFixed(5) + ', ' + lonLat.lon.toFixed(5);
+    $('#mapInfo').html(text);
+  }
   if (options.center !== null) {
     this.center(options.center.lon, options.center.lat);
   } else {
@@ -140,6 +145,9 @@ function phMap(options) {
 
   this.map.events.register('moveend', this, this.fetchMarkers);
   this.map.events.register('zoomend', this, this.fetchMarkers);
+  this.map.events.register('moveend', this, this.updateInfo);
+  this.map.events.register('zoomend', this, this.updateInfo);
 
   this.fetchMarkers();
+  this.updateInfo();
 }

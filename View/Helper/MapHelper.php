@@ -53,12 +53,13 @@ class MapHelper extends AppHelper
 
     $url = Router::url('/explorer/points/' . $this->Search->serialize(), true);
     $url = preg_replace("/'/", "\\'", $url);
-    $errors = array(
+    $messages = array(
         'noAddressFound' => __("No address found"),
-        'pictureLocations' => __("Picture Locations")
+        'pictureLocations' => __("Picture Locations"),
+        'currentLocation' => __("Location:")
       );
-    foreach ($errors as $error => $message) {
-      $i18nErrors[] = $error . ": '" . preg_replace("/'/", "\\'", $message) . "'";
+    foreach ($messages as $key => $message) {
+      $i18nMessages[] = $key . ": '" . preg_replace("/'/", "\\'", $message) . "'";
     }
 
     $code = "
@@ -66,7 +67,7 @@ OpenLayers.ImgPath = '".Router::url('/img/OpenLayers/')."';
 var mapOptions = {
     explorerPointsURL: '$url/',
     iconSize: 30,
-    i18n: { " . join(', ', $i18nErrors) ." },
+    i18n: { " . join(', ', $i18nMessages) ." },
 };";
     $out .= $this->Html->scriptBlock($code, array('inline' => false));
     return $this->output($out);
