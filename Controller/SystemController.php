@@ -30,7 +30,6 @@ class SystemController extends AppController {
       'index' => __("General"),
       'register' => __("User Registration"),
       'external' => __("External Programs"),
-      'map' => __("Map Settings"),
       'upgrade' => __("Database Upgrade"),
       'deleteUnusedMetaData' => __("Delete Unused Metadata"),
       'view' => __("Overview")
@@ -137,17 +136,6 @@ class SystemController extends AppController {
       $this->_setOption(0, 'bin.flvtool2', $this->request->data);
       $this->_setOption(0, $this->Exiftool->stayOpenOption, $this->request->data);
 
-      $this->Session->setFlash("Settings saved");
-    }
-    $tree = $this->Option->getTree(0);
-    $this->request->data = $tree;
-  }
-
-  public function map() {
-    if (!empty($this->request->data)) {
-      $this->_setOption(0, 'google.map.key', $this->request->data);
-      // debug
-      $this->set('commit', $this->request->data);
       $this->Session->setFlash("Settings saved");
     }
     $tree = $this->Option->getTree(0);
