@@ -39,7 +39,7 @@ class MapHelper extends AppHelper
       <div id="mapInfo">
       </div>
       <div id="mapSearch">
-        <label for="mapSearch">Goto:</label>
+        <label for="mapSearch">'. __("Goto address:").'</label>
         <input type="text" id="mapSearch" size="32" onkeydown="if ((event.which && event.which == 13) || (event.keyCode && event.keyCode == 13)) { map.geolocate(this.value); return false; } else { return true; }"/>
       </div>
     </div>
@@ -53,14 +53,20 @@ class MapHelper extends AppHelper
 
     $url = Router::url('/explorer/points/' . $this->Search->serialize(), true);
     $url = preg_replace("/'/", "\\'", $url);
+    $errors = array(
+        'noAddressFound' => __("No address found"),
+        'pictureLocations' => __("Picture Locations")
+      );
+    foreach ($errors as $error => $message) {
+      $i18nErrors[] = $error . ": '" . preg_replace("/'/", "\\'", $message) . "'";
+    }
+
     $code = "
 OpenLayers.ImgPath = '".Router::url('/img/OpenLayers/')."';
 var mapOptions = {
     explorerPointsURL: '$url/',
     iconSize: 30,
-    i18n: {
-        noAddressFound: \"".__("No address found")."\",
-    },
+    i18n: { " . join(', ', $i18nErrors) ." },
 };";
     $out .= $this->Html->scriptBlock($code, array('inline' => false));
     return $this->output($out);
