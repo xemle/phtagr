@@ -517,6 +517,78 @@ class QueryBuilderComponent extends Component {
     }
   }
 
+
+  /**
+   * Get start date for format YYYY-MM-DD HH:MM:SS while precise values are
+   * optional
+   *
+   * @param array $data Paramter array
+   * @param string $name Date parameter name
+   * @param string $value Date value
+   */
+  private function _mapDateStart(&$data, $name, $value) {
+    if (preg_match('/^\d{4}(-\d{2}(-\d{2}([ T]\d{2}(:\d{2}(:\d{2})?)?)?)?)?$/', $value, $m)) {
+      $m = preg_split('/[-:T ]/', $value);
+      $year = max(1901, min(2038, $m[0]));
+      if ($year != $m[0]) {
+        Logger::warn("Invalid year {$m[0]}. Adjust it to $year");
+      }
+      if (!isset($m[1]) || $m[1] > 12) {
+        $time = mktime(0, 0, 0, 1, 1, $year);
+      } else if (!isset($m[2]) || $m[2] > 31) {
+        $time = mktime(0, 0, 0, $m[1], 1, $year);
+      } else if (!isset($m[3]) || $m[3] > 23) {
+        $time = mktime(0, 0, 0, $m[1], $m[2], $year);
+      } else if (!isset($m[4]) || $m[4] > 59) {
+        $time = mktime(0, 0, $m[3], $m[1], $m[2], $year);
+      } else if (!isset($m[5]) || $m[5] > 59) {
+        $time = mktime(0, $m[4], $m[3], $m[1], $m[2], $year);
+      } else {
+        $time = mktime($m[5], $m[4], $m[3], $m[1], $m[2], $year);
+      }
+      $data[$name] = date('Y-m-d H:i:s', $time);
+    } else {
+      $data[$name] = date('Y-m-d H:i:s');
+      Logger::warn("Invalid date: $value. Adjust it to {$data[$name]}");
+    }
+  }
+
+  /**
+   * Get end date for format YYYY-MM-DD HH:MM:SS while precise values are
+   * optional
+   *
+   * @param array $data Paramter array
+   * @param string $name Date parameter name
+   * @param string $value Date value
+   */
+  private function _mapDateEnd(&$data, $name, $value) {
+    if (preg_match('/^\d{4}(-\d{2}(-\d{2}([ T]\d{2}(:\d{2}(:\d{2})?)?)?)?)?$/', $value)) {
+      $m = preg_split('/[-:T ]/', $value);
+      $year = max(1901, min(2038, $m[0]));
+      if ($year != $m[0]) {
+        Logger::warn("Invalid year {$m[0]}. Adjust it to $year");
+      }
+      // mktime params: sec, min, hour, month, day, year. day = 0 means last day of month
+      if (!isset($m[1]) || $m[1] > 12) {
+        $time = mktime(0, 0, 0, 1, 1, $year + 1) - 1;
+      } else if (!isset($m[2]) || $m[2] > 31) {
+        $time = mktime(0, 0, 0, $m[1] + 1, 0, $year) - 1;
+      } else if (!isset($m[3]) || $m[3] > 23) {
+        $time = mktime(0, 0, 0, $m[1], $m[2] + 1, $year) - 1;
+      } else if (!isset($m[4]) || $m[4] > 59) {
+        $time = mktime(0, 0, $m[3] + 1, $m[1], $m[2], $year) - 1;
+      } else if (!isset($m[5]) || $m[5] > 59) {
+        $time = mktime(0, $m[4] + 1, $m[3], $m[1], $m[2], $year) - 1;
+      } else {
+        $time = mktime($m[5], $m[4], $m[3], $m[1], $m[2], $year);
+      }
+      $data[$name] = date('Y-m-d H:i:s', $time);
+    } else {
+      $data[$name] = date('Y-m-d H:i:s');
+      Logger::warn("Invalid date: $value. Adjust it to {$data[$name]}");
+    }
+  }
+
   /**
    * Prepare and map query terms like map category:none to no_category
    *
@@ -546,6 +618,10 @@ class QueryBuilderComponent extends Component {
           unset($data[$name]);
           $key = 'any_' . $name;
           $data[$key] = "+any";
+        } else if ($name == 'from') {
+          $this->_mapDateStart($data, $name, $values);
+        } else if ($name == 'to') {
+          $this->_mapDateEnd($data, $name, $values);
         }
       }
     }
