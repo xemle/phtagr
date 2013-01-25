@@ -105,7 +105,11 @@
       }
     }).keydown(function(e){
       if (e.keyCode === 13 && options['submitOnEnter']) {
-        $(this).closest('form').submit();
+        if (!this.value.match(/:$/)) {
+          $(this).closest('form').submit();
+        } else {
+          $(this).autocomplete('search', this.value);
+        }
       }
     });
   };
