@@ -722,6 +722,7 @@ ul.p-breadcrumb {
     background-color: black; }
     #p-explorer-menu > #p-explorer-menu-content > #p-explorer-all-meta,
     #p-explorer-menu > #p-explorer-menu-content > #p-explorer-more {
+      display: none;
       padding: 10px; }
       #p-explorer-menu > #p-explorer-menu-content > #p-explorer-all-meta > p,
       #p-explorer-menu > #p-explorer-menu-content > #p-explorer-more > p {
@@ -743,6 +744,7 @@ ul.p-breadcrumb {
     background-color: #2259a5;
     color: white; }
     #p-explorer-menu > #p-explorer-menu-content > form > div {
+      display: none;
       padding: 10px 0; }
 
   dl.single-media > dd,
