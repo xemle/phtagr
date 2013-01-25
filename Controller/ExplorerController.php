@@ -104,6 +104,7 @@ class ExplorerController extends AppController
         'city' => '_getAssociation',
         'country' => '_getAssociation',
         'from' => 'true',
+        'geo' => array('any', 'none'),
         'group' => '_getAssociation',
         'location' => '_getAssociation',
         'operand' => array('OR', 'AND'),
