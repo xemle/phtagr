@@ -981,4 +981,27 @@ class SearchComponentTestCase extends CakeTestCase {
     $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
     $this->assertEqual($mediaIds, array($media2['Media']['id'], $media3['Media']['id']));
   }
+
+  /**
+   * Test search term any:vacation
+   */
+  function testTagAny() {
+    $user = $this->User->save($this->User->create(array('username' => 'user', 'role' => ROLE_USER)));
+    $user = $this->User->findById($user['User']['id']);
+    $this->mockUser($user);
+
+    $media1 = $this->Media->save($this->Media->create(array('name' => 'IMG_1231.JPG', 'user_id' => $user['User']['id'])));
+    $media2 = $this->Media->save($this->Media->create(array('name' => 'IMG_1232.JPG', 'user_id' => $user['User']['id'])));
+    $media3 = $this->Media->save($this->Media->create(array('name' => 'IMG_1233.JPG', 'user_id' => $user['User']['id'])));
+
+    $flowerKeyword = $this->Media->Field->save($this->Media->Field->create(array('name' => 'keyword', 'data' => 'flower')));
+    $dogKeyword = $this->Media->Field->save($this->Media->Field->create(array('name' => 'keyword', 'data' => 'dog')));
+
+    $this->Media->save(array('Media' => array('id' => $media2['Media']['id']), 'Field' => array('Field' => $flowerKeyword['Field']['id'])));
+    $this->Media->save(array('Media' => array('id' => $media3['Media']['id']), 'Field' => array('Field' => $dogKeyword['Field']['id'])));
+
+    $this->Search->addTag('any');
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media2['Media']['id'], $media3['Media']['id']));
+  }
 }

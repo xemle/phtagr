@@ -29,7 +29,14 @@ class QueryBuilderComponent extends Component {
    */
   var $conditionRules = array(
     'any' => array('field' => 'Field.data', 'with' => array('Field.name' => array('keyword', 'category', 'sublocation', 'city', 'state', 'country'))),
+    'any_category' => array('field' => 'Field.data', 'with' => array('Field.name' => 'category'), 'skipValue' => true),
+    'any_city' => array('field' => 'Field.data', 'with' => array('Field.name' => 'city'), 'skipValue' => true),
+    'any_country' => array('field' => 'Field.data', 'with' => array('Field.name' => 'country'), 'skipValue' => true),
+    'any_location' => array('field' => 'Field.data', 'with' => array('Field.name' => array('sublocation', 'city', 'state', 'country')), 'skipValue' => true),
     'any_geo' => array('field' => 'Media.latitude', 'with' => array('Media.latitude' => null, 'Media.longitude' => null), 'operand' => 'IS NOT', 'skipValue' => true),
+    'any_state' => array('field' => 'Field.data', 'with' => array('Field.name' => 'state'), 'skipValue' => true),
+    'any_sublocation' => array('field' => 'Field.data', 'with' => array('Field.name' => 'sublocation'), 'skipValue' => true),
+    'any_tag' => array('field' => 'Field.data', 'with' => array('Field.name' => 'keyword'), 'skipValue' => true),
     'category' => array('field' => 'Field.data', 'with' => array('Field.name' => 'category')),
     'city' => array('field' => 'Field.data', 'with' => array('Field.name' => 'city')),
     'country' => array('field' => 'Field.data', 'with' => array('Field.name' => 'country')),
@@ -482,27 +489,52 @@ class QueryBuilderComponent extends Component {
   }
 
   /**
-   * Prepare and query terms like category:none to no_category
+   * Delete a parameter from parameter array
+   *
+   * @param array $data Parameter data
+   * @param string $name Parameter name
+   * @param number $i Index of parameter to delete
+   */
+  private function _deleteArrayParam(&$data, $name, $i) {
+    unset($data[$name][$i]);
+    if (!count($data[$name])) {
+      unset($data[$name]);
+    }
+  }
+
+  /**
+   * Add query array parameter.
+   *
+   * @param array $data Parameter array
+   * @param string $name Parameter name
+   * @param string $value Parameter value
+   */
+  private function _addArrayParam(&$data, $name, $value) {
+    if (!isset($data[$name])) {
+      $data[$name] = array($value);
+    } else {
+      $data[$name][] = $value;
+    }
+  }
+
+  /**
+   * Prepare and map query terms like map category:none to no_category
    *
    * @param array $data parameter array reference
    * @return array Prepared parameter
    */
-  private function _prepareParams(&$data) {
+  private function _mapParams(&$data) {
     $noneNames = array('tag', 'category', 'location', 'sublocation', 'city', 'state', 'country', 'geo');
+    $anyNames = array('tag', 'category', 'location', 'sublocation', 'city', 'state', 'country', 'geo');
     foreach ($data as $name => $values) {
       if (is_array($values)) {
         foreach ($values as $i => $value) {
           if ($value == 'none' && in_array($name, $noneNames)) {
-            unset($data[$name][$i]);
-            if (!count($data[$name])) {
-              unset($data[$name]);
-            }
-            $key = 'no_' . $name;
-            if (!isset($data[$key])) {
-              $data[$key] = array("-none");
-            } else {
-              $data[$key][] = "-none";
-            }
+            $this->_deleteArrayParam($data, $name, $i);
+            $this->_addArrayParam($data, 'no_'.$name, '-none');
+          } else if ($value == 'any' && in_array($name, $anyNames)) {
+            $this->_deleteArrayParam($data, $name, $i);
+            $this->_addArrayParam($data, 'any_'.$name, '+any');
           }
         }
       } else {
@@ -510,7 +542,7 @@ class QueryBuilderComponent extends Component {
           unset($data[$name]);
           $key = 'no_' . $name;
           $data[$key] = "-none";
-        } else if ($values == 'any' && $name == 'geo') {
+        } else if ($values == 'any' && in_array($name, $anyNames)) {
           unset($data[$name]);
           $key = 'any_' . $name;
           $data[$key] = "+any";
@@ -522,7 +554,7 @@ class QueryBuilderComponent extends Component {
 
   public function build($data) {
     $this->counter = 0;
-    $data = $this->_prepareParams($data);
+    $data = $this->_mapParams($data);
     list($required, $exclude) = $this->_splitRequirements($data);
     // if we have some required conditions default operand is OR for optional conditions
     $defaultOperand = $required ? 'ANY' : 'AND';
