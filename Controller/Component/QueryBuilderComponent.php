@@ -540,11 +540,11 @@ class QueryBuilderComponent extends Component {
       } else if (!isset($m[3]) || $m[3] > 23) {
         $time = mktime(0, 0, 0, $m[1], $m[2], $year);
       } else if (!isset($m[4]) || $m[4] > 59) {
-        $time = mktime(0, 0, $m[3], $m[1], $m[2], $year);
+        $time = mktime($m[3], 0, 0, $m[1], $m[2], $year);
       } else if (!isset($m[5]) || $m[5] > 59) {
-        $time = mktime(0, $m[4], $m[3], $m[1], $m[2], $year);
+        $time = mktime($m[3], $m[4], 0, $m[1], $m[2], $year);
       } else {
-        $time = mktime($m[5], $m[4], $m[3], $m[1], $m[2], $year);
+        $time = mktime($m[3], $m[4], $m[5], $m[1], $m[2], $year);
       }
       $data[$name] = date('Y-m-d H:i:s', $time);
     } else {
@@ -568,7 +568,7 @@ class QueryBuilderComponent extends Component {
       if ($year != $m[0]) {
         Logger::warn("Invalid year {$m[0]}. Adjust it to $year");
       }
-      // mktime params: sec, min, hour, month, day, year. day = 0 means last day of month
+      // mktime params order: hour, min, sec, month, day, year. day = 0 means last day of month
       if (!isset($m[1]) || $m[1] > 12) {
         $time = mktime(0, 0, 0, 1, 1, $year + 1) - 1;
       } else if (!isset($m[2]) || $m[2] > 31) {
@@ -576,11 +576,11 @@ class QueryBuilderComponent extends Component {
       } else if (!isset($m[3]) || $m[3] > 23) {
         $time = mktime(0, 0, 0, $m[1], $m[2] + 1, $year) - 1;
       } else if (!isset($m[4]) || $m[4] > 59) {
-        $time = mktime(0, 0, $m[3] + 1, $m[1], $m[2], $year) - 1;
+        $time = mktime($m[3] + 1, 0, 0, $m[1], $m[2], $year) - 1;
       } else if (!isset($m[5]) || $m[5] > 59) {
-        $time = mktime(0, $m[4] + 1, $m[3], $m[1], $m[2], $year) - 1;
+        $time = mktime($m[3], $m[4] + 1, 0, $m[1], $m[2], $year) - 1;
       } else {
-        $time = mktime($m[5], $m[4], $m[3], $m[1], $m[2], $year);
+        $time = mktime($m[3], $m[4], $m[5], $m[1], $m[2], $year);
       }
       $data[$name] = date('Y-m-d H:i:s', $time);
     } else {
