@@ -202,16 +202,21 @@
 <?php echo $this->Form->end(); ?>
 <div id="p-explorer-more">
 <p><?php
-  echo __('Download:') . ' ';
-  echo $this->Html->link(__("Original"), 'javascript:void', array('id' => 'p-explorer-download-original', 'title' => __('Download original files from selected media')));
-  echo ' '.$this->Html->link(__("High Resolution"), 'javascript:void', array('id' => 'p-explorer-download-high', 'title' => __('Download high resolution files (%d px) from selected media', OUTPUT_SIZE_HIGH)));
-  echo ' '.$this->Html->link(__("Preview Resolution"), 'javascript:void', array('id' => 'p-explorer-download-preview', 'title' => __('Download preview files (%d px) from selected media', OUTPUT_SIZE_PREVIEW)));
+  echo __('Selection:') . ' ';
+  echo $this->Html->link(__("Select all"), 'javascript:void', array('id' => 'p-explorer-selection-all', 'title' => __('Select all')));
+  echo $this->Html->link(__("Invert selection"), 'javascript:void', array('id' => 'p-explorer-selection-invert', 'title' => __('Invert selection')));
 ?></p>
 <p><?php
   echo __('Media:') . ' ';
   echo $this->Html->link(__("Remove"), 'javascript:void', array('id' => 'p-explorer-selection-remove', 'title' => __('Remove Media from database')));
   echo $this->Html->link(__("Clear Cache"), 'javascript:void', array('id' => 'p-explorer-selection-delete-cache', 'title' => __('Clear media cache files')));
   echo $this->Html->link(__("Sync"), 'javascript:void', array('id' => 'p-explorer-selection-sync', 'title' => __('Synchorinze meta data')));
+?></p>
+<p><?php
+  echo __('Download:') . ' ';
+  echo $this->Html->link(__("Original"), 'javascript:void', array('id' => 'p-explorer-download-original', 'title' => __('Download original files from selected media')));
+  echo ' '.$this->Html->link(__("High Resolution"), 'javascript:void', array('id' => 'p-explorer-download-high', 'title' => __('Download high resolution files (%d px) from selected media', OUTPUT_SIZE_HIGH)));
+  echo ' '.$this->Html->link(__("Preview Resolution"), 'javascript:void', array('id' => 'p-explorer-download-preview', 'title' => __('Download preview files (%d px) from selected media', OUTPUT_SIZE_PREVIEW)));
 ?></p>
 </div>
 </div>

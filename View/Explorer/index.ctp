@@ -152,10 +152,10 @@
     $('#p-explorer-media-list .cell').each(function() {
       $(this).mediaAction();
     });
-    $('#select-all').click(function() {
+    $('#p-explorer-selection-all').click(function() {
       $('#p-explorer-media-list .cell').selectMedia();
     });
-    $('#invert-selection').click(function() {
+    $('#p-explorer-selection-invert').click(function() {
       $('#p-explorer-media-list .cell').invertMediaSelection();
     });
 
@@ -302,11 +302,6 @@ foreach ($this->request->data as $media) {
 echo '<div class="clear"></div></div>';
 ?>
 </div><!-- cells -->
-
-<div class="p-navigator-pages"><div class="sub">
-<a id="select-all"><?php echo __('Select All'); ?></a>
-<a id="invert-selection"><?php echo __('Invert Selection'); ?></a>
-</div></div>
 
 <?php echo $this->Navigator->pages() ?>
 
