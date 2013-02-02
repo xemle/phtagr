@@ -173,6 +173,21 @@
         $('#p-explorer-menu-content .active').removeClass('active').hide();
         item.addClass('active');
         target.addClass('active').slideDown('fast');
+        var timerId = false;
+        target.mouseleave(function() {
+          timerId = setTimeout(function() {
+            if (item.hasClass('active')) {
+              item.removeClass('active');
+              target.removeClass('active').hide('slow');
+            }
+          }, 1000);
+          console.log("Create mouseout timer " + timerId, target.get(0));
+        }).mouseenter(function() {
+          if (timerId) {
+            clearTimeout(timerId);
+            console.log("Clear mouseout timer " + timerId, target.get(0));
+          }
+        });
       }
     };
     $('#p-explorer-all-meta').hide();
