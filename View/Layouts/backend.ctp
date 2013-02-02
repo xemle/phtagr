@@ -24,7 +24,7 @@
 
 <div id="header"><div class="sub">
 <h1><?php echo $this->Html->link($this->Option->get('general.title', 'phTagr.'), '/'); ?></h1>
-<span><?php echo $this->Option->get('general.subtitle', 'Tag, Browse, and Share Your Photos'); ?></span>
+<span><?php echo $this->Option->get('general.subtitle', 'Organize, Browse, and Share Your Photos'); ?></span>
 </div></div>
 
 <div id="main">
@@ -41,7 +41,7 @@
 </div><!-- main -->
 
 <div id="footer"><div class="sub">
-<p><?php echo __("&copy; 2006-2013 by %s - Tag, Browse, and Share Your Photos.", $this->Html->link("phTagr.org", 'http://www.phtagr.org')) . ' ' . __("You are running version %s.", Configure::read('Phtagr.version')); ?></p>
+<p><?php echo __("&copy; 2006-2013 by %s - Organize, Browse, and Share Your Photos.", $this->Html->link("phTagr.org", 'http://www.phtagr.org')) . ' ' . __("You are running version %s.", Configure::read('Phtagr.version')); ?></p>
 </div></div>
 </body>
 </html>

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2013-01-25 10:54+0100\n"
+"POT-Creation-Date: 2013-02-02 11:10+0100\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -294,7 +294,7 @@ msgstr ""
 msgid "Slideshow Media RSS"
 msgstr ""
 
-#: Controller/ExplorerController.php:388
+#: Controller/ExplorerController.php:389
 msgid "Invalid folder: %s"
 msgstr ""
 
@@ -2620,7 +2620,7 @@ msgstr ""
 
 #: View/Layouts/backend.ctp:44
 #: View/Layouts/default.ctp:51
-msgid "&copy; 2006-2013 by %s - Tag, Browse, and Share Your Photos."
+msgid "&copy; 2006-2013 by %s - Organize, Browse, and Share Your Photos."
 msgstr ""
 
 #: View/Layouts/backend.ctp:44
