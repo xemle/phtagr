@@ -27,8 +27,6 @@ class ExiftoolComponent extends Component {
   var $hasOptionConfig = false;
   var $hasOptionStayOpen = false;
 
-  var $stayOpenOption = 'bin.exiftoolOption.stayOpen';
-
   // to be changed in case of old exiftool versions or problems with non UTF8 filenames...
   var $usePipes = true;
   // Timeout for reading pipe in seconds
@@ -117,8 +115,7 @@ class ExiftoolComponent extends Component {
       $this->hasOptionConfig = true;
     }
     // -stay_open since 8.42
-    $stayOpenEnabled = $this->controller->getOption($this->stayOpenOption, false);
-    if ($stayOpenEnabled && $version >= 8.42) {
+    if ($version >= 8.42) {
       $this->hasOptionStayOpen = true;
     }
   }

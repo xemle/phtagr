@@ -134,7 +134,6 @@ class SystemController extends AppController {
       $this->_setOption(0, 'bin.convert', $this->request->data);
       $this->_setOption(0, 'bin.ffmpeg', $this->request->data);
       $this->_setOption(0, 'bin.flvtool2', $this->request->data);
-      $this->_setOption(0, $this->Exiftool->stayOpenOption, $this->request->data);
 
       $this->Session->setFlash("Settings saved");
     }

@@ -40,7 +40,6 @@ class MediaReadTestCase extends PhtagrTestCase {
 
     $this->testDir = $this->createTestDir();
     $this->setOptionsForExternalTools();
-    $this->Option->setValue($this->Exiftool->stayOpenOption, 1, 0);
 
     $this->Option->addValue($this->FilterManager->writeEmbeddedEnabledOption, 1, 0);
     $this->Option->addValue($this->FilterManager->writeSidecarEnabledOption, 1, 0);

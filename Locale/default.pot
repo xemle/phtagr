@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2013-02-02 11:10+0100\n"
+"POT-Creation-Date: 2013-02-02 11:22+0100\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -571,15 +571,15 @@ msgstr ""
 msgid "Options saved!"
 msgstr ""
 
-#: Controller/SystemController.php:163
+#: Controller/SystemController.php:162
 msgid "Database migration failed. Please see the log files for errors."
 msgstr ""
 
-#: Controller/SystemController.php:167
+#: Controller/SystemController.php:166
 msgid "The database migration was successful."
 msgstr ""
 
-#: Controller/SystemController.php:189
+#: Controller/SystemController.php:188
 msgid "All unused meta data are deleted"
 msgstr ""
 
@@ -2056,7 +2056,7 @@ msgstr ""
 #: View/Options/password.ctp:13
 #: View/Options/profile.ctp:35
 #: View/Setup/system.ctp:33
-#: View/System/external.ctp:20
+#: View/System/external.ctp:14
 #: View/System/index.ctp:13
 #: View/System/options.ctp:12
 #: View/System/register.ctp:12
@@ -2942,18 +2942,6 @@ msgstr ""
 
 #: View/System/external.ctp:1
 msgid "Sytem Settings"
-msgstr ""
-
-#: View/System/external.ctp:14
-msgid "Exiftool Options"
-msgstr ""
-
-#: View/System/external.ctp:16
-msgid "Option -stayOpen enables fast reading and writing of meta data. This option is experimental."
-msgstr ""
-
-#: View/System/external.ctp:17
-msgid "Enable -stayOpen"
 msgstr ""
 
 #: View/System/index.ctp:8
