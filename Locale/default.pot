@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2013-02-02 11:22+0100\n"
+"POT-Creation-Date: 2013-02-06 20:57+0100\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -145,7 +145,8 @@ msgid "Import Files"
 msgstr ""
 
 #: Controller/BrowserController.php:35
-msgid "Edit Access Rrights"
+#: View/Explorer/index.ctp:11
+msgid "Edit Access Rights"
 msgstr ""
 
 #: Controller/BrowserController.php:36
@@ -1781,10 +1782,6 @@ msgstr ""
 
 #: View/Explorer/index.ctp:10
 msgid "Edit Meta Data"
-msgstr ""
-
-#: View/Explorer/index.ctp:11
-msgid "Edit Access Rights"
 msgstr ""
 
 #: View/Explorer/index.ctp:13

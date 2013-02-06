@@ -32,7 +32,7 @@ class BrowserController extends AppController
     $this->subMenu = array(
       'import' => __("Import Files"),
       'upload' => __("Upload"),
-      'easyacl' => __("Edit Access Rrights"),
+      'easyacl' => __("Edit Access Rights"),
       'sync' => __("Meta Data Sync"),
       'view' => __("Overview"),
       );
