@@ -9,14 +9,14 @@
 ?>
 <div id="p-explorer-menu">
 <ul>
-  <li id="p-explorer-button-all-meta"><a><?php echo __("View Filter"); ?></a></li>
+  <li id="p-explorer-button-all-meta"><a><?php echo __("View"); ?></a></li>
   <?php if ($canWriteTag): ?>
-  <li id="p-explorer-button-meta"><a><?php echo __("Edit Metadata"); ?></a></li>
+  <li id="p-explorer-button-meta"><a><?php echo __("Metadata"); ?></a></li>
   <?php if ($canWriteAcl): ?>
-  <li id="p-explorer-button-access"><a><?php echo __("Edit Access Rights"); ?></a></li>
+  <li id="p-explorer-button-access"><a><?php echo __("Access Right"); ?></a></li>
   <?php endif; // canWriteAcl ?>
   <?php endif; // canWriteTag ?>
-  <li id="p-explorer-button-more"><a><?php echo __("More"); ?></a></li>
+  <li id="p-explorer-button-more"><a><?php echo __("Selection"); ?></a></li>
   <li id="p-explorer-button-slideshow"><a><?php echo __("Slideshow"); ?></a></li>
 </ul>
 <div class="pages">
@@ -34,17 +34,17 @@
 <div id="p-explorer-all-meta">
 <?php
   $user = $this->Search->getUser();
-  $tagUrls = $this->ImageData->getAllExtendSearchUrls($crumbs, $user, 'tag', array_unique(Set::extract('/Tag/name', $this->request->data)));
+  $tagUrls = $this->ImageData->getAllExtendSearchUrls($crumbs, $user, 'tag', array_unique(Set::extract('/Field[name=keyword]/data', $this->request->data)));
   ksort($tagUrls);
-  $categoryUrls = $this->ImageData->getAllExtendSearchUrls($crumbs, $user, 'category', array_unique(Set::extract('/Category/name', $this->request->data)));
+  $categoryUrls = $this->ImageData->getAllExtendSearchUrls($crumbs, $user, 'category', array_unique(Set::extract('/Field[name=category]/data', $this->request->data)));
   ksort($categoryUrls);
-  $sublocationUrls = $this->ImageData->getAllExtendSearchUrls($crumbs, $user, 'sublocation', array_unique(Set::extract('/Location[type='.LOCATION_SUBLOCATION.']/name', $this->request->data)));
+  $sublocationUrls = $this->ImageData->getAllExtendSearchUrls($crumbs, $user, 'sublocation', array_unique(Set::extract('/Field[name=sublocation]/data', $this->request->data)));
   ksort($sublocationUrls);
-  $cityUrls = $this->ImageData->getAllExtendSearchUrls($crumbs, $user, 'city', array_unique(Set::extract('/Location[type='.LOCATION_CITY.']/name', $this->request->data)));
+  $cityUrls = $this->ImageData->getAllExtendSearchUrls($crumbs, $user, 'city', array_unique(Set::extract('/Field[name=city]/data', $this->request->data)));
   ksort($cityUrls);
-  $stateUrls = $this->ImageData->getAllExtendSearchUrls($crumbs, $user, 'state', array_unique(Set::extract('/Location[type='.LOCATION_STATE.']/name', $this->request->data)));
+  $stateUrls = $this->ImageData->getAllExtendSearchUrls($crumbs, $user, 'state', array_unique(Set::extract('/Field[name=state]/data', $this->request->data)));
   ksort($stateUrls);
-  $countryUrls = $this->ImageData->getAllExtendSearchUrls($crumbs, $user, 'country', array_unique(Set::extract('/Location[type='.LOCATION_COUNTRY.']/name', $this->request->data)));
+  $countryUrls = $this->ImageData->getAllExtendSearchUrls($crumbs, $user, 'country', array_unique(Set::extract('/Field[name=country]/data', $this->request->data)));
   ksort($countryUrls);
 
   if (count($tagUrls)) {
@@ -115,6 +115,13 @@
   $links[] = $this->Html->link(__('random'), $this->Breadcrumb->crumbUrl($this->Breadcrumb->replace($crumbs, 'sort', 'random')));
   echo implode(' ', $links);
 ?></p>
+<p><?php echo __('View') . " "; ?>
+<?php  $links = array();
+  $links[] = $this->Html->link(__('default'), $this->Breadcrumb->crumbUrl($this->Breadcrumb->replace($crumbs, 'view', 'default')));
+  $links[] = $this->Html->link(__('compact'), $this->Breadcrumb->crumbUrl($this->Breadcrumb->replace($crumbs, 'view', 'compact')));
+  $links[] = $this->Html->link(__('small'), $this->Breadcrumb->crumbUrl($this->Breadcrumb->replace($crumbs, 'view', 'small')));
+  echo implode(' ', $links);
+?></p>
 </div><!-- all meta -->
 <?php
   $url = $this->Breadcrumb->params($crumbs);
@@ -125,20 +132,20 @@
 <?php
   echo $this->Form->hidden('Media.ids', array('id' => 'MediaIds'));
   if ($canWriteTag) {
-    echo $this->Form->input('Tag.names', array('label' => __('Tags'), 'after' => $this->Html->tag('div', __('E.g. newtag, -oldtag'), array('class' => 'description'))));
-    echo $this->Autocomplete->autoComplete('Tag.names', 'autocomplete/tag', array('split' => true));
+    echo $this->Form->input('Field.keyword', array('label' => __('Tags'), 'after' => $this->Html->tag('div', __('E.g. newtag, -oldtag'), array('class' => 'description'))));
+    echo $this->Autocomplete->autoComplete('Field.keyword', 'autocomplete/tag', array('split' => true));
   }
   if ($canWriteMeta) {
-    echo $this->Form->input('Category.names', array('label' => __('Categories')));
-    echo $this->Autocomplete->autoComplete('Category.names', 'autocomplete/category', array('split' => true));
-    echo $this->Form->input('Location.city', array('label' => __('City')));
-    echo $this->Autocomplete->autoComplete('Location.city', 'autocomplete/city');
-    echo $this->Form->input('Location.sublocation', array('label' => __('Sublocation')));
-    echo $this->Autocomplete->autoComplete('Location.sublocation', 'autocomplete/sublocation');
-    echo $this->Form->input('Location.state', array('label' => __('State')));
-    echo $this->Autocomplete->autoComplete('Location.state', 'autocomplete/state');
-    echo $this->Form->input('Location.country', array('label' => __('Country')));
-    echo $this->Autocomplete->autoComplete('Location.country', 'autocomplete/country');
+    echo $this->Form->input('Field.category', array('label' => __('Categories')));
+    echo $this->Autocomplete->autoComplete('Field.category', 'autocomplete/category', array('split' => true));
+    echo $this->Form->input('Field.city', array('label' => __('City')));
+    echo $this->Autocomplete->autoComplete('Field.city', 'autocomplete/city');
+    echo $this->Form->input('Field.sublocation', array('label' => __('Sublocation')));
+    echo $this->Autocomplete->autoComplete('Field.sublocation', 'autocomplete/sublocation');
+    echo $this->Form->input('Field.state', array('label' => __('State')));
+    echo $this->Autocomplete->autoComplete('Field.state', 'autocomplete/state');
+    echo $this->Form->input('Field.country', array('label' => __('Country')));
+    echo $this->Autocomplete->autoComplete('Field.country', 'autocomplete/country');
     echo $this->Form->input('Media.geo', array('label' => __('Geo data'), 'maxlength' => 32, 'after' => $this->Html->tag('div', __('latitude, longitude'), array('class' => 'description'))));
   }
   if ($canWriteCaption) {
@@ -149,7 +156,8 @@
         '0' => __("Keep"),
         '90' => __("90 CW"),
         '180' => __("180 CW"),
-        '270' => __("90 CCW")
+        '270' => __("90 CCW"),
+        'reset' => __("Reset")
     );
     echo $this->Html->tag('div', $this->Html->tag('label', __("Rotate")) .
             $this->Html->tag('div', $this->Form->radio('Media.rotation', $rotations, array('legend' => false, 'value' => '0')), array('escape' => false, 'class' => 'radioSet')), array('escape' => false, 'class' => 'input radio'));
@@ -193,6 +201,17 @@
 <?php endif; // canWriteAcl==true ?>
 <?php echo $this->Form->end(); ?>
 <div id="p-explorer-more">
+<p><?php
+  echo __('Selection:') . ' ';
+  echo $this->Html->link(__("Select all"), 'javascript:void', array('id' => 'p-explorer-selection-all', 'title' => __('Select all')));
+  echo $this->Html->link(__("Invert selection"), 'javascript:void', array('id' => 'p-explorer-selection-invert', 'title' => __('Invert selection')));
+?></p>
+<p><?php
+  echo __('Media:') . ' ';
+  echo $this->Html->link(__("Remove"), 'javascript:void', array('id' => 'p-explorer-selection-remove', 'title' => __('Remove Media from database')));
+  echo $this->Html->link(__("Clear Cache"), 'javascript:void', array('id' => 'p-explorer-selection-delete-cache', 'title' => __('Clear media cache files')));
+  echo $this->Html->link(__("Sync"), 'javascript:void', array('id' => 'p-explorer-selection-sync', 'title' => __('Synchorinze meta data')));
+?></p>
 <p><?php
   echo __('Download:') . ' ';
   echo $this->Html->link(__("Original"), 'javascript:void', array('id' => 'p-explorer-download-original', 'title' => __('Download original files from selected media')));

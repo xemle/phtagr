@@ -11,24 +11,29 @@
 #page
   @include container
 
-#header 
+#header
   +column(24, true)
   background-color: $headerBackgroundColor
   +linear-gradient(color-stops($headerBackgroundColor, darken($headerBackgroundColor, 20%)))
   border: 1px solid $headerBackgroundColor
   > .sub
     padding: 15px
-    > a 
-      font-size: 200% 
-      font-weight: bold
-      +text-shadow(black, 0, 2px, 0)
-      color: white
-      &:hover
+    h1
+      display: inline-block;
+      a
+        font-size: 200%
+        font-weight: bold
+        +text-shadow(black, 0, 2px, 0)
         color: white
-        background-color: inherit
-      &:visited
-        color: white
-        background-color: inherit
+        &:hover
+          color: white
+          background-color: inherit
+        &:visited
+          color: white
+          background-color: inherit
+    span
+      display: inline-block;
+      color: white;
 
 #main
   +column(24, true)
@@ -36,8 +41,8 @@
   #sidebar
     +column(6)
     background-color: $sidebarBackgroundColor
- 
-  #content 
+
+  #content
     +column(18, true)
     @include border-top-right-radius(10px)
     background-color: $contentBackgroundColor
@@ -48,7 +53,7 @@
       padding: 10px 0
       background-color: darken($contentBackgroundColor, 10%)
 
-#footer 
+#footer
   +column(24, true)
   background-color: $footerBackgroundColor
   p
@@ -62,7 +67,7 @@
     background-color: #eee
     color: #444
     +text-shadow(white, 1px, 0px, 0)
-    
+
 .info,
 .message
   display: block

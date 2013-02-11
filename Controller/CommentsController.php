@@ -2,13 +2,13 @@
 /**
  * PHP versions 5
  *
- * phTagr : Tag, Browse, and Share Your Photos.
- * Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * phTagr : Organize, Browse, and Share Your Photos.
+ * Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  *
  * Licensed under The GPL-2.0 License
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * @copyright     Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  * @link          http://www.phtagr.org phTagr
  * @package       Phtagr
  * @since         phTagr 2.2b3
@@ -21,7 +21,7 @@ App::uses('CakeEmail', 'Network/Email');
 class CommentsController extends AppController
 {
   var $name = 'Comments';
-  var $uses = array('Comment', 'Media', 'Tag');
+  var $uses = array('Comment', 'Media');
   var $helpers = array('Html', 'Time', 'Text', 'Form', 'Rss', 'Paginator');
   var $components = array('Captcha');
 
@@ -34,7 +34,7 @@ class CommentsController extends AppController
   );
   var $namedArgs = '';
 
-  function beforeFilter() {
+  public function beforeFilter() {
     parent::beforeFilter();
 
     $params = array();
@@ -44,13 +44,13 @@ class CommentsController extends AppController
     $this->namedArgs = implode('/', $params);
   }
 
-  function index() {
-    $this->Comment->currentUser =& $this->getUser();
+  public function index() {
+    $this->Comment->currentUser = $this->getUser();
     $data = $this->paginate('Comment');
     $this->set('comments', $data);
   }
 
-  function view($id = null) {
+  public function view($id = null) {
     if (!$id) {
       $this->Session->setFlash(__('Invalid Comment.'));
       $this->redirect(array('action'=>'index'));
@@ -58,7 +58,7 @@ class CommentsController extends AppController
     $this->set('comment', $this->Comment->read(null, $id));
   }
 
-  function add() {
+  public function add() {
     if (!empty($this->request->data) && isset($this->request->data['Media']['id'])) {
       $mediaId = intval($this->request->data['Media']['id']);
       $user = $this->getUser();
@@ -92,7 +92,7 @@ class CommentsController extends AppController
         Logger::info("Media $mediaId not found");
         $this->redirect("/explorer");
       }
-      if (!$this->Media->canRead(&$media, &$user)) {
+      if (!$this->Media->canRead($media, $user)) {
         $this->Session->setFlash("Media not found");
         Logger::info("Comments denied to media $mediaId");
         $this->redirect("/explorer");
@@ -129,11 +129,13 @@ class CommentsController extends AppController
     }
   }
 
-  function _createEmail() {
-    return new CakeEmail('default');
+  public function _createEmail() {
+    $Email = new CakeEmail('default');
+    $Email->helpers('Html');
+    return $Email;
   }
 
-  function _sendEmail($commentId) {
+  public function _sendEmail($commentId) {
     $comment = $this->Comment->findById($commentId);
     if (!$comment) {
       Logger::err("Could not find comment $commentId");
@@ -147,7 +149,7 @@ class CommentsController extends AppController
     $email = $this->_createEmail();
     $email->template('comment')
       ->to(array($user['User']['email'] => $user['User']['firstname'] . ' ' . $user['User']['lastname']))
-      ->subject('[phtagr] Comment: '.$comment['Media']['name'])
+      ->subject(__('[phtagr] Comment: %s', $comment['Media']['name']))
       ->viewVars(array('user' => $user, 'data' => $comment));
 
     try {
@@ -166,7 +168,7 @@ class CommentsController extends AppController
    * @param mediaId Current media id
    * @param commentId Id of the new comment
    */
-  function _sendNotifies($mediaId, $commentId) {
+  public function _sendNotifies($mediaId, $commentId) {
     $this->Media->bindModel(array('hasMany' => array('Comment')));
     $media = $this->Media->findById($mediaId);
     if (!$media) {
@@ -204,7 +206,7 @@ class CommentsController extends AppController
     $email->template('commentnotify')
       ->to($to)
       ->bcc($emails)
-      ->subject('[phtagr] Comment notification: '.$media['Media']['name'])
+      ->subject(__('[phtagr] Comment notification: %s', $media['Media']['name']))
       ->viewVars(array('data' => $comment));
 
     Logger::debug($comment);
@@ -216,7 +218,7 @@ class CommentsController extends AppController
     }
   }
 
-  function delete($id = null) {
+  public function delete($id = null) {
     if (!$id) {
       $this->Session->setFlash(__('Invalid id for Comment'));
       $this->redirect("/explorer");
@@ -242,13 +244,13 @@ class CommentsController extends AppController
     $this->redirect("/images/view/".$comment['Media']['id']."/{$this->namedArgs}");
   }
 
-  function captcha() {
+  public function captcha() {
     $this->Captcha->render();
   }
 
-  function rss() {
+  public function rss() {
     $this->layoutPath = 'rss';
-    $this->Comment->currentUser =& $this->getUser();
+    $this->Comment->currentUser = $this->getUser();
     $data = $this->paginate('Comment');
     $this->set('data', $data);
 

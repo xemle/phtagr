@@ -2,13 +2,13 @@
 /**
  * PHP versions 5
  *
- * phTagr : Tag, Browse, and Share Your Photos.
- * Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * phTagr : Organize, Browse, and Share Your Photos.
+ * Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  *
  * Licensed under The GPL-2.0 License
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * @copyright     Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  * @link          http://www.phtagr.org phTagr
  * @package       Phtagr
  * @since         phTagr 2.2b3
@@ -19,18 +19,20 @@ class BrowserController extends AppController
 {
   var $name = "Browser";
 
-  var $components = array('FileManager', 'RequestHandler', 'FilterManager', 'Upload', 'Zip');
-  var $uses = array('User', 'MyFile', 'Media', 'Tag', 'Category', 'Location', 'Option');
-  var $helpers = array('Form', 'Html', 'Number', 'FileList', 'ImageData');
+  var $components = array('FileManager', 'RequestHandler', 'FilterManager', 'Upload', 'Zip', 'Plupload', 'QueryBuilder');
+  var $uses = array('User', 'MyFile', 'Media', 'Option');
+  var $helpers = array('Form', 'Html', 'Number', 'FileList', 'ImageData', 'Plupload', 'Autocomplete');
   var $subMenu = false;
   /** Array of filesystem root directories. */
   var $_fsRoots = array();
 
-  function beforeFilter() {
+  public function beforeFilter() {
     parent::beforeFilter();
+    $this->logUser();
     $this->subMenu = array(
       'import' => __("Import Files"),
       'upload' => __("Upload"),
+      'easyacl' => __("Edit Access Rights"),
       'sync' => __("Meta Data Sync"),
       'view' => __("Overview"),
       );
@@ -51,7 +53,7 @@ class BrowserController extends AppController
     $this->layout = 'backend';
   }
 
-  function beforeRender() {
+  public function beforeRender() {
     parent::beforeRender();
   }
 
@@ -65,7 +67,7 @@ class BrowserController extends AppController
    * '.')
    * @return True on success. False otherwise
    */
-  function _addFsRoot($root, $alias = null) {
+  public function _addFsRoot($root, $alias = null) {
     if (!$root) {
       Logger::warn("Invalid directory. Input is empty");
       return false;
@@ -102,7 +104,7 @@ class BrowserController extends AppController
   /**
    * @return Returns the path of the current request
    */
-  function _getPathFromUrl($strip = 0, $len = false) {
+  public function _getPathFromUrl($strip = 0, $len = false) {
     $strip = max(0, $strip);
     if (count($this->request->params['pass']) - $strip - abs($len) > 0) {
       if ($len) {
@@ -123,7 +125,7 @@ class BrowserController extends AppController
    * @param path
    * @return canonicalized path
    */
-  function _canonicalPath($path) {
+  public function _canonicalPath($path) {
     $paths = explode('/', $path);
     $canonical = array();
     foreach ($paths as $p) {
@@ -149,7 +151,7 @@ class BrowserController extends AppController
    * resolved it returns false
    * @note At lease one filesystem root must be defined
    */
-  function _getFsPath($path) {
+  public function _getFsPath($path) {
     $path = $this->_canonicalPath($path);
     $dirs = explode('/', $path);
     $fspath = false;
@@ -179,7 +181,7 @@ class BrowserController extends AppController
    * @param fsPath Filesystem path
    * @return Array of files or false on error
    */
-  function _readPath($fsPath) {
+  public function _readPath($fsPath) {
     if (!$fsPath || !is_dir($fsPath)) {
       Logger::err("Invalid path $fsPath");
       return false;
@@ -191,7 +193,7 @@ class BrowserController extends AppController
     $dbFiles = $this->MyFile->find('all', array('conditions' => array('path' => $fsPath), 'recursive' => -1));
     $dbFileNames = Set::extract('/File/file', $dbFiles);
 
-    $folder =& new Folder();
+    $folder = new Folder();
     $folder->cd($fsPath);
     list($fsDirs, $fsFiles) = $folder->read();
 
@@ -215,16 +217,16 @@ class BrowserController extends AppController
     return array($dirs, $files);
   }
 
-  function _readFile($filename) {
+  public function _readFile($filename) {
     $user = $this->getUser();
     if (!$this->MyFile->canRead($filename, $user)) {
       Logger::info("User cannot read $filename");
       $this->redirect(null, 404);
     }
 
-    // Update metadata on dirty file
+    // Update metadata on dirty file ??? and if file was also changed? ask owner before writing?
     $file = $this->MyFile->findByFilename($filename);
-    if ($file && $this->Media->hasFlag($file, MEDIA_FLAG_DIRTY)) {
+    if ($file && $this->Media->hasFlag($file, MEDIA_FLAG_DIRTY) && $this->getOption('filter.write.onDemand')) {
       $media = $this->Media->findById($file['Media']['id']);
       $this->FilterManager->write($media);
     }
@@ -232,10 +234,10 @@ class BrowserController extends AppController
     $options = $this->MyFile->getMediaViewOptions($filename);
     $options['download'] = true;
     $this->set($options);
-    $this->view = 'Media';
+    $this->viewClass = 'Media';
   }
 
-  function index() {
+  public function index() {
     $path = $this->_getPathFromUrl();
     $fsPath = $this->_getFsPath($path);
 
@@ -270,14 +272,20 @@ class BrowserController extends AppController
     $this->set('isInternal', !$isExternal);
   }
 
-  function import() {
+  public function import() {
+
+    if ($this->hasRole(ROLE_ADMIN)) {
+      ini_set('max_execution_time', 3600);//1 hour
+    }
+
     $path = $this->_getPathFromUrl();
     if (empty($this->request->data)) {
       Logger::warn("Empty post data");
       $this->redirect('index/'.$path);
     }
 
-    $recursive = (bool) $this->request->data['Browser']['recursive'];
+    $recursive = (bool) $this->request->data['Browser']['options']['recursive'];
+    $options = $this->request->data['Browser']['options'];
     if (isset($this->request->data['unlink'])) {
       $this->_unlinkSelected($path, $this->request->data['Browser']['import'], $recursive);
       return;
@@ -301,7 +309,9 @@ class BrowserController extends AppController
     }
 
     $this->FilterManager->clearErrors();
-    $readed = $this->FilterManager->readFiles($toRead, $recursive);
+
+    $readed = $this->FilterManager->readFiles($toRead, $options);
+    $skipped = count($this->FilterManager->skipped);
     $errorCount = count($this->FilterManager->errors);
 
     $readCount = 0;
@@ -310,12 +320,13 @@ class BrowserController extends AppController
         $readCount++;
       }
     }
-    $this->Session->setFlash(__("Imported %d files (%d) errors)", $readCount, $errorCount));
+    $this->Session->setFlash(__("Processed %d files (imported %d, skipped %d, %d errors)", $readCount, $readCount-$skipped, $skipped, $errorCount));
 
+    $this->FilterManager->ImageFilter->Exiftool->exitExiftool();
     $this->redirect('index/'.$path);
   }
 
-  function unlink() {
+  public function unlink() {
     $path = $this->_getPathFromUrl();
     $fsPath = $this->_getFsPath($path);
     $file = $this->MyFile->findByFilename($fsPath);
@@ -339,7 +350,7 @@ class BrowserController extends AppController
    * @param type $recursive Find media files recursivly if true
    * @return type Array of File model data
    */
-  function _findMediaFiles($path, $files, $recursive) {
+  public function _findMediaFiles($path, $files, $recursive) {
     $fsPath = $this->_getFsPath($path);
     $fsPath = Folder::slashTerm($fsPath);
     if (!is_dir($fsPath)) {
@@ -351,7 +362,11 @@ class BrowserController extends AppController
       if (!$file) {
         continue;
       }
-      $filename = $fsPath . $file;
+      if ($file==="."){
+        $filename = $fsPath;
+      } else {
+        $filename = $fsPath . $file;
+      }
       if (is_dir($filename)) {
         $filename = Folder::slashTerm($filename);
         if ($recursive) {
@@ -378,7 +393,7 @@ class BrowserController extends AppController
    * @param type $files List of selected files or directories
    * @param type $recursive True is unlinking should be act recursive
    */
-  function _unlinkselected($path, $files, $recursive) {
+  public function _unlinkselected($path, $files, $recursive) {
     $unlinkedCount=0;
     $mediaFiles = $this->_findMediaFiles($path, $files, $recursive);
     foreach ($mediaFiles as $file) {
@@ -391,7 +406,7 @@ class BrowserController extends AppController
     $this->redirect('index/'.$path);
   }
 
-  function delete() {
+  public function delete() {
     $path = $this->_getPathFromUrl();
     $fsPath = $this->_getFsPath($path);
     if (file_exists($fsPath)) {
@@ -410,6 +425,7 @@ class BrowserController extends AppController
         $this->Session->setFlash(__('Could not delete file or directory'));
       }
     }
+
     $this->redirect('index/'.$path);
   }
 
@@ -418,7 +434,7 @@ class BrowserController extends AppController
    * the MEDIA_FLAG_DIRTY are synced or shortly before the maximum execution
    * time is exceed.
    */
-  function sync($action = false) {
+  public function sync($action = false) {
     $userId = $this->getUserId();
     $data = array('action' => $action, 'synced' => array(), 'errors' => array(), 'unsynced' => 0);
 
@@ -467,7 +483,7 @@ class BrowserController extends AppController
     $this->request->data = $data;
   }
 
-  function view() {
+  public function view() {
     $user = $this->getUser();
     $userId = $this->getUserId();
     $this->request->data = $user;
@@ -492,7 +508,7 @@ class BrowserController extends AppController
     $this->set('files', $files);
   }
 
-  function folder() {
+  public function folder() {
     $path = $this->_getPathFromUrl();
     $fsPath = $this->_getFsPath($path);
     // Check for internal path
@@ -526,7 +542,7 @@ class BrowserController extends AppController
     $this->set('path', $path);
   }
 
-  function _upload($dst, $redirectOnFailure = false) {
+  public function _upload($dst, $redirectOnFailure = false) {
     if ($redirectOnFailure === false) {
       $redirectOnFailure = $this->action;
     }
@@ -547,7 +563,7 @@ class BrowserController extends AppController
     return $result;
   }
 
-  function _extract($dst, $files) {
+  public function _extract($dst, $files) {
     $result = array();
     foreach ($files as $file) {
       if (strtolower(substr($file, -4)) == '.zip') {
@@ -567,7 +583,7 @@ class BrowserController extends AppController
     return $result;
   }
 
-  function __fromReadableSize($readable) {
+  public function __fromReadableSize($readable) {
     if (is_float($readable) || is_numeric($readable)) {
       return $readable;
     } elseif (preg_match_all('/^\s*(0|[1-9][0-9]*)(\.[0-9]+)?\s*([KkMmGg][Bb]?)?\s*$/', $readable, $matches, PREG_SET_ORDER)) {
@@ -606,7 +622,7 @@ class BrowserController extends AppController
 
   /** Evaluates the maximum upload size by php configuration of post_max_size,
  * upload_max_filesize, and memory_limit */
-  function _getMaxUploadSize() {
+  public function _getMaxUploadSize() {
     $max = 1024 * 1024 * 1024;
     if (!function_exists('ini_get')) {
       return 16 * 1024 * 1024;
@@ -627,7 +643,7 @@ class BrowserController extends AppController
   /**
    * Set quota information for the view
    */
-  function _setQuotaForView() {
+  public function _setQuotaForView() {
     // Fetch quota and free bytes
     $user = $this->getUser();
     $userId = $this->getUserId();
@@ -639,7 +655,7 @@ class BrowserController extends AppController
     $this->set('max', $this->_getMaxUploadSize());
   }
 
-  function upload() {
+  public function upload() {
     $path = $this->_getPathFromUrl();
     $fsPath = $this->_getFsPath($path);
     if (!$fsPath) {
@@ -679,7 +695,7 @@ class BrowserController extends AppController
     $this->_setQuotaForView();
   }
 
-  function _getDailyUploadDir() {
+  public function _getDailyUploadDir() {
     $root = $this->User->getRootDir($this->getUser());
     if (!$root) {
       Logger::err("Invalid user upload directory");
@@ -697,7 +713,7 @@ class BrowserController extends AppController
     return $dst;
   }
 
-  function quickupload() {
+  public function quickupload() {
     if (!empty($this->request->data)) {
       if (!$this->Upload->isUpload()) {
         Logger::info("No upload data");
@@ -726,8 +742,15 @@ class BrowserController extends AppController
       $this->FilterManager->clearErrors();
       $readed = $this->FilterManager->readFiles($files, false);
       $errors = $this->FilterManager->errors;
-      $this->Session->setFlash(__("Uploaded %d files with %d errors.", count($readed), count($errors)));
-      $this->set('imports', $readed);
+      $mediaIds = array();
+      foreach ($readed as $file => $mediaId) {
+        if ($mediaId) {
+          $mediaIds[] = $mediaId;
+        }
+      }
+      $this->Session->setFlash(__("Uploaded %d files with %d errors.", count($mediaIds), count($errors)));
+      $media = $this->Media->find('all', array('conditions' => array('Media.id' => $mediaIds)));
+      $this->set('imports', $media);
       $this->set('errors', $errors);
     } else {
       $this->set('imports', array());
@@ -736,5 +759,146 @@ class BrowserController extends AppController
     $this->_setQuotaForView();
     $this->layout = 'default';
   }
+
+  public function plupload() {
+    $dst = $this->_getDailyUploadDir();
+    if (!$dst) {
+      $this->redirect($this->action);
+    }
+    $filename = $this->Plupload->upload($dst);
+    $pluploadResponse = $this->Plupload->response;
+    if ($filename) {
+      $files = array(Folder::addPathElement($dst, $filename));
+      $zips = $this->_extract($dst, $files);
+      foreach ($zips as $zip => $extracted) {
+        $this->FileManager->delete($zip);
+        unset($files[array_search($zip, $files)]);
+        $files = am($files, $extracted);
+      }
+      if (!$files) {
+        $this->Session->setFlash(__("No files uploaded"));
+        $this->redirect($this->action);
+      }
+      $this->FilterManager->clearErrors();
+      $result = $this->FilterManager->readFiles($files);
+      $mediaIds = array();
+      foreach ($result as $filename => $mediaId) {
+        if ($mediaId) {
+          $mediaIds[] = $mediaId;
+        }
+      }
+      $pluploadResponse['mediaIds'] = $mediaIds;
+    }
+    $this->viewClass = 'Json';
+    foreach ($pluploadResponse as $key => $value) {
+      $this->set($key, $value);
+    }
+    $this->set('_serialize', array_keys($pluploadResponse));
+  }
+
+  /**
+   * Extract acl changes from request form
+   *
+   * @param array $user Current model user
+   * @return array ACL changes
+   */
+  private function _extractAclParameter(&$user) {
+    $aclData = array('Media' => array());
+    foreach (array('readPreview', 'readOriginal', 'writeTag', 'writeMeta') as $name) {
+      if (!empty($this->request->data['Media'][$name]) && $this->request->data['Media'][$name] != ACL_LEVEL_KEEP) {
+        $aclData['Media'][$name] = $this->request->data['Media'][$name];
+      }
+    }
+    $editData = $this->Media->prepareMultiEditData($aclData, $user);
+    return $editData;
+  }
+
+  /**
+   * Spilt text into words and remove empty words
+   *
+   * @param string $text
+   * @return array
+   */
+  private function _splitWords($text) {
+    $words = preg_split('/\s*,\s*/', trim($text));
+    $result = array();
+    foreach ($words as $word) {
+      if ($word) {
+        $result[] = $word;
+      }
+    }
+    return $result;
+  }
+
+  /**
+   * Change acl for all media of first selected group or first sellected keyword
+   */
+  public function easyacl() {
+    $mediaIds = array();
+    $this->set('mediaIds', $mediaIds);
+
+    if (empty($this->request->data)) {
+      return;
+    }
+
+    $groupNames = $this->_splitWords($this->request->data['Group']['names']);
+    $tagNames = $this->_splitWords($this->request->data['Field']['keyword']);
+
+    if (!$groupNames && !$tagNames) {
+      $this->Session->setFlash(__("Group or tag criteria is missing"));
+      return;
+    }
+
+    $userId = $this->getUserId();
+    $user = $this->User->findById($userId);
+
+    $editData = $this->_extractAclParameter($user);
+    if (!$editData) {
+      $this->Session->setFlash(__("No access right changes given"));
+      return;
+    }
+
+    $queryData = array('user' => $user['User']['username']);
+    if ($groupNames) {
+      $queryData['group'] = $groupNames;
+    }
+    if ($tagNames) {
+      $queryData['tag'] = $tagNames;
+    }
+    $query = $this->QueryBuilder->build($queryData);
+    $allMedia = $this->Media->find('all', $query);
+
+    if ($allMedia) {
+      $mediaIds = $this->_applyAclChanges($allMedia, $editData, $user);
+      $this->set('mediaIds', $mediaIds);
+      $this->Session->setFlash(__("Updated access rights of %d media", count($mediaIds)));
+    } else {
+      $this->Session->setFlash(__("No media found!"));
+    }
+  }
+
+  private function _applyAclChanges(&$allMedia, &$editData, &$user) {
+    $changedMedia = array();
+    foreach ($allMedia as $media) {
+      $this->Media->setAccessFlags($media, $user);
+      // primary access check
+      if (!$media['Media']['canWriteTag'] && !$media['Media']['canWriteAcl']) {
+        Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change any metadata of image ".$id);
+        continue;
+      }
+      $tmp = $this->Media->editMulti($media, $editData, $user);
+      if ($tmp) {
+        $changedMedia[] = $tmp;
+      }
+    }
+    if ($changedMedia) {
+      if (!$this->Media->saveAll($changedMedia)) {
+        Logger::warn("Could not save media: " . join(", ", Set::extract("/Media/id", $changedMedia)));
+      } else {
+        Logger::debug("Saved media: " . join(', ', Set::extract("/Media/id", $changedMedia)));
+        return Set::extract('/Media/id', $changedMedia);
+      }
+    }
+    return array();
+  }
 }
-?>

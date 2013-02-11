@@ -2,26 +2,29 @@
 /**
  * PHP versions 5
  *
- * phTagr : Tag, Browse, and Share Your Photos.
- * Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * phTagr : Organize, Browse, and Share Your Photos.
+ * Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  *
  * Licensed under The GPL-2.0 License
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * @copyright     Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  * @link          http://www.phtagr.org phTagr
  * @package       Phtagr
  * @since         phTagr 2.2b3
  * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
 
-class SimilarBehavior extends ModelBehavior
-{
-  /** Breaks a text into tokens of given length
-    * @param text Text to tokenize
-    * @param tokenLen Length of each token
-    * @result Array of tokens */
-  function _tokenize($text, $tokenLen = 3) {
+class SimilarBehavior extends ModelBehavior {
+
+  /**
+   * Breaks a text into tokens of given length
+   *
+   * @param text Text to tokenize
+   * @param tokenLen Length of each token
+   * @return Array of tokens
+   */
+  public function _tokenize($text, $tokenLen = 3) {
     $len = strlen($text) - $tokenLen + 1;
     $tokens = array();
     for ($i = 0; $i < $len; $i++) {
@@ -30,11 +33,14 @@ class SimilarBehavior extends ModelBehavior
     return $tokens;
   }
 
-  /** Creates a token array which token as key and occurance count as value
-    * @param text Text to tokenize
-    * @param tokenLen Length of token
-    * @result Array of token with occurance count as array value */
-  function _tokenizeAndCount($text, $tokenLen = 3) {
+  /**
+   * Creates a token array which token as key and occurance count as value
+   *
+   * @param text Text to tokenize
+   * @param tokenLen Length of token
+   * @return Array of token with occurance count as array value
+   */
+  public function _tokenizeAndCount($text, $tokenLen = 3) {
     $tokens = $this->_tokenize($text, $tokenLen);
     $counts = array();
     foreach($tokens as $token) {
@@ -47,14 +53,16 @@ class SimilarBehavior extends ModelBehavior
     return $counts;
   }
 
-  /** Evaluate current text with given searchTokens.
-    *
-    * The function counts the occurrence of search tokens in the given text.
-    * @param text Given text to evaluate
-    * @param searchTokens counted search tokens
-    * @param tokenLen Length of each search token
-    * @result count of matches */
-  function _evaluate($text, $searchTokens) {
+  /**
+   * Evaluate current text with given searchTokens.
+   *
+   * The function counts the occurrence of search tokens in the given text.
+   * @param text Given text to evaluate
+   * @param searchTokens counted search tokens
+   * @param tokenLen Length of each search token
+   * @return count of matches
+   */
+  public function _evaluate($text, $searchTokens) {
     if (!count($searchTokens)) {
       return 0;
     }
@@ -70,32 +78,39 @@ class SimilarBehavior extends ModelBehavior
     return $matches;
   }
 
-  /** Search similar text through fuzzy text search through n-grams. For short
-    * search terms tokens of 2, and 3 length are compared. For longer search
-    * terms (string length greater as 6) tokens of 3 and 5 are used.
-    *
-    * @param Model Current model
-    * @param searchTerm search term (string with length between 3 and 32
-    * @param field Field name to search
-    * @return array of model data, ordered by relevance. Highest first. */
-  function similar(&$Model, $searchTerm, $field = 'name') {
+  /**
+   * Search similar text through fuzzy text search through n-grams. For short
+   * search terms tokens of 2, and 3 length are compared. For longer search
+   * terms (string length greater as 6) tokens of 3 and 5 are used.
+   *
+   * @param Model Current model
+   * @param searchTerm search term (string with length between 3 and 32
+   * @param field Field name to search
+   * @return array of model data, ordered by relevance. Highest first.
+   */
+  public function similar(&$Model, $searchTerm, $field = 'name', $similarity = 0.3) {
     // Comparison is expensive. So cut long search terms
     if (strlen($searchTerm) > 32) {
       $searchTerm = substr($searchTerm, 0, 32);
     }
     $all = $Model->find('all', array('recursive' => -1));
     if (strlen($searchTerm) < 3) {
-      return $all;
+      return array($searchTerm);
     }
 
     $searchTerm = strtolower(trim($searchTerm));
-    if (strlen($searchTerm) > 6) {
-      $searchTokensA = $this->_tokenizeAndCount($searchTerm, 5);
-      $searchTokensB = $this->_tokenizeAndCount($searchTerm, 3);
-    } else {
-      $searchTokensA = $this->_tokenizeAndCount($searchTerm, 3);
-      $searchTokensB = $this->_tokenizeAndCount($searchTerm, 2);
+    $lenSearchTerm = strlen($searchTerm);
+    $lenA = 5;
+    $lenB = 3;
+    if ($lenSearchTerm < 12) {
+      $lenA = 3;
+      $lenB = 2;
     }
+    $searchTokensA = $this->_tokenizeAndCount($searchTerm, $lenA);
+    $searchTokensB = $this->_tokenizeAndCount($searchTerm, $lenB);
+    $maxA = $lenSearchTerm - $lenA + 1;
+    $maxB = $lenSearchTerm - $lenB + 1;
+    $lenWeight = 0.5 / $lenSearchTerm;
 
     $match = array();
     foreach ($all as $index => $data) {
@@ -103,7 +118,11 @@ class SimilarBehavior extends ModelBehavior
       $matchesA = $this->_evaluate($text, $searchTokensA);
       $matchesB = $this->_evaluate($text, $searchTokensB);
       if ($matchesA > 0 || $matchesB > 1) {
-        $match[$index] = ($matchesA + 1) * ($matchesB + 1);
+        $weight = 1 - $lenWeight * abs($lenSearchTerm - strlen($text));
+        $rating = $weight * (0.3 * $matchesA / $maxA) + (0.7 * $matchesB / $maxB);
+        if ($rating >= $similarity) {
+          $match[$index] = $rating;
+        }
       }
     }
     arsort($match);
@@ -114,4 +133,3 @@ class SimilarBehavior extends ModelBehavior
     return $result;
   }
 }
-?>

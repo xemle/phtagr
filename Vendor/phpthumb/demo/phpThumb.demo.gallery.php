@@ -19,7 +19,9 @@ This is a demo of how you can use <a href="http://phpthumb.sourceforge.net">phpT
 //                                                          //
 //////////////////////////////////////////////////////////////
 
-$docroot = realpath((getenv('DOCUMENT_ROOT') && ereg('^'.preg_quote(realpath(getenv('DOCUMENT_ROOT'))), realpath(__FILE__))) ? getenv('DOCUMENT_ROOT') : str_replace(dirname(@$_SERVER['PHP_SELF']), '', str_replace(DIRECTORY_SEPARATOR, '/', dirname(__FILE__))));
+die('For security reasons, this demo is disabled by default. Please comment out line '.__LINE__.' in '.basename(__FILE__));
+
+$docroot = realpath((getenv('DOCUMENT_ROOT') && preg_match('#^'.preg_quote(realpath(getenv('DOCUMENT_ROOT'))).'#', realpath(__FILE__))) ? getenv('DOCUMENT_ROOT') : str_replace(dirname(@$_SERVER['PHP_SELF']), '', str_replace(DIRECTORY_SEPARATOR, '/', dirname(__FILE__))));
 $basedir = '/demo/images/';                         // webroot-relative path to main images directory (only this and subdirectories of this will be displayed)
 $thumb   = '/demo/phpThumb.php';                    // webroot-relative path to "phpThumb.php"
 $popup   = '/demo/demo/phpThumb.demo.showpic.php';  // webroot-relative path to "phpThumb.demo.showpic.php" (only used if $use_popup == true)
@@ -40,7 +42,7 @@ if (file_exists($captionfile)) {
 	}
 }
 
-if (@$_REQUEST['pic']) {
+if (!empty($_REQUEST['pic'])) {
 
 	$alt = @$CAPTIONS[$_REQUEST['pic']] ? $CAPTIONS[$_REQUEST['pic']] : $_REQUEST['pic'];
 	echo '<img src="'.$thumb.'?src='.htmlentities(urlencode($basedir.@$_REQUEST['dir'].'/'.$_REQUEST['pic']).'&w='.$displaysize.'&h='.$displaysize).'" border="0" alt="'.htmlentities($alt).'"><br>';
@@ -49,7 +51,7 @@ if (@$_REQUEST['pic']) {
 } else {
 
 	$currentdir = realpath($docroot.'/'.$basedir.@$_REQUEST['dir']);
-	if (!ereg('^'.preg_quote($dirlimit), $currentdir)) {
+	if (!preg_match('#^'.preg_quote($dirlimit).'#', $currentdir)) {
 		echo 'Cannot browse to "'.htmlentities($currentdir).'"<br>';
 	} elseif ($dh = @opendir($currentdir)) {
 		$folders = array();
@@ -57,30 +59,30 @@ if (@$_REQUEST['pic']) {
 		while ($file = readdir($dh)) {
 			if (is_dir($currentdir.'/'.$file) && ($file{0} != '.')) {
 				$folders[] = $file;
-			} elseif (eregi('\.(jpe?g|gif|png|bmp|tiff?)$', $file)) {
+			} elseif (preg_match('#\\.(jpe?g|gif|png|bmp|tiff?)$#i', $file)) {
 				$pictures[] = $file;
 			}
 		}
 		closedir($dh);
-		if (ereg('^'.preg_quote($dirlimit), realpath($currentdir.'/..'))) {
-			echo '<a href="'.$_SERVER['PHP_SELF'].'?dir='.urlencode($_REQUEST['dir'].'/..').'">Parent directory</a><br>';
+		if (preg_match('#^'.preg_quote($dirlimit).'#', realpath($currentdir.'/..'))) {
+			echo '<a href="'.htmlentities($_SERVER['PHP_SELF'].'?dir='.urlencode($_REQUEST['dir'].'/..'), ENT_QUOTES).'">Parent directory</a><br>';
 		}
 		if (!empty($folders)) {
 			echo '<ul>';
 			rsort($folders);
 			foreach ($folders as $dummy => $folder) {
-				echo '<li><a href="'.$_SERVER['PHP_SELF'].'?dir='.urlencode(@$_REQUEST['dir'].'/'.$folder).'">'.htmlentities($folder).'</a></li>';
+				echo '<li><a href="'.htmlentities($_SERVER['PHP_SELF'].'?dir='.urlencode(@$_REQUEST['dir'].'/'.$folder), ENT_QUOTES).'">'.htmlentities($folder).'</a></li>';
 			}
 			echo '</ul>';
 		}
 		if (!empty($pictures)) {
 			foreach ($pictures as $file) {
 				$alt = (@$CAPTIONS[$file] ? $CAPTIONS[$file] : $file);
-				echo '<table style="float: left;">'.(@$CAPTIONS[$file] ? '<caption align="bottom">'.htmlentities($CAPTIONS[$file]).'</caption>' : '').'<tbody><tr><td>';
+				echo '<table style="float: left;">'.(!empty($CAPTIONS[$file]) ? '<caption align="bottom">'.htmlentities($CAPTIONS[$file]).'</caption>' : '').'<tbody><tr><td>';
 				if ($use_popup) {
-					echo '<a title="'.htmlentities($alt).'" href="#" onClick="window.open(\''.$popup.'?src='.htmlentities($basedir.@$_REQUEST['dir'].'/'.$file.'&w='.$displaysize.'&h='.$displaysize.'&title='.urlencode(@$CAPTIONS[$file] ? $CAPTIONS[$file] : $file)).'\', \'showpic\', \'width='.$displaysize.',height='.$displaysize.',resizable=no,status=no,menubar=no,toolbar=no,scrollbars=no\'); return false;">';
+					echo '<a title="'.htmlentities($alt, ENT_QUOTES).'" href="#" onClick="window.open(\''.$popup.'?src='.htmlentities($basedir.@$_REQUEST['dir'].'/'.$file.'&w='.$displaysize.'&h='.$displaysize.'&title='.urlencode(@$CAPTIONS[$file] ? $CAPTIONS[$file] : $file)).'\', \'showpic\', \'width='.$displaysize.',height='.$displaysize.',resizable=no,status=no,menubar=no,toolbar=no,scrollbars=no\'); return false;">';
 				} else {
-					echo '<a title="'.htmlentities($alt).'" href="'.$_SERVER['PHP_SELF'].'?dir='.htmlentities(urlencode(@$_REQUEST['dir']).'&pic='.urlencode($file)).'">';
+					echo '<a title="'.htmlentities($alt, ENT_QUOTES).'" href="'.$_SERVER['PHP_SELF'].'?dir='.htmlentities(urlencode(@$_REQUEST['dir']).'&pic='.urlencode($file)).'">';
 				}
 				echo '<img src="'.$thumb.'?src='.htmlentities(urlencode($basedir.@$_REQUEST['dir'].'/'.$file).'&zc=1&w='.$thumbnailsize.'&h='.$thumbnailsize).'" border="1" width="'.$thumbnailsize.'" height="'.$thumbnailsize.'" alt="'.htmlentities($alt).'">';
 				echo '</a></td></tr></tbody></table>';

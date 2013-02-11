@@ -2,13 +2,13 @@
 /**
  * PHP versions 5
  *
- * phTagr : Tag, Browse, and Share Your Photos.
- * Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * phTagr : Organize, Browse, and Share Your Photos.
+ * Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  *
  * Licensed under The GPL-2.0 License
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * @copyright     Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  * @link          http://www.phtagr.org phTagr
  * @package       Phtagr
  * @since         phTagr 2.2b3
@@ -24,7 +24,7 @@ class GuestsController extends AppController {
   var $helpers = array('Form', 'Autocomplete');
   var $subMenu = false;
 
-  function beforeFilter() {
+  public function beforeFilter() {
     parent::beforeFilter();
     $this->layout = 'backend';
     $this->requireRole(ROLE_USER);
@@ -33,16 +33,28 @@ class GuestsController extends AppController {
       );
   }
 
-  function beforeRender() {
+  /**
+   * Add sub menu entry for guest
+   */
+  private function _addSubmenu(&$guest) {
+    $this->subMenu[] = array(
+      'url' => array('action' => $this->action, $guest['Guest']['id']),
+      'title' => __("Edit %s", $guest['Guest']['username']), 'active' => true,
+      array(
+        'url' => array('action' => 'links', $guest['Guest']['id']), 'title' => __("Links")),
+      );
+  }
+
+  public function beforeRender() {
     parent::beforeRender();
   }
 
-  function index() {
+  public function index() {
     $userId = $this->getUserId();
     $this->request->data = $this->Guest->find('all', array('conditions' => array('Guest.creator_id' => $userId)));
   }
 
-  function autocomplete() {
+  public function autocomplete() {
     if (!$this->RequestHandler->isAjax() || !$this->RequestHandler->isPost()) {
       $this->redirect(null, '404');
     }
@@ -53,7 +65,7 @@ class GuestsController extends AppController {
     $this->layout = "bare";
   }
 
-  function create() {
+  public function create() {
     if (!empty($this->request->data)) {
       $userId = $this->getUserId();
       $this->request->data['Guest']['creator_id'] = $userId;
@@ -73,7 +85,7 @@ class GuestsController extends AppController {
     }
   }
 
-  function edit($guestId) {
+  public function edit($guestId) {
     $guestId = intval($guestId);
     $userId = $this->getUserId();
 
@@ -96,18 +108,17 @@ class GuestsController extends AppController {
         $this->Session->setFlash(__("Updates could not be saved!"));
       }
     }
-    $this->request->data = $this->Guest->findById($guestId);
-    unset($this->request->data['Guest']['password']);
-    $this->request->data['Comment']['auth'] = $this->Option->getValue($this->request->data, 'comment.auth', COMMENT_AUTH_NONE);
+    $guest = $this->Guest->findById($guestId);
+    unset($guest['Guest']['password']);
+    $this->_addSubMenu($guest);
+    $this->request->data = $guest;
+    $this->request->data['Comment']['auth'] = $this->Option->getValue($guest, 'comment.auth', COMMENT_AUTH_NONE);
     $this->set('userId', $userId);
-    $this->subMenu[] = array('url' => array('action' => $this->action, $guestId), 'title' => __("Edit"), 'active' => true,
-      array('url' => array('action' => 'links', $guestId), 'title' => __("RSS")),
-      );
   }
 
   /**
     @todo Reset all group information of image */
-  function delete($guestId) {
+  public function delete($guestId) {
     $userId = $this->getUserId();
     $guest = $this->Guest->find('first', array('conditions' => array('Guest.id' => $guestId, 'Creator.id' => $userId)));
     if (!$guest) {
@@ -121,7 +132,7 @@ class GuestsController extends AppController {
     $this->redirect("index");
   }
 
-  function addGroup($groupId) {
+  public function addGroup($groupId) {
     if (!empty($this->request->data)) {
       $userId = $this->getUserId();
       $group = $this->Group->find('first', array('conditions' => array('Group.name' => $this->request->data['Group']['name'], 'Group.user_id' => $userId)));
@@ -149,7 +160,7 @@ class GuestsController extends AppController {
     }
   }
 
-  function deleteGroup($guestId, $groupId) {
+  public function deleteGroup($guestId, $groupId) {
     $guestId = intval($guestId);
     $groupId = intval($groupId);
     $userId = $this->getUserId();
@@ -183,7 +194,7 @@ class GuestsController extends AppController {
     }
   }
 
-  function links($guestId, $action = null) {
+  public function links($guestId, $action = null) {
     $this->requireRole(ROLE_USER);
 
     $userId = $this->getUserId();
@@ -197,7 +208,7 @@ class GuestsController extends AppController {
     if ($action == 'renew' || empty($guest['Guest']['key'])) {
       // reuse function of User model
       $tmp = array('Guest' => array('id' => $guestId));
-      $this->User->generateKey(&$tmp);
+      $this->User->generateKey($tmp);
       $tmp['Guest']['key'] = $tmp['User']['key'];
       unset($tmp['User']['key']);
       if (!$this->Guest->save($tmp, false, array('key'))) {
@@ -205,10 +216,9 @@ class GuestsController extends AppController {
         Logger::debug($this->Guest->validationErrors);
       }
     }
-    $this->request->data = $this->Guest->findById($guestId);
-    $this->subMenu[] = array('url' => array('action' => 'edit', $guestId), 'title' => __("Edit"), 'active' => true,
-      array('url' => array('action' => 'links', $guestId), 'title' => __("RSS"), 'active' => true),
-      );
+    $guest = $this->Guest->findById($guestId);
+    $this->_addSubMenu($guest);
+    $this->request->data = $guest;
   }
 }
 ?>

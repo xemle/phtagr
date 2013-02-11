@@ -2,13 +2,13 @@
 /**
  * PHP versions 5
  *
- * phTagr : Tag, Browse, and Share Your Photos.
- * Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * phTagr : Organize, Browse, and Share Your Photos.
+ * Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  *
  * Licensed under The GPL-2.0 License
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * @copyright     Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  * @link          http://www.phtagr.org phTagr
  * @package       Phtagr
  * @since         phTagr 2.2b3
@@ -25,7 +25,7 @@ class UpgradeMediaSchemaShell extends Shell {
   var $deletePolicy = false;
 
   function initialize() {
-    $this->UpgradeSchema =& new UpgradeSchemaComponent();
+    $this->UpgradeSchema = new UpgradeSchemaComponent();
 
     $this->out("Schema Upgrade Shell Script for Media Schema");
     $this->hr();
@@ -103,7 +103,7 @@ class UpgradeMediaSchemaShell extends Shell {
   function _addVideoThumb($media, $file) {
     $name = $file['File']['file'];
     $pattern = substr($name, 0, strrpos($name, '.')+1)."[Tt][Hh][Mm]";
-    $folder =& new Folder();
+    $folder = new Folder();
     $folder->cd($file['File']['path']);
     $found = $folder->find($pattern);
     if (!count($found)) {
@@ -202,8 +202,8 @@ class UpgradeMediaSchemaShell extends Shell {
     * each media */
   function _migrateData() {
     // init media and file model
-    $this->Media =& new Media();
-    $this->MyFile =& new MyFile();
+    $this->Media = new Media();
+    $this->MyFile = new MyFile();
 
     // fetch all media
     $this->Media->unbindAll();

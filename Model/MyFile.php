@@ -2,13 +2,13 @@
 /**
  * PHP versions 5
  *
- * phTagr : Tag, Browse, and Share Your Photos.
- * Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * phTagr : Organize, Browse, and Share Your Photos.
+ * Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  *
  * Licensed under The GPL-2.0 License
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * @copyright     Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  * @link          http://www.phtagr.org phTagr
  * @package       Phtagr
  * @since         phTagr 2.2b3
@@ -31,7 +31,8 @@ class MyFile extends AppModel
     FILE_TYPE_VIDEO => array('avi', 'mpg', 'mpeg', 'mov', 'mp4', 'mts', 'flv', 'ogg'),
     FILE_TYPE_VIDEOTHUMB => array('thm'),
     FILE_TYPE_TEXT => array('txt'),
-    FILE_TYPE_GPS => array('log')
+    FILE_TYPE_GPS => array('log'),
+    FILE_TYPE_SIDECAR => array('xmp')
     );
 
   var $actsAs = array('Type', 'Flag');
@@ -44,7 +45,7 @@ class MyFile extends AppModel
    * @param optional file flag
    * @return model data
    */
-  function createFromFile($filename, $userId, $flag = 0) {
+  public function createFromFile($filename, $userId, $flag = 0) {
     if (is_dir($filename)) {
       $flag |= FILE_FLAG_DIRECTORY;
       $path = Folder::slashTerm($filename);
@@ -88,7 +89,7 @@ class MyFile extends AppModel
    * @return Type of the file. If the type is not known it returns
    * FILE_TYPE_UNKNOWN
    */
-  function _getTypeFromFilename($filename) {
+  public function _getTypeFromFilename($filename) {
     $ext = strtolower(substr($filename, strrpos($filename, '.') + 1));
     foreach ($this->types as $type => $extensions) {
       if (in_array($ext, $extensions)) {
@@ -102,9 +103,9 @@ class MyFile extends AppModel
    * Deletes the linked file (if the file is not external) and also deletes
    * the media if the file is required by the media
    */
-  function beforeDelete($cascade = true) {
+  public function beforeDelete($cascade = true) {
     $this->set($this->findById($this->id));
-    if (!$this->hasFlag(&$this->data, FILE_FLAG_EXTERNAL)) {
+    if (!$this->hasFlag($this->data, FILE_FLAG_EXTERNAL)) {
       $filename = $this->getFilename();
       if (!@unlink($filename)) {
         Logger::err("Could not delete internal file $filename");
@@ -124,8 +125,8 @@ class MyFile extends AppModel
   /**
    * If the media depends on the file the function deletes the media
    */
-  function afterDelete() {
-    if ($this->hasFlag(&$this->data, FILE_FLAG_DEPENDENT) &&
+  public function afterDelete() {
+    if ($this->hasFlag($this->data, FILE_FLAG_DEPENDENT) &&
       $this->hasMedia()) {
       Logger::verbose("Delete media {$this->data['Media']['id']} from dependent file {$this->data['File']['id']}");
       $this->Media->delete($this->data['File']['media_id']);
@@ -137,11 +138,21 @@ class MyFile extends AppModel
    *
    * @param filename Filename of the current image
    */
-  function findByFilename($filename) {
+  public function findByFilename($filename) {
     $file = basename($filename);
     $path = Folder::slashTerm(dirname($filename));
 
     return $this->find('first', array('conditions' => array("path" => $path, "file" => $file)));
+  }
+
+  /**
+   * Find all files within the path
+   *
+   * @param string $path
+   * @return array
+   */
+  public function findAllByPath($path) {
+    return $this->find('all', array('conditions' => array("path" => Folder::slashTerm($path))));
   }
 
   /**
@@ -151,7 +162,7 @@ class MyFile extends AppModel
    * @return Returns the ID if filename is already in the database, otherwise it
    * returns false.
    */
-  function fileExists($filename) {
+  public function fileExists($filename) {
     $file = $this->findByFilename($filename);
     if ($file) {
       return $file['File']['id'];
@@ -167,7 +178,7 @@ class MyFile extends AppModel
    * used
    * @result Filename of the model
    */
-  function getFilename($data = null) {
+  public function getFilename($data = null) {
     if (!$data) {
       $data = $this->data;
     }
@@ -183,7 +194,7 @@ class MyFile extends AppModel
     return $data['path'].$data['file'];
   }
 
-  function getExtension($data) {
+  public function getExtension($data) {
     if (!$data) {
       $data = $this->data;
     }
@@ -197,7 +208,7 @@ class MyFile extends AppModel
     return strtolower(substr($data['file'], strrpos($data['file'], '.') + 1));
   }
 
-  function hasMedia($data = null) {
+  public function hasMedia($data = null) {
     if (!$data) {
       $data = $this->data;
     }
@@ -212,7 +223,7 @@ class MyFile extends AppModel
     return false;
   }
 
-  function setMedia($data, $mediaId) {
+  public function setMedia($data, $mediaId) {
     if (!$data) {
       $data = $this->data;
     }
@@ -241,7 +252,7 @@ class MyFile extends AppModel
    * the media of this single file is unlinked
    * @param fileId Optional file id
    */
-  function unlinkMedia($data, $fileId = false) {
+  public function unlinkMedia($data, $fileId = false) {
     if (is_numeric($data)) {
       $conditions = array('File.media_id' => $data);
       if ($fileId) {
@@ -268,7 +279,7 @@ class MyFile extends AppModel
     $this->updateAll(array('media_id' => null, 'readed' => null), array('id' => $ids));
 
     foreach ($files as $file) {
-      if ($this->hasFlag(&$file, FILE_FLAG_EXTERNAL)) {
+      if ($this->hasFlag($file, FILE_FLAG_EXTERNAL)) {
         Logger::debug("Delete external file {$file['File']['id']} from database");
         $this->delete($file['File']['id']);
       }
@@ -283,7 +294,7 @@ class MyFile extends AppModel
    * @param flag Reading image flag which must match the condition
    * @return True if user can read the filename
    */
-  function canRead($filename, $user, $flag = ACL_READ_ORIGINAL) {
+  public function canRead($filename, $user, $flag = ACL_READ_ORIGINAL) {
     if (!file_exists($filename)) {
       Logger::debug("Filename does not exists: $filename");
       return false;
@@ -332,7 +343,7 @@ class MyFile extends AppModel
    * @param includeExternal Set true to include also external files. Default is
    * false
    */
-  function countBytes($userId, $includeExternal = false) {
+  public function countBytes($userId, $includeExternal = false) {
     $userId = intval($userId);
     $conditions = array("User.id" => $userId);
     if (!$includeExternal) {
@@ -347,7 +358,7 @@ class MyFile extends AppModel
    *
    * @param data Optional model data
    */
-  function update($data = null) {
+  public function update($data = null) {
     if (!$data) {
       $data = $this->data;
     }
@@ -365,7 +376,7 @@ class MyFile extends AppModel
     }
   }
 
-  function updateReaded($data = null) {
+  public function updateReaded($data = null) {
     if (!$data) {
       $data = $this->data;
     }
@@ -384,7 +395,7 @@ class MyFile extends AppModel
     return true;
   }
 
-  function move($src, $dst) {
+  public function move($src, $dst) {
     if (is_dir($src)) {
       return $this->moveDir($src, $dst);
     }
@@ -407,8 +418,9 @@ class MyFile extends AppModel
     } else {
       $data['File']['path'] = Folder::slashTerm(dirname($dst));
       $data['File']['file'] = basename($dst);
+      $data['File']['type'] = $this->_getTypeFromFilename($dst);
     }
-    if (!$this->save($data, true, array('path', 'file'))) {
+    if (!$this->save($data, true, array('path', 'file', 'type'))) {
       Logger::err("Could not updated new filename '$dst' (id=$id)");
       return false;
     }
@@ -421,7 +433,7 @@ class MyFile extends AppModel
    * @param src Source directory
    * @param dst Destination directory or empty filename
    */
-  function moveDir($src, $dst) {
+  public function moveDir($src, $dst) {
     if (!is_dir($src)) {
       Logger::err("Source '$src' is not a directory");
       return false;
@@ -441,7 +453,6 @@ class MyFile extends AppModel
     $src = Folder::slashTerm($src);
     $dst = Folder::slashTerm($dst);
 
-    uses('sanitize');
     $sqlSrc = Sanitize::escape($src);
     $sqlDst = Sanitize::escape($dst);
 
@@ -453,7 +464,7 @@ class MyFile extends AppModel
     return true;
   }
 
-  function deletePath($path, $deleteFolder = false) {
+  public function deletePath($path, $deleteFolder = false) {
     if (!file_exists($path)) {
       Logger::err("Path $path does not exists");
       return false;
@@ -477,7 +488,7 @@ class MyFile extends AppModel
    * @param filename Filename of the media
    * @return Array of Media Option for the view.
    */
-  function getMediaViewOptions($filename) {
+  public function getMediaViewOptions($filename) {
     $path = substr($filename, 0, strrpos($filename, DS) + 1);
     $file = substr($filename, strrpos($filename, DS) + 1);
     $ext = strtolower(substr($file, strrpos($file, '.') + 1));

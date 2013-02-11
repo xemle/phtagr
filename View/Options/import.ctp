@@ -6,14 +6,27 @@
 <p><?php echo __('The following access rights are applied to new images.'); ?></p>
 <?php
   $aclSelect = array(
-    ACL_LEVEL_OTHER => __('Everyone'),
-    ACL_LEVEL_USER => __('User'),
-    ACL_LEVEL_GROUP => __('Group Members'),
-    ACL_LEVEL_PRIVATE => __('Me only'));
-  echo $this->Form->input('acl.read.preview', array('type' => 'select', 'options' => $aclSelect, 'label' => __("Who can view the image?")));
-  echo $this->Form->input('acl.read.original', array('type' => 'select', 'options' => $aclSelect, 'label' => __("Who can download the image?")));
-  echo $this->Form->input('acl.write.tag', array('type' => 'select', 'options' => $aclSelect, 'label' => __("Who can add tags?")));
-  echo $this->Form->input('acl.write.meta', array('type' => 'select', 'options' => $aclSelect, 'label' => __("Who can edit all meta data?")));
+    ACL_LEVEL_PRIVATE => __('Me'),
+    ACL_LEVEL_GROUP => __('Group'),
+    ACL_LEVEL_USER => __('Users'),
+    ACL_LEVEL_OTHER => __('All'));
+  echo $this->Html->tag('div',
+    $this->Html->tag('label', __("Who can view the image?")).
+    $this->Html->tag('div', $this->Form->radio('acl.read.preview', $aclSelect, array('legend' => false)), array('escape' => false, 'class' => 'radioSet')),
+    array('escape' => false, 'class' => 'input radio'));
+  echo $this->Html->tag('div',
+    $this->Html->tag('label', __("Who can download the image?")).
+    $this->Html->tag('div', $this->Form->radio('acl.read.original', $aclSelect, array('legend' => false)), array('escape' => false, 'class' => 'radioSet')),
+    array('escape' => false, 'class' => 'input radio'));
+  echo $this->Html->tag('div',
+    $this->Html->tag('label', __("Who can add tags?")).
+    $this->Html->tag('div', $this->Form->radio('acl.write.tag', $aclSelect, array('legend' => false)), array('escape' => false, 'class' => 'radioSet')),
+    array('escape' => false, 'class' => 'input radio'));
+  echo $this->Html->tag('div',
+    $this->Html->tag('label', __("Who can edit all meta data?")).
+    $this->Html->tag('div', $this->Form->radio('acl.write.meta', $aclSelect, array('legend' => false)), array('escape' => false, 'class' => 'radioSet')),
+    array('escape' => false, 'class' => 'input radio'));
+
   echo $this->Form->input('acl.group', array('type' => 'select', 'options' => $groups, 'label' => __("Default image group?")));
 ?>
 </fieldset>
@@ -26,4 +39,5 @@
   echo $this->Form->input('filter.gps.overwrite', array('type' => 'checkbox',  'label' => __("Overwrite existing coordinates?")));
 ?>
 </fieldset>
+
 <?php echo $this->Form->end(__('Save')); ?>

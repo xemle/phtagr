@@ -3,75 +3,31 @@
 /**
  * PHP versions 5
  *
- * phTagr : Tag, Browse, and Share Your Photos.
- * Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * phTagr : Organize, Browse, and Share Your Photos.
+ * Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  *
  * Licensed under The GPL-2.0 License
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * @copyright     Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  * @link          http://www.phtagr.org phTagr
  * @package       Phtagr
  * @since         phTagr 2.2b3
  * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
-App::uses('Option', 'Model');
-App::uses('User', 'Model');
 
-App::uses('Router', 'Routing');
-App::uses('Controller', 'Controller');
-App::uses('AppController', 'Controller');
-App::uses('Logger', 'Lib');
-App::uses('Folder', 'Utility');
-
-if (!defined('RESOURCES')) {
-  define('RESOURCES', TESTS . 'Resources' . DS);
-}
-if (!defined('TEST_FILES')) {
-  define('TEST_FILES', TMP);
-}
-if (!defined('TEST_FILES_TMP')) {
-  define('TEST_FILES_TMP', TEST_FILES . 'write.test.tmp' . DS);
-}
-
-if (!is_writeable(TEST_FILES)) {
-  trigger_error(__('Test file directory %s must be writeable', TEST_FILES), E_USER_ERROR);
-}
-
-class TestWriteController extends AppController {
-
-  var $uses = array('Media', 'MyFile', 'User', 'Option');
-  var $components = array('FileManager', 'FilterManager');
-
-  function getUser() {
-    return $this->User->find('first');
-  }
-
-}
+App::uses('PhtagrTestCase', 'Test/Case');
 
 /**
  * GpsFilterComponent Test Case
- *
  */
-class MediaWriteTestCase extends CakeTestCase {
+class MediaWriteTestCase extends PhtagrTestCase {
 
-  var $controller;
-  var $User;
-  var $Media;
-  var $Option;
-  var $userId;
+  var $uses = array('Media', 'Option');
+  var $components = array('FilterManager', 'VideoPreview', 'Exiftool');
 
-  var $Folder;
-
-  /**
-   * Fixtures
-   *
-   * @var array
-   */
-  public $fixtures = array('app.file', 'app.media', 'app.user', 'app.group', 'app.groups_media',
-      'app.groups_user', 'app.option', 'app.guest', 'app.comment', 'app.my_file',
-      'app.tag', 'app.media_tag', 'app.category', 'app.categories_media',
-      'app.location', 'app.locations_media', 'app.comment');
+  var $testDir;
+  var $autostartController = false;
 
   /**
    * setUp method
@@ -80,72 +36,19 @@ class MediaWriteTestCase extends CakeTestCase {
    */
   public function setUp() {
     parent::setUp();
-    $this->Folder = new Folder();
 
-    $this->User = ClassRegistry::init('User');
-    $this->User->save($this->User->create(array('username' => 'admin', 'role' => ROLE_ADMIN)));
-    $this->userId = $this->User->getLastInsertID();
+    $this->testDir = $this->createTestDir();
+    $this->setOptionsForExternalTools();
+    $this->Option->setValue($this->VideoPreview->createVideoThumbOption, 1, 0);
 
-    $this->Option = ClassRegistry::init('Option');
-    $this->Option->setValue('bin.ffmpeg', $this->findExecutable('ffmpeg'), 0);
-    $this->Option->setValue('bin.exiftool', $this->findExecutable('exiftool'), 0);
-    $this->Option->setValue('bin.convert', $this->findExecutable('convert'), 0);
+    $this->Option->addValue($this->FilterManager->writeEmbeddedEnabledOption, 1, 0);
+    $this->Option->addValue($this->FilterManager->writeSidecarEnabledOption, 1, 0);
+    $this->Option->addValue($this->FilterManager->createSidecarOption, 0, 0);
 
-    $CakeRequest = new CakeRequest();
-    $CakeResponse = new CakeResponse();
-    $this->Controller = new TestWriteController($CakeRequest, $CakeResponse);
-    $this->Controller->constructClasses();
+    $admin = $this->Factory->createUser('admin', ROLE_ADMIN);
+    $this->mockUser($admin);
+
     $this->Controller->startupProcess();
-    $this->Media = & $this->Controller->Media;
-    $this->MyFile = & $this->Controller->MyFile;
-
-
-    $this->Folder->create(TEST_FILES_TMP);
-  }
-
-  private function findExecutable($command) {
-    if (DS != '/') {
-      throw new Exception("Non Unix OS are not supported yet");
-    }
-    $paths = array('/usr/local/bin/', '/usr/bin/');
-    foreach ($paths as $path) {
-      if (file_exists($path . $command)) {
-        return $path . $command;
-      }
-    }
-    $result = array();
-    exec('which ' . $command, &$result);
-    if ($result) {
-      return $result[0];
-    } else {
-      return false;
-    }
-  }
-
-  /**
-   * tearDown method
-   *
-   * @return void
-   */
-  public function tearDown() {
-    $this->Folder->delete(TEST_FILES_TMP);
-
-    unset($this->Controller);
-    unset($this->Media);
-    unset($this->User);
-    unset($this->Folder);
-    parent::tearDown();
-  }
-
-  private function copyResource($resourceName, $dstPath, $dstName = null) {
-    $src = dirname(dirname(__FILE__)) . DS . 'Resources' . DS . $resourceName;
-    if (is_dir($dstPath) || can_write($dstPath)) {
-      throw new Exception("Destination does not exist or is not writeabel: $dstPath");
-    }
-    $dst = Folder::slashTerm($dstPath);
-    $dst .= ($dstName ? $dstName : $resourceName);
-    copy($src, $dst);
-    return $dst;
   }
 
   /**
@@ -160,46 +63,288 @@ class MediaWriteTestCase extends CakeTestCase {
       return array();
     }
     $cmd = $option['Option']['value'];
+    $cmd .= ' -config ' . escapeshellarg(APP . 'Config' . DS . 'ExifTool-phtagr.conf');
     $cmd .= ' ' . escapeshellarg('-n');
     $cmd .= ' ' . escapeshellarg('-S');
     $cmd .= ' ' . escapeshellarg($filename);
     $result = array();
     $exitCode = 0;
-    exec($cmd, &$result, &$exitcode);
+    exec($cmd, $result, $exitcode);
     if (!$result) {
       return array();
     }
 
     $values = array();
     foreach ($result as $line) {
-      if (preg_match('/(\w+):\s(.*)/', $line, $m)) {
+      if (preg_match('/(\S+):\s(.*)/', $line, $m)) {
         $values[$m[1]] = $m[2];
       }
     }
+    ksort($values);
     return $values;
   }
 
-  function testThumbnailCreation() {
-    $filename = TEST_FILES_TMP . 'MVI_7620.OGG';
-    copy(RESOURCES . 'MVI_7620.OGG', $filename);
+  /**
+   * Test for video thumbnail THM creation without xmp sidecar file
+   */
+  function testVideoThumbnailCreation() {
+    $filename = $this->copyResource('MVI_7620.OGG', $this->testDir);
+    $this->FilterManager->VideoFilter->createVideoThumb = true;
+    $this->FilterManager->createSidecarForNonEmbeddableFile = true;
 
     // Insert video and add tag 'thailand'
-    $this->Controller->FilterManager->read($filename);
+    $this->FilterManager->read($filename);
     $media = $this->Media->find('first');
     $this->assertNotEqual($media, false);
-    $user = $this->Controller->getUser();
-    $this->Media->setAccessFlags(&$media, &$user);
-    $data = array('Tag' => array('names' => 'thailand'));
-    $tmp = $this->Media->editSingle(&$media, &$data, &$user);
+    $user = $this->getUser();
+    $this->Media->setAccessFlags($media, $user);
+    $data = array('Field' => array('keyword' => 'thailand'));
+    $tmp = $this->Media->editSingle($media, $data, $user);
     $this->Media->save($tmp);
 
     $media = $this->Media->findById($media['Media']['id']);
-    $result = $this->Controller->FilterManager->write(&$media);
+    $result = $this->FilterManager->write($media);
     $this->assertEqual($result, true);
 
-    $thumb = TEST_FILES_TMP . 'MVI_7620.thm';
+    $thumb = dirname($filename) . DS . 'MVI_7620.thm';
     $this->assertEqual(file_exists($thumb), true);
     $values = $this->extractMeta($thumb);
     $this->assertEqual($values['Keywords'], 'thailand');
+
+    $Folder = new Folder($this->testDir);
+    $files = $Folder->find();
+    $this->assertEqual(count($files), 2);
   }
+
+  /**
+   * Test for xmp sidecar file creation without video thumbnail THM
+   */
+  function testVideoSidecarCreation() {
+    $filename = $this->copyResource('MVI_7620.OGG', $this->testDir);
+    $this->FilterManager->VideoFilter->createVideoThumb = false;
+    $this->FilterManager->createSidecarForNonEmbeddableFile = true;
+
+    // Insert video and add tag 'thailand'
+    $this->FilterManager->read($filename);
+    $media = $this->Media->find('first');
+    $this->assertNotEqual($media, false);
+    $user = $this->getUser();
+    $this->Media->setAccessFlags($media, $user);
+    $data = array('Field' => array('keyword' => 'thailand'));
+    $tmp = $this->Media->editSingle($media, $data, $user);
+    $this->Media->save($tmp);
+
+    $media = $this->Media->findById($media['Media']['id']);
+    $result = $this->FilterManager->write($media);
+    $this->assertEqual($result, true);
+
+    $xmp = dirname($filename) . DS . 'MVI_7620.xmp';
+    $this->assertEqual(file_exists($xmp), true);
+    $values = $this->extractMeta($xmp);
+    $this->assertEqual($values['Subject'], 'thailand');
+
+    $Folder = new Folder($this->testDir);
+    $files = $Folder->find();
+    $this->assertEqual(count($files), 2);
+  }
+
+  function testImageMetaData() {
+    //use for testing the same time zone as initial values (+02:00)
+    date_default_timezone_set('Europe/Belgrade');//GMT+2 = Europe/Belgrade is 1 hrs behind Europe/Helsinki.
+    $filename = $this->copyResource('IMG_6131.JPG', $this->testDir);
+
+    $user = $this->getUser();
+
+    $this->FilterManager->read($filename);
+    $media = $this->Media->find('first');
+    $this->assertNotEqual($media, false);
+    $this->assertEqual($media['Media']['flag'], 0);
+    $this->assertEqual($media['Media']['orientation'], 1);
+    $this->assertEqual($media['Media']['latitude'], null);
+    $this->assertEqual($media['Media']['longitude'], null);
+    $this->assertEqual($media['Field'], array());
+
+    $data = array(
+        'Media' => array(
+            'name' => 'Mosque Taj Mahal, India',
+            'geo' => '27.175,78.0416',
+            'rotation' => 90
+        ),
+        'Field' => array(
+            'keyword' => 'sunset',
+            'category' => 'vacation, sightseeing',
+            'sublocation' => 'taj mahal',
+            'city' => 'agra',
+            'state' => 'uttar pradesh',
+            'country' => 'india')
+        );
+    $tmp = $this->Media->editSingle($media, $data, $user);
+    $this->Media->save($tmp);
+
+    $media = $this->Media->findById($media['Media']['id']);
+    // test if meta data has changed
+    $this->assertEqual($media['Media']['flag'], MEDIA_FLAG_DIRTY);
+    $result = $this->FilterManager->write($media);
+    $this->assertEqual($result, true);
+    $media = $this->Media->findById($media['Media']['id']);
+    // test if all media are written and clean
+    $this->assertEqual($media['Media']['flag'], 0);
+
+    // Verify written meta data
+    $values = $this->extractMeta($filename);
+    $this->assertEqual($values['ObjectName'], 'Mosque Taj Mahal, India');
+    $this->assertEqual($values['Orientation'], '6');
+    $this->assertEqual($values['GPSLatitudeRef'], 'N');
+    $this->assertEqual($values['GPSLatitude'], '27.175');
+    $this->assertEqual($values['GPSLongitudeRef'], 'E');
+    $this->assertEqual($values['GPSLongitude'], '78.0416');
+    $this->assertEqual($values['Keywords'], 'sunset');
+    $this->assertEqual($values['SupplementalCategories'], 'vacation, sightseeing');
+    $this->assertEqual($values['Sub-location'], 'taj mahal');
+    $this->assertEqual($values['City'], 'agra');
+    $this->assertEqual($values['Province-State'], 'uttar pradesh');
+    $this->assertEqual($values['Country-PrimaryLocationName'], 'india');
+  }
+
+  function testImageWithChangedLocation() {
+    //use the same time zone +02:00
+    date_default_timezone_set('Europe/Belgrade');//Europe/Belgrade is 1 hrs behind Europe/Helsinki.
+    //$d = date_default_timezone_get();
+    $filename = $this->copyResource('IMG_6131.JPG', $this->testDir);
+
+    $user = $this->getUser();
+
+    $this->FilterManager->read($filename);
+    $media = $this->Media->find('first');
+
+    $data = array(
+        'Media' => array(
+            'name' => 'Mosque Taj Mahal, India',
+            'geo' => '27.175,78.0416'
+        ),
+        'Field' => array(
+            'keyword' => 'sunset',
+            'category' => 'vacation, sightseeing',
+            'sublocation' => 'taj mahal',
+            'city' => 'agra',
+            'state' => 'uttar pradesh',
+            'country' => 'india')
+        );
+    $tmp = $this->Media->editSingle($media, $data, $user);
+    $this->Media->save($tmp);
+    $media = $this->Media->findById($media['Media']['id']);
+    $result = $this->FilterManager->write($media);
+    // Verify written meta data
+    $values = $this->extractMeta($filename);
+    $this->assertEqual($values['ObjectName'], 'Mosque Taj Mahal, India');
+    $this->assertTrue(!isset($values['Comment']));
+    $this->assertEqual($values['Orientation'], '1');
+    $this->assertEqual($values['GPSLatitudeRef'], 'N');
+    $this->assertEqual($values['GPSLatitude'], '27.175');
+    $this->assertEqual($values['GPSLongitudeRef'], 'E');
+    $this->assertEqual($values['GPSLongitude'], '78.0416');
+    $this->assertEqual($values['Keywords'], 'sunset');
+    $this->assertEqual($values['SupplementalCategories'], 'vacation, sightseeing');
+    $this->assertEqual($values['Sub-location'], 'taj mahal');
+    $this->assertEqual($values['City'], 'agra');
+    $this->assertEqual($values['Province-State'], 'uttar pradesh');
+    $this->assertEqual($values['Country-PrimaryLocationName'], 'india');
+
+    $data = array(
+        'Media' => array(
+            'name' => 'IMG_6131.JPG',
+            'rotation' => 90,
+            'geo' => '10.461,-12.674',      // value change
+            'date' => '2012-10-03 10:10:43',
+            'name' => 'Mosque Taj Mahal, India',
+            'caption' => 'Temple of love'
+        ),
+        'Field' => array(
+            'keyword' => 'sunset, mosque', // list addition +mosque
+            'category' => 'sightseeing',   // list removal -vacation
+            'city' => 'agra city',         // value change
+            'state' => ''                  // value removal
+        ));
+    $tmp = $this->Media->editSingle($media, $data, $user);
+    $this->Media->save($tmp);
+    $media = $this->Media->findById($media['Media']['id']);
+    $result = $this->FilterManager->write($media);
+
+    // Verify written meta data
+    $values = $this->extractMeta($filename);
+    $this->assertTrue(!isset($values['ObjectName']));
+    $this->assertEqual($values['Comment'], 'Temple of love');
+    $this->assertEqual(substr($values['DateTimeOriginal'], 0, 19), "2012:10:03 10:10:43");
+    $this->assertEqual($values['Orientation'], '6');
+    $this->assertEqual($values['GPSLatitudeRef'], 'N');
+    $this->assertEqual($values['GPSLatitude'], '10.461');
+    $this->assertEqual($values['GPSLongitudeRef'], 'W');
+    $this->assertEqual($values['GPSLongitude'], '-12.674');
+    $this->assertEqual($values['Keywords'], 'sunset, mosque');
+    $this->assertEqual($values['SupplementalCategories'], 'sightseeing');
+    $this->assertEqual($values['Sub-location'], 'taj mahal');
+    $this->assertEqual($values['City'], 'agra city');
+    $this->assertTrue(!isset($values['Province-State']));
+    $this->assertEqual($values['Country-PrimaryLocationName'], 'india');
+  }
+
+  function testGroupWrite() {
+    $filename = $this->copyResource('IMG_6131.JPG', $this->testDir);
+
+    $user = $this->getUser();
+    $group1 = $this->Factory->createGroup('family', $user);
+    $group2 = $this->Factory->createGroup('friends', $user);
+
+    $this->FilterManager->read($filename);
+    $media = $this->Media->find('first');
+
+    $data = array('Group' => array('names' => 'family,friends'));
+
+    $tmp = $this->Media->editSingle($media, $data, $user);
+    $this->Media->save($tmp);
+    $media = $this->Media->findById($media['Media']['id']);
+    $result = $this->FilterManager->write($media);
+    $this->assertEqual($result, true);
+
+    // Verify written meta data
+    $values = $this->extractMeta($filename);
+    $this->assertEqual($values['PhtagrGroups'], 'family, friends');
+  }
+
+  public function testKeepFileGroupIfSubscriptionIsMissing() {
+    $filename = $this->copyResource('IMG_7795.JPG', $this->testDir);
+
+    // Precondition: There are not groups yet and will be created on import
+    $this->assertEqual($this->Media->Group->find('count'), 0);
+
+    $userA = $this->Factory->createUser('User');
+    $this->Factory->createGroup('worker', $userA, array('is_moderated' => true, 'is_shared' => false));
+    $this->mockUser($userA);
+
+    $userB = $this->Factory->createUser('Another User');
+    $this->Factory->createGroup('friends', $userB, array('is_moderated' => false, 'is_shared' => true));
+    $this->Factory->createGroup('family', $userB, array('is_moderated' => true, 'is_shared' => true));
+
+    $this->FilterManager->readFiles($this->testDir);
+    $userA = $this->User->findById($userA['User']['id']);
+    $media = $this->Media->find('first');
+    // Test auto subscription. Exclude group family which is moderated
+    $this->assertEqual(Set::extract('/Group/name', $media), array('friends'));
+
+    $data = array('Group' => array('names' => 'friends, worker'));
+    $tmp = $this->Media->editSingle($media, $data, $userA);
+    $this->Media->save($tmp);
+    $media = $this->Media->find('first');
+    // Test auto subscription. Exclude group family which is moderated
+    $this->assertEqual(Set::extract('/Group/name', $media), array('friends', 'worker'));
+
+    $media = $this->Media->findById($media['Media']['id']);
+    $result = $this->FilterManager->write($media);
+    $this->assertEqual($result, true);
+
+    // Verify written meta data
+    $values = $this->extractMeta($filename);
+    $this->assertEqual($values['PhtagrGroups'], 'family, friends, worker');
+  }
+
 }

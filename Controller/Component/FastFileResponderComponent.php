@@ -2,13 +2,13 @@
 /**
  * PHP versions 5
  *
- * phTagr : Tag, Browse, and Share Your Photos.
- * Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * phTagr : Organize, Browse, and Share Your Photos.
+ * Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  *
  * Licensed under The GPL-2.0 License
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * @copyright     Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  * @link          http://www.phtagr.org phTagr
  * @package       Phtagr
  * @since         phTagr 2.2b3
@@ -22,12 +22,12 @@ class FastFileResponderComponent extends Component {
   var $expireOffset = 10; // seconds
   var $excludeMediaIds = array();
 
-  function initialize(&$controller) {
+  public function initialize(Controller $controller) {
     $this->controller = $controller;
     $this->removeExpiredItems();
   }
 
-  function removeExpiredItems() {
+  public function removeExpiredItems() {
     $now = time();
     $validItems = array();
     $files = (array) $this->Session->read($this->sessionKey);
@@ -39,7 +39,7 @@ class FastFileResponderComponent extends Component {
     $this->Session->write($this->sessionKey, $validItems);
   }
 
-  function add($media, $name, $ext = 'jpg') {
+  public function add($media, $name, $ext = 'jpg') {
     $file = $this->FileCache->getFilePath($media, $name);
     if (!is_readable($file) || in_array($media['Media']['id'], $this->excludeMediaIds)) {
       return false;
@@ -51,13 +51,13 @@ class FastFileResponderComponent extends Component {
     return true;
   }
 
-  function addAll($data, $name, $ext = 'jpg') {
+  public function addAll($data, $name, $ext = 'jpg') {
     foreach ($data as $media) {
       $this->add($media, $name, $ext);
     }
   }
 
-  function excludeMedia($media) {
+  public function excludeMedia($media) {
     $this->excludeMediaIds[] = $media['Media']['id'];
   }
 }

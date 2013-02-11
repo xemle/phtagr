@@ -82,6 +82,14 @@
 	Configure::write('App.encoding', 'UTF-8');
 
 /**
+ * Usually phTagr will answer by client's preferred language if supported.
+ * Uncomment following line to set a fix language of the gallery.
+ *
+ * See Locale directory for supported languages.
+ */
+	// Configure::write('Config.language', 'fre');
+
+/**
  * phTagr version from VERSION.txt file
  */
 	$versionFile = file(APP . 'VERSION.txt');
@@ -97,7 +105,7 @@
  * See also http://bugs.php.net/bug.php?id=44945
  *          http://bugs.php.net/bug.php?id=44564
  */
-//setlocale(LC_CTYPE, "UTF8", "en_US.UTF-8");
+  setlocale(LC_CTYPE, "UTF8", "en_US.UTF-8");
 
 /**
  * To configure CakePHP *not* to use mod_rewrite and to

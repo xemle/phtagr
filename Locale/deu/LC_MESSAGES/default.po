@@ -94,11 +94,11 @@ msgstr "Ausloggen"
 #: test.php:50
 #: Controller/AppController.php:71
 msgid "Dashboard"
-msgstr "Schreibisch"
+msgstr "Einstellungen"
 
 #: Controller/AppController.php:69
 msgid "Howdy, %s!"
-msgstr "Servus, %s!"
+msgstr "Hallo, %s!"
 
 #: Controller/BrowserController.php:32
 msgid "Import Files"
@@ -790,7 +790,7 @@ msgstr "Datei oder ZIP"
 
 #: View/Browser/quickupload.ctp:44
 msgid "You can upload maximal %s and %s at once. ZIP archives are extracted automatically."
-msgstr "Man kann maximal %s hochladen und %s auf einmal. ZIP Dateien werden automatisch entpackt."
+msgstr "Du kannst maximal %s hochladen, wobei Dateien nicht größer als %s sein dürfen. ZIP Dateien werden automatisch entpackt."
 
 #: View/Browser/quickupload.ctp:46
 #: View/Browser/upload.ctp:27
@@ -890,7 +890,7 @@ msgstr "Gesammter Speicherplatz"
 
 #: View/Browser/view.ctp:19
 msgid "Quota (free)"
-msgstr "Quota (frei="
+msgstr "Quota (frei)"
 
 #: View/Browser/view.ctp:21
 msgid "Videos"

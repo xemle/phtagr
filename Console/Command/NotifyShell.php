@@ -2,13 +2,13 @@
 /**
  * PHP versions 5
  *
- * phTagr : Tag, Browse, and Share Your Photos.
- * Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * phTagr : Organize, Browse, and Share Your Photos.
+ * Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  *
  * Licensed under The GPL-2.0 License
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * @copyright     Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  * @link          http://www.phtagr.org phTagr
  * @package       Phtagr
  * @since         phTagr 2.2b3
@@ -20,7 +20,7 @@ class NotifyShell extends AppShell {
 
   var $uses = array('User', 'Media', 'MyFile');
   var $components = array('Search', 'PreviewManager');
-	
+
   var $verbose = false;
   var $force = false;
   var $dryrun = false;
@@ -35,22 +35,24 @@ class NotifyShell extends AppShell {
       exit(1);
     }
     $this->Email = new CakeEmail('default');
-  }
-	
-  function startup() {
+    $this->Email->helpers('Html');
   }
 
-  function main() {
-    $this->help();
-  }
-
-  function help() {
-    $this->out("Help screen");
-    $this->hr();
-    $this->out("run [noemail] [dryrun] [verbose] [force]");
-    $this->out("\tNotify new media for users via email");
-    $this->hr();
-    exit();
+  public function getOptionParser() {
+    $parser = parent::getOptionParser();
+    $parser->addOption('noemail', array(
+      'help' => __('Do not send emails.'),
+      'boolean' => true
+    ))->addOption('dryrun', array(
+      'help' => __('Simulate the run. Do not change anything'),
+      'boolean' => true
+    ))->addOption('force', array(
+      'help' => __('Send emails always even if user already received an email'),
+      'boolean' => true
+    ))->addSubcommand('run', array(
+      'help' => __('Run the notification updates')
+    ))->description(__('Notify new media for users via email'));
+    return $parser;
   }
 
   function _buildImages($media) {
@@ -88,7 +90,7 @@ class NotifyShell extends AppShell {
   function run() {
     $args = array('dryrun', 'verbose', 'noemail', 'force');
     foreach($args as $arg) {
-      if (in_array($arg, $this->args)) {
+      if ($this->params[$arg]) {
         $this->{$arg} = true;
       }
     }

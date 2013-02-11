@@ -2,13 +2,13 @@
 /**
  * PHP versions 5
  *
- * phTagr : Tag, Browse, and Share Your Photos.
- * Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * phTagr : Organize, Browse, and Share Your Photos.
+ * Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  *
  * Licensed under The GPL-2.0 License
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * @copyright     Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  * @link          http://www.phtagr.org phTagr
  * @package       Phtagr
  * @since         phTagr 2.2b3
@@ -19,19 +19,19 @@ App::uses('SearchComponent', 'Controller/Component');
 if (!class_exists('TestControllerMock')) {
   App::import('File', 'TestControllerMock', array('file' => dirname(dirname(__FILE__)) . DS . 'TestControllerMock.php'));
 }
+
 /**
  * SearchComponent Test Case
  *
  */
 class SearchComponentTestCase extends CakeTestCase {
 	var $controllerMock;
-	var $uses = array('User', 'Group', 'Media', 'Tag', 'Category');
+	var $uses = array('User', 'Group', 'Media', 'Field');
 	var $components = array('Search');
 
 	public $fixtures = array('app.file', 'app.media', 'app.user', 'app.group', 'app.groups_media',
       'app.groups_user', 'app.option', 'app.guest', 'app.comment', 'app.my_file',
-      'app.tag', 'app.media_tag', 'app.category', 'app.categories_media',
-      'app.location', 'app.locations_media', 'app.comment');
+      'app.fields_media', 'app.field', 'app.comment');
 
   /**
  * setUp method
@@ -45,28 +45,6 @@ class SearchComponentTestCase extends CakeTestCase {
     $this->bindModels();
     $this->bindCompontents();
 
-    $this->Search->validate = array(
-      'categories' => array(
-        'wordRule' => array('rule' => array('custom', '/^[-]?\w+$/')),
-        'minRule' => array('rule' => array('minLength', 3))
-        ),
-      'cities' => array('rule' => array('maxLength', 30)),
-      'countries' => array('rule' => array('maxLength', 30)),
-      'groups' => 'notEmpty',
-      'locations' => array('rule' => array('maxLength', 30)),
-      'page' => 'numeric',
-      'show' => array('rule' => array('inList', array(2, 12, 24, 64))),
-      'sort' => array('rule' => array('inList', array('date', '-date', 'newest', 'changes', 'viewed', 'popularity', 'random', 'name'))),
-      'states' => array('rule' => array('maxLength', 30)),
-      'tags' => array(
-        'wordRule' => array('rule' => array('custom', '/^[-]?\w+$/')),
-        'minRule' => array('rule' => array('minLength', 3))
-        ),
-      'tag_op' => array('rule' => array('inList', array('AND', 'OR'))),
-      'user' => 'alphaNumeric', // disabled
-      'visibility', // no validation
-      'world' // no validation but disabled
-      );
     $this->Search->disabled = array('user', 'world');
     $this->Search->defaults = array();
     $this->Search->clear();
@@ -75,8 +53,8 @@ class SearchComponentTestCase extends CakeTestCase {
 	/**
    * Load ShellControllerMock with models and components
    */
-  function loadControllerMock() {
-    $this->ControllerMock =& new TestControllerMock();
+  public function loadControllerMock() {
+    $this->ControllerMock = new TestControllerMock();
     $this->ControllerMock->setRequest(new CakeRequest());
     $this->ControllerMock->response = new CakeResponse();
     $this->ControllerMock->uses = $this->uses;
@@ -88,7 +66,7 @@ class SearchComponentTestCase extends CakeTestCase {
   /**
    * Bind controller's components to shell
    */
-  function bindCompontents() {
+  public function bindCompontents() {
     foreach($this->ControllerMock->components as $key => $component) {
       if (!is_numeric($key)) {
         $component = $key;
@@ -97,14 +75,14 @@ class SearchComponentTestCase extends CakeTestCase {
         $this->out("Could not load component $component");
         exit(1);
       }
-      $this->{$component} =& $this->ControllerMock->{$component};
+      $this->{$component} = $this->ControllerMock->{$component};
     }
   }
 
   /**
    * Bind controller's model to shell
    */
-  function bindModels() {
+  public function bindModels() {
     foreach($this->ControllerMock->uses as $key => $model) {
       if (!is_numeric($key)) {
         $model = $key;
@@ -113,11 +91,11 @@ class SearchComponentTestCase extends CakeTestCase {
         $this->out("Could not load model $model");
         exit(1);
       }
-      $this->{$model} =& $this->ControllerMock->{$model};
+      $this->{$model} = $this->ControllerMock->{$model};
     }
   }
 
-  function mockUser($user) {
+  public function mockUser($user) {
     $this->ControllerMock->mockUser($user);
   }
 
@@ -132,7 +110,16 @@ class SearchComponentTestCase extends CakeTestCase {
 		parent::tearDown();
 	}
 
-  function testValidation() {
+  public function testValidation() {
+    // overwrite rules for testing
+    $this->Search->validate['show'] = array('rule' => array('inList', array(2, 12, 24, 64)));
+    $this->Search->validate['tag'] = array(
+        'wordRule' => array('rule' => array('custom', '/^[-]?\w+$/')),
+        'minRule' => array('rule' => array('minLength', 3))
+        );
+    // No validation for visibility
+    unset($this->Search->validate['visibility']);
+    $this->Search->validate[] = 'visibility';
 
     // simple rule, false test
     $this->Search->setPage('two');
@@ -159,7 +146,7 @@ class SearchComponentTestCase extends CakeTestCase {
     $result = $this->Search->getShow();
     $this->assertEqual($result, 'no validation');
 
-    // multple rules
+    // multple rules. Tag should have at least 3 chars
     $this->Search->addTag(array('he', 'the'));
     $result = $this->Search->getTags();
     $this->assertEqual($result, array('the'));
@@ -191,12 +178,12 @@ class SearchComponentTestCase extends CakeTestCase {
     $this->assertEqual($result, "rule it");
   }
 
-  function testDecode() {
+  public function testDecode() {
     $decoded = $this->Search->decode("folder:2012=2f2012-03-10");
     $this->assertEqual($decoded, "folder:2012/2012-03-10");
   }
 
-  function testEncode() {
+  public function testEncode() {
     $encoded = $this->Search->encode("folder:2012/2012-03-10");
     $this->assertEqual($encoded, "folder:2012=2f2012-03-10");
   }
@@ -204,7 +191,7 @@ class SearchComponentTestCase extends CakeTestCase {
   /**
    * Test group search with correct acl sql query
    */
-  function testGroupSearchWithGroupAcl() {
+  public function testGroupSearchWithGroupAcl() {
     $admin = $this->User->save($this->User->create(array('username' => 'admin', 'role' => ROLE_ADMIN)));
     $user1 = $this->User->save($this->User->create(array('username' => 'admin', 'role' => ROLE_USER)));
 
@@ -226,7 +213,7 @@ class SearchComponentTestCase extends CakeTestCase {
     $this->assertEqual(array('IMG_1234.JPG'), Set::extract('/Media/name', $result));
   }
 
-  function testMultipleGroupSearch() {
+  public function testMultipleGroupSearch() {
     $this->User->save($this->User->create(array('username' => 'admin', 'role' => ROLE_ADMIN)));
     $admin = $this->User->findById($this->User->getLastInsertID());
 
@@ -273,7 +260,7 @@ class SearchComponentTestCase extends CakeTestCase {
     $this->assertEqual(array('IMG_1234.JPG'), Set::extract('/Media/name', $result));
   }
 
-  function testAccessForUserRole() {
+  public function testAccessForUserRole() {
     $this->User->save($this->User->create(array('username' => 'userA', 'role' => ROLE_USER)));
     $userA = $this->User->findById($this->User->getLastInsertID());
     $this->User->save($this->User->create(array('username' => 'userB', 'role' => ROLE_USER)));
@@ -351,7 +338,7 @@ class SearchComponentTestCase extends CakeTestCase {
     $this->Media->save(array('Media' => array('id' => $media2['Media']['id']), 'Group' => array('Group' => array($groupA['Group']['id']))));
 
     $this->mockUser($userA);
-    $this->Search->addSort('newest');
+    $this->Search->setSort('newest');
     $result = $this->Search->paginate();
     $this->assertEqual(Set::extract('/Media/name', $result), array('IMG_1234.JPG', 'IMG_2345.JPG'));
   }
@@ -398,13 +385,14 @@ class SearchComponentTestCase extends CakeTestCase {
     $userA = $this->User->findById($userA['User']['id']);
     $userB = $this->User->findById($userB['User']['id']);
 
-    $media1 = $this->Media->save($this->Media->create(array('name' => 'IMG_1234.JPG', 'user_id' => $userB['User']['id'], 'gacl' => 97)));
+    $media1 = $this->Media->save($this->Media->create(array('name' => 'IMG_1234.JPG', 'user_id' => $userB['User']['id'], 'gacl' => 97, 'date' => date('Y-m-d h:i:s', time() - 1000))));
     $this->Media->save(array('Media' => array('id' => $media1['Media']['id']), 'Group' => array('Group' => array($groupA['Group']['id']))));
-    $media2 = $this->Media->save($this->Media->create(array('name' => 'IMG_2345.JPG', 'user_id' => $userB['User']['id'], 'gacl' => 97)));
+    $media2 = $this->Media->save($this->Media->create(array('name' => 'IMG_2345.JPG', 'user_id' => $userB['User']['id'], 'gacl' => 97, 'date' => date('Y-m-d h:i:s', time()))));
     $this->Media->save(array('Media' => array('id' => $media2['Media']['id']), 'Group' => array('Group' => array($groupA['Group']['id']))));
+    $this->assertEqual(true, $media1['Media']['id'] < $media2['Media']['id']);
 
     $this->mockUser($userA);
-    $result = $this->Search->paginateMediaByCrumb($media1['Media']['id'], array('sort:newest'));
+    $result = $this->Search->paginateMediaByCrumb($media1['Media']['id'], array('sort:-date'));
     $this->assertEqual($result['Media']['name'], 'IMG_1234.JPG');
     // Check ACL
     $this->assertEqual($result['Media']['canWriteTag'], 1);
@@ -420,7 +408,7 @@ class SearchComponentTestCase extends CakeTestCase {
     $search = $this->ControllerMock->request->params['search'];
     $this->assertEqual($search['prevMedia'], false);
     $this->assertEqual($search['nextMedia'], $media2['Media']['id']);
-    $this->assertEqual($search['data'], array('sort' => 'newest'));
+    $this->assertEqual($search['data'], array('sort' => '-date'));
   }
 
   public function testExclusion() {
@@ -445,35 +433,32 @@ class SearchComponentTestCase extends CakeTestCase {
     // media4 is private
     $media4 = $this->Media->save($this->Media->create(array('name' => 'IMG_4567.JPG', 'user_id' => $userA['User']['id'])));
 
-    $skyTag = $this->Tag->save($this->Tag->create(array('name' => 'sky')));
-    $vacationTag = $this->Tag->save($this->Tag->create(array('name' => 'vacation')));
-    $natureTag = $this->Tag->save($this->Tag->create(array('name' => 'nature')));
+    $skyKeyword = $this->Field->save($this->Field->create(array('name' => 'keyword', 'data' => 'sky')));
+    $vacationKeyword = $this->Field->save($this->Field->create(array('name' => 'keyword', 'data' => 'vacation')));
+    $natureKeyword = $this->Field->save($this->Field->create(array('name' => 'keyword', 'data' => 'nature')));
 
-    $familyCategory = $this->Category->save($this->Category->create(array('name' => 'family')));
-    $friendsCategory = $this->Category->save($this->Category->create(array('name' => 'friends')));
+    $familyCategory = $this->Field->save($this->Field->create(array('name' => 'category', 'data' => 'family')));
+    $friendsCategory = $this->Field->save($this->Field->create(array('name' => 'category', 'data' => 'friends')));
 
-    // media1: Tags: sky, vacation. Category: family
+    // media1: Fields: sky, vacation. Category: family
     $this->Media->save(array(
         'Media' => array('id' => $media1['Media']['id']),
-        'Tag' => array('Tag' => array($skyTag['Tag']['id'], $vacationTag['Tag']['id'])),
-        'Category' => array('Category' => array($familyCategory['Category']['id'])),
+        'Field' => array('Field' => array($skyKeyword['Field']['id'], $vacationKeyword['Field']['id'], $familyCategory['Field']['id']))
         ));
-    // media2: Tags: sky, vacation, nature. Category: family, friends
+    // media2: Fields: sky, vacation, nature. Category: family, friends
     $this->Media->save(array(
         'Media' => array('id' => $media2['Media']['id']),
-        'Tag' => array('Tag' => array($skyTag['Tag']['id'], $vacationTag['Tag']['id'], $natureTag['Tag']['id'])),
-        'Category' => array('Category' => array($familyCategory['Category']['id'], $friendsCategory['Category']['id'])),
+        'Field' => array('Field' => array($skyKeyword['Field']['id'], $vacationKeyword['Field']['id'], $natureKeyword['Field']['id'], $familyCategory['Field']['id'], $friendsCategory['Field']['id']))
         ));
-    // media3: Tags: vacation, nature. Category:
+    // media3: Fields: vacation, nature. Category:
     $this->Media->save(array(
         'Media' => array('id' => $media3['Media']['id']),
-        'Tag' => array('Tag' => array($vacationTag['Tag']['id'], $natureTag['Tag']['id']))
+        'Field' => array('Field' => array($vacationKeyword['Field']['id'], $natureKeyword['Field']['id']))
         ));
-    // media4: Tags: vacation. Category: friends
+    // media4: Fields: vacation. Category: friends
     $this->Media->save(array(
         'Media' => array('id' => $media4['Media']['id']),
-        'Tag' => array('Tag' => array($vacationTag['Tag']['id'])),
-        'Category' => array('Category' => array($friendsCategory['Category']['id'])),
+        'Field' => array('Field' => array($vacationKeyword['Field']['id'], $friendsCategory['Field']['id'])),
         ));
 
     $this->mockUser($userB);
@@ -485,12 +470,12 @@ class SearchComponentTestCase extends CakeTestCase {
     $result = $this->Search->paginate();
     $this->assertEqual(array('IMG_1234.JPG'), Set::extract('/Media/name', $result));
 
-    // test with tag OR Operand
+    // test with keyword OR Operand
     $this->mockUser($userB);
     $this->Search->clear();
     $this->Search->addTag('sky');
     $this->Search->addTag('nature');
-    $this->Search->setTagOp('OR');
+    $this->Search->setOperand('OR');
     $this->Search->addCategory('-friends');
     $result = $this->Search->paginate();
     $this->assertEqual(array('IMG_1234.JPG', 'IMG_3456.JPG'), Set::extract('/Media/name', $result));
@@ -654,13 +639,13 @@ class SearchComponentTestCase extends CakeTestCase {
     $media2 = $this->Media->save($this->Media->create(array('name' => 'IMG_1232.JPG', 'user_id' => $user['User']['id'])));
     $media3 = $this->Media->save($this->Media->create(array('name' => 'IMG_1233.JPG', 'user_id' => $user['User']['id'])));
 
-    $city = $this->Media->Location->save($this->Media->Location->create(array('type' => LOCATION_CITY, 'name' => 'quebec')));
-    $state = $this->Media->Location->save($this->Media->Location->create(array('type' => LOCATION_STATE, 'name' => 'quebec')));
-    $country = $this->Media->Location->save($this->Media->Location->create(array('type' => LOCATION_COUNTRY, 'name' => 'canada')));
+    $city = $this->Media->Field->save($this->Media->Field->create(array('name' => 'city', 'data' => 'quebec')));
+    $state = $this->Media->Field->save($this->Media->Field->create(array('name' => 'state', 'data' => 'quebec')));
+    $country = $this->Media->Field->save($this->Media->Field->create(array('name' => 'country', 'data' => 'canada')));
 
-    $this->Media->save(array('Media' => array('id' => $media1['Media']['id']), 'Location' => array('Location' => array($city['Location']['id'], $country['Location']['id']))));
-    $this->Media->save(array('Media' => array('id' => $media2['Media']['id']), 'Location' => array('Location' => array($state['Location']['id'], $country['Location']['id']))));
-    $this->Media->save(array('Media' => array('id' => $media3['Media']['id']), 'Location' => array('Location' => array($country['Location']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media1['Media']['id']), 'Field' => array('Field' => array($city['Field']['id'], $country['Field']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media2['Media']['id']), 'Field' => array('Field' => array($state['Field']['id'], $country['Field']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media3['Media']['id']), 'Field' => array('Field' => array($country['Field']['id']))));
 
     $user = $this->User->findById($user['User']['id']);
 
@@ -683,5 +668,340 @@ class SearchComponentTestCase extends CakeTestCase {
     $this->Search->addState('-quebec');
     $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
     $this->assertEqual($mediaIds, array($media1['Media']['id'], $media3['Media']['id']));
+  }
+
+  public function testSearcheWithIncludeOptionalAndExcludedValues() {
+    $user = $this->User->save($this->User->create(array('username' => 'user', 'role' => ROLE_USER)));
+
+    $media1 = $this->Media->save($this->Media->create(array('name' => 'IMG_1231.JPG', 'user_id' => $user['User']['id'])));
+    $media2 = $this->Media->save($this->Media->create(array('name' => 'IMG_1232.JPG', 'user_id' => $user['User']['id'])));
+    $media3 = $this->Media->save($this->Media->create(array('name' => 'IMG_1233.JPG', 'user_id' => $user['User']['id'])));
+    $media4 = $this->Media->save($this->Media->create(array('name' => 'IMG_1234.JPG', 'user_id' => $user['User']['id'])));
+    $media5 = $this->Media->save($this->Media->create(array('name' => 'IMG_1235.JPG', 'user_id' => $user['User']['id'])));
+    $media6 = $this->Media->save($this->Media->create(array('name' => 'IMG_1236.JPG', 'user_id' => $user['User']['id'])));
+
+    $building = $this->Media->Field->save($this->Media->Field->create(array('name' => 'keyword', 'data' => 'building')));
+    $church = $this->Media->Field->save($this->Media->Field->create(array('name' => 'keyword', 'data' => 'church')));
+    $ruine = $this->Media->Field->save($this->Media->Field->create(array('name' => 'keyword', 'data' => 'ruine')));
+    $vacation = $this->Media->Field->save($this->Media->Field->create(array('name' => 'category', 'data' => 'vacation')));
+    $rome = $this->Media->Field->save($this->Media->Field->create(array('name' => 'city', 'data' => 'rome')));
+    $venice = $this->Media->Field->save($this->Media->Field->create(array('name' => 'city', 'data' => 'venice')));
+
+    $this->Media->save(array('Media' => array('id' => $media1['Media']['id']), 'Field' => array('Field' => array($building['Field']['id'], $vacation['Field']['id'], $rome['Field']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media2['Media']['id']), 'Field' => array('Field' => array($building['Field']['id'], $church['Field']['id'], $vacation['Field']['id'], $rome['Field']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media3['Media']['id']), 'Field' => array('Field' => array($building['Field']['id'], $church['Field']['id'], $ruine['Field']['id'], $vacation['Field']['id'], $rome['Field']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media4['Media']['id']), 'Field' => array('Field' => array($vacation['Field']['id'], $rome['Field']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media5['Media']['id']), 'Field' => array('Field' => array($building['Field']['id'], $church['Field']['id'], $ruine['Field']['id'], $vacation['Field']['id'], $venice['Field']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media6['Media']['id']), 'Field' => array('Field' => array($building['Field']['id'], $church['Field']['id'], $ruine['Field']['id'], $rome['Field']['id']))));
+
+    $user = $this->User->findById($user['User']['id']);
+
+    // Allow 'user' parameter
+    $this->Search->disabled = array();
+
+    $this->mockUser($user);
+
+    // Test must include of vaction. Optional building, church, and ruine. Exclude venice
+    // Images with more matches should be ranked higher
+    $this->Search->addTag('building');
+    $this->Search->addTag('church');
+    $this->Search->addTag('ruine');
+    $this->Search->addCategory('+vacation');
+    $this->Search->addCity('-venice');
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media3['Media']['id'], $media2['Media']['id'], $media1['Media']['id'], $media4['Media']['id']));
+  }
+
+  function testFolder() {
+    $user = $this->User->save($this->User->create(array('username' => 'user', 'role' => ROLE_USER)));
+    $uploadDir = $this->User->getRootDir($user);
+
+    $media1 = $this->Media->save($this->Media->create(array('name' => 'IMG_1231.JPG', 'user_id' => $user['User']['id'])));
+    $media2 = $this->Media->save($this->Media->create(array('name' => 'IMG_1232.JPG', 'user_id' => $user['User']['id'])));
+    $media3 = $this->Media->save($this->Media->create(array('name' => 'IMG_1233.JPG', 'user_id' => $user['User']['id'])));
+    $file1 = $this->Media->File->save($this->Media->File->create(array('media_id' => $media1['Media']['id'], 'path' => $uploadDir . '2006-01-22' . DS)));
+    $file2 = $this->Media->File->save($this->Media->File->create(array('media_id' => $media2['Media']['id'], 'path' => $uploadDir . '2012-11-02' . DS)));
+    $file3 = $this->Media->File->save($this->Media->File->create(array('media_id' => $media3['Media']['id'], 'path' => $uploadDir . '2012-11-02' . DS . 'post' . DS)));
+
+    $user = $this->User->findById($user['User']['id']);
+    $this->mockUser($user);
+
+    // Allow 'user' parameter
+    $this->Search->disabled = array();
+
+    $this->Search->setUser('user');
+    $this->Search->setFolder('2012-11-02');
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media2['Media']['id'], $media3['Media']['id']));
+  }
+
+  function testSearchWithDifferentFields() {
+    $user = $this->User->save($this->User->create(array('username' => 'user', 'role' => ROLE_USER)));
+    $user = $this->User->findById($user['User']['id']);
+    $this->mockUser($user);
+
+    $media1 = $this->Media->save($this->Media->create(array('name' => 'IMG_1231.JPG', 'user_id' => $user['User']['id'])));
+    $media2 = $this->Media->save($this->Media->create(array('name' => 'IMG_1232.JPG', 'user_id' => $user['User']['id'])));
+    $media3 = $this->Media->save($this->Media->create(array('name' => 'IMG_1233.JPG', 'user_id' => $user['User']['id'])));
+    $media4 = $this->Media->save($this->Media->create(array('name' => 'IMG_1234.JPG', 'user_id' => $user['User']['id'])));
+
+    $snow = $this->Media->Field->save($this->Media->Field->create(array('name' => 'keyword', 'data' => 'snow')));
+    $nature = $this->Media->Field->save($this->Media->Field->create(array('name' => 'category', 'data' => 'nature')));
+
+    $this->Media->save(array('Media' => array('id' => $media1['Media']['id']), 'Field' => array('Field' => array($snow['Field']['id'], $nature['Field']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media2['Media']['id']), 'Field' => array('Field' => array($nature['Field']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media3['Media']['id']), 'Field' => array('Field' => array($snow['Field']['id']))));
+
+    $this->Search->addTag('snow');
+    $this->Search->addCategory('nature');
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media1['Media']['id']));
+  }
+
+  function testMediaType() {
+    $user = $this->User->save($this->User->create(array('username' => 'user', 'role' => ROLE_USER)));
+    $user = $this->User->findById($user['User']['id']);
+    $this->mockUser($user);
+
+    $media1 = $this->Media->save($this->Media->create(array('name' => 'IMG_1231.JPG', 'user_id' => $user['User']['id'], 'type' => MEDIA_TYPE_IMAGE)));
+    $media2 = $this->Media->save($this->Media->create(array('name' => 'IMG_1232.JPG', 'user_id' => $user['User']['id'], 'type' => MEDIA_TYPE_VIDEO)));
+    $media3 = $this->Media->save($this->Media->create(array('name' => 'IMG_1233.JPG', 'user_id' => $user['User']['id'], 'type' => MEDIA_TYPE_IMAGE)));
+
+    $this->Search->setType('image');
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media1['Media']['id'], $media3['Media']['id']));
+
+    $this->Search->setType('video');
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media2['Media']['id']));
+  }
+
+  function testMediaTypeWithFields() {
+    $user = $this->User->save($this->User->create(array('username' => 'user', 'role' => ROLE_USER)));
+    $user = $this->User->findById($user['User']['id']);
+    $this->mockUser($user);
+
+    $media1 = $this->Media->save($this->Media->create(array('name' => 'IMG_1231.JPG', 'user_id' => $user['User']['id'], 'type' => MEDIA_TYPE_IMAGE)));
+    $media2 = $this->Media->save($this->Media->create(array('name' => 'IMG_1232.JPG', 'user_id' => $user['User']['id'], 'type' => MEDIA_TYPE_VIDEO)));
+    $media3 = $this->Media->save($this->Media->create(array('name' => 'IMG_1233.JPG', 'user_id' => $user['User']['id'], 'type' => MEDIA_TYPE_IMAGE)));
+    $media4 = $this->Media->save($this->Media->create(array('name' => 'IMG_1234.JPG', 'user_id' => $user['User']['id'], 'type' => MEDIA_TYPE_IMAGE)));
+    $media5 = $this->Media->save($this->Media->create(array('name' => 'IMG_1235.JPG', 'user_id' => $user['User']['id'], 'type' => MEDIA_TYPE_VIDEO)));
+
+    $snow = $this->Media->Field->save($this->Media->Field->create(array('name' => 'keyword', 'data' => 'snow')));
+    $nature = $this->Media->Field->save($this->Media->Field->create(array('name' => 'category', 'data' => 'nature')));
+
+    $this->Media->save(array('Media' => array('id' => $media1['Media']['id']), 'Field' => array('Field' => array($snow['Field']['id'], $nature['Field']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media2['Media']['id']), 'Field' => array('Field' => array($snow['Field']['id'], $nature['Field']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media3['Media']['id']), 'Field' => array('Field' => array($snow['Field']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media4['Media']['id']), 'Field' => array('Field' => array($nature['Field']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media5['Media']['id']), 'Field' => array('Field' => array($nature['Field']['id']))));
+
+    $this->Search->addTag('snow');
+    $this->Search->addCategory('nature');
+    $this->Search->setType('image');
+    // Media must contain 'snow' and 'nature' and must be an image
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media1['Media']['id']));
+
+    $this->Search->setType('video');
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media2['Media']['id']));
+  }
+
+  function testUserWithFields() {
+    $userA = $this->User->save($this->User->create(array('username' => 'userA', 'role' => ROLE_USER)));
+    $userA = $this->User->findById($userA['User']['id']);
+    $this->mockUser($userA);
+    $userB = $this->User->save($this->User->create(array('username' => 'userB', 'role' => ROLE_USER)));
+
+    $media1 = $this->Media->save($this->Media->create(array('name' => 'IMG_1231.JPG', 'user_id' => $userB['User']['id'], 'type' => MEDIA_TYPE_IMAGE, 'oacl' => ACL_READ_ORIGINAL)));
+    $media2 = $this->Media->save($this->Media->create(array('name' => 'IMG_1232.JPG', 'user_id' => $userB['User']['id'], 'type' => MEDIA_TYPE_VIDEO, 'oacl' => ACL_READ_ORIGINAL)));
+    $media3 = $this->Media->save($this->Media->create(array('name' => 'IMG_1233.JPG', 'user_id' => $userB['User']['id'], 'type' => MEDIA_TYPE_IMAGE, 'oacl' => ACL_READ_ORIGINAL)));
+    $media4 = $this->Media->save($this->Media->create(array('name' => 'IMG_1234.JPG', 'user_id' => $userA['User']['id'], 'type' => MEDIA_TYPE_IMAGE, 'oacl' => ACL_READ_ORIGINAL)));
+    $media5 = $this->Media->save($this->Media->create(array('name' => 'IMG_1235.JPG', 'user_id' => $userA['User']['id'], 'type' => MEDIA_TYPE_VIDEO, 'oacl' => ACL_READ_ORIGINAL)));
+
+    $snow = $this->Media->Field->save($this->Media->Field->create(array('name' => 'keyword', 'data' => 'snow')));
+    $nature = $this->Media->Field->save($this->Media->Field->create(array('name' => 'category', 'data' => 'nature')));
+
+    $this->Media->save(array('Media' => array('id' => $media1['Media']['id']), 'Field' => array('Field' => array($snow['Field']['id'], $nature['Field']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media2['Media']['id']), 'Field' => array('Field' => array($nature['Field']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media4['Media']['id']), 'Field' => array('Field' => array($snow['Field']['id'], $nature['Field']['id']))));
+    $this->Media->save(array('Media' => array('id' => $media5['Media']['id']), 'Field' => array('Field' => array($nature['Field']['id']))));
+
+    // Allow 'user' parameter
+    $this->Search->disabled = array();
+
+    $this->Search->addTag('snow');
+    $this->Search->addCategory('nature');
+    $this->Search->setOperand('OR');
+    $this->Search->setUser('UserB');
+    // Media must contain 'snow' or 'nature' and must belong to userB
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media1['Media']['id'], $media2['Media']['id']));
+  }
+
+  /**
+   * Test non assignments to fields and go
+   */
+  function testNotAssignedFields() {
+    $user = $this->User->save($this->User->create(array('username' => 'user', 'role' => ROLE_USER)));
+    $user = $this->User->findById($user['User']['id']);
+    $this->mockUser($user);
+
+    $media1 = $this->Media->save($this->Media->create(array('name' => 'IMG_1231.JPG', 'user_id' => $user['User']['id'], 'latitude' => 48.4, 'longitude' => 8.12)));
+    $media2 = $this->Media->save($this->Media->create(array('name' => 'IMG_1232.JPG', 'user_id' => $user['User']['id'])));
+
+    $keyword = $this->Media->Field->save($this->Media->Field->create(array('name' => 'keyword', 'data' => 'church')));
+    $category = $this->Media->Field->save($this->Media->Field->create(array('name' => 'category', 'data' => 'urban')));
+    $sublocation = $this->Media->Field->save($this->Media->Field->create(array('name' => 'sublocation', 'data' => 'munster')));
+    $city = $this->Media->Field->save($this->Media->Field->create(array('name' => 'city', 'data' => 'freiburg')));
+    $state = $this->Media->Field->save($this->Media->Field->create(array('name' => 'state', 'data' => 'bw')));
+    $country = $this->Media->Field->save($this->Media->Field->create(array('name' => 'country', 'data' => 'germany')));
+
+    $fieldIds = Set::extract('/Field/id', array($keyword, $category, $sublocation, $city, $state, $country));
+    $this->Media->save(array('Media' => array('id' => $media1['Media']['id']), 'Field' => array('Field' => $fieldIds)));
+
+    $this->Search->addTag('none');
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media2['Media']['id']));
+
+    $this->Search->clear();
+    $this->Search->addCategory('none');
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media2['Media']['id']));
+
+    $this->Search->clear();
+    $this->Search->addSublocation('none');
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media2['Media']['id']));
+
+    $this->Search->clear();
+    $this->Search->addCity('none');
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media2['Media']['id']));
+
+    $this->Search->clear();
+    $this->Search->addState('none');
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media2['Media']['id']));
+
+    $this->Search->clear();
+    $this->Search->addCountry('none');
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media2['Media']['id']));
+
+    $this->Search->clear();
+    $this->Search->addLocation('none');
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media2['Media']['id']));
+
+    $this->Search->clear();
+    $this->Search->setGeo('none');
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media2['Media']['id']));
+  }
+
+  function testNotAssignedFieldsMultiple() {
+    $user = $this->User->save($this->User->create(array('username' => 'user', 'role' => ROLE_USER)));
+    $user = $this->User->findById($user['User']['id']);
+    $this->mockUser($user);
+
+    $media1 = $this->Media->save($this->Media->create(array('name' => 'IMG_1231.JPG', 'user_id' => $user['User']['id'])));
+    $media2 = $this->Media->save($this->Media->create(array('name' => 'IMG_1232.JPG', 'user_id' => $user['User']['id'])));
+    $media3 = $this->Media->save($this->Media->create(array('name' => 'IMG_1234.JPG', 'user_id' => $user['User']['id'])));
+
+    $keyword = $this->Media->Field->save($this->Media->Field->create(array('name' => 'keyword', 'data' => 'church')));
+    $category = $this->Media->Field->save($this->Media->Field->create(array('name' => 'category', 'data' => 'urban')));
+
+    $this->Media->save(array('Media' => array('id' => $media1['Media']['id']), 'Field' => array('Field' => $keyword['Field']['id'])));
+    $this->Media->save(array('Media' => array('id' => $media3['Media']['id']), 'Field' => array('Field' => $category['Field']['id'])));
+
+    $this->Search->addTag('none');
+    $this->Search->addCategory('none');
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media2['Media']['id']));
+  }
+
+  /**
+   * Test search term geo:any
+   */
+  function testAnyGeo() {
+    $user = $this->User->save($this->User->create(array('username' => 'user', 'role' => ROLE_USER)));
+    $user = $this->User->findById($user['User']['id']);
+    $this->mockUser($user);
+
+    $media1 = $this->Media->save($this->Media->create(array('name' => 'IMG_1231.JPG', 'user_id' => $user['User']['id'], 'latitude' => 48.4, 'longitude' => 8.12)));
+    $media2 = $this->Media->save($this->Media->create(array('name' => 'IMG_1232.JPG', 'user_id' => $user['User']['id'])));
+
+    $this->Search->setGeo('any');
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media1['Media']['id']));
+  }
+
+  /**
+   * Test search term similar:power
+   */
+  function testSimilar() {
+    $user = $this->User->save($this->User->create(array('username' => 'user', 'role' => ROLE_USER)));
+    $user = $this->User->findById($user['User']['id']);
+    $this->mockUser($user);
+
+    $media1 = $this->Media->save($this->Media->create(array('name' => 'IMG_1231.JPG', 'user_id' => $user['User']['id'])));
+    $media2 = $this->Media->save($this->Media->create(array('name' => 'IMG_1232.JPG', 'user_id' => $user['User']['id'])));
+
+    $flower = $this->Media->Field->save($this->Media->Field->create(array('name' => 'keyword', 'data' => 'flower')));
+    $vacation = $this->Media->Field->save($this->Media->Field->create(array('name' => 'keyword', 'data' => 'flower')));
+
+    $this->Media->save(array('Media' => array('id' => $media2['Media']['id']), 'Field' => array('Field' => $flower['Field']['id'])));
+
+    $this->Search->addSimilar('power');
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media2['Media']['id']));
+  }
+
+  /**
+   * Test search term any:vacation
+   */
+  function testAny() {
+    $user = $this->User->save($this->User->create(array('username' => 'user', 'role' => ROLE_USER)));
+    $user = $this->User->findById($user['User']['id']);
+    $this->mockUser($user);
+
+    $media1 = $this->Media->save($this->Media->create(array('name' => 'IMG_1231.JPG', 'user_id' => $user['User']['id'])));
+    $media2 = $this->Media->save($this->Media->create(array('name' => 'IMG_1232.JPG', 'user_id' => $user['User']['id'])));
+    $media3 = $this->Media->save($this->Media->create(array('name' => 'IMG_1233.JPG', 'user_id' => $user['User']['id'])));
+
+    $vacationKeyword = $this->Media->Field->save($this->Media->Field->create(array('name' => 'keyword', 'data' => 'vacation')));
+    $vacationCategory = $this->Media->Field->save($this->Media->Field->create(array('name' => 'category', 'data' => 'vacation')));
+
+    $this->Media->save(array('Media' => array('id' => $media2['Media']['id']), 'Field' => array('Field' => $vacationKeyword['Field']['id'])));
+    $this->Media->save(array('Media' => array('id' => $media3['Media']['id']), 'Field' => array('Field' => $vacationCategory['Field']['id'])));
+
+    $this->Search->addAny('vacation');
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media2['Media']['id'], $media3['Media']['id']));
+  }
+
+  /**
+   * Test search term any:vacation
+   */
+  function testTagAny() {
+    $user = $this->User->save($this->User->create(array('username' => 'user', 'role' => ROLE_USER)));
+    $user = $this->User->findById($user['User']['id']);
+    $this->mockUser($user);
+
+    $media1 = $this->Media->save($this->Media->create(array('name' => 'IMG_1231.JPG', 'user_id' => $user['User']['id'])));
+    $media2 = $this->Media->save($this->Media->create(array('name' => 'IMG_1232.JPG', 'user_id' => $user['User']['id'])));
+    $media3 = $this->Media->save($this->Media->create(array('name' => 'IMG_1233.JPG', 'user_id' => $user['User']['id'])));
+
+    $flowerKeyword = $this->Media->Field->save($this->Media->Field->create(array('name' => 'keyword', 'data' => 'flower')));
+    $dogKeyword = $this->Media->Field->save($this->Media->Field->create(array('name' => 'keyword', 'data' => 'dog')));
+
+    $this->Media->save(array('Media' => array('id' => $media2['Media']['id']), 'Field' => array('Field' => $flowerKeyword['Field']['id'])));
+    $this->Media->save(array('Media' => array('id' => $media3['Media']['id']), 'Field' => array('Field' => $dogKeyword['Field']['id'])));
+
+    $this->Search->addTag('any');
+    $mediaIds = Set::extract('/Media/id', $this->Search->paginate());
+    $this->assertEqual($mediaIds, array($media2['Media']['id'], $media3['Media']['id']));
   }
 }

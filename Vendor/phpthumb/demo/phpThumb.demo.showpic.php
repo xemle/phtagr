@@ -27,6 +27,8 @@
 // See demo linked from http://phpthumb.sourceforge.net    ///
 //////////////////////////////////////////////////////////////
 
+die('For security reasons, this demo is disabled by default. Please comment out line '.__LINE__.' in '.basename(__FILE__));
+
 $phpThumbLocation = '../phpThumb.php?';
 
 echo '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">';
@@ -113,7 +115,7 @@ if (isset($_GET['title'])) {
 
 <body style="margin: 0px;" onLoad="setBrowserWindowSizeToImage();"><div id="showpicspan"><?php
 
-if (@$_GET['src']) {
+if (!empty($_GET['src'])) {
 
 	echo '<script type="text/javascript">';
 	echo 'document.writeln(\'<img src="'.$imagesrc.'" border="0" id="imageimg" hspace="0" hspace="0" style="padding: 0px; margin: 0px;">\');';

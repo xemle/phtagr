@@ -2,13 +2,13 @@
 /**
  * PHP versions 5
  *
- * phTagr : Tag, Browse, and Share Your Photos.
- * Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * phTagr : Organize, Browse, and Share Your Photos.
+ * Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  *
  * Licensed under The GPL-2.0 License
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * @copyright     Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  * @link          http://www.phtagr.org phTagr
  * @package       Phtagr
  * @since         phTagr 2.2b3
@@ -39,8 +39,8 @@ class User extends AppModel
       'rule' => array('between', 3, 32),
       'message' => 'Username must be between 3 and 32 characters long.'),
     'password' => array(
-      'rule' => array('between', 6, 20),
-      'message' => 'Password must be between 6 and 20 characters long.'),
+      'rule' => array('between', 6, 32),
+      'message' => 'Password must be between 6 and 32 characters long.'),
     'role' => array(
       'rule' => array('between', ROLE_GUEST, ROLE_ADMIN),
       'message' => 'Invalid role'),
@@ -52,14 +52,14 @@ class User extends AppModel
       'message' => 'Invalid notification interval')
     );
 
-  function afterFind($result, $primary = false) {
+  public function afterFind($result, $primary = false) {
     if ($primary && isset($result[0]['Option'])) {
       $result[0]['Option'] = $this->Option->addDefaults($result[0]['Option']);
     }
     return $result;
   }
 
-  function __fromReadableSize($readable) {
+  public function __fromReadableSize($readable) {
     if (is_float($readable) || is_numeric($readable)) {
       return $readable;
     } elseif (preg_match_all('/^\s*(0|[1-9][0-9]*)(\.[0-9]+)?\s*([KkMmGg][Bb]?)?\s*$/', $readable, $matches, PREG_SET_ORDER)) {
@@ -96,7 +96,7 @@ class User extends AppModel
     }
   }
 
-  function beforeValidate() {
+  public function beforeValidate($options = array()) {
     if (isset($this->data['User']['password']) &&
       isset($this->data['User']['confirm'])) {
       if (empty($this->data['User']['password']) &&
@@ -105,12 +105,12 @@ class User extends AppModel
         unset($this->data['User']['confirm']);
         unset($this->data['User']['password']);
       } elseif (empty($this->data['User']['password'])) {
-        $this->invalidate('password', __('Password not given', true));
+        $this->invalidate('password', __('Password not given'));
       } elseif (empty($this->data['User']['confirm'])) {
-        $this->invalidate('confirm', __('Password confirmation is missing', true));
+        $this->invalidate('confirm', __('Password confirmation is missing'));
       } elseif ($this->data['User']['password'] != $this->data['User']['confirm']) {
-        $this->invalidate('password', __('Password confirmation mismatch', true));
-        $this->invalidate('confirm', __('Password confirmation mismatch', true));
+        $this->invalidate('password', __('Password confirmation mismatch'));
+        $this->invalidate('confirm', __('Password confirmation mismatch'));
       }
     }
     $id = false;
@@ -122,13 +122,13 @@ class User extends AppModel
     if (isset($this->data['User']['username']) && $id) {
       $other = $this->find('first', array('conditions' => array('User.username' => $this->data['User']['username']), 'recursive' => -1));
       if ($other && $other['User']['id'] != $id) {
-        $this->invalidate('username', __('Username already taken', true));
+        $this->invalidate('username', __('Username already taken'));
       }
     }
     return true;
   }
 
-  function beforeSave() {
+  public function beforeSave($options = array()) {
     if (isset($this->data['User']['quota'])) {
       $this->data['User']['quota'] = $this->__fromReadableSize($this->data['User']['quota']);
     }
@@ -140,7 +140,7 @@ class User extends AppModel
     return true;
   }
 
-  function beforeDelete($cascade) {
+  public function beforeDelete($cascade = true) {
     $id = $this->id;
     $this->bindModel(array('hasMany' => array('Media')));
     Logger::info("Delete all image database entries of user $id");
@@ -157,7 +157,7 @@ class User extends AppModel
     return true;
   }
 
-  function writeSession($user, $session) {
+  public function writeSession(&$user, &$session) {
     if (!$session || !isset($user['User']['id']) || !isset($user['User']['role']) || !isset($user['User']['username'])) {
       return;
     }
@@ -166,23 +166,24 @@ class User extends AppModel
     $session->write('User.username', $user['User']['username']);
   }
 
-  function hasAnyWithRole($role = ROLE_ADMIN) {
+  public function hasAnyWithRole($role = ROLE_ADMIN) {
     $role = min(max(intval($role), ROLE_NOBODY), ROLE_ADMIN);
     return $this->hasAny("role >= $role");
   }
 
-  function getNobody() {
+  public function getNobody() {
     $nobody = array(
         'User' => array(
             'id' => -1,
             'username' => '',
             'role' => ROLE_NOBODY),
         'Member' => array(),
+        'Group' => array(),
         'Option' => $this->Option->addDefaults(array()));
     return $nobody;
   }
 
-  function isExpired($data) {
+  public function isExpired($data) {
     if (!isset($data['User']['expires']))
       return false;
     $now = time();
@@ -192,12 +193,15 @@ class User extends AppModel
     return false;
   }
 
-  /** Generate a keystring
-    @param data User model data
-    @param length Key length. Default is 10. Must be beween 3 and 128.
-    @param alphabet Key alphabet as string. Default is [a-zA-Z0-9]. Must be at least 10 characters long.
-    @return User model data */
-  function generateKey($data, $length = 10, $alphabet = false) {
+  /**
+   * Generate a random key
+   *
+   * @param data User model data as reference
+   * @param length Key length. Default is 10. Must be beween 3 and 128.
+   * @param alphabet Key alphabet as string. Default is [a-zA-Z0-9]. Must be at least 10 characters long.
+   * @return User model data
+   */
+  public function generateKey(&$data, $length = 10, $alphabet = false) {
     srand(microtime(true)*1000);
 
     if (!$alphabet || strlen(strval($alphabet)) < 10) {
@@ -210,35 +214,37 @@ class User extends AppModel
 
     $key = '';
     for ($i = 0; $i < $length; $i++) {
-      $key .= substr($alphabet, rand(0, $count), 1);
+      $key .= substr($alphabet, rand(0, $count - 1), 1);
     }
     $data['User']['key'] = $key;
     return $data;
   }
 
-  function getRootDir($data) {
+  public function getRootDir($data, $create = true) {
     if (!isset($data['User']['id'])) {
       Logger::err("Data does not contain user's id");
       return false;
     }
 
     $rootDir = USER_DIR.$data['User']['id'].DS.'files'.DS;
-    $folder = new Folder();
-    if (!$folder->create($rootDir)) {
-      Logger::err("Could not create users root directory '$fileDir'");
-      return false;
+    if ($create) {
+      $folder = new Folder();
+      if (!$folder->create($rootDir)) {
+        Logger::err("Could not create users root directory '$fileDir'");
+        return false;
+      }
     }
     return $rootDir;
   }
 
-  function allowWebdav($user) {
+  public function allowWebdav($user) {
     if (isset($user['User']['quota']) && $user['User']['quota'] > 0) {
       return true;
     }
     return false;
   }
 
-  function canUpload($user, $size) {
+  public function canUpload($user, $size) {
     $this->bindModel(array('hasMany' => array('MyFile')));
     $userId = intval($user['User']['id']);
     if ($userId < 1) {
@@ -262,7 +268,7 @@ class User extends AppModel
    * @param boolean like If true search for similar
    * @return Array of users model data. If username is set only one user model data
    */
-  function findVisibleUsers($user, $username = false, $like = false) {
+  public function findVisibleUsers($user, $username = false, $like = false) {
     $conditions = array();
     $findType = 'all';
     $resusive = -1;

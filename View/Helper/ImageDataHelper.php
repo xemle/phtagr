@@ -2,13 +2,13 @@
 /**
  * PHP versions 5
  *
- * phTagr : Tag, Browse, and Share Your Photos.
- * Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * phTagr : Organize, Browse, and Share Your Photos.
+ * Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  *
  * Licensed under The GPL-2.0 License
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * @copyright     Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  * @link          http://www.phtagr.org phTagr
  * @package       Phtagr
  * @since         phTagr 2.2b3
@@ -19,9 +19,9 @@ class ImageDataHelper extends AppHelper {
 
   var $helpers = array('Session', 'Html', 'Form', 'Search', 'Option', 'Breadcrumb');
 
-  function beforeRender() {
+  function beforeRender($viewFile) {
     $this->Search->initialize();
-    $this->Option->beforeRender();
+    $this->Option->beforeRender($viewFile);
   }
 
   /**
@@ -216,7 +216,7 @@ class ImageDataHelper extends AppHelper {
       return false;
     }
 
-    $img = $this->mediaImage(&$media, $options);
+    $img = $this->mediaImage($media, $options);
 
     $options = am(array('div' => false, 'params' => false, 'before' => '', 'after' => ''), $options);
 
@@ -344,51 +344,75 @@ class ImageDataHelper extends AppHelper {
     $output = '<span onmouseover="toggleVisibility(\''.$id.'\', \'inline\');"';
     $output .= ' onmouseout="toggleVisibility(\''.$id.'\', \'inline\');">';
 
-    $output .= $this->Html->link($data['Media']['date'], $this->getDateLink(&$data, '3h'));
+    $output .= $this->Html->link($data['Media']['date'], $this->getDateLink($data, '3h'));
     $output .= ' ';
 
     $output .= '<div style="display: none;" class="actionlist" id="'.$id.'">';
     $icon = $this->Html->image('icons/date_previous.png', array('alt' => '<', 'title' => __("View media of previous dates")));
-    $output .= $this->Html->link($icon, $this->getDateLink(&$data, 'to'), array('escape' => false));
+    $output .= $this->Html->link($icon, $this->getDateLink($data, 'to'), array('escape' => false));
 
     if ($this->Search->getFrom() && !$this->Search->getTo()) {
       $icon = $this->Html->image('icons/date_interval.png', array('alt' => '<>', 'title' => __("View media of interval")));
-      $output .= $this->Html->link($icon, $this->getDateLink(&$data, 'addTo'), array('escape' => false));
+      $output .= $this->Html->link($icon, $this->getDateLink($data, 'addTo'), array('escape' => false));
     }
 
     if ($this->Search->getFrom() && $this->Search->getTo()) {
       $icon = $this->Html->image('icons/date_interval_add_prev.png', array('alt' => '<>', 'title' => __("Set new end date of interval")));
-      $output .= $this->Html->link($icon, $this->getDateLink(&$data, 'addTo'), array('escape' => false));
+      $output .= $this->Html->link($icon, $this->getDateLink($data, 'addTo'), array('escape' => false));
     }
 
     $icon = $this->Html->image('icons/calendar_view_day.png', array('alt' => 'd', 'title' => __("View media of this day")));
-    $output .= $this->Html->link($icon, $this->getDateLink(&$data, '12h'), array('escape' => false));
+    $output .= $this->Html->link($icon, $this->getDateLink($data, '12h'), array('escape' => false));
 
     $icon = $this->Html->image('icons/calendar_view_week.png', array('alt' => 'w', 'title' => __("View media of this week")));
-    $output .= $this->Html->link($icon, $this->getDateLink(&$data, '3.5d'), array('escape' => false));
+    $output .= $this->Html->link($icon, $this->getDateLink($data, '3.5d'), array('escape' => false));
 
     $icon = $this->Html->image('icons/calendar_view_month.png', array('alt' => 'm', 'title' => __("View media of this month")));
-    $output .= $this->Html->link($icon, $this->getDateLink(&$data, '15d'), array('escape' => false));
+    $output .= $this->Html->link($icon, $this->getDateLink($data, '15d'), array('escape' => false));
 
     if ($this->Search->getTo() && !$this->Search->getFrom()) {
       $icon = $this->Html->image('icons/date_interval.png', array('alt' => '<>', 'title' => __("View media of interval")));
-      $output .= $this->Html->link($icon, $this->getDateLink(&$data, 'addFrom'), array('escape' => false));
+      $output .= $this->Html->link($icon, $this->getDateLink($data, 'addFrom'), array('escape' => false));
     }
 
     if ($this->Search->getTo() && $this->Search->getFrom()) {
       $icon = $this->Html->image('icons/date_interval_add_next.png', array('alt' => '<>', 'title' => __("Set new start date for interval")));
-      $output .= $this->Html->link($icon, $this->getDateLink(&$data, 'addFrom'), array('escape' => false));
+      $output .= $this->Html->link($icon, $this->getDateLink($data, 'addFrom'), array('escape' => false));
     }
 
     $icon = $this->Html->image('icons/date_next.png', array('alt' => '>', 'title' => __("View media of next dates")));
-    $output .= $this->Html->link($icon, $this->getDateLink(&$data, 'from'), array('escape' => false));
+    $output .= $this->Html->link($icon, $this->getDateLink($data, 'from'), array('escape' => false));
     $output .= '</div></span>';
 
     return $output;
   }
 
-  function _metaHabtm($data, $habtm) {
-    if (!count($data[$habtm])) {
+  /**
+   * Returns media fields as field name to field value array
+   *
+   * @param array $media Media model data
+   * @return array nameToValue array
+   */
+  function getMediaFields(&$media) {
+    $fields = array('keyword' => array(), 'category' => array(), 'location' => array());
+    $locations = array('sublocation', 'city', 'state', 'country');
+    if (!isset($media['Field'])) {
+      return $fields;
+    }
+    foreach ($media['Field'] as $field) {
+      if (!isset($fields[$field['name']])) {
+        $fields[$field['name']] = array();
+      }
+      $fields[$field['name']][] = $field['data'];
+      if (in_array($field['name'], $locations)) {
+        $fields['location'][] = $field['data'];
+      }
+    }
+    return $fields;
+  }
+
+  function _metaHabtm($data, $name, $values) {
+    if (!count($values)) {
       return false;
     }
 
@@ -396,11 +420,11 @@ class ImageDataHelper extends AppHelper {
     if ($this->action == 'user') {
       $base .= "/user/".$this->params['pass'][0];
     }
-    $base .= "/".strtolower($habtm);
+    $base .= "/".$name;
 
     $links = array();
-    foreach ($data[$habtm] as $assoc) {
-      $links[] = $this->Html->link($assoc['name'], "$base/{$assoc['name']}");
+    foreach ($values as $value) {
+      $links[] = $this->Html->link($value, "$base/$value");
     }
     return implode(', ', $links);
   }
@@ -492,7 +516,7 @@ class ImageDataHelper extends AppHelper {
     } else {
       $output = $this->Html->link($value, $urls['global']);
     }
-    $icons[] = $this->Html->link($this->getIcon('add', false, __("Include %s from search", $value)), $urls['add'], array('escape' => false));
+    $icons[] = $this->Html->link($this->getIcon('add', false, __("Include %s into search", $value)), $urls['add'], array('escape' => false));
     if ($withExclude) {
       $icons[] = $this->Html->link($this->getIcon('delete', false, __("Exclude %s from search", $value)), $urls['del'], array('escape' => false));
     }
@@ -522,21 +546,22 @@ class ImageDataHelper extends AppHelper {
     if ($userId) {
       $this->Search->setUser($userId);
     }
-    $cells[] = array(__("Date"), $this->_metaDate(&$data));
+    $cells[] = array(__("Date"), $this->_metaDate($data));
 
-    if (count($data['Tag'])) {
-      $cells[] = array(__('Tags'), $this->_metaHabtm(&$data, 'Tag'));
+    $fields = $this->getMediaFields($data);
+    if (count($fields['keyword'])) {
+      $cells[] = array(__('Tags'), $this->_metaHabtm($data, 'tag', $fields['keyword']));
     }
-    if (count($data['Category'])) {
-      $cells[] = array(__('Categories'), $this->_metaHabtm(&$data, 'Category'));
+    if (count($fields['category'])) {
+      $cells[] = array(__('Categories'), $this->_metaHabtm($data, 'category', $fields['category']));
     }
 
     $locations = array();
-    if (count($data['Location'])) {
-      $locations[] = $this->_metaHabtm(&$data, 'Location');
+    if (count($fields['location'])) {
+      $locations[] = $this->_metaHabtm($data, 'location', $fields['location']);
     }
     if (isset($data['Media']['longitude']) && isset($data['Media']['latitude'])) {
-      $locations[] = $this->geoLocation(&$data);
+      $locations[] = $this->geoLocation($data);
     }
     if (count($locations)) {
       $cells[] = array(__('Locations'), implode(', ', $locations));
@@ -584,7 +609,7 @@ class ImageDataHelper extends AppHelper {
    */
   function acl2select($fieldName, $data, $flag=0, $mask=0, $options=null) {
     if (is_array($data)) {
-      $level = $this->_getCurrentLevel(&$data, &$flag, &$mask);
+      $level = $this->_getCurrentLevel($data, $flag, $mask);
     } elseif (is_numeric($data)) {
       $level = $data;
     } else {

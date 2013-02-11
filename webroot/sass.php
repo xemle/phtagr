@@ -86,7 +86,7 @@ if (!defined('CAKE_CORE_INCLUDE_PATH')) {
 	exit('File Not Found');
 }
 
-if (preg_match('|\.\.|', $url) || !preg_match('|^(\w+/)?ccss/(.+)(\.[^.]+)?$|iU', $url, $regs)) {
+if (preg_match('|\.\.|', $url) || !preg_match('|^([\w/]+)?ccss/(.+)(\.[^.]+)?$|iU', $url, $regs)) {
 	die('Wrong file name.');
 }
 
@@ -118,10 +118,14 @@ header("Pragma: cache");        // HTTP/1.0
 $cssPath = CSS;
 if ($regs[1]) {
 	$plugin = trim($regs[1], '/');
+	$theme = split('/', $plugin);
 	if (is_dir('.' . DS . $plugin . DS . 'css')) {
 		$cssPath = '.' . DS . $plugin . DS . 'css' . DS;
+	} else if (count($theme) > 1 && $theme[0] == 'theme') {
+		$path = App::themePath($theme[1]);
+		$cssPath = $path . 'webroot' . DS . 'css' . DS;
 	} else {
-		$path = App::pluginPath($plugin);
+		$path = App::pluginPath(Inflector::camelize($plugin));
 		$cssPath = $path . 'webroot' . DS . 'css' . DS;
 	}
 }
@@ -130,6 +134,27 @@ $cssFile = $cssPath . $regs[2] . $regs[3];
 $sassFile = false;
 if ($ext === 'css') {
 	$sassFile = str_replace('.css', '.sass', $cssFile);
+}
+
+// Used Sass compiler does not work with PHP 5.4. Following section is a
+// work around to provide a precompiled SASS file
+$phpVersion = preg_split('/[-\.]/', phpversion());
+$requiredPhpVersion = $phpVersion[0] == 5 && $phpVersion[1] < 4;
+$useSassCompiler = $requiredPhpVersion && Configure::read('debug') > 0;
+
+if (!$useSassCompiler) {
+  if (file_exists($cssFile)) {
+    echo file_get_contents($cssFile);
+  } else {
+    echo "/*\nCan not compile SASS file '$sassFile'!\n\n"
+      . "PHP 5.3 with and debug mode 1 or 2 is required. ";
+    if ($requiredPhpVersion) {
+      echo "Please set Configure::write(\"debug\", 1); in Config/core.php.\n*/";
+    } else {
+      echo "Please use PHP 5.3. You are running PHP " . phpversion() . "\n*/";
+    }
+  }
+  die;
 }
 
 // Parse the Sass file if there is one

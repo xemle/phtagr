@@ -2,13 +2,13 @@
 /**
  * PHP versions 5
  *
- * phTagr : Tag, Browse, and Share Your Photos.
- * Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * phTagr : Organize, Browse, and Share Your Photos.
+ * Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  *
  * Licensed under The GPL-2.0 License
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * @copyright     Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  * @link          http://www.phtagr.org phTagr
  * @package       Phtagr
  * @since         phTagr 2.2b3
@@ -21,7 +21,7 @@ class FileManagerComponent extends Component {
   var $MyFile = null;
   var $User = null;
 
-  function initialize(&$controller) {
+  public function initialize(Controller $controller) {
     $this->controller = $controller;
     if (!empty($controller->MyFile)) {
       $this->MyFile = $controller->MyFile;
@@ -32,11 +32,18 @@ class FileManagerComponent extends Component {
     $this->User = $controller->User;
   }
 
-  /** Add a file to the database
-    @param filename Filename to add
-    @param user Optional user. User model data or user Id.
-    @return File id or false on error */
-  function add($filename, $user = false) {
+  /**
+   * Add a file to the database
+   *
+   * @param filename Filename to add
+   * @param user Optional user. User model data or user Id.
+   * @return array File id or false on error
+   */
+  public function add($filename, $user = false) {
+    if (!is_readable($filename)) {
+      Logger::error("Can not read file: $filename");
+      return false;
+    }
     if (!$user) {
       $userId = $this->controller->getUserId();
     } elseif (is_numeric($user)) {
@@ -53,7 +60,9 @@ class FileManagerComponent extends Component {
 
     $id = $this->controller->MyFile->fileExists($filename);
     if ($id) {
-      Logger::verbose("File $filename already exists (id $id)");
+      $file = $this->controller->MyFile->findById($id);
+      $this->controller->MyFile->update($file);
+      Logger::verbose("Update file $filename (id $id)");
       return $id;
     }
     $flag = 0;
@@ -73,19 +82,29 @@ class FileManagerComponent extends Component {
 
   }
 
-  /** Delete a file
-    @param file File ID, filename or file model data
-    @return True on success */
-  function delete($file) {
+  /**
+   * Delete a file
+   *
+   * @param file File ID, filename or file model data
+   * @return True on success
+   */
+  public function delete($file) {
+    $isExternal = $this->isExternal($file);
     if (is_string($file)) {
       if (is_dir($file)) {
-        $deleteFolder = !$this->isExternal($file);
+        $deleteFolder = !$isExternal;
         return $this->controller->MyFile->deletePath($file, $deleteFolder);
       }
       $id = $this->controller->MyFile->fileExists($file);
       if (!$id) {
-        Logger::warn("Could not find file $file");
-        return false;
+        if (!$isExternal && is_readable($file) && is_writable(dirname($file))) {
+          Logger::warn("Delete unasigned internal file: $file");
+          @unlink($file);
+          return true;
+        } else {
+          Logger::warn("Could not find file $file");
+          return false;
+        }
       }
     } elseif (is_int($file)) {
       $id = $file;
@@ -98,15 +117,20 @@ class FileManagerComponent extends Component {
     return $this->controller->MyFile->delete($id);
   }
 
-  /** Delete a file (Alias of delete()) */
-  function del($file) {
+  /**
+   * Delete a file (Alias of delete())
+   */
+  public function del($file) {
     return $this->delete($file);
   }
 
-  /** Returns the internal directory of a user
-    @param user Optional user
-    @return internal user directory */
-  function getUserDir($user = false) {
+  /**
+   * Returns the internal directory of a user
+   *
+   * @param user Optional user
+   * @return internal user directory
+   */
+  public function getUserDir($user = false) {
     if (!$user) {
       $user = $this->controller->getUser();
     }
@@ -123,11 +147,14 @@ class FileManagerComponent extends Component {
     return Folder::slashTerm($userDir);
   }
 
-  /** Evaluates if a filename is external or internal
-    @param filename Filename
-    @param user Optional user
-    @return True if filename is external */
-  function isExternal($filename, $user = false) {
+  /**
+   * Evaluates if a filename is external or internal
+   *
+   * @param filename Filename
+   * @param user Optional user
+   * @return True if filename is external
+   */
+  public function isExternal($filename, $user = false) {
     if (!is_dir($filename)) {
       $filename = Folder::slashTerm(dirname($filename));
     }
@@ -139,10 +166,13 @@ class FileManagerComponent extends Component {
     }
   }
 
-  /** Checks if a user can read the file
-    @param file Filename
-    @param user Optional user */
-  function canRead($file, $user = false) {
+  /**
+   * Checks if a user can read the file
+   *
+   * @param file Filename
+   * @param user Optional user
+   */
+  public function canRead($file, $user = false) {
     if (!$user) {
       $user = $this->controller->getUser();
     }
@@ -152,7 +182,7 @@ class FileManagerComponent extends Component {
   /** Checks if the user can write to his user directory
     @param size Bytes to write
     @param user Optionial user */
-  function canWrite($size, $user = false) {
+  public function canWrite($size, $user = false) {
     if (!$user) {
       $user = $this->controller->getUser();
     }
@@ -166,9 +196,9 @@ class FileManagerComponent extends Component {
     return false;
   }
 
-  function copy($src, $dst) {
+  public function copy($src, $dst) {
     if (is_dir($src)) {
-      $folder =& new Folder($src);
+      $folder = new Folder($src);
       list($dirs, $files) = $folder->tree($src);
       sort($dirs);
       sort($files);
@@ -221,7 +251,7 @@ class FileManagerComponent extends Component {
     return true;
   }
 
-  function move($src, $dst) {
+  public function move($src, $dst) {
     if (!file_exists($src)) {
       Logger::err("Invalid source: $src. File does not exists");
       return false;
@@ -237,12 +267,15 @@ class FileManagerComponent extends Component {
     return $this->controller->MyFile->move($src, $dst);
   }
 
-  /** Creates a unique filename within a path and a filename. The new filename
+  /**
+   * Creates a unique filename within a path and a filename. The new filename
    * has the pattern of name.unique-number.extension
-    @param path Path for the filename
-    @param filename Filename
-    @return unique filename */
-  function createUniqueFilename($path, $filename) {
+   *
+   * @param path Path for the filename
+   * @param filename Filename
+   * @return unique filename
+   */
+  public function createUniqueFilename($path, $filename) {
     $path = Folder::slashTerm($path);
     if (!file_exists($path . $filename)) {
       return $filename;

@@ -21,8 +21,26 @@
   } ?>.
 </p>
 
+<fieldset><legend><?php echo __("Import Options") ?></legend>
 <?php
-  echo $this->Form->input('Browser.recursive', array('type' => 'checkbox', 'label' => __('Recursive')));
+  echo $this->Form->input('Browser.options.recursive', array('type' => 'checkbox', 'label' => __('Recursive')));
+  echo $this->Form->input('Browser.options.forceReadMeta', array('type' => 'checkbox', 'label' => __('Reread metadata for existing files')));
+?>
+</fieldset>
+
+<fieldset><legend><?php echo __("File Filter") ?></legend>
+<?php
+   $options = array(
+    'any' => __('Any'),
+    'xmp' => __('XMP (sidecar)'),
+    'jpg' => __('JPG'),
+    'avi' => __('AVI'));
+   $selected = 'any';
+   echo $this->Form->input('Browser.options.extensions', array('type' => 'select', 'options' => $options, 'multiple' => 'checkbox', 'selected' => $selected, 'label' => __("Select extensions to be imported:")));
+?>
+</fieldset>
+
+<?php
   echo $this->Html->tag('div',
     $this->Form->submit(__('Import'), array('div' => false, 'name' => 'import', 'value' => 'import'))
     . $this->Form->submit(__('Unlink'), array('div' => false, 'name' => 'unlink', 'value' => 'unlink')),

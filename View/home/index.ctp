@@ -47,8 +47,7 @@
 <div class="comment <?php echo ($count++ % 2) ? 'even' : 'odd'; ?>">
 <?php echo $this->ImageData->mediaLink($comment, array('type' => 'mini', 'div' => 'image')); ?>
 <div class="meta">
-<span class="from"><?php echo $comment['Comment']['name'] ?></span> said
-<span class="date"><?php echo $this->Time->timeAgoInWords($comment['Comment']['date']); ?>:</span>
+<?php echo __('%s said %s:', '<span class="from">' . $comment['Comment']['name'] . '</span>', '<span class="date">' . $this->Time->timeAgoInWords($comment['Comment']['date']) . '</span>'); ?>
 </div><!-- comment meta -->
 
 <div class="text">
@@ -71,7 +70,9 @@ if (isset($cloudTags) && count($cloudTags)) {
   echo '<p>' . __("No tags assigned") . '</p>';
 }
 ?>
-</div></div>
+</div>
+<p><?php echo $this->Html->link(__("See more..."), 'cloud'); ?></p>
+</div>
 
 <div id="category-cloud">
 <h3><?php echo __("Popular Categories"); ?></h3>
@@ -83,4 +84,6 @@ if (isset($cloudCategories) && count($cloudCategories)) {
   echo '<p>' . __("No categories assigned") . '</p>';
 }
 ?>
-</div></div>
+</div>
+<p><?php echo $this->Html->link(__("See more..."), 'cloud'); ?></p>
+</div>

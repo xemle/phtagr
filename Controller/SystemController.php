@@ -2,13 +2,13 @@
 /**
  * PHP versions 5
  *
- * phTagr : Tag, Browse, and Share Your Photos.
- * Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * phTagr : Organize, Browse, and Share Your Photos.
+ * Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  *
  * Licensed under The GPL-2.0 License
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * @copyright     Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  * @link          http://www.phtagr.org phTagr
  * @package       Phtagr
  * @since         phTagr 2.2b3
@@ -19,9 +19,10 @@ class SystemController extends AppController {
   var $name = 'System';
   var $helpers = array('Form', 'Number');
   var $uses = array('Media', 'Option');
+  var $components = array('Exiftool');
   var $subMenu = array();
 
-  function beforeFilter() {
+  public function beforeFilter() {
     parent::beforeFilter();
     $this->requireRole(ROLE_SYSOP, array('redirect' => '/'));
 
@@ -29,24 +30,23 @@ class SystemController extends AppController {
       'index' => __("General"),
       'register' => __("User Registration"),
       'external' => __("External Programs"),
-      'map' => __("Map Settings"),
       'upgrade' => __("Database Upgrade"),
       'deleteUnusedMetaData' => __("Delete Unused Metadata"),
       'view' => __("Overview")
       );
   }
 
-  function beforeRender() {
+  public function beforeRender() {
     $this->layout = 'backend';
     parent::beforeRender();
   }
 
-  function _set($userId, $path, $data) {
+  private function _setOption($userId, $path, $data) {
     $value = Set::extract($data, $path);
     $this->Option->setValue($path, $value, $userId);
   }
 
-  function __fromReadableSize($readable) {
+  public function __fromReadableSize($readable) {
     if (is_float($readable) || is_numeric($readable)) {
       return $readable;
     } elseif (preg_match_all('/^\s*(0|[1-9][0-9]*)(\.[0-9]+)?\s*([KkMmGg][Bb]?)?\s*$/', $readable, $matches, PREG_SET_ORDER)) {
@@ -86,15 +86,16 @@ class SystemController extends AppController {
     }
   }
 
-  function index() {
-    if (isset($this->request->data)) {
-      $this->_set(0, 'general.title', $this->request->data);
-      $this->_set(0, 'general.subtitle', $this->request->data);
+  public function index() {
+    if (!empty($this->request->data)) {
+      $this->_setOption(0, 'general.title', $this->request->data);
+      $this->_setOption(0, 'general.subtitle', $this->request->data);
+      $this->Session->setFlash(__("Titles were updated"));
     }
     $this->request->data = $this->Option->getTree(0);
   }
 
-  function register() {
+  public function register() {
     if (!empty($this->request->data)) {
       if ($this->request->data['user']['register']['enable']) {
         $this->Option->setValue('user.register.enable', 1, 0);
@@ -103,6 +104,13 @@ class SystemController extends AppController {
       }
       $quota = $this->__fromReadableSize($this->request->data['user']['register']['quota']);
       $this->Option->setValue('user.register.quota', $quota, 0);
+
+      if ($this->request->data['user']['logging']['enable']) {
+        $this->Option->setValue('user.logging.enable', 1, 0);
+      } else {
+        $this->Option->setValue('user.logging.enable', 0, 0);
+      }
+
       $this->Session->setFlash(__("Options saved!"));
     }
     $this->request->data = $this->Option->getTree($this->getUserId());
@@ -114,28 +122,19 @@ class SystemController extends AppController {
     if (!isset($this->request->data['user']['register']['quota'])) {
       $this->request->data['user']['register']['quota'] = (float)100*1024*1024;
     }
-  }
-
-  function external() {
-    if (!empty($this->request->data)) {
-      // TODO check valid acl
-      $this->_set(0, 'bin.exiftool', $this->request->data);
-      $this->_set(0, 'bin.convert', $this->request->data);
-      $this->_set(0, 'bin.ffmpeg', $this->request->data);
-      $this->_set(0, 'bin.flvtool2', $this->request->data);
-      // debug
-      $this->set('commit', $this->request->data);
-      $this->Session->setFlash("Settings saved");
+    if (!isset($this->request->data['user']['logging']['enable'])) {
+      $this->request->data['user']['logging']['enable'] = 0;
     }
-    $tree = $this->Option->getTree(0);
-    $this->request->data = $tree;
+
   }
 
-  function map() {
+  public function external() {
     if (!empty($this->request->data)) {
-      $this->_set(0, 'google.map.key', $this->request->data);
-      // debug
-      $this->set('commit', $this->request->data);
+      $this->_setOption(0, 'bin.exiftool', $this->request->data);
+      $this->_setOption(0, 'bin.convert', $this->request->data);
+      $this->_setOption(0, 'bin.ffmpeg', $this->request->data);
+      $this->_setOption(0, 'bin.flvtool2', $this->request->data);
+
       $this->Session->setFlash("Settings saved");
     }
     $tree = $this->Option->getTree(0);
@@ -143,7 +142,7 @@ class SystemController extends AppController {
   }
 
   /** Database upgrade via the Migraions plugin */
-  function upgrade($action = '') {
+  public function upgrade($action = '') {
     CakePlugin::load('Migrations');
     App::import('Lib', 'Migrations.MigrationVersion');
     $Migration = new MigrationVersion(array('connection' => 'default'));
@@ -158,6 +157,7 @@ class SystemController extends AppController {
     }
     $migrationVersion = max(array_keys($Migration->getMapping('app')));
     if ($action == 'run' && $currentVersion < $migrationVersion) {
+      @ini_set('max_execution_time', 600);
       if (!$Migration->run(array('type' => 'app', 'direction' => 'up'))) {
         $this->Session->setFlash(__("Database migration failed. Please see the log files for errors."));
         Logger::error("Could not run migration");
@@ -179,31 +179,21 @@ class SystemController extends AppController {
     $this->set('newMappingNames', $newMappingNames);
   }
 
-  function deleteUnusedMetaData($delete = '') {
-    $this->Media->Tag->bindModel(array('hasAndBelongsToMany' => array('Media')), false);
-    $this->Media->Tag->Behaviors->attach('DeleteUnused', array('relatedHabtm' => 'Media'));
-
-    $this->Media->Category->bindModel(array('hasAndBelongsToMany' => array('Media')), false);
-    $this->Media->Category->Behaviors->attach('DeleteUnused', array('relatedHabtm' => 'Media'));
-
-    $this->Media->Location->bindModel(array('hasAndBelongsToMany' => array('Media')), false);
-    $this->Media->Location->Behaviors->attach('DeleteUnused', array('relatedHabtm' => 'Media'));
+  public function deleteUnusedMetaData($delete = '') {
+    $this->Media->Field->bindModel(array('hasAndBelongsToMany' => array('Media')), false);
+    $this->Media->Field->Behaviors->attach('DeleteUnused', array('relatedHabtm' => 'Media'));
 
     if ($delete == 'delete') {
-      $this->Media->Tag->deleteAllUnused();
-      $this->Media->Location->deleteAllUnused();
-      $this->Media->Category->deleteAllUnused();
+      $this->Media->Field->deleteAllUnused();
       $this->Session->setFlash(__("All unused meta data are deleted"));
     }
 
-    $unusedTagCount = count($this->Media->Tag->findAllUnused());
-    $unusedCategoryCount = count($this->Media->Category->findAllUnused());
-    $unusedLocationCount = count($this->Media->Location->findAllUnused());
+    $unusedFieldCount = count($this->Media->Field->findAllUnused());
 
-    $this->request->data = compact('unusedTagCount', 'unusedCategoryCount', 'unusedLocationCount');
+    $this->request->data = compact('unusedFieldCount');
   }
 
-  function view() {
+  public function view() {
     $data = array();
     $data['users'] = $this->User->find('count', array('conditions' => array('User.role >=' => ROLE_USER)));
     $data['guests'] = $this->User->find('count', array('conditions' => array('User.role =' => ROLE_GUEST)));
@@ -232,9 +222,10 @@ class SystemController extends AppController {
     Logger::debug($result);
     $data['media.video.length'] = floatval($result[0][0]['Duration']);
     $data['comments'] = $this->Media->Comment->find('count');
-    $data['tags'] = $this->Media->Tag->find('count');
-    $data['categories'] = $this->Media->Category->find('count');
-    $data['locations'] = $this->Media->Location->find('count');
+    $allFields = $this->Media->Field->find('all');
+    $data['tags'] = count(Set::extract('/Field[name=keyword]/data', $allFields));
+    $data['categories'] = count(Set::extract('/Field[name=category]/data', $allFields));
+    $data['locations'] = count(Set::extract('/Field[name=/(sublocation|city|state|country)/]/data', $allFields));
     $this->set('data', $data);
   }
 }

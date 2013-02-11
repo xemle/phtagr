@@ -16,6 +16,7 @@
 //   bypassed and it's up to you to handle the reading and
 //   writing of cached files, if appropriate.
 
+die('For security reasons, this demo is disabled by default. Please comment out line '.__LINE__.' in '.basename(__FILE__));
 
 require_once('../phpthumb.class.php');
 
@@ -69,6 +70,7 @@ foreach ($thumbnail_widths as $thumbnail_width) {
 				// do something with debug/error messages
 				echo 'Failed (size='.$thumbnail_width.'):<pre>'.implode("\n\n", $phpThumb->debugmessages).'</pre>';
 			}
+			$phpThumb->purgeTempFiles();
 		} else {
 			$phpThumb->OutputThumbnail();
 		}

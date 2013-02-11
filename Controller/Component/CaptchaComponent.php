@@ -3,11 +3,11 @@ App::import('Vendor', 'kcaptcha/kcaptcha');
 
 class CaptchaComponent extends Component
 {
-  function initialize(&$controller) {
+  public function initialize(Controller $controller) {
     $this->controller = $controller;
   }
 
-  function render($name = 'captcha') {
+  public function render($name = 'captcha') {
     $kcaptcha = new KCAPTCHA();
     $this->controller->Session->write($name, $kcaptcha->getKeyString());
   }

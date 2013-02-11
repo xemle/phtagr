@@ -2,13 +2,13 @@
 /**
  * PHP versions 5
  *
- * phTagr : Tag, Browse, and Share Your Photos.
- * Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * phTagr : Organize, Browse, and Share Your Photos.
+ * Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  *
  * Licensed under The GPL-2.0 License
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * @copyright     Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  * @link          http://www.phtagr.org phTagr
  * @package       Phtagr
  * @since         phTagr 2.2b3
@@ -27,15 +27,15 @@ class MenuComponent extends Component {
 
   var $currentMenu = 'main';
 
-  function initialize(&$controller) {
+  public function initialize(Controller $controller) {
     if ($this->controller) {
       return;
     }
-    $this->controller =& $controller;
+    $this->controller = $controller;
     $this->setCurrentMenu('main');
   }
 
-  function setBasicMainMenu() {
+  public function setBasicMainMenu() {
     $controllers = array(
       'options' => __('Account Settings'),
       'groups' => __('Groups'),
@@ -56,18 +56,14 @@ class MenuComponent extends Component {
     }
   }
 
-  function &getData(&$data, $key) {
-    $p =& $data[$key];
-    return $p;
-  }
-
-  function beforeRender() {
+  public function beforeRender(Controller $controller) {
     $this->setCurrentMenu('main');
     $this->setBasicMainMenu();
-    if (isset($this->controller->subMenu)) {
+    $menu =& $this->menus[$this->currentMenu];
+
+    if (isset($this->controller->subMenu) && $this->controller->subMenu) {
       $name = strtolower($this->controller->name);
       $parentId = 'item-' . $name;
-      $parentItem =& $this->getItem($parentId);
       foreach ($this->controller->subMenu as $action => $title) {
         $defaults = array('parent' => $parentId, 'active' => false, 'controller' => $name, 'action' => false, 'admin' => false);
         if (is_numeric($action)) {
@@ -78,68 +74,75 @@ class MenuComponent extends Component {
         if ($this->controller->action == $item['action']) {
           $item['active'] = true;
         }
-        $parentItem[] = $item;
+        $this->insertItem($menu, $parentId, $item);
       }
     }
     $this->controller->params['menus'] = $this->menus;
     $this->controller->set('menus_for_layout', $this->menus);
   }
 
-  /** Set the current menu
-    @param name Menu name */
-  function setCurrentMenu($name) {
+  /**
+   * Set the current menu
+   *
+   * @param name Menu name
+   */
+  public function setCurrentMenu($name) {
     $this->currentMenu = $name;
     if (!isset($this->menus[$name])) {
       $this->menus[$name] = array('options' => array());
     }
   }
 
-  /** Add menu item
-    @param title Menu title
-    @param url Menu url
-    @param options e.g. html link class options */
-  function addItem($title, $url, $options = array()) {
+  /**
+   * Insert given item into menu tree below given parent Id
+   *
+   * @param type $tree Menu tree
+   * @param type $parentId Parent id
+   * @param type $item Submenu item
+   * @return boolean True if item was inserted
+   */
+  private function insertItem(&$tree, $parentId, $item) {
+    if (!is_array($tree)) {
+      return false;
+    }
+    if (isset($tree['id']) && $tree['id'] == $parentId) {
+      $tree[] = $item;
+      return true;
+    } else {
+      foreach ($tree as &$subItem) {
+        $found = $this->insertItem($subItem, $parentId, $item);
+        if ($found) {
+          return $found;
+        }
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Add menu item
+   *
+   * @param title Menu title
+   * @param url Menu url
+   * @param options e.g. html link class options
+   */
+  public function addItem($title, $url, $options = array()) {
     $item = am(array('title' => $title, 'url' => $url), $options);
     $menu =& $this->menus[$this->currentMenu];
     if (isset($options['parent'])) {
-      $parent =& $this->getItem($options['parent']);
-      if ($parent) {
-        $parent[] = $item;
-      }
+      $this->insertItem($menu, $options['parent'], $item);
     } else {
       $menu[] = $item;
     }
   }
 
-  function &_findItem($id, &$items) {
-    $keys = array_keys($items);
-    $found = false;
-    foreach($keys as $key) {
-      if (is_array($items[$key])) {
-        $found =& $this->_findItem($id, &$items[$key]);
-        if ($found) {
-          return $found;
-        }
-      } else if ($key == 'id' && $items[$key] == $id) {
-        return $items;
-      }
-    }
-    return $found;
-  }
-
-  function &getItem($id, $menuName = null) {
-    if (!$menuName) {
-      $menu =& $this->menus[$this->currentMenu];
-    } else {
-      $menu =& $this->menus[$menuName];
-    }
-    return $this->_findItem($id, &$menu);
-  }
-
-  /** Set menu option for current menu
-    @param name Option name
-    @param value Option value */
-  function setOption($name, $value) {
+  /**
+   * Set menu option for current menu
+   *
+   * @param name Option name
+   * @param value Option value
+   */
+  public function setOption($name, $value) {
     $this->menus[$this->currentMenu]['options'][$name] = $value;
   }
 }

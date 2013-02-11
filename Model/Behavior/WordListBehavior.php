@@ -2,29 +2,29 @@
 /**
  * PHP versions 5
  *
- * phTagr : Tag, Browse, and Share Your Photos.
- * Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * phTagr : Organize, Browse, and Share Your Photos.
+ * Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  *
  * Licensed under The GPL-2.0 License
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * @copyright     Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  * @link          http://www.phtagr.org phTagr
  * @package       Phtagr
  * @since         phTagr 2.2b3
  * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
 
-class WordListBehavior extends ModelBehavior
-{
+class WordListBehavior extends ModelBehavior {
+
   var $config = array();
 
-  function setup(&$Model, $config = array()) {
+  public function setup(Model $Model, $config = array()) {
     $default = array('field' => 'name');
     $this->config[$Model->alias] = am($config, $default);
   }
 
-  function findAllByField(&$Model, $values, $createMissing = true) {
+  public function findAllByField(&$Model, $values, $createMissing = true) {
     $config = $this->config[$Model->alias];
     $field = $config['field'];
     $alias = $Model->alias;
@@ -56,8 +56,8 @@ class WordListBehavior extends ModelBehavior
    * @param type $withRemovals Include words with leading minus
    * @return type Array of words
    */
-  function splitWords(&$Model, $input) {
-    $words = split(',', $input);
+  public function splitWords(&$Model, $input) {
+    $words = preg_split('/,/', $input);
     $names = array();
     foreach ($words as $name) {
       $name = trim($name);
@@ -76,7 +76,7 @@ class WordListBehavior extends ModelBehavior
    * @param type $words Array of words
    * @return array Remaining non negated words
    */
-  function removeNegatedWords(&$Model, $words) {
+  public function removeNegatedWords(&$Model, $words) {
     $result = array();
     foreach ((array) $words as $word) {
       if (!$word) {
@@ -96,7 +96,7 @@ class WordListBehavior extends ModelBehavior
    * @param type $words Array of words
    * @return array Array of negated words
    */
-  function getNegatedWords(&$Model, $words) {
+  public function getNegatedWords(&$Model, $words) {
     $result = array();
     foreach ((array) $words as $word) {
       if (!$word) {
@@ -119,7 +119,7 @@ class WordListBehavior extends ModelBehavior
    * @param type $words Array of words
    * @return array
    */
-  function normalizeWords(&$Model, $words) {
+  public function normalizeWords(&$Model, $words) {
     $result = array();
     foreach ((array) $words as $word) {
       if (!$word) {
@@ -137,4 +137,3 @@ class WordListBehavior extends ModelBehavior
     return $result;
   }
 }
-?>

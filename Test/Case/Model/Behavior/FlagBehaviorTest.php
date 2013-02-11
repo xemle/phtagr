@@ -2,13 +2,13 @@
 /**
  * PHP versions 5
  *
- * phTagr : Tag, Browse, and Share Your Photos.
- * Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * phTagr : Organize, Browse, and Share Your Photos.
+ * Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  *
  * Licensed under The GPL-2.0 License
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * @copyright     Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  * @link          http://www.phtagr.org phTagr
  * @package       Phtagr
  * @since         phTagr 2.2b3
@@ -70,7 +70,7 @@ class FlagBehaviorTestCase extends CakeTestCase {
     $file = $this->File->findById($fileId);
     $this->assertEqual(1, $file['File']['flag']);
 
-    $this->File->setFlag(&$file, 4);
+    $this->File->setFlag($file, 4);
     $this->assertEqual(isset($file['File']), true);
     $file = $this->File->findById($fileId);
     $this->assertEqual(5, $file['File']['flag']);
@@ -96,7 +96,7 @@ class FlagBehaviorTestCase extends CakeTestCase {
     $file = $this->File->findById($fileId);
     $this->assertEqual(4, $file['File']['flag']);
 
-    $this->File->deleteFlag(&$file, 4);
+    $this->File->deleteFlag($file, 4);
     $this->assertEqual(isset($file['File']), true);
     $file = $this->File->findById($fileId);
     $this->assertEqual(0, $file['File']['flag']);
@@ -112,11 +112,11 @@ class FlagBehaviorTestCase extends CakeTestCase {
     $file = $this->File->findById($fileId);
     $this->assertEqual(0, $file['File']['flag']);
 
-    $this->File->setFlag(&$file, 2);
+    $this->File->setFlag($file, 2);
     $file = $this->File->findById($fileId);
-    $this->assertEqual($this->File->hasFlag(&$file, 2), true);
+    $this->assertEqual($this->File->hasFlag($file, 2), true);
     $this->assertEqual(isset($file['File']), true);
-    $this->assertEqual($this->File->hasFlag(&$file, 4), false);
+    $this->assertEqual($this->File->hasFlag($file, 4), false);
     $this->assertEqual(isset($file['File']), true);
   }
 }

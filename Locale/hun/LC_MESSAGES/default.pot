@@ -1,0 +1,3144 @@
+# LANGUAGE translation of CakePHP Application
+# Copyright 2013 Adam Majoros <adamsys@gmail.com>
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2012-12-23 20:23+0000\n"
+"PO-Revision-Date: 2013-01-13 23:26+0100\n"
+"Last-Translator: Adam Majoros <adamsys@gmail.com>\n"
+"Language-Team: HUNGARIAN <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+"X-Generator: Poedit 1.5.4\n"
+
+#: Console/Command/NotifyShell.php:44
+msgid "Do not send emails."
+msgstr "Ne küldjön emailt."
+
+#: Console/Command/NotifyShell.php:47
+msgid "Simulate the run. Do not change anything"
+msgstr "Szimulált futás, nem változtat meg semmit"
+
+#: Console/Command/NotifyShell.php:50
+msgid "Send emails always even if user already received an email"
+msgstr "Mindig küldjön email-t, akkor is ha a felhasználó már kapott"
+
+#: Console/Command/NotifyShell.php:53
+msgid "Run the notification updates"
+msgstr "Frissítési értesítések futtatása"
+
+#: Console/Command/NotifyShell.php:54
+msgid "Notify new media for users via email"
+msgstr "Felhasználók értesítése új média felkerülése esetén"
+
+#: Console/Command/PreviewShell.php:36
+msgid "Maximum generation count. Default is 10. Use 0 to generate all previews"
+msgstr ""
+"Generálás maximális száma. Alapértelmezett: 10. 0 beírása esetén minden "
+"előnézet újra generálódik"
+
+#: Console/Command/PreviewShell.php:38
+msgid ""
+"Set the start chunk number. A chunk has a size of 100 media. Default is 1"
+msgstr ""
+"Chunk-ok kezdő száma. Egy chunk 100 médiát tartalmaz. Alapértelmezett: 1"
+
+#: Console/Command/PreviewShell.php:40 Console/Command/SyncShell.php:37
+msgid "Set the minimum preview size. Default is thumb"
+msgstr "Előnézet minimális mérete. Alapértelmezett: thumb"
+
+#: Console/Command/PreviewShell.php:43
+msgid "Generate only previews for given user"
+msgstr "Előnézet generálása csak egy adott felhasználó számára"
+
+#: Console/Command/PreviewShell.php:45
+msgid "Create preview files"
+msgstr "Előnézeti fájlok létrehozása"
+
+#: Console/Command/PreviewShell.php:46
+msgid "Generate preview files"
+msgstr "Előnézeti fájlok generálása"
+
+#: Console/Command/SyncShell.php:35
+msgid ""
+"Maximum of synchronization count. Default is 100. Use 0 to synchronize all"
+msgstr ""
+"Szinkronizáció maximális száma. Alapértelmezett: 100. 0 beírása esetén "
+"mindent szinkronizál"
+
+#: Console/Command/SyncShell.php:40
+msgid "Synchronize only images for given username"
+msgstr "Képek szinkronizálása csak egy adott felhasználó számára"
+
+#: Console/Command/SyncShell.php:42
+msgid "Run the synchronization process"
+msgstr "Szinkronizáció futtatása"
+
+#: Console/Command/SyncShell.php:43
+msgid "Write all meta data from database to images in batch mode"
+msgstr "Minden metaadat képekbe írása az adatbázisból, kötegelt módban"
+
+#: Controller/AppController.php:36
+msgid "Recent photos"
+msgstr "Legfrissebb képek"
+
+#: Controller/AppController.php:37
+msgid "Media RSS of recent photos"
+msgstr "RSS feed a legfrissebb képekről"
+
+#: Controller/AppController.php:38
+msgid "Recent comments"
+msgstr "Legfrissebb hozzászólások"
+
+#: Controller/AppController.php:53 Controller/HomeController.php:42
+#: View/Elements/menu.ctp:6
+msgid "Home"
+msgstr "Kezdőlap"
+
+#: Controller/AppController.php:54 View/Elements/menu.ctp:19;44
+#: View/Helper/NavigatorHelper.php:139 View/Images/notfound.ctp:3
+#: View/Themed/Mobile/Explorer/index.ctp:1
+msgid "Explorer"
+msgstr "Böngésző"
+
+#: Controller/AppController.php:57 View/Elements/menu.ctp:25
+msgid "My Photos"
+msgstr "Képeim"
+
+#: Controller/AppController.php:60 Controller/BrowserController.php:33
+#: View/Browser/upload.ctp:21 View/Elements/menu.ctp:32
+msgid "Upload"
+msgstr "Feltöltés"
+
+#: Controller/AppController.php:68 View/Elements/topnav.ctp:14
+#: View/Themed/Mobile/Elements/header.ctp:7 View/Users/login.ctp:5;15
+msgid "Login"
+msgstr "Bejelentkezés"
+
+#: Controller/AppController.php:70 View/Users/login.ctp:17
+#: View/Users/register.ctp:16
+msgid "Sign Up"
+msgstr "Regisztráció"
+
+#: Controller/AppController.php:74
+msgid "Howdy, %s!"
+msgstr "Üdv, %s!"
+
+#: Controller/AppController.php:75 View/Elements/topnav.ctp:12
+#: View/Themed/Mobile/Elements/header.ctp:5
+msgid "Logout"
+msgstr "Kijelentkezés"
+
+#: Controller/AppController.php:76
+msgid "Dashboard"
+msgstr "Beállítások"
+
+#: Controller/BrowserController.php:32
+msgid "Import Files"
+msgstr "Fájlok importálása"
+
+#: Controller/BrowserController.php:34
+msgid "Meta Data Sync"
+msgstr "Metaadat szinkronizáció"
+
+#: Controller/BrowserController.php:35 Controller/SystemController.php:35
+msgid "Overview"
+msgstr "Áttekintés"
+
+#: Controller/BrowserController.php:50 View/Elements/menu.ctp:37
+msgid "My Files"
+msgstr "Fájljaim"
+
+#: Controller/BrowserController.php:313
+msgid "Imported %d files (%d errors)"
+msgstr "Importálva %d fájl (%d hiba)"
+
+#: Controller/BrowserController.php:328
+msgid "Media %d was unlinked successfully"
+msgstr "%d számú média sikeresen lecsatolva"
+
+#: Controller/BrowserController.php:389
+msgid "Unlinked %d files."
+msgstr "Lecsatolva %d fájl."
+
+#: Controller/BrowserController.php:405
+msgid "Deleted directory successfully"
+msgstr "Könyvtár törlése sikeres"
+
+#: Controller/BrowserController.php:407
+msgid "Deleted file successfully"
+msgstr "Fájl törlése sikeres"
+
+#: Controller/BrowserController.php:410
+msgid "Could not delete file or directory"
+msgstr "Nem törölhető fájl vagy könyvtár"
+
+#: Controller/BrowserController.php:502
+msgid "Invalid path to create folder"
+msgstr "Érvénytelen könyvtár létrehozási útvonal "
+
+#: Controller/BrowserController.php:506
+msgid "Could not create folder here: %s"
+msgstr "Nem hozható létre könyvtár itt: %s"
+
+#: Controller/BrowserController.php:522
+msgid "Could not create folder"
+msgstr "Nem hozható létre könyvtár"
+
+#: Controller/BrowserController.php:539
+msgid "Your upload quota is exceeded"
+msgstr "Feltöltési kvóta túllépve"
+
+#: Controller/BrowserController.php:648
+msgid "Invalid path for upload"
+msgstr "Érvénytelen feltöltési útvonal"
+
+#: Controller/BrowserController.php:653
+msgid "Could not upload here: %s"
+msgstr "Nem lehetséges a feltöltés ide: %s"
+
+#: Controller/BrowserController.php:674
+msgid "Uploaded %d and %d extraced file(s)"
+msgstr "Feltöltve %d és kitömörítve %d fájl"
+
+#: Controller/BrowserController.php:676
+msgid "Uploaded %d file(s)"
+msgstr "Feltöltve %d fájl"
+
+#: Controller/BrowserController.php:687;695
+msgid "Error: Invalid upload directory"
+msgstr "Hiba: érvénytelen feltöltési könyvtár"
+
+#: Controller/BrowserController.php:705
+msgid "No files uploaded or upload errors"
+msgstr "Nem lett feltöltve fájl vagy feltöltési hiba"
+
+#: Controller/BrowserController.php:722;757
+msgid "No files uploaded"
+msgstr "Nem lett feltöltve fájl"
+
+#: Controller/BrowserController.php:730
+msgid "Uploaded %d files with %d errors."
+msgstr "Feltöltve %d fájl %d hibával."
+
+#: Controller/CommentsController.php:55
+msgid "Invalid Comment."
+msgstr "Érvénytelen hozzászólás."
+
+#: Controller/CommentsController.php:112
+msgid "The Comment has been saved"
+msgstr "Hozzászólás elmentve"
+
+#: Controller/CommentsController.php:120
+msgid "The Comment could not be saved. Please, try again."
+msgstr "Hozzászólás nem menthető, próbálja meg újra."
+
+#: Controller/CommentsController.php:152
+msgid "[phtagr] Comment: %s"
+msgstr "[phtagr] Hozzászólás: %s"
+
+#: Controller/CommentsController.php:209
+msgid "[phtagr] Comment notification: %s"
+msgstr "[phtagr] Hozzászólási értesítés: %s"
+
+#: Controller/CommentsController.php:223
+msgid "Invalid id for Comment"
+msgstr "Érvénytelen hozzászólás azonosító"
+
+#: Controller/CommentsController.php:237
+msgid "Comment deleted"
+msgstr "Hozzászólás törölve"
+
+#: Controller/ExplorerController.php:60 Controller/ImagesController.php:33
+msgid "[Keep]"
+msgstr "[Megtartás]"
+
+#: Controller/ExplorerController.php:61 Controller/ImagesController.php:34
+#: Controller/OptionsController.php:143
+msgid "[No Group]"
+msgstr "[Nincs csoport]"
+
+#: Controller/ExplorerController.php:69
+msgid "Slideshow Media RSS"
+msgstr "Diavetítés média RSS"
+
+#: Controller/ExplorerController.php:387
+msgid "Invalid folder: %s"
+msgstr "Érvénytelen könyvtár: %s"
+
+#: Controller/GroupsController.php:29
+msgid "My Groups"
+msgstr "Csoportjaim"
+
+#: Controller/GroupsController.php:30
+msgid "My Memberships"
+msgstr "Tagságaim"
+
+#: Controller/GroupsController.php:31
+msgid "All Groups"
+msgstr "Minden csoport"
+
+#: Controller/GroupsController.php:32 View/Groups/index.ctp:67
+msgid "Create Group"
+msgstr "Csoport létrehozása"
+
+#: Controller/GroupsController.php:86;201;262;282 Model/Group.php:153;155;179
+msgid "%s not found"
+msgstr "%s nem található"
+
+#: Controller/GroupsController.php:86;102;201;297;299;301
+#: Model/Group.php:153;161;179;185 View/Elements/Explorer/menu.ctp:175
+#: View/Explorer/search.ctp:38 View/Guests/edit.ctp:56 View/Users/view.ctp:40
+msgid "Group"
+msgstr "Csoport"
+
+#: Controller/GroupsController.php:102;297
+msgid "%s already exists"
+msgstr "%s már létezik"
+
+#: Controller/GroupsController.php:108
+msgid "Add successfully group '%s'"
+msgstr "'%s' csoport sikeresen hozzáadva "
+
+#: Controller/GroupsController.php:111
+msgid "Could not create group '%s'"
+msgstr "'%s' csoport nem hozható létre"
+
+#: Controller/GroupsController.php:134
+msgid "Group subscription request was sent to the group owner"
+msgstr "Csoport feliratkozási kérelem elküldve a csoport tulajdonosának"
+
+#: Controller/GroupsController.php:138
+msgid "Mail could not be sent"
+msgstr "Nem sikerült elküldeni a levelet"
+
+#: Controller/GroupsController.php:257;277
+msgid "You are not authorized to perform this action"
+msgstr "Nincs jogosultság a művelet elvégzésére"
+
+#: Controller/GroupsController.php:262;282 Model/Group.php:155
+#: View/Explorer/search.ctp:40 View/Images/view.ctp:62
+#: View/Options/import.ctp:10 View/Users/admin_edit.ctp:11
+#: View/Users/view.ctp:41
+msgid "User"
+msgstr "Felhasználó"
+
+#: Controller/GroupsController.php:269
+msgid "User %s is now subscribe to this group"
+msgstr "%s felhasználó feliratkozott erre a csoportra"
+
+#: Controller/GroupsController.php:289
+msgid "User %s is now unsubscribe from this group"
+msgstr "%s felhasználó leiratkozott erről a csoportról"
+
+#: Controller/GroupsController.php:299 Model/Group.php:161;185
+msgid "Could not save %s"
+msgstr "Nem menthető: %s"
+
+#: Controller/GroupsController.php:301
+msgid "%s updated"
+msgstr "%s frissítve"
+
+#: Controller/GroupsController.php:313;333
+msgid "Could not find group"
+msgstr "Nem található csoport"
+
+#: Controller/GroupsController.php:331
+msgid "Successfully deleted group '%s'"
+msgstr "'%s' csoport sikeresen törölve"
+
+#: Controller/GuestsController.php:32
+msgid "New Guest"
+msgstr "Új vendég"
+
+#: Controller/GuestsController.php:42
+msgid "Edit %s"
+msgstr "%s szerkesztése"
+
+#: Controller/GuestsController.php:44 Controller/OptionsController.php:29
+msgid "Links"
+msgstr "Linkek"
+
+#: Controller/GuestsController.php:74
+msgid "Sorry. Username is already taken"
+msgstr "Elnézést, de ez a felhasználónév már foglalt"
+
+#: Controller/GuestsController.php:80
+msgid "Guest account '%s' was successfully created"
+msgstr "'%s' vendég hozzáférés sikeresen létrehozva"
+
+#: Controller/GuestsController.php:83
+msgid "Sorry. Guest account could not created"
+msgstr "Elnézést, de vendég hozzáférések nem hozhatók létre"
+
+#: Controller/GuestsController.php:93
+msgid "Sorry. Could not find requested guest"
+msgstr "Elnézést, de nem található a kért vendég"
+
+#: Controller/GuestsController.php:102
+msgid "Guest data were saved"
+msgstr "Vendég adatok mentve"
+
+#: Controller/GuestsController.php:108
+msgid "Updates could not be saved!"
+msgstr "Változtatások nem menthetők!"
+
+#: Controller/GuestsController.php:125
+msgid "Could not find requested guest"
+msgstr "Nem található a kért vendég"
+
+#: Controller/GuestsController.php:129
+msgid "Guest account '%s' deleted!"
+msgstr "'%s' vendég hozzáférés törölve!"
+
+#: Controller/MediaController.php:304
+msgid "Download of more than %d media is not allowed"
+msgstr "Nagyobb mennyiségű média, mint %d letöltése nem engedélyezett"
+
+#: Controller/MediaController.php:308
+msgid "Download of more than %d media is not allowed for anonymous visitors"
+msgstr ""
+"Nagyobb mennyiségű média, mint %d letöltése nem engedélyezett névtelen "
+"látogatók számára"
+
+#: Controller/MediaController.php:329
+msgid "No files for download found for given media set"
+msgstr "Nem található letölthető fájl az adott média tárban"
+
+#: Controller/MediaController.php:335
+msgid "Download of not more than %d MB is not allowed"
+msgstr "%d MB-nál több letöltés nem engedélyezett"
+
+#: Controller/OptionsController.php:26 View/Options/password.ctp:1
+#: View/Options/profile.ctp:1
+msgid "Profile"
+msgstr "Profil"
+
+#: Controller/OptionsController.php:27 Controller/UsersController.php:206
+#: View/Guests/create.ctp:11 View/Guests/edit.ctp:13;15
+#: View/Options/password.ctp:7;9 View/Setup/config.ctp:14
+#: View/Setup/user.ctp:10 View/Users/admin_add.ctp:10
+#: View/Users/admin_password.ctp:8 View/Users/login.ctp:8
+#: View/Users/register.ctp:8
+msgid "Password"
+msgstr "Jelszó"
+
+#: Controller/OptionsController.php:28 View/Options/import.ctp:1
+msgid "Import Options"
+msgstr "Importálási beállítások"
+
+#: Controller/OptionsController.php:57;72
+msgid "Could not save profile!"
+msgstr "Profil nem menthető"
+
+#: Controller/OptionsController.php:60;75
+msgid "Profile saved"
+msgstr "Profil mentve"
+
+#: Controller/OptionsController.php:127
+msgid "Settings saved"
+msgstr "Beállítások mentve"
+
+#: Controller/SetupController.php:331
+msgid "Could not write configuration to '%s'"
+msgstr "Nem írható konfiguráció ide: '%s'"
+
+#: Controller/SetupController.php:338
+msgid "Update core settings"
+msgstr "Belső beállítások frissítése"
+
+#: Controller/SetupController.php:448
+msgid "Could not write database configuration file"
+msgstr "Adatbázis konfigurációs fájl nem írható"
+
+#: Controller/SetupController.php:485
+msgid ""
+"Could not connect to database. Please check your database configuration!"
+msgstr ""
+"Nem lehetséges az adatbázishoz való csatlakozás. Kérem ellenőrizze az "
+"adatbázis beállításokat!"
+
+#: Controller/SetupController.php:498
+msgid "Could not initialize database migration"
+msgstr "Adatbázis migráció nem indítható el"
+
+#: Controller/SetupController.php:504
+msgid "Could not initialize database"
+msgstr "Adatbázis nem hozható létre"
+
+#: Controller/SetupController.php:509
+msgid "All required tables are created"
+msgstr "Minden adattábla létrehozva"
+
+#: Controller/SetupController.php:513
+msgid "Could not create tables correctly. Please see logfile for details"
+msgstr "Adattáblák létrehozása nem sikerült. Kérem ellenőrizze a naplófájlt."
+
+#: Controller/SetupController.php:541
+msgid "Admin account was successfully created"
+msgstr "Admin hozzáférés sikeresen létrehozva"
+
+#: Controller/SetupController.php:545
+msgid "Could not create admin account. Please retry"
+msgstr "Admin hozzáférés létrehozása sikertelen. Kérem próbálja újra"
+
+#: Controller/SystemController.php:29 View/Images/view.ctp:35
+#: View/Options/profile.ctp:6 View/System/index.ctp:1;6
+#: View/Users/admin_edit.ctp:6
+msgid "General"
+msgstr "Általános"
+
+#: Controller/SystemController.php:30 View/System/register.ctp:1
+msgid "User Registration"
+msgstr "Felhasználói regisztráció"
+
+#: Controller/SystemController.php:31 View/Setup/system.ctp:1
+#: View/System/external.ctp:6
+msgid "External Programs"
+msgstr "Külső alkalmazások"
+
+#: Controller/SystemController.php:32 View/System/map.ctp:1
+msgid "Map Settings"
+msgstr "Térkép beállítások"
+
+#: Controller/SystemController.php:33 View/System/upgrade.ctp:1
+msgid "Database Upgrade"
+msgstr "Adatbázis frissítése"
+
+#: Controller/SystemController.php:34
+#: View/System/delete_unused_meta_data.ctp:1
+msgid "Delete Unused Metadata"
+msgstr "Nem használt metaadatok törlése"
+
+#: Controller/SystemController.php:93
+msgid "Titles were updated"
+msgstr "Címek frissítve"
+
+#: Controller/SystemController.php:107
+msgid "Options saved!"
+msgstr "Beállítások mentve"
+
+#: Controller/SystemController.php:164
+msgid "Database migration failed. Please see the log files for errors."
+msgstr "Adatbázis migráció nem sikerült. Kérem ellenőrizze a naplófájlt."
+
+#: Controller/SystemController.php:168
+msgid "The database migration was successful."
+msgstr "Adatbázis migráció sikerült."
+
+#: Controller/SystemController.php:190
+msgid "All unused meta data are deleted"
+msgstr "Minden nem használt metaadat törölve"
+
+#: Controller/UsersController.php:32
+msgid "List User"
+msgstr "Felhasználók listázása"
+
+#: Controller/UsersController.php:36
+msgid "Add User"
+msgstr "Felhasználó hozzáadása"
+
+#: Controller/UsersController.php:113
+msgid "Sorry. Wrong password or unknown username!"
+msgstr "Elnézést, érvénytelen felhasználónév vagy jelszó!"
+
+#: Controller/UsersController.php:121
+msgid "Please enter username and password!"
+msgstr "Kérem adja meg a felhasználónevét és a jelszavát!"
+
+#: Controller/UsersController.php:133
+msgid "Sorry. Your account is expired!"
+msgstr "Elnézést, a hozzáférése lejárt!"
+
+#: Controller/UsersController.php:155
+msgid "Sorry. Internal login procedure failed!"
+msgstr "Elnézést, belső beléptetési hiba történt."
+
+#: Controller/UsersController.php:196
+msgid "Can not degrade last admin"
+msgstr "Utolsó admin leminősítése nem lehetséges"
+
+#: Controller/UsersController.php:207
+msgid "Local Paths"
+msgstr "Helyi útvonalak"
+
+#: Controller/UsersController.php:208 View/Groups/all.ctp:42
+#: View/Groups/index.ctp:41 View/Groups/members.ctp:42 View/Groups/view.ctp:18
+#: View/Guests/index.ctp:23 View/Images/view.ctp:40
+#: View/Users/admin_index.ctp:46 View/Users/view.ctp:4
+msgid "Edit"
+msgstr "Szerkesztés"
+
+#: Controller/UsersController.php:225;248
+msgid "User data was updated"
+msgstr "Felhasználói adatok frissítve"
+
+#: Controller/UsersController.php:229;252
+msgid "Could not be updated"
+msgstr "Nem frissíthető"
+
+#: Controller/UsersController.php:277
+msgid "Directory '%s' was added"
+msgstr "'%s' könyvtár hozzáadva"
+
+#: Controller/UsersController.php:280
+msgid "Directory '%s' could not be read"
+msgstr "'%s' könyvtár nem olvasható"
+
+#: Controller/UsersController.php:298
+msgid "Username already exists, please choose a different name!"
+msgstr "Ez a felhasználónév már foglalt. Kérem válasszon másikat!"
+
+#: Controller/UsersController.php:303
+msgid "User was created"
+msgstr "Felhasználó létrehozva"
+
+#: Controller/UsersController.php:307
+msgid "Could not create user!"
+msgstr "Felhasználó nem hozható létre"
+
+#: Controller/UsersController.php:319
+msgid "Could not delete user: user not found!"
+msgstr "Felhasználó nem törölhető, mert nincs ilyen felhasználó!"
+
+#: Controller/UsersController.php:324
+msgid "User %s was deleted"
+msgstr "%s felhasználó törölve"
+
+#: Controller/UsersController.php:343
+msgid "Deleted external directory '%s'"
+msgstr "'%s' külső könyvtár törölve"
+
+#: Controller/UsersController.php:362
+msgid "No user with this email was found"
+msgstr "Nem létezik felhasználó ilyen email címmel"
+
+#: Controller/UsersController.php:371
+msgid "[phtagr] Password Request"
+msgstr "[phtagr] Jelszó kérése"
+
+#: Controller/UsersController.php:380
+msgid "Mail was sent!"
+msgstr "Levél elküldve"
+
+#: Controller/UsersController.php:386
+msgid "Mail could not be sent: unknown error!"
+msgstr "Levél elküldése sikertelen: ismeretlen hiba!"
+
+#: Controller/UsersController.php:403
+msgid "Captcha verification failed"
+msgstr "Captcha ellenőrzés sikertelen"
+
+#: Controller/UsersController.php:406
+msgid "Username already exists, please choose different name!"
+msgstr "Felhasználónév már foglalt. Kérem válasszon másikat!"
+
+#: Controller/UsersController.php:415
+msgid "Could not create user"
+msgstr "Felhasználó nem hozható létre"
+
+#: Controller/UsersController.php:453
+msgid "Could not send the confirmation email. Please contact the admin."
+msgstr "Megerősítő levél nem küldhető. Kérem keresse az adminisztrátort."
+
+#: Controller/UsersController.php:461
+msgid "A confirmation email was sent to your email address"
+msgstr "Megerősítő levél elküldve az ön email címére"
+
+#: Controller/UsersController.php:476
+msgid "Please enter the confirmation key"
+msgstr "Kérem adja meg a megerősítési kulcsot"
+
+#: Controller/UsersController.php:496;511
+msgid "Could not find confirmation key"
+msgstr "Nem található megerősítési kulcs"
+
+#: Controller/UsersController.php:502
+msgid "Internal error occured"
+msgstr "Belső hiba történt"
+
+#: Controller/UsersController.php:546
+msgid "[phtagr] Account confirmation: %s"
+msgstr "[phtagr] Hozzáférés megerősítése: %s"
+
+#: Controller/UsersController.php:567
+msgid "[phtagr] Welcome %s"
+msgstr "[phtagr] Üdvözöljük %s"
+
+#: Controller/UsersController.php:598
+msgid "[phtagr] New account notification: %s"
+msgstr "[phtagr] Új hozzáférés értesítés: %s"
+
+#: Controller/Component/MenuComponent.php:42
+msgid "Account Settings"
+msgstr "Hozzáférés beállítások"
+
+#: Controller/Component/MenuComponent.php:43
+#: View/Elements/single_acl_form.ctp:8
+#: View/Elements/Explorer/description.ctp:42 View/Groups/all.ctp:1
+#: View/Groups/index.ctp:1 View/Groups/members.ctp:1 View/Guests/index.ctp:10
+#: View/Helper/ImageDataHelper.php:571 View/System/view.ctp:15
+msgid "Groups"
+msgstr "Csoportok"
+
+#: Controller/Component/MenuComponent.php:44
+#: View/Elements/Explorer/description.ctp:50
+#: View/Elements/Explorer/menu.ctp:93;176
+#: View/Helper/ImageDataHelper.php:335;630 View/Options/profile.ctp:20
+#: View/System/view.ctp:13 View/Users/index.ctp:2
+msgid "Users"
+msgstr "Felhasználók"
+
+#: Controller/Component/MenuComponent.php:45 View/Guests/index.ctp:1
+#: View/System/view.ctp:14 View/Users/admin_index.ctp:18
+msgid "Guests"
+msgstr "Vendégek"
+
+#: Controller/Component/MenuComponent.php:46
+msgid "Media Files"
+msgstr "Médiafájlok"
+
+#: Controller/Component/MenuComponent.php:49 View/Elements/topnav.ctp:7
+msgid "System"
+msgstr "Rendszer"
+
+#: Model/Group.php:163
+msgid "You are now subscribed to group %s"
+msgstr "Feliratkozva a(z) %s csoportra"
+
+#: Model/Group.php:166
+msgid "You are allready subscribed to group %s"
+msgstr "Már fel van iratkozva a(z) %s csoportra"
+
+#: Model/Group.php:187
+msgid "You are now unsubscribed of group %s"
+msgstr "Leliratkozva a(z) %s csoportról"
+
+#: Model/Group.php:190
+msgid "You are not subscribed to group %s"
+msgstr "Nincs feliratkozva a(z) %s csoportra"
+
+#: Model/Guest.php:68 Model/User.php:108
+msgid "Password not given"
+msgstr "Nem lett megadva jelszó"
+
+#: Model/Guest.php:70 Model/User.php:110
+msgid "Password confirmation is missing"
+msgstr "Jelszó megerősítés hiányzik"
+
+#: Model/Guest.php:72;73 Model/User.php:112;113
+msgid "Password confirmation mismatch"
+msgstr "Nem egyező jelszó"
+
+#: Model/User.php:125
+msgid "Username already taken"
+msgstr "Felhasználónév már foglalt"
+
+#: View/Browser/folder.ctp:1
+msgid "Create Folder"
+msgstr "Könyvtár létrehozása"
+
+#: View/Browser/folder.ctp:5 View/Browser/index.ctp:7;16
+msgid "Location %s"
+msgstr "%s hely"
+
+#: View/Browser/folder.ctp:9
+msgid "Folder Name"
+msgstr "Könyvtár neve"
+
+#: View/Browser/folder.ctp:12 View/Groups/create.ctp:16
+#: View/Groups/dashboard_create.ctp:15;35;55;75;95;115
+#: View/Guests/create.ctp:15 View/Setup/user.ctp:15
+#: View/Users/admin_add.ctp:14
+msgid "Create"
+msgstr "Létrehozás"
+
+#: View/Browser/import.ctp:1
+msgid "Browser"
+msgstr "Böngésző"
+
+#: View/Browser/import.ctp:5
+msgid "View folder %s"
+msgstr "Könyvtár megtekintése: %s"
+
+#: View/Browser/index.ctp:1
+msgid "File Browser"
+msgstr "Fájl böngésző"
+
+#: View/Browser/index.ctp:9;18
+msgid " (%s or %s here)"
+msgstr "(%s vagy %s)"
+
+#: View/Browser/index.ctp:10;19 View/Browser/upload.ctp:10
+msgid "Upload files"
+msgstr "Fájlok feltöltése"
+
+#: View/Browser/index.ctp:11;20
+msgid "create folder"
+msgstr "Könyvtár létrehozása"
+
+#: View/Browser/index.ctp:25
+msgid "Recursive"
+msgstr "Rekurzív"
+
+#: View/Browser/index.ctp:27
+msgid "Import"
+msgstr "Importálás"
+
+#: View/Browser/index.ctp:28
+msgid "Unlink"
+msgstr "Lecsatolás"
+
+#: View/Browser/quickupload.ctp:1
+msgid "Media Upload"
+msgstr "Média feltöltés"
+
+#: View/Browser/quickupload.ctp:6
+msgid "Your uploaded media"
+msgstr "Feltöltött média"
+
+#: View/Browser/quickupload.ctp:17
+msgid "See all uploaded media of today %s"
+msgstr "Ma feltöltött média %s"
+
+#: View/Browser/quickupload.ctp:17 View/Setup/finish.ctp:7
+#: View/System/map.ctp:7
+msgid "here"
+msgstr "itt"
+
+#: View/Browser/quickupload.ctp:22
+msgid "Upload your photos, videos, GPS logs or ZIP archives here."
+msgstr "Töltse fel fényképeit, videóit, GPS naplóit vagy ZIP archívjait ide."
+
+#: View/Browser/quickupload.ctp:23
+msgid ""
+"You can upload maximal %s and %s at once. ZIP archives are extracted "
+"automatically."
+msgstr ""
+"Maximum %s és %s tölthető fel egyszerre. ZIP archívok automatikusan "
+"kitömörítésre kerülnek."
+
+#: View/Browser/quickupload.ctp:27 View/Browser/upload.ctp:27
+msgid "You cannot upload files now. Your upload quota is exceeded."
+msgstr ""
+"Feltöltés jelenleg nem lehetséges, az ön feltöltési kvótája elérte a "
+"maximumot."
+
+#: View/Browser/sync.ctp:1
+msgid "Meta Data Synchronization"
+msgstr "Metaadat szinkronizáció"
+
+#: View/Browser/sync.ctp:5
+msgid ""
+"phTagr embedds meta data like tags, categories, or (geo) location "
+"information direct into the image video files."
+msgstr ""
+"phTagr közvetlenül a médiafájlokba írja az olyan metaadatokat, mint a "
+"címkék, kategóriák, (földrajzi) helyek"
+
+#: View/Browser/sync.ctp:7
+msgid ""
+"Note:  In case you are using phTagr with external paths it is recommended to "
+"synchronize your images to store this important information within the media "
+"file.  After the synchronization these mata data could be read by other "
+"image programs or desktop search engines."
+msgstr ""
+"Ha külső útvonalakkal használja a phTagr-t, ajánlott a képek "
+"szinkronizációja, hogy minden fontos információ megmaradjon a fájlokban. A "
+"szinkronizáció után ezek a metaadatok olvashatóak lesznek képszerkesztő "
+"alkalmazásokban, keresőkben. "
+
+#: View/Browser/sync.ctp:10
+msgid "All media are synchronized"
+msgstr "Minden média szinkronizálva"
+
+#: View/Browser/sync.ctp:14
+msgid ""
+"Some files could not be updated with new metadata. Mainly this happens if "
+"the files are write protected. Please have a look to the log files for "
+"details."
+msgstr ""
+"Néhány fájl metaadata nem frissíthető. Ez akkor szokott előfordulni, ha a "
+"fájlok írásvédettek. Kérem nézze meg a logfájlt a részletekért."
+
+#: View/Browser/sync.ctp:19
+msgid "Synchronized %d media."
+msgstr "%d média szinkronizálva"
+
+#: View/Browser/sync.ctp:21
+msgid " %d media remains unsynced. Click %s to synchronize again"
+msgstr ""
+"%d médiát nem sikerült szinkronizálni. Új szinkronizációhoz kattintson ide: "
+"%s"
+
+#: View/Browser/sync.ctp:21
+msgid "sync"
+msgstr "szinkronizálás"
+
+#: View/Browser/sync.ctp:27
+msgid ""
+"You have %d unsynchronized media. Click %s to start the synchronization "
+"(this might take some time)"
+msgstr ""
+"Önnek %d nem szinkronizált médiája van. Szinkronizációhoz kattintson ide: %s "
+"(némi időt vesz igénybe)"
+
+#: View/Browser/sync.ctp:27;28
+msgid "Write Metadata"
+msgstr "Metaadat írása"
+
+#: View/Browser/upload.ctp:1
+msgid "File Upload"
+msgstr "Fájl feltöltése"
+
+#: View/Browser/upload.ctp:6
+msgid "You upload files to folder %s"
+msgstr "Fájlok feltöltése ebbe a könyvtárba: %s"
+
+#: View/Browser/upload.ctp:7
+msgid "You can upload maximal %s and %s at once"
+msgstr "%s és %s a maximális és egyszerre feltölthető mennyiség"
+
+#: View/Browser/upload.ctp:11;12;13;14;15
+msgid "File or archive"
+msgstr "Fájl vagy tömörített állomány"
+
+#: View/Browser/upload.ctp:16
+msgid "Extract ZIP archive"
+msgstr "ZIP archív kitömörítése"
+
+#: View/Browser/view.ctp:1
+msgid "File Overview"
+msgstr "Fájl áttekintés"
+
+#: View/Browser/view.ctp:5 View/Groups/all.ctp:12 View/Groups/create.ctp:10
+#: View/Groups/dashboard_create.ctp:9;29;49;69;89;109 View/Groups/edit.ctp:11
+#: View/Groups/index.ctp:11 View/Groups/members.ctp:12 View/Groups/view.ctp:7
+#: View/Users/view.ctp:16;42
+msgid "Description"
+msgstr "Leírás"
+
+#: View/Browser/view.ctp:5 View/Users/view.ctp:17
+msgid "Value"
+msgstr "Érték"
+
+#: View/Browser/view.ctp:10
+msgid "Files total"
+msgstr "Összes fájl"
+
+#: View/Browser/view.ctp:11
+msgid "Count of images/videos"
+msgstr "Képek/videók száma"
+
+#: View/Browser/view.ctp:13
+msgid "External images/videos"
+msgstr "Külső képek/videók"
+
+#: View/Browser/view.ctp:14
+msgid "Bytes total (with external sources)"
+msgstr "Össz méret (külső forrásokkal)"
+
+#: View/Browser/view.ctp:16
+msgid "Bytes total"
+msgstr "Össz méret"
+
+#: View/Browser/view.ctp:19
+msgid "Quota (free)"
+msgstr "Kvóta (ingyenes)"
+
+#: View/Browser/view.ctp:21
+msgid "Videos"
+msgstr "Videók"
+
+#: View/Browser/view.ctp:22
+msgid "Public files"
+msgstr "Publikus fájlok"
+
+#: View/Browser/view.ctp:23
+msgid "Visible for users"
+msgstr "Felhasználók számára látható"
+
+#: View/Browser/view.ctp:24
+msgid "Visible for group members"
+msgstr "Csoporttagok számára látható"
+
+#: View/Browser/view.ctp:25
+msgid "Private files"
+msgstr "Privát fájlok"
+
+#: View/Browser/view.ctp:26
+msgid "Unsynced files"
+msgstr "Nem szinkronizált fájlok"
+
+#: View/Comments/rss.ctp:3
+msgid "Most Recent Comments"
+msgstr "Legfrissebb hozzászólások"
+
+#: View/Comments/rss.ctp:5
+msgid "Most recent comments at %s"
+msgstr "Legfrissebb hozzászólások %s-kor"
+
+#: View/Elements/comment.ctp:7 View/Guests/edit.ctp:19 View/System/view.ctp:24
+msgid "Comments"
+msgstr "Hozzászólások"
+
+#: View/Elements/comment.ctp:19
+msgid "%s said %s"
+msgstr "%s mondta %s"
+
+#: View/Elements/comment.ctp:23
+msgid "(delete)"
+msgstr "(törlés)"
+
+#: View/Elements/comment.ctp:35
+msgid "Add new Comment"
+msgstr "Új hozzászólás küldése"
+
+#: View/Elements/comment.ctp:43 View/Explorer/search.ctp:30
+#: View/Groups/all.ctp:10 View/Groups/create.ctp:9
+#: View/Groups/dashboard_create.ctp:8;28;48;68;88;108 View/Groups/edit.ctp:10
+#: View/Groups/index.ctp:10 View/Groups/members.ctp:10 View/Guests/edit.ctp:23
+#: View/Guests/index.ctp:9 View/Helper/ExplorerMenuHelper.php:152
+#: View/Helper/FileListHelper.php:134 View/Users/index.ctp:15
+msgid "Name"
+msgstr "Név"
+
+#: View/Elements/comment.ctp:44
+msgid "Will not be published"
+msgstr "Nem lesz nyilvános"
+
+#: View/Elements/comment.ctp:45
+msgid "Optional"
+msgstr "Opcionális"
+
+#: View/Elements/comment.ctp:49
+msgid "Verification"
+msgstr "Ellenőrzés"
+
+#: View/Elements/comment.ctp:53
+msgid "Comment"
+msgstr "Hozzászólás"
+
+#: View/Elements/comment.ctp:54
+msgid "Notify me on new comments"
+msgstr "Értesítsen új hozzászólás érkezésekor"
+
+#: View/Elements/comment.ctp:57
+msgid "Add Comment"
+msgstr "Hozzászólás küldése"
+
+#: View/Elements/footer.ctp:4
+msgid "%s Social Web Gallery %s in %.3fs. Layout based on %s, Icons by %s"
+msgstr "%s Social Web Gallery %s in %.3fs. Layout based on %s, Icons by %s"
+
+#: View/Elements/single_acl_form.ctp:2
+msgid "Who can view image?"
+msgstr "Ki láthatja a képet?"
+
+#: View/Elements/single_acl_form.ctp:3 View/Elements/Explorer/menu.ctp:184
+#: View/Options/import.ctp:14
+msgid "Who can download the image?"
+msgstr "Ki töltheti le a képet?"
+
+#: View/Elements/single_acl_form.ctp:4
+msgid "Who can edit the tags?"
+msgstr "Ki szerkesztheti a címkéket?"
+
+#: View/Elements/single_acl_form.ctp:5 View/Elements/Explorer/menu.ctp:192
+#: View/Options/import.ctp:16
+msgid "Who can edit all meta data?"
+msgstr "Ki szerkesztheti az összes metaadatot?"
+
+#: View/Elements/single_meta_form.ctp:3
+#: View/Elements/Explorer/description.ctp:7
+#: View/Elements/Explorer/menu.ctp:51;135 View/Explorer/search.ctp:6
+#: View/Helper/ExplorerMenuHelper.php:211 View/Helper/ImageDataHelper.php:553
+#: View/System/view.ctp:25 View/Themed/Mobile/Explorer/index.ctp:31
+#: View/Themed/Mobile/Images/view.ctp:29
+msgid "Tags"
+msgstr "Címkék"
+
+#: View/Elements/single_meta_form.ctp:7
+#: View/Elements/Explorer/description.ctp:12
+#: View/Elements/Explorer/menu.ctp:58;139 View/Explorer/search.ctp:7
+#: View/Helper/ExplorerMenuHelper.php:216 View/Helper/ImageDataHelper.php:556
+#: View/System/view.ctp:26 View/Themed/Mobile/Explorer/index.ctp:40
+#: View/Themed/Mobile/Images/view.ctp:38
+msgid "Categories"
+msgstr "Kategóriák"
+
+#: View/Elements/single_meta_form.ctp:9 View/Elements/Explorer/menu.ctp:141
+msgid "City"
+msgstr "Város"
+
+#: View/Elements/single_meta_form.ctp:11 View/Elements/Explorer/menu.ctp:143
+msgid "Sublocation"
+msgstr "Helység"
+
+#: View/Elements/single_meta_form.ctp:13 View/Elements/Explorer/menu.ctp:145
+msgid "State"
+msgstr "Állam"
+
+#: View/Elements/single_meta_form.ctp:15 View/Elements/Explorer/menu.ctp:147
+msgid "Country"
+msgstr "Ország"
+
+#: View/Elements/single_meta_form.ctp:21 View/Elements/Explorer/menu.ctp:149
+msgid "Geo data"
+msgstr "Földrajzi adat"
+
+#: View/Elements/single_meta_form.ctp:24 View/Elements/Explorer/menu.ctp:152
+msgid "E.g. 2008-08-07 15:30"
+msgstr "Pl. 2008-08-07 15:30"
+
+#: View/Elements/topnav.ctp:10
+msgid "Preferences"
+msgstr "Tulajdonságok"
+
+#: View/Elements/topnav.ctp:16
+msgid "Register"
+msgstr "Regisztrálás"
+
+#: View/Elements/Explorer/actions.ctp:3
+msgid "Select media"
+msgstr "Média kijelölése"
+
+#: View/Elements/Explorer/actions.ctp:7
+msgid "Deselect media"
+msgstr "Kijelölés törlése"
+
+#: View/Elements/Explorer/actions.ctp:12
+msgid "Edit meta data"
+msgstr "Metaadat szerkesztése"
+
+#: View/Elements/Explorer/actions.ctp:18
+msgid "Edit access rights"
+msgstr "Hozzáférési jogok szerkesztése"
+
+#: View/Elements/Explorer/actions.ctp:25
+msgid "Download file %s"
+msgstr "%s fájl letöltése"
+
+#: View/Elements/Explorer/date.ctp:2 View/Explorer/search.ctp:19
+#: View/Helper/ImageDataHelper.php:549
+msgid "Date"
+msgstr "Dátum"
+
+#: View/Elements/Explorer/date.ctp:7 View/Helper/ImageDataHelper.php:351
+msgid "View media of previous dates"
+msgstr "Korábbi dátumhoz tartozó média megtekintése"
+
+#: View/Elements/Explorer/date.ctp:13;32
+#: View/Helper/ImageDataHelper.php:355;374
+msgid "View media of interval"
+msgstr "Intervallumba tartozó média megtekintése"
+
+#: View/Elements/Explorer/date.ctp:16 View/Helper/ImageDataHelper.php:360
+msgid "Set new end date of interval"
+msgstr "Új végdátum megadása"
+
+#: View/Elements/Explorer/date.ctp:22 View/Helper/ImageDataHelper.php:364
+msgid "View media of this day"
+msgstr "Ehhez a naphoz tartozó média megtekintése"
+
+#: View/Elements/Explorer/date.ctp:24 View/Helper/ImageDataHelper.php:367
+msgid "View media of this week"
+msgstr "E hét megtekintése"
+
+#: View/Elements/Explorer/date.ctp:26 View/Helper/ImageDataHelper.php:370
+msgid "View media of this month"
+msgstr "E hét megtekintése"
+
+#: View/Elements/Explorer/date.ctp:35 View/Helper/ImageDataHelper.php:379
+msgid "Set new start date for interval"
+msgstr "Új kezdődátum megadása"
+
+#: View/Elements/Explorer/date.ctp:41 View/Helper/ImageDataHelper.php:383
+msgid "View media of next dates"
+msgstr "Későbbi dátumhoz tartozó média megtekintése"
+
+#: View/Elements/Explorer/description.ctp:26 View/Explorer/search.ctp:8
+#: View/Helper/ExplorerMenuHelper.php:221 View/Helper/ImageDataHelper.php:567
+#: View/System/view.ctp:27
+msgid "Locations"
+msgstr "Helyek"
+
+#: View/Elements/Explorer/description.ctp:48
+#: View/Helper/ImageDataHelper.php:572
+msgid "Access"
+msgstr "Hozzáférés"
+
+#: View/Elements/Explorer/description.ctp:49 View/Explorer/search.ctp:40
+#: View/Helper/ImageDataHelper.php:332;629 View/Options/profile.ctp:19
+msgid "Group members"
+msgstr "Csoporttagok"
+
+#: View/Elements/Explorer/description.ctp:51
+#: View/Elements/Explorer/menu.ctp:177
+msgid "All"
+msgstr "Mind"
+
+#: View/Elements/Explorer/media.ctp:3
+#: View/Elements/Explorer/media_compact.ctp:3 View/home/index.ctp:8
+msgid "%s by %s"
+msgstr "%s by %s"
+
+#: View/Elements/Explorer/menu.ctp:12
+msgid "View Filter"
+msgstr "Szűrő"
+
+#: View/Elements/Explorer/menu.ctp:14
+msgid "Edit Metadata"
+msgstr "Metaadat szerkesztése"
+
+#: View/Elements/Explorer/menu.ctp:16 View/Explorer/index.ctp:11
+msgid "Edit Access Rights"
+msgstr "Hozzáférési jogok szerkesztése"
+
+#: View/Elements/Explorer/menu.ctp:19
+msgid "More"
+msgstr "Több"
+
+#: View/Elements/Explorer/menu.ctp:20
+msgid "Slideshow"
+msgstr "Diavetítés"
+
+#: View/Elements/Explorer/menu.ctp:27
+msgid "Page %d of %d"
+msgstr "%d / %d oldal"
+
+#: View/Elements/Explorer/menu.ctp:65
+msgid "Sublocations"
+msgstr "Helységek"
+
+#: View/Elements/Explorer/menu.ctp:72
+msgid "Cities"
+msgstr "Városok"
+
+#: View/Elements/Explorer/menu.ctp:79
+msgid "States"
+msgstr "Államok"
+
+#: View/Elements/Explorer/menu.ctp:86
+msgid "Countries"
+msgstr "Országok"
+
+#: View/Elements/Explorer/menu.ctp:100 View/Helper/ExplorerMenuHelper.php:171
+msgid "Pagesize"
+msgstr "Oldal mérete"
+
+#: View/Elements/Explorer/menu.ctp:107
+msgid "Sort"
+msgstr "Rendezés"
+
+#: View/Elements/Explorer/menu.ctp:109 View/Helper/ExplorerMenuHelper.php:132
+msgid "newest"
+msgstr "legújabb"
+
+#: View/Elements/Explorer/menu.ctp:110
+msgid "date"
+msgstr "dátum"
+
+#: View/Elements/Explorer/menu.ctp:111
+msgid "date (reverse)"
+msgstr "dátum (fordított)"
+
+#: View/Elements/Explorer/menu.ctp:112
+msgid "name"
+msgstr "név"
+
+#: View/Elements/Explorer/menu.ctp:113
+msgid "modified"
+msgstr "módosítva"
+
+#: View/Elements/Explorer/menu.ctp:114
+msgid "view count"
+msgstr "megtekintések száma"
+
+#: View/Elements/Explorer/menu.ctp:115 View/Helper/ExplorerMenuHelper.php:140
+msgid "random"
+msgstr "véletlenszerű"
+
+#: View/Elements/Explorer/menu.ctp:118 View/Helper/ImageDataHelper.php:444
+msgid "View"
+msgstr "nézet"
+
+#: View/Elements/Explorer/menu.ctp:120
+msgid "default"
+msgstr "alapértelmezett"
+
+#: View/Elements/Explorer/menu.ctp:121
+msgid "compact"
+msgstr "kompakt"
+
+#: View/Elements/Explorer/menu.ctp:122
+msgid "small"
+msgstr "kicsi"
+
+#: View/Elements/Explorer/menu.ctp:131 View/Explorer/search.ctp:4
+msgid "Metadata"
+msgstr "metaadat"
+
+#: View/Elements/Explorer/menu.ctp:135
+msgid "E.g. newtag, -oldtag"
+msgstr "Pl. újcímke, -régicímke"
+
+#: View/Elements/Explorer/menu.ctp:149
+msgid "latitude, longitude"
+msgstr "hosszúság, szélesség"
+
+#: View/Elements/Explorer/menu.ctp:156;178 View/Helper/ImageDataHelper.php:627
+msgid "Keep"
+msgstr "Megtart"
+
+#: View/Elements/Explorer/menu.ctp:157
+msgid "90 CW"
+msgstr "90 fok jobbra"
+
+#: View/Elements/Explorer/menu.ctp:158
+msgid "180 CW"
+msgstr "180 fok"
+
+#: View/Elements/Explorer/menu.ctp:159
+msgid "90 CCW"
+msgstr "90 fok balra"
+
+#: View/Elements/Explorer/menu.ctp:160
+msgid "Reset"
+msgstr "Alapállapot"
+
+#: View/Elements/Explorer/menu.ctp:162
+msgid "Rotate"
+msgstr "Forgatás"
+
+#: View/Elements/Explorer/menu.ctp:167;199
+msgid "Apply"
+msgstr "Alkalmaz"
+
+#: View/Elements/Explorer/menu.ctp:171
+msgid "Access Rights"
+msgstr "Hozzáférési jogok"
+
+#: View/Elements/Explorer/menu.ctp:174
+msgid "Me"
+msgstr "Én"
+
+#: View/Elements/Explorer/menu.ctp:180
+msgid "Who can view the image"
+msgstr "Ki láthatja a képet"
+
+#: View/Elements/Explorer/menu.ctp:188 View/Options/import.ctp:15
+msgid "Who can add tags?"
+msgstr "Ki adhat hozzá címkéket"
+
+#: View/Elements/Explorer/menu.ctp:195
+msgid "Media access group"
+msgstr "Csoport"
+
+#: View/Elements/Explorer/menu.ctp:205
+msgid "Download:"
+msgstr "Letöltés:"
+
+#: View/Elements/Explorer/menu.ctp:206
+msgid "Original"
+msgstr "Eredeti"
+
+#: View/Elements/Explorer/menu.ctp:206
+msgid "Download original files from selected media"
+msgstr "A kijelölt média eredetijének letöltése"
+
+#: View/Elements/Explorer/menu.ctp:207
+msgid "High Resolution"
+msgstr "Nagy felbontás"
+
+#: View/Elements/Explorer/menu.ctp:207
+msgid "Download high resolution files (%d px) from selected media"
+msgstr "Média nagy felbontású változatának (%d pixel) letöltése"
+
+#: View/Elements/Explorer/menu.ctp:208
+msgid "Preview Resolution"
+msgstr "Előnézeti felbontás"
+
+#: View/Elements/Explorer/menu.ctp:208
+msgid "Download preview files (%d px) from selected media"
+msgstr "Média előnézeti felbontású változatának (%d pixel) letöltése"
+
+#: View/Emails/html/notify_new_media.ctp:1
+#: View/Emails/text/notify_new_media.ctp:2
+msgid "Hi %s!"
+msgstr "Üdv, %s!"
+
+#: View/Emails/html/notify_new_media.ctp:3
+#: View/Emails/text/notify_new_media.ctp:4
+msgid "New media available at %s"
+msgstr "Új média elérhető itt: %s"
+
+#: View/Emails/html/notify_new_media.ctp:16
+#: View/Emails/text/notify_new_media.ctp:17
+msgid "User %s published following media"
+msgstr "%s felhasználó megosztotta a következő médiát"
+
+#: View/Emails/html/notify_new_media.ctp:29
+#: View/Emails/text/notify_new_media.ctp:24
+msgid "See all new media at %s"
+msgstr "Minden új média megtekintése %s-kor"
+
+#: View/Emails/html/notify_new_media.ctp:31
+#: View/Emails/text/notify_new_media.ctp:27
+msgid "Sincerly, your phTagr agent"
+msgstr "Üdv, phTagr"
+
+#: View/Emails/html/notify_new_media.ctp:33
+#: View/Emails/text/notify_new_media.ctp:30
+msgid ""
+"PS: If you do not like to receive this notification again, please configure "
+"the notification interval in your user profile."
+msgstr ""
+"UI: Ha nem szeretne ilyen értesítéseket kapni, kérem kapcsolja ki a "
+"profiljában, az Értesítés új médiáról menüpontban"
+
+#: View/Emails/text/comment.ctp:2
+msgid "Hi %s"
+msgstr "Üdv, %s"
+
+#: View/Emails/text/comment.ctp:4
+msgid "New comment on your media %s: %s was submitted"
+msgstr "Új hozzászólás érkezett a %s médiához: %s "
+
+#: View/Emails/text/comment.ctp:7
+msgid "Author: %s"
+msgstr "Feladó: %s"
+
+#: View/Emails/text/comment.ctp:8
+msgid "Email: %s"
+msgstr "Email: %s"
+
+#: View/Emails/text/comment.ctp:9
+msgid "URL: %s"
+msgstr "URL: %s"
+
+#: View/Emails/text/comment.ctp:10 View/Emails/text/commentnotify.ctp:7
+msgid "Date: %s"
+msgstr "Dátum: %s"
+
+#: View/Emails/text/comment.ctp:14
+msgid "You can see the comments on this media here: %s"
+msgstr "Médiához tartozó hozzászólások megtekintése itt: %s"
+
+#: View/Emails/text/comment.ctp:16
+msgid "Delete it: %s"
+msgstr "Törlés: %s"
+
+#: View/Emails/text/comment.ctp:19 View/Emails/text/commentnotify.ctp:13
+#: View/Emails/text/group_confirmation.ctp:14
+#: View/Emails/text/group_subscribtion.ctp:16
+#: View/Emails/text/group_subscribtion_request.ctp:18
+#: View/Emails/text/group_unsubscribtion.ctp:16
+#: View/Emails/text/new_account.ctp:8
+#: View/Emails/text/new_account_confirmation.ctp:14
+#: View/Emails/text/new_account_notification.ctp:6
+#: View/Emails/text/password.ctp:8
+msgid "Sincerely"
+msgstr "Üdvözlettel,"
+
+#: View/Emails/text/comment.ctp:21 View/Emails/text/commentnotify.ctp:15
+#: View/Emails/text/group_confirmation.ctp:16
+#: View/Emails/text/group_subscribtion.ctp:18
+#: View/Emails/text/group_subscribtion_request.ctp:20
+#: View/Emails/text/group_unsubscribtion.ctp:18
+#: View/Emails/text/new_account.ctp:10
+#: View/Emails/text/new_account_confirmation.ctp:16
+#: View/Emails/text/new_account_notification.ctp:8
+#: View/Emails/text/password.ctp:10
+msgid "Your phTagr Agent"
+msgstr "phTagr"
+
+#: View/Emails/text/commentnotify.ctp:2
+msgid "Hello"
+msgstr "Üdvözlet"
+
+#: View/Emails/text/commentnotify.ctp:4
+msgid "A new comment on %s was submitted."
+msgstr "Új hozzászólás hozzáadva ehhez: %s"
+
+#: View/Emails/text/commentnotify.ctp:6
+msgid "From: %s"
+msgstr "Feladó: %s"
+
+#: View/Emails/text/commentnotify.ctp:8
+msgid "Link: %s"
+msgstr "Link: %s"
+
+#: View/Emails/text/commentnotify.ctp:17
+msgid ""
+"PS: This mail is a comment notification of your previous comment(s) on this "
+"media."
+msgstr ""
+"UI: Ez a levél egy értesítő a legutóbbi hozzászólásairól ezen a médián."
+
+#: View/Emails/text/group_confirmation.ctp:2
+#: View/Emails/text/group_subscribtion.ctp:2
+#: View/Emails/text/group_subscribtion_request.ctp:2
+#: View/Emails/text/group_unsubscribtion.ctp:2
+#: View/Emails/text/new_account_confirmation.ctp:2
+#: View/Emails/text/password.ctp:2
+msgid "Hello %s!"
+msgstr "Üdv, %s!"
+
+#: View/Emails/text/group_confirmation.ctp:4
+msgid "Your group subscription of group %s was accepted."
+msgstr "Csoport feliratkozási kérelme elfogadva."
+
+#: View/Emails/text/group_confirmation.ctp:6
+msgid "Group information:"
+msgstr "Csoport információ:"
+
+#: View/Emails/text/group_confirmation.ctp:8
+#: View/Emails/text/group_subscribtion.ctp:10
+#: View/Emails/text/group_subscribtion_request.ctp:12
+#: View/Emails/text/group_unsubscribtion.ctp:10
+msgid "Description: %s"
+msgstr "Leírás:"
+
+#: View/Emails/text/group_confirmation.ctp:9
+#: View/Emails/text/group_subscribtion.ctp:11
+#: View/Emails/text/group_subscribtion_request.ctp:13
+#: View/Emails/text/group_unsubscribtion.ctp:11
+msgid "Number of members: %d"
+msgstr "Tagok száma:"
+
+#: View/Emails/text/group_confirmation.ctp:11
+msgid "More details of group %s are available at %s."
+msgstr "%s csoportról további információk elérhetők itt: %s."
+
+#: View/Emails/text/group_subscribtion.ctp:4
+msgid "User %s joined your group %s"
+msgstr "%s felhasználó csatlakozott a %s csoporthoz"
+
+#: View/Emails/text/group_subscribtion.ctp:6
+msgid "To see more information about user %s, please visit %s."
+msgstr "További információk megtekintése %s felhasználóról itt: %s."
+
+#: View/Emails/text/group_subscribtion.ctp:8
+#: View/Emails/text/group_subscribtion_request.ctp:10
+#: View/Emails/text/group_unsubscribtion.ctp:8
+msgid "Group info:"
+msgstr "Csoport információ:"
+
+#: View/Emails/text/group_subscribtion.ctp:13
+#: View/Emails/text/group_subscribtion_request.ctp:15
+#: View/Emails/text/group_unsubscribtion.ctp:13
+msgid "More details of your group %s are available at %s"
+msgstr "További információk megtekintése %s csoportról itt: %s."
+
+#: View/Emails/text/group_subscribtion_request.ctp:4
+msgid "User %s likes to join your group %s."
+msgstr "%s felhasználó szeretne csatlakozni a %s csoporthoz."
+
+#: View/Emails/text/group_subscribtion_request.ctp:6
+msgid "To confirm the subscription please visit %s"
+msgstr "A csatlakozási kérelem jóváhagyásához látogassa meg a %s helyet"
+
+#: View/Emails/text/group_subscribtion_request.ctp:8
+#: View/Emails/text/group_unsubscribtion.ctp:6
+msgid "To see more information about user %s, please visit %s"
+msgstr "További információk %s felhasználóról itt: %s"
+
+#: View/Emails/text/group_unsubscribtion.ctp:4
+msgid "User %s unsubscribed from your group %s."
+msgstr "%s felhasználó leiratkozott a %s csoportról"
+
+#: View/Emails/text/new_account.ctp:2
+msgid "Welcome %s!"
+msgstr "Üdvözlet, %s!"
+
+#: View/Emails/text/new_account.ctp:4
+msgid "Your phTagr account is now activated for %s"
+msgstr "Az ön phTagr fiókja létrejött: %s"
+
+#: View/Emails/text/new_account.ctp:6
+msgid "Login at %s with your new account and see %s for first steps."
+msgstr ""
+"Jelentkezzen be itt: %s az új fiókjával és tekintse meg a kezdeti lépésekhez "
+"a következőt: %s"
+
+#: View/Emails/text/new_account_confirmation.ctp:3
+msgid "\n"
+msgstr "\n"
+
+#: View/Emails/text/new_account_confirmation.ctp:4
+msgid "Please confirm your account creation"
+msgstr "Kérem erősítse meg regisztrációját"
+
+#: View/Emails/text/new_account_confirmation.ctp:8
+msgid "Or visit %s and enter the confirmation key:"
+msgstr "Vagy látogassa meg ezt: %s és írja be a jóváhagyási kódot:"
+
+#: View/Emails/text/new_account_confirmation.ctp:12
+msgid "to finalize your account creation"
+msgstr "hogy befejezze regisztrációját"
+
+#: View/Emails/text/new_account_notification.ctp:2
+msgid "Hello System Operator!"
+msgstr "Üdv, Rendszeradminisztrátor!"
+
+#: View/Emails/text/new_account_notification.ctp:4
+msgid "A new phTagr user account was created for %s"
+msgstr "Egy új phTagr felhasználó jött létre itt: %s"
+
+#: View/Emails/text/password.ctp:4
+msgid "Your phTagr account password is:"
+msgstr "Az ön fiókjának jelszava:"
+
+#: View/Explorer/index.ctp:10
+msgid "Edit Meta Data"
+msgstr "Metaadat szerkesztése"
+
+#: View/Explorer/index.ctp:12
+msgid "Update"
+msgstr "Frissítés"
+
+#: View/Explorer/index.ctp:13
+msgid "Cancel"
+msgstr "Mégse"
+
+#: View/Explorer/index.ctp:292
+msgid "Select All"
+msgstr "Mind kijelölése"
+
+#: View/Explorer/index.ctp:293
+msgid "Invert Selection"
+msgstr "Kijelölés megfordítása"
+
+#: View/Explorer/rss.ctp:3
+msgid "Most Recent Media"
+msgstr "Legfrissebb média"
+
+#: View/Explorer/rss.ctp:5
+msgid "Most recent media of %s"
+msgstr "Legfrissebb média ettől: %s"
+
+#: View/Explorer/search.ctp:1 View/Helper/ExplorerMenuHelper.php:204
+msgid "Advanced Search"
+msgstr "Részletes keresés"
+
+#: View/Explorer/search.ctp:6
+msgid "E.g. includeTag, -excludeTag"
+msgstr "Pl. KívántCímke, -NemKívántCímke"
+
+#: View/Explorer/search.ctp:10
+msgid "Date from"
+msgstr "Dátum innen"
+
+#: View/Explorer/search.ctp:10
+msgid "E.g. 2008-08-07"
+msgstr "Pl. 2008-08-07"
+
+#: View/Explorer/search.ctp:11
+msgid "Date to"
+msgstr "Dátum eddig"
+
+#: View/Explorer/search.ctp:14 View/Helper/ExplorerMenuHelper.php:227
+msgid "Options"
+msgstr "Beállítások"
+
+#: View/Explorer/search.ctp:17
+msgid "Page size"
+msgstr "Oldal mérete"
+
+#: View/Explorer/search.ctp:19
+msgid "Default"
+msgstr "Alapértelmezett"
+
+#: View/Explorer/search.ctp:19
+msgid "Newest"
+msgstr "Legújabb"
+
+#: View/Explorer/search.ctp:19 View/Helper/ExplorerMenuHelper.php:144
+msgid "Changes"
+msgstr "Változások"
+
+#: View/Explorer/search.ctp:19
+msgid "Random"
+msgstr "Véletlen"
+
+#: View/Explorer/search.ctp:19
+msgid "Popularity"
+msgstr "Népszerűség"
+
+#: View/Explorer/search.ctp:20
+msgid "Sort by"
+msgstr "Rendezési szempont"
+
+#: View/Explorer/search.ctp:24
+msgid "Advanced"
+msgstr "Haladó"
+
+#: View/Explorer/search.ctp:31
+msgid "Any Type"
+msgstr "Bármilyen"
+
+#: View/Explorer/search.ctp:31
+msgid "Image or Photos"
+msgstr "Kép vagy fotó"
+
+#: View/Explorer/search.ctp:31
+msgid "Video"
+msgstr "Videó"
+
+#: View/Explorer/search.ctp:32
+msgid "File Type"
+msgstr "Fájltípus"
+
+#: View/Explorer/search.ctp:36 View/Groups/view.ctp:90
+#: View/Guests/create.ctp:9 View/Options/profile.ctp:8
+#: View/Setup/config.ctp:13 View/Setup/user.ctp:9 View/Users/admin_add.ctp:8
+#: View/Users/login.ctp:7 View/Users/password.ctp:9 View/Users/register.ctp:7
+msgid "Username"
+msgstr "Felhasználói név"
+
+#: View/Explorer/search.ctp:40
+msgid "Any"
+msgstr "Bármi"
+
+#: View/Explorer/search.ctp:40 View/Options/profile.ctp:18
+msgid "Private"
+msgstr "Privát"
+
+#: View/Explorer/search.ctp:40 View/Options/profile.ctp:21
+msgid "Public"
+msgstr "Publikus"
+
+#: View/Explorer/search.ctp:41
+msgid "Media visibility"
+msgstr "Média láthatósága"
+
+#: View/Explorer/search.ctp:44
+msgid "AND"
+msgstr "ÉS"
+
+#: View/Explorer/search.ctp:44
+msgid "OR"
+msgstr "VAGY"
+
+#: View/Explorer/search.ctp:45
+msgid "General Operand"
+msgstr "Általános operátor"
+
+#: View/Explorer/search.ctp:46
+msgid "Tag operand"
+msgstr "Címke operátor"
+
+#: View/Explorer/search.ctp:47
+msgid "Category operand"
+msgstr "Kategória operátor"
+
+#: View/Explorer/search.ctp:48
+msgid "Location operand"
+msgstr "Hely operátor"
+
+#: View/Explorer/search.ctp:53
+#: View/Groups/dashboard_search.ctp:22;50;78;106;134;162
+msgid "Search"
+msgstr "Keresés"
+
+#: View/Groups/all.ctp:11 View/Groups/members.ctp:11
+msgid "From User"
+msgstr "Ettől a felhasználótól"
+
+#: View/Groups/all.ctp:13 View/Groups/index.ctp:12 View/Groups/members.ctp:13
+msgid "Members"
+msgstr "Tagok"
+
+#: View/Groups/all.ctp:14 View/Groups/index.ctp:13 View/Groups/members.ctp:14
+#: View/Guests/edit.ctp:57 View/Guests/index.ctp:11
+#: View/Helper/FileListHelper.php:134 View/Users/admin_index.ctp:20
+#: View/Users/admin_path.ctp:13
+msgid "Actions"
+msgstr "Műveletek"
+
+#: View/Groups/all.ctp:31 View/Groups/index.ctp:30 View/Groups/members.ctp:31
+#: View/Groups/view.ctp:100
+msgid "Subscribe"
+msgstr "Feliratkozás"
+
+#: View/Groups/all.ctp:35 View/Groups/index.ctp:34 View/Groups/members.ctp:35
+#: View/Groups/view.ctp:98
+msgid "Unsubscribe"
+msgstr "Leiratkozás"
+
+#: View/Groups/all.ctp:44 View/Groups/index.ctp:43 View/Groups/members.ctp:44
+msgid "Do you realy want to delete the group '%s'?"
+msgstr "Tényleg törölni szeretné a %s csoportot?"
+
+#: View/Groups/all.ctp:46 View/Groups/index.ctp:45
+#: View/Groups/listmembers.ctp:28 View/Groups/members.ctp:46
+#: View/Groups/view.ctp:67 View/Guests/index.ctp:26
+#: View/System/delete_unused_meta_data.ctp:4 View/Users/admin_index.ctp:48
+#: View/Users/admin_path.ctp:22
+msgid "Delete"
+msgstr "Törlés"
+
+#: View/Groups/all.ctp:64
+msgid ""
+"Currently no image groups are assigned. At the one hand each image could be "
+"assigned to a specific group. On the other hand a guest can be member of a "
+"set of groups. The guest is than able to view the images from his groups."
+msgstr ""
+"Jelenleg nincsenek csoportok hozzárendelve. Egyrészt minden kép "
+"hozzárendelhető egy bizonyos csoporthoz. Másrészt egy vendég több csoport "
+"tagja lehet. A vendég a csoport(ok)ba lépés után láthatja a csoport(ok)ban "
+"lévő képeket."
+
+#: View/Groups/create.ctp:1
+msgid "New Group"
+msgstr "Új csoport"
+
+#: View/Groups/create.ctp:7 View/Groups/dashboard_create.ctp:6;26;46;66;86;106
+msgid "Create new group"
+msgstr "Új csoport létrehozása"
+
+#: View/Groups/create.ctp:11
+#: View/Groups/dashboard_create.ctp:10;30;50;70;90;110 View/Groups/edit.ctp:12
+msgid "This group is hidden"
+msgstr "Ez a csoport rejtett"
+
+#: View/Groups/create.ctp:12
+#: View/Groups/dashboard_create.ctp:11;31;51;71;91;111
+msgid "New group members are moderated"
+msgstr "Új csoporttagok moderálása"
+
+#: View/Groups/create.ctp:13
+#: View/Groups/dashboard_create.ctp:12;32;52;72;92;112
+msgid "This group is shared and other group members can use this group"
+msgstr ""
+"Ez a csoport meg van osztva és más csoportok tagjai is láthatják/"
+"használhatják"
+
+#: View/Groups/dashboard_manage.ctp:8;40;72;104;136;168
+msgid "Group Name"
+msgstr "Csoport név"
+
+#: View/Groups/dashboard_manage.ctp:8;40;72;104;136;168
+#: View/Groups/listmembers.ctp:13 View/Groups/view.ctp:52
+#: View/Users/view.ctp:43
+msgid "Action"
+msgstr "Művelet"
+
+#: View/Groups/dashboard_search.ctp:5;33;61;89;117;145
+msgid "Results"
+msgstr "Eredmények"
+
+#: View/Groups/dashboard_search.ctp:20;48;76;104;132;160
+msgid "Find Group:"
+msgstr "Csoport keresése:"
+
+#: View/Groups/edit.ctp:1
+msgid "Group: %s"
+msgstr "Csoport: %s"
+
+#: View/Groups/edit.ctp:7
+msgid "Edit Group"
+msgstr "Csoport szerkesztése"
+
+#: View/Groups/edit.ctp:13
+msgid "New group members require a confirmation by the moderator"
+msgstr "Új csoporttagok felvételét jóvá kell hagynia a moderátornak"
+
+#: View/Groups/edit.ctp:14
+msgid "The group can be used by other members"
+msgstr "A csoport használható más tagok által"
+
+#: View/Groups/edit.ctp:17 View/Guests/edit.ctp:47
+#: View/Images/view.ctp:114;123 View/Options/import.ctp:29
+#: View/Options/password.ctp:13 View/Options/profile.ctp:35
+#: View/Setup/system.ctp:33 View/System/external.ctp:14
+#: View/System/index.ctp:13 View/System/map.ctp:12 View/System/register.ctp:9
+#: View/Users/admin_edit.ctp:26 View/Users/admin_password.ctp:13
+msgid "Save"
+msgstr "Mentés"
+
+#: View/Groups/index.ctp:63
+msgid "You have currently no media groups created."
+msgstr "Még nem hozott létre csoportot."
+
+#: View/Groups/listmembers.ctp:1 View/Groups/view.ctp:1
+msgid "Group %s"
+msgstr "%s csoport"
+
+#: View/Groups/listmembers.ctp:5 View/Groups/view.ctp:44
+msgid "Member List"
+msgstr "Taglista"
+
+#: View/Groups/listmembers.ctp:10 View/Groups/view.ctp:49
+#: View/Users/admin_index.ctp:35
+msgid "Member"
+msgstr "Tag"
+
+#: View/Groups/listmembers.ctp:29 View/Groups/view.ctp:68
+msgid "Unsubscribe '%s'"
+msgstr "Leiratkozás erről '%s'"
+
+#: View/Groups/members.ctp:64
+msgid "You have currently no memberships to media groups."
+msgstr "Jelenleg nem tagja egyetlen csoportnak sem."
+
+#: View/Groups/view.ctp:5
+msgid "Details"
+msgstr "Részletek"
+
+#: View/Groups/view.ctp:11
+msgid "This group has no description"
+msgstr "Ennek a csoportnak nincs leírása"
+
+#: View/Groups/view.ctp:16
+msgid "The group is owned by user %s and has %d media in total."
+msgstr "Ez a csoport %s felhasználó tulajdonában van és %d médiát tartalmaz."
+
+#: View/Groups/view.ctp:27
+msgid "The group is hidden"
+msgstr "A csoport rejtett"
+
+#: View/Groups/view.ctp:29
+msgid "The group is shown with the media"
+msgstr "A csoport a médiával látszik"
+
+#: View/Groups/view.ctp:32
+msgid "The group subscription requires a confirmation"
+msgstr "A csoport feliratkozáshoz megerősítésre van szükség"
+
+#: View/Groups/view.ctp:34
+msgid "The group subscription is free and does not need a confirmation"
+msgstr "A csoportra való feliratkozás lehetséges és nem szükséges megerősítés"
+
+#: View/Groups/view.ctp:37
+msgid "This group is shared and can be used by other members"
+msgstr "Ez a csoport meg van osztva és használható más tagok számára"
+
+#: View/Groups/view.ctp:39
+msgid "This group is not shared"
+msgstr "Ez a csoport nincs megosztva"
+
+#: View/Groups/view.ctp:88
+msgid "Add user"
+msgstr "Felhasználó hozzáadása"
+
+#: View/Groups/view.ctp:93 View/Helper/BreadcrumbHelper.php:188
+#: View/Users/admin_path.ctp:41
+msgid "Add"
+msgstr "Hozzáadás"
+
+#: View/Groups/view.ctp:106 View/Guests/links.ctp:31 View/Options/links.ctp:16
+#: View/Users/view.ctp:91
+msgid "Recent Media"
+msgstr "Legutóbbi média"
+
+#: View/Groups/view.ctp:112
+msgid "See all media of the group %s"
+msgstr "%s csoport minden médiája"
+
+#: View/Guests/create.ctp:1
+msgid "Guest Creation"
+msgstr "Vendég létrehozása"
+
+#: View/Guests/create.ctp:7
+msgid "Create new guest account"
+msgstr "Új vendég hozzáférés létrehozása"
+
+#: View/Guests/create.ctp:10 View/Guests/edit.ctp:8
+#: View/Options/profile.ctp:11 View/Setup/user.ctp:12
+#: View/Users/admin_add.ctp:9 View/Users/admin_edit.ctp:10
+#: View/Users/password.ctp:10 View/Users/register.ctp:10
+msgid "Email"
+msgstr "Email"
+
+#: View/Guests/create.ctp:12 View/Guests/edit.ctp:16
+#: View/Options/password.ctp:10 View/Setup/user.ctp:11
+#: View/Users/admin_add.ctp:11 View/Users/admin_password.ctp:9
+#: View/Users/confirm.ctp:11 View/Users/register.ctp:9
+msgid "Confirm"
+msgstr "Megerősít"
+
+#: View/Guests/edit.ctp:1
+msgid "Guest: %s"
+msgstr "Vendég: %s"
+
+#: View/Guests/edit.ctp:6 View/Users/admin_index.ctp:36
+msgid "Guest"
+msgstr "Vendég"
+
+#: View/Guests/edit.ctp:9
+msgid "Expires"
+msgstr "Lejár"
+
+#: View/Guests/edit.ctp:10
+msgid "Enable WebDAV access"
+msgstr "WebDAV hozzáférés engedélyezése"
+
+#: View/Guests/edit.ctp:22
+msgid "None"
+msgstr "Nincs"
+
+#: View/Guests/edit.ctp:24
+msgid "Name and captcha"
+msgstr "Név és captcha"
+
+#: View/Guests/edit.ctp:28
+msgid "Authentication"
+msgstr "Hitelesítés"
+
+#: View/Guests/edit.ctp:34
+msgid "Email Notification"
+msgstr "Email értesítés"
+
+#: View/Guests/edit.ctp:37 View/Options/profile.ctp:25
+msgid "Never"
+msgstr "Soha"
+
+#: View/Guests/edit.ctp:38 View/Options/profile.ctp:26
+msgid "Every 30 minutes"
+msgstr "30 percenként"
+
+#: View/Guests/edit.ctp:39 View/Options/profile.ctp:27
+msgid "Every hour"
+msgstr "Óránként"
+
+#: View/Guests/edit.ctp:40 View/Options/profile.ctp:28
+msgid "Every day"
+msgstr "Naponta"
+
+#: View/Guests/edit.ctp:41 View/Options/profile.ctp:29
+msgid "Every week"
+msgstr "Hetente"
+
+#: View/Guests/edit.ctp:42 View/Options/profile.ctp:30
+msgid "Every month"
+msgstr "Havonta"
+
+#: View/Guests/edit.ctp:44 View/Options/profile.ctp:32
+msgid "Send new media notifications"
+msgstr "Értesítés küldése új médiáról"
+
+#: View/Guests/edit.ctp:51 View/Users/view.ctp:35
+msgid "Group List"
+msgstr "Csoport lista"
+
+#: View/Guests/edit.ctp:67
+msgid "Do you really want to delete the group '%s' from this guest '%s'?"
+msgstr "Tényleg törölni akarja a '%s' csoportot ettől a vendégtől: '%s'?"
+
+#: View/Guests/edit.ctp:80
+msgid ""
+"Currently this guest account has no assigned groups. Please add groups to "
+"grant access to your personal images."
+msgstr ""
+"Jelenleg ennek a vendég hozzáférésnek nincsenek hozzárendelt csoportjai. "
+"Kérem adjon hozzá csoportokat hogy láthatóak legyenek számára a képek."
+
+#: View/Guests/edit.ctp:84
+msgid "Group Assignements"
+msgstr "Csoport hozzárendelések"
+
+#: View/Guests/edit.ctp:88
+msgid "Add Group"
+msgstr "Csoport hozzáadása"
+
+#: View/Guests/index.ctp:35
+msgid ""
+"Currently, no guest accounts are set. You can create guests accounts to "
+"grant access to your images e.g. to your friends or family. Please add also "
+"some groups to the guest to grant access to this guest for these groups."
+msgstr ""
+"Jelenleg nincs vendég hozzáférés beállítva. Létrehozhat vendég "
+"hozzáféréseket családtagok, barátok számára hogy láthassák a képeit. Adjon "
+"hozzá néhány csoportot a vendéghez."
+
+#: View/Guests/links.ctp:1
+msgid "Authenticated Links"
+msgstr "Hitelesített linkek"
+
+#: View/Guests/links.ctp:4
+msgid ""
+"Following links contains an authentication key which should be used "
+"carefully. Copy the links with with right mouse click and select <i>Copy "
+"link address</i>."
+msgstr ""
+"A következő linkek autentikációs kulcsokat tartalmaznak, kérjük, óvatosan "
+"használja őket. Másolja le a linkeket, kattintson az egér jobb gombjával és "
+"válassza a <i>Hivatkozás másolása</i> lehetőséget."
+
+#: View/Guests/links.ctp:7 View/Options/links.ctp:7
+msgid ""
+"The links are valid for the current session. For permanent login the user "
+"has to login via username and password."
+msgstr ""
+"A linkek csak az aktuális munkamenetben érvényesek. Végleges hozzáféréshez "
+"be kell jelentkezni felhasználónévvel és jelszóval."
+
+#: View/Guests/links.ctp:9
+msgid "Direct Link"
+msgstr "Közvetlen link"
+
+#: View/Guests/links.ctp:11
+msgid ""
+"Following link provides a direct link to <i>My Photos</i> of the guest which "
+"omits the login with username and password."
+msgstr ""
+"A következő link közvetlenül mutat a következőhöz: <i>Képeim</i>. A vendég "
+"ennek felhasználásával felhasználónév és jelszó nélkül tudja megtekinteni."
+
+#: View/Guests/links.ctp:17
+msgid "My Media of Guest %s (Link %s)"
+msgstr "Médiám %s vendég számára (link: %s)"
+
+#: View/Guests/links.ctp:21
+msgid "RSS"
+msgstr "RSS"
+
+#: View/Guests/links.ctp:23
+msgid "Following links provide a authenticated RSS and Media RSS links."
+msgstr ""
+"A következő linkek hitelesített RSS csatornára és Média RSS-re mutatnak."
+
+#: View/Guests/links.ctp:32 View/Options/links.ctp:17 View/home/index.ctp:42
+msgid "Recent Comments"
+msgstr "Legfrissebb hozzászólások"
+
+#: View/Guests/links.ctp:33 View/Options/links.ctp:18
+msgid "Media RSS"
+msgstr "Média RSS"
+
+#: View/Guests/links.ctp:34 View/Options/links.ctp:19
+msgid "Media RSS of My Media"
+msgstr "Média RSS a Médiámhoz"
+
+#: View/Guests/links.ctp:37
+msgid ""
+"Click %s to renew the authentication key. All previous links become invalid."
+msgstr ""
+"Kattintson a %s-ra, hogy megújítsa a hitelesítő kulcsot. Minden korábbi link "
+"érvénytelenné válik."
+
+#: View/Guests/links.ctp:37 View/Options/links.ctp:22
+msgid "renew key"
+msgstr "kulcs megújítása"
+
+#: View/Helper/BreadcrumbHelper.php:193
+msgid "Filter"
+msgstr "Szűrő"
+
+#: View/Helper/ExplorerMenuHelper.php:59
+msgid "Show media in high quality (if available)"
+msgstr "Média mutatása magas minőségben (ha lehetséges)"
+
+#: View/Helper/ExplorerMenuHelper.php:63
+msgid "Start Slideshow"
+msgstr "Diavetítés indítása"
+
+#: View/Helper/ExplorerMenuHelper.php:122
+msgid "Order"
+msgstr "Rendezés"
+
+#: View/Helper/ExplorerMenuHelper.php:128
+msgid "date asc"
+msgstr "Dátum növekvő"
+
+#: View/Helper/ExplorerMenuHelper.php:128
+msgid "Show oldest first"
+msgstr "Régiek legfelül"
+
+#: View/Helper/ExplorerMenuHelper.php:132
+msgid "Show newest first"
+msgstr "Újak legfelül"
+
+#: View/Helper/ExplorerMenuHelper.php:136
+msgid "pouplarity"
+msgstr "népszerűség"
+
+#: View/Helper/ExplorerMenuHelper.php:136
+msgid "Show popular first"
+msgstr "Népszerű felül"
+
+#: View/Helper/ExplorerMenuHelper.php:140
+msgid "Show random order"
+msgstr "Népszerű alul"
+
+#: View/Helper/ExplorerMenuHelper.php:144
+msgid "Show changes first"
+msgstr "Változások elől"
+
+#: View/Helper/ExplorerMenuHelper.php:148
+msgid "Views"
+msgstr "Megtekintések"
+
+#: View/Helper/ExplorerMenuHelper.php:148
+msgid "Show last views first"
+msgstr "Legutóbbi megtekintések felül"
+
+#: View/Helper/ExplorerMenuHelper.php:152
+msgid "Order by name"
+msgstr "Rendezés név szerint"
+
+#: View/Helper/FileListHelper.php:79;108
+msgid "delete"
+msgstr "törlés"
+
+#: View/Helper/FileListHelper.php:79
+msgid "Delete folder %s?"
+msgstr "Törli a(z) %s könyvtárat?"
+
+#: View/Helper/FileListHelper.php:92
+msgid "unlink"
+msgstr "lecsatolás"
+
+#: View/Helper/FileListHelper.php:92
+msgid "Unlink media from this file"
+msgstr "Média lecsatolása erről a fájlról"
+
+#: View/Helper/FileListHelper.php:102
+msgid "Download %s"
+msgstr "%s letöltése"
+
+#: View/Helper/FileListHelper.php:120
+msgid "(parent folder)"
+msgstr "(szülő könyvtár)"
+
+#: View/Helper/FileListHelper.php:122
+msgid "(this folder)"
+msgstr "(ez a könyvtár)"
+
+#: View/Helper/FileListHelper.php:134 View/System/view.ctp:20
+msgid "Media"
+msgstr "Média"
+
+#: View/Helper/FileListHelper.php:134 View/Images/view.ctp:78
+msgid "Size"
+msgstr "Méret"
+
+#: View/Helper/ImageDataHelper.php:311
+msgid "%s can edit the meta data"
+msgstr "%s szerkesztheti a metaadatokat"
+
+#: View/Helper/ImageDataHelper.php:313
+msgid "%s can edit the tags"
+msgstr "%s szerkesztheti a címkéket"
+
+#: View/Helper/ImageDataHelper.php:318
+msgid "%s can download this media"
+msgstr "%s letöltheti ezt a médiát"
+
+#: View/Helper/ImageDataHelper.php:320
+msgid "%s an view this media"
+msgstr "%s nézheti ezt a médiát"
+
+#: View/Helper/ImageDataHelper.php:334
+msgid "users:"
+msgstr "felhasználók:"
+
+#: View/Helper/ImageDataHelper.php:334
+msgid "Access for users"
+msgstr "Hozzáférés felhasználóknak"
+
+#: View/Helper/ImageDataHelper.php:337
+msgid "public:"
+msgstr "publikus:"
+
+#: View/Helper/ImageDataHelper.php:337
+msgid "Access for the public"
+msgstr "Publikus hozzáférés"
+
+#: View/Helper/ImageDataHelper.php:338
+msgid "The public"
+msgstr "Publikus"
+
+#: View/Helper/ImageDataHelper.php:442
+msgid "This media belongs to the group '%s'"
+msgstr "Ez a média a(z) '%s' csoporthoz tartozik"
+
+#: View/Helper/ImageDataHelper.php:447
+msgid "No group assigned"
+msgstr "Nincs csoport hozzárendelve"
+
+#: View/Helper/ImageDataHelper.php:515
+msgid "Search global for %s"
+msgstr "Globális keresés erre: %s"
+
+#: View/Helper/ImageDataHelper.php:519
+msgid "Include %s into search"
+msgstr "%s belevétele a keresésbe"
+
+#: View/Helper/ImageDataHelper.php:521
+msgid "Exclude %s from search"
+msgstr "%s kivétele a keresésből"
+
+#: View/Helper/ImageDataHelper.php:628 View/Options/import.ctp:12
+msgid "Me only"
+msgstr "Csak én"
+
+#: View/Helper/ImageDataHelper.php:631 View/Options/import.ctp:9
+msgid "Everyone"
+msgstr "Mindenki"
+
+#: View/Helper/ImageDataHelper.php:648
+msgid "This media is public visible"
+msgstr "Ez a média publikus"
+
+#: View/Helper/ImageDataHelper.php:651
+msgid "This media is visible for users"
+msgstr "Ez a média felhasználók számára látható"
+
+#: View/Helper/ImageDataHelper.php:654
+msgid "This media is visible for group members"
+msgstr "Ez a média látható csoporttagoknak"
+
+#: View/Helper/ImageDataHelper.php:657
+msgid "This media is private"
+msgstr "Ez a média privát"
+
+#: View/Helper/MenuHelper.php:128
+msgid "Main Menu"
+msgstr "Főmenü"
+
+#: View/Helper/NavigatorHelper.php:59;129
+msgid "prev"
+msgstr "előző"
+
+#: View/Helper/NavigatorHelper.php:109;162
+msgid "next"
+msgstr "következő"
+
+#: View/Helper/PluploadHelper.php:30
+msgid "Uploading file %s"
+msgstr "Fájl feltöltése: %s"
+
+#: View/Helper/PluploadHelper.php:31
+msgid "Uploading file %d/%d. Upload is finished in %s (estimated)."
+msgstr "Fájl feltöltése: %d/%d. Feltöltés befejeződik körülbelül %s múlva."
+
+#: View/Helper/PluploadHelper.php:68
+msgid "Upload Files"
+msgstr "Fájlok feltöltése"
+
+#: View/Helper/PluploadHelper.php:69
+msgid "Drop files here"
+msgstr "Húzza ide a fájlokat"
+
+#: View/Helper/PluploadHelper.php:70
+msgid "Your new uploaded photos:"
+msgstr "Új feltöltött fotók"
+
+#: View/Helper/PluploadHelper.php:71
+msgid "View your %s in explorer"
+msgstr "%s megtekintése böngészőben"
+
+#: View/Helper/PluploadHelper.php:71
+msgid "newest media"
+msgstr "legújabb média"
+
+#: View/Images/notfound.ctp:1
+msgid "No media Found"
+msgstr "Nem található média"
+
+#: View/Images/notfound.ctp:3
+msgid "No media found. Please goto the %s and try again"
+msgstr "Nem található média. Kérem menjen a(z) %s oldalra és próbálja újra."
+
+#: View/Images/view.ctp:35
+msgid "Media Details"
+msgstr "Média részletek"
+
+#: View/Images/view.ctp:37
+msgid "Map"
+msgstr "Térkép"
+
+#: View/Images/view.ctp:43
+msgid "Access Right"
+msgstr "Hozzáférési jogosultság"
+
+#: View/Images/view.ctp:69
+msgid "File(s)"
+msgstr "Fájl(ok)"
+
+#: View/Images/view.ctp:73
+msgid "Folder"
+msgstr "Könyvtár"
+
+#: View/Images/view.ctp:75
+msgid "View Count"
+msgstr "Megtekintések"
+
+#: View/Images/view.ctp:76
+msgid "Created"
+msgstr "Létrehozva"
+
+#: View/Images/view.ctp:77
+msgid "Last modified"
+msgstr "Utoljára módosítva"
+
+#: View/Images/view.ctp:81
+msgid "Model"
+msgstr "Modell"
+
+#: View/Images/view.ctp:84
+msgid "Duration"
+msgstr "Hossz"
+
+#: View/Images/view.ctp:87
+msgid "Aperture"
+msgstr "Blende"
+
+#: View/Images/view.ctp:90
+msgid "Shutter"
+msgstr "Záridő"
+
+#: View/Images/view.ctp:93
+msgid "ISO"
+msgstr "Érzékenység"
+
+#: View/Layouts/backend.ctp:44 View/Layouts/default.ctp:51
+msgid "&copy; 2006-2012 by %s - Tag, Browse, and Share Your Photos."
+msgstr "&copy; 2006-2012 by %s - Címkézze, böngéssze és ossza meg fotóit"
+
+#: View/Layouts/backend.ctp:44
+msgid "You are running version %s."
+msgstr "Aktuális verzió: %s."
+
+#: View/Layouts/default.ctp:34
+msgid "Search..."
+msgstr "Keresés..."
+
+#: View/Layouts/default.ctp:35
+msgid "Go"
+msgstr "Ugrás"
+
+#: View/Layouts/default.ctp:51
+msgid "phTagr.org"
+msgstr "phTagr.org"
+
+#: View/Layouts/Emails/html/default.ctp:3
+msgid "New Media notifications"
+msgstr "Értesítés új médiáról"
+
+#: View/Layouts/Emails/html/default.ctp:7
+#: View/Layouts/Emails/text/default.ctp:4
+msgid "Email was sent by the open source web gallery %s"
+msgstr "Ezt a levelet a nyílt forráskódú web galéria, a %s küldte"
+
+#: View/Options/import.ctp:5
+msgid "Default Access Rights"
+msgstr "Alapértelmezett hozzáférési jogosultságok"
+
+#: View/Options/import.ctp:6
+msgid "The following access rights are applied to new images."
+msgstr ""
+"A következő hozzáférési jogosultságok az új képekre lesznek alkalmazva."
+
+#: View/Options/import.ctp:11
+msgid "Group Members"
+msgstr "Csoporttagok"
+
+#: View/Options/import.ctp:13
+msgid "Who can view the image?"
+msgstr "Ki láthatja a képet?"
+
+#: View/Options/import.ctp:17
+msgid "Default image group?"
+msgstr "Alapértelmezett kép csoport?"
+
+#: View/Options/import.ctp:21
+msgid "GPS Tracks"
+msgstr "GPS Nyomok"
+
+#: View/Options/import.ctp:22
+msgid ""
+"Usually GPS logs are in UTC while camera time is set to local time. Set time "
+"offset to correct time difference between GPS logs and your media."
+msgstr ""
+"Általában a GPS logok UTC-ben vannak, mivel a fényképezőgép órája helyi "
+"időhöz van igazítva. Állítsa be az idő eltérést hogy korrigálja az eltérést "
+"a GPS logok és a média között."
+
+#: View/Options/import.ctp:24
+msgid "Time offset (minutes)"
+msgstr "Idő eltérés (perc)"
+
+#: View/Options/import.ctp:25
+msgid "Coordinate time range (minutes)"
+msgstr "Koordináta idősáv (perc)"
+
+#: View/Options/import.ctp:26
+msgid "Overwrite existing coordinates?"
+msgstr "Felülírja a meglévő koordinátákat?"
+
+#: View/Options/links.ctp:1
+msgid "Authenticated RSS"
+msgstr "Hitelesített RSS"
+
+#: View/Options/links.ctp:4
+msgid ""
+"Following links contain authentication keys of your account. Using these "
+"links you are authenticated directly without username and password. The "
+"links could be spoofed easily and should be used carefully."
+msgstr ""
+"A következő linkekben hitelesített kulcsok vannak, amelyek az ön profiljához "
+"tartoznak. A linkek használatával közvetlen hitelesítés történik "
+"felhasználónév és jelszó megadása nélkül. Kérjük óvatosan használja őket. "
+
+#: View/Options/links.ctp:22
+msgid ""
+"Click %s to renew the authentication key. All previous keys become invalid."
+msgstr ""
+"Kattintson a %s-ra, hogy megújítsa a hitelesítő kulcsát. Minden korábbi "
+"kulcs érvénytelenné válik."
+
+#: View/Options/profile.ctp:9 View/Users/admin_edit.ctp:8
+msgid "First name"
+msgstr "Keresztnév"
+
+#: View/Options/profile.ctp:10 View/Users/admin_edit.ctp:9
+msgid "Last name"
+msgstr "Családnév"
+
+#: View/Options/profile.ctp:15
+msgid "Others"
+msgstr "Egyebek"
+
+#: View/Options/profile.ctp:23
+msgid "Profile visibility"
+msgstr "Profil láthatósága"
+
+#: View/Setup/config.ctp:1 View/Setup/configro.ctp:1
+msgid "Database connection"
+msgstr "Adatbázis kapcsolat"
+
+#: View/Setup/config.ctp:5
+msgid ""
+"This step creates the configuration for the database connection. Please add "
+"your database connection settings here."
+msgstr ""
+"Ebben a lépésben megadhatja a beállításokat az adatbázis kapcsolathoz. "
+
+#: View/Setup/config.ctp:9;12
+msgid "Database"
+msgstr "Adatbázis"
+
+#: View/Setup/config.ctp:11
+msgid "Host"
+msgstr "Hoszt"
+
+#: View/Setup/config.ctp:15
+msgid "Prefix"
+msgstr "Prefix"
+
+#: View/Setup/config.ctp:18 View/Setup/configro.ctp:47
+#: View/Setup/saltro.ctp:16
+msgid "Continue"
+msgstr "Folytatás"
+
+#: View/Setup/configro.ctp:6
+msgid ""
+"The configuration file for the database connection could not be written. "
+"Please create a database configuration file by your own!"
+msgstr ""
+"Az adatbázis kapcsolatot leíró konfigurációs fájl nem írható. Kérjük, kézzel "
+"hozza létre az adatbázis fájlt!"
+
+#: View/Setup/configro.ctp:9
+msgid ""
+"Below a sample configuration file is shown. Please adapt your database "
+"credentials and continue."
+msgstr ""
+"Alább látható egy minta konfigurációs fájl. Kérjük egészítse ki a saját "
+"beállításaival és hitelesítő adataival."
+
+#: View/Setup/database.ctp:1
+msgid "Initialize Database"
+msgstr "Adatbázis inicializálása"
+
+#: View/Setup/database.ctp:3
+msgid "All tables are now initialized"
+msgstr "Minden tábla inicializálva"
+
+#: View/Setup/finish.ctp:1
+msgid "Setup Complete"
+msgstr "Telepítés kész"
+
+#: View/Setup/finish.ctp:4
+msgid ""
+"Congratulations! Your configuration of phTagr is completed. Have fun using "
+"phTagr!"
+msgstr ""
+"Gratulálunk! Az ön phTagr beállítása megtörtént. Használja örömmel a phTagr-"
+"t!"
+
+#: View/Setup/finish.ctp:7
+msgid "Click %s to go to home or %s your first media."
+msgstr ""
+"Kattintson a %s-ra hogy a kezdőlapra kerüljön, vagy a %s oldalon töltse fel "
+"az első médiáját."
+
+#: View/Setup/finish.ctp:7
+msgid "upload"
+msgstr "feltöltés"
+
+#: View/Setup/index.ctp:1
+msgid "Welcome"
+msgstr "Üdvözöljük"
+
+#: View/Setup/index.ctp:5
+msgid ""
+"Welcome to the installation setup of phTagr. Following steps are required to "
+"install it:"
+msgstr ""
+"Üdvözli a phTagr telepítője. A következő lépések szükségesek a sikeres "
+"telepítéshez:"
+
+#: View/Setup/index.ctp:8
+msgid "Initial file and directory check"
+msgstr "Kezdeti fájl és könyvtár ellenőrzés"
+
+#: View/Setup/index.ctp:9
+msgid "Configuration of database connection"
+msgstr "Adatbázis kapcsolat beállítása"
+
+#: View/Setup/index.ctp:10
+msgid "Initialize required tables"
+msgstr "Szükséges táblák inicializálása"
+
+#: View/Setup/index.ctp:11
+msgid "Administration account creation"
+msgstr "Adminisztrátori hozzáférés létrehozása"
+
+#: View/Setup/index.ctp:12
+msgid "Configuration of external tools"
+msgstr "Külső alkalmazások beállítása"
+
+#: View/Setup/index.ctp:15
+msgid "Note: Cookies are required to install and run phTagr."
+msgstr "Megjegyzés: a phTagr telepítéséhez és futtatásához sütik szükségesek."
+
+#: View/Setup/index.ctp:17
+msgid "This setup will step through the required steps."
+msgstr "Ez a telepítő végigvisz minden lépésen."
+
+#: View/Setup/index.ctp:18
+msgid "Start Installation"
+msgstr "Telepítés indítása"
+
+#: View/Setup/path.ctp:1
+msgid "Path settings"
+msgstr "Útvonal beállítások"
+
+#: View/Setup/path.ctp:7
+msgid "Following paths are missing. Please create these paths!"
+msgstr "A következő útvonalak hiányoznak. Kérjük hozza létre ezeket!"
+
+#: View/Setup/path.ctp:19
+msgid "Following paths are not writeable. Please change the permissions!"
+msgstr "A következő útvonalak nem írhatóak. Kérjük javítsa a jogosultságokat!"
+
+#: View/Setup/path.ctp:29
+msgid "Retry"
+msgstr "Újra"
+
+#: View/Setup/salt.ctp:1 View/Setup/saltro.ctp:1
+msgid "Security settings"
+msgstr "Biztonsági beállítások"
+
+#: View/Setup/salt.ctp:5
+msgid ""
+"An error occured while setting the security salt. Please have look to the "
+"log files and click on %s"
+msgstr ""
+"Hiba történt a biztonsági só beállításakor. Kérjük tekintse meg a "
+"naplófájlokat és kattintson a %s-ra"
+
+#: View/Setup/salt.ctp:5 View/Setup/saltro.ctp:7
+msgid "continue"
+msgstr "folytatás"
+
+#: View/Setup/saltro.ctp:5
+msgid ""
+"phTagr could not set the security salt because the a configuration file file "
+"is write protected.  Please change the configuration manually"
+msgstr ""
+"phTagr nem tudja beállítani a biztonsági sót, mert a konfigurációs fájl "
+"írásvédett. Kérjük javítsa a jogosultságokat!"
+
+#: View/Setup/saltro.ctp:7
+msgid ""
+"Change the <b>Security.salt</b> setting in the core configuration file <code>"
+"%s</code> (line %d) to a random string with alpha numeric values. You can "
+"change the setting to the provided value below. After changing, click on %s."
+msgstr ""
+"Változtassa meg a <b>Security.salt</b> beállítást az alap konfigurációs "
+"fájlban <code>%s</code>-t(%d. sor) egy véletlen szövegre, alfanumerikus "
+"karakterekkel. Megváltoztathatja a beállítást az alábbi értékre. Miután "
+"megváltoztatta, kattintson a %s-ra."
+
+#: View/Setup/saltro.ctp:9
+msgid "Current security salt value"
+msgstr "Jelenlegi biztonsági só"
+
+#: View/Setup/saltro.ctp:12
+msgid "New security salt value"
+msgstr "Új biztonsági só"
+
+#: View/Setup/system.ctp:5
+msgid "Congratulation! phTagr just runs fine now!"
+msgstr "Gratulálunk! A phTagr így már jól fut!"
+
+#: View/Setup/system.ctp:7
+msgid ""
+"phTagr can use <u>optional</u> external programs to enlarge the "
+"functionality. exiftool is used to export the meta data to images like tags, "
+"categories or (geo) locations. ffmpeg supports other video file formats like "
+"AVI, MPEG, or MOV. And convert supports better thumbnail creation for bigger "
+"photos."
+msgstr ""
+"phTagr képes <u>opcionális</u> külső alkalmazásokat használni, hogy "
+"funkcióit kibővítse. Az exiftool olyan metaadatok képekbe történő "
+"exportálására való, mint a címkék, kategóriák, földrajzi helyzet. Az ffmpeg "
+"sokféle videóformátumot támogat, úgy, mint az AVI, MPEG, vagy a MOV. A "
+"convert-tel jobb minőségű bélyegképeket készíthet."
+
+#: View/Setup/system.ctp:9
+msgid ""
+"You can set the file path of these exteranl programs here or set them later "
+"in the system preferences."
+msgstr ""
+"Beállíthatja ezen külső alkalmazások útvonalait most, vagy később, a "
+"rendszer beállításai között."
+
+#: View/Setup/system.ctp:11
+msgid "Skip these settings"
+msgstr "Lépés kihagyása"
+
+#: View/Setup/system.ctp:15
+msgid "Following programs could not be found: %s."
+msgstr "A következő alkalmazások nem találhatók: %s."
+
+#: View/Setup/system.ctp:20
+msgid ""
+"FFMPEG does not support the MP3 audio format. Sound will be disabled for "
+"videos!"
+msgstr ""
+"Az FFMPEG nem támogatja az MP3 audió formátumot. A hang nem lesz hallható a "
+"videóknál."
+
+#: View/Setup/system.ctp:27;28;29;30 View/System/external.ctp:8;9;10;11
+msgid "Path to %s"
+msgstr "Útvonal ehhez: %s"
+
+#: View/Setup/user.ctp:1
+msgid "Create admin account"
+msgstr "Adminisztrátor hozzáférés létrehozása"
+
+#: View/System/delete_unused_meta_data.ctp:3
+msgid "Delete all unused meta data from database: %d fields."
+msgstr "Minden nem használt metaadat törlése az adatbázisból: %d mező."
+
+#: View/System/external.ctp:1
+msgid "Sytem Settings"
+msgstr "Rendszerbeállítások"
+
+#: View/System/index.ctp:8
+msgid "Gallery title"
+msgstr "Galéria címe"
+
+#: View/System/index.ctp:9
+msgid "Gallery subtitle"
+msgstr "Galéria alcíme"
+
+#: View/System/map.ctp:6
+msgid "Google Maps"
+msgstr "Google Térkép"
+
+#: View/System/map.ctp:7
+msgid ""
+"Enter here your API map key for %s. You can signup %s for a new key. No API "
+"map key is required for local setup with localhost."
+msgstr ""
+"Adja meg a térkép API kulcsát a %s-hoz. %s tud új kulcsot kérni. Nem "
+"szükséges API kulcs helyi gépre való telepítéshez."
+
+#: View/System/map.ctp:9
+msgid "API key"
+msgstr "API kulcs"
+
+#: View/System/register.ctp:5
+msgid "Registration"
+msgstr "Regisztráció"
+
+#: View/System/register.ctp:6
+msgid "Allow anonymous registration"
+msgstr "Névtelen regisztráció engedélyezése"
+
+#: View/System/register.ctp:7
+msgid "Initial quota limit"
+msgstr "Kezdeti kvóta határ"
+
+#: View/System/upgrade.ctp:5
+msgid "Your database requires an update from version %d to %d!"
+msgstr "Az adatbázis frissítése szükséges %d-ról %d-ra!"
+
+#: View/System/upgrade.ctp:5
+msgid "Run database upgrade"
+msgstr "Adatbázis frissítése"
+
+#: View/System/upgrade.ctp:6
+msgid "Following database migrations will be executed:"
+msgstr "A következő adatbázis migráció fog lefutni:"
+
+#: View/System/upgrade.ctp:15
+msgid "Your system has the newest database version %d."
+msgstr "Az adatbázis a legfrissebb verzióval rendelkezik: %d."
+
+#: View/System/view.ctp:1
+msgid "System overview"
+msgstr "Rendszer áttekintés"
+
+#: View/System/view.ctp:5
+msgid "Type"
+msgstr "Típus"
+
+#: View/System/view.ctp:5
+msgid "Amount"
+msgstr "Mennyiség"
+
+#: View/System/view.ctp:16
+msgid "Files"
+msgstr "Fájlok"
+
+#: View/System/view.ctp:17
+msgid "External files"
+msgstr "Külső fájlok"
+
+#: View/System/view.ctp:18
+msgid "Sum of file size"
+msgstr "Össz fájl méret"
+
+#: View/System/view.ctp:19
+msgid "Sum of external file size"
+msgstr "Össz külső fájl méret"
+
+#: View/System/view.ctp:21
+msgid "Image media"
+msgstr "Kép média"
+
+#: View/System/view.ctp:22
+msgid "Video media"
+msgstr "Videó média"
+
+#: View/System/view.ctp:23
+msgid "Video duration"
+msgstr "Videó hossz"
+
+#: View/Themed/Mobile/Elements/footer.ctp:2
+msgid "%s Web Gallery %s - mobile version"
+msgstr "%s Web Galéria %s - mobil verzió"
+
+#: View/Themed/Mobile/Elements/footer.ctp:3
+msgid "View standard version"
+msgstr "Váltás hagyományos módra"
+
+#: View/Themed/Mobile/Elements/header.ctp:1
+msgid "mobile"
+msgstr "mobil"
+
+#: View/Themed/Mobile/Explorer/index.ctp:49
+#: View/Themed/Mobile/Images/view.ctp:47
+msgid "Location"
+msgstr "Helyzet"
+
+#: View/Themed/Mobile/Home/index.ctp:1
+msgid "Welcome to phTagr"
+msgstr "Üdvözöljük a phTagr-ben"
+
+#: View/Themed/Mobile/Home/index.ctp:3 View/home/index.ctp:2
+msgid "Random Media"
+msgstr "Véletlen média"
+
+#: View/Themed/Mobile/Home/index.ctp:21 View/home/index.ctp:15
+msgid "See more %s"
+msgstr "Még több %s"
+
+#: View/Themed/Mobile/Home/index.ctp:21 View/home/index.ctp:15
+msgid "random media..."
+msgstr "véletlen média..."
+
+#: View/Themed/Mobile/Home/index.ctp:25 View/home/index.ctp:21
+msgid "Newest Media"
+msgstr "Legújabb média"
+
+#: View/Themed/Mobile/Home/index.ctp:52 View/home/index.ctp:37
+msgid "See %s"
+msgstr "%s megtekintése"
+
+#: View/Themed/Mobile/Home/index.ctp:52 View/home/index.ctp:37
+msgid "all new media..."
+msgstr "minden új média"
+
+#: View/Users/admin_add.ctp:1
+msgid "Add new User"
+msgstr "Új felhasználó hozzáadása"
+
+#: View/Users/admin_add.ctp:6
+msgid "Create new user"
+msgstr "Új felhasználó létrehozása"
+
+#: View/Users/admin_edit.ctp:1 View/Users/admin_password.ctp:1
+#: View/Users/admin_path.ctp:1
+msgid " User: %s"
+msgstr "Felhasználó: %s"
+
+#: View/Users/admin_edit.ctp:11
+msgid "System Operator"
+msgstr "Rendszer adminisztrátor"
+
+#: View/Users/admin_edit.ctp:13 View/Users/admin_index.ctp:33
+msgid "Admin"
+msgstr "Adminisztrátor"
+
+#: View/Users/admin_edit.ctp:21
+msgid "Expire date"
+msgstr "Lejárati dátum"
+
+#: View/Users/admin_edit.ctp:22
+msgid "Upload Quota"
+msgstr "Feltöltési kvóta"
+
+#: View/Users/admin_index.ctp:6
+msgid "Prev"
+msgstr "Előző"
+
+#: View/Users/admin_index.ctp:8
+msgid "Next"
+msgstr "Következő"
+
+#: View/Users/admin_index.ctp:15
+msgid "username"
+msgstr "felhasználónév"
+
+#: View/Users/admin_index.ctp:16
+msgid "firstname"
+msgstr "keresztnév"
+
+#: View/Users/admin_index.ctp:17
+msgid "lastname"
+msgstr "családnév"
+
+#: View/Users/admin_index.ctp:19
+msgid "User role"
+msgstr "Felhasználói szerep"
+
+#: View/Users/admin_index.ctp:34
+msgid "SysOp"
+msgstr "SysOp"
+
+#: View/Users/admin_index.ctp:37
+msgid "Nobody"
+msgstr "Senki"
+
+#: View/Users/admin_index.ctp:39
+msgid "Unknown"
+msgstr "Ismeretlen"
+
+#: View/Users/admin_index.ctp:44
+msgid ""
+"Do you really want to detete the user '%s'? This action is irreversible! All "
+"the data of the users will be deleted!"
+msgstr ""
+"Tényleg törölni szeretné '%s' felhasználót? A lépés nem visszavonható. A "
+"felhasználó minden adata el fog veszni!"
+
+#: View/Users/admin_path.ctp:7
+msgid "The user can import media files from following external directories:"
+msgstr ""
+"A felhasználó tud importálni médiafájlokat a következő külső könyvtárakból:"
+
+#: View/Users/admin_path.ctp:12;39
+msgid "Directory"
+msgstr "Könyvtár"
+
+#: View/Users/admin_path.ctp:21
+msgid "Do you really want to detete the path '%s' of '%s'?"
+msgstr "Tényleg törölni szeretné a(z) '%s' útvonalat ebből: '%s'?"
+
+#: View/Users/admin_path.ctp:22
+msgid "Delete path '%s'"
+msgstr "'%s' útvonal törlése"
+
+#: View/Users/admin_path.ctp:31
+msgid "Currently no external directories are set for this user."
+msgstr "Jelenleg nincsenek külső könyvtárak beállítva ennek a felhasználónak. "
+
+#: View/Users/admin_path.ctp:33
+msgid ""
+"The user has a dedicated upload directory which is handled by phTagr itself. "
+"External directories can be added here to the user to allow the import of "
+"external media files from the local file system."
+msgstr ""
+"A felhasználónak van egy saját feltöltési könyvtára, amelyet a phTagr kezel. "
+"Külső könyvtárak itt hozzáadhatóak a felhasználóhoz, amelyekkel "
+"importálhatóak médiafájlok a helyi fájlrendszerből."
+
+#: View/Users/admin_path.ctp:38
+msgid "Add Directory"
+msgstr "Könyvtár hozzáadása"
+
+#: View/Users/confirm.ctp:5
+msgid "Account Confirmation"
+msgstr "Hozzáférés megerősítése"
+
+#: View/Users/confirm.ctp:6
+msgid "Please insert your confirmation key to finalize the account creation."
+msgstr ""
+"Kérjük adja meg a megerősítő kulcsot hogy befejeződhessen a profil "
+"létrehozása."
+
+#: View/Users/confirm.ctp:8
+msgid "Key"
+msgstr "Kulcs"
+
+#: View/Users/index.ctp:4
+msgid "Admin List"
+msgstr "Adminisztrátor lista"
+
+#: View/Users/index.ctp:16
+msgid "Member Since"
+msgstr "Tagság kezdete"
+
+#: View/Users/index.ctp:38
+msgid "User list is empty"
+msgstr "A felhasználók listája üres"
+
+#: View/Users/login.ctp:19
+msgid "Forgot your password"
+msgstr "Elfelejtett jelszó"
+
+#: View/Users/password.ctp:1
+msgid "Password Request"
+msgstr "Jelszó kérése"
+
+#: View/Users/password.ctp:4
+msgid ""
+"Please insert your username and email address to request your lost password."
+msgstr ""
+"Kérjük adja meg a felhasználónevét és email címét hogy megkapja a jelszavát."
+
+#: View/Users/password.ctp:7
+msgid "Account Data"
+msgstr "Hozzáférési adatok"
+
+#: View/Users/password.ctp:13
+msgid "Submit"
+msgstr "Küld"
+
+#: View/Users/register.ctp:5
+msgid "Create Account"
+msgstr "Hozzáférés létrehozása"
+
+#: View/Users/view.ctp:2
+msgid "User %s"
+msgstr "%s felhasználó"
+
+#: View/Users/view.ctp:10
+msgid "User Details"
+msgstr "Felhasználói részletek"
+
+#: View/Users/view.ctp:26
+msgid "Member since"
+msgstr "Tagság kezdete"
+
+#: View/Users/view.ctp:27
+msgid "Count of media"
+msgstr "Média száma"
+
+#: View/Users/view.ctp:28
+msgid "Count of files"
+msgstr "Fájlok száma"
+
+#: View/Users/view.ctp:29
+msgid "Size of files"
+msgstr "Fájlok mérete"
+
+#: View/Users/view.ctp:59;71
+msgid "View media"
+msgstr "Média megtekintése"
+
+#: View/Users/view.ctp:97
+msgid "See all media of user %s"
+msgstr "%s felhasználó minden médiájának megtekintése"
+
+#: View/home/index.ctp:50
+msgid "%s said %s:"
+msgstr "%s mondta %s:"
+
+#: View/home/index.ctp:59
+msgid "Older comments..."
+msgstr "Régebbi hozzászólások..."
+
+#: View/home/index.ctp:64
+msgid "Popular Tags"
+msgstr "Népszerű címkék"
+
+#: View/home/index.ctp:70
+msgid "No tags assigned"
+msgstr "Nincsenek címkék"
+
+#: View/home/index.ctp:76
+msgid "Popular Categories"
+msgstr "Népszerű kategóriák"
+
+#: View/home/index.ctp:82
+msgid "No categories assigned"
+msgstr "Nincsenek kategóriák"
+
+#: Model/Comment.php:validation for field name
+msgid "Name is missing"
+msgstr "Hiányzó név"
+
+#: Model/Comment.php:validation for field email
+msgid "Email is invalid"
+msgstr "Érvénytelen email"
+
+#: Model/Comment.php:validation for field url
+msgid "URL is invalid"
+msgstr "Érvénytelen URL"
+
+#: Model/Comment.php:validation for field text
+msgid "Comment text is empty"
+msgstr "A hozzászólás szövege üres"
+
+#: Model/Comment.php:validation for field text
+msgid "Comment is to long"
+msgstr "A hozzászólás túl hosszú"
+
+#: Model/Guest.php:validation for field username
+msgid "Guestname must be between 3 and 32 characters long."
+msgstr "A vendégnév 3-32 karakter hosszú lehet."
+
+#: Model/Guest.php:validation for field password Model/User.php:validation
+msgid "Password must be between 6 and 32 characters long."
+msgstr "A jelszó 6-32 karakter hosszú lehet."
+
+#: Model/Guest.php:validation for field email Model/User.php:validation
+msgid "Email address is not valid"
+msgstr "Érvénytelen email cím "
+
+#: Model/Guest.php:validation for field notify_interval
+#: Model/User.php:validation
+msgid "Invalid notification interval"
+msgstr "Érvénytelen értesítési intervallum"
+
+#: Model/User.php:validation for field username
+msgid "Username must be between 3 and 32 characters long."
+msgstr "A felhasználónév 3-32 karakter hosszú lehet."
+
+#: Model/User.php:validation for field role
+msgid "Invalid role"
+msgstr "Érvénytelen szerep"

@@ -2,13 +2,13 @@
 /**
  * PHP versions 5
  *
- * phTagr : Tag, Browse, and Share Your Photos.
- * Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * phTagr : Organize, Browse, and Share Your Photos.
+ * Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  *
  * Licensed under The GPL-2.0 License
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * @copyright     Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  * @link          http://www.phtagr.org phTagr
  * @package       Phtagr
  * @since         phTagr 2.2b3
@@ -28,12 +28,12 @@ class FeedComponent extends Component {
    * needs a special web test with ugly post data handling */
   var $_testRun = false;
 
-  function initialize(&$controller) {
+  public function initialize(Controller $controller) {
     $this->controller = $controller;
   }
 
   /** Set feeds output for layout */
-  function beforeRender() {
+  public function beforeRender(Controller $controller) {
     App::uses('HtmlHelper', 'View/Helper');
     App::uses('View', 'View');
     $View = new View($this->controller, false);
@@ -56,7 +56,7 @@ class FeedComponent extends Component {
   }
 
   /** Clears all feeds */
-  function clear() {
+  public function clear() {
     $this->_feeds = array();
   }
 
@@ -65,7 +65,7 @@ class FeedComponent extends Component {
   @param options Option arrya
     - title
   @param type Optional feed type. Default is 'rss' */
-  function add($url, $options, $type = 'rss') {
+  public function add($url, $options, $type = 'rss') {
     if (is_array($url)) {
       $this->_feeds[] = am(array('type' => $type, 'url' => $url), $options);
     } else {

@@ -29,55 +29,76 @@
 form
   overflow: hidden
   width: 710px
-  > fieldset
+  margin: 15px 0
+  fieldset
     padding: 15px 0
     border: 0
-    > legend
+    legend
       font-family: Ubuntu-bold
       width: 81.5%
       border-bottom: 1px solid darken(white, 10%)
-    > div
+    div.input
       padding: 5px 0
       position: relative
       display: block
-      width: 100% 
+      width: 100%
       > label
         display: inline
         float: left
         width: 30%
-      > input[type=text],
-      > input[type=password],
-      > textarea
+      input[type=text],
+      input[type=password],
+      textarea
         width: 50%
         +default-input
-      > select
+      select
         width: 51.5%
         +default-input
-      &.checkbox 
-        > input[type=checkbox]
+      &.select
+        div.checkbox
+          margin-left: 30%
+          input[type=checkbox]
+            margin-right: 5px
+      &.checkbox
+        input[type=checkbox]
           margin-left: 30%
           margin-right: 5px
-        > label
+        label
           float: none
           display: inline-block
           width: 50%
-      > .error-message
+      .radioSet
+        margin: 3px 0
+        input[type=radio]
+          display: none
+        label
+          padding: 5px 10px
+          border: 1px solid #aaa
+          color: #666
+          background-color: #efefef
+          &:hover
+            cursor:pointer
+        input[type=radio]:checked + label
+          color: white
+          background-color: $menuActiveBackgroundColor
+          border-color: darken($menuActiveBackgroundColor, 20%)
+      .error-message, .description
         padding-left: 30%
       &.error
         background-color: #faa
-  ul.buttons 
+  ul.buttons
     margin-left: 30%
-    > li 
+    > li
       display: inline-block
       margin-right: 10px
       > input
         +default-button
-  div.submit 
+  div.submit
     padding-left: 30%
-    > input
+    input
       +default-button
   div.submit-list
-    > input
+    input
       margin-right: 5px
       +default-button
 a.button

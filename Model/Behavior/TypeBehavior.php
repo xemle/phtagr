@@ -2,13 +2,13 @@
 /**
  * PHP versions 5
  *
- * phTagr : Tag, Browse, and Share Your Photos.
- * Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * phTagr : Organize, Browse, and Share Your Photos.
+ * Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  *
  * Licensed under The GPL-2.0 License
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * @copyright     Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  * @link          http://www.phtagr.org phTagr
  * @package       Phtagr
  * @since         phTagr 2.2b3
@@ -19,13 +19,13 @@ class TypeBehavior extends ModelBehavior
 {
   var $config = array();
 
-  function setup(&$model, $config = array()) {
+  public function setup(Model $model, $config = array()) {
     $this->config[$model->name] = $config;
   }
 
-  function isType(&$model, $data, $type) {
+  public function isType(&$model, $data, $type) {
     if (!$data) {
-      $data =& $model->data;
+      $data = $model->data;
     }
 
     $modelData = $data;
@@ -41,9 +41,9 @@ class TypeBehavior extends ModelBehavior
     return $modelData['type'] == $type ? true : false;
   }
 
-  function setType(&$model, $data, $type) {
+  public function setType(&$model, $data, $type) {
     if (!$data) {
-      $data =& $model->data;
+      $data = $model->data;
     }
     $modelData = $data;
     if (isset($modelData[$model->alias])) {
@@ -61,9 +61,9 @@ class TypeBehavior extends ModelBehavior
     }
   }
 
-  function getType(&$model, $data) {
+  public function getType(&$model, $data) {
     if (!$data) {
-      $data =& $model->data;
+      $data = $model->data;
     }
     $modelData = $data;
     if (isset($modelData[$model->alias])) {

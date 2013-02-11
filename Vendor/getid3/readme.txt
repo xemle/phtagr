@@ -30,6 +30,15 @@ A: Unzip getID3() to a directory, then access /demos/demo.browse.php
 
 
 
+Support
+===========================================================================
+
+Q: I have a question, or I found a bug. What do I do?
+A: The preferred method of support requests and/or bug reports is the
+   forum at http://support.getid3.org/
+
+
+
 Sourceforge Notification
 ===========================================================================
 
@@ -57,8 +66,11 @@ Reads & parses (to varying degrees):
   * MP3/MP2/MP1
   * MPC / Musepack
   * Ogg (Vorbis, OggFLAC, Speex)
+  * AC3
+  * DTS
   * RealAudio
   * Speex
+  * DSS
   * VQF
 
  ¤ audio-lossless:
@@ -68,11 +80,14 @@ Reads & parses (to varying degrees):
   * CD-audio (*.cda)
   * FLAC
   * LA (Lossless Audio)
+  * LiteWave
   * LPAC
   * MIDI
   * Monkey's Audio
   * OptimFROG
   * RKAU
+  * Shorten
+  * TTA
   * VOC
   * WAV (RIFF)
   * WavPack
@@ -81,6 +96,7 @@ Reads & parses (to varying degrees):
   * ASF: ASF, Windows Media Audio (WMA), Windows Media Video (WMV)
   * AVI (RIFF)
   * Flash
+  * Matroska (MKV)
   * MPEG-1 / MPEG-2
   * NSV (Nullsoft Streaming Video)
   * Quicktime
@@ -91,11 +107,16 @@ Reads & parses (to varying degrees):
   * GIF
   * JPEG
   * PNG
+  * TIFF
+  * SWF (Flash)
+  * PhotoCD
 
  ¤ data:
   * ISO-9660 CD-ROM image (directory structure)
   * SZIP (limited support)
   * ZIP (directory structure)
+  * TAR
+  * CUE
 
 
 Writes:
@@ -111,9 +132,10 @@ Writes:
 Requirements
 ===========================================================================
 
-* PHP 4.2.0 (or higher) for getID3() 1.7.8 (and up).
-* PHP 5.0.0 (or higher) for getID3() 2.0.0 (and up).
-* at least 4MB memory for PHP. 8MB is highly recommended.
+* PHP 4.2.0 up to 5.2.x for getID3() 1.7.x (and earlier)
+* PHP 5.0.5 (or higher) for getID3() 1.8.x (and up)
+* PHP 5.0.5 (or higher) for getID3() 2.0.x (and up)
+* at least 4MB memory for PHP. 8MB or more is highly recommended.
   12MB is required with all modules loaded.
 
 
@@ -182,7 +204,7 @@ the file itself.
 Notes
 ===========================================================================
 
-getID3() 1.7:
+getID3() 1.x:
 If the format parser encounters a critical problem, it will return
 something in $fileinfo['error'], describing the encountered error. If
 a less critical error or notice is generated it will appear in
@@ -196,7 +218,7 @@ other programs. Some warnings may indicate that the data that is
 returned is OK but that some data could not be extracted due to
 errors in the file.
 
-getID3() 2.0:
+getID3() 2.x:
 See above except errors are thrown (so you will only get one error).
 
 
@@ -247,13 +269,19 @@ A: You're generally free to use getID3 however you see fit. The only
 
 
 
-Future Plans
+Why is it called "getID3()" if it does so much more than just that?
 ===========================================================================
 
-* Writing support for Real
+v0.1 did in fact just do that. I don't have a copy of code that old, but I
+could essentially write it today with a one-line function:
+  function getID3($filename) { return unpack('a3TAG/a30title/a30artist/a30album/a4year/a28comment/c1track/c1genreid', substr(file_get_contents($filename), -128)); }
+
+
+Future Plans
+===========================================================================
+http://www.getid3.org/phpBB3/viewforum.php?f=7
+
 * Better support for MP4 container format
-* Support for Matroska (www.matroska.org)
-  http://corecodec.com/modules.php?op=modload&name=PNphpBB2&file=viewtopic&t=227
 * Scan for appended ID3v2 tag at end of file per ID3v2.4 specs (Section 5.0)
 * Support for JPEG-2000 (http://www.morgan-multimedia.com/jpeg2000_overview.htm)
 * Support for MOD (mod/stm/s3m/it/xm/mtm/ult/669)
@@ -293,11 +321,11 @@ Future Plans
 * Optional scan-through-frames for AVI verification
   (thanks rockcohenØmassive-interactive*nl)
 * Support for TTF (thanks infoØbutterflyx*com)
-* Support for DSS (http://www.getid3.org/phpBB2/viewtopic.php?t=171)
+* Support for DSS (http://www.getid3.org/phpBB3/viewtopic.php?t=171)
 * Support for SMAF (http://smaf-yamaha.com/what/demo.html)
-  http://www.getid3.org/phpBB2/viewtopic.php?t=182
-* Support for AMR (http://www.getid3.org/phpBB2/viewtopic.php?t=195)
-* Support for 3gpp (http://www.getid3.org/phpBB2/viewtopic.php?t=195)
+  http://www.getid3.org/phpBB3/viewtopic.php?t=182
+* Support for AMR (http://www.getid3.org/phpBB3/viewtopic.php?t=195)
+* Support for 3gpp (http://www.getid3.org/phpBB3/viewtopic.php?t=195)
 * Support for ID4 (http://www.wackysoft.cjb.net grizlyY2KØhotmail*com)
 * Parse XML data returned in Ogg comments
 * Parse XML data from Quicktime SMIL metafiles (klausrathØmac*com)
@@ -333,6 +361,7 @@ Future Plans
 
 Known Bugs/Issues in getID3() that may be fixed eventually
 ===========================================================================
+http://www.getid3.org/phpBB3/viewtopic.php?t=25
 
 * Cannot determine bitrate for MPEG video with VBR video data
   (need documentation)
@@ -358,13 +387,16 @@ Known Bugs/Issues in getID3() that may be fixed eventually
 
 Known Bugs/Issues in getID3() that cannot be fixed
 --------------------------------------------------
+http://www.getid3.org/phpBB3/viewtopic.php?t=25
 
-* Files larger than 2GB cannot always be parsed fully by getID3()
-  due to limitations in the PHP filesystem functions.
+* 32-bit PHP installations only:
+  Files larger than 2GB cannot always be parsed fully by getID3()
+  due to limitations in the 32-bit PHP filesystem functions.
   NOTE: Since v1.7.8b3 there is partial support for larger-than-
   2GB files, most of which will parse OK, as long as no critical
   data is located beyond the 2GB offset.
   Known will-work:
+  * all file formats on 64-bit PHP
   * ZIP  (format doesn't support files >2GB)
   * FLAC (current encoders don't support files >2GB)
   Known will-not-work:
@@ -385,7 +417,12 @@ Known Bugs/Issues in getID3() that cannot be fixed
 
 Known Bugs/Issues in other programs
 -----------------------------------
+http://www.getid3.org/phpBB3/viewtopic.php?t=25
 
+* Windows Media Player (up to v11) and iTunes (up to v10+) do
+    not correctly handle ID3v2.3 tags with UTF-16BE+BOM
+    encoding (they assume the data is UTF-16LE+BOM and either
+    crash (WMP) or output Asian character set (iTunes)
 * Winamp (up to v2.80 at least) does not support ID3v2.4 tags,
     only ID3v2.3
     see: http://forums.winamp.com/showthread.php?postid=387524
@@ -450,6 +487,9 @@ Known Bugs/Issues in other programs
 * iTunes has been known to append a new ID3v1 tag on the end of an
   existing ID3v1 tag when ID3v2 tag is also present
   (detected by getID3())
+* MediaMonkey may write a blank RGAD ID3v2 frame but put actual
+  replay gain adjustments in a series of user-defined TXXX frames
+  (detected and handled by getID3() since v1.9.2)
 
 
 
@@ -491,9 +531,9 @@ Reference material:
 * http://www.lossless-audio.com/
 * http://download.microsoft.com/download/winmediatech40/Doc/1.0/WIN98MeXP/EN-US/ASF_Specification_v.1.0.exe
 * http://mediaxw.sourceforge.net/files/doc/Active%20Streaming%20Format%20(ASF)%201.0%20Specification.pdf
-* http://www.uni-jena.de/~pfk/mpp/sv8/
+* http://www.uni-jena.de/~pfk/mpp/sv8/ (archived at http://www.hydrogenaudio.org/musepack/klemm/www.personal.uni-jena.de/~pfk/mpp/sv8/)
 * http://jfaul.de/atl/
-* http://www.uni-jena.de/~pfk/mpp/
+* http://www.uni-jena.de/~pfk/mpp/ (archived at http://www.hydrogenaudio.org/musepack/klemm/www.personal.uni-jena.de/~pfk/mpp/)
 * http://www.libpng.org/pub/png/spec/png-1.2-pdg.html
 * http://www.real.com/devzone/library/creating/rmsdk/doc/rmff.htm
 * http://www.fastgraph.com/help/bmp_os2_header_format.html
@@ -547,3 +587,5 @@ Reference material:
 * http://pda.etsi.org/pda/queryform.asp
 * http://cpansearch.perl.org/src/RGIBSON/Audio-DSS-0.02/lib/Audio/DSS.pm
 * http://trac.musepack.net/trac/wiki/SV8Specification
+* http://wyday.com/cuesharp/specification.php
+* http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/Nikon.html

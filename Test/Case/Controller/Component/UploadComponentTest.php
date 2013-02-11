@@ -2,13 +2,13 @@
 /**
  * PHP versions 5
  *
- * phTagr : Tag, Browse, and Share Your Photos.
- * Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * phTagr : Organize, Browse, and Share Your Photos.
+ * Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  *
  * Licensed under The GPL-2.0 License
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * @copyright     Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  * @link          http://www.phtagr.org phTagr
  * @package       Phtagr
  * @since         phTagr 2.2b3
@@ -40,11 +40,11 @@ if (!is_writeable(TEST_FILES)) {
 }
 
 class UploadComponentMock extends UploadComponent {
-  function isUploadedFile($filename) {
+  public function isUploadedFile($filename) {
     return true;
   }
 
-  function moveUploadedFile($filename, $dst) {
+  public function moveUploadedFile($filename, $dst) {
     return rename($filename, $dst);
   }
 }
@@ -54,19 +54,19 @@ class FileManagerComponentMock extends FileManagerComponent {
   var $uniqueFilenameMockValue = '';
   var $addMockValue = true;
 
-  function canWrite($size, $user = false) {
+  public function canWrite($size, $user = false) {
     return $this->canWriteMockValue;
   }
 
-  function delete($file) {
+  public function delete($file) {
     return true;
   }
 
-  function createUniqueFilename($path, $filename) {
+  public function createUniqueFilename($path, $filename) {
     return $this->uniqueFilenameMockValue;
   }
 
-  function add($filename, $user = false) {
+  public function add($filename, $user = false) {
     return $this->addMockValue;
   }
 }
@@ -107,7 +107,7 @@ class UploadComponentTest extends CakeTestCase {
     parent::tearDown();
   }
 
-  function _buildUploadFolders() {
+  public function _buildUploadFolders() {
     $src = TEST_FILES . 'src' . DS;
     $dst = TEST_FILES . 'dst' . DS;
     $this->Folder->create($src);
@@ -116,7 +116,7 @@ class UploadComponentTest extends CakeTestCase {
     $this->assertEqual(true, is_dir($dst));
   }
 
-  function _deleteUploadFolders() {
+  public function _deleteUploadFolders() {
     $src = TEST_FILES . 'src' . DS;
     $dst = TEST_FILES . 'dst' . DS;
     $this->Folder->delete($src);
@@ -125,7 +125,7 @@ class UploadComponentTest extends CakeTestCase {
     $this->assertEqual(false, is_dir($dst));
   }
 
-  function testInitialStates() {
+  public function testInitialStates() {
     // initial no upload
     $result = $this->Upload->isUpload();
     $this->assertEqual(false, $result);
@@ -140,7 +140,7 @@ class UploadComponentTest extends CakeTestCase {
     $this->assertEqual(false, $result);
   }
 
-  function testGetUploadsSingle() {
+  public function testGetUploadsSingle() {
     $data = array(
         'error' => 0,
         'extraField' => 'invisible',
@@ -181,7 +181,7 @@ class UploadComponentTest extends CakeTestCase {
     $this->assertEqual($expected, $result);
   }
 
-  function testGetUploadsMulti() {
+  public function testGetUploadsMulti() {
     $data = array(
         'File' => array(
             'uploads' => array(
@@ -258,7 +258,7 @@ class UploadComponentTest extends CakeTestCase {
     $this->assertEqual($expected, $result);
   }
 
-  function testUpload() {
+  public function testUpload() {
     $src = TEST_FILES . 'src' . DS;
     $dst = TEST_FILES . 'dst' . DS;
     $this->_buildUploadFolders();
@@ -344,7 +344,7 @@ class UploadComponentTest extends CakeTestCase {
     $this->_deleteUploadFolders();
   }
 
-  function testErrors() {
+  public function testErrors() {
     $src = TEST_FILES . 'src' . DS;
     $dst = TEST_FILES . 'dst' . DS;
     $this->_buildUploadFolders();

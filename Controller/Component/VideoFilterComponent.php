@@ -2,13 +2,13 @@
 /**
  * PHP versions 5
  *
- * phTagr : Tag, Browse, and Share Your Photos.
- * Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * phTagr : Organize, Browse, and Share Your Photos.
+ * Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  *
  * Licensed under The GPL-2.0 License
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * @copyright     Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  * @link          http://www.phtagr.org phTagr
  * @package       Phtagr
  * @since         phTagr 2.2b3
@@ -20,17 +20,20 @@ App::uses('BaseFilter', 'Component');
 class VideoFilterComponent extends BaseFilterComponent {
 
   var $controller = null;
-  var $components = array('VideoPreview', 'FileManager', 'Command');
+  var $components = array('VideoPreview', 'FileManager', 'Command', 'Exiftool', 'SidecarFilter');
 
-  function initialize(&$controller) {
-    $this->controller =& $controller;
+  var $createVideoThumb = false;
+
+  public function initialize(Controller $controller) {
+    $this->controller = $controller;
+    $this->createVideoThumb = $this->controller->getOption($this->VideoPreview->createVideoThumbOption, false);
   }
 
-  function getName() {
+  public function getName() {
     return "Video";
   }
 
-  function _getVideoExtensions() {
+  private function _getVideoExtensions() {
     if ($this->controller->getOption('bin.exiftool') || $this->controller->getOption('bin.ffmpeg')) {
       return array('avi', 'mov', 'mpeg', 'mpg', 'mts', 'mp4', 'flv', 'ogg');
     } else {
@@ -38,18 +41,20 @@ class VideoFilterComponent extends BaseFilterComponent {
     }
   }
 
-  function getExtensions() {
-    return am($this->_getVideoExtensions(), array('thm' => array('priority' => 5)));
+  public function getExtensions() {
+    return am($this->_getVideoExtensions(), array('thm' => array('priority' => 5, 'hasMetaData' => true)));
   }
 
-  /** Finds the video thumb of a video
-    @param video File model data of the video
-    @param insertIfMissing If true, adds the thumb file to the database. Default is true
-    @return Filename of the thumb file. False if no thumb file was found */
-  function _findVideo($thumb) {
+  /**
+   * Finds the video thumb of a video
+   *
+   * @param array $thumb File model data of the video
+   * @return string Filename of the thumb file. False if no thumb file was found
+   */
+  private function _findVideo($thumb) {
     $thumbFilename = $this->controller->MyFile->getFilename($thumb);
     $path = dirname($thumbFilename);
-    $folder =& new Folder($path);
+    $folder = new Folder($path);
     $pattern = basename($thumbFilename);
     $pattern = substr($pattern, 0, strrpos($pattern, '.')+1).'('.implode($this->_getVideoExtensions(), '|').')';
     $found = $folder->find($pattern);
@@ -68,7 +73,7 @@ class VideoFilterComponent extends BaseFilterComponent {
     return false;
   }
 
-  function _readThumb($file, &$media) {
+  private function _readThumb($file, &$media) {
     $filename = $this->controller->MyFile->getFilename($file);
     if (!$media) {
       $video = $this->_findVideo($file);
@@ -91,7 +96,7 @@ class VideoFilterComponent extends BaseFilterComponent {
         $tmp[$column] = $media['Media'][$column];
       }
     }
-    $ImageFilter->read(&$file, &$media, array('noSave' => true));
+    $ImageFilter->read($file, $media, array('noSave' => true));
     // accept different name except filename
     if ($media['Media']['name'] != basename($filename)) {
       unset($tmp['name']);
@@ -109,14 +114,19 @@ class VideoFilterComponent extends BaseFilterComponent {
     return $this->controller->Media->findById($media['Media']['id']);
   }
 
-  /** Read the video data from the file
-   * @param image Media model data
-   * @return True, false on error */
-  function read(&$file, &$media, $options = array()) {
+  /**
+   * Read the video data from the file
+   *
+   * @param array $file File model data as reference
+   * @param array $media image Media model data as reference
+   * @param array $options $options
+   * @return mixed Media model data on success, false on error
+   */
+  public function read(&$file, &$media = null, $options = array()) {
     $filename = $this->controller->MyFile->getFilename($file);
 
     if ($this->controller->MyFile->isType($file, FILE_TYPE_VIDEOTHUMB)) {
-      return $this->_readThumb($file, &$media);
+      return $this->_readThumb($file, $media);
     } elseif (!$this->controller->MyFile->isType($file, FILE_TYPE_VIDEO)) {
       $this->FilterManager->addError($filename, "FileNotSupported");
       Logger::err("File type is not supported: ".$this->controller->MyFile->getFilename($file));
@@ -136,12 +146,12 @@ class VideoFilterComponent extends BaseFilterComponent {
       } else {
         $user = $this->controller->getUser();
       }
-      $media = $this->controller->Media->addDefaultAcl(&$media, &$user);
+      $media = $this->controller->Media->addDefaultAcl($media, $user);
 
       $isNew = true;
     }
 
-    $media = $this->_readVideoFormat(&$media, $filename);
+    $media = $this->_readVideoFormat($media, $filename);
     if (!$media || !$this->controller->Media->save($media)) {
       $this->FilterManager->addError($filename, "MediaSaveError");
       Logger::err("Could not save media");
@@ -166,11 +176,12 @@ class VideoFilterComponent extends BaseFilterComponent {
     return $this->controller->Media->findById($mediaId);
   }
 
-  function _readVideoFormat(&$media, $filename) {
-    if ($this->controller->getOption('bin.exiftool')) {
+  private function _readVideoFormat(&$media, $filename) {
+    $result = false;
+    if ($this->Exiftool->isEnabled()) {
       $result = $this->_readExiftool($filename);
     }
-    if (!$result || $this->controller->getOption('bin.ffmpeg')) {
+    if (!$result && $this->controller->getOption('bin.ffmpeg')) {
       $result = $this->_readFfmpeg($filename);
     }
     if (!$result) {
@@ -181,52 +192,56 @@ class VideoFilterComponent extends BaseFilterComponent {
       Logger::err("Could extract video format");
       return false;
     }
-    $media['Media']['width'] = $result['width'];
-    $media['Media']['height'] = $result['height'];
-    $media['Media']['duration'] = $result['duration'];
+    foreach ($result as $name => $value) {
+      $media['Media'][$name] = $value;
+    }
     return $media;
   }
 
-  function _readExiftool($filename) {
-    $bin = $this->controller->getOption('bin.exiftool', 'exiftool');
-    $this->Command->redirectError = true;
-    $result = $this->Command->run($bin, array('-n', '-S', $filename));
-    $output = $this->Command->output;
-
-    if ($result != 0) {
-      Logger::err("Command '$bin' returned unexcpected $result");
-      return false;
-    } elseif (!count($output)) {
-      Logger::err("Command returned no output!");
-      return false;
-    }
+  /**
+   * Reads video information via exiftool
+   *
+   * @param string $filename
+   * @return array Media properties
+   */
+  private function _readExiftool($filename) {
+    $data = $this->Exiftool->readMetaData($filename, array('image', 'video', 'other'));
 
     $result = array();
-    foreach ($output as $line) {
-      if (!preg_match('/^(\w+): (.*)$/', $line, $m)) {
-        Logger::warn('Could not parse line: '.$line);
-        continue;
-      }
-      if ($m[1] == 'ImageWidth') {
-        $result['width'] = intval($m[2]);
-        Logger::trace("Extract video width of '$filename': ". $result['width']);
-      } else if ($m[1] == 'ImageHeight') {
-        $result['height'] = intval($m[2]);
-        Logger::trace("Extract video height of '$filename': ". $result['height']);
-      } else if ($m[1] == 'Duration') {
-        $result['duration'] = ceil(intval($m[2]));
-        Logger::trace("Extract duration of '$filename': ". $result['duration']."s");
-      }
-    }
-    if (count($result) != 3) {
-      Logger::warn("Could not extract width, height, or durration from '$filename'");
-      Logger::warn($result);
+    if (!$data || !isset($data['ImageWidth']) || !isset($data['ImageWidth']) || !isset($data['Duration']) ) {
+      Logger::warn("Could not extract width, height, or durration from '$filename' via exiftool");
+      Logger::warn($data);
       return false;
     }
+    $result['height'] = intval($data['ImageHeight']);
+    $result['width'] = intval($data['ImageWidth']);
+    $result['duration'] = intval(ceil($data['Duration']));
+
+    if (isset($data['DateTimeOriginal'])) {
+      $result['date'] = $data['DateTimeOriginal'];
+    } else if (isset($data['TrackCreateDate'])) {
+      $result['date'] = $data['TrackCreateDate'];
+    } else if (isset($data['MediaCreateDate'])) {
+      $result['date'] = $data['MediaCreateDate'];
+    } else if (isset($data['FileModifyDate'])) {
+      $result['date'] = $data['FileModifyDate'];
+    }
+    if (isset($data['Orientation'])) {
+      $result['orientation'] = $data['Orientation'];
+    }
+    if (isset($data['Model'])) {
+      $result['model'] = $data['Model'];
+    }
+    if (isset($data['GPSLatitude']) && isset($data['GPSLongitude'])) {
+      $result['latitude'] = $data['GPSLatitude'];
+      $result['longitude'] = $data['GPSLongitude'];
+    }
+    Logger::trace("Extracted " . count($result) . " fields via exiftool");
+    Logger::trace($result);
     return $result;
   }
 
-  function _readFfmpeg($filename) {
+  private function _readFfmpeg($filename) {
     $bin = $this->controller->getOption('bin.ffmpeg', 'ffmpeg');
     $this->Command->redirectError = true;
     $result = $this->Command->run($bin, array('-i' => $filename, '-t', 0.0));
@@ -266,7 +281,7 @@ class VideoFilterComponent extends BaseFilterComponent {
     return $result;
   }
 
-  function _readGetId3($filename) {
+  private function _readGetId3($filename) {
     App::import('vendor', 'getid3/getid3');
     $getId3 = new getId3();
     // disable not required modules
@@ -290,17 +305,11 @@ class VideoFilterComponent extends BaseFilterComponent {
     return $result;
   }
 
-  // Check for video thumb
-  function _hasThumb($media) {
-    $thumb = $this->controller->Media->getFile($media, FILE_TYPE_VIDEOTHUMB);
-    if ($thumb) {
-      return true;
-    } else {
-      return false;
+  public function createThumb(&$media) {
+    if (!$this->createVideoThumb || $this->VideoPreview->findVideoThumb($media)) {
+      return;
     }
-  }
 
-  function _createThumb($media) {
     $video = $this->controller->Media->getFile($media, FILE_TYPE_VIDEO);
     if (!$video) {
       Logger::err("Media {$media['Media']['id']} has no video");
@@ -308,24 +317,17 @@ class VideoFilterComponent extends BaseFilterComponent {
     }
     if (!is_writable(dirname($this->controller->MyFile->getFilename($video)))) {
       Logger::warn("Cannot create video thumb. Directory of video is not writeable");
-    }
-    $thumb = $this->VideoPreview->create($video);
-    if (!$thumb) {
       return false;
     }
-    return $this->FileManager->add($thumb);
+    $thumbFilename = $this->VideoPreview->createVideoThumb($media);
+    if ($thumbFilename) {
+      $thumb = $this->controller->MyFile->findByFilename($thumbFilename);
+      $media['File'][] = $thumb['File'];
+    }
+    return true;
   }
 
-  function write($file, $media, $options = array()) {
-    if (!$this->_hasThumb($media)) {
-      $id = $this->_createThumb($media);
-      if ($id) {
-        $file = $this->controller->MyFile->findById($id);
-        $this->controller->MyFile->setMedia($file, $media['Media']['id']);
-        $media = $this->controller->Media->findById($media['Media']['id']);
-        $this->write($file, $media);
-      }
-    }
+  public function write(&$file, &$media, $options = array()) {
     if ($this->controller->MyFile->isType($file, FILE_TYPE_VIDEOTHUMB)) {
       $imageFilter = $this->FilterManager->getFilter('Image');
       if (!$imageFilter) {
@@ -334,11 +336,9 @@ class VideoFilterComponent extends BaseFilterComponent {
       }
       $filename = $this->controller->MyFile->getFilename($file);
       Logger::debug("Write video thumbnail by ImageFilter: $filename");
-      return $imageFilter->write(&$file, &$media);
+      return $imageFilter->write($file, $media);
     }
     return true;
   }
 
 }
-
-?>

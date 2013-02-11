@@ -2,13 +2,13 @@
 /**
  * PHP versions 5
  *
- * phTagr : Tag, Browse, and Share Your Photos.
- * Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * phTagr : Organize, Browse, and Share Your Photos.
+ * Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  *
  * Licensed under The GPL-2.0 License
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * @copyright     Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  * @link          http://www.phtagr.org phTagr
  * @package       Phtagr
  * @since         phTagr 2.2b3
@@ -27,11 +27,11 @@ class DigestAuthComponent extends Component
   var $controller = null;
   var $components = array('Session');
 
-  function initialize(&$controller) {
+  public function initialize(Controller $controller) {
     $this->controller = $controller;
   }
 
-  function __fixWindowsUsername() {
+  public function __fixWindowsUsername() {
     if (!isset($this->_authData['username'])) {
       Logger::err("Username is not set");
       return false;
@@ -48,7 +48,7 @@ class DigestAuthComponent extends Component
     return $username;
   }
 
-  function __writeUserData($user) {
+  public function __writeUserData($user) {
     Logger::info("User '{$user['User']['username']}' (id {$user['User']['id']}) authenticated");
     if (!$this->Session->check('User.id') || $this->Session->read('User.id') != $user['User']['id']) {
       Logger::info("Start new session for '{$user['User']['username']}' (id {$user['User']['id']})");
@@ -56,7 +56,7 @@ class DigestAuthComponent extends Component
     }
   }
 
-  function __addBasicRequestHeader() {
+  public function __addBasicRequestHeader() {
     Logger::trace("Add basic authentications header");
     header('WWW-Authenticate: Basic realm="'.$this->realm.'"');
   }
@@ -64,7 +64,7 @@ class DigestAuthComponent extends Component
   /** Add authentication header to the response. The session keeps a login
    * counter. If more than 3 logins where done, it denies the access by omitting
    * the authentication header */
-  function __addDigestRequestHeader() {
+  public function __addDigestRequestHeader() {
     // Use opaque value as session id
     if (!$this->Session->started()) {
       $this->Session->renew();
@@ -86,7 +86,7 @@ class DigestAuthComponent extends Component
 
   /** Request the client for authentication. The given authentication schema
    * depends on the preferedSchema property */
-  function requestAuthentication() {
+  public function requestAuthentication() {
     if ($this->preferedSchema == 'basic') {
       $this->__addBasicRequestHeader();
     } else {
@@ -97,7 +97,7 @@ class DigestAuthComponent extends Component
   }
 
   /** Decline the client connection */
-  function decline() {
+  public function decline() {
     $this->controller->redirect(null, 403, true);
   }
 
@@ -106,7 +106,7 @@ class DigestAuthComponent extends Component
    * _SERVER[HTTP_AUTHORIZATION] variable or from _SERVER[PHP_AUTH_DIGEST]. If no
    * header information is available, it returns false
     @return HTTP authorization header. False if no header was found */
-  function __getAuthHeader() {
+  public function __getAuthHeader() {
     $hdr = false;
     if (function_exists('apache_request_headers')) {
       $arh=apache_request_headers();
@@ -126,7 +126,7 @@ class DigestAuthComponent extends Component
     return $hdr;
   }
 
-  function __getAuthSchema() {
+  public function __getAuthSchema() {
     $words = preg_split("/[\s]+/", $this->_authHdr);
     if (!$words) {
       Logger::warn("Could not split authentication header");
@@ -147,7 +147,7 @@ class DigestAuthComponent extends Component
     return $schema;
   }
 
-  function __checkBasicHeader() {
+  public function __checkBasicHeader() {
     $words = preg_split("/[\s]+/", $this->_authHdr);
     if (count($words) != 2 || strtolower($words[0]) != 'basic') {
       Logger::err("Wrong basic authentication header");
@@ -168,7 +168,7 @@ class DigestAuthComponent extends Component
     return $data;
   }
 
-  function __checkBasicUser() {
+  public function __checkBasicUser() {
     if (!$this->_authData) {
       Logger::err("Aauthentication data is not set");
       $this->requestAuthentication();
@@ -187,7 +187,7 @@ class DigestAuthComponent extends Component
     }
 
     // check credentials
-    $user = $this->controller->User->decrypt(&$user);
+    $user = $this->controller->User->decrypt($user);
     if ($user['User']['password'] != $this->_authData['password']) {
       Logger::err("Password missmatch");
       $this->requestAuthentication();
@@ -198,7 +198,7 @@ class DigestAuthComponent extends Component
 
   /** Parse the http authorization header and checks for all required fields.
     */
-  function __checkDigestHeader() {
+  public function __checkDigestHeader() {
     // protect against missing data
     $requiredParts=array('nonce'=>1, 'nc'=>1, 'cnonce'=>1, 'qop'=>1, 'username'=>1, 'uri'=>1, 'response'=>1, 'opaque'=>1);
     $data=array();
@@ -222,7 +222,7 @@ class DigestAuthComponent extends Component
     $this->_authData = $data;
   }
 
-  function __checkUri() {
+  public function __checkUri() {
     $requestUri = $_SERVER['REQUEST_URI'];
     $uri = $this->_authData['uri'];
 
@@ -246,7 +246,7 @@ class DigestAuthComponent extends Component
    * session is not alive or the request counter was already used, an
    * unauthorized response is thrown
    */
-  function __checkSession() {
+  public function __checkSession() {
     $sid = $this->_authData['opaque'];
     if ($this->Session->started()) {
       Logger::warn("Session already started!");
@@ -278,7 +278,7 @@ class DigestAuthComponent extends Component
     $this->Session->write('auth.nc', $nc);
   }
 
-  function __checkDigestUser() {
+  public function __checkDigestUser() {
     $username = $this->__fixWindowsUsername();
     $user = $this->controller->User->findByUsername($username);
     if ($user === false) {
@@ -286,7 +286,7 @@ class DigestAuthComponent extends Component
       $this->requestAuthentication();
     }
 
-    $user = $this->controller->User->decrypt(&$user);
+    $user = $this->controller->User->decrypt($user);
     $A1=md5($this->_authData['username'].':'.$this->realm.':'.$user['User']['password']);
     $A2=md5($_SERVER['REQUEST_METHOD'].':'.$this->_authData['uri']);
     $validResponse=md5($A1.':'.$this->_authData['nonce'].':'.$this->_authData['nc'].':'.$this->_authData['cnonce'].':'.$this->_authData['qop'].':'.$A2);
@@ -311,7 +311,7 @@ class DigestAuthComponent extends Component
     true, the authentication is force and will redirect the request with
     authentication information. In this case, the function will not return on
     unsuccessful authentication. */
-  function authenticate($required = true) {
+  public function authenticate($required = true) {
     if (!$this->__getAuthHeader()) {
       if ($required) {
         $this->requestAuthentication();

@@ -32,7 +32,7 @@
 ?>
 </fieldset>
 <fieldset><legend><?php echo __('Email Notification'); ?></legend>
-<?
+<?php
   $options = array(
     0 => __("Never"),
     1800 => __("Every 30 minutes"),

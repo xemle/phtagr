@@ -1,12 +1,19 @@
 (function($) {
+  $.fn.toggleMedia = function() {
+    if ($(this).hasClass('selected')) {
+      $(this).unselectMedia();
+    } else {
+      $(this).selectMedia();
+    }
+  };
   $.fn.selectMedia = function() {
     $(this).each(function() {
       if ($(this).hasClass('selected')) {
         return;
       }
       $(this).addClass('selected');
-      $(this).find('.p-explorer-media-actions ul li .add').hide();
-      $(this).find('.p-explorer-media-actions ul li .del').show();
+      $(this).find('.actions li.add').hide();
+      $(this).find('.actions li.del').show();
 
       var id = $(this).attr('id').split('-')[1];
       var input = $(':input[id=MediaIds]');
@@ -26,8 +33,8 @@
         return;
       }
       $(this).removeClass('selected');
-      $(this).find('.p-explorer-media-actions ul li .add').show();
-      $(this).find('.p-explorer-media-actions ul li .del').hide();
+      $(this).find('.actions li.add').show();
+      $(this).find('.actions li.del').hide();
 
       var id = $(this).attr('id').split('-')[1];
       var input = $(':input[id=MediaIds]');
@@ -98,7 +105,11 @@
       }
     }).keydown(function(e){
       if (e.keyCode === 13 && options['submitOnEnter']) {
-        $(this).closest('form').submit();
+        if (!this.value.match(/:$/)) {
+          $(this).closest('form').submit();
+        } else {
+          $(this).autocomplete('search', this.value);
+        }
       }
     });
   };

@@ -2,13 +2,13 @@
 /**
  * PHP versions 5
  *
- * phTagr : Tag, Browse, and Share Your Photos.
- * Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * phTagr : Organize, Browse, and Share Your Photos.
+ * Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  *
  * Licensed under The GPL-2.0 License
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * @copyright     Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  * @link          http://www.phtagr.org phTagr
  * @package       Phtagr
  * @since         phTagr 2.2b3
@@ -26,16 +26,16 @@ class GpsFilterComponent extends BaseFilterComponent {
   var $range = 600;
   var $utcZone = null;
 
-  function initialize(&$controller) {
-    $this->controller =& $controller;
+  public function initialize(Controller $controller) {
+    $this->controller = $controller;
     $this->utcZone = new DateTimeZone('UTC');
   }
 
-  function getName() {
+  public function getName() {
     return "Gps";
   }
 
-  function getExtensions() {
+  public function getExtensions() {
     return array(
         'log' => array('priority' => 2),
         'gpx' => array('priority' => 3));
@@ -44,15 +44,15 @@ class GpsFilterComponent extends BaseFilterComponent {
   /**
    * Read the meta data from the file
    *
-   * @param file File data model
-   * @param media Media data model
-   * @param options
+   * @param array $file File data model
+   * @param array $media Media data model
+   * @param array $options
    *  - offset Time offset in seconds
    *  - overwrite Overwrite GPS
    *  - range Threshold in seconds which media get a GPS point
    * @return The image data array or False on error
    */
-  function read($file, &$media, $options = array()) {
+  public function read(&$file, &$media = null, $options = array()) {
     $offset = $this->controller->getOption('filter.gps.offset', 0) * 60;
     $overwrite = $this->controller->getOption('filter.gps.overwrite', 0);
     $range = $this->controller->getOption('filter.gps.range', 10) * 60;
@@ -67,6 +67,7 @@ class GpsFilterComponent extends BaseFilterComponent {
 
     $filename = $this->controller->MyFile->getFilename($file);
     $ext = strtolower(substr($filename, strrpos($filename, '.') + 1));
+    $this->clear();
     $points = array();
     if ($ext == 'log') {
       $points = $this->Nmea->readFile($filename);
@@ -77,10 +78,8 @@ class GpsFilterComponent extends BaseFilterComponent {
       Logger::debug("Reading GPS data from $filename has no points");
       return false;
     }
-    if ($options['overwrite']) {
-      $this->clear();
-    }
     $this->addPoints($points, $options['offset']);
+    unset($points);
 
     // fetch [first, last] positions
     $userId = $this->controller->getUserId();
@@ -107,6 +106,7 @@ class GpsFilterComponent extends BaseFilterComponent {
     }
     // fetch images of same user, no gps, range
     $updated = 0;
+    $mediaIds = array();
     foreach ($mediaSet as $media) {
       $utc = new DateTime($media['Media']['date'], $this->utcZone);
       $time = $utc->format('U');
@@ -121,6 +121,7 @@ class GpsFilterComponent extends BaseFilterComponent {
       $media['Media']['longitude'] = $position['longitude'];
       $media['Media']['flag'] |= MEDIA_FLAG_DIRTY;
       if ($this->controller->Media->save($media['Media'], true, array('latitude', 'longitude', 'flag'))) {
+        $mediaIds[] = $media['Media']['id'];
         Logger::debug("Update GPS position of image {$media['Media']['id']} to {$position['latitude']}/{$position['longitude']}");
       } else {
         Logger::warn("Could not update GPS position of image {$media['Media']['id']}");
@@ -128,14 +129,18 @@ class GpsFilterComponent extends BaseFilterComponent {
       $updated++;
     }
     Logger::info("Updated $updated of " . count($mediaSet) . " media for interval $startDate to $endDate");
-    return 1;
+    if (count($mediaIds)) {
+      $dummy = array('Media' => array('id' => array_pop($mediaIds)));
+      return $dummy;
+    }
+    return false;
   }
 
-  function write($file, $media = null, $options = array()) {
+  public function write(&$file, &$media, $options = array()) {
     return 0;
   }
 
-  function clear() {
+  public function clear() {
     $this->points = array();
     $this->times = array();
   }
@@ -147,7 +152,7 @@ class GpsFilterComponent extends BaseFilterComponent {
    * following array keys: time, latitude, longitude.
    * @param offset Timeoffset for points
    */
-  function addPoints($points, $offset) {
+  public function addPoints($points, $offset) {
     foreach ($points as $point) {
       if (!isset($point['date']) || !isset($point['latitude']) || !isset($point['longitude'])) {
         continue;
@@ -168,7 +173,7 @@ class GpsFilterComponent extends BaseFilterComponent {
    * @param time Time in seconds
    * @return True if the time is in the current time interval
    */
-  function _containsDate($time) {
+  private function _containsDate($time) {
     if (count($this->times) > 0 &&
       $time >= $this->times[0] - $this->range &&
       $time <= $this->times[count($this->times)-1] + $this->range) {
@@ -186,7 +191,7 @@ class GpsFilterComponent extends BaseFilterComponent {
    * @param high Higher bound
    * @return Index of time which is before the given time.
    */
-  function _getIndex($time, $low, $high) {
+  private function _getIndex($time, $low, $high) {
     if ($high-$low < 2) {
       return $low;
     }
@@ -207,7 +212,7 @@ class GpsFilterComponent extends BaseFilterComponent {
    * @param y Second GPS point
    * @return Estimated position at the given time
    */
-  function _estimatePosition($time, $x, $y) {
+  private function _estimatePosition($time, $x, $y) {
     // check pre conditions: x < time < y
     if ($x['time'] > $y['time']) {
       $z = $x;
@@ -251,7 +256,7 @@ class GpsFilterComponent extends BaseFilterComponent {
   /**
    * Returns count of available points
    */
-  function getPointCount() {
+  public function getPointCount() {
     return count($this->times);
   }
 
@@ -261,7 +266,7 @@ class GpsFilterComponent extends BaseFilterComponent {
    * @param time Time in seconds
    * @return Array of position. False on failure
    */
-  function getPosition($time) {
+  public function getPosition($time) {
     if (!$this->_containsDate($time)) {
       //echo "GPS track does not contain $time\n";
       return false;
@@ -282,7 +287,7 @@ class GpsFilterComponent extends BaseFilterComponent {
     }
   }
 
-  function getNorthWest() {
+  public function getNorthWest() {
     $maxLatitude = -400;
     $minLongitude = 400;
     foreach($this->points as $point) {
@@ -292,7 +297,7 @@ class GpsFilterComponent extends BaseFilterComponent {
     return array('latitude' => $maxLatitude, 'longitude' => $minLongitude);
   }
 
-  function getSouthEast() {
+  public function getSouthEast() {
     $minLatitude = 400;
     $maxLongitude = -400;
     foreach($this->points as $point) {
@@ -307,7 +312,7 @@ class GpsFilterComponent extends BaseFilterComponent {
    *
    * @return Array of start and end time in seconds
    */
-  function getTimeInterval() {
+  public function getTimeInterval() {
     if (!count($this->times)) {
       return array(0, 0);
     }
@@ -316,5 +321,3 @@ class GpsFilterComponent extends BaseFilterComponent {
       $this->times[count($this->times)-1]+$this->range);
   }
 }
-
-?>

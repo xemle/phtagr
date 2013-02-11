@@ -2,13 +2,13 @@
 /**
  * PHP versions 5
  *
- * phTagr : Tag, Browse, and Share Your Photos.
- * Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * phTagr : Organize, Browse, and Share Your Photos.
+ * Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  *
  * Licensed under The GPL-2.0 License
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * @copyright     Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  * @link          http://www.phtagr.org phTagr
  * @package       Phtagr
  * @since         phTagr 2.2b3
@@ -20,7 +20,9 @@ class PreviewManagerComponent extends Component {
   var $controller = null;
   var $components = array('FileCache');
 
-  /** Defauls for a preview configuration */
+  /**
+   * Defauls for a preview configuration
+   */
   var $defaults = array(
     'type' => 'image',
     'square' => false,
@@ -33,7 +35,9 @@ class PreviewManagerComponent extends Component {
     'rotation' => 0
     );
 
-  /** Different preview configurations */
+  /**
+   * Different preview configurations
+   */
   var $config = array(
     'mini' => array(
       'size' => OUTPUT_SIZE_MINI,
@@ -54,23 +58,25 @@ class PreviewManagerComponent extends Component {
 
   var $errors = 0;
 
-  function initialize(&$controller) {
-    $this->controller =& $controller;
+  public function initialize(Controller $controller) {
+    $this->controller = $controller;
     if (!isset($controller->Media)) {
       Logger::err("Model MyFile and Media is not found");
       return false;
     }
   }
 
-  /** Return image source file of the media */
-  function _getImageSoureFilename($media) {
+  /**
+   * Return image source file of the media
+   */
+  public function _getImageSoureFilename($media) {
     $type = $this->controller->Media->getType($media);
     if ($type != MEDIA_TYPE_IMAGE && $type != MEDIA_TYPE_VIDEO) {
       Logger::err("Media type not supported: {$this->controller->Media->getType($media)}");
       return false;
     }
     if ($type == MEDIA_TYPE_VIDEO) {
-      $this->controller->loadComponent('VideoPreview', &$this);
+      $this->controller->loadComponent('VideoPreview', $this);
       return $this->VideoPreview->getPreviewFilename($media);
     }
     $file = $this->controller->Media->getFile($media, FILE_TYPE_IMAGE, false);
@@ -81,12 +87,15 @@ class PreviewManagerComponent extends Component {
     return $this->controller->Media->File->getFilename($file);
   }
 
-  /** Fetches the preview of a given media.
-    @param media Media model data
-    @param name Configuration name
-    @param config (Optional) configuration for the preview generation
-    @return Full path to the preview file */
-  function getPreview(&$media, $name, $config = array()) {
+  /**
+   * Fetches the preview of a given media.
+   *
+   * @param media Media model data
+   * @param name Configuration name
+   * @param config (Optional) configuration for the preview generation
+   * @return Full path to the preview file
+   */
+  public function getPreview(&$media, $name, $config = array()) {
     $config = am($this->defaults, $config);
     if (isset($this->config[$name])) {
       $config = am($config, $this->config[$name]);
@@ -116,7 +125,7 @@ class PreviewManagerComponent extends Component {
         return false;
       }
     }
-    $this->controller->loadComponent('ImageResizer', &$this);
+    $this->controller->loadComponent('ImageResizer', $this);
     if (!$this->ImageResizer->resize($src, $dst, $config)) {
       Logger::err("Resize of '$src' to '$dst' failed");
       //Logger::debug($config);
@@ -125,4 +134,3 @@ class PreviewManagerComponent extends Component {
     return $dst;
   }
 }
-?>

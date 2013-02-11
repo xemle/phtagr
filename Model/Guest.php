@@ -2,13 +2,13 @@
 /**
  * PHP versions 5
  *
- * phTagr : Tag, Browse, and Share Your Photos.
- * Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * phTagr : Organize, Browse, and Share Your Photos.
+ * Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  *
  * Licensed under The GPL-2.0 License
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * @copyright     Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  * @link          http://www.phtagr.org phTagr
  * @package       Phtagr
  * @since         phTagr 2.2b3
@@ -39,21 +39,24 @@ class Guest extends AppModel
       'rule' => array('between', 3, 32),
       'message' => 'Guestname must be between 3 and 32 characters long.'),
     'password' => array(
-      'rule' => array('between', 6, 20),
-      'message' => 'Password must be between 6 and 20 characters long.'),
+      'rule' => array('between', 6, 32),
+      'message' => 'Password must be between 6 and 32 characters long.'),
     'email' => array(
       'rule' => array('email'),
-      'message' => 'Email address is not valid')
+      'message' => 'Email address is not valid'),
+    'notify_interval' => array(
+      'rule' => array('inList', array('0', '1800', '3600', '86400', '604800', '2592000')),
+      'message' => 'Invalid notification interval')
     );
 
-  function afterFind($result, $primary = false) {
+  public function afterFind($result, $primary = false) {
     if ($primary && isset($result[0]['Option'])) {
       $result[0]['Option'] = $this->Option->addDefaults($result[0]['Option']);
     }
     return $result;
   }
 
-  function beforeValidate() {
+  public function beforeValidate($options = array()) {
     if (isset($this->data['Guest']['password']) &&
       isset($this->data['Guest']['confirm'])) {
       if (empty($this->data['Guest']['password']) &&
@@ -62,17 +65,17 @@ class Guest extends AppModel
         unset($this->data['Guest']['confirm']);
         unset($this->data['Guest']['password']);
       } elseif (empty($this->data['Guest']['password'])) {
-        $this->invalidate('password', 'Password not given');
+        $this->invalidate('password', __('Password not given'));
       } elseif (empty($this->data['Guest']['confirm'])) {
-        $this->invalidate('confirm', 'Password confirmation is missing');
+        $this->invalidate('confirm', __('Password confirmation is missing'));
       } elseif ($this->data['Guest']['password'] != $this->data['Guest']['confirm']) {
-        $this->invalidate('password', 'Password confirmation mismatch');
-        $this->invalidate('confirm', 'Password confirmation mismatch');
+        $this->invalidate('password', __('Password confirmation mismatch'));
+        $this->invalidate('confirm', __('Password confirmation mismatch'));
       }
     }
   }
 
-  function beforeSave() {
+  public function beforeSave($options = array()) {
     if (isset($this->data['Guest']['webdav']) && $this->data['Guest']['webdav'] > 0) {
       $this->data['Guest']['quota'] = 1;
     } else {
@@ -86,7 +89,7 @@ class Guest extends AppModel
     return true;
   }
 
-  function generateKey($data) {
+  public function generateKey($data) {
     srand(microtime(true)*1000);
     $h = '';
     for ($i = 0; $i < 128; $i++) {
@@ -97,6 +100,4 @@ class Guest extends AppModel
     return $data;
   }
 
-
 }
-?>

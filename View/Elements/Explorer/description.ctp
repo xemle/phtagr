@@ -1,18 +1,19 @@
 <?php
   $this->Search->initialize();
   echo $this->element('Explorer/date', array('media' => $media));
-  if (count($media['Tag'])) {
+  $fields = $this->ImageData->getMediaFields($media);
+  if (count($fields['keyword'])) {
     echo $this->Html->tag('p',
-      __("Tags").' '.implode(', ', $this->ImageData->linkList('/explorer/tag', Set::extract('/Tag/name', $media))),
+      __("Tags").' '.implode(', ', $this->ImageData->linkList('/explorer/tag', $fields['keyword'])),
       array('class' => 'tag list', 'escape' => false));
   }
-  if (count($media['Category'])) {
+  if (count($fields['category'])) {
     echo $this->Html->tag('p',
-      __("Categories").' '.implode(', ', $this->ImageData->linkList('/explorer/category', Set::extract('/Category/name', $media))),
+      __("Categories").' '.implode(', ', $this->ImageData->linkList('/explorer/category', $fields['category'])),
       array('class' => 'category list', 'escape' => false));
   }
-  if (count($media['Location']) || ($media['Media']['latitude'] && $media['Media']['longitude'])) {
-    $links = $this->ImageData->linkList('/explorer/location', Set::extract('/Location/name', $media));
+  if (count($fields['location']) || ($media['Media']['latitude'] && $media['Media']['longitude'])) {
+    $links = $this->ImageData->linkList('/explorer/location', $fields['location']);
     if ($media['Media']['latitude'] && $media['Media']['longitude']) {
       $geo = sprintf('%.2f', abs($media['Media']['latitude']));
       $geo .= $media['Media']['latitude'] >= 0 ? 'N/' : 'S/';

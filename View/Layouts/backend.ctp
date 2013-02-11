@@ -23,7 +23,8 @@
 <div id="page">
 
 <div id="header"><div class="sub">
-<?php echo $this->Html->link(__('Gallery'), '/'); ?>
+<h1><?php echo $this->Html->link($this->Option->get('general.title', 'phTagr.'), '/'); ?></h1>
+<span><?php echo $this->Option->get('general.subtitle', 'Organize, Browse, and Share Your Photos'); ?></span>
 </div></div>
 
 <div id="main">
@@ -40,7 +41,7 @@
 </div><!-- main -->
 
 <div id="footer"><div class="sub">
-<p>&copy; 2006-2012 by <?php echo $this->Html->link("phTagr - Tag, Browse, and Share Your Photos", 'http://www.phtagr.org'); ?>. phTagr version <?php echo Configure::read('Phtagr.version'); ?></p>
+<p><?php echo __("&copy; 2006-2013 by %s - Organize, Browse, and Share Your Photos.", $this->Html->link("phTagr.org", 'http://www.phtagr.org')) . ' ' . __("You are running version %s.", Configure::read('Phtagr.version')); ?></p>
 </div></div>
 </body>
 </html>

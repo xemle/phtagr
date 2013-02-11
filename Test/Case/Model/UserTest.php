@@ -3,13 +3,13 @@
 /**
  * PHP versions 5
  *
- * phTagr : Tag, Browse, and Share Your Photos.
- * Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * phTagr : Organize, Browse, and Share Your Photos.
+ * Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  *
  * Licensed under The GPL-2.0 License
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * @copyright     Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  * @link          http://www.phtagr.org phTagr
  * @package       Phtagr
  * @since         phTagr 2.2b3
@@ -30,7 +30,9 @@ class UserTestCase extends CakeTestCase {
    *
    * @var array
    */
-  public $fixtures = array('app.file', 'app.media', 'app.user', 'app.group', 'app.groups_media', 'app.groups_user', 'app.option', 'app.guest', 'app.comment', 'app.my_file', 'app.tag', 'app.media_tag', 'app.category', 'app.categories_media', 'app.location', 'app.locations_media');
+  public $fixtures = array('app.file', 'app.media', 'app.user', 'app.group',
+      'app.groups_media', 'app.groups_user', 'app.option', 'app.guest', 'app.comment',
+      'app.my_file', 'app.fields_media', 'app.field');
 
   /**
    * setUp method
@@ -121,4 +123,18 @@ class UserTestCase extends CakeTestCase {
     $users = $this->User->findVisibleUsers($userB);
     $this->assertEqual(array('admin', 'sysop'), Set::extract('/User/username', $users));
   }
+
+  public function testGenerateKey() {
+    $user = $this->User->save($this->User->create(array('username' => 'user')));
+    $user = $this->User->findById($user['User']['id']);
+
+    $this->User->generateKey($user, 20, '0123456789abcdef');
+    $key = $user['User']['key'];
+    $this->assertEqual(20, strlen($key));
+    $this->assertEqual(true, preg_match('/[0123456789abcdef]+/', $key));
+
+    $this->User->generateKey($user);
+    $this->assertEqual(true, $user['User']['key'] != $key);
+  }
+
 }

@@ -2,13 +2,13 @@
 /**
  * PHP versions 5
  *
- * phTagr : Tag, Browse, and Share Your Photos.
- * Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * phTagr : Organize, Browse, and Share Your Photos.
+ * Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  *
  * Licensed under The GPL-2.0 License
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright 2006-2012, Sebastian Felis (sebastian@phtagr.org)
+ * @copyright     Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
  * @link          http://www.phtagr.org phTagr
  * @package       Phtagr
  * @since         phTagr 2.2b3
@@ -30,40 +30,27 @@ class PreviewShell extends AppShell {
     $this->mockUser($mockUser);
   }
 
-  function startup() {
-  }
-
-  function main() {
-    $this->help();
+  public function getOptionParser() {
+    $parser = parent::getOptionParser();
+    $parser->addOption('max', array(
+      'help' => __('Maximum generation count. Default is 10. Use 0 to generate all previews')
+    ))->addOption('start-chunk', array(
+      'help' => __('Set the start chunk number. A chunk has a size of 100 media. Default is 1')
+    ))->addOption('size', array(
+      'help' => __('Set the minimum preview size. Default is thumb'),
+      'choices' => $this->sizes
+    ))->addOption('user', array(
+      'help' => __('Generate only previews for given user')
+    ))->addSubcommand('generate', array(
+      'help' => __('Create preview files')
+    ))->description(__('Generate preview files'));
+    return $parser;
   }
 
   function verboseOut($msg) {
     if ($this->verbose) {
       $this->out($msg);
     }
-  }
-
-  function help() {
-    $this->out("Help screen");
-    $this->hr();
-    $this->out("This shell generates preview images in batch mode.");
-    $this->out("");
-    $this->out("generate");
-    $this->out("\tGenerate previews.");
-    $this->hr();
-    $this->out("Options:");
-    $this->out("-max count");
-    $this->out("\tMaximum generation count. Default is 10. Use 0 to generate all previews.");
-    $this->out("-start-chunk number");
-    $this->out("\tSet the start chunk number. A chunk has a size of 100 media. Default is 1.");
-    $this->out("-size (mini|thumb|preview|high)");
-    $this->out("\tSet the minimum preview size. Default is thumb.");
-    $this->out("-user username");
-    $this->out("\tGenerate only previews for given user.");
-    $this->out("-verbose");
-    $this->out("\tBe verbose");
-    $this->hr();
-    exit();
   }
 
   function generate() {
@@ -98,7 +85,7 @@ class PreviewShell extends AppShell {
           continue;
         }
         //$this->out($file);
-        $preview = $this->PreviewManager->getPreview(&$media, $size);
+        $preview = $this->PreviewManager->getPreview($media, $size);
         if (!$preview) {
           $this->out("Error: Could not create preview of media {$media['Media']['id']}");
           $errors[] = $media['Media']['id'];

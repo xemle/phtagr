@@ -33,7 +33,7 @@
 <div id="image-tabs">
 <?php
   $items = array(__("General"), __("Media Details"));
-  if ($this->Map->hasApi() && $this->Map->hasMediaGeo($this->request->data)) {
+  if ($this->Map->hasMediaGeo($this->request->data)) {
     $items['map'] = __("Map");
   }
   if ($this->request->data['Media']['canWriteTag']) {
@@ -48,7 +48,7 @@
 <div class="meta">
 <div id="meta-<?php echo $this->request->data['Media']['id']; ?>">
 <table class="bare">
-  <?php echo $this->Html->tableCells($this->ImageData->metaTable(&$this->request->data)); ?>
+  <?php echo $this->Html->tableCells($this->ImageData->metaTable($this->request->data)); ?>
 </table>
 </div>
 </div><!-- meta -->
@@ -99,7 +99,7 @@
 </div>
 <?php echo $this->Tab->close(); ?>
 <?php
-  if ($this->Map->hasApi() && $this->Map->hasMediaGeo($this->request->data)) {
+  if ($this->Map->hasMediaGeo($this->request->data)) {
     echo $this->Tab->open('map');
     echo $this->Map->container();
     echo $this->Map->script();
@@ -131,6 +131,7 @@
   $lat = $this->request->data['Media']['latitude'] ? $this->request->data['Media']['latitude'] : 0;
   $long = $this->request->data['Media']['longitude'] ? $this->request->data['Media']['longitude'] : 0;
   $script = <<<SCRIPT
+var map = null;
 (function($) {
 $.fn.resizeImageHeight = function(size) {
   var image = $(this);
@@ -146,7 +147,7 @@ $.fn.resizeImage = function(size) {
   var image = $(this);
   var w = image.attr('width');
   var h = image.attr('height');
-  if (0 >= Math.min(w, h) || size > Math.max(w, h)) {
+  if (size < 100 || 0 >= Math.min(w, h) || size > Math.max(w, h)) {
     return;
   }
   if (w > h) {
@@ -163,7 +164,7 @@ $(document).ready(function() {
   media = $('#p-media-preview');
   if (media) {
     var top = media.position().top;
-    var size = window.innerHeight - top - 10;
+    var size = $(window).height() - top - 10;
     media.find('img').resizeImageHeight(size);
   }
   $("#image-tabs").tabs({
@@ -171,7 +172,12 @@ $(document).ready(function() {
       if (ui.panel.id == 'tab-map') {
         if ($('#map').children().length == 0) {
           $('#mapbox').show();
-          loadMap($mediaId, $lat, $long);
+	  mapOptions.center = {
+	      lon: $long,
+	      lat: $lat
+	  };
+          map = new phMap(mapOptions);
+          map.addMarker($mediaId, $lat, $long);
         }
       }
       return true;

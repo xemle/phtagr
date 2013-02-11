@@ -80,7 +80,7 @@
 	}
 
 /**
- * Fast media delivery without CakePHP 
+ * Fast media delivery without CakePHP
  */
 	$url = '';
 	if (isset($_GET['url'])) {
@@ -88,7 +88,7 @@
 	} else {
 		$url = array_shift(array_keys($_GET));
 	}
-	if ($url && preg_match('/media\/\w+\/\d+/', $url)) {
+	if ($url && preg_match('/.*media\/\w+\/\d+/', $url)) {
 		require APP . DS . 'fast_file_responder.php';
 
 		$fileResponder = new FastFileResponder();
