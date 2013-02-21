@@ -57,7 +57,8 @@ playlist: [
   {
     url: '".Router::url("/media/video/$id/$id.flv", true)."',
     autoPlay: false,
-    autoBuffering: false
+    autoBuffering: false,
+    scaling: 'fit'
   }
 ]});\n");
   }
