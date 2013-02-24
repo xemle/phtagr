@@ -29,7 +29,7 @@ class SystemControllerTest extends ControllerTestCase {
    * @var array
    */
   public $fixtures = array('app.file', 'app.media', 'app.user', 'app.group', 'app.groups_media',
-      'app.groups_user', 'app.option', 'app.guest', 'app.comment', 'app.my_file',
+      'app.groups_user', 'app.option', 'app.guest', 'app.comment',
       'app.fields_media', 'app.field', 'app.comment');
 
   /**

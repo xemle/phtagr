@@ -29,8 +29,8 @@ class SimilarBehaviorTestCase extends CakeTestCase {
  * @var array
  */
   public $fixtures = array('app.file', 'app.media', 'app.user', 'app.group', 'app.groups_media',
-      'app.groups_user', 'app.option', 'app.guest', 'app.comment', 'app.my_file',
-      'app.field', 'app.field_media', 'app.comment');
+      'app.groups_user', 'app.option', 'app.guest', 'app.comment',
+      'app.field', 'app.fields_media', 'app.comment');
   /**
  * setUp method
  *
