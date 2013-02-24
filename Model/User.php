@@ -295,11 +295,14 @@ class User extends AppModel
             'MemberUser.group_id' => $groupIds
           );
         }
-        $prefix = $this->tablePrefix;
-        $joins[] = "LEFT JOIN `{$prefix}groups_users` AS `MemberUser` ON `MemberUser`.`user_id` = `User`.`id`";
+        $joins[] = array(
+            'table' => 'groups_users',
+            'alias' => 'MemberUser',
+            'type' => 'LEFT',
+            'conditions' => array('MemberUser.user_id = User.id')
+        );
       }
     }
     return $this->find($findType, array('conditions' => $conditions, 'joins' => $joins, 'recusive' => $resusive, 'group' => 'User.id'));
   }
 }
-?>
