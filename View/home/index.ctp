@@ -23,12 +23,13 @@
   $links = array();
   $max = 6 * 4;
   $keys = array_keys($newMedia);
+  $show = $this->Search->config['defaults']['show'];
   foreach ($keys as $i) {
     if (count($links) >= $max) {
       continue;
     }
     $pos = $i + 1;
-    $page = ceil($pos / $this->Search->getShow(12));
+    $page = ceil($pos / $show);
     $params = '/'.$this->Search->serialize(array('sort' => 'newest', 'page' => $page, 'pos' => $pos), false, false, array('defaults' => array('pos' => 1)));
     $links[] = $this->ImageData->mediaLink($newMedia[$i], array('type' => 'mini', 'params' => $params));
   }
