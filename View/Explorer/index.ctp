@@ -290,8 +290,8 @@ SCRIPT;
     $element = "Explorer/media_compact";
     $columns = 4;
   } else {
-    $class = "p-list-default";
-    $element = "Explorer/media";
+    $class = "p-list-full";
+    $element = "Explorer/media_full";
     $columns = 4;
   }
 ?>

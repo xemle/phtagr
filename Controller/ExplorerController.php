@@ -116,7 +116,7 @@ class ExplorerController extends AppController
         'type' => array('image', 'video'),
         'to' => 'true',
         'user' => '_getAssociation',
-        'view' => array('default', 'compact', 'small')
+        'view' => array('full', 'compact', 'small')
       );
       if ($this->hasRole(ROLE_USER)) {
         $queryMap['visibility'] = array('private', 'group', 'user', 'public');

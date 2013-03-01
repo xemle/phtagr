@@ -9,7 +9,7 @@
   } else if ($view == 'compact' ) {
     $element = "Explorer/media_compact";
   } else {
-    $element = "Explorer/media";
+    $element = "Explorer/media_full";
   }
   echo $this->element($element, array('media' => $this->request->data, 'index' => $index, 'pos' => $pos));
 ?>
