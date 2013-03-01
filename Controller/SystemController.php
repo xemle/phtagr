@@ -98,6 +98,7 @@ class SystemController extends AppController {
       $this->_setOption(0, 'explorer.default.show', $this->request->data, array(12, 24, 60, 120, 240));
       $this->_setOption(0, 'explorer.default.sort', $this->request->data, array('date', '-date', 'newest'));
       $this->_setOption(0, 'explorer.default.view', $this->request->data, array('full', 'compact', 'small', 'name', 'changes'));
+      $this->User->resetSession($this->Session);
       $this->Session->setFlash(__("Settings saved"));
     }
     $this->request->data = $this->Option->getTree(0);

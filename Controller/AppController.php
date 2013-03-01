@@ -134,7 +134,7 @@ class AppController extends Controller
       $this->Session->write('Session.requestCount', $count + 1);
     }
 
-    if ($this->Session->check('User.id')) {
+    if ($this->User->readSession($this->Session)) {
       return true;
     }
 
@@ -179,18 +179,16 @@ class AppController extends Controller
       return true;
     }
 
-    $userId = $this->Session->read('User.id');
-    $user = $this->User->findById($userId);
+    $user = $this->User->readSession($this->Session);
     if (!$user) {
       return false;
     }
 
-    $this->_user = $user;
     return true;
   }
 
   public function &getUser() {
-    if (!$this->_checkUser() || !$this->_user) {
+    if (!$this->_checkUser()) {
       if (!$this->_nobody && isset($this->User)) {
         $this->_nobody = $this->User->getNobody();
       } elseif (!$this->_nobody) {
@@ -198,7 +196,8 @@ class AppController extends Controller
       }
       return $this->_nobody;
     }
-    return $this->_user;
+    $user = $this->User->readSession($this->Session);
+    return $user;
   }
 
   public function getUserRole() {

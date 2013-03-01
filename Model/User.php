@@ -157,13 +157,24 @@ class User extends AppModel
     return true;
   }
 
-  public function writeSession(&$user, &$session) {
-    if (!$session || !isset($user['User']['id']) || !isset($user['User']['role']) || !isset($user['User']['username'])) {
-      return;
+  public function resetSession(&$session) {
+    $session->delete('user');
+  }
+
+  public function readSession(&$session) {
+    if ($session->check('user')) {
+      return $session->read('user');
+    } else if ($session->check('user.id')) {
+      $user = $this->findById($session->read('user.id'));
+      $this->writeSession($user, $session);
+      return $user;
     }
-    $session->write('User.id', $user['User']['id']);
-    $session->write('User.role', $user['User']['role']);
-    $session->write('User.username', $user['User']['username']);
+    return false;
+  }
+
+  public function writeSession(&$user, &$session) {
+    $session->write('user', $user);
+    $session->write('user.id', $user['User']['id']);
   }
 
   public function hasAnyWithRole($role = ROLE_ADMIN) {
