@@ -26,6 +26,7 @@ class OptionsController extends AppController {
     $this->subMenu = array(
       'profile' => __("Profile"),
       'password' => __("Password"),
+      'explorer' => __("Explorer"),
       'import' => __("Import Options"),
       'export' => __("Export Options"),
       'links' => __("Links"),
@@ -41,8 +42,13 @@ class OptionsController extends AppController {
     parent::beforeRender();
   }
 
-  private function _setOption($userId, $path, $data) {
+  private function _setOption($userId, $path, $data, $validate = false) {
     $value = Set::extract($data, $path);
+    if ($validate !== false) {
+      if (!in_array($value, (array)$validate)) {
+        return;
+      }
+    }
     $this->Option->setValue($path, $value, $userId);
   }
 
@@ -170,5 +176,15 @@ class OptionsController extends AppController {
     $this->set('userId', $userId);
   }
 
+  public function explorer() {
+    $userId = $this->getUserId();
+    if (!empty($this->request->data)) {
+      $this->_setOption($userId, 'explorer.default.show', $this->request->data, array(12, 24, 60, 120, 240));
+      $this->_setOption($userId, 'explorer.default.sort', $this->request->data, array('date', '-date', 'newest'));
+      $this->_setOption($userId, 'explorer.default.view', $this->request->data, array('full', 'compact', 'small', 'name', 'changes'));
+      $this->Session->setFlash(__("Settings saved"));
+    }
+    $this->request->data = $this->Option->getTree($userId);
+  }
 }
 ?>

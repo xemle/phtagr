@@ -41,8 +41,13 @@ class SystemController extends AppController {
     parent::beforeRender();
   }
 
-  private function _setOption($userId, $path, $data) {
+  private function _setOption($userId, $path, $data, $validate = false) {
     $value = Set::extract($data, $path);
+    if ($validate !== false) {
+      if (!in_array($value, (array)$validate)) {
+        return;
+      }
+    }
     $this->Option->setValue($path, $value, $userId);
   }
 
@@ -90,7 +95,10 @@ class SystemController extends AppController {
     if (!empty($this->request->data)) {
       $this->_setOption(0, 'general.title', $this->request->data);
       $this->_setOption(0, 'general.subtitle', $this->request->data);
-      $this->Session->setFlash(__("Titles were updated"));
+      $this->_setOption(0, 'explorer.default.show', $this->request->data, array(12, 24, 60, 120, 240));
+      $this->_setOption(0, 'explorer.default.sort', $this->request->data, array('date', '-date', 'newest'));
+      $this->_setOption(0, 'explorer.default.view', $this->request->data, array('full', 'compact', 'small', 'name', 'changes'));
+      $this->Session->setFlash(__("Settings saved"));
     }
     $this->request->data = $this->Option->getTree(0);
   }

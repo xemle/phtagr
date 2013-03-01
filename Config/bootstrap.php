@@ -163,6 +163,10 @@ define("BULK_DOWNLOAD_FILE_COUNT_ANONYMOUS", 12);
 define("BULK_DOWNLOAD_FILE_COUNT_USER", 240);
 define("BULK_DOWNLOAD_TOTAL_MB_LIMIT", 250);
 
+define("EXPLORER_DEFAULT_SHOW", 12);
+define("EXPLORER_DEFAULT_SORT", 'date');
+define("EXPLORER_DEFAULT_VIEW", 'full');
+
 /**
  * Add pear path within vendor path to the include_path
  */

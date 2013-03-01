@@ -90,8 +90,9 @@ class SearchComponent extends Component
   var $defaults = array(
     'page' => '1',
     'pos' => false,
-    'show' => '12',
-    'sort' => 'default',
+    'show' => EXPLORER_DEFAULT_SHOW,
+    'sort' => EXPLORER_DEFAULT_SORT,
+    'view' => EXPLORER_DEFAULT_VIEW,
     );
 
   /**
@@ -106,6 +107,12 @@ class SearchComponent extends Component
     }
     $this->clear();
     return true;
+  }
+
+  public function startup(Controller $controller) {
+    $this->defaults['show'] = $this->controller->getOption('explorer.default.show', $this->defaults['show']);
+    $this->defaults['sort'] = $this->controller->getOption('explorer.default.sort', $this->defaults['sort']);
+    $this->defaults['view'] = $this->controller->getOption('explorer.default.view', $this->defaults['view']);
   }
 
   public function clear() {

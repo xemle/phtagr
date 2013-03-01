@@ -41,6 +41,27 @@ class SearchHelper extends Search {
   var $singulars = array('pos');
 
   /**
+   * Helper function for options
+   *
+   * @param String $name Option name
+   * @param mixed $default Default value if option does not exist
+   * @return mixed Option or given default value
+   */
+  private function getOption($name, $default) {
+    if (isset($this->request->params['options'][$name])) {
+      return $this->request->params['options'][$name];
+    } else {
+      return $default;
+    }
+  }
+
+  public function beforeRender($viewFile) {
+    $this->config['defaults']['show'] = $this->getOption('explorer.default.show', EXPLORER_DEFAULT_SHOW);
+    $this->config['defaults']['sort'] = $this->getOption('explorer.default.sort', EXPLORER_DEFAULT_SORT);
+    $this->config['defaults']['view'] = $this->getOption('explorer.default.view', EXPLORER_DEFAULT_VIEW);
+  }
+
+  /**
    * Initialize query parameters from the global parameter array, which is
    * set by the query component. All search parameters are reset after calling
    * this function. All previous changes are overritten
