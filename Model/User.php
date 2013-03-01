@@ -15,8 +15,8 @@
  * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
 
-class User extends AppModel
-{
+class User extends AppModel {
+
   var $name = 'User';
 
   var $actsAs = array('Cipher' => array());

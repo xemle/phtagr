@@ -15,6 +15,8 @@
  * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
 
+App::uses('AppController', 'Controller');
+
 class BrowserController extends AppController
 {
   var $name = "Browser";

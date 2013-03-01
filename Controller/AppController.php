@@ -120,9 +120,11 @@ class AppController extends Controller
     return false;
   }
 
-  /** Checks a cookie for a valid user id. If a id found, the user is load to
+  /**
+   * Checks a cookie for a valid user id. If a id found, the user is load to
    * the session
-   * @todo Check expired user */
+   * @todo Check expired user
+   */
   public function _checkSession() {
     //$this->Session->activate();
     if (!$this->Session->check('Session.requestCount')) {
@@ -167,9 +169,12 @@ class AppController extends Controller
     return true;
   }
 
-  /** Checks the session for valid user. If no user is found, it checks for a
+  /**
+   * Checks the session for valid user. If no user is found, it checks for a
    * valid cookie
-   * @return True if the correct session correspond to an user */
+   *
+   * @return True if the correct session correspond to an user
+   */
   public function _checkUser() {
     if (!$this->_checkSession()) {
       return false;
@@ -275,9 +280,9 @@ class AppController extends Controller
 
     return true;
   }
-  
+
   /**
-   * Log User (username, Ip, path) if admin 'users logging option' enabled 
+   * Log User (username, Ip, path) if admin 'users logging option' enabled
    * localhost and internal network not logged
    */
   public function logUser()  {
@@ -291,6 +296,6 @@ class AppController extends Controller
       $this->log("User '{$user['User']['username']}' ({$user['User']['id']}), IP ".$IP.", path: ".$path, 'IP_log');
     }
   }
-  
+
 }
 ?>

@@ -18,8 +18,8 @@
 App::uses('Folder', 'Utility');
 App::uses('CakeEmail', 'Network/Email');
 
-class UsersController extends AppController
-{
+class UsersController extends AppController {
+
   var $components = array('RequestHandler', 'Cookie', 'Captcha', 'Search');
   var $uses = array('Option', 'Media', 'MyFile');
   var $helpers = array('Form', 'Number', 'Time', 'Text', 'ImageData');
@@ -107,8 +107,10 @@ class UsersController extends AppController
     $this->set('media', $this->Search->paginate());
   }
 
-  /** Checks the login of the user. If the session variable 'loginRedirect' is
-   * set the user is forwarded to this given address on successful login. */
+  /**
+   * Checks the login of the user. If the session variable 'loginRedirect' is
+   * set the user is forwarded to this given address on successful login.
+   */
   public function login() {
     $failedText = __("Sorry. Wrong password or unknown username!");
     if (!empty($this->request->data) && !$this->RequestHandler->isPost()) {
@@ -179,37 +181,39 @@ class UsersController extends AppController
   }
 
   public function admin_index() {
-  $userId = $this->getUserId();
-
+    $userId = $this->getUserId();
     $this->requireRole(ROLE_SYSOP, array('loginRedirect' => '/admin/users'));
 
     $this->request->data = $this->paginate('User', array('User.role>='.ROLE_USER));
 
-  foreach($this->request->data as $user):
- 
-    $userId = $user['User']['id'];
-     
-    $this->request->data['calc'][$userId]['MediaCount'] = $this->Media->find('count', array('conditions' => array('Media.user_id' => $userId), 'recursive' => -1));
-    $this->request->data['calc'][$userId]['FileCount'] = $this->MyFile->find('count', array('conditions' => array('File.user_id' => $userId), 'recursive' => -1));
+    foreach($this->request->data as $user) {
 
-    $this->request->data['calc'][$userId]['files.external'] = $this->Media->File->find('count', array('conditions' => array('File.flag & ' . FILE_FLAG_EXTERNAL. ' > 0', 'File.user_id' => $userId)));
+      $userId = $user['User']['id'];
 
-    $bytes = $this->MyFile->find('all', array('conditions' => array("File.user_id" => $userId), 'recursive' => -1, 'fields' => 'SUM(File.size) AS Bytes'));
-    $this->request->data['calc'][$userId]['FileBytes'] = max(0, floatval($bytes[0][0]['Bytes']));
+      $this->request->data['calc'][$userId]['MediaCount'] = $this->Media->find('count', array('conditions' => array('Media.user_id' => $userId), 'recursive' => -1));
+      $this->request->data['calc'][$userId]['FileCount'] = $this->MyFile->find('count', array('conditions' => array('File.user_id' => $userId), 'recursive' => -1));
+
+      $this->request->data['calc'][$userId]['files.external'] = $this->Media->File->find('count', array('conditions' => array('File.flag & ' . FILE_FLAG_EXTERNAL. ' > 0', 'File.user_id' => $userId)));
+
+      $bytes = $this->MyFile->find('all', array('conditions' => array("File.user_id" => $userId), 'recursive' => -1, 'fields' => 'SUM(File.size) AS Bytes'));
+      $this->request->data['calc'][$userId]['FileBytes'] = max(0, floatval($bytes[0][0]['Bytes']));
 
 
-    $bytes = $this->Media->File->find('all', array('conditions' => array("File.flag & ".FILE_FLAG_EXTERNAL." > 0", 'Media.user_id' => $userId), 'fields' => 'SUM(File.size) AS Bytes'));
-    $this->request->data['calc'][$userId]['file.size.external'] = floatval($bytes[0][0]['Bytes']);
+      $bytes = $this->Media->File->find('all', array('conditions' => array("File.flag & ".FILE_FLAG_EXTERNAL." > 0", 'Media.user_id' => $userId), 'fields' => 'SUM(File.size) AS Bytes'));
+      $this->request->data['calc'][$userId]['file.size.external'] = floatval($bytes[0][0]['Bytes']);
 
-    $bytes = $this->Media->File->find('all', array('conditions' => array("File.flag & ".FILE_FLAG_EXTERNAL." = 0", 'Media.user_id' => $userId), 'fields' => 'SUM(File.size) AS Bytes'));
-    $this->request->data['calc'][$userId]['file.size.internal'] = floatval($bytes[0][0]['Bytes']);
+      $bytes = $this->Media->File->find('all', array('conditions' => array("File.flag & ".FILE_FLAG_EXTERNAL." = 0", 'Media.user_id' => $userId), 'fields' => 'SUM(File.size) AS Bytes'));
+      $this->request->data['calc'][$userId]['file.size.internal'] = floatval($bytes[0][0]['Bytes']);
 
-  endforeach;
+    }
   }
 
-  /** Ensure at least one admin exists
-    @param id Current user
-    @return True if at least one system operator exists */
+  /**
+   * Ensure at least one admin exists
+   *
+   * @param id Current user
+   * @return True if at least one system operator exists
+   */
   public function _lastAdminCheck($id) {
     $userId = $this->getUserId();
     $userRole = $this->getUserRole();
@@ -224,7 +228,9 @@ class UsersController extends AppController
     return true;
   }
 
-  /** Add 3rd level menu for user edit for admin */
+  /**
+   * Add 3rd level menu for user edit for admin
+   */
   public function _addAdminEditMenu($userId) {
     $subActions = array(
       'password' => __("Password"),
@@ -510,6 +516,7 @@ class UsersController extends AppController
 
   /**
    * Verifies the confirmation key and activates the new user account
+   *
    * @param key Account confirmation key
    */
   public function _checkConfirmation($key) {
@@ -560,6 +567,7 @@ class UsersController extends AppController
 
   /**
    * Send the confirmation email to the new user
+   *
    * @param user User model data
    * @param key Confirmation key to activate the account
    */
@@ -582,6 +590,7 @@ class UsersController extends AppController
 
   /**
    * Send an email for the new account to the new user
+   *
    * @param user User model data
    */
   public function _sendNewAccountEmail($user) {
@@ -604,6 +613,7 @@ class UsersController extends AppController
   /**
    * Send a notification email to all system operators (and admins) of the new
    * account
+   *
    * @param user User model data (of the new user)
    */
   public function _sendNewAccountNotifiactionEmail($user) {
@@ -636,4 +646,3 @@ class UsersController extends AppController
   }
 
 }
-?>
