@@ -363,12 +363,15 @@ class QueryBuilderComponent extends Component {
     $conditions = array();
     $joins = array();
     if ($operand !== 'NOT') {
-      $joins[] = "$joinType JOIN ("
-              ." SELECT `$joinAlias`.`$foreignKey`,COUNT(*) AS `$counterName`"
+      $joins[] = array(
+        'type' => $joinType,
+        'alias' => $joinAlias,
+        'table' => "(SELECT `$joinAlias`.`$foreignKey`,COUNT(*) AS `$counterName`"
               ." FROM `$joinTable` AS `$joinAlias`, `$table` AS `$alias`"
               ." WHERE `$joinAlias`.`$associationForeignKey` = `$alias`.`$key`"
               ." AND (" . join(' OR ', $this->_buildConditions($modelConditions)) . ")"
-              ." GROUP BY `$joinAlias`.`$foreignKey`) AS $joinAlias ON `$joinAlias`.`$foreignKey` = `$modelAlias`.`$modelKey`";
+              ." GROUP BY `$joinAlias`.`$foreignKey`)",
+        'conditions' => array("$joinAlias.$foreignKey = $modelAlias.$modelKey"));
     } else {
       // Exclusion with operand NOT: use NOT IN () with subquery for query speed
       $subQuery = "SELECT `$joinAlias`.`$foreignKey`"
