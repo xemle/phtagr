@@ -631,9 +631,17 @@ class QueryBuilderComponent extends Component {
     return $data;
   }
 
-  public function build($data) {
+  /**
+   * Build CakePHP query array for given search parameters
+   *
+   * @param array $data Query parameter
+   * @param array $defaults Default query parameter
+   * @return array CakePHP query array
+   */
+  public function build($data, $defaults) {
     $this->counter = 0;
     $data = $this->_mapParams($data);
+    $defaults = am(array('sort' => 'id', 'show' => EXPLORER_DEFAULT_SHOW, 'page' => 1), (array) $defaults);
     list($required, $exclude) = $this->_splitRequirements($data);
     // if we have some required conditions default operand is OR for optional conditions
     $defaultOperand = $required ? 'ANY' : 'AND';
@@ -656,81 +664,70 @@ class QueryBuilderComponent extends Component {
       $query = array_merge_recursive($query, $requiredQuery);
     }
     $this->_buildAccessConditions($data, $query);
-    $this->_buildOrder($data, $query);
+    $this->_buildOrder($data, $query, $defaults);
     $visibility = $this->_getParam($data, 'visibility');
     if ($visibility) {
       $this->_buildVisibility($data, $query, $visibility);
     }
     // paging, offsets and limit
+    $show = isset($data['show']) ? $data['show'] : $defaults['show'];
+    $page = isset($data['page']) ? $data['page'] : $defaults['page'];
     if (!empty($data['pos'])) {
       $query['offset'] = $data['pos'];
-    } elseif (isset($data['show']) && isset($data['page'])) {
-      $query['page'] = $data['page'];
+    } elseif (isset($show) && isset($page)) {
+      $query['page'] = $page;
     }
-    if (isset($data['show'])) {
-      $query['limit'] = $data['show'];
+    if (isset($show)) {
+      $query['limit'] = $show;
     }
     $query['group'] = 'Media.id';
     return $query;
   }
 
-  private function _buildOrder(&$data, &$query) {
+  /**
+   * Build sql order for query and adds it to the CakePHP query array
+   *
+   * @param array $data Query parameter
+   * @param array $query CakePHP query array
+   * @param array $defaults Default query parameter
+   */
+  private function _buildOrder(&$data, &$query, &$defaults) {
     if (isset($data['sort']) && is_array($data['sort'])) {
       Logger::err("Invalid sort value. Value is an array: " . join(', ', $data['sort']) . " Use default sort order");
-      $data['sort'] = 'default';
+      unset($data['sort']);
     }
-    if (!isset($data['sort']) || $data['sort'] == 'default') {
-      if (isset($query['_counters']) && count($query['_counters']) > 0) {
-        if (count($query['_counters']) > 1) {
-          $counters = array();
-          foreach ($query['_counters'] as $counter) {
-            $counters[] = "( COALESCE($counter, 0) + 1 )";
-          }
-          $query['order'][] = implode(" * ", $counters).' DESC';
-        } else {
-          $counter = $query['_counters'][0];
-          $query['order'][] = "COALESCE($counter, 0) DESC";
+    if (!isset($data['sort']) && isset($query['_counters']) && count($query['_counters']) > 0) {
+      if (count($query['_counters']) > 1) {
+        $counters = array();
+        foreach ($query['_counters'] as $counter) {
+          $counters[] = "( COALESCE($counter, 0) + 1 )";
         }
+        $query['order'][] = implode(" * ", $counters).' DESC';
+      } else {
+        $counter = $query['_counters'][0];
+        $query['order'][] = "COALESCE($counter, 0) DESC";
       }
-      $query['order'][] = 'Media.date DESC';
+    }
+    $sort = isset($data['sort']) ? $data['sort'] : $defaults['sort'];
+    switch ($sort) {
+      case 'date': $query['order'][] = 'Media.date DESC'; break;
+      case '-date': $query['order'][] = 'Media.date ASC'; break;
+      case 'newest': $query['order'][] = 'Media.created DESC'; break;
+      case 'changes': $query['order'][] = 'Media.modified DESC'; break;
+      case 'viewed': $query['order'][] = 'Media.lastview DESC'; break;
+      case 'popularity': $query['order'][] = 'Media.ranking DESC'; break;
+      case 'random': $query['order'][] = 'RAND()'; break;
+      case 'name': $query['order'][] = 'Media.name'; break;
+      case '-name': $query['order'][] = 'Media.name DESC'; break;
+      case 'id': $query['order'][] = 'Media.id'; break;
+      default:
+        Logger::err("Unknown sort value: {$sort}. Use default sort order");
+        $query['order'][] = 'Media.date DESC, Media.id';
+        break;
+    }
+    // Add Media.id for deterministic order
+    if ($sort != 'random' && $sort != 'id') {
       $query['order'][] = 'Media.id';
-    } else {
-      switch ($data['sort']) {
-        case 'date':
-          $query['order'][] = 'Media.date DESC';
-          break;
-        case '-date':
-          $query['order'][] = 'Media.date ASC';
-          break;
-        case 'newest':
-          $query['order'][] = 'Media.created DESC';
-          break;
-        case 'changes':
-          $query['order'][] = 'Media.modified DESC';
-          break;
-        case 'viewed':
-          $query['order'][] = 'Media.lastview DESC';
-          break;
-        case 'popularity':
-          $query['order'][] = 'Media.ranking DESC';
-          break;
-        case 'random':
-          $query['order'][] = 'RAND()';
-          break;
-        case 'name':
-          $query['order'][] = 'Media.name';
-          break;
-        case '-name':
-          $query['order'][] = 'Media.name DESC';
-          break;
-        default:
-          Logger::err("Unknown sort value: {$sort}. Use default sort order");
-          $query['order'][] = 'Media.date DESC, Media.id';
-          break;
-      }
-      if ($data['sort'] != 'random') {
-        $query['order'][] = 'Media.id';
-      }
     }
   }
 

@@ -19,6 +19,7 @@
 App::uses('Media', 'Model');
 App::uses('User', 'Model');
 App::uses('PhtagrTestFactory', 'Test/Case');
+App::uses('AppController', 'Controller');
 
 class ExplorerControllerTest extends ControllerTestCase {
   /**
@@ -225,7 +226,8 @@ class ExplorerControllerTest extends ControllerTestCase {
 
     // tag flower is a must, category nature is optional
     $this->testAction('/explorer/view/tag:+flower/category:nature', array('return' => 'vars'));
-    $this->assertEqual(Set::extract('/Media/id', $Explorer->request->data), array($media2['Media']['id'], $media1['Media']['id']));
+    $mediaIds = Set::extract('/Media/id', $Explorer->request->data);
+    $this->assertEqual($mediaIds, array($media2['Media']['id'], $media1['Media']['id']));
   }
 
   public function testSelectionUnlink() {

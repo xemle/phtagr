@@ -116,7 +116,7 @@ class SearchComponent extends Component
   }
 
   public function clear() {
-    $this->_data = $this->defaults;
+    $this->_data = array();
   }
 
   /**
@@ -552,7 +552,7 @@ class SearchComponent extends Component
   }
 
   public function paginate() {
-    $query = $this->QueryBuilder->build($this->getParams());
+    $query = $this->QueryBuilder->build($this->getParams(), $this->defaults);
     $tmp = $query;
     unset($query['limit']);
     unset($query['page']);
@@ -633,7 +633,7 @@ class SearchComponent extends Component
   }
 
   public function paginateMedia($id) {
-    $query = $this->QueryBuilder->build($this->getParams());
+    $query = $this->QueryBuilder->build($this->getParams(), $this->defaults);
     $tmp = $query;
     unset($query['limit']);
     unset($query['offset']);

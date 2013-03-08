@@ -21,7 +21,7 @@ class BrowserController extends AppController
 {
   var $name = "Browser";
 
-  var $components = array('FileManager', 'RequestHandler', 'FilterManager', 'Upload', 'Zip', 'Plupload', 'QueryBuilder');
+  var $components = array('FileManager', 'RequestHandler', 'FilterManager', 'Upload', 'Zip', 'Plupload', 'Search', 'QueryBuilder');
   var $uses = array('User', 'MyFile', 'Media', 'Option');
   var $helpers = array('Form', 'Html', 'Number', 'FileList', 'ImageData', 'Plupload', 'Autocomplete');
   var $subMenu = false;
@@ -867,7 +867,7 @@ class BrowserController extends AppController
     if ($tagNames) {
       $queryData['tag'] = $tagNames;
     }
-    $query = $this->QueryBuilder->build($queryData);
+    $query = $this->QueryBuilder->build($queryData, $this->Search->defaults);
     $allMedia = $this->Media->find('all', $query);
 
     if ($allMedia) {
