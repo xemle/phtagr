@@ -14,10 +14,19 @@
  * @since         phTagr 2.2b3
  * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
-
 App::uses('Model', 'Model');
 
 class AppModel extends Model {
+
+  /**
+   * Fire generic event for Model.[Alias].afterSave
+   *
+   * @param boolean $created
+   */
+  public function afterSave($created) {
+    parent::afterSave($created);
+    $this->getEventManager()->dispatch(new CakeEvent('Model.'.$this->alias.'.afterSave', $this, $this->data));
+  }
 
   public function unbindAll($params = array()) {
     $bindings = array(
