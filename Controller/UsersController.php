@@ -136,9 +136,8 @@ class UsersController extends AppController {
       } else {
         $user = $this->User->decrypt($user);
         if ($user['User']['password'] == $this->request->data['User']['password']) {
-          $this->Session->renew();
-          $user = $this->User->readSession($this->Session);
-          if (!$user || $user['User']['id'] != $user['User']['id']) {
+          $sessionUser = $this->User->readSession($this->Session);
+          if (!$sessionUser || $sessionUser['User']['id'] != $user['User']['id']) {
             Logger::info("Start new session for '{$user['User']['username']}' (id {$user['User']['id']})");
             $this->User->writeSession($user, $this->Session);
 
