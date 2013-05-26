@@ -15,10 +15,12 @@
  * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
 
-/** This helper handles the user options which is intialized in app_controller::beforeRender() */
+/**
+ * This helper handles the user options which is intialized in app_controller::beforeRender()
+ */
 class OptionHelper extends AppHelper
 {
-  var $options = null;
+  var $options = array();
 
   /**
    * Intitialize the options
@@ -44,4 +46,3 @@ class OptionHelper extends AppHelper
     }
   }
 }
-?>

@@ -20,37 +20,53 @@ class Search extends Object
 
   var $_data;
 
-  /** List of chars to escape on setParam() */
+  /**
+   * List of chars to escape on setParam()
+   */
   var $escapeChars = '=,/';
 
-  /** Clears all parameters and set them to the defaults*/
+  /**
+   * Clears all parameters and set them to the defaults
+   */
   function clear() {
     $this->_data = array();
   }
 
-  /** Returns all parameters
-    @return Parameter array */
+  /**
+   * Returns all parameters
+   *
+   * @return Parameter array
+   */
   function getParams() {
     return $this->_data;
   }
 
-  /** Set all parameters
-    @param data Parameter array
-    @note The parameters are not validated! */
+  /**
+   * Set all parameters
+   *
+   * @param data Parameter array
+   * @note The parameters are not validated!
+   */
   function setParams($data = array()) {
     $this->_data = $data;
   }
 
-  /** Validate parameter value.
-    @note Overwritten by inherited classes */
+  /**
+   * Validate parameter value.
+   *
+   * @note Overwritten by inherited classes
+   */
   function validate($name, $value) {
     return true;
   }
 
-  /** Returns parameter
-    @param name Name of parameter
-    @param default Default value, if the parameter does not exists. Default
-    value is null */
+  /**
+   * Returns parameter
+   *
+   * @param name Name of parameter
+   * @param default Default value, if the parameter does not exists. Default
+   * value is null
+   */
   function getParam($name, $default = null) {
     if (!empty($this->_data[$name])) {
       return $this->_data[$name];
@@ -59,12 +75,15 @@ class Search extends Object
     }
   }
 
-  /** Set a singular parameter
-    @param name Parameter name
-    @param value Parameter value
-    @param validate Optional parameter to validate the parameter. Default is
-    true
-    @return True on success */
+  /**
+   * Set a singular parameter
+   *
+   * @param name Parameter name
+   * @param value Parameter value
+   * @param validate Optional parameter to validate the parameter. Default is
+   * true
+   * @return True on success
+   */
   function setParam($name, $value, $validate = true) {
     if ($validate === false || $this->validate($name, $value)) {
       $this->_data[$name] = $value;
@@ -74,12 +93,15 @@ class Search extends Object
     }
   }
 
-  /** Add a parameter to an array.
-    @param name Parameter name.
-    @param value Parameter value (which will be pluralized)
-    @param validate Optional parameter to validate the parameter. Default is
-    true
-    @note The name will be pluralized. */
+  /**
+   * Add a parameter to an array.
+   *
+   * @param name Parameter name.
+   * @param value Parameter value (which will be pluralized)
+   * @param validate Optional parameter to validate the parameter. Default is
+   * true
+   * @note The name will be pluralized.
+   */
   function addParam($name, $value, $validate = true) {
     $name = Inflector::pluralize($name);
     if (is_array($value)) {
@@ -227,4 +249,3 @@ class Search extends Object
     return $out;
   }
 }
-?>
