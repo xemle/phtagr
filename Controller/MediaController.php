@@ -313,8 +313,9 @@ class MediaController extends AppController
     $user = $this->getUser();
     $allMedia = $this->Media->find('all', array('conditions' => array('Media.id' => $ids)));
     $files = array();
+    $groupIds = $this->User->getAclGroupIds($user);
     foreach ($allMedia as $media) {
-      $this->Media->setAccessFlags($media, $user);
+      $this->Media->setAccessFlags($media, $user, $groupIds);
       if (!$media['Media']['canReadPreview']) {
         continue;
       }

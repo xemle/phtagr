@@ -596,8 +596,9 @@ class SearchComponent extends Component
     $this->controller->Media->bindModel(array('hasMany' => array('GroupsMedia' => array())));
     $data = $this->controller->Media->find('all', $query);
     $user = $this->controller->getUser();
+    $groupIds = $this->controller->User->getAclGroupIds($user);
     for ($i = 0; $i < count($data); $i++) {
-      $this->controller->Media->setAccessFlags($data[$i], $user);
+      $this->controller->Media->setAccessFlags($data[$i], $user, $groupIds);
     }
 
     // Set data for search helper

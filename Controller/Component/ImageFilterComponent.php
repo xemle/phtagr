@@ -48,6 +48,10 @@ class ImageFilterComponent extends BaseFilterComponent {
 
     if ($this->Exiftool->isEnabled()) {
       $meta = $this->Exiftool->readMetaData($filename);
+      $name = basename($filename);
+      if ($name != $meta['FileName']) {
+        $this->log(">>> File $name differs from {$meta['FileName']}", 'import');
+      }
     } else {
       $meta = $this->_readMetaDataGetId3($filename);
     }
@@ -76,6 +80,9 @@ class ImageFilterComponent extends BaseFilterComponent {
       $this->Exiftool->extractImageData($media, $meta);
     } else {
       $this->_extractImageDataGetId3($media, $meta);
+    }
+    if ($media['Media']['name'] != basename($filename)) {
+        $this->log(">>> File ". basename($filename) . " differs from {$media['Media']['name']} (extractImageData)", 'import');
     }
     // fallback for image size
     if (!isset($media['Media']['width']) || $media['Media']['width'] == 0 ||
@@ -111,11 +118,6 @@ class ImageFilterComponent extends BaseFilterComponent {
     }
     $this->controller->MyFile->updateReaded($file);
     $this->controller->MyFile->setFlag($file, FILE_FLAG_DEPENDENT);
-
-    if ($this->controller->getOption('xmp.use.sidecar', 0)) {
-      //$hasSidecar = $this->SidecarFilter->hasSidecar($filename, false);
-      //link sidecar to media(to main file); really needed here?
-    }
 
     return $media;
   }

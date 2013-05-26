@@ -316,4 +316,17 @@ class User extends AppModel {
     }
     return $this->find($findType, array('conditions' => $conditions, 'joins' => $joins, 'recusive' => $resusive, 'group' => 'User.id'));
   }
+
+  /**
+   * Extract ACL group ID of user
+   *
+   * @param array $user
+   * @return array List of group Ids for ACL
+   */
+  public function getAclGroupIds(&$user) {
+    $groupIds = Set::extract('/Group/id', $user);
+    $groupIds = am($groupIds, Set::extract('/Member/id', $user));
+    return $groupIds;
+  }
 }
+

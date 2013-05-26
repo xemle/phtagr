@@ -193,15 +193,18 @@ class Media extends AppModel {
   }
 
   public function canRead(&$media, &$user) {
-    return $this->checkAccess($media, $user, ACL_READ_PREVIEW, ACL_READ_MASK, null);
+    $groupIds = null;
+    return $this->checkAccess($media, $user, ACL_READ_PREVIEW, ACL_READ_MASK, $groupsId);
   }
 
   public function canReadOriginal(&$media, &$user) {
-    return $this->checkAccess($media, $user, ACL_READ_ORIGINAL, ACL_READ_MASK, null);
+    $groupIds = null;
+    return $this->checkAccess($media, $user, ACL_READ_ORIGINAL, ACL_READ_MASK, $groupsId);
   }
 
   public function canWrite(&$media, &$user) {
-    return $this->checkAccess($media, $user, ACL_WRITE_TAG, ACL_WRITE_MASK, null);
+    $groupIds = null;
+    return $this->checkAccess($media, $user, ACL_WRITE_TAG, ACL_WRITE_MASK, $groupsId);
   }
 
   public function canWriteAcl(&$media, &$user) {
@@ -220,37 +223,43 @@ class Media extends AppModel {
    * by the user's data.
    * @return True is user is allowed, False otherwise
    */
-  public function checkAccess(&$data, &$user, $flag, $mask, $userGroupIds = array()) {
+  public function checkAccess(&$data, &$user, $flag, $mask, &$groupIds = array()) {
     if (!$data || !$user || !isset($data['Media']) || !isset($user['User'])) {
       Logger::err("precondition failed");
       return false;
     }
 
     // check for public access
-    if (($data['Media']['oacl'] & $mask) >= $flag)
+    if (($data['Media']['oacl'] & $mask) >= $flag) {
       return true;
+    }
 
     // check for members
     if ($user['User']['role'] >= ROLE_USER &&
-      ($data['Media']['uacl'] & $mask) >= $flag)
-      return true;
-
-    if ($userGroupIds === null) {
-      $userGroupIds = Set::extract('/Group/id', $user);
-      $userGroupIds = am($userGroupIds, Set::extract('/Member/id', $user));
-    }
-    $mediaGroupIds = Set::extract('/Group/id', $data);
-    // user groups and media groups must match to gain access via common group
-    $match = array_intersect($mediaGroupIds, $userGroupIds);
-    if ($user['User']['role'] >= ROLE_GUEST &&
-      ($data['Media']['gacl'] & $mask) >= $flag &&
-      count($match) > 0) {
+      ($data['Media']['uacl'] & $mask) >= $flag) {
       return true;
     }
 
     // Media owner and admin check
     if ($user['User']['id'] == $data['Media']['user_id'] ||
       $user['User']['role'] == ROLE_ADMIN) {
+      return true;
+    }
+
+    if ($groupIds === null) {
+      $groupIds = $this->User->getAclGroupIds($user);
+    }
+
+    // user groups and media groups must match to gain access via common group
+    $match = false;
+    foreach ($data['Group'] as $group) {
+      if (in_array($group['id'], $groupIds)) {
+        $match = true;
+        break;
+      }
+    }
+    if ($match && $user['User']['role'] >= ROLE_GUEST &&
+      ($data['Media']['gacl'] & $mask) >= $flag) {
       return true;
     }
 
@@ -264,7 +273,7 @@ class Media extends AppModel {
    * @param user User array
    * @return $data of Media data with the access flags
    */
-  public function setAccessFlags(&$data, $user) {
+  public function setAccessFlags(&$data, $user, &$groupIds = null) {
     if (!isset($data)) {
       return $data;
     }
@@ -277,16 +286,17 @@ class Media extends AppModel {
     $uacl = $data['Media']['uacl'];
     $gacl = $data['Media']['gacl'];
 
-    $userGroupIds = Set::extract('/Group/id', $user);
-    $userGroupIds = am($userGroupIds, Set::extract('/Member/id', $user));
+    if ($groupIds === null) {
+      $groupIds = $this->User->getAclGroupIds($user);
+    }
 
-    $data['Media']['canWriteTag'] = $this->checkAccess($data, $user, ACL_WRITE_TAG, ACL_WRITE_MASK, $userGroupIds);
-    $data['Media']['canWriteMeta'] = $this->checkAccess($data, $user, ACL_WRITE_META, ACL_WRITE_MASK, $userGroupIds);
-    $data['Media']['canWriteCaption'] = $this->checkAccess($data, $user, ACL_WRITE_CAPTION, ACL_WRITE_MASK, $userGroupIds);
+    $data['Media']['canWriteTag'] = $this->checkAccess($data, $user, ACL_WRITE_TAG, ACL_WRITE_MASK, $groupIds);
+    $data['Media']['canWriteMeta'] = $this->checkAccess($data, $user, ACL_WRITE_META, ACL_WRITE_MASK, $groupIds);
+    $data['Media']['canWriteCaption'] = $this->checkAccess($data, $user, ACL_WRITE_CAPTION, ACL_WRITE_MASK, $groupIds);
 
-    $data['Media']['canReadPreview'] = $this->checkAccess($data, $user, ACL_READ_PREVIEW, ACL_READ_MASK, $userGroupIds);
-    $data['Media']['canReadHigh'] = $this->checkAccess($data, $user, ACL_READ_HIGH, ACL_READ_MASK, $userGroupIds);
-    $data['Media']['canReadOriginal'] = $this->checkAccess($data, $user, ACL_READ_ORIGINAL, ACL_READ_MASK, $userGroupIds);
+    $data['Media']['canReadPreview'] = $this->checkAccess($data, $user, ACL_READ_PREVIEW, ACL_READ_MASK, $groupIds);
+    $data['Media']['canReadHigh'] = $this->checkAccess($data, $user, ACL_READ_HIGH, ACL_READ_MASK, $groupIds);
+    $data['Media']['canReadOriginal'] = $this->checkAccess($data, $user, ACL_READ_ORIGINAL, ACL_READ_MASK, $groupIds);
     if (($data['Media']['oacl'] & ACL_READ_PREVIEW) > 0) {
       $data['Media']['visibility'] = ACL_LEVEL_OTHER;
     } elseif (($data['Media']['uacl'] & ACL_READ_PREVIEW) > 0) {
@@ -298,7 +308,7 @@ class Media extends AppModel {
     }
 
     $data['Media']['isOwner'] = ($data['Media']['user_id'] == $user['User']['id']) ? true : false;
-    $data['Media']['canWriteAcl'] = $this->checkAccess($data, $user, 1, 0, $userGroupIds);
+    $data['Media']['canWriteAcl'] = $this->checkAccess($data, $user, 1, 0, $groupIds);
     $data['Media']['isDirty'] = (($data['Media']['flag'] & MEDIA_FLAG_DIRTY) > 0) ? true : false;
 
     return $data;

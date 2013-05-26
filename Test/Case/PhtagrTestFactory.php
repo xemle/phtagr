@@ -42,6 +42,13 @@ class PhtagrTestFactory {
     return $this->User->findById($this->User->getLastInsertID());
   }
 
+  public function createFile($filename, $user, $options = array()) {
+    $data = array('path' => direname($filename), 'file' => basename($filename), 'user_id' => $user['User']['id']);
+    $data = $this->Media->File->create(am($data, $options));
+    $this->Media->File->save($data);
+    return $this->Media->File->findById($this->Media->File->getLastInsertID());
+  }
+
   public function createMedia($name = null, $user = null, $options = array()) {
     $data = array();
     $data['name'] = $name ? $name : 'IMG_1234.JPG';

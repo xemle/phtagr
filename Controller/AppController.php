@@ -241,6 +241,13 @@ class AppController extends Controller
     return true;
   }
 
+  /**
+   * Returns the option of current user
+   *
+   * @param string $name Option name
+   * @param mixed $default Default value
+   * @return mixed
+   */
   public function getOption($name, $default=null) {
     $user = $this->getUser();
     return $this->Option->getValue($user, $name, $default);

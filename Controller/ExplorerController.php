@@ -527,8 +527,9 @@ class ExplorerController extends AppController
 
       $allMedia = $this->Media->find('all', array('conditions' => array('Media.id' => $ids)));
       $changedMedia = array();
+      $groupIds = $this->User->getAclGroupIds($user);
       foreach ($allMedia as $media) {
-        $this->Media->setAccessFlags($media, $user);
+        $this->Media->setAccessFlags($media, $user, $groupIds);
         // primary access check
         if (!$media['Media']['canWriteTag'] && !$media['Media']['canWriteAcl']) {
           Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change any metadata of image ".$id);

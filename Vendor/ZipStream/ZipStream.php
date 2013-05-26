@@ -125,7 +125,7 @@ class ZipStream {
 		}
 
 		$gzType = "\x08\x00"; // Compression type 8 = deflate
-		$gpFlags = "\x02\x00"; // General Purpose bit flags for compression type 8 it is: 0=Normal, 1=Maximum, 2=Fast, 3=super fast compression.
+		$gpFlags = "\x02\x08"; // General Purpose bit flags for compression type 8 it is: 0=Normal, 1=Maximum, 2=Fast, 3=super fast compression.
 		$dataLength = strlen($data);
 		$fileCRC32 = pack("V", crc32($data));
 
@@ -271,7 +271,7 @@ class ZipStream {
 		gzclose($this->streamData);
 
 		$gzType = "\x08\x00"; // Compression type 8 = deflate
-		$gpFlags = "\x02\x00"; // General Purpose bit flags for compression type 8 it is: 0=Normal, 1=Maximum, 2=Fast, 3=super fast compression.
+		$gpFlags = "\x02\x08"; // General Purpose bit flags for compression type 8 it is: 0=Normal, 1=Maximum, 2=Fast, 3=super fast compression.
 
 		$file_handle = fopen($this->streamFile, "rb");
 		$stats = fstat($file_handle);
