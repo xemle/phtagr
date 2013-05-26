@@ -182,34 +182,34 @@ pre {
           background-color: #333333;
           padding: 5px; }
       #main-menu > .sub #quicksearch .inputWrap {
-        -moz-"border-radius-topleft": 5px;
-        -webkit-"border-top-left-radius": 5px;
-        -o-"border-top-left-radius": 5px;
-        -ms-"border-top-left-radius": 5px;
-        -khtml-"border-top-left-radius": 5px;
-        "border-top-left-radius": 5px;
-        -moz-"border-radius-bottomleft": 5px;
-        -webkit-"border-bottom-left-radius": 5px;
-        -o-"border-bottom-left-radius": 5px;
-        -ms-"border-bottom-left-radius": 5px;
-        -khtml-"border-bottom-left-radius": 5px;
-        "border-bottom-left-radius": 5px; }
+        -moz-border-radius-topleft: 5px;
+        -webkit-border-top-left-radius: 5px;
+        -o-border-top-left-radius: 5px;
+        -ms-border-top-left-radius: 5px;
+        -khtml-border-top-left-radius: 5px;
+        border-top-left-radius: 5px;
+        -moz-border-radius-bottomleft: 5px;
+        -webkit-border-bottom-left-radius: 5px;
+        -o-border-bottom-left-radius: 5px;
+        -ms-border-bottom-left-radius: 5px;
+        -khtml-border-bottom-left-radius: 5px;
+        border-bottom-left-radius: 5px; }
         #main-menu > .sub #quicksearch .inputWrap input {
           border: none;
           background-color: #333333; }
       #main-menu > .sub #quicksearch .submitWrap {
-        -moz-"border-radius-topright": 5px;
-        -webkit-"border-top-right-radius": 5px;
-        -o-"border-top-right-radius": 5px;
-        -ms-"border-top-right-radius": 5px;
-        -khtml-"border-top-right-radius": 5px;
-        "border-top-right-radius": 5px;
-        -moz-"border-radius-bottomright": 5px;
-        -webkit-"border-bottom-right-radius": 5px;
-        -o-"border-bottom-right-radius": 5px;
-        -ms-"border-bottom-right-radius": 5px;
-        -khtml-"border-bottom-right-radius": 5px;
-        "border-bottom-right-radius": 5px; }
+        -moz-border-radius-topright: 5px;
+        -webkit-border-top-right-radius: 5px;
+        -o-border-top-right-radius: 5px;
+        -ms-border-top-right-radius: 5px;
+        -khtml-border-top-right-radius: 5px;
+        border-top-right-radius: 5px;
+        -moz-border-radius-bottomright: 5px;
+        -webkit-border-bottom-right-radius: 5px;
+        -o-border-bottom-right-radius: 5px;
+        -ms-border-bottom-right-radius: 5px;
+        -khtml-border-bottom-right-radius: 5px;
+        border-bottom-right-radius: 5px; }
         #main-menu > .sub #quicksearch .submitWrap:hover {
           background-color: #666666;
           color: white;
@@ -836,18 +836,18 @@ ul.p-breadcrumb {
       padding-right: 100px;
       height: 100%; }
       #p-media-preview > .navigator > .prev > .sub a {
-        -moz-"border-radius-topright": 15px;
-        -webkit-"border-top-right-radius": 15px;
-        -o-"border-top-right-radius": 15px;
-        -ms-"border-top-right-radius": 15px;
-        -khtml-"border-top-right-radius": 15px;
-        "border-top-right-radius": 15px;
-        -moz-"border-radius-bottomright": 15px;
-        -webkit-"border-bottom-right-radius": 15px;
-        -o-"border-bottom-right-radius": 15px;
-        -ms-"border-bottom-right-radius": 15px;
-        -khtml-"border-bottom-right-radius": 15px;
-        "border-bottom-right-radius": 15px; }
+        -moz-border-radius-topright: 15px;
+        -webkit-border-top-right-radius: 15px;
+        -o-border-top-right-radius: 15px;
+        -ms-border-top-right-radius: 15px;
+        -khtml-border-top-right-radius: 15px;
+        border-top-right-radius: 15px;
+        -moz-border-radius-bottomright: 15px;
+        -webkit-border-bottom-right-radius: 15px;
+        -o-border-bottom-right-radius: 15px;
+        -ms-border-bottom-right-radius: 15px;
+        -khtml-border-bottom-right-radius: 15px;
+        border-bottom-right-radius: 15px; }
     #p-media-preview > .navigator > .up {
       padding: 0;
       padding-bottom: 100px;
@@ -859,18 +859,18 @@ ul.p-breadcrumb {
         display: block;
         width: 120px;
         margin: 0 auto;
-        -moz-"border-radius-bottomleft": 15px;
-        -webkit-"border-bottom-left-radius": 15px;
-        -o-"border-bottom-left-radius": 15px;
-        -ms-"border-bottom-left-radius": 15px;
-        -khtml-"border-bottom-left-radius": 15px;
-        "border-bottom-left-radius": 15px;
-        -moz-"border-radius-bottomright": 15px;
-        -webkit-"border-bottom-right-radius": 15px;
-        -o-"border-bottom-right-radius": 15px;
-        -ms-"border-bottom-right-radius": 15px;
-        -khtml-"border-bottom-right-radius": 15px;
-        "border-bottom-right-radius": 15px; }
+        -moz-border-radius-bottomleft: 15px;
+        -webkit-border-bottom-left-radius: 15px;
+        -o-border-bottom-left-radius: 15px;
+        -ms-border-bottom-left-radius: 15px;
+        -khtml-border-bottom-left-radius: 15px;
+        border-bottom-left-radius: 15px;
+        -moz-border-radius-bottomright: 15px;
+        -webkit-border-bottom-right-radius: 15px;
+        -o-border-bottom-right-radius: 15px;
+        -ms-border-bottom-right-radius: 15px;
+        -khtml-border-bottom-right-radius: 15px;
+        border-bottom-right-radius: 15px; }
     #p-media-preview > .navigator > .next {
       position: absolute;
       top: 70px;
@@ -878,18 +878,18 @@ ul.p-breadcrumb {
       height: 100%;
       padding-left: 100px; }
       #p-media-preview > .navigator > .next > .sub a {
-        -moz-"border-radius-topleft": 15px;
-        -webkit-"border-top-left-radius": 15px;
-        -o-"border-top-left-radius": 15px;
-        -ms-"border-top-left-radius": 15px;
-        -khtml-"border-top-left-radius": 15px;
-        "border-top-left-radius": 15px;
-        -moz-"border-radius-bottomleft": 15px;
-        -webkit-"border-bottom-left-radius": 15px;
-        -o-"border-bottom-left-radius": 15px;
-        -ms-"border-bottom-left-radius": 15px;
-        -khtml-"border-bottom-left-radius": 15px;
-        "border-bottom-left-radius": 15px; }
+        -moz-border-radius-topleft: 15px;
+        -webkit-border-top-left-radius: 15px;
+        -o-border-top-left-radius: 15px;
+        -ms-border-top-left-radius: 15px;
+        -khtml-border-top-left-radius: 15px;
+        border-top-left-radius: 15px;
+        -moz-border-radius-bottomleft: 15px;
+        -webkit-border-bottom-left-radius: 15px;
+        -o-border-bottom-left-radius: 15px;
+        -ms-border-bottom-left-radius: 15px;
+        -khtml-border-bottom-left-radius: 15px;
+        border-bottom-left-radius: 15px; }
 
 #image-tabs {
   margin: 10px 0 5px 0; }
@@ -926,6 +926,7 @@ ul.p-breadcrumb {
         text-align: right; }
   * html form fieldset > div > label {
     overflow-x: hidden; }
+      form fieldset > div input[type=email],
       form fieldset > div input[type=password],
       form fieldset > div input[type=text],
       form fieldset > div textarea {
@@ -946,15 +947,18 @@ ul.p-breadcrumb {
         font-size: 12pt;
         width: 224px;
         margin-top: 10px; }
+  * html form fieldset > div input[type=email],
   * html form fieldset > div input[type=password],
   * html form fieldset > div input[type=text],
   * html form fieldset > div textarea {
     overflow-x: hidden; }
+  form fieldset > div input[type=email]:hover,
   form fieldset > div input[type=password]:hover,
   form fieldset > div input[type=text]:hover,
   form fieldset > div textarea:hover {
     border: #123e78 1px solid;
     background-color: #222222; }
+  form fieldset > div input[type=email]:focus,
   form fieldset > div input[type=password]:focus,
   form fieldset > div input[type=text]:focus,
   form fieldset > div textarea:focus {
@@ -1143,6 +1147,7 @@ form.login {
       width: 230px !important;
       clear: left;
       text-align: left; }
+    form.login fieldset input[type=email],
     form.login fieldset input[type=password],
     form.login fieldset input[type=text] {
       width: 230px !important;
@@ -1160,10 +1165,12 @@ form.login {
       padding: 4px;
       clear: left;
       font-size: 15pt; }
+  form.login fieldset input[type=email]:hover,
   form.login fieldset input[type=password]:hover,
   form.login fieldset input[type=text]:hover {
     border: #123e78 1px solid;
     background-color: #222222; }
+  form.login fieldset input[type=email]:focus,
   form.login fieldset input[type=password]:focus,
   form.login fieldset input[type=text]:focus {
     color: #eeeeee;

@@ -534,10 +534,9 @@ class DATABASE_CONFIG {
       }
       if ($this->User->save()) {
         $userId = $this->User->getLastInsertID();
-        $this->Session->write('User.id', $userId);
-        $this->Session->write('User.role', ROLE_ADMIN);
-        $this->Session->write('User.username', $this->request->data['User']['username']);
-        Logger::info("Admin account '{$this->request->data['User']['username']}' was created");
+        $user = $this->User->findById($userId);
+        $this->User->writeSession($user, $this->Session);
+        Logger::info("Admin account '{$user['User']['username']}' was created");
         $this->Session->setFlash(__("Admin account was successfully created"));
         $this->redirect('system');
       } else {

@@ -28,8 +28,9 @@ form
         +column(6)
         margin-top: 15px
         text-align: right
-      input[type=password], 
-      input[type=text], 
+      input[type=password],
+      input[type=text],
+      input[type=email],
       textarea
         +column(6, true)
         +default-input
@@ -55,12 +56,12 @@ form
         +prepend(6)
         +column(6, true)
         margin-top: 3px
-    > .checkbox 
+    > .checkbox
       input[type=checkbox]
         margin-left: 240px
         margin-right: 5px
       label
-        width: 200px 
+        width: 200px
         float: none
         text-align: left
         display: inline-block
@@ -74,7 +75,7 @@ form.explorer-menu
     padding: 5px 0
     border: 0
     legend
-      display: none 
+      display: none
     > div
       > label
         +column(6)
@@ -92,7 +93,7 @@ form.explorer-menu
         +default-input
         option
           padding: 3px 0
-          color: white 
+          color: white
           background-color: $clickable-default-bg
           &.selected
             background-color: $clickable-active-bg
@@ -131,6 +132,7 @@ form.login
       clear: left
       text-align: left
     input[type=text],
+    input[type=email],
     input[type=password]
       +span(6, true)
       +default-input

@@ -2,7 +2,7 @@
 
 <?php echo $this->Session->flash(); ?>
 
-<?php echo $this->Form->create(null, array('action' => 'user')); ?>
+<?php echo $this->Form->create(null, array('url' => '/setup/user')); ?>
 
 <fieldset>
 <?php
