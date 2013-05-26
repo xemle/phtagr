@@ -15,23 +15,17 @@
  * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
 
+App::uses('PhtagrTestCase', 'Test/Case');
 App::uses('SearchComponent', 'Controller/Component');
-if (!class_exists('TestControllerMock')) {
-  App::import('File', 'TestControllerMock', array('file' => dirname(dirname(__FILE__)) . DS . 'TestControllerMock.php'));
-}
 
 /**
  * SearchComponent Test Case
  *
  */
-class SearchComponentTestCase extends CakeTestCase {
+class SearchComponentTestCase extends PhtagrTestCase {
 	var $controllerMock;
 	var $uses = array('User', 'Group', 'Media', 'Field');
 	var $components = array('Search');
-
-	public $fixtures = array('app.file', 'app.media', 'app.user', 'app.group', 'app.groups_media',
-      'app.groups_user', 'app.option', 'app.guest', 'app.comment',
-      'app.fields_media', 'app.field', 'app.comment');
 
   /**
  * setUp method
@@ -41,73 +35,9 @@ class SearchComponentTestCase extends CakeTestCase {
 	public function setUp() {
 		parent::setUp();
 
-    $this->loadControllerMock();
-    $this->bindModels();
-    $this->bindCompontents();
-
     $this->Search->disabled = array('user', 'world');
     $this->Search->defaults = array();
     $this->Search->clear();
-	}
-
-	/**
-   * Load ShellControllerMock with models and components
-   */
-  public function loadControllerMock() {
-    $this->ControllerMock = new TestControllerMock();
-    $this->ControllerMock->setRequest(new CakeRequest());
-    $this->ControllerMock->response = new CakeResponse();
-    $this->ControllerMock->uses = $this->uses;
-    $this->ControllerMock->components = $this->components;
-    $this->ControllerMock->constructClasses();
-    $this->ControllerMock->startupProcess();
-  }
-
-  /**
-   * Bind controller's components to shell
-   */
-  public function bindCompontents() {
-    foreach($this->ControllerMock->components as $key => $component) {
-      if (!is_numeric($key)) {
-        $component = $key;
-      }
-      if (empty($this->ControllerMock->{$component})) {
-        $this->out("Could not load component $component");
-        exit(1);
-      }
-      $this->{$component} = $this->ControllerMock->{$component};
-    }
-  }
-
-  /**
-   * Bind controller's model to shell
-   */
-  public function bindModels() {
-    foreach($this->ControllerMock->uses as $key => $model) {
-      if (!is_numeric($key)) {
-        $model = $key;
-      }
-      if (empty($this->ControllerMock->{$model})) {
-        $this->out("Could not load model $model");
-        exit(1);
-      }
-      $this->{$model} = $this->ControllerMock->{$model};
-    }
-  }
-
-  public function mockUser($user) {
-    $this->ControllerMock->mockUser($user);
-  }
-
-/**
- * tearDown method
- *
- * @return void
- */
-	public function tearDown() {
-		unset($this->Search);
-
-		parent::tearDown();
 	}
 
   public function testValidation() {
@@ -362,12 +292,12 @@ class SearchComponentTestCase extends CakeTestCase {
     $this->assertEqual(Set::extract('/Media/name', $result), array('IMG_1234.JPG'));
 
     // Check if 3 assigned groups do not cause wrong page count
-    $search = $this->ControllerMock->request->params['search'];
+    $search = $this->Controller->request->params['search'];
     $this->assertEqual($search['pageCount'], 1);
 
     $result = $this->Search->paginateMedia($media1['Media']['id']);
     $this->assertEqual($result['Media']['id'], $media1['Media']['id']);
-    $search = $this->ControllerMock->request->params['search'];
+    $search = $this->Controller->request->params['search'];
     $this->assertEqual($search['prevMedia'], false);
     $this->assertEqual($search['nextMedia'], false);
   }
@@ -405,7 +335,7 @@ class SearchComponentTestCase extends CakeTestCase {
     $this->assertEqual($result['Media']['visibility'], ACL_LEVEL_GROUP);
     $this->assertEqual($result['Media']['isOwner'], 0);
 
-    $search = $this->ControllerMock->request->params['search'];
+    $search = $this->Controller->request->params['search'];
     $this->assertEqual($search['prevMedia'], false);
     $this->assertEqual($search['nextMedia'], $media2['Media']['id']);
     $this->assertEqual($search['data'], array('sort' => '-date'));

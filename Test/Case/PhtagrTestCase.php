@@ -89,6 +89,17 @@ class PhtagrTestCase extends CakeTestCase {
   public function tearDown() {
     $this->Controller->shutdownProcess();
 
+    $uses = array_unique(am(array('User', 'Media', 'MyFile'), $this->uses));
+    foreach ($uses as $modelName) {
+      unset($this->Controller->{$modelName});
+      unset($this->{$modelName});
+    }
+    foreach ($this->components as $componentName) {
+      unset($this->Controller->{$componentName});
+      unset($this->{$componentName});
+    }
+    unset($this->Controller);
+
     $Folder = new Folder();
     foreach ($this->_tmpDirs as $path) {
       $Folder->delete($path);

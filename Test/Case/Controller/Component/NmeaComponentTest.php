@@ -15,6 +15,7 @@
  * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
 
+App::uses('PhtagrTestCase', 'Test/Case');
 App::uses('ComponentCollection', 'Controller');
 App::uses('NmeaComponent', 'Controller/Component');
 App::uses('Logger', 'Lib');
@@ -23,7 +24,7 @@ App::uses('Logger', 'Lib');
  * NmeaComponent Test Case
  *
  */
-class NmeaComponentTestCase extends CakeTestCase {
+class NmeaComponentTestCase extends PhtagrTestCase {
 /**
  * setUp method
  *

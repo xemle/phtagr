@@ -15,6 +15,7 @@
  * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
 
+App::uses('PhtagrTestCase', 'Test/Case');
 App::uses('ComponentCollection', 'Controller');
 App::uses('GpxComponent', 'Controller/Component');
 App::uses('Logger', 'Lib');
@@ -23,7 +24,7 @@ App::uses('Logger', 'Lib');
  * GpxComponent Test Case
  *
  */
-class GpxComponentTestCase extends CakeTestCase {
+class GpxComponentTestCase extends PhtagrTestCase {
 /**
  * setUp method
  *
