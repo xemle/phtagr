@@ -19,6 +19,7 @@
 App::uses('Media', 'Model');
 App::uses('User', 'Model');
 App::uses('Option', 'Model');
+App::uses('AppController', 'Controller');
 
 class GroupsControllerTest extends ControllerTestCase {
 

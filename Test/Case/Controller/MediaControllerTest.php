@@ -17,6 +17,7 @@
  */
 
 App::uses('PhtagrTestCase', 'Test/Case');
+App::uses('AppController', 'Controller');
 App::uses('MediaController', 'Controller');
 
 class MediaTestController extends MediaController {

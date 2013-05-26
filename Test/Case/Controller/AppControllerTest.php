@@ -17,6 +17,7 @@
  */
 
 App::uses('Component', 'Controller');
+App::uses('AppController', 'Controller');
 
 class ComponentAComponent extends Component {
   var $controller = null;

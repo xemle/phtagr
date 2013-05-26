@@ -20,6 +20,7 @@ App::uses('Comment', 'Model');
 App::uses('Media', 'Model');
 App::uses('User', 'Model');
 App::uses('Group', 'Model');
+App::uses('AppController', 'Controller');
 
 class CommentControllerTest extends ControllerTestCase {
   /**
