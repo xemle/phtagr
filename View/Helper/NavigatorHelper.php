@@ -121,7 +121,7 @@ class NavigatorHelper extends AppHelper {
     $params = $this->request->params['search'];
     $crumbs = $this->request->params['crumbs'];
     $pos = $this->Search->getPos(1) - 1;
-    $page = ceil($pos / $this->Search->getShow());
+    $page = ceil($pos / $this->Search->getShow($this->Search->getDefault('show')));
     $baseUri = '/images/view/'.$params['prevMedia'] . '/';
     $crumbs = $this->request->params['crumbs'];
     $crumbParams = $this->Breadcrumb->params($this->Breadcrumb->replace($this->Breadcrumb->replace($crumbs, 'page', $page), 'pos', $pos));
@@ -146,7 +146,7 @@ class NavigatorHelper extends AppHelper {
   function getNextMediaUrl() {
     $params = $this->request->params['search'];
     $pos = $this->Search->getPos(1) + 1;
-    $page = ceil($pos / $this->Search->getShow());
+    $page = ceil($pos / $this->Search->getShow($this->Search->getDefault('show')));
     $baseUri = '/images/view/'.$params['nextMedia'] . '/';
     $crumbs = $this->request->params['crumbs'];
     $crumbParams = $this->Breadcrumb->params($this->Breadcrumb->replace($this->Breadcrumb->replace($crumbs, 'page', $page), 'pos', $pos));

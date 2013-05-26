@@ -55,6 +55,13 @@ class SearchHelper extends Search {
     }
   }
 
+  public function getDefault($name) {
+    if (isset($this->config['defaults'][$name])) {
+      return $this->config['defaults'][$name];
+    }
+    return null;
+  }
+
   public function beforeRender($viewFile) {
     $this->config['defaults']['show'] = $this->getOption('explorer.default.show', EXPLORER_DEFAULT_SHOW);
     $this->config['defaults']['sort'] = $this->getOption('explorer.default.sort', EXPLORER_DEFAULT_SORT);
@@ -249,4 +256,3 @@ class SearchHelper extends Search {
   }
 
 }
-?>
