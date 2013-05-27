@@ -180,7 +180,7 @@ class BreadcrumbHelper extends AppHelper
         array('class' => 'p-breadcrumb-crumb'));
     }
 
-    $form = $this->Form->create(null, array('action' => 'view'));
+    $form = $this->Form->create(null, array('url' => 'view'));
     $form .= "<div>";
     $form .= $this->Form->hidden('Breadcrumb.current', array('value' => implode('/', $crumbs), 'div' => false));
     $form .= $this->Form->input('Breadcrumb.input', array('div' => false, 'label' => false));
