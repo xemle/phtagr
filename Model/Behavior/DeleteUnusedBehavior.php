@@ -69,7 +69,7 @@ class DeleteUnusedBehavior extends ModelBehavior
     if (!$conditions) {
       return false;
     }
-    Logger::debug("Delete all unused association for {$Model->alias} with conditions: " . join(' and ', $conditions));
+    CakeLog::debug("Delete all unused association for {$Model->alias} with conditions: " . join(' and ', $conditions));
     return $Model->deleteAll($conditions);
   }
 

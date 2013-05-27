@@ -41,7 +41,7 @@ class CommandComponent extends Component {
 
   public function run($bin, $args) {
     if (!is_executable($bin)) {
-      Logger::err("Command is not exectuable: '$bin'");
+      CakeLog::error("Command is not exectuable: '$bin'");
       return 1;
     }
     if (is_array($args)) {
@@ -57,7 +57,7 @@ class CommandComponent extends Component {
     exec($this->lastCommand, $output, $result);
     $t2 = microtime(true);
     $this->output = $output;
-    Logger::debug("Command '{$this->lastCommand}' returned $result and required ".round($t2-$t1, 4)."ms");
+    CakeLog::debug("Command '{$this->lastCommand}' returned $result and required ".round($t2-$t1, 4)."ms");
     return $result;
   }
 }

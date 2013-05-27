@@ -79,18 +79,18 @@ class VideoFilterComponent extends BaseFilterComponent {
       $video = $this->_findVideo($file);
       if (!$video) {
         $this->FilterManager->addError($filename, "VideoNotFound");
-        Logger::err("Could not find video for video thumb $filename");
+        CakeLog::error("Could not find video for video thumb $filename");
         return false;
       }
       $media = $this->controller->Media->findById($video['File']['media_id']);
       if (!$media) {
         $this->FilterManager->addError($filename, "MediaNotFound");
-        Logger::err("Could not find media for video file. Maybe import it first");
+        CakeLog::error("Could not find media for video file. Maybe import it first");
         return false;
       }
     }
     $ImageFilter = $this->FilterManager->getFilter('Image');
-    Logger::debug("Read video thumbnail by ImageFilter: $filename");
+    CakeLog::debug("Read video thumbnail by ImageFilter: $filename");
     foreach (array('name', 'width', 'height', 'flag', 'duration') as $column) {
       if (isset($media['Media'][$column])) {
         $tmp[$column] = $media['Media'][$column];
@@ -105,12 +105,12 @@ class VideoFilterComponent extends BaseFilterComponent {
     $media['Media'] = am($media['Media'], $tmp);
     if (!$this->controller->Media->save($media)) {
       $this->FilterManager->addError($filename, "MediaSaveError");
-      Logger::err("Could not save media");
+      CakeLog::error("Could not save media");
       return false;
     }
     $this->controller->MyFile->setMedia($file, $media['Media']['id']);
     $this->controller->MyFile->updateReaded($file);
-    Logger::verbose("Updated media from thumb file");
+    CakeLog::debug("Updated media from thumb file");
     return $this->controller->Media->findById($media['Media']['id']);
   }
 
@@ -129,7 +129,7 @@ class VideoFilterComponent extends BaseFilterComponent {
       return $this->_readThumb($file, $media);
     } elseif (!$this->controller->MyFile->isType($file, FILE_TYPE_VIDEO)) {
       $this->FilterManager->addError($filename, "FileNotSupported");
-      Logger::err("File type is not supported: ".$this->controller->MyFile->getFilename($file));
+      CakeLog::error("File type is not supported: ".$this->controller->MyFile->getFilename($file));
       return false;
     }
 
@@ -154,7 +154,7 @@ class VideoFilterComponent extends BaseFilterComponent {
     $media = $this->_readVideoFormat($media, $filename);
     if (!$media || !$this->controller->Media->save($media)) {
       $this->FilterManager->addError($filename, "MediaSaveError");
-      Logger::err("Could not save media");
+      CakeLog::error("Could not save media");
       return false;
     }
 
@@ -162,7 +162,7 @@ class VideoFilterComponent extends BaseFilterComponent {
     if ($isNew || !$this->controller->MyFile->hasMedia($file)) {
       $mediaId = $isNew ? $this->controller->Media->getLastInsertID() : $data['id'];
       if (!$this->controller->MyFile->setMedia($file, $mediaId)) {
-        Logger::err("File was not saved: " . $filename);
+        CakeLog::error("File was not saved: " . $filename);
         $this->FilterManager->addError($filename, "FileSaveError");
         $this->controller->Media->delete($mediaId);
         return false;
@@ -189,7 +189,7 @@ class VideoFilterComponent extends BaseFilterComponent {
     }
     if (!$result || !isset($result['width']) || !isset($result['height']) || !isset($result['duration'])) {
       $this->FilterManager->addError($filename, "UnknownVideoFormatError");
-      Logger::err("Could extract video format");
+      CakeLog::error("Could extract video format");
       return false;
     }
     foreach ($result as $name => $value) {
@@ -209,8 +209,8 @@ class VideoFilterComponent extends BaseFilterComponent {
 
     $result = array();
     if (!$data || !isset($data['ImageWidth']) || !isset($data['ImageWidth']) || !isset($data['Duration']) ) {
-      Logger::warn("Could not extract width, height, or durration from '$filename' via exiftool");
-      Logger::warn($data);
+      CakeLog::warning("Could not extract width, height, or durration from '$filename' via exiftool");
+      CakeLog::warning($data);
       return false;
     }
     $result['height'] = intval($data['ImageHeight']);
@@ -236,8 +236,8 @@ class VideoFilterComponent extends BaseFilterComponent {
       $result['latitude'] = $data['GPSLatitude'];
       $result['longitude'] = $data['GPSLongitude'];
     }
-    Logger::trace("Extracted " . count($result) . " fields via exiftool");
-    Logger::trace($result);
+    CakeLog::debug("Extracted " . count($result) . " fields via exiftool");
+    CakeLog::debug($result);
     return $result;
   }
 
@@ -248,13 +248,13 @@ class VideoFilterComponent extends BaseFilterComponent {
     $output = $this->Command->output;
 
     if ($result != 1) {
-      Logger::err("Command '$bin' returned unexcpected $result");
+      CakeLog::error("Command '$bin' returned unexcpected $result");
       return false;
     } elseif (!count($output)) {
-      Logger::err("Command returned no output!");
+      CakeLog::error("Command returned no output!");
       return false;
     }
-    Logger::trace($output);
+    CakeLog::debug($output);
 
     $result = array();
     foreach ($output as $line) {
@@ -263,19 +263,19 @@ class VideoFilterComponent extends BaseFilterComponent {
         $times = preg_split("/:/", $words[1]);
         $time = $times[0] * 3600 + $times[1] * 60 + intval($times[2]);
         $result['duration'] = $time;
-        Logger::trace("Extract duration of '$filename': $time");
+        CakeLog::debug("Extract duration of '$filename': $time");
       } elseif (count($words) >= 6 && $words[2] == "Video:") {
         $words = preg_split("/,+/", trim($line));
         $size = preg_split("/\s+/", trim($words[2]));
         list($width, $height) = split("x", trim($size[0]));
         $result['width'] = $width;
         $result['height'] = $height;
-        Logger::trace("Extract video size of '$filename': $width x $height");
+        CakeLog::debug("Extract video size of '$filename': $width x $height");
       }
     }
     if (count($result) != 3) {
-      Logger::warn("Could not extract width, height, or durration from '$filename'");
-      Logger::warn($result);
+      CakeLog::warning("Could not extract width, height, or durration from '$filename'");
+      CakeLog::warning($result);
       return false;
     }
     return $result;
@@ -292,8 +292,8 @@ class VideoFilterComponent extends BaseFilterComponent {
 
     $data = $getId3->analyze($filename);
     if (isset($data['error'])) {
-      Logger::err("GetId3 analyzing error: {$data['error'][0]}");
-      Logger::debug($data);
+      CakeLog::error("GetId3 analyzing error: {$data['error'][0]}");
+      CakeLog::debug($data);
       return false;
     }
 
@@ -312,11 +312,11 @@ class VideoFilterComponent extends BaseFilterComponent {
 
     $video = $this->controller->Media->getFile($media, FILE_TYPE_VIDEO);
     if (!$video) {
-      Logger::err("Media {$media['Media']['id']} has no video");
+      CakeLog::error("Media {$media['Media']['id']} has no video");
       return false;
     }
     if (!is_writable(dirname($this->controller->MyFile->getFilename($video)))) {
-      Logger::warn("Cannot create video thumb. Directory of video is not writeable");
+      CakeLog::warning("Cannot create video thumb. Directory of video is not writeable");
       return false;
     }
     $thumbFilename = $this->VideoPreview->createVideoThumb($media);
@@ -331,11 +331,11 @@ class VideoFilterComponent extends BaseFilterComponent {
     if ($this->controller->MyFile->isType($file, FILE_TYPE_VIDEOTHUMB)) {
       $imageFilter = $this->FilterManager->getFilter('Image');
       if (!$imageFilter) {
-        Logger::err("Could not get filter Image");
+        CakeLog::error("Could not get filter Image");
         return false;
       }
       $filename = $this->controller->MyFile->getFilename($file);
-      Logger::debug("Write video thumbnail by ImageFilter: $filename");
+      CakeLog::debug("Write video thumbnail by ImageFilter: $filename");
       return $imageFilter->write($file, $media);
     }
     return true;

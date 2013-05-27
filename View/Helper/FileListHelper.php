@@ -36,7 +36,7 @@ class FileListHelper extends AppHelper
       case FILE_TYPE_TEXT: break;
       case FILE_TYPE_SIDECAR: $icon = 'chain'; break;
       default:
-        Logger::warn("Unhanded file type $type");
+        CakeLog::warning("Unhanded file type $type");
         return false;
     }
     if ($icon) {

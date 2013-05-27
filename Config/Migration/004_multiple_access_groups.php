@@ -69,17 +69,17 @@ class M57acac5f420bd77f6d55a446199ccab6 extends CakeMigration {
       'recursive' => -1));
     $groupCount = count($groups);
     if (!$groupCount) {
-      Logger::info("No groups to migrate");
+      CakeLog::info("No groups to migrate");
       return true;
     }
 
-    Logger::info("Found $groupCount groups to migrate");
+    CakeLog::info("Found $groupCount groups to migrate");
     $migrated = 0;
     foreach ($groups as $group) {
       $migrated += $this->migrateGroup($group);
     }
     if ($migrated) {
-      Logger::info("Migration of $migrated media from $groupCount groups was successful");
+      CakeLog::info("Migration of $migrated media from $groupCount groups was successful");
     }
     return true;
 	}

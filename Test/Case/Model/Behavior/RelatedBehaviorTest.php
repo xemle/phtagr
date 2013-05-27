@@ -18,7 +18,7 @@
 App::uses('RelatedBehavior', 'Model/Behavior');
 App::uses('Media', 'Model');
 App::uses('Field', 'Model');
-App::uses('Logger', 'Lib');
+
 /**
  * RelatedBehavior Test Case
  *

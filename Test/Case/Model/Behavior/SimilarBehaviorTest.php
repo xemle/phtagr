@@ -17,7 +17,7 @@
 
 App::uses('SimilarBehavior', 'Model/Behavior');
 App::uses('Field', 'Model');
-App::uses('Logger', 'Lib');
+
 /**
  * SimilarBehavior Test Case
  *

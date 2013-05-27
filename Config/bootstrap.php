@@ -109,6 +109,11 @@ CakeLog::config('error', array(
 	'types' => array('warning', 'error', 'critical', 'alert', 'emergency'),
 	'file' => 'error',
 ));
+CakeLog::config('full', array(
+	'engine' => 'FileLog',
+	'types' => array('debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'),
+	'file' => 'logger',
+));
 
 /**
  * User storage directory

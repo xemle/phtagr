@@ -51,7 +51,7 @@ class NmeaComponent extends Component {
     $check = strtolower(substr($line, $i+1, 2));
 
     if ($sum != $check) {
-      Logger::warn("Wrong checksum! $sum!=$check (line: $line");
+      CakeLog::warning("Wrong checksum! $sum!=$check (line: $line");
       return false;
     }
 
@@ -217,12 +217,12 @@ class NmeaComponent extends Component {
    */
   public function readFile($filename) {
     if (!is_readable($filename)) {
-      Logger::warn("File '$file' is not readable");
+      CakeLog::warning("File '$file' is not readable");
       return false;
     }
     $h = fopen($filename, 'r');
     if (!$h) {
-      Logger::warn("Could not open file '$file'");
+      CakeLog::warning("Could not open file '$file'");
       return false;
     }
 

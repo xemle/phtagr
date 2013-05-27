@@ -18,7 +18,6 @@
 App::uses('PhtagrTestCase', 'Test/Case');
 App::uses('ComponentCollection', 'Controller');
 App::uses('GpxComponent', 'Controller/Component');
-App::uses('Logger', 'Lib');
 
 /**
  * GpxComponent Test Case

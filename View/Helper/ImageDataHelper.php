@@ -110,7 +110,7 @@ class ImageDataHelper extends AppHelper {
     $size = $options['size'];
 
     if ($size && !is_numeric($size) && !in_array($size, array('mini', 'thumb', 'preview', 'original'))) {
-      Logger::err("Wrong media size $size");
+      CakeLog::error("Wrong media size $size");
       return;
     }
 
@@ -163,7 +163,7 @@ class ImageDataHelper extends AppHelper {
    */
   function mediaImage($media, $options) {
     if (!isset($media['Media']['id'])) {
-      Logger::err("Media id is not set");
+      CakeLog::error("Media id is not set");
       return false;
     }
     if (!is_array($options)) {
@@ -172,7 +172,7 @@ class ImageDataHelper extends AppHelper {
     $mediaOptions = am(array('type' => 'thumb', 'size' => false, 'width' => false, 'height' => false), $options);
 
     if (!in_array($mediaOptions['type'], array('mini', 'thumb', 'preview', 'original'))) {
-      Logger::err("Wrong media type {$options['type']}");
+      CakeLog::error("Wrong media type {$options['type']}");
       return false;
     }
     if (!$mediaOptions['size'] && !$mediaOptions['width'] && !$mediaOptions['height']) {
@@ -182,7 +182,7 @@ class ImageDataHelper extends AppHelper {
     $imgSrc = Router::url("/media/{$options['type']}/{$media['Media']['id']}");
     $size = $this->getimagesize($media, $mediaOptions);
     if (!$size) {
-      Logger::err("Could not fetch media size of type {$mediaOptions['type']} or size {$mediaOptions['size']}");
+      CakeLog::error("Could not fetch media size of type {$mediaOptions['type']} or size {$mediaOptions['size']}");
       return false;
     }
     $alt = $media['Media']['name'];
@@ -212,7 +212,7 @@ class ImageDataHelper extends AppHelper {
    */
   function mediaLink($media, $options = array()) {
     if (!isset($media['Media']['id'])) {
-      Logger::err("Media id is not set");
+      CakeLog::error("Media id is not set");
       return false;
     }
 
@@ -277,7 +277,7 @@ class ImageDataHelper extends AppHelper {
           $offset *= 30*24*60*60;
           break;
         default:
-          Logger::err("Unknown date offset {$matches[3]}");
+          CakeLog::error("Unknown date offset {$matches[3]}");
       }
     } else {
       $offset = (integer)$option;
@@ -540,8 +540,8 @@ class ImageDataHelper extends AppHelper {
 
     $mediaId = $data['Media']['id'];
 
-    //Logger::debug($this->Search->_data);
-    //Logger::debug("HUHU");
+    //CakeLog::debug($this->Search->_data);
+    //CakeLog::debug("HUHU");
     $userId = $this->Search->getUser();
     if ($userId) {
       $this->Search->setUser($userId);
@@ -719,17 +719,17 @@ class ImageDataHelper extends AppHelper {
     if (!isset($file['user_id']) ||
       !isset($file['flag']) ||
       !isset($file['path'])) {
-      Logger::err("Invalide input");
-      Logger::trace($file);
+      CakeLog::error("Invalide input");
+      CakeLog::debug($file);
       return false;
     }
     if ($file['flag'] & FILE_FLAG_EXTERNAL > 0) {
-      Logger::trace("External files are not supported");
+      CakeLog::debug("External files are not supported");
       return false;
     }
     $userRoot = USER_DIR . $file['user_id'] . DS . 'files' . DS;
     if (strpos($file['path'], $userRoot) !== 0) {
-      Logger::trace("Invalid upload path {$file['path']}");
+      CakeLog::debug("Invalid upload path {$file['path']}");
       return false;
     }
     $folder = substr($file['path'], strlen($userRoot));

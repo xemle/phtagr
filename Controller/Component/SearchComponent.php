@@ -338,7 +338,7 @@ class SearchComponent extends Component
    */
   public function validate($name, $value) {
     if (!$value && $value !== 0) {
-      Logger::verbose("Parameter value of '$name' is empty!");
+      CakeLog::debug("Parameter value of '$name' is empty!");
       return false;
     }
     if (!isset($this->validate[$name])) {
@@ -346,17 +346,17 @@ class SearchComponent extends Component
       $key = array_search($name, $this->validate);
       if ($key !== false && is_numeric($key)) {
         if (in_array($name, $this->disabled)) {
-          Logger::verbose("Parameter '$name' is disabled");
+          CakeLog::debug("Parameter '$name' is disabled");
           return false;
         }
-        Logger::verbose("Parameter '$name' has no validation!");
+        CakeLog::debug("Parameter '$name' has no validation!");
         return true;
       }
-      Logger::verbose("Parameter '$name' does not exists");
+      CakeLog::debug("Parameter '$name' does not exists");
       return false;
     }
     if (in_array($name, $this->disabled)) {
-      Logger::verbose("Parameter '$name' is disabled");
+      CakeLog::debug("Parameter '$name' is disabled");
       return false;
     }
 
@@ -369,7 +369,7 @@ class SearchComponent extends Component
       foreach ($ruleSet as $ruleName => $rule) {
         $result &= $this->_dispatchRule($rule, $value);
         if (!$result) {
-          Logger::verbose("Failed multiple rules on rule '$ruleName' ($name): $value");
+          CakeLog::debug("Failed multiple rules on rule '$ruleName' ($name): $value");
         }
       }
     }
@@ -388,7 +388,7 @@ class SearchComponent extends Component
       $rule = $ruleSet;
       $params = array($check);
     } elseif (!isset($ruleSet['rule'])) {
-      Logger::err("Rule definition is missing");
+      CakeLog::error("Rule definition is missing");
       return false;
     } elseif (is_array($ruleSet['rule'])) {
       $rule = $ruleSet['rule'][0];
@@ -404,14 +404,14 @@ class SearchComponent extends Component
     } elseif (method_exists('Validation', $rule)) {
       $result = call_user_func_array(array('Validation', $rule), $params);
     } else {
-      Logger::debug("Rule '$rule' could not be found");
+      CakeLog::debug("Rule '$rule' could not be found");
       return false;
     }
 
     if (!$result) {
-      Logger::verbose("Failed rule '$rule': $check");
+      CakeLog::debug("Failed rule '$rule': $check");
       if (isset($ruleSet['message'])) {
-        Logger::debug($ruleSet['message']);
+        CakeLog::debug($ruleSet['message']);
       }
     }
     return $result;
@@ -435,7 +435,7 @@ class SearchComponent extends Component
       case ROLE_ADMIN:
         break;
       default:
-        Logger::err("Unhandled role $role");
+        CakeLog::error("Unhandled role $role");
     }
     $this->disabled = $disabled;
   }
@@ -526,7 +526,7 @@ class SearchComponent extends Component
         continue;
       }
       if (!preg_match('/^(\w+):(.*)$/', $crumb, $match)) {
-        Logger::warn("Invalid crumb: $crumb");
+        CakeLog::warning("Invalid crumb: $crumb");
         continue;
       }
       $type = Inflector::singularize($match[1]);
@@ -659,9 +659,9 @@ class SearchComponent extends Component
     $access = $this->controller->Media->canRead($data, $user);
     if ($count == 0 || !$data || !$access) {
       if (!$data) {
-        Logger::info("Media $id not found");
+        CakeLog::info("Media $id not found");
       } else {
-        Logger::verbose("Deny access to media $id");
+        CakeLog::debug("Deny access to media $id");
       }
       $this->controller->request->params['search'] = $params;
       return array();

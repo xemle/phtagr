@@ -132,7 +132,7 @@ class QueryBuilderComponent extends Component {
     $operands = array('=', '!=', '>', '<', '>=', '<=', 'IN', 'NOT IN', 'LIKE', 'IS', 'IS NOT');
     extract($options); // extract operand and count
     if (!in_array(strtoupper($operand), $operands)) {
-      Logger::err("Illigal operand '$operand'. Set it to '='");
+      CakeLog::error("Illigal operand '$operand'. Set it to '='");
       $operand = '=';
     }
 
@@ -159,7 +159,7 @@ class QueryBuilderComponent extends Component {
         $operand = 'IN';
       }
       if ($operand != 'IN' && $operand != 'NOT IN') {
-        Logger::err("Illigal operand '$operand' for field '$field' with array values: " . implode(', ', $value) . ". Use first value.");
+        CakeLog::error("Illigal operand '$operand' for field '$field' with array values: " . implode(', ', $value) . ". Use first value.");
         $condition .= " $operand ".$this->_sanitizeData(array_pop($values));
       } else {
         sort($values);
@@ -173,7 +173,7 @@ class QueryBuilderComponent extends Component {
     if (preg_match('/^(\w+)\..*/', $field, $m)) {
       return $m[1];
     }
-    Logger::error("Could not get model name from $field!");
+    CakeLog::error("Could not get model name from $field!");
     return false;
   }
 
@@ -213,8 +213,8 @@ class QueryBuilderComponent extends Component {
         $condition = array();
         $count = 1;
         if (!$rule['field']) {
-           Logger::err("Field in rule is missing for parameter name '$name'");
-           Logger::debug($rule);
+           CakeLog::error("Field in rule is missing for parameter name '$name'");
+           CakeLog::debug($rule);
            continue;
         } else if ($rule['custom'] && method_exists($this, $rule['custom'])) {
           list($condition, $count) = call_user_func_array(array($this, $rule['custom']), array(&$params, $value));
@@ -342,7 +342,7 @@ class QueryBuilderComponent extends Component {
 
   private function _buildQueryForHABTM($Model, $assoc, $joinType, $modelConditions, $count, $operand) {
     if (!isset($Model->{$assoc})) {
-      Logger::err("Could not access $assoc");
+      CakeLog::error("Could not access $assoc");
     }
     $this->counter++;
     $table = $Model->{$assoc}->tablePrefix.$Model->{$assoc}->table;
@@ -390,14 +390,14 @@ class QueryBuilderComponent extends Component {
     } else if ($operand === 'OR') {
       $conditions[] = "COALESCE($counterName, 0) >= 1";
     } else if ($operand !== 'NOT' && $operand !== 'ANY') {
-      Logger::err("Unknown operand $operand");
+      CakeLog::error("Unknown operand $operand");
     }
     return array('joins' => $joins, 'conditions' => $conditions, '_counters' => array($counterName));
   }
 
   private function _buildQueryForHasMany($Model, $assoc, $joinType, $conditions, $count, $operand) {
     if (!isset($Model->{$assoc})) {
-      Logger::err("Could not access $assoc");
+      CakeLog::error("Could not access $assoc");
     }
     $this->counter++;
     $table = $Model->{$assoc}->tablePrefix.$Model->{$assoc}->table;
@@ -424,14 +424,14 @@ class QueryBuilderComponent extends Component {
     } else if ($operand === 'NOT') {
       $conditions = array("COALESCE($counterName, 0) = " . 0);
     } else if ($operand !== 'ANY') {
-      Logger::err("Unknown operand $operand");
+      CakeLog::error("Unknown operand $operand");
     }
     return array('joins' => array($join), 'conditions' => $conditions, '_counters' => array($counterName));
   }
 
   private function _buildQueryForBelongsTo($Model, $assoc, $joinType, $conditions) {
     if (!isset($Model->{$assoc})) {
-      Logger::err("Could not access $assoc");
+      CakeLog::error("Could not access $assoc");
     }
     $this->counter++;
     $table = $Model->{$assoc}->tablePrefix.$Model->{$assoc}->table;
@@ -534,7 +534,7 @@ class QueryBuilderComponent extends Component {
       $m = preg_split('/[-:T ]/', $value);
       $year = max(1901, min(2038, $m[0]));
       if ($year != $m[0]) {
-        Logger::warn("Invalid year {$m[0]}. Adjust it to $year");
+        CakeLog::warning("Invalid year {$m[0]}. Adjust it to $year");
       }
       if (!isset($m[1]) || $m[1] > 12) {
         $time = mktime(0, 0, 0, 1, 1, $year);
@@ -552,7 +552,7 @@ class QueryBuilderComponent extends Component {
       $data[$name] = date('Y-m-d H:i:s', $time);
     } else {
       $data[$name] = date('Y-m-d H:i:s');
-      Logger::warn("Invalid date: $value. Adjust it to {$data[$name]}");
+      CakeLog::warning("Invalid date: $value. Adjust it to {$data[$name]}");
     }
   }
 
@@ -569,7 +569,7 @@ class QueryBuilderComponent extends Component {
       $m = preg_split('/[-:T ]/', $value);
       $year = max(1901, min(2038, $m[0]));
       if ($year != $m[0]) {
-        Logger::warn("Invalid year {$m[0]}. Adjust it to $year");
+        CakeLog::warning("Invalid year {$m[0]}. Adjust it to $year");
       }
       // mktime params order: hour, min, sec, month, day, year. day = 0 means last day of month
       if (!isset($m[1]) || $m[1] > 12) {
@@ -588,7 +588,7 @@ class QueryBuilderComponent extends Component {
       $data[$name] = date('Y-m-d H:i:s', $time);
     } else {
       $data[$name] = date('Y-m-d H:i:s');
-      Logger::warn("Invalid date: $value. Adjust it to {$data[$name]}");
+      CakeLog::warning("Invalid date: $value. Adjust it to {$data[$name]}");
     }
   }
 
@@ -693,7 +693,7 @@ class QueryBuilderComponent extends Component {
    */
   private function _buildOrder(&$data, &$query, &$defaults) {
     if (isset($data['sort']) && is_array($data['sort'])) {
-      Logger::err("Invalid sort value. Value is an array: " . join(', ', $data['sort']) . " Use default sort order");
+      CakeLog::error("Invalid sort value. Value is an array: " . join(', ', $data['sort']) . " Use default sort order");
       unset($data['sort']);
     }
     if (!isset($data['sort']) && isset($query['_counters']) && count($query['_counters']) > 0) {
@@ -721,7 +721,7 @@ class QueryBuilderComponent extends Component {
       case '-name': $query['order'][] = 'Media.name DESC'; break;
       case 'id': $query['order'][] = 'Media.id'; break;
       default:
-        Logger::err("Unknown sort value: {$sort}. Use default sort order");
+        CakeLog::error("Unknown sort value: {$sort}. Use default sort order");
         $query['order'][] = 'Media.date DESC, Media.id';
         break;
     }
@@ -751,7 +751,7 @@ class QueryBuilderComponent extends Component {
         $userId = $u['User']['id'];
       } else {
         // user not found or wrong invalid guest name
-        Logger::warn("Invalid user. Disable search");
+        CakeLog::warning("Invalid user. Disable search");
         $query['conditions'][] = '1 = 0';
       }
     }
@@ -782,7 +782,7 @@ class QueryBuilderComponent extends Component {
       $rootDir = $this->controller->User->getRootDir($me, false);
     }
     if (!$rootDir) {
-      Logger::err("Root dir is empty. Invalidate query");
+      CakeLog::error("Root dir is empty. Invalidate query");
       $conditions[] = '0 = 1';
     }
     return $this->_buildCondition('File.path', $rootDir . $value . '%', array('operand' => 'LIKE'));
@@ -876,7 +876,7 @@ class QueryBuilderComponent extends Component {
         $query['conditions'][] = $condition;
         break;
       default:
-        Logger::err("Unknown visibility value $value");
+        CakeLog::error("Unknown visibility value $value");
         $query['conditions'][] = "1 = 0";
     }
   }

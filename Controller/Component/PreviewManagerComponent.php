@@ -61,7 +61,7 @@ class PreviewManagerComponent extends Component {
   public function initialize(Controller $controller) {
     $this->controller = $controller;
     if (!isset($controller->Media)) {
-      Logger::err("Model MyFile and Media is not found");
+      CakeLog::error("Model MyFile and Media is not found");
       return false;
     }
   }
@@ -72,7 +72,7 @@ class PreviewManagerComponent extends Component {
   public function _getImageSoureFilename($media) {
     $type = $this->controller->Media->getType($media);
     if ($type != MEDIA_TYPE_IMAGE && $type != MEDIA_TYPE_VIDEO) {
-      Logger::err("Media type not supported: {$this->controller->Media->getType($media)}");
+      CakeLog::error("Media type not supported: {$this->controller->Media->getType($media)}");
       return false;
     }
     if ($type == MEDIA_TYPE_VIDEO) {
@@ -81,7 +81,7 @@ class PreviewManagerComponent extends Component {
     }
     $file = $this->controller->Media->getFile($media, FILE_TYPE_IMAGE, false);
     if (!$file) {
-      Logger::err("No files are attached to media {$media['Media']['id']}");
+      CakeLog::error("No files are attached to media {$media['Media']['id']}");
       return false;
     }
     return $this->controller->Media->File->getFilename($file);
@@ -103,7 +103,7 @@ class PreviewManagerComponent extends Component {
     if ($config['requires']) {
       $src = $this->getPreview($media, $config['requires']);
       if (!$src) {
-        Logger::err("Could not get preview of {$config['requires']}");
+        CakeLog::error("Could not get preview of {$config['requires']}");
         return false;
       }
     } else {
@@ -113,7 +113,7 @@ class PreviewManagerComponent extends Component {
     }
     $dst = $this->FileCache->getFilePath($media, $name);
     if (!$dst) {
-      Logger::err("Could not get cache file path for media {$this->controller->Media->toString($media)}");
+      CakeLog::error("Could not get cache file path for media {$this->controller->Media->toString($media)}");
       return false;
     }
 
@@ -121,14 +121,14 @@ class PreviewManagerComponent extends Component {
       if (is_readable($dst)) {
         return $dst;
       } else {
-        Logger::err("Cachefile not readable: $dst");
+        CakeLog::error("Cachefile not readable: $dst");
         return false;
       }
     }
     $this->controller->loadComponent('ImageResizer', $this);
     if (!$this->ImageResizer->resize($src, $dst, $config)) {
-      Logger::err("Resize of '$src' to '$dst' failed");
-      //Logger::debug($config);
+      CakeLog::error("Resize of '$src' to '$dst' failed");
+      //CakeLog::debug($config);
       return false;
     }
     return $dst;

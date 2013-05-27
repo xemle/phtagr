@@ -77,7 +77,7 @@ class CommentsController extends AppController
       // Check capatcha if required
       if (($auth & COMMENT_AUTH_CAPTCHA) > 0 && (!$this->Session->check('captcha') || $this->request->data['Captcha']['verification'] != $this->Session->read('captcha'))) {
         $this->Session->setFlash("Verification failed");
-        Logger::warn("Captcha verification failed: ".$this->request->data['Captcha']['verification']." != ".$this->Session->read('captcha'));
+        CakeLog::warning("Captcha verification failed: ".$this->request->data['Captcha']['verification']." != ".$this->Session->read('captcha'));
         $this->Session->delete('captcha');
         $this->Session->write('Comment.data', $this->request->data);
         $this->Session->write('Comment.validationErrors', $this->Comment->validationErrors);
@@ -89,12 +89,12 @@ class CommentsController extends AppController
       $media = $this->Media->findById($mediaId);
       if (!$media) {
         $this->Session->setFlash("Media not found");
-        Logger::info("Media $mediaId not found");
+        CakeLog::info("Media $mediaId not found");
         $this->redirect("/explorer");
       }
       if (!$this->Media->canRead($media, $user)) {
         $this->Session->setFlash("Media not found");
-        Logger::info("Comments denied to media $mediaId");
+        CakeLog::info("Comments denied to media $mediaId");
         $this->redirect("/explorer");
       }
 
@@ -110,7 +110,7 @@ class CommentsController extends AppController
       if ($this->Comment->save($this->request->data)) {
         $commentId = $this->Comment->getLastInsertID();
         $this->Session->setFlash(__('The Comment has been saved'));
-        Logger::info("New comment of media $mediaId");
+        CakeLog::info("New comment of media $mediaId");
         // Send email notification of other media owners
         if ($media['Media']['user_id'] != $userId) {
           $this->_sendEmail($commentId);
@@ -118,8 +118,8 @@ class CommentsController extends AppController
         $this->_sendNotifies($mediaId, $commentId);
       } else {
         $this->Session->setFlash(__('The Comment could not be saved. Please, try again.'));
-        Logger::err("Could not save comment to media $mediaId");
-        Logger::trace($this->Comment->validationErrors);
+        CakeLog::error("Could not save comment to media $mediaId");
+        CakeLog::debug($this->Comment->validationErrors);
         $this->Session->write('Comment.data', $this->request->data);
         $this->Session->write('Comment.validationErrors', $this->Comment->validationErrors);
       }
@@ -138,12 +138,12 @@ class CommentsController extends AppController
   public function _sendEmail($commentId) {
     $comment = $this->Comment->findById($commentId);
     if (!$comment) {
-      Logger::err("Could not find comment $commentId");
+      CakeLog::error("Could not find comment $commentId");
       return;
     }
     $user = $this->User->findById($comment['Media']['user_id']);
     if (!$user) {
-      Logger::err("Could not find user '{$comment['Media']['user_id']}'");
+      CakeLog::error("Could not find user '{$comment['Media']['user_id']}'");
       return;
     }
     $email = $this->_createEmail();
@@ -154,9 +154,9 @@ class CommentsController extends AppController
 
     try {
       $email->send();
-      Logger::info("Notification mail for new comment send to {$user['User']['email']}");
+      CakeLog::info("Notification mail for new comment send to {$user['User']['email']}");
     } catch (Exception $e) {
-      Logger::warn("Could not send notification mail for new comment");
+      CakeLog::warning("Could not send notification mail for new comment");
     }
   }
 
@@ -172,15 +172,15 @@ class CommentsController extends AppController
     $this->Media->bindModel(array('hasMany' => array('Comment')));
     $media = $this->Media->findById($mediaId);
     if (!$media) {
-      Logger::err("Could not find media $mediaId");
+      CakeLog::error("Could not find media $mediaId");
       return;
     }
     $comment = $this->Comment->findById($commentId);
     if (!$comment || $comment['Comment']['media_id'] != $mediaId) {
-      Logger::err("Could not find comment $commentId");
+      CakeLog::error("Could not find comment $commentId");
       return;
     } elseif ($comment['Comment']['media_id'] != $mediaId) {
-      Logger::err("Comment $commentId does not corrolate with media $mediaId");
+      CakeLog::error("Comment $commentId does not corrolate with media $mediaId");
       return;
     }
 
@@ -195,7 +195,7 @@ class CommentsController extends AppController
       $emails[] = $c['email'];
     }
     if (!count($emails)) {
-      Logger::debug("No user for comment update notifications found");
+      CakeLog::debug("No user for comment update notifications found");
       return;
     }
 
@@ -209,12 +209,12 @@ class CommentsController extends AppController
       ->subject(__('[phtagr] Comment notification: %s', $media['Media']['name']))
       ->viewVars(array('data' => $comment));
 
-    Logger::debug($comment);
+    CakeLog::debug($comment);
     try {
       $email->send();
-      Logger::info("Send comment update notification to: $to, bbc to: " . implode(', ', $emails));
+      CakeLog::info("Send comment update notification to: $to, bbc to: " . implode(', ', $emails));
     } catch (Exception $e) {
-      Logger::warn("Could not send comment update notification mail for new comment");
+      CakeLog::warning("Could not send comment update notification mail for new comment");
     }
   }
 
@@ -235,11 +235,11 @@ class CommentsController extends AppController
     if ((isset($comment['User']['id']) && $comment['User']['id'] == $userId) || ($comment['Media']['user_id'] == $userId) || ($this->getUserRole() == ROLE_ADMIN)) {
       if ($this->Comment->delete($id)) {
         $this->Session->setFlash(__('Comment deleted'));
-        Logger::info("Delete comment {$comment['Comment']['id']} of media {$comment['Media']['id']}");
+        CakeLog::info("Delete comment {$comment['Comment']['id']} of media {$comment['Media']['id']}");
       }
     } else {
       $this->Session->setFlash("Deny deletion of comment");
-      Logger::warn("Deny deletion of comment");
+      CakeLog::warning("Deny deletion of comment");
     }
     $this->redirect("/images/view/".$comment['Media']['id']."/{$this->namedArgs}");
   }

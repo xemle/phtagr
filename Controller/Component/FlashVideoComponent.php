@@ -65,29 +65,29 @@ class FlashVideoComponent extends Component {
   public function create($media, $config = array()) {
     $config = am($this->config, $config);
     if (!$this->controller->Media->isType($media, MEDIA_TYPE_VIDEO)) {
-      Logger::err("Media {$media['Media']['id']} is not a video");
+      CakeLog::error("Media {$media['Media']['id']} is not a video");
       return false;
     }
     $video = $this->controller->Media->getFile($media, FILE_TYPE_VIDEO);
     if (!$video) {
-      Logger::err("Could not find video for media {$media['Media']['id']}");
+      CakeLog::error("Could not find video for media {$media['Media']['id']}");
       return false;
     }
 
     $src = $this->controller->MyFile->getFilename($video);
     if ($this->isValidFlash($media, $video)) {
-      Logger::verbose("Use media's flash video as source: $src");
+      CakeLog::debug("Use media's flash video as source: $src");
       return $src;
     }
 
     $flashFilename = $this->FileCache->getFilePath($media, 'flashmovie', 'flv');
     if (!$flashFilename) {
-      Logger::fatal("Precondition of cache directory failed: $cacheDir");
+      CakeLog::fatal("Precondition of cache directory failed: $cacheDir");
       return false;
     }
 
     if (!file_exists($flashFilename) && !$this->convertVideo($media, $src, $flashFilename, $config)) {
-      Logger::err("Could not create preview file {$flashFilename}");
+      CakeLog::error("Could not create preview file {$flashFilename}");
       return false;
     }
 
@@ -98,7 +98,7 @@ class FlashVideoComponent extends Component {
     $config = am($this->config, $config);
     $bin = $this->controller->getOption('bin.ffmpeg');
     if (!$bin) {
-      Logger::warn("Path to external program ffmpeg is missing");
+      CakeLog::warning("Path to external program ffmpeg is missing");
       return false;
     }
     $args = array(
@@ -117,11 +117,11 @@ class FlashVideoComponent extends Component {
       sem_release($this->_semaphoreId);
     }
     if ($result != 0) {
-      Logger::err("Command '$bin' returned unexcpected with $result");
+      CakeLog::error("Command '$bin' returned unexcpected with $result");
       @unlink($dst);
       return false;
     }
-    Logger::info("Created flash video '$dst' of '$src'");
+    CakeLog::info("Created flash video '$dst' of '$src'");
     $this->_addCuePoints($dst);
     return true;
   }
@@ -132,10 +132,10 @@ class FlashVideoComponent extends Component {
       return;
     }
     if ($this->Command->run($bin, array('-U' => $filename))) {
-      Logger::err("Command '$bin' returned unexcpected $result");
+      CakeLog::error("Command '$bin' returned unexcpected $result");
       return false;
     }
-    Logger::info("Updated flash video '$filename' with meta tags");
+    CakeLog::info("Updated flash video '$filename' with meta tags");
     return true;
   }
 }

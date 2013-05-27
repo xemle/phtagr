@@ -63,7 +63,7 @@ class GpsFilterComponent extends BaseFilterComponent {
           'range' => $range),
           $options);
     $this->range = $options['range'];
-    //Logger::trace($options);
+    //CakeLog::debug($options);
 
     $filename = $this->controller->MyFile->getFilename($file);
     $ext = strtolower(substr($filename, strrpos($filename, '.') + 1));
@@ -75,7 +75,7 @@ class GpsFilterComponent extends BaseFilterComponent {
       $points = $this->Gpx->readFile($filename);
     }
     if (!is_array($points)) {
-      Logger::debug("Reading GPS data from $filename has no points");
+      CakeLog::debug("Reading GPS data from $filename has no points");
       return false;
     }
     $this->addPoints($points, $options['offset']);
@@ -86,7 +86,7 @@ class GpsFilterComponent extends BaseFilterComponent {
     list($start, $end) = $this->getTimeInterval();
     $startDate = gmdate("Y-m-d H:i:s", $start);
     $endDate = gmdate("Y-m-d H:i:s", $end);
-    //Logger::trace("start: ".date("'Y-m-d H:i:sZ'", $start)." end: ".date("'Y-m-d H:i:sZ'", $end));
+    //CakeLog::debug("start: ".date("'Y-m-d H:i:sZ'", $start)." end: ".date("'Y-m-d H:i:sZ'", $end));
 
 
     // Calculate only with UTC time stamps
@@ -97,11 +97,11 @@ class GpsFilterComponent extends BaseFilterComponent {
       $conditions['Media.latitude'] = null;
       $conditions['Media.longitude'] = null;
     }
-    //Logger::trace($conditions);
+    //CakeLog::debug($conditions);
     $this->controller->Media->unbindAll();
     $mediaSet = $this->controller->Media->find('all', array('conditions' => $conditions));
     if (!count($mediaSet)) {
-      Logger::info("No images found for GPS interval $startDate to $endDate");
+      CakeLog::info("No images found for GPS interval $startDate to $endDate");
       return false;
     }
     // fetch images of same user, no gps, range
@@ -114,7 +114,7 @@ class GpsFilterComponent extends BaseFilterComponent {
       // evaluate position
       $position = $this->getPosition($time);
       if (!$position) {
-        Logger::debug("No GPS position found for image {$media['Media']['id']}");
+        CakeLog::debug("No GPS position found for image {$media['Media']['id']}");
         continue;
       }
       $media['Media']['latitude'] = $position['latitude'];
@@ -122,13 +122,13 @@ class GpsFilterComponent extends BaseFilterComponent {
       $media['Media']['flag'] |= MEDIA_FLAG_DIRTY;
       if ($this->controller->Media->save($media['Media'], true, array('latitude', 'longitude', 'flag'))) {
         $mediaIds[] = $media['Media']['id'];
-        Logger::debug("Update GPS position of image {$media['Media']['id']} to {$position['latitude']}/{$position['longitude']}");
+        CakeLog::debug("Update GPS position of image {$media['Media']['id']} to {$position['latitude']}/{$position['longitude']}");
       } else {
-        Logger::warn("Could not update GPS position of image {$media['Media']['id']}");
+        CakeLog::warning("Could not update GPS position of image {$media['Media']['id']}");
       }
       $updated++;
     }
-    Logger::info("Updated $updated of " . count($mediaSet) . " media for interval $startDate to $endDate");
+    CakeLog::info("Updated $updated of " . count($mediaSet) . " media for interval $startDate to $endDate");
     if (count($mediaIds)) {
       $dummy = array('Media' => array('id' => array_pop($mediaIds)));
       return $dummy;

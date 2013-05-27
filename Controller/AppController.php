@@ -15,7 +15,6 @@
  * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
 
-App::uses('Logger', 'Lib');
 App::uses('Controller', 'Controller');
 
 class AppController extends Controller
@@ -154,17 +153,17 @@ class AppController extends Controller
     // Fetch User
     $user = $this->User->findById($id);
     if (!$user) {
-      Logger::err("Could not find user with given id '$id' (via $authType)");
+      CakeLog::error("Could not find user with given id '$id' (via $authType)");
       return false;
     }
 
     if ($this->User->isExpired($user)) {
-      Logger::warn("User account of '{$user['User']['username']}' (id {$user['User']['id']}) is expired!");
+      CakeLog::warning("User account of '{$user['User']['username']}' (id {$user['User']['id']}) is expired!");
       return false;
     }
 
     $this->User->writeSession($user, $this->Session);
-    Logger::info("User '{$user['User']['username']}' (id {$user['User']['id']}) authenticated via $authType!");
+    CakeLog::info("User '{$user['User']['username']}' (id {$user['User']['id']}) authenticated via $authType!");
 
     return true;
   }
@@ -275,7 +274,7 @@ class AppController extends Controller
     }
     $component = $this->Components->load($componentName);
     if (!$component) {
-      Logger::warn("Could not load component $componentName");
+      CakeLog::warning("Could not load component $componentName");
       return false;
     }
     $parent->{$componentName} = $component;

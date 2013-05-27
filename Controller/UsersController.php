@@ -70,11 +70,11 @@ class UsersController extends AppController {
             $size = $size * 1024 * 1024 * 1024 * 1024;
             break;
           default:
-            Logger::err("Unknown unit {$matches[3]}");
+            CakeLog::error("Unknown unit {$matches[3]}");
         }
       }
       if ($size < 0) {
-        Logger::err("Size is negtive: $size");
+        CakeLog::error("Size is negtive: $size");
         return 0;
       }
       return $size;
@@ -114,12 +114,12 @@ class UsersController extends AppController {
   public function login() {
     $failedText = __("Sorry. Wrong password or unknown username!");
     if (!empty($this->request->data) && !$this->RequestHandler->isPost()) {
-      Logger::warn("Authentication failed: Request was not HTTP POST");
+      CakeLog::warning("Authentication failed: Request was not HTTP POST");
       $this->Session->setFlash($failedText);
       $this->request->data = null;
     }
     if (empty($this->request->data['User']['username']) xor empty($this->request->data['User']['password'])) {
-      Logger::warn("Authentication failed: Username or password are not set");
+      CakeLog::warning("Authentication failed: Username or password are not set");
       $this->Session->setFlash(__("Please enter username and password!"));
       $this->request->data = null;
     }
@@ -128,24 +128,24 @@ class UsersController extends AppController {
       $user = $this->User->findByUsername($this->request->data['User']['username']);
 
       if (!$user) {
-        Logger::warn("Authentication failed: Unknown username '{$this->request->data['User']['username']}'!");
+        CakeLog::warning("Authentication failed: Unknown username '{$this->request->data['User']['username']}'!");
         $this->Session->setFlash($failedText);
       } elseif ($this->User->isExpired($user)) {
-        Logger::warn("User account of '{$user['User']['username']}' (id {$user['User']['id']}) is expired!");
+        CakeLog::warning("User account of '{$user['User']['username']}' (id {$user['User']['id']}) is expired!");
         $this->Session->setFlash(__("Sorry. Your account is expired!"));
       } else {
         $user = $this->User->decrypt($user);
         if ($user['User']['password'] == $this->request->data['User']['password']) {
           $sessionUser = $this->User->readSession($this->Session);
           if (!$sessionUser || $sessionUser['User']['id'] != $user['User']['id']) {
-            Logger::info("Start new session for '{$user['User']['username']}' (id {$user['User']['id']})");
+            CakeLog::info("Start new session for '{$user['User']['username']}' (id {$user['User']['id']})");
             $this->User->writeSession($user, $this->Session);
 
             // Save Cookie for 3 months
             $this->Cookie->write('user', $user['User']['id'], true, 92*24*3600);
-            Logger::debug("Write authentication cookie for user '{$user['User']['username']}' (id {$user['User']['id']})");
+            CakeLog::debug("Write authentication cookie for user '{$user['User']['username']}' (id {$user['User']['id']})");
 
-            Logger::info("Successfull login of user '{$user['User']['username']}' (id {$user['User']['id']})");
+            CakeLog::info("Successfull login of user '{$user['User']['username']}' (id {$user['User']['id']})");
             if ($this->Session->check('loginRedirect')) {
               $this->redirect($this->Session->read('loginRedirect'));
               $this->Session->delete('loginRedirect');
@@ -153,11 +153,11 @@ class UsersController extends AppController {
               $this->redirect('/');
             }
           } else {
-            Logger::err("Could not write session information of user '{$user['User']['username']}' ({$user['User']['id']})");
+            CakeLog::error("Could not write session information of user '{$user['User']['username']}' ({$user['User']['id']})");
             $this->Session->setFlash(__("Sorry. Internal login procedure failed!"));
           }
         } else {
-          Logger::warn("Authentication failed: Incorrect password of username '{$this->request->data['User']['username']}'!");
+          CakeLog::warning("Authentication failed: Incorrect password of username '{$this->request->data['User']['username']}'!");
           $this->Session->setFlash($failedText);
         }
       }
@@ -169,7 +169,7 @@ class UsersController extends AppController {
 
   public function logout() {
     $user = $this->getUser();
-    Logger::info("Delete session for user id {$user['User']['id']}");
+    CakeLog::info("Delete session for user id {$user['User']['id']}");
 
     $this->Session->destroy();
 
@@ -219,7 +219,7 @@ class UsersController extends AppController {
     if ($userId == $id && $userRole == ROLE_ADMIN && $this->request->data['User']['role'] < ROLE_ADMIN) {
       $count = $this->User->find('count', array('conditions' => array('User.role >= '.ROLE_ADMIN)));
       if ($count == 1) {
-        Logger::warn('Can not degrade last admin');
+        CakeLog::warning('Can not degrade last admin');
         $this->Session->setFlash(__('Can not degrade last admin'));
         return false;
       }
@@ -238,7 +238,7 @@ class UsersController extends AppController {
     foreach ($subActions as $action => $title) {
       $subItems[] = array('url' => array('admin' => true, 'action' => $action, $userId), 'title' => $title, 'active' => ('admin_'.$action == $this->action));
     }
-    Logger::debug($this->action);
+    CakeLog::debug($this->action);
     $this->subMenu[] = $subItems;
   }
 
@@ -250,11 +250,11 @@ class UsersController extends AppController {
       $this->request->data['User']['id'] = $id;
 
       if ($this->User->save($this->request->data, true, array('email', 'expires', 'quota', 'firstname', 'lastname', 'role'))) {
-        Logger::debug("Data of user {$this->request->data['User']['id']} was updated");
+        CakeLog::debug("Data of user {$this->request->data['User']['id']} was updated");
         $this->Session->setFlash(__('User data was updated'));
       } else {
-        Logger::err("Could not save user data");
-        Logger::debug($this->User->validationErrors);
+        CakeLog::error("Could not save user data");
+        CakeLog::debug($this->User->validationErrors);
         $this->Session->setFlash(__('Could not be updated'));
       }
     }
@@ -273,11 +273,11 @@ class UsersController extends AppController {
       $this->request->data['User']['id'] = $id;
 
       if ($this->User->save($this->request->data, true, array('password'))) {
-        Logger::debug("Data of user {$this->request->data['User']['id']} was updated");
+        CakeLog::debug("Data of user {$this->request->data['User']['id']} was updated");
         $this->Session->setFlash(__('User data was updated'));
       } else {
-        Logger::err("Could not save user data");
-        Logger::debug($this->User->validationErrors);
+        CakeLog::error("Could not save user data");
+        CakeLog::debug($this->User->validationErrors);
         $this->Session->setFlash(__('Could not be updated'));
       }
     }
@@ -304,10 +304,10 @@ class UsersController extends AppController {
         if (is_dir($fsroot) && is_readable($fsroot)) {
           $this->Option->addValue('path.fsroot[]', $fsroot, $id);
           $this->Session->setFlash(__("Directory '%s' was added", $fsroot));
-          Logger::info("Add external directory '$fsroot' to user $id");
+          CakeLog::info("Add external directory '$fsroot' to user $id");
         } else {
           $this->Session->setFlash(__("Directory '%s' could not be read", $fsroot));
-          Logger::err("Directory '$fsroot' could not be read");
+          CakeLog::error("Directory '$fsroot' could not be read");
         }
       }
     }
@@ -328,11 +328,11 @@ class UsersController extends AppController {
       } else {
         $this->request->data['User']['role'] = ROLE_USER;
         if ($this->User->save($this->request->data, true, array('username', 'password', 'role', 'email'))) {
-          Logger::info("New user {$this->request->data['User']['username']} was created");
+          CakeLog::info("New user {$this->request->data['User']['username']} was created");
           $this->Session->setFlash(__('User was created'));
           $this->redirect('/admin/users/edit/'.$this->User->id);
         } else {
-          Logger::warn("Creation of user {$this->request->data['User']['username']} failed");
+          CakeLog::warning("Creation of user {$this->request->data['User']['username']} failed");
           $this->Session->setFlash(__('Could not create user!'));
         }
       }
@@ -349,7 +349,7 @@ class UsersController extends AppController {
       $this->redirect('index');
     } else {
       $this->User->delete($id);
-      Logger::notice("All data of user '{$user['User']['username']}' ($id) deleted");
+      CakeLog::notice("All data of user '{$user['User']['username']}' ($id) deleted");
       $this->Session->setFlash(__("User %s was deleted", $user['User']['username']));
       $this->redirect('index');
     }
@@ -368,7 +368,7 @@ class UsersController extends AppController {
     $fsroot = Folder::slashTerm($fsroot);
 
     $this->Option->delValue('path.fsroot[]', $fsroot, $id);
-    Logger::info("Deleted external directory '$fsroot' from user $id");
+    CakeLog::info("Deleted external directory '$fsroot' from user $id");
     $this->Session->setFlash(__("Deleted external directory '%s'", $fsroot));
     $this->redirect("path/$id");
   }
@@ -389,7 +389,7 @@ class UsersController extends AppController {
           'email' => $this->request->data['User']['email'])));
       if (empty($user)) {
         $this->Session->setFlash(__('No user with this email was found'));
-        Logger::warn(sprintf("No user '%s' with email %s was found",
+        CakeLog::warning(sprintf("No user '%s' with email %s was found",
             $this->request->data['User']['username'], $this->request->data['User']['email']));
       } else {
         $user = $this->User->decrypt($user);
@@ -402,13 +402,13 @@ class UsersController extends AppController {
 
         try {
           $email->send();
-          Logger::info(sprintf("Sent password mail to user '%s' (id %d) with address %s",
+          CakeLog::info(sprintf("Sent password mail to user '%s' (id %d) with address %s",
             $user['User']['username'],
             $user['User']['id'],
             $user['User']['email']));
           $this->Session->setFlash(__('Mail was sent!'));
         } catch (Exception $e) {
-          Logger::err(sprintf("Could not send password mail to user '%s' (id %d) with address '%s'",
+          CakeLog::error(sprintf("Could not send password mail to user '%s' (id %d) with address '%s'",
             $user['User']['username'],
             $user['User']['id'],
             $user['User']['email']));
@@ -423,24 +423,24 @@ class UsersController extends AppController {
     if ($this->getUserRole() != ROLE_NOBODY) {
       $this->redirect('/');
     } elseif (!$this->getOption('user.register.enable', 0)) {
-      Logger::verbose("User registration is disabled");
+      CakeLog::debug("User registration is disabled");
       $this->redirect('login');
     }
 
     if (!empty($this->request->data)) {
       if ($this->request->data['Captcha']['verification'] != $this->Session->read('user.register.captcha')) {
         $this->Session->setFlash(__('Captcha verification failed'));
-        Logger::verbose("Captcha verification failed");
+        CakeLog::debug("Captcha verification failed");
       } elseif ($this->User->hasAny(array('User.username' => $this->request->data['User']['username']))) {
         $this->Session->setFlash(__('Username already exists, please choose different name!'));
-        Logger::info("Username already exists: {$this->request->data['User']['username']}");
+        CakeLog::info("Username already exists: {$this->request->data['User']['username']}");
       } else {
         $user = $this->User->create($this->request->data);
         if ($this->User->save($user['User'], true, array('username', 'password', 'email'))) {
-          Logger::info("New user {$this->request->data['User']['username']} was created");
+          CakeLog::info("New user {$this->request->data['User']['username']} was created");
           $this->_initRegisteredUser($this->User->getLastInsertID());
         } else {
-          Logger::err("Creation of user {$this->request->data['User']['username']} failed");
+          CakeLog::error("Creation of user {$this->request->data['User']['username']} failed");
           $this->Session->setFlash(__('Could not create user'));
         }
       }
@@ -462,7 +462,7 @@ class UsersController extends AppController {
   public function _initRegisteredUser($newUserId) {
     $user = $this->User->findById($newUserId);
     if (!$user) {
-      Logger::err("Could not find user with ID $newUserId");
+      CakeLog::error("Could not find user with ID $newUserId");
       return false;
     }
     $options = $this->Option->getTree(0);
@@ -470,7 +470,7 @@ class UsersController extends AppController {
     $user['User']['expires'] = date("Y-m-d H:i:s", time() - 3600);
     $user['User']['quota'] = $this->Option->getValue($options, 'user.register.quota', 0);
     if (!$this->User->save($user['User'], true, array('role', 'expires', 'quota'))) {
-      Logger::err("Could not init user $newUserId");
+      CakeLog::error("Could not init user $newUserId");
       return false;
     }
 
@@ -481,9 +481,9 @@ class UsersController extends AppController {
     if (!$this->_sendConfirmationEmail($user, $key)) {
       $this->Session->setFlash(__("Could not send the confirmation email. Please contact the admin."));
       if (!$this->User->delete($user['User']['id'])) {
-        Logger::err("Could not delete user {$user['User']['id']} due email error");
+        CakeLog::error("Could not delete user {$user['User']['id']} due email error");
       } else {
-        Logger::info("Delete user {$user['User']['id']} due email error");
+        CakeLog::info("Delete user {$user['User']['id']} due email error");
       }
       return false;
     }
@@ -495,7 +495,7 @@ class UsersController extends AppController {
     if ($this->getUserRole() != ROLE_NOBODY) {
       $this->redirect('/');
     } elseif (!$this->getOption('user.register.enable', 0)) {
-      Logger::verbose("User registration is disabled");
+      CakeLog::debug("User registration is disabled");
       $this->redirect(null, 404);
     }
 
@@ -522,13 +522,13 @@ class UsersController extends AppController {
     // check key. Option [belongsTo] User: The user is bound to option
     $user = $this->Option->find('first', array('conditions' => array("Option.value" => $key)));
     if (!$user) {
-      Logger::trace("Could not find confirmation key");
+      CakeLog::debug("Could not find confirmation key");
       $this->Session->setFlash(__("Could not find confirmation key"));
       return false;
     }
 
     if (!isset($user['User']['id'])) {
-      Logger::err("Could not find the user for register confirmation");
+      CakeLog::error("Could not find the user for register confirmation");
       $this->Session->setFlash(__("Internal error occured"));
       return false;
     }
@@ -539,16 +539,16 @@ class UsersController extends AppController {
     $expires = strtotime($user['User']['expires']);
     if ($now - $expires > (14 * 24 * 3600 + 3600)) {
       $this->Session->setFlash(__("Could not find confirmation key"));
-      Logger::err("Registration confirmation is expired.");
+      CakeLog::error("Registration confirmation is expired.");
       $this->User->delete($user['User']['id']);
-      Logger::info("Deleted user from expired registration");
+      CakeLog::info("Deleted user from expired registration");
       return false;
     }
 
     // activate user account (disabling the expire date)
     $user['User']['expires'] = null;
     if (!$this->User->save($user['User'], true, array('expires'))) {
-      Logger::err("Could not update expires of user {$user['User']['id']}");
+      CakeLog::error("Could not update expires of user {$user['User']['id']}");
       return false;
     }
 
@@ -579,10 +579,10 @@ class UsersController extends AppController {
 
     try {
       $email->send();
-      Logger::info("Account confirmation mail send to {$user['User']['email']} for new user {$user['User']['username']}");
+      CakeLog::info("Account confirmation mail send to {$user['User']['email']} for new user {$user['User']['username']}");
       return true;
     } catch (Exception $e) {
-      Logger::err("Could not send account confirmation mail to {$user['User']['email']} for new user {$user['User']['username']}");
+      CakeLog::error("Could not send account confirmation mail to {$user['User']['email']} for new user {$user['User']['username']}");
       return false;
     }
   }
@@ -601,10 +601,10 @@ class UsersController extends AppController {
 
     try {
       $email->send();
-      Logger::info("New account mail send to {$user['User']['email']} for new user {$user['User']['username']}");
+      CakeLog::info("New account mail send to {$user['User']['email']} for new user {$user['User']['username']}");
       return true;
     } catch (Exception $e) {
-      Logger::err("Could not send new account mail to {$user['User']['email']} for new user {$user['User']['username']}");
+      CakeLog::error("Could not send new account mail to {$user['User']['email']} for new user {$user['User']['username']}");
       return false;
     }
   }
@@ -618,7 +618,7 @@ class UsersController extends AppController {
   public function _sendNewAccountNotifiactionEmail($user) {
     $sysOps = $this->User->find('all', array('conditions' => "User.role >= ".ROLE_SYSOP));
     if (!$sysOps) {
-      Logger::err("Could not find system operators");
+      CakeLog::error("Could not find system operators");
       return false;
     }
     $sysOpsNames = Set::extract('/User/username', $sysOps);
@@ -636,10 +636,10 @@ class UsersController extends AppController {
 
     try {
       $email->send();
-      Logger::info("New account notification email send to system operators " . implode(', ', $sysOpsNames));
+      CakeLog::info("New account notification email send to system operators " . implode(', ', $sysOpsNames));
       return true;
     } catch (Exception $e) {
-      Logger::err("Could not send new account notification email to system operators ".implode(', ', $sysOpsNames));
+      CakeLog::error("Could not send new account notification email to system operators ".implode(', ', $sysOpsNames));
       return false;
     }
   }

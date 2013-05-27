@@ -54,11 +54,11 @@ class ImageResizerComponent extends Component {
       ), $options);
 
     if (!is_readable($src)) {
-      Logger::err("Could not read source $src");
+      CakeLog::error("Could not read source $src");
       return false;
     }
     if (!is_writeable(dirname($dst))) {
-      Logger::err("Could not write to path ".dirname($dst));
+      CakeLog::error("Could not write to path ".dirname($dst));
       return false;
     }
     if (!isset($options['width']) || !isset($options['height'])) {
@@ -81,11 +81,11 @@ class ImageResizerComponent extends Component {
       sem_release($this->_semaphoreId);
     }
     if ($result) {
-      Logger::debug("Render {$options['size']}x{$options['size']} image in ".round($t2-$t1, 4)."ms to '{$phpThumb->cache_filename}'");
+      CakeLog::debug("Render {$options['size']}x{$options['size']} image in ".round($t2-$t1, 4)."ms to '{$phpThumb->cache_filename}'");
       $phpThumb->RenderToFile($phpThumb->cache_filename);
     } else {
-      Logger::err("Could not generate thumbnail: ".$phpThumb->error);
-      Logger::err($phpThumb->debugmessages);
+      CakeLog::error("Could not generate thumbnail: ".$phpThumb->error);
+      CakeLog::error($phpThumb->debugmessages);
       die('Failed: '.$phpThumb->error);
     }
 

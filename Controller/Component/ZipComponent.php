@@ -32,7 +32,7 @@ class ZipComponent extends Component {
     if (class_exists('ZipArchive')) {
       $this->Zip = new ZipArchive();
     } else {
-      Logger::err("Missing plugin for class ZipArchive");
+      CakeLog::error("Missing plugin for class ZipArchive");
     }
   }
 
@@ -46,17 +46,17 @@ class ZipComponent extends Component {
     }
 
     if (!is_readable($file)) {
-      Logger::err("File $file is not readable");
+      CakeLog::error("File $file is not readable");
       $this->_stats[$file] = false;
       return false;
     }
 
     if ($this->Zip->open($file) !== true) {
-      Logger::err("Could not open file $file");
+      CakeLog::error("Could not open file $file");
       $this->_stats[$file] = false;
       return false;
     } else {
-      Logger::info("Open $file with {$this->Zip->numFiles} file(s)");
+      CakeLog::info("Open $file with {$this->Zip->numFiles} file(s)");
     }
 
     $stat = array();
@@ -98,22 +98,22 @@ class ZipComponent extends Component {
     if (!$dst) {
       $dst = dirname($file);
     } elseif (!is_dir($dst)) {
-      Logger::err("Destination $dst is not a directory");
+      CakeLog::error("Destination $dst is not a directory");
       return false;
     }
     $dst = Folder::slashTerm($dst);
 
     if (!is_writeable($dst)) {
-      Logger::err("Destiantion $dst is not writeable");
+      CakeLog::error("Destiantion $dst is not writeable");
       return false;
     }
 
     if (!$this->FileManager->canWrite($stat['size'])) {
-      Logger::warn("Extracted data exceeds user's quota");
+      CakeLog::warning("Extracted data exceeds user's quota");
       return array();
     }
     if ($this->Zip->open($file) !== true) {
-      Logger::err("Could not open file $file");
+      CakeLog::error("Could not open file $file");
       return false;
     }
 
@@ -125,7 +125,7 @@ class ZipComponent extends Component {
       }
     }
     $this->Zip->close();
-    Logger::debug($newFiles);
+    CakeLog::debug($newFiles);
     return $newFiles;
   }
 
@@ -136,7 +136,7 @@ class ZipComponent extends Component {
   public function _extract($file, $dst) {
     $fp = $this->Zip->getStream($file['name']);
     if (!$fp) {
-      Logger::err("Could not extract {$file['name']}");
+      CakeLog::error("Could not extract {$file['name']}");
       return false;
     }
     if (dirname($file['name']) != '') {
@@ -146,10 +146,10 @@ class ZipComponent extends Component {
       }
       if (!is_dir($dst)) {
         if (!$this->Folder->create($dst)) {
-          Logger::err("Could not create directory $dst");
+          CakeLog::error("Could not create directory $dst");
           return false;
         } else {
-          Logger::verbose("Create directory $dst");
+          CakeLog::debug("Create directory $dst");
         }
       }
     }
@@ -158,7 +158,7 @@ class ZipComponent extends Component {
 
     // skip directories, which have zero size
     if ($file['size'] === 0) {
-      Logger::debug("Skip directory {$file['name']}");
+      CakeLog::debug("Skip directory {$file['name']}");
       return false;
     }
 
@@ -166,7 +166,7 @@ class ZipComponent extends Component {
     $tp = fopen($newFile, 'w');
     if (!$tp) {
       fclose($fp);
-      Logger::err("Could not open file $newFile");
+      CakeLog::error("Could not open file $newFile");
       return false;
     }
 
@@ -178,17 +178,17 @@ class ZipComponent extends Component {
     fclose($fp);
     fclose($tp);
     if ($written != $file['size']) {
-      Logger::warn("Extraction error: File has {$file['size']} Bytes but $written Bytes were written");
+      CakeLog::warning("Extraction error: File has {$file['size']} Bytes but $written Bytes were written");
       unlink($newFile);
       return false;
     }
 
     if (!$this->FileManager->add($newFile)) {
       unlink($newFile);
-      Logger::err("Could not insert $newFile to database");
+      CakeLog::error("Could not insert $newFile to database");
       return false;
     }
-    Logger::verbose("Extracted {$file['name']} ($written Bytes)");
+    CakeLog::debug("Extracted {$file['name']} ($written Bytes)");
     return $newFile;
   }
 

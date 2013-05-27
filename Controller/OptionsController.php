@@ -61,10 +61,10 @@ class OptionsController extends AppController {
     if (!empty($this->request->data)) {
       $this->User->id = $userId;
       if (!$this->User->save($this->request->data['User'], true, array('username', 'firstname', 'lastname', 'email', 'visible_level', 'notify_interval'))) {
-        Logger::err("Could not update user profile");
+        CakeLog::error("Could not update user profile");
         $this->Session->setFlash(__("Could not save profile!"));
       } else {
-        Logger::info("User $userId profile updated");
+        CakeLog::info("User $userId profile updated");
         $this->Session->setFlash(__("Profile saved"));
       }
     }
@@ -76,10 +76,10 @@ class OptionsController extends AppController {
     if (!empty($this->request->data)) {
       $this->User->id = $userId;
       if (!$this->User->save($this->request->data['User'], true, array('password'))) {
-        Logger::err("Could not update user profile");
+        CakeLog::error("Could not update user profile");
         $this->Session->setFlash(__("Could not save profile!"));
       } else {
-        Logger::info("User $userId profile updated");
+        CakeLog::info("User $userId profile updated");
         $this->Session->setFlash(__("Profile saved"));
       }
     }
@@ -94,8 +94,8 @@ class OptionsController extends AppController {
       $tmp = array('User' => array('id' => $userId));
       $tmp = $this->User->generateKey($tmp);
       if (!$this->User->save($tmp, false, array('key'))) {
-        Logger::err("Could not save user data");
-        Logger::debug($this->User->validationErrors);
+        CakeLog::error("Could not save user data");
+        CakeLog::debug($this->User->validationErrors);
       }
     }
     $this->request->data = $this->User->findById($userId);

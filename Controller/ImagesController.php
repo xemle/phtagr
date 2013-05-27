@@ -61,15 +61,15 @@ class ImagesController extends AppController
    * in the session to avoid multiple rating per session. */
   public function _updateRating() {
     if (!$this->request->data || !isset($this->request->data['Media']['id'])) {
-      Logger::warn("Precondition failed");
+      CakeLog::warning("Precondition failed");
       return;
     }
     if (!$this->Session->check('Session.requestCount') ||
       $this->Session->read('Session.requestCount') <= 1) {
-      Logger::verbose("No session found or request counter to low");
+      CakeLog::debug("No session found or request counter to low");
       return;
     } elseif ($this->_isCrawler()) {
-      Logger::verbose("Deny ranking for crawler: ".env('HTTP_USER_AGENT'));
+      CakeLog::debug("Deny ranking for crawler: ".env('HTTP_USER_AGENT'));
       return;
     }
 
@@ -80,7 +80,7 @@ class ImagesController extends AppController
       $ranked = $this->Session->read('Media.ranked');
     }
     if (in_array($id, $ranked)) {
-      Logger::trace("Skip ranking for already rated media $id");
+      CakeLog::debug("Skip ranking for already rated media $id");
       return;
     }
 
@@ -126,23 +126,23 @@ class ImagesController extends AppController
       $user = $this->getUser();
       $media = $this->Media->findById($id);
       if (!$media) {
-        Logger::warn("Invalid media id: $id");
+        CakeLog::warning("Invalid media id: $id");
         $this->redirect(null, '404');
       } elseif (!$this->Media->canWrite($media, $user)) {
-        Logger::warn("User '{$username}' ({$user['User']['id']}) has no previleges to change tags of image ".$id);
+        CakeLog::warning("User '{$username}' ({$user['User']['id']}) has no previleges to change tags of image ".$id);
       } else {
         $this->Media->setAccessFlags($media, $user);
         $tmp = $this->Media->editSingle($media, $this->request->data, $user);
         if (!$this->Media->save($tmp)) {
-          Logger::warn("Could not save media");
-          Logger::debug($tmp);
+          CakeLog::warning("Could not save media");
+          CakeLog::debug($tmp);
         } else {
-          Logger::info("Updated meta of media {$tmp['Media']['id']}");
+          CakeLog::info("Updated meta of media {$tmp['Media']['id']}");
         }
         if (isset($tmp['Media']['orientation'])) {
           $this->FileCache->delete($tmp);
           $this->FastFileResponder->excludeMedia($tmp);
-          Logger::debug("Deleted previews of media {$tmp['Media']['id']}");
+          CakeLog::debug("Deleted previews of media {$tmp['Media']['id']}");
         }
       }
     }
@@ -158,19 +158,19 @@ class ImagesController extends AppController
       $user = $this->getUser();
       $media = $this->Media->findById($id);
       if (!$media) {
-        Logger::warn("Invalid media id: $id");
+        CakeLog::warning("Invalid media id: $id");
         $this->redirect(null, '404');
       } elseif (!$this->Media->canWriteAcl($media, $user)) {
-        Logger::warn("User '{$username}' ({$user['User']['id']}) has no previleges to change tags of image ".$id);
+        CakeLog::warning("User '{$username}' ({$user['User']['id']}) has no previleges to change tags of image ".$id);
       } else {
         $this->Media->setAccessFlags($media, $user);
         $tmp = $this->Media->editSingle($media, $this->request->data, $user);
         if ($tmp) {
           if ($this->Media->save($tmp, true)) {
-            Logger::info("Changed acl of media $id");
+            CakeLog::info("Changed acl of media $id");
           } else {
-            Logger::err("Could not update acl of media {$media['Media']['id']}");
-            Logger::debug($tmp);
+            CakeLog::error("Could not update acl of media {$media['Media']['id']}");
+            CakeLog::debug($tmp);
           }
         }
       }

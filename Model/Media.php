@@ -76,18 +76,18 @@ class Media extends AppModel {
     }
 
     if (!$mediaId || $fileId <= 0) {
-      Logger::err("Invalid input");
+      CakeLog::error("Invalid input");
       return false;
     }
 
     $media = $this->findById($mediaId);
     if (!$media) {
-      Logger::warn("Could not found media with id $mediaId");
+      CakeLog::warning("Could not found media with id $mediaId");
       return false;
     }
     $fileIds = Set::extract("/File/id", $media);
     if (!in_array($fileId, $fileIds)) {
-      Logger::warn("Media $mediaId does not have file $fileId");
+      CakeLog::warning("Media $mediaId does not have file $fileId");
       return false;
     }
 
@@ -111,7 +111,7 @@ class Media extends AppModel {
       }
     }
     if ($delete) {
-      Logger::info("Delete media $mediaId");
+      CakeLog::info("Delete media $mediaId");
       $this->delete($mediaId);
     } else {
       $this->File->unlinkMedia(false, $fileId);
@@ -124,8 +124,8 @@ class Media extends AppModel {
       $data = $this->data;
     }
     if (!isset($user) || !isset($user['User']['id'])) {
-      Logger::err("User data is not correct! Media ACL will be wrong!");
-      Logger::trace($user);
+      CakeLog::error("User data is not correct! Media ACL will be wrong!");
+      CakeLog::debug($user);
     }
 
     // Access control values
@@ -153,7 +153,7 @@ class Media extends AppModel {
     }
 
     if (!isset($data['File'])) {
-      Logger::err("Precondition failed");
+      CakeLog::error("Precondition failed");
       return false;
     }
 
@@ -225,7 +225,7 @@ class Media extends AppModel {
    */
   public function checkAccess(&$data, &$user, $flag, $mask, &$groupIds = array()) {
     if (!$data || !$user || !isset($data['Media']) || !isset($user['User'])) {
-      Logger::err("precondition failed");
+      CakeLog::error("precondition failed");
       return false;
     }
 
@@ -280,7 +280,7 @@ class Media extends AppModel {
 
     // at least dummy user
     $user = am(array('User' => array('id' => -1, 'role' => ROLE_NOBODY), 'Member' => array()), $user);
-    //Logger::debug($user);
+    //CakeLog::debug($user);
 
     $oacl = $data['Media']['oacl'];
     $uacl = $data['Media']['uacl'];
@@ -325,7 +325,7 @@ class Media extends AppModel {
    * @param level Highes ACL level which should be increased
    */
   public function _increaseAcl(&$data, $flag, $mask, $level) {
-    //Logger::debug("Increase: {$data['Media']['gacl']},{$data['Media']['uacl']},{$data['Media']['oacl']}: $flag/$mask ($level)");
+    //CakeLog::debug("Increase: {$data['Media']['gacl']},{$data['Media']['uacl']},{$data['Media']['oacl']}: $flag/$mask ($level)");
     if ($level>ACL_LEVEL_OTHER)
       return;
 
@@ -334,7 +334,7 @@ class Media extends AppModel {
       if (($data['Media'][$name]&($mask))<$flag)
         $data['Media'][$name]=($data['Media'][$name]&(~$mask))|$flag;
     }
-    //Logger::debug("Increase (result): {$data['Media']['gacl']},{$data['Media']['uacl']},{$data['Media']['oacl']}: $flag/$mask ($level)");
+    //CakeLog::debug("Increase (result): {$data['Media']['gacl']},{$data['Media']['uacl']},{$data['Media']['oacl']}: $flag/$mask ($level)");
   }
 
   /**
@@ -350,7 +350,7 @@ class Media extends AppModel {
    * @param level Lower ACL level which should be downgraded
    */
   public function _decreaseAcl(&$data, $flag, $mask, $level) {
-    //Logger::debug("Decrease: {$data['Media']['gacl']},{$data['Media']['uacl']},{$data['Media']['oacl']}: $flag/$mask ($level)");
+    //CakeLog::debug("Decrease: {$data['Media']['gacl']},{$data['Media']['uacl']},{$data['Media']['oacl']}: $flag/$mask ($level)");
     if ($level<ACL_LEVEL_GROUP)
       return;
 
@@ -367,7 +367,7 @@ class Media extends AppModel {
       if (($data['Media'][$name]&($mask))>=$flag)
         $data['Media'][$name]=($data['Media'][$name]&(~$mask))|$lower;
     }
-    //Logger::debug("Decrease (result): {$data['Media']['gacl']},{$data['Media']['uacl']},{$data['Media']['oacl']}: $flag/$mask ($level)");
+    //CakeLog::debug("Decrease (result): {$data['Media']['gacl']},{$data['Media']['uacl']},{$data['Media']['oacl']}: $flag/$mask ($level)");
   }
 
   public function setAcl(&$data, $flag, $mask, $level) {
@@ -483,7 +483,7 @@ class Media extends AppModel {
     }
 
     $sql = sprintf($this->hasMany[$model]['cacheQuery'], $modelId);
-    //Logger::debug($sql);
+    //CakeLog::debug($sql);
     $result = $this->query($sql);
     if (count($result)) {
       $tmp = array();
@@ -616,7 +616,7 @@ class Media extends AppModel {
 
   public function updateRanking($data) {
     if (!isset($data['Media']['id'])) {
-      Logger::warn("Precondition failed");
+      CakeLog::warning("Precondition failed");
       return false;
     }
 
@@ -627,10 +627,10 @@ class Media extends AppModel {
     $data['Media']['lastview'] = date("Y-m-d H:i:s", time());
     $data['Media']['clicks']++;
     if (!$this->save($data['Media'], true, array('clicks', 'ranking', 'lastview'))) {
-      Logger::err("Could not save new ranking data");
+      CakeLog::error("Could not save new ranking data");
       return false;
     } else {
-      Logger::trace("Update ranking of media {$data['Media']['id']} to $ranking with {$data['Media']['clicks']} click(s)");
+      CakeLog::debug("Update ranking of media {$data['Media']['id']} to $ranking with {$data['Media']['clicks']} click(s)");
       return true;
     }
   }
@@ -685,7 +685,7 @@ class Media extends AppModel {
             ), $aclQuery['joins']);
 
     } else {
-      Logger::error("Model {$this->alias} has no relation to $assoc. Return empty result");
+      CakeLog::error("Model {$this->alias} has no relation to $assoc. Return empty result");
       return array();
     }
 
@@ -718,7 +718,7 @@ class Media extends AppModel {
     $options = am(array('model' => 'Field', 'field' => 'data', 'count' => 50, 'conditions' => array()), $options);
     $assoc = $options['model'];
     if (!isset($this->hasAndBelongsToMany[$assoc])) {
-      Logger::error("Model {$this->alias} has no HABTM relation to $assoc. Return emtyp result");
+      CakeLog::error("Model {$this->alias} has no HABTM relation to $assoc. Return emtyp result");
       return array();
     }
     $myTable = $this->tablePrefix.$this->table;
@@ -770,7 +770,7 @@ class Media extends AppModel {
     $alias = $this->alias;
     $key = $this->primaryKey;
 
-    Logger::info("Delete HasAndBelongsToMany Media association of user '$userId'");
+    CakeLog::info("Delete HasAndBelongsToMany Media association of user '$userId'");
     foreach ($this->hasAndBelongsToMany as $model => $data) {
       $joinTable = $db->fullTableName($data['joinTable'], false, false);
       $joinAlias = $data['with'];
@@ -778,7 +778,7 @@ class Media extends AppModel {
       $sql = "DELETE FROM `$joinAlias`".
              " USING `$joinTable` AS `$joinAlias`, `$table` AS `$alias`".
              " WHERE `$alias`.`user_id` = $userId AND `$alias`.`$key` = `$joinAlias`.`$foreignKey`";
-      Logger::debug("Delete $model HABTM associations");
+      CakeLog::debug("Delete $model HABTM associations");
       $this->query($sql);
     }
   }
@@ -790,7 +790,7 @@ class Media extends AppModel {
     $alias = $this->alias;
     $key = $this->primaryKey;
 
-    Logger::info("Delete HasMany Media assosciation of user '$userId'");
+    CakeLog::info("Delete HasMany Media assosciation of user '$userId'");
     foreach ($this->hasMany as $model => $data) {
       if (!isset($data['dependent']) || !$data['dependent']) {
         continue;
@@ -800,7 +800,7 @@ class Media extends AppModel {
       $sql = "DELETE FROM `$model`".
              " USING `$manyTable` AS `$model`, `$table` AS `$alias`".
              " WHERE `$alias`.`user_id` = $userId AND `$alias`.`$key` = `$model`.`$foreignKey`";
-      Logger::debug("Delete $model HasMany associations");
+      CakeLog::debug("Delete $model HasMany associations");
       $this->query($sql);
     }
   }
@@ -851,7 +851,7 @@ class Media extends AppModel {
       case 6: $degree = 90; break;
       case 8: $degree = 270; break;
       default:
-        Logger::warn("Unsupported rotation flag: {$data['orientation']} for {$this->toStringModel($data)}");
+        CakeLog::warning("Unsupported rotation flag: {$data['orientation']} for {$this->toStringModel($data)}");
         break;
     }
     return $degree;
@@ -867,7 +867,7 @@ class Media extends AppModel {
   public function splitGeo(&$data, $geo) {
     $numbers = preg_split('/\s*,\s*/', trim($geo));
     if (count($numbers) != 2) {
-      Logger::debug("Invalid geo input: $geo");
+      CakeLog::debug("Invalid geo input: $geo");
       return;
     } elseif ($numbers[0] == "-") {
       $data['Media']['latitude'] = '-';
@@ -877,7 +877,7 @@ class Media extends AppModel {
     // validate numbers
     foreach ($numbers as $number) {
       if (!preg_match('/^[+-]?\d+(\.\d+)?$/', $number)) {
-        Logger::debug("Invalid geo input number: $number");
+        CakeLog::debug("Invalid geo input number: $number");
         return;
       }
     }

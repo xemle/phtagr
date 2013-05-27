@@ -66,7 +66,7 @@ class ReadOnlyImageFilterComponent extends BaseFilterComponent {
         $media['Media']['width'] = $size[0];
         $media['Media']['height'] = $size[1];
       } else {
-        Logger::error("Could not determine image size of $filename");
+        CakeLog::error("Could not determine image size of $filename");
         return false;
       }
     }
@@ -77,8 +77,8 @@ class ReadOnlyImageFilterComponent extends BaseFilterComponent {
     if ($options['noSave']) {
       return $media;
     } elseif (!$this->controller->Media->save($media)) {
-      Logger::err("Could not save Media");
-      Logger::trace($media);
+      CakeLog::error("Could not save Media");
+      CakeLog::debug($media);
       $this->FilterManager->addError($filename, 'MediaSaveError');
       return false;
     }
@@ -89,11 +89,11 @@ class ReadOnlyImageFilterComponent extends BaseFilterComponent {
         $this->FilterManager->addError($filename, 'FileSaveError');
         return false;
       } else {
-        Logger::info("Created new Media (id $mediaId)");
+        CakeLog::info("Created new Media (id $mediaId)");
         $media = $this->controller->Media->findById($mediaId);
       }
     } else {
-      Logger::verbose("Updated media (id ".$media['Media']['id'].")");
+      CakeLog::debug("Updated media (id ".$media['Media']['id'].")");
     }
     $this->controller->MyFile->updateReaded($file);
     $this->controller->MyFile->setFlag($file, FILE_FLAG_DEPENDENT);
@@ -109,7 +109,7 @@ class ReadOnlyImageFilterComponent extends BaseFilterComponent {
    * @return False on error
    */
   public function write(&$file, &$media, $options = array()) {
-    Logger::warn("Write action is not supported for {$file['File']['file']}");
+    CakeLog::warning("Write action is not supported for {$file['File']['file']}");
     $filename = $this->controller->MyFile->getFilename($file);
     $this->FilterManager->addError($filename, 'MetaDataWriteNotSupported');
     return false;

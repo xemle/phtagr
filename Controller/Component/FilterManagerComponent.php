@@ -16,7 +16,7 @@
  */
 
 if (!App::import('Component', 'BaseFilter')) {
-  Logger::error("Could not load BaseFilter");
+  CakeLog::error("Could not load BaseFilter");
 }
 
 class FilterManagerComponent extends Component {
@@ -75,7 +75,7 @@ class FilterManagerComponent extends Component {
   public function initialize(Controller $controller) {
     $this->controller = $controller;
     if (!isset($controller->MyFile) || !isset($controller->Media)) {
-      Logger::err("Model MyFile and Media is not found");
+      CakeLog::error("Model MyFile and Media is not found");
       return;
     }
     $this->loadFilter(array('ImageFilter', 'ReadOnlyImageFilter', 'VideoFilter', 'GpsFilter', 'SidecarFilter'));
@@ -130,11 +130,11 @@ class FilterManagerComponent extends Component {
         $this->config[$ext] = $config;
         $new[] = $ext;
       } else {
-        Logger::warn("Filter for extension '$ext' already exists");
+        CakeLog::warning("Filter for extension '$ext' already exists");
       }
     }
     if (count($new)) {
-      //Logger::trace("Loaded filter $filterName ($name) with extension(s): ".implode(', ', $new));
+      //CakeLog::debug("Loaded filter $filterName ($name) with extension(s): ".implode(', ', $new));
     }
     $this->filters[$filterName] = $filter;
   }
@@ -144,8 +144,8 @@ class FilterManagerComponent extends Component {
     if (isset($this->filters[$name])) {
       $filter = $this->filters[$name];
     } else {
-      Logger::warn("Could not find filter '$name'");
-      Logger::debug(array_keys($this->filters));
+      CakeLog::warning("Could not find filter '$name'");
+      CakeLog::debug(array_keys($this->filters));
     }
     return $filter;
   }
@@ -163,7 +163,7 @@ class FilterManagerComponent extends Component {
       }
     }
     if ($missing) {
-      Logger::err("Could not import Filter '$name'. Missing function(s): ".implode(', ', $missing));
+      CakeLog::error("Could not import Filter '$name'. Missing function(s): ".implode(', ', $missing));
       return false;
     }
     return true;
@@ -198,7 +198,7 @@ class FilterManagerComponent extends Component {
     if (isset($this->extensions[$ext])) {
       return $this->extensions[$ext];
     } else {
-      Logger::debug("No filter found for extension '$ext'");
+      CakeLog::debug("No filter found for extension '$ext'");
     }
     return null;
   }
@@ -308,10 +308,10 @@ class FilterManagerComponent extends Component {
         }
       }
     }
-    Logger::verbose("Found ".count($stack)." files to import");
+    CakeLog::debug("Found ".count($stack)." files to import");
     $extStack = $this->_sortFilesByExtension($stack);
     $order = $this->_getExtensionsByPriority();
-    //Logger::debug($order);
+    //CakeLog::debug($order);
 
     $result = array();
     $importLog = $this->_importlog($importLog, $file);
@@ -445,26 +445,26 @@ class FilterManagerComponent extends Component {
    */
   public function read($filename, $forceReadMeta = false) {
     if (!is_readable($filename)) {
-      Logger::err("Could not read file $filename");
+      CakeLog::error("Could not read file $filename");
       $this->addError($filename, 'FileNotReadable');
       return false;
     }
     if (!$this->isSupported($filename)) {
-      Logger::verbose("File $filename is not supported");
+      CakeLog::debug("File $filename is not supported");
       return false;
     }
     $path = Folder::slashTerm(dirname($filename));
     $file = $this->findFileInPath($path, $filename);
     if (!$file){
       if (!$this->FileManager->add($filename)) {
-        Logger::err("Could not add file $filename");
+        CakeLog::error("Could not add file $filename");
         $this->addError($filename, 'FileAddError');
         return false;
       }
 
       $file = $this->controller->MyFile->findByFilename($filename);
       if (!$file) {
-        Logger::err("Could not find file with filename: " . $filename);
+        CakeLog::error("Could not find file with filename: " . $filename);
         return false;
       }
       $this->fileCache[$path][] = $file;
@@ -473,10 +473,10 @@ class FilterManagerComponent extends Component {
     // Check changes
     $fileTime = filemtime($filename);
     $dbTime = strtotime($file['File']['time']);
-    //Logger::debug("db $dbTime file $fileTime");
+    //CakeLog::debug("db $dbTime file $fileTime");
     $forceRead = false;
     if ($fileTime > $dbTime) {
-      Logger::warn("File '$filename' was changed without notice of phTagr! Read the file again.");
+      CakeLog::warning("File '$filename' was changed without notice of phTagr! Read the file again.");
       // @todo Action if file is newer than phtagr. Eg. force rereada
       $forceRead = true;
     }
@@ -488,7 +488,7 @@ class FilterManagerComponent extends Component {
         $forceRead = true;
       }
       if ($readed && !$forceRead) {
-        Logger::verbose("File '$filename' already readed. Skip reading!");
+        CakeLog::debug("File '$filename' already readed. Skip reading!");
         $this->skipped[$filename] = 'skipped';
         //return $media;//overload memory with 20kb for each file
         return $filename;//around 0.2kb
@@ -502,7 +502,7 @@ class FilterManagerComponent extends Component {
     }
 
     $filter = $this->getFilterByExtension($filename);
-    Logger::debug("Read file $filename with filter ".$filter->getName());
+    CakeLog::debug("Read file $filename with filter ".$filter->getName());
     $result = $filter->read($file, $media);
 
     if (isset($result['Media']['id'])) {
@@ -515,27 +515,27 @@ class FilterManagerComponent extends Component {
   private function _createAndWriteSidecar(&$media) {
     $filename = $this->controller->Media->getMainFilename($media);
     if (!$filename) {
-      Logger::err("Main file for {$media['Media']['id']} not found");
+      CakeLog::error("Main file for {$media['Media']['id']} not found");
       $this->addError($filename, 'FileNotFound');
       return false;
     } else if (!is_writable(dirname($filename))) {
-      Logger::err("Can not create sidecar file for {$media['Media']['id']}");
+      CakeLog::error("Can not create sidecar file for {$media['Media']['id']}");
       $this->addError($filename, 'DirectoryNotWritable');
       return false;
     }
 
     $sidecar = $this->SidecarFilter->create($filename);
     if (!$sidecar) {
-      Logger::err("Creation of sidecar file for $filename failed");
+      CakeLog::error("Creation of sidecar file for $filename failed");
       return false;
     }
     $file = $this->controller->MyFile->findByFilename($sidecar);
     if (!$file) {
-      Logger::err("Can not find file in database for $sidecar");
+      CakeLog::error("Can not find file in database for $sidecar");
       return false;
     }
     if (!$this->controller->MyFile->setMedia($file, $media['Media']['id'])) {
-      Logger::err("Could not assign media {$media['Media']['id']} to file {$file['File']['id']}");
+      CakeLog::error("Could not assign media {$media['Media']['id']} to file {$file['File']['id']}");
       return false;
     }
     return $this->SidecarFilter->write($file, $media);
@@ -572,7 +572,7 @@ class FilterManagerComponent extends Component {
    */
   public function write(&$media) {
     if (!count($media['File'])) {
-      Logger::warn("No files found for media {$media['Media']['id']}");
+      CakeLog::warning("No files found for media {$media['Media']['id']}");
       $this->addError('Media-' . $media['Media']['id'], 'NoMediaFile');
       return false;
     }
@@ -590,12 +590,12 @@ class FilterManagerComponent extends Component {
       $file = $this->controller->MyFile->findById($file['id']);
       $filename = $this->controller->MyFile->getFilename($file);
       if (!file_exists($filename)) {
-        Logger::err("File of media {$media['Media']['id']} does not exist: $filename");
+        CakeLog::error("File of media {$media['Media']['id']} does not exist: $filename");
         $this->addError($filename, 'FileNotFound');
         $success = false;
         continue;
       } else if (!is_writable(dirname($filename))) {
-        Logger::err("Directory of file of media {$media['Media']['id']} is not writeable: $filename");
+        CakeLog::error("Directory of file of media {$media['Media']['id']} is not writeable: $filename");
         $this->addError($filename, 'DirectoryNotWritable');
         $success = false;
         continue;
@@ -615,13 +615,13 @@ class FilterManagerComponent extends Component {
       }
       $filter = $this->getFilterByExtension($filename);
       if (!$filter) {
-        Logger::verbose("Could not find a filter for $filename");
+        CakeLog::debug("Could not find a filter for $filename");
         $this->addError($filename, 'FilterNotFound');
         $filterMissing = true;
         continue;
       }
       $filterMissing = false;
-      Logger::trace("Call filter ".$filter->getName()." for $filename");
+      CakeLog::debug("Call filter ".$filter->getName()." for $filename");
       $success = ($success && $filter->write($file, $media));
     }
     if (!$hasSidecar && ($this->createSidecar || (!$hasFileWithMetaData && $this->createSidecarForNonEmbeddableFile))) {

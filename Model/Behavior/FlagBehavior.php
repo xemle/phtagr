@@ -33,7 +33,7 @@ class FlagBehavior extends ModelBehavior
       $modelData = $modelData[$model->alias];
     }
     if (!isset($modelData['id']) || !isset($modelData['flag'])) {
-      Logger::err("Precondition failed");
+      CakeLog::error("Precondition failed");
       return false;
     }
 
@@ -43,7 +43,7 @@ class FlagBehavior extends ModelBehavior
 
     $modelData['flag'] |= $flag;
     if (!$model->save($modelData, true, array('flag'))) {
-      Logger::err("Could not update flag");
+      CakeLog::error("Could not update flag");
       return false;
     }
     return true;
@@ -59,7 +59,7 @@ class FlagBehavior extends ModelBehavior
       $modelData = $modelData[$model->alias];
     }
     if (!isset($modelData['id']) || !isset($modelData['flag'])) {
-      Logger::err("Precondition failed");
+      CakeLog::error("Precondition failed");
       return false;
     }
 
@@ -68,7 +68,7 @@ class FlagBehavior extends ModelBehavior
     }
     $modelData['flag'] ^= $flag;
     if (!$model->save($modelData, true, array('flag'))) {
-      Logger::err("Could not update flag");
+      CakeLog::error("Could not update flag");
       return false;
     }
     return true;
@@ -89,7 +89,7 @@ class FlagBehavior extends ModelBehavior
       $modelData = $modelData[$model->alias];
     }
     if (!isset($modelData['flag'])) {
-      Logger::err("Precondition failed! Model {$model->alias} has no flag field.");
+      CakeLog::error("Precondition failed! Model {$model->alias} has no flag field.");
       return false;
     }
 

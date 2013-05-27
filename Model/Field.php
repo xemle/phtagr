@@ -179,7 +179,7 @@ class Field extends AppModel {
         } elseif (!$field) {
           $field = $this->save($this->create($conditions));
           if (!$field) {
-            Logger::error("Could not create new field '$name' with value '$value'");
+            CakeLog::error("Could not create new field '$name' with value '$value'");
             continue;
           }
         }

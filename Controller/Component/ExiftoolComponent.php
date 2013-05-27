@@ -103,7 +103,7 @@ class ExiftoolComponent extends Component {
     $outputline = join("", $this->Command->output);
     // result is 0 for no error
     if ($result || !preg_match('/^(\d+\.\d+).*/', $outputline, $match)) {
-      Logger::err("Unexpected result output of exiftool ({$this->bin}): Returnd $result with output: $output. Disable exiftool");
+      CakeLog::error("Unexpected result output of exiftool ({$this->bin}): Returnd $result with output: $output. Disable exiftool");
       $this->bin = false;
       return false;
     }
@@ -147,7 +147,7 @@ class ExiftoolComponent extends Component {
       stream_set_blocking($this->stderr, 0);
       return true;
     } else {
-      Logger::warn("Could not open exiftool pipes");
+      CakeLog::warning("Could not open exiftool pipes");
       return false;
     }
   }
@@ -172,15 +172,15 @@ class ExiftoolComponent extends Component {
    */
   private function _writeCommands(&$pipe, &$commands) {
     if (!is_resource($pipe)) {
-      Logger::err("Invalid pipe. Command could not be written: " . join(', ', $commands));
+      CakeLog::error("Invalid pipe. Command could not be written: " . join(', ', $commands));
       return;
     }
     try {
       $data = join("\n", $commands) . "\n";
       fwrite($pipe, $data);
-      Logger::debug("Write exiftool pipe: " . join(" ", $commands));
+      CakeLog::debug("Write exiftool pipe: " . join(" ", $commands));
     } catch (Exception $e) {
-      Logger::err("Writing error on pipe: " . $e->getMessage() . " Command could not be written: " . join(', ', $commands));
+      CakeLog::error("Writing error on pipe: " . $e->getMessage() . " Command could not be written: " . join(', ', $commands));
     }
   }
 
@@ -236,7 +236,7 @@ class ExiftoolComponent extends Component {
         break;
       }
       if (microtime(true) - $starttime > $this->pipeReadTimeoutSec) {
-        Logger::err('Pipe read timeout');
+        CakeLog::error('Pipe read timeout');
       }
     }
     return $result;
@@ -262,7 +262,7 @@ class ExiftoolComponent extends Component {
         $value = trim($m[2]);
         $result[$name] = $value;
       } else {
-        Logger::warn("Unexprected line: $line");
+        CakeLog::warning("Unexprected line: $line");
       }
     }
     ksort($result);
@@ -288,8 +288,8 @@ class ExiftoolComponent extends Component {
     }
     $params = $this->_convertOutputToParams($output);
     if ($params['FileName'] != basename($filename)) {
-      Logger::err("Unexpected meta data for file: $filename. FileName does not match");
-      Logger::err($output);
+      CakeLog::error("Unexpected meta data for file: $filename. FileName does not match");
+      CakeLog::error($output);
       return false;
     }
     return $params;
@@ -410,7 +410,7 @@ class ExiftoolComponent extends Component {
       } else {
         $dbGroup = Set::extract("/Group[name=$fileGroupName]", $dbGroups);
         if (!$dbGroup) {
-          Logger::err("Could not find group with name $fileGroupName in groups " . join(', ', Set::extract("/Group/name", $dbGroups)));
+          CakeLog::error("Could not find group with name $fileGroupName in groups " . join(', ', Set::extract("/Group/name", $dbGroups)));
           continue;
         }
         $dbGroup = array_pop($dbGroup); // Set::extract returns always arrays
@@ -640,7 +640,7 @@ class ExiftoolComponent extends Component {
     if (count($stderr) > 1 || (count($stderr) && !($stderr[0] === false))) {// and count($stdout) !==1//i.e.="    1 image files created "
       //TODO: test if warnings and original file internal errors are reported on stderr or stdout
       $errors = implode(",", $stderr);
-      Logger::err(am("exiftool stderr returned errors: ",$errors));
+      CakeLog::error(am("exiftool stderr returned errors: ",$errors));
     }
 
     if ($this->enableImportLogging) {
@@ -669,10 +669,10 @@ class ExiftoolComponent extends Component {
     $result = $this->Command->run($this->bin, $args);
     $output = $this->Command->output;
     if ($result == 127) {
-      Logger::err("$bin could not be found!");
+      CakeLog::error("$bin could not be found!");
       return false;
     } elseif ($result != 0) {
-      Logger::err("$bin returned with error: $result (command: '{$this->Command->lastCommand}')");
+      CakeLog::error("$bin returned with error: $result (command: '{$this->Command->lastCommand}')");
       return false;
     }
     if ($this->enableImportLogging) {
@@ -722,7 +722,7 @@ class ExiftoolComponent extends Component {
       $args[] = '-XMP-xmp:CreateDate=' . date("Y:m:d H:i:sP", $timeDb);
       $args[] = '-XMP-photoshop:DateCreated=' . date("Y:m:d H:i:sP", $timeDb);
       $args[] = '-XMP-tiff:DateTime=' . date("Y:m:d H:i:sP", $timeDb);
-      //Logger::trace("Set new date via IPTC: $arg");
+      //CakeLog::debug("Set new date via IPTC: $arg");
     }
     return $args;
   }
@@ -966,7 +966,7 @@ class ExiftoolComponent extends Component {
     if (count($stderr) > 1 || (count($stderr) && !($stderr[0] === false))) {// and count($stdout) !==1//i.e.="    1 image files created "
       //TODO: test if warnings and original file internal errors are reported on stderr or stdout
       $errors = implode(",", $stderr);
-      Logger::err(am("exiftool stderr returned errors: ",$errors));
+      CakeLog::error(am("exiftool stderr returned errors: ",$errors));
       return $errors;
     }
 
@@ -988,11 +988,11 @@ class ExiftoolComponent extends Component {
     $result = $this->Command->run($this->bin, $args);
     $output = $this->Command->output;
     if ($result == 127) {
-      Logger::err("{$this->bin} could not be found!");
+      CakeLog::error("{$this->bin} could not be found!");
       return false;
     } elseif ($result != 0) {
       $errors = implode(",", $output);
-      Logger::err("{$this->bin} returned with error: $result (command: '{$this->Command->lastCommand}'). Errors: $errors");
+      CakeLog::error("{$this->bin} returned with error: $result (command: '{$this->Command->lastCommand}'). Errors: $errors");
       return false;
     }
     return true;
@@ -1007,10 +1007,10 @@ class ExiftoolComponent extends Component {
     if (!$this->bin) {
       return;
     } else if (!file_exists($filename)) {
-      Logger::err("Filename '$filename' does not exists");
+      CakeLog::error("Filename '$filename' does not exists");
       return;
     } else if (!is_writeable($filename)) {
-      Logger::err("Filename '$filename' is not writeable");
+      CakeLog::error("Filename '$filename' is not writeable");
       return;
     }
     $args = array('-all=', '-overwrite_original', $filename);
@@ -1020,10 +1020,10 @@ class ExiftoolComponent extends Component {
       $result = $this->Command->run($this->bin, $args);
     }
     if ($result != 0) {
-      Logger::err("Cleaning of meta data of file '$filename' failed");
+      CakeLog::error("Cleaning of meta data of file '$filename' failed");
       return false;
     }
-    Logger::debug("Cleaned meta data of '$filename'");
+    CakeLog::debug("Cleaned meta data of '$filename'");
     return true;
   }
 

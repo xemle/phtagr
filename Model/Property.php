@@ -40,8 +40,8 @@ class Property extends AppModel {
       $property['Property']['image_id'] = $imageId;
       $property = $this->create($property);
       if (!$this->save($property)) {
-        Logger::err("Could not save property");
-        Logger::trace($property);
+        CakeLog::error("Could not save property");
+        CakeLog::debug($property);
       }
     }
   }

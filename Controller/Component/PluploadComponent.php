@@ -87,7 +87,7 @@ class PluploadComponent extends Component {
     $targetFilename = $path . $filename;
     if (!$this->moveUploadedFile($upload['tmp_name'], $targetFilename)) {
       $this->_addError($upload['name'], 'uploadMoveError', $upload);
-      Logger::err("Could not write uploaded file");
+      CakeLog::error("Could not write uploaded file");
       return false;
     }
     return $filename;
@@ -137,7 +137,7 @@ class PluploadComponent extends Component {
       }
     } else if ($chunk > 0) {
       $this->_addError($upload['name'], 'chunkMissing', $upload);
-      Logger::err("Could not find chunk");
+      CakeLog::error("Could not find chunk");
       return false;
     }
     // Look for the content type header
@@ -164,11 +164,11 @@ class PluploadComponent extends Component {
         }
       }
       $this->FileManager->move($absoluteFilename, $path . $filename);
-      Logger::verbose("Uploaded complete of " . $upload['name']);
+      CakeLog::debug("Uploaded complete of " . $upload['name']);
       return $filename;
     } else {
       $this->FileManager->add($absoluteFilename);
-      Logger::verbose("Uploaded chunk $chunk/$chunks (" . sprintf('%.2f', $chunk / $chunks) . '%) of ' . $upload['name']);
+      CakeLog::debug("Uploaded chunk $chunk/$chunks (" . sprintf('%.2f', $chunk / $chunks) . '%) of ' . $upload['name']);
     }
     return false;
   }
@@ -190,7 +190,7 @@ class PluploadComponent extends Component {
 
     if (!is_dir($path) || !is_writeable($path)) {
       $this->response['error'] = array('code' => 101, 'message' => "Cound not write to target directory");
-      Logger::err("Upload path '$path' does not exists or is not writeable");
+      CakeLog::error("Upload path '$path' does not exists or is not writeable");
       return false;
     }
     $request = $this->controller->request;
@@ -208,7 +208,7 @@ class PluploadComponent extends Component {
 
     if (!$this->FileManager->canWrite($upload['size'])) {
       $this->response['error'] = array('code' => 102, 'message' => "Upload limit exceeded");
-      Logger::warn("Quota exceed. Deny upload of {$upload['size']} Bytes");
+      CakeLog::warning("Quota exceed. Deny upload of {$upload['size']} Bytes");
       return false;
     }
 
@@ -224,7 +224,7 @@ class PluploadComponent extends Component {
       if (!$this->FileManager->add($path . $filename)) {
         $this->_addError($upload['name'], 'fileManagerError', $upload);
         @unlink($path . $filename);
-        Logger::err("Could not insert $path$filename to database");
+        CakeLog::error("Could not insert $path$filename to database");
       } else {
         return $filename;
       }

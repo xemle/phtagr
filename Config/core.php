@@ -184,13 +184,6 @@
 	define('LOG_ERROR', LOG_ERR);
 
 /**
- * Configuration of phTagr's logger
- */
-  Configure::write('Logger.enable', true);
-  Configure::write('Logger.level', 1);
-  Configure::write('Logger.file', TMP.'logs'.DS.'logger.log');
-
-/**
  * Session configuration.
  *
  * Contains an array of settings to use for session configuration. The defaults key is

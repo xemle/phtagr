@@ -43,7 +43,7 @@ class UpgradeSchemaComponent extends Component {
       return false;
     }
     if (!$this->db) {
-      Logger::err("Could not create database source");
+      CakeLog::error("Could not create database source");
       return false;
     }
     $this->db->cacheSources = false;
@@ -55,7 +55,7 @@ class UpgradeSchemaComponent extends Component {
     $options = am(array('path' => CONFIGS.'schema'.DS, 'name' => 'Phtagr'), $options);
     $schema = $this->cakeSchema->load($options);
     if (!$schema) {
-      Logger::err("Could not load schema!");
+      CakeLog::error("Could not load schema!");
     }
     $this->schema = $schema;
     return $schema;
@@ -81,13 +81,13 @@ class UpgradeSchemaComponent extends Component {
     if (!is_array($tables)) {
       $tables = array($tables);
     }
-    Logger::debug("Check for required tables: ".implode($tables, ', '));
+    CakeLog::debug("Check for required tables: ".implode($tables, ', '));
 
     $sources = $this->db->listSources();
     foreach ($tables as $table) {
       $tableName = $this->db->fullTableName($table, false, false);
       if (!in_array($tableName, $sources)) {
-        Logger::warn("Missing table $tableName (from $table)");
+        CakeLog::warning("Missing table $tableName (from $table)");
         return false;
       }
     }
@@ -97,12 +97,12 @@ class UpgradeSchemaComponent extends Component {
   public function requireUpgrade() {
     $missingTables = $this->_getMissingTables($this->schema);
     if ($missingTables) {
-      Logger::verbose("Missing table(s): ".implode(", ", array_keys($missingTables)));
+      CakeLog::debug("Missing table(s): ".implode(", ", array_keys($missingTables)));
       return true;
     }
     $alterColumns = $this->_getAlteredColumns(false);
     if ($alterColumns) {
-      Logger::verbose("Table change(s): ".implode(", ", array_keys($alterColumns)));
+      CakeLog::debug("Table change(s): ".implode(", ", array_keys($alterColumns)));
       return true;
     }
     return false;
@@ -125,7 +125,7 @@ class UpgradeSchemaComponent extends Component {
     $modelCacheFiles = $folder->find('cake_model_.*');
     foreach ($modelCacheFiles as $file) {
       if (!@unlink($folder->addPathElement($modelCacheDir, $file))) {
-        Logger::err("Could not delete model cache file '$file' in '$modelCacheDir'");
+        CakeLog::error("Could not delete model cache file '$file' in '$modelCacheDir'");
       }
     }
   }

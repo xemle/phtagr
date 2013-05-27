@@ -71,7 +71,7 @@ class SidecarFilterComponent extends BaseFilterComponent {
 
     $fileOfMedia = $this->MyFile->findByFilename($filename);
     if (!$fileOfMedia || empty($fileOfMedia['File']['media_id'])) {//['Media']['id']
-      Logger::err("Could not find File with filename: $filename");
+      CakeLog::error("Could not find File with filename: $filename");
       return false;
     }
     $media = $this->Media->findById($fileOfMedia['Media']['id']);
@@ -85,7 +85,7 @@ class SidecarFilterComponent extends BaseFilterComponent {
     if (!$sidecar){
       $this->FileManager->add($xmpFilename);
       $sidecar = $this->MyFile->findByFilename($xmpFilename);
-      Logger::info("Added sidecar file to database: $xmpFilename");
+      CakeLog::info("Added sidecar file to database: $xmpFilename");
     }
 
     $mediaId = $media['Media']['id'];
@@ -93,7 +93,7 @@ class SidecarFilterComponent extends BaseFilterComponent {
       //add media to sidecar file
       $sidecar = $this->MyFile->findByFilename($xmpFilename);
       if (!$this->controller->MyFile->setMedia($sidecar, $mediaId)) {
-        Logger::err("File was not saved: " . $xmpFilename);
+        CakeLog::error("File was not saved: " . $xmpFilename);
         $this->FilterManager->addError($xmpFilename, "FileSaveError");
         return false;
       }
@@ -144,7 +144,7 @@ class SidecarFilterComponent extends BaseFilterComponent {
     }
 
     if (!is_writable(dirname($filename))) {
-      Logger::warn("Cannot create file sidecar. Directory of media is not writeable");
+      CakeLog::warning("Cannot create file sidecar. Directory of media is not writeable");
       return false;
     }
 
@@ -162,15 +162,15 @@ class SidecarFilterComponent extends BaseFilterComponent {
     }
 
     if ($result != true || !file_exists($xmpFilename)) {
-      Logger::err("Could not create sidecar file from original file '$filename': " . join(", ", (array)$result));
+      CakeLog::error("Could not create sidecar file from original file '$filename': " . join(", ", (array)$result));
       if (!$this->_createEmpty($xmpFilename)) {
-        Logger::err("Could not create empty sidecar '$xmpFilename' file from original file '$filename'");
+        CakeLog::error("Could not create empty sidecar '$xmpFilename' file from original file '$filename'");
         return false;
       } else {
-        Logger::info("Created empty xmp sidecar file: $xmpFilename");
+        CakeLog::info("Created empty xmp sidecar file: $xmpFilename");
       }
     } else {
-      Logger::info("Created xmp sidecar file from '$filename': $xmpFilename");
+      CakeLog::info("Created xmp sidecar file from '$filename': $xmpFilename");
     }
 
     $this->FileManager->add($xmpFilename);
@@ -245,7 +245,7 @@ class SidecarFilterComponent extends BaseFilterComponent {
         $media = $this->FilterManager->_findMediaInPath($path, $mediaMainFilename);
         // attach sidecar file to media
         if (!$this->controller->MyFile->setMedia($file, $mediaId)) {
-          Logger::err("File was not saved: " . $filename);
+          CakeLog::error("File was not saved: " . $filename);
           $this->FilterManager->addError($filename, "FileSaveError");
           return false;
         }
@@ -270,14 +270,14 @@ class SidecarFilterComponent extends BaseFilterComponent {
     if ($options['noSave']) {
       return $media;
     } elseif (!$this->Media->save($media)) {
-      Logger::err("Could not save Media");
-      Logger::trace($media);
+      CakeLog::error("Could not save Media");
+      CakeLog::debug($media);
       $this->FilterManager->addError($filename, 'MediaSaveError');
       return false;
     }
     $this->FilterManager->_replaceInCache($path, $media, 'Media');
 
-    Logger::verbose("Updated media (id ".$media['Media']['id'].")");
+    CakeLog::debug("Updated media (id ".$media['Media']['id'].")");
 
     $this->controller->MyFile->update($file);//fix for permanent changed outside
     $this->controller->MyFile->updateReaded($file);
@@ -295,38 +295,38 @@ class SidecarFilterComponent extends BaseFilterComponent {
    */
   public function write(&$file, &$media, $options = array()) {
     if (!$file || !$media) {
-      Logger::err("File or media is empty");
+      CakeLog::error("File or media is empty");
       return false;
     }
     if (!$this->controller->getOption('bin.exiftool')) {
-      Logger::err("Exiftool is not defined. Abored writing of meta data");
+      CakeLog::error("Exiftool is not defined. Abored writing of meta data");
       return false;
     }
     $filename = $this->controller->MyFile->getFilename($file);
     if (!file_exists($filename) || !is_writeable(dirname($filename)) || !is_writeable($filename)) {
       $id = isset($media['Media']['id']) ? $media['Media']['id'] : 0;
-      Logger::warn("File: $filename (#$id) does not exists nor is readable");
+      CakeLog::warning("File: $filename (#$id) does not exists nor is readable");
       return false;
     }
 
     $data = $this->Exiftool->readMetaData($filename);
     if ($data === false) {
-      Logger::warn("File has no metadata!");
+      CakeLog::warning("File has no metadata!");
       return false;
     }
 
     $args = $this->Exiftool->createExportArguments($data, $media, $filename);
     if (!count($args)) {
-      Logger::debug("File '$filename' has no metadata changes");
+      CakeLog::debug("File '$filename' has no metadata changes");
       if (!$this->Media->deleteFlag($media, MEDIA_FLAG_DIRTY)) {
-        Logger::warn("Could not update image data of media {$media['Media']['id']}");
+        CakeLog::warning("Could not update image data of media {$media['Media']['id']}");
       }
       return true;
     }
 
     $result = $this->Exiftool->writeMetaData($filename, $args);
     if ($result !== true) {
-      Logger::warn("Could not write meta data. Result is " . join(", ", (array) $result));
+      CakeLog::warning("Could not write meta data. Result is " . join(", ", (array) $result));
       return false;
     }
 

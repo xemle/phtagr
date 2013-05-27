@@ -229,7 +229,7 @@ class Option extends AppModel {
    * @param level Highes ACL level which should be increased
    */
   public function _increaseAcl(&$data, $flag, $mask, $level) {
-    //Logger::debug("Increase: {$data['gacl']},{$data['uacl']},{$data['oacl']}: $flag/$mask ($level)");
+    //CakeLog::debug("Increase: {$data['gacl']},{$data['uacl']},{$data['oacl']}: $flag/$mask ($level)");
     if ($level>ACL_LEVEL_OTHER)
       return;
 
@@ -238,7 +238,7 @@ class Option extends AppModel {
       if (($data[$name]&($mask))<$flag)
         $data[$name]=($data[$name]&(~$mask))|$flag;
     }
-    //Logger::debug("Increase (result): {$data['gacl']},{$data['uacl']},{$data['oacl']}: $flag/$mask ($level)");
+    //CakeLog::debug("Increase (result): {$data['gacl']},{$data['uacl']},{$data['oacl']}: $flag/$mask ($level)");
   }
 
   /**
@@ -254,7 +254,7 @@ class Option extends AppModel {
    * @param level Lower ACL level which should be downgraded
    */
   public function _decreaseAcl(&$data, $flag, $mask, $level) {
-    //Logger::debug("Decrease: {$data['gacl']},{$data['uacl']},{$data['oacl']}: $flag/$mask ($level)");
+    //CakeLog::debug("Decrease: {$data['gacl']},{$data['uacl']},{$data['oacl']}: $flag/$mask ($level)");
     if ($level<ACL_LEVEL_GROUP)
       return;
 
@@ -271,7 +271,7 @@ class Option extends AppModel {
       if (($data[$name]&($mask))>=$flag)
         $data[$name]=($data[$name]&(~$mask))|$lower;
     }
-    //Logger::debug("Decrease (result): {$data['gacl']},{$data['uacl']},{$data['oacl']}: $flag/$mask ($level)");
+    //CakeLog::debug("Decrease (result): {$data['gacl']},{$data['uacl']},{$data['oacl']}: $flag/$mask ($level)");
   }
 
   public function setAcl(&$data, $flag, $mask, $level) {

@@ -59,7 +59,7 @@ class BreadcrumbHelper extends AppHelper
       if ($matches[1] != $name) {
         continue;
       }
-      Logger::debug($matches);
+      CakeLog::debug($matches);
       if ($value === false ||
         $exactMatch && $value == $matches[3] ||
         !$exactMatch && $value == $matches[2]) {
@@ -107,7 +107,7 @@ class BreadcrumbHelper extends AppHelper
         continue;
       }
       if (!preg_match('/^(\w+):(.+$)/', $crumb, $match)) {
-        Logger::warn("Invalid crumb: $crumb");
+        CakeLog::warning("Invalid crumb: $crumb");
         continue;
       }
       if ($match[1] == $needle && (!$needleValue || $needleValue == $match[2])) {
@@ -136,7 +136,7 @@ class BreadcrumbHelper extends AppHelper
     $filter = array();
     foreach ($crumbs as $crumb) {
       if (!preg_match('/^(\w+):.+/', $crumb, $match)) {
-        Logger::warn("Invalid crumb: $crumb");
+        CakeLog::warning("Invalid crumb: $crumb");
         continue;
       }
       if (in_array($match[1], $exclude)) {
@@ -158,7 +158,7 @@ class BreadcrumbHelper extends AppHelper
     $crumbs = $this->filterCrumbs($crumbs, $exclude);
     foreach ($crumbs as $key => $crumb) {
       if (!preg_match('/^(\w+):(.*)$/', $crumb, $match)) {
-        Logger::warn("Invalid crumb: $crumb");
+        CakeLog::warning("Invalid crumb: $crumb");
         continue;
       }
       $name = $match[1];

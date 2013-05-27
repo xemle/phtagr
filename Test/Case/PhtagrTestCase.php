@@ -20,8 +20,6 @@ App::uses('CakeResponse', 'Network');
 App::uses('CakeRequest', 'Network');
 App::uses('Folder', 'Utility');
 
-App::uses('Logger', 'Lib');
-
 App::uses('PhtagrTestFactory', 'Test/Case');
 App::uses('PhtagrTestController', 'Test/Case');
 

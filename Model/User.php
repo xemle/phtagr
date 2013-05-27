@@ -83,11 +83,11 @@ class User extends AppModel {
             $size = $size * 1024 * 1024 * 1024;
             break;
           default:
-            Logger::err("Unknown unit {$matches[3]}");
+            CakeLog::error("Unknown unit {$matches[3]}");
         }
       }
       if ($size < 0) {
-        Logger::err("Size is negtive: $size");
+        CakeLog::error("Size is negtive: $size");
         return 0;
       }
       return $size;
@@ -143,14 +143,14 @@ class User extends AppModel {
   public function beforeDelete($cascade = true) {
     $id = $this->id;
     $this->bindModel(array('hasMany' => array('Media')));
-    Logger::info("Delete all image database entries of user $id");
+    CakeLog::info("Delete all image database entries of user $id");
     $this->Media->deleteFromUser($id);
 
     $this->bindModel(array('hasMany' => array('MyFile')));
     $this->MyFile->deleteAll("File.user_id = $id");
 
     $dir = USER_DIR.$id;
-    Logger::info("Delete user directory of user $id: $dir");
+    CakeLog::info("Delete user directory of user $id: $dir");
     $folder = new Folder();
     $folder->delete($dir);
 
@@ -233,7 +233,7 @@ class User extends AppModel {
 
   public function getRootDir($data, $create = true) {
     if (!isset($data['User']['id'])) {
-      Logger::err("Data does not contain user's id");
+      CakeLog::error("Data does not contain user's id");
       return false;
     }
 
@@ -241,7 +241,7 @@ class User extends AppModel {
     if ($create) {
       $folder = new Folder();
       if (!$folder->create($rootDir)) {
-        Logger::err("Could not create users root directory '$fileDir'");
+        CakeLog::error("Could not create users root directory '$fileDir'");
         return false;
       }
     }

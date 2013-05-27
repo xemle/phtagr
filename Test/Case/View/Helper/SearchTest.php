@@ -17,7 +17,6 @@
 
 App::uses('View', 'View');
 App::uses('SearchHelper', 'View/Helper');
-App::uses('Logger', 'Lib');
 
 class SearchHelperTest extends CakeTestCase {
 

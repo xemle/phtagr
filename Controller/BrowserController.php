@@ -71,10 +71,10 @@ class BrowserController extends AppController
    */
   public function _addFsRoot($root, $alias = null) {
     if (!$root) {
-      Logger::warn("Invalid directory. Input is empty");
+      CakeLog::warning("Invalid directory. Input is empty");
       return false;
     } elseif (!@is_dir($root)) {
-      Logger::err("Directory of '$root' does not exists");
+      CakeLog::error("Directory of '$root' does not exists");
       return false;
     }
 
@@ -94,11 +94,11 @@ class BrowserController extends AppController
 
     // Check alias syntax
     if (!preg_match('/^[A-Za-z0-9][A-Za-z0-9\-_\.\: ]+$/', $alias)) {
-      Logger::err("Name '$alias' as alias is invalid");
+      CakeLog::error("Name '$alias' as alias is invalid");
       return false;
     }
 
-    Logger::trace("Add new FS root '$root' (alias '$alias')");
+    CakeLog::debug("Add new FS root '$root' (alias '$alias')");
     $this->_fsRoots[$alias]=$root;
     return true;
   }
@@ -185,7 +185,7 @@ class BrowserController extends AppController
    */
   public function _readPath($fsPath) {
     if (!$fsPath || !is_dir($fsPath)) {
-      Logger::err("Invalid path $fsPath");
+      CakeLog::error("Invalid path $fsPath");
       return false;
     }
     $userId = $this->getUserId();
@@ -222,7 +222,7 @@ class BrowserController extends AppController
   public function _readFile($filename) {
     $user = $this->getUser();
     if (!$this->MyFile->canRead($filename, $user)) {
-      Logger::info("User cannot read $filename");
+      CakeLog::info("User cannot read $filename");
       $this->redirect(null, 404);
     }
 
@@ -252,7 +252,7 @@ class BrowserController extends AppController
       }
     } else {
       if (strlen($path) > 1) {
-        Logger::debug("Invalid path: '$path'. Redirect to index");
+        CakeLog::debug("Invalid path: '$path'. Redirect to index");
         $this->redirect('index');
       }
       // filesystem path could not be resolved. Take all aliases of filesystem
@@ -282,7 +282,7 @@ class BrowserController extends AppController
 
     $path = $this->_getPathFromUrl();
     if (empty($this->request->data)) {
-      Logger::warn("Empty post data");
+      CakeLog::warning("Empty post data");
       $this->redirect('index/'.$path);
     }
 
@@ -333,10 +333,10 @@ class BrowserController extends AppController
     $fsPath = $this->_getFsPath($path);
     $file = $this->MyFile->findByFilename($fsPath);
     if (!$file) {
-      Logger::err("File not found: $fsPath");
+      CakeLog::error("File not found: $fsPath");
       $this->redirect('index/'.$path);
     } elseif ($file['User']['id'] != $this->getUserId()) {
-      Logger::warn("Deny access to file: $fsPath");
+      CakeLog::warning("Deny access to file: $fsPath");
     } else {
       $this->Session->setFlash(__("Media %d was unlinked successfully", $file['File']['media_id']));
       $this->Media->unlinkFile($file['File']['media_id'], $file['File']['id']);
@@ -458,10 +458,10 @@ class BrowserController extends AppController
       while (count($results)) {
         foreach ($results as $media) {
           if (!$this->FilterManager->write($media)) {
-            Logger::err("Could not export media {$media['Media']['name']} ({$media['Media']['id']})");
+            CakeLog::error("Could not export media {$media['Media']['name']} ({$media['Media']['id']})");
             $data['errors'][] = $media;
           } else {
-            Logger::verbose("Synced meta data of media {$media['Media']['name']} ({$media['Media']['id']})");
+            CakeLog::debug("Synced meta data of media {$media['Media']['name']} ({$media['Media']['id']})");
             $data['synced'][] = $media;
           }
           $lastId = $media['Media']['id'];
@@ -515,13 +515,13 @@ class BrowserController extends AppController
     $fsPath = $this->_getFsPath($path);
     // Check for internal path
     if (!$fsPath) {
-      Logger::warn("Invalid path to create folder");
+      CakeLog::warning("Invalid path to create folder");
       $this->Session->setFlash(__("Invalid path to create folder"));
       $this->redirect("index");
     }
     if ($this->FileManager->isExternal($fsPath)) {
       $this->Session->setFlash(__("Could not create folder here: %s", $path));
-      Logger::warn("Could not create folder in external path: $fsPath");
+      CakeLog::warning("Could not create folder in external path: $fsPath");
       $this->redirect("index/".$path);
     }
 
@@ -531,11 +531,11 @@ class BrowserController extends AppController
 
       $newFolder = Folder::slashTerm($fsPath).$name;
       if ($folder->create($newFolder)) {
-        Logger::verbose("Create folder $newFolder");
+        CakeLog::debug("Create folder $newFolder");
         $this->Session->setFlash("Folder $name created");
         $this->redirect("index/".$path.$name);
       } else {
-        Logger::err("Could not create folder $name in $fsPath");
+        CakeLog::error("Could not create folder $name in $fsPath");
         $this->Session->setFlash(__("Could not create folder"));
         $this->redirect('folder/'.$path);
       }
@@ -550,11 +550,11 @@ class BrowserController extends AppController
     }
     $dst = Folder::slashTerm($dst);
     if (!$this->Upload->isUpload()) {
-      Logger::info("No upload data available");
+      CakeLog::info("No upload data available");
       return false;
     } elseif (!$this->FileManager->canWrite($this->Upload->getSize())) {
       $this->Session->setFlash(__("Your upload quota is exceeded"));
-      Logger::warn("User upload quota exceeded. Upload denied.");
+      CakeLog::warning("User upload quota exceeded. Upload denied.");
       return false;
     }
     $files = $this->Upload->upload($dst, array('overwrite' => false));
@@ -570,14 +570,14 @@ class BrowserController extends AppController
     foreach ($files as $file) {
       if (strtolower(substr($file, -4)) == '.zip') {
         if (!$this->FileManager->canWrite($this->Zip->getExtractedSize($file))) {
-          Logger::warn("User upload quota exceeded. Unzip failed: " . $file);
+          CakeLog::warning("User upload quota exceeded. Unzip failed: " . $file);
           continue;
         }
         $zipFiles = $this->Zip->unzip($file);
         if ($zipFiles !== false) {
           $result[$file] = $zipFiles;
         } else {
-          Logger::warn("Could not extract $file");
+          CakeLog::warning("Could not extract $file");
         }
       }
     }
@@ -609,11 +609,11 @@ class BrowserController extends AppController
             $size = $size * 1024 * 1024 * 1024;
             break;
           default:
-            Logger::err("Unknown unit {$matches[3]}");
+            CakeLog::error("Unknown unit {$matches[3]}");
         }
       }
       if ($size < 0) {
-        Logger::err("Size is negtive: $size");
+        CakeLog::error("Size is negtive: $size");
         return 0;
       }
       return $size;
@@ -661,14 +661,14 @@ class BrowserController extends AppController
     $path = $this->_getPathFromUrl();
     $fsPath = $this->_getFsPath($path);
     if (!$fsPath) {
-      Logger::warn("Invalid path for upload");
+      CakeLog::warning("Invalid path for upload");
       $this->Session->setFlash(__("Invalid path for upload"));
       $this->redirect("index");
     }
     // Check for internal path
     if ($this->FileManager->isExternal($fsPath)) {
       $this->Session->setFlash(__("Could not upload here: %s", $path));
-      Logger::warn("Could not upload in external path: $fsPath");
+      CakeLog::warning("Could not upload in external path: $fsPath");
       $this->redirect("index/".$path);
     }
     if (!empty($this->request->data) && $this->Upload->isUpload()) {
@@ -700,7 +700,7 @@ class BrowserController extends AppController
   public function _getDailyUploadDir() {
     $root = $this->User->getRootDir($this->getUser());
     if (!$root) {
-      Logger::err("Invalid user upload directory");
+      CakeLog::error("Invalid user upload directory");
       $this->Session->setFlash(__("Error: Invalid upload directory"));
       return false;
     }
@@ -708,7 +708,7 @@ class BrowserController extends AppController
     $dst = $root . date('Y') . DS . date('Y-m-d') . DS;
     $folder = new Folder($dst, true);
     if (!$folder) {
-      Logger::err("Daily upload directory not created");
+      CakeLog::error("Daily upload directory not created");
       $this->Session->setFlash(__("Error: Invalid upload directory"));
       return false;
     }
@@ -718,7 +718,7 @@ class BrowserController extends AppController
   public function quickupload() {
     if (!empty($this->request->data)) {
       if (!$this->Upload->isUpload()) {
-        Logger::info("No upload data");
+        CakeLog::info("No upload data");
         $this->Session->setFlash(__("No files uploaded or upload errors"));
         $this->redirect($this->action);
       }
@@ -886,7 +886,7 @@ class BrowserController extends AppController
       $this->Media->setAccessFlags($media, $user, $groupIds);
       // primary access check
       if (!$media['Media']['canWriteTag'] && !$media['Media']['canWriteAcl']) {
-        Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change any metadata of image ".$id);
+        CakeLog::warning("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change any metadata of image ".$id);
         continue;
       }
       $tmp = $this->Media->editMulti($media, $editData, $user);
@@ -896,9 +896,9 @@ class BrowserController extends AppController
     }
     if ($changedMedia) {
       if (!$this->Media->saveAll($changedMedia)) {
-        Logger::warn("Could not save media: " . join(", ", Set::extract("/Media/id", $changedMedia)));
+        CakeLog::warning("Could not save media: " . join(", ", Set::extract("/Media/id", $changedMedia)));
       } else {
-        Logger::debug("Saved media: " . join(', ', Set::extract("/Media/id", $changedMedia)));
+        CakeLog::debug("Saved media: " . join(', ', Set::extract("/Media/id", $changedMedia)));
         return Set::extract('/Media/id', $changedMedia);
       }
     }

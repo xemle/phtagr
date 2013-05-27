@@ -60,7 +60,7 @@ class NotifyShell extends AppShell {
     foreach ($media as $m) {
       $file = $this->PreviewManager->getPreview($m, 'mini');
       if (!$file) {
-        Logger::err("Could not create preview for media {$m['Media']['id']}");
+        CakeLog::error("Could not create preview for media {$m['Media']['id']}");
         continue;
       }
       $filename = 'media-' . $m['Media']['id'] . '.jpg';
@@ -78,12 +78,12 @@ class NotifyShell extends AppShell {
             ->emailFormat("both");
     if (!$this->Email->send()) {
       $this->out("Could not send new media notification email to {$user['User']['email']}");
-      Logger::err("Could not send new media notification email to {$user['User']['email']}");
+      CakeLog::error("Could not send new media notification email to {$user['User']['email']}");
     } else {
       if ($this->verbose) {
         $this->out("Send new media notification email to {$user['User']['email']}");
       }
-      Logger::info("Send new media notification email to {$user['User']['email']}");
+      CakeLog::info("Send new media notification email to {$user['User']['email']}");
     }
   }
 
@@ -132,8 +132,8 @@ class NotifyShell extends AppShell {
         $user['User']['last_notify'] = date('Y-m-d h:m:s', $now);
         if (!$this->User->save($user['User'], true, array('last_notify'))) {
           $this->out("Could not save user data of {$user['User']['username']}");
-          Logger::err("Could not save user data of {$user['User']['username']}");
-          Logger::debug($user);
+          CakeLog::error("Could not save user data of {$user['User']['username']}");
+          CakeLog::debug($user);
         }
       }
     }

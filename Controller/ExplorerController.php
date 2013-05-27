@@ -145,7 +145,7 @@ class ExplorerController extends AppController
         $exclude = $matches[2];
 
         if (!in_array($crumbType, $queryTypes)) {
-          Logger::debug("Invalid crumb type: $crumbType");
+          CakeLog::debug("Invalid crumb type: $crumbType");
           $this->redirect(404);
         }
         if (is_array($queryMap[$crumbType])) {
@@ -162,7 +162,7 @@ class ExplorerController extends AppController
         }
       }
     } else {
-      Logger::warn("Invalid autocomlete type: $type");
+      CakeLog::warning("Invalid autocomlete type: $type");
       $this->redirect(404);
     }
     $this->layout = 'xml';
@@ -279,7 +279,7 @@ class ExplorerController extends AppController
         $result = Set::extract('/User/username', $data);
         break;
       default:
-        Logger::err("Unknown type $type");
+        CakeLog::error("Unknown type $type");
         $this->redirect(404);
         break;
     }
@@ -365,7 +365,7 @@ class ExplorerController extends AppController
   public function user($username, $param = false, $value = false) {
     $user = $this->User->find('first', array('conditions' => array('User.username' => $username, 'User.role' >= ROLE_USER), 'recursive' => 0));
     if (!$user) {
-      Logger::verbose(sprintf("User not found %s", $username));
+      CakeLog::debug(sprintf("User not found %s", $username));
       $this->render('index');
       return;
     }
@@ -385,7 +385,7 @@ class ExplorerController extends AppController
         $crumbs[] = "folder:$folder";
         $crumbs[] = "sort:name";
       } else {
-        Logger::info(sprintf("Invalid root %s or folder %s", $fsRoot, $fsFolder));
+        CakeLog::info(sprintf("Invalid root %s or folder %s", $fsRoot, $fsFolder));
         $this->Session->setFlash(__("Invalid folder: %s", $folder));
       }
     } else {
@@ -532,7 +532,7 @@ class ExplorerController extends AppController
         $this->Media->setAccessFlags($media, $user, $groupIds);
         // primary access check
         if (!$media['Media']['canWriteTag'] && !$media['Media']['canWriteAcl']) {
-          Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change any metadata of image ".$id);
+          CakeLog::warning("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change any metadata of image ".$id);
           continue;
         }
         $tmp = $this->Media->editMulti($media, $editData, $user);
@@ -542,15 +542,15 @@ class ExplorerController extends AppController
       }
       if ($changedMedia) {
         if (!$this->Media->saveAll($changedMedia)) {
-          Logger::warn("Could not save media: " . join(", ", Set::extract("/Media/id", $changedMedia)));
+          CakeLog::warning("Could not save media: " . join(", ", Set::extract("/Media/id", $changedMedia)));
         } else {
-          Logger::debug("Saved media: " . join(', ', Set::extract("/Media/id", $changedMedia)));
+          CakeLog::debug("Saved media: " . join(', ', Set::extract("/Media/id", $changedMedia)));
         }
         foreach ($changedMedia as $media) {
           if (isset($media['Media']['orientation'])) {
             $this->FileCache->delete($media);
             $this->FastFileResponder->excludeMedia($media);
-            Logger::debug("Deleted previews of media {$media['Media']['id']}");
+            CakeLog::debug("Deleted previews of media {$media['Media']['id']}");
           }
         }
       }
@@ -565,14 +565,14 @@ class ExplorerController extends AppController
     */
   public function editmeta($id) {
     if (!$this->RequestHandler->isAjax()) {
-      Logger::warn("Decline wrong ajax request");
+      CakeLog::warning("Decline wrong ajax request");
       $this->redirect(null, '404');
     }
     $id = intval($id);
     $user = $this->getUser();
     $media = $this->Media->findById($id);
     if (!$this->Media->canWrite($media, $user)) {
-      Logger::warn("User is not allowed to edit media {$media['Media']['id']}");
+      CakeLog::warning("User is not allowed to edit media {$media['Media']['id']}");
       $this->redirect(null, '403');
     }
     $this->Media->setAccessFlags($media, $user);
@@ -587,7 +587,7 @@ class ExplorerController extends AppController
    */
   public function savemeta($id) {
     if (!$this->RequestHandler->isAjax()) {
-      Logger::warn("Decline wrong ajax request");
+      CakeLog::warning("Decline wrong ajax request");
       $this->redirect(null, '404');
     }
     $id = intval($id);
@@ -597,22 +597,22 @@ class ExplorerController extends AppController
     if (isset($this->request->data)) {
       $media = $this->Media->findById($id);
       if (!$media) {
-        Logger::warn("Invalid media id: $id");
+        CakeLog::warning("Invalid media id: $id");
         $this->redirect(null, '404');
       } elseif (!$this->Media->canWrite($media, $user)) {
-        Logger::warn("User '{$username}' ({$user['User']['id']}) has no previleges to change tags of image ".$id);
+        CakeLog::warning("User '{$username}' ({$user['User']['id']}) has no previleges to change tags of image ".$id);
       } else {
         $this->Media->setAccessFlags($media, $user);
         $tmp = $this->Media->editSingle($media, $this->request->data, $user);
         if (!$this->Media->save($tmp)) {
-          Logger::warn("Could not save media");
+          CakeLog::warning("Could not save media");
         } else {
-          Logger::info("Updated meta of media {$tmp['Media']['id']}");
+          CakeLog::info("Updated meta of media {$tmp['Media']['id']}");
         }
         if (isset($tmp['Media']['orientation'])) {
           $this->FileCache->delete($tmp);
           $this->FastFileResponder->excludeMedia($tmp);
-          Logger::debug("Deleted previews of media {$tmp['Media']['id']}");
+          CakeLog::debug("Deleted previews of media {$tmp['Media']['id']}");
         }
       }
     }
@@ -632,7 +632,7 @@ class ExplorerController extends AppController
    */
   public function updatemeta($id) {
     if (!$this->RequestHandler->isAjax()) {
-      Logger::warn("Decline wrong ajax request");
+      CakeLog::warning("Decline wrong ajax request");
       $this->redirect(null, '404');
     }
     $id = intval($id);
@@ -649,14 +649,14 @@ class ExplorerController extends AppController
 
   public function editacl($id) {
     if (!$this->RequestHandler->isAjax()) {
-      Logger::warn("Decline wrong ajax request");
+      CakeLog::warning("Decline wrong ajax request");
       $this->redirect(null, '404');
     }
     $id = intval($id);
     $user = $this->getUser();
     $media = $this->Media->findById($id);
     if (!$this->Media->canWriteAcl($media, $user)) {
-      Logger::warn("User is not allowed to edit acl of media {$media['Media']['id']}");
+      CakeLog::warning("User is not allowed to edit acl of media {$media['Media']['id']}");
       $this->redirect('400');
     }
     $this->Media->setAccessFlags($media, $user);
@@ -667,7 +667,7 @@ class ExplorerController extends AppController
 
   public function saveacl($id) {
     if (!$this->RequestHandler->isAjax()) {
-      Logger::warn("Decline wrong ajax request");
+      CakeLog::warning("Decline wrong ajax request");
       $this->redirect(null, '404');
     }
     $id = intval($id);
@@ -679,16 +679,16 @@ class ExplorerController extends AppController
       $userId = $user['User']['id'];
       $this->Search->setUser($user['User']['username']); // Triggers acl descriptions
       if (!$this->Media->canWriteAcl($media, $user)) {
-        Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change ACL of image ".$id);
+        CakeLog::warning("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to change ACL of image ".$id);
       } else {
         $this->Media->setAccessFlags($media, $user);
         $tmp = $this->Media->editSingle($media, $this->request->data, $user);
         if ($tmp) {
           if ($this->Media->save($tmp, true)) {
-            Logger::info("Changed acl of media $id");
+            CakeLog::info("Changed acl of media $id");
           } else {
-            Logger::err("Could not update acl of media {$media['Media']['id']}");
-            Logger::debug($tmp);
+            CakeLog::error("Could not update acl of media {$media['Media']['id']}");
+            CakeLog::debug($tmp);
           }
         }
       }
@@ -707,14 +707,14 @@ class ExplorerController extends AppController
   public function selection($action) {
     $validActions = array('unlink', 'deleteCache', 'sync');
     if (!$this->RequestHandler->isPost()) {
-      Logger::warn("Decline wrong ajax request");
+      CakeLog::warning("Decline wrong ajax request");
       $this->redirect(null, 404);
     } else if (!in_array($action, $validActions)) {
-      Logger::warn("Invalid selection action: $action");
+      CakeLog::warning("Invalid selection action: $action");
       $this->render('index');
       return;
     } else if (!isset($this->request->data['Media']['ids'])) {
-      Logger::warn("No media ids is empty");
+      CakeLog::warning("No media ids is empty");
       $this->render('index');
       return;
     }
@@ -740,7 +740,7 @@ class ExplorerController extends AppController
 
   public function sync($id) {
     if (!$this->RequestHandler->isAjax() || !$this->RequestHandler->isPost()) {
-      Logger::warn("Decline wrong ajax request");
+      CakeLog::warning("Decline wrong ajax request");
       $this->redirect(null, '404');
     }
     $id = intval($id);
@@ -748,12 +748,12 @@ class ExplorerController extends AppController
     $user = $this->getUser();
     $media = $this->Media->findById($id);
     if (!$media) {
-      Logger::err("User '{$user['User']['username']}' ({$user['User']['id']}) requested non existing image id '$id'");
+      CakeLog::error("User '{$user['User']['username']}' ({$user['User']['id']}) requested non existing image id '$id'");
       $this->redirect(null, 401);
     }
     $this->Media->setAccessFlags($media, $user);
     if (!$media['Media']['isOwner']) {
-      Logger::warn("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to sync image '$id'");
+      CakeLog::warning("User '{$user['User']['username']}' ({$user['User']['id']}) has no previleges to sync image '$id'");
     } else {
       $this->FilterManager->write($media);
       $media =  $this->Media->findById($id);
@@ -806,7 +806,7 @@ class ExplorerController extends AppController
         $this->Search->setWest($lng);
         $this->Search->setEast($lng + $stepLng);
         $points = $this->Search->paginate();
-        //Logger::trace("Found ".count($points)." points");
+        //CakeLog::debug("Found ".count($points)." points");
         if ($points) {
           $this->request->data = am($points, $this->request->data);
         }
@@ -816,7 +816,7 @@ class ExplorerController extends AppController
     }
 
     $this->layout = 'xml';
-    Logger::trace("Search points of N:$north, S:$south, W:$west, E:$east: Found ".count($this->request->data)." points");
+    CakeLog::debug("Search points of N:$north, S:$south, W:$west, E:$east: Found ".count($this->request->data)." points");
     $this->FastFileResponder->addAll($this->request->data, 'mini');
     if (Configure::read('debug') > 1) {
       Configure::write('debug', 1);

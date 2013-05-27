@@ -104,7 +104,7 @@ class Mffcaea2061011ff9181c79c14fa83622 extends CakeMigration {
       $all = $db->fetchAll(sprintf($query, $limit, ($page - 1) * $limit), array());
     }
     $names = Inflector::pluralize($name);
-    Logger::info("Migrated $modelCount $names to fields with $mediaCount media");
+    CakeLog::info("Migrated $modelCount $names to fields with $mediaCount media");
   }
 
   /**

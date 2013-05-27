@@ -40,10 +40,10 @@ class WordListBehavior extends ModelBehavior {
       $Model->create();
       if ($Model->save($new)) {
         $new = $Model->findById($Model->getInsertID());
-        Logger::debug("Create new {$alias} with ${field} '$missingfield'");
+        CakeLog::debug("Create new {$alias} with ${field} '$missingfield'");
         $data[] = $new;
       } else {
-        Logger::debug("Could not create new model {$alias} with ${field} '$missingfield'");
+        CakeLog::debug("Could not create new model {$alias} with ${field} '$missingfield'");
       }
     }
     return $data;

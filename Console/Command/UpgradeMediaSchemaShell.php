@@ -39,7 +39,7 @@ class UpgradeMediaSchemaShell extends Shell {
   }
 
   function _execute($sql) {
-    Logger::debug($sql);
+    CakeLog::debug($sql);
     $this->UpgradeSchema->db->execute($sql);
   }
 
@@ -114,9 +114,9 @@ class UpgradeMediaSchemaShell extends Shell {
     $thumb['File']['media_id'] = $media['Media']['id'];
     $thumb['File']['readed'] = date("Y-m-d H:i:s", filemtime($filename));
     if (!$this->MyFile->save($thumb)) {
-      Logger::warn("Could not add thumbnail to database");
+      CakeLog::warning("Could not add thumbnail to database");
     } else {
-      Logger::verbose("Add thumb file of media {$media['Media']['id']}");
+      CakeLog::debug("Add thumb file of media {$media['Media']['id']}");
     }
   }
 
@@ -127,9 +127,9 @@ class UpgradeMediaSchemaShell extends Shell {
     // create file model
     $filename = $media['Media']['path'].$media['Media']['file'];
     if (!file_exists($filename)) {
-      Logger::err("Cannot find media {$media['Media']['id']}: $filename");
+      CakeLog::error("Cannot find media {$media['Media']['id']}: $filename");
       if ($this->deletePolicy == "a") {
-        Logger::warn("Delete not existing media file {$media['Media']['id']}: $filename");
+        CakeLog::warning("Delete not existing media file {$media['Media']['id']}: $filename");
         $this->out("Auto delete not existing media file {$media['Media']['id']}: $filename");
         $this->Media->delete($media['Media']['id']);
         return false;
@@ -139,14 +139,14 @@ class UpgradeMediaSchemaShell extends Shell {
         $a = $this->in("Could not find media {$media['Media']['id']}: $filename!\n[d]elete, [s]kip, [r]etry, delete [a]ll, [c]ancel", array("d", "s", "r", "a", "c"), "d");
       }
       if ($a == "d" || $a == "a") {
-        Logger::warn("Delete media {$media['Media']['id']}: $filename");
+        CakeLog::warning("Delete media {$media['Media']['id']}: $filename");
         $this->Media->delete($media['Media']['id']);
         if ($a == "a") {
           $this->deletePolicy = "a";
         }
         return true;
       } elseif ($a == "s") {
-        Logger::warn("Skip media {$media['Media']['id']}: $filename");
+        CakeLog::warning("Skip media {$media['Media']['id']}: $filename");
         return true;
       } elseif ($a == "r") {
         clearstatcache();
@@ -160,8 +160,8 @@ class UpgradeMediaSchemaShell extends Shell {
     $file['File']['media_id'] = $media['Media']['id'];
     $file['File']['readed'] = date("Y-m-d H:i:s", filemtime($filename));
     if (!$this->MyFile->save($file)) {
-      Logger::debug("Cannot migrate data from media {$media['Media']['id']}");
-      Logger::warn($file);
+      CakeLog::debug("Cannot migrate data from media {$media['Media']['id']}");
+      CakeLog::warning($file);
       return false;
     }
 
@@ -186,14 +186,14 @@ class UpgradeMediaSchemaShell extends Shell {
           $this->_addVideoThumb($media, $file);
           break;
         default:
-          Logger::warn("Unhandled file type $type");
+          CakeLog::warning("Unhandled file type $type");
       }
       // Delete old flag IMAGE_FLAG_ACTIVE
       $this->Media->deleteFlag($media, 1);
     } else {
       // Inactive media will be deleted, data is stored in files
       $this->Media->delete($media['Media']['id']);
-      Logger::debug("Deleted inactive media {$media['Media']['id']}");
+      CakeLog::debug("Deleted inactive media {$media['Media']['id']}");
     }
     return true;
   }
@@ -209,7 +209,7 @@ class UpgradeMediaSchemaShell extends Shell {
     $this->Media->unbindAll();
     $media = $this->Media->find('all', array('fields' => array('Media.id', 'Media.path', 'Media.file', 'Media.user_id', 'Media.flag')));
     $this->out("Migrate ".count($media)." media...");
-    Logger::verbose("Found ".count($media)." media to migrade ...");
+    CakeLog::debug("Found ".count($media)." media to migrade ...");
 
     $errors = 0;
     foreach ($media as $m) {
@@ -219,10 +219,10 @@ class UpgradeMediaSchemaShell extends Shell {
     }
     if ($errors) {
       $this->out("Upgrade ".count($media)." media with $errors errors");
-      Logger::err("Upgrade ".count($media)." media with $errors errors");
+      CakeLog::error("Upgrade ".count($media)." media with $errors errors");
       return true;
     } else {
-      Logger::info("Upgrade ".count($media)." media successfully");
+      CakeLog::info("Upgrade ".count($media)." media successfully");
       return false;
     }
   }

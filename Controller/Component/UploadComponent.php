@@ -191,7 +191,7 @@ class UploadComponent extends Component {
     $options = am(array('overwrite' => true), $options);
 
     if (!is_dir($path) || !is_writeable($path)) {
-      Logger::err("Upload path '$path' does not exists or is not writeable");
+      CakeLog::error("Upload path '$path' does not exists or is not writeable");
       return false;
     }
     $path = Folder::slashTerm($path);
@@ -211,20 +211,20 @@ class UploadComponent extends Component {
       // Check users quota
       if (!$this->FileManager->canWrite($upload['size'])) {
         $this->_addError($upload['name'], 'quotaExceed', $upload);
-        Logger::warn("Quota exceed. Deny upload of {$upload['size']} Bytes");
+        CakeLog::warning("Quota exceed. Deny upload of {$upload['size']} Bytes");
         continue;
       }
 
       if (!$this->moveUploadedFile($upload['tmp_name'], $path . $filename)) {
         $this->_addError($upload['name'], 'uploadMoveError', $upload);
-        Logger::err("Could not write uploaded file");
+        CakeLog::error("Could not write uploaded file");
         continue;
       }
 
       if (!$this->FileManager->add($path . $filename)) {
         $this->_addError($upload['name'], 'fileManagerError', $upload);
         @unlink($path . $filename);
-        Logger::err("Could not insert $path$filename to database");
+        CakeLog::error("Could not insert $path$filename to database");
         continue;
       }
 

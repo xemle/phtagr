@@ -16,9 +16,6 @@
  */
 
 App::import('File', 'ShellControllerMock', array('file' => dirname(__FILE__) . DS . 'ShellControllerMock.php'));
-if (!class_exists('Logger')) {
-  App::import('File', 'Logger', array('file' => APP . 'logger.php'));
-}
 
 class AppShell extends Shell {
   var $uses = array();

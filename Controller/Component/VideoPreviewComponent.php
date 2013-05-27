@@ -68,16 +68,16 @@ class VideoPreviewComponent extends Component {
       $thumb = $this->controller->MyFile->findByFilename($thumbFilename);
       if (!$thumb) {
         $thumbId = $this->FileManager->add($thumbFilename, $video['File']['user_id']);
-        Logger::verbose("Add missing video thumb $thumbFilename to database: $thumbId");
+        CakeLog::debug("Add missing video thumb $thumbFilename to database: $thumbId");
         $thumb = $this->controller->MyFile->findById($thumbId);
       }
       if (!$thumb) {
-        Logger::err("Could not find thumbnail in database");
+        CakeLog::error("Could not find thumbnail in database");
         return false;
       }
       if ($thumb['File']['media_id'] != $video['File']['media_id'] &&
         $this->controller->MyFile->setMedia($thumb, $video['File']['media_id'])) {
-        Logger::verbose("Link video thumb {$thumb['File']['id']} to media {$video['File']['media_id']}");
+        CakeLog::debug("Link video thumb {$thumb['File']['id']} to media {$video['File']['media_id']}");
       }
       return $thumbFilename;
     }
@@ -101,11 +101,11 @@ class VideoPreviewComponent extends Component {
    */
   private function _create($videoFilename, $thumbFilename) {
     if (!file_exists($videoFilename) || !is_readable($videoFilename)) {
-      Logger::err("Video file '$videoFilename' does not exists or is readable");
+      CakeLog::error("Video file '$videoFilename' does not exists or is readable");
       return false;
     }
     if (!is_writeable(dirname($thumbFilename))) {
-      Logger::err("Could not write video thumb. Path '".dirname($thumbFilename)."' is not writable");
+      CakeLog::error("Could not write video thumb. Path '".dirname($thumbFilename)."' is not writable");
       return false;
     }
     if ($this->_semaphoreId) {
@@ -120,10 +120,10 @@ class VideoPreviewComponent extends Component {
       sem_release($this->_semaphoreId);
     }
     if ($result != 0) {
-      Logger::err("Command '{$this->bin}' returned unexcpected $result");
+      CakeLog::error("Command '{$this->bin}' returned unexcpected $result");
       return false;
     } else {
-      Logger::info("Created video thumbnail of '$videoFilename'");
+      CakeLog::info("Created video thumbnail of '$videoFilename'");
     }
     return $thumbFilename;
   }
@@ -153,7 +153,7 @@ class VideoPreviewComponent extends Component {
       $this->FileManager->add($thumbFilename, $media['Media']['user_id']);
       $thumb = $this->controller->MyFile->findByFilename($thumbFilename);
       if ($this->controller->MyFile->setMedia($thumb, $video['File']['media_id'])) {
-        Logger::verbose("Link thumbnail {$thumb['File']['id']} to media {$video['File']['media_id']}");
+        CakeLog::debug("Link thumbnail {$thumb['File']['id']} to media {$video['File']['media_id']}");
       }
     }
     return $thumbFilename;
@@ -225,10 +225,10 @@ class VideoPreviewComponent extends Component {
    */
   private function _createCachedFile($thumbFilename, $cacheFilename) {
     if (!is_readable($thumbFilename)) {
-      Logger::err("Thumbnail file is not readable: $thumbFilename");
+      CakeLog::error("Thumbnail file is not readable: $thumbFilename");
       return $this->_getDummyPreview();
     } else if (!is_writable(dirname($cacheFilename))) {
-      Logger::err("Target directory " . dirname($cacheFilename) . " is not writable for copy");
+      CakeLog::error("Target directory " . dirname($cacheFilename) . " is not writable for copy");
       return $this->_getDummyPreview();
     }
     if ($thumbFilename != $cacheFilename) {
@@ -248,12 +248,12 @@ class VideoPreviewComponent extends Component {
   private function _validateVideoMedia(&$media) {
     $video = $this->controller->Media->getFile($media, FILE_TYPE_VIDEO, false);
     if (!$video) {
-      Logger::err("Media {$media['Media']['id']} has no attached video file");
+      CakeLog::error("Media {$media['Media']['id']} has no attached video file");
       return false;
     }
     $videoFilename = $this->controller->MyFile->getFilename($video);
     if (!is_readable($videoFilename)) {
-      Logger::err("Video file of media {$media['Media']['id']} not readable: $videoFilename");
+      CakeLog::error("Video file of media {$media['Media']['id']} not readable: $videoFilename");
       return false;
     }
     return true;
@@ -271,7 +271,7 @@ class VideoPreviewComponent extends Component {
     }
 
     if (!$this->_validateVideoMedia($media)) {
-      Logger::err("Invalid media {$media['Media']['id']}");
+      CakeLog::error("Invalid media {$media['Media']['id']}");
       return $this->_getDummyPreview();
     }
 
@@ -285,7 +285,7 @@ class VideoPreviewComponent extends Component {
       return $this->_createCachedFile($thumbFilename, $cache);
     }
 
-    Logger::info("Create cached video preview $cache");
+    CakeLog::info("Create cached video preview $cache");
     $videoFile = $this->_getVideoFile($media);
     $this->_create($videoFile, $cache);
     return $this->_createCachedFile($cache, $cache);

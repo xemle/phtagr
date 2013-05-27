@@ -59,7 +59,7 @@ class MyFile extends AppModel
         $size = filesize($filename);
       } else {
         $size = 0;
-        Logger::info("Could not read file: " . $filename);
+        CakeLog::info("Could not read file: " . $filename);
       }
       $type = $this->_getTypeFromFilename($filename);
     }
@@ -108,9 +108,9 @@ class MyFile extends AppModel
     if (!$this->hasFlag($this->data, FILE_FLAG_EXTERNAL)) {
       $filename = $this->getFilename();
       if (!@unlink($filename)) {
-        Logger::err("Could not delete internal file $filename");
+        CakeLog::error("Could not delete internal file $filename");
       } else {
-        Logger::verbose("Delete internal file $filename");
+        CakeLog::debug("Delete internal file $filename");
       }
     }
     // prepare associations for deletion
@@ -128,7 +128,7 @@ class MyFile extends AppModel
   public function afterDelete() {
     if ($this->hasFlag($this->data, FILE_FLAG_DEPENDENT) &&
       $this->hasMedia()) {
-      Logger::verbose("Delete media {$this->data['Media']['id']} from dependent file {$this->data['File']['id']}");
+      CakeLog::debug("Delete media {$this->data['Media']['id']} from dependent file {$this->data['File']['id']}");
       $this->Media->delete($this->data['File']['media_id']);
     }
   }
@@ -202,7 +202,7 @@ class MyFile extends AppModel
       $data = $data['File'];
     }
     if (!isset($data['file'])) {
-      Logger::err("Precondition failed");
+      CakeLog::error("Precondition failed");
       return false;
     }
     return strtolower(substr($data['file'], strrpos($data['file'], '.') + 1));
@@ -233,12 +233,12 @@ class MyFile extends AppModel
     }
 
     if (!isset($data['id']) || !intval($mediaId)) {
-      Logger::err("Precondition failed");
+      CakeLog::error("Precondition failed");
       return false;
     }
     $data['media_id'] = $mediaId;
     if (!$this->save($data, true, array('media_id'))) {
-      Logger::err("Could not bind media $mediaId to file {$data['id']}");
+      CakeLog::error("Could not bind media $mediaId to file {$data['id']}");
       return false;
     }
     return true;
@@ -263,24 +263,24 @@ class MyFile extends AppModel
     } elseif (!$data && $fileId) {
       $conditions = array('File.id' => intval($fileId));
     } else {
-      Logger::warn("Invalid input");
-      Logger::debug($data);
+      CakeLog::warning("Invalid input");
+      CakeLog::debug($data);
       return false;
     }
 
     $files = $this->find('all', array('conditions' => $conditions, 'recursive' => -1));
     if (!$files) {
-      Logger::debug("No files found to unlink media");
+      CakeLog::debug("No files found to unlink media");
       return true;
     }
 
     $ids = Set::extract('/File/id', $files);
-    Logger::debug("Unlink media of files ".implode(', ', $ids));
+    CakeLog::debug("Unlink media of files ".implode(', ', $ids));
     $this->updateAll(array('media_id' => null, 'readed' => null), array('id' => $ids));
 
     foreach ($files as $file) {
       if ($this->hasFlag($file, FILE_FLAG_EXTERNAL)) {
-        Logger::debug("Delete external file {$file['File']['id']} from database");
+        CakeLog::debug("Delete external file {$file['File']['id']} from database");
         $this->delete($file['File']['id']);
       }
     }
@@ -296,7 +296,7 @@ class MyFile extends AppModel
    */
   public function canRead($filename, $user, $flag = ACL_READ_ORIGINAL) {
     if (!file_exists($filename)) {
-      Logger::debug("Filename does not exists: $filename");
+      CakeLog::debug("Filename does not exists: $filename");
       return false;
     }
 
@@ -369,9 +369,9 @@ class MyFile extends AppModel
       $this->data['File']['size'] = filesize($filename);
       $this->data['File']['time'] = date("Y-m-d H:i:s", filemtime($filename));
       if (!$this->save(null, true, array('size', 'time'))) {
-        Logger::warn("Could not update file data of $filename");
+        CakeLog::warning("Could not update file data of $filename");
       } else {
-        Logger::debug("Update file type and size of $filename");
+        CakeLog::debug("Update file type and size of $filename");
       }
     }
   }
@@ -384,12 +384,12 @@ class MyFile extends AppModel
       $data = $data['File'];
     }
     if (!isset($data['id'])) {
-      Logger::err("Precondition failed");
+      CakeLog::error("Precondition failed");
       return false;
     }
     $data['readed'] = date("Y-m-d H:i:s", time());
     if (!$this->save($data, true, array('readed'))) {
-      Logger::err("could not save data");
+      CakeLog::error("could not save data");
       return false;
     }
     return true;
@@ -400,17 +400,17 @@ class MyFile extends AppModel
       return $this->moveDir($src, $dst);
     }
     if (file_exists($dst)) {
-      Logger::err("Destination '$dst' exists and cannot overwritten!");
+      CakeLog::error("Destination '$dst' exists and cannot overwritten!");
       return false;
     }
     $data = $this->findByFilename($src);
     if (!$data) {
-      Logger::err("Source '$src' was not found in the database!");
+      CakeLog::error("Source '$src' was not found in the database!");
       return false;
     }
 
     if (!@rename($src, $dst)) {
-      Logger::err("Could not move '$src'to '$dst'");
+      CakeLog::error("Could not move '$src'to '$dst'");
       return false;
     }
     if (is_dir($dst)) {
@@ -421,7 +421,7 @@ class MyFile extends AppModel
       $data['File']['type'] = $this->_getTypeFromFilename($dst);
     }
     if (!$this->save($data, true, array('path', 'file', 'type'))) {
-      Logger::err("Could not updated new filename '$dst' (id=$id)");
+      CakeLog::error("Could not updated new filename '$dst' (id=$id)");
       return false;
     }
     return true;
@@ -435,18 +435,18 @@ class MyFile extends AppModel
    */
   public function moveDir($src, $dst) {
     if (!is_dir($src)) {
-      Logger::err("Source '$src' is not a directory");
+      CakeLog::error("Source '$src' is not a directory");
       return false;
     }
     // Allow dir and writeable parent dir
     if ((file_exists($dst) && !is_dir($dst)) ||
       (!file_exists($dst) && !is_writeable(dirname($dst)))) {
-      Logger::err("Invalid destination '$dst'");
+      CakeLog::error("Invalid destination '$dst'");
       return false;
     }
 
     if (!@rename($src, $dst)) {
-      Logger::err("Could not rename directory");
+      CakeLog::error("Could not rename directory");
       return false;
     }
 
@@ -459,14 +459,14 @@ class MyFile extends AppModel
     $sql = "UPDATE ".$this->tablePrefix.$this->table." AS File ".
            "SET path=REPLACE(path,'$sqlSrc','$sqlDst') ".
            "WHERE path LIKE '$sqlSrc%'";
-    Logger::debug($sql);
+    CakeLog::debug($sql);
     $this->query($sql);
     return true;
   }
 
   public function deletePath($path, $deleteFolder = false) {
     if (!file_exists($path)) {
-      Logger::err("Path $path does not exists");
+      CakeLog::error("Path $path does not exists");
       return false;
     }
     if (!is_dir($path)) {
@@ -476,7 +476,7 @@ class MyFile extends AppModel
     $files = $this->deleteAll("File.path LIKE '$sqlPath%'", true, true);
     if ($deleteFolder) {
       $folder = new Folder();
-      Logger::info("Delete folder $path");
+      CakeLog::info("Delete folder $path");
       $folder->delete($path);
     }
     return true;

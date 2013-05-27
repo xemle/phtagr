@@ -78,7 +78,7 @@ class SetupController extends AppController {
    */
   public function __loadModel($models) {
     if (!$this->UpgradeSchema->isConnected()) {
-      Logger::warn("Not connected");
+      CakeLog::warning("Not connected");
       return false;
     }
 
@@ -92,7 +92,7 @@ class SetupController extends AppController {
       }
 
       if (!App::import('Model', $model)) {
-        Logger::err("Could not load model '$model'");
+        CakeLog::error("Could not load model '$model'");
         $success = false;
         continue;
       }
@@ -106,9 +106,9 @@ class SetupController extends AppController {
       return $this->checks['hasSalt'];
     }
 
-    Logger::debug("Check for settings in core");
+    CakeLog::debug("Check for settings in core");
     if (Configure::read('Security.salt') == 'DYhG93b0qyJfIxfs2guVoUubWwvniR2G0FgaC9mi') {
-      Logger::warn("Detecting unsecure security salt");
+      CakeLog::warning("Detecting unsecure security salt");
       $this->checks['hasSalt'] = false;
       return false;
     }
@@ -128,8 +128,7 @@ class SetupController extends AppController {
 
   public function __checkSession() {
     if (!$this->__hasSession()) {
-      Logger::warn('Setup is disabled. Setup session variable is not set.');
-      Logger::bt();
+      CakeLog::warning('Setup is disabled. Setup session variable is not set.');
       $this->redirect('/');
     }
   }
@@ -142,7 +141,7 @@ class SetupController extends AppController {
       return $this->checks['hasPaths'];
     }
 
-    Logger::debug("Check for writable paths");
+    CakeLog::debug("Check for writable paths");
     foreach ($this->paths as $path) {
       if (!is_dir($path) || !is_writeable($path)) {
         $this->checks['hasPaths'] = false;
@@ -163,7 +162,7 @@ class SetupController extends AppController {
       return false;
     }
 
-    Logger::debug("Check for database configuration");
+    CakeLog::debug("Check for database configuration");
     $this->checks['hasConfig'] = is_readable($this->dbConfig);
     return $this->checks['hasConfig'];
   }
@@ -180,7 +179,7 @@ class SetupController extends AppController {
       $this->checks['hasConnection'] = false;
       return false;
     }
-    Logger::debug("Check for database connection");
+    CakeLog::debug("Check for database connection");
 
     if (!$this->UpgradeSchema->initDataSource()) {
       $this->checks['hasConnection'] = false;
@@ -207,9 +206,9 @@ class SetupController extends AppController {
       return false;
     }
 
-    Logger::debug("Check for initial required tables");
+    CakeLog::debug("Check for initial required tables");
     if (!$this->UpgradeSchema->hasTables($tables)) {
-      Logger::debug("require tables");
+      CakeLog::debug("require tables");
       $this->checks['hasTables'] = false;
       return false;
     } else {
@@ -230,7 +229,7 @@ class SetupController extends AppController {
       return false;
     }
 
-    Logger::debug("Check for admin account");
+    CakeLog::debug("Check for admin account");
     if (!$this->__loadModel(array('User', 'Option'))) {
       $this->checks['hasSysOp'] = false;
       return false;
@@ -258,7 +257,7 @@ class SetupController extends AppController {
     } else {
       foreach ($commands as $command) {
         if (!$this->Option->hasAny(array('user_id' => 0, 'name' => 'bin.'.$command))) {
-          Logger::trace("Command '$command' is missing");
+          CakeLog::debug("Command '$command' is missing");
           return false;
         }
       }
@@ -280,16 +279,16 @@ class SetupController extends AppController {
   public function index() {
     if ($this->__hasSysOp()) {
       if ($this->hasRole(ROLE_SYSOP)) {
-        Logger::verbose("Redirect to upgrade");
+        CakeLog::debug("Redirect to upgrade");
         $this->redirect('/system/upgrade');
       } else {
-        Logger::warn("Setup is disabled. phTagr is already configured!");
+        CakeLog::warning("Setup is disabled. phTagr is already configured!");
         $this->Session->write('loginRedirect', '/setup');
         $this->redirect('/users/login');
       }
     }
     $this->Session->write('setup', true);
-    Logger::info("Start Setup of phTagr!");
+    CakeLog::info("Start Setup of phTagr!");
 
     if (!$this->__hasSalt()) {
       $this->redirect('salt');
@@ -329,14 +328,14 @@ class SetupController extends AppController {
     $newContent = preg_replace("/$oldSalt/", $salt, $content);
     if (!$file->write($newContent)) {
       $this->Session->setFlash(__("Could not write configuration to '%s'", $this->core));
-      Logger::err("Could not write configuration to '$this->core'");
+      CakeLog::error("Could not write configuration to '$this->core'");
     } else {
       Configure::write('Security.salt', $salt);
       $this->Session->destroy();
       $this->Session->renew();
 
       $this->Session->setFlash(__("Update core settings"));
-      Logger::info("Set new security salt to '$this->core'");
+      CakeLog::info("Set new security salt to '$this->core'");
       $this->redirect('index');
     }
   }
@@ -384,7 +383,7 @@ class SetupController extends AppController {
         $readonly[] = $path;
     }
 
-    Logger::info("Missing directories: ".implode(', ', $missing).", readonly Directories: ".implode(', ', $readonly));
+    CakeLog::info("Missing directories: ".implode(', ', $missing).", readonly Directories: ".implode(', ', $readonly));
     $this->set('missing', $missing);
     $this->set('readonly', $readonly);
   }
@@ -440,11 +439,11 @@ class DATABASE_CONFIG {
 ";
       $file = new File($this->dbConfig, true, 644);
       if ($file->write($output)) {
-        Logger::info("Database configuration file '{$this->dbConfig}' was written successfully");
+        CakeLog::info("Database configuration file '{$this->dbConfig}' was written successfully");
         $file->close();
         $this->redirect('database');
       } else {
-        Logger::err("Could not write database configuration file '{$this->dbConfig}'");
+        CakeLog::error("Could not write database configuration file '{$this->dbConfig}'");
         $this->Session->setFlash(__("Could not write database configuration file"));
       }
       $file->close();
@@ -459,7 +458,7 @@ class DATABASE_CONFIG {
         $this->request->data('login', 'phtagr');
       }
     }
-    Logger::info("Request database configuration");
+    CakeLog::info("Request database configuration");
   }
 
   public function configro() {
@@ -473,7 +472,7 @@ class DATABASE_CONFIG {
 
     // nothing to do
     $this->set('dbConfig', $this->dbConfig);
-    Logger::info("Request database configuration (readonly)");
+    CakeLog::info("Request database configuration (readonly)");
   }
 
   public function database() {
@@ -496,20 +495,20 @@ class DATABASE_CONFIG {
     try {
       if (!$this->__loadMigration()) {
         $this->Session->setFlash(__('Could not initialize database migration'));
-        Logger::error("Initialization of database migration failed");
+        CakeLog::error("Initialization of database migration failed");
         return;
       }
       $maxVersion = max(array_keys($this->Migration->getMapping('app')));
       if (!$this->Migration->run(array('type' => 'app', 'direction' => 'up', 'version' => $maxVersion))) {
         $this->Session->setFlash(__('Could not initialize database'));
-        Logger::error("Initial database migration failed");
+        CakeLog::error("Initial database migration failed");
         return;
       }
-      Logger::info("Successful database migration to verion " . $this->Migration->getVersion('app'));
+      CakeLog::info("Successful database migration to verion " . $this->Migration->getVersion('app'));
       $this->Session->setFlash(__("All required tables are created"));
       $this->redirect('user');
     } catch (MigrationVersionException $errors) {
-      Logger::trace($errors->getMessage());
+      CakeLog::debug($errors->getMessage());
       $this->Session->setFlash(__("Could not create tables correctly. Please see logfile for details"));
     }
   }
@@ -536,17 +535,17 @@ class DATABASE_CONFIG {
         $userId = $this->User->getLastInsertID();
         $user = $this->User->findById($userId);
         $this->User->writeSession($user, $this->Session);
-        Logger::info("Admin account '{$user['User']['username']}' was created");
+        CakeLog::info("Admin account '{$user['User']['username']}' was created");
         $this->Session->setFlash(__("Admin account was successfully created"));
         $this->redirect('system');
       } else {
-        Logger::err("Admin account '{$this->request->data['User']['username']}' could not be created");
+        CakeLog::error("Admin account '{$this->request->data['User']['username']}' could not be created");
         $this->Session->setFlash(__("Could not create admin account. Please retry"));
       }
     } elseif (!isset($this->request->data['User']['username'])) {
       $this->request->data['User']['username'] = 'admin';
     }
-    Logger::info("Request account data for the admin");
+    CakeLog::info("Request account data for the admin");
   }
 
   public function __findCommand($command) {
@@ -596,10 +595,10 @@ class DATABASE_CONFIG {
       $this->redirect('/');
     }
     if (!isset($this->Option->User)) {
-      Logger::warn("Could not associate User model to Option model");
+      CakeLog::warning("Could not associate User model to Option model");
     }
 
-    Logger::info("Check for required external programs");
+    CakeLog::info("Check for required external programs");
     $missing = array();
     if (!empty($this->request->data)) {
       foreach ($this->commands as $command) {
@@ -607,10 +606,10 @@ class DATABASE_CONFIG {
         $file = new File($bin);
         if ($file->executable()) {
           $this->Option->setValue('bin.'.$command, $bin, 0);
-          Logger::debug("Write 'bin.$command'='$bin'");
+          CakeLog::debug("Write 'bin.$command'='$bin'");
         } else {
           $missing[] = $command;
-          Logger::err("Command for '$command': '$bin' is missing or not executeable!");
+          CakeLog::error("Command for '$command': '$bin' is missing or not executeable!");
         }
       }
       $this->redirect('finish');
@@ -638,7 +637,7 @@ class DATABASE_CONFIG {
 
     $this->__checkSession();
 
-    Logger::info("Setup complete");
+    CakeLog::info("Setup complete");
 
     // cleanup
     $this->Session->delete('setup');
@@ -650,7 +649,7 @@ class DATABASE_CONFIG {
     $modelCacheFiles = $folder->find('cake_model_.*');
     foreach ($modelCacheFiles as $file) {
       if (!@unlink($folder->addPathElement($modelCacheDir, $file))) {
-        Logger::err("Could not delete model cache file '$file' in '$modelCacheDir'");
+        CakeLog::error("Could not delete model cache file '$file' in '$modelCacheDir'");
       }
     }
   }
@@ -666,15 +665,15 @@ class DATABASE_CONFIG {
     }
     CakePlugin::load('Migrations');
     if (!App::import('Lib', 'Migrations.MigrationVersion')) {
-      Logger::err("Could not import Migrations plugin");
+      CakeLog::error("Could not import Migrations plugin");
       return false;
     }
     $this->Migration = new MigrationVersion(array('connection' => 'default'));
     if (empty($this->Migration)) {
-      Logger::err("Could not load class Migrations.MigrationVersion");
+      CakeLog::error("Could not load class Migrations.MigrationVersion");
       return false;
     }
-    Logger::debug('Loaded Migration plugin');
+    CakeLog::debug('Loaded Migration plugin');
     return true;
   }
 

@@ -48,14 +48,14 @@ class FileCacheComponent extends Component {
 
       $folder = new Folder($cacheDir);
       if (!$folder->create($cacheDir)) {
-        Logger::err("Could not create cache dir '$cacheDir'");
+        CakeLog::error("Could not create cache dir '$cacheDir'");
         return false;
       } else {
-        Logger::debug("Cache dir '$cacheDir' created");
+        CakeLog::debug("Cache dir '$cacheDir' created");
       }
     }
     if (!is_writeable($cacheDir)) {
-      Logger::err("Cache directory '$cacheDir' is not writeable");
+      CakeLog::error("Cache directory '$cacheDir' is not writeable");
       return false;
     }
     return $cacheDir;
@@ -103,7 +103,7 @@ class FileCacheComponent extends Component {
     $mediaId = intval($media['Media']['id']);
     $cacheDir = $this->getPath($media, false);
     if (!$cacheDir) {
-      Logger::trace("No cache dir found for media $mediaId");
+      CakeLog::debug("No cache dir found for media $mediaId");
       return true;
     }
 
@@ -111,15 +111,15 @@ class FileCacheComponent extends Component {
     $pattern = $this->getFilenamePrefix($mediaId).'.*';
     $files = $folder->find($pattern);
     if ($files) {
-      Logger::debug("Delete cached files of image $mediaId");
+      CakeLog::debug("Delete cached files of image $mediaId");
       foreach($files as $file) {
-        Logger::trace("Delete cache file '$file'");
+        CakeLog::debug("Delete cache file '$file'");
         $filename = $folder->addPathElement($cacheDir, $file);
         unlink($filename);
       }
       clearstatcache();
     } else {
-      Logger::trace("No cached files found for image $mediaId");
+      CakeLog::debug("No cached files found for image $mediaId");
     }
   }
 
@@ -134,10 +134,10 @@ class FileCacheComponent extends Component {
     if (is_dir($cacheDir)) {
       $folder = new Folder();
       $folder->delete($cacheDir);
-      Logger::info("Deleted cache dir '$cacheDir'");
+      CakeLog::info("Deleted cache dir '$cacheDir'");
       clearstatcache();
     } else {
-      Logger::debug("User $userId has no cached files");
+      CakeLog::debug("User $userId has no cached files");
     }
   }
 }

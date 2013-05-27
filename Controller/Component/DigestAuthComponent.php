@@ -33,7 +33,7 @@ class DigestAuthComponent extends Component
 
   public function __fixWindowsUsername() {
     if (!isset($this->_authData['username'])) {
-      Logger::err("Username is not set");
+      CakeLog::error("Username is not set");
       return false;
     }
 
@@ -49,15 +49,15 @@ class DigestAuthComponent extends Component
   }
 
   public function __writeUserData($user) {
-    Logger::info("User '{$user['User']['username']}' (id {$user['User']['id']}) authenticated");
+    CakeLog::info("User '{$user['User']['username']}' (id {$user['User']['id']}) authenticated");
     if (!$this->Session->check('User.id') || $this->Session->read('User.id') != $user['User']['id']) {
-      Logger::info("Start new session for '{$user['User']['username']}' (id {$user['User']['id']})");
+      CakeLog::info("Start new session for '{$user['User']['username']}' (id {$user['User']['id']})");
       $this->controller->User->writeSession($user, $this->Session);
     }
   }
 
   public function __addBasicRequestHeader() {
-    Logger::trace("Add basic authentications header");
+    CakeLog::debug("Add basic authentications header");
     header('WWW-Authenticate: Basic realm="'.$this->realm.'"');
   }
 
@@ -75,12 +75,12 @@ class DigestAuthComponent extends Component
     $counter = $this->Session->read('auth.logins');
 
     if ($counter>3) {
-      Logger::err('login countes exceeded');
+      CakeLog::error('login countes exceeded');
       $this->decline();
     }
     $this->Session->write('auth.logins', $counter+1);
 
-    Logger::trace("Add authentications header");
+    CakeLog::debug("Add authentications header");
     $this->controller->response->header('WWW-Authenticate', 'Digest realm="'.$this->realm.'",qop="auth",nonce="'.uniqid().'",opaque="'.$opaque.'",algorithm="MD5"');
   }
 
@@ -112,16 +112,16 @@ class DigestAuthComponent extends Component
       $arh=apache_request_headers();
       if (isset($arh['Authorization']))
         $hdr=$arh['Authorization'];
-      //Logger::trace($arh);
+      //CakeLog::debug($arh);
     } elseif (isset($_SERVER['HTTP_AUTHORIZATION'])) {
       $hdr=$_SERVER['HTTP_AUTHORIZATION'];
     } elseif (isset($_SERVER['PHP_AUTH_DIGEST'])) {
       $hdr=$_SERVER['PHP_AUTH_DIGEST'];
     }
     if ($hdr === false) {
-      Logger::info("Could not find any authentication header");
+      CakeLog::info("Could not find any authentication header");
     }
-    //Logger::trace($hdr);
+    //CakeLog::debug($hdr);
     $this->_authHdr = $hdr;
     return $hdr;
   }
@@ -129,18 +129,18 @@ class DigestAuthComponent extends Component
   public function __getAuthSchema() {
     $words = preg_split("/[\s]+/", $this->_authHdr);
     if (!$words) {
-      Logger::warn("Could not split authentication header");
+      CakeLog::warning("Could not split authentication header");
       $this->requestAuthentication();
     }
 
     if (count($words) < 2) {
-      Logger::warn("Authentication header a to less parameter");
+      CakeLog::warning("Authentication header a to less parameter");
       $this->requestAuthentication();
     }
 
     $schema = strtolower($words[0]);
     if ($schema != 'digest' && $schema != 'basic') {
-      Logger::err("Unsupported authentication schema: $schema");
+      CakeLog::error("Unsupported authentication schema: $schema");
       $this->requestAuthentication();
     }
 
@@ -150,16 +150,16 @@ class DigestAuthComponent extends Component
   public function __checkBasicHeader() {
     $words = preg_split("/[\s]+/", $this->_authHdr);
     if (count($words) != 2 || strtolower($words[0]) != 'basic') {
-      Logger::err("Wrong basic authentication header");
-      Logger::trace($this->authHdr);
+      CakeLog::error("Wrong basic authentication header");
+      CakeLog::debug($this->authHdr);
       $this->requestAuthentication();
     }
 
     $decode = base64_decode($words[1]);
     $data = preg_split('/:/', $decode, 2);
     if (count($data) != 2) {
-      Logger::err("Authentication data is invalid");
-      Logger::trace("Basic authentication string is: {$word[1]} (decoded: $decode)");
+      CakeLog::error("Authentication data is invalid");
+      CakeLog::debug("Basic authentication string is: {$word[1]} (decoded: $decode)");
       $this->requestAuthentication();
     }
 
@@ -170,7 +170,7 @@ class DigestAuthComponent extends Component
 
   public function __checkBasicUser() {
     if (!$this->_authData) {
-      Logger::err("Aauthentication data is not set");
+      CakeLog::error("Aauthentication data is not set");
       $this->requestAuthentication();
     }
 
@@ -178,18 +178,18 @@ class DigestAuthComponent extends Component
     $username = $this->__fixWindowsUsername();
     $user = $this->controller->User->findByUsername($username);
     if (!$user) {
-      Logger::err("User '$username' not found");
+      CakeLog::error("User '$username' not found");
       $this->requestAuthentication();
     }
     if ($this->controller->User->isExpired($user)) {
-      Logger::warn("User account of '{$user['User']['username']}' (id {$user['User']['id']}) is expired!");
+      CakeLog::warning("User account of '{$user['User']['username']}' (id {$user['User']['id']}) is expired!");
       $this->decline();
     }
 
     // check credentials
     $user = $this->controller->User->decrypt($user);
     if ($user['User']['password'] != $this->_authData['password']) {
-      Logger::err("Password missmatch");
+      CakeLog::error("Password missmatch");
       $this->requestAuthentication();
     }
 
@@ -214,8 +214,8 @@ class DigestAuthComponent extends Component
     }
 
     if ($requiredParts) {
-      Logger::warn("Missing authorization part(s): ".implode(", ", array_keys($requiredParts)));
-      Logger::info("Authorization header is: ".$this->_authHdr);
+      CakeLog::warning("Missing authorization part(s): ".implode(", ", array_keys($requiredParts)));
+      CakeLog::info("Authorization header is: ".$this->_authHdr);
       $this->requestAuthentication();
     }
 
@@ -237,7 +237,7 @@ class DigestAuthComponent extends Component
     }
 
     if ($uri !== $requestUri) {
-      Logger::err("Uri missmatch: Request is '$requestUri' but auth header has '$uri'");
+      CakeLog::error("Uri missmatch: Request is '$requestUri' but auth header has '$uri'");
       $this->requestAuthentication();
     }
   }
@@ -249,7 +249,7 @@ class DigestAuthComponent extends Component
   public function __checkSession() {
     $sid = $this->_authData['opaque'];
     if ($this->Session->started()) {
-      Logger::warn("Session already started!");
+      CakeLog::warning("Session already started!");
     }
     $this->Session->id($sid);
 
@@ -257,20 +257,20 @@ class DigestAuthComponent extends Component
       $this->Session->renew();
       $this->Session->write('auth.logins', 0);
       $this->Session->write('auth.nc', 0);
-      Logger::warn("Unknown or died session ($sid).");
-      //Logger::trace($_SESSION);
+      CakeLog::warning("Unknown or died session ($sid).");
+      //CakeLog::debug($_SESSION);
       $this->requestAuthentication();
     }
 
     $snc=$this->Session->read('auth.nc');
     $nc=hexdec($this->_authData['nc']);
     if ($snc==$nc) {
-      Logger::warn("Same request counter $snc is used!");
+      CakeLog::warning("Same request counter $snc is used!");
     }
 
     // Check request counter
     if ($snc>$nc) {
-      Logger::err("Reused request counter. Current count is {$snc}. Request counter is $nc");
+      CakeLog::error("Reused request counter. Current count is {$snc}. Request counter is $nc");
       $this->decline();
     }
 
@@ -282,7 +282,7 @@ class DigestAuthComponent extends Component
     $username = $this->__fixWindowsUsername();
     $user = $this->controller->User->findByUsername($username);
     if ($user === false) {
-      Logger::err("Unknown username '$username'");
+      CakeLog::error("Unknown username '$username'");
       $this->requestAuthentication();
     }
 
@@ -291,12 +291,12 @@ class DigestAuthComponent extends Component
     $A2=md5($_SERVER['REQUEST_METHOD'].':'.$this->_authData['uri']);
     $validResponse=md5($A1.':'.$this->_authData['nonce'].':'.$this->_authData['nc'].':'.$this->_authData['cnonce'].':'.$this->_authData['qop'].':'.$A2);
     if ($this->_authData['response']!=$validResponse) {
-      Logger::err("Invalid authentication response: Got '".$this->_authData['response']."' but expected '$validResponse'");
+      CakeLog::error("Invalid authentication response: Got '".$this->_authData['response']."' but expected '$validResponse'");
       $this->decline();
     }
 
     if ($this->controller->User->isExpired($user)) {
-      Logger::warn("User account of '{$user['User']['username']}' (id {$user['User']['id']}) is expired!");
+      CakeLog::warning("User account of '{$user['User']['username']}' (id {$user['User']['id']}) is expired!");
       $this->decline();
     } else {
       $this->__writeUserData($user);
@@ -322,12 +322,12 @@ class DigestAuthComponent extends Component
 
     $schema = $this->__getAuthSchema();
     if (!$schema) {
-      Logger::err("Drop request without valid authentication");
+      CakeLog::error("Drop request without valid authentication");
       $this->requestAuthentication();
     }
 
     if (!in_array($schema, $this->validSchemas) && $schema != $this->preferedSchema) {
-      Logger::err("Schema '$schema' is not allowed");
+      CakeLog::error("Schema '$schema' is not allowed");
       $this->requestAuthentication();
     }
 
@@ -344,7 +344,7 @@ class DigestAuthComponent extends Component
         $this->__checkBasicUser();
         break;
       default:
-        Logger::err("Authentication schema '$schema' NIY");
+        CakeLog::error("Authentication schema '$schema' NIY");
         $this->decline();
         break;
     }

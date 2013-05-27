@@ -78,11 +78,11 @@ class SystemController extends AppController {
             $size = $size * 1024 * 1024 * 1024 * 1024;
             break;
           default:
-            Logger::err("Unknown unit {$matches[3]}");
+            CakeLog::error("Unknown unit {$matches[3]}");
         }
       }
       if ($size < 0) {
-        Logger::err("Size is negtive: $size");
+        CakeLog::error("Size is negtive: $size");
         return 0;
       }
       return $size;
@@ -156,7 +156,7 @@ class SystemController extends AppController {
     App::import('Lib', 'Migrations.MigrationVersion');
     $Migration = new MigrationVersion(array('connection' => 'default'));
     if (empty($Migration)) {
-      Logger::err("Could not load class Migrations.MigrationVersion");
+      CakeLog::error("Could not load class Migrations.MigrationVersion");
       $this->redirect(false, 505);
     }
     $currentVersion = $Migration->getVersion('app');
@@ -169,9 +169,9 @@ class SystemController extends AppController {
       @ini_set('max_execution_time', 600);
       if (!$Migration->run(array('type' => 'app', 'direction' => 'up'))) {
         $this->Session->setFlash(__("Database migration failed. Please see the log files for errors."));
-        Logger::error("Could not run migration");
+        CakeLog::error("Could not run migration");
       } else {
-        Logger::info("Upgraded database from version $currentVersion to " . max(array_keys($Migration->getMapping('app'))));
+        CakeLog::info("Upgraded database from version $currentVersion to " . max(array_keys($Migration->getMapping('app'))));
         $this->Session->setFlash(__("The database migration was successful."));
       }
     }
@@ -228,7 +228,7 @@ class SystemController extends AppController {
     $result = $this->Media->find('all', array(
       'conditions' => array('Media.type & ' . MEDIA_TYPE_VIDEO . ' > 0', 'Media.duration > 0'),
       'fields' => 'SUM(Media.duration) AS Duration'));
-    Logger::debug($result);
+    CakeLog::debug($result);
     $data['media.video.length'] = floatval($result[0][0]['Duration']);
     $data['comments'] = $this->Media->Comment->find('count');
     $allFields = $this->Media->Field->find('all');

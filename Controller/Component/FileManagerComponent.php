@@ -41,7 +41,7 @@ class FileManagerComponent extends Component {
    */
   public function add($filename, $user = false) {
     if (!is_readable($filename)) {
-      Logger::error("Can not read file: $filename");
+      CakeLog::error("Can not read file: $filename");
       return false;
     }
     if (!$user) {
@@ -50,8 +50,8 @@ class FileManagerComponent extends Component {
       $userId = intval($user);
     } else {
       if (!isset($user['User']['id'])) {
-        Logger::err('Unexcpected user data array. Use current user.');
-        Logger::debug($user);
+        CakeLog::error('Unexcpected user data array. Use current user.');
+        CakeLog::debug($user);
         $userId = $this->controller->getUserId();
       } else {
         $userId = $user['User']['id'];
@@ -62,7 +62,7 @@ class FileManagerComponent extends Component {
     if ($id) {
       $file = $this->controller->MyFile->findById($id);
       $this->controller->MyFile->update($file);
-      Logger::verbose("Update file $filename (id $id)");
+      CakeLog::debug("Update file $filename (id $id)");
       return $id;
     }
     $flag = 0;
@@ -73,10 +73,10 @@ class FileManagerComponent extends Component {
 
     if ($this->controller->MyFile->save($file)) {
       $id = $this->controller->MyFile->getLastInsertID();
-      Logger::verbose("Insert file $filename to database (id $id)");
+      CakeLog::debug("Insert file $filename to database (id $id)");
       return $id;
     } else {
-      Logger::err("Could not save file $filename to database");
+      CakeLog::error("Could not save file $filename to database");
       return false;
     }
 
@@ -98,11 +98,11 @@ class FileManagerComponent extends Component {
       $id = $this->controller->MyFile->fileExists($file);
       if (!$id) {
         if (!$isExternal && is_readable($file) && is_writable(dirname($file))) {
-          Logger::warn("Delete unasigned internal file: $file");
+          CakeLog::warning("Delete unasigned internal file: $file");
           @unlink($file);
           return true;
         } else {
-          Logger::warn("Could not find file $file");
+          CakeLog::warning("Could not find file $file");
           return false;
         }
       }
@@ -111,7 +111,7 @@ class FileManagerComponent extends Component {
     } elseif (is_array($file) && !empty($file['File']['id'])) {
       $id = $file['File']['id'];
     } else {
-      Logger::warn("Could not determine file from $file");
+      CakeLog::warning("Could not determine file from $file");
       return false;
     }
     return $this->controller->MyFile->delete($id);
@@ -140,7 +140,7 @@ class FileManagerComponent extends Component {
     if (!is_dir($userDir)) {
       $Folder = new Folder();
       if (!$Folder->create($userDir)) {
-        Logger::err(sprintf("Directory %s NOT created", $userDir));
+        CakeLog::error(sprintf("Directory %s NOT created", $userDir));
         return false;
       }
     }
@@ -206,9 +206,9 @@ class FileManagerComponent extends Component {
       // Create required directories
       foreach ($dirs as $dir) {
         $dstDir = str_replace($src, $dst, $dir);
-        Logger::info($dstDir);
+        CakeLog::info($dstDir);
         if (!file_exists($dstDir) && !@mkdir($dstDir)) {
-          Logger::err("Could not create directory '$dstDir'");
+          CakeLog::error("Could not create directory '$dstDir'");
           return false;
         }
         // COPY properties
@@ -224,13 +224,13 @@ class FileManagerComponent extends Component {
       $dstFile = str_replace($src, $dst, $file);
 
       if (!@copy($file, $dstFile)) {
-        Logger::err("Could not copy file '$file' to '$dstFile'");
+        CakeLog::error("Could not copy file '$file' to '$dstFile'");
         //return "409 Conflict";
         return false;
       }
       $dstFileId = $this->add($dstFile, $user);
       if (!$dstFileId) {
-        Logger::err("Could not insert copied file '$dstFile' to database (from '$file')");
+        CakeLog::error("Could not insert copied file '$dstFile' to database (from '$file')");
         unlink($dstFile);
         // return "409 Conflict";
         return false;
@@ -238,30 +238,30 @@ class FileManagerComponent extends Component {
         // Copy all properties
         $srcFile = $this->controller->MyFile->findByFilename($file);
         if (!$srcFile) {
-          Logger::warn("Could not found source '$file' in database");
+          CakeLog::warning("Could not found source '$file' in database");
         } else {
           if (!empty($srcFile['Property'])) {
             $this->controller->Property->copy($srcFile, $dstFileId);
-            Logger::debug("Copy properties from '$file' to '$dstFile'");
+            CakeLog::debug("Copy properties from '$file' to '$dstFile'");
           }
         }
       }
-      Logger::info("Insert copied file '$dstFile' to database (from '$file')");
+      CakeLog::info("Insert copied file '$dstFile' to database (from '$file')");
     }
     return true;
   }
 
   public function move($src, $dst) {
     if (!file_exists($src)) {
-      Logger::err("Invalid source: $src. File does not exists");
+      CakeLog::error("Invalid source: $src. File does not exists");
       return false;
     }
     if ((!file_exists($dst) && !is_writeable(dirname($dst))) ||
       (is_dir($dst) && !is_writeable($dst))) {
-      Logger::err("Invalid destination $dst. Destination is not writeable");
+      CakeLog::error("Invalid destination $dst. Destination is not writeable");
       return false;
     } elseif (file_exists($dst) && !is_dir($dst)) {
-      Logger::err("Invalid destination: $dst. Destination is a file");
+      CakeLog::error("Invalid destination: $dst. Destination is a file");
       return false;
     }
     return $this->controller->MyFile->move($src, $dst);

@@ -111,7 +111,7 @@ class MediaController extends AppController
     $this->Media->bindModel(array('hasMany' => array('GroupsMedia' => array())));
     $media = $this->Media->find('first', $query);
     if (!$media) {
-      Logger::verbose("Media not found or access denied for media $id");
+      CakeLog::debug("Media not found or access denied for media $id");
       $this->redirect(null, 403);
     }
 
@@ -122,7 +122,7 @@ class MediaController extends AppController
     $media = $this->_getMedia($id, $type);
     $preview = $this->PreviewManager->getPreview($media, $type);
     if (!$preview) {
-      Logger::err("Fetching preview type '{$type}' for {$this->Media->toString($media)} failed");
+      CakeLog::error("Fetching preview type '{$type}' for {$this->Media->toString($media)} failed");
       $this->redirect(null, 403);
     }
     $this->_handleClientCache($preview);
@@ -142,7 +142,7 @@ class MediaController extends AppController
     $flashFilename = $this->FlashVideo->create($media, $config);
 
     if (!is_file($flashFilename)) {
-      Logger::err("Could not create preview file {$flashFilename}");
+      CakeLog::error("Could not create preview file {$flashFilename}");
       $this->redirect(null, 500);
     }
 
@@ -182,11 +182,11 @@ class MediaController extends AppController
     $file = $this->MyFile->findById($id);
     $user = $this->getUser();
     if (!$this->MyFile->hasMedia($file)) {
-      Logger::warn("User {$user['User']['id']} requested file {$file['File']['id']} without media");
+      CakeLog::warning("User {$user['User']['id']} requested file {$file['File']['id']} without media");
       $this->redirect(null, 404);
     }
     if (!$this->Media->canReadOriginal($file, $user)) {
-      Logger::warn("User {$user['User']['id']} has no previleges to access image ".$file['Media']['id']);
+      CakeLog::warning("User {$user['User']['id']} has no previleges to access image ".$file['Media']['id']);
       $this->redirect(null, 404);
     }
     if ($this->Media->hasFlag($file, MEDIA_FLAG_DIRTY) && $this->getOption('filter.write.onDemand')) {
@@ -194,7 +194,7 @@ class MediaController extends AppController
       $this->loadComponent('FilterManager');
       $this->FilterManager->write($media);
     }
-    Logger::info("Request of media {$file['Media']['id']}: file $id '{$file['File']['file']}'");
+    CakeLog::info("Request of media {$file['Media']['id']}: file $id '{$file['File']['file']}'");
     $filename = $this->MyFile->getFilename($file);
 
     $mediaOptions = $this->MyFile->getMediaViewOptions($filename);
@@ -243,7 +243,7 @@ class MediaController extends AppController
           $files[] = array('name' => $format . '/' . $name, 'filename' => $filename, 'size' => filesize($filename));
         }
       } else if ($mediaType != MEDIA_TYPE_IMAGE) {
-        Logger::warn("Media type $mediaType for {$media['Media']['id']} is not suppored yet");
+        CakeLog::warning("Media type $mediaType for {$media['Media']['id']} is not suppored yet");
       } else {
         $filename = $this->PreviewManager->getPreview($media, $format);
         if (is_readable($filename)) {
@@ -290,22 +290,22 @@ class MediaController extends AppController
       $this->redirect(null, 404, true);
     }
     if (!preg_match('/^\d+(,\d+)*$/', $this->request->data['Media']['ids'])) {
-      Logger::warn("Invalid id input: " . $this->request->data['Media']['ids']);
+      CakeLog::warning("Invalid id input: " . $this->request->data['Media']['ids']);
       $this->Session->setFlash("Invalid media ids");
       $this->redirect($redirectUrl);
     } else if (!in_array($format, array('mini', 'thumb', 'preview', 'high', 'hd', 'original'))) {
-      Logger::warn("Invalid format: $format");
+      CakeLog::warning("Invalid format: $format");
       $this->Session->setFlash("Unsupported download format: " + $format);
       $this->redirect($redirectUrl);
     }
     $ids = preg_split('/\s*,\s*/', trim($this->request->data['Media']['ids']));
     $ids = array_unique($ids);
     if ($this->hasRole(ROLE_GUEST) && count($ids) > BULK_DOWNLOAD_FILE_COUNT_USER) {
-      Logger::warn("Download of more than 240 media is not allowed");
+      CakeLog::warning("Download of more than 240 media is not allowed");
       $this->Session->setFlash(__("Download of more than %d media is not allowed", BULK_DOWNLOAD_FILE_COUNT_USER));
       $this->redirect($redirectUrl);
     } else if (!$this->hasRole(ROLE_GUEST) && count($ids) > BULK_DOWNLOAD_FILE_COUNT_ANONYMOUS) {
-      Logger::warn("Download of more than 12 media is not allowed for anonymous visitors");
+      CakeLog::warning("Download of more than 12 media is not allowed for anonymous visitors");
       $this->Session->setFlash(__("Download of more than %d media is not allowed for anonymous visitors", BULK_DOWNLOAD_FILE_COUNT_ANONYMOUS));
       $this->redirect($redirectUrl);
     }
@@ -327,13 +327,13 @@ class MediaController extends AppController
       $files = am($files, $this->_getMediaFiles($media, $fileFormat));
     }
     if (!count($files)) {
-      Logger::warn("No files for download");
+      CakeLog::warning("No files for download");
       $this->Session->setFlash(__("No files for download found for given media set"));
       $this->redirect($redirectUrl);
     }
     $sizes = Set::extract('/size', $files);
     if (array_sum($sizes) > BULK_DOWNLOAD_TOTAL_MB_LIMIT * 1024 * 1024) {
-      Logger::warn("Download of not more than " . BULK_DOWNLOAD_TOTAL_MB_LIMIT . " MB is not allowed");
+      CakeLog::warning("Download of not more than " . BULK_DOWNLOAD_TOTAL_MB_LIMIT . " MB is not allowed");
       $this->Session->setFlash(__("Download of not more than %d MB is not allowed", BULK_DOWNLOAD_TOTAL_MB_LIMIT));
       $this->redirect($redirectUrl);
     }

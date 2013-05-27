@@ -63,14 +63,14 @@ class GpxComponent extends Component {
    */
   public function readFile($filename) {
     if (!is_readable($filename)) {
-      Logger::warn("File '$file' is not readable");
+      CakeLog::warning("File '$file' is not readable");
       return false;
     }
     $t1 = microtime(true);
     try {
       $xml = Xml::build($filename);
     } catch (XmlException $xe) {
-      Logger::err("Could not read gpx file $filename: " . $xe->getMessage());
+      CakeLog::error("Could not read gpx file $filename: " . $xe->getMessage());
       return false;
     }
 
@@ -88,7 +88,7 @@ class GpxComponent extends Component {
     unset($xml);
     $time = sprintf("%.3fs", microtime(true) - $t1);
 
-    Logger::info("Read $filename with " . count($points) . " track points in $time");
+    CakeLog::info("Read $filename with " . count($points) . " track points in $time");
     return $points;
   }
 }
