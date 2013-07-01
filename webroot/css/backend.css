@@ -217,6 +217,7 @@ form {
         display: inline;
         float: left;
         width: 30%; }
+      form fieldset div.input input[type=email],
       form fieldset div.input input[type=password],
       form fieldset div.input input[type=text],
       form fieldset div.input textarea {
@@ -230,11 +231,13 @@ form {
         border: #aaaaaa 1px solid;
         padding: 5px;
         background-color: #efefef; }
+  form fieldset div.input input[type=email]:hover,
   form fieldset div.input input[type=password]:hover,
   form fieldset div.input input[type=text]:hover,
   form fieldset div.input textarea:hover {
     border: #999999 1px solid;
     background-color: #ffffdd; }
+  form fieldset div.input input[type=email]:focus,
   form fieldset div.input input[type=password]:focus,
   form fieldset div.input input[type=text]:focus,
   form fieldset div.input textarea:focus {
