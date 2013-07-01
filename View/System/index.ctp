@@ -2,7 +2,7 @@
 
 <?php echo $this->Session->flash(); ?>
 
-<?php echo $this->Form->create(null, array('action' => 'index')); ?>
+<?php echo $this->Form->create(null, array('url' => 'index')); ?>
 <fieldset><legend><?php echo __('General'); ?></legend>
 <?php
   echo $this->Form->input('general.title', array('label' => __('Gallery title')));

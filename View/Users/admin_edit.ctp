@@ -2,7 +2,7 @@
 
 <?php echo $this->Session->flash(); ?>
 
-<?php echo $this->Form->create(null, array('action' => 'edit/'.$this->request->data['User']['id'])); ?>
+<?php echo $this->Form->create(null, array('url' => 'edit/'.$this->request->data['User']['id'])); ?>
 <fieldset><legend><?php echo __('General'); ?></legend>
 <?php
   echo $this->Form->input('User.firstname', array('label' => __('First name')));
