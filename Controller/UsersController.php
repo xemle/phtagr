@@ -37,6 +37,7 @@ class UsersController extends AppController {
         ));
     }
     $this->layout = 'backend';
+    $this->Cookie->name = 'phTagr';
   }
 
   public function beforeRender() {
@@ -172,8 +173,6 @@ class UsersController extends AppController {
     CakeLog::info("Delete session for user id {$user['User']['id']}");
 
     $this->Session->destroy();
-
-    $this->Cookie->name = 'phTagr';
     $this->Cookie->destroy();
 
     $this->redirect('/');
