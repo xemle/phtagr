@@ -2,7 +2,7 @@
 
 <?php echo $this->Session->flash(); ?>
 
-<?php echo $this->Form->create(null, array('action' => 'edit/'.$this->request->data['Guest']['id']));?>
+<?php echo $this->Form->create(null, array('url' => 'edit/'.$this->request->data['Guest']['id']));?>
 <fieldset><legend><?php echo __('Guest'); ?></legend>
 <?php
   echo $this->Form->input('Guest.email', array('label' => __('Email')));
@@ -80,7 +80,7 @@
 <div class="info"><?php echo __('Currently this guest account has no assigned groups. Please add groups to grant access to your personal images.'); ?></div>
 <?php endif; ?>
 
-<?php echo $this->Form->create(null, array('action' => 'addGroup/'.$this->request->data['Guest']['id']));?>
+<?php echo $this->Form->create(null, array('url' => 'addGroup/'.$this->request->data['Guest']['id']));?>
 <fieldset><legend><?php echo __('Group Assignements'); ?></legend>
   <?php echo $this->Form->input('Group.name'); ?>
   <?php echo $this->Autocomplete->autoComplete('Group.name', '/guests/autocomplete'); ?>

@@ -34,7 +34,7 @@
 </div>
 <?php endif; ?>
 
-<?php echo $this->Form->create(null, array('action' => 'path/'.$this->request->data['User']['id'])); ?>
+<?php echo $this->Form->create(null, array('url' => 'path/'.$this->request->data['User']['id'])); ?>
 <fieldset><legend><?php echo __('Add Directory'); ?></legend>
 <?php echo $this->Form->input('Option.path.fspath', array('label' => __('Directory'))); ?>
 </fieldset>
