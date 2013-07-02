@@ -113,9 +113,9 @@ class CommentsController extends AppController
         CakeLog::info("New comment of media $mediaId");
         // Send email notification of other media owners
         if ($media['Media']['user_id'] != $userId) {
-          $this->_sendEmail($commentId);
+          $this->__sendEmail($commentId);
         }
-        $this->_sendNotifies($mediaId, $commentId);
+        $this->__sendNotifies($mediaId, $commentId);
       } else {
         $this->Session->setFlash(__('The Comment could not be saved. Please, try again.'));
         CakeLog::error("Could not save comment to media $mediaId");
@@ -129,13 +129,13 @@ class CommentsController extends AppController
     }
   }
 
-  public function _createEmail() {
+  private function __createEmail() {
     $Email = new CakeEmail('default');
     $Email->helpers('Html');
     return $Email;
   }
 
-  public function _sendEmail($commentId) {
+  private function __sendEmail($commentId) {
     $comment = $this->Comment->findById($commentId);
     if (!$comment) {
       CakeLog::error("Could not find comment $commentId");
@@ -146,7 +146,7 @@ class CommentsController extends AppController
       CakeLog::error("Could not find user '{$comment['Media']['user_id']}'");
       return;
     }
-    $email = $this->_createEmail();
+    $email = $this->__createEmail();
     $email->template('comment')
       ->to(array($user['User']['email'] => $user['User']['firstname'] . ' ' . $user['User']['lastname']))
       ->subject(__('[phtagr] Comment: %s', $comment['Media']['name']))
@@ -168,7 +168,7 @@ class CommentsController extends AppController
    * @param mediaId Current media id
    * @param commentId Id of the new comment
    */
-  public function _sendNotifies($mediaId, $commentId) {
+  private function __sendNotifies($mediaId, $commentId) {
     $this->Media->bindModel(array('hasMany' => array('Comment')));
     $media = $this->Media->findById($mediaId);
     if (!$media) {
@@ -202,7 +202,7 @@ class CommentsController extends AppController
     $emails = array_unique($emails);
     $to = array_pop($emails);
 
-    $email = $this->_createEmail();
+    $email = $this->__createEmail();
     $email->template('commentnotify')
       ->to($to)
       ->bcc($emails)

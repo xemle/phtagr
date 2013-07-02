@@ -43,7 +43,7 @@ class UsersController extends AppController {
     parent::beforeRender();
   }
 
-  public function __fromReadableSize($readable) {
+  private function __fromReadableSize($readable) {
     if (is_float($readable) || is_numeric($readable)) {
       return $readable;
     } elseif (preg_match_all('/^\s*(0|[1-9][0-9]*)(\.[0-9]+)?\s*([KkMmGg][Bb]?)?\s*$/', $readable, $matches, PREG_SET_ORDER)) {
@@ -213,7 +213,7 @@ class UsersController extends AppController {
    * @param id Current user
    * @return True if at least one system operator exists
    */
-  public function _lastAdminCheck($id) {
+  private function __lastAdminCheck($id) {
     $userId = $this->getUserId();
     $userRole = $this->getUserRole();
     if ($userId == $id && $userRole == ROLE_ADMIN && $this->request->data['User']['role'] < ROLE_ADMIN) {
@@ -230,7 +230,7 @@ class UsersController extends AppController {
   /**
    * Add 3rd level menu for user edit for admin
    */
-  public function _addAdminEditMenu($userId) {
+  private function __addAdminEditMenu($userId) {
     $subActions = array(
       'password' => __("Password"),
       'path' => __("Local Paths"));
@@ -246,7 +246,7 @@ class UsersController extends AppController {
     $this->requireRole(ROLE_SYSOP, array('loginRedirect' => '/admin/users'));
 
     $id = intval($id);
-    if (!empty($this->request->data) && $this->_lastAdminCheck($id)) {
+    if (!empty($this->request->data) && $this->__lastAdminCheck($id)) {
       $this->request->data['User']['id'] = $id;
 
       if ($this->User->save($this->request->data, true, array('email', 'expires', 'quota', 'firstname', 'lastname', 'role'))) {
@@ -262,7 +262,7 @@ class UsersController extends AppController {
     $this->request->data = $this->User->findById($id);
     $this->set('allowAdminRole', ($this->getUserRole() == ROLE_ADMIN) ? true : false);
 
-    $this->_addAdminEditMenu($id);
+    $this->__addAdminEditMenu($id);
   }
 
   public function admin_password($id) {
@@ -285,7 +285,7 @@ class UsersController extends AppController {
     $this->request->data = $this->User->findById($id);
     unset($this->request->data['User']['password']);
 
-    $this->_addAdminEditMenu($id);
+    $this->__addAdminEditMenu($id);
   }
 
   public function admin_path($id) {
@@ -316,7 +316,7 @@ class UsersController extends AppController {
     unset($this->request->data['User']['password']);
 
     $this->set('fsroots', $this->Option->buildTree($this->request->data, 'path.fsroot'));
-    $this->_addAdminEditMenu($id);
+    $this->__addAdminEditMenu($id);
   }
 
   public function admin_add() {
@@ -373,7 +373,7 @@ class UsersController extends AppController {
     $this->redirect("path/$id");
   }
 
-  public function _createEmail() {
+  private function __createEmail() {
     $Email = new CakeEmail('default');
     $Email->helpers('Html');
     return $Email;
@@ -394,7 +394,7 @@ class UsersController extends AppController {
       } else {
         $user = $this->User->decrypt($user);
 
-        $email = $this->_createEmail();
+        $email = $this->__createEmail();
         $email->template('password')
           ->to(array($user['User']['email'] => $user['User']['username']))
           ->subject(__('[phtagr] Password Request'))
@@ -438,7 +438,7 @@ class UsersController extends AppController {
         $user = $this->User->create($this->request->data);
         if ($this->User->save($user['User'], true, array('username', 'password', 'email'))) {
           CakeLog::info("New user {$this->request->data['User']['username']} was created");
-          $this->_initRegisteredUser($this->User->getLastInsertID());
+          $this->__initRegisteredUser($this->User->getLastInsertID());
         } else {
           CakeLog::error("Creation of user {$this->request->data['User']['username']} failed");
           $this->Session->setFlash(__('Could not create user'));
@@ -459,7 +459,7 @@ class UsersController extends AppController {
     $this->Captcha->render('user.register.captcha');
   }
 
-  public function _initRegisteredUser($newUserId) {
+  private function __initRegisteredUser($newUserId) {
     $user = $this->User->findById($newUserId);
     if (!$user) {
       CakeLog::error("Could not find user with ID $newUserId");
@@ -478,7 +478,7 @@ class UsersController extends AppController {
     $key = md5($newUserId.':'.$user['User']['username'].':'.$user['User']['password'].':'.$user['User']['expires']);
     $this->Option->setValue('user.register.key', $key, $newUserId);
     // send confimation email
-    if (!$this->_sendConfirmationEmail($user, $key)) {
+    if (!$this->__sendConfirmationEmail($user, $key)) {
       $this->Session->setFlash(__("Could not send the confirmation email. Please contact the admin."));
       if (!$this->User->delete($user['User']['id'])) {
         CakeLog::error("Could not delete user {$user['User']['id']} due email error");
@@ -509,7 +509,7 @@ class UsersController extends AppController {
     }
 
     if ($key) {
-      $this->_checkConfirmation($key);
+      $this->__checkConfirmation($key);
     }
   }
 
@@ -518,16 +518,16 @@ class UsersController extends AppController {
    *
    * @param key Account confirmation key
    */
-  public function _checkConfirmation($key) {
+  private function __checkConfirmation($key) {
     // check key. Option [belongsTo] User: The user is bound to option
-    $user = $this->Option->find('first', array('conditions' => array("Option.value" => $key)));
-    if (!$user) {
+    $keyOption = $this->Option->find('first', array('conditions' => array("Option.value" => $key)));
+    if (!$keyOption) {
       CakeLog::debug("Could not find confirmation key");
       $this->Session->setFlash(__("Could not find confirmation key"));
       return false;
     }
 
-    if (!isset($user['User']['id'])) {
+    if (!isset($keyOption['User']['id'])) {
       CakeLog::error("Could not find the user for register confirmation");
       $this->Session->setFlash(__("Internal error occured"));
       return false;
@@ -536,25 +536,26 @@ class UsersController extends AppController {
     // check expiration (14 days+1h). After this time, the account will be
     // deleted
     $now = time();
-    $expires = strtotime($user['User']['expires']);
+    $expires = strtotime($keyOption['User']['expires']);
     if ($now - $expires > (14 * 24 * 3600 + 3600)) {
       $this->Session->setFlash(__("Could not find confirmation key"));
       CakeLog::error("Registration confirmation is expired.");
-      $this->User->delete($user['User']['id']);
+      $this->User->delete($keyOption['User']['id']);
       CakeLog::info("Deleted user from expired registration");
       return false;
     }
 
     // activate user account (disabling the expire date)
-    $user['User']['expires'] = null;
-    if (!$this->User->save($user['User'], true, array('expires'))) {
-      CakeLog::error("Could not update expires of user {$user['User']['id']}");
+    $keyOption['User']['expires'] = null;
+    if (!$this->User->save($keyOption['User'], true, array('expires'))) {
+      CakeLog::error("Could not update expires of user {$keyOption['User']['id']}");
       return false;
     }
+    $user = $this->User->findById($keyOption['User']['id']);
 
     // send email to user and notify the sysops
-    $this->_sendNewAccountEmail($user);
-    $this->_sendNewAccountNotifiactionEmail($user);
+    $this->__sendNewAccountEmail($user);
+    $this->__sendNewAccountNotifiactionEmail($user);
 
     // delete confirmation key
     $this->Option->delete($user['Option']['id']);
@@ -570,8 +571,8 @@ class UsersController extends AppController {
    * @param user User model data
    * @param key Confirmation key to activate the account
    */
-  public function _sendConfirmationEmail($user, $key) {
-    $email = $this->_createEmail();
+  private function __sendConfirmationEmail($user, $key) {
+    $email = $this->__createEmail();
     $email->template('new_account_confirmation', 'default')
       ->to(array($user['User']['email'] => $user['User']['username']))
       ->subject(__('[phtagr] Account confirmation: %s', $user['User']['username']))
@@ -592,8 +593,8 @@ class UsersController extends AppController {
    *
    * @param user User model data
    */
-  public function _sendNewAccountEmail($user) {
-    $email = $this->_createEmail();
+  private function __sendNewAccountEmail($user) {
+    $email = $this->__createEmail();
     $email->template('new_account')
       ->to($user['User']['email'])
       ->subject(__('[phtagr] Welcome %s', $user['User']['username']))
@@ -615,7 +616,7 @@ class UsersController extends AppController {
    *
    * @param user User model data (of the new user)
    */
-  public function _sendNewAccountNotifiactionEmail($user) {
+  private function __sendNewAccountNotifiactionEmail($user) {
     $sysOps = $this->User->find('all', array('conditions' => "User.role >= ".ROLE_SYSOP));
     if (!$sysOps) {
       CakeLog::error("Could not find system operators");
@@ -625,7 +626,7 @@ class UsersController extends AppController {
     $first = array_pop($sysOps);
     $to = array($first['User']['email'] => $first['User']['username']);
 
-    $email = $this->_createEmail();
+    $email = $this->__createEmail();
     $email->template('new_account_notification')
       ->to($to)
       ->subject(__('[phtagr] New account notification: %s', $user['User']['username']))
