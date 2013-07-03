@@ -9,4 +9,15 @@
 ?>
 </fieldset>
 <?php echo $this->Form->end(__('Confirm')); ?>
+<?php
+  $script = <<<SCRIPT
+(function($) {
+  $(document).ready(function() {
+    $(':submit').button();
+    $('.button').button();
+  });
+})(jQuery);
+SCRIPT;
+  echo $this->Html->scriptBlock($script, array('inline' => false));
+?>
 

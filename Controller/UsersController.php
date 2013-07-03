@@ -497,6 +497,7 @@ class UsersController extends AppController {
       CakeLog::debug("User registration is disabled");
       $this->redirect(null, 404);
     }
+    $this->layout = 'default';
 
     if (!$key && !empty($this->request->data)) {
       // check user input
@@ -557,7 +558,7 @@ class UsersController extends AppController {
     $this->__sendNewAccountNotifiactionEmail($user);
 
     // delete confirmation key
-    $this->Option->delete($user['Option']['id']);
+    $this->Option->delete($keyOption['Option']['id']);
 
     // login the user automatically
     $this->User->writeSession($user, $this->Session);
