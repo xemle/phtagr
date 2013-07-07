@@ -577,6 +577,7 @@ class FilterManagerComponent extends Component {
       return false;
     }
     if (!$this->_writeEnabled) {
+      CakeLog::debug("Writing meta data is disabled for this user. Skip media {$media['Media']['name']}. (Your might change your profile settings to enable it)");
       return false;
     }
     $success = true;
