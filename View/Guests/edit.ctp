@@ -12,7 +12,7 @@
 </fieldset>
 <fieldset><legend><?php echo __('Password'); ?></legend>
 <?php
-  echo $this->Form->input('Guest.password', array('label' => __('Password')));
+  echo $this->Form->input('Guest.password', array('label' => __('Password'), 'required' => false));
   echo $this->Form->input('Guest.confirm', array('type' => 'password', 'label' => __('Confirm')));
 ?>
 </fieldset>
