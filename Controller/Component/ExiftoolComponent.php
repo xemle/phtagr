@@ -103,7 +103,7 @@ class ExiftoolComponent extends Component {
     $outputline = join("", $this->Command->output);
     // result is 0 for no error
     if ($result || !preg_match('/^(\d+\.\d+).*/', $outputline, $match)) {
-      CakeLog::error("Unexpected result output of exiftool ({$this->bin}): Returnd $result with output: $output. Disable exiftool");
+      CakeLog::error("Unexpected result output of exiftool ({$this->bin}): Returnd $result with output: $outputline. Disable exiftool");
       $this->bin = false;
       return false;
     }
