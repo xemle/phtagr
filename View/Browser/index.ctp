@@ -2,7 +2,7 @@
 
 <?php echo $this->Session->flash(); ?>
 
-<?php echo $this->Form->create('Browser', array('action' => 'import/'.$path)); ?>
+<?php echo $this->Form->create('Browser', array('url' => 'import/'.$path)); ?>
 
 <p><?php echo __("Location %s", $this->FileList->location($path)); ?>
 <?php if ($isInternal) {

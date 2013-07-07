@@ -2,7 +2,7 @@
 
 <?php echo $this->Session->flash(); ?>
 
-<?php echo $this->Form->create(null, array('action' => 'create')); ?>
+<?php echo $this->Form->create(null, array('url' => 'create')); ?>
 
 <fieldset><legend><?php echo __('Create new group'); ?></legend>
 <?php

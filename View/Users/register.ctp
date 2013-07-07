@@ -1,6 +1,6 @@
 <?php echo $this->Session->flash(); ?>
 
-<?php echo $this->Form->create('User', array('action' => 'register')); ?>
+<?php echo $this->Form->create('User', array('url' => 'register')); ?>
 <fieldset>
 <legend><?php echo __('Create Account'); ?></legend>
 <?php

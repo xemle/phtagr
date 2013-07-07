@@ -1,6 +1,6 @@
 <?php echo $this->Session->flash(); ?>
 
-<?php echo $this->Form->create('User', array('action' => 'login', 'class' => 'login')); ?>
+<?php echo $this->Form->create('User', array('url' => 'login', 'class' => 'login')); ?>
 <fieldset>
 <legend><?php echo __('Login'); ?></legend>
 <?php

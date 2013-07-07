@@ -1,6 +1,6 @@
 <h1><?php echo __('Export Options'); ?></h1>
 <?php echo $this->Session->flash(); ?>
-<?php echo $this->Form->create(null, array('action' => 'export')); ?>
+<?php echo $this->Form->create(null, array('url' => 'export')); ?>
 
 <fieldset><legend><?php echo __('Video Options'); ?></legend>
 <?php

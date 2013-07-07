@@ -2,7 +2,7 @@
 
 <?php echo $this->Session->flash(); ?>
 
-<?php echo $this->Form->create(null, array('action' => 'password')); ?>
+<?php echo $this->Form->create(null, array('url' => 'password')); ?>
 
 <fieldset><legend><?php echo __('Password'); ?></legend>
 <?php

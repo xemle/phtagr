@@ -2,7 +2,7 @@
 
 <?php echo $this->Session->flash(); ?>
 
-<?php echo $this->Form->create(null, array('action' => 'explorer')); ?>
+<?php echo $this->Form->create(null, array('url' => 'explorer')); ?>
 <fieldset><legend><?php echo __('Explorer'); ?></legend>
 <?php
   $shows = array(

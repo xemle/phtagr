@@ -1,6 +1,6 @@
 <h1><?php echo __('Import Options'); ?></h1>
 <?php echo $this->Session->flash(); ?>
-<?php echo $this->Form->create(null, array('action' => 'import')); ?>
+<?php echo $this->Form->create(null, array('url' => 'import')); ?>
 
 <fieldset><legend><?php echo __('Default Access Rights'); ?></legend>
 <p><?php echo __('The following access rights are applied to new images.'); ?></p>

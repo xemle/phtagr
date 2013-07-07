@@ -2,7 +2,7 @@
 
 <?php echo $this->Session->flash(); ?>
 
-<?php echo $this->Form->create('User', array('action' => 'add')); ?>
+<?php echo $this->Form->create('User', array('url' => 'add')); ?>
 <fieldset><legend><?php echo __('Create new user'); ?></legend>
 <?php
   echo $this->Form->input('User.username', array('label' => __('Username')));

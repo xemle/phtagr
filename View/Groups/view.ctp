@@ -84,7 +84,7 @@
 
 <?php
   if ($this->request->data['Group']['is_admin']) {
-    echo $this->Form->create('Group', array('action' => 'addMember'));
+    echo $this->Form->create('Group', array('url' => 'addMember'));
     echo "<fieldset><legend>" . __("Add user") . "</legend>";
     $this->Form->unlockField('Member.new');
     echo $this->Form->input('Member.new', array('label' => __("Username"), 'secure' => false));

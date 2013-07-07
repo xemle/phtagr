@@ -2,7 +2,7 @@
 
 <?php echo $this->Session->flash() ?>
 
-<?php echo $this->Form->create(null, array('action' => "edit/{$this->request->data['Group']['name']}")); ?>
+<?php echo $this->Form->create(null, array('url' => "edit/{$this->request->data['Group']['name']}")); ?>
 
 <fieldset><legend><?php echo __('Edit Group'); ?></legend>
 <?php

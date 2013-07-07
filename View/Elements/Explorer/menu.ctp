@@ -125,7 +125,7 @@
 </div><!-- all meta -->
 <?php
   $url = $this->Breadcrumb->params($crumbs);
-  echo $this->Form->create(null, array('id' => 'explorer', 'action' => 'edit/'.$url, 'class' => 'explorer-menu'));
+  echo $this->Form->create(null, array('id' => 'explorer', 'url' => 'edit/'.$url, 'class' => 'explorer-menu'));
 ?>
 <div id="p-explorer-edit-meta">
 <fieldset><legend><?php echo __("Metadata"); ?></legend>

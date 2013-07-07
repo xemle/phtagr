@@ -6,7 +6,7 @@
 <p><?php echo __("You upload files to folder %s", $this->FileList->location($path)); ?></p>
 <p><?php echo __("You can upload maximal %s and %s at once", $this->Number->toReadableSize($free), $this->Number->toReadableSize($max)); ?></p>
 
-<?php echo $this->Form->create(false, array('action' => 'upload/'.$path, 'type' => 'file')); ?>
+<?php echo $this->Form->create(false, array('url' => 'upload/'.$path, 'type' => 'file')); ?>
 <fieldset><legend><?php echo __("Upload files"); ?></legend>
   <?php echo $this->Form->input('File.upload][', array('type' => 'file', 'label' => __('File or archive'), 'id' => 'FileUpload1')); ?>
   <?php echo $this->Form->input('File.upload][', array('type' => 'file', 'label' => __('File or archive'), 'id' => 'FileUpload2')); ?>

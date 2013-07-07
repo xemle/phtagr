@@ -1,6 +1,6 @@
 <h1><?php echo __('Advanced Search'); ?></h1>
 
-<?php echo $this->Form->create(null, array('action' => 'query')); ?>
+<?php echo $this->Form->create(null, array('url' => 'query')); ?>
 <fieldset><legend><?php echo __('Metadata'); ?></legend>
 <?php
   echo $this->Form->input('Media.tags', array('label' => __('Tags'), 'after' => '<span class="hint">' . __('E.g. includeTag, -excludeTag') . '</span>'));

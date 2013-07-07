@@ -2,7 +2,7 @@
 
 <?php echo $this->Session->flash() ?>
 
-<?php echo $this->Form->create(null, array('action' => "easyacl")); ?>
+<?php echo $this->Form->create(null, array('url' => "easyacl")); ?>
 
 <fieldset><legend><?php echo __('Media Selection Criteria'); ?></legend>
 
