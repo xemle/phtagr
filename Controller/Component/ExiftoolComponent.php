@@ -966,7 +966,7 @@ class ExiftoolComponent extends Component {
     if (count($stderr) > 1 || (count($stderr) && !($stderr[0] === false))) {// and count($stdout) !==1//i.e.="    1 image files created "
       //TODO: test if warnings and original file internal errors are reported on stderr or stdout
       $errors = implode(",", $stderr);
-      CakeLog::error(am("exiftool stderr returned errors: ",$errors));
+      CakeLog::error("exiftool stderr returned errors: $errors");
       return $errors;
     }
 
