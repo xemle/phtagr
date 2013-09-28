@@ -23,7 +23,7 @@ App::uses('GpxComponent', 'Controller/Component');
  * GpxComponent Test Case
  *
  */
-class GpxComponentTestCase extends PhtagrTestCase {
+class GpxComponentTestCase extends AppTestCase {
 /**
  * setUp method
  *

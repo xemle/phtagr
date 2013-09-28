@@ -35,7 +35,7 @@ class MediaTestController extends MediaController {
 
 }
 
-class MediaControllerTest extends PhtagrTestCase {
+class MediaControllerTest extends AppTestCase {
 
 	var $uses = array('Media', 'Option');
 	var $components = array('FilterManager');

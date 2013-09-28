@@ -40,7 +40,7 @@ class ExplorerControllerTest extends ControllerTestCase {
    */
   public function setUp() {
     parent::setUp();
-    $this->Factory = new PhtagrTestFactory();
+    $this->Factory = new AppTestFactory();
 
     $this->Media = ClassRegistry::init('Media');
     $this->User = ClassRegistry::init('User');

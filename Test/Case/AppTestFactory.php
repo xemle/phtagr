@@ -20,7 +20,7 @@ App::uses('Media', 'Model');
 /**
  * Factory for test data
  */
-class PhtagrTestFactory {
+class AppTestFactory {
   var $Media;
   var $User;
   var $Group;

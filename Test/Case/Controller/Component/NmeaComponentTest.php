@@ -23,7 +23,7 @@ App::uses('NmeaComponent', 'Controller/Component');
  * NmeaComponent Test Case
  *
  */
-class NmeaComponentTestCase extends PhtagrTestCase {
+class NmeaComponentTestCase extends AppTestCase {
 /**
  * setUp method
  *

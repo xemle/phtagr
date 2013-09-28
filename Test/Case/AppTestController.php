@@ -20,7 +20,7 @@ App::uses('AppController', 'Controller');
 /**
  * Phtagr test controller with mocked user
  */
-class PhtagrTestController extends AppController {
+class AppTestController extends AppController {
   var $mockUser;
 
   public function &getUser() {

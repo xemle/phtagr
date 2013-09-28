@@ -20,7 +20,7 @@ App::uses('PhtagrTestCase', 'Test/Case');
 /**
  * Test read meta data nativly
  */
-class MediaReadGetId3TestCase extends PhtagrTestCase {
+class MediaReadGetId3TestCase extends AppTestCase {
 
   var $components = array('FilterManager');
   var $testDir;

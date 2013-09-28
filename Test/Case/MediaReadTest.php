@@ -21,7 +21,7 @@ App::uses('PhtagrTestCase', 'Test/Case');
  * GpsFilterComponent Test Case
  *
  */
-class MediaReadTestCase extends PhtagrTestCase {
+class MediaReadTestCase extends AppTestCase {
 
   var $uses = array('Media', 'MyFile', 'User', 'Option');
   var $components = array('FileManager', 'FilterManager', 'Exiftool');

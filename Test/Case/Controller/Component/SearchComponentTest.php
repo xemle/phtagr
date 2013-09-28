@@ -22,7 +22,7 @@ App::uses('SearchComponent', 'Controller/Component');
  * SearchComponent Test Case
  *
  */
-class SearchComponentTestCase extends PhtagrTestCase {
+class SearchComponentTestCase extends AppTestCase {
 	var $controllerMock;
 	var $uses = array('User', 'Group', 'Media', 'Field');
 	var $components = array('Search');

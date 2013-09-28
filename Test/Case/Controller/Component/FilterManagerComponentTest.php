@@ -17,7 +17,7 @@
 
 App::uses('PhtagrTestCase', 'Test/Case');
 
-class FilterManagerComponentTest  extends PhtagrTestCase {
+class FilterManagerComponentTest  extends AppTestCase {
 
 	var $uses = array('Media', 'MyFile', 'User', 'Option');
 	var $components = array('FileManager', 'FilterManager', 'Exiftool');
