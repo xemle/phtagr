@@ -16,21 +16,11 @@
  * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
 
-App::uses('Comment', 'Model');
-App::uses('Media', 'Model');
-App::uses('User', 'Model');
-App::uses('Group', 'Model');
+App::uses('AppControllerTestCase', 'Test/Case');
 App::uses('AppController', 'Controller');
+App::uses('Comment', 'Model');
 
-class CommentControllerTest extends ControllerTestCase {
-  /**
-   * Fixtures
-   *
-   * @var array
-   */
-  public $fixtures = array('app.file', 'app.media', 'app.user', 'app.group', 'app.groups_media',
-      'app.groups_user', 'app.option', 'app.guest', 'app.comment',
-      'app.fields_media', 'app.field', 'app.comment');
+class CommentControllerTest extends AppControllerTestCase {
 
   /**
    * setUp method
@@ -40,9 +30,6 @@ class CommentControllerTest extends ControllerTestCase {
   public function setUp() {
     parent::setUp();
     $this->Comment = ClassRegistry::init('Comment');
-    $this->Media = ClassRegistry::init('Media');
-    $this->User = ClassRegistry::init('User');
-    $this->Group = ClassRegistry::init('Group');
   }
 
   /**
@@ -52,9 +39,6 @@ class CommentControllerTest extends ControllerTestCase {
    */
   public function tearDown() {
     unset($this->Comment);
-    unset($this->Media);
-    unset($this->User);
-    unset($this->Group);
 
     parent::tearDown();
   }

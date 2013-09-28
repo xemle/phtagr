@@ -16,48 +16,11 @@
  * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
 
-App::uses('Media', 'Model');
-App::uses('User', 'Model');
-App::uses('Option', 'Model');
+App::uses('AppControllerTestCase', 'Test/Case');
 App::uses('AppController', 'Controller');
 
-class SystemControllerTest extends ControllerTestCase {
+class SystemControllerTest extends AppControllerTestCase {
   var $Folder;
-
-  /**
-   * Fixtures
-   *
-   * @var array
-   */
-  public $fixtures = array('app.file', 'app.media', 'app.user', 'app.group', 'app.groups_media',
-      'app.groups_user', 'app.option', 'app.guest', 'app.comment',
-      'app.fields_media', 'app.field', 'app.comment');
-
-  /**
-   * setUp method
-   *
-   * @return void
-   */
-  public function setUp() {
-    parent::setUp();
-
-    $this->Media = ClassRegistry::init('Media');
-    $this->User = ClassRegistry::init('User');
-    $this->Option = ClassRegistry::init('Option');
-  }
-
-  /**
-   * tearDown method
-   *
-   * @return void
-   */
-  public function tearDown() {
-    unset($this->Media);
-    unset($this->User);
-    unset($this->Option);
-
-    parent::tearDown();
-  }
 
   public function testDeleteUnusedMetaData() {
     $admin = $this->User->save($this->User->create(array('role' => ROLE_ADMIN, 'username' => 'admin')));

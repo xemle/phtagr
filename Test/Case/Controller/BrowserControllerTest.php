@@ -16,13 +16,8 @@
  * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
 
-App::uses('Media', 'Model');
-App::uses('User', 'Model');
-App::uses('Option', 'Model');
+App::uses('AppControllerTestCase', 'Test/Case');
 
-if (!defined('RESOURCES')) {
-  define('RESOURCES', TESTS . 'Resources' . DS);
-}
 if (!defined('TEST_FILES')) {
   define('TEST_FILES', TMP);
 }
@@ -34,17 +29,8 @@ if (!is_writeable(TEST_FILES)) {
   trigger_error(__('Test file directory %s must be writeable', TEST_FILES), E_USER_ERROR);
 }
 
-class BrowserControllerTest extends ControllerTestCase {
+class BrowserControllerTest extends AppControllerTestCase {
   var $Folder;
-
-  /**
-   * Fixtures
-   *
-   * @var array
-   */
-  public $fixtures = array('app.file', 'app.media', 'app.user', 'app.group', 'app.groups_media',
-      'app.groups_user', 'app.option', 'app.guest', 'app.comment',
-      'app.fields_media', 'app.field', 'app.comment');
 
   /**
    * setUp method
@@ -55,12 +41,6 @@ class BrowserControllerTest extends ControllerTestCase {
     parent::setUp();
     $this->Folder = new Folder();
     $this->Folder->create(TEST_FILES_TMP);
-
-    $this->Media = ClassRegistry::init('Media');
-    $this->Field = $this->Media->Field;
-    $this->Group = $this->Media->Group;
-    $this->User = $this->Media->User;
-    $this->Option = $this->User->Option;
   }
 
   /**
@@ -69,11 +49,6 @@ class BrowserControllerTest extends ControllerTestCase {
    * @return void
    */
   public function tearDown() {
-    unset($this->Media);
-    unset($this->Field);
-    unset($this->Group);
-    unset($this->User);
-    unset($this->Option);
     $this->Folder->delete(TEST_FILES_TMP);
 
     parent::tearDown();
