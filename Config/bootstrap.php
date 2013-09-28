@@ -225,3 +225,6 @@ if (function_exists('ini_set') && function_exists('ini_get')) {
   ini_set('include_path', $vendorPearPath . PATH_SEPARATOR . ini_get('include_path'));
 }
 
+App::uses('CakeEventManager', 'Event');
+App::uses('UserSessionListener', 'Event');
+CakeEventManager::instance()->attach(new UserSessionListener());
