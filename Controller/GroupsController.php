@@ -44,7 +44,7 @@ class GroupsController extends AppController {
 
   public function fail($type) {
     CakeLog::error("The security component denied action {$this->action}. Reason: $type");
-    CakeLog::debug($this->request->data);
+    CakeLog::debug(print_r($this->request->data, true));
     $this->redirect(null, '404');
   }
 
