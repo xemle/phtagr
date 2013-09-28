@@ -33,7 +33,6 @@ class UserSessionListener implements CakeEventListener {
 
     public function afterSave($event) {
       $model = $event->subject();
-      CakeLog::debug("afterSave:" . $model->alias);
       if (in_array($model->alias, $this->resetModels)) {
         CakeSession::delete('user');
       }
