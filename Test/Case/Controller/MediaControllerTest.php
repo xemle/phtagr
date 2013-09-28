@@ -16,7 +16,7 @@
  * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
  */
 
-App::uses('PhtagrTestCase', 'Test/Case');
+App::uses('AppTestCase', 'Test/Case');
 App::uses('AppController', 'Controller');
 App::uses('MediaController', 'Controller');
 
