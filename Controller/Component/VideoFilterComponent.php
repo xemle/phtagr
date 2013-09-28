@@ -237,7 +237,6 @@ class VideoFilterComponent extends BaseFilterComponent {
       $result['longitude'] = $data['GPSLongitude'];
     }
     CakeLog::debug("Extracted " . count($result) . " fields via exiftool");
-    CakeLog::debug(print_r($result, true));
     return $result;
   }
 
