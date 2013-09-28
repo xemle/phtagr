@@ -99,6 +99,11 @@
 	Configure::write('Phtagr.version', trim(array_pop($versionFile)));
 
 /**
+ * User storage directory
+ */
+  Configure::write('user.home.dir', APP . 'users' . DS);
+
+/**
  * In some php versions escapeshellarg() removes special characters like german
  * umlaut. This bug causes wrong system calls to files like import of media
  * with umlaut. The call setlocale() to an UTF8 character set fixes this

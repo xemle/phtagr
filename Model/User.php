@@ -149,10 +149,11 @@ class User extends AppModel {
     $this->bindModel(array('hasMany' => array('MyFile')));
     $this->MyFile->deleteAll("File.user_id = $id");
 
-    $dir = USER_DIR.$id;
-    CakeLog::info("Delete user directory of user $id: $dir");
+    $homeDir = Configure::read('user.home.dir');
+    $userDir = $homeDir . $id;
+    CakeLog::info("Delete user directory of user $id: $userDir");
     $folder = new Folder();
-    $folder->delete($dir);
+    $folder->delete($userDir);
 
     return true;
   }
@@ -237,11 +238,12 @@ class User extends AppModel {
       return false;
     }
 
-    $rootDir = USER_DIR.$data['User']['id'].DS.'files'.DS;
+    $homeDir = Configure::read('user.home.dir');
+    $rootDir = $homeDir . $data['User']['id'] . DS . 'files' . DS;
     if ($create) {
       $folder = new Folder();
       if (!$folder->create($rootDir)) {
-        CakeLog::error("Could not create users root directory '$fileDir'");
+        CakeLog::error("Could not create users root directory '$rootDir'");
         return false;
       }
     }

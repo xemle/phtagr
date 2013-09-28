@@ -677,7 +677,8 @@ class ImageDataHelper extends AppHelper {
     $path = $file['path'];
 
     $fsRoots = $this->Option->get('path.fsroot', array());
-    $fsRoots[] = USER_DIR.$file['user_id'].DS.'files'.DS;
+    $homeDir = Configure::read('user.home.dir');
+    $fsRoots[] = $homeDir . $file['user_id'] . DS . 'files' . DS;
     rsort($fsRoots);
 
     foreach ($fsRoots as $root) {
@@ -727,7 +728,8 @@ class ImageDataHelper extends AppHelper {
       CakeLog::debug("External files are not supported");
       return false;
     }
-    $userRoot = USER_DIR . $file['user_id'] . DS . 'files' . DS;
+    $homeDir = Configure::read('user.home.dir');
+    $userRoot = $homeDir . $file['user_id'] . DS . 'files' . DS;
     if (strpos($file['path'], $userRoot) !== 0) {
       CakeLog::debug("Invalid upload path {$file['path']}");
       return false;

@@ -46,7 +46,8 @@ class CacheBehavior extends ModelBehavior
       return false;
     }
 
-    $cacheDir = USER_DIR.$modelData['user_id'].DS.'cache'.DS;
+    $homeDir = Configure::read('user.home.dir');
+    $cacheDir = $homeDir . $modelData['user_id'] . DS . 'cache' . DS;
     $cacheDir .= sprintf("%04d", ($modelData['id'] / 1000)).DS;
     if (!is_dir($cacheDir)) {
       return true;

@@ -135,16 +135,7 @@ class FileManagerComponent extends Component {
       $user = $this->controller->getUser();
     }
 
-    // create untailed directory, otherwise Folder->create() might act wrong
-    $userDir = USER_DIR . $user['User']['id'] . DS . 'files';
-    if (!is_dir($userDir)) {
-      $Folder = new Folder();
-      if (!$Folder->create($userDir)) {
-        CakeLog::error(sprintf("Directory %s NOT created", $userDir));
-        return false;
-      }
-    }
-    return Folder::slashTerm($userDir);
+    return $this->controller->User->getRootDir($user, true);
   }
 
   /**

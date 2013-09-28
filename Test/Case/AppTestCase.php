@@ -55,6 +55,7 @@ class AppTestCase extends CakeTestCase {
 
   public function setUp() {
     parent::setUp();
+    Configure::write('user.home.dir', $this->createTestDir());
     $this->Factory = new AppTestFactory();
 
     if ($this->testController) {

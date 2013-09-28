@@ -25,6 +25,11 @@ class FileCacheComponent extends Component {
     $this->controller = $controller;
   }
 
+  private function getUserCacheDir($userId) {
+    $homeDir = Configure::read('user.home.dir');
+    return $homeDir . $userId . DS . 'cache' . DS;
+  }
+
   /**
    * Returns the cache path of the user
    *
@@ -37,7 +42,7 @@ class FileCacheComponent extends Component {
     $userId = intval($media['Media']['user_id']);
     $mediaId = intval($media['Media']['id']);
 
-    $cacheDir = USER_DIR . $userId . DS . 'cache' . DS;
+    $cacheDir = $this->getUserCacheDir($userId);
     $dir = intval($mediaId/1000);
     $cacheDir .= sprintf("%04d", $dir).DS;
 
@@ -130,7 +135,7 @@ class FileCacheComponent extends Component {
    */
   public function deleteAll($userId) {
     $userId = intval($userId);
-    $cacheDir = USER_DIR.$userId.DS.'cache'.DS;
+    $cacheDir = $this->getUserCacheDir($userId);
     if (is_dir($cacheDir)) {
       $folder = new Folder();
       $folder->delete($cacheDir);

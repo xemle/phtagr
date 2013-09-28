@@ -116,13 +116,6 @@ CakeLog::config('full', array(
 ));
 
 /**
- * User storage directory
- */
-if (!defined('USER_DIR')) {
-  define('USER_DIR', APP . 'users' . DS);
-}
-
-/**
  * Configuration directory
  */
 if (!defined('CONFIGS')) {

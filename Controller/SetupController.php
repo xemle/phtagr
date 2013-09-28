@@ -39,7 +39,7 @@ class SetupController extends AppController {
     $this->UpgradeSchema->modelMapping = array('files' => 'MyFile');
     $this->core = CONFIGS.'core.php';
     $this->dbConfig = CONFIGS.'database.php';
-    $this->paths = array(TMP, USER_DIR);
+    $this->paths = array(TMP, Configure::read('user.home.dir'));
     if (isset($this->request->params['admin']) && $this->request->params['admin'] && $this->__hasSysOp()) {
       parent::beforeFilter();
     } else {
