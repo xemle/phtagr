@@ -6,5 +6,6 @@ $map = array(
 	4 => array('004_multiple_access_groups' => 'M57acac5f420bd77f6d55a446199ccab6'),
 	5 => array('005_table_media_drop_column_group_id' => 'M6cac9a91a1109f703aff4297a71a0f52'),
 	6 => array('006_one_meta_data_table' => 'Mffcaea2061011ff9181c79c14fa83622'),
+	7 => array('007_drop_tag_category_location_tables' => 'M9d052303c09a794e405d658ada760960'),
 );
 ?>
