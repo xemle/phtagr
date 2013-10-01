@@ -172,7 +172,7 @@ class UsersController extends AppController {
     $user = $this->getUser();
     CakeLog::info("Delete session for user id {$user['User']['id']}");
 
-    $this->Session->destroy();
+    $this->User->destroySession($this->Session);
     $this->Cookie->destroy();
 
     $this->redirect('/');

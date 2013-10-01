@@ -165,17 +165,43 @@ class User extends AppModel {
   public function readSession(&$session) {
     if ($session->check('user')) {
       return $session->read('user');
-    } else if ($session->check('user.id')) {
-      $user = $this->findById($session->read('user.id'));
-      $this->writeSession($user, $session);
-      return $user;
+    }
+    $userId = $session->read('userId');
+    if ($userId >= 0) {
+      $user = $this->findById($userId);
+      if ($user) {
+        $this->writeSession($user, $session);
+        return $user;
+      }
     }
     return false;
   }
 
   public function writeSession(&$user, &$session) {
+    $oldUserId = $session->read('userId');
     $session->write('user', $user);
-    $session->write('user.id', $user['User']['id']);
+    $session->write('userId', $user['User']['id']);
+
+    $userId = $user['User']['id'];
+    if ($userId < 0) {
+      $session->delete('userIdStack');
+    } else if ($oldUserId >= 0 && $userId != $oldUserId) {
+      $stack = (array) $session->read('userIdStack');
+      $stack[] = $oldUserId;
+      $session->write('userIdStack', $stack);
+    }
+  }
+
+  public function destroySession(&$session) {
+    $stack = (array) $session->read('userIdStack');
+
+    $session->destroy();
+
+    if (count($stack)) {
+      $userId = array_pop($stack);
+      $session->write('userIdStack', $stack);
+      $session->write('userId', $userId);
+    }
   }
 
   public function hasAnyWithRole($role = ROLE_ADMIN) {
