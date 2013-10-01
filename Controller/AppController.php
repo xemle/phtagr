@@ -124,7 +124,6 @@ class AppController extends Controller
    * the session
    */
   private function __checkSession() {
-    //$this->Session->activate();
     if (!$this->Session->check('Session.requestCount')) {
       $this->Session->write('Session.requestCount', 1);
       $this->Session->write('Session.start', time());
@@ -134,25 +133,30 @@ class AppController extends Controller
       $this->Session->write('Session.requestCount', $count + 1);
     }
 
-    if ($this->User->readSession($this->Session)) {
+    $keyUserId = $this->__checkKey();
+    $user = $this->User->readSession($this->Session);
+    if ($user && $user['User']['id'] >= 0 && $keyUserId == $user['User']['id']) {
       return true;
     }
 
-    $authType = 'Cookie';
-    $id = $this->__checkCookie();
-    if (!$id) {
-      $id = $this->__checkKey();
-      $authType = 'Key';
+    $authType = 'Session';
+    $userId = 0;
+    if ($keyUserId) {
+      $userId = $keyUserId;
+      $authType = 'AuthKey';
+    } else {
+      $userId = $this->__checkCookie();
+      $authType = 'Cookie';
     }
 
-    if (!$id) {
+    if (!$userId) {
       return false;
     }
 
     // Fetch User
-    $user = $this->User->findById($id);
+    $user = $this->User->findById($userId);
     if (!$user) {
-      CakeLog::error("Could not find user with given id '$id' (via $authType)");
+      CakeLog::error("Could not find user with given id '$userId' (via $authType)");
       return false;
     }
 
@@ -173,7 +177,8 @@ class AppController extends Controller
    * @return array
    */
   public function &getUser() {
-    if (!$this->__checkSession()) {
+    $user = $this->User->readSession($this->Session);
+    if (!$user) {
       $nobody = $this->User->getNobody();
       $this->User->writeSession($nobody, $this->Session);
     }
