@@ -145,23 +145,23 @@ class MediaController extends AppController
   }
 
   public function mini($id) {
-    $this->_sendPreview($id, 'mini');
+    return $this->_sendPreview($id, 'mini');
   }
 
   public function thumb($id)	{
-    $this->_sendPreview($id, 'thumb');
+    return $this->_sendPreview($id, 'thumb');
   }
 
   public function preview($id) {
-    $this->_sendPreview($id, 'preview');
+    return $this->_sendPreview($id, 'preview');
   }
 
   public function high($id) {
-    $this->_sendPreview($id, 'high');
+    return $this->_sendPreview($id, 'high');
   }
 
   public function hd($id) {
-    $this->_sendPreview($id, 'hd');
+    return $this->_sendPreview($id, 'hd');
   }
 
   public function video($id) {
