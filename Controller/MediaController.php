@@ -185,12 +185,12 @@ class MediaController extends AppController
       CakeLog::warning("User {$user['User']['id']} requested file {$file['File']['id']} without media");
       $this->redirect(null, 404);
     }
-    if (!$this->Media->canReadOriginal($file, $user)) {
-      CakeLog::warning("User {$user['User']['id']} has no previleges to access image ".$file['Media']['id']);
+    $media = $this->Media->findById($file['Media']['id']);
+    if (!$this->Media->canReadOriginal($media, $user)) {
+      CakeLog::warning("User {$user['User']['id']} has no previleges to access file {$file['File']['id']} of media {$file['Media']['id']}");
       $this->redirect(null, 404);
     }
-    if ($this->Media->hasFlag($file, MEDIA_FLAG_DIRTY) && $this->getOption('filter.write.onDemand')) {
-      $media = $this->Media->findById($file['Media']['id']);
+    if ($this->Media->hasFlag($media, MEDIA_FLAG_DIRTY) && $this->getOption('filter.write.onDemand')) {
       $this->loadComponent('FilterManager');
       $this->FilterManager->write($media);
     }
