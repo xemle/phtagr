@@ -21,7 +21,7 @@
  * @link          http://cakephp.org CakePHP(tm) Project
  * @package       app.Config
  * @since         CakePHP(tm) v 0.10.8.2117
- * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
+ * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
 
 // Setup a 'default' cache configuration for use in the application.
@@ -31,24 +31,24 @@ Cache::config('default', array('engine' => 'File'));
  * The settings below can be used to set additional paths to models, views and controllers.
  *
  * App::build(array(
- *     'Model'                     => array('/path/to/models', '/next/path/to/models'),
- *     'Model/Behavior'            => array('/path/to/behaviors', '/next/path/to/behaviors'),
- *     'Model/Datasource'          => array('/path/to/datasources', '/next/path/to/datasources'),
- *     'Model/Datasource/Database' => array('/path/to/databases', '/next/path/to/database'),
- *     'Model/Datasource/Session'  => array('/path/to/sessions', '/next/path/to/sessions'),
- *     'Controller'                => array('/path/to/controllers', '/next/path/to/controllers'),
- *     'Controller/Component'      => array('/path/to/components', '/next/path/to/components'),
- *     'Controller/Component/Auth' => array('/path/to/auths', '/next/path/to/auths'),
- *     'Controller/Component/Acl'  => array('/path/to/acls', '/next/path/to/acls'),
- *     'View'                      => array('/path/to/views', '/next/path/to/views'),
- *     'View/Helper'               => array('/path/to/helpers', '/next/path/to/helpers'),
- *     'Console'                   => array('/path/to/consoles', '/next/path/to/consoles'),
- *     'Console/Command'           => array('/path/to/commands', '/next/path/to/commands'),
- *     'Console/Command/Task'      => array('/path/to/tasks', '/next/path/to/tasks'),
- *     'Lib'                       => array('/path/to/libs', '/next/path/to/libs'),
- *     'Locale'                    => array('/path/to/locales', '/next/path/to/locales'),
- *     'Vendor'                    => array('/path/to/vendors', '/next/path/to/vendors'),
- *     'Plugin'                    => array('/path/to/plugins', '/next/path/to/plugins'),
+ *     'Model'                     => array('/path/to/models/', '/next/path/to/models/'),
+ *     'Model/Behavior'            => array('/path/to/behaviors/', '/next/path/to/behaviors/'),
+ *     'Model/Datasource'          => array('/path/to/datasources/', '/next/path/to/datasources/'),
+ *     'Model/Datasource/Database' => array('/path/to/databases/', '/next/path/to/database/'),
+ *     'Model/Datasource/Session'  => array('/path/to/sessions/', '/next/path/to/sessions/'),
+ *     'Controller'                => array('/path/to/controllers/', '/next/path/to/controllers/'),
+ *     'Controller/Component'      => array('/path/to/components/', '/next/path/to/components/'),
+ *     'Controller/Component/Auth' => array('/path/to/auths/', '/next/path/to/auths/'),
+ *     'Controller/Component/Acl'  => array('/path/to/acls/', '/next/path/to/acls/'),
+ *     'View'                      => array('/path/to/views/', '/next/path/to/views/'),
+ *     'View/Helper'               => array('/path/to/helpers/', '/next/path/to/helpers/'),
+ *     'Console'                   => array('/path/to/consoles/', '/next/path/to/consoles/'),
+ *     'Console/Command'           => array('/path/to/commands/', '/next/path/to/commands/'),
+ *     'Console/Command/Task'      => array('/path/to/tasks/', '/next/path/to/tasks/'),
+ *     'Lib'                       => array('/path/to/libs/', '/next/path/to/libs/'),
+ *     'Locale'                    => array('/path/to/locales/', '/next/path/to/locales/'),
+ *     'Vendor'                    => array('/path/to/vendors/', '/next/path/to/vendors/'),
+ *     'Plugin'                    => array('/path/to/plugins/', '/next/path/to/plugins/'),
  * ));
  *
  */
@@ -75,7 +75,7 @@ Inflector::rules('singular', array('uninflected' => array('pos')));
  */
 
 /**
- * You can attach event listeners to the request lifecyle as Dispatcher Filter . By Default CakePHP bundles two filters:
+ * You can attach event listeners to the request lifecycle as Dispatcher Filter . By Default CakePHP bundles two filters:
  *
  * - AssetDispatcher filter will serve your asset files (css, images, js, etc) from your themes and plugins
  * - CacheDispatcher filter will read the Cache.check configure variable and try to serve cached content generated from controllers
@@ -100,17 +100,17 @@ Configure::write('Dispatcher.filters', array(
  */
 App::uses('CakeLog', 'Log');
 CakeLog::config('debug', array(
-	'engine' => 'FileLog',
+	'engine' => 'File',
 	'types' => array('notice', 'info', 'debug'),
 	'file' => 'debug',
 ));
 CakeLog::config('error', array(
-	'engine' => 'FileLog',
+	'engine' => 'File',
 	'types' => array('warning', 'error', 'critical', 'alert', 'emergency'),
 	'file' => 'error',
 ));
 CakeLog::config('full', array(
-	'engine' => 'FileLog',
+	'engine' => 'File',
 	'types' => array('debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'),
 	'file' => 'logger',
 ));

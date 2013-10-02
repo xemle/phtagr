@@ -23,8 +23,8 @@ class AppModel extends Model {
    *
    * @param boolean $created
    */
-  public function afterSave($created) {
-    parent::afterSave($created);
+  public function afterSave($created, $options = array()) {
+    parent::afterSave($created, $options);
     $this->getEventManager()->dispatch(new CakeEvent('Model.'.$this->alias.'.afterSave', $this, $this->data));
   }
 

@@ -74,7 +74,7 @@ class CipherBehavior extends ModelBehavior
 
   /** Model hook to encrypt model data
     @param model Current model */
-  public function beforeSave(Model $model) {
+  public function beforeSave(Model $model, $options = array()) {
     if (isset($this->config[$model->name]) && !$this->config[$model->name]['noEncypt']) {
       if (!is_array($this->config[$model->name]['cipher'])) {
         $cipher = array($this->config[$model->name]['cipher']);
