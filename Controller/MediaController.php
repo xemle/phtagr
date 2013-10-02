@@ -43,7 +43,7 @@ class MediaController extends AppController
    *
    * @return Array of request header
    */
-  public function _getRequestHeaders() {
+  private function _getRequestHeaders() {
     $headers = array();
     if (function_exists('apache_request_headers')) {
       $headers = apache_request_headers();
@@ -67,7 +67,7 @@ class MediaController extends AppController
    *
    * @param filename filename of cache file
    */
-  public function _handleClientCache($filename) {
+  private function _handleClientCache($filename) {
     $cacheTime = filemtime($filename);
     $headers = $this->_getRequestHeaders();
     if (isset($headers['if-modified-since']) &&
@@ -91,7 +91,7 @@ class MediaController extends AppController
    * @return Media model data. If no media is found or access is denied it
    * responses 404
    */
-  public function _getMedia($id, $type = 'preview') {
+  private function _getMedia($id, $type = 'preview') {
     $user = $this->getUser();
     switch ($type) {
       case 'hd':
@@ -113,7 +113,7 @@ class MediaController extends AppController
     return $media;
   }
 
-  public function _sendPreview($id, $type) {
+  private function _sendPreview($id, $type) {
     $media = $this->_getMedia($id, $type);
     $preview = $this->PreviewManager->getPreview($media, $type);
     if (!$preview) {
@@ -126,7 +126,7 @@ class MediaController extends AppController
     return $this->response;
   }
 
-  public function _createFlashVideo($id) {
+  private function _createFlashVideo($id) {
     $id = intval($id);
     $media = $this->_getMedia($id, 'preview');
     $this->loadComponent('FlashVideo');
@@ -201,7 +201,7 @@ class MediaController extends AppController
    * @param format File format
    * @return array of file information (name, filename, size)
    */
-  public function _getMediaFiles($media, $format) {
+  private function _getMediaFiles($media, $format) {
     $files = array();
     if (!count($media['File'])) {
       return $files;
@@ -252,7 +252,7 @@ class MediaController extends AppController
    * @param name Name of the zip file
    * @param files Array of files
    */
-  public function _createZipFile($name, $files) {
+  protected function _createZipFile($name, $files) {
     App::import('Vendor', 'ZipStream/ZipStream');
 
     ini_set('memory_limit', '51002M');
@@ -333,4 +333,3 @@ class MediaController extends AppController
     $this->_createZipFile($zipName, $files);
   }
 }
-?>

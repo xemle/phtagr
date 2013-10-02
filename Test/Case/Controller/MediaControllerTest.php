@@ -29,7 +29,7 @@ class MediaTestController extends MediaController {
     return $this->mockUser;
   }
 
-  function _createZipFile($name, $files) {
+  protected function _createZipFile($name, $files) {
     $this->zipContent = $files;
   }
 
