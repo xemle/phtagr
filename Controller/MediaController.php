@@ -37,11 +37,6 @@ class MediaController extends AppController
     parent::beforeFilter();
   }
 
-  public function beforeRender() {
-    parent::beforeRender();
-    $this->viewClass = 'Media';
-  }
-
   /**
    * Fetch the request headers. Getting headers sent by the client. Convert
    * header to lower case since it is case insensitive.
@@ -127,8 +122,8 @@ class MediaController extends AppController
     }
     $this->_handleClientCache($preview);
 
-    $this->set($this->MyFile->getMediaViewOptions($preview));
-    $this->viewClass = 'Media';
+    $this->response->file($preview);
+    return $this->response;
   }
 
   public function _createFlashVideo($id) {
@@ -171,10 +166,8 @@ class MediaController extends AppController
 
   public function video($id) {
     $filename = $this->_createFlashVideo($id);
-    $mediaOptions = $this->MyFile->getMediaViewOptions($filename);
-    $mediaOptions['download'] = true;
-    $this->viewClass = 'Media';
-    $this->set($mediaOptions);
+    $this->response->file($filename, array('download' => true));
+    return $this->response;
   }
 
   public function file($id) {
@@ -197,10 +190,8 @@ class MediaController extends AppController
     CakeLog::info("Request of media {$file['Media']['id']}: file $id '{$file['File']['file']}'");
     $filename = $this->MyFile->getFilename($file);
 
-    $mediaOptions = $this->MyFile->getMediaViewOptions($filename);
-    $mediaOptions['download'] = true;
-    $this->viewClass = 'Media';
-    $this->set($mediaOptions);
+    $this->response->file($filename, array('download' => true));
+    return $this->response;
   }
 
   /**
