@@ -23,6 +23,7 @@ class ExiftoolComponent extends Component {
   var $components = array('Command');
   var $enableImportLogging = true;
 
+  var $readExifVersion = true;
   var $bin = false;             // exiftool binary
   var $hasOptionConfig = false;
   var $hasOptionStayOpen = false;
@@ -65,7 +66,6 @@ class ExiftoolComponent extends Component {
       return;
     }
     $this->controller = $controller;
-    $this->readExiftoolVersion();
   }
 
   /**
@@ -88,6 +88,10 @@ class ExiftoolComponent extends Component {
    * @return boolean True if exiftool is enabled
    */
   public function isEnabled() {
+    if ($this->readExifVersion) {
+      $this->readExiftoolVersion();
+      $this->readExifVersion = false;
+    }
     return $this->bin != null;
   }
 
@@ -277,7 +281,7 @@ class ExiftoolComponent extends Component {
    * @result Array of metadata or false on error
    */
   public function readMetaData($filename, $groups = array('image', 'other')) {
-    if (!$this->bin) {
+    if (!$this->isEnabled()) {
       return false;
     }
     $output = array();
@@ -935,7 +939,7 @@ class ExiftoolComponent extends Component {
    * @return mixed True on no error
    */
   public function writeMetaData($filename, $args) {
-    if (!$this->bin) {
+    if (!$this->isEnabled()) {
       return false;
     } else if ($this->_isExiftoolOpen()) {
       $result = $this->_writeMetaDataPipes($args);
@@ -1004,7 +1008,7 @@ class ExiftoolComponent extends Component {
    * @param filename Filename to file to clean
    */
   public function clearMetaData($filename) {
-    if (!$this->bin) {
+    if (!$this->isEnabled()) {
       return;
     } else if (!file_exists($filename)) {
       CakeLog::error("Filename '$filename' does not exists");
