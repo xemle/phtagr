@@ -269,6 +269,8 @@
       $(this).triggerZipDownload(url, mediaIds);
     });
     $('.tooltip-actions').tooltipAction();
+    // quickfix for cakephp 2.4.1. See https://github.com/cakephp/cakephp/issues/2154
+    $('.radioSet label').attr('for', function(i, attr) { return attr.replace(/MediaMedia/, 'Media');})
     $('.radioSet').buttonset();
   });
   $(window).load(function() {
