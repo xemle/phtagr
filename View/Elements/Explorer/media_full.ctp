@@ -7,10 +7,13 @@
 ?></h2>
 <?php
   $size = $this->ImageData->getimagesize($media, OUTPUT_SIZE_THUMB);
-  $imageCrumbs = $this->Breadcrumb->replace($crumbs, 'page', $this->Search->getPage());
+  $imageCrumbs = am($crumbs, array());
+  if ($this->Search->getPage(1) != 1) {
+    $imageCrumbs = $this->Breadcrumb->replace($imageCrumbs, 'page', $this->Search->getPage(1));
+  }
   $imageCrumbs = $this->Breadcrumb->replace($imageCrumbs, 'pos', ($pos + $index));
   if ($this->Search->getShow(12) != 12) {
-    $imageCrumbs = $this->Breadcrumb->replace($imageCrumbs, 'show', $this->Search->getShow());
+    $imageCrumbs = $this->Breadcrumb->replace($imageCrumbs, 'show', $this->Search->getShow(12));
   }
 
   // image centrering from http://www.brunildo.org/test/img_center.html
