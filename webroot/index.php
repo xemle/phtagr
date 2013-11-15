@@ -103,7 +103,8 @@ $url = '';
 if (isset($_GET['url'])) {
 	$url = $_GET['url'];
 } else {
-	$url = array_shift(array_keys($_GET));
+	$keys = array_keys($_GET);
+	$url = array_shift($keys);
 }
 if ($url && preg_match('/.*media\/\w+\/\d+/', $url)) {
 	require APP . DS . 'fast_file_responder.php';
