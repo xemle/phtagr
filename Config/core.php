@@ -256,6 +256,7 @@
  *
  */
 	Configure::write('Session', array(
+		'cookie' => 'phtagrSession',
 		'defaults' => 'php'
 	));
 

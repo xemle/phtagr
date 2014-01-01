@@ -37,7 +37,6 @@ class UsersController extends AppController {
         ));
     }
     $this->layout = 'backend';
-    $this->Cookie->name = 'phTagr';
   }
 
   public function beforeRender() {

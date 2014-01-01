@@ -21,7 +21,7 @@
  */
 class FastFileResponder {
   /** Should be same as in app/config/core.php Session.cookie */
-  var $sessionCookie = 'CAKEPHP';
+  var $sessionCookie = 'phtagrSession';
   var $sessionKey = 'fastFile';
   var $items = array();
 
@@ -37,6 +37,7 @@ class FastFileResponder {
       return;
     }
     session_id($_COOKIE[$this->sessionCookie]);
+    session_name($this->sessionCookie);
     session_start();
     if (isset($_SESSION[$this->sessionKey])) {
       $this->items = (array) $_SESSION[$this->sessionKey]['items'];

@@ -30,6 +30,10 @@ class AppController extends Controller
    */
   public function beforeFilter() {
     parent::beforeFilter();
+
+    $this->Cookie->name = 'phtagr';
+    $this->Cookie->type('rijndael');
+
     $this->__checkSession();
     $this->Feed->add('/explorer/rss', array('title' => __('Recent photos')));
     $this->Feed->add('/explorer/media', array('title' =>  __('Media RSS of recent photos'), 'id' => 'gallery'));
@@ -93,10 +97,9 @@ class AppController extends Controller
   }
 
   private function __checkCookie() {
-    $this->Cookie->name = 'phTagr';
-    $id = $this->Cookie->read('user');
-    if (is_numeric($id)) {
-      return (int) $id;
+    $id = strval($this->Cookie->read('user'));
+    if (preg_match('/^\d+$/', $id)) {
+      return intval($id);
     } else {
       return false;
     }
@@ -144,7 +147,7 @@ class AppController extends Controller
     if ($keyUserId) {
       $userId = $keyUserId;
       $authType = 'AuthKey';
-    } else {
+    } else if ($this->Session->read('Session.requestCount') == 1) {
       $userId = $this->__checkCookie();
       $authType = 'Cookie';
     }
