@@ -43,6 +43,7 @@ class ImageResizerComponent extends Component {
    *   - rotation Rotation in degree. Default i s0
    *   - square Square the image. Default is false. If set, only width is considered.
    *   - clearMetaData Clear all meta data. Default is true
+   *   - isOriginal True if source is original file
    */
   public function resize($src, $dst, $options = array()) {
     $options = am(array(
@@ -50,7 +51,8 @@ class ImageResizerComponent extends Component {
       'quality' => 85,
       'rotation' => 0,
       'square' => false,
-      'clearMetaData' => true
+      'clearMetaData' => true,
+      'isOriginal' => false
       ), $options);
 
     if (!is_readable($src)) {

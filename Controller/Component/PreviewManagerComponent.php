@@ -110,6 +110,7 @@ class PreviewManagerComponent extends Component {
       $src = $this->_getImageSoureFilename($media);
       $config['clearMetaData'] = true;
       $config['rotation'] = $this->controller->Media->getRotationInDegree($media);
+      $config['isOriginal'] = true;
     }
     $dst = $this->FileCache->getFilePath($media, $name);
     if (!$dst) {
