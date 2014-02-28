@@ -165,42 +165,14 @@ class VideoPreviewComponent extends Component {
    * @param type $filename
    */
   private function _addWatermark($filename) {
-    if (!function_exists('imagecreatefromjpeg')) {
-      return;
+    $watermarkFile = APP . 'webroot' . DS . 'img' . DS . 'play.icon.png';
+
+    App::uses('WatermarkCreator', 'Lib');
+    $watermark = new WatermarkCreator();
+
+    if (!$watermark->create($filename, $watermarkFile)) {
+      CakeLog::error(join(', ', $watermark->errors));
     }
-    $maxSize = 1920;
-
-    $img = imagecreatefromjpeg($filename);
-    $imgWidth = imagesx($img);
-    $imgHeight = imagesy($img);
-    $watermark = imagecreatefrompng(APP . 'webroot' . DS . 'img' . DS . 'play.icon.png');
-    $watermarkWidth = imagesx($watermark);
-    $watermarkHeight = imagesy($watermark);
-    if ($imgWidth > $maxSize || $imgHeight > $maxSize) {
-      $watermarkX = ($imgWidth - $watermarkWidth) / 2;
-      $watermarkY = ($imgHeight - $watermarkHeight) / 2;
-      imagecopy($img, $watermark, $watermarkX, $watermarkY, 0, 0, $watermarkWidth, $watermarkHeight);
-    } else {
-      // resize to suit smaller thumbnails
-      $scale = $imgWidth / $maxSize;
-      $scaledWidth = (int) ($scale * $watermarkWidth);
-      $scaledHeight = (int) ($scale * $watermarkHeight);
-
-      $scaledWatermark = imagecreatetruecolor($scaledWidth, $scaledHeight);
-      $white = imagecolorallocate($scaledWatermark, 255, 255, 255);
-      imagecolortransparent($scaledWatermark, $white);
-      imagealphablending($scaledWatermark, false);
-      imagecopyresized($scaledWatermark, $watermark, 0, 0, 0, 0, $scaledWidth, $scaledHeight, $watermarkWidth, $watermarkHeight);
-
-      $watermarkX = ($imgWidth - $scaledWidth) / 2;
-      $watermarkY = ($imgHeight - $scaledHeight) / 2;
-
-      imagecopy($img, $scaledWatermark, $watermarkX, $watermarkY, 0, 0, $scaledWidth, $scaledHeight);
-    }
-
-    imagejpeg($img, $filename, 95);
-    imagedestroy($img);
-    imagedestroy($watermark);
   }
 
   /**
