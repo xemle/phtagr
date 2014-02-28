@@ -252,7 +252,12 @@ class AppController extends Controller
     if (!$parent) {
       $parent = $this;
     }
-    if (isset($parent->{$componentName})) {
+    $alias = $componentName;
+    if (strpos($alias, '.') > 0) {
+      $names = preg_split('/\./', $componentName);
+      $alias = $names[1];
+    }
+    if (isset($parent->{$alias})) {
       return true;
     }
     if (!in_array($componentName, $parent->components)) {
@@ -263,7 +268,7 @@ class AppController extends Controller
       CakeLog::warning("Could not load component $componentName");
       return false;
     }
-    $parent->{$componentName} = $component;
+    $parent->{$alias} = $component;
     // Load components recusivly
     if (is_array($component->components)) {
       $this->loadComponent($component->components, $component);
