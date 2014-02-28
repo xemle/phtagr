@@ -94,7 +94,14 @@ class ImageResizerComponent extends Component {
     if ($options['clearMetaData']) {
       $this->Exiftool->clearMetaData($dst);
     }
-    return true;
+
+    $event = new CakeEvent('Component.ImageResizer.afterResize', $this, array(
+        'src' => $src,
+        'dst' => $dst,
+        'options' => $options
+    ));
+    $this->controller->getEventManager()->dispatch($event);
+    return !$event->isStopped();
   }
 
   /**
