@@ -1,4 +1,20 @@
 <?php
+/**
+ * PHP versions 5
+ *
+ * phTagr : Organize, Browse, and Share Your Photos.
+ * Copyright 2006-2014, Sebastian Felis (sebastian@phtagr.org)
+ *
+ * Licensed under The GPL-2.0 License
+ * Redistributions of files must retain the above copyright notice.
+ *
+ * @copyright     Copyright 2006-2013, Sebastian Felis (sebastian@phtagr.org)
+ * @link          http://www.phtagr.org phTagr
+ * @package       Phtagr
+ * @since         phTagr 2.3-dev
+ * @license       GPL-2.0 (http://www.opensource.org/licenses/GPL-2.0)
+ */
+
 
 /**
  * Add a watermark to an image via GD library
@@ -20,6 +36,7 @@ class WatermarkCreator {
   private function getExtension($filename) {
     return strtolower(substr($filename, strrpos($filename, '.') + 1));
   }
+
   private function createImage($filename) {
     $ext = $this->getExtension($filename);
     if ($ext == 'jpeg' || $ext == 'jpg' || $ext == 'thm') {
@@ -54,32 +71,84 @@ class WatermarkCreator {
     return false;
   }
 
-  private function _applyWatermark($image, $watermark) {
-    $imgWidth = imagesx($image);
-    $imgHeight = imagesy($image);
+  private function scaleImage($image, $width, $height, $scale) {
+    $scaledWidth = (int) ($scale * $width);
+    $scaledHeight = (int) ($scale * $height);
+
+    $scaledImage = imagecreatetruecolor($scaledWidth, $scaledHeight);
+    $white = imagecolorallocate($scaledImage, 255, 255, 255);
+    imagecolortransparent($scaledImage, $white);
+    imagealphablending($scaledImage, false);
+    imagecopyresized($scaledImage, $image, 0, 0, 0, 0, $scaledWidth, $scaledHeight, $width, $height);
+
+    return $scaledImage;
+  }
+
+  /**
+   * Position the watermark and return watermark offset.
+   *
+   * @param int $imageWidth
+   * @param int $imageHeight
+   * @param int $watermarkWidth
+   * @param int $watermarkHeight
+   * @param string $position Position. 'n' for north, 'e' for east, 's' for south,
+   * and 'w' for west. To place watermark in left bottom use south-east with 'se'.
+   * Default position is centered.
+   * @return array of offsetX and offsetY
+   */
+  private function positionWatermark($imageWidth, $imageHeight, $watermarkWidth, $watermarkHeight, $position = '') {
+    $position = strtolower($position);
+    $offsetX = ($imageWidth - $watermarkWidth) / 2;
+    $offsetY = ($imageHeight - $watermarkHeight) / 2;
+
+    // Position north and south
+    if (strpos($position, 'n') !== false) {
+      $offsetY = 0;
+    } else if (strpos($position, 's') !== false) {
+      $offsetY = $imageHeight - $watermarkHeight;
+    }
+    // Position west and east
+    if (strpos($position, 'w') !== false) {
+      $offsetX = 0;
+    } else if (strpos($position, 'e') !== false) {
+      $offsetX = $imageWidth - $watermarkWidth;
+    }
+
+    return array($offsetX, $offsetY);
+  }
+
+  /**
+   * Apply watermark to image buffer. The watermark will be scaled into the
+   * image that the outer watermark bounding box is equal to the inner image
+   * bounding box. The inner bounding box is the box of the shorter side and
+   * the outer bounding box is the longer side.
+   *
+   * @param resource $image Buffer of image
+   * @param resource $watermark Buffer of watermark
+   * @param string $position See function _positionWatermark()
+   */
+  private function applyWatermark($image, $watermark, $position) {
+    $imageWidth = imagesx($image);
+    $imageHeight = imagesy($image);
+    $imgInnerBoundingBox = min($imageWidth, $imageHeight);
 
     $watermarkWidth = imagesx($watermark);
     $watermarkHeight = imagesy($watermark);
-    if ($imgWidth > $this->maxSize || $imgHeight > $this->maxSize) {
-      $watermarkX = ($imgWidth - $watermarkWidth) / 2;
-      $watermarkY = ($imgHeight - $watermarkHeight) / 2;
-      imagecopy($image, $watermark, $watermarkX, $watermarkY, 0, 0, $watermarkWidth, $watermarkHeight);
-    } else {
-      // resize to suit smaller thumbnails
-      $scale = $imgWidth / $this->maxSize;
-      $scaledWidth = (int) ($scale * $watermarkWidth);
-      $scaledHeight = (int) ($scale * $watermarkHeight);
+    $watermarkOuterBoundingBox = max($watermarkWidth, $watermarkHeight);
 
-      $scaledWatermark = imagecreatetruecolor($scaledWidth, $scaledHeight);
-      $white = imagecolorallocate($scaledWatermark, 255, 255, 255);
-      imagecolortransparent($scaledWatermark, $white);
-      imagealphablending($scaledWatermark, false);
-      imagecopyresized($scaledWatermark, $watermark, 0, 0, 0, 0, $scaledWidth, $scaledHeight, $watermarkWidth, $watermarkHeight);
+    $scale = $imgInnerBoundingBox / $watermarkOuterBoundingBox;
+    if ($scale != 1) {
+      $watermark = $this->scaleImage($watermark, $watermarkWidth, $watermarkHeight, $scale);
+      $watermarkWidth = (int) ($scale * $watermarkWidth);
+      $watermarkHeight = (int) ($scale * $watermarkHeight);
+    }
 
-      $watermarkX = ($imgWidth - $scaledWidth) / 2;
-      $watermarkY = ($imgHeight - $scaledHeight) / 2;
+    list($watermarkX, $watermarkY) = $this->positionWatermark($imageWidth, $imageHeight, $watermarkWidth, $watermarkHeight, $position);
+    imagecopy($image, $watermark, $watermarkX, $watermarkY, 0, 0, $watermarkWidth, $watermarkHeight);
 
-      imagecopy($image, $scaledWatermark, $watermarkX, $watermarkY, 0, 0, $scaledWidth, $scaledHeight);
+    // Free scaled image buffer
+    if ($scale != 1) {
+      imagedestroy($watermark);
     }
   }
 
@@ -88,12 +157,16 @@ class WatermarkCreator {
    *
    * @param string $src Filename of image source file
    * @param string $watermarkSrc Filename of watermark image
+   * @param string $position See _positionWatermark() with cardinal direction
+   * of 'n' for north, 'e' for east, 's' for south, and 'w' for west. Use 'se'
+   * to place the watermark to south east which is right bottom. Use empty string
+   * for center. Default is center
    * @param string $dst Optional destination file. If obmitted the watermark is
    * applied to $src
    * @return boolean Return true on success. If false the errors are listed
    * in WatermarkCreator::errors array.
    */
-  public function create($src, $watermarkSrc, $dst = null) {
+  public function create($src, $watermarkSrc, $position = '', $dst = null) {
     // Reset errors
     $this->errors = array();
 
@@ -121,9 +194,9 @@ class WatermarkCreator {
       imagedestroy($image);
       return false;
     }
-    
+
     // Add watermark image
-    $this->_applyWatermark($image, $watermark);
+    $this->applyWatermark($image, $watermark, $position);
 
     // Save final watermark image
     if ($dst === null) {
