@@ -25,12 +25,13 @@ class GroupsController extends AppController {
 
   public function beforeFilter() {
     parent::beforeFilter();
-    $this->subMenu = array(
-      'index' => __("My Groups"),
-      'members' => __("My Memberships"),
-      'all' => __("All Groups"),
-      'create' => __("Create Group"),
-      );
+    $this->Menu->createSubMenu(array(
+       'index' => __("My Groups"),
+       'members' => __("My Memberships"),
+       'all' => __("All Groups"),
+       'create' => __("Create Group")
+    ));
+
     $this->requireRole(ROLE_USER);
     $this->Security->blackHoleCallback = 'fail';
     $this->Security->requirePost = array('addMember', 'autocomplete');

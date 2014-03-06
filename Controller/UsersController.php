@@ -28,14 +28,11 @@ class UsersController extends AppController {
 
   public function beforeFilter() {
     parent::beforeFilter();
-    $this->subMenu = array(
-      'index' => __("List User"),
-      );
+    $actionToTitle = array('index' => __('List User'));
     if ($this->hasRole(ROLE_SYSOP)) {
-      $this->subMenu = am($this->subMenu, array(
-        array('action' => 'add', 'title' => __("Add User"), 'admin' => true),
-        ));
+      $actionToTitle['add'] = array('title' => __('Add User'), 'admin' => true);
     }
+    $this->Menu->createSubMenu($actionToTitle);
     $this->layout = 'backend';
   }
 
@@ -313,7 +310,7 @@ class UsersController extends AppController {
     $this->request->data = $this->User->findById($id);
     unset($this->request->data['User']['password']);
 
-    $this->set('fsroots', $this->Option->buildTree($this->request->data, 'path.fsroot'));
+    $this->set('fsroots', $this->Option->createTreeMenu($this->request->data, 'path.fsroot'));
     $this->__addAdminEditMenu($id);
   }
 

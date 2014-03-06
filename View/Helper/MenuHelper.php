@@ -189,5 +189,131 @@ class MenuHelper extends AppHelper
     $menu = $this->params['menus'][$name];
     return $this->_getSubMenu($menu, am($options, array('id' => $name), $menu['options']));
   }
+
+  /**
+   * create item defaults
+   *
+   * @param array $items
+   */
+  function createItemDefaults(&$items) {
+    $result = array();
+    foreach ($items as $name => $item) {
+      if (!is_array($item)) {
+        $item = array('url' => $item);
+      }
+      $item = am(array(
+          'id' => $name,
+          'parent' => false,
+          'title' => $name,
+          'url' => false,
+          'controller' => false,
+          'action' => false,
+          'admin' => false,
+          'class' => array(),
+          'active' => false,
+          'disabled' => false,
+          'deactivated' => false,
+          'priority' => 10,
+          'requiredRole' => ROLE_NOBODY,
+          'children' => array(),
+          )
+          , $item);
+      $result[] = $item;
+    }
+    return $result;
+  }
+
+  /**
+   * Create tree items
+   *
+   * @param array $items
+   * @return array menu items in tree structure
+   */
+  public function createTreeMenu($items) {
+    $parentList = array();
+    foreach ($items as $item){
+        $parentList[$item['parent']][] = $item;
+    }
+    return $this->buildTree($parentList, $parentList[0]);
+  }
+
+  private function buildTree(&$list, $parents){
+    $tree = array();
+    foreach ($parents as $parent){
+      if(isset($list[$parent['id']])){
+        $parent['children'] = $this->buildTree($list, $list[$parent['id']]);
+      }
+      $tree[] = $parent;
+    }
+    return $tree;
+  }
+
+  /**
+   * Render tree items
+   *
+   * @param array $treeItems
+   * @return string
+   */
+  function renderTree(&$treeItems) {
+    $output = '';
+    foreach ($treeItems as $item) {
+      if ($item['deactivated']) {
+        continue;
+      }
+      $url = false;
+      if ($item['url']) {
+        $url = $item['url'];
+      } elseif ($item['controller']) {
+        $url = array('controller' => $item['controller']);
+        if ($item['action']) {
+          $url['action'] = $item['action'];
+        } else {
+          $url['action'] = 'index';
+        }
+        if ($item['admin']) {
+          $url['admin'] = $item['admin'];
+        }
+      }
+      $class = $item['class'];
+      if ($item['active']) {
+        $class[] = 'active';
+      } else if ($item['disabled']) {
+        $class[] = 'disabled';
+      }
+      $aOptions = array();
+      if (count($class)) {
+        $aOptions['class'] = join(' ', $class);
+      }
+
+      $link = array();
+      if ($url) {
+        $link[] = $this->Html->link($item['title'], $url, $aOptions);
+      } else {
+        $link[] = $item['title'];
+      }
+      if (count($item['children'])) {
+        $link[] = '<ul>' . $this->renderTree($item['children']) . '</ul>';
+      }
+      $output .= $this->Html->tag('li', join('', $link));
+    }
+    return $output;
+  }
+
+  /**
+   * Render menu
+   *
+   * @param String $name Menu name
+   * @return string output string
+   */
+  public function renderMenu($name) {
+    $items = Configure::read("menu.$name");
+    if (!count($items)) {
+      return '';
+    }
+    $list = $this->createItemDefaults($items);
+    $list = Hash::sort($list, '{n}.priority', 'asc');
+    $tree = $this->createTreeMenu($list);
+    return $this->renderTree($tree);
+  }
 }
-?>
+

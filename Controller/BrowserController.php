@@ -31,20 +31,20 @@ class BrowserController extends AppController
   public function beforeFilter() {
     parent::beforeFilter();
     $this->logUser();
-    $this->subMenu = array(
+    $this->Menu->createSubMenu(array(
       'import' => __("Import Files"),
       'upload' => __("Upload"),
       'easyacl' => __("Edit Access Rights"),
       'sync' => __("Meta Data Sync"),
       'view' => __("Overview"),
-      );
+      ));
 
     $this->requireRole(ROLE_USER, array('redirect' => '/'));
 
     $userDir = $this->FileManager->getUserDir();
     $this->_addFsRoot($userDir);
 
-    $fsroots = $this->Option->buildTree($this->getUser(), 'path.fsroot', true);
+    $fsroots = $this->Option->createTreeMenu($this->getUser(), 'path.fsroot', true);
     if (count($fsroots)) {
       foreach ($fsroots['fsroot'] as $id => $root) {
         $this->_addFsRoot($root);

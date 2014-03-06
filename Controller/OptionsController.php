@@ -23,14 +23,16 @@ class OptionsController extends AppController {
   var $subMenu = false;
 
   public function beforeFilter() {
-    $this->subMenu = array(
-      'profile' => __("Profile"),
-      'password' => __("Password"),
-      'explorer' => __("Explorer"),
-      'import' => __("Import Options"),
-      'export' => __("Export Options"),
-      'links' => __("Links"),
-      );
+    $actionsToTitle = array(
+        'profile' => __('Profile'),
+        'password' => __('Password'),
+        'explorer' => __('Explorer'),
+        'import' => __('Import Options'),
+        'export' => __('Export Options'),
+        'links' => __('Links'),
+    );
+
+    $this->Menu->createSubMenu($actionsToTitle);
     parent::beforeFilter();
 
     $this->requireRole(ROLE_GUEST, array('redirect' => '/'));

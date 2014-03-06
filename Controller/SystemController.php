@@ -26,14 +26,14 @@ class SystemController extends AppController {
     parent::beforeFilter();
     $this->requireRole(ROLE_SYSOP, array('redirect' => '/'));
 
-    $this->subMenu = array(
+    $this->Menu->createSubMenu(array(
       'index' => __("General"),
       'register' => __("User Registration"),
       'external' => __("External Programs"),
       'upgrade' => __("Database Upgrade"),
       'deleteUnusedMetaData' => __("Delete Unused Metadata"),
       'view' => __("Overview")
-      );
+      ));
   }
 
   public function beforeRender() {

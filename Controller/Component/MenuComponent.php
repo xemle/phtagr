@@ -32,33 +32,61 @@ class MenuComponent extends Component {
       return;
     }
     $this->controller = $controller;
+    $this->setBackendMenu();
     $this->setCurrentMenu('main');
   }
 
-  public function setBasicMainMenu() {
-    $controllers = array(
-      'options' => __('Account Settings'),
-      'groups' => __('Groups'),
-      'users' => __('Users'),
-      'guests' => __('Guests'),
-      'browser' => __('Media Files')
-      );
-    if ($this->controller->hasRole(ROLE_SYSOP)) {
-      $controllers['system'] = __("System");
-    }
+  public function setBackendMenu() {
+    $menu = array(
+        'Options' => array('title' => __('Account Settings'), 'controller' => 'options', 'priority' => 1),
+        'Groups' => array('title' => __('Groups'), 'controller' => 'groups', 'priority' => 2),
+        'Users' => array('title' => __('Users'), 'controller' => 'users', 'priority' => 3),
+        'Guests' => array('title' => __('Guests'), 'controller' => 'guests', 'priority' => 4),
+        'Browser' => array('title' => __('Media Files'), 'controller' => 'browser', 'priority' => 5),
+        'System' => array('title' => __('System'), 'controller' => 'system', 'priority' => 6, 'requiredRole' => ROLE_SYSOP),
+        );
+    Configure::write('menu.backend', Hash::merge($menu, (array) Configure::read('menu.backend')));
 
-    foreach ($controllers as $ctrl => $text) {
-      $options = array('id' => 'item-' . $ctrl);
-      if (strtolower($this->controller->name) == $ctrl) {
+    $headerMenu = array(
+        'gallery' => array('title' => __("View Gallery"), 'url' => '/'),
+        );
+    Configure::write('menu.backend-header', Hash::merge($headerMenu, (array) Configure::read('menu.backend-header')));
+  }
+
+  /**
+   * Create a submenu of current controller
+   *
+   * @param array $actionToTitle Mapping from action to menu item title
+   * @param string $menu Menu name. Default is backend
+   */
+  public function createSubMenu($actionToTitle, $menu = 'backend') {
+    $controllerName = $this->controller->name;
+    $currentAction = $this->controller->action;
+
+    $subMenuItems = array($controllerName => array('active' => true));
+
+    $default = array('controller' => $controllerName, 'parent' => $controllerName);
+    foreach ($actionToTitle as $action => $title) {
+      if (is_array($title)) {
+        $options = $title;
+        if (!isset($options['action']) && isset($options['url'])) {
+          $options['action'] = $action;
+        }
+      } else {
+        $options = array('title' => $title, 'action' => $action);
+      }
+      if ($action == $currentAction) {
         $options['active'] = true;
       }
-      $this->addItem($text, array('controller' => $ctrl, 'admin' => false, 'action' => 'index'), $options);
+      $name = $controllerName . Inflector::camelize($action);
+      $subMenuItems[$name] = am($default, $options);
     }
+
+    Configure::write('menu.'.$menu, Hash::merge($subMenuItems, (array) Configure::read('menu.'.$menu)));
   }
 
   public function beforeRender(Controller $controller) {
     $this->setCurrentMenu('main');
-    $this->setBasicMainMenu();
     $menu =& $this->menus[$this->currentMenu];
 
     if (isset($this->controller->subMenu) && $this->controller->subMenu) {

@@ -28,25 +28,21 @@ class GuestsController extends AppController {
     parent::beforeFilter();
     $this->layout = 'backend';
     $this->requireRole(ROLE_USER);
-    $this->subMenu = array(
-      'create' => __('New Guest')
-      );
+
+    $this->Menu->createSubmenu(array(
+       'create' => __('New Guest')
+    ));
   }
 
   /**
    * Add sub menu entry for guest
    */
   private function _addSubmenu(&$guest) {
-    $this->subMenu[] = array(
-      'url' => array('action' => $this->action, $guest['Guest']['id']),
-      'title' => __("Edit %s", $guest['Guest']['username']), 'active' => true,
-      array(
-        'url' => array('action' => 'links', $guest['Guest']['id']), 'title' => __("Links")),
-      );
-  }
-
-  public function beforeRender() {
-    parent::beforeRender();
+    $guestId = $guest['Guest']['id'];
+    $this->Menu->createSubmenu(array(
+        'edit' => array('url' => array('action' => 'edit', $guestId), 'title' => __("Edit %s", $guest['Guest']['username']), 'id' => 'guest' . $guestId, 'priority' => 11),
+        'links' => array('url' => array('action' => 'links', $guestId), 'title' => __("Links"), 'parent' => 'guest' . $guestId)
+    ));
   }
 
   public function index() {

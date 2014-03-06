@@ -32,7 +32,9 @@
 <div id="sidebar">
 <div class="box">
 <h1>Menu</h1>
-<?php echo $this->Menu->menu('main'); ?>
+<ul>
+<?php echo $this->Menu->renderMenu('backend'); ?>
+</ul>
 </div>
 </div>
 <div id="content">
