@@ -71,17 +71,101 @@ class WatermarkCreator {
     return false;
   }
 
-  private function scaleImage($image, $width, $height, $scale) {
-    $scaledWidth = (int) ($scale * $width);
-    $scaledHeight = (int) ($scale * $height);
+  /**
+   * If $scaleMode is set to 'width' the watermark is scaled to fit the width
+   * of the image. Analog to $scaleMode 'height'.
+   *
+   * If $scaleMode is set to 'bestFit' the watermark ist scaled that it fits
+   * into the image without cutting it.
+   *
+   * The watermark is not scaled if $scaleMode is set to 'none'.
+   *
+   * On $scaleMode 'inner' the longer watermark side is scaled to the shorter
+   * image side. This ensures that the watermark has equal sizes for different
+   * image orientations of portait and landscape.
+   *
+   * @param int $imageWidth
+   * @param int $imageHeight
+   * @param int $watermarkWidth
+   * @param int $watermarkHeight
+   * @param string $scaleMode
+   * @return float Scaling factor
+   */
+  private function getScaleFactor($imageWidth, $imageHeight, $watermarkWidth, $watermarkHeight, $scaleMode) {
+    $scaleFactor = 1.0;
+    if ($scaleMode == 'width') {
+      $scaleFactor = $imageWidth / $watermarkWidth;
+    } else if ($scaleMode == 'height') {
+      $scaleFactor = $imageHeight / $watermarkHeight;
+    } else if ($scaleMode == 'bestFit') {
+      $scaleWidth = $imageWidth / $watermarkWidth;
+      $scaleHeight = $imageHeight / $watermarkHeight;
 
-    $scaledImage = imagecreatetruecolor($scaledWidth, $scaledHeight);
+      $scaleFactor = min($scaleWidth, $scaleHeight);
+    } else if ($scaleMode == 'none') {
+      $scaleFactor = 1.0;
+    } else if ($scaleMode == 'inner') {
+      $imageBoundingBox = min($imageWidth, $imageHeight);
+      $watermarkBoundingBox = max($watermarkWidth, $watermarkHeight);
+
+      $scaleFactor = $imageBoundingBox / $watermarkBoundingBox;
+    } else {
+      CakeLog::warning("Invalid scaleMode $scaleMode. Do not scale watermark");
+    }
+
+    return $scaleFactor;
+  }
+
+  /**
+   * Scale an image from its source size to given target size
+   *
+   * @param resource $image Resource of image source
+   * @param int $imageWidth
+   * @param int $imageHeight
+   * @param int $targetWidth
+   * @param int $targetHeight
+   * @return resouce Resource of scaled image
+   */
+  private function scaleImage($image, $imageWidth, $imageHeight, $targetWidth ,$targetHeight) {
+    $scaledImage = imagecreatetruecolor($targetWidth, $targetHeight);
     $white = imagecolorallocate($scaledImage, 255, 255, 255);
     imagecolortransparent($scaledImage, $white);
     imagealphablending($scaledImage, false);
-    imagecopyresized($scaledImage, $image, 0, 0, 0, 0, $scaledWidth, $scaledHeight, $width, $height);
+    imagecopyresized($scaledImage, $image, 0, 0, 0, 0, $targetWidth, $targetHeight, $imageWidth, $imageHeight);
 
     return $scaledImage;
+  }
+
+  /**
+   * Scale watermark image according to size of image, watermark and scale mode.
+   *
+   * @param resource $image
+   * @param resource $watermark
+   * @param string $scaleMode Scale mode of width, height, bestFit, none, inner.
+   * Default is inner. See function getScaleFactor()
+   * @return mixed Watermark resource on success. False otherwise
+   */
+  private function scaleWatermark($image, $watermark, $scaleMode) {
+    $imageWidth = imagesx($image);
+    $imageHeight = imagesy($image);
+    $watermarkWidth = imagesx($watermark);
+    $watermarkHeight = imagesy($watermark);
+
+    if ($imageWidth * $imageHeight == 0) {
+      $this->errors[] = "Invalid image size of {$imageWidth}x$imageHeight";
+      return false;
+    }
+    if ($watermarkWidth * $watermarkHeight == 0) {
+      $this->errors[] = "Invalid watermark size of {$watermarkWidth}x$watermarkHeight";
+      return false;
+    }
+
+    $scaleFactor = $this->getScaleFactor($imageWidth, $imageHeight, $watermarkWidth, $watermarkHeight, $scaleMode);
+    if ($scaleFactor == 1.0) {
+      return $watermark;
+    }
+
+    return $this->scaleImage($watermark, $watermarkWidth, $watermarkHeight, (int) ($scaleFactor * $watermarkWidth), (int) ($scaleFactor * $watermarkHeight));
   }
 
   /**
@@ -125,31 +209,29 @@ class WatermarkCreator {
    *
    * @param resource $image Buffer of image
    * @param resource $watermark Buffer of watermark
-   * @param string $position See function _positionWatermark()
+   * @param string $scaleMode Position mode. See function scaleWatermark()
+   * @param string $position See function positionWatermark()
    */
-  private function applyWatermark($image, $watermark, $position) {
+  private function applyWatermark($image, $watermark, $scaleMode, $position) {
+    $scaledWatermark = $this->scaleWatermark($image, $watermark, $scaleMode);
+    if (!$scaledWatermark) {
+      return false;
+    }
+
     $imageWidth = imagesx($image);
     $imageHeight = imagesy($image);
-    $imgInnerBoundingBox = min($imageWidth, $imageHeight);
 
-    $watermarkWidth = imagesx($watermark);
-    $watermarkHeight = imagesy($watermark);
-    $watermarkOuterBoundingBox = max($watermarkWidth, $watermarkHeight);
-
-    $scale = $imgInnerBoundingBox / $watermarkOuterBoundingBox;
-    if ($scale != 1) {
-      $watermark = $this->scaleImage($watermark, $watermarkWidth, $watermarkHeight, $scale);
-      $watermarkWidth = (int) ($scale * $watermarkWidth);
-      $watermarkHeight = (int) ($scale * $watermarkHeight);
-    }
+    $watermarkWidth = imagesx($scaledWatermark);
+    $watermarkHeight = imagesy($scaledWatermark);
 
     list($watermarkX, $watermarkY) = $this->positionWatermark($imageWidth, $imageHeight, $watermarkWidth, $watermarkHeight, $position);
-    imagecopy($image, $watermark, $watermarkX, $watermarkY, 0, 0, $watermarkWidth, $watermarkHeight);
+    imagecopy($image, $scaledWatermark, $watermarkX, $watermarkY, 0, 0, $watermarkWidth, $watermarkHeight);
 
-    // Free scaled image buffer
-    if ($scale != 1) {
-      imagedestroy($watermark);
+    // Free resource
+    if ($watermark != $scaledWatermark) {
+      imagedestroy($scaledWatermark);
     }
+    return true;
   }
 
   /**
@@ -157,7 +239,8 @@ class WatermarkCreator {
    *
    * @param string $src Filename of image source file
    * @param string $watermarkSrc Filename of watermark image
-   * @param string $position See _positionWatermark() with cardinal direction
+   * @param string $scaleMode See scaleWatermark() for different scale modes
+   * @param string $position See positionWatermark() with cardinal direction
    * of 'n' for north, 'e' for east, 's' for south, and 'w' for west. Use 'se'
    * to place the watermark to south east which is right bottom. Use empty string
    * for center. Default is center
@@ -166,7 +249,7 @@ class WatermarkCreator {
    * @return boolean Return true on success. If false the errors are listed
    * in WatermarkCreator::errors array.
    */
-  public function create($src, $watermarkSrc, $position = '', $dst = null) {
+  public function create($src, $watermarkSrc, $scaleMode = 'inner', $position = '', $dst = null) {
     // Reset errors
     $this->errors = array();
 
@@ -196,7 +279,9 @@ class WatermarkCreator {
     }
 
     // Add watermark image
-    $this->applyWatermark($image, $watermark, $position);
+    if (!$this->applyWatermark($image, $watermark, $scaleMode, $position)) {
+      return false;
+    }
 
     // Save final watermark image
     if ($dst === null) {

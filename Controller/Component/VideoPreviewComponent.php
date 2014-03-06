@@ -170,7 +170,10 @@ class VideoPreviewComponent extends Component {
     App::uses('WatermarkCreator', 'Lib');
     $watermark = new WatermarkCreator();
 
-    if (!$watermark->create($filename, $watermarkFile)) {
+    $scaleMode = 'inner';
+    $position = ''; // empty for center
+
+    if (!$watermark->create($filename, $watermarkFile, $scaleMode, $position)) {
       CakeLog::error(join(', ', $watermark->errors));
     }
   }
