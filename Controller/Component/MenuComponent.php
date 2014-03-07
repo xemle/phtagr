@@ -51,6 +51,14 @@ class MenuComponent extends Component {
         'gallery' => array('title' => __("View Gallery"), 'url' => '/'),
         );
     Configure::write('menu.backend-header', Hash::merge($headerMenu, (array) Configure::read('menu.backend-header')));
+
+    $topMenu = array(
+        'login' => array('title' => __("Login"), 'controller' => 'users', 'action' => 'login', 'roles' => ROLE_NOBODY),
+        'register' => array('title' => __("Sign Up"), 'controller' => 'users', 'action' => 'register', 'roles' => ROLE_NOBODY),
+        'dashboard' => array('title' => __("Dashboard"), 'controller' => 'options', 'requiredRole' => ROLE_USER),
+        'logout' => array('title' => __("Logout"), 'controller' => 'users', 'action' => 'logout', 'requiredRole' => ROLE_GUEST)
+    );
+    Configure::write('menu.top-menu', Hash::merge($topMenu, (array) Configure::read('menu.top-menu')));
   }
 
   /**
@@ -107,6 +115,15 @@ class MenuComponent extends Component {
     }
     $this->controller->params['menus'] = $this->menus;
     $this->controller->set('menus_for_layout', $this->menus);
+
+    $user = $this->Session->read('user');
+    $username = isset($user['User']['username']) ? $user['User']['username'] : 'John Doe';
+
+    // Set login name
+    $topMenu = array(
+        'username' => array('title' => __("Howdy, %s!", $username), 'requiredRole' => ROLE_GUEST, 'priority' => 0)
+    );
+    Configure::write('menu.top-menu', Hash::merge($topMenu, (array) Configure::read('menu.top-menu')));
   }
 
   /**

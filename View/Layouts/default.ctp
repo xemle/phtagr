@@ -23,7 +23,9 @@
 <div id="header"><div class="sub">
 <h1><?php echo $this->Html->link($this->Option->get('general.title', 'phTagr.'), '/'); ?></h1>
 <span class="subtitle"><?php echo $this->Option->get('general.subtitle', 'Organize, Browse, and Share Your Photos'); ?></span>
-<?php echo $this->Menu->menu('top-menu'); ?>
+<ul id="top-menu">
+  <?php echo $this->Menu->renderMenu('top-menu'); ?>
+</ul>
 </div></div><!-- #header/sub -->
 
 <div id="main-menu"><div class="sub">
