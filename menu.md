@@ -11,7 +11,7 @@ plugins `bootstrap.php` file.
 
 Example:
 
-    Configuration::write('menu.backend.MyPlugin' => '/myPlugin/myController');
+    Configure::write(array('menu.backend.MyPlugin' => '/myPlugin/myController'));
 
 # Options
 
@@ -23,8 +23,9 @@ Following options are supported
 * `parent`: `String` id of parent menu
 * `title`: `String` of item title
 * `url`: Url as `String` or `Array`.
+* `plugin`: `String` of plugin.
+* `controler`: `String` of controller.
 * `action`: `String` of url action.
-* `controler`: `String` of url controller.
 * `active`: `Boolean` if the item is active.
 * `disabled`: `Boolean` if the item is disabled. This item will be shown.
 * `deactivated`: `Boolean` if the itmem should not be shown

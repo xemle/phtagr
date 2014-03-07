@@ -206,6 +206,7 @@ class MenuHelper extends AppHelper
           'parent' => false,
           'title' => $name,
           'url' => false,
+          'plugin' => false,
           'controller' => false,
           'action' => false,
           'admin' => false,
@@ -264,7 +265,7 @@ class MenuHelper extends AppHelper
       if ($item['url']) {
         $url = $item['url'];
       } elseif ($item['controller']) {
-        $url = array('controller' => $item['controller']);
+        $url = array('plugin' => $item['plugin'], 'controller' => $item['controller']);
         if ($item['action']) {
           $url['action'] = $item['action'];
         } else {
