@@ -16,7 +16,7 @@
  */
 class MenuHelper extends AppHelper
 {
-  var $helpers = array('Html');
+  var $helpers = array('Html', 'Session');
 
   var $_url = false;
 
@@ -215,7 +215,8 @@ class MenuHelper extends AppHelper
           'disabled' => false,
           'deactivated' => false,
           'priority' => 10,
-          'requiredRole' => ROLE_NOBODY,
+          'requiredRole' => false,
+          'roles' => false,
           'children' => array(),
           )
           , $item);
@@ -249,6 +250,27 @@ class MenuHelper extends AppHelper
     return $tree;
   }
 
+  private function isValidMenuItem(&$item) {
+    if ($item['deactivated']) {
+      return false;
+    }
+    if ($item['roles'] !== false) {
+      $roles = (array) $item['roles'];
+      $user = $this->Session->read('user');
+      if (!$user || !isset($user['User']['role']) || !in_array($user['User']['role'], $roles)) {
+        return false;
+      }
+    }
+    if ($item['requiredRole'] !== false) {
+      $requiredRole = (int) $item['requiredRole'];
+      $user = $this->Session->read('user');
+      if (!$user || !isset($user['User']['role']) || $user['User']['role'] < $requiredRole) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   /**
    * Render tree items
    *
@@ -258,9 +280,10 @@ class MenuHelper extends AppHelper
   function renderTree(&$treeItems) {
     $output = '';
     foreach ($treeItems as $item) {
-      if ($item['deactivated']) {
+      if (!$this->isValidMenuItem($item)) {
         continue;
       }
+
       $url = false;
       if ($item['url']) {
         $url = $item['url'];

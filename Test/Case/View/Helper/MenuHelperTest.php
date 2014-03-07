@@ -168,7 +168,57 @@ class MenuHelperTest extends CakeTestCase {
     $expected .= '<li><a href="/test3">Title3</a></li>';
     $this->assertEqual($output, $expected);
   }
- 
+
+  function testRoles() {
+    Configure::write('menu.test.Title1', array('url' => '/test1', 'roles' => ROLE_NOBODY));
+    Configure::write('menu.test.Title2', array('url' => '/test2', 'roles' => array(ROLE_NOBODY, ROLE_GUEST)));
+
+    CakeSession::write('user', array('User' => array('role' => ROLE_NOBODY)));
+    $output = $this->Menu->renderMenu('test');
+    $expected = '<li><a href="/test1">Title1</a></li>';
+    $expected .= '<li><a href="/test2">Title2</a></li>';
+    $this->assertEqual($output, $expected);
+
+
+    CakeSession::write('user', array('User' => array('role' => ROLE_GUEST)));
+    $output = $this->Menu->renderMenu('test');
+    $expected = '<li><a href="/test2">Title2</a></li>';
+    $this->assertEqual($output, $expected);
+  }
+
+  function testRequiredRole() {
+    Configure::write('menu.test.Title1', array('url' => '/test1', 'requiredRole' => ROLE_USER));
+
+    CakeSession::write('user', array('User' => array('role' => ROLE_NOBODY)));
+    $output = $this->Menu->renderMenu('test');
+    $this->assertEqual($output, "");
+
+
+    CakeSession::write('user', array('User' => array('role' => ROLE_USER)));
+    $output = $this->Menu->renderMenu('test');
+    $expected = '<li><a href="/test1">Title1</a></li>';
+    $this->assertEqual($output, $expected);
+  }
+
+  function testRolesAndRequiredRole() {
+    Configure::write('menu.test.Title1', array('url' => '/test1', 'roles' => ROLE_SYSOP, 'requiredRole' => ROLE_USER));
+
+    CakeSession::write('user', array('User' => array('role' => ROLE_USER)));
+    $output = $this->Menu->renderMenu('test');
+    $this->assertEqual($output, "");
+
+
+    CakeSession::write('user', array('User' => array('role' => ROLE_SYSOP)));
+    $output = $this->Menu->renderMenu('test');
+    $expected = '<li><a href="/test1">Title1</a></li>';
+    $this->assertEqual($output, $expected);
+
+
+    CakeSession::write('user', array('User' => array('role' => ROLE_ADMIN)));
+    $output = $this->Menu->renderMenu('test');
+    $this->assertEqual($output, "");
+  }
+
   function testSubMenu() {
     Configure::write('menu.test.Title', array('url' => '/url'));
     Configure::write('menu.test.SubTitle', array('url' => '/sub', 'parent' => 'Title'));

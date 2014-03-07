@@ -30,7 +30,9 @@ Following options are supported
 * `disabled`: `Boolean` if the item is disabled. This item will be shown.
 * `deactivated`: `Boolean` if the itmem should not be shown
 * `priority`: Priority for sort order. Default is `10`.
-* `requiredRole`: Required Role. Possible roles are `ROLE_NOBODY`, `ROLE_GUEST`, 
+* `requiredRole`: Required Role. Possible roles are `ROLE_NOBODY`, `ROLE_GUEST`,
+`ROLE_USER`, `ROLE_SYSOP`, `ROLE_ADMIN`. Default is `ROLE_NOBODY`
+* `roles`: `Array` of user role. Possible roles are `ROLE_NOBODY`, `ROLE_GUEST`,
 `ROLE_USER`, `ROLE_SYSOP`, `ROLE_ADMIN`. Default is `ROLE_NOBODY`
 
 Example:
