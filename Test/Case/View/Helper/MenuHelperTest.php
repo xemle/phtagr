@@ -30,7 +30,7 @@ class MenuHelperTest extends CakeTestCase {
     // Test write array value than scalar value
     Configure::write('menu.test', array('options' => array('url' => '/options', 'title' => 'My Options')));
     Configure::write('menu.test.options.enabled', true);
-    
+
     $result = Configure::read('menu.test');
     $expected = array('options' => array('url' => '/options', 'title' => 'My Options', 'enabled' => true));
     $this->assertEqual($result, $expected);
@@ -38,7 +38,7 @@ class MenuHelperTest extends CakeTestCase {
     // Test write scalar value than array value => Scalar will be overwritten
     Configure::write('menu.test.options.enabled', true);
     Configure::write('menu.test', array('options' => array('url' => '/options', 'title' => 'My Options')));
-    
+
     $result = Configure::read('menu.test');
     $expected = array('options' => array('url' => '/options', 'title' => 'My Options'));
     $this->assertEqual($result, $expected);
@@ -46,23 +46,23 @@ class MenuHelperTest extends CakeTestCase {
     // Test merge
     Configure::write('menu.test.options.enabled', true);
     Configure::write('menu.test', Hash::merge(array('options' => array('url' => '/options', 'title' => 'My Options')), (array) Configure::read('menu.test')));
-    
+
     $result = Configure::read('menu.test');
     $expected = array('options' => array('url' => '/options', 'title' => 'My Options', 'enabled' => true));
     $this->assertEqual($result, $expected);
   }
-  
+
   function testMinimal() {
     Configure::write('menu.test.myTitle', '/test');
-    
+
     $output = $this->Menu->renderMenu('test');
     $expected = '<li><a href="/test">myTitle</a></li>';
     $this->assertEqual($output, $expected);
   }
-  
+
   function testTitleName() {
     Configure::write('menu.test.myTitle.url', '/test');
-    
+
     $output = $this->Menu->renderMenu('test');
     $expected = '<li><a href="/test">myTitle</a></li>';
     $this->assertEqual($output, $expected);
@@ -70,7 +70,7 @@ class MenuHelperTest extends CakeTestCase {
 
   function testTitleParam() {
     Configure::write('menu.test.myTitle', array('url' => '/test', 'title' => 'Another Title'));
-    
+
     $output = $this->Menu->renderMenu('test');
     $expected = '<li><a href="/test">Another Title</a></li>';
     $this->assertEqual($output, $expected);
@@ -78,7 +78,7 @@ class MenuHelperTest extends CakeTestCase {
 
   function testControllerParam() {
     Configure::write('menu.test.myTitle', array('controller' => 'test'));
-    
+
     $output = $this->Menu->renderMenu('test');
     $expected = '<li><a href="/test">myTitle</a></li>';
     $this->assertEqual($output, $expected);
@@ -86,7 +86,7 @@ class MenuHelperTest extends CakeTestCase {
 
   function testControllerActionParam() {
     Configure::write('menu.test.myTitle', array('controller' => 'tests', 'action' => 'edit'));
-    
+
     $output = $this->Menu->renderMenu('test');
     $expected = '<li><a href="/tests/edit">myTitle</a></li>';
     $this->assertEqual($output, $expected);
@@ -94,7 +94,7 @@ class MenuHelperTest extends CakeTestCase {
 
   function testActiveParam() {
     Configure::write('menu.test.myTitle', array('url' => '/test', 'active' => true));
-    
+
     $output = $this->Menu->renderMenu('test');
     $expected = '<li><a href="/test" class="active">myTitle</a></li>';
     $this->assertEqual($output, $expected);
@@ -102,7 +102,7 @@ class MenuHelperTest extends CakeTestCase {
 
   function testAdminParam() {
     Configure::write('menu.test.myTitle', array('controller' => 'tests', 'admin' => true));
-    
+
     $output = $this->Menu->renderMenu('test');
     $expected = '<li><a href="/admin/tests">myTitle</a></li>';
     $this->assertEqual($output, $expected);
@@ -110,7 +110,7 @@ class MenuHelperTest extends CakeTestCase {
 
   function testPluginParam() {
     Configure::write('menu.test.myTitle', array('controller' => 'tests', 'plugin' => 'plugin'));
-    
+
     $output = $this->Menu->renderMenu('test');
     $expected = '<li><a href="/plugin/tests">myTitle</a></li>';
     $this->assertEqual($output, $expected);
@@ -134,7 +134,7 @@ class MenuHelperTest extends CakeTestCase {
 
   function testDisabledParam() {
     Configure::write('menu.test.myTitle', array('url' => '/test', 'disabled' => true));
-    
+
     $output = $this->Menu->renderMenu('test');
     $expected = '<li><a href="/test" class="disabled">myTitle</a></li>';
     $this->assertEqual($output, $expected);
@@ -142,7 +142,7 @@ class MenuHelperTest extends CakeTestCase {
 
   function testDeactivatedParam() {
     Configure::write('menu.test.myTitle', array('url' => '/test', 'deactivated' => true));
-    
+
     $output = $this->Menu->renderMenu('test');
     $expected = '';
     $this->assertEqual($output, $expected);
@@ -151,7 +151,7 @@ class MenuHelperTest extends CakeTestCase {
   function testNoLink() {
     Configure::write('menu.test.title1', array());
     Configure::write('menu.test.title2', array('title' => 'Another Title'));
-    
+
     $output = $this->Menu->renderMenu('test');
     $expected = '<li>title1</li><li>Another Title</li>';
     $this->assertEqual($output, $expected);
@@ -161,7 +161,7 @@ class MenuHelperTest extends CakeTestCase {
     Configure::write('menu.test.Title1', array('url' => '/test1', 'priority' => 2));
     Configure::write('menu.test.Title2', array('url' => '/test2', 'priority' => 1));
     Configure::write('menu.test.Title3', array('url' => '/test3', 'priority' => 3));
-    
+
     $output = $this->Menu->renderMenu('test');
     $expected = '<li><a href="/test2">Title2</a></li>';
     $expected .= '<li><a href="/test1">Title1</a></li>';
@@ -222,19 +222,19 @@ class MenuHelperTest extends CakeTestCase {
   function testSubMenu() {
     Configure::write('menu.test.Title', array('url' => '/url'));
     Configure::write('menu.test.SubTitle', array('url' => '/sub', 'parent' => 'Title'));
-    
+
     $output = $this->Menu->renderMenu('test');
     $expected = '<li><a href="/url">Title</a>';
     $expected .= '<ul><li><a href="/sub">SubTitle</a></li></ul>';
     $expected .= '</li>';
     $this->assertEqual($output, $expected);
   }
-  
+
   function testSubSubMenu() {
     Configure::write('menu.test.Title', array('url' => '/url'));
     Configure::write('menu.test.SubTitle', array('url' => '/sub', 'parent' => 'Title'));
     Configure::write('menu.test.SubSubTitle', array('url' => '/sub/sub', 'parent' => 'SubTitle'));
-    
+
     $output = $this->Menu->renderMenu('test');
     $expected = '<li><a href="/url">Title</a>';
     $expected .= '<ul><li><a href="/sub">SubTitle</a>';
@@ -243,25 +243,25 @@ class MenuHelperTest extends CakeTestCase {
     $expected .= '</li>';
     $this->assertEqual($output, $expected);
   }
-  
+
   function testSubMenuDeactivated() {
     Configure::write('menu.test.Title', array('url' => '/url', 'deactivated' => true));
     Configure::write('menu.test.SubTitle', array('url' => '/sub', 'parent' => 'Title'));
-    
+
     $output = $this->Menu->renderMenu('test');
     $expected = '';
     $this->assertEqual($output, $expected);
   }
-  
+
   function testSubMenuWithIdParam() {
     Configure::write('menu.test.Title', array('url' => '/url', 'id' => 'myId'));
     Configure::write('menu.test.SubTitle', array('url' => '/sub', 'parent' => 'myId'));
-    
+
     $output = $this->Menu->renderMenu('test');
     $expected = '<li><a href="/url">Title</a>';
     $expected .= '<ul><li><a href="/sub">SubTitle</a></li></ul>';
     $expected .= '</li>';
     $this->assertEqual($output, $expected);
   }
-  
+
 }
