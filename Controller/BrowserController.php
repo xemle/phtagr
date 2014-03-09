@@ -44,7 +44,7 @@ class BrowserController extends AppController
     $userDir = $this->FileManager->getUserDir();
     $this->_addFsRoot($userDir);
 
-    $fsroots = $this->Option->createTreeMenu($this->getUser(), 'path.fsroot', true);
+    $fsroots = $this->Option->buildTree($this->getUser(), 'path.fsroot', true);
     if (count($fsroots)) {
       foreach ($fsroots['fsroot'] as $id => $root) {
         $this->_addFsRoot($root);

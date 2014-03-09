@@ -75,8 +75,9 @@ class Option extends AppModel {
   public function buildTree($data, $subPath = null, $strip = false) {
     $tree = array();
     // Option is set as root
-    if (isset($data['Option']))
+    if (isset($data['Option'])) {
       $data = $data['Option'];
+    }
 
     foreach ($data as $item) {
       // Option is set as item
