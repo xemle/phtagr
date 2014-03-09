@@ -29,7 +29,9 @@
 </div></div><!-- #header/sub -->
 
 <div id="main-menu"><div class="sub">
-<?php echo $this->Menu->menu('main-menu'); ?>
+<ul>
+  <?php echo $this->Menu->renderMenu('main-menu'); ?>
+</ul>
 <div id="quicksearch">
 <?php
   echo $this->Form->create(false, array('url' => array('controller' => 'explorer', 'action' => 'quicksearch')));

@@ -59,6 +59,13 @@ class MenuComponent extends Component {
         'logout' => array('title' => __("Logout"), 'controller' => 'users', 'action' => 'logout', 'requiredRole' => ROLE_GUEST)
     );
     Configure::write('menu.top-menu', Hash::merge($topMenu, (array) Configure::read('menu.top-menu')));
+
+    $mainMenu = array(
+        'home' => array('title' => __("Home"), 'url' => '/'),
+        'explorer' => array('title' => __("Explorer"), 'controller' => 'explorer'),
+        'upload' => array('title' => __("Upload"), 'controller' => 'browser', 'action' => 'quickupload', 'requiredRole' => ROLE_USER, 'priority' => 15)
+    );
+    Configure::write('menu.main-menu', Hash::merge($mainMenu, (array) Configure::read('menu.main-menu')));
   }
 
   /**
@@ -124,6 +131,11 @@ class MenuComponent extends Component {
         'username' => array('title' => __("Howdy, %s!", $username), 'requiredRole' => ROLE_GUEST, 'priority' => 0)
     );
     Configure::write('menu.top-menu', Hash::merge($topMenu, (array) Configure::read('menu.top-menu')));
+
+    $mainMenu = array(
+        'myPhotos' => array('title' => __("My Photos"), 'url' => '/explorer/user/' . $username, 'requiredRole' => ROLE_GUEST, 'priority' => 11),
+    );
+    Configure::write('menu.main-menu', Hash::merge($mainMenu, (array) Configure::read('menu.main-menu')));
   }
 
   /**
