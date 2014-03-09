@@ -20,7 +20,7 @@ class ImagesController extends AppController
   var $name = 'Images';
   var $components = array('RequestHandler', 'Search', 'FastFileResponder');
   var $uses = array('Media', 'Group');
-  var $helpers = array('Form', 'Html', 'ImageData', 'Time', 'Search', 'ExplorerMenu', 'Rss', 'Map', 'Navigator', 'Flowplayer', 'Tab', 'Number', 'Option', 'Autocomplete');
+  var $helpers = array('Form', 'Html', 'ImageData', 'Time', 'Search', 'Rss', 'Map', 'Navigator', 'Flowplayer', 'Tab', 'Number', 'Option', 'Autocomplete');
   var $crumbs = array();
 
   public function beforeFilter() {

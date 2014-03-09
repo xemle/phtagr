@@ -21,7 +21,7 @@ class ExplorerController extends AppController
 {
   var $components = array('RequestHandler', 'FilterManager', 'Search', 'QueryBuilder', 'FastFileResponder', 'Feed', 'FileCache');
   var $uses = array('Media', 'MyFile', 'Group');
-  var $helpers = array('Form', 'Html', 'ImageData', 'Time', 'ExplorerMenu', 'Rss', 'Search', 'Navigator', 'Tab', 'Breadcrumb', 'Autocomplete');
+  var $helpers = array('Form', 'Html', 'ImageData', 'Time', 'Rss', 'Search', 'Navigator', 'Tab', 'Breadcrumb', 'Autocomplete');
 
   var $crumbs = array();
   var $paginateActions = array('category', 'date', 'edit', 'group', 'index', 'location', 'sublocation', 'city', 'state', 'country', 'query', 'tag', 'user', 'view', 'quicksearch', 'selection');
