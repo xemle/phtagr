@@ -228,7 +228,7 @@ class SystemController extends AppController {
     $result = $this->Media->find('all', array(
       'conditions' => array('Media.type & ' . MEDIA_TYPE_VIDEO . ' > 0', 'Media.duration > 0'),
       'fields' => 'SUM(Media.duration) AS Duration'));
-    CakeLog::debug($result);
+    CakeLog::debug(print_r($result, true));
     $data['media.video.length'] = floatval($result[0][0]['Duration']);
     $data['comments'] = $this->Media->Comment->find('count');
     $allFields = $this->Media->Field->find('all');

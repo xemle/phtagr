@@ -57,7 +57,7 @@ class GroupsController extends AppController {
     $userId = $this->getUserId();
     $this->Group->bindModel(array('hasOne' => array('GroupsUser' => array())));
     $this->request->data = $this->Group->find('all', array('conditions' => array('GroupsUser.user_id' => $userId)));
-    CakeLog::debug($this->request->data);
+    CakeLog::debug(print_r($this->request->data, true));
   }
 
   public function all() {
