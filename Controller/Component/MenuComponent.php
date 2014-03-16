@@ -69,6 +69,17 @@ class MenuComponent extends Component {
   }
 
   /**
+   * Create a menu ID from controller name and action
+   *
+   * @param string $controllerName
+   * @param string $action
+   * @return string
+   */
+  public function createMenuId($controllerName, $action) {
+    return $controllerName . Inflector::camelize($action);
+  }
+
+  /**
    * Create a submenu of current controller
    *
    * @param array $actionToTitle Mapping from action to menu item title
@@ -93,8 +104,8 @@ class MenuComponent extends Component {
       if ($action == $currentAction) {
         $options['active'] = true;
       }
-      $name = $controllerName . Inflector::camelize($action);
-      $subMenuItems[$name] = am($default, $options);
+      $id = $this->createMenuId($controllerName, $action);
+      $subMenuItems[$id] = am($default, $options);
     }
 
     Configure::write('menu.'.$menu, Hash::merge($subMenuItems, (array) Configure::read('menu.'.$menu)));

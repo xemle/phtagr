@@ -225,16 +225,26 @@ class UsersController extends AppController {
   /**
    * Add 3rd level menu for user edit for admin
    */
-  private function __addAdminEditMenu($userId) {
+  private function __addAdminEditMenu($user) {
+    $userId = $user['User']['id'];
+    $editId = $this->Menu->createMenuId($this->name, 'admin_edit');
+
+    $backendMenu = array(
+       'Users' => array('active' => true),
+       $editId => array('parent' => 'Users', 'url' => array('admin' => true, 'controller' => $this->name, 'action' => 'edit', $userId), 'title' => __('Edit %s', $user['User']['username']), 'active' => true)
+    );
+
     $subActions = array(
       'password' => __("Password"),
       'path' => __("Local Paths"));
-    $subItems = array('url' => array('admin' => true, 'action' => 'edit', $userId), 'title' => __('Edit'), 'active' => true);
+
     foreach ($subActions as $action => $title) {
-      $subItems[] = array('url' => array('admin' => true, 'action' => $action, $userId), 'title' => $title, 'active' => ('admin_'.$action == $this->action));
+      $id = $this->Menu->createMenuId($this->name, 'admin_' . $action);
+      $url = array('admin' => true, 'controller' => $this->name, 'action' => $action, $userId);
+      $isActive = ('admin_'.$action == $this->action);
+      $backendMenu[$id] = array('parent' => $editId, 'url' => $url, 'title' => $title, 'active' => $isActive);
     }
-    CakeLog::debug($this->action);
-    $this->subMenu[] = $subItems;
+    Configure::write('menu.backend', Hash::merge($backendMenu, (array) Configure::read('menu.backend')));
   }
 
   public function admin_edit($id) {
@@ -254,10 +264,16 @@ class UsersController extends AppController {
       }
     }
 
-    $this->request->data = $this->User->findById($id);
+    $user = $this->User->findById($id);
+    if (!$user) {
+      CakeLog::warn("Could not find user with id $id");
+      $this->redirect('/admin/users');
+      return;
+    }
+    $this->request->data = $user;
     $this->set('allowAdminRole', ($this->getUserRole() == ROLE_ADMIN) ? true : false);
 
-    $this->__addAdminEditMenu($id);
+    $this->__addAdminEditMenu($user);
   }
 
   public function admin_password($id) {
@@ -277,10 +293,17 @@ class UsersController extends AppController {
       }
     }
 
-    $this->request->data = $this->User->findById($id);
-    unset($this->request->data['User']['password']);
+    $user = $this->User->findById($id);
+    if (!$user) {
+      CakeLog::warn("Could not find user with id $id");
+      $this->redirect('/admin/users');
+      return;
+    }
 
-    $this->__addAdminEditMenu($id);
+    unset($user['User']['password']);
+    $this->request->data = $user;
+
+    $this->__addAdminEditMenu($user);
   }
 
   public function admin_path($id) {
@@ -307,11 +330,17 @@ class UsersController extends AppController {
       }
     }
 
-    $this->request->data = $this->User->findById($id);
-    unset($this->request->data['User']['password']);
+    $user = $this->User->findById($id);
+    if (!$user) {
+      CakeLog::warn("Could not find user with id $id");
+      $this->redirect('/admin/users');
+      return;
+    }
+    unset($user['User']['password']);
+    $this->request->data = $user;
 
-    $this->set('fsroots', $this->Option->createTreeMenu($this->request->data, 'path.fsroot'));
-    $this->__addAdminEditMenu($id);
+    $this->set('fsroots', $this->Option->buildTree($user, 'path.fsroot'));
+    $this->__addAdminEditMenu($user);
   }
 
   public function admin_add() {
