@@ -39,43 +39,11 @@ class AppController extends Controller
     $this->Feed->add('/explorer/media', array('title' =>  __('Media RSS of recent photos'), 'id' => 'gallery'));
     $this->Feed->add('/comment/rss', array('title' => __('Recent comments')));
 
-    $this->__setMainMenu();
-    $this->__setTopMenu();
-
     if (isset($this->request->params['named']['mobile'])) {
       // Allow 0, false, off as parameter
       $param = $this->request->params['named']['mobile'];
       $disable = in_array(strtolower(substr($param, 0, 5)), array('0', 'false', 'off'));
       $this->Session->write('mobile', !$disable);
-    }
-  }
-
-  private function __setMainMenu() {
-    $this->Menu->setCurrentMenu('main-menu');
-    $this->Menu->addItem(__('Home'), "/");
-    $this->Menu->addItem(__('Explorer'), array('controller' => 'explorer', 'action' => 'index'));
-    if ($this->hasRole(ROLE_GUEST)) {
-      $user = $this->getUser();
-      $this->Menu->addItem(__('My Photos'), array('controller' => 'explorer', 'action' => 'user', $user['User']['username']));
-    }
-    if ($this->hasRole(ROLE_USER)) {
-      $this->Menu->addItem(__('Upload'), array('controller' => 'browser', 'action' => 'quickupload'));
-    }
-  }
-
-  private function __setTopMenu() {
-    $this->Menu->setCurrentMenu('top-menu');
-    $role = $this->getUserRole();
-    if ($role == ROLE_NOBODY) {
-      $this->Menu->addItem(__('Login'), array('controller' => 'users', 'action' => 'login'));
-      if ($this->getOption('user.register.enable', 0)) {
-        $this->Menu->addItem(__('Sign Up'), array('controller' => 'users', 'action' => 'register'));
-      }
-    } else {
-      $user = $this->getUser();
-      $this->Menu->addItem(__('Howdy, %s!', $user['User']['username']), false);
-      $this->Menu->addItem(__('Logout'), array('controller' => 'users', 'action' => 'logout'));
-      $this->Menu->addItem(__('Dashboard'), array('controller' => 'options'));
     }
   }
 
