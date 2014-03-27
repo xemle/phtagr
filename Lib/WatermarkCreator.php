@@ -160,6 +160,10 @@ class WatermarkCreator {
       return false;
     }
 
+    // Set default option to inner if not set
+    if (!$scaleMode) {
+      $scaleMode = 'inner';
+    }
     $scaleFactor = $this->getScaleFactor($imageWidth, $imageHeight, $watermarkWidth, $watermarkHeight, $scaleMode);
     if ($scaleFactor == 1.0) {
       return $watermark;
