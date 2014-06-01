@@ -53,7 +53,7 @@ function phMap(options) {
   this.geolocate = function(queryString) {
     new OpenLayers.Protocol.Script({
       scope: this,
-      url: 'http://nominatim.openstreetmap.org/search',
+      url: '//nominatim.openstreetmap.org/search',
       params: {
         q: queryString,
         format: 'json',

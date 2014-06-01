@@ -18,7 +18,7 @@ class MapHelper extends AppHelper
 {
   var $helpers = array("Html", "Search", "Option");
 
-  var $googleMapApiUrl = 'http://maps.google.com/maps/api/js?v=3.2&amp;sensor=false';
+  var $googleMapApiUrl = '//maps.google.com/maps/api/js?v=3.2&amp;sensor=false';
 
   function initialize() {
     $this->Search->initialize();
