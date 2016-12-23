@@ -469,7 +469,7 @@ class SearchComponent extends Component
   public function urlToCrumbs($url, $skip = 2) {
     // We need '+' sign for search inclusion
     $url = str_replace('+', '%2B', $url);
-    $parts = split('/', trim(urldecode($url), '/'));
+    $parts = preg_split('/\\//', trim(urldecode($url), '/'));
     $encoded = array_splice($parts, $skip);
     $crumbs = array();
     foreach ($encoded as $crumb) {
@@ -532,7 +532,7 @@ class SearchComponent extends Component
       $type = Inflector::singularize($match[1]);
       $value = $match[2];
       if (in_array($type, $this->listTerms)) {
-        $values = split(',', $value);
+        $values = preg_split('/,/', $value);
         foreach ($values as $value) {
           $this->addParam($type, $value);
         }

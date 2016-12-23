@@ -271,7 +271,7 @@ class MediaController extends AppController
 
   public function zip($format) {
     // get explorer crumbs
-    $params = split('/', $this->request->url);
+    $params = preg_split('/\\//', $this->request->url);
     $crumbs = join('/', array_splice($params, 3));
     $redirectUrl = "/explorer/view/" . $crumbs;
     if (empty($this->request->data)) {

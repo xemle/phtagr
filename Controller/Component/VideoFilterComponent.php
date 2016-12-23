@@ -266,7 +266,7 @@ class VideoFilterComponent extends BaseFilterComponent {
       } elseif (count($words) >= 6 && $words[2] == "Video:") {
         $words = preg_split("/,+/", trim($line));
         $size = preg_split("/\s+/", trim($words[2]));
-        list($width, $height) = split("x", trim($size[0]));
+        list($width, $height) = preg_split("/x/", trim($size[0]));
         $result['width'] = $width;
         $result['height'] = $height;
         CakeLog::debug("Extract video size of '$filename': $width x $height");

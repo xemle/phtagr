@@ -164,7 +164,7 @@ class BreadcrumbHelper extends AppHelper
       $name = $match[1];
       $value = $match[2];
       if (in_array($name, array('to', 'from'))) {
-        list($value) = split(' ', $value);
+        list($value) = preg_split('/\s/', $value);
       }
       $remove = $crumbs;
       unset($remove[$key]);

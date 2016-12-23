@@ -122,7 +122,7 @@ class NmeaComponent extends Component {
       return false;
     }
 
-    $parts = split(',', $line);
+    $parts = preg_split('/,/', $line);
     if (count($parts) != 15) {
       return false;
     }
@@ -178,7 +178,7 @@ class NmeaComponent extends Component {
       return false;
     }
 
-    $parts = split(',', $line);
+    $parts = preg_split('/,/', $line);
     if (count($parts) != 13) {
       return false;
     }
