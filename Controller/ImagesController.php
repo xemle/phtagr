@@ -38,7 +38,7 @@ class ImagesController extends AppController
       $this->set('groups', array());
     }
 
-    $parts = split('/', urldecode($this->request->url));
+    $parts = preg_split('/\\//', urldecode($this->request->url));
     $encoded = array_splice($parts, 3);
     foreach ($encoded as $crumb) {
       $this->crumbs[] = $this->Search->decode($crumb);

@@ -118,7 +118,7 @@ header("Pragma: cache");        // HTTP/1.0
 $cssPath = CSS;
 if ($regs[1]) {
 	$plugin = trim($regs[1], '/');
-	$theme = split('/', $plugin);
+	$theme = preg_split('/\\//', $plugin);
 	if (is_dir('.' . DS . $plugin . DS . 'css')) {
 		$cssPath = '.' . DS . $plugin . DS . 'css' . DS;
 	} else if (count($theme) > 1 && $theme[0] == 'theme') {

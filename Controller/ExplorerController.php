@@ -77,7 +77,7 @@ class ExplorerController extends AppController
 
   public function view() {
     if (!empty($this->request->data)) {
-      $crumbs = split('/', $this->request->data['Breadcrumb']['current']);
+      $crumbs = preg_split('/\\//', $this->request->data['Breadcrumb']['current']);
       $input = $this->request->data['Breadcrumb']['input'];
       if (strpos($input, ":") === false) {
         $input = "any:$input";
