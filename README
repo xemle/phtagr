@@ -1,5 +1,6 @@
-phTagr - Tag, Browse, and Share Your Photos
-===========================================
+# phTagr - Tag, Browse, and Share Your Photos
+
+**This project is dicontinued** Please clone the project and inspect the source code to fix your issues by your self.
 
 phTagr is an open source web gallery to organize your photos with embedded meta
 data, to browse your photos and videos by tags and to share your digital life
@@ -13,20 +14,4 @@ you need is a webserver with PHP and mysql.
 
 For more details please visit following sites
 
-Main page
-http://www.phtagr.org
-
-Blog
-http://www.phtagr.org/blog
-
-Demo gallery
-http://demo.phtagr.org
-
-Project page with documention and ticket
-http://trac.phtagr.org
-
-Install instructions
-http://trac.phtagr.org/wiki/HowToInstall
-
-Mailing list
-phtagr-gallery@lists.sourceforge.net
+Please visit [phtagr.org](http://www.phtagr.org) for further information.
